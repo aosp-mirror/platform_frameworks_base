@@ -1,0 +1,402 @@
+page.title=動作の変更点
+page.keywords=プレビュー,sdk,compatibility
+sdk.platform.apiLevel=MNC
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本書の内容</h2>
+
+<ol id="toc44" class="hide-nested">
+    <li><a href="#behavior-runtime-permissions">実行時パーミッション</a></li>
+    <li><a href="#behavior-power">省電力の最適化 </a>
+        <ol>
+            <li><a href="#behavior-doze">Doze</a></li>
+            <li><a href="#behavior-app-standby">App Standby</a></li>
+        </ol>
+    </li>
+    <li><a href="#behavior-adoptable-storage">追加可能なストレージ端末</a></li>
+    <li><a href="#behavior-apache-http-client">Apache HTTP Client の削除</a></li>
+    <li><a href="#behavior-audiomanager-Changes">AudioManager の変更点</a></li>
+    <li><a href="#behavior-test-selection">テキスト選択</a></li>
+    <li><a href="#behavior-keystore">Android キーストロークの変更点</a></li>
+    <li><a href="#behavior-network">Wi-Fi とネットワークの変更点</a></li>
+    <li><a href="#behavior-camera">カメラ サービスの変更点</a></li>
+    <li><a href="#behavior-art-runtime">ART ランタイム</a></li>
+    <li><a href="#behavior-apk-validation">APK の検証</a></li>
+    <li><a href="#behavior-afw">Android for Work の変更点</a></li>
+</ol>
+
+<h2>API の変更点</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API レベル 22 から M Preview&raquo;</a> </li>
+</ol>
+
+
+<h2>関連ドキュメント</h2>
+<ol>
+<li><a href="{@docRoot}preview/api-overview.html">M Developer Preview API の概要</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>M Developer Preview には、新機能以外にもさまざまなシステムの変更点や API の動作の変更点が盛り込まれています。
+このドキュメントでは、アプリ開発において把握しておくべき主な変更点について説明します。
+</p>
+
+<p>過去に Android にアプリを公開したことがある場合は、アプリがこれらの変更による影響を受ける場合があることに注意してください。
+</p>
+
+<h2 id="behavior-runtime-permissions">実行時パーミッション</h1>
+<p>このプレビューでは、アプリのパーミッションを実行時にユーザーが直接管理できる新しいパーミッション モデルが採用されました。
+このモデルによって、ユーザーに対するパーミッションの可視性と制御性が向上し、アプリ開発者にとってはアプリのインストールや自動アップデート プロセスの効率が上がります。ユーザーはインストール済みアプリのパーミッションを個別に付与したり取り消したりできます。
+
+ </p>
+
+<p>M Preview を対象としたアプリでは、必ずパーミッションを実行時に確認、要求するようにします。
+アプリにパーミッションが付与されているかどうかを確認するには、新しい {@code Context.checkSelfPermission()} メソッドを呼び出します。
+パーミッションを要求するには、新しい
+{@code Activity.requestPermission()} メソッドを呼び出します。アプリが M を対象としていない場合でも、新しいパーミッション モデルでアプリをテストするようにしてください。
+</p>
+
+<p>アプリで新しいパーミッションをサポートする際の詳細については、Developer Preview ページの
+<a href="{@docRoot}preview/features/runtime-permissions.html">Permissions</a> をご覧ください。
+アプリへの影響を評価する際のヒントについては、<a href="{@docRoot}preview/testing/guide.html#runtime-permissions">Testing Guide</a> をご覧ください。
+</p>
+
+<h2 id="behavior-power">省電力の最適化 </h2>
+<p>このプレビューでは、アイドル中の端末やアプリに対する新しい省電力の最適化機能が採用されています。</p>
+
+<h3 id="behavior-doze">Doze</h3>
+<p>端末が電源に接続されておらず、画面が一定時間オフ状態の場合は <em>Doze</em> モードに入り、システムをスリープ状態に保ちます。
+このモードでは、端末は定期的に通常の操作を短時間再開することで、アプリを同期したり、システムが保留中の操作を行ったりすることができます。
+
+</p>
+
+<p>Doze 中は、アプリに次の制限が適用されます。</p>
+<ul>
+<li>アプリで優先度の高い Google Cloud Messaging の通知を受信する場合以外、ネットワーク アクセスは無効になります。
+</li>
+<li><a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">Wake ロック</a> は無視されます。</li>
+<li>{@link android.app.AlarmManager} クラスを使ってスケジュールされたアラームは無効になりますが、{@link android.app.AlarmManager#setAlarmClock setAlarmClock()} メソッドと {@code AlarmManager.setAndAllowWhileIdle()} を使って設定したアラームは除きます。
+
+</li>
+<li>WiFi スキャンは実行されません。</li>
+<li>同期アダプタ と {@link android.app.job.JobScheduler} の同期とジョブは実行できません。
+</li>
+</ul>
+</p>
+<p>端末が Doze モードでなくなると、保留中のすべての同期とジョブが実行されます。</p>
+<p>この機能をテストするには、M Preview を実行する端末を開発マシンに接続して、次のコマンドを呼び出します。
+
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+<p class="note"><strong>注</strong>: 
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">Google Cloud Messaging</a> の次期リリースでは、高優先度のメッセージを指定できます。
+
+アプリが高優先度の GCM メッセージを受信する場合は、端末が Doze 中でも短時間のネットワーク アクセスが付与されます。
+
+</p>
+
+<p>アプリで Doze をテストする方法のヒントについては、
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> をご覧ください。
+ </p>
+
+<h3 id="behavior-app-standby">App Standby</h3>
+<p>このプレビューでは、アクティブに使用されていないアプリをシステムがアイドル状態であるとみなす場合があります。
+システムが次の信号を検出しない場合、一定時間の経過後にアプリはアイドル状態であるとみなされます。
+</p>
+
+<ul>
+<li>アプリがユーザーによって明示的に起動された。</li>
+<li>アプリのプロセスが現在フォアグラウンドにある（アクティビティかフォアグラウンド サービスとしてか、他のアクティビティかフォアグラウンド サービスによって使用されている）。
+</li>
+<li>アプリがロック画面や通知トレイに表示される通知を生成する。
+</li>
+<li>ユーザーが、アプリに最適化が適用されないよう <strong>[設定]</strong> で明示的に指定する。
+</li>
+</ul>
+
+<p>端末が電源に接続されていない場合、アイドル中のみなされたアプリのネットワーク アクセスは無効になり、同期とジョブは保留されます。
+端末が電源に接続されると、アプリのネットワーク アクセスは許可され、保留中のすべてのジョブと同期が実行されます。
+端末が長時間アイドル状態の場合、アイドル中のアプリは 1 日 1 回程度ネットワーク アクセスが許可されます。
+</p>
+
+<p>この機能をテストするには、M Preview を実行する端末を開発マシンに接続して、次のコマンドを呼び出します。
+
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell am set-idle &lt;packageName&gt; true
+$ adb shell am set-idle &lt;packageName&gt; false
+$ adb shell am get-idle &lt;packageName&gt;
+</pre>
+
+<p class="note"><strong>注：</strong> 
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">Google Cloud Messaging</a>（GCM）の次期リリースでは、高優先度のメッセージを指定できます。
+
+アプリが高優先度の GCM メッセージを受信する場合は、アプリがアイドル 中でも短時間のネットワーク アクセスが付与されます。
+
+</p>
+
+<p>アプリで App Standby をテストする方法のヒントについては、
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> をご覧ください。
+ </p>
+
+<h2 id="behavior-adoptable-storage">追加可能なストレージ端末</h2>
+<p>
+このプレビューでは、SD カードなどの外部ストレージ端末を<em>追加</em>できます。外部ストレージ端末を追加すると、端末が内部ストレージのように動作するよう暗号化とフォーマットが行われます。
+この機能によって、アプリとアプリの個人データをストレージ端末間で移動できるようになります。
+アプリを移動する際、システムはマニフェストの 
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code android:installLocation}</a> を遵守します。
+
+</p>
+
+<p>アプリが次の API やフィールドにアクセスする場合は、アプリが内部ストレージ端末と外部ストレージ端末間で移動する際に返されるファイルパスが動的に変化することに注意してください。ファイルパスの構築時は、これらの API を動的に呼び出すことを強くお勧めします。ハードコードされたファイル パスを使用したり、過去にビルドした完全修飾ファイルパスをそのまま使用したりしないでください。
+
+
+</p>
+
+<ul>
+<li>{@link android.content.Context} メソッド:
+    <ul>
+        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
+        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
+        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
+        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
+        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
+        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
+        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
+        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
+        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
+    </ul>
+</li>
+<li>{@link android.content.pm.ApplicationInfo} フィールド:
+    <ul>
+        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
+    </ul>
+</li>
+</ul>
+
+<p>Developer Preview のこの機能をデバッグするには、USB On-The-Go（OTG）ケーブルで Android 端末に接続された USB ドライブの追加を有効にして、次のコマンドを実行します。
+</p>
+
+<pre class="no-prettyprint">
+$ adb shell sm set-force-adoptable true
+</pre>
+
+<h2 id="behavior-apache-http-client">Apache HTTP Client の削除</h2>
+<p>このプレビューでは、Apache HTTP クライアントのサポートが削除されました。アプリでこのクライアントを使用していて、Android 2.3（API レベル 9）以上を対象としている場合は、代わりに {@link java.net.HttpURLConnection} クラスを使用します。
+
+この API は透過的データ圧縮と応答のキャッシュによってネットワーク使用を軽減し、電源の消費を最小化するため、効率性が向上します。
+Apache HTTP API を引き続き使用するには、まず {@code build.gradle} ファイルで次のコンパイル時の依存関係を宣言する必要があります。
+
+</p>
+<pre>
+android {
+    useLibrary 'org.apache.http.legacy'
+}
+</pre>
+<p>Android は、OpenSSL から
+<a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a> ライブラリに移行しています。
+アプリで Android NDK を使用している場合は、{@code libcrypto.so} や {@code libssl.so} など、NDK API の一部でない暗号化ライブラリにリンクしないでください。
+これらのライブラリは パブリック API ではなく、リリースや端末に対する通知なしで変更されたり、中断したりする可能性があります。また、セキュリティ上の脆弱性を露呈する場合もあります。
+
+代わりに、ネイティブ コードを変更して JNI 経由で Java の暗号化 API を呼び出すか、希望の暗号化ライブラリに静的リンクします。
+
+</p>
+
+<h2 id="behavior-audiomanager-Changes">AudioManager の変更点</h2>
+<p>{@link android.media.AudioManager} クラスで音量を直接設定したり、特定のストリームをミュートにしたりする方法はサポートされなくなりました。
+{@link android.media.AudioManager#setStreamSolo(int,boolean)
+setStreamSolo()} メソッドは廃止されたため、代わりに
+{@code AudioManager.requestAudioFocus()} メソッドを呼び出す必要があります。同様に、
+{@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()} メソッドも廃止され、代わりに {@code AudioManager.adjustStreamVolume()} メソッドを呼び出して、値に {@code ADJUST_MUTE} か {@code ADJUST_UNMUTE} を渡します。
+
+</p>
+
+<h2 id="behavior-test-selection">テキスト選択</h2>
+
+<img src="{@docRoot}preview/images/text-selection.gif" style="float:right; margin:0 0 20px 30px" width="360" height="640" />
+
+<p>ユーザーがアプリ内でテキストを選択するとき、
+<em>切り取り</em>、<em>コピー</em>、<em>貼り付け</em>などのテキスト選択のアクションを
+<a href="http://www.google.com/design/spec/patterns/selection.html#selection-text-selection" class="external-link">フローティング ツール バー</a>に表示できるようになりました。
+<a href="{@docRoot}guide/topics/ui/menus.html#CABforViews">個別のビューに対してコンテキスト アクション モードを有効にする</a>にあるように、コンテキスト アクションバーに関するユーザー操作の実装も同様です。
+
+</p>
+
+<p>テキスト選択にフローティング ツール バーを実装するには、既存のアプリに次の変更を加えます。
+</p>
+<ol>
+<li>{@link android.view.View} オブジェクトか {@link android.app.Activity} オブジェクトで、{@link android.view.ActionMode} の呼び出しを
+{@code startActionMode(Callback)} から {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)} に変更します。
+</li>
+<li>既存の {@code ActionMode.Callback} の実装を、{@code ActionMode.Callback2} に拡張します。
+</li>
+<li>{@code Callback2.onGetContentRect()} メソッドをオーバーライドして、ビューのコンテンツの {@link android.graphics.Rect} オブジェクト）テキスト選択の四角形など）の座標を指定します。
+</li>
+<li>四角形の位置が有効でなくなり、無効な要素がこれのみである場合は、{@code ActionMode.invalidateContentRect()} メソッドを呼び出します。
+</li>
+</ol>
+
+<p><a href="{@docRoot}tools/support-library/index.html">
+Android Support Library</a> revision 22.2 を使用している場合、フローティング ツール バーに下方互換性はなく、デフォルトで appcompat が代わりに {@link android.view.ActionMode} オブジェクトを制御することに注意してください。
+
+これにより、フローティング ツール バーは表示されなくなります。
+{@link android.support.v7.app.AppCompatActivity} で
+{@link android.view.ActionMode} がサポートされるようにするには、
+{@code android.support.v7.app.AppCompatActivity.getDelegate()} を呼び出して、返された
+{@link android.support.v7.app.AppCompatDelegate} オブジェクトで
+{@code android.support.v7.app.AppCompatDelegate.setHandleNativeActionModesEnabled()} を呼び出し、 入力パラメータを {@code false} に設定します。
+この呼び出して、{@link android.view.ActionMode} オブジェクトの制御がフレームワークに戻ります。
+M Preview を実行する端末ではフレームワークによる
+{@link android.support.v7.app.ActionBar} やフローティング ツール バー モードのサポートが可能ですが、M Preview 以前の端末では
+{@link android.support.v7.app.ActionBar} モードのみがサポートされます。</p>
+
+<h2 id="behavior-keystore">Android キーストロークの変更点</h2>
+<p>このプレビューでは、
+<a href="{@docRoot}training/articles/keystore.html">Android Keystore プロバイダ</a>による DSA のサポートがなくなります。
+ECDSA は引き続きサポートされます。</p>
+
+<p>停止時に暗号化を必要としないキーが、ロック画面の（ユーザーや端末の管理者などによる）無効時やリセット時に削除されなくなりました。
+停止時に暗号化を必要とするキーは、これらのイベント時に削除されます。
+</p>
+
+<h2 id="behavior-network">Wi-Fi とネットワークの変更点</h2>
+
+<p>このプレビューでは、Wi-Fi API とネットワーク API の動作に次のような変更点が追加されました。</p>
+<ul>
+<li>オブジェクトの作成者である場合のみ、アプリで{@link android.net.wifi.WifiConfiguration} オブジェクトの状態を変更できます。
+ユーザーや他のアプリによって作成された
+{@link android.net.wifi.WifiConfiguration} オブジェクトは変更、削除できません。
+</li>
+<li>
+以前は、
+{@link android.net.wifi.WifiManager#enableNetwork(int,boolean) enableNetwork()} で
+{@code disableAllOthers=true} 設定を使ってアプリから端末を特定の Wi-Fi ネットワークに接続させた場合、端末はセルラー データなどの他のネットワークから切断されていました。
+このプレビューでは、端末が他のネットワークから切断されないようになりました。アプリの {@code targetSdkVersion} が {@code “20”} 以下の場合は、選択した Wi-Fi ネットワークに固定されます。
+
+アプリの {@code targetSdkVersion} が {@code “21”} 以上の場合は、マルチネットワーク API（
+{@link android.net.Network#openConnection(java.net.URL) openConnection()}メソッド、
+{@link android.net.Network#bindSocket(java.net.Socket) bindSocket()}メソッド、新しい
+{@code ConnectivityManager.bindProcessToNetwork()} メソッドなど）を使用してネットワーク トラフィックが選択したネットワークに送られるようにします。
+
+</li>
+</ul>
+
+<h2 id="behavior-camera">カメラ サービスの変更点</h2>
+<p>このプレビューでは、カメラ サービスの共有リソースへのアクセスモデルが、以前の "先着順" モデルから、"優先度順" に変更されました。
+
+この動作の変更には、次のようなものがあります。</p>
+<ul>
+<li>カメラ端末を開いて構成するなど、カメラのサブシステム リソースへのアクセスは、クライアント アプリケーション プロセスの "優先度" に基づいて与えられます。
+通常、ユーザーに表示されているアクティビティやフォアグラウンドにあるアクティビティのあるアプリケーション プロセスの優先度が最も高くなり、カメラ リソースの取得や使用の信頼性が高まります。
+
+</li>
+<li>優先度の低いアプリでアクティブなカメラ クライアントは、より優先度の高いアプリケーションがカメラを使おうとした際に使用が中断される場合があります。
+廃止された {@link android.hardware.Camera} API では、使用が中断されたクライアントに
+{@link android.hardware.Camera.ErrorCallback#onError(int,android.hardware.Camera) onError()} が呼び出されます。
+
+{@link android.hardware.camera2 Camera2} API では、使用が中断されたクライアントに
+{@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected(android.hardware.camera2.CameraDevice) onDisconnected()} が呼び出されます。
+</li>
+<li>適切なカメラ ハードウェア付きの端末では、別のアプリケーション プロセスを独立して開き、別のカメラ端末を同時に使用できます。
+ただし、同時アクセスによってパフォーマンスや開いているカメラ端末の性能が著しく低下するマルチプロセスの使用が検出可能になり、カメラ サービスでは許可されなくなりました。
+
+この変更によって、同じカメラ端末にアクセスしようとしているアプリが他になくても、優先度の低いクライアントによる使用が中断される場合があります。
+
+
+</li>
+<li>
+現在のユーザーを変更すると、アプリ内で前のユーザー アカウントで所有していたアクティブなカメラ クライアントが中断させられることになります。
+カメラへのアクセスは、現在の端末ユーザーが所有するユーザー プロファイルのみに制限されます。つまり、ユーザーが別のアカウントに切り替えた場合、"ゲスト" アカウントはカメラのサブシステムを使用するプロセスを実行したまま去ることはできません。
+
+
+</li>
+</ul>
+
+<h2 id="behavior-art-runtime">ART ランタイム</h2>
+<p>ART ランタイムで、
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} メソッドに対するアクセスルールを正常に実装できるようになりました。この変更によって、以前のバージョンで Dalvik がアクセス ルールを正しく確認できなかった問題が解決しました。アプリで
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} メソッドを使用していて、アクセス チェックをオーバーライドしたい場合は、 {@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()} メソッドを使って入力パラメータを {@code true} に設定します。
+
+
+
+
+アプリで
+<a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7 appcompat ライブラリ</a>や
+<a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">v7 recyclerview ライブラリ</a>を使用する場合は、これらのライブラリの最新バージョンを使用するようアプリをアップデートする必要があります。
+アップデートしない場合は、XML から参照するカスタム クラスがアップデートされていて、クラス コンストラクタがアクセス可能であることを確認しておく必要があります。
+</p>
+
+<p>このプレビューでは、動的リンクの動作がアップデートされました。動的リンクでは、ライブラリの {@code soname} とそのパス（<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">
+public bug 6670</a>）の違いを認識でき、{@code soname} が実装されています。
+
+
+以前動作していたアプリで間違った {@code DT_NEEDED} エントリを持つもの（ビルドマシンのファイル システムの絶対パスなど）は、読み込み時に失敗する場合があります。
+</p>
+
+<p>{@code dlopen(3) RTLD_LOCAL} フラグは正常に実装されました。
+{@code RTLD_LOCAL} はデフォルトのため、
+{@code RTLD_LOCAL} を明示的に使用しない {@code dlopen(3)} への呼び出しは影響を受けます（アプリで明示的に {@code RTLD_GLOBAL} を使用している場合を除く）。
+{@code RTLD_LOCAL} では、後に
+{@code dlopen(3)} への呼び出しで読み込まれたライブラリで記号は使用できません（{@code DT_NEEDED} エントリによって参照された場合とは逆）。</p>
+</p>
+
+<h2 id="behavior-apk-validation">APK の検証</h2>
+<p>プラットフォームでより厳しい APK の検証が行われるようになりました。APK がマニフェスト ファイルで宣言されているにもかかわらず、APK 自体に存在しない場合、その APK は破損しているとみなされます。
+コンテンツが一部でも削除された場合は、APK の再署名が必要になります。
+</p>
+
+<h2 id="behavior-afw">Android for Work の変更点</h2>
+<p>このプレビューには、次のような Android for Work に関する動作の変更点が含まれています。</p>
+<ul>
+<li><strong>個人のコンテキストでの仕事用の連絡先</strong>ユーザーが過去の通話履歴を表示したときに、Google Dialer
+Call Log に仕事用の連絡先が表示されるようになりました。{@code DevicePolicyManager.setCrossProfileCallerIdDisabled()} を {@code true} に設定すると、Google Dialer Call Log に仕事用プロファイルの連絡先は表示されなくなります。
+
+{@code DevicePolicyManager.setBluetoothContactSharingDisabled()} を {@code false} に設定した場合のみ、Bluetooth 経由で端末に仕事用の連絡先と個人用の連絡先を表示できます。
+
+デフォルトでは、{@code true} に設定されています。
+
+</li>
+<li><strong>WiFi 設定の削除:</strong>プロファイル オーナーによって追加された WiFi 設定（@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
+addNetwork()} メソッドへの呼び出しなどを介して）は、その仕事用プロファイルが削除されると同時に削除されます。
+
+</li>
+<li><strong>WiFi 設定のロック:</strong>アクティブなデバイス オーナーによって作成された WiFi 設定は、ユーザーが修正したり削除したりできなくなりました。
+ユーザーに {@link android.os.UserManager} 定数
+{@link android.os.UserManager#DISALLOW_CONFIG_WIFI} が設定されていない限り、ユーザー自身の WiFi 設定を作成、修正することはできます。
+</li>
+<li><strong>Google アカウントの追加経由での Work Policy Controller のダウンロード:</strong>Work Policy Controller（WPC）アプリ経由で管理する必要のある Google アカウントがマネージド コンテキスト外で端末に追加されると、アカウントの追加フローでユーザーに適切な WPC をインストールするよう要求します。この動作は、初期の端末のセットアップ ウィザードでの
+<strong>[設定]&gt; [アカウント]</strong> で追加されるアカウントにも適用されます。
+
+
+</li>
+<li><strong>特定の DevicePolicyManager API の動作の変更点: </strong>
+{@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()} メソッドの呼び出しは、呼び出し元のユーザーのカメラにのみ影響を与えます。マネージド プロファイルから呼び出した場合は、プライマリ ユーザーで実行しているカメラ アプリに影響はありません。
+
+さらに、
+{@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()} メソッドは、デバイス オーナーに加えてプロファイル オーナーでも利用可能になりました。
+プロファイル オーナーは、これらのキーガード制限を設定できます:
+
+<ul>
+<li>プロファイルの親ユーザーのキーガード設定に影響を与える {@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} と {@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_FINGERPRINT}。
+
+</li>
+<li>マネージド プロファイルのアプリケーションで生成された通知のみに影響を与える {@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}。
+</li>
+</ul>
+</li>
+</ul>

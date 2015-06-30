@@ -1,0 +1,402 @@
+page.title=Mudanças de comportamento
+page.keywords=preview,sdk,compatibility
+sdk.platform.apiLevel=MNC
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento</h2>
+
+<ol id="toc44" class="hide-nested">
+    <li><a href="#behavior-runtime-permissions">Permissões do tempo de execução</a></li>
+    <li><a href="#behavior-power">Otimizações de economia de energia</a>
+        <ol>
+            <li><a href="#behavior-doze">Soneca</a></li>
+            <li><a href="#behavior-app-standby">Aplicativo em espera</a></li>
+        </ol>
+    </li>
+    <li><a href="#behavior-adoptable-storage">Dispositivos de armazenamento adotáveis</a></li>
+    <li><a href="#behavior-apache-http-client">Remoção do cliente Apache HTTP</a></li>
+    <li><a href="#behavior-audiomanager-Changes">Mudanças no AudioManager</a></li>
+    <li><a href="#behavior-test-selection">Seleção de texto</a></li>
+    <li><a href="#behavior-keystore">Mudanças no Android Keystore</a></li>
+    <li><a href="#behavior-network">Mudanças de rede e Wi-Fi</a></li>
+    <li><a href="#behavior-camera">Mudanças no serviço de câmera</a></li>
+    <li><a href="#behavior-art-runtime">Tempo de execução de ART</a></li>
+    <li><a href="#behavior-apk-validation">Validação de APK</a></li>
+    <li><a href="#behavior-afw">Mudanças do Android for Work</a></li>
+</ol>
+
+<h2>Diferenças de API</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API de nível 22 para M Preview &raquo;</a> </li>
+</ol>
+
+
+<h2>Veja também</h2>
+<ol>
+<li><a href="{@docRoot}preview/api-overview.html">Visão geral da API do M Developer Preview</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>Junto com novas capacidades e recursos, o M Developer Preview inclui uma variedade
+de mudanças do sistema e alterações no comportamento da API. Este documento destaca algumas
+das alterações principais que você deve entender e levar em consideração nos aplicativos.</p>
+
+<p>Caso tenha publicado anteriormente um aplicativo para Android, saiba que ele pode ser afetado
+ pelas alterações na plataforma.</p>
+
+<h2 id="behavior-runtime-permissions">Permissões do tempo de execução</h1>
+<p>Esta prévia introduz um novo modelo de permissões em que os usuários podem gerenciar diretamente
+ as permissões do aplicativo no tempo de execução. Este modelo fornece aos usuários uma visibilidade aprimorada e controle sobre permissões,
+ ao mesmo tempo em que agiliza os processos de atualização automática e instalação para os desenvolvedores de aplicativos.
+Os usuários podem conceder ou revogar as permissões individualmente para os aplicativos instalados. </p>
+
+<p>Nos aplicativos direcionados para o M Preview, certifique-se de verificar e solicitar as permissões
+ no tempo de execução. Para determinar se o aplicativo recebeu uma permissão, chame
+ o novo método {@code Context.checkSelfPermission()}. Para solicitar uma permissão, chame o novo método
+ {@code Activity.requestPermission()}. Mesmo se o aplicativo não é direcionado para o M,
+ deve-se testá-lo sob o novo modelo de permissões.</p>
+
+<p>Para obter mais detalhes sobre o suporte do novo modelo de permissões no aplicativo, consulte a página de prévia de desenvolvedor 
+<a href="{@docRoot}preview/features/runtime-permissions.html">
+Permissões</a>. Para obter dicas sobre como avaliar o impacto no aplicativo,
+ consulte o <a href="{@docRoot}preview/testing/guide.html#runtime-permissions">guia de teste</a>.</p>
+
+<h2 id="behavior-power">Otimizações de economia de energia</h2>
+<p>Esta prévia introduz novas otimizações de economia de energia para dispositivos e aplicativos ociosos.</p>
+
+<h3 id="behavior-doze">Soneca</h3>
+<p>Se o dispositivo estiver desconectado e parado com a tela desligada por um período,
+ o modo <em>Soneca</em> será ativado, onde ele tentará manter o sistema em um estado ocioso. Neste modo,
+ os dispositivos retomam as operações normais periodicamente por breves períodos para que a sincronização de aplicativos
+ possa ocorrer e para que o sistema possa realizar quaisquer operações pendentes.</p>
+
+<p>As seguintes restrições se aplicam aos aplicativos durante a Soneca:</p>
+<ul>
+<li>O acesso à rede é desativado, a não ser que o aplicativo receba um convite de alta prioridade
+ do Google Cloud Messaging.</li>
+<li><a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">Bloqueios de soneca</a> são ignorados.</li>
+<li>Os despertadores agendados com a classe {@link android.app.AlarmManager} são ignorados,
+ exceto os alarmes definidos com o método {@link android.app.AlarmManager#setAlarmClock setAlarmClock()}
+ e {@code AlarmManager.setAndAllowWhileIdle()}.</li>
+<li>As verificações de Wi-Fi não são realizadas.</li>
+<li>Sincronizações e trabalhos para os adaptadores de sincronização e {@link android.app.job.JobScheduler}
+ não têm permissão para serem executados.</li>
+</ul>
+</p>
+<p>Quando o dispositivo sair do modo soneca, quaisquer sincronizações e trabalhos pendentes são executados.</p>
+<p>É possível testar este recurso conectando o dispositivo executando o M Preview
+ à máquina de desenvolvimento e chamando os seguintes comandos:
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+<p class="note"><strong>Observação</strong>: o próximo lançamento do 
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+Google Cloud Messaging</a> permite que você designe
+ mensagens de alta prioridade. Se o aplicativo recebe mensagens de alta prioridade do GCM,
+ um acesso breve à rede é concedido mesmo quando o dispositivo está no modo soneca.
+</p>
+
+<p>Consulte o
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">guia de teste</a> para obter dicas sobre
+como testar a soneca nos aplicativos. </p>
+
+<h3 id="behavior-app-standby">Aplicativo em espera</h3>
+<p>Com esta prévia, o sistema pode determinar quais aplicativos estão em espera quando
+não estão em uso ativo. O aplicativo é considerado em espera após um período, a não ser que o sistema detecte
+algum destes sinais:</p>
+
+<ul>
+<li>O aplicativo foi explicitamente iniciado pelo usuário.</li>
+<li>O aplicativo tem um processo atualmente em primeiro plano (seja uma atividade ou serviço de primeiro plano
+ ou esteja em uso por outra atividade ou serviço de primeiro plano).</li>
+<li>O aplicativo gera uma notificação que o usuário vê na tela de bloqueio
+ ou na bandeja de notificações.</li>
+<li>O usuário explicitamente pede para que o aplicativo seja liberado das otimizações,
+ ajustado em <strong>Settings (Configurações)</strong>.</li>
+</ul>
+
+<p>Se o dispositivo estiver desconectado, o aplicativo considerado ocioso terá o acesso
+à rede desativado e as sincronizações e os trabalhos suspensos. Quando o dispositivo está conectado em uma fonte de alimentação,
+ esses aplicativos têm acesso à rede permitido e podem executar quaisquer sincronizações e trabalhos pendentes. Se o dispositivo permanece ocioso por longos períodos,
+ os aplicativos ociosos têm acesso à rede permitido aproximadamente uma vez por dia.</p>
+
+<p>É possível testar este recurso conectando o dispositivo executando o M Preview
+ à máquina de desenvolvimento e chamando os seguintes comandos:
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell am set-idle &lt;packageName&gt; true
+$ adb shell am set-idle &lt;packageName&gt; false
+$ adb shell am get-idle &lt;packageName&gt;
+</pre>
+
+<p class="note"><strong>Observação</strong>: o próximo lançamento do
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+Google Cloud Messaging</a> (GCM) permite que você
+designe mensagens de alta prioridade. Se o aplicativo recebe mensagens de alta prioridade do GCM,
+um acesso breve à rede é concedido mesmo quando o aplicativo está ocioso.
+</p>
+
+<p>Consulte o
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">guia de teste</a> para obter dicas sobre como
+testar a espera dos aplicativos. </p>
+
+<h2 id="behavior-adoptable-storage">Dispositivos de armazenamento adotáveis</h2>
+<p>
+Com esta prévia, os usuários podem <em>adotar</em> dispositivos de armazenamento externo como cartões SD. Adotar um dispositivo
+de armazenamento externo criptografa e formata o dispositivo para agir como um armazenamento interno. Este recurso
+permite que os usuários movam aplicativos e dados privados desses aplicativos entre dispositivos de armazenamento. Ao mover aplicativos,
+o sistema respeita a preferência
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code android:installLocation}</a>
+no manifesto.</p>
+
+<p>Se o aplicativo acessar as seguintes APIs ou campos, saiba que os caminhos de arquivos retornados
+serão alterados dinamicamente quando o aplicativo for movido entre os dispositivos de armazenamento externo e interno.
+Ao compilar caminhos de arquivos, é recomendado que essas APIs sempre sejam chamadas dinamicamente.
+Não use caminhos de arquivo criptografados nem persista em caminhos de arquivo completamente qualificados que foram compilados anteriormente.</p>
+
+<ul>
+<li>Métodos {@link android.content.Context}:
+    <ul>
+        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
+        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
+        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
+        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
+        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
+        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
+        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
+        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
+        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
+    </ul>
+</li>
+<li>Campos {@link android.content.pm.ApplicationInfo}:
+    <ul>
+        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
+    </ul>
+</li>
+</ul>
+
+<p>Para depurar este recurso na prévia de desenvolvedor, é possível ativar a adoção
+de uma unidade USB que está conectada a um dispositivo Android por meio de um cabo USB On-The-Go (OTG) executando este comando:</p>
+
+<pre class="no-prettyprint">
+$ adb shell sm set-force-adoptable true
+</pre>
+
+<h2 id="behavior-apache-http-client">Remoção do cliente Apache HTTP</h2>
+<p>Esta prévia remove o suporte para o cliente Apache HTTP. Se o aplicativo estiver usando este cliente e for direcionado
+para Android 2.3 (nível da API 9) ou mais recente, use
+a classe {@link java.net.HttpURLConnection}. Esta API é mais eficiente, pois reduz o uso de rede por meio de compressão transparente e armazenamento
+em cachê de respostas, além de minimizar o consumo de energia. Para continuar usando as APIs do Apache HTTP,
+deve-se primeiro declarar a dependência de tempo de compilação no arquivo {@code build.gradle}:
+</p>
+<pre>
+android {
+    useLibrary 'org.apache.http.legacy'
+}
+</pre>
+<p>O Android está mudando da biblioteca OpenSSL para
+<a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a>
+. Caso esteja usando o Android NDK no aplicativo, não vincule contra bibliotecas criptográficas
+que não fazem parte da API de NDK, como {@code libcrypto.so} e {@code libssl.so}. Estas bibliotecas não são APIs públicas
+e podem mudar ou apresentar erros sem notificar entre liberações e dispositivos.
+Além disso, você pode se expor a vulnerabilidades de segurança. Em vez disso,
+modifique o código nativo para chamar as APIs de criptografia Java via JNI ou para vincular estaticamente
+com relação a uma biblioteca criptográfica de sua escolha.</p>
+
+<h2 id="behavior-audiomanager-Changes">Mudanças no AudioManager</h2>
+<p>Ajustar o volume diretamente ou desativar o áudio de transmissões específicas por meio da classe {@link android.media.AudioManager}
+não são mais recursos suportados. O método {@link android.media.AudioManager#setStreamSolo(int,boolean)
+setStreamSolo()} é obsoleto e deve-se chamar o método
+{@code AudioManager.requestAudioFocus()}. De forma semelhante, o método
+{@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()} é
+obsoleto; em vez disso, chame o método {@code AudioManager.adjustStreamVolume()}
+e passe o valor da direção de {@code ADJUST_MUTE} ou {@code ADJUST_UNMUTE}.</p>
+
+<h2 id="behavior-test-selection">Seleção de texto</h2>
+
+<img src="{@docRoot}preview/images/text-selection.gif" style="float:right; margin:0 0 20px 30px" width="360" height="640" />
+
+<p>Quando os usuários selecionam o texto no aplicativo, agora é possível exibir ações de seleção de texto como 
+<em>Recortar</em>, <em>Copiar</em> e <em>Colar</em> na 
+<a href="http://www.google.com/design/spec/patterns/selection.html#selection-text-selection" class="external-link">barra de ferramentas flutuante</a>. A implementação da interação do usuário é semelhante ao processo
+da barra de ação contextual, como descrito em 
+<a href="{@docRoot}guide/topics/ui/menus.html#CABforViews">
+Ativação do modo de ação contextual para vistas individuais</a>.</p>
+
+<p>Para implementar uma barra de ferramentas flutuante para seleção de texto, faça as seguintes alterações nos aplicativos
+existentes:</p>
+<ol>
+<li>No objeto {@link android.view.View} ou {@link android.app.Activity}, altere as chamadas 
+{@link android.view.ActionMode} de 
+{@code startActionMode(Callback)} para {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)}.</li>
+<li>Pegue a implementação existente de {@code ActionMode.Callback} e torne-a uma extensão de
+{@code ActionMode.Callback2}.</li>
+<li>Substitua o método {@code Callback2.onGetContentRect()} para fornecer as coordenadas do conteúdo
+do objeto {@link android.graphics.Rect} (como um retângulo de seleção de texto) na vista.</li>
+<li>Se o posicionamento do retângulo deixar de ser válido e for o único elemento a ser invalidado,
+chame o método {@code ActionMode.invalidateContentRect()}.</li>
+</ol>
+
+<p>Caso esteja usando a <a href="{@docRoot}tools/support-library/index.html">
+biblioteca de suporte Android</a> revisão 22.2, saiba que as barras de ferramentas flutuantes não
+têm compatibilidade com versões anteriores e que o appcompat tem controle sobre os objetos {@link android.view.ActionMode} por
+padrão. Isto evita que barras de ferramentas flutuantes sejam exibidas. Para ativar o suporte de 
+{@link android.view.ActionMode} em um 
+{@link android.support.v7.app.AppCompatActivity}, chame 
+{@code android.support.v7.app.AppCompatActivity.getDelegate()} e, em seguida, chame 
+{@code android.support.v7.app.AppCompatDelegate.setHandleNativeActionModesEnabled()} no objeto 
+{@link android.support.v7.app.AppCompatDelegate} retornado e defina
+o parâmetro de entrada para {@code false}. Esta chamada retorna o controle dos objetos {@link android.view.ActionMode}
+à estrutura. Em dispositivos que são executados no M Preview, isto permite que a estrutura suporte os modos de 
+{@link android.support.v7.app.ActionBar} ou de barra de ferramenta flutuante, enquanto que, para dispositivos anteriores ao M Preview,
+somente os modos {@link android.support.v7.app.ActionBar} são suportados.</p>
+
+<h2 id="behavior-keystore">Mudanças no Android Keystore</h2>
+<p>Com esta prévia,
+o <a href="{@docRoot}training/articles/keystore.html">provedor Android Keystore</a> não suporta mais
+DSA. ECDSA ainda é suportado.</p>
+
+<p>As chaves que não exigem criptografia em rest não precisam ser excluídas quando a tela de bloqueio segura
+é desativada ou redefinida (por exemplo, pelo usuário ou por um administrador do dispositivo). As chaves que exigem
+criptografia serão excluídas durante esses eventos.</p>
+
+<h2 id="behavior-network">Mudanças de rede e Wi-Fi</h2>
+
+<p>Esta prévia introduz as seguintes alterações de comportamento nas APIs de rede e Wi-Fi.</p>
+<ul>
+<li>Os aplicativos podem alterar o estado dos objetos {@link android.net.wifi.WifiConfiguration}
+somente se você os tiver criado. Você não tem permissão para modificar nem excluir objetos
+{@link android.net.wifi.WifiConfiguration} criados pelo usuário ou outros aplicativos.
+</li>
+<li>
+Anteriormente, se um aplicativo forçasse o dispositivo a se conectar a uma rede Wi-Fi específica usando
+{@link android.net.wifi.WifiManager#enableNetwork(int,boolean) enableNetwork()} com a configuração
+{@code disableAllOthers=true}, o dispositivo desconectava de outras redes,
+como dados de celular. Nesta prévia, o dispositivo não rompe a conexão com outras redes. Se
+o {@code targetSdkVersion} do aplicativo for {@code “20”} ou menor, ele é fixado
+à rede Wi-Fi selecionada. Se o {@code targetSdkVersion} do aplicativo for {@code “21”} ou maior, use
+as APIS de multi-rede (como
+{@link android.net.Network#openConnection(java.net.URL) openConnection()},
+{@link android.net.Network#bindSocket(java.net.Socket) bindSocket()} e o novo método
+{@code ConnectivityManager.bindProcessToNetwork()}) para garantir que o tráfego de rede
+seja enviado na rede selecionada.</li>
+</ul>
+
+<h2 id="behavior-camera">Mudanças no serviço de câmera</h2>
+<p>Nesta prévia, o modelo para acessar recursos compartilhados no serviço de câmera foi alterado
+do antigo modelo de acesso “primeiro a chegar, primeiro a ser atendido” para um modelo de acesso onde
+os processos de alta prioridade são favorecidos.  As mudanças no comportamento do serviço incluem:</p>
+<ul>
+<li>Acesso aos recursos do subsistema da câmera, incluindo abertura e configuração de um dispositivo de câmera,
+concedido com base na prioridade do processo do aplicativo do cliente. Processos de aplicativos com atividades
+visíveis ao usuário ou de primeiro plano são geralmente de alta prioridade, tornando a aquisição
+e o uso de recursos da câmera mais dependentes.</li>
+<li>Clientes de câmera ativa para aplicativos de menor prioridade podem ser "despejados" quando
+um aplicativo de alta prioridade tenta usar a câmera.  Na API {@link android.hardware.Camera} obsoleta,
+isto resulta em
+{@link android.hardware.Camera.ErrorCallback#onError(int,android.hardware.Camera) onError()} sendo
+chamado para o cliente despejado. Na API {@link android.hardware.camera2 Camera2}, isto resulta em
+{@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected(android.hardware.camera2.CameraDevice) onDisconnected()}
+sendo chamado para o cliente despejado.</li>
+<li>Em dispositivos com hardware de câmera adequado, processos de aplicativo separados podem
+abrir e usar independentemente os dispositivos de câmera simultaneamente. No entanto, casos de uso de vários processos
+em que o acesso simultâneo causa uma degradação significante de desempenho ou capacidades
+de qualquer um dos dispositivos de câmera abertos agora são detectados e proibidos pelo serviço da câmera. Esta alteração
+pode resultar em "despejos" para clientes de menor prioridade quando nenhum aplicativo está
+tentando acessar o mesmo dispositivo de câmera diretamente.
+</li>
+<li>
+Alterar o usuário atual faz com que os clientes da câmera ativa em aplicativos pertencentes à conta do usuário anterior
+sejam despejados.  O acesso à câmera é limitado a perfis de usuário pertencentes ao usuário do dispositivo atual.
+Na prática, isso significa que uma conta de "convidado", por exemplo, não poderá deixar
+processos em execução que usam o subsistema da câmera quando o usuário alternar para uma conta diferente.
+</li>
+</ul>
+
+<h2 id="behavior-art-runtime">Tempo de execução de ART</h2>
+<p>O tempo de execução de ART agora implementa adequadamente as regras de acesso
+para o método {@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()}. Esta
+alteração corrige um problema onde o Dalvik estava verificando as regras de acesso incorretamente em versões anteriores.
+Se o aplicativo usa o método
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} e você quer
+substituir as verificações de acesso, chame o método
+{@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()} com o parâmetro
+de entrada definido como {@code true}. Se o aplicativo usar a
+<a href="{@docRoot}tools/support-library/features.html#v7-appcompat">biblioteca v7 appcompat</a> ou a 
+<a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">biblioteca v7 recyclerview</a>,
+deve-se atualizá-lo para usar as versões mais recentes dessas bibliotecas. Caso contrário, certifique-se
+de que as classes personalizadas mencionadas a partir do XML sejam atualizadas para que os construtores de classe estejam acessíveis.</p>
+
+<p>Esta prévia atualiza o comportamento do vinculador dinâmico. O vinculador dinâmico agora entende
+a diferença entre um {@code soname} da biblioteca e o seu caminho
+(<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">
+erro público 6670</a>), e a pesquisa por {@code soname}
+agora está implementada. Os aplicativos que anteriormente trabalhavam e têm entradas {@code DT_NEEDED} inválidas
+(geralmente, caminhos absolutos no sistema de arquivo na máquina de programação) podem falhar ao serem carregados.</p>
+
+<p>O sinalizador {@code dlopen(3) RTLD_LOCAL} agora está corretamente implementado. Observe que
+{@code RTLD_LOCAL} é o padrão. Portanto, chamadas para {@code dlopen(3)} que não usam explicitamente
+{@code RTLD_LOCAL} serão afetadas (a não ser que o aplicativo tenha usado explicitamente {@code RTLD_GLOBAL}). Com
+{@code RTLD_LOCAL}, os símbolos não estarão disponíveis para as bibliotecas carregadas por chamadas posteriores a
+{@code dlopen(3)} (o oposto ocorre quando mencionado por entradas {@code DT_NEEDED}).</p>
+</p>
+
+<h2 id="behavior-apk-validation">Validação de APK</h2>
+<p>A plataforma agora realiza validações mais estritas de APKs. Um APK é considerado corrompido se um arquivo
+for declarado no manifesto, mas não estiver presente no próprio APK. Um APK deve ser atribuído novamente se qualquer
+conteúdo for removido.</p>
+
+<h2 id="behavior-afw">Mudanças do Android for Work</h2>
+<p>Esta prévia inclui as seguintes mudanças de comportamento para Android for Work:</p>
+<ul>
+<li><strong>Contatos de trabalho em contextos pessoais.</strong> O registro de chamadas do telefone do Google
+agora exibe os contatos de trabalho quando o usuário visualiza chamadas anteriores.
+A configuração {@code DevicePolicyManager.setCrossProfileCallerIdDisabled()} para {@code true} oculta
+os contatos do perfil de trabalho no registro de chamadas do telefone. Os contatos de trabalho podem ser exibidos junto com os contatos pessoais
+aos dispositivos por meio de Bluetooth somente
+se {@code DevicePolicyManager.setBluetoothContactSharingDisabled()} estiver definido como {@code false}. Por
+padrão, ele está definido como {@code true}.
+</li>
+<li><strong>Remoção de configuração Wi-Fi:</strong> as configurações de Wi-Fi adicionadas por um dono de perfil
+(por exemplo, por meio de chamadas para o método
+{@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
+addNetwork()}) agora são removidas se esse perfil de trabalho é excluído.</li>
+<li><strong>Bloqueio de configuração Wi-Fi:</strong> qualquer configuração Wi-Fi criada por um dono do dispositivo
+ativo não pode mais ser modificada nem excluída pelo usuário. O usuário ainda pode criar
+e modificar as próprias configurações de Wi-Fi, contanto que a constante {@link android.os.UserManager}
+{@link android.os.UserManager#DISALLOW_CONFIG_WIFI} não tenha sido definida por ele.</li>
+<li><strong>Faça o download do Work Policy Controller por meio de uma adição de conta Google:</strong> quando uma conta Google
+que requer um gerenciamento por meio do aplicativo Work Policy Controller (WPC) é adicionada ao dispositivo
+fora de um contexto gerenciado, o fluxo de conta adicionada agora solicita ao usuário para instalar
+o WPC adequado. Este comportamento também se aplica a contas adicionadas por meio de 
+<strong>Settings (Configurações) &gt; Accounts (Contas)</strong> no assistente de configuração inicial do dispositivo.</li>
+<li><strong>Alterações aos comportamentos específicos da API DevicePolicyManager:</strong>
+chamar o método {@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()}
+afeta a câmera somente para o usuário que realizou a chamada. Chamá-lo a partir do perfil gerenciado
+não afeta os aplicativos de câmera em execução no usuário principal. Além disso,
+o método {@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()}
+agora está disponível para donos de perfil, além dos donos do dispositivo. Um dono de perfil pode definir
+estas restrições de proteção de bloqueio:
+<ul>
+<li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} e
+ {@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_FINGERPRINT}, que afetam
+ as configurações de proteção de bloqueio para o usuário pai do perfil.</li>
+<li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}, que
+ afeta somente as notificações geradas por aplicativos no perfil gerenciado.</li>
+</ul>
+</li>
+</ul>

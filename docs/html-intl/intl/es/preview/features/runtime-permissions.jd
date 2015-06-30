@@ -1,0 +1,794 @@
+page.title=Permisos
+page.tags=recursos de la versión preliminar, androidm
+page.keywords=permisos, tiempo de ejecución, vista preliminar
+page.image={@docRoot}preview/features/images/permissions_check.png
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Quickview</h2>
+    <ul>
+      <li>Si su aplicación tiene como destino el SDK de la versión preliminar de Android M, se solicitará a los usuarios que concedan permisos durante el tiempo de ejecución, en lugar de durante la instalación.
+</li>
+      <li>Los usuarios pueden cancelar los permisos en cualquier momento desde la pantalla Settings de la aplicación.
+</li>
+      <li>La aplicación necesita controlar los permisos cada vez que se ejecuta.
+</li>
+    </ul>
+
+    <h2>Contenido del documento</h2>
+    <ol>
+      <li><a href="#overview">Información general</a></li>
+      <li><a href="#coding">Codificación para permisos de tiempo de ejecución</a></li>
+      <li><a href="#testing">Prueba de permisos de tiempo de ejecución</a></li>
+      <li><a href="#best-practices">Mejores prácticas</a></li>
+    </ol>
+
+<!--
+  <h2>Related Samples</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
+
+<!--
+  <h2>See also</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
+  </div> <!-- qv -->
+</div> <!-- qv-wrapper -->
+
+
+<p>
+  M Developer Preview introduce un nuevo modelo de permisos de la aplicación que facilita a los usuarios el proceso de instalación y actualización de aplicaciones.
+ Si una aplicación que se ejecuta en la versión preliminar de Android M es compatible con el nuevo modelo de permisos, el usuario no tiene que conceder ningún permiso al instalar o actualizar la aplicación. En su lugar, la aplicación solicitará los permisos a medida que los vaya necesitado y el sistema mostrará al usuario un diálogo en el que le solicitará los permisos necesarios.
+
+
+
+
+</p>
+
+<p>
+  Si la aplicación es compatible con el nuevo modelo de permisos, podrá instalarse y ejecutarse en los dispositivos con versiones anteriores de Android, utilizando el modelo de permisos anterior en esos dispositivos.
+
+
+</p>
+
+<h2 id="overview">
+  Información general
+</h2>
+
+<p>
+  En M Developer Preview, la plataforma introduce un nuevo modelo
+de permisos de la aplicación. A continuación, se presenta un resumen de los componentes principales de este nuevo modelo:
+</p>
+
+<ul>
+  <li>
+    <strong>Declaración de los permisos:</strong> Al igual que en las plataformas anteriores de Android, la aplicación declara todos los permisos que necesita en el manifiesto.
+
+  </li>
+
+  <li>
+    <strong>Grupos de permisos:</strong> Según su función, los permisos se dividen en
+<em>grupos de permisos</em>. Por ejemplo, el grupo de permisos
+<code>CONTACTS</code> contiene permisos para leer y escribir los contactos y la información de perfil del usuario.
+
+  </li>
+
+  <li>
+    <p><strong>Permisos limitados concedidos durante la instalación:</strong> Cuando el usuario instala o actualiza la aplicación, el sistema le concede a la aplicación todos los permisos que la aplicación solicita que corresponden a {@link
+    android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}.
+
+
+    Por ejemplo, los permisos para la alarma y los permisos de intento corresponden a {@link
+    android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}, por lo que se conceden automáticamente durante la instalación.
+
+    </p>
+
+    <p>El sistema puede concederle a la aplicación permisos de firma y de sistema, como se especifica en la sección <a href="#system-apps">Permisos de firma y de sistema de la aplicación</a>.
+
+ Al usuario <em>no</em> se le solicitará conceder ningún permiso durante la instalación.
+</p>
+  </li>
+
+  <li>
+    <strong>Solicitud de permisos al usuario durante el tiempo de ejecución:</strong> Cuando la aplicación solicita un permiso, el sistema le muestra al usuario un diálogo y luego llama a la función de devolución de llamada de la aplicación para notificarle si el permiso se otorgó.
+
+ Si el usuario concede un permiso, la aplicación recibe todos los permisos del área funcional de dicho permiso, los cuales fueron declarados en el manifiesto de la aplicación.
+
+
+  </li>
+
+</ul>
+
+<p>
+  Este modelo de permisos cambia la forma en la que la aplicación se comporta para características que requieren permisos.
+ A continuación, se presenta un resumen de las prácticas de desarrollo que debe seguir para ajustarse a este modelo:
+
+</p>
+
+<ul>
+
+  <li>
+    <strong>Siempre compruebe los permisos:</strong> Siempre que una aplicación necesite realizar una acción que requiere algún permiso, primero debe comprobar si ya tiene otorgado ese permiso.
+
+ En caso de no tenerlo, solicitará que se le otorgue ese permiso.
+
+  </li>
+
+  <li>
+    <strong>Administre la falta de permisos correctamente:</strong> Si la aplicación no recibe un permiso adecuado, deberá administrar la falla sin errores.
+
+    Por ejemplo, si se necesita el permiso solo para una característica añadida, la aplicación puede desactivar esa característica.
+ Si el permiso es fundamental para que la aplicación funcione, la aplicación podrá desactivar toda su funcionalidad e informar al usuario que se deben conceder dichos permisos.
+
+
+  </li>
+
+  <div class="figure" style="width:220px" id="fig-perms-screen">
+    <img src="{@docRoot}preview/features/images/app-permissions-screen_2x.png" srcset="{@docRoot}preview/features/images/app-permissions-screen.png 1x, {@docRoot}preview/features/images/app-permissions-screen_2x.png 2x" alt="" width="220">
+    <p class="img-caption">
+      <strong>Figura 1</strong> Pantalla de permisos en Settings de la aplicación.
+    </p>
+  </div>
+
+  <li>
+    <strong>Los permisos son revocables:</strong> Los usuarios pueden revocar los permisos en cualquier momento.
+ Si un usuario desactiva los permisos de una aplicación, la aplicación <em>no</em> recibe ningún aviso.
+ Nuevamente, la aplicación deberá verificar que cuenta con los permisos necesarios antes de realizar cualquier acción restringida.
+
+  </li>
+</ul>
+
+<p class="note">
+  <strong>Nota:</strong> Si una aplicación tiene como destino M Developer Preview, <em>debe</em> utilizar el nuevo modelo de permisos.
+
+</p>
+
+<p>
+  A partir del lanzamiento de M Developer Preview, no todas las aplicaciones de Google implementarán por completo el nuevo modelo de permisos.
+ Google actualiza estas aplicaciones durante el transcurso de M Developer Preview para respetar adecuadamente las configuraciones de alternancia de los permisos.
+
+
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Si la aplicación cuenta con su propia superficie de API, no transmita permisos sin antes asegurarse de que el iniciador de la llamada cuente con los permisos requeridos para acceder a esa información.
+
+
+</p>
+
+<h3 id="system-apps">
+  Permisos de las aplicaciones de firma y de sistema
+</h3>
+
+<p>
+  Generalmente, cuando el usuario instala una aplicación, el sistema solo otorga a la aplicación
+{@link android.content.pm.PermissionInfo#PROTECTION_NORMAL
+  PROTECTION_NORMAL}. Sin embargo, en ciertas circunstancias, el sistema le concede a la aplicación más permisos:
+
+</p>
+
+<ul>
+  <li>Si una aplicación es parte de la imagen del sistema, la aplicación recibe automáticamente todos los permisos enumerados en el manifiesto.
+
+  </li>
+
+  <li>Si la aplicación solicita permisos en el manifiesto que corresponden a {@link
+  android.content.pm.PermissionInfo#PROTECTION_SIGNATURE PROTECTION_SIGNATURE} y la aplicación está firmada con el mismo certificado que el de la aplicación que declaró dichos permisos, el sistema le concede a la aplicación que los solicita esos permisos durante la instalación.
+
+
+
+  </li>
+</ul>
+
+<p>
+  En ambos casos, el usuario aún puede revocar los permisos en cualquier momento si accede a la pantalla <strong>Settings</strong> del sistema y selecciona <strong>Apps &gt;</strong>
+
+ <i>app_name</i> <strong>&gt; Permissions</strong>. La aplicación debe seguir controlando los permisos al momento de la ejecución y solicitarlos si fuese necesario.
+
+
+</p>
+
+<h3 id="compatibility">
+  Compatibilidad con modelos anteriores y posteriores
+</h3>
+
+<p>
+  Si una aplicación no tiene como destino M Developer Preview, la aplicación continúa utilizando el modelo de permisos anterior, incluso en dispositivos con la versión preliminar de Android M.
+ Cuando el usuario instala la aplicación, el sistema le solicita al usuario que otorgue todos los permisos enumerados en el manifiesto de la aplicación.
+
+
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> En dispositivos que ejecutan M Developer Preview, el usuario puede desactivar los permisos para cualquier aplicación (incluso para aplicaciones heredadas) desde la pantalla Settings de la aplicación.
+
+ Si un usuario desactiva permisos para una aplicación heredada, el sistema desactiva las funciones correspondientes de forma automática.
+ Cuando la aplicación intenta realizar una operación que requiere ese permiso, la operación no generará necesariamente una excepción.
+
+ En su lugar, devolverá un conjunto de datos vacíos, indicará un error o, de lo contrario, mostrará un comportamiento inesperado.
+ Por ejemplo, si realiza una consulta sobre el calendario sin permisos, el método devuelve un conjunto de datos vacíos.
+
+</p>
+
+<p>
+  Si instala una aplicación que utiliza el nuevo modelo de permisos en un dispositivo que no ejecuta la versión preliminar de Android M, el sistema la trata como cualquier otra aplicación: el sistema le pide al usuario, durante la instalación, que conceda los permisos declarados.
+
+
+
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Para el lanzamiento de la versión preliminar, debe configurar la versión mínima del SDK en M Preview SDK para compilar con la versión del SDK preliminar.
+ Esto significa que no podrá probar dichas aplicaciones en plataformas anteriores durante la versión preliminar para desarrolladores.
+
+
+</p>
+
+<h3 id="perms-vs-intents">Permisos frente a intentos</h3>
+
+<p>
+  En muchas situaciones, puede elegir entre dos formas para que sus aplicaciones realicen una tarea.
+ Puede hacer que su aplicación solicite permiso para realizar la operación por sí misma.
+ De lo contrario, puede hacer que la aplicación utilice un intento para que otra aplicación realice la tarea.
+
+</p>
+
+<p>
+  Por ejemplo, supongamos que su aplicación necesita poder tomar fotografías con la cámara del dispositivo.
+ Su aplicación puede solicitar el permiso
+<code>android.permission.CAMERA</code>, lo que le permite a su aplicación acceder a la cámara directamente.
+ Entonces, su aplicación utilizará las API de la cámara para controlar la cámara y tomar una fotografía.
+ Este enfoque le otorga a su aplicación total control del proceso de fotografía y le permite incorporar la UI de la cámara en su aplicación.
+
+
+</p>
+
+<p>
+  Sin embargo, si no necesita dicho control, puede utilizar {@link
+  android.provider.MediaStore#ACTION_IMAGE_CAPTURE ACTION_IMAGE_CAPTURE} para solicitar una imagen.
+ Cuando ejecute el intento, se le solicita al usuario que elija una aplicación de cámara (en caso de que no haya una aplicación de cámara predeterminada) y esa aplicación tomará la fotografía.
+
+ La aplicación de cámara devuelve la fotografía al método {@link
+  android.app.Activity#onActivityResult onActivityResult()} de su aplicación.
+</p>
+
+<p>
+  De manera similar, si necesita realizar una llamada telefónica, acceder a los contactos del usuario, etc., lo puede hacer creando intentos apropiados o puede solicitar los permisos e ingresar directamente a los objetos apropiados.
+
+ Cada enfoque tiene ventajas y desventajas.
+
+</p>
+
+<p>
+  Si utiliza los permisos:
+</p>
+
+<ul>
+  <li>La aplicación posee total control sobre la experiencia del usuario cuando usted realiza la operación.
+ Sin embargo, un control tan amplio complica su tarea, ya que usted deberá diseñar una UI apropiada.
+
+  </li>
+
+  <li>Se le solicita al usuario otorgar el permiso una vez, la primera vez que usted realiza la operación.
+ Luego, su aplicación puede realizar la operación sin requerir interacción adicional por parte del usuario.
+ Sin embargo, si el usuario no concede el permiso (o lo revoca luego), su aplicación queda inhabilitada para realizar la operación.
+
+
+  </li>
+</ul>
+
+<p>
+  Si utiliza un intento:
+</p>
+
+<ul>
+  <li>No debe diseñar la UI para la operación. La aplicación que controla el intento provee la UI. Sin embargo, esto significa que usted no tiene control sobre la experiencia del usuario.
+
+ El usuario podrá interactuar con una aplicación que usted no conoce.
+
+  </li>
+
+  <li>Si el usuario no tiene una aplicación predeterminada para la operación, el sistema le solicita al usuario que elija una aplicación. Si el usuario no designa un controlador predeterminado, es probable que surja un diálogo adicional cada vez que realice la operación.
+
+
+
+  </li>
+</ul>
+
+<h2 id="coding">Codificación para permisos de tiempo de ejecución</h2>
+
+<p>
+  Si su aplicación tiene como destino el nuevo M Developer Preview, deberá usar el nuevo modelo de permisos.
+  Esto significa que, además de declarar los permisos necesarios en el manifiesto, también debe comprobar si tiene los permisos de tiempo de ejecución y solicitarlos en caso de no tenerlos.
+
+
+
+</p>
+
+<h3 id="enabling">
+  Habilitar el nuevo modelo de permisos
+</h3>
+
+<p>
+  Para habilitar el nuevo modelo de permisos de M Developer Preview, configure el atributo
+<code>targetSdkVersion</code> de la aplicación en <code>"MNC"</code> y
+<code>compileSdkVersion</code> en <code>"android-MNC"</code>. Al hacerlo, se habilitan todas las características de los nuevos permisos.
+
+</p>
+
+<p>
+  Para el lanzamiento de la versión preliminar, debe establecer <code>minSdkVersion</code> en
+<code>"MNC"</code> para compilar con el SDK preliminar.
+</p>
+
+<h3 id="m-only-perm">
+  Establecer un permiso solo para la versión preliminar de Android M
+</h3>
+
+<p>
+  Puede utilizar el nuevo elemento <code>&lt;uses-permission-sdk-m&gt;</code> en el manifiesto de la aplicación para indicar que se necesita un permiso solo para M Developer Preview.
+ Si declara un permiso de esta manera, cuando la aplicación se instale en un dispositivo anterior, el sistema no le solicitará al usuario el permiso ni se lo otorgará a la aplicación. Al usar el elemento <code>&lt;uses-permission-sdk-m&gt;</code>, puede añadir nuevos permisos a las versiones actualizadas de su aplicación sin forzar a los usuarios a otorgar permisos cuando instalen la actualización.
+
+
+
+
+
+
+</p>
+
+<p>
+  Si la aplicación se ejecuta en un dispositivo con M Developer Preview,
+<code>&lt;uses-permission-sdk-m&gt;</code> se comporta al igual que
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>.
+  El sistema no le solicita al usuario que otorgue ningún permiso al instalar la aplicación y la aplicación solicita los permisos a medida que se necesiten.
+
+</p>
+
+<h3 id="prompting">
+  Solicitar permisos
+</h3>
+
+<p>
+  Si su aplicación utiliza el nuevo modelo de permisos de M Developer Preview, no se le pedirá al usuario que otorgue todos los permisos cuando la aplicación se ejecute por primera vez en un dispositivo con la versión preliminar de Android M.
+
+ En su lugar, su aplicación solicita los permisos a medida que los necesita.
+ Cuando su aplicación solicita un permiso, el sistema le muestra un diálogo al usuario.
+
+</p>
+
+<p>
+  Si su aplicación se ejecuta en un dispositivo con SDK 22 o anterior, la aplicación utiliza el modelo de permisos anterior.
+ Cuando el usuario instala la aplicación, se le solicita que otorgue todos los permisos que la aplicación requiere en su manifiesto, excepto aquellos permisos marcados con <code>&lt;uses-permission-sdk-m&gt;</code>.
+
+
+</p>
+
+<h4 id="check-platform">Controlar en qué plataforma se ejecuta la aplicación</h4>
+
+<p>
+  Este modelo de permisos es compatible solamente con dispositivos que ejecutan M Developer Preview.
+ Antes de llamar a cualquiera de estos métodos, la aplicación debe verificar en qué plataforma se está ejecutando y, para hacerlo, se controla el valor de {@link android.os.Build.VERSION#CODENAME
+  Build.VERSION.CODENAME}.
+
+ Si el dispositivo ejecuta M Developer Preview,
+{@link android.os.Build.VERSION#CODENAME CODENAME} es <code>"MNC"</code>.
+</p>
+
+<h4 id="check-for-permission">Controlar si la aplicación cuenta con los permisos necesarios</h4>
+
+<p>Cuando el usuario intenta realizar algo que requiere un permiso, la aplicación controla si ya tiene el permiso para realizar esa operación.
+ Para hacerlo, la aplicación llama a <code>Context.checkSelfPermission(
+
+<i>permission_name</i>)</code>. La aplicación debe realizar este control incluso si sabe que el usuario ya ha concedido ese permiso, ya que el usuario puede revocar los permisos de una aplicación en cualquier momento.
+
+
+ Por ejemplo, si un usuario quiere usar una aplicación para tomar una fotografía, la aplicación llama a <code>Context.checkSelfPermission(Manifest.permission.CAMERA)</code>.
+
+</p>
+
+<p class="table-caption" id="permission-groups">
+  <strong>Tabla 1.</strong> Permisos y grupo de permisos.</p>
+<table>
+  <tr>
+    <th scope="col">Grupo de permisos</th>
+    <th scope="col">Permisos</th>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CALENDAR</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_CALENDAR</code>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <code>android.permission.WRITE_CALENDAR</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CAMERA</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.CAMERA</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.CONTACTS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_CONTACTS</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_CONTACTS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_PROFILE</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_PROFILE</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.LOCATION</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.ACCESS_FINE_LOCATION</code>
+        </li>
+        <li>
+          <code>android.permission.ACCESS_COARSE_LOCATION</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.MICROPHONE</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.RECORD_AUDIO</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.PHONE</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_PHONE_STATE</code>
+        </li>
+        <li>
+          <code>android.permission.CALL_PHONE</code>
+        </li>
+        <li>
+          <code>android.permission.READ_CALL_LOG</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_CALL_LOG</code>
+        </li>
+        <li>
+          <code>com.android.voicemail.permission.ADD_VOICEMAIL</code>
+        </li>
+        <li>
+          <code>android.permission.USE_SIP</code>
+        </li>
+        <li>
+          <code>android.permission.PROCESS_OUTGOING_CALLS</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.SENSORS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.BODY_SENSORS</code>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <code>android.permission.USE_FINGERPRINT</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>android.permission-group.SMS</code></td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.SEND_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_SMS</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_WAP_PUSH</code>
+        </li>
+        <li>
+          <code>android.permission.RECEIVE_MMS</code>
+        </li>
+        <li>
+          <code>android.permission.READ_CELL_BROADCASTS</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+</table>
+
+<h4 id="request-permissions">Solicitar permisos si se necesitan</h4>
+
+<p>Si la aplicación no posee los permisos que necesita, llama al método
+<code>Activity.requestPermissions(String[], int)</code> para solicitar el permiso o los permisos apropiados.
+ La aplicación pasa el permiso o los permisos que necesita y un “código de solicitud” entero.
+
+  Este método funciona de manera asincrónica: realiza la devolución inmediatamente y cuando el usuario responde a la ventana de diálogo, el sistema llama al método de devolución de llamada de la aplicación con los resultados, y pasa el mismo “código de solicitud” que pasó la aplicación a
+<code>requestPermissions()</code>.
+
+</p>
+
+  <p>El siguiente código verifica si la aplicación tiene permisos para leer los contactos del usuario y solicita los permisos de ser necesario:
+</p>
+
+<pre>
+if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+        != PackageManager.PERMISSION_GRANTED) {
+    requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+            MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+    // app-defined int constant
+
+    return;
+}
+</pre>
+
+<h4 id="handle-response">Administrar la respuesta a la solicitud de permisos</h4>
+
+<p>
+  Cuando una aplicación solicita permisos, el sistema le muestra al usuario una ventana de diálogo.
+ Cuando el usuario responde, el sistema invoca
+<code>Activity.onRequestPermissionsResult(int, String[], int[])</code>
+ de su aplicación y le transfiere la respuesta del usuario. Su aplicación necesita invalidar ese método. La devolución de llamada pasa el mismo código de solicitud que usted pasó a <code>requestPermissions()</code>.
+
+ Por ejemplo, si una aplicación solicita acceso <code>READ_CONTACTS</code>, es posible que tenga el siguiente método de devolución de llamada:
+
+
+</p>
+
+<pre>
+&#64;Override
+public void onRequestPermissionsResult(int requestCode,
+        String permissions[], int[] grantResults) {
+    switch (requestCode) {
+        case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // permission was granted, yay! do the
+                // calendar task you need to do.
+
+            } else {
+
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+            }
+            return;
+        }
+
+        // other 'switch' lines to check for other
+        // permissions this app might request
+    }
+}
+</pre>
+
+  <p>Si el usuario concede un permiso, el sistema le otorga a la aplicación todos los permisos enumerados en el manifiesto para esa área funcional.
+ Se deben tomar acciones apropiadas si el usuario rechaza la solicitud.
+ Por ejemplo, usted podría desactivar cualquier acción del menú que dependa de este permiso.
+
+  </li>
+</p>
+
+<p>
+  Cuando el sistema le solicita al usuario que otorgue un permiso, el usuario tiene la opción de indicarle al sistema que no solicite ese permiso de nuevo.
+ En ese caso, cuando la aplicación utiliza <code>requestPermissions()</code> para solicitar ese permiso, el sistema rechaza la solicitud inmediatamente.
+
+ En este caso, el sistema llama a su <code>onRequestPermissionsResult()</code> de la misma manera en que lo haría si el usuario hubiese rechazado explícitamente su solicitud nuevamente.
+
+ Por esta razón, su aplicación no puede asumir que se ha llevado a cabo algún tipo de interacción con el usuario.
+
+</p>
+
+<h2 id="testing">Prueba de permisos de tiempo de ejecución</h2>
+
+
+<p>
+  Si su aplicación tiene como destino M Developer Preview, debe probar que administre los permisos correctamente.
+ No debe asumir que su aplicación tiene algún permiso en particular cuando se ejecuta.
+ Cuando la aplicación se ejecuta por primera vez, es muy probable que no tenga permisos y el usuario puede revocar o reestablecer los permisos en cualquier momento.
+
+
+</p>
+
+<p>
+  Debe probar su aplicación para asegurarse de que funciona correctamente en todas las situaciones de permisos.
+ Con el SDK de la versión preliminar de Android M, hemos brindado nuevos comandos <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (adb)</a> que le permitirán probar su aplicación con cualquier configuración de permisos que necesite probar.
+
+
+
+</p>
+
+<h3>
+  Nuevas opciones y comandos adb
+</h3>
+
+<p>
+  Las herramientas de plataforma del SDK de la versión preliminar de Android M contienen varios comandos nuevos que le permiten probar la manera en que su aplicación administra los permisos.
+
+</p>
+
+<h4>
+  Instalar con permisos
+</h4>
+
+<p>
+  Puede utilizar la nueva opción <code>-g</code> del comando <a href="{@docRoot}tools/help/adb.html#move"><code>adb
+  install</code></a>, que instala la aplicación y concede todos los permisos enumerados en el manifiesto de la aplicación:
+
+</p>
+
+<pre class="no-pretty-print">
+$ adb install -g &lt;path_to_apk&gt;
+</pre>
+
+<h4>
+  Conceder y revocar permisos
+</h4>
+
+<p>
+  Puede utilizar los comandos ADB nuevos <a href="{@docRoot}tools/help/adb.html#pm">package manager (pm)</a> para conceder y revocar permisos a una aplicación instalada. Esta funcionalidad puede resultar útil para pruebas automáticas.
+
+
+</p>
+
+<p>
+  Para conceder un permiso, utilice el comando <code>grant</code> de package manager:
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm grant &lt;package_name&gt; &lt;permission_name&gt;
+</pre>
+
+<p>
+  Por ejemplo, para conceder el paquete de permisos com.example.myapp para grabar audio utilice este comando:
+
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm grant com.example.myapp android.permission.RECORD_AUDIO
+</pre>
+
+<p>
+  Para revocar un permiso, utilice el comando <code>revoke</code> de package manager:
+</p>
+
+<pre class="no-pretty-print">
+$ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
+</pre>
+
+<h2 id="best-practices">Mejores prácticas</h2>
+
+<p>
+  El nuevo modelo de permisos brinda a los usuarios una experiencia más fluida y les facilita la instalación de aplicaciones, además de hacerlos sentir cómodos con las actividades de sus aplicaciones.
+
+ Sugerimos las siguientes mejores prácticas para obtener el mayor beneficio del nuevo modelo.
+
+</p>
+
+
+<h3 id="bp-what-you-need">Solicite solo los permisos que necesite</h3>
+
+<p>
+  Cada vez que solicite un permiso, usted obliga al usuario a tomar una decisión.
+  La funcionalidad de su aplicación se verá reducida si el usuario rechaza la solicitud.
+  Debe minimizar la cantidad de veces que realiza estas solicitudes.
+</p>
+
+<p>
+  Por ejemplo, a menudo, su aplicación puede obtener la funcionalidad necesaria a través de un <a href="{@docRoot}guide/components/intents-filters.html">intento</a> en lugar de una solicitud de permiso.
+
+ Si su aplicación necesita tomar fotografías con la cámara del teléfono, la aplicación puede utilizar un intento {@link
+  android.provider.MediaStore#ACTION_IMAGE_CAPTURE
+  MediaStore.ACTION_IMAGE_CAPTURE}.
+  Cuando su aplicación ejecuta el intento, el sistema le solicita al usuario que elija una aplicación para la cámara que ya está instalada a fin de tomar la fotografía.
+
+
+</p>
+
+<h3 id="bp-dont-overwhelm">
+  No abrume al usuario
+</h3>
+
+<p>
+  Si expone al usuario a muchas solicitudes de permisos al mismo tiempo, lo abrumará y hará que deje de usar su aplicación. Por el contrario, debe pedir permisos en la medida que los necesite.
+
+
+</p>
+
+<p>
+  A veces, uno o más permisos pueden ser absolutamente necesarios para la aplicación. En ese caso, es recomendable pedir todos los permisos no bien se inicie la aplicación.
+
+ Por ejemplo, si crea una aplicación de fotografía, la aplicación necesitará acceso a la cámara del dispositivo.
+ Cuando el usuario inicie la aplicación por primera vez, no se sorprenderá si la aplicación le solicita permiso para usar la cámara.
+
+ Sin embargo, si la misma aplicación además tuviese una característica para compartir fotografías con los contactos del usuario, <em>no</em> solicite ese permiso la primera vez que se ejecute.
+
+ En su lugar, espere hasta que el usuario utilice la característica “compartir” para solicitar el permiso en ese momento.
+
+</p>
+
+<p>
+  Si su aplicación proporciona un tutorial, se recomienda que se pidan los permisos esenciales de la aplicación al final del tutorial.
+
+</p>
+
+<h3 id="bp-explain">
+  Explique por qué se necesitan los permisos
+</h3>
+
+<p>
+  El diálogo de permisos que muestra el sistema cuando llama a
+ <code>requestPermissions()</code> informa qué permisos necesita su aplicación pero no establece el motivo.
+ A veces, el usuario puede confundirse.
+  Es una buena idea explicarle al usuario los motivos por los que la aplicación necesita esos permisos antes de llamar a <code>requestPermissions()</code>.
+
+</p>
+
+<p>
+  Por ejemplo, una aplicación de fotografía puede solicitar servicios de ubicación para añadir una etiqueta geográfica a las fotografías.
+ Es posible que un usuario típico no sepa que una fotografía puede contener información sobre la ubicación y se confundiría si una aplicación de fotografía solicita la ubicación.
+
+ En este caso, es recomendable que la aplicación le informe al usuario acerca de esta característica <em>antes</em> de llamar a
+<code>requestPermissions()</code>.
+
+</p>
+
+<p>
+  Una forma de hacerlo es incorporar estas solicitudes en el tutorial de la aplicación. El tutorial puede mostrar todas las características de la aplicación, una por vez, y mientras lo hace explicar los permisos que son necesarios.
+
+ Por ejemplo, el tutorial de la aplicación de fotografía puede mostrar la característica “compartir fotografías con contactos” y luego explicarle al usuario que debe otorgar permisos para que la aplicación vea los contactos del usuario.
+
+
+ La aplicación puede entonces llamar a <code>requestPermissions()</code> para solicitarle al usuario ese acceso.
+ Por supuesto, no todos los usuarios siguen el tutorial, por lo que aun así debe controlar y solicitar los permisos durante el funcionamiento normal de la aplicación.
+
+
+</p>

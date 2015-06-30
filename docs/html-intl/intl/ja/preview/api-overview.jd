@@ -1,0 +1,521 @@
+page.title=API の概要
+page.keywords=プレビュー,sdk,互換性
+page.tags=previewresources, androidm sdk.platform.apiLevel=22-mnc
+page.image=images/cards/card-api-overview_16-9_2x.png
+@jd:body
+
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本書の内容
+ <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">詳細を表示</span>
+        <span class="less" style="display:none">詳細を非表示</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#app-linking">アプリのリンク機能</a></li>
+  <li><a href="#backup">アプリの自動バックアップ</a></li>
+  <li><a href="#authentication">認証</a>
+    <ol>
+      <li><a href="#fingerprint-authentication">指紋認証</a></li>
+      <li><a href="#confirm-credential">資格情報の確認</a></li>
+    </ol>
+  </li>
+  <li><a href="#direct-share">ダイレクト シェア</a></li>
+  <li><a href="#voice-interactions">音声インタラクション</a></li>
+  <li><a href="#assist">Assist API</a></li>
+  <li><a href="#notifications">通知</a></li>
+  <li><a href="#bluetooth-stylus">Bluetooth スタイラスのサポート</a></li>
+  <li><a href="#ble-scanning">Bluetooth Low Energy のスキャンの改善</a></li>
+  <li><a href="#hotspot">アクセス ポイント2.0 リリース 1 のサポート</a></li>
+  <li><a href="#4K-display">4K ディスプレイ モード</a></li>
+  <li><a href="#behavior-themeable-colorstatelists">テーマ化可能な ColorStateLists</a></li>
+  <li><a href="#audio">オーディオ機能</a></li>
+  <li><a href="#video">ビデオ機能</a></li>
+  <li><a href="#camera">カメラ機能</a>
+    <ol>
+      <li><a href="#flashlight">Flashlight API</a></li>
+      <li><a href="#reprocessing">カメラの再処理</a></li>
+    </ol>
+  </li>
+  <li><a href="#afw">Android for Work の機能</a></li>
+</ol>
+
+<h2>API の変更点</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API レベル 22 から M Preview&raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>M Developer Preview では、ユーザーやアプリ開発者に Android プラットフォームの次期リリースの新機能をいち早く試していただくことができます。
+
+このドキュメントでは、いくつかの注目すべき API の概要について説明します。</p>
+
+<p>M Developer Preview は、<strong>Developer の早期導入者</strong>と<strong>テスター</strong>を対象としています。
+是非
+<a href="{@docRoot}preview/setup-sdk.html">M Developer Preview を試して</a>フィードバックをご提供ください。あなたのご意見が、Android フレームワークの方向性を決定する上で貴重な情報になります。
+
+</p>
+
+<p class="caution"><strong>注意:</strong> M Developer Preview を使用したアプリは、Google Play ストアには公開しないでください。
+</p>
+
+<p class="note"><strong>注</strong>: このドキュメントには、まだ <a href="{@docRoot}">developer.android.com</a> のリファレンス マテリアルにないクラスやメソッドが多数登場します。
+このドキュメントでは、API エレメントは {@code code style} 形式で記載されています（ハイパーリンクなし）。
+これらのエレメントに関する API ドキュメント（準備段階）については、<a href="{@docRoot}preview/download.html#docs">プレビューのリファレンス</a>をダウンロードしてください。
+</p>
+
+<h3>重要な動作の変更点</h3>
+
+<p>過去に Android にアプリを公開したことがある場合は、アプリがプラットフォームの変更による影響を受ける場合があります。
+</p>
+
+<p>詳細については、<a href="behavior-changes.html">Behavior Changes</a> をご覧ください。</p>
+
+<h2 id="app-linking">アプリのリンク機能</h2>
+<p>このプレビューでは、アプリのリンク機能を強化することで Android のインテント システムが向上しました。この機能では、所有するウェブドメインにアプリを関連付けることができます。
+この関連付けに基づいて、プラットフォームが特定のウェブリンクの処理に使用するデフォルトのアプリを決めることができ、ユーザーにアプリを選択させる操作をスキップできます。この機能の実装方法については、
+<a href="{@docRoot}preview/features/app-linking.html">アプリのリンク機能</a>をご覧ください。
+
+
+
+<h2 id="backup">アプリの自動バックアップ</h2>
+<p>システムで、アプリの自動フルデータ バックアップと復元を実行できるようになりました。この動作は、M Preview を対象としたアプリでデフォルトで有効になっています。追加のコードは必要ありません。
+ユーザーが Google アカウントを削除すると、バックアップ データも削除されます。
+この機能の仕組みとファイル システムでバックアップ対象を設定する方法については、
+<a href="{@docRoot}preview/backup/index.html">アプリの自動バックアップ</a>をご覧ください。
+</p>
+
+<h2 id="authentication">認証</h2>
+<p>このプレビューでは、サポートされる端末での指紋スキャンを使用したユーザー認証や、端末のロック解除メカニズム（ロック画面のパスワードなど）を使って最後にユーザーが認証された時期の確認などを行える新しい API が提供されます。
+
+これらの API は、<a href="{@docRoot}training/articles/keystore.html">Android キーストローク システム</a>と共に使用します。
+</p>
+
+<h3 id="fingerprint-authentication">指紋認証</h3>
+
+<p>指紋スキャンでユーザーを認証するには、新しい
+{@code android.hardware.fingerprint.FingerprintManager} クラスのインスタンスを取得して、
+{@code FingerprintManager.authenticate()} メソッドを呼び出します。アプリは、指紋センサー付きの、互換性のある端末上で実行している必要があります。
+指紋認証フローのユーザー インターフェースをアプリに実装し、UI には標準の Android 指紋アイコンを使用する必要があります。Android 指紋アイコン（{@code c_fp_40px.png}）は<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">サンプルアプリ</a>に含まれています。指紋認証を使用するアプリを複数開発する場合は、それぞれのアプリで個別にユーザーの指紋を認証する必要があります。
+
+
+
+
+</p>
+
+<p>アプリでこの機能を使用するには、まずマニフェストに {@code USE_FINGERPRINT} パーミッションを追加する必要があります。
+</p>
+
+<pre>
+&lt;uses-permission
+        android:name="android.permission.USE_FINGERPRINT" /&gt;
+</pre>
+
+<img src="{@docRoot}preview/images/fingerprint-screen.png" srcset="{@docRoot}preview/images/fingerprint-screen.png 1x, {@docRoot}preview/images/fingerprint-screen_2x.png 2x" style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+
+<p>アプリでの指紋認証の実装については、
+<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">指紋ダイアログのサンプル</a>をご覧ください。
+</p>
+
+<p>この機能をテストする場合は、次の手順を使用します。</p>
+<ol>
+<li>Android SDK Tools Revision 24.3 をインストールします（まだインストールしていない場合）。</li>
+<li>
+<strong>[設定] &gt; [セキュリティ] &gt; [指紋]</strong> の登録手順に従い、エミュレータに新しい指紋を登録します。</li>
+<li>エミュレータを使って、次のコマンドで指紋のタッチ ベントをエミュレートします。
+同じコマンドを使って、ロック画面やアプリでの指紋のタッチイベントをエミュレートします。
+
+<pre class="no-prettyprint">
+adb -e emu finger touch &lt;finger_id&gt;
+</pre>
+<p>Windows では、{@code telnet 127.0.0.1 &lt;emulator-id&gt;}、
+{@code finger touch &lt;finger_id&gt;} の順に実行する必要がある場合があります。
+</p>
+</li>
+</ol>
+
+<h3 id="confirm-credential">資格情報の確認</h3>
+<p>アプリでは、ユーザーがいつ、最後に端末のロックを解除したかに基づいて、ユーザーを認証できます。この機能によって、ユーザーがアプリ固有のパスワードを覚えたり、開発者が独自の認証ユーザー インターフェースを実装したりする必要性がなくなります。
+
+アプリでこの機能を使用する場合は、ユーザー認証用の公開鍵か秘密鍵を実装する必要があります。
+</p>
+
+<p>ユーザーが正常に認証された後、同じキーを再使用できるタイムアウト期間を設定するには、{@link javax.crypto.KeyGenerator} か
+{@link java.security.KeyPairGenerator} のセットアップ後に新しい
+{@code android.security.keystore.KeyGenParameterSpec.setUserAuthenticationValidityDurationSeconds()} メソッドを呼び出します。
+
+現在、この機能は対象暗号化操作で動作します。
+</p>
+
+<p>再認証ダイアログを過度に表示しないようにします。アプリでは、まず暗号オブジェクトを使用し、タイムアウトした場合は
+{@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence) createConfirmDeviceCredentialIntent()} メソッドを使用してユーザーをアプリ内で再認証するようにします。
+
+
+</p>
+
+<p>アプリでのこの機能の実装については、
+<a href="https://github.com/googlesamples/android-ConfirmCredential" class="external-link">資格情報の確認サンプル</a>をご覧ください。
+</p>
+
+<h2 id="direct-share">ダイレクト シェア</h2>
+
+<img src="{@docRoot}preview/images/direct-share-screen.png" srcset="{@docRoot}preview/images/direct-share-screen.png 1x, {@docRoot}preview/images/direct-share-screen_2x.png 2x" style="float:right; margin:0 0 20px 30px" width="312" height="329" />
+
+<p>このプレビューでは、ユーザーが直感的にすばやく共有できるようにする API が提供されます。アプリで特定のアクティビティを起動する<em>ダイレクト シェアのターゲット</em>を定義すると、それらのダイレクト シェアのターゲットは <em>[共有]</em> メニューに表示されるようになります。
+
+この機能を使うと、他のアプリ内にある連絡先などのターゲットにコンテンツを共有できます。
+たとえば、ダイレクト シェアのターゲットによって他のソーシャル ネットワーク アプリのアクティビティが起動し、そのアプリ内の特定の友人やコミュニティに直接コンテンツを共有できるようになります。
+
+</p>
+
+<p>ダイレクト シェアのターゲットを有効にするには、まず
+{@code android.service.} を拡張するクラスを定義する必要があります。 <br>
+{@code chooser.ChooserTargetService} クラス。マニフェストで
+{@code ChooserTargetService} を宣言します。その宣言内で、
+{@code BIND_CHOOSER_TARGET_SERVICE} パーミッションと、
+{@code SERVICE_INTERFACE} アクションを使ったインテント フィルタを指定します。</p>
+<p>次の例は、マニフェストで {@code ChooserTargetService} を宣言する方法を示しています。
+</p>
+<pre>
+&lt;service android:name=".ChooserTargetService"
+        android:label="&#64;string/service_name"
+        android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.service.chooser.ChooserTargetService" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/service&gt;
+</pre>
+
+<p>{@code ChooserTargetService} に公開するアクティビティごとに、 {@code "android.service.chooser.chooser_target_service"} という名前の
+{@code &lt;meta-data&gt;} 要素をアプリのマニフェストに追加します。
+
+</p>
+
+<pre>
+&lt;activity android:name=".MyShareActivity”
+        android:label="&#64;string/share_activity_label"&gt;
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND" /&gt;
+    &lt;/intent-filter>
+&lt;meta-data
+        android:name="android.service.chooser.chooser_target_service"
+        android:value=".ChooserTargetService" /&gt;
+&lt;/activity>
+</pre>
+
+<h2 id="voice-interactions">音声インタラクション</h2>
+<p>
+このプレビューでは、<a href="https://developers.google.com/voice-actions/" class="external-link">音声アクション</a>と共に使用することでアプリに対話形式の音声操作をビルドできる新しい音声インタラクション API が提供されます。
+
+
+{@code android.app.Activity.isVoiceInteraction()} メソッドを呼び出して、アクティビティが音声アクションへの応答として開始されたかどうかを確認します。
+音声アクションへの応答であった場合、アプリで
+{@code android.app.VoiceInteractor} クラスを使用してユーザーに音声の確認や、オプションのリストからの選択などを要求できます。
+音声アクションの実装の詳細については、
+<a href="https://developers.google.com/voice-actions/interaction/" class="external-link">音声アクションの開発者サイト</a>をご覧ください。
+</p>
+
+<h2 id="assist">Assist API</h2>
+<p>
+このプレビューでは、アシスタントを介してユーザーがアプリを操作できる新しい方法が用意されています。この機能を使用するには、ユーザーが現在のコンテキストを使うようアシスタントを有効にする必要があります。
+有効にすると、<strong>ホーム</strong> ボタンを長押しすることで、すべてのアプリ内でアシスタントを呼び出すことができます。
+</p>
+<p>
+{@link android.view.WindowManager.LayoutParams#FLAG_SECURE} フラグを設定すると、アプリが現在のコンテキストをアシスタントと共有しないようにできます。新しい {@code android.app.Activity.AssistContent} クラスを使用すると、プラットフォームがアシスタントに渡す標準的な情報セットの他に、アプリで追加の情報を共有できます。
+
+</p>
+
+<p>アプリから追加のコンテキストをアシスタントに提供するには、次の手順を使用します。</p>
+
+<ol>
+<li>{@link android.app.Application.OnProvideAssistDataListener} インターフェースを実装します。</li>
+<li>
+{@link android.app.Application#registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener) registerOnProvideAssistDataListener()} を使用してこのリスナーを登録します。</li>
+<li>アクティビティ固有の文脈情報を提供するには、
+{@link android.app.Activity#onProvideAssistData(android.os.Bundle) onProvideAssistData()} コールバックと、任意で新しい
+{@code Activity.onProvideAssistContent()} コールバックをオーバーライドします。
+</ol>
+
+<h2 id="notifications">通知</h2>
+<p>このプレビューでは、通知に関して次のような API の変更点が追加されています。</p>
+<ul>
+  <li>新しい<em>アラームのみの</em> Do not disturb モードに相当する新しい {@code NotificationListenerService.INTERRUPTION_FILTER_ALARMS} フィルタレベル。
+</li>
+  <li>ユーザーが予定したリマインダを他のイベント（{@link android.app.Notification#CATEGORY_EVENT}）やアラーム（{@link android.app.Notification#CATEGORY_ALARM}）から区別する際に使用される新しい{@code Notification.CATEGORY_REMINDER} カテゴリの値。
+
+
+</li>
+  <li>{@code Notification.Builder.setSmallIcon(Icon)} メソッドや {@code Notification.Builder.setLargeIcon(Icon)} メソッド経由で通知にアタッチできる新しい {@code android.graphics.drawable.Icon} クラス。
+
+</li>
+  <li>現在どの通知がアクティブなのかをアプリが検出できるようにする新しい {@code NotificationManager.getActiveNotifications()} メソッド。
+この機能を使用するアプリの実装については、<a href="https://github.com/googlesamples/android-ActiveNotifications" class="external-link">アクティブな通知のサンプル</a>をご覧ください。
+</li>
+</ul>
+
+<h2 id="bluetooth-stylus">Bluetooth スタイラスのサポート</h2>
+<p>このプレビューでは、Bluetooth スタイラスを使用したユーザー入力のサポートが強化されました。互換性のある Bluetooth スタイラスと電話やタブレットをペアリングして接続できます。
+接続されている間、タッチスクリーンからの位置情報とスタイラスからの筆圧やボタン情報を合わせることで、タッチスクリーン単独の場合よりも表現の幅が大きく広がります。
+
+新しい
+{@code View.onStylusButtonPressListener} コールバックと {@code GestureDetector.OnStylusButtonPressListener} コールバックをアクティビティに登録すると、スタイラスのボタンが押されたことをアプリがリッスンし、次のアクションを実行できるようになります。
+
+</p>
+
+<p>スタイラスのボタン操作を検出するには、{@link android.view.MotionEvent} メソッドと定数を使用します。
+</p>
+<ul>
+<li>ユーザーがスタイラスでアプリ画面のボタンをタップすると、
+{@link android.view.MotionEvent#getToolType(int) getTooltype()} メソッドが
+{@link android.view.MotionEvent#TOOL_TYPE_STYLUS} を返します。</li>
+<li>M Preview を対象としたアプリでは、ユーザーがプライマリのスタイラス ボタンを押すと
+{@link android.view.MotionEvent#getButtonState() getButtonState()} メソッドが {@code MotionEvent.STYLUS_BUTTON_PRIMARY} を返します。
+
+スタイラスにセカンダリ ボタンがある場合は、ユーザーがそのボタンを押したときに同じメソッドで {@code MotionEvent.STYLUS_BUTTON_SECONDARY} が返されます。
+ユーザーが同時に両方のボタンを押した場合は、両方の値が OR で返されます（{@code STYLUS_BUTTON_PRIMARY|STYLUS_BUTTON_SECONDARY}）
+
+</li>
+<li>
+以前のプラットフォーム バージョンを対象としたアプリでは、
+{@link android.view.MotionEvent#getButtonState() getButtonState()} メソッドは
+{@link android.view.MotionEvent#BUTTON_SECONDARY}（プライマリのスタイラス ボタンが押されたとき）、
+{@link android.view.MotionEvent#BUTTON_TERTIARY}（セカンダリのスタイラス ボタンが押されたとき）、または両方を返します。
+</li>
+</ul>
+
+<h2 id="ble-scanning">Bluetooth Low Energy のスキャンの改善</h2>
+<p>
+アプリで Bluetooth Low Energy スキャンを実行する場合は、新しい
+{@code android.bluetooth.le.ScanSettings.Builder.setCallbackType()} メソッドを使って、設定された
+{@link android.bluetooth.le.ScanFilter} に一致する宣伝パケットが最初に見つかったときと、それが長期間見つからない場合に通知する目的でのみコールバックが必要であると指定できます。
+
+このスキャン アプローチは、以前のプラットフォーム バージョンで提供されていたものよりもはるかに効率的です。
+
+</p>
+
+<h2 id="hotspot">アクセス ポイント 2.0 リリース 1 のサポート</h2>
+<p>
+このプレビューでは、Nexus 6 と Nexus 9 端末のアクセス ポイント2.0 Release 1 仕様のサポートが追加されました。アクセス ポイント 2.0 の資格情報をアプリに提供するには、
+{@code setPlmn()} や {@code setRealm()} などの
+{@link android.net.wifi.WifiEnterpriseConfig} クラスの新しいメソッドを使用します。
+{@link android.net.wifi.WifiConfiguration} オブジェクトで、
+{@link android.net.wifi.WifiConfiguration#FQDN} フィールドと {@code providerFriendlyName} フィールドを設定できます。新しい {@code ScanResult.PasspointNetwork} プロパティは、検出されたネットワークがアクセス ポイント 2.0 のアクセス ポイントを表しているかどうかを示します。
+
+
+</p>
+
+<h2 id="4K-display">4K ディスプレイ モード</h2>
+<p>互換性のあるハードウェアで、ディスプレイの解像度を 4K レンダリングにアップグレードするようアプリから要求できるようになりました。
+現在の物理的解像度を照会するには、新しい
+{@code android.view.Display.Mode} API を使用します。UI が低い論理的解像度で描画されていて、より高い物理的解像度にアップスケールされた場合は、
+{@code Display.Mode.getPhysicalWidth()} メソッドが返す物理的解像度が {@link android.view.Display#getSize(android.graphics.Point) getSize()} で報告される論理的解像度と異なる場合があります。
+
+</p>
+
+<p>アプリ ウィンドウの
+{@code WindowManager.LayoutParams.preferredDisplayModeId} プロパティを設定することで、アプリの実行時に物理的解像度を変更するようシステムに要求できます。この機能は、4K ディスプレイの解像度に切り替えたい場合に便利です。
+4K ディスプレイ モード中、UI は引き続き元の解像度（1080p など）で表示され、4K にアップスケールされますが、
+{@link android.view.SurfaceView} オブジェクトではコンテンツをネイティブの解像度で表示する場合があります。
+</p>
+
+<h2 id="behavior-themeable-colorstatelists">テーマ化可能な ColorStateLists</h2>
+<p>M Preview を実行する端末で、テーマの属性が
+{@link android.content.res.ColorStateList} でサポートされるようになりました。
+{@link android.content.res.Resources#getColorStateList(int) getColorStateList()} メソッドと 
+{@link android.content.res.Resources#getColor(int) getColor()} メソッドは廃止されました。これらの API を呼び出す場合は、代わりに新しい {@code Context.getColorStateList()} メソッドか
+{@code Context.getColor()} メソッドを呼び出します。
+これらのメソッドは、{@link android.support.v4.content.ContextCompat} の v4 appcompat ライブラリにもあります。
+</p>
+
+<h2 id="audio">オーディオ機能</h2>
+
+<p>このプレビューでは、次のように Android でのオーディオ処理が改善されました。 </p>
+<ul>
+  <li>新しい {@code android.media.midi} API を使った <a href="http://en.wikipedia.org/wiki/MIDI" class="external-link">MIDI</a> プロトコルのサポート。
+これらの API を使用して MIDI イベントを送受信できます。
+</li>
+  <li>デジタル オーディオの録音を作成して、それぞれのオブジェクトを再生し、システムのデフォルトをオーバーライドするオーディオ ソースとシンク プロパティを構成するための新しい {@code android.media.AudioRecord.Builder} クラスと {@code android.media.AudioTrack.Builder} クラス
+
+。</li>
+  <li>オーディオと入力端末を関連付ける API フック。これは、ユーザーが Android TV に接続されているゲーム コントローラーやリモート コントロールから音声検索を開始できるアプリの場合に特に便利です。ユーザーが検索を開始すると、システムが新しい
+{@code android.app.Activity.onSearchRequested()} コールバックを呼び出します。
+
+ユーザーの入力端末に組み込みのマイクがあるかどうかを確認するには、そのコールバックから {@link android.view.InputDevice} オブジェクトを取得して、新しい
+{@code InputDevice.hasMic()} メソッドを呼び出します。
+</li>
+  <li>アタッチされたすべてのソースとシンク オーディオ端末の一覧を取得できる新しい {@code android.media.AudioDevicesManager} クラス。
+また、オーディオ端末の接続時と接続解除時にアプリで通知を受けたい場合は、
+{@code android.media.OnAudioDeviceConnectionListener} オブジェクトを指定することもできます。
+</li>
+</ul>
+
+<h2 id="video">ビデオ機能</h2>
+<p>このプレビューでは、ビデオ処理の API に次のような新機能が追加されました。</p>
+<ul>
+<li>アプリでオーディオ ストリームとビデオ ストリームを同調してレンダリングできる新しい {@code android.media.MediaSync}。
+オーディオ バッファはノンブロッキング方式で送信され、コールバック経由で返されます。
+ダイナミック再生レートもサポートしています。
+</li>
+<li>アプリで開かれたセッションが、リソース マネージャーによって再要求されたことを示す新しい {@code MediaDrm.EVENT_SESSION_RECLAIMED} イベント。
+アプリが DRM セッションを使用する場合は、必ずこのイベントを処理し、再要求されたセッションは使用しないようにします。
+
+</li>
+<li>リソース マネージャーがコーデックで使用されたメディア リソースを再要求したことを示す新しい {@code MediaCodec.CodecException.ERROR_RECLAIMED} エラーコード。
+この例外では、コーデックはターミナル状態に移動するため、解放する必要があります。
+
+</li>
+<li>同時に発生できるコーデック インスタンスの最大数のヒントを得られる新しい {@code MediaCodecInfo.CodecCapabilities.getMaxSupportedInstances()} インターフェース。
+
+</li>
+<li>高速または低速モーション再生におけるメディアの再生レートを設定する新しい {@code MediaPlayer.setPlaybackParams()} メソッド。
+ビデオと共にオーディオの再生を自動的に延ばしたり早めたりもします。
+</li>
+</ul>
+
+<h2 id="camera">カメラ機能</h2>
+<p>このプレビューでは、カメラのフラッシュやカメラによる画像の再処理にアクセスするための新しい API が用意されています。
+</p>
+
+<h3 id="flashlight">Flashlight API</h3>
+<p>カメラ端末にフラッシュ ユニットが付属している場合は、{@code CameraManager.setTorchMode()} メソッドを呼び出すことで、カメラ端末を開かずにフラッシュ ユニットのタッチモードのオン/オフを切り替えることができます。
+アプリには、フラッシュ ユニットやカメラ端末のフラッシュの独占所有権はありません。
+トーチモードは、カメラ端末が利用不可になったときや、トーチを付けている他のカメラリソースが利用不可になったときにオフになり、利用できなくなります。
+
+他のアプリでも {@code setTorchMode()} を呼び出してトーチモードをオフにできます。
+最後にトーチモードをオンにしたアプリが閉じられると、トーチモードはオフになります。
+</p>
+
+<p>
+{@code CameraManager.registerTorchCallback()} メソッドを呼び出すことで、トーチモードの状態に関する通知を受けるようコールバックを登録できます。コールバックを初めて登録したときに、現在検知されているすべてのフラッシュ ユニット付きのカメラ端末のトーチモードの状態が即座に呼び出されます。
+
+トーチモードが正常にオン/オフされると、
+{@code CameraManager.TorchCallback.onTorchModeChanged()} メソッドが呼び出されます。</p>
+
+<h3 id="reprocessing">Reprocessing API</h3>
+<p>{@link android.hardware.camera2 Camera2} API は、YUV とプライベートな不透明形式の画像の再処理をサポートするよう拡張されました。
+アプリは、再処理機能が利用可能かどうかを {@code CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES} 経由で確認します。
+端末が再処理をサポートしている場合は、
+{@code CameraDevice.createReprocessableCaptureSession()} を呼び出して再処理可能なカメラ撮影セッションを作成し、入力バッファの再処理の要求を作成できます。
+
+</p>
+
+<p>入力バッファのフローをカメラの再処理入力に接続するには、{@code ImageWriter} クラスを使用します。
+空のバッファを取得するには、次のプログラミング モデルを使用します。</p>
+
+<ol>
+<li>{@code ImageWriter.dequeueInputImage()} メソッドを呼び出します。</li>
+<li>入力バッファにデータを入力します。</li>
+<li>{@code ImageWriter.queueInputImage()} メソッドを呼び出して、バッファをカメラに送ります。</li>
+</ol>
+
+<p>{@code ImageWriter} オブジェクトを
+{@code android.graphics.ImageFormat.PRIVATE} 画像と共に使用する場合、アプリから直接画像データにアクセスすることはできません。
+代わりに、{@code ImageWriter.queueInputImage()} メソッドをバッファコピーなしで呼び出して、{@code ImageFormat.PRIVATE} 画像を直接
+{@code ImageWriter} に渡します。
+</p>
+
+<p>{@code ImageReader} クラスで {@code android.graphics.ImageFormat.PRIVATE} 形式の画像ストリームがサポートされるようになりました。
+これにより、アプリが 
+{@code ImageReader} 出力画像の循環的な画像のキューを維持でき、1 つ以上の画像を選択して、それらをカメラの再処理用に
+{@code ImageWriter} に送ることができます。</p>
+
+<h2 id="afw">Android for Work の機能</h2>
+<p>このプレビューには、次のような Android for Work 用の新しい API が含まれています。</p>
+<ul>
+  <li><strong>企業の専用端末の制御の強化:</strong>デバイス オーナーは次の設定を制御でき、企業の専用端末を管理しやすくなります。
+
+
+  <ul>
+    <li>
+{@code DevicePolicyManager.setKeyguardEnabledState()} メソッドを使ったキーガードの無効化と有効化。</li>
+    <li>
+{@code DevicePolicyManager.setStatusBarEnabledState()} メソッドを使ったステータスバー（クイック設定、通知、Google Now を起動するスワイプアップのジェスチャ）の無効化と有効化。
+</li>
+    <li>{@link android.os.UserManager} の定数 {@code DISALLOW_SAFE_BOOT} を使ったセーフブートの無効化と有効化。
+</li>
+    <li>
+{@link android.provider.Settings.Global} の定数 {@code STAY_ON_WHILE_PLUGGED_IN} を使った電源接続時の画面オフの回避。</li>
+  </ul>
+  </li>
+  <li><strong>デバイス オーナーによるアプリのサイレント インストールとアンインストール：</strong>デバイス オーナーでは、{@link android.content.pm.PackageInstaller} API を使って、Google Play for Work から独立してアプリケーションをサイレントにインストール、アンインストールできます。
+
+デバイス オーナー経由で、ユーザー操作なしでアプリを取得したりインストールしたりできる端末を提供できます。
+この機能は、Google アカウントのアクティベートなしでキオスクや同様の端末のワンタッチ プロビジョニングを有効にする際に便利です。
+</li>
+<li><strong>企業証明書のサイレント アクセス: </strong>ユーザーが証明書の選択を求められる前にアプリが 
+{@link android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity,android.security.KeyChainAliasCallback,java.lang.String[],java.security.Principal[],java.lang.String,int,java.lang.String) choosePrivateKeyAlias()} を呼び出すと、プロファイルやデバイス オーナーが {@code DeviceAdminReceiver.onChoosePrivateKeyAlias()} メソッドを呼び出して要求元のアプリケーションにエイリアスをサイレントに提供できるようになりました。
+
+
+この機能によって、ユーザー操作なしでマネージド アプリが証明書にアクセスできるようになります。
+</li>
+<li><strong>システムアップデートの自動受信。</strong>
+{@code DevicePolicyManager.setSystemUpdatePolicy()} を使ってシステムアップデートのポリシーを設定することで、デバイス オーナーがキオスク端末などでシステムアップデートを自動的に受信できるようにしたり、ユーザーが操作しないようアップデートを最大 30 日間保留したりできます。
+
+さらに、管理者はアップデートを実行する時間枠を、キオスク端末が使用されていない時間帯などに設定できます。
+利用可能なシステムアップデートがある場合、システムは Work Policy Controller アプリにシステムアップデートのポリシーがあるかどうかを確認し、それに基づいて動作します。
+
+
+</li>
+<li>
+<strong>代理証明書のインストール:</strong>プロファイルやデバイス オーナーで、サードパーティ アプリが次の {@link android.app.admin.DevicePolicyManager} 証明書の管理 API を呼び出す権限を付与できるようになりました。
+
+
+<ul>
+  <li>{@link android.app.admin.DevicePolicyManager#getInstalledCaCerts(android.content.ComponentName)
+getInstalledCaCerts()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#hasCaCertInstalled(android.content.ComponentName,byte[])
+hasCaCertInstalled()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#installCaCert(android.content.ComponentName,byte[])
+installCaCert()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#uninstallCaCert(android.content.ComponentName,byte[])
+uninstallCaCert()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#uninstallAllUserCaCerts(android.content.ComponentName)
+uninstallAllUserCaCerts()}</li>
+  <li>{@link android.app.admin.DevicePolicyManager#installKeyPair(android.content.ComponentName,java.security.PrivateKey,java.security.cert.Certificate,java.lang.String)
+installKeyPair()}</li>
+</ul>
+</li>
+<li><strong>企業のファクトリー リセット制限:</strong>デバイス オーナーをプロビジョニングする際、
+{@code DeviceManagerPolicy.EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS} バンドルを設定して、ファクトリー リセット保護（FRP）をロック解除するようパラメータを構成できます。
+NFC プログラマー アプリでは、端末が FRP のロック解除するようリセットされ、端末がプロビジョニングされた後にこれらのパラメータを提供でき、事前に Google アカウントを設定しておく必要はありません。
+
+これらのパラメータを修正しない場合、FRP は続行し、事前にアクティブ化された Google の資格情報なしで端末がアクティベートされないようにします。
+
+
+<p>さらに、Google Play サービスでアプリの制限を設定することで、デバイス オーナーは FRP のロック解除用の別の Google アカウントを指定して、端末でアクティベートされたアカウントを置き換えることができます。
+</p>
+</li>
+<img src="{@docRoot}preview/images/work-profile-screen.png" srcset="{@docRoot}preview/images/work-profile-screen.png 1x, {@docRoot}preview/images/work-profile-screen_2x.png 2x" style="float:right; margin:0 0 10px 20px" width="282" height="476" />
+<li><strong>データ使用のトラッキング</strong>プロファイルやデバイス オーナーでは、新しい
+{@code android.app.usage.NetworkStatsManager} メソッドを使用して、<strong>[設定] &gt; [データ]</strong> に表示されるデータ使用の統計を照会できます。
+プロファイル オーナーには、管理するプロファイルのデータを照会するパーミッションが自動的に付与され、デバイス オーナーは管理されたプライマリ ユーザーの使用データへのアクセス権が付与されます。
+
+</li>
+<li><strong>実行時パーミッションの管理:</strong>
+<p>プロファイルやデバイス オーナーは、
+{@code DevicePolicyManager.setPermissionPolicy()} を使用するすべてのアプリケーションのすべての実行時の要求に対するパーミッション ポリシーを設定でき、通常のとおりユーザーにパーミッションを付与するよう要求する、自動的に付与する、パーミッションをサイレントに拒否する、のいずれかを行うことができます。
+
+後者のポリシーが設定されている場合、ユーザーはプロファイルやデバイス オーナーによって選択された内容を <strong>[設定]</strong> にあるアプリのパーミッション画面で修正できません。
+
+</p></li>
+<li><strong>設定の VPN:</strong>VPN アプリは、<strong>[設定] &gt; [その他] &gt; [VPN]</strong> に表示されます。さらに、VPN の使用に関する通知は、その VPN の構成状況によるものになります。
+
+
+プロファイル オーナーの場合、通知は VPN が マネージド プロファイル、個人プロファイル、または両方のどれに構成されているかによって、それ固有のものになります。
+デバイス オーナーの場合、通知は VPN が端末全体に構成されているかどうかによって、それ固有のものになります。
+</li>
+<li><strong>ワーク ステータスの通知:</strong>マネージド プロファイルからのアプリのアクティビティがフォアグラウンドにある場合は、ステータスバーのブリーフケース アイコンが表示されます。
+さらに、端末がマネージド プロファイルのアプリのアクティビティに直接ロック解除されている場合、ユーザーがワーク プロファイル内にいることがトースト通知で表示されます。
+
+
+</li>
+</ul>
+
+<p class="note">
+  M Developer Preview のすべての API の変更点の詳細については、<a href="{@docRoot}preview/download.html">API Differences Report</a> をご覧ください。
+</p>
