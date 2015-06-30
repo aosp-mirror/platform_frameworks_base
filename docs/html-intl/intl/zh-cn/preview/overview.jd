@@ -1,0 +1,362 @@
+page.title=计划概览
+page.metaDescription=欢迎参加 Android M 开发者预览版计划。此计划将为您提供针对 Android 的下一版本测试和优化应用所需的所有功能。
+page.image=images/cards/card-preview_16-9_2x.png
+page.tags="preview", "developer", "android"
+
+@jd:body
+
+<p>
+  欢迎使用 <strong>Android M 开发者预览版</strong>计划。此计划将为您提供针对 Android 的下一版本测试和优化应用所需的所有功能。
+
+它是一款免费软件。您仅需下载 M 开发者预览版工具即可立即使用。
+
+</p>
+
+<div style="background-color:#eceff1;padding:1em;">
+<div class="wrap">
+  <div class="cols">
+    <div class="col-4of12">
+      <h5>
+        硬件和模拟器系统映像
+      </h5>
+
+      <p>
+        在 Nexus 5、6、9 和 Player（适用于电视）以及模拟器中运行并测试应用。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        最新的平台代码
+      </h5>
+
+      <p>
+        我们将在预览版期间提供多次更新，因此您将可以针对最新的平台变更测试您的应用。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        通过 OTA（空中下载技术）更新
+      </h5>
+
+      <p>
+        在向设备刷入初始预览版后，即可通过 OTA 技术获取更新。
+
+      </p>
+    </div>
+  </div>
+
+  <div class="cols">
+
+
+    <div class="col-4of12">
+      <h5>
+        新行为和新功能
+      </h5>
+
+      <p>
+        尽早做好支持新平台行为（例如新运行时权限模型和省电功能）的准备工作。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        为处理开发者反馈问题而设的优先窗口
+      </h5>
+
+      <p>
+        在最初的几周里，我们将优先处理开发者报告的问题，以便尽快测试并提供反馈。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        反馈和支持
+      </h5>
+
+      <p>
+        使用<a href="https://code.google.com/p/android-developer-preview/">问题跟踪器</a>向我们报告问题并提供反馈。
+        与 <a href="http://g.co/dev/AndroidMDevPreview">M&nbsp;开发者社区</a>中的其他开发者建立联系。
+
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!--
+<p>
+  With the M Developer Preview, you'll get an early start on testing your apps,
+  with enough time to make adjustments before the public platform release later
+  in the year. We'll provide several updates to the Preview tools in the weeks
+  ahead, so you can keep in sync with the latest changes as the platform moves
+  toward launch.
+</p>
+<img src="{@docRoot}preview/images/m-preview-timeline.png" alt=
+"Preview program timeline" id="timeline">
+<p>
+  You can help us improve the platform by <a href=
+  "https://code.google.com/p/android-developer-preview/">reporting issues</a>
+  through our feedback channels. This is especially
+  critical in the first month of the preview, when we’ll be giving priority to
+  developer-reported issues and feedback.
+</p> -->
+
+
+<h2 id="timeline">
+  时间表和更新
+</h2>
+<img src="{@docRoot}preview/images/m-preview-timeline-crop.png" alt="Preview program timeline" id="timeline">
+<p>
+  M 开发者预览版从 5 月 28 日开始一直运行到最终 Android M SDK 发布为止。最终的 Android M SDK 将于 2015 年第三季度公众版发布之前不久发布。
+
+
+</p>
+
+<p>
+  在开发阶段的各个里程碑，我们将为您的测试设备提供预览版更新。
+  暂定的里程碑包括
+</p>
+
+<ul>
+  <li>
+    <strong>预览版&nbsp;1</strong>（5 月底发布初始预览版）；
+  </li>
+
+  <li>
+    <strong>预览版&nbsp;2</strong>（6 月底/7 月初）；
+  </li>
+
+  <li>
+    <strong>预览版&nbsp;3</strong>（7 月底发布近乎最终版本）
+  </li>
+</ul>
+
+<p>
+  这些更新将促进形成<strong>最终版本的 SDK</strong>（第三季度末），为 Android 新版本以及最终的系统行为和功能交付官方 API。
+
+
+</p>
+
+<p>
+  如果您在 Android M 中进行测试和开发，我们郑重建议您随着预览版更新的发布，<strong>将开发环境保持为相应的最新版本</strong>。
+
+  为了简化这一过程，我们将为已刷入预览版内部版本的设备提供<strong>空中下载 (OTA) 更新</strong>功能，并提供可供您手动下载并刷入的系统映像。
+
+
+</p>
+<p class="note">
+  <strong>注：</strong>最终的 SDK 和系统映像无法通过 OTA 交付，而是需要<strong>手动刷入</strong>到测试设备中。</strong>
+
+
+</p>
+
+<p>
+  当有预览版更新可用时，我们将通过 <a href="http://android-developers.blogspot.com/">Android 开发者博客</a>、此站点以及 <a href="http://g.co/dev/AndroidMDevPreview">Android M 开发者社区</a>通知您。
+
+
+</p>
+
+<h2 id="preview_tools">
+  预览版具有哪些功能？
+</h2>
+
+<p>
+  M 开发者预览版包括您在各种使用不同屏幕尺寸、网络技术、CPU/GPU 芯片和硬件架构的设备中测试现有应用所需的所有功能。
+
+
+</p>
+
+<h4>
+  SDK 工具
+</h4>
+
+<p>
+  您可通过 <a href="{@docRoot}sdk/installing/adding-packages.html">Android Studio</a> 中的 SDK 管理器下载这些组件：
+</p>
+
+<ul>
+  <li>M 开发者预览版 <strong>SDK 工具</strong>
+  </li>
+
+  <li>M 开发者预览版<strong>模拟器系统映像</strong>（32 位和 64 位）
+
+  </li>
+
+  <li>适用于 Android TV 的 M 开发者预览版<strong>模拟器系统映像</strong>（32 位）
+
+  </li>
+</ul>
+
+<h4>
+  硬件系统映像
+</h4>
+
+<p>
+  您可从<a href="download.html">“下载”页面</a>中下载这些供 Nexus 设备使用的硬件系统映像：
+
+</p>
+
+<ul>
+  <li>
+    <strong>Nexus 5</strong> (GSM/LTE) “hammerhead” 设备系统映像
+  </li>
+
+  <li>
+    <strong>Nexus 6</strong> “shamu” 设备系统映像
+  </li>
+
+  <li>
+    <strong>Nexus 9</strong> (Wi-Fi) “volantis” 设备系统映像
+  </li>
+
+  <li>
+    <strong>Nexus Player</strong> (Android TV) “fugu” 设备系统映像
+  </li>
+</ul>
+
+<h4>
+  文档和示例代码
+</h4>
+
+<p>
+  以下文档资源有助于您了解预览版：
+</p>
+
+<ul>
+  <li>
+    <a href="setup-sdk.html">设置 SDK</a>，提供入门指南的分步说明。
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/testing/guide.html">测试指南</a>和<a href="behavior-changes.html">行为变更</a>，带您了解主要测试领域。
+  </li>
+
+  <li>新 API 文档，包括 <a href="api-overview.html">API 概览</a>、可下载的 <a href="{@docRoot}preview/download.html#docs">API 参考资料</a>以及有关<a href="{@docRoot}preview/features/runtime-permissions.html">权限</a>、<a href="{@docRoot}preview/backup/index.html">应用备份</a>等主要功能的详细开发者指南。
+
+
+
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/samples.html">示例代码</a>，演示如何支持权限和其他新功能。
+
+  </li>
+
+  <li>
+    M 开发者预览版当前版本的<a href="{@docRoot}preview/support.html#release-notes">版本说明</a>，包括变更说明和差异报告。
+
+  </li>
+</ul>
+
+<h4>
+  支持资源
+</h4>
+
+<p>
+  在 M 开发者预览版中测试和开发时，您可使用以下支持资源：
+
+</p>
+
+<ul>
+  <li><a href="https://code.google.com/p/android-developer-preview/">M 开发者预览版问题跟踪器</a>是您的<strong>主要反馈渠道。</strong>
+
+您可通过问题跟踪器报告错误、性能问题和一般反馈。
+您还可检查<a href="https://code.google.com/p/android-developer-preview/wiki/KnownIssues">已知问题</a>并找出解决方法步骤。
+
+  </li>
+
+  <li><a href="http://g.co/dev/AndroidMDevPreview">Android M 开发者社区</a>是一家 Google+ 社区。在此社区中，您可<strong>与其他使用 Android M 的开发者建立联系</strong>。您可以共享观察结果或想法，或查找 Android M 问题的解决方法。
+
+
+
+  </li>
+</ul>
+
+
+<h2 id="preview_apis_and_publishing">
+  锁定目标、预览版 API 和发布
+</h2>
+
+<p>
+  Android M 开发者预览版是仅面向开发的版本，
+<strong>并不具有标准的 API 级别</strong>。如果您想选择拒绝通过兼容性行为测试您的应用（强烈推荐），则可将应用的 <code><a href=
+  "/guide/topics/manifest/uses-sdk-element.html">targetSdkVersion</a></code>
+ 设置为 <code>“MNC”</code>，从而锁定 M 开发者预览版。
+
+
+</p>
+
+<p>
+  Android M 开发者预览版提供<strong>预览 API</strong> 功能 
+&mdash; 在最终的 SDK 发布之前，这些 API 都不是正式的 API。目前，最终的 SDK 计划于 2015 年第三季度发布。
+这意味着一段时期内，特别是该计划的最初几周内，
+<strong>API 可能会出现细微变化</strong>。
+我们会通过 Android M 开发者预览版的每次更新，为您提供一份变更摘要。
+
+</p>
+
+<p class="note">
+  请注意，尽管预览版 API 可能会更改，但运行时权限和省电功能等基本系统行为仍保持稳定，可以立即用于测试。
+
+
+</p>
+
+<p>
+  关于发布，Google Play 会<strong>禁止发布面向 M 开发者预览版的应用</strong>。
+当 Android M 最终版本 SDK 可用时，您可以锁定官方 Android M API 级别，并将应用发布至 Google Play。
+
+与此同时，如果您需要将针对 Android M 的应用分发给测试者，则可通过电子邮件或从您的站点直接下载实现这一点。
+
+
+</p>
+
+<h2 id="get_started">
+  如何开始
+</h2>
+
+<p>
+  要开始测试应用，请执行以下操作：
+</p>
+
+<ol>
+  <li>查看 <a href="{@docRoot}preview/api-overview.html">API 概览</a>和<a href="{@docRoot}preview/behavior-changes.html">行为变更</a>，大致了解新功能及其如何影响您的应用。
+
+特别地，您需要了解新的<a href="{@docRoot}preview/features/runtime-permissions.html">运行时权限</a>模型、省电功能和自动备份。
+
+
+  </li>
+
+  <li>遵循有关<a href="{@docRoot}preview/setup-sdk.html">设置预览版 SDK</a> 和配置测试设备的说明，来设置您的环境。
+
+
+  </li>
+
+  <li>遵循<a href="https://developers.google.com/android/nexus/images">刷入说明</a>，刷入 Nexus 5、6、9 和 Player 的最新 M 开发者预览版系统映像。
+
+为开发设备刷入系统映像后，预览版更新将通过无线 (OTA) 更新进行交付。</a>
+
+  </li>
+
+  <li>下载 <a href="{@docRoot}preview/download.html#docs">M 预览版 API 参考资料</a>和 <a href="{@docRoot}preview/samples.html">M 预览版示例</a>，更深入地了解新 API 功能以及如何在应用中使用这些功能。
+
+
+
+  </li>
+
+  <li>加入 <a href="http://g.co/dev/AndroidMDevPreview">Android M 开发者社区</a>，获取最新资讯并与使用新平台的其他开发者建立联系。
+
+
+  </li>
+</ol>
+
+<p>
+  感谢您参加 Android M 开发者预览版计划！
+</p>
