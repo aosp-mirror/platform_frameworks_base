@@ -41,16 +41,16 @@ figure 1. The development steps encompass four development phases, which include
     <a href="{@docRoot}tools/projects/index.html">Create an Android project</a>.</p>
   </li>
   <li><strong>Building, Debugging and Testing</strong>
-    <p>During this phase you build your project into a debuggable <code>.apk</code> package(s) 
-    that you can install and run on the emulator or an Android-powered device. Android Studio uses 
-    a build system based on <a href="http://www.gradle.org/" target="_android">Gradle</a> 
-    that provides flexibility, customized build variants, dependency resolution, and much more. 
-    If you're using another IDE, you can build your project using Gradle and install it on a device 
+    <p>During this phase you build your project into a debuggable <code>.apk</code> package(s)
+    that you can install and run on the emulator or an Android-powered device. Android Studio uses
+    a build system based on <a href="http://www.gradle.org/" target="_android">Gradle</a>
+    that provides flexibility, customized build variants, dependency resolution, and much more.
+    If you're using another IDE, you can build your project using Gradle and install it on a device
     using <a href="{@docRoot}tools/help/adb.html">adb</a>. For more information, see
     <a href="{@docRoot}tools/building/index.html">Build and run your application</a>.</p>
     <p>Next, with Android Studio you debug your application using the
-    <a href="{@docRoot}tools/help/monitor.html">Android Debug Monitor</a> and device log messages
-    (<a href="{@docRoot}tools/help/logcat.html">logact</a>) along with the IntelliJ IDEA intelligent
+    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> and device log messages
+    (<a href="{@docRoot}tools/help/logcat.html">logcat</a>) along with the IntelliJ IDEA intelligent
     coding features. You can also use a JDWP-compliant debugger along with the debugging and logging
     tools that are provided with the Android SDK. For more information see
     <a href="{@docRoot}tools/debugging/index.html">Debug your application with the SDK debugging and logging tools</a>.</p>
