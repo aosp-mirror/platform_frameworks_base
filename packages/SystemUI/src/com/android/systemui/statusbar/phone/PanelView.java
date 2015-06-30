@@ -834,8 +834,10 @@ public abstract class PanelView extends FrameLayout {
             }
         } else if (!isFullyCollapsed() && !mTracking && !mClosing) {
             cancelHeightAnimator();
-            mClosing = true;
             notifyExpandingStarted();
+
+            // Set after notifyExpandingStarted, as notifyExpandingStarted resets the closing state.
+            mClosing = true;
             if (delayed) {
                 mNextCollapseSpeedUpFactor = speedUpFactor;
                 postDelayed(mFlingCollapseRunnable, 120);
