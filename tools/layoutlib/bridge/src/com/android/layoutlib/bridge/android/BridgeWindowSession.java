@@ -47,7 +47,7 @@ public final class BridgeWindowSession implements IWindowSession {
 
     @Override
     public int addToDisplay(IWindow arg0, int seq, LayoutParams arg1, int arg2, int displayId,
-                            Rect arg3, Rect arg4, InputChannel outInputchannel)
+                            Rect arg3, Rect arg4, Rect arg5, InputChannel outInputchannel)
             throws RemoteException {
         // pass for now.
         return 0;
