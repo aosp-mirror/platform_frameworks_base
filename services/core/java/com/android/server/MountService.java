@@ -1202,6 +1202,21 @@ class MountService extends IMountService.Stub
         }
     }
 
+    private void enforceAdminUser() {
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        final int callingUserId = UserHandle.getCallingUserId();
+        boolean isAdmin;
+        long token = Binder.clearCallingIdentity();
+        try {
+            isAdmin = um.getUserInfo(callingUserId).isAdmin();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        if (!isAdmin) {
+            throw new SecurityException("Only admin users can adopt sd cards");
+        }
+    }
+
     /**
      * Constructs a new MountService instance
      *
@@ -1537,6 +1552,7 @@ class MountService extends IMountService.Stub
     @Override
     public void partitionPrivate(String diskId) {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+        enforceAdminUser();
         waitForReady();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
@@ -1551,6 +1567,7 @@ class MountService extends IMountService.Stub
     @Override
     public void partitionMixed(String diskId, int ratio) {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+        enforceAdminUser();
         waitForReady();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);

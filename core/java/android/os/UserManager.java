@@ -583,6 +583,16 @@ public class UserManager {
         return UserHandle.myUserId() == UserHandle.USER_SYSTEM;
     }
     /**
+     * @hide
+     * Returns whether the caller is running as an admin user. There can be more than one admin
+     * user.
+     */
+    public boolean isAdminUser() {
+        UserInfo user = getUserInfo(UserHandle.myUserId());
+        return user != null ? user.isAdmin() : false;
+    }
+
+    /**
      * Used to check if the user making this call is linked to another user. Linked users may have
      * a reduced number of available apps, app restrictions and account restrictions.
      * @return whether the user making this call is a linked user
