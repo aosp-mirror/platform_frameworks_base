@@ -225,6 +225,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final Set<String> SECURE_SETTINGS_WHITELIST;
     private static final Set<String> SECURE_SETTINGS_DEVICEOWNER_WHITELIST;
     private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
+    private static final Set<String> GLOBAL_SETTINGS_DEPRECATED;
     static {
         SECURE_SETTINGS_WHITELIST = new HashSet();
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
@@ -240,13 +241,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME_ZONE);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DATA_ROAMING);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.MODE_RINGER);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.NETWORK_PREFERENCE);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_SLEEP_POLICY);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN);
+
+        GLOBAL_SETTINGS_DEPRECATED = new HashSet();
+        GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.BLUETOOTH_ON);
+        GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED);
+        GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.MODE_RINGER);
+        GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.NETWORK_PREFERENCE);
+        GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.WIFI_ON);
     }
 
     // Keyguard features that when set of a profile will affect the profiles
@@ -5954,14 +5959,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
+            // Some settings are no supported any more. However we do not want to throw a
+            // SecurityException to avoid breaking apps.
+            if (GLOBAL_SETTINGS_DEPRECATED.contains(setting)) {
+                Log.i(LOG_TAG, "Global setting no longer supported: " + setting);
+                return;
+            }
+
             if (!GLOBAL_SETTINGS_WHITELIST.contains(setting)) {
-                // BLUETOOTH_ON and WIFI_ON used to be supported but not any more. We do not want to
-                // throw a SecurityException not to break apps.
-                if (!Settings.Global.BLUETOOTH_ON.equals(setting)
-                        && !Settings.Global.WIFI_ON.equals(setting)) {
-                    throw new SecurityException(String.format(
-                            "Permission denial: device owners cannot update %1$s", setting));
-                }
+                throw new SecurityException(String.format(
+                        "Permission denial: device owners cannot update %1$s", setting));
             }
 
             if (Settings.Global.STAY_ON_WHILE_PLUGGED_IN.equals(setting)) {
