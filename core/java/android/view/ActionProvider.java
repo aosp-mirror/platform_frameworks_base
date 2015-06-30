@@ -237,6 +237,14 @@ public abstract class ActionProvider {
     }
 
     /**
+     * @hide
+     */
+    public void reset() {
+        mVisibilityListener = null;
+        mSubUiVisibilityListener = null;
+    }
+
+    /**
      * @hide Internal use only
      */
     public interface SubUiVisibilityListener {
