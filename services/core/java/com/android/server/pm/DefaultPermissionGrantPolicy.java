@@ -381,8 +381,8 @@ final class DefaultPermissionGrantPolicy {
             // Device provisioning
             Intent deviceProvisionIntent = new Intent(
                     DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE);
-            PackageParser.Package deviceProvisionPackage = getDefaultSystemHandlerActvityPackageLPr(
-                    deviceProvisionIntent, userId);
+            PackageParser.Package deviceProvisionPackage =
+                    getDefaultSystemHandlerActivityPackageLPr(deviceProvisionIntent, userId);
             if (deviceProvisionPackage != null
                     && doesPackageSupportRuntimePermissions(deviceProvisionPackage)) {
                 grantRuntimePermissionsLPw(contactsPackage, ACCOUNTS_PERMISSIONS, userId);
