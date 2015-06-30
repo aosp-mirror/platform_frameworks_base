@@ -2290,7 +2290,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int addWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int viewVisibility, int displayId,
-            Rect outContentInsets, Rect outStableInsets, InputChannel outInputChannel) {
+            Rect outContentInsets, Rect outStableInsets, Rect outOutsets,
+            InputChannel outInputChannel) {
         int[] appOp = new int[1];
         int res = mPolicy.checkAddPermission(attrs, appOp);
         if (res != WindowManagerGlobal.ADD_OKAY) {
@@ -2528,7 +2529,8 @@ public class WindowManagerService extends IWindowManager.Stub
             winAnimator.mEnteringAnimation = true;
 
             if (displayContent.isDefaultDisplay) {
-                mPolicy.getInsetHintLw(win.mAttrs, outContentInsets, outStableInsets);
+                mPolicy.getInsetHintLw(win.mAttrs, mRotation, outContentInsets, outStableInsets,
+                        outOutsets);
             } else {
                 outContentInsets.setEmpty();
                 outStableInsets.setEmpty();
