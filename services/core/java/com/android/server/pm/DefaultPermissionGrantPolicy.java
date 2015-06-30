@@ -247,7 +247,7 @@ final class DefaultPermissionGrantPolicy {
             for (int i = 0; i < installerCount; i++) {
                 PackageParser.Package installPackage = installerPackages.get(i);
                 grantInstallPermissionsLPw(installPackage, INSTALLER_PERMISSIONS, userId);
-                grantRuntimePermissionsLPw(installPackage, STORAGE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(installPackage, STORAGE_PERMISSIONS, true, userId);
             }
 
             // Verifiers
@@ -614,6 +614,12 @@ final class DefaultPermissionGrantPolicy {
 
     private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
             int userId) {
+        grantRuntimePermissionsLPw(pkg, permissions, false, userId);
+
+    }
+
+    private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
+            boolean systemFixed, int userId) {
         List<String> requestedPermissions = pkg.requestedPermissions;
 
         if (pkg.isUpdatedSystemApp()) {
@@ -637,6 +643,12 @@ final class DefaultPermissionGrantPolicy {
                     if (DEBUG) {
                         Log.i(TAG, "Granted " + permission + " to default handler "
                                 + pkg.packageName);
+                    }
+
+                    if (systemFixed) {
+                        mService.updatePermissionFlags(permission, pkg.packageName,
+                                PackageManager.FLAG_PERMISSION_SYSTEM_FIXED,
+                                PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, userId);
                     }
                 }
             }
