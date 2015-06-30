@@ -228,15 +228,15 @@ void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y, uint8_t* 
     for (uint32_t cacheY = startY, bitmapY = dstY * bitmapWidth; cacheY < endY;
             cacheY += srcStride, bitmapY += bitmapWidth) {
 
-        if (formatSize == 1) {
-            memcpy(&bitmap[bitmapY + dstX], &cacheBuffer[cacheY + glyph->mStartX], glyph->mBitmapWidth);
-        } else {
-            for (uint32_t i = 0; i < glyph->mBitmapWidth; ++i) {
-                bitmap[bitmapY + dstX + i] = cacheBuffer[cacheY + (glyph->mStartX + i)*formatSize + alpha_channel_offset];
-            }
+        for (uint32_t i = 0; i < glyph->mBitmapWidth; ++i) {
+            uint8_t* dst = &(bitmap[bitmapY + dstX + i]);
+            const uint8_t& src = cacheBuffer[
+                    cacheY + (glyph->mStartX + i)*formatSize + alpha_channel_offset];
+            // Add alpha values to a max of 255, full opacity. This is done to handle
+            // fonts/strings where glyphs overlap.
+            *dst = std::min(*dst + src, 255);
         }
     }
-
 }
 
 void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float vOffset,
