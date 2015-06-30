@@ -1135,7 +1135,7 @@ public final class FloatingToolbar {
         private final Runnable mCloseOverflow;
 
         private MenuItem.OnMenuItemClickListener mOnMenuItemClickListener;
-        private int mOverflowWidth = 0;
+        private int mOverflowWidth;
         private int mSuggestedHeight;
 
         /**
@@ -1146,7 +1146,6 @@ public final class FloatingToolbar {
          */
         public FloatingToolbarOverflowPanel(Context context, Runnable closeOverflow) {
             mCloseOverflow = Preconditions.checkNotNull(closeOverflow);
-            mSuggestedHeight = getScreenHeight(context);
 
             mContentView = new LinearLayout(context);
             mContentView.setOrientation(LinearLayout.VERTICAL);
@@ -1270,7 +1269,8 @@ public final class FloatingToolbar {
             mListView.setLayoutParams(params);
         }
 
-        private int setOverflowWidth() {
+        private void setOverflowWidth() {
+            mOverflowWidth = 0;
             for (int i = 0; i < mListView.getAdapter().getCount(); i++) {
                 MenuItem menuItem = (MenuItem) mListView.getAdapter().getItem(i);
                 Preconditions.checkNotNull(menuItem);
@@ -1280,7 +1280,6 @@ public final class FloatingToolbar {
                 mOverflowWidth = Math.max(
                         mListViewItemWidthCalculator.getMeasuredWidth(), mOverflowWidth);
             }
-            return mOverflowWidth;
         }
 
         private ListView createOverflowListView() {
@@ -1504,19 +1503,5 @@ public final class FloatingToolbar {
     private static int getEstimatedOpenOverflowButtonWidth(Context context) {
         return context.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_menu_button_minimum_width);
-    }
-
-    /**
-     * Returns the device's screen width.
-     */
-    private static int getScreenWidth(Context context) {
-        return context.getResources().getDisplayMetrics().widthPixels;
-    }
-
-    /**
-     * Returns the device's screen height.
-     */
-    private static int getScreenHeight(Context context) {
-        return context.getResources().getDisplayMetrics().heightPixels;
     }
 }
