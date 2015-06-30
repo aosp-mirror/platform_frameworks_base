@@ -742,7 +742,7 @@ public final class BridgeContext extends Context {
                 if (item != null) {
                     // item is a reference to a style entry. Search for it.
                     item = mRenderResources.findResValue(item.getValue(), item.isFramework());
-
+                    item = mRenderResources.resolveResValue(item);
                     if (item instanceof StyleResourceValue) {
                         defStyleValues = (StyleResourceValue) item;
                     }
