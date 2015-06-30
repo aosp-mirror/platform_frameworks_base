@@ -20,9 +20,13 @@
 #include <sys/mount.h>
 #include <linux/fs.h>
 
+#include <list>
+#include <string>
+
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
+#include <mntent.h>
 #include <paths.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -249,6 +253,34 @@ static void SetSchedulerPolicy(JNIEnv* env) {
   }
 }
 
+static int UnmountTree(const char* path) {
+    size_t path_len = strlen(path);
+
+    FILE* fp = setmntent("/proc/mounts", "r");
+    if (fp == NULL) {
+        ALOGE("Error opening /proc/mounts: %s", strerror(errno));
+        return -errno;
+    }
+
+    // Some volumes can be stacked on each other, so force unmount in
+    // reverse order to give us the best chance of success.
+    std::list<std::string> toUnmount;
+    mntent* mentry;
+    while ((mentry = getmntent(fp)) != NULL) {
+        if (strncmp(mentry->mnt_dir, path, path_len) == 0) {
+            toUnmount.push_front(std::string(mentry->mnt_dir));
+        }
+    }
+    endmntent(fp);
+
+    for (auto path : toUnmount) {
+        if (umount2(path.c_str(), MNT_DETACH)) {
+            ALOGW("Failed to unmount %s: %s", path.c_str(), strerror(errno));
+        }
+    }
+    return 0;
+}
+
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
 static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
@@ -262,7 +294,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
     }
 
     // Unmount storage provided by root namespace and mount requested view
-    umount2("/storage", MNT_FORCE);
+    UnmountTree("/storage");
 
     String8 storageSource;
     if (mount_mode == MOUNT_EXTERNAL_DEFAULT) {
@@ -281,7 +313,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         return false;
     }
 
-    // Mount user-specific symlink helpers into place
+    // Mount user-specific symlink helper into place
     userid_t user_id = multiuser_get_user_id(uid);
     const String8 userSource(String8::format("/mnt/user/%d", user_id));
     if (fs_prepare_dir(userSource.string(), 0751, 0, 0) == -1) {
