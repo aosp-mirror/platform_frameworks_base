@@ -659,7 +659,8 @@ public class LinearLayout extends ViewGroup {
      */
     private boolean allViewsAreGoneBefore(int childIndex) {
         for (int i = childIndex - 1; i >= 0; i--) {
-            if (getVirtualChildAt(i).getVisibility() != GONE) {
+            View child = getVirtualChildAt(i);
+            if (child != null && child.getVisibility() != GONE) {
                 return false;
             }
         }
