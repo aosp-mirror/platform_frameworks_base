@@ -287,6 +287,22 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 mKeymasterBlockModes = KeyProperties.BlockMode.allToKeymaster(spec.getBlockModes());
                 mKeymasterEncryptionPaddings = KeyProperties.EncryptionPadding.allToKeymaster(
                         spec.getEncryptionPaddings());
+                if (((spec.getPurposes() & KeyProperties.PURPOSE_ENCRYPT) != 0)
+                        && (spec.isRandomizedEncryptionRequired())) {
+                    for (int keymasterPadding : mKeymasterEncryptionPaddings) {
+                        if (!KeymasterUtils
+                                .isKeymasterPaddingSchemeIndCpaCompatibleWithAsymmetricCrypto(
+                                        keymasterPadding)) {
+                            throw new InvalidAlgorithmParameterException(
+                                    "Randomized encryption (IND-CPA) required but may be violated"
+                                    + " by padding scheme: "
+                                    + KeyProperties.EncryptionPadding.fromKeymaster(
+                                            keymasterPadding)
+                                    + ". See " + KeyGenParameterSpec.class.getName()
+                                    + " documentation.");
+                        }
+                    }
+                }
                 mKeymasterSignaturePaddings = KeyProperties.SignaturePadding.allToKeymaster(
                         spec.getSignaturePaddings());
                 if (spec.isDigestsSpecified()) {
