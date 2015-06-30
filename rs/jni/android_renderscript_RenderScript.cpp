@@ -696,8 +696,8 @@ nScriptIntrinsicBLAS_BNNM(JNIEnv *_env, jobject _this, jlong con, jlong id, jint
     call.M = M;
     call.N = N;
     call.K = K;
-    call.a_offset = a_offset;
-    call.b_offset = b_offset;
+    call.a_offset = a_offset & 0xFF;
+    call.b_offset = b_offset & 0xFF;
     call.c_offset = c_offset;
     call.c_mult_int = c_mult_int;
 
