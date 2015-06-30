@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.Manifest;
 import android.app.DownloadManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -28,6 +29,8 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
+import android.provider.CalendarContract;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.ArraySet;
 import android.util.Log;
@@ -56,7 +59,7 @@ final class DefaultPermissionGrantPolicy {
     static {
         PHONE_PERMISSIONS.add(Manifest.permission.READ_PHONE_STATE);
         PHONE_PERMISSIONS.add(Manifest.permission.CALL_PHONE);
-        PHONE_PERMISSIONS.add( Manifest.permission.READ_CALL_LOG);
+        PHONE_PERMISSIONS.add(Manifest.permission.READ_CALL_LOG);
         PHONE_PERMISSIONS.add(Manifest.permission.WRITE_CALL_LOG);
         PHONE_PERMISSIONS.add(Manifest.permission.ADD_VOICEMAIL);
         PHONE_PERMISSIONS.add(Manifest.permission.USE_SIP);
@@ -110,6 +113,11 @@ final class DefaultPermissionGrantPolicy {
     static {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    }
+
+    private static final Set<String> ACCOUNTS_PERMISSIONS = new ArraySet<>();
+    static {
+        ACCOUNTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
     private static final Set<String> SETTINGS_PERMISSIONS = new ArraySet<>();
@@ -324,6 +332,17 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(calendarPackage)) {
                 grantRuntimePermissionsLPw(calendarPackage, CALENDAR_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(calendarPackage, CONTACTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(calendarPackage, ACCOUNTS_PERMISSIONS, userId);
+            }
+
+            // Calendar provider
+            PackageParser.Package calendarProviderPackage = getDefaultProviderAuthorityPackageLPr(
+                    CalendarContract.AUTHORITY, userId);
+            if (calendarProviderPackage != null) {
+                grantRuntimePermissionsLPw(calendarProviderPackage, CONTACTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(calendarProviderPackage, CALENDAR_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(calendarProviderPackage, ACCOUNTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(calendarProviderPackage, STORAGE_PERMISSIONS, userId);
             }
 
             // Contacts
@@ -335,6 +354,26 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(contactsPackage)) {
                 grantRuntimePermissionsLPw(contactsPackage, CONTACTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(contactsPackage, PHONE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(contactsPackage, ACCOUNTS_PERMISSIONS, userId);
+            }
+
+            // Contacts provider
+            PackageParser.Package contactsProviderPackage = getDefaultProviderAuthorityPackageLPr(
+                    ContactsContract.AUTHORITY, userId);
+            if (contactsProviderPackage != null) {
+                grantRuntimePermissionsLPw(contactsProviderPackage, CONTACTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(contactsProviderPackage, ACCOUNTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(contactsProviderPackage, STORAGE_PERMISSIONS, userId);
+            }
+
+            // Device provisioning
+            Intent deviceProvisionIntent = new Intent(
+                    DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE);
+            PackageParser.Package deviceProvisionPackage = getDefaultSystemHandlerActvityPackageLPr(
+                    deviceProvisionIntent, userId);
+            if (deviceProvisionPackage != null
+                    && doesPackageSupportRuntimePermissions(deviceProvisionPackage)) {
+                grantRuntimePermissionsLPw(contactsPackage, ACCOUNTS_PERMISSIONS, userId);
             }
 
             // Maps
