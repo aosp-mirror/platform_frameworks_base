@@ -186,6 +186,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -1780,7 +1781,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case FINISH_BOOTING_MSG: {
                 if (msg.arg1 != 0) {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
                     finishBooting();
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 }
                 if (msg.arg2 != 0) {
                     enableScreenAfterBoot();
@@ -6285,7 +6288,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             mBootAnimationComplete = true;
         }
         if (callFinishBooting) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
             finishBooting();
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -6311,7 +6316,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (booting) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
             finishBooting();
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
 
         if (enableScreen) {
