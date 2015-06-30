@@ -89,8 +89,8 @@ class DisplayContent {
      * (except a future lockscreen TaskStack) moves to the top. */
     private TaskStack mHomeStack = null;
 
-    /** Detect user tapping outside of current focused stack bounds .*/
-    StackTapPointerEventListener mTapDetector;
+    /** Detect user tapping outside of current focused task bounds .*/
+    TaskTapPointerEventListener mTapDetector;
 
     /** Detect user tapping outside of current focused stack bounds .*/
     Region mTouchExcludeRegion = new Region();
@@ -219,24 +219,27 @@ class DisplayContent {
         mContentRect.set(contentRect);
     }
 
-    int stackIdFromPoint(int x, int y) {
+    int taskIdFromPoint(int x, int y) {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = mStacks.get(stackNdx);
-            stack.getBounds(mTmpRect);
-            if (mTmpRect.contains(x, y)) {
-                return stack.mStackId;
+            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                final Task task = tasks.get(taskNdx);
+                task.getBounds(mTmpRect);
+                if (mTmpRect.contains(x, y)) {
+                    return task.mTaskId;
+                }
             }
         }
         return -1;
     }
 
-    void setTouchExcludeRegion(TaskStack focusedStack) {
+    void setTouchExcludeRegion(Task focusedTask) {
         mTouchExcludeRegion.set(mBaseDisplayRect);
         WindowList windows = getWindowList();
         for (int i = windows.size() - 1; i >= 0; --i) {
             final WindowState win = windows.get(i);
-            final TaskStack stack = win.getStack();
-            if (win.isVisibleLw() && stack != null && stack != focusedStack) {
+            final Task task = win.getTask();
+            if (win.isVisibleLw() && task != null && task != focusedTask) {
                 mTmpRect.set(win.mVisibleFrame);
                 // If no intersection, we need mTmpRect to be unmodified.
                 mTmpRect.intersect(win.mVisibleInsets);
@@ -273,21 +276,37 @@ class DisplayContent {
     boolean animateDimLayers() {
         boolean result = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            result |= mStacks.get(stackNdx).animateDimLayers();
+            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                final Task task = tasks.get(taskNdx);
+                result |= task.animateDimLayers();
+                if (task.isFullscreen()) {
+                    // No point in continuing as this task covers the entire screen.
+                    // Also, fullscreen tasks all share the same dim layer, so we don't want
+                    // processing of fullscreen task below this one affecting the dim layer state.
+                    return result;
+                }
+            }
         }
         return result;
     }
 
     void resetDimming() {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            mStacks.get(stackNdx).resetDimmingTag();
+            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                tasks.get(taskNdx).clearContinueDimming();
+            }
         }
     }
 
     boolean isDimming() {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            if (mStacks.get(stackNdx).isDimming()) {
-                return true;
+            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                if (tasks.get(taskNdx).isDimming()) {
+                    return true;
+                }
             }
         }
         return false;
@@ -295,7 +314,10 @@ class DisplayContent {
 
     void stopDimmingIfNeeded() {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            mStacks.get(stackNdx).stopDimmingIfNeeded();
+            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                tasks.get(taskNdx).stopDimmingIfNeeded();
+            }
         }
     }
 

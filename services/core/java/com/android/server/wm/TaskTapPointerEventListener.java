@@ -23,7 +23,7 @@ import android.view.WindowManagerPolicy.PointerEventListener;
 
 import com.android.server.wm.WindowManagerService.H;
 
-public class StackTapPointerEventListener implements PointerEventListener {
+public class TaskTapPointerEventListener implements PointerEventListener {
     private static final int TAP_TIMEOUT_MSEC = 300;
     private static final float TAP_MOTION_SLOP_INCHES = 0.125f;
 
@@ -35,7 +35,7 @@ public class StackTapPointerEventListener implements PointerEventListener {
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
 
-    public StackTapPointerEventListener(WindowManagerService service,
+    public TaskTapPointerEventListener(WindowManagerService service,
             DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
@@ -77,7 +77,7 @@ public class StackTapPointerEventListener implements PointerEventListener {
                                 && Math.abs(x - mDownX) < mMotionSlop
                                 && Math.abs(y - mDownY) < mMotionSlop
                                 && !mTouchExcludeRegion.contains(x, y)) {
-                            mService.mH.obtainMessage(H.TAP_OUTSIDE_STACK, x, y,
+                            mService.mH.obtainMessage(H.TAP_OUTSIDE_TASK, x, y,
                                     mDisplayContent).sendToTarget();
                         }
                     }

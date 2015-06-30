@@ -22,22 +22,18 @@ import static com.android.server.wm.WindowManagerService.TAG;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
-import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Slog;
-import android.util.TypedValue;
-import android.view.Surface;
+import android.view.DisplayInfo;
 
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
-public class TaskStack {
-    /** Amount of time in milliseconds to animate the dim surface from one value to another,
-     * when no window animation is driving it. */
-    private static final int DEFAULT_DIM_DURATION = 200;
-
+public class TaskStack implements DimLayer.DimLayerUser {
     /** Unique identifier */
     final int mStackId;
 
@@ -49,12 +45,10 @@ public class TaskStack {
 
     /** The Tasks that define this stack. Oldest Tasks are at the bottom. The ordering must match
      * mTaskHistory in the ActivityStack with the same mStackId */
-    private final ArrayList<Task> mTasks = new ArrayList<Task>();
+    private final ArrayList<Task> mTasks = new ArrayList<>();
 
     /** For comparison with DisplayContent bounds. */
     private Rect mTmpRect = new Rect();
-    /** For handling display rotations. */
-    private Rect mTmpRect2 = new Rect();
 
     /** Content limits relative to the DisplayContent this sits in. */
     private Rect mBounds = new Rect();
@@ -62,21 +56,11 @@ public class TaskStack {
     /** Whether mBounds is fullscreen */
     private boolean mFullscreen = true;
 
-    /** Used to support {@link android.view.WindowManager.LayoutParams#FLAG_DIM_BEHIND} */
-    private DimLayer mDimLayer;
-
-    /** The particular window with FLAG_DIM_BEHIND set. If null, hide mDimLayer. */
-    WindowStateAnimator mDimWinAnimator;
-
     /** Support for non-zero {@link android.view.animation.Animation#getBackgroundColor()} */
     DimLayer mAnimationBackgroundSurface;
 
     /** The particular window with an Animation with non-zero background color. */
     WindowStateAnimator mAnimationBackgroundAnimator;
-
-    /** Set to false at the start of performLayoutAndPlaceSurfaces. If it is still false by the end
-     * then stop any dimming. */
-    boolean mDimmingTag;
 
     /** Application tokens that are exiting, but still on screen for animations. */
     final AppTokenList mExitingAppTokens = new AppTokenList();
@@ -84,27 +68,10 @@ public class TaskStack {
     /** Detach this stack from its display when animation completes. */
     boolean mDeferDetach;
 
-    // Contains configurations settings that are different from the global configuration due to
-    // stack specific operations. E.g. {@link #setBounds}.
-    Configuration mOverrideConfig;
-    // True if the stack was forced to fullscreen disregarding the override configuration.
-    private boolean mForceFullscreen;
-    // The {@link #mBounds} before the stack was forced to fullscreen. Will be restored as the
-    // stack bounds once the stack is no longer forced to fullscreen.
-    final private Rect mPreForceFullscreenBounds;
-
-    // Device rotation as of the last time {@link #mBounds} was set.
-    int mRotation;
-
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
-        mOverrideConfig = Configuration.EMPTY;
-        mForceFullscreen = false;
-        mPreForceFullscreenBounds = new Rect();
-        // TODO: remove bounds from log, they are always 0.
-        EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, mBounds.left, mBounds.top,
-                mBounds.right, mBounds.bottom);
+        EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId);
     }
 
     DisplayContent getDisplayContent() {
@@ -116,30 +83,39 @@ public class TaskStack {
     }
 
     void resizeWindows() {
-        final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
-                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                    final WindowState win = windows.get(winNdx);
-                    if (!resizingWindows.contains(win)) {
-                        if (WindowManagerService.DEBUG_RESIZE) Slog.d(TAG,
-                                "setBounds: Resizing " + win);
-                        resizingWindows.add(win);
-                    }
-                }
-            }
+            mTasks.get(taskNdx).resizeWindows();
         }
     }
 
-    /** Set the stack bounds. Passing in null sets the bounds to fullscreen. */
-    boolean setBounds(Rect bounds) {
+    /**
+     * Set the bounds of the stack and its containing tasks.
+     * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
+     * @param changedTaskIds Output list of Ids of tasks that changed in bounds.
+     * @param newTaskConfigs Output list of new Configuation of the tasks that changed.
+     * @return True if the stack bounds was changed.
+     * */
+    boolean setBounds(Rect bounds, IntArray changedTaskIds, List<Configuration> newTaskConfigs) {
+        if (!setBounds(bounds)) {
+            return false;
+        }
+
+        // Update bounds of containing tasks.
+        final Rect newBounds = mFullscreen ? null : mBounds;
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mTasks.get(taskNdx);
+            if (task.setBounds(newBounds)) {
+                changedTaskIds.add(task.mTaskId);
+                newTaskConfigs.add(task.mOverrideConfig);
+            }
+        }
+        return true;
+    }
+
+    private boolean setBounds(Rect bounds) {
         boolean oldFullscreen = mFullscreen;
-        int rotation = Surface.ROTATION_0;
         if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
-            rotation = mDisplayContent.getDisplayInfo().rotation;
             if (bounds == null) {
                 bounds = mTmpRect;
                 mFullscreen = true;
@@ -157,15 +133,12 @@ public class TaskStack {
             // Can't set to fullscreen if we don't have a display to get bounds from...
             return false;
         }
-        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
+        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen) {
             return false;
         }
 
-        mDimLayer.setBounds(bounds);
         mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
-        mRotation = rotation;
-        updateOverrideConfiguration();
         return true;
     }
 
@@ -173,93 +146,13 @@ public class TaskStack {
         out.set(mBounds);
     }
 
-    private void updateOverrideConfiguration() {
-        final Configuration serviceConfig = mService.mCurConfiguration;
-        if (mFullscreen) {
-            mOverrideConfig = Configuration.EMPTY;
-            return;
-        }
-
-        if (mOverrideConfig == Configuration.EMPTY) {
-            mOverrideConfig  = new Configuration();
-        }
-
-        // TODO(multidisplay): Update Dp to that of display stack is on.
-        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        mOverrideConfig.screenWidthDp =
-                Math.min((int)(mBounds.width() / density), serviceConfig.screenWidthDp);
-        mOverrideConfig.screenHeightDp =
-                Math.min((int)(mBounds.height() / density), serviceConfig.screenHeightDp);
-        mOverrideConfig.smallestScreenWidthDp =
-                Math.min(mOverrideConfig.screenWidthDp, mOverrideConfig.screenHeightDp);
-        mOverrideConfig.orientation =
-                (mOverrideConfig.screenWidthDp <= mOverrideConfig.screenHeightDp)
-                        ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
-    }
-
     void updateDisplayInfo() {
-        if (mFullscreen) {
-            setBounds(null);
-        } else if (mDisplayContent != null) {
-            final int newRotation = mDisplayContent.getDisplayInfo().rotation;
-            if (mRotation == newRotation) {
-                return;
-            }
-
-            // Device rotation changed. We don't want the stack to move around on the screen when
-            // this happens, so update the stack bounds so it stays in the same place.
-            final int rotationDelta = DisplayContent.deltaRotation(mRotation, newRotation);
+        if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
-            switch (rotationDelta) {
-                case Surface.ROTATION_0:
-                    mTmpRect2.set(mBounds);
-                    break;
-                case Surface.ROTATION_90:
-                    mTmpRect2.top = mTmpRect.bottom - mBounds.right;
-                    mTmpRect2.left = mBounds.top;
-                    mTmpRect2.right = mTmpRect2.left + mBounds.height();
-                    mTmpRect2.bottom = mTmpRect2.top + mBounds.width();
-                    break;
-                case Surface.ROTATION_180:
-                    mTmpRect2.top = mTmpRect.bottom - mBounds.bottom;
-                    mTmpRect2.left = mTmpRect.right - mBounds.right;
-                    mTmpRect2.right = mTmpRect2.left + mBounds.width();
-                    mTmpRect2.bottom = mTmpRect2.top + mBounds.height();
-                    break;
-                case Surface.ROTATION_270:
-                    mTmpRect2.top = mBounds.left;
-                    mTmpRect2.left = mTmpRect.right - mBounds.bottom;
-                    mTmpRect2.right = mTmpRect2.left + mBounds.height();
-                    mTmpRect2.bottom = mTmpRect2.top + mBounds.width();
-                    break;
+            mAnimationBackgroundSurface.setBounds(mTmpRect);
+            for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
             }
-            setBounds(mTmpRect2);
-        }
-    }
-
-    boolean isFullscreen() {
-        return mFullscreen;
-    }
-
-    /** Forces the stack to fullscreen if input is true, else un-forces the stack from fullscreen.
-     * Returns true if something happened.
-     */
-    boolean forceFullscreen(boolean forceFullscreen) {
-        if (mForceFullscreen == forceFullscreen) {
-            return false;
-        }
-        mForceFullscreen = forceFullscreen;
-        if (forceFullscreen) {
-            if (mFullscreen) {
-                return false;
-            }
-            mPreForceFullscreenBounds.set(mBounds);
-            return setBounds(null);
-        } else {
-            if (!mFullscreen || mPreForceFullscreenBounds.isEmpty()) {
-                return false;
-            }
-            return setBounds(mPreForceFullscreenBounds);
         }
     }
 
@@ -313,6 +206,7 @@ public class TaskStack {
         mTasks.add(stackNdx, task);
 
         task.mStack = this;
+        task.updateDisplayInfo(mDisplayContent);
         if (toTop) {
             mDisplayContent.moveStack(this, true);
         }
@@ -361,8 +255,7 @@ public class TaskStack {
         }
 
         mDisplayContent = displayContent;
-        mDimLayer = new DimLayer(mService, this, displayContent);
-        mAnimationBackgroundSurface = new DimLayer(mService, this, displayContent);
+        mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId());
         updateDisplayInfo();
     }
 
@@ -394,98 +287,6 @@ public class TaskStack {
         mAnimationBackgroundSurface.hide();
     }
 
-    private long getDimBehindFadeDuration(long duration) {
-        TypedValue tv = new TypedValue();
-        mService.mContext.getResources().getValue(
-                com.android.internal.R.fraction.config_dimBehindFadeDuration, tv, true);
-        if (tv.type == TypedValue.TYPE_FRACTION) {
-            duration = (long)tv.getFraction(duration, duration);
-        } else if (tv.type >= TypedValue.TYPE_FIRST_INT && tv.type <= TypedValue.TYPE_LAST_INT) {
-            duration = tv.data;
-        }
-        return duration;
-    }
-
-    boolean animateDimLayers() {
-        final int dimLayer;
-        final float dimAmount;
-        if (mDimWinAnimator == null) {
-            dimLayer = mDimLayer.getLayer();
-            dimAmount = 0;
-        } else {
-            dimLayer = mDimWinAnimator.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM;
-            dimAmount = mDimWinAnimator.mWin.mAttrs.dimAmount;
-        }
-        final float targetAlpha = mDimLayer.getTargetAlpha();
-        if (targetAlpha != dimAmount) {
-            if (mDimWinAnimator == null) {
-                mDimLayer.hide(DEFAULT_DIM_DURATION);
-            } else {
-                long duration = (mDimWinAnimator.mAnimating && mDimWinAnimator.mAnimation != null)
-                        ? mDimWinAnimator.mAnimation.computeDurationHint()
-                        : DEFAULT_DIM_DURATION;
-                if (targetAlpha > dimAmount) {
-                    duration = getDimBehindFadeDuration(duration);
-                }
-                mDimLayer.show(dimLayer, dimAmount, duration);
-            }
-        } else if (mDimLayer.getLayer() != dimLayer) {
-            mDimLayer.setLayer(dimLayer);
-        }
-        if (mDimLayer.isAnimating()) {
-            if (!mService.okToDisplay()) {
-                // Jump to the end of the animation.
-                mDimLayer.show();
-            } else {
-                return mDimLayer.stepAnimation();
-            }
-        }
-        return false;
-    }
-
-    void resetDimmingTag() {
-        mDimmingTag = false;
-    }
-
-    void setDimmingTag() {
-        mDimmingTag = true;
-    }
-
-    boolean testDimmingTag() {
-        return mDimmingTag;
-    }
-
-    boolean isDimming() {
-        return mDimLayer.isDimming();
-    }
-
-    boolean isDimming(WindowStateAnimator winAnimator) {
-        return mDimWinAnimator == winAnimator && mDimLayer.isDimming();
-    }
-
-    void startDimmingIfNeeded(WindowStateAnimator newWinAnimator) {
-        // Only set dim params on the highest dimmed layer.
-        // Don't turn on for an unshown surface, or for any layer but the highest dimmed layer.
-        if (newWinAnimator.mSurfaceShown && (mDimWinAnimator == null
-                || !mDimWinAnimator.mSurfaceShown
-                || mDimWinAnimator.mAnimLayer < newWinAnimator.mAnimLayer)) {
-            mDimWinAnimator = newWinAnimator;
-            if (mDimWinAnimator.mWin.mAppToken == null
-                    && !mFullscreen && mDisplayContent != null) {
-                // Dim should cover the entire screen for system windows.
-                mDisplayContent.getLogicalDisplayRect(mTmpRect);
-                mDimLayer.setBounds(mTmpRect);
-            }
-        }
-    }
-
-    void stopDimmingIfNeeded() {
-        if (!mDimmingTag && isDimming()) {
-            mDimWinAnimator = null;
-            mDimLayer.setBounds(mBounds);
-        }
-    }
-
     void setAnimationBackground(WindowStateAnimator winAnimator, int color) {
         int animLayer = winAnimator.mAnimLayer;
         if (mAnimationBackgroundAnimator == null
@@ -514,9 +315,8 @@ public class TaskStack {
             mAnimationBackgroundSurface.destroySurface();
             mAnimationBackgroundSurface = null;
         }
-        if (mDimLayer != null) {
-            mDimLayer.destroySurface();
-            mDimLayer = null;
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            mTasks.get(taskNdx).close();
         }
     }
 
@@ -524,21 +324,17 @@ public class TaskStack {
         pw.print(prefix); pw.print("mStackId="); pw.println(mStackId);
         pw.print(prefix); pw.print("mDeferDetach="); pw.println(mDeferDetach);
         for (int taskNdx = 0; taskNdx < mTasks.size(); ++taskNdx) {
-            pw.print(prefix); pw.println(mTasks.get(taskNdx));
+            pw.print(prefix);
+            mTasks.get(taskNdx).printTo(prefix + " ", pw);
         }
         if (mAnimationBackgroundSurface.isDimming()) {
             pw.print(prefix); pw.println("mWindowAnimationBackgroundSurface:");
             mAnimationBackgroundSurface.printTo(prefix + "  ", pw);
         }
-        if (mDimLayer.isDimming()) {
-            pw.print(prefix); pw.println("mDimLayer:");
-            mDimLayer.printTo(prefix + " ", pw);
-            pw.print(prefix); pw.print("mDimWinAnimator="); pw.println(mDimWinAnimator);
-        }
         if (!mExitingAppTokens.isEmpty()) {
             pw.println();
             pw.println("  Exiting application tokens:");
-            for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
+            for (int i = mExitingAppTokens.size() - 1; i >= 0; i--) {
                 WindowToken token = mExitingAppTokens.get(i);
                 pw.print("  Exiting App #"); pw.print(i);
                 pw.print(' '); pw.print(token);
@@ -546,6 +342,16 @@ public class TaskStack {
                 token.dump(pw, "    ");
             }
         }
+    }
+
+    @Override
+    public boolean isFullscreen() {
+        return mFullscreen;
+    }
+
+    @Override
+    public DisplayInfo getDisplayInfo() {
+        return mDisplayContent.getDisplayInfo();
     }
 
     @Override

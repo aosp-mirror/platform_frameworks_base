@@ -40,7 +40,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Debug;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -92,6 +94,7 @@ final class TaskRecord {
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
     private static final String ATTR_RESIZEABLE = "resizeable";
     private static final String ATTR_PRIVILEGED = "privileged";
+    private static final String ATTR_BOUNDS = "bounds";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
@@ -199,6 +202,14 @@ final class TaskRecord {
 
     final ActivityManagerService mService;
 
+    // Whether or not this task covers the entire screen; by default tasks are fullscreen.
+    boolean mFullscreen = true;
+
+    // Bounds of the Task. null for fullscreen tasks.
+    Rect mBounds = null;
+
+    Configuration mOverrideConfig = Configuration.EMPTY;
+
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mService = service;
@@ -252,7 +263,8 @@ final class TaskRecord {
             long _firstActiveTime, long _lastActiveTime, long lastTimeMoved,
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
             int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
-            int callingUid, String callingPackage, boolean resizeable, boolean privileged) {
+            int callingUid, String callingPackage, boolean resizeable, boolean privileged,
+            Rect bounds) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -289,6 +301,7 @@ final class TaskRecord {
         mCallingPackage = callingPackage;
         mResizeable = resizeable;
         mPrivileged = privileged;
+        mBounds = bounds;
     }
 
     void touchActiveTime() {
@@ -950,6 +963,9 @@ final class TaskRecord {
         out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
         out.attribute(null, ATTR_RESIZEABLE, String.valueOf(mResizeable));
         out.attribute(null, ATTR_PRIVILEGED, String.valueOf(mPrivileged));
+        if (mBounds != null) {
+            out.attribute(null, ATTR_BOUNDS, mBounds.flattenToString());
+        }
 
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
@@ -1010,6 +1026,7 @@ final class TaskRecord {
         String callingPackage = "";
         boolean resizeable = false;
         boolean privileged = false;
+        Rect bounds = null;
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -1067,6 +1084,8 @@ final class TaskRecord {
                 resizeable = Boolean.valueOf(attrValue);
             } else if (ATTR_PRIVILEGED.equals(attrName)) {
                 privileged = Boolean.valueOf(attrValue);
+            } else if (ATTR_BOUNDS.equals(attrName)) {
+                bounds = Rect.unflattenFromString(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -1126,7 +1145,7 @@ final class TaskRecord {
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
-                callingUid, callingPackage, resizeable, privileged);
+                callingUid, callingPackage, resizeable, privileged, bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;
@@ -1134,6 +1153,16 @@ final class TaskRecord {
 
         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Restored task=" + task);
         return task;
+    }
+
+    boolean updateOverrideConfiguration(Configuration newConfig) {
+        Configuration oldConfig = mOverrideConfig;
+        mOverrideConfig = (newConfig == null) ? Configuration.EMPTY : newConfig;
+        // We override the configuration only when the task's dimensions are different from the
+        // display. In this manner, we know that if the override configuration is empty, the task
+        // is necessarily fullscreen.
+        mFullscreen = Configuration.EMPTY.equals(mOverrideConfig);
+        return !mOverrideConfig.equals(oldConfig);
     }
 
     void dump(PrintWriter pw, String prefix) {

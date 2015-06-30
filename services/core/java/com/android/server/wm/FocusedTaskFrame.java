@@ -33,8 +33,8 @@ import android.view.SurfaceSession;
 
 import com.android.server.wm.WindowStateAnimator.SurfaceTrace;
 
-class FocusedStackFrame {
-    private static final String TAG = "FocusedStackFrame";
+class FocusedTaskFrame {
+    private static final String TAG = "FocusedTaskFrame";
     private static final boolean DEBUG = false;
     private static final int THICKNESS = 2;
     private static final float ALPHA = 0.3f;
@@ -47,14 +47,14 @@ class FocusedStackFrame {
     private final Rect mLastBounds = new Rect();
     private int mLayer = -1;
 
-    public FocusedStackFrame(Display display, SurfaceSession session) {
+    public FocusedTaskFrame(Display display, SurfaceSession session) {
         SurfaceControl ctrl = null;
         try {
             if (DEBUG_SURFACE_TRACE) {
-                ctrl = new SurfaceTrace(session, "FocusedStackFrame",
+                ctrl = new SurfaceTrace(session, "FocusedTaskFrame",
                     1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
             } else {
-                ctrl = new SurfaceControl(session, "FocusedStackFrame",
+                ctrl = new SurfaceControl(session, "FocusedTaskFrame",
                     1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
             }
             ctrl.setLayerStack(display.getLayerStack());
@@ -122,11 +122,11 @@ class FocusedStackFrame {
         }
     }
 
-    void setVisibility(TaskStack stack) {
-        if (stack == null || stack.isFullscreen()) {
+    void setVisibility(Task task) {
+        if (task == null || task.isFullscreen()) {
             setupSurface(false);
         } else {
-            stack.getBounds(mBounds);
+            task.getBounds(mBounds);
             setupSurface(true);
             if (!mBounds.equals(mLastBounds)) {
                 draw();

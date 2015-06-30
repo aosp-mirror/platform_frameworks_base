@@ -224,7 +224,7 @@ public class TaskViewHeader extends FrameLayout {
     /** Updates the resize task bar button. */
     void updateResizeTaskBarIcon(Task t) {
         Rect display = mSsp.getWindowRect();
-        Rect taskRect = mSsp.getTaskBounds(t.key.stackId);
+        Rect taskRect = mSsp.getTaskBounds(t.key.id);
         int resId = R.drawable.star;
         if (display.equals(taskRect) || taskRect.isEmpty()) {
             resId = R.drawable.vector_drawable_place_fullscreen;

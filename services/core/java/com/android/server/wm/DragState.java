@@ -413,7 +413,7 @@ class DragState {
                 continue;
             }
 
-            child.getStackBounds(mTmpRect);
+            child.getTaskBounds(mTmpRect);
             if (!mTmpRect.contains(x, y)) {
                 // outside of this window's activity stack == don't tell about drags
                 continue;

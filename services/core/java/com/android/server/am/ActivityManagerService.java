@@ -2695,6 +2695,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public void setFocusedTask(int taskId) {
+        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedTask: taskId=" + taskId);
+        synchronized (ActivityManagerService.this) {
+            TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+            if (task != null) {
+                ActivityRecord r = task.topRunningActivityLocked(null);
+                if (r != null) {
+                    setFocusedActivityLocked(r, "setFocusedTask");
+                    mStackSupervisor.resumeTopActivitiesLocked(task.stack, null, null);
+                }
+            }
+        }
+    }
+
     /** Sets the task stack listener that gets callbacks when a task stack changes. */
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException {
@@ -8572,6 +8587,27 @@ public final class ActivityManagerService extends ActivityManagerNative
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    @Override
+    public Rect getTaskBounds(int taskId) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "getTaskBounds()");
+        long ident = Binder.clearCallingIdentity();
+        Rect rect = new Rect();
+        try {
+            synchronized (this) {
+                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task == null) {
+                    Slog.w(TAG, "getTaskBounds: taskId=" + taskId + " not found");
+                    return rect;
+                }
+                mWindowManager.getTaskBounds(task.taskId, rect);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return rect;
     }
 
     @Override

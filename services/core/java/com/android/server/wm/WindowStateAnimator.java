@@ -169,9 +169,6 @@ class WindowStateAnimator {
     /** Set when the window has been shown in the screen the first time. */
     static final int HAS_DRAWN = 4;
 
-    private static final int SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-
     String drawStateToString() {
         switch (mDrawState) {
             case NO_SURFACE: return "NO_SURFACE";
@@ -1418,9 +1415,9 @@ class WindowStateAnimator {
                 mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
-                    final TaskStack stack = w.getStack();
-                    if (stack != null) {
-                        stack.startDimmingIfNeeded(this);
+                    final Task task = w.getTask();
+                    if (task != null) {
+                        task.startDimmingIfNeeded(this);
                     }
                 }
             } catch (RuntimeException e) {

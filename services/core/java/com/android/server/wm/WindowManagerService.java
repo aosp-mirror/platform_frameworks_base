@@ -70,6 +70,7 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -155,7 +156,6 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
@@ -184,7 +184,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -251,9 +250,9 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int LAYER_OFFSET_DIM = 1;
 
     /**
-     * FocusedStackFrame layer is immediately above focused window.
+     * FocusedTaskFrame layer is immediately above focused window.
      */
-    static final int LAYER_OFFSET_FOCUSED_STACK = 1;
+    static final int LAYER_OFFSET_FOCUSED_TASK = 1;
 
     /**
      * Animation thumbnail is as far as possible below the window above
@@ -446,9 +445,9 @@ public class WindowManagerService extends IWindowManager.Stub
     StrictModeFlash mStrictModeFlash;
     CircularDisplayMask mCircularDisplayMask;
     EmulatorDisplayOverlay mEmulatorDisplayOverlay;
-    FocusedStackFrame mFocusedStackFrame;
+    FocusedTaskFrame mFocusedTaskFrame;
 
-    int mFocusedStackLayer;
+    int mFocusedTaskLayer;
 
     final float[] mTmpFloats = new float[9];
     final Rect mTmpContentRect = new Rect();
@@ -991,7 +990,7 @@ public class WindowManagerService extends IWindowManager.Stub
         SurfaceControl.openTransaction();
         try {
             createWatermarkInTransaction();
-            mFocusedStackFrame = new FocusedStackFrame(
+            mFocusedTaskFrame = new FocusedTaskFrame(
                     getDefaultDisplayContentLocked().getDisplay(), mFxSession);
         } finally {
             SurfaceControl.closeTransaction();
@@ -4063,37 +4062,33 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /** Call while in a Surface transaction. */
-    void setFocusedStackLayer() {
-        mFocusedStackLayer = 0;
+    void setFocusedTaskLayer() {
+        mFocusedTaskLayer = 0;
         if (mFocusedApp != null) {
             final WindowList windows = mFocusedApp.allAppWindows;
             for (int i = windows.size() - 1; i >= 0; --i) {
                 final WindowState win = windows.get(i);
                 final int animLayer = win.mWinAnimator.mAnimLayer;
                 if (win.mAttachedWindow == null && win.isVisibleLw() &&
-                        animLayer > mFocusedStackLayer) {
-                    mFocusedStackLayer = animLayer + LAYER_OFFSET_FOCUSED_STACK;
+                        animLayer > mFocusedTaskLayer) {
+                    mFocusedTaskLayer = animLayer + LAYER_OFFSET_FOCUSED_TASK;
                 }
             }
         }
-        if (DEBUG_LAYERS) Slog.v(TAG, "Setting FocusedStackFrame to layer=" +
-                mFocusedStackLayer);
-        mFocusedStackFrame.setLayer(mFocusedStackLayer);
+        if (DEBUG_LAYERS) Slog.v(TAG, "Setting FocusedTaskFrame to layer=" + mFocusedTaskLayer);
+        mFocusedTaskFrame.setLayer(mFocusedTaskLayer);
     }
 
-    void setFocusedStackFrame() {
-        final TaskStack stack;
+    void setFocusedTaskFrame() {
+        Task task = null;
         if (mFocusedApp != null) {
-            final Task task = mFocusedApp.mTask;
-            stack = task.mStack;
+            task = mFocusedApp.mTask;
             final DisplayContent displayContent = task.getDisplayContent();
             if (displayContent != null) {
-                displayContent.setTouchExcludeRegion(stack);
+                displayContent.setTouchExcludeRegion(task);
             }
-        } else {
-            stack = null;
         }
-        mFocusedStackFrame.setVisibility(stack);
+        mFocusedTaskFrame.setVisibility(task);
     }
 
     @Override
@@ -4121,11 +4116,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (changed) {
                 mFocusedApp = newFocus;
                 mInputMonitor.setFocusedAppLw(newFocus);
-                setFocusedStackFrame();
+                setFocusedTaskFrame();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setFocusedApp");
                 SurfaceControl.openTransaction();
                 try {
-                    setFocusedStackLayer();
+                    setFocusedTaskLayer();
                 } finally {
                     SurfaceControl.closeTransaction();
                     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
@@ -5233,71 +5228,78 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Re-sizes the specified stack and its containing windows.
-     * Returns a {@link Configuration} object that contains configurations settings
-     * that should be overridden due to the operation.
-     */
-    public Configuration resizeStack(int stackId, Rect bounds) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null) {
-                throw new IllegalArgumentException("resizeStack: stackId " + stackId
-                        + " not found.");
-            }
-            if (stack.setBounds(bounds)) {
-                stack.resizeWindows();
-                stack.getDisplayContent().layoutNeeded = true;
-                performLayoutAndPlaceSurfacesLocked();
-            }
-            return new Configuration(stack.mOverrideConfig);
-        }
-    }
-
     public void getStackBounds(int stackId, Rect bounds) {
-        final TaskStack stack = mStackIdToStack.get(stackId);
-        if (stack != null) {
-            stack.getBounds(bounds);
-            return;
-        }
-        bounds.setEmpty();
-    }
-
-    /** Returns the id of an application (non-home stack) stack that match the input bounds.
-     * -1 if no stack matches.*/
-    public int getStackIdWithBounds(Rect bounds) {
-        Rect stackBounds = new Rect();
         synchronized (mWindowMap) {
-            for (int i = mStackIdToStack.size() - 1; i >= 0; --i) {
-                TaskStack stack = mStackIdToStack.valueAt(i);
-                if (stack.mStackId != HOME_STACK_ID) {
-                    stack.getBounds(stackBounds);
-                    if (stackBounds.equals(bounds)) {
-                        return stack.mStackId;
-                    }
-                }
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack != null) {
+                stack.getBounds(bounds);
+                return;
             }
+            bounds.setEmpty();
         }
-        return -1;
     }
 
-    /** Forces the stack to fullscreen if input is true, else un-forces the stack from fullscreen.
-     * Returns a {@link Configuration} object that contains configurations settings
-     * that should be overridden due to the operation.
-     */
-    public Configuration forceStackToFullscreen(int stackId, boolean forceFullscreen) {
+    /**
+     * Re-sizes a stack and its containing tasks.
+     * @param stackId Id of stack to resize.
+     * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
+     * @param changedTaskIds Output list of Ids of tasks that changed in bounds due to resize.
+     * @param newTaskConfigs Output list of new Configuation of the tasks that changed.
+     * @return True if the stack is now fullscreen.
+     * */
+    public boolean resizeStack(
+            int stackId, Rect bounds, IntArray changedTaskIds, List<Configuration> newTaskConfigs) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack == null) {
                 throw new IllegalArgumentException("resizeStack: stackId " + stackId
                         + " not found.");
             }
-            if (stack.forceFullscreen(forceFullscreen)) {
+            if (stack.setBounds(bounds, changedTaskIds, newTaskConfigs)) {
                 stack.resizeWindows();
                 stack.getDisplayContent().layoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
             }
-            return new Configuration(stack.mOverrideConfig);
+            return stack.isFullscreen();
+        }
+    }
+
+    /**
+     * Re-sizes the specified task and its containing windows.
+     * Returns a {@link Configuration} object that contains configurations settings
+     * that should be overridden due to the operation.
+     */
+    public Configuration resizeTask(int taskId, Rect bounds) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                throw new IllegalArgumentException("resizeTask: taskId " + taskId
+                        + " not found.");
+            }
+            if (task.setBounds(bounds)) {
+                task.resizeWindows();
+                task.getDisplayContent().layoutNeeded = true;
+                performLayoutAndPlaceSurfacesLocked();
+            }
+            return new Configuration(task.mOverrideConfig);
+        }
+    }
+
+    public void getTaskBounds(int taskId, Rect bounds) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task != null) {
+                task.getBounds(bounds);
+                return;
+            }
+            bounds.setEmpty();
+        }
+    }
+
+    /** Return true if the input task id represents a valid window manager task. */
+    public boolean isValidTaskId(int taskId) {
+        synchronized (mWindowMap) {
+            return mTaskIdToTask.get(taskId) != null;
         }
     }
 
@@ -6249,7 +6251,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         int right = wf.right - cr.right;
                         int bottom = wf.bottom - cr.bottom;
                         frame.union(left, top, right, bottom);
-                        ws.getStackBounds(stackBounds);
+                        ws.getTaskBounds(stackBounds);
                         if (!frame.intersect(stackBounds)) {
                             // Set frame empty if there's no intersection.
                             frame.setEmpty();
@@ -7708,7 +7710,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int DO_DISPLAY_CHANGED = 29;
 
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
-        public static final int TAP_OUTSIDE_STACK = 31;
+        public static final int TAP_OUTSIDE_TASK = 31;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
         public static final int ALL_WINDOWS_DRAWN = 33;
@@ -8170,14 +8172,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     break;
 
-                case TAP_OUTSIDE_STACK: {
-                    int stackId;
+                case TAP_OUTSIDE_TASK: {
+                    int taskId;
                     synchronized (mWindowMap) {
-                        stackId = ((DisplayContent)msg.obj).stackIdFromPoint(msg.arg1, msg.arg2);
+                        taskId = ((DisplayContent)msg.obj).taskIdFromPoint(msg.arg1, msg.arg2);
                     }
-                    if (stackId >= 0) {
+                    if (taskId >= 0) {
                         try {
-                            mActivityManager.setFocusedStack(stackId);
+                            mActivityManager.setFocusedTask(taskId);
                         } catch (RemoteException e) {
                         }
                     }
@@ -8877,8 +8879,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 layerChanged = true;
                 anyLayerChanged = true;
             }
-            final TaskStack stack = w.getStack();
-            if (layerChanged && stack != null && stack.isDimming(winAnimator)) {
+            final Task task = w.getTask();
+            if (layerChanged && task != null && task.isDimming(winAnimator)) {
                 // Force an animation pass just to update the mDimLayer layer.
                 scheduleAnimationLocked();
             }
@@ -9768,14 +9770,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 && w.isDisplayedLw()
                 && !w.mExiting) {
             final WindowStateAnimator winAnimator = w.mWinAnimator;
-            final TaskStack stack = w.getStack();
-            if (stack == null) {
+            final Task task = w.getTask();
+            if (task == null) {
                 return;
             }
-            stack.setDimmingTag();
-            if (!stack.isDimming(winAnimator)) {
+            task.setContinueDimming();
+            if (!task.isDimming(winAnimator)) {
                 if (localLOGV) Slog.v(TAG, "Win " + w + " start dimming.");
-                stack.startDimmingIfNeeded(winAnimator);
+                task.startDimmingIfNeeded(winAnimator);
             }
         }
     }
@@ -9927,7 +9929,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     // FIRST LOOP: Perform a layout, if needed.
-                    if (repeats < 4) {
+                    if (repeats < LAYOUT_REPEAT_THRESHOLD) {
                         performLayoutLockedInner(displayContent, repeats == 1,
                                 false /*updateInputWindows*/);
                     } else {
@@ -9962,8 +9964,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int N = windows.size();
                 for (i=N-1; i>=0; i--) {
                     WindowState w = windows.get(i);
-                    final TaskStack stack = w.getStack();
-                    if (stack == null && w.getAttrs().type != TYPE_PRIVATE_PRESENTATION) {
+                    final Task task = w.getTask();
+                    if (task == null && w.getAttrs().type != TYPE_PRIVATE_PRESENTATION) {
                         continue;
                     }
 
@@ -9975,7 +9977,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         handleNotObscuredLocked(w, innerDw, innerDh);
                     }
 
-                    if (stack != null && !stack.testDimmingTag()) {
+                    if (task != null && !task.getContinueDimming()) {
                         handleFlagDimBehind(w);
                     }
 
@@ -10369,7 +10371,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (updateInputWindowsNeeded) {
             mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
-        setFocusedStackFrame();
+        setFocusedTaskFrame();
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
@@ -11428,7 +11430,8 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean dumpWindows(PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll) {
         WindowList windows = new WindowList();
-        if ("visible".equals(name)) {
+        if ("visible".equals(name) || "visible-apps".equals(name)) {
+            final boolean appsOnly = "visible-apps".equals(name);
             synchronized(mWindowMap) {
                 final int numDisplays = mDisplayContents.size();
                 for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
@@ -11436,7 +11439,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             mDisplayContents.valueAt(displayNdx).getWindowList();
                     for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                         final WindowState w = windowList.get(winNdx);
-                        if (w.mWinAnimator.mSurfaceShown) {
+                        if (w.mWinAnimator.mSurfaceShown
+                                && (!appsOnly || (appsOnly && w.mAppToken != null))) {
                             windows.add(w);
                         }
                     }
@@ -11561,6 +11565,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    Window hex object identifier, or");
                 pw.println("    \"all\" for all windows, or");
                 pw.println("    \"visible\" for the visible windows.");
+                pw.println("    \"visible-apps\" for the visible app windows.");
                 pw.println("  -a: include all available server state.");
                 return;
             } else {
@@ -11711,7 +11716,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // TODO: Create an input channel for each display with touch capability.
         if (displayId == Display.DEFAULT_DISPLAY) {
-            displayContent.mTapDetector = new StackTapPointerEventListener(this, displayContent);
+            displayContent.mTapDetector = new TaskTapPointerEventListener(this, displayContent);
             registerPointerEventListener(displayContent.mTapDetector);
         }
 

@@ -799,6 +799,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case SET_FOCUSED_TASK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int taskId = data.readInt();
+            setFocusedStack(taskId);
+            reply.writeNoException();
+            return true;
+        }
+
         case REGISTER_TASK_STACK_LISTENER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -2429,6 +2437,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_TASK_BOUNDS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int taskId = data.readInt();
+            Rect r = getTaskBounds(taskId);
+            reply.writeNoException();
+            r.writeToParcel(reply, 0);
+            return true;
+        }
+
         case GET_TASK_DESCRIPTION_ICON_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String filename = data.readString();
@@ -3518,6 +3535,18 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return focusedStackId;
+    }
+    @Override
+    public void setFocusedTask(int taskId) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(taskId);
+        mRemote.transact(SET_FOCUSED_TASK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException
@@ -5787,6 +5816,21 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    @Override
+    public Rect getTaskBounds(int taskId) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(taskId);
+        mRemote.transact(GET_TASK_BOUNDS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        Rect rect = Rect.CREATOR.createFromParcel(reply);
+        data.recycle();
+        reply.recycle();
+        return rect;
     }
 
     @Override

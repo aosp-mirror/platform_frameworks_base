@@ -535,10 +535,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             Rect osf) {
         mHaveFrame = true;
 
-        final TaskStack stack = mAppToken != null ? getStack() : null;
-        final boolean nonFullscreenStack = stack != null && !stack.isFullscreen();
-        if (nonFullscreenStack) {
-            stack.getBounds(mContainingFrame);
+        final Task task = mAppToken != null ? getTask() : null;
+        final boolean nonFullscreenTask = task != null && !task.isFullscreen();
+        if (nonFullscreenTask) {
+            task.getBounds(mContainingFrame);
             final WindowState imeWin = mService.mInputMethodWindow;
             if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this
                     && mContainingFrame.bottom > cf.bottom) {
@@ -626,7 +626,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             y = mAttrs.y;
         }
 
-        if (nonFullscreenStack) {
+        if (nonFullscreenTask) {
             // Make sure window fits in containing frame since it is in a non-fullscreen stack as
             // required by {@link Gravity#apply} call.
             w = Math.min(w, pw);
@@ -856,27 +856,33 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return displayContent.getDisplayId();
     }
 
-    TaskStack getStack() {
+    Task getTask() {
         AppWindowToken wtoken = mAppToken == null ? mService.mFocusedApp : mAppToken;
-        if (wtoken != null) {
-            Task task = wtoken.mTask;
-            if (task != null) {
-                if (task.mStack != null) {
-                    return task.mStack;
-                }
-                Slog.e(TAG, "getStack: mStack null for task=" + task);
-            } else {
-                Slog.e(TAG, "getStack: " + this + " couldn't find task for " + wtoken
-                    + " Callers=" + Debug.getCallers(4));
+        if (wtoken == null) {
+            Slog.e(TAG, "getTask: " + this + " null wtoken " + " Callers=" + Debug.getCallers(5));
+            return null;
+        }
+        final Task task = wtoken.mTask;
+        if (task == null) Slog.e(TAG, "getStack: " + this + " couldn't find task for " + wtoken
+                    + " Callers=" + Debug.getCallers(5));
+        return task;
+    }
+
+    TaskStack getStack() {
+        Task task = getTask();
+        if (task != null) {
+            if (task.mStack != null) {
+                return task.mStack;
             }
+            Slog.e(TAG, "getStack: mStack null for task=" + task);
         }
         return mDisplayContent.getHomeStack();
     }
 
-    void getStackBounds(Rect bounds) {
-        final TaskStack stack = getStack();
-        if (stack != null) {
-            stack.getBounds(bounds);
+    void getTaskBounds(Rect bounds) {
+        final Task task = getTask();
+        if (task != null) {
+            task.getBounds(bounds);
             return;
         }
         bounds.set(mFrame);
@@ -1139,9 +1145,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isConfigChanged() {
-        final TaskStack stack = getStack();
+        final Task task = getTask();
         final Configuration overrideConfig =
-                (stack != null) ? stack.mOverrideConfig : Configuration.EMPTY;
+                (task != null) ? task.mOverrideConfig : Configuration.EMPTY;
         final Configuration serviceConfig = mService.mCurConfiguration;
         boolean configChanged =
                 (mConfiguration != serviceConfig && mConfiguration.diff(serviceConfig) != 0)
@@ -1387,11 +1393,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public boolean isDimming() {
-        TaskStack stack = getStack();
-        if (stack == null) {
+        Task task = getTask();
+        if (task == null) {
             return false;
         }
-        return stack.isDimming(mWinAnimator);
+        return task.isDimming(mWinAnimator);
     }
 
     public void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
@@ -1489,9 +1495,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mCompatFrame);
             boolean configChanged = isConfigChanged();
-            final TaskStack stack = getStack();
+            final Task task = getTask();
             final Configuration overrideConfig =
-                    (stack != null) ? stack.mOverrideConfig : Configuration.EMPTY;
+                    (task != null) ? task.mOverrideConfig : Configuration.EMPTY;
             if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) && configChanged) {
                 Slog.i(TAG, "Sending new config to window " + this + ": "
                         + mWinAnimator.mSurfaceW + "x" + mWinAnimator.mSurfaceH + " / config="
