@@ -102,7 +102,6 @@ import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
-import android.content.pm.IPackagesProvider;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
@@ -9711,6 +9710,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 result |= updateIntentVerificationStatus(packageName,
                         PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
                         UserHandle.myUserId());
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowserLPr(
+                        packageName, userId);
             }
             return result;
         }
@@ -13026,7 +13027,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @param flags The flags that is going to be reset.
      */
     private void revokeRuntimePermissionsAndClearFlagsLocked(
-            PermissionsState permissionsState, int userId, int flags) {
+            PermissionsState permissionsState, final int userId, int flags) {
         boolean needsWrite = false;
 
         for (PermissionState state : permissionsState.getRuntimePermissionStates(userId)) {
@@ -13039,7 +13040,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Ensure default permissions are never cleared.
-        mDefaultPermissionPolicy.grantDefaultPermissions(userId);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mDefaultPermissionPolicy.grantDefaultPermissions(userId);
+            }
+        });
 
         if (needsWrite) {
             mSettings.writeRuntimePermissionsForUserLPr(userId, true);
@@ -15943,48 +15949,44 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mDefaultPermissionPolicy.setVoiceInteractionPackagesProviderLPw(provider);
             }
         }
-    }
 
-    @Override
-    public void grantDefaultPermissions(final int userId) {
-        enforceSystemOrPhoneCaller("grantDefaultPermissions");
-        long token = Binder.clearCallingIdentity();
-        try {
-            // We cannot grant the default permissions with a lock held as
-            // we query providers from other components for default handlers
-            // such as enabled IMEs, etc.
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mDefaultPermissionPolicy.grantDefaultPermissions(userId);
-                }
-            });
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        @Override
+        public void setSmsAppPackagesProvider(PackagesProvider provider) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.setSmsAppPackagesProviderLPw(provider);
+            }
+        }
+
+        @Override
+        public void setDialerAppPackagesProvider(PackagesProvider provider) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.setDialerAppPackagesProviderLPw(provider);
+            }
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultSmsApp(String packageName, int userId) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSmsAppLPr(
+                        packageName, userId);
+            }
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultDialerAppLPr(
+                        packageName, userId);
+            }
         }
     }
 
     @Override
-    public void setCarrierAppPackagesProvider(final IPackagesProvider provider) {
-        enforceSystemOrPhoneCaller("setCarrierAppPackagesProvider");
-        long token = Binder.clearCallingIdentity();
-        try {
-            PackageManagerInternal.PackagesProvider wrapper =
-                    new PackageManagerInternal.PackagesProvider() {
-                @Override
-                public String[] getPackages(int userId) {
-                    try {
-                        return provider.getPackages(userId);
-                    } catch (RemoteException e) {
-                        return null;
-                    }
-                }
-            };
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.setCarrierAppPackagesProviderLPw(wrapper);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
+    public void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId) {
+        enforceSystemOrPhoneCaller("grantPermissionsToEnabledCarrierApps");
+        synchronized (mPackages) {
+            mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledCarrierAppsLPr(
+                    packageNames, userId);
         }
     }
 
