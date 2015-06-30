@@ -126,6 +126,11 @@ public class VolumeDialogMotion {
         return mChevron.getHeight() / 6;
     }
 
+    private int chevronPosY() {
+        final Object tag = mChevron == null ? null : mChevron.getTag();
+        return tag == null ? 0 : (Integer) tag;
+    }
+
     private void startShowAnimation() {
         if (D.BUG) Log.d(TAG, "startShowAnimation");
         mDialogView.animate()
@@ -139,7 +144,7 @@ public class VolumeDialogMotion {
                         if (mChevronPositionAnimator == null) return;
                         // reposition chevron
                         final float v = (Float) mChevronPositionAnimator.getAnimatedValue();
-                        final int posY = (Integer) mChevron.getTag();
+                        final int posY = chevronPosY();
                         mChevron.setTranslationY(posY + v + -mDialogView.getTranslationY());
                     }})
                 .start();
@@ -212,7 +217,7 @@ public class VolumeDialogMotion {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
                         mContents.setTranslationY(-mDialogView.getTranslationY());
-                        int posY = (Integer) mChevron.getTag();
+                        final int posY = chevronPosY();
                         mChevron.setTranslationY(posY + -mDialogView.getTranslationY());
                     }
                 })
