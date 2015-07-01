@@ -349,7 +349,7 @@ public class NetworkMonitor extends StateMachine {
     // Being in the ValidatedState State indicates a Network is:
     // - Successfully validated, or
     // - Wanted "as is" by the user, or
-    // - Does not satsify the default NetworkRequest and so validation has been skipped.
+    // - Does not satisfy the default NetworkRequest and so validation has been skipped.
     private class ValidatedState extends State {
         @Override
         public void enter() {
@@ -558,7 +558,7 @@ public class NetworkMonitor extends StateMachine {
 
     // Being in the LingeringState State indicates a Network's validated bit is true and it once
     // was the highest scoring Network satisfying a particular NetworkRequest, but since then
-    // another Network satsified the NetworkRequest with a higher score and hence this Network
+    // another Network satisfied the NetworkRequest with a higher score and hence this Network
     // is "lingered" for a fixed period of time before it is disconnected.  This period of time
     // allows apps to wrap up communication and allows for seamless reactivation if the other
     // higher scoring Network happens to disconnect.
@@ -633,7 +633,8 @@ public class NetworkMonitor extends StateMachine {
      * Do a URL fetch on a known server to see if we get the data we expect.
      * Returns HTTP response code.
      */
-    private int isCaptivePortal() {
+    @VisibleForTesting
+    protected int isCaptivePortal() {
         if (!mIsCaptivePortalCheckEnabled) return 204;
 
         HttpURLConnection urlConnection = null;

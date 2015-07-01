@@ -2142,6 +2142,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mDefaultInetConditionPublished = 0;
             }
             notifyIfacesChanged();
+            // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
+            // by other networks that are already connected. Perhaps that can be done by
+            // sending all CALLBACK_LOST messages (for requests, not listens) at the end
+            // of rematchAllNetworksAndRequests
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOST);
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
@@ -2250,7 +2254,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     //    is currently satisfying the request.  This is desirable when
                     //    cellular ends up validating but WiFi does not.
                     // 2. Unvalidated WiFi will not be reaped when validated cellular
-                    //    is currently satsifying the request.  This is desirable when
+                    //    is currently satisfying the request.  This is desirable when
                     //    WiFi ends up validating and out scoring cellular.
                     mNetworkForRequestId.get(nri.request.requestId).getCurrentScore() <
                             nai.getCurrentScoreAsValidated())) {
@@ -3799,10 +3803,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // TODO: Instead of passing mDefaultRequest, provide an API to determine whether a Network
         // satisfies mDefaultRequest.
-        NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
+        final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
                 new Network(reserveNetId()), new NetworkInfo(networkInfo), new LinkProperties(
                 linkProperties), new NetworkCapabilities(networkCapabilities), currentScore,
-                mContext, mTrackerHandler, new NetworkMisc(networkMisc), mDefaultRequest);
+                mContext, mTrackerHandler, new NetworkMisc(networkMisc), mDefaultRequest, this);
         synchronized (this) {
             nai.networkMonitor.systemReady = mSystemReady;
         }
@@ -4196,8 +4200,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ArrayList<NetworkRequestInfo> addedRequests = new ArrayList<NetworkRequestInfo>();
         if (VDBG) log(" network has: " + newNetwork.networkCapabilities);
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-            NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
-            if (newNetwork == currentNetwork) {
+            final NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
+            final boolean satisfies = newNetwork.satisfies(nri.request);
+            if (newNetwork == currentNetwork && satisfies) {
                 if (VDBG) {
                     log("Network " + newNetwork.name() + " was already satisfying" +
                             " request " + nri.request.requestId + ". No change.");
@@ -4208,7 +4213,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // check if it satisfies the NetworkCapabilities
             if (VDBG) log("  checking if request is satisfied: " + nri.request);
-            if (newNetwork.satisfies(nri.request)) {
+            if (satisfies) {
                 if (!nri.isRequest) {
                     // This is not a request, it's a callback listener.
                     // Add it to newNetwork regardless of score.
@@ -4251,6 +4256,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         oldDefaultNetwork = currentNetwork;
                     }
                 }
+            } else if (newNetwork.networkRequests.get(nri.request.requestId) != null) {
+                // If "newNetwork" is listed as satisfying "nri" but no longer satisfies "nri",
+                // mark it as no longer satisfying "nri".  Because networks are processed by
+                // rematchAllNetworkAndRequests() in descending score order, "currentNetwork" will
+                // match "newNetwork" before this loop will encounter a "currentNetwork" with higher
+                // score than "newNetwork" and where "currentNetwork" no longer satisfies "nri".
+                // This means this code doesn't have to handle the case where "currentNetwork" no
+                // longer satisfies "nri" when "currentNetwork" does not equal "newNetwork".
+                if (DBG) {
+                    log("Network " + newNetwork.name() + " stopped satisfying" +
+                            " request " + nri.request.requestId);
+                }
+                newNetwork.networkRequests.remove(nri.request.requestId);
+                if (currentNetwork == newNetwork) {
+                    mNetworkForRequestId.remove(nri.request.requestId);
+                    sendUpdatedScoreToFactories(nri.request, 0);
+                } else {
+                    if (nri.isRequest == true) {
+                        Slog.wtf(TAG, "BUG: Removing request " + nri.request.requestId + " from " +
+                                newNetwork.name() +
+                                " without updating mNetworkForRequestId or factories!");
+                    }
+                }
+                // TODO: technically, sending CALLBACK_LOST here is
+                // incorrect if nri is a request (not a listen) and there
+                // is a replacement network currently connected that can
+                // satisfy it. However, the only capability that can both
+                // a) be requested and b) change is NET_CAPABILITY_TRUSTED,
+                // so this code is only incorrect for a network that loses
+                // the TRUSTED capability, which is a rare case.
+                callCallbackForRequest(nri, newNetwork, ConnectivityManager.CALLBACK_LOST);
             }
         }
         // Linger any networks that are no longer needed.
@@ -4269,41 +4305,41 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 unlinger(nai);
             }
         }
+        if (isNewDefault) {
+            // Notify system services that this network is up.
+            makeDefault(newNetwork);
+            synchronized (ConnectivityService.this) {
+                // have a new default network, release the transition wakelock in
+                // a second if it's held.  The second pause is to allow apps
+                // to reconnect over the new network
+                if (mNetTransitionWakeLock.isHeld()) {
+                    mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                            EVENT_CLEAR_NET_TRANSITION_WAKELOCK,
+                            mNetTransitionWakeLockSerialNumber, 0),
+                            1000);
+                }
+            }
+        }
+
+        // do this after the default net is switched, but
+        // before LegacyTypeTracker sends legacy broadcasts
+        for (NetworkRequestInfo nri : addedRequests) notifyNetworkCallback(newNetwork, nri);
+
+        if (isNewDefault) {
+            // Maintain the illusion: since the legacy API only
+            // understands one network at a time, we must pretend
+            // that the current default network disconnected before
+            // the new one connected.
+            if (oldDefaultNetwork != null) {
+                mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
+                                          oldDefaultNetwork, true);
+            }
+            mDefaultInetConditionPublished = newNetwork.lastValidated ? 100 : 0;
+            mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
+            notifyLockdownVpn(newNetwork);
+        }
+
         if (keep) {
-            if (isNewDefault) {
-                // Notify system services that this network is up.
-                makeDefault(newNetwork);
-                synchronized (ConnectivityService.this) {
-                    // have a new default network, release the transition wakelock in
-                    // a second if it's held.  The second pause is to allow apps
-                    // to reconnect over the new network
-                    if (mNetTransitionWakeLock.isHeld()) {
-                        mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                                EVENT_CLEAR_NET_TRANSITION_WAKELOCK,
-                                mNetTransitionWakeLockSerialNumber, 0),
-                                1000);
-                    }
-                }
-            }
-
-            // do this after the default net is switched, but
-            // before LegacyTypeTracker sends legacy broadcasts
-            for (NetworkRequestInfo nri : addedRequests) notifyNetworkCallback(newNetwork, nri);
-
-            if (isNewDefault) {
-                // Maintain the illusion: since the legacy API only
-                // understands one network at a time, we must pretend
-                // that the current default network disconnected before
-                // the new one connected.
-                if (oldDefaultNetwork != null) {
-                    mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
-                                              oldDefaultNetwork, true);
-                }
-                mDefaultInetConditionPublished = newNetwork.lastValidated ? 100 : 0;
-                mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
-                notifyLockdownVpn(newNetwork);
-            }
-
             // Notify battery stats service about this network, both the normal
             // interface and any stacked links.
             // TODO: Avoid redoing this; this must only be done once when a network comes online.
@@ -4697,4 +4733,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
     }
+
+    @VisibleForTesting
+    public NetworkMonitor createNetworkMonitor(Context context, Handler handler,
+            NetworkAgentInfo nai, NetworkRequest defaultRequest) {
+        return new NetworkMonitor(context, handler, nai, defaultRequest);
+    }
+
 }

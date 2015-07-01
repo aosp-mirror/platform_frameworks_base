@@ -30,6 +30,7 @@ import android.os.Messenger;
 import android.util.SparseArray;
 
 import com.android.internal.util.AsyncChannel;
+import com.android.server.ConnectivityService;
 import com.android.server.connectivity.NetworkMonitor;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ import java.util.Comparator;
 //    ConnectivityService will tell netd to create the network and immediately transition to
 //    state #3.
 // 3. registered, created, connected, unvalidated
-//    If this network can satsify the default NetworkRequest, then NetworkMonitor will
+//    If this network can satisfy the default NetworkRequest, then NetworkMonitor will
 //    probe for Internet connectivity.
 //    If this network cannot satisfy the default NetworkRequest, it will immediately be
 //    transitioned to state #4.
@@ -164,7 +165,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
-            NetworkMisc misc, NetworkRequest defaultRequest) {
+            NetworkMisc misc, NetworkRequest defaultRequest, ConnectivityService connService) {
         this.messenger = messenger;
         asyncChannel = ac;
         network = net;
@@ -172,7 +173,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         currentScore = score;
-        networkMonitor = new NetworkMonitor(context, handler, this, defaultRequest);
+        networkMonitor = connService.createNetworkMonitor(context, handler, this, defaultRequest);
         networkMisc = misc;
     }
 

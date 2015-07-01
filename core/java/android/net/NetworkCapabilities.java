@@ -626,6 +626,7 @@ public final class NetworkCapabilities implements Parcelable {
                 case NET_CAPABILITY_TRUSTED:        capabilities += "TRUSTED"; break;
                 case NET_CAPABILITY_NOT_VPN:        capabilities += "NOT_VPN"; break;
                 case NET_CAPABILITY_VALIDATED:      capabilities += "VALIDATED"; break;
+                case NET_CAPABILITY_CAPTIVE_PORTAL: capabilities += "CAPTIVE_PORTAL"; break;
             }
             if (++i < types.length) capabilities += "&";
         }
