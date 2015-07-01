@@ -1180,6 +1180,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         notification.getKey());
                 notification.getNotification().fullScreenIntent.send();
                 shadeEntry.notifyFullScreenIntentLaunched();
+                MetricsLogger.count(mContext, "note_fullscreen", 1);
             } catch (PendingIntent.CanceledException e) {
             }
         }
