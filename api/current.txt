@@ -9469,6 +9469,7 @@ package android.content.pm {
     field public static final int PROTECTION_DANGEROUS = 1; // 0x1
     field public static final int PROTECTION_FLAG_APPOP = 64; // 0x40
     field public static final int PROTECTION_FLAG_DEVELOPMENT = 32; // 0x20
+    field public static final int PROTECTION_FLAG_PRE23 = 128; // 0x80
     field public static final int PROTECTION_FLAG_SYSTEM = 16; // 0x10
     field public static final int PROTECTION_MASK_BASE = 15; // 0xf
     field public static final int PROTECTION_MASK_FLAGS = 240; // 0xf0

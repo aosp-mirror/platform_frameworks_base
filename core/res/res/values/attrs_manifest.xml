@@ -215,6 +215,11 @@
         <!-- Additional flag from base permission type: this permission is closely
              associated with an app op for controlling access. -->
         <flag name="appop" value="0x40" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+             granted to apps that target API levels below
+             {@link android.os.Build.VERSION_CODES#MNC} (before runtime permissions
+             were introduced). -->
+        <flag name="pre23" value="0x80" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

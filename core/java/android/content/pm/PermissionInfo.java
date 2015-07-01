@@ -76,6 +76,13 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_FLAG_APPOP = 0x40;
 
     /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>pre23</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_PRE23 = 0x80;
+
+    /**
      * Mask for {@link #protectionLevel}: the basic protection type.
      */
     public static final int PROTECTION_MASK_BASE = 0xf;
@@ -170,6 +177,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level&PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
             protLevel += "|appop";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_PRE23) != 0) {
+            protLevel += "|pre23";
         }
         return protLevel;
     }
