@@ -143,7 +143,6 @@ package android {
 
   public static final class Manifest.permission_group {
     ctor public Manifest.permission_group();
-    field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
     field public static final java.lang.String CALENDAR = "android.permission-group.CALENDAR";
     field public static final java.lang.String CAMERA = "android.permission-group.CAMERA";
     field public static final java.lang.String CONTACTS = "android.permission-group.CONTACTS";
