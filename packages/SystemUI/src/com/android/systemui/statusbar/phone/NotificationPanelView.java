@@ -1126,38 +1126,41 @@ public class NotificationPanelView extends PanelView implements
     };
 
     private void animateKeyguardStatusBarOut() {
-        mKeyguardStatusBar.animate()
-                .alpha(0f)
-                .setStartDelay(mStatusBar.isKeyguardFadingAway()
-                        ? mStatusBar.getKeyguardFadingAwayDelay()
-                        : 0)
-                .setDuration(mStatusBar.isKeyguardFadingAway()
-                        ? mStatusBar.getKeyguardFadingAwayDuration() / 2
-                        : StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
-                .setUpdateListener(mStatusBarAnimateAlphaListener)
-                .withEndAction(mAnimateKeyguardStatusBarInvisibleEndRunnable)
-                .start();
+        ValueAnimator anim = ValueAnimator.ofFloat(mKeyguardStatusBar.getAlpha(), 0f);
+        anim.addUpdateListener(mStatusBarAnimateAlphaListener);
+        anim.setStartDelay(mStatusBar.isKeyguardFadingAway()
+                ? mStatusBar.getKeyguardFadingAwayDelay()
+                : 0);
+        anim.setDuration(mStatusBar.isKeyguardFadingAway()
+                ? mStatusBar.getKeyguardFadingAwayDuration() / 2
+                : StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        anim.setInterpolator(mDozeAnimationInterpolator);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mAnimateKeyguardStatusBarInvisibleEndRunnable.run();
+            }
+        });
+        anim.start();
     }
 
     private final ValueAnimator.AnimatorUpdateListener mStatusBarAnimateAlphaListener =
             new ValueAnimator.AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
-            mKeyguardStatusBarAnimateAlpha = mKeyguardStatusBar.getAlpha();
+            mKeyguardStatusBarAnimateAlpha = (float) animation.getAnimatedValue();
+            updateHeaderKeyguardAlpha();
         }
     };
 
     private void animateKeyguardStatusBarIn(long duration) {
         mKeyguardStatusBar.setVisibility(View.VISIBLE);
         mKeyguardStatusBar.setAlpha(0f);
-        mKeyguardStatusBar.animate()
-                .alpha(1f)
-                .setStartDelay(0)
-                .setDuration(duration)
-                .setInterpolator(mDozeAnimationInterpolator)
-                .setUpdateListener(mStatusBarAnimateAlphaListener)
-                .start();
+        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+        anim.addUpdateListener(mStatusBarAnimateAlphaListener);
+        anim.setDuration(duration);
+        anim.setInterpolator(mDozeAnimationInterpolator);
+        anim.start();
     }
 
     private final Runnable mAnimateKeyguardBottomAreaInvisibleEndRunnable = new Runnable() {
@@ -1716,12 +1719,16 @@ public class NotificationPanelView extends PanelView implements
         return alpha;
     }
 
-    private void updateHeaderKeyguard() {
+    private void updateHeaderKeyguardAlpha() {
         float alphaQsExpansion = 1 - Math.min(1, getQsExpansionFraction() * 2);
         mKeyguardStatusBar.setAlpha(Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
                 * mKeyguardStatusBarAnimateAlpha);
         mKeyguardStatusBar.setVisibility(mKeyguardStatusBar.getAlpha() != 0f
                 && !mDozing ? VISIBLE : INVISIBLE);
+    }
+
+    private void updateHeaderKeyguard() {
+        updateHeaderKeyguardAlpha();
         setQsTranslation(mQsExpansionHeight);
     }
 
