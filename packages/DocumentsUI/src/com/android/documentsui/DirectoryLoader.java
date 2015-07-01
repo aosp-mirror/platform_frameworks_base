@@ -31,7 +31,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.OperationCanceledException;
+import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
@@ -163,6 +166,10 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
             cursor = client.query(
                     mUri, null, null, null, getQuerySortOrder(result.sortOrder), mSignal);
+            if (cursor == null) {
+                throw new RemoteException("Provider returned null");
+            }
+
             cursor.registerContentObserver(mObserver);
 
             cursor = new RootCursorWrapper(mUri.getAuthority(), mRoot.rootId, cursor, -1);
