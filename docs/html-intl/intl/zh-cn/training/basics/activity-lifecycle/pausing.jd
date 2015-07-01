@@ -1,5 +1,5 @@
-page.title=暂停和继续活动
-page.tags=活动生命周期
+page.title=暂停和继续Activity
+page.tags=Activity生命周期
 helpoutsWidget=true
 
 trainingnavtop=true
@@ -11,13 +11,13 @@ trainingnavtop=true
     
     <h2>本课程将向您展示如何</h2>
     <ol>
-      <li><a href="#Pause">暂停活动</a></li>
-      <li><a href="#Resume">继续活动</a></li>
+      <li><a href="#Pause">暂停Activity</a></li>
+      <li><a href="#Resume">继续Activity</a></li>
     </ol>
     
     <h2>您还应阅读</h2>
     <ul>
-      <li><a href="{@docRoot}guide/components/activities.html">活动</a>
+      <li><a href="{@docRoot}guide/components/activities.html">Activity</a>
       </li>
     </ul>
 
@@ -31,36 +31,36 @@ trainingnavtop=true
   </div>
 </div>
 
-<p>在正常使用应用的过程中，前台活动有时会被其他导致活动<em>暂停的可视组件阻挡</em>。
-例如，当半透明活动打开时（比如对话框样式中的活动），上一个活动会暂停。
-只要活动仍然部分可见但目前又未处于焦点之中，它会一直暂停。
+<p>在正常使用应用的过程中，前台Activity有时会被其他导致Activity<em>暂停的可视组件阻挡</em>。
+例如，当半透明Activity打开时（比如对话框样式中的Activity），上一个Activity会暂停。
+只要Activity仍然部分可见但目前又未处于焦点之中，它会一直暂停。
 </p>
 
-<p>但是，一旦活动完全被阻挡并且不可见，它便<em>停止</em>（将在下一堂课中讨论）。
+<p>但是，一旦Activity完全被阻挡并且不可见，它便<em>停止</em>（将在下一堂课中讨论）。
 </p>
 
-<p>当您的活动进入暂停状态时，系统会对您的 {@link android.app.Activity} 调用 {@link
-android.app.Activity#onPause onPause()} 方法，通过该方法，您可以停止不应在暂停时继续的进行之中的操作（比如视频）或保留任何应该永久保存的信息，以防用户坚持离开应用。如果用户从暂停状态返回到您的活动，系统会重新开始该活动并调用
+<p>当您的Activity进入暂停状态时，系统会对您的 {@link android.app.Activity} 调用 {@link
+android.app.Activity#onPause onPause()} 方法，通过该方法，您可以停止不应在暂停时继续的进行之中的操作（比如视频）或保留任何应该永久保存的信息，以防用户坚持离开应用。如果用户从暂停状态返回到您的Activity，系统会重新开始该Activity并调用
 {@link android.app.Activity#onResume onResume()} 方法。
 
 
 </p>
 
-<p class="note"><strong>注意：</strong>当您的活动收到对 {@link
-android.app.Activity#onPause()} 的调用时，可能意味着活动将暂停
-一会，并且用户可能从焦点返回到您的活动。但这通常意味着用户即将离开您的活动。
+<p class="note"><strong>注意：</strong>当您的Activity收到对 {@link
+android.app.Activity#onPause()} 的调用时，可能意味着Activity将暂停
+一会，并且用户可能从焦点返回到您的Activity。但这通常意味着用户即将离开您的Activity。
 </p>
 
 <img src="{@docRoot}images/training/basics/basic-lifecycle-paused.png" />
-<p class="img-caption"><strong>图 1.</strong>当半透明活动阻挡您的活动时，系统会调用 {@link android.app.Activity#onPause onPause()} 并且活动会在“暂停”状态下等待 (1)。
+<p class="img-caption"><strong>图 1.</strong>当半透明Activity阻挡您的Activity时，系统会调用 {@link android.app.Activity#onPause onPause()} 并且Activity会在“暂停”状态下等待 (1)。
 
-如果用户在活动仍然处于暂停状态时返回活动，则系统会调用 {@link android.app.Activity#onResume onResume()} (2)。
+如果用户在Activity仍然处于暂停状态时返回Activity，则系统会调用 {@link android.app.Activity#onResume onResume()} (2)。
 </p>
 
 
-<h2 id="Pause">暂停活动</h2>
+<h2 id="Pause">暂停Activity</h2>
       
-<p>当系统为您的活动调用 {@link android.app.Activity#onPause()} 时，它从技术角度看意味着您的活动仍然处于部分可见状态，但往往说明用户即将离开活动并且它很快就要进入“停止”状态。
+<p>当系统为您的Activity调用 {@link android.app.Activity#onPause()} 时，它从技术角度看意味着您的Activity仍然处于部分可见状态，但往往说明用户即将离开Activity并且它很快就要进入“停止”状态。
 
 您通常应使用
  {@link android.app.Activity#onPause()} 回调：</p>
@@ -69,7 +69,7 @@ android.app.Activity#onPause()} 的调用时，可能意味着活动将暂停
   <li>停止动画或其他可能消耗 CPU 的进行之中的操作。</li>
   <li>提交未保存的更改，但仅当用户离开时希望永久性保存此类更改（比如电子邮件草稿）。
 </li>
-  <li>释放系统资源，比如广播接收器、传感器手柄（比如 GPS） 或当您的活动暂停且用户不需要它们时仍然可能影响电池寿命的任何其他资源。
+  <li>释放系统资源，比如广播接收器、传感器手柄（比如 GPS） 或当您的Activity暂停且用户不需要它们时仍然可能影响电池寿命的任何其他资源。
 
 </li>
 </ul>
@@ -93,7 +93,7 @@ public void onPause() {
 
 <p>一般情况下，您<strong>不得</strong>使用 {@link android.app.Activity#onPause()} 永久性存储用户更改（比如输入表格的个人信息）。
 只有在您确定用户希望自动保存这些更改的情况（比如，电子邮件草稿）下，才能在 {@link android.app.Activity#onPause()}中永久性存储用户更改。但您应避免在 {@link
-android.app.Activity#onPause()} 期间执行 CPU 密集型工作，比如向数据库写入信息，因为这会拖慢向下一活动过渡的过程（您应改为在
+android.app.Activity#onPause()} 期间执行 CPU 密集型工作，比如向数据库写入信息，因为这会拖慢向下一Activity过渡的过程（您应改为在
 {@link android.app.Activity#onStop onStop()}期间执行高负载关机操作。
 
 
@@ -101,30 +101,30 @@ android.app.Activity#onPause()} 期间执行 CPU 密集型工作，比如向数�
 </p>
 
 <p>您应通过相对简单的方式在 {@link android.app.Activity#onPause
-onPause()} 方法中完成大量操作，这样才能加快在您的活动确实停止的情况下用户向下一个目标过渡的速度。
+onPause()} 方法中完成大量操作，这样才能加快在您的Activity确实停止的情况下用户向下一个目标过渡的速度。
 </p>
 
-<p class="note"><strong>注意：</strong>当您的活动暂停时，{@link
-android.app.Activity} 实例将驻留在内存中并且在活动继续时被再次调用。您无需重新初始化在执行任何导致进入“继续”状态的回调方法期间创建的组件。
+<p class="note"><strong>注意：</strong>当您的Activity暂停时，{@link
+android.app.Activity} 实例将驻留在内存中并且在Activity继续时被再次调用。您无需重新初始化在执行任何导致进入“继续”状态的回调方法期间创建的组件。
 
 </p>
 
 
 
-<h2 id="Resume">继续活动</h2>
+<h2 id="Resume">继续Activity</h2>
 
-<p>当用户从“暂停”状态继续您的活动时，系统会调用 {@link
+<p>当用户从“暂停”状态继续您的Activity时，系统会调用 {@link
 android.app.Activity#onResume()} 方法。</p>
 
-<p>请注意，每当您的活动进入前台时系统便会调用此方法，包括它初次创建之时。
+<p>请注意，每当您的Activity进入前台时系统便会调用此方法，包括它初次创建之时。
 同样地，您应实现{@link
 android.app.Activity#onResume()} 初始化您在 {@link
-android.app.Activity#onPause()} 期间释放的组件并且执行每当活动进入“继续”状态时必须进行的任何其他初始化操作（比如开始动画和初始化只在活动具有用户焦点时使用的组件）。
+android.app.Activity#onPause()} 期间释放的组件并且执行每当Activity进入“继续”状态时必须进行的任何其他初始化操作（比如开始动画和初始化只在Activity具有用户焦点时使用的组件）。
 
 </p>
 
 <p>{@link android.app.Activity#onResume()} 的以下示例对应于以上的
- {@link android.app.Activity#onPause()} 示例，因此它初始化活动暂停时释放的照相机。
+ {@link android.app.Activity#onPause()} 示例，因此它初始化Activity暂停时释放的照相机。
 </p>
 
 <pre>
