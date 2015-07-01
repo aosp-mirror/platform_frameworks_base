@@ -2469,7 +2469,9 @@ public class Activity extends ContextThemeWrapper
      * @return True if the key shortcut was handled.
      */
     public boolean onKeyShortcut(int keyCode, KeyEvent event) {
-        return false;
+        // Let the Action Bar have a chance at handling the shortcut.
+        ActionBar actionBar = getActionBar();
+        return (actionBar != null && actionBar.onKeyShortcut(keyCode, event));
     }
 
     /**
