@@ -229,13 +229,13 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktpersoner"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"have adgang til dine kontaktpersoner"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Placering"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"adgang til enhedens placering"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"få adgang til enhedens placering"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"have adgang til din kalender"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"Send og se sms-beskeder"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"Få adgang til billeder, medier og filer på din enhed"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"sende og se sms-beskeder"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagerplads"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"få adgang til billeder, medier og filer på din enhed"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"optage lyd"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>

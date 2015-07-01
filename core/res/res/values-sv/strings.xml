@@ -240,7 +240,7 @@
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spela in ljud"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ta bilder och spela in video"</string>
-    <string name="permgrouplab_phone" msgid="5229115638567440675">"Mobil"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ringa och hantera telefonsamtal"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få åtkomst till sensordata om dina vitalparametrar"</string>
@@ -507,7 +507,7 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ändra skärmlåset."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skärmen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollera hur och när skärmlåset aktiveras."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Radera alla data"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Radera all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Ta bort data från surfplattan utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Rensar uppgifterna på tv:n utan föregående varning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ta bort data från mobilen utan förvarning genom att återställa standardinställningarna."</string>
@@ -630,7 +630,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Mamma"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Förälder"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Rekommenderad av"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Genom"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Släkting"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Syster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Make/maka"</string>
