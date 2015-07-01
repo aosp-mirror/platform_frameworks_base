@@ -221,6 +221,17 @@ public final class UserHandle implements Parcelable {
      * components -- user, app, isolated, etc.
      * @hide
      */
+    public static String formatUid(int uid) {
+        StringBuilder sb = new StringBuilder();
+        formatUid(sb, uid);
+        return sb.toString();
+    }
+
+    /**
+     * Generate a text representation of the uid, breaking out its individual
+     * components -- user, app, isolated, etc.
+     * @hide
+     */
     public static void formatUid(PrintWriter pw, int uid) {
         if (uid < Process.FIRST_APPLICATION_UID) {
             pw.print(uid);

@@ -183,6 +183,12 @@ option java_package com.android.server
 34000 device_idle (state|1|5), (reason|3)
 34001 device_idle_step
 34002 device_idle_wake_from_idle (is_idle|1|5), (reason|3)
+34003 device_idle_on_start
+34004 device_idle_on_phase (what|3)
+34005 device_idle_on_complete
+34006 device_idle_off_start (reason|3)
+34007 device_idle_off_phase (what|3)
+34008 device_idle_off_complete
 
 # ---------------------------
 # DisplayManagerService.java
@@ -224,8 +230,8 @@ option java_package com.android.server
 # ---------------------------
 # IdleMaintenanceService.java
 # ---------------------------
-2753 idle_maintenance_window_start (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
-2754 idle_maintenance_window_finish (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
+51500 idle_maintenance_window_start (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
+51501 idle_maintenance_window_finish (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
 
 # ---------------------------
 # MountService.java
