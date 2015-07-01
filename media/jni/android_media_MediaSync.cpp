@@ -102,6 +102,10 @@ float JMediaSync::getVideoFrameRate() {
     return mSync->getVideoFrameRate();
 }
 
+void JMediaSync::flush() {
+    mSync->flush();
+}
+
 status_t JMediaSync::updateQueuedAudioData(
         int sizeInBytes, int64_t presentationTimeUs) {
     return mSync->updateQueuedAudioData(sizeInBytes, presentationTimeUs);
@@ -464,6 +468,16 @@ static jobject android_media_MediaSync_getSyncParams(JNIEnv *env, jobject thiz) 
     return scs.asJobject(env, gSyncParamsFields);
 }
 
+static void android_media_MediaSync_native_flush(JNIEnv *env, jobject thiz) {
+    sp<JMediaSync> sync = getMediaSync(env, thiz);
+    if (sync == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    sync->flush();
+}
+
 static void android_media_MediaSync_native_init(JNIEnv *env) {
     ScopedLocalRef<jclass> clazz(env, env->FindClass("android/media/MediaSync"));
     CHECK(clazz.get() != NULL);
@@ -523,6 +537,8 @@ static JNINativeMethod gMethods[] = {
     { "native_getPlayTimeForPendingAudioFrames",
       "()J",
       (void *)android_media_MediaSync_native_getPlayTimeForPendingAudioFrames },
+
+    { "native_flush", "()V", (void *)android_media_MediaSync_native_flush },
 
     { "native_init", "()V", (void *)android_media_MediaSync_native_init },
 
