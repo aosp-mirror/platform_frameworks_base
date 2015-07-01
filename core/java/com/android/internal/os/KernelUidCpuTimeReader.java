@@ -30,7 +30,7 @@ import java.io.IOException;
 /**
  * Reads /proc/uid_cputime/show_uid_stat which has the line format:
  *
- * uid: user_time_micro_seconds system_time_micro_seconds
+ * uid: user_time_micro_seconds system_time_micro_seconds power_in_milli-amp-micro_seconds
  *
  * This provides the time a UID's processes spent executing in user-space and kernel-space.
  * The file contains a monotonically increasing count of time for a single boot. This class
@@ -46,11 +46,18 @@ public class KernelUidCpuTimeReader {
      * Callback interface for processing each line of the proc file.
      */
     public interface Callback {
-        void onUidCpuTime(int uid, long userTimeUs, long systemTimeUs);
+        /**
+         * @param uid UID of the app
+         * @param userTimeUs time spent executing in user space in microseconds
+         * @param systemTimeUs time spent executing in kernel space in microseconds
+         * @param powerMaUs power consumed executing, in milli-ampere microseconds
+         */
+        void onUidCpuTime(int uid, long userTimeUs, long systemTimeUs, long powerMaUs);
     }
 
     private SparseLongArray mLastUserTimeUs = new SparseLongArray();
     private SparseLongArray mLastSystemTimeUs = new SparseLongArray();
+    private SparseLongArray mLastPowerMaUs = new SparseLongArray();
     private long mLastTimeReadUs = 0;
 
     /**
@@ -70,50 +77,60 @@ public class KernelUidCpuTimeReader {
                 final int uid = Integer.parseInt(uidStr.substring(0, uidStr.length() - 1), 10);
                 final long userTimeUs = Long.parseLong(splitter.next(), 10);
                 final long systemTimeUs = Long.parseLong(splitter.next(), 10);
+                final long powerMaUs = Long.parseLong(splitter.next(), 10) / 1000;
 
                 if (callback != null) {
                     long userTimeDeltaUs = userTimeUs;
                     long systemTimeDeltaUs = systemTimeUs;
+                    long powerDeltaMaUs = powerMaUs;
                     int index = mLastUserTimeUs.indexOfKey(uid);
                     if (index >= 0) {
                         userTimeDeltaUs -= mLastUserTimeUs.valueAt(index);
                         systemTimeDeltaUs -= mLastSystemTimeUs.valueAt(index);
+                        powerDeltaMaUs -= mLastPowerMaUs.valueAt(index);
 
                         final long timeDiffUs = nowUs - mLastTimeReadUs;
-                        if (userTimeDeltaUs < 0 || systemTimeDeltaUs < 0 ||
+                        if (userTimeDeltaUs < 0 || systemTimeDeltaUs < 0 || powerDeltaMaUs < 0 ||
                                 userTimeDeltaUs > timeDiffUs || systemTimeDeltaUs > timeDiffUs) {
-                            StringBuilder sb = new StringBuilder("Malformed cpu data!\n");
+                            StringBuilder sb = new StringBuilder("Malformed cpu data for UID=");
+                            sb.append(uid).append("!\n");
                             sb.append("Time between reads: ");
                             TimeUtils.formatDuration(timeDiffUs / 1000, sb);
-                            sb.append("ms\n");
+                            sb.append("\n");
                             sb.append("Previous times: u=");
                             TimeUtils.formatDuration(mLastUserTimeUs.valueAt(index) / 1000, sb);
-                            sb.append("ms s=");
+                            sb.append(" s=");
                             TimeUtils.formatDuration(mLastSystemTimeUs.valueAt(index) / 1000, sb);
-                            sb.append("ms\n");
+                            sb.append(" p=").append(mLastPowerMaUs.valueAt(index) / 1000);
+                            sb.append("mAms\n");
+
                             sb.append("Current times: u=");
                             TimeUtils.formatDuration(userTimeUs / 1000, sb);
-                            sb.append("ms s=");
+                            sb.append(" s=");
                             TimeUtils.formatDuration(systemTimeUs / 1000, sb);
-                            sb.append("ms\n");
-                            sb.append("Delta for UID=").append(uid).append(": u=");
+                            sb.append(" p=").append(powerMaUs / 1000);
+                            sb.append("mAms\n");
+                            sb.append("Delta: u=");
                             TimeUtils.formatDuration(userTimeDeltaUs / 1000, sb);
-                            sb.append("ms s=");
+                            sb.append(" s=");
                             TimeUtils.formatDuration(systemTimeDeltaUs / 1000, sb);
-                            sb.append("ms");
+                            sb.append(" p=").append(powerDeltaMaUs / 1000).append("mAms");
                             Slog.wtf(TAG, sb.toString());
 
                             userTimeDeltaUs = 0;
                             systemTimeDeltaUs = 0;
+                            powerDeltaMaUs = 0;
                         }
                     }
 
-                    if (userTimeDeltaUs != 0 || systemTimeDeltaUs != 0) {
-                        callback.onUidCpuTime(uid, userTimeDeltaUs, systemTimeDeltaUs);
+                    if (userTimeDeltaUs != 0 || systemTimeDeltaUs != 0 || powerDeltaMaUs != 0) {
+                        callback.onUidCpuTime(uid, userTimeDeltaUs, systemTimeDeltaUs,
+                                powerDeltaMaUs);
                     }
                 }
                 mLastUserTimeUs.put(uid, userTimeUs);
                 mLastSystemTimeUs.put(uid, systemTimeUs);
+                mLastPowerMaUs.put(uid, powerMaUs);
             }
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read uid_cputime", e);
