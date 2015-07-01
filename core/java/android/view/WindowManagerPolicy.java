@@ -913,12 +913,13 @@ public interface WindowManagerPolicy {
 
     /**
      * Called following layout of all window to apply policy to each window.
-     * 
+     *
      * @param win The window being positioned.
-     * @param attrs The LayoutParams of the window. 
+     * @param attrs The LayoutParams of the window.
+     * @param attached For sub-windows, the window it is attached to. Otherwise null.
      */
     public void applyPostLayoutPolicyLw(WindowState win,
-            WindowManager.LayoutParams attrs);
+            WindowManager.LayoutParams attrs, WindowState attached);
 
     /**
      * Called following layout of all windows and after policy has been applied
