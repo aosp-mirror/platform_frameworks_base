@@ -1,0 +1,62 @@
+page.title=与其他应用交互
+page.tags=意向、活动
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>依赖项和先决条件</h2>
+<ul>
+  <li>活动生命周期基础知识（请参阅<a href="{@docRoot}training/basics/activity-lifecycle/index.html">管理活动生命周期</a>）
+</li>
+</ul>
+
+
+<h2>您还应阅读</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">共享简单数据</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">共享文件</a>
+  <li><a href="http://android-developers.blogspot.com/2009/11/integrating-application-with-intents.html">
+将应用与意向集成（博客文章）</a></li>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">意向和意向过滤器</a>
+</li>
+</ul>
+
+</div>
+</div>
+
+<p>Android 应用一般具有若干个<a href="{@docRoot}guide/components/activities.html">活动</a>。每个活动显示一个用户界面，用户可通过该界面执行特定任务（比如，查看地图或拍照）。要将用户从一个活动转至另一活动，您的应用必须使用 {@link
+android.content.Intent} 定义您的应用做某事的“意向”。
+
+当您使用诸如
+{@link
+android.app.Activity#startActivity startActivity()} 的方法将 {@link android.content.Intent} 传递至系统时，系统会使用 {@link
+android.content.Intent} 识别和启动相应的应用组件。使用意向甚至可以让您的应用开始另一个应用中包含的活动。
+</p>
+
+<p>{@link android.content.Intent} 可以为 <em>显式</em> 以便启动特定组件（特定的 {@link android.app.Activity} 实例）或<em>隐式</em> 以便启动处理意向操作（比如“拍摄照片”）的任何组件。
+
+</p>
+
+<p>本课程您向展示如何使用 {@link android.content.Intent} 执行与其他应用的一些基本交互操作，比如启动另一个应用、接收来自该应用的结果以及使您的应用能够响应来自其他应用的意向。
+
+</p>
+
+<h2>课程</h2>
+
+<dl>
+  <dt><b><a href="sending.html">向另一个应用发送用户</a></b></dt>
+  <dd>显示您如何创建可执行操作的其他应用的隐含意向。
+</dd>
+  <dt><b><a href="result.html">获取活动的结果</a></b></dt>
+  <dd>显示如何开始另一活动并接收该活动的结果。</dd>
+  <dt><b><a href="filters.html">允许其他应用开始您的活动</a></b></dt>
+  <dd>显示如何通过定义声明您的应用接受的隐含意向的意向过滤器使您的应用中的活动可供其他应用使用。
+</dd>
+</dl>
+

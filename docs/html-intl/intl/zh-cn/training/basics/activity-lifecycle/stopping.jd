@@ -1,0 +1,187 @@
+page.title=停止并重新开始活动
+page.tags=活动生命周期
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>本课程将向您展示如何</h2>
+    <ol>
+      <li><a href="#Stop">停止活动</a></li>
+      <li><a href="#Start">开始/重新开始活动</a></li>
+    </ol>
+    
+    <h2>您还应阅读</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">活动</a>
+      </li>
+    </ul>
+
+<h2>试一试</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">下载演示</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>正确停止和重新开始活动是活动生命周期中的重要过程，其可确保您的用户知晓应用始终保持活动状态并且不会丢失进度。有几种活动停止和重新开始的关键场景：
+
+</p>
+
+<ul>
+  <li>用户打开“最近应用”窗口并从您的应用切换到另一个应用。当前位于前台的您的应用中的活动将停止。
+如果用户从主屏幕启动器图标或“最近应用”窗口返回到您的应用，活动会重新开始。
+</li>
+  <li>用户在您的应用中执行开始新活动的操作。当第二个活动创建好后，当前活动便停止。
+如果用户之后按了<em>返回</em>按钮，第一个活动会重新开始。
+</li>
+  <li>用户在其手机上使用您的应用的同时接听来电。</li>
+</ul>
+
+<p>{@link android.app.Activity} 课程提供两种生命周期方法：{@link
+android.app.Activity#onStop()} 和 {@link android.app.Activity#onRestart()}，这些方法允许您专门处理正在停止和重新开始的活动。
+不同于识别部分 UI 阻挡的暂停状态，停止状态保证 UI 不再可见，且用户的焦点在另外的活动（或完全独立的应用）中。
+
+</p>
+
+<p class="note"><strong>注意：</strong>因为系统在停止时会将您的 {@link android.app.Activity}
+实例保留在系统内存中，您根本无需实现
+{@link android.app.Activity#onStop()} 和 {@link android.app.Activity#onRestart()}或甚至{@link
+android.app.Activity#onStart()} 方法。对于大多数相对简单的活动而言， 活动将停止并重新开始，并且您可能只需使用 {@link
+android.app.Activity#onPause()} 暂停正在进行的操作，并从系统资源断开连接。
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-stopped.png" />
+<p class="img-caption"><strong>图 1.</strong>用户离开活动时，系统会调用 {@link android.app.Activity#onStop onStop()} 停止活动(1)。
+如果用户在活动停止时返回，系统会调用 {@link android.app.Activity#onRestart onRestart()}
+(2)，紧接着调用 {@link android.app.Activity#onStart onStart()} (3) 和 {@link
+android.app.Activity#onResume()} (4)。
+注意：无论什么场景导致活动停止，系统始终会在调用 {@link
+android.app.Activity#onStop onStop()} 之前调用 {@link android.app.Activity#onPause onPause()}。
+</p>
+
+
+
+<h2 id="Stop">停止活动</h2>
+
+<p>当您的活动收到 {@link android.app.Activity#onStop()} 方法的调用时，它不再可见，并且应释放几乎所有用户不使用时不需要的资源。
+
+一旦您的活动停止，如果需要恢复系统内存，系统可能会销毁该实例。
+在极端情况下，系统可能会仅终止应用进程，而不会调用活动的最终 {@link android.app.Activity#onDestroy()} 回调，因此您使用 {@link android.app.Activity#onStop()} 释放可能泄露内存的资源非常重要。
+
+</p>
+
+<p>尽管 {@link android.app.Activity#onPause onPause()} 方法在
+{@link android.app.Activity#onStop()}之前调用，您应使用 {@link android.app.Activity#onStop onStop()}
+执行更大、占用更多 CPU 的关闭操作，比如向数据库写入信息。
+</p>
+
+<p>例如，此处是将草稿笔记内容保存在永久存储中的 {@link android.app.Activity#onStop onStop()} 的实现：
+</p>
+
+<!-- TODO: Find a better example for onStop, because this kind of thing should probably use a
+separate thread but that's too complicated to show here. -->
+<pre>
+&#64;Override
+protected void onStop() {
+    super.onStop();  // Always call the superclass method first
+
+    // Save the note's current draft, because the activity is stopping
+    // and we want to be sure the current note progress isn't lost.
+    ContentValues values = new ContentValues();
+    values.put(NotePad.Notes.COLUMN_NAME_NOTE, getCurrentNoteText());
+    values.put(NotePad.Notes.COLUMN_NAME_TITLE, getCurrentNoteTitle());
+
+    getContentResolver().update(
+            mUri,    // The URI for the note to update.
+            values,  // The map of column names and new values to apply to them.
+            null,    // No SELECT criteria are used.
+            null     // No WHERE columns are used.
+            );
+}
+</pre>
+
+<p>当您的活动停止时， {@link android.app.Activity} 对象将驻留在内存中并在活动继续时被再次调用。
+您无需重新初始化在任何导致进入“继续”状态的回调方法过程中创建的组件。
+系统还会在布局中跟踪每个 {@link android.view.View} 的当前状态，如果用户在 {@link android.widget.EditText} 小工具中输入文本，该内容会保留，因此您无需保存即可恢复它。
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>即使系统在活动停止时销毁了活动，它仍会保留 {@link android.os.Bundle}（键值对的二进制大对象）中的 {@link android.view.View} 对象（比如 {@link
+android.widget.EditText} 中的文本），并在用户导航回活动的相同实例时恢复它们 （<a href="recreating.html">下一堂课</a> 讲述更多有关在您的活动被销毁且重新创建的情况下使用 {@link android.os.Bundle} 保存其他数据状态的知识）。
+
+
+</p>
+
+
+
+<h2 id="Start">开始/重新开始活动</h2>
+
+<p>当您的活动从停止状态返回前台时，它会接收对
+{@link android.app.Activity#onRestart()} 的调用。系统还会在每次您的活动变为可见时调用 {@link
+android.app.Activity#onStart()} 方法（无论是正重新开始还是初次创建）。
+但是，只会在活动从停止状态继续时调用 {@link
+android.app.Activity#onRestart()} 方法，因此您可以使用它执行只有在活动之前停止但未销毁的情况下可能必须执行的特殊恢复工作。
+
+</p>
+
+<p>应用需要使用 {@link android.app.Activity#onRestart()} 恢复活动状态的情况并不常见，因此没有适用于一般应用群体的任何方法指导原则。
+
+但是，因为您的 {@link android.app.Activity#onStop()}
+方法应基本清理所有活动的资源，您将需要在活动重新开始时重新实例化它们。
+但是，您还需要在您的活动初次创建时重新实例化它们（没有活动的现有实例）。
+出于此原因，您应经常使用 {@link android.app.Activity#onStart()} 回调方法作为
+ {@link android.app.Activity#onStop()} 方法的对应部分，因为系统会在它创建您的活动以及从停止状态重新开始活动时调用 {@link
+android.app.Activity#onStart()} 。
+
+</p>
+
+<p>例如，因为用户可能在回到它之前已离开应用很长时间， {@link android.app.Activity#onStart()} 方法是确认所需系统功能已启动的理想选择：
+
+</p>
+
+<pre>
+&#64;Override
+protected void onStart() {
+    super.onStart();  // Always call the superclass method first
+    
+    // The activity is either being restarted or started for the first time
+    // so this is where we should make sure that GPS is enabled
+    LocationManager locationManager = 
+            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    
+    if (!gpsEnabled) {
+        // Create a dialog here that requests the user to enable GPS, and use an intent
+        // with the android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS action
+        // to take the user to the Settings screen to enable GPS when they click "OK"
+    }
+}
+
+&#64;Override
+protected void onRestart() {
+    super.onRestart();  // Always call the superclass method first
+    
+    // Activity being restarted from stopped state    
+}
+</pre>
+
+
+
+
+<p>当系统销毁您的活动时，它会调用您的 {@link android.app.Activity} 的 {@link android.app.Activity#onDestroy()}
+方法。因为您通常应已使用 {@link android.app.Activity#onStop()} 释放大多数您的资源，到您接收对 {@link
+android.app.Activity#onDestroy()} 的调用时，大多数应用无需做太多操作。
+此方法是您清理可导致内存泄露的资源的最后一种方法，因此您应确保其他线程被销毁且其他长期运行的操作（比如方法跟踪）也会停止。
+
+
+</p>
+

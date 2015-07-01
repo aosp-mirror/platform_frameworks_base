@@ -1,0 +1,57 @@
+page.title=Salvando dados
+page.tags=armazenamento de dados,arquivos,sql,basededados,preferências
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependências e pré-requisitos</h2>
+<ul>
+  <li>Android 1.6 (API Nível 4) ou superior</li>
+  <li>Familiaridade com coleções de valores-chave do Map</li>
+  <li>Familiaridade com API de E/S de arquivos Java</li>
+  <li>Familiaridade com bancos de dados do SQL</li>
+</ul>
+
+<h2>Leia também</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html">Opções de armazenamento</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>A maioria dos aplicativos Android precisa salvar dados, mesmo que seja apenas para salvar informações sobre o estado do aplicativo
+durante {@link android.app.Activity#onPause onPause()} para que o progresso do usuário não seja perdido. A maior parte
+dos aplicativos não triviais também precisa salvar configurações do usuário e alguns aplicativos precisam gerenciar grandes
+quantidades de informação em arquivos e bancos de dados. Esta aula apresenta as
+principais opções de armazenamento de dados no Android, incluindo:</p>
+
+<ul>
+    <li>Como salvar pares de valores-chave de tipos de dados simples em um arquivo de preferências
+compartilhadas</li>
+    <li>Como salvar arquivos arbitrários no sistema de arquivos do Android</li>
+    <li>Como usar bancos de dados gerenciadas pelo SQLite</li>
+</ul>
+
+
+<h2>Lições</h2>
+
+<dl>
+  <dt><b><a href="shared-preferences.html">Salvando conjuntos de valores-chave</a></b></dt>
+    <dd>Aprenda a como usar um arquivo de preferências compartilhadas para armazenar pequenas quantidades de informação em pares de
+valores-chave.</dd>
+
+  <dt><b><a href="files.html">Salvando arquivos</a></b></dt>
+    <dd>Aprenda a como salvar um arquivo básico, como para armazenar longas sequências de dados que
+        são geralmente lidas em ordem.</dd>
+
+ <dt><b><a href="databases.html">Salvando dados em bancos de dados do SQL</a></b></dt>
+   <dd>Aprenda a usar o banco de dados do SQLite para ler e gravar dados estruturados.</dd>
+
+</dl>

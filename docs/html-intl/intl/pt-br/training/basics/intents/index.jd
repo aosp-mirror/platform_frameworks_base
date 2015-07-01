@@ -1,0 +1,62 @@
+page.title=Interagindo com outros aplicativos
+page.tags=intenções,atividade
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependências e pré-requisitos</h2>
+<ul>
+  <li>Conhecimento básico sobre o ciclo de vida da atividade (consulte <a href="{@docRoot}training/basics/activity-lifecycle/index.html">Como gerenciar o ciclo de vida
+da atividade</a>)</li>
+</ul>
+
+
+<h2>Leia também</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">Compartilhando dados simples</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">Compartilhando arquivos</a>
+  <li><a href="http://android-developers.blogspot.com/2009/11/integrating-application-with-intents.html">
+Integrando aplicativos e intenções (publicações do blog)</a></li>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Intenções e filtros de
+intenções</a>.</li>
+</ul>
+
+</div>
+</div>
+
+<p>Geralmente, um aplicativo Android tem várias <a href="{@docRoot}guide/components/activities.html">atividades</a>. Cada atividade exibe uma
+interface do usuário que permite ao usuário executar tarefas específicas (como visualizar um mapa ou tirar uma foto).
+Para levar o usuário de uma atividade para outra, o aplicativo deve usar um {@link
+android.content.Intent} para definir a “intenção” do aplicativo de fazer algo. Ao transmitir um
+{@link android.content.Intent} para o sistema com um método como {@link
+android.app.Activity#startActivity startActivity()}, o sistema usa {@link
+android.content.Intent} para identificar e iniciar o componente adequado do aplicativo. Usar intenções
+permite até mesmo que o aplicativo inicie uma atividade que esteja contida em outro aplicativo.</p>
+
+<p>Um {@link android.content.Intent} pode ser <em>explícito</em> para iniciar um componente específico
+(uma instância {@link android.app.Activity} específica) ou <em>implícito</em> para iniciar qualquer
+componente que possa responder à ação pretendida (como “capturar uma foto”).</p>
+
+<p>Esta aula mostra como utilizar um {@link android.content.Intent} para executar algumas interações
+básicas com outros aplicativos, como iniciar outro aplicativo, receber seus resultados, e
+disponibilizar seu aplicativo para responder às intenções de outros aplicativos.</p>
+
+<h2>Lições</h2>
+
+<dl>
+  <dt><b><a href="sending.html">Enviando o usuário para outro aplicativo</a></b></dt>
+  <dd>Mostra como criar intenções implícitas para iniciar outros aplicativos que podem executar uma
+ação.</dd>
+  <dt><b><a href="result.html">Obtendo resultados de uma atividade</a></b></dt>
+  <dd>Como iniciar outra atividade e receber seu resultado.</dd>
+  <dt><b><a href="filters.html">Permitindo que outros aplicativos iniciem sua atividade</a></b></dt>
+  <dd>Como fazer com que atividades em seu aplicativo se abram para serem usadas por outros aplicativos através de definição
+de filtros de intenções que declaram as intenções implícitas aceitas pelo aplicativo.</dd>
+</dl>
+

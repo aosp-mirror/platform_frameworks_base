@@ -1,0 +1,120 @@
+page.title=Salvando conjuntos de valor-chave
+page.tags=armazenamento de dados
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#GetSharedPreferences">Obter um identificador para preferências compartilhadas</a></li>
+  <li><a href="#WriteSharedPreference">Gravar em preferências compartilhadas</a></li>
+  <li><a href="#ReadSharedPreference">Ler de preferências compartilhadas</a></li>
+</ol>
+
+<h2>Leia também</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#pref">Usando preferências compartilhadas</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>Caso você tenha uma coleção relativamente pequena de valores-chave para salvar,
+use as APIs {@link android.content.SharedPreferences}.
+Um objeto {@link android.content.SharedPreferences} indica um arquivo que contém
+pares de valores-chave e fornece métodos simples para ler e gravar. Cada arquivo
+{@link android.content.SharedPreferences} é
+gerenciado pelo framework e pode ser privado ou compartilhado.</p>
+
+<p>Essa lição mostra como usar as APIs {@link android.content.SharedPreferences} para armazenar e
+recuperar valores simples.</p>
+
+<p class="note"><strong>Observação:</strong> as APIs {@link android.content.SharedPreferences} são
+usadas apenas para leitura e gravação de pares de valores-chave e não devem ser confundidas com as APIs
+{@link android.preference.Preference}, que ajudam a criar uma interface do usuário
+para as configurações do seu aplicativo (embora usem {@link android.content.SharedPreferences} como
+implementação para salvar as configurações de aplicativo). Para obter mais informação sobre uso de APIs {@link
+android.preference.Preference}, consulte a guia <a href="{@docRoot}guide/topics/ui/settings.html">Configurações</a>.</p>
+
+<h2 id="GetSharedPreferences">Obter um identificador para preferências compartilhadas</h2>
+
+<p>É possível criar um novo arquivo de preferência compartilhada ou acessar um existente
+chamando um destes dois métodos:</p>
+<ul>
+  <li>{@link android.content.Context#getSharedPreferences(String,int)
+getSharedPreferences()} &mdash; Use este método se precisar identificar vários arquivos de preferência compartilhada
+por nome, que devem ser especificados com o primeiro parâmetro. É possível chamá-lo por qualquer
+{@link android.content.Context} em seu aplicativo.</li>
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} &mdash; Use este método por um
+{@link android.app.Activity} se precisar
+usar apenas um arquivo de preferência compartilhada para a atividade. Como ele retorna um arquivo de preferência compartilhada
+padrão que pertence à atividade, não é necessário fornecer um nome.</li>
+</ul>
+
+<p>Por exemplo, o código a seguir é executado dentro de um {@link android.app.Fragment}.
+Ele acessa o arquivo de preferências compartilhadas que é
+identificado pela cadeia de caracteres de recursos {@code R.string.preference_file_key} e o abre usando
+o modo privado para que o arquivo possa ser acessado apenas pelo seu aplicativo.</p>
+
+<pre>
+Context context = getActivity();
+SharedPreferences sharedPref = context.getSharedPreferences(
+        getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+</pre>
+
+<p>Ao nomear seus arquivos de preferência compartilhada, você deve usar um nome que seja identificável exclusivamente
+para o aplicativo, como {@code "com.example.myapp.PREFERENCE_FILE_KEY"}</p>
+
+<p>Em alternativa, caso precise apenas de um arquivo de preferência compartilhada para sua atividade, use o método
+{@link android.app.Activity#getPreferences(int) getPreferences()}:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+</pre>
+
+<p class="caution"><strong>Cuidado:</strong> se você criar um arquivo de preferência compartilhada
+com {@link android.content.Context#MODE_WORLD_READABLE} ou {@link
+android.content.Context#MODE_WORLD_WRITEABLE}, qualquer outro aplicativo que conhecer o identificador de arquivo
+poderá acessar seus dados.</p>
+
+
+<h2 id="WriteSharedPreference">Gravar em preferências compartilhadas</h2>
+
+<p>Para gravar em um arquivo de preferência compartilhada, crie um {@link
+android.content.SharedPreferences.Editor} chamando {@link
+android.content.SharedPreferences#edit} em seu {@link android.content.SharedPreferences}.</p>
+
+<p>Transmita as chaves e os valores que deseja gravar com métodos como {@link
+android.content.SharedPreferences.Editor#putInt putInt()} e {@link
+android.content.SharedPreferences.Editor#putString putString()}. Chame {@link
+android.content.SharedPreferences.Editor#commit} para salvar as alterações. Por exemplo:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+SharedPreferences.Editor editor = sharedPref.edit();
+editor.putInt(getString(R.string.saved_high_score), newHighScore);
+editor.commit();
+</pre>
+
+
+<h2 id="ReadSharedPreference">Ler de preferências compartilhadas</h2>
+
+<p>Para recuperar valores de um arquivo de preferência compartilhada, chame métodos como {@link
+android.content.SharedPreferences#getInt getInt()} e {@link
+android.content.SharedPreferences#getString getString()}, fornecendo a chave para o valor
+desejado e opcionalmente um valor padrão para retornar caso a chave não esteja
+presente. Por exemplo:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
+long highScore = sharedPref.getInt(getString(R.string.saved_high_score), defaultValue);
+</pre>
+

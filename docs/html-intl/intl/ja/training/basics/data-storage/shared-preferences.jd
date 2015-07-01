@@ -1,0 +1,120 @@
+page.title=キー値セットを保存する
+page.tags=データ ストレージ
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#GetSharedPreferences">SharedPreferences を操作する</a></li>
+  <li><a href="#WriteSharedPreference">共有の環境設定に書き込む</a></li>
+  <li><a href="#ReadSharedPreference">共有の環境設定から読み取る</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#pref">共有の環境設定を使用する</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>保存しようとするキー値の比較的小さなコレクションがある場合は、
+{@link android.content.SharedPreferences} API を使用する必要があります。
+{@link android.content.SharedPreferences} オブジェクトは、キー値のペアを含むファイルをポイントし、読み取りと書き込み用の単純なメソッドを提供します。
+各
+{@link android.content.SharedPreferences} ファイルは、フレームワークによって管理され、プライベートまたは共有にすることができます。
+</p>
+
+<p>このクラスでは、{@link android.content.SharedPreferences} API を使用して単純な値を格納し、取得する方法について説明します。
+</p>
+
+<p class="note"><strong>注:</strong> {@link android.content.SharedPreferences} API は、キー値のペアの読み取りおよび書き込みの目的にのみ使用できます。自分のアプリの設定用のユーザー インタフェースのビルドを支援する
+ {@link android.preference.Preference} API と混同しないようにしてください（ただし、これらは
+ {@link android.content.SharedPreferences} を実装として使用してアプリの設定を保存します）。
+
+{@link
+android.preference.Preference} API の使用方法については、<a href="{@docRoot}guide/topics/ui/settings.html">設定</a>のガイドを参照してください。</p>
+
+<h2 id="GetSharedPreferences">SharedPreferences を操作する</h2>
+
+<p>新しい共有の環境設定ファイルを作成したり、次の 2 つのメソッドのいずれかを呼び出すことにより、既存のファイルにアクセスできます。
+</p>
+<ul>
+  <li>{@link android.content.Context#getSharedPreferences(String,int)
+getSharedPreferences()} - 最初のパラメータで指定した名前で識別される共有の環境設定ファイルが複数必要な場合に使用します。
+自分のアプリの任意の
+{@link android.content.Context} から、これを呼び出すことができます。</li>
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} - アクティビティに対して共有の環境設定ファイルを 1 つのみ使用する必要がある場合、
+{@link android.app.Activity} からこれを使用します。
+これにより、アクティビティに属するデフォルトの共有の環境設定ファイルを取得できるので、名前を指定する必要はありません。
+</li>
+</ul>
+
+<p>たとえば、{@link android.app.Fragment} 内で次のコードが実行されます。これにより、リソース文字列 {@code R.string.preference_file_key} で識別する共有の環境設定ファイルにアクセスし、自分のアプリからのみアクセス可能になるよう、プライベート モードを使用して開きます。
+
+
+</p>
+
+<pre>
+Context context = getActivity();
+SharedPreferences sharedPref = context.getSharedPreferences(
+        getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+</pre>
+
+<p>共有の環境設定ファイルに名前を付ける場合は、{@code "com.example.myapp.PREFERENCE_FILE_KEY"} のような、自分のアプリを識別できる、一意の名前を使用する必要があります。
+</p>
+
+<p>または、アクティビティ用に共有の環境設定ファイルが 1 つのみ必要な場合、
+{@link android.app.Activity#getPreferences(int) getPreferences()} メソッドを使用することができます。</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+</pre>
+
+<p class="caution"><strong>警告: </strong>{@link android.content.Context#MODE_WORLD_READABLE} または {@link
+android.content.Context#MODE_WORLD_WRITEABLE} を使用して共有の環境設定を作成した場合、ファイル識別子が既知である任意の他のアプリが自分のデータにアクセスできるようになります。
+
+</p>
+
+
+<h2 id="WriteSharedPreference">共有の環境設定に書き込む</h2>
+
+<p>共有の環境設定ファイルに書き込むには、自分の {@link android.content.SharedPreferences} で {@link
+android.content.SharedPreferences#edit} を呼び出して、{@link
+android.content.SharedPreferences.Editor} を作成します。</p>
+
+<p>{@link
+android.content.SharedPreferences.Editor#putInt putInt()} や {@link
+android.content.SharedPreferences.Editor#putString putString()} などのメソッドを使用して、書き込む対象のキーと値を渡します。{@link
+android.content.SharedPreferences.Editor#commit} を呼び出して変更を保存します。次に例を示します。</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+SharedPreferences.Editor editor = sharedPref.edit();
+editor.putInt(getString(R.string.saved_high_score), newHighScore);
+editor.commit();
+</pre>
+
+
+<h2 id="ReadSharedPreference">共有の環境設定から読み取る</h2>
+
+<p>共有の環境設定ファイルから希望の値を取得するには、{@link
+android.content.SharedPreferences#getInt getInt()} や {@link
+android.content.SharedPreferences#getString getString()} などのメソッドを呼び出して値のキーを指定しますが、オプションで、キーが存在しない場合に戻すデフォルト値を指定します。
+
+次に例を示します。</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
+long highScore = sharedPref.getInt(getString(R.string.saved_high_score), defaultValue);
+</pre>
+

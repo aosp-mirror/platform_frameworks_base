@@ -1,0 +1,178 @@
+page.title=アクティビティを再作成する
+page.tags=アクティビティのライフサイクル
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>このレッスンでの学習内容</h2>
+    <ol>
+      <li><a href="#SaveState">自分のアクティビティ状態を保存する</a></li>
+      <li><a href="#RestoreState">自分のアクティビティ状態をリストアする</a></li>
+    </ol>
+    
+    <h2>関連ドキュメント</h2>
+    <ul>
+      <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">異なる画面のサポート
+</a></li>
+      <li><a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更を処理する</a></li>
+      <li><a href="{@docRoot}guide/components/activities.html">アクティビティ</a>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<p>アクティビティには、通常のアプリの動作によって破棄されるいくつかのシナリオがあります。たとえば、ユーザーが <em>[戻る]</em> ボタンを押したり、アクティビティが {@link android.app.Activity#finish()} を呼び出すことによって自身の破棄を知らせる場合などです。
+
+システムはまた、現在停止していて長時間使用されていないアクティビティがある場合や、フォアグラウンドのアクティビティが多くのリソースを必要とするためにシステムがメモリを取り戻すためにバックグラウンド プロセスを停止する必要がある場合にも、アクティビティを破棄することがあります。
+
+</p>
+
+<p>ユーザーが <em>[戻る]</em> を押すか、アクティビティ自身が終了することでアクティビティが破棄されたとき、これらの動作はアクティビティの必要性がなくなったことを示すため、システムの方針として {@link android.app.Activity} インスタンスは永遠に失われます。
+
+システムの制約（通常のアプリの動作ではなく）が原因で
+アクティビティが破棄される場合、実際の
+{@link android.app.Activity} インスタンスは失われますが、アクティビティが存在していたことをシステムが記憶しているため、ユーザーがアクティビティに復帰した場合は、破棄されたときのアクティビティの状態を記述する一連の保存されたデータを使用して、アクティビティの新しいインスタンスが作成されます。
+
+システムが以前の状態を復元するために使用する保存されたデータは、「インスタンス状態」と呼ばれ、{@link android.os.Bundle} オブジェクトに格納されたキーと値のペアの集合です。
+
+</p>
+
+<p class="caution"><strong>警告: </strong>ユーザーが画面を回転させるたびに、アクティビティが破棄され、再作成されます。
+画面の向きが変更されると、画面構成が変更され、アクティビティで（レイアウトなどの）代替リソースをロードする必要が生じる場合があるため、システムはフォアグラウンドのアクティビティを破棄し、再作成します。
+
+</p>
+
+<p>デフォルトでは、システムは {@link android.os.Bundle} のインスタンス状態を使用して、アクティビティのレイアウトの各 {@link android.view.View} オブジェクトに関する情報を保存しています（{@link android.widget.EditText} オブジェクトに入力されたテキスト値など）。
+
+アクティビティのインスタンスが破棄され、再作成される場合、レイアウトの状態はコードを必要とすることなく以前の状態に復元されます。
+
+しかし、アクティビティでは、アクティビティにおけるユーザーの作業状況を追跡しているメンバ変数などの、復元することが望ましいその他の情報が存在する可能性があります。
+
+</p>
+
+<p class="note"><strong>注:</strong> Android システムがアクティビティのビューの状態を復元できるようにするためには、<strong>各ビューは固有の ID を持っている必要があります</strong>。これは
+ <a href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code
+android:id}</a> によって提供されます。
+</p>
+
+<p>アクティビティ状態についての追加データを保存するには、
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} コールバック メソッドをオーバーライドする必要があります。システムは、ユーザーがアクティビティを離れようとするとこのメソッドを呼び出し、{@link android.os.Bundle} オブジェクトに渡してアクティビティが予期せずに破棄された場合に備えて保存します。
+
+
+システムが後でアクティビティのインスタンスを再作成する必要がある場合は、同じ {@link
+android.os.Bundle} オブジェクトを {@link android.app.Activity#onRestoreInstanceState
+onRestoreInstanceState()} と {@link android.app.Activity#onCreate onCreate()}
+ の両方のメソッドに渡します。
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
+<p class="img-caption"><strong>図 2.</strong> システムがアクティビティを停止し始めると、
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}（1）が呼び出されるため、{@link android.app.Activity} インスタンスの再作成の必要がある場合に備えて、保存する追加の状態データを指定できます。アクティビティが破棄され、同じインスタンスを再作成する必要がある場合、システムは（1）で定義された状態データを {@link android.app.Activity#onCreate onCreate()} メソッド（2）と 
+{@link android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} メソッド（3）の両方に渡します。
+
+
+
+
+</p>
+
+
+
+<h2 id="SaveState">自分のアクティビティ状態を保存する</h2>
+
+<p>アクティビティが停止し始めると、システムは {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} を呼び出すため、アクティビティではキー値のペアのコレクションを使用して、状態情報を保存することができます。
+このメソッドのデフォルトの実装では、{@link android.widget.EditText} ウィジェット内のテキストまたは {@link android.widget.ListView} のスクロール位置などのアクティビティのビュー階層の状態に関する情報が保存されます。
+
+</p>
+
+<p>アクティビティの追加の状態情報を保存するには、
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} を実装し、{@link android.os.Bundle} オブジェクトにキー値のペアを追加する必要があります。
+次に例を示します。</p>
+
+<pre>
+static final String STATE_SCORE = "playerScore";
+static final String STATE_LEVEL = "playerLevel";
+...
+
+&#64;Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+    savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+    
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+</pre>
+
+<p class="caution"><strong>警告: </strong>デフォルトの実装でビュー階層の状態を保存できるよう、{@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} のスーパークラスの実装を常に呼び出す必要があります。
+</p>
+
+
+
+<h2 id="RestoreState">自分のアクティビティ状態をリストアする</h2>
+
+<p>以前破棄された後にアクティビティが再作成される場合、システムがアクティビティを渡した先の {@link android.os.Bundle} から、保存済みの状態を回復することができます。
+
+{@link android.app.Activity#onCreate onCreate()} と {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} の両方のコールバック メソッドが、インスタンスの状態情報を含む同じ {@link android.os.Bundle} を受け取ります。
+</p>
+
+<p>{@link android.app.Activity#onCreate onCreate()} メソッドは、システムがアクティビティの新しいインスタンスを作成しているか、以前のものを復元しているかどうかに関係なく呼び出されるため、状態の {@link android.os.Bundle} を読み取る前にこれが null かどうかを確認する必要があります。
+
+null の場合は、破棄された以前のアクティビティを復元する代わりにアクティビティの新しいインスタンスが作成されます。
+
+</p>
+
+<p>{@link android.app.Activity#onCreate
+onCreate()} で、いくつかの状態データを復元する方法について、次に例を示します。</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+   
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    } else {
+        // Probably initialize members with default values for a new instance
+    }
+    ...
+}
+</pre>
+
+<p>{@link android.app.Activity#onCreate onCreate()} 中に状態を復元する代わりに、
+{@link android.app.Activity#onStart()} メソッドの後に呼び出される {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} の実装を選択できます。
+復元対象の保存済みの状態がある場合のみ {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} が呼び出されるため、
+{@link android.os.Bundle} が null であるかどうかをチェックする必要はありません。</p>
+        
+<pre>
+public void onRestoreInstanceState(Bundle savedInstanceState) {
+    // Always call the superclass so it can restore the view hierarchy
+    super.onRestoreInstanceState(savedInstanceState);
+   
+    // Restore state members from saved instance
+    mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+    mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+</pre>
+
+<p class="caution"><strong>警告: </strong>デフォルトの実装でビュー階層の状態を復元できるよう、{@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} のスーパークラスの実装を常に呼び出す必要があります。
+</p>
+
+<p>実行時の再起動イベント（画面が回転したときなど）によるアクティビティの再作成の詳細については、<a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更を処理する</a>をお読みください。
+</p>
+
