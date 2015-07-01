@@ -243,7 +243,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"pořizování fotografií a nahrávání videa"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"uskutečňování a správa telefonních hovorů"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"uskutečňování a spravování telefonních hovorů"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Tělesné senzory"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"přístup k údajům snímačů vašich životních funkcí"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načíst obsah okna"</string>
@@ -272,8 +272,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Umožňuje aplikaci přijmout a zpracovat zprávy MMS. Znamená to, že aplikace může sledovat zprávy odeslané do vašeho zařízení nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čtení zpráv informačních služeb"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaše účty"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Přístup k dostupným účtům."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čtení zdrojů přihlášených k odběru"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikaci získat podrobnosti o aktuálně synchronizovaných zdrojích."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"odesílání a zobrazení zpráv SMS"</string>

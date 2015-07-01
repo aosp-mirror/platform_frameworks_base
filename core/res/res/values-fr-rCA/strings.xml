@@ -242,8 +242,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"prendre des photos et filmer des vidéos"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"faire et gérer des appels téléphoniques"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Capteurs corporels"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accéder aux données des capteurs sur vos signes vitaux"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Récupérer le contenu d\'une fenêtre"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecter le contenu d\'une fenêtre avec laquelle vous interagissez."</string>
@@ -271,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permet à l\'application de recevoir et de traiter les messages multimédias. Cette autorisation lui donne la possibilité de surveiller ou de supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lire les messages de diffusion cellulaire"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permet à l\'application de lire les messages de diffusion cellulaire que votre appareil reçoit. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Des applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lors de la réception d\'un message de diffusion cellulaire."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vos comptes"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accéder aux comptes disponibles"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lire les flux auxquels vous êtes abonné"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permet à l\'application d\'obtenir des données sur les flux en cours de synchronisation."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"envoyer et afficher des messages texte"</string>

@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lehetővé teszi az alkalmazás számára, hogy MMS-eket fogadjon és dolgozzon fel. Ez azt jelenti, hogy az alkalmazás megfigyelheti vagy törölheti a beérkező üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"cellán belüli üzenetek olvasása"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lehetővé teszi az alkalmazás számára az eszközre érkező cellán belüli üzenetek olvasását. Bizonyos helyeken figyelmeztető üzeneteket kaphat a cellán belül a vészhelyzetekről. A rosszindulatú alkalmazások befolyásolhatják az eszköz  teljesítményét vagy működését vészhelyzeti cellaüzenet érkezésekor."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Az Ön fiókjai"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Hozzáférés az elérhető fiókokhoz."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"feliratkozott hírcsatornák olvasása"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lehetővé teszi az alkalmazás számára, hogy részleteket kapjon a jelenleg szinkronizált hírcsatornákról."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS-ek küldése és megtekintése"</string>

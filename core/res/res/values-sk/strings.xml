@@ -235,7 +235,7 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendár"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"prístup ku kalendáru"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"posielanie a zobrazovanie správ SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"posielať a zobrazovať SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložisko"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"prístup k fotkám, médiám a súborom na zariadení"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofón"</string>
@@ -243,9 +243,8 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a zaznamenávanie videí"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefón"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovanie a správa hovorov"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovať a spravovať hovory"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Telesné senzory"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"prístup k údajom senzorov o životných funkciách"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítať obsah okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Môžete preskúmať obsah okna, s ktorým pracujete."</string>
@@ -273,11 +272,9 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Umožňuje aplikácii prijímať a spracovávať správy MMS. Znamená to, že aplikácia môže sledovať správy odoslané na vaše zariadenie alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čítať správy Cell Broadcast"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikácii čítať správy Cell Broadcast prijaté vaším zariadením. Upozornenia Cell Broadcast sú doručované na určitých miestach a upozorňujú na núdzové situácie. Škodlivé aplikácie môžu pri prijatí núdzovej správy Cell Broadcast narušiť výkonnosť alebo prevádzku vášho zariadenia."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaše účty"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Prístup k dostupným účtom."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čítať odoberané informačné kanály"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikácii získať podrobnosti o aktuálne synchronizovaných informačných kanáloch."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"posielať a zobrazovať správy SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"posielať a zobrazovať SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikácii odosielať správy SMS. Môže to mať za následok účtovanie neočakávaných poplatkov. Škodlivé aplikácie vám môžu spôsobiť výdavky odosielaním správ bez vášho potvrdenia."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čítať textové správy (SMS alebo MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Umožňuje aplikácii čítať správy SMS uložené v tablete alebo na SIM karte. Toto povolenie umožňuje aplikácii čítať správy SMS bez ohľadu na ich obsah alebo dôvernosť."</string>

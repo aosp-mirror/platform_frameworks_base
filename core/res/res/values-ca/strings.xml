@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permet que l\'aplicació rebi i processi missatges MMS. Això vol dir que l\'aplicació pot controlar o suprimir missatges que s\'han enviat al teu dispositiu sense mostrar-te\'ls."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"llegir missatges de difusió mòbil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permet que l\'aplicació llegeixi missatges de difusió mòbil rebuts pel dispositiu. Les alertes de difusió mòbil s\'entreguen en algunes ubicacions per alertar de situacions d\'emergència. És possible que les aplicacions malicioses interfereixin en el rendiment o en el funcionament del dispositiu quan es rep una difusió mòbil d\'emergència."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Comptes"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accedeix als comptes disponibles."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"llegir els feeds als quals esteu subscrit"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permet que l\'aplicació obtingui detalls sobre els feeds sincronitzats actualment."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"envia i llegeix missatges SMS"</string>

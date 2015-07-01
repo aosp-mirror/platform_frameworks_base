@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Hiermee kan de app MMS-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"infodienstberichten lezen"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Toestaan dat de app infodienstberichten leest die worden ontvangen op uw apparaat. Infodienstberichten worden verzonden naar bepaalde locaties om u te waarschuwen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van uw apparaat verstoren wanneer een infodienstbericht wordt ontvangen."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Uw accounts"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Toegang tot de beschikbare accounts."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Geabonneerde feeds lezen"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Hiermee kan de app details over de huidige gesynchroniseerde feeds achterhalen."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"sms\'jes verzenden en bekijken"</string>

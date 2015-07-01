@@ -242,8 +242,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ስዕሎች ያንሱ እና ቪዲዮ ይቅረጹ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ስልክ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"የስልክ ጥሪዎች ያድርጉ እና ያስተዳድሩ"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"የሰውነት ዳሳሾች"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ስለአስፈላጊ ምልክቶችዎ ያሉ የዳሳሽ ውሂብ ይድረሱ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"የመስኮት ይዘት ሰርስረው ያውጡ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"መስተጋበር የሚፈጥሩት የመስኮት ይዘት ይመርምሩ።"</string>
@@ -271,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"መተግበሪያው የኤም.ኤም.ኤስ. መልዕክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ማለት መተግበሪያው ወደ መሳሪያህ የተላኩ መልዕክቶችን ላንተ ሳያሳይህ ሊቆጣጠር ወይም ሊሰርዝ ይችላል።"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"የህዋስ ስርጭት መልዕክቶችን አንብብ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"መሣሪያህ የህዋስ ስርጭት መልዕክቶች ሲቀበል መተግበሪያው እንዲያነበው ይፈቅድለታል። የህዋስ ስርጭት ማንቂያዎች አስቸኳይ ሁኔታዎች ሲያጋጥሙ አንዳንድ አካባቢዎች ላይ የሚላኩ ናቸው። የህዋስ ስርጭት ሲደርስ ተንኮል አዘል መተግበሪያዎች በመሣሪያህ አፈጻጸም ወይም አሰራር ላይ ጣልቃ ሊገቡ ይችላሉ።"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"መለያዎችዎ"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">" ለተገኙት መለያዎች ድረስ"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"የምዝገባ መግቦች አንበብ"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ስለ አሁኑ ጊዜ አስምር ምላሾች ዝርዝሮች ለማግኘት ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>

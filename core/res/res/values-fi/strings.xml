@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Antaa sovelluksen vastaanottaa ja käsitellä multimediaviestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lue tiedotteita"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Antaa sovelluksen lukea laitteesi vastaanottamia tiedotteita. Tiedotteiden avulla ilmoitetaan hätätilanteista joissakin paikoissa. Haitalliset sovellukset voivat häiritä laitteen toimintaa laitteen vastaanottaessa hätätiedotteen."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Omat tilit"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Käytä saatavilla olevia tilejä."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lukea tilattuja syötteitä"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Antaa sovelluksen saada tietoja tällä hetkellä synkronoitavista syötteistä."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"lähettää ja tarkastella tekstiviestejä"</string>

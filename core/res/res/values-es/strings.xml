@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría utilizar este permiso para controlar o eliminar mensajes enviados al dispositivo sin mostrárselos al usuario."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"leer mensajes de difusión móvil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite que la aplicación lea mensajes de difusión móvil que haya recibido el dispositivo. Las alertas de difusión móvil se envían en algunas ubicaciones para avisar de situaciones de emergencia. Es posible que las aplicaciones malintencionadas interfieran en el rendimiento o en el funcionamiento del dispositivo si se recibe una alerta de difusión móvil de emergencia."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Tus cuentas"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acceder a las cuentas disponibles"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"leer feeds a los que está suscrito el usuario"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite que la aplicación obtenga detalles sobre los feeds sincronizados actualmente."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"enviar y ver mensajes SMS"</string>

@@ -243,7 +243,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फोन कलहरू गर्नुहोस् र व्यवस्थापन गर्नुहोस्"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शारीरिक सेन्सर"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"तपाईँको महत्त्वपूर्ण संकेत बारेको सेन्सर डेटा पहुँच गर्नुहोस्"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"तपाईँको महत्त्वपूर्ण संकेत बारे सेन्सर डेटा पहुँच गर्नुहोस्"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विन्डो सामग्रीको पुनःबहाली गर्नुहोस्।"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तपाईँको अन्तरक्रिया भइरहेको विन्डोको सामग्रीको निरीक्षण गर्नुहोस्।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छोएर गरिने खोजलाई सुचारु गर्नुहोस्"</string>
@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"अनुप्रयोगलाई MMS सन्देशहरू प्राप्त गर्न र प्रकृया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको सन्देशहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल प्रसारित सन्देशहरू पढ्नुहोस्"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"तपाईंको उपकरणद्वारा प्राप्त सेल प्रसारण सन्देशहरू अनुप्रयोगलाई पढ्न अनुमति दिन्छ। सेल प्रसारण चेतावनीहरू केही स्थानहरूमा तपाईंलाई आपतकालीन गतिविधिहरूको बारेमा सचेत गराउन गरिएका छन्। खराब अनुप्रयोगहरूले एउटा आपतकालीन सेल प्रसारण प्राप्त गर्दछ जब तपाईंको उपकरणको प्रदर्शन वा अपरेशनको साथ हस्तक्षेप गर्न सक्दछन्।"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"तपाईँका खाताहरू"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"उपलब्ध खाताहरू पहुँच गर्नुहोस्।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्य बनाइका फिडहरू पढ्नुहोस्"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"अनुप्रयोगलाई अहिलेको समीकरण गरिएका सूचकहरू बारे विवरणहरू लिने अनुमति दिन्छ।"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>

@@ -244,8 +244,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"фото- и видеосъемка"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществление телефонных звонков и управление ими"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Нательные датчики"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"доступ к данным датчиков о состоянии организма"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
@@ -273,8 +272,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Приложение сможет получать и обрабатывать MMS. Это значит, что оно сможет отслеживать и удалять отправленные на ваше устройство сообщения, не показывая их."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Читать сообщения массовой рассылки"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Приложение получит доступ к сообщениям широковещательных SMS-служб, которые в некоторых странах используются для информирования населения об экстренных ситуациях. Вредоносные программы могут помешать работе устройства, на которое поступают такие сообщения."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ваши аккаунты"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Доступ к имеющимся аккаунтам."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Просмотр фидов пользователя"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Приложение сможет получать сведения о синхронизируемых в настоящее время фидах."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"отправка и просмотр SMS-сообщений"</string>

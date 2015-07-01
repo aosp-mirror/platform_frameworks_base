@@ -229,7 +229,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"連絡先へのアクセス"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置情報"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"この端末の位置情報にアクセス"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"この端末の位置情報へのアクセス"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"カレンダー"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"カレンダーへのアクセス"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMSメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"緊急警報SMSの読み取り"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信した緊急警報SMSの読み取りをアプリに許可します。緊急警報は、緊急事態を警告する目的で一部の地域に配信されます。緊急警報の受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"アカウント"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"利用可能なアカウントにアクセスします。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"登録したフィードの読み取り"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"現在同期されているフィードの詳細を取得することをアプリに許可します。"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMSメッセージの送信と表示"</string>
@@ -1061,7 +1059,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>を準備中"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"エラーを確認中"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"新しい<xliff:g id="NAME">%s</xliff:g>が検出されました"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"写真などのメディアを転送するため"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"写真などのメディア転送用"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g>は破損しています"</string>
     <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g>は破損しています。タップして解決してください。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>

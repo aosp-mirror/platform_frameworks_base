@@ -352,7 +352,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"телефон чалуу жана аларды башкаруу"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Дене сенсорлору"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"өмүр белгилериңиз тууралуу сенсордун дайындарына мүмкүнчүлүк алуу"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"организмдин абалына көз салган сенсордун дайындарына мүмкүнчүлүк алуу"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмунун алуу"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Сиз иштеп жаткан терезенин мазмунун изилдөө."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Сыйпалап изилдөөнү жандыруу"</string>
@@ -382,10 +382,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Колдонмого MMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"уюктук берүү билдирүүлөрүн окуу"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Колдонмого түзмөгүңүз кабыл алган уюк берүүнүн билдирүүлөрүн окууга жол берет. Шашылыш эскертүү билдирүүлөрү кээ бир жерлердеги өзгөчө кырдаалдар тууралу сизди эскертүү үчүн жөнөтүлөт. Зыяндуу колдономолор шашылыш эскертүүлөр берилип жатканда, сиздин түзмөктүн иштешине жолтоо болушу мүмкүн."</string>
-    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
-    <skip />
     <!-- no translation found for permlab_subscribedFeedsRead (4756609637053353318) -->
     <skip />
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Колдонмого учурда шайкештештирилген каналдардын чоо-жайларын алуу мүмкүнчүлүгүн берет."</string>
