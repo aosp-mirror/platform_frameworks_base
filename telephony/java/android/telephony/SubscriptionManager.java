@@ -335,7 +335,7 @@ public class SubscriptionManager {
      *                 onSubscriptionsChanged overridden.
      */
     public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
-        String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
             logd("register OnSubscriptionsChangedListener pkgForDebug=" + pkgForDebug
                     + " listener=" + listener);
@@ -361,7 +361,7 @@ public class SubscriptionManager {
      * @param listener that is to be unregistered.
      */
     public void removeOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
-        String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
             logd("unregister OnSubscriptionsChangedListener pkgForDebug=" + pkgForDebug
                     + " listener=" + listener);
@@ -603,7 +603,7 @@ public class SubscriptionManager {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
                 // FIXME: This returns 1 on success, 0 on error should should we return it?
-                iSub.addSubInfoRecord(iccId, slotId, mContext.getOpPackageName());
+                iSub.addSubInfoRecord(iccId, slotId);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -633,7 +633,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setIconTint(tint, subId, mContext.getOpPackageName());
+                result = iSub.setIconTint(tint, subId);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -678,8 +678,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setDisplayNameUsingSrc(displayName, subId, nameSource,
-                        mContext.getOpPackageName());
+                result = iSub.setDisplayNameUsingSrc(displayName, subId, nameSource);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -707,7 +706,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setDisplayNumber(number, subId, mContext.getOpPackageName());
+                result = iSub.setDisplayNumber(number, subId);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -736,7 +735,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setDataRoaming(roaming, subId, mContext.getOpPackageName());
+                result = iSub.setDataRoaming(roaming, subId);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -975,7 +974,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                iSub.clearSubInfo(mContext.getOpPackageName());
+                iSub.clearSubInfo();
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1009,7 +1008,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                iSub.clearDefaultsForInactiveSubIds(mContext.getOpPackageName());
+                iSub.clearDefaultsForInactiveSubIds();
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1153,4 +1152,3 @@ public class SubscriptionManager {
         return false;
     }
 }
-
