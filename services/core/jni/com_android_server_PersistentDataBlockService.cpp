@@ -17,6 +17,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <JNIHelp.h>
 #include <jni.h>
+#include <ScopedUtfChars.h>
 
 #include <utils/misc.h>
 #include <sys/ioctl.h>
@@ -77,8 +78,8 @@ namespace android {
 
     static jlong com_android_server_PersistentDataBlockService_getBlockDeviceSize(JNIEnv *env, jclass, jstring jpath)
     {
-        const char *path = env->GetStringUTFChars(jpath, 0);
-        int fd = open(path, O_RDONLY);
+        ScopedUtfChars path(env, jpath);
+        int fd = open(path.c_str(), O_RDONLY);
 
         if (fd < 0)
             return 0;
@@ -87,8 +88,8 @@ namespace android {
     }
 
     static int com_android_server_PersistentDataBlockService_wipe(JNIEnv *env, jclass, jstring jpath) {
-        const char *path = env->GetStringUTFChars(jpath, 0);
-        int fd = open(path, O_WRONLY);
+        ScopedUtfChars path(env, jpath);
+        int fd = open(path.c_str(), O_WRONLY);
 
         if (fd < 0)
             return 0;
