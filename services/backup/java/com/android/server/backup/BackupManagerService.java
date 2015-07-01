@@ -3223,6 +3223,27 @@ public class BackupManagerService {
         }
     }
 
+    void tearDownAgentAndKill(ApplicationInfo app) {
+        try {
+            // unbind and tidy up even on timeout or failure, just in case
+            mActivityManager.unbindBackupAgent(app);
+
+            // The agent was running with a stub Application object, so shut it down.
+            // !!! We hardcode the confirmation UI's package name here rather than use a
+            //     manifest flag!  TODO something less direct.
+            if (app.uid != Process.SYSTEM_UID
+                    && !app.packageName.equals("com.android.backupconfirm")
+                    && app.uid != Process.PHONE_UID) {
+                if (MORE_DEBUG) Slog.d(TAG, "Killing agent host process");
+                mActivityManager.killApplicationProcess(app.processName, app.uid);
+            } else {
+                if (MORE_DEBUG) Slog.d(TAG, "Not killing after operation: " + app.processName);
+            }
+        } catch (RemoteException e) {
+            Slog.d(TAG, "Lost app trying to shut down");
+        }
+    }
+
     // Core logic for performing one package's full backup, gathering the tarball from the
     // application and emitting it to the designated OutputStream.
 
@@ -3525,21 +3546,7 @@ public class BackupManagerService {
             if (pkg != null) {
                 final ApplicationInfo app = pkg.applicationInfo;
                 if (app != null) {
-                    try {
-                        // unbind and tidy up even on timeout or failure, just in case
-                        mActivityManager.unbindBackupAgent(app);
-
-                        // The agent was running with a stub Application object, so shut it down.
-                        if (app.uid != Process.SYSTEM_UID
-                                && app.uid != Process.PHONE_UID) {
-                            if (MORE_DEBUG) Slog.d(TAG, "Backup complete, killing host process");
-                            mActivityManager.killApplicationProcess(app.processName, app.uid);
-                        } else {
-                            if (MORE_DEBUG) Slog.d(TAG, "Not killing after backup: " + app.processName);
-                        }
-                    } catch (RemoteException e) {
-                        Slog.d(TAG, "Lost app trying to shut down");
-                    }
+                    tearDownAgentAndKill(app);
                 }
             }
         }
@@ -4697,7 +4704,11 @@ public class BackupManagerService {
             mBytes = 0;
         }
 
-        public boolean restoreOneFile(InputStream instream) {
+        public IBackupAgent getAgent() {
+            return mAgent;
+        }
+
+        public boolean restoreOneFile(InputStream instream, boolean mustKillAgent) {
             if (!isRunning()) {
                 Slog.w(TAG, "Restore engine used after halting");
                 return false;
@@ -5011,8 +5022,10 @@ public class BackupManagerService {
                     Slog.i(TAG, "No [more] data for this package; tearing down");
                 }
                 tearDownPipes();
-                tearDownAgent(mTargetApp);
                 setRunning(false);
+                if (mustKillAgent) {
+                    tearDownAgent(mTargetApp);
+                }
             }
             return (info != null);
         }
@@ -5037,23 +5050,7 @@ public class BackupManagerService {
 
         void tearDownAgent(ApplicationInfo app) {
             if (mAgent != null) {
-                try {
-                    // unbind and tidy up even on timeout or failure, just in case
-                    mActivityManager.unbindBackupAgent(app);
-
-                    // The agent was running with a stub Application object, so shut it down.
-                    // !!! We hardcode the confirmation UI's package name here rather than use a
-                    //     manifest flag!  TODO something less direct.
-                    if (app.uid != Process.SYSTEM_UID
-                            && !app.packageName.equals("com.android.backupconfirm")) {
-                        if (MORE_DEBUG) Slog.d(TAG, "Killing host process");
-                        mActivityManager.killApplicationProcess(app.processName, app.uid);
-                    } else {
-                        if (MORE_DEBUG) Slog.d(TAG, "Not killing after full restore");
-                    }
-                } catch (RemoteException e) {
-                    Slog.d(TAG, "Lost app trying to shut down");
-                }
+                tearDownAgentAndKill(app);
                 mAgent = null;
             }
         }
@@ -7956,7 +7953,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     IoUtils.closeQuietly(mTransportPipes[0]);
                     IoUtils.closeQuietly(mTransportPipes[1]);
 
-                    // Don't proceed until the engine has torn down the agent etc
+                    // Don't proceed until the engine has finished
                     eThread.waitForResult();
 
                     if (MORE_DEBUG) {
@@ -7969,8 +7966,12 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     // If we hit a transport-level error, we are done with everything;
                     // if we hit an agent error we just go back to running the queue.
                     if (status == BackupTransport.TRANSPORT_OK) {
-                        // Clean finish, so just carry on
-                        nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                        // Clean finish means we issue the restore-finished callback
+                        nextState = UnifiedRestoreState.RESTORE_FINISHED;
+
+                        // the engine bound the target's agent, so recover that binding
+                        // to use for the callback.
+                        mAgent = mEngine.getAgent();
                     } else {
                         // Something went wrong somewhere.  Whether it was at the transport
                         // level is immaterial; we need to tell the transport to bail
@@ -8021,7 +8022,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             @Override
             public void run() {
                 while (mEngine.isRunning()) {
-                    mEngine.restoreOneFile(mEngineStream);
+                    // Tell it to be sure to leave the agent instance up after finishing
+                    mEngine.restoreOneFile(mEngineStream, false);
                 }
             }
         }
