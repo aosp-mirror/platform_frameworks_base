@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ilovaga MMS xabarlarini qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Bu sizga yuborilgan xabarlarni ilova sizga ko‘rsatmasdan kuzatishi va o‘chirishi mumkinligini bildiradi."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"uyali tarmoq operatori xabarlarini o‘qish"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ilovaga qurilmangiz tomonidan qabul qilingan uyali tarmoq operatori xabarlarini o‘qish uchun ruxsat beradi. Uyali tarmoq operatorining ogohlantiruvchi xabarlari ba’zi manzillarga favqulodda holatlar haqida ogohlantirish uchun jo‘natiladi. Zararli ilovalar uyali tarmoq orqali favqulodda xabar qabul qilinganda qurilmangizning ish faoliyati yoki amallariga xalaqit qilishi mumkin"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Hisoblaringiz"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Mavjud hisoblarga kirish."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"obunalarni o‘qish"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ilova hozirgi vaqtda sinxronlanayotgan elementlar to‘g‘risidagi ma’lumotlarni olishi mumkin."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS xabarlarni yuborish va ko‘rish"</string>

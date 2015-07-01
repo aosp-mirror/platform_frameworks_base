@@ -242,8 +242,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"правене на снимки и запис на видеоклипове"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"извършване и управление на телефонни обаждания"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"достъп до сензорните данни за жизнените ви показатели"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Извличане на съдържанието от прозореца"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Инспектиране на съдържанието на прозорец, с който взаимодействате."</string>
@@ -271,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Разрешава на приложението да получава и обработва MMS съобщения. Това означава, че то може да наблюдава или изтрива изпратените до устройството ви, без да ви ги покаже."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"четене на съобщения с клетъчно излъчване"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Разрешава на приложението да чете съобщения с клетъчно излъчване, получени от устройството ви. Сигналите с клетъчно излъчване се получават на някои местоположения, за да ви предупредят за спешни ситуации. Злонамерените приложения могат да възпрепятстват изпълнението или работата на устройството ви при получаване на такова спешно излъчване."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Вашите профили"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Достъп до наличните профили."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"четене на емисиите с абонамент"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Разрешава на приложението да получи подробности за текущо синхронизираните емисии."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"изпращане и преглед на SMS съобщения"</string>

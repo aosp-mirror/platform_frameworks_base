@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"ऐप्स  को MMS संदेशों को प्राप्‍त और संसाधित करने देता है. इसका अर्थ है कि ऐप्स  आपके डिवाइस पर भेजे गए संदेशों की निगरानी आपको दिखाए बिना कर सकता है और उन्‍हें हटा सकता है."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल प्रसारण संदेश पढ़ें"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ऐप्स को आपके डिवाइस द्वारा प्राप्त सेल प्रसारण संदेशों को पढ़ने देता है. कुछ स्‍थानों पर आपको आपातकालीन स्‍थितियों की चेतावनी देने के लिए सेल प्रसारण अलर्ट वितरित किए जाते हैं. आपातकालीन सेल प्रसारण प्राप्त होने पर दुर्भावनापूर्ण ऐप्स आपके डिवाइस के निष्‍पादन या संचालन में हस्‍तक्षेप कर सकते हैं."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"आपके खाते"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"उपलब्‍ध खातों में पहुंचें."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता-प्राप्त फ़ीड पढ़ें"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ऐप्स को वर्तमान में समन्वयित फ़ीड के बारे में विवरण प्राप्त करने देता है."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS संदेश भेजें और देखें"</string>

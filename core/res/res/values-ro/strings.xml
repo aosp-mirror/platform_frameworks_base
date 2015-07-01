@@ -243,8 +243,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografiază și înregistrează videoclipuri"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"inițiază și gestionează apeluri telefonice"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Senzori corporali"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accesează datele înregistrate de senzori despre semnele vitale"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspectează conținutul unei ferestre cu care interacționați."</string>
@@ -272,8 +271,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite aplicației să primească și să proceseze mesaje MMS. Acest lucru înseamnă că aplicația ar putea monitoriza sau şterge mesajele trimise pe dispozitivul dvs. fără a vi le arăta."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"citeşte mesajele cu transmisie celulară"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitivul dvs. Alertele cu transmisie celulară sunt difuzate în unele locaţii pentru a vă avertiza cu privire la situaţiile de urgenţă. Aplicaţiile rău intenţionate pot afecta performanţa sau funcţionarea dispozitivului dvs. când este primită o transmisie celulară de urgenţă."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Conturile dvs."</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accesează conturile disponibile."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"citire feeduri abonat"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite aplicației să obţină detalii despre feedurile sincronizate în prezent."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"trimite și vede mesajele SMS"</string>

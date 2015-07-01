@@ -243,8 +243,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"snimati fotografije i videozapise"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"uspostavljati telefonske pozive i upravljati njima"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Biometrijski senzori"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"pristupiti podacima senzora o vašim vitalnim znakovima"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Dohvaćati sadržaj prozora"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Istražite sadržaj prozora koji upotrebljavate."</string>
@@ -272,8 +271,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Aplikaciji omogućuje primanje i obradu MMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj, a da vam ih ne prikaže."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čitaj poruke koje se emitiraju unutar mobilne mreže"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogućuje aplikaciji čitanje poruka emitiranih unutar mobilne mreže koje prima vaš uređaj. Upozorenja koja se emitiraju na području mobilne mreže dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno upozorenje koje se emitira unutar mobilne mreže."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaši računi"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Pristup dostupnim računima."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čitanje pretplaćenih feedova"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Aplikaciji omogućuje dohvaćanje detalja o trenutačno sinkroniziranim feedovima."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"slati i pregledavati SMS poruke"</string>

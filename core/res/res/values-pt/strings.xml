@@ -242,8 +242,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"tirar fotos e gravar vídeos"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"fazer e gerenciar chamadas telefônicas"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acessar dados do sensor sobre seus sinais vitais"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar cont. da janela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo da janela com que você está interagindo."</string>
@@ -271,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que o app receba e processe mensagens MMS. Isso significa que o app pode monitorar ou excluir as mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensagens de difusão celular"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite que o app leia mensagens de difusão celular recebidas por seu dispositivo. Alertas de difusão celular são recebidos em alguns locais para avisar você de situações de emergência. Apps maliciosos podem interferir no desempenho ou funcionamento de seu dispositivo quando uma difusão celular de emergência é recebida."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Suas contas"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acessar as contas disponíveis."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds inscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite que o app obtenha detalhes sobre os feeds sincronizados no momento."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"enviar e ver mensagens SMS"</string>

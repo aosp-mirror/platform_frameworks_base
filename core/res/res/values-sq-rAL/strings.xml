@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lejon aplikacionin të marrë dhe përpunojë mesazhe MMS. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lexo mesazhet e transmetimit të qelizës"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lejon aplikacionin të lexojë mesazhet e transmetimit të qelizës, të marra nga pajisja jote. Alarmet e transmetimit të qelizës dërgohen në disa vendndodhje për të të paralajmëruar në situata urgjente. Aplikacionet keqdashëse mund të ndërhyjnë në veprimtarinë ose operacionin e pajisjes tënde kur merret një transmetim urgjent i qelizës."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Llogaritë e tua"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Qasje në llogaritë e vlefshme."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lexo informacione të abonuara"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lejon aplikacionin të marrë detaje rreth çdo gjëje që sinkronizohet në pajisje."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"dërgo dhe shiko mesazhet SMS"</string>

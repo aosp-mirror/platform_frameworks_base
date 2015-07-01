@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ermöglicht der App, MMS zu empfangen und zu verarbeiten. Das bedeutet, dass die App an Ihr Gerät gesendete Nachrichten überwachen und löschen kann, ohne sie Ihnen anzuzeigen."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Cell Broadcast-Nachrichten lesen"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ermöglicht der App, von Ihrem Gerät empfangene Cell Broadcast-Nachrichten zu lesen. Cell Broadcast-Benachrichtigungen werden an einigen Standorten gesendet, um Sie über Notfallsituationen zu informieren. Schädliche Apps können die Leistung oder den Betrieb Ihres Geräts beeinträchtigen, wenn eine Cell Broadcast-Notfallbenachrichtigung eingeht."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ihre Konten"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Zugriff auf verfügbare Konten"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Abonnierte Feeds lesen"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ermöglicht der App, Details zu den zurzeit synchronisierten Feeds abzurufen"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS senden und abrufen"</string>
@@ -600,7 +598,7 @@
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Benutzerdefiniert"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Privat"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Büro"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Geschäftlich"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Sonstige"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Benutzerdefiniert"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Privat"</string>
@@ -1061,7 +1059,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> wird vorbereitet"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Nach Fehlern wird gesucht"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Neue <xliff:g id="NAME">%s</xliff:g> entdeckt"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Für die Übertragung von Fotos und Medien"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Zum Übertragen von Fotos und Medien"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> beschädigt"</string>
     <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> ist beschädigt. Zum Reparieren tippen."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> nicht unterstützt"</string>
