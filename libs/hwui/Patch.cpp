@@ -81,9 +81,9 @@ Patch::Patch(const float bitmapWidth, const float bitmapHeight,
         }
         const float xStretchTex = stretchSize;
         const float fixed = bitmapWidth - stretchSize;
-        const float xStretch = fmaxf(width - fixed, 0.0f);
+        const float xStretch = std::max(width - fixed, 0.0f);
         stretchX = xStretch / xStretchTex;
-        rescaleX = fixed == 0.0f ? 0.0f : fminf(fmaxf(width, 0.0f) / fixed, 1.0f);
+        rescaleX = fixed == 0.0f ? 0.0f : std::min(std::max(width, 0.0f) / fixed, 1.0f);
     }
 
     if (yStretchCount > 0) {
@@ -93,9 +93,9 @@ Patch::Patch(const float bitmapWidth, const float bitmapHeight,
         }
         const float yStretchTex = stretchSize;
         const float fixed = bitmapHeight - stretchSize;
-        const float yStretch = fmaxf(height - fixed, 0.0f);
+        const float yStretch = std::max(height - fixed, 0.0f);
         stretchY = yStretch / yStretchTex;
-        rescaleY = fixed == 0.0f ? 0.0f : fminf(fmaxf(height, 0.0f) / fixed, 1.0f);
+        rescaleY = fixed == 0.0f ? 0.0f : std::min(std::max(height, 0.0f) / fixed, 1.0f);
     }
 
     uint32_t quadCount = 0;

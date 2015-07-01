@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_RECT_H
 
 #include <cmath>
+#include <algorithm>
 #include <SkRect.h>
 
 #include <utils/Log.h>
@@ -246,17 +247,17 @@ public:
     }
 
     void expandToCoverVertex(float x, float y) {
-        left = fminf(left, x);
-        top = fminf(top, y);
-        right = fmaxf(right, x);
-        bottom = fmaxf(bottom, y);
+        left = std::min(left, x);
+        top = std::min(top, y);
+        right = std::max(right, x);
+        bottom = std::max(bottom, y);
     }
 
     void expandToCoverRect(float otherLeft, float otherTop, float otherRight, float otherBottom) {
-        left = fminf(left, otherLeft);
-        top = fminf(top, otherTop);
-        right = fmaxf(right, otherRight);
-        bottom = fmaxf(bottom, otherBottom);
+        left = std::min(left, otherLeft);
+        top = std::min(top, otherTop);
+        right = std::max(right, otherRight);
+        bottom = std::max(bottom, otherBottom);
     }
 
     SkRect toSkRect() const {
@@ -273,18 +274,18 @@ public:
 
 private:
     void intersectWith(Rect& tmp) const {
-        tmp.left = fmaxf(left, tmp.left);
-        tmp.top = fmaxf(top, tmp.top);
-        tmp.right = fminf(right, tmp.right);
-        tmp.bottom = fminf(bottom, tmp.bottom);
+        tmp.left = std::max(left, tmp.left);
+        tmp.top = std::max(top, tmp.top);
+        tmp.right = std::min(right, tmp.right);
+        tmp.bottom = std::min(bottom, tmp.bottom);
     }
 
     Rect intersectWith(float l, float t, float r, float b) const {
         Rect tmp;
-        tmp.left = fmaxf(left, l);
-        tmp.top = fmaxf(top, t);
-        tmp.right = fminf(right, r);
-        tmp.bottom = fminf(bottom, b);
+        tmp.left = std::max(left, l);
+        tmp.top = std::max(top, t);
+        tmp.right = std::min(right, r);
+        tmp.bottom = std::min(bottom, b);
         return tmp;
     }
 
