@@ -9937,7 +9937,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         for (i = windows.size() - 1; i >= 0; i--) {
                             WindowState w = windows.get(i);
                             if (w.mHasSurface) {
-                                mPolicy.applyPostLayoutPolicyLw(w, w.mAttrs);
+                                mPolicy.applyPostLayoutPolicyLw(w, w.mAttrs, w.mAttachedWindow);
                             }
                         }
                         displayContent.pendingLayoutChanges |= mPolicy.finishPostLayoutPolicyLw();
