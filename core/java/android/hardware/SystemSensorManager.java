@@ -42,7 +42,8 @@ import java.util.List;
 public class SystemSensorManager extends SensorManager {
     private static native void nativeClassInit();
     private static native long nativeCreate(String opPackageName);
-    private static native int nativeGetNextSensor(long nativeInstance, Sensor sensor, int next);
+    private static native boolean nativeGetSensorAtIndex(long nativeInstance,
+            Sensor sensor, int index);
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
 
     private static boolean sSensorModuleInitialized = false;
@@ -81,15 +82,12 @@ public class SystemSensorManager extends SensorManager {
         }
 
         // initialize the sensor list
-        int i = 0;
-        do {
+        for (int index = 0;;++index) {
             Sensor sensor = new Sensor();
-            i = nativeGetNextSensor(mNativeInstance, sensor, i);
-            if (i >= 0) {
-                mFullSensorsList.add(sensor);
-                mHandleToSensor.append(sensor.getHandle(), sensor);
-            }
-        } while (i > 0);
+            if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
+            mFullSensorsList.add(sensor);
+            mHandleToSensor.append(sensor.getHandle(), sensor);
+        }
     }
 
 
