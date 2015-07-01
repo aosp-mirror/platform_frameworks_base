@@ -21,11 +21,14 @@ import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
-import junit.framework.TestCase;
+
+import com.android.internal.util.HexDump;
 
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import junit.framework.TestCase;
 
 import static android.net.dhcp.DhcpPacket.*;
 
@@ -329,8 +332,8 @@ public class DhcpPacketTest extends TestCase {
         byte[] actual = new byte[packet.limit()];
         packet.get(actual);
         String msg =
-                "Expected:\n  " + Arrays.toString(expected) +
-                "\nActual:\n  " + Arrays.toString(actual);
+                "Expected:\n  " + HexDump.toHexString(expected) +
+                "\nActual:\n  " + HexDump.toHexString(actual);
         assertTrue(msg, Arrays.equals(expected, actual));
     }
 }
