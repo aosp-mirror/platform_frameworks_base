@@ -14745,6 +14745,7 @@ package android.media {
     field public static final int TYPE_FM_TUNER = 16; // 0x10
     field public static final int TYPE_HDMI = 9; // 0x9
     field public static final int TYPE_HDMI_ARC = 10; // 0xa
+    field public static final int TYPE_IP = 20; // 0x14
     field public static final int TYPE_LINE_ANALOG = 5; // 0x5
     field public static final int TYPE_LINE_DIGITAL = 6; // 0x6
     field public static final int TYPE_TELEPHONY = 18; // 0x12
