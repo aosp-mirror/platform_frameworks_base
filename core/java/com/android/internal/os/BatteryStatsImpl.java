@@ -106,7 +106,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 129 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 130 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -4386,6 +4386,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         LongSamplingCounter mUserCpuTime = new LongSamplingCounter(mOnBatteryTimeBase);
         LongSamplingCounter mSystemCpuTime = new LongSamplingCounter(mOnBatteryTimeBase);
+        LongSamplingCounter mCpuPower = new LongSamplingCounter(mOnBatteryTimeBase);
         LongSamplingCounter[] mSpeedBins;
 
         /**
@@ -4978,6 +4979,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        public long getCpuPowerMaUs(int which) {
+            return mCpuPower.getCountLocked(which);
+        }
+
+        @Override
         public long getTimeAtCpuSpeed(int step, int which) {
             if (step >= 0 && step < mSpeedBins.length) {
                 if (mSpeedBins[step] != null) {
@@ -5097,6 +5103,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             mUserCpuTime.reset(false);
             mSystemCpuTime.reset(false);
+            mCpuPower.reset(false);
             for (int i = 0; i < mSpeedBins.length; i++) {
                 LongSamplingCounter c = mSpeedBins[i];
                 if (c != null) {
@@ -5248,6 +5255,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                 mUserCpuTime.detach();
                 mSystemCpuTime.detach();
+                mCpuPower.detach();
                 for (int i = 0; i < mSpeedBins.length; i++) {
                     LongSamplingCounter c = mSpeedBins[i];
                     if (c != null) {
@@ -5427,6 +5435,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             mUserCpuTime.writeToParcel(out);
             mSystemCpuTime.writeToParcel(out);
+            mCpuPower.writeToParcel(out);
 
             out.writeInt(mSpeedBins.length);
             for (int i = 0; i < mSpeedBins.length; i++) {
@@ -5618,6 +5627,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             mUserCpuTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
             mSystemCpuTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
+            mCpuPower = new LongSamplingCounter(mOnBatteryTimeBase, in);
 
             int bins = in.readInt();
             int steps = getCpuSpeedSteps();
@@ -7964,7 +7974,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mKernelUidCpuTimeReader.readDelta(!mOnBatteryInternal ? null :
                 new KernelUidCpuTimeReader.Callback() {
                     @Override
-                    public void onUidCpuTime(int uid, long userTimeUs, long systemTimeUs) {
+                    public void onUidCpuTime(int uid, long userTimeUs, long systemTimeUs,
+                                             long powerMaUs) {
                         final Uid u = getUidStatsLocked(mapUid(uid));
 
                         // Accumulate the total system and user time.
@@ -7978,7 +7989,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                             TimeUtils.formatDuration(userTimeUs / 1000, sb);
                             sb.append(" s=");
                             TimeUtils.formatDuration(systemTimeUs / 1000, sb);
-                            sb.append("\n");
+                            sb.append(" p=").append(powerMaUs / 1000).append("mAms\n");
                         }
 
                         if (numWakelocksF > 0) {
@@ -7994,11 +8005,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                             TimeUtils.formatDuration(userTimeUs / 1000, sb);
                             sb.append(" s=");
                             TimeUtils.formatDuration(systemTimeUs / 1000, sb);
+                            sb.append(" p=").append(powerMaUs / 1000).append("mAms");
                             Slog.d(TAG, sb.toString());
                         }
 
                         u.mUserCpuTime.addCountLocked(userTimeUs);
                         u.mSystemCpuTime.addCountLocked(systemTimeUs);
+                        u.mCpuPower.addCountLocked(powerMaUs);
 
                         // Add the cpu speeds to this UID. These are used as a ratio
                         // for computing the power this UID used.
@@ -9229,6 +9242,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             u.mUserCpuTime.readSummaryFromParcelLocked(in);
             u.mSystemCpuTime.readSummaryFromParcelLocked(in);
+            u.mCpuPower.readSummaryFromParcelLocked(in);
 
             int NSB = in.readInt();
             if (NSB > 100) {
@@ -9575,6 +9589,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             u.mUserCpuTime.writeSummaryFromParcelLocked(out);
             u.mSystemCpuTime.writeSummaryFromParcelLocked(out);
+            u.mCpuPower.writeSummaryFromParcelLocked(out);
 
             out.writeInt(u.mSpeedBins.length);
             for (int i = 0; i < u.mSpeedBins.length; i++) {
