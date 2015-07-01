@@ -47,6 +47,7 @@ import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.LocalLog.ReadOnlyLocalLog;
 import android.util.Log;
@@ -59,6 +60,7 @@ import com.android.server.connectivity.NetworkAgentInfo;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.List;
 import java.util.Random;
@@ -643,15 +645,31 @@ public class NetworkMonitor extends StateMachine {
             //    fact block fetching of the generate_204 URL which would lead to false negative
             //    results for network validation.
             boolean fetchPac = false;
-            {
-                final ProxyInfo proxyInfo = mNetworkAgentInfo.linkProperties.getHttpProxy();
-                if (proxyInfo != null && !Uri.EMPTY.equals(proxyInfo.getPacFileUrl())) {
-                    url = new URL(proxyInfo.getPacFileUrl().toString());
-                    fetchPac = true;
+            final ProxyInfo proxyInfo = mNetworkAgentInfo.linkProperties.getHttpProxy();
+            if (proxyInfo != null && !Uri.EMPTY.equals(proxyInfo.getPacFileUrl())) {
+                url = new URL(proxyInfo.getPacFileUrl().toString());
+                fetchPac = true;
+            }
+            final StringBuffer connectInfo = new StringBuffer();
+            String hostToResolve = null;
+            // Only resolve a host if HttpURLConnection is about to, to avoid any potentially
+            // unnecessary resolution.
+            if (proxyInfo == null || fetchPac) {
+                hostToResolve = url.getHost();
+            } else if (proxyInfo != null) {
+                hostToResolve = proxyInfo.getHost();
+            }
+            if (!TextUtils.isEmpty(hostToResolve)) {
+                connectInfo.append(", " + hostToResolve + "=");
+                final InetAddress[] addresses =
+                        mNetworkAgentInfo.network.getAllByName(hostToResolve);
+                for (InetAddress address : addresses) {
+                    connectInfo.append(address.getHostAddress());
+                    if (address != addresses[addresses.length-1]) connectInfo.append(",");
                 }
             }
             validationLog("Checking " + url.toString() + " on " +
-                    mNetworkAgentInfo.networkInfo.getExtraInfo());
+                    mNetworkAgentInfo.networkInfo.getExtraInfo() + connectInfo);
             urlConnection = (HttpURLConnection) mNetworkAgentInfo.network.openConnection(url);
             urlConnection.setInstanceFollowRedirects(fetchPac);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
