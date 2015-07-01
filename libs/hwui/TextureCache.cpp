@@ -93,7 +93,7 @@ void TextureCache::setMaxSize(uint32_t maxSize) {
 }
 
 void TextureCache::setFlushRate(float flushRate) {
-    mFlushRate = fmaxf(0.0f, fminf(1.0f, flushRate));
+    mFlushRate = std::max(0.0f, std::min(1.0f, flushRate));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
