@@ -51,6 +51,19 @@
             android:text="@string/abortVoice"
             />
 
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/command"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/commandVoice"
+            />
+
         <Button android:id="@+id/pick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

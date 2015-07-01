@@ -5941,7 +5941,7 @@ package android.app.admin {
 
 package android.app.assist {
 
-  public deprecated class AssistContent implements android.os.Parcelable {
+  public class AssistContent implements android.os.Parcelable {
     ctor public AssistContent();
     method public int describeContents();
     method public android.content.ClipData getClipData();
