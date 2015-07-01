@@ -60,7 +60,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     static final int STATE_COMMAND = 4;
     static final int STATE_ABORT_VOICE = 5;
     static final int STATE_COMPLETE_VOICE = 6;
-    static final int STATE_DONE=7;
+    static final int STATE_DONE = 7;
 
     int mState = STATE_IDLE;
     VoiceInteractor.PickOptionRequest.Option[] mPendingOptions;
@@ -72,8 +72,8 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     @Override
-    public void onCreate(Bundle args, int startFlags) {
-        super.onCreate(args, startFlags);
+    public void onCreate() {
+        super.onCreate();
         ActivityManager am = getContext().getSystemService(ActivityManager.class);
         am.setWatchHeapLimit(40 * 1024 * 1024);
     }
@@ -163,8 +163,8 @@ public class MainInteractionSession extends VoiceInteractionSession
         if (screenshot != null) {
             mScreenshot.setImageBitmap(screenshot);
             mScreenshot.setAdjustViewBounds(true);
-            mScreenshot.setMaxWidth(screenshot.getWidth()/3);
-            mScreenshot.setMaxHeight(screenshot.getHeight()/3);
+            mScreenshot.setMaxWidth(screenshot.getWidth() / 3);
+            mScreenshot.setMaxHeight(screenshot.getHeight() / 3);
             mFullScreenshot.setImageBitmap(screenshot);
         } else {
             mScreenshot.setImageDrawable(null);
@@ -207,11 +207,12 @@ public class MainInteractionSession extends VoiceInteractionSession
             updateState();
             startVoiceActivity(mStartIntent);
         } else if (v == mConfirmButton) {
-            if (mState == STATE_CONFIRM) {
-                mPendingRequest.sendConfirmResult(true, null);
+            if (mPendingRequest instanceof ConfirmationRequest) {
+                ((ConfirmationRequest)mPendingRequest).sendConfirmationResult(true, null);
                 mPendingRequest = null;
                 mState = STATE_LAUNCHING;
-            } else if (mState == STATE_PICK_OPTION) {
+            } else if (mPendingRequest instanceof PickOptionRequest) {
+                PickOptionRequest pick = (PickOptionRequest)mPendingRequest;
                 int numReturn = mPendingOptions.length/2;
                 if (numReturn <= 0) {
                     numReturn = 1;
@@ -223,23 +224,25 @@ public class MainInteractionSession extends VoiceInteractionSession
                 }
                 mPendingOptions = picked;
                 if (picked.length <= 1) {
-                    mPendingRequest.sendPickOptionResult(true, picked, null);
+                    pick.sendPickOptionResult(picked, null);
                     mPendingRequest = null;
                     mState = STATE_LAUNCHING;
                 } else {
-                    mPendingRequest.sendPickOptionResult(false, picked, null);
+                    pick.sendIntermediatePickOptionResult(picked, null);
                     updatePickText();
                 }
-            } else if (mPendingRequest != null) {
-                mPendingRequest.sendCommandResult(true, null);
+            } else if (mPendingRequest instanceof CommandRequest) {
+                Bundle result = new Bundle();
+                result.putString("key", "a result!");
+                ((CommandRequest)mPendingRequest).sendResult(result);
                 mPendingRequest = null;
                 mState = STATE_LAUNCHING;
             }
-        } else if (v == mAbortButton) {
-            mPendingRequest.sendAbortVoiceResult(null);
+        } else if (v == mAbortButton && mPendingRequest instanceof AbortVoiceRequest) {
+            ((AbortVoiceRequest)mPendingRequest).sendAbortResult(null);
             mPendingRequest = null;
-        } else if (v == mCompleteButton) {
-            mPendingRequest.sendCompleteVoiceResult(null);
+        } else if (v == mCompleteButton && mPendingRequest instanceof CompleteVoiceRequest) {
+            ((CompleteVoiceRequest)mPendingRequest).sendCompleteResult(null);
             mPendingRequest = null;
         } else if (v == mScreenshot) {
             if (mFullScreenshot.getVisibility() != View.VISIBLE) {
@@ -261,29 +264,45 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     @Override
-    public boolean[] onGetSupportedCommands(Caller caller, String[] commands) {
-        return new boolean[commands.length];
+    public boolean[] onGetSupportedCommands(String[] commands) {
+        boolean[] res = new boolean[commands.length];
+        for (int i=0; i<commands.length; i++) {
+            if ("com.android.test.voiceinteraction.COMMAND".equals(commands[i])) {
+                res[i] = true;
+            }
+        }
+        return res;
     }
 
+    void setPrompt(VoiceInteractor.Prompt prompt) {
+        if (prompt == null) {
+            mText.setText("(null)");
+            mPendingPrompt = "";
+        } else {
+            mText.setText(prompt.getVisualPrompt());
+            mPendingPrompt = prompt.getVisualPrompt();
+        }
+    }
+      
     @Override
-    public void onConfirm(Caller caller, Request request, CharSequence prompt, Bundle extras) {
-        Log.i(TAG, "onConfirm: prompt=" + prompt + " extras=" + extras);
-        mText.setText(prompt);
+    public void onRequestConfirmation(ConfirmationRequest request) {
+        Log.i(TAG, "onConfirm: prompt=" + request.getVoicePrompt() + " extras="
+                + request.getExtras());
+        setPrompt(request.getVoicePrompt());
         mConfirmButton.setText("Confirm");
         mPendingRequest = request;
-        mPendingPrompt = prompt;
         mState = STATE_CONFIRM;
         updateState();
     }
 
     @Override
-    public void onPickOption(Caller caller, Request request, CharSequence prompt,
-            VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
-        Log.i(TAG, "onPickOption: prompt=" + prompt + " options=" + options + " extras=" + extras);
+    public void onRequestPickOption(PickOptionRequest request) {
+        Log.i(TAG, "onPickOption: prompt=" + request.getVoicePrompt() + " options="
+                + request.getOptions() + " extras=" + request.getExtras());
         mConfirmButton.setText("Pick Option");
         mPendingRequest = request;
-        mPendingPrompt = prompt;
-        mPendingOptions = options;
+        setPrompt(request.getVoicePrompt());
+        mPendingOptions = request.getOptions();
         mState = STATE_PICK_OPTION;
         updatePickText();
         updateState();
@@ -303,27 +322,33 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     @Override
-    public void onCompleteVoice(Caller caller, Request request, CharSequence message, Bundle extras) {
-        Log.i(TAG, "onCompleteVoice: message=" + message + " extras=" + extras);
-        mText.setText(message);
+    public void onRequestCompleteVoice(CompleteVoiceRequest request) {
+        Log.i(TAG, "onCompleteVoice: message=" + request.getVoicePrompt() + " extras="
+                + request.getExtras());
+        setPrompt(request.getVoicePrompt());
         mPendingRequest = request;
         mState = STATE_COMPLETE_VOICE;
         updateState();
     }
 
     @Override
-    public void onAbortVoice(Caller caller, Request request, CharSequence message, Bundle extras) {
-        Log.i(TAG, "onAbortVoice: message=" + message + " extras=" + extras);
-        mText.setText(message);
+    public void onRequestAbortVoice(AbortVoiceRequest request) {
+        Log.i(TAG, "onAbortVoice: message=" + request.getVoicePrompt() + " extras="
+                + request.getExtras());
+        setPrompt(request.getVoicePrompt());
         mPendingRequest = request;
         mState = STATE_ABORT_VOICE;
         updateState();
     }
 
     @Override
-    public void onCommand(Caller caller, Request request, String command, Bundle extras) {
-        Log.i(TAG, "onCommand: command=" + command + " extras=" + extras);
-        mText.setText("Command: " + command);
+    public void onRequestCommand(CommandRequest request) {
+        Bundle extras = request.getExtras();
+        if (extras != null) {
+            extras.getString("arg");
+        }
+        Log.i(TAG, "onCommand: command=" + request.getCommand() + " extras=" + extras);
+        mText.setText("Command: " + request.getCommand() + ", " + extras);
         mConfirmButton.setText("Finish Command");
         mPendingRequest = request;
         mState = STATE_COMMAND;
@@ -331,8 +356,13 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     @Override
-    public void onCancel(Request request) {
+    public void onCancelRequest(Request request) {
         Log.i(TAG, "onCancel");
-        request.sendCancelResult();
+        if (mPendingRequest == request) {
+            mPendingRequest = null;
+            mState = STATE_LAUNCHING;
+            updateState();
+        }
+        request.cancel();
     }
 }
