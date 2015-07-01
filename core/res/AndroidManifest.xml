@@ -1024,15 +1024,6 @@
     <!-- ================================== -->
     <eat-comment />
 
-    <!-- Permissions for direct access to the accounts managed
-         by the Account Manager. -->
-    <permission-group android:name="android.permission-group.ACCOUNTS"
-        android:label="@string/permgrouplab_accounts"
-        android:icon="@drawable/perm_group_accounts"
-        android:description="@string/permgroupdesc_accounts"
-        android:permissionGroupFlags="personalInfo"
-        android:priority="1000" />
-
     <!-- Allows access to the list of accounts in the Accounts Service.
         <p>Protection level: normal
     -->
@@ -1045,7 +1036,6 @@
     <!-- @SystemApi Allows applications to call into AccountAuthenticators.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.ACCOUNT_MANAGER"
-        android:permissionGroup="android.permission-group.ACCOUNTS"
         android:protectionLevel="signature" />
 
     <!-- ================================== -->
