@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal.PackagesProvider;
+import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
 import android.content.pm.PackageParser;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
@@ -146,6 +147,7 @@ final class DefaultPermissionGrantPolicy {
     private PackagesProvider mVoiceInteractionPackagesProvider;
     private PackagesProvider mSmsAppPackagesProvider;
     private PackagesProvider mDialerAppPackagesProvider;
+    private SyncAdapterPackagesProvider mSyncAdapterPackagesProvider;
 
     public DefaultPermissionGrantPolicy(PackageManagerService service) {
         mService = service;
@@ -169,6 +171,10 @@ final class DefaultPermissionGrantPolicy {
 
     public void setDialerAppPackagesProviderLPw(PackagesProvider provider) {
         mDialerAppPackagesProvider = provider;
+    }
+
+    public void setSyncAdapterPackagesProviderrLPw(SyncAdapterPackagesProvider provider) {
+        mSyncAdapterPackagesProvider = provider;
     }
 
     public void grantDefaultPermissions(int userId) {
@@ -216,6 +222,7 @@ final class DefaultPermissionGrantPolicy {
         final PackagesProvider voiceInteractionPackagesProvider;
         final PackagesProvider smsAppPackagesProvider;
         final PackagesProvider dialerAppPackagesProvider;
+        final SyncAdapterPackagesProvider syncAdapterPackagesProvider;
 
         synchronized (mService.mPackages) {
             imePackagesProvider = mImePackagesProvider;
@@ -223,6 +230,7 @@ final class DefaultPermissionGrantPolicy {
             voiceInteractionPackagesProvider = mVoiceInteractionPackagesProvider;
             smsAppPackagesProvider = mSmsAppPackagesProvider;
             dialerAppPackagesProvider = mDialerAppPackagesProvider;
+            syncAdapterPackagesProvider = mSyncAdapterPackagesProvider;
         }
 
         String[] imePackageNames = (imePackagesProvider != null)
@@ -235,6 +243,10 @@ final class DefaultPermissionGrantPolicy {
                 ? smsAppPackagesProvider.getPackages(userId) : null;
         String[] dialerAppPackageNames = (dialerAppPackagesProvider != null)
                 ? dialerAppPackagesProvider.getPackages(userId) : null;
+        String[] contactsSyncAdapterPackages = (syncAdapterPackagesProvider != null) ?
+                syncAdapterPackagesProvider.getPackages(ContactsContract.AUTHORITY, userId) : null;
+        String[] calendarSyncAdapterPackages = (syncAdapterPackagesProvider != null) ?
+                syncAdapterPackagesProvider.getPackages(CalendarContract.AUTHORITY, userId) : null;
 
         synchronized (mService.mPackages) {
             // Installers
@@ -304,14 +316,14 @@ final class DefaultPermissionGrantPolicy {
             PackageParser.Package mediaStorePackage = getDefaultProviderAuthorityPackageLPr(
                     MediaStore.AUTHORITY, userId);
             if (mediaStorePackage != null) {
-                grantRuntimePermissionsLPw(mediaStorePackage, STORAGE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(mediaStorePackage, STORAGE_PERMISSIONS, true, userId);
             }
 
             // Downloads provider
             PackageParser.Package downloadsPackage = getDefaultProviderAuthorityPackageLPr(
                     "downloads", userId);
             if (downloadsPackage != null) {
-                grantRuntimePermissionsLPw(downloadsPackage, STORAGE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(downloadsPackage, STORAGE_PERMISSIONS, true, userId);
             }
 
             // Downloads UI
@@ -320,7 +332,7 @@ final class DefaultPermissionGrantPolicy {
                     downloadsUiIntent, userId);
             if (downloadsUiPackage != null
                     && doesPackageSupportRuntimePermissions(downloadsUiPackage)) {
-                grantRuntimePermissionsLPw(downloadsUiPackage, STORAGE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(downloadsUiPackage, STORAGE_PERMISSIONS, true, userId);
             }
 
             // Storage provider
@@ -360,9 +372,22 @@ final class DefaultPermissionGrantPolicy {
                     CalendarContract.AUTHORITY, userId);
             if (calendarProviderPackage != null) {
                 grantRuntimePermissionsLPw(calendarProviderPackage, CONTACTS_PERMISSIONS, userId);
-                grantRuntimePermissionsLPw(calendarProviderPackage, CALENDAR_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(calendarProviderPackage, CALENDAR_PERMISSIONS,
+                        true, userId);
                 grantRuntimePermissionsLPw(calendarProviderPackage, ACCOUNTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(calendarProviderPackage, STORAGE_PERMISSIONS, userId);
+            }
+
+            // Calendar provider sync adapters
+            List<PackageParser.Package> calendarSyncAdapters =
+                    getHeadlessSyncAdapterPackagesLPr(calendarSyncAdapterPackages,
+                            userId);
+            final int calendarSyncAdapterCount = calendarSyncAdapters.size();
+            for (int i = 0; i < calendarSyncAdapterCount; i++) {
+                PackageParser.Package calendarSyncAdapter = calendarSyncAdapters.get(i);
+                if (doesPackageSupportRuntimePermissions(calendarSyncAdapter)) {
+                    grantRuntimePermissionsLPw(calendarSyncAdapter, CALENDAR_PERMISSIONS, userId);
+                }
             }
 
             // Contacts
@@ -377,11 +402,24 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(contactsPackage, ACCOUNTS_PERMISSIONS, userId);
             }
 
+            // Contacts provider sync adapters
+            List<PackageParser.Package> contactsSyncAdapters =
+                    getHeadlessSyncAdapterPackagesLPr(contactsSyncAdapterPackages,
+                            userId);
+            final int contactsSyncAdapterCount = contactsSyncAdapters.size();
+            for (int i = 0; i < contactsSyncAdapterCount; i++) {
+                PackageParser.Package contactsSyncAdapter = contactsSyncAdapters.get(i);
+                if (doesPackageSupportRuntimePermissions(contactsSyncAdapter)) {
+                    grantRuntimePermissionsLPw(contactsSyncAdapter, CONTACTS_PERMISSIONS, userId);
+                }
+            }
+
             // Contacts provider
             PackageParser.Package contactsProviderPackage = getDefaultProviderAuthorityPackageLPr(
                     ContactsContract.AUTHORITY, userId);
             if (contactsProviderPackage != null) {
-                grantRuntimePermissionsLPw(contactsProviderPackage, CONTACTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(contactsProviderPackage, CONTACTS_PERMISSIONS,
+                        true, userId);
                 grantRuntimePermissionsLPw(contactsProviderPackage, ACCOUNTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(contactsProviderPackage, STORAGE_PERMISSIONS, userId);
             }
@@ -478,7 +516,8 @@ final class DefaultPermissionGrantPolicy {
                         grantRuntimePermissionsLPw(locationPackage, MICROPHONE_PERMISSIONS, userId);
                         grantRuntimePermissionsLPw(locationPackage, PHONE_PERMISSIONS, userId);
                         grantRuntimePermissionsLPw(locationPackage, SMS_PERMISSIONS, userId);
-                        grantRuntimePermissionsLPw(locationPackage, LOCATION_PERMISSIONS, userId);
+                        grantRuntimePermissionsLPw(locationPackage, LOCATION_PERMISSIONS,
+                                true, userId);
                         grantRuntimePermissionsLPw(locationPackage, CAMERA_PERMISSIONS, userId);
                         grantRuntimePermissionsLPw(locationPackage, SENSORS_PERMISSIONS, userId);
                         grantRuntimePermissionsLPw(locationPackage, STORAGE_PERMISSIONS, userId);
@@ -601,6 +640,31 @@ final class DefaultPermissionGrantPolicy {
             }
         }
         return null;
+    }
+
+    private List<PackageParser.Package> getHeadlessSyncAdapterPackagesLPr(
+            String[] syncAdapterPackageNames, int userId) {
+        List<PackageParser.Package> syncAdapterPackages = new ArrayList<>();
+
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+
+        for (String syncAdapterPackageName : syncAdapterPackageNames) {
+            homeIntent.setPackage(syncAdapterPackageName);
+
+            List<ResolveInfo> homeActivities = mService.queryIntentActivities(homeIntent,
+                    homeIntent.resolveType(mService.mContext.getContentResolver()), 0, userId);
+            if (!homeActivities.isEmpty()) {
+                continue;
+            }
+
+            PackageParser.Package syncAdapterPackage = getSystemPackageLPr(syncAdapterPackageName);
+            if (syncAdapterPackage != null) {
+                syncAdapterPackages.add(syncAdapterPackage);
+            }
+        }
+
+        return syncAdapterPackages;
     }
 
     private PackageParser.Package getDefaultProviderAuthorityPackageLPr(

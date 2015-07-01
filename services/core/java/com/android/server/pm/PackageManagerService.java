@@ -15970,6 +15970,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
+        public void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.setSyncAdapterPackagesProviderrLPw(provider);
+            }
+        }
+
+        @Override
         public void grantDefaultPermissionsToDefaultSmsApp(String packageName, int userId) {
             synchronized (mPackages) {
                 mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSmsAppLPr(
