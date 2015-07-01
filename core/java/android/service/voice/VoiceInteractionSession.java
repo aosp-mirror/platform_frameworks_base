@@ -71,7 +71,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  */
 public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCallbacks2 {
     static final String TAG = "VoiceInteractionSession";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     /**
      * Flag received in {@link #onShow}: originator requested that the session be started with
@@ -175,6 +175,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             CommandRequest request = new CommandRequest(callingPackage,
                     Binder.getCallingUid(), callback, VoiceInteractionSession.this,
                     command, extras);
+            addRequest(request);
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_START_COMMAND,
                     request));
             return request.mInterface;
@@ -249,16 +250,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     };
 
-    /** @hide */
-    public static class Caller {
-    }
-
     /**
      * Base class representing a request from a voice-driver app to perform a particular
      * voice operation with the user.  See related subclasses for the types of requests
      * that are possible.
      */
-    public static class Request extends Caller {
+    public static class Request {
         final IVoiceInteractorRequest mInterface = new IVoiceInteractorRequest.Stub() {
             @Override
             public void cancel() throws RemoteException {
@@ -319,74 +316,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             }
         }
 
-        /** @hide */
-        public void sendConfirmResult(boolean confirmed, Bundle result) {
-            try {
-                if (DEBUG) Log.d(TAG, "sendConfirmResult: req=" + mInterface
-                        + " confirmed=" + confirmed + " result=" + result);
-                finishRequest();
-                mCallback.deliverConfirmationResult(mInterface, confirmed, result);
-            } catch (RemoteException e) {
-            }
-        }
-
-        /** @hide */
-        public void sendPickOptionResult(boolean finished,
-                VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
-            try {
-                if (DEBUG) Log.d(TAG, "sendPickOptionResult: req=" + mInterface
-                        + " finished=" + finished + " selections=" + selections
-                        + " result=" + result);
-                if (finished) {
-                    finishRequest();
-                }
-                mCallback.deliverPickOptionResult(mInterface, finished, selections, result);
-            } catch (RemoteException e) {
-            }
-        }
-
-        /** @hide */
-        public void sendCompleteVoiceResult(Bundle result) {
-            try {
-                if (DEBUG) Log.d(TAG, "sendCompleteVoiceResult: req=" + mInterface
-                        + " result=" + result);
-                finishRequest();
-                mCallback.deliverCompleteVoiceResult(mInterface, result);
-            } catch (RemoteException e) {
-            }
-        }
-
-        /** @hide */
-        public void sendAbortVoiceResult(Bundle result) {
-            try {
-                if (DEBUG) Log.d(TAG, "sendConfirmResult: req=" + mInterface
-                        + " result=" + result);
-                finishRequest();
-                mCallback.deliverAbortVoiceResult(mInterface, result);
-            } catch (RemoteException e) {
-            }
-        }
-
-        /** @hide */
-        public void sendCommandResult(boolean finished, Bundle result) {
-            try {
-                if (DEBUG) Log.d(TAG, "sendCommandResult: req=" + mInterface
-                        + " result=" + result);
-                if (finished) {
-                    finishRequest();
-                }
-                mCallback.deliverCommandResult(mInterface, finished, result);
-            } catch (RemoteException e) {
-            }
-        }
-
-        /** @hide */
-        public void sendCancelResult() {
-            cancel();
-        }
-
         /**
-         * ASk the app to cancelLocked this current request.
+         * Ask the app to cancel this current request.
          */
         public void cancel() {
             try {
@@ -440,7 +371,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * VoiceInteractor.ConfirmationRequest.onConfirmationResult}.
          */
         public void sendConfirmationResult(boolean confirmed, Bundle result) {
-            sendConfirmResult(confirmed, result);
+            try {
+                if (DEBUG) Log.d(TAG, "sendConfirmationResult: req=" + mInterface
+                        + " confirmed=" + confirmed + " result=" + result);
+                finishRequest();
+                mCallback.deliverConfirmationResult(mInterface, confirmed, result);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -485,6 +422,20 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          */
         public VoiceInteractor.PickOptionRequest.Option[] getOptions() {
             return mOptions;
+        }
+
+        void sendPickOptionResult(boolean finished,
+                VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
+            try {
+                if (DEBUG) Log.d(TAG, "sendPickOptionResult: req=" + mInterface
+                        + " finished=" + finished + " selections=" + selections
+                        + " result=" + result);
+                if (finished) {
+                    finishRequest();
+                }
+                mCallback.deliverPickOptionResult(mInterface, finished, selections, result);
+            } catch (RemoteException e) {
+            }
         }
 
         /**
@@ -553,7 +504,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * VoiceInteractor.CompleteVoiceRequest.onCompleteResult}.
          */
         public void sendCompleteResult(Bundle result) {
-            sendCompleteVoiceResult(result);
+            try {
+                if (DEBUG) Log.d(TAG, "sendCompleteVoiceResult: req=" + mInterface
+                        + " result=" + result);
+                finishRequest();
+                mCallback.deliverCompleteVoiceResult(mInterface, result);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -596,7 +553,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * VoiceInteractor.AbortVoiceRequest.onAbortResult}.
          */
         public void sendAbortResult(Bundle result) {
-            sendAbortVoiceResult(result);
+            try {
+                if (DEBUG) Log.d(TAG, "sendConfirmResult: req=" + mInterface
+                        + " result=" + result);
+                finishRequest();
+                mCallback.deliverAbortVoiceResult(mInterface, result);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -619,6 +582,18 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          */
         public String getCommand() {
             return mCommand;
+        }
+
+        void sendCommandResult(boolean finished, Bundle result) {
+            try {
+                if (DEBUG) Log.d(TAG, "sendCommandResult: req=" + mInterface
+                        + " result=" + result);
+                if (finished) {
+                    finishRequest();
+                }
+                mCallback.deliverCommandResult(mInterface, finished, result);
+            } catch (RemoteException e) {
+            }
         }
 
         /**
@@ -829,11 +804,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
-    void doCreate(IVoiceInteractionManagerService service, IBinder token, Bundle args,
-            int startFlags) {
+    void doCreate(IVoiceInteractionManagerService service, IBinder token) {
         mSystemService = service;
         mToken = token;
-        onCreate(args, startFlags);
+        onCreate();
     }
 
     void doShow(Bundle args, int flags, final IVoiceInteractionSessionShowCallback showCallback) {
@@ -919,11 +893,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mContentFrame = (FrameLayout)mRootView.findViewById(android.R.id.content);
     }
 
-    /** @hide */
-    public void show() {
-        show(null, 0);
-    }
-
     /**
      * Show the UI for this session.  This asks the system to go through the process of showing
      * your UI, which will eventually culminate in {@link #onShow}.  This is similar to calling
@@ -956,14 +925,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             mSystemService.hideSessionFromSession(mToken);
         } catch (RemoteException e) {
         }
-    }
-
-    /** @hide */
-    public void showWindow() {
-    }
-
-    /** @hide */
-    public void hideWindow() {
     }
 
     /**
@@ -1062,7 +1023,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
         }
-        hideWindow();
         try {
             mSystemService.finish(mToken);
         } catch (RemoteException e) {
@@ -1074,16 +1034,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * session will be used for; you will find that out in {@link #onShow}.
      */
     public void onCreate() {
-        doOnCreate();
-    }
-
-    /** @hide */
-    public void onCreate(Bundle args) {
-        doOnCreate();
-    }
-
-    /** @hide */
-    public void onCreate(Bundle args, int showFlags) {
         doOnCreate();
     }
 
@@ -1244,34 +1194,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         hide();
     }
 
-    /** @hide */
-    public boolean[] onGetSupportedCommands(Caller caller, String[] commands) {
-        return new boolean[commands.length];
-    }
-    /** @hide */
-    public void onConfirm(Caller caller, Request request, CharSequence prompt,
-            Bundle extras) {
-    }
-    /** @hide */
-    public void onPickOption(Caller caller, Request request, CharSequence prompt,
-            VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
-    }
-    /** @hide */
-    public void onCompleteVoice(Caller caller, Request request, CharSequence message,
-           Bundle extras) {
-        request.sendCompleteVoiceResult(null);
-    }
-    /** @hide */
-    public void onAbortVoice(Caller caller, Request request, CharSequence message, Bundle extras) {
-        request.sendAbortVoiceResult(null);
-    }
-    /** @hide */
-    public void onCommand(Caller caller, Request request, String command, Bundle extras) {
-    }
-    /** @hide */
-    public void onCancel(Request request) {
-    }
-
     /**
      * Request to query for what extended commands the session supports.
      *
@@ -1282,7 +1204,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * an array of all false entries.
      */
     public boolean[] onGetSupportedCommands(String[] commands) {
-        return onGetSupportedCommands(new Caller(), commands);
+        return new boolean[commands.length];
     }
 
     /**
@@ -1293,7 +1215,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param request The active request.
      */
     public void onRequestConfirmation(ConfirmationRequest request) {
-        onConfirm(request, request, request.getPrompt(), request.getExtras());
     }
 
     /**
@@ -1303,8 +1224,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param request The active request.
      */
     public void onRequestPickOption(PickOptionRequest request) {
-        onPickOption(request, request, request.getPrompt(), request.getOptions(),
-                request.getExtras());
     }
 
     /**
@@ -1317,7 +1236,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param request The active request.
      */
     public void onRequestCompleteVoice(CompleteVoiceRequest request) {
-        onCompleteVoice(request, request, request.getMessage(), request.getExtras());
     }
 
     /**
@@ -1330,7 +1248,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param request The active request.
      */
     public void onRequestAbortVoice(AbortVoiceRequest request) {
-        onAbortVoice(request, request, request.getMessage(), request.getExtras());
     }
 
     /**
@@ -1341,11 +1258,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param request The active request.
      */
     public void onRequestCommand(CommandRequest request) {
-        onCommand(request, request, request.getCommand(), request.getExtras());
     }
 
     /**
-     * Called when the {@link android.app.VoiceInteractor} has asked to cancelLocked a {@link Request}
+     * Called when the {@link android.app.VoiceInteractor} has asked to cancel a {@link Request}
      * that was previously delivered to {@link #onRequestConfirmation},
      * {@link #onRequestPickOption}, {@link #onRequestCompleteVoice}, {@link #onRequestAbortVoice},
      * or {@link #onRequestCommand}.
@@ -1353,6 +1269,5 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param request The request that is being canceled.
      */
     public void onCancelRequest(Request request) {
-        onCancel(request);
     }
 }

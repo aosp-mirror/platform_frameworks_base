@@ -52,39 +52,29 @@ public class AssistInteractionSession extends VoiceInteractionSession {
     }
 
     @Override
-    public void onConfirm(Caller caller,
-            Request request, CharSequence prompt, Bundle extras) {
-
+    public void onRequestConfirmation(ConfirmationRequest request) {
     }
 
     @Override
-    public void onPickOption(Caller caller,
-            Request request, CharSequence prompt,
-            VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
-
+    public void onRequestPickOption(PickOptionRequest request) {
     }
 
     @Override
-    public void onCommand(Caller caller,
-            Request request, String command, Bundle extras) {
-
+    public void onRequestCommand(CommandRequest request) {
     }
 
     @Override
-    public void onCreate(Bundle args) {
-        super.onCreate(args);
+    public void onCancelRequest(Request request) {
+    }
 
+    @Override
+    public void onCreate() {
         // Simulate slowness of Assist app
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void onCancel(Request request) {
-
     }
 
     @Override
