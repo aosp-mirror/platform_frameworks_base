@@ -130,7 +130,6 @@ getInternedString(JNIEnv *env, const String8* string) {
         internedStrings.insert(std::make_pair(string, internedString));
         env->DeleteLocalRef(localString);
     }
-
     return internedString;
 }
 
@@ -182,10 +181,9 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sens
     return size_t(next) < count ? next : 0;
 }
 
-static int nativeEnableDataInjection(JNIEnv *_env, jclass _this, jlong sensorManager,
-        jboolean enable) {
+static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong sensorManager) {
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
-    return mgr->enableDataInjection(enable);
+    return mgr->isDataInjectionEnabled();
 }
 
 //----------------------------------------------------------------------------
@@ -358,9 +356,9 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
             "(JLandroid/hardware/Sensor;I)I",
             (void*)nativeGetNextSensor },
 
-    {"nativeEnableDataInjection",
-            "(JZ)I",
-            (void*)nativeEnableDataInjection },
+    {"nativeIsDataInjectionEnabled",
+            "(J)Z",
+            (void*)nativeIsDataInjectionEnabled},
 };
 
 static JNINativeMethod gBaseEventQueueMethods[] = {
