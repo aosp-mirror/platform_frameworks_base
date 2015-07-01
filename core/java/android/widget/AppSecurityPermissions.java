@@ -553,7 +553,8 @@ public class AppSecurityPermissions {
             int existingReqFlags) {
         final int base = pInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
         final boolean isNormal = (base == PermissionInfo.PROTECTION_NORMAL);
-        final boolean isDangerous = (base == PermissionInfo.PROTECTION_DANGEROUS);
+        final boolean isDangerous = (base == PermissionInfo.PROTECTION_DANGEROUS)
+                || ((pInfo.protectionLevel&PermissionInfo.PROTECTION_FLAG_PRE23) != 0);
         final boolean isRequired =
                 ((newReqFlags&PackageInfo.REQUESTED_PERMISSION_REQUIRED) != 0);
         final boolean isDevelopment =
