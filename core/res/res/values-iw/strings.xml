@@ -212,7 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"כיבוי"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"דיווח על באג"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"שלח דיווח על באג"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד שיהיה ניתן לבצע שליחה. אנא המתן בסבלנות."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד לשליחת ההודעה בפועל. אנא המתן בסבלנות."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"מצב שקט"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"הקול כבוי"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"קול מופעל"</string>
@@ -476,8 +476,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"הרשאה זו מאפשרת למשתמש לבצע איגוד לממשק הרמה העליונה של שירות מאזין להתראות. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"איגוד לשירות ספק תנאי"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"מאפשרת לבעלים לאגד לממשק ברמה העליונה של שירות ספק תנאי. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"‏איגוד לשירות Dream"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"‏מאפשרת לבעלים לבצע איגוד לממשק הרמה העליונה של שירות Dream. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילות."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"איגוד לשירות ׳חלום בהקיץ׳"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"מאפשרת לבעלים לבצע איגוד לממשק הרמה העליונה של שירות ׳חלום בהקיץ׳. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילות."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"הפעלה של אפליקציית תצורה שסופקה על ידי ספק"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ההרשאה הזו מאפשרת לבעלים להפעיל את אפליקציית התצורה שסופקה על ידי ספק. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"קליטת מעקב אחר תנאי רשת"</string>

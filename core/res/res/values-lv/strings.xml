@@ -530,8 +530,8 @@
     <item msgid="8901098336658710359">"Mājas"</item>
     <item msgid="869923650527136615">"Mobilais"</item>
     <item msgid="7897544654242874543">"Darbā"</item>
-    <item msgid="1103601433382158155">"Faksa numurs darbā"</item>
-    <item msgid="1735177144948329370">"Faksa numurs mājās"</item>
+    <item msgid="1103601433382158155">"Darba fakss"</item>
+    <item msgid="1735177144948329370">"Mājas fakss"</item>
     <item msgid="603878674477207394">"Peidžers"</item>
     <item msgid="1650824275177931637">"Cits"</item>
     <item msgid="9192514806975898961">"Pielāgots"</item>
@@ -573,8 +573,8 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"Mājas"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobilais"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Darbā"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Faksa numurs darbā"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faksa numurs mājās"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Darba fakss"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Mājas fakss"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Peidžers"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Cits"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Atzvanīšana"</string>
@@ -1048,7 +1048,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB savienojums MIDI režīmā"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Pievienots kā instalēšanas programma"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Ir izveidots savienojums ar USB piederumu."</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Lai skatītu citas opcijas, pieskarieties šeit."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Citas opcijas"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Vai formatēt USB atmiņu?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vai formatēt SD karti?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Visi USB atmiņā saglabātie faili tiks dzēsti. Šo darbību nevar atsaukt."</string>

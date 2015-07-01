@@ -243,8 +243,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografiază și înregistrează videoclipuri"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"inițiază și gestionează apeluri telefonice"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Senzori corporali"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accesează datele înregistrate de senzori despre semnele vitale"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspectează conținutul unei ferestre cu care interacționați."</string>

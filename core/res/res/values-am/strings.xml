@@ -242,8 +242,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ስዕሎች ያንሱ እና ቪዲዮ ይቅረጹ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ስልክ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"የስልክ ጥሪዎች ያድርጉ እና ያስተዳድሩ"</string>
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"የሰውነት ዳሳሾች"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ስለአስፈላጊ ምልክቶችዎ ያሉ የዳሳሽ ውሂብ ይድረሱ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"የመስኮት ይዘት ሰርስረው ያውጡ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"መስተጋበር የሚፈጥሩት የመስኮት ይዘት ይመርምሩ።"</string>
