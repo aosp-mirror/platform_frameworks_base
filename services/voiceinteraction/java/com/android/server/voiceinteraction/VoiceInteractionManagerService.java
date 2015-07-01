@@ -545,6 +545,24 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public void closeSystemDialogs(IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "closeSystemDialogs without running voice interaction service");
+                    return;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.closeSystemDialogsLocked(callingPid, callingUid, token);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
         public void finish(IBinder token) {
             synchronized (this) {
                 if (mImpl == null) {
