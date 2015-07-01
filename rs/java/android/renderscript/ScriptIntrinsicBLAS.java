@@ -3277,11 +3277,11 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
      * just before there's a shift down to drop the fractional parts. The output
      * values are gated to 0 to 255 to fit in a byte, but the 10-bit format
      * gives some headroom to avoid wrapping around on small overflows.
-     * 
+     *
      * @param A The input allocation contains matrix A, supported elements type {@link Element#U8}.
-     * @param a_offset The offset for all values in matrix A, e.g A[i,j] = A[i,j] - a_offset.
+     * @param a_offset The offset for all values in matrix A, e.g A[i,j] = A[i,j] - a_offset. Value should be from 0 to 255.
      * @param B The input allocation contains matrix B, supported elements type {@link Element#U8}.
-     * @param b_offset The offset for all values in matrix B, e.g B[i,j] = B[i,j] - b_offset.
+     * @param b_offset The offset for all values in matrix B, e.g B[i,j] = B[i,j] - b_offset. Value should be from 0 to 255.
      * @param C The input allocation contains matrix C, supported elements type {@link Element#U8}.
      * @param c_offset The offset for all values in matrix C.
      * @param c_mult The multiplier for all values in matrix C, e.g C[i,j] = (C[i,j] + c_offset) * c_mult.
@@ -3289,6 +3289,12 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
     public void BNNM(Allocation A, int a_offset, Allocation B, int b_offset, Allocation C, int c_offset, int c_mult) {
         validateL3(Element.U8(mRS), NO_TRANSPOSE, TRANSPOSE, 0, A, B, C);
 
+        if (a_offset < 0 || a_offset > 255) {
+            throw new RSRuntimeException("Invalid a_offset passed to BNNM");
+        }
+        if (b_offset < 0 || b_offset > 255) {
+            throw new RSRuntimeException("Invalid b_offset passed to BNNM");
+        }
         int M = -1, N = -1, K = -1;
         M = A.getType().getY();
         N = B.getType().getY();
