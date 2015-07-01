@@ -388,6 +388,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Permission grant: grant as runtime a permission that was granted as an install time one. */
     private static final int GRANT_UPGRADE = 5;
 
+    /** Canonical intent used to identify what counts as a "web browser" app */
+    private static final Intent sBrowserIntent;
+    static {
+        sBrowserIntent = new Intent();
+        sBrowserIntent.setAction(Intent.ACTION_VIEW);
+        sBrowserIntent.addCategory(Intent.CATEGORY_BROWSABLE);
+        sBrowserIntent.setData(Uri.parse("http:"));
+    }
+
     final ServiceThread mHandlerThread;
 
     final PackageHandler mHandler;
@@ -1300,6 +1309,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (data != null) {
                         InstallArgs args = data.args;
                         PackageInstalledInfo res = data.res;
+                        final String packageName = res.pkg.applicationInfo.packageName;
 
                         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                             res.removedInfo.sendBroadcast(false, true, false);
@@ -1348,22 +1358,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 }
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                    res.pkg.applicationInfo.packageName,
-                                    extras, null, null, firstUsers);
+                                    packageName, extras, null, null, firstUsers);
                             final boolean update = res.removedInfo.removedPackage != null;
                             if (update) {
                                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                    res.pkg.applicationInfo.packageName,
-                                    extras, null, null, updateUsers);
+                                    packageName, extras, null, null, updateUsers);
                             if (update) {
                                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                                        res.pkg.applicationInfo.packageName,
-                                        extras, null, null, updateUsers);
+                                        packageName, extras, null, null, updateUsers);
                                 sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
-                                        null, null,
-                                        res.pkg.applicationInfo.packageName, null, updateUsers);
+                                        null, null, packageName, null, updateUsers);
 
                                 // treat asec-hosted packages like removable media on upgrade
                                 if (res.pkg.isForwardLocked() || isExternal(res.pkg)) {
@@ -1373,7 +1379,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     }
                                     int[] uidArray = new int[] { res.pkg.applicationInfo.uid };
                                     ArrayList<String> pkgList = new ArrayList<String>(1);
-                                    pkgList.add(res.pkg.applicationInfo.packageName);
+                                    pkgList.add(packageName);
                                     sendResourcesChangedBroadcast(true, true,
                                             pkgList,uidArray, null);
                                 }
@@ -1383,6 +1389,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 deleteOld = true;
                             }
 
+                            // If this app is a browser and it's newly-installed for some
+                            // users, clear any default-browser state in those users
+                            if (firstUsers.length > 0) {
+                                // the app's nature doesn't depend on the user, so we can just
+                                // check its browser nature in any user and generalize.
+                                if (packageIsBrowser(packageName, firstUsers[0])) {
+                                    synchronized (mPackages) {
+                                        for (int userId : firstUsers) {
+                                            mSettings.setDefaultBrowserPackageNameLPw(null, userId);
+                                        }
+                                    }
+                                }
+                            }
                             // Log current value of "unknown sources" setting
                             EventLog.writeEvent(EventLogTags.UNKNOWN_SOURCES_ENABLED,
                                 getUnknownSourcesSettings());
@@ -2405,14 +2424,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private List<String> resolveAllBrowserApps(int userId) {
-        // Match all generic http: browser apps
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-        intent.setData(Uri.parse("http:"));
-
-        // Resolve that intent and check that the handleAllWebDataURI boolean is set
-        List<ResolveInfo> list = queryIntentActivities(intent, null, 0, userId);
+        // Resolve the canonical browser intent and check that the handleAllWebDataURI boolean is set
+        List<ResolveInfo> list = queryIntentActivities(sBrowserIntent, null,
+                PackageManager.MATCH_ALL, userId);
 
         final int count = list.size();
         List<String> result = new ArrayList<String>(count);
@@ -2428,6 +2442,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return result;
+    }
+
+    private boolean packageIsBrowser(String packageName, int userId) {
+        List<ResolveInfo> list = queryIntentActivities(sBrowserIntent, null,
+                PackageManager.MATCH_ALL, userId);
+        final int N = list.size();
+        for (int i = 0; i < N; i++) {
+            ResolveInfo info = list.get(i);
+            if (packageName.equals(info.activityInfo.packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void checkDefaultBrowser() {
