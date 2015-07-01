@@ -531,7 +531,8 @@ public final class ViewRootImpl implements ViewParent,
                     collectViewAttributes();
                     res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(),
-                            mAttachInfo.mContentInsets, mAttachInfo.mStableInsets, mInputChannel);
+                            mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
+                            mAttachInfo.mOutsets, mInputChannel);
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
@@ -1590,6 +1591,7 @@ public final class ViewRootImpl implements ViewParent,
                         + " content=" + mPendingContentInsets.toShortString()
                         + " visible=" + mPendingVisibleInsets.toShortString()
                         + " visible=" + mPendingStableInsets.toShortString()
+                        + " outsets=" + mPendingOutsets.toShortString()
                         + " surface=" + mSurface);
 
                 if (mPendingConfiguration.seq != 0) {
