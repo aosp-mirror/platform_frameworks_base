@@ -1014,10 +1014,10 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append(this.numNoInternetAccessReports).append("\n");
         }
         if (this.updateTime != null) {
-            sbuf.append("creation=").append(this.updateTime).append("\n");
+            sbuf.append("update ").append(this.updateTime).append("\n");
         }
         if (this.creationTime != null) {
-            sbuf.append("update=").append(this.creationTime).append("\n");
+            sbuf.append("creation").append(this.creationTime).append("\n");
         }
         if (this.didSelfAdd) sbuf.append(" didSelfAdd");
         if (this.selfAdded) sbuf.append(" selfAdded");
