@@ -1001,6 +1001,21 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     /**
+     * Request that all system dialogs (and status bar shade etc) be closed, allowing
+     * access to the session's UI.  This will <em>not</em> cause the lock screen to be
+     * dismissed.
+     */
+    public void closeSystemDialogs() {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
+        try {
+            mSystemService.closeSystemDialogs(mToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Convenience for inflating views.
      */
     public LayoutInflater getLayoutInflater() {

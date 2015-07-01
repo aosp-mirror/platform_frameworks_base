@@ -28807,6 +28807,7 @@ package android.service.voice {
   public class VoiceInteractionSession implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback {
     ctor public VoiceInteractionSession(android.content.Context);
     ctor public VoiceInteractionSession(android.content.Context, android.os.Handler);
+    method public void closeSystemDialogs();
     method public void finish();
     method public android.content.Context getContext();
     method public android.view.LayoutInflater getLayoutInflater();
