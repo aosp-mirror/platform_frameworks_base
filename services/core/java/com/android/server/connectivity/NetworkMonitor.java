@@ -273,7 +273,7 @@ public class NetworkMonitor extends StateMachine {
 
     @Override
     protected void log(String s) {
-        Log.d(TAG + "/" + mNetworkAgentInfo.name(), s);
+        if (DBG) Log.d(TAG + "/" + mNetworkAgentInfo.name(), s);
     }
 
     private void validationLog(String s) {
@@ -290,18 +290,15 @@ public class NetworkMonitor extends StateMachine {
     private class DefaultState extends State {
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
             switch (message.what) {
                 case CMD_NETWORK_LINGER:
-                    if (DBG) log("Lingering");
+                    log("Lingering");
                     transitionTo(mLingeringState);
                     return HANDLED;
                 case CMD_NETWORK_CONNECTED:
-                    if (DBG) log("Connected");
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
-                    if (DBG) log("Disconnected - quitting");
                     if (mLaunchCaptivePortalAppBroadcastReceiver != null) {
                         mContext.unregisterReceiver(mLaunchCaptivePortalAppBroadcastReceiver);
                         mLaunchCaptivePortalAppBroadcastReceiver = null;
@@ -310,13 +307,14 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_FORCE_REEVALUATION:
                 case CMD_CAPTIVE_PORTAL_RECHECK:
-                    if (DBG) log("Forcing reevaluation");
+                    log("Forcing reevaluation for UID " + message.arg1);
                     mUidResponsibleForReeval = message.arg1;
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_CAPTIVE_PORTAL_APP_FINISHED:
                     if (!mCaptivePortalLoggedInResponseToken.equals((String)message.obj))
                         return HANDLED;
+                    log("CaptivePortal App responded with " + message.arg1);
                     // Previous token was sent out, come up with a new one.
                     mCaptivePortalLoggedInResponseToken = String.valueOf(new Random().nextLong());
                     switch (message.arg1) {
@@ -354,14 +352,12 @@ public class NetworkMonitor extends StateMachine {
     private class ValidatedState extends State {
         @Override
         public void enter() {
-            if (DBG) log("Validated");
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_VALID, 0, mNetworkAgentInfo));
         }
 
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
             switch (message.what) {
                 case CMD_NETWORK_CONNECTED:
                     transitionTo(mValidatedState);
@@ -377,7 +373,6 @@ public class NetworkMonitor extends StateMachine {
     private class MaybeNotifyState extends State {
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
             switch (message.what) {
                 case CMD_LAUNCH_CAPTIVE_PORTAL_APP:
                     final Intent intent = new Intent(
@@ -421,7 +416,6 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
             switch (message.what) {
                 case CMD_REEVALUATE:
                     if (message.arg1 != mReevaluateToken || mUserDoesNotWant)
@@ -546,12 +540,6 @@ public class NetworkMonitor extends StateMachine {
         }
 
         @Override
-        public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
-            return NOT_HANDLED;
-        }
-
-        @Override
         public void exit() {
              removeMessages(CMD_CAPTIVE_PORTAL_RECHECK);
         }
@@ -583,9 +571,9 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
             switch (message.what) {
                 case CMD_NETWORK_CONNECTED:
+                    log("Unlingered");
                     // Go straight to active as we've already evaluated.
                     transitionTo(mValidatedState);
                     return HANDLED;
@@ -729,7 +717,6 @@ public class NetworkMonitor extends StateMachine {
             long requestTimestampMs, long responseTimestampMs) {
         if (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0) {
-            if (DBG) log("Don't send network conditions - lacking user consent.");
             return;
         }
 
@@ -763,7 +750,7 @@ public class NetworkMonitor extends StateMachine {
                     if (cellInfo.isRegistered()) {
                         numRegisteredCellInfo++;
                         if (numRegisteredCellInfo > 1) {
-                            if (DBG) log("more than one registered CellInfo.  Can't " +
+                            log("more than one registered CellInfo.  Can't " +
                                     "tell which is active.  Bailing.");
                             return;
                         }
