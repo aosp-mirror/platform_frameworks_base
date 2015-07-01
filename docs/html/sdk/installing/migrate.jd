@@ -50,7 +50,7 @@ the key changes you should be aware of as you prepare to migrate to Android Stud
     <p>Android Studio uses a different project structure. Each Eclipse ADT
     project is called a module in Android Studio. Each instance of Android
     Studio contains a project with one or more app modules. For more information see,
-    <a href="{@docRoot}tools/studio/eclipse-migration-guide.html#project-structure">Project
+    <a href="{@docRoot}tools/studio/eclipse-transition-guide.html#project-structure">Project
     Structure</a>.</p></li>
 
   <li><strong>Manifest settings</strong>
@@ -59,14 +59,14 @@ the key changes you should be aware of as you prepare to migrate to Android Stud
     <code>build.gradle</code> file. These elements are still valid manifest entries and may
     appear in manifests from older projects, imported projects, dependencies, and libraries. For
     more information see,
-    <a href="{@docRoot}tools/studio/eclipse-migration-guide.html#manifest-settings">Manifest
+    <a href="{@docRoot}tools/studio/eclipse-transition-guide.html#manifest-settings">Manifest
     Settings</a>.</p></li>
 
   <li><strong>Dependencies</strong>
     <p>Library dependencies are handled differently in Android Studio, using Gradle dependency
     declarations and Maven dependencies for well-known local source and binary libraries with
     Maven coordinates.  For more information see,
-    <a href="{@docRoot}tools/studio/eclipse-migration-guide.html#dependencies">Dependencies</a></p>
+    <a href="{@docRoot}tools/studio/eclipse-transition-guide.html#dependencies">Dependencies</a></p>
     </li>
 
   <li><strong>Test code</strong>
@@ -261,7 +261,7 @@ Android Studio project and does not impact the existing Eclipse ADT project. </p
 <a href="http://www.gradle.org">Gradle</a>-based build system to become familiar with the new
 project and module structure, flexible build settings, and other advanced Android development
 capabilities. For a comparison of Eclipse ADT and Android Studio features and usage, see
-<a href="{@docRoot}tools/studio/eclipse-migration-guide.html">Transitioning to Android Studio from
+<a href="{@docRoot}tools/studio/eclipse-transition-guide.html">Transitioning to Android Studio from
 Eclipse</a>. For specific Android Studio how-to documentation, see the pages in the
 <a href="{@docRoot}tools/workflow/index.html">Workflow</a> section.
 </p>
