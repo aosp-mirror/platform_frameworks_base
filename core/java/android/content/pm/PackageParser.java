@@ -1505,7 +1505,8 @@ public class PackageParser {
                 if (!parseUsesPermission(pkg, res, parser, attrs)) {
                     return null;
                 }
-            } else if (tagName.equals("uses-permission-sdk-m")) {
+            } else if (tagName.equals("uses-permission-sdk-m")
+                    || tagName.equals("uses-permission-sdk-23")) {
                 if (!parseUsesPermission(pkg, res, parser, attrs)) {
                     return null;
                 }
