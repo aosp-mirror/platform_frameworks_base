@@ -1999,70 +1999,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.graphics.Rect>("android.sensor.info.activeArraySize", android.graphics.Rect.class);
 
     /**
-     * <p>The area of the image sensor which corresponds to active pixels prior to the
-     * application of any geometric distortion correction.</p>
-     * <p>This is the rectangle representing the size of the active region of the sensor (i.e.
-     * the region that actually receives light from the scene) before any geometric correction
-     * has been applied, and should be treated as the active region rectangle for any of the
-     * raw formats.  All metadata associated with raw processing (e.g. the lens shading
-     * correction map, and radial distortion fields) treats the top, left of this rectangle as
-     * the origin, (0,0).</p>
-     * <p>The size of this region determines the maximum field of view and the maximum number of
-     * pixels that an image from this sensor can contain, prior to the application of
-     * geometric distortion correction. The effective maximum pixel dimensions of a
-     * post-distortion-corrected image is given by the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}
-     * field, and the effective maximum field of view for a post-distortion-corrected image
-     * can be calculated by applying the geometric distortion correction fields to this
-     * rectangle, and cropping to the rectangle given in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
-     * <p>E.g. to calculate position of a pixel, (x,y), in a processed YUV output image with the
-     * dimensions in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} given the position of a pixel,
-     * (x', y'), in the raw pixel array with dimensions give in
-     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}:</p>
-     * <ol>
-     * <li>Choose a pixel (x', y') within the active array region of the raw buffer given in
-     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}, otherwise this pixel is considered
-     * to be outside of the FOV, and will not be shown in the processed output image.</li>
-     * <li>Apply geometric distortion correction to get the post-distortion pixel coordinate,
-     * (x_i, y_i). When applying geometric correction metadata, note that metadata for raw
-     * buffers is defined relative to the top, left of the
-     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} rectangle.</li>
-     * <li>If the resulting corrected pixel coordinate is within the region given in
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}, then the position of this pixel in the
-     * processed output image buffer is <code>(x_i - activeArray.left, y_i - activeArray.top)</code>,
-     * when the top, left coordinate of that buffer is treated as (0, 0).</li>
-     * </ol>
-     * <p>Thus, for pixel x',y' = (25, 25) on a sensor where {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}
-     * is (100,100), {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} is (10, 10, 100, 100),
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} is (20, 20, 80, 80), and the geometric distortion
-     * correction doesn't change the pixel coordinate, the resulting pixel selected in
-     * pixel coordinates would be x,y = (25, 25) relative to the top,left of the raw buffer
-     * with dimensions given in {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}, and would be (5, 5)
-     * relative to the top,left of post-processed YUV output buffer with dimensions given in
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
-     * <p>The currently supported fields that correct for geometric distortion are:</p>
-     * <ol>
-     * <li>android.lens.radialDistortion.</li>
-     * </ol>
-     * <p>If all of the geometric distortion fields are no-ops, this rectangle will be the same
-     * as the post-distortion-corrected rectangle given in
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
-     * <p>This rectangle is defined relative to the full pixel array; (0,0) is the top-left of
-     * the full pixel array, and the size of the full pixel array is given by
-     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.</p>
-     * <p>The pre-correction active array may be smaller than the full pixel array, since the
-     * full array may include black calibration pixels or other inactive regions.</p>
-     * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
-     * <p>This key is available on all devices.</p>
-     *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
-     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
-     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
-     */
-    @PublicKey
-    public static final Key<android.graphics.Rect> SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE =
-            new Key<android.graphics.Rect>("android.sensor.info.preCorrectionActiveArraySize", android.graphics.Rect.class);
-
-    /**
      * <p>Range of sensitivities for {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} supported by this
      * camera device.</p>
      * <p>The values are the standard ISO sensitivity values,
@@ -2249,6 +2185,70 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     public static final Key<Boolean> SENSOR_INFO_LENS_SHADING_APPLIED =
             new Key<Boolean>("android.sensor.info.lensShadingApplied", boolean.class);
+
+    /**
+     * <p>The area of the image sensor which corresponds to active pixels prior to the
+     * application of any geometric distortion correction.</p>
+     * <p>This is the rectangle representing the size of the active region of the sensor (i.e.
+     * the region that actually receives light from the scene) before any geometric correction
+     * has been applied, and should be treated as the active region rectangle for any of the
+     * raw formats.  All metadata associated with raw processing (e.g. the lens shading
+     * correction map, and radial distortion fields) treats the top, left of this rectangle as
+     * the origin, (0,0).</p>
+     * <p>The size of this region determines the maximum field of view and the maximum number of
+     * pixels that an image from this sensor can contain, prior to the application of
+     * geometric distortion correction. The effective maximum pixel dimensions of a
+     * post-distortion-corrected image is given by the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}
+     * field, and the effective maximum field of view for a post-distortion-corrected image
+     * can be calculated by applying the geometric distortion correction fields to this
+     * rectangle, and cropping to the rectangle given in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
+     * <p>E.g. to calculate position of a pixel, (x,y), in a processed YUV output image with the
+     * dimensions in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} given the position of a pixel,
+     * (x', y'), in the raw pixel array with dimensions give in
+     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}:</p>
+     * <ol>
+     * <li>Choose a pixel (x', y') within the active array region of the raw buffer given in
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}, otherwise this pixel is considered
+     * to be outside of the FOV, and will not be shown in the processed output image.</li>
+     * <li>Apply geometric distortion correction to get the post-distortion pixel coordinate,
+     * (x_i, y_i). When applying geometric correction metadata, note that metadata for raw
+     * buffers is defined relative to the top, left of the
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} rectangle.</li>
+     * <li>If the resulting corrected pixel coordinate is within the region given in
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}, then the position of this pixel in the
+     * processed output image buffer is <code>(x_i - activeArray.left, y_i - activeArray.top)</code>,
+     * when the top, left coordinate of that buffer is treated as (0, 0).</li>
+     * </ol>
+     * <p>Thus, for pixel x',y' = (25, 25) on a sensor where {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}
+     * is (100,100), {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} is (10, 10, 100, 100),
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} is (20, 20, 80, 80), and the geometric distortion
+     * correction doesn't change the pixel coordinate, the resulting pixel selected in
+     * pixel coordinates would be x,y = (25, 25) relative to the top,left of the raw buffer
+     * with dimensions given in {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}, and would be (5, 5)
+     * relative to the top,left of post-processed YUV output buffer with dimensions given in
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
+     * <p>The currently supported fields that correct for geometric distortion are:</p>
+     * <ol>
+     * <li>android.lens.radialDistortion.</li>
+     * </ol>
+     * <p>If all of the geometric distortion fields are no-ops, this rectangle will be the same
+     * as the post-distortion-corrected rectangle given in
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
+     * <p>This rectangle is defined relative to the full pixel array; (0,0) is the top-left of
+     * the full pixel array, and the size of the full pixel array is given by
+     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.</p>
+     * <p>The pre-correction active array may be smaller than the full pixel array, since the
+     * full array may include black calibration pixels or other inactive regions.</p>
+     * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
+     * <p>This key is available on all devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
+     */
+    @PublicKey
+    public static final Key<android.graphics.Rect> SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE =
+            new Key<android.graphics.Rect>("android.sensor.info.preCorrectionActiveArraySize", android.graphics.Rect.class);
 
     /**
      * <p>The standard reference illuminant used as the scene light source when
