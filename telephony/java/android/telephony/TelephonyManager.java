@@ -4157,6 +4157,8 @@ public class TelephonyManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#canChangeDtmfToneLength", e);
+        } catch (SecurityException e) {
+            Log.w(TAG, "Permission error calling ITelephony#canChangeDtmfToneLength", e);
         }
         return false;
     }
