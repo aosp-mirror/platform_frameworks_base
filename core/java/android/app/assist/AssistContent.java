@@ -12,7 +12,6 @@ import android.os.Parcelable;
  * assistant at the user's request.  This is filled in by
  * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
  */
-@Deprecated
 public class AssistContent implements Parcelable {
     private boolean mIsAppProvidedIntent = false;
     private Intent mIntent;
