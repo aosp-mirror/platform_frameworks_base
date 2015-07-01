@@ -172,15 +172,6 @@ public class VoiceInteractionService extends Service {
         }
     }
 
-    /** @hide */
-    public void startSession(Bundle args, int flags) {
-        showSession(args, flags);
-    }
-    /** @hide */
-    public void startSession(Bundle args) {
-        startSession(args, 0);
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
