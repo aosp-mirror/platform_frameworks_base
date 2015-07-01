@@ -593,7 +593,7 @@ public final class MenuItemImpl implements MenuItem {
 
     public MenuItem setActionProvider(ActionProvider actionProvider) {
         if (mActionProvider != null) {
-            mActionProvider.setVisibilityListener(null);
+            mActionProvider.reset();
         }
         mActionView = null;
         mActionProvider = actionProvider;
