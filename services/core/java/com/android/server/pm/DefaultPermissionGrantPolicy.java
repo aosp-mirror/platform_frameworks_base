@@ -54,6 +54,7 @@ final class DefaultPermissionGrantPolicy {
     private static final boolean DEBUG = false;
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
+    private static final String AUDIO_MIME_TYPE = "audio/mpeg";
 
     private static final Set<String> PHONE_PERMISSIONS = new ArraySet<>();
     static {
@@ -176,7 +177,7 @@ final class DefaultPermissionGrantPolicy {
     }
 
     private void grantPermissionsToSysComponentsAndPrivApps(int userId) {
-        Log.i(TAG, "Granting permissions to platform components for user" + userId);
+        Log.i(TAG, "Granting permissions to platform components for user " + userId);
 
         synchronized (mService.mPackages) {
             for (PackageParser.Package pkg : mService.mPackages.values()) {
@@ -208,7 +209,7 @@ final class DefaultPermissionGrantPolicy {
     }
 
     private void grantDefaultSystemHandlerPermissions(int userId) {
-        Log.i(TAG, "Granting permissions to default platform handlers for user:" + userId);
+        Log.i(TAG, "Granting permissions to default platform handlers for user " + userId);
 
         final PackagesProvider imePackagesProvider;
         final PackagesProvider locationPackagesProvider;
@@ -320,6 +321,13 @@ final class DefaultPermissionGrantPolicy {
             if (downloadsUiPackage != null
                     && doesPackageSupportRuntimePermissions(downloadsUiPackage)) {
                 grantRuntimePermissionsLPw(downloadsUiPackage, STORAGE_PERMISSIONS, userId);
+            }
+
+            // Storage provider
+            PackageParser.Package storagePackage = getDefaultProviderAuthorityPackageLPr(
+                    "com.android.externalstorage.documents", userId);
+            if (storagePackage != null) {
+                grantRuntimePermissionsLPw(storagePackage, STORAGE_PERMISSIONS, userId);
             }
 
             // SMS
@@ -476,6 +484,18 @@ final class DefaultPermissionGrantPolicy {
                         grantRuntimePermissionsLPw(locationPackage, STORAGE_PERMISSIONS, userId);
                     }
                 }
+            }
+
+            // Music
+            Intent musicIntent = new Intent(Intent.ACTION_VIEW);
+            musicIntent.addCategory(Intent.CATEGORY_DEFAULT);
+            musicIntent.setDataAndType(Uri.fromFile(new File("foo.mp3")),
+                    AUDIO_MIME_TYPE);
+            PackageParser.Package musicPackage = getDefaultSystemHandlerActivityPackageLPr(
+                    musicIntent, userId);
+            if (musicPackage != null
+                    && doesPackageSupportRuntimePermissions(musicPackage)) {
+                grantRuntimePermissionsLPw(musicPackage, STORAGE_PERMISSIONS, userId);
             }
 
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
