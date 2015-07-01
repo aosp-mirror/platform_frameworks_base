@@ -2565,7 +2565,7 @@ public class ConnectivityManager {
      * replaced by this one, effectively releasing the previous {@link NetworkRequest}.
      * <p>
      * The request may be released normally by calling
-     * {@link #releaseNetworkRequest(android.app.PendingIntent)}.
+     * {@link #unregisterNetworkCallback(android.app.PendingIntent)}.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * @param request {@link NetworkRequest} describing this request.
@@ -2616,6 +2616,19 @@ public class ConnectivityManager {
         try {
             mService.releaseNetworkRequest(networkCallback.networkRequest);
         } catch (RemoteException e) {}
+    }
+
+    /**
+     * Unregisters a callback previously registered via
+     * {@link #registerNetworkCallback(NetworkRequest, android.app.PendingIntent)}.
+     *
+     * @param operation A PendingIntent equal (as defined by {@link Intent#filterEquals}) to the
+     *                  PendingIntent passed to
+     *                  {@link #registerNetworkCallback(NetworkRequest, android.app.PendingIntent)}.
+     *                  Cannot be null.
+     */
+    public void unregisterNetworkCallback(PendingIntent operation) {
+        releaseNetworkRequest(operation);
     }
 
     /**
