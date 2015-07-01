@@ -146,6 +146,7 @@ import android.util.SparseIntArray;
 import android.util.TrustedTime;
 import android.util.Xml;
 
+import com.android.server.EventLogTags;
 import libcore.io.IoUtils;
 
 import com.android.internal.R;
@@ -1764,7 +1765,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (mDeviceIdleMode != enabled) {
                 mDeviceIdleMode = enabled;
                 if (mSystemReady) {
-                    updateRulesForGlobalChangeLocked(true);
+                    updateRulesForDeviceIdleLocked();
+                }
+                if (enabled) {
+                    EventLogTags.writeDeviceIdleOnPhase("net");
+                } else {
+                    EventLogTags.writeDeviceIdleOffPhase("net");
                 }
             }
         }
