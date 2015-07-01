@@ -452,6 +452,7 @@ public abstract class Visibility extends Transition {
                 DisappearListener disappearListener = new DisappearListener(viewToKeep,
                         finalVisibility, isForcedVisibility);
                 animator.addListener(disappearListener);
+                animator.addPauseListener(disappearListener);
                 addListener(disappearListener);
             } else if (!isForcedVisibility) {
                 viewToKeep.setTransitionVisibility(originalVisibility);
