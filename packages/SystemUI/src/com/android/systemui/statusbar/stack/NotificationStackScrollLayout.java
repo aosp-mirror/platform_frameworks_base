@@ -163,6 +163,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mChildrenUpdateRequested;
     private SpeedBumpView mSpeedBumpView;
     private boolean mIsExpansionChanging;
+    private boolean mPanelTracking;
     private boolean mExpandingNotification;
     private boolean mExpandedInThisMotion;
     private boolean mScrollingEnabled;
@@ -1513,7 +1514,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         if (mExpandedInThisMotion) {
             return RUBBER_BAND_FACTOR_AFTER_EXPAND;
-        } else if (mIsExpansionChanging) {
+        } else if (mIsExpansionChanging || mPanelTracking) {
             return RUBBER_BAND_FACTOR_ON_PANEL_EXPAND;
         } else if (mScrolledToTopOnFirstDown) {
             return 1.0f;
@@ -1527,7 +1528,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * overscroll view (e.g. expand QS).
      */
     private boolean isRubberbanded(boolean onTop) {
-        return !onTop || mExpandedInThisMotion || mIsExpansionChanging
+        return !onTop || mExpandedInThisMotion || mIsExpansionChanging || mPanelTracking
                 || !mScrolledToTopOnFirstDown;
     }
 
@@ -2247,6 +2248,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             // lets make sure nothing is in the overlay anymore
             getOverlay().clear();
         }
+    }
+
+    public void onPanelTrackingStarted() {
+        mPanelTracking = true;
+    }
+    public void onPanelTrackingStopped() {
+        mPanelTracking = false;
     }
 
     public void resetScrollPosition() {
