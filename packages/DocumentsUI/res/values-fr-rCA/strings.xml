@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Documents"</string>
-    <string name="title_open" msgid="4353228937663917801">"Ouvert à partir de"</string>
+    <string name="title_open" msgid="4353228937663917801">"Ouvrir à partir de"</string>
     <string name="title_save" msgid="2433679664882857999">"Enregistrer dans"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Créer un dossier"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Grille"</string>
