@@ -44,7 +44,7 @@ interface IStatusBarService
     // You need the STATUS_BAR_SERVICE permission
     void registerStatusBar(IStatusBar callbacks, out StatusBarIconList iconList,
             out int[] switches, out List<IBinder> binders);
-    void onPanelRevealed(boolean clearNotificationEffects);
+    void onPanelRevealed(boolean clearNotificationEffects, int numItems);
     void onPanelHidden();
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.
     void clearNotificationEffects();
