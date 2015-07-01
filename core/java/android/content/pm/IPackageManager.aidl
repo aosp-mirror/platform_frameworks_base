@@ -31,6 +31,7 @@ import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IPackagesProvider;
 import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.InstrumentationInfo;
@@ -503,7 +504,7 @@ interface IPackageManager {
     void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
 
+    void grantDefaultPermissions(int userId);
+    void setCarrierAppPackagesProvider(in IPackagesProvider provider);
     int getMountExternalMode(int uid);
-
-    void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
 }
