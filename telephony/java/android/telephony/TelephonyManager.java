@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -133,6 +134,16 @@ public class TelephonyManager {
         return sInstance;
     }
 
+    private String getOpPackageName() {
+        // For legacy reasons the TelephonyManager has API for getting
+        // a static instance with no context set preventing us from
+        // getting the op package name. As a workaround we do a best
+        // effort and get the context from the current activity thread.
+        if (mContext != null) {
+            return mContext.getOpPackageName();
+        }
+        return ActivityThread.currentOpPackageName();
+    }
 
     /**
      * Returns the multi SIM variant
@@ -2128,7 +2139,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 alphaTag = telephony.getLine1AlphaTagForDisplay(subId,
-                        mContext.getOpPackageName());
+                        getOpPackageName());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -2139,7 +2150,7 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getLine1AlphaTagForSubscriber(subId, mContext.getOpPackageName());
+            return info.getLine1AlphaTagForSubscriber(subId, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -2160,7 +2171,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getMergedSubscriberIds(mContext.getOpPackageName());
+                return telephony.getMergedSubscriberIds(getOpPackageName());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -2195,7 +2206,7 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getMsisdnForSubscriber(subId, mContext.getOpPackageName());
+            return info.getMsisdnForSubscriber(subId, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -2228,7 +2239,7 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getVoiceMailNumberForSubscriber(subId, mContext.getOpPackageName());
+            return info.getVoiceMailNumberForSubscriber(subId, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -2367,7 +2378,7 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getVoiceMailAlphaTagForSubscriber(subId, mContext.getOpPackageName());
+            return info.getVoiceMailAlphaTagForSubscriber(subId, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -2619,7 +2630,7 @@ public class TelephonyManager {
         if (mContext == null) return;
         try {
             Boolean notifyNow = (getITelephony() != null);
-            sRegistry.listenForSubscriber(listener.mSubId, mContext.getOpPackageName(),
+            sRegistry.listenForSubscriber(listener.mSubId, getOpPackageName(),
                     listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
@@ -2775,7 +2786,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getAllCellInfo(mContext.getOpPackageName());
+            return telephony.getAllCellInfo(getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3387,7 +3398,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return new String[0];
-            return telephony.getPcscfAddress(apnType, mContext.getOpPackageName());
+            return telephony.getPcscfAddress(apnType, getOpPackageName());
         } catch (RemoteException e) {
             return new String[0];
         }
@@ -3810,7 +3821,7 @@ public class TelephonyManager {
     @SystemApi
     public void silenceRinger() {
         try {
-            getTelecomService().silenceRinger(mContext.getOpPackageName());
+            getTelecomService().silenceRinger(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#silenceRinger", e);
         }
@@ -3874,7 +3885,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.isSimPinEnabled(mContext.getOpPackageName());
+                return telephony.isSimPinEnabled(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isSimPinEnabled", e);
         }
@@ -4141,7 +4152,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.isVideoCallingEnabled(mContext.getOpPackageName());
+                return telephony.isVideoCallingEnabled(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isVideoCallingEnabled", e);
         }
