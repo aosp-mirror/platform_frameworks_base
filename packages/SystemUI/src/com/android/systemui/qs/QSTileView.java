@@ -83,6 +83,7 @@ public class QSTileView extends ViewGroup {
         setClipChildren(false);
 
         mTopBackgroundView = new View(context);
+        mTopBackgroundView.setId(View.generateViewId());
         addView(mTopBackgroundView);
 
         mIcon = createIcon();
@@ -95,8 +96,8 @@ public class QSTileView extends ViewGroup {
         addView(mDivider);
 
         setClickable(true);
-
         updateTopPadding();
+        setId(View.generateViewId());
     }
 
     private void updateTopPadding() {
@@ -137,7 +138,7 @@ public class QSTileView extends ViewGroup {
         final Resources res = mContext.getResources();
         if (mDual) {
             mDualLabel = new QSDualTileLabel(mContext);
-            mDualLabel.setId(android.R.id.title);
+            mDualLabel.setId(View.generateViewId());
             mDualLabel.setBackgroundResource(R.drawable.btn_borderless_rect);
             mDualLabel.setFirstLineCaret(mContext.getDrawable(R.drawable.qs_dual_tile_caret));
             mDualLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
@@ -155,9 +156,9 @@ public class QSTileView extends ViewGroup {
                 mDualLabel.setContentDescription(labelDescription);
             }
             addView(mDualLabel);
+            mDualLabel.setAccessibilityTraversalAfter(mTopBackgroundView.getId());
         } else {
             mLabel = new TextView(mContext);
-            mLabel.setId(android.R.id.title);
             mLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
             mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
             mLabel.setMinLines(2);
@@ -326,6 +327,26 @@ public class QSTileView extends ViewGroup {
 
     public void onStateChanged(QSTile.State state) {
         mHandler.obtainMessage(H.STATE_CHANGED, state).sendToTarget();
+    }
+
+    /**
+     * Update the accessibility order for this view.
+     *
+     * @param previousView the view which should be before this one
+     * @return the last view in this view which is accessible
+     */
+    public View updateAccessibilityOrder(View previousView) {
+        View firstView;
+        View lastView;
+        if (mDual) {
+            lastView = mDualLabel;
+            firstView = mTopBackgroundView;
+        } else {
+            firstView = this;
+            lastView = this;
+        }
+        firstView.setAccessibilityTraversalAfter(previousView.getId());
+        return lastView;
     }
 
     private class H extends Handler {
