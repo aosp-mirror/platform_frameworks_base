@@ -406,6 +406,16 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(mapsPackage, LOCATION_PERMISSIONS, userId);
             }
 
+            // Gallery
+            Intent galleryIntent = new Intent(Intent.ACTION_MAIN);
+            galleryIntent.addCategory(Intent.CATEGORY_APP_GALLERY);
+            PackageParser.Package galleryPackage = getDefaultSystemHandlerActivityPackageLPr(
+                    galleryIntent, userId);
+            if (galleryPackage != null
+                    && doesPackageSupportRuntimePermissions(galleryPackage)) {
+                grantRuntimePermissionsLPw(galleryPackage, STORAGE_PERMISSIONS, userId);
+            }
+
             // Email
             Intent emailIntent = new Intent(Intent.ACTION_MAIN);
             emailIntent.addCategory(Intent.CATEGORY_APP_EMAIL);
