@@ -287,20 +287,6 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(setupPackage, SETTINGS_PERMISSIONS, userId);
             }
 
-            // Dialer
-            if (dialerAppPackageNames != null) {
-                for (String dialerAppPackageName : dialerAppPackageNames) {
-                    PackageParser.Package dialerPackage = getPackageLPr(dialerAppPackageName);
-                    if (dialerPackage != null
-                            && doesPackageSupportRuntimePermissions(dialerPackage)) {
-                        grantRuntimePermissionsLPw(dialerPackage, PHONE_PERMISSIONS, userId);
-                        grantRuntimePermissionsLPw(dialerPackage, CONTACTS_PERMISSIONS, userId);
-                        grantRuntimePermissionsLPw(dialerPackage, SMS_PERMISSIONS, userId);
-                        grantRuntimePermissionsLPw(dialerPackage, MICROPHONE_PERMISSIONS, userId);
-                    }
-                }
-            }
-
             // Camera
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             PackageParser.Package cameraPackage = getDefaultSystemHandlerActivityPackageLPr(
@@ -342,15 +328,37 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(storagePackage, STORAGE_PERMISSIONS, userId);
             }
 
+            // Dialer
+            if (dialerAppPackageNames == null) {
+                Intent dialerIntent = new Intent(Intent.ACTION_DIAL);
+                PackageParser.Package dialerPackage = getDefaultSystemHandlerActivityPackageLPr(
+                        dialerIntent, userId);
+                if (dialerPackage != null) {
+                    grantDefaultPermissionsToDefaultSystemDialerAppLPr(dialerPackage, userId);
+                }
+            } else {
+                for (String dialerAppPackageName : dialerAppPackageNames) {
+                    PackageParser.Package dialerPackage = getSystemPackageLPr(dialerAppPackageName);
+                    if (dialerPackage != null) {
+                        grantDefaultPermissionsToDefaultSystemDialerAppLPr(dialerPackage, userId);
+                    }
+                }
+            }
+
             // SMS
-            if (smsAppPackageNames != null) {
+            if (smsAppPackageNames == null) {
+                Intent smsIntent = new Intent(Intent.ACTION_MAIN);
+                smsIntent.addCategory(Intent.CATEGORY_APP_MESSAGING);
+                PackageParser.Package smsPackage = getDefaultSystemHandlerActivityPackageLPr(
+                        smsIntent, userId);
+                if (smsPackage != null) {
+                   grantDefaultPermissionsToDefaultSystemSmsAppLPr(smsPackage, userId);
+                }
+            } else {
                 for (String smsPackageName : smsAppPackageNames) {
-                    PackageParser.Package smsPackage = getPackageLPr(smsPackageName);
-                    if (smsPackage != null
-                            && doesPackageSupportRuntimePermissions(smsPackage)) {
-                        grantRuntimePermissionsLPw(smsPackage, PHONE_PERMISSIONS, userId);
-                        grantRuntimePermissionsLPw(smsPackage, CONTACTS_PERMISSIONS, userId);
-                        grantRuntimePermissionsLPw(smsPackage, SMS_PERMISSIONS, userId);
+                    PackageParser.Package smsPackage = getSystemPackageLPr(smsPackageName);
+                    if (smsPackage != null) {
+                        grantDefaultPermissionsToDefaultSystemSmsAppLPr(smsPackage, userId);
                     }
                 }
             }
@@ -379,8 +387,8 @@ final class DefaultPermissionGrantPolicy {
             }
 
             // Calendar provider sync adapters
-            List<PackageParser.Package> calendarSyncAdapters =
-                    getHeadlessSyncAdapterPackagesLPr(calendarSyncAdapterPackages,
+            List<PackageParser.Package> calendarSyncAdapters = getHeadlessSyncAdapterPackagesLPr(
+                    calendarSyncAdapterPackages,
                             userId);
             final int calendarSyncAdapterCount = calendarSyncAdapters.size();
             for (int i = 0; i < calendarSyncAdapterCount; i++) {
@@ -403,8 +411,8 @@ final class DefaultPermissionGrantPolicy {
             }
 
             // Contacts provider sync adapters
-            List<PackageParser.Package> contactsSyncAdapters =
-                    getHeadlessSyncAdapterPackagesLPr(contactsSyncAdapterPackages,
+            List<PackageParser.Package> contactsSyncAdapters = getHeadlessSyncAdapterPackagesLPr(
+                    contactsSyncAdapterPackages,
                             userId);
             final int contactsSyncAdapterCount = contactsSyncAdapters.size();
             for (int i = 0; i < contactsSyncAdapterCount; i++) {
@@ -540,6 +548,27 @@ final class DefaultPermissionGrantPolicy {
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
         }
     }
+
+    private void grantDefaultPermissionsToDefaultSystemDialerAppLPr(
+            PackageParser.Package dialerPackage, int userId) {
+        if (doesPackageSupportRuntimePermissions(dialerPackage)) {
+            grantRuntimePermissionsLPw(dialerPackage, PHONE_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(dialerPackage, CONTACTS_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(dialerPackage, SMS_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(dialerPackage, MICROPHONE_PERMISSIONS, userId);
+        }
+    }
+
+
+    private void grantDefaultPermissionsToDefaultSystemSmsAppLPr(
+            PackageParser.Package smsPackage, int userId) {
+        if (doesPackageSupportRuntimePermissions(smsPackage)) {
+            grantRuntimePermissionsLPw(smsPackage, PHONE_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(smsPackage, CONTACTS_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(smsPackage, SMS_PERMISSIONS, userId);
+        }
+    }
+
 
     public void grantDefaultPermissionsToDefaultSmsAppLPr(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default sms app for user:" + userId);
