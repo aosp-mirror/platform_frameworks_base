@@ -1,0 +1,307 @@
+page.title=Princípios de projeto para Android
+@jd:body
+
+<p>Estes princípios de projeto foram desenvolvidos pela e para a Equipe de Experiência do Usuário do Android
+para manter os interesses dos usuários em mente.
+Para desenvolvedores e projetistas do Android, eles continuam a
+definir as diretrizes de projeto mais detalhadas para diferentes
+tipos de dispositivo.</p>
+
+<p>
+Considere estes princípios ao aplicar 
+suas próprias criatividade e mentalidade de projeto. Desvie-se de forma objetiva.
+</p>
+
+<h2 id="enchant-me">Encante-me</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="delight-me">Agrade-me de formas surpreendentes</h4>
+<p>Uma bela superfície, uma animação cuidadosamente posicionada ou um efeito sonoro no momento certo 
+ contribui para a boa experiência. Efeitos sutis contribuem para uma sensação de facilidade e de que algo
+poderoso está à mão.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_delight.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="real-objects-more-fun">Objetos reais são mais divertidos que botões e menus</h4>
+<p>Deixe que as pessoas manipulem e toquem diretamente em objetos no seu aplicativo. Isso reduz o esforço cognitivo
+necessário para realizar uma tarefa e torna o aplicativo mais emocionalmente satisfatório.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_real_objects.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-it-mine">Deixe-me torná-lo meu</h4>
+<p>As pessoas adoram adicionar toques pessoais, pois isso as ajuda a se sentirem à vontade e em controle. Forneça
+padrões sensatos e belos, mas também considere personalizações divertidas e opcionais que não
+prejudiquem as tarefas principais.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_it_mine.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="get-to-know-me">Conheça-me</h4>
+<p>Conheça as preferências das pessoas no decorrer do tempo. Em vez de pedir que façam as mesmas escolhas repetidamente,
+coloque escolhas anteriores em alcance fácil.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_get_to_know_me.png">
+
+  </div>
+</div>
+
+<h2 id="simplify-my-life">Simplifique minha vida</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="keep-it-brief">Seja breve</h4>
+<p>Use frases curtas com palavras simples. As pessoas provavelmente ignorarão frases longas.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_keep_it_brief.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="pictures-faster-than-words">Imagens são mais rápidas que palavras</h4>
+<p>Considere usar imagens para explicar ideias. Elas chamam a atenção das pessoas e podem ser muito mais eficientes
+que palavras.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_pictures.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="decide-for-me">Decida por mim, mas deixe que eu tenha a palavra final</h4>
+<p>Faça a melhor suposição e tome uma ação, em vez de primeiro perguntar. Escolhas e decisões demais deixam as pessoas
+incomodadas. Caso suponha errado, permita "desfazer".</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_decide_for_me.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="only-show-when-i-need-it">Mostre só o que preciso, quando eu precisar</h4>
+<p>As pessoas se sentem oprimidas quando veem coisas demais de uma vez. Detalhe tarefas e informações em partes
+pequenas e digeríveis. Oculte opções que não sejam essenciais no momento e ensine as pessoas à medida que avançam.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_information_when_need_it.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="always-know-where-i-am">Eu sempre devo saber onde estou</h4>
+<p>Dê às pessoas a confiança de saberem o que fazer. Faça com que os locais no seu aplicativo pareçam distintos
+e use transições para mostrar relacionamentos entre telas. Forneça feedback sobre tarefas em andamento.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_navigation.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="never-lose-my-stuff">Nunca perca as minhas coisas</h4>
+<p>Salve o que as pessoas criaram e deixe que elas acessem de qualquer lugar. Lembre-se de configurações,
+toques pessoais e criações entre celulares, tablets e computadores. Isso torna a atualização a
+coisa mais fácil do mundo.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="looks-same-should-act-same">Se parece igual, deve agir da mesma forma</h4>
+<p>Ajude as pessoas a discernir diferenças funcionais tornando-as visualmente distintas, em vez de sutis.
+Evite que modos locais que agem de forma diferente sobre a mesma entrada se pareçam.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_looks_same.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="interrupt-only-if-important">Só me interrompa se for importante</h4>
+<p>Como um bom assistente pessoal, proteja as pessoas de informações não importantes. As pessoas querem ficar
+concentradas e, a não ser que seja crítica e dependente de tempo, uma interrupção pode ser irritante e frustrante.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_important_interruption.png">
+
+  </div>
+</div>
+
+<h2 id="make-me-amazing">Faça com que eu seja incrível</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="give-me-tricks">Dê-me truques que funcionem em qualquer lugar</h4>
+<p>As pessoas se sentem ótimas quando descobrem coisas sozinhas. Torne seu aplicativo mais inteligível ao
+aproveitar padrões visuais e memórias de outros aplicativos do Android. Por exemplo, o gesto de deslizar
+pode ser um bom atalho de navegação.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_tricks.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="its-not-my-fault">Não é culpa minha</h4>
+<p>Seja gentil sobre como solicita correções a pessoas. Elas querem se sentir inteligentes ao usar o seu
+aplicativo. Se alguma coisa der errada, dê instruções de recuperação claras, mas evite os detalhes técnicos.
+Se for possível corrigir em segundo plano, melhor ainda.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_error.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="sprinkle-encouragement">Espalhe motivação</h4>
+<p>Divida tarefas complexas em passos menores que possam ser realizados facilmente. Dê feedback sobre ações,
+mesmo que seja um brilho sutil.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="do-heavy-lifting-for-me">Faça o trabalho pesado por mim</h4>
+<p>Faça com que novatos se sintam peritos possibilitando que façam coisas que nunca acharam possíveis. Por
+exemplo, atalhos que combinem vários efeitos de fotos podem fazer com que fotografias amadoras pareçam incríveis
+com apenas alguns passos.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_heavy_lifting.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-important-things-fast">Torne coisas importantes rápidas</h4>
+<p>Nem todas as ações são iguais. Decida o que é mais importante em seu aplicativo e torne fácil de encontrar e
+rápido de usar, como o botão do obturador em uma câmera ou o botão de pausa em um reprodutor de música.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_important_fast.png">
+
+  </div>
+</div>

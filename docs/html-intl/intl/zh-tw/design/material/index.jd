@@ -1,0 +1,186 @@
+page.title=材料設計
+page.tags=Material, design
+page.type=設計
+page.image=design/material/images/MaterialLight.png
+
+@jd:body
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>開發人員文件</h3>
+    <p>使用材料設計建立應用程式</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>影片</h3>
+    <p>材料設計簡介</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>影片</h3>
+    <p>紙張和墨水：重要的材料</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>影片</h3>
+    <p>Google I/O 應用程式中的材料設計</p>
+</div>
+</a>
+
+
+
+<p itemprop="description">材料設計是一份內容廣泛的綜合性指南，引導您跨平台、跨裝置進行視覺、動態和互動的設計。
+Android 現已納入對材料設計應用程式的支援。
+如果要在 Android 應用程式中使用材料設計，請依照<a href="http://www.google.com/design/spec">材料設計規格</a>中定義的指示，並使用
+Android
+5.0 (API 層級 21) 或後續版本中的新元件和新功能。</p>
+
+<p>Android 提供下列元素，供您打造材料設計應用程式：</p>
+
+<ul>
+  <li>一個新的設計風格</li>
+  <li>用於複雜檢視的小工具</li>
+  <li>自訂陰影和動畫的新 API</li>
+</ul>
+
+<p>如需取得如何在 Android 上實作材料設計的詳細資訊，請詳見<a href="{@docRoot}training/material/index.html">使用材料設計建立應用程式</a>。
+</p>
+
+
+<h3>材料設計風格</h3>
+
+<p>材料設計風格提供您應用程式使用的新樣式、可以讓您設定色板的系統小工具，並針對輕觸回饋與操作行為轉換提供預設動畫。
+</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">深色材料設計風格</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">淺色材料設計風格</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>如需詳細資訊，請參閱<a href="{@docRoot}training/material/theme.html">使用材料設計風格</a>。
+</p>
+
+
+<h3>清單和卡片</h3>
+
+<p>Android 提供兩個新的小工具，搭配材料設計樣式與動畫，可用來顯示清單和卡片：
+</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
+  <p>新的 <code>RecyclerView</code> 小工具是 <code>ListView</code>
+更容易插入的版本，支援不同的版面配置類型，並提供效能改善。</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
+  <p>新的 <code>CardView</code> 小工具讓您可以顯示卡片內的重要資訊，並且該資訊都能擁有一致的外觀與風格。
+</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>如需詳細資訊，請參閱<a href="{@docRoot}training/material/lists-cards.html">建立清單和卡片</a>。
+</p>
+
+
+<h3>檢視陰影</h3>
+
+<p>除了 X 和 Y 屬性外，Android 中的檢視現在也有 Z 屬性。
+這個新屬性代表檢視的高度，這會決定：</p>
+
+<ul>
+<li>陰影大小：帶有較高 Z 值的檢視會投射更大的陰影。</li>
+<li>繪製順序：具有較高 Z 值的檢視會顯示在其他檢視之上。</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    如要重播影片，請按一下裝置螢幕<em></em>
+  </div>
+</div>
+
+<p>如需取得詳細資訊，請參閱<a href="{@docRoot}training/material/shadows-clipping.html">定義陰影和裁剪檢視</a>。
+</p>
+
+
+<h3>動畫</h3>
+
+<p>新的動畫 API 可針對 UI 控制項的輕觸回饋、檢視狀態中的變更，以及行為轉換，讓您建立自訂動畫。
+</p>
+
+<p>這些 API 讓您可以：</p>
+
+<ul>
+<li style="margin-bottom:15px">
+回應您檢視中有<strong>輕觸回饋</strong>動畫的輕觸事件。
+</li>
+<li style="margin-bottom:15px">
+隱藏和顯示有<strong>循環顯示</strong>動畫的檢視。
+</li>
+<li style="margin-bottom:15px">
+在有自訂<strong>行為轉換</strong>動畫的行為間切換。
+</li>
+<li style="margin-bottom:15px">
+使用<strong>曲線動作</strong>建立更自然的動畫。
+</li>
+<li style="margin-bottom:15px">
+在帶有<strong>檢視狀態變更</strong>動畫的一個或多個檢視屬性中變更動畫。
+</li>
+<li style="margin-bottom:15px">
+在檢視狀態變更間，顯示<strong>狀態清單可繪項目</strong>中的動畫。
+</li>
+</ul>
+
+<p>輕觸回饋動畫會內建於數個標準檢視中，例如按鈕等。新 API 可讓您自訂這些動畫，並將其新增至您的自訂檢視中。
+</p>
+
+<p>如需詳細資訊，請參閱<a href="{@docRoot}training/material/animations.html">定義自訂動畫</a>。
+</p>
+
+
+<h3>可繪項目</h3>
+
+<p>可繪項目的這些新功能可以幫助您實作材料設計應用程式：</p>
+
+<ul>
+<li><strong>矢量可繪項目</strong>可以調整大小，但又不會喪失定義，最適合於應用程式中的單色圖示。
+</li>
+<li><strong>可繪項目著色</strong>可讓您在執行階段將點陣圖定義為 Alpha 遮罩，並以一個顏色進行著色。
+</li>
+<li><strong>顏色提取</strong>可讓您自動從點陣圖影像中提取顯著顏色。
+</li>
+</ul>
+
+<p>如需詳細資訊，請參閱<a href="{@docRoot}training/material/drawables.html">使用可繪項目</a>。
+</p>

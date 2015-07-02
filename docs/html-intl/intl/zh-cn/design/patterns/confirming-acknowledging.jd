@@ -1,0 +1,70 @@
+page.title=确认和确知
+page.tags=dialog,toast,notification
+@jd:body
+
+<p>在某些情况下，当用户在您的应用中调用某个操作时，最好使用文字内容来<em>确认</em>或<em>确知</em>该操作。</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_confirming.png">
+    <p><strong>确认</strong>是要求用户确认自己确实希望执行刚才所调用的操作。在某些情况下，确认随需要用户考虑的操作所相关的警告或关键信息一起显示。</p>
+  </div>
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_acknowledge.png">
+    <p><strong>确知</strong>就是显示一段文字信息，让用户知道自己刚才调用的操作已经完成。这将消除系统正在执行的隐式操作的不确定性。在某些情况下，确知随撤消操作的选项一起显示。</p>
+  </div>
+</div>
+
+<p>以上述方式通知用户有助于减少用户对已发生或即将发生的事情的不确定性。确认或确知还可以有效防止用户犯下可能让自己后悔的错误。</p>
+
+<h2>何时需要确认或确知用户操作</h2>
+<p>并非所有操作都一定要确认或确知。请使用以下流程图指导自己的设计决策。</p>
+<img src="{@docRoot}design/media/confirm_ack_flowchart.png">
+
+<h2>确认</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>示例：Google Play 书籍</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>在该示例中，用户要求从其 Google Play 书架中删除一本书。系统显示了一条<a href="{@docRoot}design/building-blocks/dialogs.html#alerts">警告</a>来要求确认该操作，因为用户必须知道，一旦删除，该书籍将无法继续在任何设备上使用。</p>
+    <p>在设计确认对话框时，请使用反映所请求操作的文字作为标题，使标题更有意义。</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>示例：Android Beam</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>确认不一定要显示在有两个按钮的警告中。在启动 Android Beam 后，系统提示用户触摸要分享的内容（本例中是一张照片）。如果他们决定不继续操作，只需移开手机即可。</p>
+  </div>
+</div>
+
+<h2>确知</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>示例：已保存中断的 Gmail 草稿</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
+    <p>在本例中，如果用户在 Gmail 撰写邮件屏幕中向后或向上导航，可能会发生一些意外情况，此时会自动保存当前草稿。Toast 形式的确知会明确告知这一点。它会在几秒钟后消失。</p>
+    <p>在这种情况下不能执行撤消操作，因为保存是由应用发起的，而不是由用户执行的。通过导航至草稿列表，可迅速方便地恢复邮件。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+    <h4>示例：已删除 Gmail 会话</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
+    <p>在用户从 Gmail 中的列表删除某个会话后，会出现带撤消选项的确知。确知消息会一直等到用户采取无关操作才会消失，例如滚动列表。</p>
+  </div>
+</div>
+
+<h2>无需确认或确知</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>示例：+1 操作</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>无需确认</strong>。如果用户意外触摸 +1 按钮，不会有什么大问题。他们只需再次触摸该按钮，撤消该操作即可。</p>
+    <p><strong>无需确知</strong>。用户将看到 +1 按钮弹起并变红。这是非常明确的信号。</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>示例：从主屏幕删除应用</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <p><strong>无需确认</strong>。这属于有意操作：用户必须将项目拖放到相对较大并且独立的目标上。因此，很难发生意外。但是如果用户反悔决定，只需数秒钟时间即可复原。</p>
+    <p><strong>无需确知</strong>。用户知道该应用会从主屏幕上消失，因为是他们将其拖走而使其消失的。</p>
+
+  </div>
+</div>

@@ -1,0 +1,70 @@
+page.title=確認と通知
+page.tags=dialog,toast,notification
+@jd:body
+
+<p>状況に応じて、ユーザーがアプリでアクションを呼び出したときに、テキストを使ってそのアクションを<em>確認</em>したり<em>通知</em>したりするのは良い方法です。</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_confirming.png">
+    <p><strong>確認</strong>とは、呼び出したアクションを続けるかどうかをユーザーに確認してもらうことです。場合によって、確認は考慮する必要があるアクションに関連する警告や重要情報とともに表示されることがあります。</p>
+  </div>
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_acknowledge.png">
+    <p><strong>通知</strong>とは、呼び出したアクションが完了したことをユーザーにお知らせするテキストを表示することです。これによって、システムが実行している暗黙的な処理の不明瞭さをなくすことができます。場合によって、通知はアクションを元に戻すオプションとともに表示されることがあります。</p>
+  </div>
+</div>
+
+<p>このような方法でユーザーに情報を伝えると、実行された処理やこれから実行される処理についての不明瞭さを軽減できます。確認や通知によって、後悔するような間違いをするのを防ぐこともできます。</p>
+
+<h2>ユーザーのアクションを確認または通知する場合</h2>
+<p>すべてのアクションに確認または通知が必要なわけではありません。デザインを決定する際の指針として次のチャートを使用してください。</p>
+<img src="{@docRoot}design/media/confirm_ack_flowchart.png">
+
+<h2>確認</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>例: Google Play ブックス</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>この例では、ユーザーが Google Play ライブラリから書籍を削除することを要求しています。その書籍が今後端末で使えなくなることを知ってもらうことが重要であるため、このアクションを確認する<a href="{@docRoot}design/building-blocks/dialogs.html#alerts">アラート</a>が表示されます。</p>
+    <p>確認のダイアログを作成するときは、要求されたアクションがすぐわかるようなタイトルにします。</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>例: Android Beam</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>確認は、必ずしも 2 つのボタンの付いたアラートで示す必要はありません。Android Beam を開始した後に、ユーザーには共有するコンテンツ（この例では写真）にタップするように求めるメッセージが表示されます。共有を続行しない場合は、電話を離すだけです。</p>
+  </div>
+</div>
+
+<h2>通知</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>例: 放置した Gmail 下書きの保存</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
+    <p>この例では、ユーザーが Gmail 作成画面から前の画面に戻ったり、上位画面に移動したりするときに、予測しないことが起こる可能性があるため、現在の下書きが自動的に保存されます。トースト形式の通知によってその状態が明らかになります。この通知は数秒後にフェードします。</p>
+    <p>この場合、保存操作はユーザーではなくアプリによって行われるため、元に戻す操作は適切ではありません。また、下書きのリストに移動するだけでメッセージの作成をすぐに再開できます。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+    <h4>例: Gmail スレッドの削除</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
+    <p>ユーザーが Gmail のリストからスレッドを削除した後に、元に戻すオプションとともに通知が表示されます。ユーザーがリストのスクロールなど関連しないアクションを実行するまで通知は表示されたままになります。</p>
+  </div>
+</div>
+
+<h2>確認または通知を行わない場合</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>例: +1 操作</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>確認は不要</strong>。ユーザーが誤って +1 ボタンをタップしても、大きな問題にはなりません。ボタンをもう一度タップすればアクションを元に戻すことができます。</p>
+    <p><strong>通知は不要</strong>。+1 ボタンがバウンスし、赤に変わります。これは非常にわかりやすいシグナルです。</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>例: ホームスクリーンからアプリを削除</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <p><strong>確認は不要</strong>。これは意図的なアクションです。ユーザーはアイテムを比較的大きな分離されたターゲットにドラッグ アンド ドロップする必要があります。そのため、不測の問題が発生することはほとんどありません。ユーザーがこの決定を元に戻したい場合は、ほんの数秒で元に戻すことができます。</p>
+    <p><strong>通知は不要</strong>。ユーザーは自分でアプリをドラッグして削除するため、アプリがホームスクリーンから消えることがわかっています。</p>
+
+  </div>
+</div>
