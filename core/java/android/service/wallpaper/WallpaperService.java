@@ -271,8 +271,8 @@ public abstract class WallpaperService extends Service {
             public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                     Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
                     Configuration newConfig) {
-                Message msg = mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
-                        reportDraw ? 1 : 0);
+                Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
+                        reportDraw ? 1 : 0, outsets);
                 mCaller.sendMessage(msg);
             }
 
@@ -1192,6 +1192,7 @@ public abstract class WallpaperService extends Service {
                 } break;
                 case MSG_WINDOW_RESIZED: {
                     final boolean reportDraw = message.arg1 != 0;
+                    mEngine.mOutsets.set((Rect) message.obj);
                     mEngine.updateSurface(true, false, reportDraw);
                     mEngine.doOffsetsChanged(true);
                 } break;
