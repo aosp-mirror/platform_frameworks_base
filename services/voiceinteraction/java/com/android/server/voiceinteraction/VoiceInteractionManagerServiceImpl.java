@@ -48,6 +48,8 @@ import java.io.PrintWriter;
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
 
+    final static String CLOSE_REASON_VOICE_INTERACTION = "voiceinteraction";
+
     final boolean mValid;
 
     final Context mContext;
@@ -68,11 +70,14 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                synchronized (mLock) {
-                    if (mActiveSession != null && mActiveSession.mSession != null) {
-                        try {
-                            mActiveSession.mSession.closeSystemDialogs();
-                        } catch (RemoteException e) {
+                String reason = intent.getStringExtra("reason");
+                if (!CLOSE_REASON_VOICE_INTERACTION.equals(reason)) {
+                    synchronized (mLock) {
+                        if (mActiveSession != null && mActiveSession.mSession != null) {
+                            try {
+                                mActiveSession.mSession.closeSystemDialogs();
+                            } catch (RemoteException e) {
+                            }
                         }
                     }
                 }
@@ -191,6 +196,18 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 return;
             }
             mAm.setVoiceKeepAwake(mActiveSession.mSession, keepAwake);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Unexpected remote error", e);
+        }
+    }
+
+    public void closeSystemDialogsLocked(int callingPid, int callingUid, IBinder token) {
+        try {
+            if (mActiveSession == null || token != mActiveSession.mToken) {
+                Slog.w(TAG, "closeSystemDialogs does not match active session");
+                return;
+            }
+            mAm.closeSystemDialogs(CLOSE_REASON_VOICE_INTERACTION);
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpected remote error", e);
         }
