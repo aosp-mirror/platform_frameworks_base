@@ -48,6 +48,7 @@
 #define TRANSFORMED_PENUMBRA_ALPHA 1.0f
 #define TRANSFORMED_UMBRA_ALPHA 0.0f
 
+#include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 #include <utils/Log.h>
@@ -145,7 +146,10 @@ static float rayIntersectPoints(const Vector2& rayOrigin, float dx, float dy,
  * @param pointsLength the number of vertices of the polygon.
  */
 void SpotShadow::xsort(Vector2* points, int pointsLength) {
-    quicksortX(points, 0, pointsLength - 1);
+    auto cmp = [](const Vector2& a, const Vector2& b) -> bool {
+        return a.x < b.x;
+    };
+    std::sort(points, points + pointsLength, cmp);
 }
 
 /**
@@ -270,35 +274,6 @@ void SpotShadow::quicksortCirc(Vector2* points, int low, int high,
     }
     if (low < j) quicksortCirc(points, low, j, center);
     if (i < high) quicksortCirc(points, i, high, center);
-}
-
-/**
- * Sort points by x axis
- *
- * @param points points to sort
- * @param low start index
- * @param high end index
- */
-void SpotShadow::quicksortX(Vector2* points, int low, int high) {
-    int i = low, j = high;
-    int p = low + (high - low) / 2;
-    float pivot = points[p].x;
-    while (i <= j) {
-        while (points[i].x < pivot) {
-            i++;
-        }
-        while (points[j].x > pivot) {
-            j--;
-        }
-
-        if (i <= j) {
-            swap(points, i, j);
-            i++;
-            j--;
-        }
-    }
-    if (low < j) quicksortX(points, low, j);
-    if (i < high) quicksortX(points, i, high);
 }
 
 /**
