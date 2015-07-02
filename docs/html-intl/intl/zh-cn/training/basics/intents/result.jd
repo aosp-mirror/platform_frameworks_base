@@ -1,4 +1,4 @@
-page.title=获取活动的结果
+page.title=获取Activity的结果
 page.tags=意向
 helpoutsWidget=true
 
@@ -11,7 +11,7 @@ trainingnavtop=true
 
 <h2>本课程将向您展示如何</h2>
 <ol>
-  <li><a href="#StartActivity">开始活动</a></li>
+  <li><a href="#StartActivity">开始Activity</a></li>
   <li><a href="#ReceiveResult">接收结果</a></li>
 </ol>
 
@@ -24,7 +24,7 @@ trainingnavtop=true
   </div>
 </div>
 
-<p>开始并不一定是单向的另一个活动。您还可以开始另一个活动并
+<p>开始并不一定是单向的另一个Activity。您还可以开始另一个Activity并
 接收返回的结果。要接收结果，请调用 {@link android.app.Activity#startActivityForResult
 startActivityForResult()}（而不是 {@link android.app.Activity#startActivity
 startActivity()}）。</p>
@@ -33,19 +33,19 @@ startActivity()}）。</p>
 
 </p>
 
-<p>当然，响应的活动必须设计为返回结果。当它这样做时，它会作为另一
- {@link android.content.Intent} 对象发送结果。您的活动在
+<p>当然，响应的Activity必须设计为返回结果。当它这样做时，它会作为另一
+ {@link android.content.Intent} 对象发送结果。您的Activity在
 {@link android.app.Activity#onActivityResult onActivityResult()} 回调中接收它。</p>
 
 <p class="note"><strong>注意：</strong>当您调用
-{@link android.app.Activity#startActivityForResult startActivityForResult()} 时，您可以使用明确或隐含意向。当开始您自己的活动以接收结果时，您应使用明确意向确保您可收到预期结果。
+{@link android.app.Activity#startActivityForResult startActivityForResult()} 时，您可以使用明确或隐含意向。当开始您自己的Activity以接收结果时，您应使用明确意向确保您可收到预期结果。
 
 </p>
 
 
-<h2 id="StartActivity">开始活动</h2>
+<h2 id="StartActivity">开始Activity</h2>
 
-<p> 开始针对结果的活动时，您所使用的 {@link android.content.Intent} 对象并没有什么特别之处，但您需要向 {@link
+<p> 开始针对结果的Activity时，您所使用的 {@link android.content.Intent} 对象并没有什么特别之处，但您需要向 {@link
 android.app.Activity#startActivityForResult startActivityForResult()} 方法传递额外的整数参数。
 </p>
 
@@ -53,7 +53,7 @@ android.app.Activity#startActivityForResult startActivityForResult()} 方法传�
 
 </p>
 
-<p>例如，此处显示如何开始允许用户选择联系人的活动：</p>
+<p>例如，此处显示如何开始允许用户选择联系人的Activity：</p>
 
 <pre>
 static final int PICK_CONTACT_REQUEST = 1;  // The request code
@@ -68,14 +68,14 @@ private void pickContact() {
 
 <h2 id="ReceiveResult">接收结果</h2>
 
-<p>当用户完成后续活动并且返回时，系统会调用您的活动
+<p>当用户完成后续Activity并且返回时，系统会调用您的Activity
 {@link android.app.Activity#onActivityResult onActivityResult()} 的方法。此方法包括三个参数：
 </p>
 
 <ul>
   <li>您向 {@link
 android.app.Activity#startActivityForResult startActivityForResult()} 传递的请求代码。</li>
-  <li>第二个活动指定的结果代码。如果操作成功，这是 {@link
+  <li>第二个Activity指定的结果代码。如果操作成功，这是 {@link
 android.app.Activity#RESULT_OK}；如果用户退出或操作出于某种原因失败，则是 {@link
 android.app.Activity#RESULT_CANCELED}。
 </li>
@@ -105,7 +105,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 </p>
 
 <p>为了成功处理结果，您必须了解结果的
-{@link android.content.Intent} 的格式。当返回结果的活动是您自己的活动之一时，这便非常容易。
+{@link android.content.Intent} 的格式。当返回结果的Activity是您自己的Activity之一时，这便非常容易。
 Andriod 平台附带的应用提供它们自己的 API，您可用这些 API 获取特定结果数据。
 例如，“联系人” 应用（在一些较旧的版本中是 Contacts 应用）始终返回带内容 URI（识别所选联系人）的结果，并且“照相机” 应用在 {@code "data"} 额外项中返回 {@link android.graphics.Bitmap}（请参阅有关
 <a href="{@docRoot}training/camera/index.html">拍摄照片</a>的课程）。
