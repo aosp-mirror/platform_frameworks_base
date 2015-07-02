@@ -2311,6 +2311,11 @@ public final class PowerManagerService extends SystemService
             if (mDeviceIdleMode != enabled) {
                 mDeviceIdleMode = enabled;
                 updateWakeLockDisabledStatesLocked();
+                if (enabled) {
+                    EventLogTags.writeDeviceIdleOnPhase("power");
+                } else {
+                    EventLogTags.writeDeviceIdleOffPhase("power");
+                }
             }
         }
     }
