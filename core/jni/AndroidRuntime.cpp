@@ -1427,20 +1427,10 @@ AndroidRuntime* AndroidRuntime::getRuntime()
 }
 
 /**
- * Used by WithFramework to register native functions.
+ * Used by surface flinger's DdmConnection to register native methods from
+ * the framework.
  */
-extern "C"
-jint Java_com_android_internal_util_WithFramework_registerNatives(
-        JNIEnv* env, jclass clazz) {
+extern "C" jint registerFrameworkNatives(JNIEnv* env) {
     return register_jni_procs(gRegJNI, NELEM(gRegJNI), env);
 }
-
-/**
- * Used by LoadClass to register native functions.
- */
-extern "C"
-jint Java_LoadClass_registerNatives(JNIEnv* env, jclass clazz) {
-    return register_jni_procs(gRegJNI, NELEM(gRegJNI), env);
-}
-
 }   // namespace android
