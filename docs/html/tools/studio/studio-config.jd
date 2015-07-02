@@ -1,0 +1,174 @@
+page.title=Configuration
+page.metaDescription=Learn about the Android Studio configuration.
+page.tags=studio, configuration
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#update-channel">Update Channels</a></li>
+      <li><a href="#proxy">Proxy Settings</a></li>
+    </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}sdk/installing/index.html?pkg=studio">Installing Android Studio</a></li>
+    <li><a href="{@docRoot}tools/workflow/index.html">Workflow</a></li>
+    <li><a href="{@docRoot}sdk/installing/studio-features.html">Build System</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>During installation, Android Studio provides wizards and templates that verify your system
+requirements, such as the Java Development Kit (JDK) and available RAM, and configure default
+settings, such as an optimized default Android Virtual Device (AVD) emulation and updated system
+images. This document describes additional configuration settings you may want to use to
+customize your use of Android Studio. </p>
+
+<p>For specific documentation about emulator and device setup and use, see
+<a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>,
+<a href="{@docRoot}tools/device.html">Using Hardware Devices</a>, and
+<a href="{@docRoot}tools/extras/oem-usb.html">OEM USB Drivers</a>. </p>
+
+
+
+<h2 id="update-channel">Update channels</h2>
+<p>Android Studio provides four update channels to keep Android Studio up-to-date based on your
+code-level preference:
+<ul>
+  <li><strong>Canary channel</strong>: Canary builds provide bleeding edge releases, updated
+  about weekly. While these builds do get tested, they are still subject to bugs, as we want
+  people to see what's new as soon as possible. This is not recommended for production.</li>
+  <li><strong>Dev channel</strong>: Dev builds are hand-picked older canary builds that survived
+  the test of time. They are updated roughly bi-weekly or monthly.</li>
+  <li><strong>Beta channel</strong>: Beta builds are used for beta-quality releases before a
+  production release.</li>
+  <li><strong>Stable channel</strong>: Used for stable, production-ready versions.</li>
+</ul>
+</p>
+
+<p>By default, Android Studio uses the <em>Stable</em> channel. Use
+<strong>File > Settings > Appearance & Behavior System Settings > Updates</strong> to change your
+channel setting. </p>
+
+
+
+<h2 id="proxy">Proxy Settings</h2>
+<p>Proxies serve as intermediary connection points between HTTP clients and web servers that add
+security and privacy to internet connections.</p>
+
+<p>To support running Android Studio behind a firewall, set the proxy settings for the
+Android Studio IDE and the SDK Manager. Use the Android Studio IDE HTTP Proxy settings page to set
+the HTTP proxy settings for Android Studio. The SDK Manager has a separate HTTP Proxy settings
+page.</p>
+
+<p>When running the Android Plugin for Gradle from the command line or on machines where
+Android Studio is not installed, such as continuous integration servers, set the proxy settings
+in the Gradle build file.</p>
+
+<p class="note"><strong>Note:</strong> After the initial installation of the Android Studio bundle,
+Android Studio can run with internet access or off-line. However, Android Studio requires an
+internet connection for Setup Wizard synchronization, 3rd-party library access, access to remote
+repositories, Gradle initialization and synchronization, and Android Studio version updates.</p>
+
+
+<h3>Setting up the Android Studio Proxy</h3>
+<p>Android Studio supports HTTP proxy settings so you can run Android Studio behind a firewall or
+secure network. To set the HTTP proxy settings in Android Studio:</p>
+<ol>
+ <li>From the main menu choose <strong>File &gt; Settings &gt; Appearance & Behavior -- System
+ Settings -- HTTP Proxy</strong>.
+
+<li>In Android Studio, open the IDE Settings dialog.
+  <ul>
+     <li>On Windows and Linux, choose
+     <strong>File &gt; Settings &gt; IDE Setting -- HTTP Proxy</strong>. </li>
+     <li>On Mac, choose
+     <strong>Android Studio &gt; Preferences &gt; IDE Setting -- HTTP Proxy</strong>. </li>
+   </ul>
+ The HTTP Proxy page appears.</li>
+ <li>Select <strong>auto-detection</strong> to use an auto-configuration URL to configure the
+ proxy settings or <strong>manual</strong> to enter each of the settings. For a detailed explanation
+ of these settings, see
+ <a href="https://www.jetbrains.com/idea/help/http-proxy.html">HTTP Proxy</a>. </li>
+ <li>Click <strong>Apply</strong> to enable the proxy settings. </li>
+</ol>
+
+<h3>Android Plugin for Gradle HTTP proxy settings</h3>
+When running the Android Plugin from the command line or on machines where Android Studio is not
+installed, set the Android Plugin for Gradle proxy settings in the Gradle build file.</p>
+
+<p>For application-specific HTTP proxy settings, set the proxy settings in the
+{@code build.gradle} file as required for each application module.</p>
+<pre>
+apply plugin: 'com.android.application'
+
+android {
+    ...
+
+    defaultConfig {
+        ...
+        systemProp.http.proxyHost=proxy.company.com
+        systemProp.http.proxyPort=443
+        systemProp.http.proxyUser=userid
+        systemProp.http.proxyPassword=password
+        systemProp.http.auth.ntlm.domain=domain
+    }
+    ...
+}
+</pre>
+
+
+
+<p>For project-wide HTTP proxy settings, set the proxy settings in the
+<code>gradle/gradle.properties</code> file. </p>
+
+<pre>
+# Project-wide Gradle settings.
+...
+
+systemProp.http.proxyHost=proxy.company.com
+systemProp.http.proxyPort=443
+systemProp.http.proxyUser=username
+systemProp.http.proxyPassword=password
+systemProp.http.auth.ntlm.domain=domain
+
+systemProp.https.proxyHost=proxy.company.com
+systemProp.https.proxyPort=443
+systemProp.https.proxyUser=username
+systemProp.https.proxyPassword=password
+systemProp.https.auth.ntlm.domain=domain
+
+...
+</pre>
+
+
+<p>For information about using Gradle properties for proxy settings, see the
+ <a href="http://www.gradle.org/docs/current/userguide/build_environment.html">Gradle User Guide</a>.</p>
+
+<p class="note"><strong>Note:</strong> When using Android Studio, the settings in the Android
+Studio IDE HTTP proxy settings page override the HTTP proxy settings in the
+<strong>gradle.properties</strong> file.</p>
+
+
+
+<h3>SDK Manager HTTP Proxy Settings </h3>
+<p>SDK Manager proxy settings enable proxy internet access for Android package and library
+updates from SDK Manager packages. </p>
+
+<p>To set the SDK Manager settings for proxy internet access, start the SDK Manager and open the
+SDK Manager page. </p>
+
+<ul>
+   <li>On Windows, select <strong>Tools &gt; Options</strong> from the menu bar. </li>
+   <li>On Mac and Linux, choose <strong>Tools &gt; Options</strong> from the system menu bar. </li>
+ </ul>
+
+<p>The Android SDK Manager page appears. Enter the settings and click <strong>Apply</strong>. </p>
+
+
+
