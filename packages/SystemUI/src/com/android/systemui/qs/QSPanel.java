@@ -472,6 +472,7 @@ public class QSPanel extends ViewGroup {
             rows = r + 1;
         }
 
+        View previousView = mBrightnessView;
         for (TileRecord record : mRecords) {
             if (record.tileView.setDual(record.tile.supportsDualTargets())) {
                 record.tileView.handleStateChanged(record.tile.getState());
@@ -480,6 +481,7 @@ public class QSPanel extends ViewGroup {
             final int cw = record.row == 0 ? mLargeCellWidth : mCellWidth;
             final int ch = record.row == 0 ? mLargeCellHeight : mCellHeight;
             record.tileView.measure(exactly(cw), exactly(ch));
+            previousView = record.tileView.updateAccessibilityOrder(previousView);
         }
         int h = rows == 0 ? brightnessHeight : (getRowTop(rows) + mPanelPaddingBottom);
         if (mFooter.hasFooter()) {
