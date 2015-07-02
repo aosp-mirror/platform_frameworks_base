@@ -1,0 +1,186 @@
+page.title=Material Design
+page.tags=Material,design
+page.type=design
+page.image=design/material/images/MaterialLight.png
+
+@jd:body
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>Documentos para desarrolladores</h3>
+    <p>Creación de aplicaciones con Material Design</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>Video</h3>
+    <p>Introducción a Material Design</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>Video</h3>
+    <p>Papel y tinta: los materiales más importantes</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>Video</h3>
+    <p>Material Design en la aplicación Google I/O</p>
+</div>
+</a>
+
+
+
+<p itemprop="description">Material Design es una guía integral para el diseño visual, de movimientos y
+de interacción en distintas plataformas y dispositivos. Android ahora es compatible con las aplicaciones de
+Material Design. Para usar Material Design en sus aplicaciones de Android, siga las pautas descritas
+en la <a href="http://www.google.com/design/spec">especificación de Material Design</a> y use los
+nuevos componentes y funcionalidades disponibles en Android 5.0 (nivel de API 21) y versiones posteriores.</p>
+
+<p>En Android, se proporcionan los siguientes elementos que le permitirán crear aplicaciones en Material Design:</p>
+
+<ul>
+  <li>un tema nuevo;</li>
+  <li>nuevos widgets para vistas complejas;</li>
+  <li>nuevas API (interfaces de programación de aplicaciones) para sombras y animaciones personalizadas.</li>
+</ul>
+
+<p>Para obtener más información sobre la implementación de Material Design en Android, consulte
+<a href="{@docRoot}training/material/index.html">Creación de aplicaciones con Material Design</a>.</p>
+
+
+<h3>Tema Material</h3>
+
+<p>El tema Material le ofrece un nuevo estilo para su aplicación, widgets del sistema que le permiten configurar
+la paleta de colores y animaciones predeterminadas para información táctil y transiciones de actividades.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Tema Dark Material</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Tema Light Material</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>Para obtener más información, consulte <a href="{@docRoot}training/material/theme.html">Uso del tema
+Material</a>.</p>
+
+
+<h3>Listas y tarjetas</h3>
+
+<p>Android proporciona dos widgets nuevos para mostrar listas y tarjetas con estilos y
+animaciones de Material Design:</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
+  <p>El nuevo widget <code>RecyclerView</code> es una versión más acoplable de <code>ListView</code>
+ que admite diferentes tipos de diseños y proporciona mejoras en el rendimiento.</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
+  <p>El nuevo widget <code>CardView</code> le permite mostrar extractos de información importante dentro de
+ tarjetas que tienen apariencia y estilo coherentes.</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>Para obtener más información, consulte <a href="{@docRoot}training/material/lists-cards.html">Creación de listas
+y tarjetas</a>.</p>
+
+
+<h3>Visualización de sombras</h3>
+
+<p>Además de las propiedades X e Y, las vistas de Android ahora poseen una
+propiedad Z. Esta propiedad nueva representa la elevación de una vista, que determina lo siguiente:</p>
+
+<ul>
+<li>El tamaño de la sombra: las vistas con valores Z más elevados proyectan sombras más grandes.</li>
+<li>El orden del dibujo: las vistas con valores Z más elevados aparecen sobre las otras vistas.</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>Para volver a reproducir la película, haga clic en la pantalla del dispositivo.</em>
+  </div>
+</div>
+
+<p>Para obtener más información, consulte <a href="{@docRoot}training/material/shadows-clipping.html">Definición
+de vistas de recorte y sombras</a>.</p>
+
+
+<h3>Animaciones</h3>
+
+<p>Las nuevas API de animaciones le permiten crear animaciones personalizadas para la información táctil en los controles de IU,
+además de realizar cambios en el estado de las vistas y transiciones entre actividades.</p>
+
+<p>Estas API le permiten hacer lo siguiente:</p>
+
+<ul>
+<li style="margin-bottom:15px">
+responder a los eventos táctiles de sus vistas mediante animaciones de <strong>información táctil</strong>;
+</li>
+<li style="margin-bottom:15px">
+ocultar y mostrar vistas con animaciones con <strong>efecto circular</strong>;
+</li>
+<li style="margin-bottom:15px">
+alternar entre actividades con animaciones personalizadas de <strong>transición de actividades</strong>;
+</li>
+<li style="margin-bottom:15px">
+crear animaciones más naturales con <strong>movimiento curvo</strong>;
+</li>
+<li style="margin-bottom:15px">
+animar los cambios en una o más propiedades de las vistas con las animaciones de <strong>cambio de estado de la vista</strong>;
+</li>
+<li style="margin-bottom:15px">
+mostrar animaciones en los <strong>elementos de diseño de la lista de estados</strong> entre los cambios de estado de las vistas.
+</li>
+</ul>
+
+<p>Las animaciones de la información táctil se concentran en diferentes vistas estándar, como los botones. Las nuevas API
+le permiten personalizar estas animaciones y agregarlas a sus vistas personalizadas.</p>
+
+<p>Para obtener más información, consulte <a href="{@docRoot}training/material/animations.html">Definición de animaciones
+personalizadas</a>.</p>
+
+
+<h3>Elementos de diseño</h3>
+
+<p>Estas nuevas capacidades para los elementos de diseño le permiten implementar aplicaciones de Material Design:</p>
+
+<ul>
+<li>Los <strong>dibujables en vector</strong> se pueden escalar sin perder definición y son perfectos
+para los iconos de las aplicaciones de un solo color.</li>
+<li>El <strong>teñido de los dibujables</strong> le permite definir mapas de bits como máscaras alfa y pintarlos con
+un color durante el tiempo de ejecución.</li>
+<li>La <strong>extracción de color</strong> le permite extraer automáticamente colores prominentes de una
+imagen del mapa de bits.</li>
+</ul>
+
+<p>Para obtener más información, consulte <a href="{@docRoot}training/material/drawables.html">Trabajo con
+elementos de diseño</a>.</p>

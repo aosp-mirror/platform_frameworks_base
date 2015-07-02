@@ -1,0 +1,186 @@
+page.title=머티어리얼 디자인
+page.tags=Material,design
+page.type=design
+page.image=design/material/images/MaterialLight.png
+
+@jd:body
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>개발자 문서</h3>
+    <p>머티어리얼 디자인으로 앱 생성</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>비디오</h3>
+    <p>머티어리얼 디자인 소개</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>비디오</h3>
+    <p>종이와 잉크: 중요한 머티어리얼</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>비디오</h3>
+    <p>Google I/O 앱 내 머티어리얼 디자인</p>
+</div>
+</a>
+
+
+
+<p itemprop="description">머티어리얼 디자인은 플랫폼 및 기기 전반의 표현 방식, 모션 및
+상호 작용 디자인에 대한 종합적인 지침입니다. Android에는 이제
+머티어리얼 디자인 앱에 대한 지원이 포함되었습니다. Android 앱에서 머티어리얼 디자인을 사용하려면 <a href="http://www.google.com/design/spec">머티어리얼 디자인 사양</a>에
+규정되어 있는 지침을 따르세요. 또한 Android 5.0(API 레벨 21) 이상에서 제공하는
+새 구성 요소 및 기능을 사용하세요.</p>
+
+<p>Android는 머티어리얼 디자인 앱을 구축하는 데 사용할 수 있는 다음 요소를 제공합니다.</p>
+
+<ul>
+  <li>새로운 테마</li>
+  <li>복잡한 뷰를 위한 새로운 위젯</li>
+  <li>사용자 지정 그림자 및 애니메이션을 위한 새로운 API</li>
+</ul>
+
+<p>Android에서 머티어리얼 디자인을 구현하는 방법에 대한 자세한 내용은
+<a href="{@docRoot}training/material/index.html">머티어리얼 디자인으로 앱 생성</a>을 참조하세요.</p>
+
+
+<h3>머티어리얼 테마</h3>
+
+<p>머티어리얼 테마는 앱에 사용할 수 있는 새로운 스타일, 색상표를
+설정할 수 있는 시스템 위젯, 그리고 터치 피드백 및 액티비티 전환을 위한 기본 애니메이션을 제공합니다.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">어두운 머티어리얼 테마</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">밝은 머티어리얼 테마</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>자세한 내용은 <a href="{@docRoot}training/material/theme.html">머티어리얼
+테마 사용</a>을 참조하세요.</p>
+
+
+<h3>목록 및 카드</h3>
+
+<p>Android는 머티어리얼 디자인 스타일
+및 애니메이션으로 카드 및 목록을 표시하는 데 사용할 수 있는 두 개의 새로운 위젯을 제공합니다.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
+  <p>새로운 <code>RecyclerView</code> 위젯은 <code>ListView</code>의
+플러그 기능이 개선된 버전으로, 다양한 레이아웃 유형을 지원하고 향상된 성능을 제공합니다.</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
+  <p>새로운 <code>CardView</code> 위젯은 일관적인 모양 및 느낌이 있는
+카드 내 정보의 중요한 부분을 표시할 수 있게 해줍니다.</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>자세한 내용은 <a href="{@docRoot}training/material/lists-cards.html">목록
+및 카드 생성</a>을 참조하세요.</p>
+
+
+<h3>뷰 그림자</h3>
+
+<p>X 및 Y 속성과 더불어 이제 Android의 뷰에는 Z
+속성이 추가되었습니다. 이 새로운 속성은 다음을 결정하는 뷰의 엘리베이션을 나타냅니다.</p>
+
+<ul>
+<li>그림자 크기: 뷰의 Z 값이 클수록 표시되는 그림자도 커집니다.</li>
+<li>그리기 순서: 뷰의 Z 값이 클수록 다른 뷰의 위에 표시됩니다.</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>영화를 재생하려면 기기 화면을 클릭합니다.</em>
+  </div>
+</div>
+
+<p>자세한 내용은 <a href="{@docRoot}training/material/shadows-clipping.html">그림자
+정의 및 뷰 클리핑</a>을 참조하세요.</p>
+
+
+<h3>애니메이션</h3>
+
+<p>새 애니메이션 API는 UI 컨트롤 내의 터치 피드백, 뷰 상태
+변화, 그리고 액티비티 전환을 위한 사용자 지정 애니메이션을 생성할 수 있게 해줍니다.</p>
+
+<p>이 API를 사용하면 다음 작업을 수행할 수 있습니다.</p>
+
+<ul>
+<li style="margin-bottom:15px">
+<strong>터치 피드백</strong> 애니메이션으로 뷰 내 터치 이벤트에 응답하기.
+</li>
+<li style="margin-bottom:15px">
+<strong>회전하며 나타나기</strong> 애니메이션으로 뷰 감추기 및 표시하기.
+</li>
+<li style="margin-bottom:15px">
+사용자 지정 <strong>액티비티 전환</strong> 애니메이션으로 액티비티 간 전환하기.
+</li>
+<li style="margin-bottom:15px">
+<strong>커브 모션</strong>으로 더 자연스러운 애니메이션 생성하기.
+</li>
+<li style="margin-bottom:15px">
+<strong>뷰 상태 변경</strong> 애니메이션으로 하나 이상의 뷰 속성 변경 사항 애니메이션화하기.
+</li>
+<li style="margin-bottom:15px">
+뷰 상태 변경 간에 <strong>상태 목록 드로어블</strong>에서 애니메이션 표시하기.
+</li>
+</ul>
+
+<p>터치 피드백 애니메이션은 버튼과 같은 여러 기본 뷰에 내장되어 있습니다. 새 API를 사용하면 이러한 애니메이션을 사용자 지정하고 사용자 지정 뷰에 추가할 수
+있습니다.</p>
+
+<p>자세한 내용은 <a href="{@docRoot}training/material/animations.html">사용자지정
+애니메이션 정의</a>를 참조하세요.</p>
+
+
+<h3>드로어블</h3>
+
+<p>드로어블에 대한 다음과 같은 새 기능을 통해 머티어리얼 디자인 앱을 쉽게 구현할 수 있습니다.</p>
+
+<ul>
+<li><strong>벡터 드로어블</strong>은 단색 인앱 아이콘에
+적합하며, 정의 손실 없이 확장 가능합니다.</li>
+<li><strong>드로어블 색조</strong>를 사용하면 비트맵을 알파 마스크로 정의할 수 있으며, 런타임에
+색을 입힐 수 있습니다.</li>
+<li><strong>색상 추출</strong>은
+비트맵 이미지에서 주요 색상을 자동으로 추출할 수 있게 해줍니다.</li>
+</ul>
+
+<p>자세한 내용은 <a href="{@docRoot}training/material/drawables.html">Drawable
+사용</a>을 참조하세요.</p>

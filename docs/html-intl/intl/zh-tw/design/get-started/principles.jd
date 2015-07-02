@@ -1,0 +1,307 @@
+page.title=Android 設計原則
+@jd:body
+
+<p>這些設計原則是由 Android 使用者體驗團隊開發，並針對 Android 使用者體驗團隊的需求所開發，以使用者的最大利益為出發點。對於 Android 開發者和設計者而言，針對不同類型的裝置，這些原則仍持續是更詳細設計方針的基礎。
+
+
+
+</p>
+
+<p>
+當您套用您本身的創意與設計思維時，請考慮這些原則。
+偏離一般做法要帶有目的。
+</p>
+
+<h2 id="enchant-me">使人著迷</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="delight-me">以出乎意外的方式取悅人</h4>
+<p>漂亮的外觀、精心設置的動畫，或時機恰到好處的音效，都是令人感到喜悅的體驗。
+微妙的效果有助於產生毫不費力及強大力量就在手邊的感覺。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_delight.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="real-objects-more-fun">真實的物件比按鈕和功能表更有趣</h4>
+<p>讓人們可以在您應用程式中直接輕觸和操縱物件，這可減少執行某項工作所需的認知過程，同時在情緒上更令人感到滿足。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_real_objects.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-it-mine">提供個人設定</h4>
+<p>人們喜歡加上個人風格，因為這有助於他們感到自在並握有主控權。提供能令人感受及美觀的預設設定，但也可以考慮使用不會阻礙主要工作卻又好玩的可選用性自訂項目。
+
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_it_mine.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="get-to-know-me">設法了解使用者</h4>
+<p>隨著時間而學習使用者的偏好。讓人們易於取得之前的選擇，而不是一再詢問他們會做出相同選擇的問題。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_get_to_know_me.png">
+
+  </div>
+</div>
+
+<h2 id="simplify-my-life">簡化生活</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="keep-it-brief">保持簡潔</h4>
+<p>以簡單單字組成簡短語句。人們傾向於略過冗長的句子。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_keep_it_brief.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="pictures-faster-than-words">圖片的傳達效果更勝於言語</h4>
+<p>請考慮使用圖片來解釋想法。圖片能吸引人們的注意力，並比言語更有效率。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_pictures.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="decide-for-me">幫使用者決定，但使用者擁有最終決定權</h4>
+<p>做出最好的猜測，先行動，而非先詢問。太多的選擇和決定會讓人們不高興。
+為防止錯誤，務必允許復原。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_decide_for_me.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="only-show-when-i-need-it">必要時僅顯示使用者需要的東西</h4>
+<p>人們無法承受一次看到太多東西。將工作和資訊細分成小型、易消化的區塊。
+隱藏當下不重要的選項，但在人們需要選擇時要明確指導。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_information_when_need_it.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="always-know-where-i-am">使用者應該總是清楚所在位置</h4>
+<p>給人們信心，知道自己沒有迷路。讓您應用程式中的各處看起來都有獨特性，並使用轉換來顯示畫面之間的關係。
+針對進行中的工作提供回饋。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_navigation.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="never-lose-my-stuff">別弄丟使用者的東西</h4>
+<p>儲存使用者花時間所建立的資訊，並且讓使用者可從任何地方存取。跨手機、平板電腦和電腦記住設定、個人風格和建立的資訊。
+這會讓升級變得很簡單。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="looks-same-should-act-same">如果看起來一樣，就應該有相同的動作</h4>
+<p>讓功能看起來就不一樣，而非變化微妙，這可以協助人們辨別功能差異。在相同輸入環境下，因為模式看起來很類似但卻有不同的動作，請盡量避免使用。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_looks_same.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="interrupt-only-if-important">重要時才打斷</h4>
+<p>就像一位好的私人助理，讓人們免於無關緊要的枝微末節。人們總想集中注意力，除非很重要且具時效性，不然貿然中斷會令人感到費力且沮喪。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_important_interruption.png">
+
+  </div>
+</div>
+
+<h2 id="make-me-amazing">讓使用者驚艷</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="give-me-tricks">提供使用者各處通用的訣竅</h4>
+<p>當人們能自行弄清楚來龍去脈時是很棒的體驗。運用來自其他 Android 應用程式的視覺模式和肌肉記憶效應，讓使用者更易於學會您的應用程式。
+例如，擺動手勢可能是很好的導覽捷徑。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_tricks.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="its-not-my-fault">不是使用者的錯</h4>
+<p>提示人們更正時要溫和。人們使用您的應用程式時，會想要感受到自已非常明智。如果有什麼不對，請提供明確的復原指示，但不需要使用者明瞭技術細節。如果可以，請盡量在幕後修正。
+
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_error.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="sprinkle-encouragement">分段鼓勵</h4>
+<p>將複雜工作細分成更小的步驟，讓使用者可以輕鬆完成。對動作給予回饋，即使只是個微光效果。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="do-heavy-lifting-for-me">為使用者處理繁重的工作</h4>
+<p>讓新手也能做出以前從未想像過可以辦到的事情，讓使用者有專家的感覺。例如，組合多個相片效果的捷徑，只要幾個步驟，即可讓業餘照片令人驚艷。
+
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_heavy_lifting.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-important-things-fast">快速找到重要的功能</h4>
+<p>並非所有的動作都一視同仁。決定應用程式中最重要的部分，並讓使用者易於找到並可迅速使用，例如相機的快門按鈕或音樂播放器的暫停按鈕。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_important_fast.png">
+
+  </div>
+</div>
