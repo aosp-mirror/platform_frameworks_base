@@ -20827,14 +20827,11 @@ package android.net.wifi {
     field public static final int CHANNEL_WIDTH_40MHZ = 1; // 0x1
     field public static final int CHANNEL_WIDTH_80MHZ = 2; // 0x2
     field public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4; // 0x4
-    field public static final long FLAG_80211mc_RESPONDER = 2L; // 0x2L
-    field public static final long FLAG_PASSPOINT_NETWORK = 1L; // 0x1L
     field public java.lang.String SSID;
     field public java.lang.String capabilities;
     field public int centerFreq0;
     field public int centerFreq1;
     field public int channelWidth;
-    field public long flags;
     field public int frequency;
     field public int level;
     field public java.lang.CharSequence operatorFriendlyName;
@@ -20889,7 +20886,7 @@ package android.net.wifi {
     field public java.lang.String preSharedKey;
     field public int priority;
     field public java.lang.String providerFriendlyName;
-    field public java.lang.Long[] roamingConsortiumIds;
+    field public long[] roamingConsortiumIds;
     field public int status;
     field public java.lang.String[] wepKeys;
     field public int wepTxKeyIndex;
