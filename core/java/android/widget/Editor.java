@@ -38,7 +38,6 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.inputmethodservice.ExtractEditText;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
@@ -70,6 +69,7 @@ import android.text.style.TextAppearanceSpan;
 import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.DisplayListCanvas;
@@ -89,6 +89,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
@@ -102,6 +103,7 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.EditableInputConnection;
 
 import java.text.BreakIterator;
@@ -109,6 +111,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+
 
 /**
  * Helper class used by TextView to handle editable text views.
@@ -244,6 +247,8 @@ public class Editor {
 
     private TextView mTextView;
 
+    final ProcessTextIntentActionsHandler mProcessTextIntentActionsHandler;
+
     final CursorAnchorInfoNotifier mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier();
 
     private final Runnable mShowFloatingToolbar = new Runnable() {
@@ -261,6 +266,7 @@ public class Editor {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
         mTextView.setFilters(mTextView.getFilters());
+        mProcessTextIntentActionsHandler = new ProcessTextIntentActionsHandler(this);
     }
 
     ParcelableParcel saveInstanceState() {
@@ -3157,7 +3163,9 @@ public class Editor {
                 }
             }
 
-            addIntentMenuItemsForTextProcessing(menu);
+            if (mTextView.canProcessText()) {
+                mProcessTextIntentActionsHandler.onInitializeMenu(menu);
+            }
 
             if (menu.hasVisibleItems() || mode.getCustomView() != null) {
                 mTextView.setHasTransientState(true);
@@ -3205,34 +3213,6 @@ public class Editor {
             updateReplaceItem(menu);
         }
 
-        private void addIntentMenuItemsForTextProcessing(Menu menu) {
-            if (mTextView.canProcessText()) {
-                PackageManager packageManager = mTextView.getContext().getPackageManager();
-                List<ResolveInfo> supportedActivities =
-                        packageManager.queryIntentActivities(createProcessTextIntent(), 0);
-                for (int i = 0; i < supportedActivities.size(); ++i) {
-                    ResolveInfo info = supportedActivities.get(i);
-                    menu.add(Menu.NONE, Menu.NONE,
-                            MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i,
-                            info.loadLabel(packageManager))
-                        .setIntent(createProcessTextIntentForResolveInfo(info))
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-                }
-            }
-        }
-
-        private Intent createProcessTextIntent() {
-            return new Intent()
-                .setAction(Intent.ACTION_PROCESS_TEXT)
-                .setType("text/plain");
-        }
-
-        private Intent createProcessTextIntentForResolveInfo(ResolveInfo info) {
-            return createProcessTextIntent()
-                    .putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, !mTextView.isTextEditable())
-                    .setClassName(info.activityInfo.packageName, info.activityInfo.name);
-        }
-
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             updateSelectAllItem(menu);
@@ -3271,12 +3251,7 @@ public class Editor {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            if (item.getIntent() != null
-                    && item.getIntent().getAction().equals(Intent.ACTION_PROCESS_TEXT)) {
-                item.getIntent().putExtra(Intent.EXTRA_PROCESS_TEXT, mTextView.getSelectedText());
-                mPreserveDetachedSelection = true;
-                mTextView.startActivityForResult(
-                        item.getIntent(), TextView.PROCESS_TEXT_REQUEST_CODE);
+            if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
                 return true;
             }
             Callback customCallback = getCustomCallback();
@@ -5465,5 +5440,120 @@ public class Editor {
                 return new EditOperation[size];
             }
         };
+    }
+
+    /**
+     * A helper for enabling and handling "PROCESS_TEXT" menu actions.
+     * These allow external applications to plug into currently selected text.
+     */
+    static final class ProcessTextIntentActionsHandler {
+
+        private final Editor mEditor;
+        private final TextView mTextView;
+        private final PackageManager mPackageManager;
+        private final SparseArray<Intent> mAccessibilityIntents = new SparseArray<Intent>();
+        private final SparseArray<AccessibilityNodeInfo.AccessibilityAction> mAccessibilityActions
+                = new SparseArray<AccessibilityNodeInfo.AccessibilityAction>();
+
+        private ProcessTextIntentActionsHandler(Editor editor) {
+            mEditor = Preconditions.checkNotNull(editor);
+            mTextView = Preconditions.checkNotNull(mEditor.mTextView);
+            mPackageManager = Preconditions.checkNotNull(
+                    mTextView.getContext().getPackageManager());
+        }
+
+        /**
+         * Adds "PROCESS_TEXT" menu items to the specified menu.
+         */
+        public void onInitializeMenu(Menu menu) {
+            int i = 0;
+            for (ResolveInfo resolveInfo : getSupportedActivities()) {
+                menu.add(Menu.NONE, Menu.NONE,
+                        Editor.MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i++,
+                        getLabel(resolveInfo))
+                        .setIntent(createProcessTextIntentForResolveInfo(resolveInfo))
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            }
+        }
+
+        /**
+         * Performs a "PROCESS_TEXT" action if there is one associated with the specified
+         * menu item.
+         *
+         * @return True if the action was performed, false otherwise.
+         */
+        public boolean performMenuItemAction(MenuItem item) {
+            return fireIntent(item.getIntent());
+        }
+
+        /**
+         * Initializes and caches "PROCESS_TEXT" accessibility actions.
+         */
+        public void initializeAccessibilityActions() {
+            mAccessibilityIntents.clear();
+            mAccessibilityActions.clear();
+            int i = 0;
+            for (ResolveInfo resolveInfo : getSupportedActivities()) {
+                int actionId = TextView.ACCESSIBILITY_ACTION_PROCESS_TEXT_START_ID + i++;
+                mAccessibilityActions.put(
+                        actionId,
+                        new AccessibilityNodeInfo.AccessibilityAction(
+                                actionId, getLabel(resolveInfo)));
+                mAccessibilityIntents.put(
+                        actionId, createProcessTextIntentForResolveInfo(resolveInfo));
+            }
+        }
+
+        /**
+         * Adds "PROCESS_TEXT" accessibility actions to the specified accessibility node info.
+         * NOTE: This needs a prior call to {@link #initializeAccessibilityActions()} to make the
+         * latest accessibility actions available for this call.
+         */
+        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo nodeInfo) {
+            for (int i = 0; i < mAccessibilityActions.size(); i++) {
+                nodeInfo.addAction(mAccessibilityActions.valueAt(i));
+            }
+        }
+
+        /**
+         * Performs a "PROCESS_TEXT" action if there is one associated with the specified
+         * accessibility action id.
+         *
+         * @return True if the action was performed, false otherwise.
+         */
+        public boolean performAccessibilityAction(int actionId) {
+            return fireIntent(mAccessibilityIntents.get(actionId));
+        }
+
+        private boolean fireIntent(Intent intent) {
+            if (intent != null && Intent.ACTION_PROCESS_TEXT.equals(intent.getAction())) {
+                intent.putExtra(Intent.EXTRA_PROCESS_TEXT, mTextView.getSelectedText());
+                mEditor.mPreserveDetachedSelection = true;
+                mTextView.startActivityForResult(intent, TextView.PROCESS_TEXT_REQUEST_CODE);
+                return true;
+            }
+            return false;
+        }
+
+        private List<ResolveInfo> getSupportedActivities() {
+            PackageManager packageManager = mTextView.getContext().getPackageManager();
+            return packageManager.queryIntentActivities(createProcessTextIntent(), 0);
+        }
+
+        private Intent createProcessTextIntentForResolveInfo(ResolveInfo info) {
+            return createProcessTextIntent()
+                    .putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, !mTextView.isTextEditable())
+                    .setClassName(info.activityInfo.packageName, info.activityInfo.name);
+        }
+
+        private Intent createProcessTextIntent() {
+            return new Intent()
+                    .setAction(Intent.ACTION_PROCESS_TEXT)
+                    .setType("text/plain");
+        }
+
+        private CharSequence getLabel(ResolveInfo resolveInfo) {
+            return resolveInfo.loadLabel(mPackageManager);
+        }
     }
 }
