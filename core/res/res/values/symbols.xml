@@ -625,9 +625,6 @@
   <java-symbol type="string" name="eventTypeBirthday" />
   <java-symbol type="string" name="eventTypeCustom" />
   <java-symbol type="string" name="eventTypeOther" />
-  <java-symbol type="string" name="extmedia_format_button_format" />
-  <java-symbol type="string" name="extmedia_format_message" />
-  <java-symbol type="string" name="extmedia_format_title" />
   <java-symbol type="string" name="fileSizeSuffix" />
   <java-symbol type="string" name="force_close" />
   <java-symbol type="string" name="format_error" />
