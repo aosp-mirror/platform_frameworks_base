@@ -216,11 +216,15 @@ public class ScanResult implements Parcelable {
      */
     public int distanceSdCm;
 
+    /** {@hide} */
     public static final long FLAG_PASSPOINT_NETWORK               = 0x0000000000000001;
+
+    /** {@hide} */
     public static final long FLAG_80211mc_RESPONDER               = 0x0000000000000002;
 
     /**
      * Defines flags; such as {@link #FLAG_PASSPOINT_NETWORK}.
+     * {@hide}
      */
     public long flags;
 
