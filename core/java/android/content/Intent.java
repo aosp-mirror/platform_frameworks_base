@@ -6181,8 +6181,12 @@ public class Intent implements Parcelable, Cloneable {
      * who sent the intent.
      * @hide
      */
-    public void setContentUserHint(int contentUserHint) {
-        mContentUserHint = contentUserHint;
+    public void prepareToLeaveUser(int userId) {
+        // If mContentUserHint is not UserHandle.USER_CURRENT, the intent has already left a user.
+        // We want mContentUserHint to refer to the original user, so don't do anything.
+        if (mContentUserHint == UserHandle.USER_CURRENT) {
+            mContentUserHint = userId;
+        }
     }
 
     /**
