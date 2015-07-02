@@ -1568,47 +1568,41 @@ public abstract class SensorManager {
     /**
      * For testing purposes only. Not for third party applications.
      *
-     * Enable data injection mode in sensor service. This mode is
-     * expected to be used only for testing purposes. If the HAL is
-     * set to data injection mode, it will ignore the input from
-     * physical sensors and read sensor data that is injected from
-     * the test application. This mode is used for testing vendor
-     * implementations for various algorithms like Rotation Vector,
-     * Significant Motion, Step Counter etc.
+     * Initialize data injection mode and create a client for data injection. SensorService should
+     * already be operating in DATA_INJECTION mode for this call succeed. To set SensorService into
+     * DATA_INJECTION mode "adb shell dumpsys sensorservice data_injection" needs to be called
+     * through adb. Typically this is done using a host side test.  This mode is expected to be used
+     * only for testing purposes. If the HAL is set to data injection mode, it will ignore the input
+     * from physical sensors and read sensor data that is injected from the test application. This
+     * mode is used for testing vendor implementations for various algorithms like Rotation Vector,
+     * Significant Motion, Step Counter etc. Not all HALs support DATA_INJECTION. This method will
+     * fail in those cases. Once this method succeeds, the test can call
+     * {@link injectSensorData(Sensor, float[], int, long)} to inject sensor data into the HAL.
      *
-     * The tests which call this API need to have {@code
-     * android.permission.LOCATION_HADWARE} permission which isn't
-     * available for third party applications.
-     *
-     * @param enable True to set the HAL in DATA_INJECTION mode.
-     *               False to reset the HAL back to NORMAL mode.
+     * @param enable True to initialize a client in DATA_INJECTION mode.
+     *               False to clean up the native resources.
      *
      * @return true if the HAL supports data injection and false
      *         otherwise.
      * @hide
      */
     @SystemApi
-    public boolean enableDataInjectionMode(boolean enable) {
-          return enableDataInjectionImpl(enable);
+    public boolean initDataInjection(boolean enable) {
+          return initDataInjectionImpl(enable);
     }
 
     /**
      * @hide
      */
-    protected abstract boolean enableDataInjectionImpl(boolean enable);
+    protected abstract boolean initDataInjectionImpl(boolean enable);
 
     /**
      * For testing purposes only. Not for third party applications.
      *
-     * This method is used to inject raw sensor data into the HAL.
-     * Call enableDataInjection before this method to set the HAL in
-     * data injection mode. This method should be called only if a
-     * previous call to enableDataInjection has been successful and
-     * the HAL is already in data injection mode.
-     *
-     * The tests which call this API need to have {@code
-     * android.permission.LOCATION_HARDWARE} permission which isn't
-     * available for third party applications.
+     * This method is used to inject raw sensor data into the HAL.  Call {@link
+     * initDataInjection(boolean)} before this method to set the HAL in data injection mode. This
+     * method should be called only if a previous call to initDataInjection has been successful and
+     * the HAL and SensorService are already opreating in data injection mode.
      *
      * @param sensor The sensor to inject.
      * @param values Sensor values to inject. The length of this
@@ -1649,9 +1643,6 @@ public abstract class SensorManager {
         }
         if (timestamp <= 0) {
             throw new IllegalArgumentException("Negative or zero sensor timestamp");
-        }
-        if (timestamp > SystemClock.elapsedRealtimeNanos()) {
-            throw new IllegalArgumentException("Sensor timestamp into the future");
         }
         return injectSensorDataImpl(sensor, values, accuracy, timestamp);
     }

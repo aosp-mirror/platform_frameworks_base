@@ -43,7 +43,7 @@ public class SystemSensorManager extends SensorManager {
     private static native void nativeClassInit();
     private static native long nativeCreate(String opPackageName);
     private static native int nativeGetNextSensor(long nativeInstance, Sensor sensor, int next);
-    private static native int nativeEnableDataInjection(long nativeInstance, boolean enable);
+    private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
 
     private static boolean sSensorModuleInitialized = false;
     private static InjectEventQueue mInjectEventQueue = null;
@@ -64,7 +64,6 @@ public class SystemSensorManager extends SensorManager {
     private final Looper mMainLooper;
     private final int mTargetSdkLevel;
     private final Context mContext;
-    private final boolean mHasDataInjectionPermissions;
     private final long mNativeInstance;
 
     /** {@hide} */
@@ -79,8 +78,6 @@ public class SystemSensorManager extends SensorManager {
                 sSensorModuleInitialized = true;
                 nativeClassInit();
             }
-            mHasDataInjectionPermissions = context.checkSelfPermission(
-                    Manifest.permission.LOCATION_HARDWARE) == PackageManager.PERMISSION_GRANTED;
         }
 
         // initialize the sensor list
@@ -230,23 +227,26 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
-    protected boolean enableDataInjectionImpl(boolean enable) {
-        if (!mHasDataInjectionPermissions) {
-            throw new SecurityException("Permission denial. Calling enableDataInjection without "
-                    + Manifest.permission.LOCATION_HARDWARE);
-        }
+    protected boolean initDataInjectionImpl(boolean enable) {
         synchronized (mLock) {
-            int ret = nativeEnableDataInjection(mNativeInstance, enable);
-            // The HAL does not support injection. Ignore.
-            if (ret != 0) {
-                Log.e(TAG, "HAL does not support data injection");
-                return false;
-            }
-            mDataInjectionMode = enable;
-            // If data injection is being disabled clean up the native resources.
-            if (!enable && mInjectEventQueue != null) {
-                mInjectEventQueue.dispose();
-                mInjectEventQueue = null;
+            if (enable) {
+                boolean isDataInjectionModeEnabled = nativeIsDataInjectionEnabled(mNativeInstance);
+                // The HAL does not support injection OR SensorService hasn't been set in DI mode.
+                if (!isDataInjectionModeEnabled) {
+                    Log.e(TAG, "Data Injection mode not enabled");
+                    return false;
+                }
+                mDataInjectionMode = true;
+                // Initialize a client for data_injection.
+                if (mInjectEventQueue == null) {
+                    mInjectEventQueue = new InjectEventQueue(mMainLooper, this);
+                }
+            } else {
+                // If data injection is being disabled clean up the native resources.
+                if (mInjectEventQueue != null) {
+                    mInjectEventQueue.dispose();
+                    mInjectEventQueue = null;
+                }
             }
             return true;
         }
@@ -254,17 +254,10 @@ public class SystemSensorManager extends SensorManager {
 
     protected boolean injectSensorDataImpl(Sensor sensor, float[] values, int accuracy,
             long timestamp) {
-        if (!mHasDataInjectionPermissions) {
-            throw new SecurityException("Permission denial. Calling injectSensorData without "
-                    + Manifest.permission.LOCATION_HARDWARE);
-        }
         synchronized (mLock) {
             if (!mDataInjectionMode) {
                 Log.e(TAG, "Data injection mode not activated before calling injectSensorData");
                 return false;
-            }
-            if (mInjectEventQueue == null) {
-                mInjectEventQueue = new InjectEventQueue(mMainLooper, this);
             }
             int ret = mInjectEventQueue.injectSensorData(sensor.getHandle(), values, accuracy,
                                                          timestamp);
