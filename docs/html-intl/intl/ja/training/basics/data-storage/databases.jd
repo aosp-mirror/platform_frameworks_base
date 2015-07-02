@@ -1,0 +1,317 @@
+page.title=SQL データベースにデータを保存する
+page.tags=データ保存
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#DefineContract">スキーマとコントラクトを定義する</a></li>
+  <li><a href="#DbHelper">SQL ヘルパーを使用してデータベースを作成する</a></li>
+  <li><a href="#WriteDbRow">データベースに情報を格納する</a></li>
+  <li><a href="#ReadDbRow">データベースから情報を読み取る</a></li>
+  <li><a href="#DeleteDbRow">データベースから情報を削除する</a></li>
+  <li><a href="#UpdateDbRow">データベースを更新する</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#db">データベースを使用する</a></li>
+</ul>
+
+<!--
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/Sample.zip" class="button">Download the sample</a>
+  <p class="filename">Sample.zip</p>
+</div>
+-->
+
+</div>
+</div>
+
+
+<p>データベースへのデータ保存は、連絡先情報などの繰り返し使用する、または構造化されたデータに最適です。
+このクラスでは、受講者が全般的な SQL データベースの知識に精通していることを前提としており、Android 上での SQLite データベースの導入を支援します。
+
+Android 上でのデータベース使用の際に必要な API は、{@link android.database.sqlite} パッケージに含まれています。
+</p>
+
+
+<h2 id="DefineContract">スキーマとコントラクトを定義する</h2>
+
+<p>SQL データベースの重要な要素の 1 つがスキーマであり、これはデータベースの編成方法に関する正式な宣言です。
+スキーマは、データベースを作成するために使用する SQL 文に反映されます。
+<em>コントラクト</em> クラスとして知られているコンパニオン クラスの作成が有用です。コンパニオン クラスでは、スキーマのレイアウトを明示的に、そして体系的な自己文書化する方法で指定します。
+
+</p>
+
+<p>コントラクト クラスは、URI、表、列の名前を定義する定数のコンテナです。
+コントラクト クラスを使用すると、同じパッケージ内の他のすべてのクラスで、同じ定数を使用することができます。
+これにより、1 つの場所で列名を変更した場合に、それをコード全体にプロパゲートすることができます。
+</p>
+
+<p>コントラクト クラスを編成するお勧めの方法の 1 つは、クラスのルート レベルでデータベース全体に対しグローバルな定義を設定することです。
+その後、その列を列挙する各表の内部クラスを作成します。
+</p>
+
+<p class="note"><strong>注:</strong> {@link
+android.provider.BaseColumns} インターフェースを実装することで、内部クラスでは、カーソル アダプタのようないくつかの Android クラスでも存在を想定されている、
+{@code _ID} と呼ばれるプライマリキーフィールドを継承することができます。
+これは必須ではありませんが、データベースが Android フレームワークと調和して動作する上で役立ちます。
+</p>
+
+<p>たとえば、次のスニペットでは、単一の表の表名と列名を定義します。
+</p>
+
+
+<pre>
+public final class FeedReaderContract {
+    // To prevent someone from accidentally instantiating the contract class,
+    // give it an empty constructor.
+    public FeedReaderContract() {}
+
+    /* Inner class that defines the table contents */
+    public static abstract class FeedEntry implements BaseColumns {
+        public static final String TABLE_NAME = &quot;entry&quot;;
+        public static final String COLUMN_NAME_ENTRY_ID = &quot;entryid&quot;;
+        public static final String COLUMN_NAME_TITLE = &quot;title&quot;;
+        public static final String COLUMN_NAME_SUBTITLE = &quot;subtitle&quot;;
+        ...
+    }
+}
+</pre>
+
+
+
+<h2 id="DbHelper">SQL ヘルパーを使用してデータベースを作成する</h2>
+
+<p>データベースの概要を定義した後、データベースと表を作成、管理するメソッドを実装する必要があります。
+表を作成して削除するための一般的な宣言の例を次にいくつか示します。
+</P>
+
+<pre>
+private static final String TEXT_TYPE = &quot; TEXT&quot;;
+private static final String COMMA_SEP = &quot;,&quot;;
+private static final String SQL_CREATE_ENTRIES =
+    &quot;CREATE TABLE &quot; + FeedEntry.TABLE_NAME + &quot; (&quot; +
+    FeedEntry._ID + &quot; INTEGER PRIMARY KEY,&quot; +
+    FeedEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
+    FeedEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
+    ... // Any other options for the CREATE command
+    &quot; )&quot;;
+
+private static final String SQL_DELETE_ENTRIES =
+    &quot;DROP TABLE IF EXISTS &quot; + FeedEntry.TABLE_NAME;
+</pre>
+
+<p>デバイスの<a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">内部ストレージ</a>にファイルを保存する場合と同様に、Android はアプリケーションに関連付けられているプライベート ディスク スペースにデータベースを格納します。
+
+デフォルトでは、この領域は他のアプリケーションからアクセスできないため、データの安全性は確保されています。
+</p>
+
+<p>一連の便利な API が、{@link
+android.database.sqlite.SQLiteOpenHelper}クラスで利用できます。このクラスを使用してデータベースへの参照を取得すると、<em>アプリケーションの起動時にではなく</em>必要な場合にのみ、データベースの作成、更新などの時間がかかる可能性が高い操作が実行されます。
+
+
+
+
+{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} または
+{@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase} の呼び出し以外は必要ありません。</p>
+
+<p class="note"><strong>注:</strong> 長時間実行する可能性があるため、
+{@link android.os.AsyncTask} または {@link android.app.IntentService} などを使用して、{@link
+android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} または {@link
+android.database.sqlite.SQLiteOpenHelper#getReadableDatabase} をバックグラウンド スレッドで呼び出すようにしてください。
+</p>
+
+<p>{@link android.database.sqlite.SQLiteOpenHelper} を使用するには、
+{@link
+android.database.sqlite.SQLiteOpenHelper#onCreate onCreate()}、{@link
+android.database.sqlite.SQLiteOpenHelper#onUpgrade onUpgrade()}、{@link
+android.database.sqlite.SQLiteOpenHelper#onOpen onOpen()} コールバック メソッドを上書きするサブクラスを作成します。また
+{@link android.database.sqlite.SQLiteOpenHelper#onDowngrade onDowngrade()} を実装することもできますが、必須ではありません。
+</p>
+
+<p>次に、上記に示したいくつかのコマンドを使用した {@link
+android.database.sqlite.SQLiteOpenHelper} の実装例を示します。</p>
+
+<pre>
+public class FeedReaderDbHelper extends SQLiteOpenHelper {
+    // If you change the database schema, you must increment the database version.
+    public static final int DATABASE_VERSION = 1;
+    public static final String DATABASE_NAME = &quot;FeedReader.db&quot;;
+
+    public FeedReaderDbHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(SQL_CREATE_ENTRIES);
+    }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // This database is only a cache for online data, so its upgrade policy is
+        // to simply to discard the data and start over
+        db.execSQL(SQL_DELETE_ENTRIES);
+        onCreate(db);
+    }
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+}
+</pre>
+
+<p>データベースにアクセスするには、{@link
+android.database.sqlite.SQLiteOpenHelper} のサブクラスのインスタンスを作成します。</p>
+
+<pre>
+FeedReaderDbHelper mDbHelper = new FeedReaderDbHelper(getContext());
+</pre>
+
+
+
+
+<h2 id="WriteDbRow">データベースに情報を格納する</h2>
+
+<p>{@link android.content.ContentValues}オブジェクトを {@link android.database.sqlite.SQLiteDatabase#insert insert()} メソッドに渡してデータベースにデータを格納できます。
+</p>
+
+<pre>
+// Gets the data repository in write mode
+SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+// Create a new map of values, where column names are the keys
+ContentValues values = new ContentValues();
+values.put(FeedEntry.COLUMN_NAME_ENTRY_ID, id);
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+values.put(FeedEntry.COLUMN_NAME_CONTENT, content);
+
+// Insert the new row, returning the primary key value of the new row
+long newRowId;
+newRowId = db.insert(
+         FeedEntry.TABLE_NAME,
+         FeedEntry.COLUMN_NAME_NULLABLE,
+         values);
+</pre>
+
+<p>{@link android.database.sqlite.SQLiteDatabase#insert insert()}の最初の引数は単なる表の名前です。
+2 番目の引数は列の名前を指定します。この列では、{@link android.content.ContentValues} が空の場合にフレームワークが NULL を挿入できます（これを {@code "null"} に設定した場合、フレームワークは値がない場合には行を挿入しません）。
+
+
+</p>
+
+
+
+
+<h2 id="ReadDbRow">データベースから情報を読み取る</h2>
+
+<p>データベースから情報を読み取るには、{@link android.database.sqlite.SQLiteDatabase#query query()}メソッドを使用して選択条件および対象となる列をこれに渡します。このメソッドは、{@link android.database.sqlite.SQLiteDatabase#insert insert()}と {@link android.database.sqlite.SQLiteDatabase#update update()} 要素を組み合わせたもので（列リストを除く）、挿入するデータではなく取得対象のデータを定義します。
+
+
+
+クエリの結果は、
+{@link android.database.Cursor} オブジェクトとして返されます。</p>
+
+<pre>
+SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+// Define a <em>projection</em> that specifies which columns from the database
+// you will actually use after this query.
+String[] projection = {
+    FeedEntry._ID,
+    FeedEntry.COLUMN_NAME_TITLE,
+    FeedEntry.COLUMN_NAME_UPDATED,
+    ...
+    };
+
+// How you want the results sorted in the resulting Cursor
+String sortOrder =
+    FeedEntry.COLUMN_NAME_UPDATED + " DESC";
+
+Cursor c = db.query(
+    FeedEntry.TABLE_NAME,  // The table to query
+    projection,                               // The columns to return
+    selection,                                // The columns for the WHERE clause
+    selectionArgs,                            // The values for the WHERE clause
+    null,                                     // don't group the rows
+    null,                                     // don't filter by row groups
+    sortOrder                                 // The sort order
+    );
+</pre>
+
+<p>Cursor 内の特定の行に注目するには、いずれかの {@link android.database.Cursor} 移動メソッドを使用します。これは、必ず値の読み取りを開始する前に呼び出す必要があります。
+通常、初めに
+{@link android.database.Cursor#moveToFirst} を呼び出します。これは、結果の最初のエントリ上に「読み取り位置」を置きます。
+各行では、{@link android.database.Cursor#getString
+getString()} または {@link android.database.Cursor#getLong getLong()} のような
+{@link android.database.Cursor} 取得メソッドのいずれかを呼び出すことによって、列の値を読み取ることができます。各取得メソッドに対して、必要な列のインデックス位置を渡す必要があります。これは、{@link android.database.Cursor#getColumnIndex getColumnIndex()} または
+{@link android.database.Cursor#getColumnIndexOrThrow getColumnIndexOrThrow()}を呼び出すことによって取得できます。以下に例を示します。
+
+
+</p>
+
+<pre>
+cursor.moveToFirst();
+long itemId = cursor.getLong(
+    cursor.getColumnIndexOrThrow(FeedEntry._ID)
+);
+</pre>
+
+
+
+
+<h2 id="DeleteDbRow">データベースから情報を削除する</h2>
+
+<p>表から行を削除するには、削除対象の行を特定するための条件を指定する必要があります。
+データベース API により、SQL インジェクションから保護される選択条件を作成するメカニズムが提供されます。
+このメカニズムでは、選択の指定を選択句と選択引数に分割します。
+句では参照対象の列を定義し、また、列のテストを組み合わせることができます。
+
+引数はテスト対象の値であり、句にバインドされます。結果は通常の SQL 文と同様には扱われないため、SQL インジェクションの影響を受けません。
+
+</p>
+
+<pre>
+// Define 'where' part of query.
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+// Specify arguments in placeholder order.
+String[] selectionArgs = { String.valueOf(rowId) };
+// Issue SQL statement.
+db.delete(table_name, selection, selectionArgs);
+</pre>
+
+
+
+<h2 id="UpdateDbRow">データベースを更新する</h2>
+
+<p>データベースの値のサブセットを変更する必要がある場合には、{@link
+android.database.sqlite.SQLiteDatabase#update update()} メソッドを使用します。</p>
+
+<p>表の更新では、{@link
+android.database.sqlite.SQLiteDatabase#insert insert()} のコンテンツ値の構文と、
+{@link android.database.sqlite.SQLiteDatabase#delete delete()} の {@code where} 構文が組み合わされます。</p>
+
+<pre>
+SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+// New value for one column
+ContentValues values = new ContentValues();
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+
+// Which row to update, based on the ID
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+String[] selectionArgs = { String.valueOf(rowId) };
+
+int count = db.update(
+    FeedReaderDbHelper.FeedEntry.TABLE_NAME,
+    values,
+    selection,
+    selectionArgs);
+</pre>
+

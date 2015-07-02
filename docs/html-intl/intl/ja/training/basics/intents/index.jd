@@ -1,0 +1,62 @@
+page.title=他のアプリとの相互操作
+page.tags=インテント、アクティビティ
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>必要な知識と前提条件</h2>
+<ul>
+  <li>アクティビティのライフサイクルに関する基本知識（<a href="{@docRoot}training/basics/activity-lifecycle/index.html">アクティビティのライフサイクル管理</a>を参照）
+</li>
+</ul>
+
+
+<h2>関連ドキュメント</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">単純なデータの共有</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">ファイルの共有</a>
+  <li><a href="http://android-developers.blogspot.com/2009/11/integrating-application-with-intents.html">Integrating Application with Intents（ブログ投稿）</a>
+</li>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">インテントとインテントフィルタ</a>
+</li>
+</ul>
+
+</div>
+</div>
+
+<p>Android アプリには通常、いくつかの<a href="{@docRoot}guide/components/activities.html">アクティビティ</a>があります。各アクティビティでは、ユーザーが特定のタスク（マップの表示や写真の撮影など）を実行できるユーザー インターフェースが表示されます。あるアクティビティから別のアクティビティにユーザーを移動させるためには、アプリで {@link
+android.content.Intent} を使用して、ある動作に至るアプリの「インテント（意図）」を定義する必要があります。
+
+{@link
+android.app.Activity#startActivity startActivity()} のようなメソッドでシステムに
+{@link android.content.Intent} を渡すと、システムは {@link
+android.content.Intent} を使用して適切なアプリ コンポーネントを特定して起動します。インテントを使用すると、自分のアプリから別のアプリにあるアクティビティを開始させることもできます。
+</p>
+
+<p>{@link android.content.Intent} は、特定のコンポーネント（特定の {@link android.app.Activity} インスタンス）を開始するために<em>明示的</em>にしたり、または（「写真を撮影する」などの）意図したアクションを処理できる任意のコンポーネントを開始するために<em>暗黙的</em>にしたりすることができます。
+
+</p>
+
+<p>このクラスでは {@link android.content.Intent} を使用して、別のアプリを起動する、そのアプリから結果を受け取る、などの他のアプリとの間でいくつかの基本的な相互操作を実行し、他のアプリのインテントに自分のアプリが応答できるようにする方法を示します。
+
+</p>
+
+<h2>レッスン</h2>
+
+<dl>
+  <dt><b><a href="sending.html">別のアプリにユーザーを送る</a></b></dt>
+  <dd>あるアクションを実行する他のアプリを起動するために、暗黙的なインテントを作成する方法を示します。
+</dd>
+  <dt><b><a href="result.html">アクティビティから結果を取得する</a></b></dt>
+  <dd>別のアクティビティを開始し、そのアクティビティの結果を受け取る方法を示します。</dd>
+  <dt><b><a href="filters.html">他のアプリからのアクティビティの開始を許可する</a></b></dt>
+  <dd>自分のアプリが受け入れる暗黙的なインテントを宣言するインテント フィルタを定義することによって、他のアプリからの使用に供するために、自分のアプリ内のアクティビティをオープンにする方法を示します。
+</dd>
+</dl>
+

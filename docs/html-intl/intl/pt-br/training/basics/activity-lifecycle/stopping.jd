@@ -1,0 +1,187 @@
+page.title=Interrompendo e reiniciando uma atividade
+page.tags=ciclo de vida da atividade
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>Esta lição ensina a</h2>
+    <ol>
+      <li><a href="#Stop">Interromper sua atividade</a></li>
+      <li><a href="#Start">Iniciar/reiniciar sua atividade</a></li>
+    </ol>
+    
+    <h2>Leia também</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">Atividades</a>
+      </li>
+    </ul>
+
+<h2>Tente</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">Baixar a demonstração</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>Interromper e reiniciar adequadamente sua atividade é um processo importante no ciclo de vida da atividade
+que garante que o usuário perceba que o aplicativo está sempre ativo e não perca o progresso.
+Há alguns cenários fundamentais em que sua atividade é interrompida e reiniciada:</p>
+
+<ul>
+  <li>O usuário abre a janela Aplicativos Utilizados Recentemente e alterna de um aplicativo a outro. A
+atividade em seu aplicativo atualmente em primeiro plano é interrompida. Se o usuário retornar ao
+aplicativo pelo ícone de inicialização da tela inicial ou da janela Aplicativos Utilizados Recentemente, a atividade é reiniciada.</li>
+  <li>O usuário executar uma ação em seu aplicativo que inicia uma nova atividade. A atividade atual
+é interrompida quando a segunda é criada. Se o usuário pressionar o botão <em>Voltar</em>
+, a primeira atividade será reiniciada.</li>
+  <li>Se o usuário receber uma chamada telefônica enquanto estiver usando o seu aplicativo.</li>
+</ul>
+
+<p>A classe {@link android.app.Activity} fornece dois métodos do ciclo de vida, {@link
+android.app.Activity#onStop()} e {@link android.app.Activity#onRestart()}, que permite que você
+decida exatamente como a atividade responderá à interrupção e reinicialização. Diferentemente do estado pausado,
+que identifica obstruções parciais da interface de usuário, o estado interrompido garante que a interface não fique
+visível e que o foco do usuário permaneça em outra atividade (ou mesmo outro aplicativo).</p>
+
+<p class="note"><strong>Observação:</strong> como o sistema retém a instância {@link android.app.Activity}
+na memória quando interrompida, talvez não seja necessário implementar os métodos
+{@link android.app.Activity#onStop()} e {@link android.app.Activity#onRestart()} (ou mesmo {@link
+android.app.Activity#onStart()}. Para a maioria das atividades que são relativamente simples, a
+atividade será interrompida e reiniciada normalmente e talvez seja necessário apenas usar {@link
+android.app.Activity#onPause()} para pausar ações em andamento e desconectar dos recursos do sistema.</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-stopped.png" />
+<p class="img-caption"><strong>Figura 1.</strong> Quando o usuário sai da atividade, o sistema
+chama {@link android.app.Activity#onStop onStop()} para interrompê-la (1). Se o usuário retornar
+enquanto a atividade estiver interrompida, o sistema chama {@link android.app.Activity#onRestart onRestart()}
+(2), rapidamente seguido por {@link android.app.Activity#onStart onStart()} (3) e {@link
+android.app.Activity#onResume()} (4). Observe que independentemente do que tenha causado a interrupção
+da atividade, o sistema sempre chama {@link android.app.Activity#onPause onPause()} antes de chamar {@link
+android.app.Activity#onStop onStop()}.</p>
+
+
+
+<h2 id="Stop">Interromper sua atividade</h2>
+
+<p>Quando sua atividade recebe uma chamada para o método {@link android.app.Activity#onStop()}, não
+está mais visível e deve liberar quase todos os recursos que não foram necessários enquanto o usuário não
+estiver utilizando. Quando a atividade for interrompida, o sistema pode destruir a instância se for necessário para
+recuperar memória do sistema. Em casos extremos, o sistema pode simplesmente desligar o processo do aplicativo sem
+chamar o retorno de chamada{@link android.app.Activity#onDestroy()} final da atividade, portanto, é importante
+usar {@link android.app.Activity#onStop()} para liberar recursos que podem vazar memória.</p>
+
+<p>Embora o método {@link android.app.Activity#onPause onPause()} seja chamado antes de
+{@link android.app.Activity#onStop()}, use {@link android.app.Activity#onStop onStop()}
+para executar operações de desligamento maiores, que exigem mais da CPU, como escrever informação no
+banco de dados.</p>
+
+<p>Por exemplo, esta é uma implementação de {@link android.app.Activity#onStop onStop()} que
+salva os conteúdos de uma nota de rascunho no armazenamento persistente:</p>
+
+<!-- TODO: Find a better example for onStop, because this kind of thing should probably use a
+separate thread but that's too complicated to show here. -->
+<pre>
+&#64;Override
+protected void onStop() {
+    super.onStop();  // Always call the superclass method first
+
+    // Save the note's current draft, because the activity is stopping
+    // and we want to be sure the current note progress isn't lost.
+    ContentValues values = new ContentValues();
+    values.put(NotePad.Notes.COLUMN_NAME_NOTE, getCurrentNoteText());
+    values.put(NotePad.Notes.COLUMN_NAME_TITLE, getCurrentNoteTitle());
+
+    getContentResolver().update(
+            mUri,    // The URI for the note to update.
+            values,  // The map of column names and new values to apply to them.
+            null,    // No SELECT criteria are used.
+            null     // No WHERE columns are used.
+            );
+}
+</pre>
+
+<p>Quando sua atividade é interrompida, o objeto {@link android.app.Activity} é mantido na memória
+e é chamado novamente quando a atividade é reiniciada. Não é necessário reiniciar componentes que foram
+criados durante qualquer método de retorno de chamada que leve ao estado Reiniciado. O sistema também
+tem controle do estado atual de cada {@link android.view.View} no layout. Portanto, se o usuário
+inserir um texto em um widget do {@link android.widget.EditText}, o conteúdo será retido e você não
+precisará salvar e restaurar.</p>
+
+<p class="note"><strong>Observação:</strong> mesmo que o sistema destrua sua atividade enquanto estiver interrompida,
+ele ainda mantém o estado do objeto {@link android.view.View} (como texto em {@link
+android.widget.EditText}) em um {@link android.os.Bundle} (um blob de pares de valores-chave) e os restaura
+se o usuário navegar de volta para a mesma instância da atividade (a <a href="recreating.html">próxima lição</a> falará mais sobre uso do {@link android.os.Bundle} para salvar
+outros dados do estado caso sua atividade seja destruída e recriada).</p>
+
+
+
+<h2 id="Start">Iniciar/reiniciar sua atividade</h2>
+
+<p>Quando sua atividade voltar ao primeiro plano do estado interrompido, ela recebe uma chamada para
+{@link android.app.Activity#onRestart()}. O sistema também chama o método {@link
+android.app.Activity#onStart()}, que acontece sempre que a atividade se tornar visível
+(ao ser reiniciada ou criada pela primeira vez). No entanto, o método {@link
+android.app.Activity#onRestart()} é chamado apenas quando a atividade é reiniciada do
+estado interrompido. Portanto, é possível usá-la para executar trabalhos de restauração especiais necessários apenas se
+a atividade tiver sido interrompida, mas não destruída.</p>
+
+<p>Dificilmente um aplicativo precisará usar {@link android.app.Activity#onRestart()} para restaurar
+o estado da atividade. Portanto, não há diretrizes para este método que se apliquem à
+população geral de aplicativos. Contudo, como espera-se que o método {@link android.app.Activity#onStop()}
+limpe todos os recursos da atividade, será necessário instanciá-los
+quando a atividade for reiniciada. Ainda assim, será necessário instanciá-los quando a atividade for criada
+pela primeira vez (quando não houver instâncias existentes da atividade). Por esse motivo, recomenda-se
+utilizar o método de retorno de chamada {@link android.app.Activity#onStart()} como contrapartida
+ao método {@link android.app.Activity#onStop()}, porque o sistema chama {@link
+android.app.Activity#onStart()} quando cria sua atividade e quando reinicia a
+atividade do estado interrompido.</p>
+
+<p>Por exemplo, como o usuário pode ter ficado longe do aplicativo por um longo período
+, o método {@link android.app.Activity#onStart()} é uma boa forma de confirmar se
+os recursos do sistema exigidos estão habilitados:</p>
+
+<pre>
+&#64;Override
+protected void onStart() {
+    super.onStart();  // Always call the superclass method first
+    
+    // The activity is either being restarted or started for the first time
+    // so this is where we should make sure that GPS is enabled
+    LocationManager locationManager = 
+            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    
+    if (!gpsEnabled) {
+        // Create a dialog here that requests the user to enable GPS, and use an intent
+        // with the android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS action
+        // to take the user to the Settings screen to enable GPS when they click "OK"
+    }
+}
+
+&#64;Override
+protected void onRestart() {
+    super.onRestart();  // Always call the superclass method first
+    
+    // Activity being restarted from stopped state    
+}
+</pre>
+
+
+
+
+<p>Quando o sistema destrói a atividade, ele chama o método {@link android.app.Activity#onDestroy()}
+para seu {@link android.app.Activity}. Como talvez a maior parte de
+seus recursos tenha sido liberada com {@link android.app.Activity#onStop()}, no momento em que você receber a chamada para {@link
+android.app.Activity#onDestroy()}, não haverá muito a ser feito pelos aplicativos. Esse método é sua
+última chance de limpar os recursos que levariam a vazamento de memória. Portanto, certifique-se de que
+outros threads sejam destruídos e outras ações de longa execução como o rastreamento de métodos também estejam
+interrompidas.</p>
+

@@ -1,0 +1,236 @@
+page.title=允许其他应用开始您的活动
+page.tags=意向
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#AddIntentFilter">添加意向过滤器</a></li>
+  <li><a href="#HandleIntent">﻿处理您的活动中的意向﻿</a></li>
+  <li><a href="#ReturnResult">返回结果</a></li>
+</ol>
+
+<h2>您还应阅读</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">共享简单数据</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">共享文件</a>
+</ul>
+  </div>
+</div>
+
+<p>前两课重点讲述一方面：从您的应用开始另一个应用的活动。但如果您的应用可以执行对另一个应用可能有用的操作，您的应用应准备好响应来自其他应用的操作请求。
+
+例如，如果您构建一款可与用户的好友分享消息或照片的社交应用，您最关注的是支持 {@link android.content.Intent#ACTION_SEND} 意向以便用户可以从另一应用发起
+“共享”操作并且启动您的应用执行该操作。
+
+</p>
+
+<p>要允许其他应用开始您的活动，您需要 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+在相应元素的宣示说明文件中添加一个 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 元素。</p>
+
+<p>当您的应用安装在设备上时，系统会识别您的意向过滤器并添加信息至所有已安装应用支持的意向内部目录。当应用通过隐含意向调用 {@link android.app.Activity#startActivity
+startActivity()} 或 {@link android.app.Activity#startActivityForResult startActivityForResult()} 时，系统会找到可以响应该意向的活动。
+
+
+
+</p>
+
+
+
+<h2 id="AddIntentFilter">添加意向过滤器</h2>
+
+<p>为了正确定义您的活动可处理的意向，您添加的每个意向过滤器在操作类型和活动接受的数据方面应尽可能具体。
+
+</p>
+
+<p>如果活动具有满足以下 {@link android.content.Intent} 对象条件的意向过滤器，系统可能向活动发送给定的 {@link android.content.Intent}：
+</p>
+
+<dl>
+  <dt>操作</dt>
+    <dd>对要执行的操作命名的字符串。通常是平台定义的值之一，比如
+ {@link android.content.Intent#ACTION_SEND} 或 {@link android.content.Intent#ACTION_VIEW}。
+    <p>使用 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a> 元素在您的意向过滤器中指定此值。您在此元素中指定的值必须是操作的完整字符串名称，而不是 API 常数（请参阅以下示例）。
+
+</p></dd>
+
+  <dt>数据</dt>
+    <dd>与意向关联的数据描述。
+    <p>用 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 元素在您的意向过滤器中指定此内容。使用此元素中的一个或多个属性，您可以只指定 MIME 类型、URI 前缀、URI 架构或这些的组合以及其他指示所接受数据类型的项。
+
+
+</p>
+    <p class="note"><strong>注意：</strong>如果您无需声明关于数据的具体信息
+{@link android.net.Uri}（比如，您的活动处理其他类型的“额外”数据而不是 URI 的时间），您应只指定 {@code android:mimeType} 属性声明您的活动处理的数据类型，比如 {@code text/plain} 或 {@code image/jpeg}。
+
+</p>
+</dd>
+  <dt>类别</dt>
+    <dd>提供另外一种表征处理意向的活动的方法，通常与用户手势或活动开始的位置有关。
+系统支持多种不同的类别，但大多数都很少使用。
+﻿但是，所有隐含意向默认使用
+{@link android.content.Intent#CATEGORY_DEFAULT} 进行定义。
+    <p>用 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>
+ 元素在您的意向过滤器中指定此内容。</p></dd>
+</dl>
+
+<p>在您的意向过滤器中，您可以通过声明嵌套在 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+元素中的具有相应 XML 元素的各项，来声明您的活动接受的条件。
+</p>
+
+<p>例如，此处有一个在数据类型为文本或图像时处理 {@link
+android.content.Intent#ACTION_SEND} 意向的意向过滤器：</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+        &lt;data android:mimeType="image/*"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>每个入站意向仅指定一项操作和一个数据类型，但可以在每个
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html"> {@code
+&lt;intent-filter&gt;}</a> 中声明
+ <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 和 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> 元素的多个实例。</p>
+
+<p>如果任何两对操作和数据的行为相斥，您应创建单独的意向过滤器指定与哪种数据类型配对时哪些操作可接受。
+
+</p>
+
+<p>比如，假定您的活动同时处理 {@link
+android.content.Intent#ACTION_SEND} 和 {@link
+android.content.Intent#ACTION_SENDTO} 意向的文本和图像。在这种情况下，您必须为两个操作定义两种不同的意向过滤器，因为 {@link
+android.content.Intent#ACTION_SENDTO} 意向必须使用数据 {@link android.net.Uri} 指定使用 {@code send} 或 {@code sendto} URI 架构的收件人地址。
+
+例如：</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;!-- filter for sending text; accepts SENDTO action with sms URI schemes -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SENDTO"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:scheme="sms" />
+        &lt;data android:scheme="smsto" />
+    &lt;/intent-filter>
+    &lt;!-- filter for sending text or images; accepts SEND action and text or image data -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>注意：</strong>为了接收隐含意向，您必须在意向过滤器中包含
+{@link android.content.Intent#CATEGORY_DEFAULT} 类别。方法 {@link
+android.app.Activity#startActivity startActivity()} 和 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 就像声明 {@link android.content.Intent#CATEGORY_DEFAULT} 类别那样处理所有意向。
+如果您不在意向过滤器中声明它，则没有隐含意向分解为您的活动。
+</p>
+
+<p>如需了解有关发送和接收 {@link android.content.Intent#ACTION_SEND}
+执行社交共享行为的意向的详细信息，请参阅有关<a href="{@docRoot}training/sharing/receive.html">从其他应用接收简单数据</a>的课程。</p>
+
+
+<h2 id="HandleIntent">处理您的活动中的意向</h2>
+
+<p>为了决定在您的活动执行哪种操作，您可读取用于开始活动的 {@link
+android.content.Intent}。</p>
+
+<p>当您的活动开始时，调用 {@link android.app.Activity#getIntent()} 检索开始活动的
+{@link android.content.Intent}。您可以在活动生命周期的任何时间执行此操作，但您通常应在早期回调时（比如，
+{@link android.app.Activity#onCreate onCreate()} 或 {@link android.app.Activity#onStart()}）执行。
+</p>
+
+<p>例如：</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.main);
+
+    // Get the intent that started this activity
+    Intent intent = getIntent();
+    Uri data = intent.getData();
+
+    // Figure out what to do based on the intent type
+    if (intent.getType().indexOf("image/") != -1) {
+        // Handle intents with image data ...
+    } else if (intent.getType().equals("text/plain")) {
+        // Handle intents with text ...
+    }
+}
+</pre>
+
+
+<h2 id="ReturnResult">返回结果</h2>
+
+<p>如果您想要向调用您的活动的活动返回结果，只需调用 {@link
+android.app.Activity#setResult(int,Intent) setResult()} 指定结果代码和结果 {@link
+android.content.Intent}。当您的操作完成且用户应返回原始活动时，调用 {@link android.app.Activity#finish()} 关闭（和销毁）您的活动。
+例如：
+</p>
+
+<pre>
+// Create intent to deliver some kind of result data
+Intent result = new Intent("com.example.RESULT_ACTION", Uri.parse("content://result_uri");
+setResult(Activity.RESULT_OK, result);
+finish();
+</pre>
+
+<p>您必须始终为结果指定结果代码。通常，它为 {@link
+android.app.Activity#RESULT_OK} 或 {@link android.app.Activity#RESULT_CANCELED}。您之后可以根据需要为
+ {@link android.content.Intent} 提供额外的数据。</p>
+
+<p class="note"><strong>注意：</strong>结果默认设置为 {@link
+android.app.Activity#RESULT_CANCELED}。因此，如果用户在完成操作动作或设置结果之前按了<em>返回</em>按钮，原始活动会收到“已取消”的结果。
+
+</p>
+
+<p>如果您只需返回指示若干结果选项之一的整数，您可以将结果代码设置为大于 0 的任何值。
+如果您使用结果代码传递整数，并且您无需包含 {@link android.content.Intent}，您可以调用 {@link
+android.app.Activity#setResult(int) setResult()} 并且仅传递结果代码。
+例如：</p>
+
+<pre>
+setResult(RESULT_COLOR_RED);
+finish();
+</pre>
+
+<p>在这种情况下，只有几个可能的结果，因此结果代码是一个本地定义的整数（大于 0）。
+当您向自己应用中的活动返回结果时，这将非常有效，因为接收结果的活动可引用公共常数来确定结果代码的值。
+
+</p>
+
+<p class="note"><strong>注意：</strong>无需检查您的活动是使用
+ {@link
+android.app.Activity#startActivity startActivity()} 还是 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 开始的。如果开始您的活动的意向可能需要结果，只需调用 {@link
+android.app.Activity#setResult(int,Intent) setResult()}。
+如果原始活动已调用 {@link
+android.app.Activity#startActivityForResult startActivityForResult()}，则系统将向其传递您提供给 {@link android.app.Activity#setResult(int,Intent) setResult()} 的结果；否则，会忽略结果。
+
+</p>
+
+
+
+
+
+

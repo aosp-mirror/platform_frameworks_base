@@ -1,0 +1,187 @@
+page.title=액티비티 정지 및 재시작하기
+page.tags=activity lifecycle
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>이 과정에서 다루는 내용</h2>
+    <ol>
+      <li><a href="#Stop">액티비티 정지하기</a></li>
+      <li><a href="#Start">액티비티 시작/재시작하기</a></li>
+    </ol>
+    
+    <h2>필독 항목</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">액티비티</a>
+      </li>
+    </ul>
+
+<h2>실습하기</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">데모 다운로드</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>액티비티 수명 주기에서 액티비티를 제대로 정지하고 재시작하는 것은 중요한 프로세스입니다.
+그래야만 사용자가 앱이 항상 작동 상태를 유지하고 진행 상태를 손실하지 않는다고 인식하도록 할 수 있습니다.
+다음과 같이 액티비티가 정지되었다가 재시작되는 몇 가지 중요한 시나리오가 있습니다.</p>
+
+<ul>
+  <li>사용자가 최근 앱 창을 열고 다른 액티비티로 전환하면 현재 전면에 있는 앱의
+액티비티가 정지됩니다. 사용자가 홈 화면 시작 관리자 아이콘 또는 최근 앱 창에서
+앱으로 돌아오면 액티비티가 재시작됩니다.</li>
+  <li>사용자가 앱에서 새 액티비티를 시작하는 작업을 수행합니다. 두 번째 액티비티가
+생성되면 현재 액티비티가 정지됩니다. 사용자가 <em>뒤로</em>
+버튼을 누르면 첫 번째 액티비티가 재시작됩니다.</li>
+  <li>사용자가 앱을 사용하는 도중에 전화가 걸려옵니다.</li>
+</ul>
+
+<p>{@link android.app.Activity} 클래스는 두 가지 수명 주기 메서드인 {@link
+android.app.Activity#onStop()} 및 {@link android.app.Activity#onRestart()}를 제공합니다. 이 메서드를 사용하면 액티비티의 정지 및 재시작 처리 방법을
+명확하게 지정할 수 있습니다. 부분적인 UI 차단을 식별하는
+일시정지됨 상태와 달리, 정지됨 상태는 UI가 더 이상 보이지 않으며,
+사용자의 포커스가 별도의 액티비티 또는 완전히 별도의 앱에 있음을 보장합니다.</p>
+
+<p class="note"><strong>참고:</strong> {@link android.app.Activity}
+인스턴스가 정지되면 시스템이 이 인스턴스를 시스템 메모리에 유지하기 때문에
+{@link android.app.Activity#onStop()} 및 {@link android.app.Activity#onRestart()} 또는 {@link
+android.app.Activity#onStart()} 메서드 조차 구현할 필요가 없을 수도 있습니다. 비교적 간단한 액티비티의 경우 대부분,
+액티비티가 별 문제 없이 정지되고 재시작됩니다. 따라서 {@link
+android.app.Activity#onPause()}를 사용하여 진행 중인 작업을 일시정지하고 시스템 리소스와의 연결을 끊기만 하면 됩니다.</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-stopped.png" />
+<p class="img-caption"><strong>그림 1.</strong> 사용자가 액티비티를 떠나면, 시스템은
+{@link android.app.Activity#onStop onStop()}을 호출하여 액티비티를 정지시킵니다(1). 액티비티가 정지된 상태에서
+사용자가 돌아올 경우, 시스템은 {@link android.app.Activity#onRestart onRestart()}(2)
+를 호출하고, 곧바로 {@link android.app.Activity#onStart onStart()}(3) 및 {@link
+android.app.Activity#onResume()}(4)을 호출합니다. 어떤 시나리오로 인해 액티비티가
+정지되든 간에, 시스템은 항상 {@link
+android.app.Activity#onStop onStop()}을 호출하기 전에 {@link android.app.Activity#onPause onPause()}를 호출합니다.</p>
+
+
+
+<h2 id="Stop">액티비티 정지하기</h2>
+
+<p>{@link android.app.Activity#onStop()} 메서드에 대한 호출을 수신한 액티비티는 더
+이상 보이지 않게 되고, 사용자가
+사용하지 않는 동안 필요하지 않은 거의 모든 리소스를 해제해야 합니다. 액티비티가 정지되고 나면, 시스템이 시스템 메모리를
+회수해야 하는 경우 해당 인스턴스를 소멸할 수도 있습니다. 심한 경우, 시스템이 액티비티의 최종
+{@link android.app.Activity#onDestroy()} 콜백을 호출하지 않고 앱 프로세스만 단순하게 중단시킬 수도 있습니다. 따라서 {@link android.app.Activity#onStop()}을 사용하여
+메모리 누수를 야기시킬 수 있는 리소스를 해제하는 것이 중요합니다.</p>
+
+<p>{@link android.app.Activity#onStop()} 전에 {@link android.app.Activity#onPause onPause()}
+메서드가 호출되기는 하지만, 데이터베이스에 정보를 쓰는
+작업과 같이 규모가 크고 CPU를 많이 사용하는 종료 작업을 수행하는 경우
+{@link android.app.Activity#onStop onStop()}을 사용해야 합니다.</p>
+
+<p>다음은 영구적인 저장소에 노트 원고의 내용을
+저장하는 {@link android.app.Activity#onStop onStop()}을 구현하는 예제입니다.</p>
+
+<!-- TODO: Find a better example for onStop, because this kind of thing should probably use a
+separate thread but that's too complicated to show here. -->
+<pre>
+&#64;Override
+protected void onStop() {
+    super.onStop();  // Always call the superclass method first
+
+    // Save the note's current draft, because the activity is stopping
+    // and we want to be sure the current note progress isn't lost.
+    ContentValues values = new ContentValues();
+    values.put(NotePad.Notes.COLUMN_NAME_NOTE, getCurrentNoteText());
+    values.put(NotePad.Notes.COLUMN_NAME_TITLE, getCurrentNoteTitle());
+
+    getContentResolver().update(
+            mUri,    // The URI for the note to update.
+            values,  // The map of column names and new values to apply to them.
+            null,    // No SELECT criteria are used.
+            null     // No WHERE columns are used.
+            );
+}
+</pre>
+
+<p>액티비티가 정지되면, {@link android.app.Activity} 개체는 메모리에 계속 유지되며,
+액티비티가 재개되면 다시 호출됩니다. 최상위 상태가 재개됨 상태인 콜백 메서드 중에
+생성된 구성요소는 다시 초기화할 필요가 없습니다. 또한 시스템은 레이아웃에 있는 각 {@link android.view.View}의 현재 상태도
+기록합니다. 따라서 사용자가 {@link android.widget.EditText} 위젯에 텍스트를
+입력하면 해당 내용이 저장되기 때문에 이를 저장 및 복원할
+필요가 없습니다.</p>
+
+<p class="note"><strong>참고:</strong> 시스템이 정지된 상태의 액티비티를 소멸시키는 경우에도,
+{@link android.os.Bundle}(키-값 쌍 Blob) 내에 {@link
+android.widget.EditText}와 같은 {@link android.view.View} 개체의 상태를 유지하고, 사용자가
+액티비티의 같은 인스턴스로 돌아오면 이를 복원합니다. 액티비티가 소멸되고 재생성될 경우, {@link android.os.Bundle}을 사용하여
+다른 상태 데이터를 저장하는 방법에 대해서는 <a href="recreating.html">다음 과정</a>에서 자세히 설명합니다.</p>
+
+
+
+<h2 id="Start">액티비티 시작/재시작하기</h2>
+
+<p>액티비티가 정지된 상태에서 전면으로 되돌아올 때
+{@link android.app.Activity#onRestart()}에 대한 호출을 수신합니다. 시스템은 {@link
+android.app.Activity#onStart()} 메서드도 호출합니다. 이 동작은 재시작되든, 아니면 처음 생성되든지에 상관없이
+액티비티가 보이게 될 때마다 발생합니다. 하지만 {@link
+android.app.Activity#onRestart()} 메서드는 액티비티가
+정지된 상태에서 재개되는 경우에만 호출됩니다. 따라서
+액티비티가 소멸된 것이 아니라 이전에 정지된 경우에 한하여 필요할 수 있는 특수 복원 작업을 수행하는 데 이 메서드를 사용할 수 있습니다.</p>
+
+<p>액티비티의 상태
+복원 작업에 앱이 {@link android.app.Activity#onRestart()}를 사용해야 하는 경우는 드물기 때문에
+일반 앱에 적용되는 이 메서드에 대한 가이드라인은 없습니다. 하지만 {@link android.app.Activity#onStop()}
+메서드는 모든 액티비티 리소스를 기본적으로 정리해야 하기 때문에, 액티비티가 재개되면
+다시 인스턴스화해야 합니다. 하지만 액티비티가 처음
+생성되는 경우(액티비티의 기존 인스턴스가 없을 경우)에도 인스턴스화해야 합니다. 따라서
+일반적으로 {@link android.app.Activity#onStart()} 콜백 메서드를 {@link android.app.Activity#onStop()} 메서드에 대한 상대
+메서드로 사용해야 합니다. 그 이유는 시스템이 액티비티를 생성할 때와
+액티비티를 정지된 상태에서 재시작할 때 모두 {@link
+android.app.Activity#onStart()}를 호출하기 때문입니다.</p>
+
+<p>예를 들어 사용자가 장시간 앱을 떠났다가 다시 앱으로
+돌아올 수 있기 때문에, {@link android.app.Activity#onStart()} 메서드는
+필요한 시스템 기능이 활성화되었는지 확인하기 위한 좋은 위치입니다.</p>
+
+<pre>
+&#64;Override
+protected void onStart() {
+    super.onStart();  // Always call the superclass method first
+    
+    // The activity is either being restarted or started for the first time
+    // so this is where we should make sure that GPS is enabled
+    LocationManager locationManager = 
+            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    
+    if (!gpsEnabled) {
+        // Create a dialog here that requests the user to enable GPS, and use an intent
+        // with the android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS action
+        // to take the user to the Settings screen to enable GPS when they click "OK"
+    }
+}
+
+&#64;Override
+protected void onRestart() {
+    super.onRestart();  // Always call the superclass method first
+    
+    // Activity being restarted from stopped state    
+}
+</pre>
+
+
+
+
+<p>시스템이 액티비티를 소멸시킬 경우, {@link android.app.Activity}에 대해 {@link android.app.Activity#onDestroy()}
+메서드를 호출합니다. {@link
+android.app.Activity#onDestroy()}에 대한 호출을 수신하기 전에 {@link android.app.Activity#onStop()}을 사용하여 대부분의
+리소스를 해제했을 것이기 때문에 대부분의 앱의 경우 수행할 작업이 거의 없습니다. 이 메서드는 메모리 누수를 야기할 수 있는 리소스를 정리할 수 있는
+마지막 기회입니다. 이에 따라
+추가 스레드를 소멸시키고 메서드 추적과 같이 시간이 걸리는 기타 작업도
+정지되도록 할 수 있습니다.</p>
+

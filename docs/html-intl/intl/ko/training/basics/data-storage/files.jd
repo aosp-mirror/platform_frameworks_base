@@ -1,0 +1,379 @@
+page.title=파일 저장하기
+page.tags=data storage
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#InternalVsExternalStorage">내부 또는 외부 저장소 선택하기</a></li>
+  <li><a href="#GetWritePermission">외부 저장소에 대한 권한 취득하기</a></li>
+  <li><a href="#WriteInternalStorage">내부 저장소에 파일 저장하기</a></li>
+  <li><a href="#WriteExternalStorage">외부 저장소에 파일 저장하기</a></li>
+  <li><a href="#GetFreeSpace">여유 공간 쿼리하기</a></li>
+  <li><a href="#DeleteFile">파일 삭제하기</a></li>
+</ol>
+
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">내부
+ 저장소 사용하기</a></li>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">외부
+ 저장소 사용하기</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>Android는 다른 플랫폼의 디스크 기반 파일 시스템과
+유사한 파일 시스템을 사용합니다. 이 과정에서는 Android 파일 시스템에서 {@link java.io.File}
+API를 사용하여 파일을 읽고 쓰는 방법을
+설명합니다.</p>
+
+<p>{@link java.io.File} 개체는 대량의 데이터를 건너뛰지 않고
+처음부터 끝까지 순서대로 읽거나 쓸 때 적합합니다. 예를 들어 이미지 파일이나
+네트워크에서 교환되는 모든 항목에 적합합니다.</p>
+
+<p>이 과정에서는 앱에서 기본적인 파일 관련 작업을 수행하는 방법을 보여줍니다.
+여기서는 사용자가 Linux 파일 시스템에 대한 기본 사항과 {@link java.io}의
+표준 파일 입출력 API에 익숙하다고 가정합니다.</p>
+
+
+<h2 id="InternalVsExternalStorage">내부 또는 외부 저장소 선택하기</h2>
+
+<p>모든 Android 기기에는 "내부" 및 "외부" 저장소의 두 가지 파일 저장소 영역이 있습니다.  이 두 저장소의 이름은
+Android 초기에 만들어졌습니다. 당시 대부분의 기기가 비휘발성 내장 메모리(내부 저장소)와
+마이크로 SD 카드와 같은 이동식 저장 장치(외부 저장소)를 제공했습니다.
+일부 기기는 이동식 저장 장치 없이도 영구 저장소 공간을 "내부" 그리고 "외부" 파티션으로 나누어
+항상 두 개의 저장소 공간을 제공하며,
+API의 동작은 외부 저장소의 이동식 유무에 상관없이 일관적입니다.
+다음 목록에서는 각각의 저장소 공간에 대한 특징을 요약하여 보여줍니다.</p>
+
+<div class="col-5" style="margin-left:0">
+<p><b>내부 저장소:</b></p>
+<ul>
+<li>항상 사용 가능합니다.</li>
+<li>여기에 저장된 파일은 기본적으로 자신의 앱에서만 액세스할 수 있습니다.</li>
+<li>사용자가 앱을 삭제하면 시스템이
+내장 저장소에서 앱의 모든 파일을 제거합니다.</li>
+</ul>
+<p>내부 저장소는 사용자와 다른 앱이 자신의 파일에
+액세스하는 것을 원치 않을 때 가장 적합합니다.</p>
+</div>
+
+<div class="col-7" style="margin-right:0">
+<p><b>외부 저장소:</b></p>
+<ul>
+<li>항상 사용 가능하지는 않습니다. 그 이유는 사용자가 USB 저장소와 같은 외부 저장소를 마운트하고
+경우에 따라 기기에서 외부 저장소를 제거할 수 있기 때문입니다.</li>
+<li>모든 사람이 읽을 수 있기 때문에 자신이 제어할 수 있는 범위 외부에서 다른 사람이 여기에 저장된
+파일을 읽을 수도 있습니다.</li>
+<li>사용자가 앱을 삭제하면 {@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()}의 디렉터리에 저장한 앱 파일에 한해서
+시스템이 제거합니다.</li>
+</ul>
+<p>외부 저장소는
+액세스 제한이 필요치 않은 파일과 다른 앱과 공유하기
+원하는 파일 또는 사용자가 컴퓨터에서 액세스할 수 있도록 허용하는 파일에 적합합니다.</p>
+</div>
+
+
+<p class="note" style="clear:both">
+<strong>팁:</strong> 기본적으로
+앱은 내부 저장소에 설치되지만 매니페스트에 <a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code
+android:installLocation}</a> 특성을 지정하여 외부 저장소에
+설치할 수도 있습니다. 사용자는 APK 크기가 매우 크고 내부 저장소 공간보다
+외부 저장소 공간이 더 클 때 이 옵션을 유용하게 활용할 수 있습니다. 자세한
+내용은 <a href="{@docRoot}guide/topics/data/install-location.html">앱 설치 위치</a>를 참조하세요.</p>
+
+
+<h2 id="GetWritePermission">외부 저장소에 대한 권한 취득하기</h2>
+
+<p>외부 저장소에 데이터를 쓰려면 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">매니페스트 파일</a>에서
+{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} 권한을 요청해야 합니다.</p>
+
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+
+<div class="caution"><p><strong>주의:</strong>
+현재는 모든 앱에서 특별한 권한 없이도 외부 저장소를
+읽을 수 있습니다. 하지만 이는 향후 릴리스에서 바뀔 예정입니다. 앱이
+외부 저장소에 데이터를 쓰지는 않고 읽어야만 해야 할 경우, {@link
+android.Manifest.permission#READ_EXTERNAL_STORAGE} 권한을 선언해야 합니다. 앱이 예상한 대로 계속
+작동하도록 하려면 변경 내용이 적용되기 전에 지금 이 권한을 선언해야 합니다.</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+<p>하지만 앱이 {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+권한을 사용하는 경우, 외부 저장소를 읽을 수 있는 권한도 묵시적으로 포함되어 있습니다.</p>
+</div>
+
+<p>내부
+저장소에 파일을 저장할 때는 어떠한 권한도 필요하지 않습니다. 애플리케이션은 내부 저장소 디렉터리에 있는 파일을 항상 읽고
+쓸 수 있는 권한을 가집니다.</p>
+
+
+
+
+
+<h2 id="WriteInternalStorage">내부 저장소에 파일 저장하기</h2>
+
+<p>내부 저장소에 파일을 저장할 경우, 다음 두 메서드 중 하나를 호출하여 적합한 디렉터리를
+{@link java.io.File}로 얻을 수 있습니다.</p>
+
+<dl>
+  <dt>{@link android.content.Context#getFilesDir}</dt>
+  <dd>앱에 대한 내부 디렉터리를 나타내는 {@link java.io.File}을 반환합니다.</dd>
+  <dt>{@link android.content.Context#getCacheDir}</dt>
+  <dd>앱의 임시
+캐시 파일에 대한 내부 디렉터리를 나타내는 {@link java.io.File}을 반환합니다. 더 이상
+필요하지 않은 파일은 모두 삭제하고 언제든지
+사용할 수 있는 메모리 크기에 합리적인 크기 제한(예. 1MB)을 구현해야 합니다. 저장 공간이 부족해지기 시작하면 경고 없이 시스템이 캐시 파일을
+삭제할 수도 있습니다.</dd>
+</dl>
+
+<p>이러한 디렉터리 중 하나에서 새 파일을 생성하려면 {@link
+java.io.File#File(File,String) File()} 생성자를 사용하고 내부 저장소 디렉터리를 지정하는 상기 메서드 중
+하나를 통해 제공되는 {@link java.io.File}을 전달하면 됩니다. 예를 들면 다음과 같습니다.</p>
+
+<pre>
+File file = new File(context.getFilesDir(), filename);
+</pre>
+
+<p>또한, {@link
+android.content.Context#openFileOutput openFileOutput()}을 호출하여 내부 디렉터리의 파일에 데이터를 쓰는
+{@link java.io.FileOutputStream}을 가져올 수도 있습니다. 다음 예는
+몇몇 텍스트를 파일에 쓰는 방법을 보여줍니다.</p>
+
+<pre>
+String filename = "myfile";
+String string = "Hello world!";
+FileOutputStream outputStream;
+
+try {
+  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+  outputStream.write(string.getBytes());
+  outputStream.close();
+} catch (Exception e) {
+  e.printStackTrace();
+}
+</pre>
+
+<p>또는, 파일을 캐싱해야 할 경우 {@link
+java.io.File#createTempFile createTempFile()}을 대신 사용합니다. 예를 들어 다음 메서드는 {@link java.net.URL}에서
+파일 이름을 추출한 후 해당 이름을 사용하여
+앱의 내부 캐시 디렉터리에 파일을 생성합니다.</p>
+
+<pre>
+public File getTempFile(Context context, String url) {
+    File file;
+    try {
+        String fileName = Uri.parse(url).getLastPathSegment();
+        file = File.createTempFile(fileName, null, context.getCacheDir());
+    catch (IOException e) {
+        // Error while creating file
+    }
+    return file;
+}
+</pre>
+
+<p class="note"><strong>참고:</strong>
+앱의 내부 저장소 디렉터리는 Android 파일 시스템의 특별한 위치에 있는 앱의 패키지 이름으로
+지정됩니다.
+엄밀히 말하면, 파일 모드를
+읽기 가능으로 설정할 경우 다른 앱이 내부 파일을 읽을 수 있습니다. 하지만 이는 다른 앱도 여러분 자신의 앱 패키지
+이름 및 파일 이름을 알아야 가능합니다. 다른 앱은 여러분 자신의 내부 디렉터리를 탐색할 수 없으며 명시적으로
+읽기 가능 및 쓰기 가능으로 파일을 설정하지 않으면 파일을 읽거나 쓸 수 없습니다. 따라서
+{@link android.content.Context#MODE_PRIVATE}을 내부 저장소 내 파일에 사용하는 한,
+다른 앱이 이러한 파일에 액세스할 수 없습니다.</p>
+
+
+
+
+
+<h2 id="WriteExternalStorage">외부 저장소에 파일 저장하기</h2>
+
+<p>사용자가
+외부 저장소를 PC에 마운트했거나 외부 저장소를 제공하는 SD 카드를 제거한 경우 등에는 외부 저장소를 사용할 수 없기 때문에 액세스하기 전
+항상 볼륨이 사용 가능한지 확인해야 합니다. {@link android.os.Environment#getExternalStorageState}를 호출하여 외부
+저장소 상태를 쿼리할 수 있습니다. 반환된
+상태가 {@link android.os.Environment#MEDIA_MOUNTED}와 동일하다면 파일을 읽거나 파일에
+쓸 수 있습니다. 예를 들어 다음 메서드는 저장소의
+가용성을 확인하는 데 유용합니다.</p>
+
+<pre>
+/* Checks if external storage is available for read and write */
+public boolean isExternalStorageWritable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state)) {
+        return true;
+    }
+    return false;
+}
+
+/* Checks if external storage is available to at least read */
+public boolean isExternalStorageReadable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state) ||
+        Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+        return true;
+    }
+    return false;
+}
+</pre>
+
+<p>외부 저장소는 사용자 및 다른 앱에 의해 수정될 수 있으나, 여기에 저장할 수 있는 파일로는 두 가지
+범주가 있습니다.</p>
+
+<dl>
+  <dt>공용 파일</dt>
+  <dd>다른 앱 및 사용자가 자유롭게 사용할 수 있는
+파일입니다. 사용자가 앱을 제거해도 사용자는
+이러한 파일을 여전히 사용할 수 있습니다.
+  <p>예를 들어 앱으로 캡처된 사진 또는 기타 다운로드된 파일이 이에 해당합니다.</p>
+  </dd>
+  <dt>개인 파일</dt>
+  <dd>앱에 속한 파일이며, 사용자가
+앱을 제거하면 같이 삭제됩니다. 이러한 파일은
+엄밀히 말해 외부 저장소에 저장된 파일이기 때문에 사용자 및 다른 앱의 액세스가 가능하긴 하지만, 앱 외부에서
+사용자에게 값을 실제로 제공하지는 않습니다. 사용자가 앱을 제거하면 앱의 외부 개인 디렉터리 내 모든 파일을 시스템에서
+삭제합니다. 
+  <p>예를 들어 앱에서 다운로드한 추가 리소스 또는 임시 미디어 파일이 이에 해당합니다.</p>
+  </dd>
+</dl>
+
+<p>외부 저장소에 공용 파일을 저장하려는 경우
+{@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} 메서드를 사용하여 외부 저장소에 적절한 디렉터리를 나타내는
+{@link java.io.File}을 가져옵니다. 이 메서드는 {@link android.os.Environment#DIRECTORY_MUSIC} 또는 {@link
+android.os.Environment#DIRECTORY_PICTURES}와 같은 다른 공개
+파일과 논리적으로 구성될 수 있도록 저장하고자 하는 파일의 유형을
+지정하는 인수를 받습니다. 예를 들면 다음과 같습니다.</p>
+
+<pre>
+public File getAlbumStorageDir(String albumName) {
+    // Get the directory for the user's public pictures directory. 
+    File file = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+
+<p>개인 파일을 앱에 저장하고자 하는 경우, {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()}을 호출하고 원하는 디렉터리 유형을
+나타내는 이름을 전달하여
+적절한 디렉터리를 얻을 수 있습니다. 이런 식으로 생성된 각 디렉터리는 부모
+디렉터리에 추가됩니다. 이 디렉터리는
+사용자가 앱을 제거할 때 시스템이 삭제하는 앱의 모든 외부 저장소 파일을 캡슐화합니다.</p>
+
+<p>예를 들어, 다음은 개인 사진 앨범을 위한 디렉터리 생성 시 사용 가능한 메서드입니다.</p>
+
+<pre>
+public File getAlbumStorageDir(Context context, String albumName) {
+    // Get the directory for the app's private pictures directory. 
+    File file = new File(context.getExternalFilesDir(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+<p>미리 정의된 하위 디렉터리 이름 중 파일에 알맞은 이름이 없을 경우 대신 {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()}을 호출하고 {@code null}을 전달할 수 있습니다. 그러면
+앱의 외부 저장소 내 개인 디렉터리의 루트 디렉터리가 반환됩니다.</p>
+
+<p>사용자가 앱을 제거할 때 {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}이
+삭제된 디렉터리 내에 디렉터리를 생성한다는 것을 기억하세요.
+앱이 카메라이고 사용자가 사진을 계속 간직하고자 하는 경우처럼, 사용자가
+앱을 제거한 후에도 본인이 저장하는 파일을 사용 가능하게 유지해야 하는 경우 {@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()}를
+대신 사용해야 합니다.</p>
+
+
+<p>공유 파일에 {@link
+android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()}를 사용하든,
+개인 파일에 {@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()}을 사용하든지에 관계없이 {@link android.os.Environment#DIRECTORY_PICTURES}와
+같이 API 상수로 제공되는
+디렉터리 이름을 사용해야 합니다. 이러한 디렉터리 이름은
+시스템이 파일을 적절하게 처리할 수 있게 해줍니다. 예를 들어 {@link
+android.os.Environment#DIRECTORY_RINGTONES}에 저장된 파일은 시스템 미디어 스캐너에 의해 음악
+대신 벨소리로 분류됩니다.</p>
+
+
+
+
+<h2 id="GetFreeSpace">여유 공간 쿼리하기</h2>
+
+<p>저장하는 데이터의 크기를 미리 알고 있을 경우, {@link java.io.File#getFreeSpace} 또는 {@link
+java.io.File#getTotalSpace}를 호출하여 {@link
+java.io.IOException}을 초래하지 않고 사용 공간이 충분한지
+확인할 수 있습니다. 이러한 메서드는 각각 저장소 볼륨에서 현재 사용 가능한 공간 및
+전체 공간을 알려줍니다. 이 정보는 일정 임계치를 초과하는 수준으로
+저장소 볼륨이 차는 것을 방지하는 데도 유용합니다.</p>
+
+<p>하지만 시스템은 {@link java.io.File#getFreeSpace}로
+지정된 만큼의 바이트를 쓸 수 있다고 보장하지 않습니다.  저장하고자 하는 데이터의 크기보다 반환된 숫자가
+몇 MB 더 클 경우 또는 파일 시스템이 90%
+미만으로 찼을 경우 안심하고 작업을 진행할 수 있습니다.
+그렇지 않다면 저장소에 데이터를 쓰지 않는 것이 좋습니다.</p>
+
+<p class="note"><strong>참고:</strong> 파일을 저장하기 전에
+사용 가능한 공간을 꼭 확인할 필요는 없습니다. 대신, 파일을 곧바로 쓴 후 {@link java.io.IOException}이 발생하는 경우 이를
+캐치하면 됩니다. 필요한 공간을 정확히 모르는 경우
+이러한 방법을 사용할 수 있습니다. 예를 들어 파일을 저장하기 전에 PNG 이미지를
+JPEG로 변환하여 파일 인코딩을
+변경하는 경우, 파일의 크기를 사전에 알 수 없습니다.</p>
+
+
+
+
+<h2 id="DeleteFile">파일 삭제하기</h2>
+
+<p>더 이상 필요하지 않은 파일은 항상 삭제해야 합니다. 파일을 삭제하는 가장 간단한 방법은 열린
+파일 참조가 {@link java.io.File#delete}를 직접 호출하도록 하는 것입니다.</p>
+
+<pre>
+myFile.delete();
+</pre>
+
+<p>파일이 내부 저장소에 저장되어 있는 경우, {@link android.content.Context}에 위치를 요청하고 {@link android.content.Context#deleteFile deleteFile()}을 호출하여 파일을 
+삭제할 수도 있습니다.</p>
+
+<pre>
+myContext.deleteFile(fileName);
+</pre>
+
+<div class="note">
+<p><strong>참고:</strong> 사용자가 앱을 제거하면 Android 시스템이
+다음 항목을 삭제합니다.</p> 
+<ul>
+<li>내부 저장소에 저장한 모든 파일</li>
+<li>{@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()}을 사용해 외부 저장소에 저장한 모든 파일</li>
+</ul>
+<p>하지만
+{@link android.content.Context#getCacheDir()}로 생성된 모든 캐시 파일과 더 이상 필요치 않은
+다른 파일은 정기적으로 직접 삭제해야 합니다.</p>
+</div>
+

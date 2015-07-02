@@ -1,0 +1,178 @@
+page.title=获取活动的结果
+page.tags=意向
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#StartActivity">开始活动</a></li>
+  <li><a href="#ReceiveResult">接收结果</a></li>
+</ol>
+
+<h2>您还应阅读</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">共享简单数据</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">共享文件</a>
+</ul>
+
+  </div>
+</div>
+
+<p>开始并不一定是单向的另一个活动。您还可以开始另一个活动并
+接收返回的结果。要接收结果，请调用 {@link android.app.Activity#startActivityForResult
+startActivityForResult()}（而不是 {@link android.app.Activity#startActivity
+startActivity()}）。</p>
+
+<p>例如，您的应用可启动照相机应用并接收拍摄的照片作为结果。或者，您可以启动“联系人”应用以便用户选择联系人，并且您将接收联系人详细信息作为结果。
+
+</p>
+
+<p>当然，响应的活动必须设计为返回结果。当它这样做时，它会作为另一
+ {@link android.content.Intent} 对象发送结果。您的活动在
+{@link android.app.Activity#onActivityResult onActivityResult()} 回调中接收它。</p>
+
+<p class="note"><strong>注意：</strong>当您调用
+{@link android.app.Activity#startActivityForResult startActivityForResult()} 时，您可以使用明确或隐含意向。当开始您自己的活动以接收结果时，您应使用明确意向确保您可收到预期结果。
+
+</p>
+
+
+<h2 id="StartActivity">开始活动</h2>
+
+<p> 开始针对结果的活动时，您所使用的 {@link android.content.Intent} 对象并没有什么特别之处，但您需要向 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 方法传递额外的整数参数。
+</p>
+
+<p>该整数参数是识别您的请求的“请求代码”。当您收到结果{@link android.content.Intent} 时，回调提供相同的请求代码，以便您的应用可以正确识别结果并确定如何处理它。
+
+</p>
+
+<p>例如，此处显示如何开始允许用户选择联系人的活动：</p>
+
+<pre>
+static final int PICK_CONTACT_REQUEST = 1;  // The request code
+...
+private void pickContact() {
+    Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+    pickContactIntent.setType(Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+    startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
+}
+</pre>
+
+
+<h2 id="ReceiveResult">接收结果</h2>
+
+<p>当用户完成后续活动并且返回时，系统会调用您的活动
+{@link android.app.Activity#onActivityResult onActivityResult()} 的方法。此方法包括三个参数：
+</p>
+
+<ul>
+  <li>您向 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 传递的请求代码。</li>
+  <li>第二个活动指定的结果代码。如果操作成功，这是 {@link
+android.app.Activity#RESULT_OK}；如果用户退出或操作出于某种原因失败，则是 {@link
+android.app.Activity#RESULT_CANCELED}。
+</li>
+  <li>传送结果数据的 {@link android.content.Intent}。</li>
+</ul>
+
+<p>本例说明您可以如何处理“选择联系人”意向的结果。</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // The user picked a contact.
+            // The Intent's data Uri identifies which contact was selected.
+
+            // Do something with the contact here (bigger example below)
+        }
+    }
+}
+</pre>
+
+<p>在本例中， Android 的“联系人”应用返回的结果 {@link android.content.Intent} 提供识别用户所选联系人的内容 {@link android.net.Uri}。
+
+</p>
+
+<p>为了成功处理结果，您必须了解结果的
+{@link android.content.Intent} 的格式。当返回结果的活动是您自己的活动之一时，这便非常容易。
+Andriod 平台附带的应用提供它们自己的 API，您可用这些 API 获取特定结果数据。
+例如，“联系人” 应用（在一些较旧的版本中是 Contacts 应用）始终返回带内容 URI（识别所选联系人）的结果，并且“照相机” 应用在 {@code "data"} 额外项中返回 {@link android.graphics.Bitmap}（请参阅有关
+<a href="{@docRoot}training/camera/index.html">拍摄照片</a>的课程）。
+
+</p>
+
+
+<h4>奖励：接收联系人数据</h4>
+
+<p>显示如何从“联系人”应用获取结果的代码不会详细说明如何实际从结果读取数据，但它需要对<a href="{@docRoot}guide/topics/providers/content-providers.html">内容提供商</a>进行更深入的探讨。
+
+
+但是，如果您很好奇，此处提供了更多的代码向您展示如何查询结果数据，从所选联系人获取电话号码：
+</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request it is that we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // Get the URI that points to the selected contact
+            Uri contactUri = data.getData();
+            // We only need the NUMBER column, because there will be only one row in the result
+            String[] projection = {Phone.NUMBER};
+
+            // Perform the query on the contact to get the NUMBER column
+            // We don't need a selection or sort order (there's only one result for the given URI)
+            // CAUTION: The query() method should be called from a separate thread to avoid blocking
+            // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
+            // Consider using {@link android.content.CursorLoader} to perform the query.
+            Cursor cursor = getContentResolver()
+                    .query(contactUri, projection, null, null, null);
+            cursor.moveToFirst();
+
+            // Retrieve the phone number from the NUMBER column
+            int column = cursor.getColumnIndex(Phone.NUMBER);
+            String number = cursor.getString(column);
+
+            // Do something with the phone number...
+        }
+    }
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>在 Android 2.3（API 级别 9）之前， 在 {@link android.provider.ContactsContract.Contacts Contacts Provider} 上执行查询（如以上所示）需要您的应用声明 {@link
+android.Manifest.permission#READ_CONTACTS} 权限（请参阅<a href="{@docRoot}guide/topics/security/security.html">安全与权限</a>）。
+
+但是，自 Android 2.3 版本开始，“联系人”应用授予您的应用在联系人提供商向您返回结果时从联系人提供商临时读取信息的权限。
+
+该临时权限仅适用于所请求的特定联系人，因此您只能查询意向的 {@link android.net.Uri} 指定的联系人，除非您声明 {@link
+android.Manifest.permission#READ_CONTACTS} 权限。
+
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

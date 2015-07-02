@@ -1,0 +1,187 @@
+page.title=Остановка и перезапуск операции
+page.tags=жизненный цикл операции
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>Содержание этого урока</h2>
+    <ol>
+      <li><a href="#Stop">Остановка операции</a></li>
+      <li><a href="#Start">Запуск/перезапуск операции</a></li>
+    </ol>
+    
+    <h2>См. также:</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">Операции</a>
+      </li>
+    </ul>
+
+<h2>Попробуйте сами</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">Загрузить демонстрацию</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>Правильное выполнение остановки и перезапуска операции является важным шагом в жизненном
+цикле операции, благодаря которому пользователи понимают, что приложение не потеряет их данные.
+Ниже приведен пример нескольких основных ситуаций с остановкой и перезапуском операции.</p>
+
+<ul>
+  <li>Пользователь открывает окно "Последние приложения" и переключается из вашего приложения в другое приложение.
+При этом останавливается операция вашего приложения, работающего на экране. Если пользователь возвращается в ваше
+приложение, нажав значок запуска на главном экране или через окно "Последние приложения", данная операция возобновляется.</li>
+  <li>Пользователь выполняет в вашем приложении действие, запускающее новую операцию. Текущая операция
+останавливается при создании второй операции. Если после этого пользователь нажимает кнопку <em>Назад</em>
+, первая операция запускается заново.</li>
+  <li>Пользователь получает телефонный звонок или переключается на другое приложение во время использования вашего приложения на своем телефоне.</li>
+</ul>
+
+<p>Класс {@link android.app.Activity} предоставляет два метода жизненного цикла, {@link
+android.app.Activity#onStop()} и {@link android.app.Activity#onRestart()}, позволяющие явно
+обрабатывать остановку и перезапуск операции. В отличие от состояния паузы,
+означающем частичное уничтожение пользовательского интерфейса, в состоянии остановки пользовательский интерфейс больше не
+отображается и пользователь переключается на отдельную операцию (или отдельное приложение).</p>
+
+<p class="note"><strong>Примечание.</strong> Поскольку система хранит ваш экземпляр {@link android.app.Activity}
+в системной памяти при остановке, вам, возможно, вообще не потребуется реализация методов
+{@link android.app.Activity#onStop()} и {@link android.app.Activity#onRestart()} (или даже {@link
+android.app.Activity#onStart()}. Большинство операций относительно простые, и операция
+остановится и перезапустится нормально, вам только может потребоваться {@link
+android.app.Activity#onPause()} для приостановки текущих операций и отключения от системных ресурсов.</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-stopped.png" />
+<p class="img-caption"><strong>Рисунок 1.</strong> Когда пользователь выйдет из операции, система
+вызовет {@link android.app.Activity#onStop onStop()} для остановки операции (1). Если пользователь возвращается
+при остановке операции, система вызывает {@link android.app.Activity#onRestart onRestart()}
+(2), затем сразу же {@link android.app.Activity#onStart onStart()} (3) и {@link
+android.app.Activity#onResume()} (4). Вне зависимости от причины остановки
+операции, система всегда вызывает {@link android.app.Activity#onPause onPause()} перед вызовом {@link
+android.app.Activity#onStop onStop()}.</p>
+
+
+
+<h2 id="Stop">Остановка операции</h2>
+
+<p>Когда операция получает вызов метода {@link android.app.Activity#onStop()},
+она становится невидимой и освобождает практически все ресурсы, которые не нужны ей, когда пользователь ее не
+использует. После остановки операции система может уничтожить экземпляр, если ей потребуется
+освободить системную память. В чрезвычайных ситуациях система может закрыть процесс приложения без
+вызова последнего метода обратного вызова {@link android.app.Activity#onDestroy()} операции, и поэтому важно
+использовать {@link android.app.Activity#onStop()} для высвобождения ресурсов, которые могут вызвать утечку памяти.</p>
+
+<p>Хотя метод {@link android.app.Activity#onPause onPause()} вызывается до
+{@link android.app.Activity#onStop()}, вам следует использовать {@link android.app.Activity#onStop onStop()}
+для выполнения более масштабных операций выключения с использованием процессорных ресурсов, например при записи информации в базу
+данных.</p>
+
+<p>В качестве примера приведем реализацию {@link android.app.Activity#onStop onStop()},
+сохраняющую содержание черновой заметки в постоянное хранилище:</p>
+
+<!-- TODO: Find a better example for onStop, because this kind of thing should probably use a
+separate thread but that's too complicated to show here. -->
+<pre>
+&#64;Override
+protected void onStop() {
+    super.onStop();  // Always call the superclass method first
+
+    // Save the note's current draft, because the activity is stopping
+    // and we want to be sure the current note progress isn't lost.
+    ContentValues values = new ContentValues();
+    values.put(NotePad.Notes.COLUMN_NAME_NOTE, getCurrentNoteText());
+    values.put(NotePad.Notes.COLUMN_NAME_TITLE, getCurrentNoteTitle());
+
+    getContentResolver().update(
+            mUri,    // The URI for the note to update.
+            values,  // The map of column names and new values to apply to them.
+            null,    // No SELECT criteria are used.
+            null     // No WHERE columns are used.
+            );
+}
+</pre>
+
+<p>При остановке операции объект {@link android.app.Activity} остается в памяти
+и вызывается повторно при возобновлении операции. Не нужно заново инициализировать компоненты,
+созданные с использованием любого из методов обратного вызова для возобновления операции. Система также
+отслеживает текущее состояние каждого {@link android.view.View} в макете, и если
+пользователь вводит текст в виджет {@link android.widget.EditText}, этот текст сохраняется, так что его не
+нужно специально сохранять и восстанавливать.</p>
+
+<p class="note"><strong>Примечание.</strong> Даже если система уничтожит операцию в период остановки,
+она сохранит состояние объектов {@link android.view.View} (например, текста в {@link
+android.widget.EditText}) в {@link android.os.Bundle} (наборе пар "ключ-значение") и восстановит
+их, если пользователь вернется в тот же экземпляр операции (на <a href="recreating.html">следующем уроке</a> мы более подробно поговорим об использовании {@link android.os.Bundle} для сохранения 
+других данных состояния в случае уничтожения и воссоздания вашей операции).</p>
+
+
+
+<h2 id="Start">Запуск/перезапуск операции</h2>
+
+<p>Когда ваша операция возвращается в экранный режим из состояния остановки, она получает вызов
+{@link android.app.Activity#onRestart()}. Система также вызывает метод {@link
+android.app.Activity#onStart()}, что происходит каждый раз, когда операция становится видимой
+(при перезапуске или первоначальном создании). Однако метод {@link
+android.app.Activity#onRestart()} вызывается только при возобновлении операции из состояния
+остановки, так что его можно использовать для выполнения специальных задач восстановления, которые могут требоваться только если операция
+была остановлена, но не была уничтожена.</p>
+
+<p>Приложениям редко требуется использовать {@link android.app.Activity#onRestart()} для восстановления
+состояния операции, и поэтому для этого метода нет правил, относящихся
+к обычным приложениям. Однако поскольку ваш метод {@link android.app.Activity#onStop()}
+должен фактически освободить все ресурсы операции, их нужно снова выделить
+при перезапуске операции. Однако их также нужно выделять при первом
+создании операции (когда нет существующего экземпляра операции). По этому причине обычно
+используют метод обратного вызова {@link android.app.Activity#onStart()} в дополнение
+к методу {@link android.app.Activity#onStop()}, поскольку система вызывает {@link
+android.app.Activity#onStart()} как при создании операции, так и при ее перезапуске
+после остановки.</p>
+
+<p>Например, если пользователь долго не пользовался приложением,
+а затем вернулся в него, метод {@link android.app.Activity#onStart()} хорошо помогает убедиться, что требуемые
+системные функции включены:</p>
+
+<pre>
+&#64;Override
+protected void onStart() {
+    super.onStart();  // Always call the superclass method first
+    
+    // The activity is either being restarted or started for the first time
+    // so this is where we should make sure that GPS is enabled
+    LocationManager locationManager = 
+            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    
+    if (!gpsEnabled) {
+        // Create a dialog here that requests the user to enable GPS, and use an intent
+        // with the android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS action
+        // to take the user to the Settings screen to enable GPS when they click "OK"
+    }
+}
+
+&#64;Override
+protected void onRestart() {
+    super.onRestart();  // Always call the superclass method first
+    
+    // Activity being restarted from stopped state    
+}
+</pre>
+
+
+
+
+<p>Когда система уничтожает вашу операцию, она вызывает метод {@link android.app.Activity#onDestroy()}
+для вашего {@link android.app.Activity}. Поскольку вы уже освобождаете большую часть
+ресурсов с помощью {@link android.app.Activity#onStop()} к моменту вызова {@link
+android.app.Activity#onDestroy()}, большинству приложений почти ничего не нужно делать. Этот метод представляет собой последний
+шанс освободить ресурсы, могущие привести к утечке памяти, обеспечивая уверенность
+в уничтожении дополнительных потоков и других долгосрочных действий, например, отслеживания
+методов.</p>
+

@@ -1,0 +1,317 @@
+page.title=在 SQL 数据库中保存数据
+page.tags=数据存储
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#DefineContract">定义架构和契约</a></li>
+  <li><a href="#DbHelper">使用 SQL 辅助工具创建数据库</a></li>
+  <li><a href="#WriteDbRow">将信息输入到数据库</a></li>
+  <li><a href="#ReadDbRow">从数据库读取信息</a></li>
+  <li><a href="#DeleteDbRow">从数据库删除信息</a></li>
+  <li><a href="#UpdateDbRow">更新数据库</a></li>
+</ol>
+
+<h2>您还应阅读</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#db">使用数据库</a></li>
+</ul>
+
+<!--
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/Sample.zip" class="button">Download the sample</a>
+  <p class="filename">Sample.zip</p>
+</div>
+-->
+
+</div>
+</div>
+
+
+<p>将数据保存到数据库对于重复或结构化数据（比如契约信息）
+而言是理想之选。本课程假定您基本熟悉 SQL 数据库并且可帮助您开始在 Android 中使用 SQLite 数据库。
+
+您在 Android 中使用数据库所需的 API 在 {@link android.database.sqlite} 软件包中提供。
+</p>
+
+
+<h2 id="DefineContract">定义架构和契约</h2>
+
+<p>SQL 数据库的主要原则之一是架构：数据库如何组织的正式声明。
+架构体现于您用于创建数据库的 SQL
+语句。您会发现它有助于创建伴随类，即<em>契约</em> 类，其以一种系统性、自记录的方式明确指定您的架构布局。
+
+</p>
+
+<p>契约类是用于定义 URI、表格和列名称的常数的容器。
+契约类允许您跨同一软件包中的所有其他类使用相同的常数。
+您可以在一个位置更改列名称并使其在您整个代码中传播。
+</p>
+
+<p>组织契约类的一种良好方法是将对于您的整个数据库而言是全局性的定义放入类的根级别。
+然后为枚举其列的每个表格创建内部类。
+</p>
+
+<p class="note"><strong>注意：</strong>通过实现 {@link
+android.provider.BaseColumns} 接口，您的内部类可继承调用的主键字段{@code _ID} ，某些 Android 类（比如光标适配器）将需要内部类拥有该字段。
+
+这并非必需项，但可帮助您的数据库与 Android 框架协调工作。
+</p>
+
+<p>例如，该代码段定义了单个表格的表格名称和列名称：
+</p>
+
+
+<pre>
+public final class FeedReaderContract {
+    // To prevent someone from accidentally instantiating the contract class,
+    // give it an empty constructor.
+    public FeedReaderContract() {}
+
+    /* Inner class that defines the table contents */
+    public static abstract class FeedEntry implements BaseColumns {
+        public static final String TABLE_NAME = &quot;entry&quot;;
+        public static final String COLUMN_NAME_ENTRY_ID = &quot;entryid&quot;;
+        public static final String COLUMN_NAME_TITLE = &quot;title&quot;;
+        public static final String COLUMN_NAME_SUBTITLE = &quot;subtitle&quot;;
+        ...
+    }
+}
+</pre>
+
+
+
+<h2 id="DbHelper">使用 SQL 辅助工具创建数据库</h2>
+
+<p>在您定义了数据库的外观后，您应实现创建和维护数据库和表格的方法。
+这里有一些典型的表格创建和删除语句：
+</P>
+
+<pre>
+private static final String TEXT_TYPE = &quot; TEXT&quot;;
+private static final String COMMA_SEP = &quot;,&quot;;
+private static final String SQL_CREATE_ENTRIES =
+    &quot;CREATE TABLE &quot; + FeedEntry.TABLE_NAME + &quot; (&quot; +
+    FeedEntry._ID + &quot; INTEGER PRIMARY KEY,&quot; +
+    FeedEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
+    FeedEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
+    ... // Any other options for the CREATE command
+    &quot; )&quot;;
+
+private static final String SQL_DELETE_ENTRIES =
+    &quot;DROP TABLE IF EXISTS &quot; + FeedEntry.TABLE_NAME;
+</pre>
+
+<p>就像您在设备的<a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">内部存储</a>中保存文件那样，Android 将您的数据库保存在私人磁盘空间，即关联的应用。
+
+您的数据是安全的，因为在默认情况下，其他应用无法访问此区域。
+</p>
+
+<p>{@link
+android.database.sqlite.SQLiteOpenHelper} 类中有一组有用的 API。当您使用此类获取对您数据库的引用时，系统将只在需要之时而不是 <em>应用启动</em>过程中执行可能长期运行的操作：创建和更新数据库。
+
+
+
+您只需调用
+{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} 或
+{@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase}。</p>
+
+<p class="note"><strong>注意：</strong>由于它们可能长期运行，因此请确保您在后台线程中调用 {@link
+android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} 或 {@link
+android.database.sqlite.SQLiteOpenHelper#getReadableDatabase} ，
+比如使用 {@link android.os.AsyncTask} 或 {@link android.app.IntentService}。
+</p>
+
+<p>要使用 {@link android.database.sqlite.SQLiteOpenHelper}，请创建一个
+替代 {@link
+android.database.sqlite.SQLiteOpenHelper#onCreate onCreate()}、{@link
+android.database.sqlite.SQLiteOpenHelper#onUpgrade onUpgrade()} 和 {@link
+android.database.sqlite.SQLiteOpenHelper#onOpen onOpen()} 回调方法的子类。您可能还希望实现 {@link android.database.sqlite.SQLiteOpenHelper#onDowngrade onDowngrade()}，
+但这并非必需操作。
+</p>
+
+<p>例如，这里有一个使用如上所示一些命令的 {@link
+android.database.sqlite.SQLiteOpenHelper} 的实现：</p>
+
+<pre>
+public class FeedReaderDbHelper extends SQLiteOpenHelper {
+    // If you change the database schema, you must increment the database version.
+    public static final int DATABASE_VERSION = 1;
+    public static final String DATABASE_NAME = &quot;FeedReader.db&quot;;
+
+    public FeedReaderDbHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(SQL_CREATE_ENTRIES);
+    }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // This database is only a cache for online data, so its upgrade policy is
+        // to simply to discard the data and start over
+        db.execSQL(SQL_DELETE_ENTRIES);
+        onCreate(db);
+    }
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+}
+</pre>
+
+<p>要访问您的数据库，请实例化 {@link
+android.database.sqlite.SQLiteOpenHelper} 的子类：</p>
+
+<pre>
+FeedReaderDbHelper mDbHelper = new FeedReaderDbHelper(getContext());
+</pre>
+
+
+
+
+<h2 id="WriteDbRow">将信息输入到数据库</h2>
+
+<p>通过将一个 {@link android.content.ContentValues}
+对象传递至 {@link android.database.sqlite.SQLiteDatabase#insert insert()} 方法将数据插入数据库：</p>
+
+<pre>
+// Gets the data repository in write mode
+SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+// Create a new map of values, where column names are the keys
+ContentValues values = new ContentValues();
+values.put(FeedEntry.COLUMN_NAME_ENTRY_ID, id);
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+values.put(FeedEntry.COLUMN_NAME_CONTENT, content);
+
+// Insert the new row, returning the primary key value of the new row
+long newRowId;
+newRowId = db.insert(
+         FeedEntry.TABLE_NAME,
+         FeedEntry.COLUMN_NAME_NULLABLE,
+         values);
+</pre>
+
+<p>{@link android.database.sqlite.SQLiteDatabase#insert insert()}
+的第一个参数即为表格名称。第二个参数指定在 
+{@link android.content.ContentValues} 为空的情况下框架可在其中插入 NULL 的列的名称（如果您将其设置为 {@code "null"}，
+那么框架将不会在没有值时插入行。）
+</p>
+
+
+
+
+<h2 id="ReadDbRow">从数据库读取信息</h2>
+
+<p>要从数据库中读取信息，请使用 {@link android.database.sqlite.SQLiteDatabase#query query()}
+方法，将其传递至选择条件和所需列。该方法结合 {@link android.database.sqlite.SQLiteDatabase#insert insert()}
+和 {@link android.database.sqlite.SQLiteDatabase#update update()} 的元素，除非列列表定义了您希望获取的数据，而不是希望插入的数据。
+
+查询的结果将在
+ {@link android.database.Cursor} 对象中返回给您。</p>
+
+<pre>
+SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+// Define a <em>projection</em> that specifies which columns from the database
+// you will actually use after this query.
+String[] projection = {
+    FeedEntry._ID,
+    FeedEntry.COLUMN_NAME_TITLE,
+    FeedEntry.COLUMN_NAME_UPDATED,
+    ...
+    };
+
+// How you want the results sorted in the resulting Cursor
+String sortOrder =
+    FeedEntry.COLUMN_NAME_UPDATED + " DESC";
+
+Cursor c = db.query(
+    FeedEntry.TABLE_NAME,  // The table to query
+    projection,                               // The columns to return
+    selection,                                // The columns for the WHERE clause
+    selectionArgs,                            // The values for the WHERE clause
+    null,                                     // don't group the rows
+    null,                                     // don't filter by row groups
+    sortOrder                                 // The sort order
+    );
+</pre>
+
+<p>要查看游标中的某一行，请使用 {@link android.database.Cursor} 移动方法之一，您必须在开始读取值之前始终调用这些方法。
+一般情况下，您应通过调用 {@link android.database.Cursor#moveToFirst} 开始，其将“读取位置”置于结果中的第一个条目中。
+
+对于每一行，您可以通过调用
+{@link android.database.Cursor} 获取方法之一读取列的值，比如 {@link android.database.Cursor#getString
+getString()} 或 {@link android.database.Cursor#getLong getLong()}。对于每种获取方法，您必须传递所需列的索引位置，您可以通过调用
+{@link android.database.Cursor#getColumnIndex getColumnIndex()} 或
+{@link android.database.Cursor#getColumnIndexOrThrow getColumnIndexOrThrow()} 获取。例如：
+
+</p>
+
+<pre>
+cursor.moveToFirst();
+long itemId = cursor.getLong(
+    cursor.getColumnIndexOrThrow(FeedEntry._ID)
+);
+</pre>
+
+
+
+
+<h2 id="DeleteDbRow">从数据库删除信息</h2>
+
+<p>要从表格中删除行，您需要提供识别行的选择条件。
+数据库 API 提供了一种机制，用于创建防止 SQL 注入的选择条件。
+该机制将选择规范划分为选择子句和选择参数。
+该子句定义要查看的列，还允许您合并列测试。
+
+参数是根据捆绑到子句的项进行测试的值。由于结果并未按照与常规 SQL 语句相同的方式进行处理，它不受 SQL 注入的影响。
+
+</p>
+
+<pre>
+// Define 'where' part of query.
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+// Specify arguments in placeholder order.
+String[] selectionArgs = { String.valueOf(rowId) };
+// Issue SQL statement.
+db.delete(table_name, selection, selectionArgs);
+</pre>
+
+
+
+<h2 id="UpdateDbRow">更新数据库</h2>
+
+<p>当您需要修改数据库值的子集时，请使用 {@link
+android.database.sqlite.SQLiteDatabase#update update()} 方法。</p>
+
+<p>更新表格可将{@link
+android.database.sqlite.SQLiteDatabase#insert insert()} 的内容值句法与
+ {@link android.database.sqlite.SQLiteDatabase#delete delete()} 的 {@code where} 句法相结合。</p>
+
+<pre>
+SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+// New value for one column
+ContentValues values = new ContentValues();
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+
+// Which row to update, based on the ID
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+String[] selectionArgs = { String.valueOf(rowId) };
+
+int count = db.update(
+    FeedReaderDbHelper.FeedEntry.TABLE_NAME,
+    values,
+    selection,
+    selectionArgs);
+</pre>
+

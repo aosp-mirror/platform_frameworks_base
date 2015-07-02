@@ -1,0 +1,187 @@
+page.title=アクティビティの停止と再起動
+page.tags=アクティビティのライフサイクル
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>このレッスンでの学習内容</h2>
+    <ol>
+      <li><a href="#Stop">アクティビティを停止する</a></li>
+      <li><a href="#Start">アクティビティを開始/再起動する</a></li>
+    </ol>
+    
+    <h2>関連ドキュメント</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">アクティビティ</a>
+      </li>
+    </ul>
+
+<h2>試してみる</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">デモのダウンロード</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>アクティビティを適切に停止、再起動することは、アクティビティのライフサイクルにおいて重要なプロセスであり、これによりアプリが常に動作中であり、進捗中の作業が失われないことをユーザーが認識できるようになります。アクティビティを停止して再開させるシナリオの主な例を次に示します。
+
+</p>
+
+<ul>
+  <li>ユーザーが [最近使用したアプリ] ウィンドウを開き、現在のアプリから別のアプリに切り替えると、現在フォアグラウンドにあるアプリのアクティビティが停止します。
+ユーザーがホーム画面のランチャー アイコンまたは [最近使用したアプリ] ウィンドウから復帰した場合は、アクティビティは再起動します。
+</li>
+  <li>ユーザーが新しいアクティビティを開始するアプリ内のアクションを実行します。2 番目のアクティビティが作成されると現在のアクティビティが停止します。
+ユーザーが <em>[戻る]</em> ボタンを押すと、最初のアクティビティが再起動されます。
+</li>
+  <li>ユーザーが自分の携帯電話でアプリの使用中に電話を受けます。</li>
+</ul>
+
+<p>{@link android.app.Activity} クラスでは、{@link
+android.app.Activity#onStop()} と {@link android.app.Activity#onRestart()} の 2 つのライフサイクル メソッドが提供され、アクティビティの停止動作と再起動動作を明確に制御できます。
+UI が部分的に隠されることでわかる一時停止状態とは異なり、停止状態では必ず UI が完全に表示されなくなり、ユーザーのフォーカスが別のアクティビティ（または完全に別個のアプリ）に移ります。
+
+</p>
+
+<p class="note"><strong>注:</strong> {@link android.app.Activity}インスタンスは、停止中にシステム メモリ内に保持されるため、
+{@link android.app.Activity#onStop()} と {@link android.app.Activity#onRestart()} （さらに {@link
+android.app.Activity#onStart()}）メソッドを実装する必要がない場合があります。
+比較的単純なほとんどのアクティビティの場合、アクティビティの停止と再起動が問題なく行われるため、現行のアクションを一時停止してシステム リソースから切り離すために {@link
+android.app.Activity#onPause()} を使用するだけでよい場合もあります。
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-stopped.png" />
+<p class="img-caption"><strong>図 1.</strong> ユーザーがアクティビティを離れたとき、システムは
+{@link android.app.Activity#onStop onStop()} を呼び出してアクティビティ（1）を停止します。アクティビティが停止している間にユーザーが復帰した場合、システムは {@link android.app.Activity#onRestart onRestart()}
+（2）を呼び出し、すぐに {@link android.app.Activity#onStart onStart()}（3）と {@link
+android.app.Activity#onResume()}（4）が続きます。
+アクティビティを停止させるシナリオによらず、システムは {@link
+android.app.Activity#onStop onStop()} を呼び出す前に、常に {@link android.app.Activity#onPause onPause()} を呼び出すことに注意してください。
+</p>
+
+
+
+<h2 id="Stop">アクティビティを停止する</h2>
+
+<p>アクティビティは {@link android.app.Activity#onStop()} メソッドの呼び出しを受信すると表示されなくなり、ユーザーが使用していない間は必要とされないほぼすべてのリソースが解放されます。
+
+アクティビティが停止すると、システムはそのメモリを取り戻す必要がある場合に、インスタンスを破棄することがあります。
+極端な場合には、システムは、アクティビティの最終段階に当たる {@link android.app.Activity#onDestroy()} コールバックを呼び出すことなく、アプリのプロセスを強制終了する場合があるため、
+{@link android.app.Activity#onStop()} を使用してメモリのリークを引き起こす可能性があるリソースを解放することが重要です。
+</p>
+
+<p>{@link android.app.Activity#onPause onPause()} メソッドが 
+{@link android.app.Activity#onStop()} の前に呼び出されますが、データベースに情報を書き込むような、規模が大きく CPU に負荷がかかるシャットダウン操作を実行するためには {@link android.app.Activity#onStop onStop()}を使用する必要があります。
+
+</p>
+
+<p>永続ストレージに下書きのメモの内容を保存する {@link android.app.Activity#onStop onStop()} の実装の例を次に示します。
+</p>
+
+<!-- TODO: Find a better example for onStop, because this kind of thing should probably use a
+separate thread but that's too complicated to show here. -->
+<pre>
+&#64;Override
+protected void onStop() {
+    super.onStop();  // Always call the superclass method first
+
+    // Save the note's current draft, because the activity is stopping
+    // and we want to be sure the current note progress isn't lost.
+    ContentValues values = new ContentValues();
+    values.put(NotePad.Notes.COLUMN_NAME_NOTE, getCurrentNoteText());
+    values.put(NotePad.Notes.COLUMN_NAME_TITLE, getCurrentNoteTitle());
+
+    getContentResolver().update(
+            mUri,    // The URI for the note to update.
+            values,  // The map of column names and new values to apply to them.
+            null,    // No SELECT criteria are used.
+            null     // No WHERE columns are used.
+            );
+}
+</pre>
+
+<p>アクティビティが停止すると、{@link android.app.Activity} オブジェクトはメモリに常駐し、アクティビティが再開したときに再び呼び出されます。
+再開状態に導くいずれかのコールバック メソッドの間に作成されたコンポーネントを再初期化する必要はありません。
+また、レイアウト内の各 {@link android.view.View} の現在の状態が追跡されます。そのため、ユーザーが {@link android.widget.EditText} ウィジェットにテキストを入力した場合、その内容が保持されるので、それを保存、復元する必要はありません。
+
+
+</p>
+
+<p class="note"><strong>注:</strong> アクティビティが停止している間にシステムにより破棄された場合でも、依然として {@link android.os.Bundle}（ひとまとまりのキー値のペア）の {@link android.view.View} オブジェクト（{@link
+android.widget.EditText} のテキストなど）の状態を保持し、ユーザーがアクティビティの同じインスタンスに復帰した場合には、それらを復元します（次の<a href="recreating.html">レッスン</a>では、アクティビティが破棄され、再作成された場合に、その他の状態データを保存するために {@link android.os.Bundle} を使用する方法の詳細について説明します）。
+
+
+</p>
+
+
+
+<h2 id="Start">アクティビティを開始/再起動する</h2>
+
+<p>アクティビティが停止状態からフォアグラウンドに復帰したとき、
+{@link android.app.Activity#onRestart()} の呼び出しを受信します。システムはまた、アクティビティが表示されるたびに（再起動か新規に作成された場合かのいずれか） {@link
+android.app.Activity#onStart()} メソッドを呼び出します。
+ただし、{@link
+android.app.Activity#onRestart()} メソッドはアクティビティが停止状態から再開する場合にのみ呼び出されるため、アクティビティが以前に停止したが破壊されていない場合にのみ必要となる可能性がある、特別な復旧作業を実行するためにこれを使用できます。
+
+</p>
+
+<p>多くの場合、アプリがアクティビティの状態を復元するために {@link android.app.Activity#onRestart()} の使用が必要となることはないため、一般的な多くのアプリに適用されるこのメソッドに関するガイドラインはありません。
+
+ただし、{@link android.app.Activity#onStop()} メソッドは、基本的にアクティビティのすべてのリソースをクリーンアップするため、アクティビティが再起動した際には再インスタンス化する必要があります。
+
+また、アクティビティが新規に作成されたとき（アクティビティの既存のインスタンスがない場合）にも、インスタンス化する必要があります。
+このような理由から、{@link android.app.Activity#onStop()} メソッドへの対応として、通常は {@link android.app.Activity#onStart()} コールバック メソッドを使用する必要があります。なぜなら、アクティビティを作成したときと停止状態からアクティビティを再開したときの両方において、システムが {@link
+android.app.Activity#onStart()} を呼び出すからです。
+
+
+</p>
+
+<p>たとえば、ユーザーが復帰まで長時間アプリから離れている可能性があるため、
+{@link android.app.Activity#onStart()} メソッドは、必要なシステム機能が有効になっているかを確認する場合に有用です。
+</p>
+
+<pre>
+&#64;Override
+protected void onStart() {
+    super.onStart();  // Always call the superclass method first
+    
+    // The activity is either being restarted or started for the first time
+    // so this is where we should make sure that GPS is enabled
+    LocationManager locationManager = 
+            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    
+    if (!gpsEnabled) {
+        // Create a dialog here that requests the user to enable GPS, and use an intent
+        // with the android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS action
+        // to take the user to the Settings screen to enable GPS when they click "OK"
+    }
+}
+
+&#64;Override
+protected void onRestart() {
+    super.onRestart();  // Always call the superclass method first
+    
+    // Activity being restarted from stopped state    
+}
+</pre>
+
+
+
+
+<p>システムがアクティビティを破棄する場合は、{@link android.app.Activity} に対して {@link android.app.Activity#onDestroy()} メソッドが呼び出されます。
+通常、{@link android.app.Activity#onStop()} を使用してリソースのほとんどを解放している可能性があるため、{@link
+android.app.Activity#onDestroy()} の呼び出しを受信する時点では、大抵のアプリでは必要な作業は少なくなっています。
+このメソッドは、メモリ リークにつながる可能性を持つリソースを一掃する最後のチャンスであるため、付加的なスレッドが破棄され、さらにメソッドのトレースのような長時間実行するその他のアクションも停止するようにする必要があります。
+
+
+</p>
+

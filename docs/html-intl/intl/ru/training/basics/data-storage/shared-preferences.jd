@@ -1,0 +1,120 @@
+page.title=Сохранение наборов "ключ-значение"
+page.tags=хранение данных
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Содержание этого урока</h2>
+<ol>
+  <li><a href="#GetSharedPreferences">Получение средства обработки SharedPreferences</a></li>
+  <li><a href="#WriteSharedPreference">Запись в общие настройки</a></li>
+  <li><a href="#ReadSharedPreference">Чтение общих настроек</a></li>
+</ol>
+
+<h2>См. также:</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#pref">Использование общих настроек</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>Если вы хотите сохранить относительно небольшой набор пар "ключ-значение",
+используйте {@link android.content.SharedPreferences} API-интерфейсы.
+Объект {@link android.content.SharedPreferences} указывает на файл,
+содержащий пары "ключ-значение", и предоставляет простые методы для чтения и записи. Управление каждым
+файлом {@link android.content.SharedPreferences} осуществляется
+с помощью инфраструктуры и может быть частным или общим.</p>
+
+<p>На этом уроке вы узнаете, как использовать API-интерфейсы {@link android.content.SharedPreferences} для сохранения и
+получения простых значений.</p>
+
+<p class="note"><strong>Примечание.</strong> API-интерфейсы {@link android.content.SharedPreferences} предназначены
+только для чтения и записи пар "ключ-значение", и их не следует путать с API-интерфейсами
+{@link android.preference.Preference}, которые помогают создать пользовательский интерфейс
+для настроек приложения (хотя они используют {@link android.content.SharedPreferences} в качестве своей
+реализации для сохранения настроек приложения). Информацию об использовании API-интерфейсов {@link
+android.preference.Preference} см. в руководстве <a href="{@docRoot}guide/topics/ui/settings.html">Настройки</a>.</p>
+
+<h2 id="GetSharedPreferences">Получение средства обработки SharedPreferences</h2>
+
+<p>Чтобы создать новый файл общих настроек или получить доступ к существующему,
+нужно вызвать один из двух методов:</p>
+<ul>
+  <li>{@link android.content.Context#getSharedPreferences(String,int)
+getSharedPreferences()} &mdash; Используйте этот метод, если вам потребуется несколько общих файлов настроек, идентифицируемых
+по имени, указанном в первом параметре. Этот метод можно вызвать из любого
+{@link android.content.Context} в вашем приложении.</li>
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} &mdash; Используйте метод из
+{@link android.app.Activity}, если вам нужен
+только один файл общих настроек для операции. Поскольку при этом получается файл общих
+настроек по умолчанию, относящийся к операции, вам не нужно указывать имя.</li>
+</ul>
+
+<p>Например, следующий код выполняется в {@link android.app.Fragment}.
+Он получает доступ к файлу общих настроек,
+идентифицируемому по строке ресурсов {@code R.string.preference_file_key} и открывает его, используя
+закрытый режим так, что данный файл доступен только вашему приложению.</p>
+
+<pre>
+Context context = getActivity();
+SharedPreferences sharedPref = context.getSharedPreferences(
+        getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+</pre>
+
+<p>Файлу общих настроек следует присваивать имя, которое ваше приложение может уникально
+идентифицировать, например {@code "com.example.myapp.PREFERENCE_FILE_KEY"}.</p>
+
+<p>Если для вашей операции нужен только один файл общих настроек, вы можете использовать метод
+{@link android.app.Activity#getPreferences(int) getPreferences()}:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+</pre>
+
+<p class="caution"><strong>Внимание!</strong> Если вы создадите общий файл настроек 
+с {@link android.content.Context#MODE_WORLD_READABLE} или {@link
+android.content.Context#MODE_WORLD_WRITEABLE}, ваши данные будут доступны всем другим приложениям, которым известен идентификатор
+файла.</p>
+
+
+<h2 id="WriteSharedPreference">Записать в общие настройки</h2>
+
+<p>Для записи в файл общих настроек создайте объект {@link
+android.content.SharedPreferences.Editor} посредством вызова {@link
+android.content.SharedPreferences#edit} в {@link android.content.SharedPreferences}.</p>
+
+<p>Передайте ключи и значения, которые хотите записать, с помощью таких методов, как {@link
+android.content.SharedPreferences.Editor#putInt putInt()} и {@link
+android.content.SharedPreferences.Editor#putString putString()}. Затем вызовите {@link
+android.content.SharedPreferences.Editor#commit} для сохранения изменений. Например:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+SharedPreferences.Editor editor = sharedPref.edit();
+editor.putInt(getString(R.string.saved_high_score), newHighScore);
+editor.commit();
+</pre>
+
+
+<h2 id="ReadSharedPreference">Чтение общих настроек</h2>
+
+<p>Для получения значений из файла общих настроек следует вызвать такие, методы как {@link
+android.content.SharedPreferences#getInt getInt()} и {@link
+android.content.SharedPreferences#getString getString()}, предоставляя ключ для нужного
+вам значения, а также при желании значение по умолчанию, которое будет выводиться при отсутствии
+ключа. Например:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
+long highScore = sharedPref.getInt(getString(R.string.saved_high_score), defaultValue);
+</pre>
+
