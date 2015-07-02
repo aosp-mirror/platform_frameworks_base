@@ -28,6 +28,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -54,6 +55,8 @@ public class TimeUtils {
     private static ArrayList<TimeZone> sLastUniqueZoneOffsets = null;
     private static String sLastUniqueCountry = null;
 
+    /** {@hide} */
+    private static SimpleDateFormat sLoggingFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /**
      * Tries to return a time zone that would have had the specified offset
@@ -439,6 +442,15 @@ public class TimeUtils {
             return String.format("%tm-%td %tH:%tM:%tS.%tL", c, c, c, c, c, c);
         } else {
             return Long.toString(millis);
+        }
+    }
+
+    /** {@hide} */
+    public static String formatForLogging(long millis) {
+        if (millis <= 0) {
+            return "unknown";
+        } else {
+            return sLoggingFormat.format(new Date(millis));
         }
     }
 }
