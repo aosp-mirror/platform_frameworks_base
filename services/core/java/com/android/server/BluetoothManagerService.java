@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
     private static final boolean DBG = false;
@@ -234,25 +235,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         sendEnableMsg(mQuietEnableExternal);
                     }
                 }
-            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                if (DBG) Log.d(TAG, "Bluetooth user switched");
-                mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_USER_SWITCHED,
-                       intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
-            } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-                if (DBG) Log.d(TAG, "Bluetooth boot completed");
-                synchronized(mReceiver) {
-                    if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
-                        //Enable
-                        if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
-                        sendEnableMsg(mQuietEnableExternal);
-                    }
-                    if (!isNameAndAddressSet()) {
-                        // Sync the Bluetooth name and address from the
-                        // Bluetooth Adapter
-                        if (DBG) Log.d(TAG, "Retrieving Bluetooth Adapter name and address...");
-                        getNameAndAddress();
-                    }
-                }
             }
         }
     };
@@ -277,9 +259,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         registerForBleScanModeChange();
         mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
         mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-        filter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
         registerForAirplaneMode(filter);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiver(mReceiver, filter);
@@ -787,6 +767,31 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             }
             mProfileServices.clear();
         }
+    }
+
+    /**
+     * Send enable message and set adapter name and address. Called when the boot phase becomes
+     * PHASE_SYSTEM_SERVICES_READY.
+     */
+    public void handleOnBootPhase() {
+        if (DBG) Log.d(TAG, "Bluetooth boot completed");
+        if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
+            if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
+            sendEnableMsg(mQuietEnableExternal);
+        }
+        if (!isNameAndAddressSet()) {
+            // Sync the Bluetooth name and address from the Bluetooth Adapter
+            if (DBG) Log.d(TAG, "Retrieving Bluetooth Adapter name and address...");
+            getNameAndAddress();
+        }
+    }
+
+    /**
+     * Called when switching to a different foreground user.
+     */
+    public void handleOnSwitchUser(int userHandle) {
+        if (DBG) Log.d(TAG, "Bluetooth user switched");
+        mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_USER_SWITCHED, userHandle, 0));
     }
 
     /**
