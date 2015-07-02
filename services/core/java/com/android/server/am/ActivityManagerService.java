@@ -18,9 +18,7 @@ package com.android.server.am;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;

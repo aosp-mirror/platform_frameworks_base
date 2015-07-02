@@ -35,6 +35,7 @@ interface IVoiceInteractionManagerService {
     boolean hideSessionFromSession(IBinder token);
     int startVoiceActivity(IBinder token, in Intent intent, String resolvedType);
     void setKeepAwake(IBinder token, boolean keepAwake);
+    void closeSystemDialogs(IBinder token);
     void finish(IBinder token);
 
     /**
