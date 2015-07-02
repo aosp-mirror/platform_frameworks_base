@@ -1,5 +1,5 @@
-page.title=管理活动生命周期
-page.tags=活动生命周期
+page.title=管理Activity生命周期
+page.tags=Activity生命周期
 helpoutsWidget=true
 
 trainingnavtop=true
@@ -20,7 +20,7 @@ startpage=true
 
 <h2>您还应阅读</h2>
 <ul>
-  <li><a href="{@docRoot}guide/components/activities.html">活动</a></li>
+  <li><a href="{@docRoot}guide/components/activities.html">Activity</a></li>
 </ul>
 
 
@@ -36,37 +36,37 @@ startpage=true
 
 <p>当用户导航、退出和返回您的应用时，应用中的 {@link android.app.Activity} 实例将在其生命周期中转换不同状态。
 
-例如，当您的活动初次开始时，它将出现在系统前台并接收用户焦点。
+例如，当您的Activity初次开始时，它将出现在系统前台并接收用户焦点。
 
-在这个过程中，Android 系统会对活动调用一系列生命周期方法，通过这些方法，您可以设置用户界面和其他组件。
-如果用户执行开始另一活动或切换至另一应用的操作，当其进入后台（在其中活动不再可见，但实例及其状态完整保留），系统会对您的活动调用另外一系列生命周期方法。
+在这个过程中，Android 系统会对Activity调用一系列生命周期方法，通过这些方法，您可以设置用户界面和其他组件。
+如果用户执行开始另一Activity或切换至另一应用的操作，当其进入后台（在其中Activity不再可见，但实例及其状态完整保留），系统会对您的Activity调用另外一系列生命周期方法。
 
 
 </p>
 
 <p>在生命周期回调方法内，您可以声明
-用户离开和再次进入活动时的活动行为。比如，如果您正构建流视频播放器，当用户切换至另一应用时，您可能要暂停视频或终止网络连接。当用户返回时，您可以重新连接网络并允许用户从同一位置继续播放视频。
+用户离开和再次进入Activity时的Activity行为。比如，如果您正构建流视频播放器，当用户切换至另一应用时，您可能要暂停视频或终止网络连接。当用户返回时，您可以重新连接网络并允许用户从同一位置继续播放视频。
 
 
 </p>
 
 <p>本课讲述每个 {@link
-android.app.Activity} 实例接收的重要生命周期回调方法以及您如何使用这些方法以使您的活动按照用户预期进行并且当您的活动不需要它们时不会消耗系统资源。
+android.app.Activity} 实例接收的重要生命周期回调方法以及您如何使用这些方法以使您的Activity按照用户预期进行并且当您的Activity不需要它们时不会消耗系统资源。
 </p>
 
 <h2>课程</h2>
  
 <dl>
-  <dt><b><a href="starting.html">开始活动</a></b></dt>
-  <dd>学习有关活动生命周期、用户如何启动您的应用以及如何执行基本活动创建操作的基础知识。
+  <dt><b><a href="starting.html">开始Activity</a></b></dt>
+  <dd>学习有关Activity生命周期、用户如何启动您的应用以及如何执行基本Activity创建操作的基础知识。
 </dd>
-  <dt><b><a href="pausing.html">暂停和继续活动</a></b></dt>
-  <dd>学习活动暂停时（部分隐藏）和继续时的情况以及您应在这些状态变化期间执行的操作。
+  <dt><b><a href="pausing.html">暂停和继续Activity</a></b></dt>
+  <dd>学习Activity暂停时（部分隐藏）和继续时的情况以及您应在这些状态变化期间执行的操作。
 </dd>
-  <dt><b><a href="stopping.html">停止和重新开始活动</a></b></dt>
-  <dd>学习用户完全离开您的活动并返回到该活动时发生的情况。</dd>
-  <dt><b><a href="recreating.html">重新创建活动</a></b></dt>
-  <dd>学习您的活动被销毁时的情况以及您如何能够根据需要重新构建活动。
+  <dt><b><a href="stopping.html">停止和重新开始Activity</a></b></dt>
+  <dd>学习用户完全离开您的Activity并返回到该Activity时发生的情况。</dd>
+  <dt><b><a href="recreating.html">重新创建Activity</a></b></dt>
+  <dd>学习您的Activity被销毁时的情况以及您如何能够根据需要重新构建Activity。
 </dd>
 </dl> 
 
