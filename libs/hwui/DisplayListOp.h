@@ -29,6 +29,8 @@
 #include "utils/LinearAllocator.h"
 #include "utils/PaintUtils.h"
 
+#include <algorithm>
+
 #include <SkColor.h>
 #include <SkPath.h>
 #include <SkPathOps.h>
@@ -184,7 +186,7 @@ public:
 
         // TODO: it would be nice if this could take scale into account, but scale isn't stable
         // since higher levels of the view hierarchy can change scale out from underneath it.
-        return fmaxf(mPaint->getStrokeWidth(), 1) * 0.5f;
+        return std::max(mPaint->getStrokeWidth(), 1.0f) * 0.5f;
     }
 
 protected:
@@ -235,10 +237,10 @@ public:
     DrawBoundedOp(const float* points, int count, const SkPaint* paint)
             : DrawOp(paint), mLocalBounds(points[0], points[1], points[0], points[1]) {
         for (int i = 2; i < count; i += 2) {
-            mLocalBounds.left = fminf(mLocalBounds.left, points[i]);
-            mLocalBounds.right = fmaxf(mLocalBounds.right, points[i]);
-            mLocalBounds.top = fminf(mLocalBounds.top, points[i + 1]);
-            mLocalBounds.bottom = fmaxf(mLocalBounds.bottom, points[i + 1]);
+            mLocalBounds.left = std::min(mLocalBounds.left, points[i]);
+            mLocalBounds.right = std::max(mLocalBounds.right, points[i]);
+            mLocalBounds.top = std::min(mLocalBounds.top, points[i + 1]);
+            mLocalBounds.bottom = std::max(mLocalBounds.bottom, points[i + 1]);
         }
     }
 
