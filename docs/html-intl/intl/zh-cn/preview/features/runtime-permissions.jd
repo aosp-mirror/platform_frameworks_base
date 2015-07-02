@@ -1,6 +1,6 @@
 page.title=权限
-page.tags=预览资源, androidm
-page.keywords=权限, 运行时, 预览
+page.tags=previewresources, androidm
+page.keywords=permissions, runtime, preview
 page.image={@docRoot}preview/features/images/permissions_check.png
 @jd:body
 
