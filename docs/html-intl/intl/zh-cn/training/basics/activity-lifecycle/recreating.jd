@@ -1,0 +1,178 @@
+page.title=重新创建活动
+page.tags=活动生命周期
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>本课程将向您展示如何</h2>
+    <ol>
+      <li><a href="#SaveState">保存活动状态</a></li>
+      <li><a href="#RestoreState">恢复活动状态</a></li>
+    </ol>
+    
+    <h2>您还应阅读</h2>
+    <ul>
+      <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">支持不同屏幕</a>
+</li>
+      <li><a href="{@docRoot}guide/topics/resources/runtime-changes.html">处理运行时更改</a></li>
+      <li><a href="{@docRoot}guide/components/activities.html">活动</a>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<p>在有些情况下，您的活动会因正常应用行为而销毁，比如当用户按 <em>返回</em>按钮或您的活动通过调用
+ {@link android.app.Activity#finish()}示意自己的销毁。
+如果活动当前被停止或长期未使用，或者前台活动需要更多资源以致系统必须关闭后台进程恢复内存，系统也可能会销毁活动。
+
+</p>
+
+<p>当您的活动因用户按了<em>返回</em> 或活动自行完成而被销毁时，系统的 {@link android.app.Activity} 实例概念将永久消失，因为行为指示不再需要活动。
+
+但是，如果系统因系统局限性（而非正常应用行为）而销毁活动，尽管
+{@link android.app.Activity} 实际实例已不在，系统会记住其存在，这样，如果用户导航回实例，系统会使用描述活动被销毁时状态的一组已保存数据创建活动的新实例。
+
+
+系统用于恢复先前状态的已保存数据被称为“实例状态”，并且是
+ {@link android.os.Bundle} 对象中存储的键值对集合。
+</p>
+
+<p class="caution"><strong>注意：</strong>每次用户旋转屏幕时，您的活动将被销毁并重新创建。
+当屏幕方向变化时，系统会销毁并重新创建前台活动，因为屏幕配置已更改并且您的活动可能需要加载备用资源（比如布局）。
+
+</p>
+
+<p>默认情况下，系统会使用 {@link android.os.Bundle} 实例状态保存您的活动布局（比如，输入到 {@link android.widget.EditText} 对象中的文本值）中有关每个 {@link android.view.View} 对象的信息。
+
+这样，如果您的活动实例被销毁并重新创建，布局状态便恢复为其先前的状态，且您无需代码。
+
+但是，您的活动可能具有您要恢复的更多状态信息，比如跟踪用户在活动中进度的成员变量。
+
+</p>
+
+<p class="note"><strong>注意：</strong>为了 Android 系统恢复活动中视图的状态，<strong>每个视图必须具有</strong>
+<a href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code
+android:id}</a> 属性提供的唯一 ID。
+</p>
+
+<p>要保存有关活动状态的其他数据，您必须替代
+ {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} 回调方法。当用户要离开活动并在活动意外销毁时向其传递将保存的 {@link android.os.Bundle} 对象时，系统会调用此方法。
+
+
+如果系统必须稍后重新创建活动实例，它会将相同的 {@link
+android.os.Bundle} 对象同时传递给 {@link android.app.Activity#onRestoreInstanceState
+onRestoreInstanceState()} 和 {@link android.app.Activity#onCreate onCreate()}
+方法。
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
+<p class="img-caption"><strong>图 2.</strong>当系统开始停止您的活动时，它会
+调用 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} (1)，因此，您可以指定您希望在 {@link android.app.Activity} 实例必须重新创建时保存的额外状态数据。如果活动被销毁且必须重新创建相同的实例，系统将在 (1) 中定义的状态数据同时传递给 {@link android.app.Activity#onCreate onCreate()} 方法(2) 和 {@link android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} 方法(3)。
+
+
+
+
+
+</p>
+
+
+
+<h2 id="SaveState">保存活动状态</h2>
+
+<p>当您的活动开始停止时，系统会调用 {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} 以便您的活动可以保存带有键值对集合的状态信息。
+此方法的默认实现保存有关活动视图层次的状态信息，例如 {@link android.widget.EditText} 小工具中的文本或{@link android.widget.ListView} 的滚动位置。
+
+</p>
+
+<p>要保存活动的更多状态信息，您必须实现 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} 并将键值对添加至 {@link android.os.Bundle} 对象。
+
+例如：</p>
+
+<pre>
+static final String STATE_SCORE = "playerScore";
+static final String STATE_LEVEL = "playerLevel";
+...
+
+&#64;Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+    savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+    
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+</pre>
+
+<p class="caution"><strong>注意：</strong>始终调用 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} 的超类实现，以便默认实现可以保存视图层次的状态。
+</p>
+
+
+
+<h2 id="RestoreState">恢复活动状态</h2>
+
+<p>当您的活动在先前销毁之后重新创建时，您可以从系统向活动传递的
+{@link android.os.Bundle}
+恢复已保存的状态。{@link android.app.Activity#onCreate onCreate()} 和 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} 回调方法均接收包含实例状态信息的相同 {@link android.os.Bundle}。
+</p>
+
+<p>因为无论系统正在创建活动的新实例还是重新创建先前的实例，都会调用 {@link android.app.Activity#onCreate onCreate()} 方法，因此您必须在尝试读取它之前检查状态 {@link android.os.Bundle} 是否为 null。
+
+如果为 null，则系统将创建活动的新实例，而不是恢复已销毁的先前实例。
+
+</p>
+
+<p>例如，此处显示您如何可以在 {@link android.app.Activity#onCreate
+onCreate()} 中恢复一些状态数据：</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+   
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    } else {
+        // Probably initialize members with default values for a new instance
+    }
+    ...
+}
+</pre>
+
+<p>您可以选择实现系统在 {@link android.app.Activity#onStart()} 方法之后调用的 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} ，而不是在{@link android.app.Activity#onCreate onCreate()} 期间恢复状态。
+
+系统只在存在要恢复的已保存状态时调用 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}
+，因此您无需检查 {@link android.os.Bundle} 是否为 null：</p>
+        
+<pre>
+public void onRestoreInstanceState(Bundle savedInstanceState) {
+    // Always call the superclass so it can restore the view hierarchy
+    super.onRestoreInstanceState(savedInstanceState);
+   
+    // Restore state members from saved instance
+    mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+    mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+</pre>
+
+<p class="caution"><strong>注意：</strong>始终调用 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} 的超类实现，以便默认实现可以恢复视图层次的状态。
+</p>
+
+<p>要了解更多有关因运行时重启事件（例如屏幕旋转时）而重新创建活动的信息，请阅读<a href="{@docRoot}guide/topics/resources/runtime-changes.html">处理运行时更改</a>。
+</p>
+

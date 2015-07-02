@@ -1,0 +1,62 @@
+page.title=與其他應用程式互動
+page.tags=意圖，應用行為的顯示
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>相依性和先決條件</h2>
+<ul>
+  <li>了解應用行為顯示生命週期的基本知識 (請參閱<a href="{@docRoot}training/basics/activity-lifecycle/index.html">管理應用行為顯示生命週期</a>)
+</li>
+</ul>
+
+
+<h2>您也應該閱讀</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">共用簡單資料</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">共用檔案</a>
+  <li><a href="http://android-developers.blogspot.com/2009/11/integrating-application-with-intents.html">將應用程式與意圖整合 (部落格文章)</a>
+</li>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">意圖和意圖篩選器</a>
+</li>
+</ul>
+
+</div>
+</div>
+
+<p>Android 應用程式通常具有多個<a href="{@docRoot}guide/components/activities.html">應用行為顯示</a>。每個應用行為顯示都會顯示使用者介面，使用者可藉此執行特定任務 (例如檢視地圖或拍照)。若要將使用者從一個應用行為顯示傳送至另一個應用行為顯示，您的應用程式必須使用 {@link
+android.content.Intent} 來定義應用程式執行作業的「意圖」。
+
+使用某方法 (例如 {@link
+android.app.Activity#startActivity startActivity()}) 將 {@link android.content.Intent} 傳遞至系統時，
+系統會使用 {@link
+android.content.Intent} 來識別並啟動相應的應用程式元件。若使用意圖，應用程式甚至可以藉此啟動獨立應用程式中包含的應用行為顯示。
+</p>
+
+<p>{@link android.content.Intent} 可以是<em>明確的</em>，以啟動特定元件
+(特定 {@link android.app.Activity} 執行個體)，也可以是<em>隱含的</em>，以啟動可處理預期行為 (例如「拍照」) 的元件。
+</p>
+
+<p>本課程將為您展示如何使用 {@link android.content.Intent} 來執行與其他應用程式的某些基本互動，例如啟動其他應用程式、接收該應用程式的結果，以及讓您的應用程式能回應其他應用程式的意圖。
+
+</p>
+
+<h2>課程</h2>
+
+<dl>
+  <dt><b><a href="sending.html">將使用者傳送至其他應用程式</a></b></dt>
+  <dd>展示如何建立隱含意圖以啟動能執行行為的其他應用程式。
+</dd>
+  <dt><b><a href="result.html">從應用行為顯示取得結果</a></b></dt>
+  <dd>展示如何啟動其他應用行為顯示並接收應用行為顯示傳回的結果。</dd>
+  <dt><b><a href="filters.html">允許其他應用程式啟動您的應用行為顯示</a></b></dt>
+  <dd>展示如何透過定義對您的應用程式所接受的隱含意圖進行宣告的意圖篩選器，讓應用程式中的應用行為顯示可供其他應用程式使用。
+</dd>
+</dl>
+

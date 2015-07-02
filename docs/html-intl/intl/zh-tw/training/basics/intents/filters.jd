@@ -1,0 +1,236 @@
+page.title=允許其他應用程式啟動您的應用行為顯示
+page.tags=意圖
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#AddIntentFilter">新增意圖篩選器</a></li>
+  <li><a href="#HandleIntent">在應用行為顯示中處理意圖</a></li>
+  <li><a href="#ReturnResult">傳回結果</a></li>
+</ol>
+
+<h2>您也應該閱讀</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">共用簡單資料</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">共用檔案</a>
+</ul>
+  </div>
+</div>
+
+<p>前兩課著重說明一個方面：從您的應用程式啟動其他應用程式的應用行為顯示。但是，若您的應用程式能執行可能適用於其他應用程式的行為，則應準備回應其他應用程式的行為要求。
+
+例如，若您建置的社交應用程式可用於與使用者的好友分享訊息或相片，則支援 {@link android.content.Intent#ACTION_SEND} 意圖可為您帶來顯著受益，使用者藉此可從其他應用程式啟動「共用」行為，並啟動您的應用程式來執行該行為。
+
+
+</p>
+
+<p>若要允許其他應用程式啟動您的應用行為顯示，需要在您的宣示說明檔案中針對對應的 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 元素新增 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 元素。
+</p>
+
+<p>若您的應用程式安裝在裝置上，系統會識別您的意圖篩選器，並將資訊新增至安裝的所有應用程式都支援的意圖內部目錄中。在應用程式使用隱含意圖呼叫 {@link android.app.Activity#startActivity
+startActivity()} 或 {@link android.app.Activity#startActivityForResult startActivityForResult()} 時，系統會找出能回應意圖的一或多項應用行為顯示。
+
+
+
+</p>
+
+
+
+<h2 id="AddIntentFilter">新增意圖篩選器</h2>
+
+<p>若要正確定義您的應用行為顯示可以處理的意圖，您新增的每個意圖篩選器都應儘可能具體地說明應用行為顯示所接受行為與資料的類型。
+
+</p>
+
+<p>若應用行為顯示的意圖篩選器執行 {@link android.content.Intent} 物件的以下條件，系統會將指定的 {@link android.content.Intent} 傳送至該應用行為顯示：
+</p>
+
+<dl>
+  <dt>行為</dt>
+    <dd>對要執行的行為進行命名的字串。通常是平台所定義值 (例如 {@link android.content.Intent#ACTION_SEND} 或 {@link android.content.Intent#ACTION_VIEW}) 的其中之一。
+
+    <p>請在您的意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a> 元素指定此項目。在此元素中指定的值必須是行為的完整字串名稱，而非 API 常數 (請參閱以下範例)。
+
+</p></dd>
+
+  <dt>資料</dt>
+    <dd>對意圖所關聯資料的描述。
+    <p>請在意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 元素指定此項目。在此元素中使用一或多個屬性，您可以僅指定 MIME 類型、URI 首碼、URI 配置，或指定這些項目的組合，以及表示所接受資料類型的其他項目。
+
+
+</p>
+    <p class="note"><strong>注意：</strong>若您不需要宣告 {@link android.net.Uri} 資料的有關詳情 (例如若您的應用行為顯示處理其他類型的「額外」資料，而非處理 URI)，應僅指定 {@code android:mimeType} 屬性以宣告應用行為顯示處理的資料類型，例如 {@code text/plain} 或 {@code image/jpeg}。
+
+
+</p>
+</dd>
+  <dt>類別</dt>
+    <dd>提供對處理意圖的應用行為顯示進行特性描述的其他方式，通常與使用者的手勢或應用行為顯示的啟動位置有關。
+系統支援多種不同的類別，但大多數類別很少使用。
+然而依預設，所有隱含意圖都與 {@link android.content.Intent#CATEGORY_DEFAULT} 一併定義。
+
+    <p>請在意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a> 元素指定此項目。
+</p></dd>
+</dl>
+
+<p>在意圖篩選器中，您可以宣告每個條件以及 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 元素中巢套的對應 XML 元素，以宣告應用行為顯示所接受的條件。
+
+</p>
+
+<p>例如，若資料類型為文字或影像，以下應用行為顯示具備的意圖篩選器可處理 {@link
+android.content.Intent#ACTION_SEND} 意圖：</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+        &lt;data android:mimeType="image/*"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>傳入的每項意圖只會指定一項行為與一種資料類型，但是在每個 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> 中，可以宣告 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 與 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> 元素的多個執行個體。
+
+</p>
+
+<p>若兩個行為與資料配對在行為方面彼此排斥，您應建立單獨的意圖篩選器，以指定與哪些資料類型配對時可接受哪些行為。
+
+</p>
+
+<p>例如，假設您的應用行為顯示可處理 {@link
+android.content.Intent#ACTION_SEND} 與 {@link
+android.content.Intent#ACTION_SENDTO} 意圖的文字與影像。在此情況下，您必須針對兩個行為定義兩個單獨的意圖篩選器，因為 {@link
+android.content.Intent#ACTION_SENDTO} 意圖必須使用 {@link android.net.Uri} 資料指定接收者的地址 (使用 {@code send} 或 {@code sendto} URI 配置)。
+
+例如：</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;!-- filter for sending text; accepts SENDTO action with sms URI schemes -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SENDTO"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:scheme="sms" />
+        &lt;data android:scheme="smsto" />
+    &lt;/intent-filter>
+    &lt;!-- filter for sending text or images; accepts SEND action and text or image data -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>注意：</strong>若要接收隱含意圖，您必須在意圖篩選器中納入 {@link android.content.Intent#CATEGORY_DEFAULT} 類別。
+{@link
+android.app.Activity#startActivity startActivity()} 與 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 方法對所有意圖進行處理時，就像已宣告 {@link android.content.Intent#CATEGORY_DEFAULT} 類別一樣。
+若您在意圖篩選器中未宣告該類別，不會將任何隱含意圖解析為您的應用行為顯示。
+</p>
+
+<p>如需有關傳送及接收 {@link android.content.Intent#ACTION_SEND} 意圖 (執行社交共用行為) 的詳細資訊，請參閱有關<a href="{@docRoot}training/sharing/receive.html">接收其他應用程式的簡單資料</a>的課程。
+</p>
+
+
+<h2 id="HandleIntent">在應用行為顯示中處理意圖</h2>
+
+<p>若要確定您應用行為顯示中將採用的行為，您可以讀取用於啟動該應用行為顯示的 {@link
+android.content.Intent}。</p>
+
+<p>您的應用行為顯示啟動時，請呼叫 {@link android.app.Activity#getIntent()} 以擷取啟動該應用行為顯示的 {@link android.content.Intent}。
+在應用行為顯示的生命週期期間，您隨時可以執行該作業，但通常應在早期回呼 (例如 {@link android.app.Activity#onCreate onCreate()} 或 {@link android.app.Activity#onStart()}) 期間執行。
+
+</p>
+
+<p>例如：</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.main);
+
+    // Get the intent that started this activity
+    Intent intent = getIntent();
+    Uri data = intent.getData();
+
+    // Figure out what to do based on the intent type
+    if (intent.getType().indexOf("image/") != -1) {
+        // Handle intents with image data ...
+    } else if (intent.getType().equals("text/plain")) {
+        // Handle intents with text ...
+    }
+}
+</pre>
+
+
+<h2 id="ReturnResult">傳回結果</h2>
+
+<p>若您希望將結果傳回至呼叫您意圖的應用行為顯示，只需呼叫 {@link
+android.app.Activity#setResult(int,Intent) setResult()} 以指定結果代碼及結果 {@link
+android.content.Intent} 即可。在您的操作已完成，且使用者應返回原始的應用行為顯示時，請呼叫 {@link android.app.Activity#finish()} 以關閉 (並終結) 您的應用行為顯示。
+例如：
+</p>
+
+<pre>
+// Create intent to deliver some kind of result data
+Intent result = new Intent("com.example.RESULT_ACTION", Uri.parse("content://result_uri");
+setResult(Activity.RESULT_OK, result);
+finish();
+</pre>
+
+<p>您必須始終一併指定結果代碼與結果。結果通常是 {@link
+android.app.Activity#RESULT_OK} 或 {@link android.app.Activity#RESULT_CANCELED}。然後，您可以視需要為其他資料提供 {@link android.content.Intent}。
+</p>
+
+<p class="note"><strong>注意：</strong>依預設，會將結果設為 {@link
+android.app.Activity#RESULT_CANCELED}。因此，若使用者在完成行為之前以及在您設定結果之前按下 [後退] 按鈕<em></em>，原始應用行為顯示會收到「已取消」結果。
+
+</p>
+
+<p>若您只需傳回表示其中一種結果選項的整數，可將結果代碼設為大於 0 的任意值。
+若您使用結果代碼以提供整數，且無需納入 {@link android.content.Intent}，可以呼叫 {@link
+android.app.Activity#setResult(int) setResult()}，然後僅傳遞結果代碼。
+例如：</p>
+
+<pre>
+setResult(RESULT_COLOR_RED);
+finish();
+</pre>
+
+<p>在此情況下，可能只會有少數結果，因此結果代碼是本機定義的整數 (大於 0)。
+若您將結果傳回至您應用程式內的應用行為顯示，此功能會非常適用，因為接收結果的應用行為顯示可以參考公用常數，以確定結果代碼的值。
+
+</p>
+
+<p class="note"><strong>注意：</strong>無需檢查是否已使用 {@link
+android.app.Activity#startActivity startActivity()} 或 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 啟動您的應用行為顯示。
+若啟動應用行為顯示的意圖希望產生結果，只需呼叫 {@link
+android.app.Activity#setResult(int,Intent) setResult()} 即可。
+若原始應用行為已呼叫 {@link
+android.app.Activity#startActivityForResult startActivityForResult()}，則系統將向其傳遞您提供給 {@link android.app.Activity#setResult(int,Intent) setResult()} 的結果；否則，結果將被忽略。
+
+</p>
+
+
+
+
+
+

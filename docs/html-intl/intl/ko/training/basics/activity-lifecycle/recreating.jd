@@ -1,0 +1,178 @@
+page.title=액티비티 재생성하기
+page.tags=activity lifecycle
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>이 과정에서 다루는 내용</h2>
+    <ol>
+      <li><a href="#SaveState">액티비티 상태 저장하기</a></li>
+      <li><a href="#RestoreState">액티비티 상태 복원하기</a></li>
+    </ol>
+    
+    <h2>필독 항목</h2>
+    <ul>
+      <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">다양한
+화면 지원</a></li>
+      <li><a href="{@docRoot}guide/topics/resources/runtime-changes.html">런타임 변경 처리하기</a></li>
+      <li><a href="{@docRoot}guide/components/activities.html">액티비티</a>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<p>정상적인 앱 동작으로 인해 액티비티가 소멸되는 몇 가지 시나리오가 있습니다.
+예를 들어 사용자가 <em>뒤로</em> 버튼을 누르거나 액티비티가 {@link android.app.Activity#finish()}를 호출하여
+자체적인 소멸 신호를 보내는 경우입니다. 또한 액티비티가
+현재 정지되어 있고 장시간 사용되지 않거나, 전면에 있는 액티비티가 더 많은
+리소스를 필요로 하여 시스템이 백그라운드 프로세스를 종료해서 메모리를 회수해야 하는 경우에도 시스템이 액티비티를 소멸시킬 수 있습니다.</p>
+
+<p>사용자가 <em>뒤로</em> 버튼을 누르거나 액티비티가
+스스로 종료되어 소멸된 경우, {@link android.app.Activity} 인스턴스에 대한 시스템의 개념은 완전히 사라지게 됩니다. 왜냐하면
+동작이 액티비티가 더 이상 필요치 않다는 것을 나타내기 때문입니다. 하지만 시스템이 정상적인 앱 동작이 아닌 시스템 제약 조건으로 인해
+액티비티를 소멸한 경우, 실제
+{@link android.app.Activity} 인스턴스는 사라지지만 시스템은 그것이 존재하고 있었음을 기억합니다. 예를 들어
+사용자가 다시 해당 액티비티를 탐색하면, 시스템은 소멸된 액티비티의 상태를 설명하는
+저장된 데이터 세트를 사용하여 액티비티의 새 인스턴스를 생성합니다. 시스템이
+이전 상태를 복원하기 위해 사용하는 저장된 데이터를 "인스턴스 상태"라고 하며, 이는 {@link android.os.Bundle} 개체에 저장된
+키-값 쌍의 컬렉션입니다.</p>
+
+<p class="caution"><strong>주의:</strong> 사용자가 화면을 회전할 때마다
+액티비티가 소멸되고 재생성됩니다. 화면 방향이 바뀌면 시스템은
+전면에 있는 액티비티를 소멸하고 재생성합니다. 그 이유는 화면 구성이 바뀌었으며, 액티비티가 레이아웃과 같은 대체 리소스를
+로딩해야 할 수 있기 때문입니다.</p>
+
+<p>기본적으로 시스템은 {@link android.os.Bundle} 인스턴스 상태를 사용하여 액티비티 레이아웃의 각 {@link android.view.View} 개체에 대한
+정보를 저장합니다(예: {@link android.widget.EditText} 개체에
+입력된 텍스트 값 등). 따라서 액티비티 인스턴스가 소멸되고
+재생성된 경우, 레이아웃의 상태는
+별도의 코드 요청 없이 이전 상태로 복원됩니다. 하지만
+액티비티에서 사용자 진행 상태를
+추적하는 멤버 변수처럼 액티비티에 복원하고자 하는 상태 정보가 더 많이 있는 경우도 있습니다.</p>
+
+<p class="note"><strong>참고:</strong> Android 시스템이 액티비티에서
+보기의 상태를 복원하기 위해서는
+<a href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code
+android:id}</a> 특성으로 제공되는 <strong>고유 ID가 각 보기마다 있어야 합니다</strong>.</p>
+
+<p>액티비티 상태에 대한 추가 데이터를 저장하려면
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} 콜백 메서드를 재정의해야 합니다.
+시스템은 사용자가 액티비티를 떠날 경우 이 메서드를 호출하며,
+액티비티가 예기치 않게 소멸될 경우 저장되는
+{@link android.os.Bundle} 개체로 전달합니다. 시스템이
+나중에 액티비티 인스턴스를 재생성해야 하는 경우, 동일한 {@link
+android.os.Bundle} 개체를 {@link android.app.Activity#onRestoreInstanceState
+onRestoreInstanceState()} 및 {@link android.app.Activity#onCreate onCreate()}
+메서드 모두에 전달합니다.</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
+<p class="img-caption"><strong>그림 2.</strong> 시스템은 액티비티 중지 작업을 시작할 때
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}(1)를 호출합니다.
+따라서 {@link android.app.Activity} 인스턴스가
+재생성되어야 하는 경우 저장하고자 하는 추가 상태 데이터를 지정할 수 있습니다.
+액티비티가 소멸되고 동일한 인스턴스가 재생성되어야 하는 경우, 시스템은 {@link android.app.Activity#onCreate onCreate()} 메서드(2)
+및 {@link android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} 메서드(3)
+모두에 (1)에서 정의된 상태
+데이터를 전달합니다.</p>
+
+
+
+<h2 id="SaveState">액티비티 상태 저장하기</h2>
+
+<p>액티비티의 정지 작업 시작 시 시스템은 {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}를 호출합니다. 이에 따라 액티비티는 키-값
+쌍 컬렉션과 함께 상태 정보를 저장할 수 있습니다. 메서드의 기본 구현은 {@link android.widget.EditText} 위젯 내 텍스트 또는 {@link android.widget.ListView}의 스크롤
+위치와 같은 액티비티의
+보기 계층 구조에 대한 정보를 저장합니다.</p>
+
+<p>액티비티에 대한 추가 상태 정보를 저장하려면 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}를
+구현한 다음 {@link android.os.Bundle} 개체에
+키-값 쌍을 추가해야 합니다. 예를 들면 다음과 같습니다.</p>
+
+<pre>
+static final String STATE_SCORE = "playerScore";
+static final String STATE_LEVEL = "playerLevel";
+...
+
+&#64;Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+    savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+    
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+</pre>
+
+<p class="caution"><strong>주의:</strong> 항상 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}의 슈퍼클래스 구현을 호출하여 기본 구현에서
+보기 계층 구조를 저장할 수 있도록 합니다.</p>
+
+
+
+<h2 id="RestoreState">액티비티 상태 복원하기</h2>
+
+<p>액티비티가 이전에 소멸된 후 재생성되면, 시스템이 액티비티를
+전달한 {@link android.os.Bundle}로부터 저장된
+상태를 복구할 수 있습니다. {@link android.app.Activity#onCreate onCreate()} 및 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} 콜백 메서드 둘 다 인스턴스 상태 정보를 포함하는
+동일한 {@link android.os.Bundle}을 수신합니다.</p>
+
+<p>{@link android.app.Activity#onCreate onCreate()} 메서드는
+시스템이 액티비티의 새 인스턴스를 생성하든, 이전 인스턴스를 재생성하든 상관없이 호출되므로, 읽기를 시도하기 전에 상태 {@link android.os.Bundle}이 null인지
+반드시 확인해야 합니다. null일 경우,
+시스템은 이전에 소멸된 액티비티의 인스턴스를
+복원하지 않고 새 인스턴스를 생성합니다.</p>
+
+<p>다음은 {@link android.app.Activity#onCreate
+onCreate()}에서 몇 가지 상태 데이터를 복원하는 방법에 대한 예제입니다.</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+   
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    } else {
+        // Probably initialize members with default values for a new instance
+    }
+    ...
+}
+</pre>
+
+<p>{@link android.app.Activity#onCreate onCreate()} 중에 상태를 복원하는
+대신, 시스템이 {@link android.app.Activity#onStart()} 메서드 후에
+호출하는 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}를 구현하도록 선택할 수 있습니다. 시스템은 복원할 저장
+상태가 있을 경우에만 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}를 호출합니다. 따라서 {@link android.os.Bundle}이 null인지 확인할 필요가 없습니다.</p>
+        
+<pre>
+public void onRestoreInstanceState(Bundle savedInstanceState) {
+    // Always call the superclass so it can restore the view hierarchy
+    super.onRestoreInstanceState(savedInstanceState);
+   
+    // Restore state members from saved instance
+    mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+    mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+</pre>
+
+<p class="caution"><strong>주의:</strong> 항상 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}의 슈퍼클래스 구현을 호출하여 기본 구현에서 보기 계층 구조의 상태를
+복원할 수 있도록 합니다.</p>
+
+<p>런타임에
+재시작 이벤트로 인한 액티비티 재생성과 관련한 자세한 내용은 <a href="{@docRoot}guide/topics/resources/runtime-changes.html">런타임 변경 처리하기</a>를 참조하세요.</p>
+

@@ -1,0 +1,120 @@
+page.title=保存键值集
+page.tags=数据存储
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#GetSharedPreferences">获取共享首选项的句柄</a></li>
+  <li><a href="#WriteSharedPreference">写入共享首选项</a></li>
+  <li><a href="#ReadSharedPreference">从共享首选项读取信息</a></li>
+</ol>
+
+<h2>您还应阅读</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#pref">使用共享首选项</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>如果您有想要保存的相对较小键值集合，您应使用 {@link android.content.SharedPreferences} API。
+{@link android.content.SharedPreferences} 对象指向包含键值对的文件并提供读写这些文件的简单方法。
+
+每个
+{@link android.content.SharedPreferences} 文件由框架进行管理并且可以专用或共享。
+</p>
+
+<p>本课向您展示如何使用 {@link android.content.SharedPreferences} API 存储和检索简单的值。
+</p>
+
+<p class="note"><strong>注意：</strong>{@link android.content.SharedPreferences} API 仅用于读写键值对，您不得将其与
+{@link android.preference.Preference} API 混淆，后者帮助您为您的应用设置构建用户界面（尽管它们使用 {@link android.content.SharedPreferences} 作为其实现以保存应用设置）。
+
+
+有关使用 {@link
+android.preference.Preference} API 的信息，请参阅<a href="{@docRoot}guide/topics/ui/settings.html">设置</a>指南。</p>
+
+<h2 id="GetSharedPreferences">获取共享首选项的句柄</h2>
+
+<p>您可以通过调用以下两种方法之一创建新的共享首选项文件或访问现有的文件：
+</p>
+<ul>
+  <li>{@link android.content.Context#getSharedPreferences(String,int)
+getSharedPreferences()} &mdash; 如果您需要按照您用第一个参数指定的名称识别的多个共享首选项文件，请使用此方法。
+您可以从您的应用中的任何
+{@link android.content.Context} 调用此方法。</li>
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} &mdash; 如果您只需使用活动的一个共享首选项，请从
+{@link android.app.Activity} 中使用此方法。
+因为此方法会检索属于该活动的默认共享首选项文件，您无需提供名称。
+</li>
+</ul>
+
+<p>例如，以下代码在 {@link android.app.Fragment} 内执行。它访问通过资源字符串
+ {@code R.string.preference_file_key} 识别的共享首选项文件并且使用专用模式打开它，从而仅允许您的应用访问文件。
+
+</p>
+
+<pre>
+Context context = getActivity();
+SharedPreferences sharedPref = context.getSharedPreferences(
+        getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+</pre>
+
+<p>命名您的共享首选项文件时，您应使用对于您的应用而言唯一可识别的名称，比如 {@code "com.example.myapp.PREFERENCE_FILE_KEY"}
+</p>
+
+<p>或者，如果您只需活动的一个共享首选项文件，您可以使用
+{@link android.app.Activity#getPreferences(int) getPreferences()} 方法：</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+</pre>
+
+<p class="caution"><strong>注意：</strong>如果您创建带 {@link android.content.Context#MODE_WORLD_READABLE} 或 {@link
+android.content.Context#MODE_WORLD_WRITEABLE} 的共享首选项文件，那么知道文件标识符
+的任何其他应用都可以访问您的数据。
+</p>
+
+
+<h2 id="WriteSharedPreference">写入共享首选项</h2>
+
+<p>要写入共享首选项文件， 请通过对您的 {@link android.content.SharedPreferences} 调用 {@link
+android.content.SharedPreferences#edit} 来创建一个 {@link
+android.content.SharedPreferences.Editor}。</p>
+
+<p>传递您想要使用诸如 {@link
+android.content.SharedPreferences.Editor#putInt putInt()} 和 {@link
+android.content.SharedPreferences.Editor#putString putString()} 方法写入的键和值。然后调用 {@link
+android.content.SharedPreferences.Editor#commit} 以保存更改。例如：</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+SharedPreferences.Editor editor = sharedPref.edit();
+editor.putInt(getString(R.string.saved_high_score), newHighScore);
+editor.commit();
+</pre>
+
+
+<h2 id="ReadSharedPreference">从共享首选项读取信息</h2>
+
+<p>要从共享首选项文件中检索值，请调用诸如 {@link
+android.content.SharedPreferences#getInt getInt()} 和 {@link
+android.content.SharedPreferences#getString getString()} 等方法，为您想要的值提供键，并根据需要提供要在键不存在的情况下返回的默认值。
+
+例如：</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
+long highScore = sharedPref.getInt(getString(R.string.saved_high_score), defaultValue);
+</pre>
+

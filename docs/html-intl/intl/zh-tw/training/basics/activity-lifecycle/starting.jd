@@ -1,0 +1,285 @@
+page.title=啟動應用行為顯示
+page.tags=應用行為顯示的生命週期
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>本課程示範</h2>
+<ol>
+  <li><a href="#lifecycle-states">了解生命週期回呼</a></li>
+  <li><a href="#launching-activity">指定您應用程式的啟動器應用行為顯示</a></li>
+  <li><a href="#Create">建立新執行個體</a></li>
+  <li><a href="#Destroy">終結應用行為顯示</a></li>
+</ol>
+    
+    <h2>您也應該閱讀</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">應用行為顯示</a></li>
+    </ul>
+
+<h2>試試看</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">下載示範</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>在其他程式設計範例中，使用 {@code main()} 方法啟動應用程式，而 Android 系統與此不同，透過呼叫與 {@link android.app.Activity} 執行個體生命週期的特定階段相對應的特定回呼方法，在該執行個體中啟動程式碼。
+
+
+可以採用一系列回呼方法啟動應用行為顯示，也可以採用一系列回呼方法終結應用行為顯示。
+</p>
+
+<p>本課程將概述最重要的生命週期方法，並為您展示如何處理第一個生命週期回呼 (該回呼會建立應用行為顯示的新執行個體)。
+</p>
+
+
+
+<h2 id="lifecycle-states">了解生命週期回呼</h2>
+
+<p>在應用行為顯示的生命週期內，系統會以類似於階梯金字塔的順序，呼叫一組核心生命週期方法。
+換言之，應用行為顯示生命週期的每個階段都是金字塔上的一個台階。
+在系統建立新應用行為顯示執行個體時，每個回呼方法都會將應用行為顯示狀態向頂部移動一個台階。
+在金字塔的頂部，應用行為顯示將在前景中執行，使用者可以與應用行為顯示互動。
+</p>
+
+<p>在使用者開始離開應用行為顯示時，系統會呼叫可將應用行為顯示狀態沿金字塔下移的其他方法，以終結應用行為顯示。
+在某些狀況下，應用行為顯示會沿金字塔僅移動部分台階，然後開始等候 (例如若使用者切換至其他應用程式)，應用行為顯示可以由此移回頂部 (若使用者返回該應用行為顯示)，並在使用者先前停止的位置繼續。
+
+
+</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle.png" />
+<p class="img-caption"><strong>圖 1.</strong>應用行為顯示生命週期的簡化圖例 (以階梯金字塔表示)。
+此圖例顯示，對於讓應用行為顯示向頂部的「已繼續」狀態邁上一個台階所用的每個回呼，都存在可讓應用行為顯示下移的回呼方法。
+
+應用行為顯示也可以從「已暫停」及「已停止」狀態返回至「已繼續」狀態。
+</p>
+
+
+<p>視應用行為顯示的複雜程度而定，您可能不需要實作所有生命週期方法。
+但是，請務必了解每個生命週期方法，並實作能確保您的應用程式以使用者預期方式運作的生命週期方法。
+正確實作應用行為顯示生命週期方法可確保您的應用程式以多種方式良好運作，包括：
+</p>
+<ul>
+  <li>使用您的應用程式時，若使用者接電話或切換至其他應用程式，不會發生當機。
+</li>
+  <li>使用者未主動使用時，不會耗用寶貴的系統資源。
+</li>
+  <li>若使用者離開您的應用程式並在稍後返回，使用者的進度不會遺失。
+</li>
+  <li>若螢幕方向在橫向與直向之間旋轉，不會發生當機或遺失使用者的進度。
+</li>
+</ul>
+
+<!--
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+methods.</p>
+<table>
+  <tr>
+    <th scope="col">Lifecycle State</th>
+    <th scope="col">Startup Method</th>
+    <th scope="col">Teardown Method</th>
+  </tr>
+  <tr>
+    <td>Created / Destroyed</td>
+    <td>{@link android.app.Activity#onCreate onCreate()}</td>
+    <td>{@link android.app.Activity#onDestroy()}</td>
+  </tr>
+  <tr>
+    <td>Started / Stopped</td>
+    <td>{@link android.app.Activity#onStart()}</td>
+    <td>{@link android.app.Activity#onStop()}</td>
+  </tr>
+  <tr>
+    <td>Resumed / Resumed</td>
+    <td>{@link android.app.Activity#onResume()}</td>
+    <td>{@link android.app.Activity#onPause()}</td>
+  </tr>
+</table>
+-->
+
+<p>在以下課程中您將了解到，某些情況下應用行為顯示會在不同的狀態之間進行轉換，如圖 1 所示。
+但是在這些狀態中，只有三種可以是靜態狀態。
+換言之，應用行為顯示長時間存在時，只能具備這三種狀態的其中之一：
+</p>
+<dl>
+  <dt>已繼續</dt>
+    <dd>若具備此狀態，應用行為顯示將位於前景中，使用者可以與應用行為顯示互動 (有時也稱為「執行中」狀態)。
+</dd>
+  <dt>已暫停</dt>
+    <dd>若具備此狀態，該應用行為顯示的一部分會遭其他應用行為顯示遮蓋，&mdash;
+位於前景中的其他應用行為顯示處於半透明狀態，或未覆蓋整個螢幕。已暫停的應用行為顯示不會接收使用者輸入，也無法執行任何程式碼。
+
+  <dt>已停止</dt>
+    <dd>若具備此狀態，應用行為顯示將完全隱藏，使用者無法看到；會將該應用行為顯示視為位於背景中。
+停止後，會保留應用行為顯示執行個體及其所有狀態資訊 (例如成員變數)，但其無法執行任何程式碼。
+</dd>
+</dl>
+
+<p>其他狀態 (「已建立」與「已啟動」) 都是暫時狀態，系統透過呼叫下一個生命週期回呼方法，會從這些狀態快速移至下一個狀態。
+換言之，在系統呼叫 {@link android.app.Activity#onCreate onCreate()} 後，會快速呼叫 {@link
+android.app.Activity#onStart()}，然後快速呼叫 {@link
+android.app.Activity#onResume()}。
+</p>
+
+<p>以上所述是應用行為顯示的基本生命週期。現在您將開始了解某些特定生命週期行為。
+</p>
+
+
+
+<h2 id="launching-activity">指定您應用程式的啟動器應用行為顯示</h2> 
+
+<p>若使用者從主螢幕中選取您的應用程式圖示，系統會針對應用程式中您已宣告作為「啟動器」(或「主程式」) 應用行為顯示的 {@link android.app.Activity}，呼叫 {@link
+android.app.Activity#onCreate onCreate()} 方法。
+此應用行為顯示將作為您應用程式使用者介面的主要進入點。
+</p>
+
+<p>您可以定義 Android 宣示說明檔案 (即 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">{@code AndroidManifest.xml}</a>，位於您專案目錄的根目錄中) 中用作主要應用行為顯示的應用行為顯示。
+</p>
+
+<p>必須在宣示說明中使用 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> (包括 {@link
+android.content.Intent#ACTION_MAIN MAIN} 行為與 {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 類別) 宣告您應用程式的主要應用行為顯示。
+例如：</p> 
+
+<pre>
+&lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>注意：</strong>使用 Android SDK 工具建立新 Android 專案時，預設專案檔案包括宣示說明中使用此篩選器宣告的 {@link android.app.Activity} 類別。
+
+</p>
+
+<p>若未針對您的其中一項應用行為顯示宣告 {@link android.content.Intent#ACTION_MAIN MAIN} 行為或 {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 類別，您的應用程式圖示將不會顯示在主螢幕的應用程式清單中。
+
+</p>
+
+
+
+<h2 id="Create">建立新執行個體</h2>
+
+<p>大多數應用程式都包括多項不同的應用行為顯示，使用者可以藉此執行不同的行為。不論應用行為顯示是使用者按一下應用程式圖示時建立的主要應用行為顯示，還是您的應用程式為回應使用者行為而啟動的其他應用行為顯示，系統都會呼叫 {@link android.app.Activity#onCreate onCreate()} 方法，以建立 {@link android.app.Activity} 的每個新執行個體。
+
+
+
+</p>
+
+<p>您必須實作 {@link android.app.Activity#onCreate onCreate()} 方法以執行基本的應用程式啟動邏輯，在應用行為顯示的整個生命週期內，該操作應僅執行一次。
+例如，實作 {@link android.app.Activity#onCreate onCreate()} 將定義使用者介面，並且可能會啟動某些類別範圍的變數。
+
+</p>
+
+<p>例如，以下 {@link android.app.Activity#onCreate onCreate()} 方法範例展示的一些程式碼將執行應用行為顯示的某些基礎設定，諸如宣告使用者介面 (在 XML 版面配置檔案中定義)、定義成員變數，以及設定 UI 的某些部分。
+
+
+</p>
+
+<pre>
+TextView mTextView; // Member variable for text view in the layout
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Set the user interface layout for this Activity
+    // The layout file is defined in the project res/layout/main_activity.xml file
+    setContentView(R.layout.main_activity);
+    
+    // Initialize member TextView so we can manipulate it later
+    mTextView = (TextView) findViewById(R.id.text_message);
+    
+    // Make sure we're running on Honeycomb or higher to use ActionBar APIs
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        // For the main activity, make sure the app icon in the action bar
+        // does not behave as a button
+        ActionBar actionBar = getActionBar();
+        actionBar.setHomeButtonEnabled(false);
+    }
+}
+</pre>
+
+<p class="caution"><strong>注意：</strong>僅在 Android 2.0 (API 層級為 5) 及更高版本中，可以透過此方式使用 {@link android.os.Build.VERSION#SDK_INT} 防止舊版系統執行新 API。
+
+在舊版系統中，將發生執行階段例外狀況。</p>
+
+<p>{@link android.app.Activity#onCreate onCreate()} 執行完成後，系統會連續快速呼叫 {@link android.app.Activity#onStart()} 與 {@link android.app.Activity#onResume()} 方法。
+
+您的應用行為顯示永遠不會具備「已建立」或「已啟動」狀態。嚴格來說，在呼叫 {@link android.app.Activity#onStart()} 時，使用者可以看到應用行為顯示，但隨後會快速呼叫 {@link android.app.Activity#onResume()}，應用行為顯示將保持「已繼續」狀態，直到發生某些狀況 (例如接聽電話、使用者導覽至其他應用行為顯示，或裝置螢幕關閉) 變更該狀態為止。
+
+
+
+</p>
+
+<p>在後續的其他課程中，您將了解在應用行為顯示的生命週期期間，其他啟動方法 ({@link
+android.app.Activity#onStart()} 與 {@link android.app.Activity#onResume()}) 在用於從「已暫停」或「已停止」狀態繼續執行應用行為顯示時如何提供助益。
+</p>
+
+<p class="note"><strong>注意：</strong>{@link android.app.Activity#onCreate onCreate()} 方法包括稱為 <code>savedInstanceState</code> 的參數，在有關<a href="recreating.html">重新建立應用行為顯示</a>的後續課程中將討論該參數。
+
+</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-create.png" />
+<p class="img-caption"><strong>圖 2.</strong>應用行為顯示生命週期結構的另一個圖例 (著重展示系統建立應用行為顯示的新執行個體時依次呼叫的三個主要回呼：{@link android.app.Activity#onCreate onCreate()}、{@link
+android.app.Activity#onStart()} 及 {@link android.app.Activity#onResume()}。
+
+完成這一系列的回呼後，應用行為顯示將具備「已繼續」狀態，此時使用者可以與應用行為顯示互動，直到使用者切換至其他應用行為顯示為止。
+
+</p>
+
+
+
+
+
+
+
+<h2 id="Destroy">終結應用行為顯示</h2>
+
+<p>應用行為顯示的第一個生命週期回呼是 {@link android.app.Activity#onCreate
+onCreate()}，最後一個回呼是 {@link android.app.Activity#onDestroy}。系統針對您的應用行為顯示呼叫此方法作為最終訊號，表示正從系統記憶體中完全移除您的應用行為顯示執行個體。
+
+</p>
+
+<p>大多數應用程式不需要實作此方法，因為區域類別參考與應用行為顯示一併終結，您的應用行為顯示應在 {@link
+android.app.Activity#onPause} 與 {@link android.app.Activity#onStop} 期間執行大多數清理。
+但是，若您的應用行為顯示包括 {@link
+android.app.Activity#onCreate onCreate()} 期間建立的背景執行緒，或包括其他長時間執行的資源 (若未正確關閉，可能會導致記憶體流失)，您應在 {@link
+android.app.Activity#onDestroy} 期間終止這些執行緒或資源。
+
+</p>
+
+<pre>
+&#64;Override
+public void onDestroy() {
+    super.onDestroy();  // Always call the superclass
+    
+    // Stop method tracing that the activity started during onCreate()
+    android.os.Debug.stopMethodTracing();
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>在所有情況下，系統會在已呼叫 {@link android.app.Activity#onPause} 與 {@link
+android.app.Activity#onStop} 後呼叫 {@link android.app.Activity#onDestroy}，但在 {@link android.app.Activity#onCreate onCreate()} 方法中呼叫 {@link
+android.app.Activity#finish()} 的情況除外。
+
+在某些情況下 (例如您應用行為顯示的執行目的在於臨時確定是否啟動其他應用行為顯示)，您可能會從 {@link
+android.app.Activity#onCreate onCreate()} 中呼叫 {@link android.app.Activity#finish()} 以終結應用行為顯示。
+若是如此，系統會立即呼叫 {@link android.app.Activity#onDestroy}，而不會呼叫其他任何生命週期方法。
+
+</p>

@@ -1,0 +1,147 @@
+page.title=Pausando e reiniciando uma atividade
+page.tags=ciclo de vida da atividade
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>Esta lição ensina a</h2>
+    <ol>
+      <li><a href="#Pause">Pausar sua atividade</a></li>
+      <li><a href="#Resume">Reiniciar sua atividade</a></li>
+    </ol>
+    
+    <h2>Leia também</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">Atividades</a>
+      </li>
+    </ul>
+
+<h2>Tente</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">Baixar a demonstração</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>Durante o uso normal do aplicativo, a atividade em primeiro plano as vezes é obstruída por outros 
+componentes visuais que causam a <em>pausa</em>.  Por exemplo, quando uma atividade
+ semitransparente é aberta (como uma no estilo de um diálogo), a atividade anterior pausa. Enquanto a 
+atividade estiver parcialmente visível, mas não for o foco da atividade, ela permanecerá pausada.</p>
+
+<p>No entanto, se a atividade estiver completamente obstruída e não visível, ela <em>para</em> (o que será 
+discutido na próxima lição).</p>
+
+<p>Conforme a atividade entra no estado pausado, o sistema chama o método {@link
+android.app.Activity#onPause onPause()} em seu {@link android.app.Activity}, que permite
+interromper ações em andamento que não devem continuar enquanto pausadas (como um vídeo) nem persistir
+quaisquer informações que devam ser permanentemente salvas caso o usuário continue a sair do aplicativo. Se
+o usuário retornar à atividade do estado de pausa, o sistema a reiniciará e chamará o método
+{@link android.app.Activity#onResume onResume()}.</p>
+
+<p class="note"><strong>Observação:</strong> quando a atividade receber o chamado para {@link
+android.app.Activity#onPause()}, pode ser um indicativo de que a atividade será pausada por um
+momento e o usuário poderá retornar o foco para a atividade. No entanto, geralmente é um indicativo
+de que o usuário está saindo da atividade.</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-paused.png" />
+<p class="img-caption"><strong>Figura 1.</strong> Quando uma atividade semitransparente obscurece
+sua atividade, o sistema chama {@link android.app.Activity#onPause onPause()} e a atividade
+aguarda no estado Pausa (1). Se o usuário retornar à atividade enquanto ainda estiver pausada, o
+ sistema chama {@link android.app.Activity#onResume onResume()} (2).</p>
+
+
+<h2 id="Pause">Pausar sua atividade</h2>
+      
+<p>Quando o sistema chama {@link android.app.Activity#onPause()} para sua atividade, teoricamente
+significa que a atividade ainda está parcialmente visível, mas geralmente é um indício
+de que o usuário está saindo da atividade e logo entrará em estado Interrompido.  Use
+o retorno de chamada {@link android.app.Activity#onPause()} para:</p>
+
+<ul>
+  <li>Interromper animações ou outras ações em andamento que consomem a CPU.</li>
+  <li>Consolidar alterações não salvas apenas se o usuário esperar que essas alterações sejam permanentemente salvas ao
+saírem (como um rascunho de email).</li>
+  <li>Liberar recursos do sistema, como receptores, cabos para sensores (como
+GPS), ou outros recursos que podem afetar a vida da bateria enquanto a atividade estiver pausada e o usuário
+não precisar deles.</li>
+</ul>
+
+<p>Por exemplo, se seu aplicativo utiliza o {@link android.hardware.Camera}, o método
+{@link android.app.Activity#onPause()} é um bom local para liberá-los.</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    super.onPause();  // Always call the superclass method first
+
+    // Release the Camera because we don't need it when paused
+    // and other activities might need to use it.
+    if (mCamera != null) {
+        mCamera.release()
+        mCamera = null;
+    }
+}
+</pre>
+
+<p>Geralmente, recomenda-se <strong>não</strong> utilizar {@link android.app.Activity#onPause()} para armazenar
+alterações do usuário (como informações pessoais digitadas em um formulário) para armazenamento permanente. O único momento
+que se deve persistir na mudança do usuário para armazenamento permanente dentro do {@link android.app.Activity#onPause()}
+é quando tem certeza de que o usuário espera que as alterações sejam salvas automaticamente (como ao esboçar um email).
+No entanto, evite executar trabalhos de uso intensivo da CPU durante {@link
+android.app.Activity#onPause()}, como gravar em um banco de dados, porque isso pode retardar a transição
+visível para a próxima atividade (execute operações de encerramento pesadas durante
+{@link android.app.Activity#onStop onStop()}).</p>
+
+<p>Simplifique a quantidade de operações feitas no método {@link android.app.Activity#onPause
+onPause()} para permitir uma transição mais rápida para o próximo
+destino do usuário se a atividade for realmente interrompida.</p>
+
+<p class="note"><strong>Observação:</strong> quando a atividade está pausada, a instância {@link
+android.app.Activity} é mantida na memória e chamada novamente quando a atividade é retomada.
+Não é necessário reiniciar componentes que foram criados durante qualquer método de retorno de chamada que
+leve ao estado Reiniciado.</p>
+
+
+
+<h2 id="Resume">Reiniciar sua atividade</h2>
+
+<p>Quando o usuário reinicia a atividade do estado Pausado, o sistema chama o método {@link
+android.app.Activity#onResume()}.</p>
+
+<p>Certifique-se de que o sistema chama esse método sempre que a atividade entrar no primeiro plano,
+mesmo quando estiver sendo criada. Dessa forma, implemente o {@link
+android.app.Activity#onResume()} para inicializar os componentes liberados durante {@link
+android.app.Activity#onPause()} e execute quaisquer outras inicializações que devem ocorrer sempre que a
+atividade entrar em estado Reiniciado (como ao iniciar animações e componentes de inicialização usados apenas
+enquanto a atividade tiver o foco do usuário).</p>
+
+<p>O seguinte exemplo de {@link android.app.Activity#onResume()} é uma contrapartida ao
+exemplo {@link android.app.Activity#onPause()} acima. Portanto, ele inicializa a câmera que é
+ liberada quando a atividade entra em pausa.</p>
+
+<pre>
+&#64;Override
+public void onResume() {
+    super.onResume();  // Always call the superclass method first
+
+    // Get the Camera instance as the activity achieves full user focus
+    if (mCamera == null) {
+        initializeCamera(); // Local method to handle camera init
+    }
+}
+</pre>
+
+
+
+
+
+
+

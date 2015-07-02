@@ -1,0 +1,236 @@
+page.title=他のアプリからのアクティビティの開始を許可する
+page.tags=インテント
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#AddIntentFilter">インテント フィルタを追加する</a></li>
+  <li><a href="#HandleIntent">自分のアクティビティでインテントを処理する</a></li>
+  <li><a href="#ReturnResult">結果を返す</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">単純なデータの共有</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">ファイルの共有</a>
+</ul>
+  </div>
+</div>
+
+<p>前 2 回のレッスンでは、自分のアプリから別のアプリのアクティビティを開始する場合について焦点を当てました。一方、自分のアプリで別のアプリにとって役に立つかもしれないアクションを実行できる場合について、自分のアプリが他のアプリからのアクション要求に応答できるようにする必要があります。
+
+たとえば、友人とメッセージや写真を共有できるソーシャル アプリをビルドした場合、ユーザーが別のアプリから「共有」アクションを開始し、こちら側のアプリを起動してそのアクションを実行できるよう、{@link android.content.Intent#ACTION_SEND} インテントをサポートすることが最善の方法です。
+
+
+</p>
+
+<p>他のアプリからアクティビティを開始できるようにするには、対応する <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>要素のマニフェスト ファイルに <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 要素を追加する必要があります。
+</p>
+
+<p>アプリが端末にインストールされている場合、システムはインテント フィルタを識別し、インストールされているすべてのアプリでサポートされるインテントの内部カタログに情報を追加します。アプリが暗黙的インテントを使って {@link android.app.Activity#startActivity
+startActivity()} または {@link android.app.Activity#startActivityForResult startActivityForResult()}を呼び出すと、システムがどのアクティビティ（または複数のアクティビティ）がインテントに応答できるかを特定します。
+
+
+
+</p>
+
+
+
+<h2 id="AddIntentFilter">インテント フィルタを追加する</h2>
+
+<p>アクティビティがどのインテントを処理できるか適切に定義するためには、アクティビティが受け入れるアクションとデータのタイプについて、追加する各インテント フィルタをできるだけ具体的にする必要があります。
+
+</p>
+
+<p>アクティビティが {@link android.content.Intent} オブジェクトに関する次の基準を満たしているインテント フィルタを持つ場合、システムは、アクティビティに対して所定の {@link android.content.Intent} を送信することができます。
+</p>
+
+<dl>
+  <dt>アクション</dt>
+    <dd>実行するアクション名を表す文字列。通常、
+{@link android.content.Intent#ACTION_SEND} や {@link android.content.Intent#ACTION_VIEW} などのプラットフォームに定義された値のいずれか。
+    <p><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a> 要素を使用してインテント フィルタでこれを指定します。この要素で指定した値は、API 定数ではなく、アクションの完全な文字列名（下記の例を参照）である必要があります。
+
+</p></dd>
+
+  <dt>データ</dt>
+    <dd>インテントに関連するデータの詳細。
+    <p><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 要素を使用して、インテント フィルタでこれを指定します。この要素で 1 つ以上の属性を
+使用して、MIME タイプのみ、URI 接頭辞のみ、URI スキームのみ、またはこれらと受け入れられるデータ タイプを示すその他の項目の組み合わせを指定することができます。
+
+</p>
+    <p class="note"><strong>注:</strong> {@link android.net.Uri} データに関する詳細を宣言する必要がない場合（アクティビティが URI ではなく他の種類の「特別」データを処理するときなど）は、
+{@code text/plain} {@code image/jpeg} のようなアクティビティが処理するデータのタイプを宣言する {@code android:mimeType} 属性のみを指定する必要があります。
+
+</p>
+</dd>
+  <dt>カテゴリ</dt>
+    <dd>インテントを処理するアクティビティを特徴づけるための追加的な方法を提供し、通常はユーザーの操作や起動元の場所に関連付けられます。
+システムでサポートされているいくつかの異なるカテゴリがありますが、大抵のカテゴリはほとんど使用されません。
+しかし、すべての暗黙的インテントは、デフォルトでは
+{@link android.content.Intent#CATEGORY_DEFAULT} を使用して定義されています。
+    <p><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>
+要素を使用して、インテント フィルタでこれを指定します。</p></dd>
+</dl>
+
+<p>インテント フィルタでは、それぞれの基準を<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 要素内でネストした対応する XML 要素を使用して宣言することによって、アクティビティが受け入れる基準を宣言することができます。
+
+</p>
+
+<p>次に、データ タイプがテキストまたは画像の場合に、{@link
+android.content.Intent#ACTION_SEND} インテントを処理するインテント フィルタを使用したアクティビティの例を示します。</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+        &lt;data android:mimeType="image/*"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>受信するインテントはそれぞれ 1 つのアクションと 1 つのデータ タイプのみを指定しますが、各
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> 内で <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> 要素の複数のインスタンスを宣言することもできます。
+</p>
+
+<p>アクションとデータのいずれか 2 つのペアが、各自の動作において相互に排他的である場合は、別のインテント フィルタを作成して、どのデータ タイプと組み合わされたときにとのアクションが受け入れられるかを指定する必要があります。
+
+</p>
+
+<p>たとえば、アクティビティが {@link
+android.content.Intent#ACTION_SEND} と {@link
+android.content.Intent#ACTION_SENDTO} の両方のインテントに関してテキストと画像の両方を処理するとします。この場合は、次の 2 つのアクションのための 2 つの別々のインテント フィルタを定義する必要があります。なぜなら {@link
+android.content.Intent#ACTION_SENDTO} インテントは、URI スキームの {@code send} または {@code sendto} を使用して受信者のアドレスを指定するために、
+{@link android.net.Uri} データを使用する必要があるからです。
+次に例を示します。</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;!-- filter for sending text; accepts SENDTO action with sms URI schemes -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SENDTO"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:scheme="sms" />
+        &lt;data android:scheme="smsto" />
+    &lt;/intent-filter>
+    &lt;!-- filter for sending text or images; accepts SEND action and text or image data -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>注:</strong> 暗黙的インテントを受信するためには、インテント フィルタで
+{@link android.content.Intent#CATEGORY_DEFAULT} カテゴリを含める必要があります。{@link
+android.app.Activity#startActivity startActivity()} と {@link
+android.app.Activity#startActivityForResult startActivityForResult()} メソッドは、すべてのインテントを {@link android.content.Intent#CATEGORY_DEFAULT} カテゴリを宣言しているものとして処理します。
+インテント フィルタで宣言していない場合、暗黙的インテントはアクティビティに紐付けされません。
+</p>
+
+<p>ソーシャル共有行動を実行する {@link android.content.Intent#ACTION_SEND}インテントの送受信方法の詳細については、<a href="{@docRoot}training/sharing/receive.html">他のアプリから単純なデータを受信する</a> のレッスンを参照してください。
+</p>
+
+
+<h2 id="HandleIntent">自分のアクティビティでインテントを処理する</h2>
+
+<p>アクティビティで実行するアクションを決定するために、起動時に使用された {@link
+android.content.Intent} を読み取ることができます。</p>
+
+<p>アクティビティが開始されたら、{@link android.app.Activity#getIntent()} を呼び出して、アクティビティを開始した 
+{@link android.content.Intent} を取得します。アクティビティのライフサイクル中はいつでもこれを行うことができますが、通常は、
+{@link android.app.Activity#onCreate onCreate()} や {@link android.app.Activity#onStart()} などの早い段階のコールバックの間に行う必要があります。
+</p>
+
+<p>次に例を示します。</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.main);
+
+    // Get the intent that started this activity
+    Intent intent = getIntent();
+    Uri data = intent.getData();
+
+    // Figure out what to do based on the intent type
+    if (intent.getType().indexOf("image/") != -1) {
+        // Handle intents with image data ...
+    } else if (intent.getType().equals("text/plain")) {
+        // Handle intents with text ...
+    }
+}
+</pre>
+
+
+<h2 id="ReturnResult">結果を返す</h2>
+
+<p>呼び出し元のアクティビティに結果を返したい場合は、{@link
+android.app.Activity#setResult(int,Intent) setResult()} を呼び出して結果コードと結果の {@link
+android.content.Intent} を指定します。操作が実行され、ユーザーが元のアクティビティに復帰する必要がある場合、
+{@link android.app.Activity#finish()} を呼び出してアクティビティを閉じます（その後破棄します）。次に例を示します。
+</p>
+
+<pre>
+// Create intent to deliver some kind of result data
+Intent result = new Intent("com.example.RESULT_ACTION", Uri.parse("content://result_uri");
+setResult(Activity.RESULT_OK, result);
+finish();
+</pre>
+
+<p>結果に対しては常に結果コードを指定する必要があります。通常は {@link
+android.app.Activity#RESULT_OK} または {@link android.app.Activity#RESULT_CANCELED} のいずれかになります。その後、必要に応じて {@link android.content.Intent} を使用して、追加のデータを指定することができます。
+</p>
+
+<p class="note"><strong>注:</strong> 結果は、デフォルトでは {@link
+android.app.Activity#RESULT_CANCELED} に設定されています。したがって、ユーザーがアクションを完了する前に<em>戻る</em>ボタンを押して、結果がまだ設定されていない場合、元のアクティビティは「キャンセルされた」結果を受け取ります。
+
+</p>
+
+<p>いくつかの結果オプションのいずれかを示す整数を返す必要がある場合は、0 よりも大きい任意の値に結果コードを設定することができます。
+結果コードを使用して整数を返す場合に {@link android.content.Intent} を含める必要がなければ、{@link
+android.app.Activity#setResult(int) setResult()} を呼び出して結果コードのみを渡すことができます。
+次に例を示します。</p>
+
+<pre>
+setResult(RESULT_COLOR_RED);
+finish();
+</pre>
+
+<p>この場合、可能性のある結果の数はわずかであるため、結果コードは、ローカルに定義されている整数（0 より大きい）になります。
+これは、自分が作成したアプリのアクティビティに結果を返す場合に役立ちます。結果を受け取るアクティビティがパブリック定数を参照でき、結果コードの値を判断できるためです。
+
+</p>
+
+<p class="note"><strong>注:</strong> 自分のアクティビティが {@link
+android.app.Activity#startActivity startActivity()} または {@link
+android.app.Activity#startActivityForResult startActivityForResult()} を使用して開始されたかどうかをチェックする必要はありません。
+アクティビティを開始したインテントが結果を待っている場合は、{@link
+android.app.Activity#setResult(int,Intent) setResult()} を呼び出します。
+元のアクティビティが {@link
+android.app.Activity#startActivityForResult startActivityForResult()} を呼び出していた場合、
+{@link android.app.Activity#setResult(int,Intent) setResult()} に提供した結果がそこに送られます。それ以外の場合は、結果は無視されます。
+</p>
+
+
+
+
+
+

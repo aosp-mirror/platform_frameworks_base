@@ -1,0 +1,187 @@
+page.title=停止並重新啟動應用行為顯示
+page.tags=應用行為顯示生命週期
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>本課程示範</h2>
+    <ol>
+      <li><a href="#Stop">停止您的應用行為顯示</a></li>
+      <li><a href="#Start">啟動/重新啟動您的應用行為顯示</a></li>
+    </ol>
+    
+    <h2>您也應該閱讀</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">應用行為顯示</a>
+      </li>
+    </ul>
+
+<h2>試試看</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">下載示範</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>正確停止並重新啟動您的應用行為顯示是應用行為顯示生命週期內的重要程序，該程序可確保使用者感知您的應用程式在持續運作，而且不會遺失進度。在以下一些重要情況下，會停止並重新啟動您的應用行為顯示：
+
+</p>
+
+<ul>
+  <li>使用者開啟 [最近的應用程式] 視窗，並從您的應用程式切換至其他應用程式。在您的應用程式內，目前位於前景中的應用行為顯示將停止。
+若使用者從主螢幕啟動器圖示或 [最近的應用程式] 視窗返回至您的應用程式，應用行為顯示將重新啟動。
+</li>
+  <li>使用者在您的應用程式中執行啟動新應用行為顯示的行為。建立第二個應用行為顯示時，目前的應用行為顯示將停止。
+若使用者隨後按下 <em>[返回]</em> 按鈕，第一個應用行為顯示將重新啟動。
+</li>
+  <li>使用者在其電話上使用您的應用程式時，會接聽電話。</li>
+</ul>
+
+<p>{@link android.app.Activity} 類別可提供兩種生命週期方法，即 {@link
+android.app.Activity#onStop()} 與 {@link android.app.Activity#onRestart()}，您可藉此明確處理如何停止並重新啟動您的應用行為顯示控點。
+處於暫停狀態時，會發生部分 UI 受阻的狀況，但停止狀態與此不同，可保證 UI 不再可見，使用者的焦點在於獨立的應用行為顯示 (或完全獨立的應用程式) 中。
+
+</p>
+
+<p class="note"><strong>注意：</strong>由於在您的 {@link android.app.Activity} 執行個體停止時，系統會將其保留在系統記憶體中，因此您可能完全不需要實作 {@link android.app.Activity#onStop()} 與 {@link android.app.Activity#onRestart()} (甚至 {@link
+android.app.Activity#onStart()}) 方法。
+
+對於相對簡單的大多數應用行為顯示，應用行為顯示會正常停止並重新啟動，您可能只需要使用 {@link
+android.app.Activity#onPause()} 暫停進行中的行為，並與系統資源中斷連線。
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-stopped.png" />
+<p class="img-caption"><strong>圖 1.</strong>使用者離開您的應用行為顯示時，系統將呼叫 {@link android.app.Activity#onStop onStop()} 以停止應用行為顯示 (1)。
+若使用者在停止應用行為顯示時返回，系統將呼叫 {@link android.app.Activity#onRestart onRestart()} (2)，然後快速呼叫 {@link android.app.Activity#onStart onStart()} (3) 與 {@link
+android.app.Activity#onResume()} (4)。
+
+請注意，不論何種狀況導致應用行為顯示停止，系統始終會先呼叫 {@link android.app.Activity#onPause onPause()}，然後呼叫 {@link
+android.app.Activity#onStop onStop()}。
+</p>
+
+
+
+<h2 id="Stop">停止您的應用行為顯示</h2>
+
+<p>您的應用行為顯示收到對 {@link android.app.Activity#onStop()} 方法的呼叫時，將不再可見，並會在使用者不使用時釋放不需要的幾乎所有資源。
+
+在停止您的應用行為顯示後，若系統需要復原系統記憶體，可能會終結執行個體。
+在極少數狀況下，系統可能只會終止應用程式的程序，而不會呼叫應用行為顯示的最終 {@link android.app.Activity#onDestroy()} 回呼，因此請您務必使用 {@link android.app.Activity#onStop()} 釋放可能導致記憶體流失的資源。
+
+</p>
+
+<p>雖然會先呼叫 {@link android.app.Activity#onPause onPause()} 方法，然後呼叫 {@link android.app.Activity#onStop()}，但是您應使用 {@link android.app.Activity#onStop onStop()} 執行規模更大、耗用 CPU 資源更多的關閉作業，諸如將資訊寫入至資料庫。
+
+
+</p>
+
+<p>例如，以下範例展示了 {@link android.app.Activity#onStop onStop()} 的實作，該實作將註記草稿的內容儲存至永續性儲存體：
+</p>
+
+<!-- TODO: Find a better example for onStop, because this kind of thing should probably use a
+separate thread but that's too complicated to show here. -->
+<pre>
+&#64;Override
+protected void onStop() {
+    super.onStop();  // Always call the superclass method first
+
+    // Save the note's current draft, because the activity is stopping
+    // and we want to be sure the current note progress isn't lost.
+    ContentValues values = new ContentValues();
+    values.put(NotePad.Notes.COLUMN_NAME_NOTE, getCurrentNoteText());
+    values.put(NotePad.Notes.COLUMN_NAME_TITLE, getCurrentNoteTitle());
+
+    getContentResolver().update(
+            mUri,    // The URI for the note to update.
+            values,  // The map of column names and new values to apply to them.
+            null,    // No SELECT criteria are used.
+            null     // No WHERE columns are used.
+            );
+}
+</pre>
+
+<p>您的應用行為顯示停止後，{@link android.app.Activity} 物件將保留在記憶體中，應用行為顯示繼續時將重新呼叫該物件。
+您無需重新初始化在使用回呼方法 (導致產生「已繼續」狀態) 期間建立的元件。
+此外，系統還會追蹤版面配置中每個 {@link android.view.View} 的目前狀態，因此若使用者在 {@link android.widget.EditText} 小工具中輸入文字，將保留該內容，您無需對其執行儲存與還原。
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>即使系統在您的應用行為顯示停止時將其終結，該應用行為顯示仍在 {@link android.os.Bundle} (索引鍵值配對的二進位大型物件) 中保留 {@link android.view.View} 物件 (例如 {@link
+android.widget.EditText} 中的文字) 的狀態，若使用者重新導覽至應用行為顯示的同一執行個體，會還原這些物件 (<a href="recreating.html">下一課</a>將更詳細地討論在終結並重新建立您的應用行為顯示時使用 {@link android.os.Bundle} 儲存其他狀態資料)。
+
+
+</p>
+
+
+
+<h2 id="Start">啟動/重新啟動您的應用行為顯示</h2>
+
+<p>您的應用行為顯示從停止狀態回到前景中時，會收到對 {@link android.app.Activity#onRestart()} 的呼叫。
+此外，系統還會呼叫 {@link
+android.app.Activity#onStart()} 方法，每次您的應用行為顯示變為可見時 (不論是重新啟動還是第一次建立)，都會執行此操作。
+但是，只有在應用行為顯示從停止狀態繼續時，才會呼叫 {@link
+android.app.Activity#onRestart()} 方法，因此，您可將其用於執行只有在先前停止但未終結應用行為顯示時才需要執行的特殊還原工作。
+
+</p>
+
+<p>應用程式需要使用 {@link android.app.Activity#onRestart()} 來還原應用行為顯示狀態的狀況並不常見，因此針對適用於普通應用程式的這一方法，不存在任何指導方針。
+
+但是，由於您的 {@link android.app.Activity#onStop()} 方法將基本上清除應用行為顯示的所有資源，因此在應用行為顯示重新啟動時，您需要重新啟動這些資源。
+
+此外，在首次建立應用行為顯示時 (此時不存在既有的應用行為顯示執行個體)，您也需要重新啟動這些資源。
+因此，您通常應使用 {@link android.app.Activity#onStart()} 回呼方法作為 {@link android.app.Activity#onStop()} 方法的對應，因為系統在建立您的應用行為顯示以及從停止狀態重新啟動應用行為顯示時，都會呼叫 {@link
+android.app.Activity#onStart()}。
+
+
+</p>
+
+<p>例如，由於使用者可能離開應用程式很長時間後才回到應用程式，因此使用 {@link android.app.Activity#onStart()} 方法可以良好地驗證所需的系統功能是否已啟用：
+
+</p>
+
+<pre>
+&#64;Override
+protected void onStart() {
+    super.onStart();  // Always call the superclass method first
+    
+    // The activity is either being restarted or started for the first time
+    // so this is where we should make sure that GPS is enabled
+    LocationManager locationManager = 
+            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    
+    if (!gpsEnabled) {
+        // Create a dialog here that requests the user to enable GPS, and use an intent
+        // with the android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS action
+        // to take the user to the Settings screen to enable GPS when they click "OK"
+    }
+}
+
+&#64;Override
+protected void onRestart() {
+    super.onRestart();  // Always call the superclass method first
+    
+    // Activity being restarted from stopped state    
+}
+</pre>
+
+
+
+
+<p>系統終結您的應用行為顯示時，會針對您的 {@link android.app.Activity} 呼叫 {@link android.app.Activity#onDestroy()} 方法。
+由於通常您應該已使用 {@link android.app.Activity#onStop()} 釋放大多數資源，因此在收到對 {@link
+android.app.Activity#onDestroy()} 的呼叫之前，大多數應用程式幾乎都不需要執行操作。
+此方法將為您提供對可能導致記憶體流失的資源執行清理的最後機會，因此您應確保已終結其他執行緒，並確保已停止長時間執行的其他行為 (例如方法追蹤)。
+
+
+</p>
+
