@@ -52,9 +52,9 @@ android.preference.Preference} API 的信息，请参阅<a href="{@docRoot}guide
 getSharedPreferences()} &mdash; 如果您需要按照您用第一个参数指定的名称识别的多个共享首选项文件，请使用此方法。
 您可以从您的应用中的任何
 {@link android.content.Context} 调用此方法。</li>
-  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} &mdash; 如果您只需使用活动的一个共享首选项，请从
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} &mdash; 如果您只需使用Activity的一个共享首选项，请从
 {@link android.app.Activity} 中使用此方法。
-因为此方法会检索属于该活动的默认共享首选项文件，您无需提供名称。
+因为此方法会检索属于该Activity的默认共享首选项文件，您无需提供名称。
 </li>
 </ul>
 
@@ -72,7 +72,7 @@ SharedPreferences sharedPref = context.getSharedPreferences(
 <p>命名您的共享首选项文件时，您应使用对于您的应用而言唯一可识别的名称，比如 {@code "com.example.myapp.PREFERENCE_FILE_KEY"}
 </p>
 
-<p>或者，如果您只需活动的一个共享首选项文件，您可以使用
+<p>或者，如果您只需Activity的一个共享首选项文件，您可以使用
 {@link android.app.Activity#getPreferences(int) getPreferences()} 方法：</p>
 
 <pre>
