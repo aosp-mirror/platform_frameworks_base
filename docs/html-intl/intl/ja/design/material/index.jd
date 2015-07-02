@@ -1,0 +1,186 @@
+page.title=マテリアル デザイン
+page.tags=Material, design
+page.type=design
+page.image=design/material/images/MaterialLight.png
+
+@jd:body
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>デベロッパー文書</h3>
+    <p>マテリアル デザインを使ったアプリの作成</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>ビデオ</h3>
+    <p>マテリアル デザインについて</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>ビデオ</h3>
+    <p>紙とインク:重要なマテリアル</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>ビデオ</h3>
+    <p>Google I/O アプリのマテリアル デザイン</p>
+</div>
+</a>
+
+
+
+<p itemprop="description">マテリアル デザインは、視覚や動作と、複数のプラットフォームや端末間でのインタラクション デザインに関する包括的な指針です。
+Android はマテリアル デザイン アプリに対応するようになりました。
+Android アプリでマテリアル デザインを使うには、<a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a>で説明されているガイドラインに従い、Android 5.0（API レベル 21）以降の新しいコンポーネントや機能を使用します。
+
+</p>
+
+<p>Android にはマテリアル デザインの作成に使うことができる次の要素が用意されています。</p>
+
+<ul>
+  <li>新しいテーマ</li>
+  <li>複雑なビュー用の新しいウィジェット</li>
+  <li>カスタムのシャドウとアニメーション用の新しい API</li>
+</ul>
+
+<p>Android でのマテリアル デザインの実装については、<a href="{@docRoot}training/material/index.html">マテリアル デザインを使ったアプリの作成</a>をご覧ください。
+</p>
+
+
+<h3>マテリアル テーマ</h3>
+
+<p>マテリアル テーマはアプリの新しいスタイルである、システム ウィジェットを提供します。システム ウィジェットを使ってカラーパレット、タッチ フィードバックやアクティビティ遷移のためのデフォルトのアニメーションを指定できます。
+</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">暗色マテリアル テーマ</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">明色マテリアル テーマ</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>詳細については、<a href="{@docRoot}training/material/theme.html">マテリアル テーマの使用</a>をご覧ください。
+</p>
+
+
+<h3>リストとカード</h3>
+
+<p>Android はマテリアル デザインのスタイルとアニメーションを含むカードとリストを表示する新しい 2 つのウィジェットを提供しています。
+</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
+  <p><code>RecyclerView</code> ウィジェットは <code>ListView</code> のさらに柔軟なバージョンで、さまざまなレイアウト タイプをサポートしてパフォーマンスを向上します。
+</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
+  <p>新しい <code>CardView</code> ウィジェットでは、外観や使用感が一貫しているカード内に重要な情報を表示できます。
+</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>詳細については、<a href="{@docRoot}training/material/lists-cards.html">リストとカードの作成</a>をご覧ください。
+</p>
+
+
+<h3>シャドウの表示</h3>
+
+<p>X と Y プロパティに加え、Android のビューに Z プロパティが追加されました。
+この新しいプロパティはビューのエレベーションを表し、次を指定します。</p>
+
+<ul>
+<li>シャドウのサイズ: Z 値が高いビューほどキャストするシャドウのサイズが大きくなります。</li>
+<li>表示される順序: Z 値が高いビューほど他のビューより上位に表示されます。</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>端末の画像をクリックすると動画を再生できます</em>
+  </div>
+</div>
+
+<p>詳細については、<a href="{@docRoot}training/material/shadows-clipping.html">シャドウとクリッピング ビューの定義</a>をご覧ください。
+</p>
+
+
+<h3>アニメーション</h3>
+
+<p>新しいアニメーション API を使って UI コントロールのタッチ フィードバック、ビューの状態遷移、アクティビティ遷移のカスタム アニメーションを作成できます。
+</p>
+
+<p>これらの API で次の操作を実行できます。</p>
+
+<ul>
+<li style="margin-bottom:15px">
+<strong>タッチ フィードバック</strong> アニメーションを使ってビューのタップイベントに応答します。
+</li>
+<li style="margin-bottom:15px">
+<strong>円形状の出現</strong>アニメーションを使ってビューを表示 / 非表示にします。
+</li>
+<li style="margin-bottom:15px">
+カスタムの<strong>アクティビティ遷移</strong>アニメーションを使ってアクティビティを切り替えます。
+</li>
+<li style="margin-bottom:15px">
+<strong>曲線モーション</strong>を使ってより自然なアニメーションを作成します。
+</li>
+<li style="margin-bottom:15px">
+<strong>ビューの状態遷移</strong>アニメーションを使って 1 つ以上のビュー プロパティの遷移を表現します。
+</li>
+<li style="margin-bottom:15px">
+ビューの状態遷移間のアニメーションを<strong>状態リスト ドローアブル</strong>で表示します。
+</li>
+</ul>
+
+<p>タッチ フィードバック アニメーションはボタンなどの複数の標準ビューに組み込まれます。新しい API を使ってこれらのアニメーションをカスタマイズし、それらをカスタム ビューに追加できます。
+</p>
+
+<p>詳細については、<a href="{@docRoot}training/material/animations.html">カスタム アニメーションの定義</a>をご覧ください。
+</p>
+
+
+<h3>ドローアブル</h3>
+
+<p>次の新しいドローアブル機能を使ってマテリアル デザイン アプリを実装できます。</p>
+
+<ul>
+<li><strong>ベクター型ドローアブル</strong>は鮮明度を失わずに拡張でき、単色のアプリ内アイコンに最適です。
+</li>
+<li><strong>ドローアブルによる着色</strong>を使ってビットマップをアルファマスクとして定義し、実行時にそれらのビットマップに色付けすることができます。
+</li>
+<li><strong>色の抽出</strong>を使ってビットマップ画像から代表色を自動的に抽出できます。
+</li>
+</ul>
+
+<p>詳細については、<a href="{@docRoot}training/material/drawables.html">ドローアブルの使用</a>をご覧ください。
+</p>

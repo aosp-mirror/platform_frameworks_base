@@ -1,0 +1,186 @@
+page.title=材料设计
+page.tags=Material, design
+page.type=设计
+page.image=design/material/images/MaterialLight.png
+
+@jd:body
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>开发者文档</h3>
+    <p>使用材料设计创建应用</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>视频</h3>
+    <p>材料设计简介</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>视频</h3>
+    <p>纸张和墨水：相关材料</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>视频</h3>
+    <p>Google I/O 应用中的材料设计</p>
+</div>
+</a>
+
+
+
+<p itemprop="description">材料设计是专为设计适用于多个平台和设备的视觉、运动与互动效果而制定的综合指南。
+Android 现在已支持材料设计应用。
+如果要在您的 Android 应用中使用材料设计，请遵循<a href="http://www.google.com/design/spec">材料设计规范</a>内定义的指导方针，并使用 Android 5.0（API 级别 21）及以上版本所提供的新组件和功能。
+
+</p>
+
+<p>Android 为您提供了以下元素来构建材料设计应用：</p>
+
+<ul>
+  <li>全新的风格主题</li>
+  <li>用于设计复杂视图的全新小工具</li>
+  <li>用于自定义阴影和动画的全新 API</li>
+</ul>
+
+<p>有关在 Android 上实现材料设计的详细信息，请参阅<a href="{@docRoot}training/material/index.html">创建材料设计应用</a>。
+</p>
+
+
+<h3>材料主题</h3>
+
+<p>材料主题提供了新的应用样式和系统小工具，让您能够为触摸反馈以及活动转换设置配色工具以及默认动画。
+</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">深色材料主题</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">浅色材料主题</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>如需了解详细信息，请参阅<a href="{@docRoot}training/material/theme.html">使用材料主题
+</a>。</p>
+
+
+<h3>列表和卡片</h3>
+
+<p>Android 提供了两个全新的小工具，用于显示采用材料设计样式和动画的卡片和列表：
+</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
+  <p>全新的 <code>RecyclerView</code> 小工具是 <code>ListView</code>
+ 的可插入版本，支持不同的布局类型，并且具有更高性能。</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
+  <p>全新的 <code>CardView</code> 小工具可让您展示卡片内的重要信息，并且有统一的观感。
+</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>如需了解详细信息，请参阅<a href="{@docRoot}training/material/lists-cards.html">创建列表和卡片</a>。
+</p>
+
+
+<h3>视图阴影</h3>
+
+<p>除了 X 和 Y 属性之外，Android 中的视图现在还提供了 Z
+属性。这一新属性用于展现视图的高度，从而确定：</p>
+
+<ul>
+<li>阴影的大小：Z 值越高的视图投射的阴影越长。</li>
+<li>绘制顺序：Z 值较高的视图会显示在其他视图的上方。</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>如果要重新播放影片，请点击设备屏幕</em>
+  </div>
+</div>
+
+<p>如需了解详细信息，请参阅<a href="{@docRoot}training/material/shadows-clipping.html">定义阴影与裁剪视图</a>。
+</p>
+
+
+<h3>动画</h3>
+
+<p>动画 API 让您可为 UI 控件中的触摸反馈、视图状态更改以及活动转换创建自定义动画。
+</p>
+
+<p>这些 API 的作用是：</p>
+
+<ul>
+<li style="margin-bottom:15px">
+使用<strong>触摸反馈</strong>动画响应视图中的触摸事件。
+</li>
+<li style="margin-bottom:15px">
+使用<strong>循环显示</strong>动画隐藏和显示视图。
+</li>
+<li style="margin-bottom:15px">
+使用自定义<strong>活动转换</strong>动画切换活动。
+</li>
+<li style="margin-bottom:15px">
+使用<strong>曲线运动</strong>创建更自然的动画。
+</li>
+<li style="margin-bottom:15px">
+使用<strong>视图状态更改</strong>动画以动画形式呈现一个或多个视图属性的更改。
+</li>
+<li style="margin-bottom:15px">
+在视图状态更改期间以<strong>可绘制状态列表</strong>显示动画。
+</li>
+</ul>
+
+<p>触摸反馈动画内建于数个标准视图（例如按钮）中。全新的 API让您可以自定义这些动画并将其添加至自己的自定义视图中。
+</p>
+
+<p>如需了解详细信息，请参阅<a href="{@docRoot}training/material/animations.html">定义自定义动画</a>。
+</p>
+
+
+<h3>可绘制对象</h3>
+
+<p>下列可绘制对象的新功能将帮助您实现材料设计应用：</p>
+
+<ul>
+<li><strong>可绘制矢量</strong>可在不影响清晰度的情况下进行缩放，非常适合单色应用内图标。
+</li>
+<li><strong>可绘制底色</strong>可让您将位图定义为 alpha 蒙板，并在运行时为其着色。
+</li>
+<li><strong>颜色提取</strong>可让您从位图图像自动提取突出色彩。
+</li>
+</ul>
+
+<p>如需了解详细信息，请参阅<a href="{@docRoot}training/material/drawables.html">使用可绘制内容</a>。
+</p>
