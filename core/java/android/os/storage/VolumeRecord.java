@@ -19,6 +19,7 @@ package android.os.storage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DebugUtils;
+import android.util.TimeUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -42,6 +43,9 @@ public class VolumeRecord implements Parcelable {
     public String partGuid;
     public String nickname;
     public int userFlags;
+    public long createdMillis;
+    public long lastTrimMillis;
+    public long lastBenchMillis;
 
     public VolumeRecord(int type, String fsUuid) {
         this.type = type;
@@ -54,6 +58,9 @@ public class VolumeRecord implements Parcelable {
         partGuid = parcel.readString();
         nickname = parcel.readString();
         userFlags = parcel.readInt();
+        createdMillis = parcel.readLong();
+        lastTrimMillis = parcel.readLong();
+        lastBenchMillis = parcel.readLong();
     }
 
     public int getType() {
@@ -86,6 +93,10 @@ public class VolumeRecord implements Parcelable {
         pw.printPair("nickname", nickname);
         pw.printPair("userFlags",
                 DebugUtils.flagsToString(VolumeRecord.class, "USER_FLAG_", userFlags));
+        pw.println();
+        pw.printPair("createdMillis", TimeUtils.formatForLogging(createdMillis));
+        pw.printPair("lastTrimMillis", TimeUtils.formatForLogging(lastTrimMillis));
+        pw.printPair("lastBenchMillis", TimeUtils.formatForLogging(lastBenchMillis));
         pw.decreaseIndent();
         pw.println();
     }
@@ -140,5 +151,8 @@ public class VolumeRecord implements Parcelable {
         parcel.writeString(partGuid);
         parcel.writeString(nickname);
         parcel.writeInt(userFlags);
+        parcel.writeLong(createdMillis);
+        parcel.writeLong(lastTrimMillis);
+        parcel.writeLong(lastBenchMillis);
     }
 }
