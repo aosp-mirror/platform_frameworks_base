@@ -2011,6 +2011,8 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * <p>
+     * The default SMS app can also use this.
      */
     public String getLine1Number() {
         return getLine1NumberForSubscriber(getDefaultSubscription());
@@ -2022,6 +2024,8 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * <p>
+     * The default SMS app can also use this.
      *
      * @param subId whose phone number for line 1 is returned
      */
