@@ -1,0 +1,307 @@
+page.title=Принципы проектирования Android
+@jd:body
+
+<p>Эти принципы проектирования были разработаны группой Android
+по взаимодействию приложений с пользователями с целью соблюдения интересов пользователей.
+Для создателей приложений под Android они лежат в
+основе более подробных рекомендаций по проектированию для конкретных
+типов устройств.</p>
+
+<p>
+Учитывайте эти принципы, используя собственный
+творческий потенциал и мышление разработчика. Впрочем, при наличии веских оснований допустимо некоторое отклонение от них.
+</p>
+
+<h2 id="enchant-me">Постарайтесь понравиться пользователю</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="delight-me">Вызовите у пользователя восхищение неожиданными решениями</h4>
+<p>Красивые экраны, тщательно продуманная анимация или своевременные звуковые сигналы создают у пользователя
+хорошее настроение. Утонченные эффекты вызывают у пользователя ощущение,
+что его возможности не ограничены.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_delight.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="real-objects-more-fun">Реальные объекты доставляют больше удовольствия, чем кнопки и меню</h4>
+<p>Позвольте пользователю касаться объектов приложения и манипулировать ими. Это сокращает когнитивные усилия,
+необходимые для выполнения задачи, повышая эмоциональное удовлетворение.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_real_objects.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-it-mine">Позвольте пользователю сделать интерфейс индивидуальным</h4>
+<p>Люди любят вносить в интерфейс что-то личное, чтобы чувствовать себя более комфортно и считать, что всё под контролем. Предоставьте
+продуманные и эстетичные настройки по умолчанию и предусмотрите дополнительные настройки, забавные, но не препятствующие
+выполнению основных задач.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_it_mine.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="get-to-know-me">Изучите пользователя</h4>
+<p>Постепенно выясняйте предпочтения пользователя Вместо того, чтобы снова и снова заставлять его выбирать одно и то же,
+ сделайте непосредственно доступными ранее выбранные варианты.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_get_to_know_me.png">
+
+  </div>
+</div>
+
+<h2 id="simplify-my-life">Упростите жизнь пользователю</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="keep-it-brief">Будьте лаконичны</h4>
+<p>Используйте короткие фразы с простыми словами. Люди, скорее всего, пропустят длинные предложения.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_keep_it_brief.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="pictures-faster-than-words">Картинки воспринимаются быстрее чем слова</h4>
+<p>Используйте картинки в своих объяснениях. Они завладевают вниманием и действуют гораздо эффективнее
+слов.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_pictures.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="decide-for-me">Принимайте решения за пользователя, но оставляйте последнее слово за ним</h4>
+<p>Не задавайте пользователю лишних вопросов и действуйте наиболее разумным образом. Слишком широкий выбор вызывает чувство
+растерянности. Если существует вероятность, что ваш выбор не устроит пользователя, предоставьте ему возможность отмены.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_decide_for_me.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="only-show-when-i-need-it">Показывайте только самое необходимое и в нужный момент времени</h4>
+<p>Люди не в состоянии справиться сразу с большим количеством информации. Разбивайте задачи и информацию на небольшие легко
+воспринимаемые части. Скройте несущественные на данный момент опции и обучайте пользователя по ходу дела.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_information_when_need_it.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="always-know-where-i-am">Пользователь всегда должен знать, в каком месте приложения он находится</h4>
+<p>Придайте пользователю уверенность, что он не заблудился. Сделайте так, чтобы экраны в вашем приложении отличались друг от друга, и
+используйте переходы, чтобы показать связь между экранами. Обеспечивайте обратную связь от выполняемых задач.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_navigation.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="never-lose-my-stuff">Ни в коем случае не теряйте данные пользователей</h4>
+<p>Сохраняйте данные, на создание которых пользователь потратил свое время, и обеспечьте ему доступ к этой информации из любого места. Запоминайте настройки
+ и предпочтения на телефонах, планшетах и компьютерах. Это позволит значительно упростить
+обновление приложения.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="looks-same-should-act-same">Внешне похожие элементы должны вести себя одинаково</h4>
+<p>Помогите людям распознать функциональные различия, сделав их визуально отличимыми.
+Избегайте ситуаций, в которых разные места приложения выглядят похоже, но работают по-разному при одних тех же исходных данных.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_looks_same.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="interrupt-only-if-important">Прерывайте пользователя только в действительно важных ситуациях</h4>
+<p>Подобно хорошему секретарю, приложение должно оградить пользователя от несущественных мелочей. Люди не любят отвлекаться,
+и беспокоить их следует только в исключительно серьезных или не терпящих отлагательства ситуациях.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_important_interruption.png">
+
+  </div>
+</div>
+
+<h2 id="make-me-amazing">Постарайтесь приятно удивить пользователя</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="give-me-tricks">Предоставьте пользователю привычные приемы</h4>
+<p>У людей повышается самооценка, когда они могут разобраться в чем-либо самостоятельно. Сделайте ваше приложение простым в освоении
+за счет использования визуальных моделей и мышечной памяти из других приложений Android. Например, жест скольжения
+является хорошим навигационным приемом.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_tricks.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="its-not-my-fault">Пользователь ни в чем не виноват</h4>
+<p>Будьте корректны, подсказывая пользователю, как выйти из сложного положения. Никто не хочет чувствовать себя бестолковым, имея дело с вашим
+приложением. При возникновении проблем дайте четкие указания по восстановлению, но избавьте пользователя от технических деталей.
+В идеальном варианте приложение способно самостоятельно исправить ситуацию.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_error.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="sprinkle-encouragement">Не скупитесь на поддержку пользователя</h4>
+<p>Разбейте сложные задачи на более мелкие, легко выполнимые этапы. Обеспечьте обратную связь, 
+даже при незначительных операциях.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="do-heavy-lifting-for-me">Выполняйте за пользователя черную работу</h4>
+<p>Дайте новичкам возможность почувствовать себя экспертами, реализовав операции о которых они и не подозревали. Например,
+ярлыки, объединяющие несколько фотоэффектов, позволят превратить любительские фотографии в шедевры всего за
+несколько шагов.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_heavy_lifting.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-important-things-fast">Важные действия должны происходить быстро</h4>
+<p>Не все действия равноценны. Решите, какие функции вашего приложения являются самыми важными, и обеспечьте возможность 
+быстро найти и использовать их. Например, это может быть кнопка спуска затвора в фотокамере или кнопка паузы в музыкальном плеере.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_important_fast.png">
+
+  </div>
+</div>

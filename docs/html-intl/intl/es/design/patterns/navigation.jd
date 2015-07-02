@@ -1,0 +1,213 @@
+page.title=Navegación con los botones Back y Up
+page.tags="navigation","activity","task","up navigation","back navigation"
+page.image=/design/media/navigation_between_siblings_gmail.png
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/implementing-navigation/index.html">
+  <div>
+    <h3>Documentos para desarrolladores</h3>
+    <p>Implementación de la navegación eficiente</p>
+  </div>
+</a>
+
+<p itemprop="description">La navegación coherente es un componente fundamental de la experiencia general del usuario. Pocas situaciones frustran más a los
+usuarios que la navegación básica que se comporta de forma irregular e inesperada. En Android 3.0,
+se introdujeron cambios significativos en el comportamiento global de la navegación. Si sigue detalladamente
+las pautas de navegación con los botones Back y Up, la navegación en su aplicación será predecible y confiable para los usuarios.</p>
+<p>En Android 2.3 y versiones anteriores, se confió en el botón <em>Back</em> del sistema para respaldar la navegación dentro de una
+aplicación. Con la introducción de las barras de acciones en Android 3.0, apareció un segundo mecanismo de navegación:
+el botón <em>Up</em>, que consiste en el icono de la aplicación y una pequeña flecha a la izquierda.</p>
+
+<img src="{@docRoot}design/media/navigation_with_back_and_up.png">
+
+<h2 id="up-vs-back">Up en comparación con Back</h2>
+
+<p>El botón Up se utiliza para navegar dentro de una aplicación sobre la base de las relaciones jerárquicas
+entre pantallas. Por ejemplo, si en la pantalla A se muestra una lista de elementos y, si se selecciona un elemento, se conduce al usuario a la
+pantalla B (en la que se presenta ese elemento de forma más detallada), entonces en la pantalla B se debe mostrar el botón Up para regresar
+a la pantalla A.</p>
+<p>Si una pantalla aparece en la parte superior de una aplicación (es decir, en el inicio de la aplicación), no debe incluir el botón Up
+.</p>
+
+<p>El botón Back del sistema se utiliza para navegar, en orden cronológico inverso, por el historial
+de pantallas en las que recientemente trabajó el usuario. Generalmente, se basa en las relaciones temporales
+entre pantallas, y no en la jerarquía de la aplicación.</p>
+
+<p>Cuando la pantalla que se visitó anteriormente es también el componente jerárquico primario de la pantalla actual, si se presiona el botón
+Back, se obtendrá el mismo resultado que si se presiona el botón Up, y esto es algo que sucede a
+menudo. Sin embargo, a diferencia del botón Up, mediante el cual se garantiza que el usuario permanezca en la aplicación, el botón Back
+le permite al usuario regresar a la pantalla de inicio o, incluso, a otra aplicación.</p>
+
+<img src="{@docRoot}design/media/navigation_up_vs_back_gmail.png">
+
+<p>El botón Back también permite diferentes comportamientos que no están vinculados directamente con la navegación entre pantallas:
+</p>
+<ul>
+<li>descartar las ventanas flotantes (cuadros de diálogo o emergentes);</li>
+<li>descartar las barras de acción contextuales y eliminar el resaltado de los elementos seleccionados;</li>
+<li>ocultar el teclado en la pantalla (IME [Editores de métodos de entrada]).</li>
+</ul>
+<h2 id="within-app">Navegación dentro de su aplicación</h2>
+
+<h4>Navegación hacia pantallas con múltiples puntos de entrada</h4>
+<p>En algunos casos, las pantallas no tienen una posición fija dentro de la jerarquía de la aplicación, y se puede acceder a ellas
+desde múltiples puntos de entrada (como la pantalla Configuración, a la que se puede acceder desde cualquier otra pantalla
+de la aplicación). En este caso, el botón Up debe permitir regresar a la pantalla remitente, por lo que se comportaría
+de forma idéntica al botón Back.</p>
+<h4>Cambio de vista dentro de una pantalla</h4>
+<p>Cambiar las opciones de vista de una pantalla no modifica el comportamiento de los botones Up o Back: la pantalla sigue estando
+en el mismo lugar dentro de la jerarquía de la aplicación y no se crea ningún historial de navegación nuevo.</p>
+<p>Entre los ejemplos de cambios en las vistas, se encuentran los siguientes:</p>
+<ul>
+<li>cambio de vistas mediante las pestañas o los deslizamientos de izquierda a derecha;</li>
+<li>cambio de vistas mediante un menú desplegable (también conocido como pestañas colapsadas);</li>
+<li>filtrado de listas;</li>
+<li>clasificación de listas;</li>
+<li>modificación de las características de la pantalla (como el zoom).</li>
+</ul>
+<h4>Navegación entre pantallas relacionadas</h4>
+<p>Si su aplicación es compatible con la navegación desde una lista de elementos hacia una vista de detalles de alguno de esos elementos, generalmente,
+es preferible respaldar la navegación de dirección desde ese elemento a otro anterior
+o siguiente en la lista. Por ejemplo, en Gmail, es fácil deslizarse hacia la izquierda o la derecha desde una conversación
+para ver una conversación anterior o más nueva en la misma bandeja de entrada. Al igual que cuando se cambia la vista dentro de una pantalla, en este tipo de
+navegación no se cambia el comportamiento de los botones Up o Back.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_gmail.png">
+
+<p>Sin embargo, una excepción importante a este caso se presenta cuando se explora entre vistas de detalles relacionadas que no están vinculadas
+mediante la lista que se está utilizando; por ejemplo, cuando se explora en Play Store entre diferentes aplicaciones
+del mismo desarrollador o entre álbumes del mismo artista. En estos casos, si se sigue cada vínculo, esto queda registrado en el
+historial, por lo que, a través del botón Back, se regresa a cada pantalla que se visitó anteriormente. El botón Up debe seguir omitiendo
+estas pantallas relacionadas y navegar hacia la pantalla del contenedor visitada más recientemente.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_market1.png">
+
+<p>Usted puede lograr que el comportamiento del botón Up sea incluso más inteligente teniendo en cuenta sus conocimientos de la vista
+detallada. Si extendemos el ejemplo de Play Store mencionado antes, imaginemos que el usuario navegó desde el último
+libro visto hacia los detalles de la adaptación de la película. En ese caso, mediante el botón Up podrá regresar a un contenedor
+(Películas) por el que el usuario no navegó anteriormente.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_market2.png">
+
+<h2 id="into-your-app">Navegación dentro de la aplicación a través de los widgets y las notificaciones de la pantalla de inicio</h2>
+
+<p>Podrá utilizar los widgets y las notificaciones de la pantalla de inicio para ayudar a los usuarios a navegar directamente hacia las pantallas
+que se encuentran en posiciones más profundas dentro de la jerarquía de su aplicación. Por ejemplo, tanto el widget de la bandeja de entrada de Gmail como las notificaciones de los mensajes nuevos
+ pueden omitir la pantalla Bandeja de entrada y llevar al usuario directamente hacia una vista de conversación.</p>
+
+<p>En ambos casos, el botón Up se debe utilizar de la siguiente manera:</p>
+
+<ul>
+<li><em>Si a la pantalla de destino generalmente se llega desde una determinada pantalla dentro de su
+aplicación</em>, el botón Up debe permitir la navegación hacia esa pantalla.</li>
+<li><em>De lo contrario, </em>el botón Up debe permitir la navegación hacia la pantalla que está en el nivel superior ("Inicio") de su aplicación.</li>
+</ul>
+
+<p>En el caso del botón Back, la navegación debe ser más predecible. Para ello, coloque en la
+pila de retroceso de la tarea la ruta completa de la navegación ascendente hacia la pantalla que se encuentra en el nivel superior de la aplicación. De este modo, los usuarios que
+no recuerdan cómo ingresaron a su aplicación podrán navegar hacia la pantalla del nivel superior de la aplicación antes de
+salir.</p>
+
+<p>A modo de ejemplo, el widget de la pantalla Inicio de Gmail posee un botón para llevar al usuario directamente a la pantalla de
+redacción. Mediante los botones Up o Back de la pantalla de redacción el usuario debería poder dirigirse hacia la Bandeja de entrada y, a partir de allí, continuar hacia la pantalla Inicio
+por medio del botón Back.</p>
+
+<img src="{@docRoot}design/media/navigation_from_outside_back.png">
+
+<h4>Notificaciones indirectas</h4>
+
+<p>Cuando su aplicación necesita presentar información sobre múltiples eventos de forma simultánea, puede utilizar una
+sola notificación que dirija al usuario a una pantalla intersticial. En esta pantalla, se resumen dichos
+eventos y se proporcionan rutas para que el usuario navegue más profundamente por la aplicación. Las notificaciones de este estilo se
+denominan <em>notificaciones indirectas</em>.</p>
+
+<p>A diferencia de las notificaciones estándar (directas), si se presiona Back desde una pantalla intersticial de una
+notificación indirecta, el usuario será dirigido hacia el punto en el que se desencadenó la notificación. No se incluyen
+pantallas adicionales en la pila de retroceso. Una vez que el usuario se dirige hacia la aplicación desde la
+pantalla intersticial, los botones Up y Back se comportan del mismo modo que lo hacen en las notificaciones estándar, como se describió antes:
+navegan dentro de la aplicación en lugar de regresar a la pantalla intersticial.</p>
+
+<p>Por ejemplo, supongamos que un usuario de Gmail recibe una notificación indirecta del calendario Si se toca
+esta notificación, se abrirá la pantalla intersticial, en la que se mostrarán recordatorios de varios
+eventos diferentes. Si se toca Back desde la pantalla intersticial, el usuario volverá a Gmail. Si se toca un evento
+en particular, el usuario saldrá de la pantalla intersticial e ingresará en la aplicación Calendario, donde se mostrarán detalles del
+evento. En la pantalla de detalles del evento, es posible navegar con los botones Up y Back hacia la vista superior del calendario.</p>
+
+<img src="{@docRoot}design/media/navigation_indirect_notification.png">
+
+<h4>Notificaciones emergentes</h4>
+
+<p><em>Las notificaciones emergentes</em> omiten el panel lateral de notificaciones y aparecen directamente 
+frente al usuario. Estas casi nunca se utilizan, y se <strong>deben reservar para ocasiones en las que es necesario proporcionar una
+respuesta oportuna y es necesario realizar una interrupción en el contexto del usuario</strong>. Por ejemplo,
+en Talk se utiliza este estilo para alertar al usuario sobre una invitación de un amigo para participar en una videocharla, ya que esta
+invitación caducará automáticamente luego de algunos segundos.</p>
+
+<p>En términos de comportamiento de la navegación, las notificaciones emergentes siguen, en gran medida, el comportamiento de la pantalla intersticial
+de una notificación indirecta. El botón Back le permite al usuario descartar la notificación emergente. Si el usuario navega
+desde la ventana emergente hacia la aplicación que genera las notificaciones, los botones Up y Back seguirán las reglas para las notificaciones estándar
+mientras se navega por la aplicación.</p>
+
+<img src="{@docRoot}design/media/navigation_popup_notification.png">
+
+<h2 id="between-apps">Navegación entre aplicaciones</h2>
+
+<p>Una de las principales ventajas del sistema Android es la capacidad de las aplicaciones de activarse
+mutuamente, por lo que el usuario puede navegar directamente desde una aplicación hacia otra. Por ejemplo, una
+aplicación que debe tomar una fotografía puede activar la aplicación de la cámara, la cual mostrará la fotografía
+en la aplicación que la activó. Esto representa una gran ventaja tanto para el desarrollador, quien puede aprovechar fácilmente el
+código de otras aplicaciones, y también para el usuario, quien disfruta de una experiencia coherente para acciones
+que se realizan comúnmente.</p>
+
+<p>Para comprender la navegación entre aplicaciones, es importante que entienda el comportamiento del marco de Android,
+que se explica a continuación.</p>
+
+<h4>Actividades, tareas e intentos</h4>
+
+<p>En Android, una <strong>actividad</strong> es un componente de la aplicación que define una pantalla de
+información y todas las acciones relacionadas que el usuario puede llevar a cabo. Su aplicación es un conjunto de
+actividades formado por las actividades que usted crea y aquellas que reutiliza de otras aplicaciones.</p>
+
+<p>Una <strong>tarea</strong> es la secuencia de actividades que un usuario realiza para lograr un objetivo. En
+una sola tarea, se pueden utilizar actividades de una sola aplicación o se pueden utilizar actividades de varias
+aplicaciones diferentes.</p>
+
+<p>Un <strong>intento</strong> es un mecanismo mediante el cual una aplicación indica que necesita la ayuda de
+otra aplicación para realizar una acción. Las actividades de una aplicación pueden indicar los intentos
+a los que pueden dar respuesta. En el caso de los intentos comunes, como "Compartir", es posible que el usuario tenga instaladas varias aplicaciones
+que pueden cumplir con esta solicitud.</p>
+
+<h4>Ejemplo: navegación entre aplicaciones para respaldar el uso compartido</h4>
+
+<p>Para comprender cómo las actividades, las tareas y los intentos funcionan en conjunto, considere cómo una aplicación les permite a los usuarios
+compartir contenido a través de otra aplicación. Por ejemplo, si ejecuta la aplicación Play Store desde la pantalla de inicio, se iniciará
+una nueva tarea A (vea la imagen a continuación). Después de navegar por Play Store y de tocar un libro promocionado
+para ver la información detallada, el usuario permanece en la misma tarea y la extiende al agregar actividades. Si se desencadena la acción
+Compartir, se le mostrará al usuario un cuadro de diálogo con una lista de todas las actividades (provenientes de diferentes aplicaciones)
+que se registraron para concretar el intento de compartir.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_inward.png">
+
+<p>Si el usuario decide compartir el contenido a través de Gmail, la actividad de redacción de Gmail se agrega como una continuación de la
+tarea A; no se crea una tarea nueva. Si Gmail estaba ejecutando su propia tarea en segundo plano, esta
+no debería verse afectada.</p>
+
+<p>Desde la actividad de redacción, si se envía el mensaje o se toca el botón Back, se dirigirá nuevamente al usuario hacia
+la actividad de detalles del libro. Si se sigue tocando el botón Back, el usuario seguirá navegando por Play
+Store y, finalmente, llegará a la pantalla de inicio.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_back.png">
+
+<p>Sin embargo, si el usuario toca el botón Up desde la actividad de redacción, estará indicando su deseo de permanecer dentro de
+Gmail. Por consiguiente, aparecerá la actividad de la lista de conversaciones de Gmail y se creará una nueva tarea B para esto. La ruta raíz de las nuevas tareas siempre conduce
+a la pantalla Inicio, por lo que, si se toca el botón Back desde la lista de conversaciones, se regresará a dicha pantalla.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_up.png">
+
+<p>La tarea A permanece en segundo plano, y el usuario podrá regresar a ella después (por ejemplo, a través de la pantalla
+Recientes). Si Gmail ya estaba ejecutando su propia tarea en segundo plano, esta se reemplazará con la
+tarea B, y el contexto anterior se abandonará para darle preferencia al nuevo objetivo del usuario.</p>
+
+<p>Cuando su aplicación se registre para manipular los intentos de una actividad que se encuentra en un nivel profundo dentro de la jerarquía de la aplicación,
+consulte <a href="#into-your-app">Navegación dentro de la aplicación a través de los widgets y
+las notificaciones de la pantalla de inicio</a> para obtener información sobre cómo especificar la navegación del botón Up.</p>

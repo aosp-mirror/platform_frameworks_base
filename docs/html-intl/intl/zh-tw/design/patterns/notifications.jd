@@ -1,0 +1,872 @@
+page.title=通知
+page.tags="notifications","design","L"
+@jd:body
+
+  <a class="notice-developers" href="{@docRoot}training/notify-user/index.html">
+  <div>
+    <h3>開發人員文件</h3>
+    <p>通知使用者</p>
+  </div>
+</a>
+
+<a class="notice-designers" href="notifications_k.html">
+  <div>
+    <h3>Android 4.4 及較早版本中的通知</h3>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
+<div>
+    <h3>影片</h3>
+    <p>DevBytes：Android L 開發者預覽版中的通知</p>
+</div>
+</a>
+
+<style>
+  .col-5, .col-6, .col-7 {
+    margin-left:0px;
+  }
+</style>
+
+<p>通知系統可以隨時知會使用者有關應用程式中的相關事件與及時事件，例如來自朋友的新聊天訊息。您可以將通知視為一種事件發生時警示使用者的新聞管道，或是在使用者沒注意時，記錄事件的日誌 &mdash; 並會視情況跨所有 Android 裝置且同步處理。
+
+
+
+
+
+</p>
+
+<h4 id="New"><strong>Android 5.0 新功能</strong></h4>
+
+<p>在 Android 5.0 中，通知會透過結構化、視覺化和功能化的效果接收重要更新：
+</p>
+
+<ul>
+  <li>通知已經有視覺方面的變更，與新的材料設計風格一致。
+</li>
+  <li> 現在可在裝置的鎖定螢幕上提供通知，而敏感內容仍可隱藏於其背後。
+
+</li>
+  <li>當裝置於使用中收到高優先順序的通知時，會使用稱為預告 (heads-up) 通知的新格式。
+</li>
+  <li>雲端同步化通知：關閉您其中一部 Android 裝置的通知，隨之也會在其他裝置上關閉此通知。
+
+</li>
+</ul>
+
+<p class="note"><strong>注意：</strong>此版本 Android 中的通知設計和先前版本大相徑庭。
+
+如需有關先前版本通知的設計資訊，請參閱
+<a href="./notifications_k.html">Android 4.4 及較早版本中的通知</a>。</p>
+
+<h2 id="Anatomy">通知的詳細分析</h2>
+
+<p>本節會重溫通知的基礎功能，以及其如何可在不同類型裝置上出現。
+</p>
+
+<h3 id="BaseLayout">基礎版面配置</h3>
+
+<p>至少，所有通知都必須包含一個基礎版面配置，它包含：</p>
+
+<ul>
+  <li> 通知的<strong>圖示</strong>。該圖示代表原始應用程式。如果應用程式會產生一種以上的通知類型，則圖示也有可能表示通知類型。
+
+
+</li>
+  <li> 一個通知<strong>標題</strong>和額外<strong>文字</strong>。
+</li>
+  <li> 一個<strong>時間戳記</strong>。</li>
+</ul>
+
+<p>針對先前平台版本，使用 {@link android.app.Notification.Builder Notification.Builder}
+所建立的通知其外觀與運作方式和在 Android 5.0
+中的一樣，只是在系統為您處理的方式上有一點樣式上的變更。
+如需更多有關 Android 先前版本通知的詳細資訊，請參閱
+<a href="./notifications_k.html">Android 4.4 及較早版本中的通知</a>。
+</p></p>
+
+
+    <img style="margin:20px 0 0 0" src="{@docRoot}images/android-5.0/notifications/basic_combo.png" alt="" width="700px" />
+
+
+<div style="clear:both;margin-top:20px">
+      <p class="img-caption">
+      手持裝置通知的基礎版面配置 (左)，以及穿戴裝置上的相同通知 (右)，都帶有使用者相片及一個通知圖示
+
+    </p>
+  </div>
+
+<h3 id="ExpandedLayouts">擴充的版面配置</h3>
+
+
+<p>您可以選擇到底要讓您應用程式的通知提供多詳細的資料。
+通知可以顯示訊息的前幾行，也可以顯示較大的影像預覽。
+此額外資訊可提供使用者更多內容，而且 &mdash; 在某些情況下 &mdash; 可讓使用者讀取完整訊息。
+
+
+使用者可以捏合縮放或執行單手指滑動，在精簡的版面配置與擴充的版面配置間切換。
+
+
+ 對於單一事件通知，Android 提供三個擴充版面配置範本
+(文字、收件匣和影像)，讓您可以在應用程式中使用。
+以下的影像顯示單一事件通知在手持裝置 (左) 和穿戴裝置 (右) 上的外觀。
+
+</p>
+
+<img style="margin-top:30px"
+src="{@docRoot}images/android-5.0/notifications/expandedtext_combo.png"
+  alt="" width="700px" height;="284px" />
+<img style="margin-top:30px"
+src="{@docRoot}images/android-5.0/notifications/stack_combo.png"
+  alt="" width="700px" height;="284px" />
+<img style="margin-top:30px"
+src="{@docRoot}images/android-5.0/notifications/ExpandedImage.png"
+    alt="" width="311px" height;="450px" />
+
+<h3 id="actions" style="clear:both; margin-top:40px">動作</h3>
+
+<p>Android 支援可以在通知底端顯示的選用動作。透過動作，使用者可針對特定通知，從通知欄 (notification shade) 內處理最常見的工作，而無需開啟原始啟動的應用程式。這可加速互動，而且在配合滑動關閉
+(swipe-to-dismiss)
+時，有助使用者專注於高重要性的通知。
+
+
+
+</p>
+
+
+  <img src="{@docRoot}images/android-5.0/notifications/action_combo.png" alt="" width="700px" />
+
+
+
+<p style="clear:both">明智地決定要在通知中要納入多少個動作。
+您納入的動作愈多，就會發現創造出愈複雜的通知。
+請納入最緊迫重要且有意義的動作，限制自己儘可能使用最少數目的動作。
+
+
+</p>
+
+<p>適合用於通知上的動作包含：</p>
+
+<ul>
+  <li> 必須是必要、頻繁且典型的想要顯示內容類型
+
+  <li> 可讓使用者快速完成工作
+</ul>
+
+<p>避免下列狀況：</p>
+
+<ul>
+  <li> 模稜兩可
+  <li> 和通知的預設動作相同 (如「讀取」或「開啟」)
+
+</ul>
+
+
+
+<p>您最多可以指定三個動作，每個動作都由一個動作圖示與名稱組成。
+
+ 為簡單的基礎版面配置新增動作，可讓通知變得更具擴充性
+--
+即使通知並未具備擴充的版面配置。由於動作只針對擴充的通知顯示，其他時候則隱藏，請確認使用者可從通知內呼叫的任何動作，也可以從關聯的應用程式中使用。
+
+
+
+
+</p>
+
+<h2 style="clear:left">預告通知</h2>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}images/android-5.0/notifications/hun-example.png" alt="" width="311px" />
+  <p class="img-caption">
+    預告通知 (來電、高優先順序)
+出現在沉浸式應用程式之上的範例
+
+  </p>
+</div>
+
+<p>當高優先順序的通知到達 (如右) 時，會對使用者呈現很短的時間，且會顯示可能執行動作的擴充版面配置。
+
+</p>
+<p> 在這段時間之後，通知會退回至通知欄。
+如果通知的<a href="#correctly_set_and_manage_notification_priority">優先順序</a>被標記為「高」、「最大」或「全螢幕」，就會取得預告通知。
+</p>
+
+<p><b>預告通知的好範例</b></p>
+
+<ul>
+  <li> 使用裝置時有來電</li>
+  <li> 使用裝置時啟動鬧鐘功能</li>
+  <li> 新簡訊</li>
+  <li> 電池電力不足</li>
+</ul>
+
+<h2 style="clear:both" id="guidelines">指導方針</h2>
+
+
+<h3 id="MakeItPersonal">提供個人設定</h3>
+
+<p>針對由另一人傳送項目的通知
+(如郵件或狀態更新)，使用
+{@link android.app.Notification.Builder#setLargeIcon setLargeIcon()} 納入對方提供的影像。也將對方的資訊附加至通知的中繼資料中
+(請參閱 {@link android.app.Notification#EXTRA_PEOPLE})。</p>
+
+<p>您通知的主要圖示仍會顯示，這樣使用者就可以將主要圖示與狀態列中的可見圖示關聯起來。
+
+</p>
+
+
+<img src="{@docRoot}images/android-5.0/notifications/Triggered.png" alt="" width="311px" />
+<p style="margin-top:10px" class="img-caption">
+  通知會顯示觸發通知的人及其傳送的內容。
+</p>
+
+
+<h3 id="navigate_to_the_right_place">導覽至正確的地方</h3>
+
+<p>當輕觸通知的本文時
+(在動作按鈕之外)，請將您的應用程式開啟至使用者可以檢視的地方，並根據通知中引用資料進行動作。
+
+在多數情況下，這將是單一資料項目 (如訊息) 的詳細資料檢視，但如果通知被堆疊時，也可能會是概述檢視。
+
+如果您的應用程式會將使用者帶到應用程式頂層之下的任何地方，則請將導覽過程插入應用程式的返回堆疊中，這可以讓使用者能夠按下系統的返回按鈕，返回至頂層。
+
+如需詳細資訊，請見<a href="{@docRoot}design/patterns/navigation.html#into-your-app">導覽</a>設計模式中的「透過主螢幕視窗小工具和通知，導覽至您的應用程式」<em></em>。
+
+</p>
+
+<h3 id="correctly_set_and_manage_notification_priority">正確設定和管理通知優先順序
+
+</h3>
+
+<p>Android 支援對通知設定優先順序的旗標。此旗標可與其他通知旗標比較，影響通知顯示的位置，這有助於確保使用者一律會先看到最重要的通知。
+
+
+在發佈通知時，您可以從以下優先順序等級選擇：
+
+</p>
+<table>
+ <tr>
+    <td class="tab0">
+<p><strong>優先順序</strong></p>
+</td>
+    <td class="tab0">
+<p><strong>使用</strong></p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>MAX</code></p>
+</td>
+    <td class="tab1">
+<p>用於關鍵且緊急的通知，警示使用者注意此通知具時效性或必須在繼續特定工作前先解決的情況。
+
+
+</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>HIGH</code></p>
+</td>
+    <td class="tab1">
+<p>主要用於重要通訊，例如內容為使用者特別感興趣的郵件或聊天事件。高優先順序通知會觸發預告通知的顯示。
+
+</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>DEFAULT</code></p>
+</td>
+    <td class="tab1">
+<p>用於不屬於此處所述任何其他優先事項類型的所有通知。</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>LOW</code></p>
+</td>
+    <td class="tab1">
+<p>用於您希望使用者能夠被告知，但不那麼緊急的通知。
+低優先順序通知往往出現在清單的底端，因此適合於公共或間接的社交更新：
+
+使用者已要求針對這類事件通知，但這些通知一律不會優先於緊急或直接通訊。
+
+
+</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>MIN</code></p>
+</td>
+    <td class="tab1">
+<p>用於內容關聯或背景資訊，例如天氣資訊或內容關聯位置的資訊。最低優先順序通知不會出現在狀態列。
+
+使用者會在展開通知欄時找到這些通知。
+</p>
+</td>
+ </tr>
+</table>
+
+
+<h4 id="how_to_choose_an_appropriate_priority"><strong>如何選擇合適的優先順序</strong>
+
+</h4>
+
+<p><code>DEFAULT</code>、<code>HIGH</code> 和 <code>MAX</code> 為可中斷的優先順序等級，且有打斷使用者正進行動作的風險。
+
+如要避免惹惱您應用程式的使用者，請將可中斷的優先順序保留給下列通知：
+</p>
+
+<ul>
+  <li> 涉及另一人</li>
+  <li> 具時效性</li>
+  <li> 可能會立即變更使用者在現實世界中的行為</li>
+</ul>
+
+<p>對使用者而言，設定為 <code>LOW</code> 和 <code>MIN</code> 的通知仍可能很有價值：
+很多通知 -- 就算不是大多數 -- 並不需要使用者立即注意，或透過振動使用者的手腕加以提醒；但在使用者選擇查看通知時，這些通知仍會包含使用者覺得有價值的資訊。
+
+
+<code>LOW</code> 和 <code>MIN</code>
+ 優先順序通知的準則包含：</p>
+
+<ul>
+  <li> 不會牽涉到別人</li>
+  <li> 不具時效性</li>
+  <li> 包含使用者可能感興趣，但可能在空閒時才會瀏覽的內容
+</li>
+</ul>
+
+
+  <img src="{@docRoot}images/android-5.0/notifications/notifications_pattern_priority.png" alt="" width="700" />
+
+
+<h3 style="clear:both" id="set_a_notification_category">設定通知類別
+</h3>
+
+<p>如果您的通知屬於某個預先定義的類別
+(詳見下列說明)，則請據以指派。
+通知欄 (或任何其他通知接聽器) 等系統 UI
+可能會使用此資訊，決定排名和篩選結果。
+</p>
+<table>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_CALL">CATEGORY_CALL</a></code></p>
+</td>
+    <td>
+<p>來電 (語音或視訊) 或類似的同步化通訊要求
+</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_MESSAGE">CATEGORY_MESSAGE</a></code></p>
+</td>
+    <td>
+<p>傳入的直接訊息 (簡訊、即時訊息等)</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_EMAIL">CATEGORY_EMAIL</a></code></p>
+</td>
+    <td>
+<p>非同步大量郵件 (電子郵件)</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_EVENT">CATEGORY_EVENT</a></code></p>
+</td>
+    <td>
+<p>「行事曆」事件</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_PROMO">CATEGORY_PROMO</a></code></p>
+</td>
+    <td>
+<p>宣傳或廣告</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_ALARM">CATEGORY_ALARM</a></code></p>
+</td>
+    <td>
+<p>鬧鐘或計時器</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_PROGRESS">CATEGORY_PROGRESS</a></code></p>
+</td>
+    <td>
+<p>長時間執行的背景操作其進度</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_SOCIAL">CATEGORY_SOCIAL</a></code></p>
+</td>
+    <td>
+<p>社交網路或共用更新</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_ERROR">CATEGORY_ERROR</a></code></p>
+</td>
+    <td>
+<p>背景操作或驗證狀態中的錯誤</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_TRANSPORT">CATEGORY_TRANSPORT</a></code></p>
+</td>
+    <td>
+<p>播放的媒體傳輸控制</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_SYSTEM">CATEGORY_SYSTEM</a></code></p>
+</td>
+    <td>
+<p>系統或裝置狀態更新。保留供系統使用。</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_SERVICE">CATEGORY_SERVICE</a></code></p>
+</td>
+    <td>
+<p>執行背景服務的表示</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_RECOMMENDATION">CATEGORY_RECOMMENDATION</a></code></p>
+</td>
+    <td>
+<p>針對單一件事的特定、及時建議。例如，新聞應用程式可能會想推薦其認為使用者下一步想要閱讀的新聞報導。
+
+</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_STATUS">CATEGORY_STATUS</a></code></p>
+</td>
+    <td>
+<p>有關裝置或內容關聯狀態的進行中資訊</p>
+</td>
+ </tr>
+</table>
+
+<h3 id="summarize_your_notifications">概述您的通知</h3>
+
+<p>當您的應用程式嘗試傳送的通知，但已有類型相同的通知仍在等待中，則請針對應用程式將這些相同類型的通知合併為單一概述通知，而不要建立新物件。
+
+</p>
+
+<p>概述通知會建立概述描述，並讓使用者瞭解特定種類的通知有多少數目正在等待處理。
+
+</p>
+
+<div class="col-6">
+
+<p><strong>不要這樣做</strong></p>
+  <img src="{@docRoot}images/android-5.0/notifications/Summarise_Dont.png" alt="" width="311px" />
+</div>
+
+<div>
+<p><strong>請這樣做</strong></p>
+
+  <img src="{@docRoot}images/android-5.0/notifications/Summarise_Do.png" alt="" width="311px" />
+</div>
+
+<p style="clear:left; padding-top:30px; padding-bottom:20px">您可以使用擴充摘要版面配置，針對組成概述的個別通知，提供更多詳細資料。
+
+這種方法可讓使用者更能感覺出哪些通知正處於等待處理，以及是否夠有趣，以便在關聯應用程式中詳細閱讀。
+
+
+
+</p>
+<div class="col-6">
+  <img src="{@docRoot}images/android-5.0/notifications/Stack.png" style="margin-bottom:20px" alt="" width="311px" />
+  <p class="img-caption">
+  概述實際上是通知的展開和收縮 (使用 <code>InboxStyle</code>)
+  </p>
+</div>
+
+<h3 style="clear:both" id="make_notifications_optional">讓通知成為可選用的
+</h3>
+
+<p>使用者應該總是能夠控制通知。讓使用者可以停用您應用程式的通知，或變更其警示屬性，如鬧鐘聲音或是否要使用振動，方法則是為您的應用程式設定新增通知設定項目。
+
+
+
+</p>
+
+<h3 id="use_distinct_icons">使用易於分辨的的圖示</h3>
+<p>使用者應該能瞄一下通知區域，即可以分辨哪些種類的通知目前正在等待處理。
+
+</p>
+
+<div class="figure">
+  <img src="{@docRoot}images/android-5.0/notifications/ProductIcons.png" alt="" width="420" />
+</div>
+
+  <div><p><strong>請這樣做</strong></p>
+    <p>查看 Android 應用程式圖示，
+Android 應用程式已為您的應用程式提供外觀易於分辨的通知圖示。
+</p>
+
+    <p><strong>請這樣做</strong></p>
+    <p>針對小圖示使用<a href="/design/style/iconography.html#notification">通知圖示樣式</a>，針對您的動作列圖示使用 Material Light <a href="/design/style/iconography.html#action-bar">動作列圖示樣式</a>。
+
+
+
+</p>
+<p ><strong>請這樣做</strong></p>
+<p >讓圖示保持看起來簡單的狀態，避免因過多的詳細資料造成使用者難以看清楚。
+</p>
+
+  <div><p><strong>不要這樣做</strong></p>
+    <p>將任何額外的
+Alpha
+(變暗或淡出)
+置入您的小圖示和動作圖示之中；它們的邊緣可能會有反鋸齒狀，但因為 Android 使用這些圖示做為遮罩
+(也就是說，只使用 Alpha 通道)，所以影像通常會以完全透明度來繪製。
+</p>
+
+</div>
+<p style="clear:both"><strong>不要這樣做</strong></p>
+
+<p>使用顏色以區分您與其他人的應用程式。通知圖示應該只是個白色圖示透明背景的背景影像。
+</p>
+
+
+<h3 id="pulse_the_notification_led_appropriately">可以調整通知 LED 適當開啟
+</h3>
+
+<p>許多 Android 裝置具備通知 LED，可用於當螢幕關閉時通知使用者有新事件。
+
+優先順序等級為<code>MAX</code>、<code>HIGH</code> 和 <code>DEFAULT</code> 的通知，
+應該要讓 LED 亮起，而只有低優先順序 (<code>LOW</code> 和 <code>MIN</code>) 的通知則不需要。
+
+</p>
+
+<p>使用者對通知的控制應該延伸到 LED 上。當您使用 DEFAULT_LIGHTS，LED 會亮白色。
+
+除非使用者已明確自訂通知，否則您的通知不應該使用其他顏色。
+
+</p>
+
+<h2 id="building_notifications_that_users_care_about">建立使用者喜歡的通知
+</h2>
+
+<p>若要建立使用者喜歡的應用程式，精心設計您的通知非常重要。通知代表您應用程式的聲音，並有助於您應用程式的個性。
+
+
+非必要或非重要的通知會讓使用者不高興，這會讓他們覺得應用程式想要吸引注目不擇手段，所以請明智地使用通知。
+
+
+</p>
+
+<h3 id="when_to_display_a_notification">顯示通知的時機</h3>
+
+<p>若要建立人們喜歡使用的應用程式，重要的是要體認到使用者的注意與專注是必須加以保護的資源。
+
+雖然 Android 的通知系統已重新設計，儘量降低通知對使用者注意力的影響。但仍然必須警覺，通知會中斷使用者的工作流程。在規劃您的通知時，請先自問：通知是否足夠重要到可以合理地中斷使用者。
+
+
+
+
+
+
+如果您不確定，則讓使用者可以使用您應用程式的通知設定，或調整通知優先順序旗標為 <code>LOW</code> 或 <code>MIN</code>，避免使用者在從事其他工作時因此分心。
+
+
+
+</p>
+
+  <img src="{@docRoot}images/android-5.0/notifications/TimeSensitive.png" alt="" width="311px" />
+  <p style="margin-top:10px" class="img-caption">
+   具時效性的通知範例
+  </p>
+
+<p>妥善規劃的應用程式只會在必要時才出現，但有幾個情況的確有益於應用程式透過無提示通知中斷使用者的行為。
+</p>
+
+<p>通知主要還是使用於<strong>具時效性時間的事件</strong>，特別是當這些同步事件<strong>涉及其他人</strong>的時候。
+比如說，傳入的聊天是通訊的即時、同步形式：
+
+另一個使用者正主動等待您的回應。
+「行事曆」事件是何時使用通知吸引使用者注意的另一個好例子，因為事件即將發生，而「行事曆」事件通常牽涉到其他人。
+
+
+</p>
+
+<h3 style="clear:both" id="when_not_to_display_a_notification">不顯示通知的時機
+</h3>
+
+<div class="figure" style="margin-top:60px">
+  <img src="{@docRoot}images/android-5.0/notifications/AntiSample1.png" alt="" width="311px" />
+</div>
+
+<p>在許多其他情況下，通知並不適當：</p>
+
+<ul>
+  <li> 當通知並非直接針對使用者，或者資訊並非真正具時效性時，請避免通知使用者。
+
+例如，來自社交網路的非同步與間接更新，通常不是即時中斷的好時機。
+
+
+對於重視這些狀況的使用者，可以讓他們自行選擇加入通知。
+</li>
+  <li> 如果相關的新資訊目前正在螢幕上，則不要建立另一個通知。
+反之，直接在前後關係中使用應用程式本身的 UI 通知使用者有新資訊。
+
+
+  例如，當使用者正與另一位使用者聊天時，聊天應用程式不應建立系統通知。
+</li>
+  <li> 如果應用程式或系統可以不干擾使用者而解決問題，就不要因為如儲存或同步化資訊，或更新應用程式等低層級的技術操作而中斷使用者活動。
+
+</li>
+  <li> 如果可能的話，就讓應用程式能自行從錯誤恢復，在不需要使用者進行任何動作時，就不要告知他們錯誤而中斷使用者的活動。
+
+</li>
+  <li> 不要建立無實質內容的通知，也不要建立內容僅是在廣告您應用程式的通知。
+
+通知應該要能夠提供實用、及時的新資訊，而非只是為了啟動一個應用程式。
+
+</li>
+  <li> 請不要為了讓您的品牌出現在使用者面前，而建立多餘的通知。
+
+  這類通知會讓您的使用者感到失望並不願意使用您的應用程式。能夠提供少量的更新資訊並可以吸引使用者注意您應用程式的最佳方式，是開發一個小工具，讓使用者可以選擇放置在主畫面上。
+
+
+
+
+</li>
+</ul>
+
+<h2 style="clear:left" id="interacting_with_notifications">與通知互動
+</h2>
+
+<p>通知可由狀態列上的圖示表示，並可以透過開啟通知匣來存取。
+
+</p>
+
+<p>輕觸通知會開啟相關應用程式，顯示符合通知的詳細資料內容。對通知往左右滑動，可以將通知從通知匣中移除。
+
+</p>
+
+<h3 id="ongoing_notifications">進行中通知</h3>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}images/android-5.0/notifications/MusicPlayback.png" alt="" width="311px" />
+      <p class="img-caption">
+    因為音樂播放的緣故所以有進行中通知
+  </p>
+</div>
+<p>進行中通知可讓使用者得知在背景中正在進行程序的資訊。例如，音樂播放程式會在通知系統中宣告正在播放的曲目，除非使用者停止曲目，否則就會繼續宣告。
+
+
+
+進行中通知也可以針對如下載檔案或編碼影片等耗時較長的工作，向使用者顯示目前進度。
+
+使用者無法手動將進行中通知從通知匣移除。
+</p>
+
+<h3 id="ongoing_notifications">媒體播放</h3>
+<p>在 Android 5.0 中，鎖定螢幕不會針對已過時的
+{@link android.media.RemoteControlClient} 類別，顯示傳輸控制項。但鎖定螢幕「的確」<em></em>會顯示通知，所以每個應用程式的播放通知，現在都已經是使用者從鎖定狀態控制播放的主要方法。
+
+這個行為可讓應用程式進一步控制以何種方式顯示哪些按鈕，同時無論螢幕是否鎖定，都能為使用者提供一致性的體驗。
+
+
+</p>
+
+<h3 style="clear:both"
+id="dialogs_and_toasts_are_for_feedback_not_notification">對話和快顯通知
+</h3>
+
+<p>您的應用程式目前若不在畫面上，就不應建立對話或快顯通知。
+對話或快顯通知只在使用者於您應用程式內採取動作時產生立即回應時才顯示。至於使用對話與快顯通知的進一步指引，請參閱<a href="/design/patterns/confirming-acknowledging.html">確認和確認完成</a>。
+
+
+
+</p>
+
+<h3>排名和排序</h3>
+
+<p>通知就是新聞，所以基本上是以逆時間順序顯示，同時會針對應用程式指定的通知<a href="#correctly_set_and_manage_notification_priority">優先順序</a>，給與特殊考慮。
+
+
+</p>
+
+<p>通知是鎖定螢幕的重要部分，並會在裝置重新顯示螢幕時明確作用。
+
+鎖定螢幕上的空間有限，所以更重要的是辨別出最緊急或相關的通知。
+
+基於這個理由，Android 針對通知提供了更複雜的排序演算法，並同時考慮：
+
+</p>
+
+<ul>
+  <li> 時間戳記和應用程式指定的優先順序。</li>
+  <li> 通知最近是否以聲音或振動干擾使用者。
+(也就是說，如果電話剛發出一個聲響，而使用者想要知道「剛剛發生什麼事？」，鎖定螢幕應該以瞄一下就能取得通知的方式來回應使用者。
+)
+
+</li>
+  <li> 任何使用 {@link android.app.Notification#EXTRA_PEOPLE} 附加至該通知的人員，尤其是他們是否為標記星號的連絡人。
+</li>
+</ul>
+
+<p>要善用這種排序，請著重於您想要建立的使用者體驗，而非著眼於清單上的任何特定排名位置。
+
+</p>
+
+  <img src="{@docRoot}images/android-5.0/notifications/AntiSample3.png" alt="" width="700px" />
+
+  <p class="img-caption" style="margin-top:10px">Gmail 通知使用預設的優先順序，所以通常排序低於像 Hangouts 等即時訊息應用程式，但當有新郵件進來時，會暫時立即提升。
+
+
+
+
+  </p>
+
+
+<h3>在鎖定螢幕上</h3>
+
+<p>由於通知可見於鎖定螢幕上，因此使用者隱私是特別重要的考量。
+
+通知通常包含敏感資訊，而且不一定要顯示給拿起裝置並打開顯示的任何人。
+
+</p>
+
+<ul>
+  <li> 針對具有安全鎖定螢幕 (PIN、圖案或密碼) 的裝置，介面有公用和私密兩部分。
+公用介面可以顯示在安全鎖定螢幕上，因此任何人都可看見。
+私密介面是鎖定螢幕背後的世界，只在使用者登入裝置時才會顯示。
+</li>
+</ul>
+
+<h3>使用者控制安全鎖定螢幕上顯示的資訊</h3>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}images/android-5.0/notifications/LockScreen@2x.png" srcset="{@docRoot}images/android-5.0/notifications/LockScreen.png 1x" alt="" width="311px" />
+      <p class="img-caption">
+    鎖定螢幕上的通知，以及使用者解鎖裝置後顯示的內容。
+  </p>
+</div>
+
+<p>當設定安全鎖定螢幕時，使用者可以選擇隱藏來自安全鎖定螢幕的機密詳細資料。
+在這種情況下，系統 UI 會考慮通知的「可見度」<em></em>等級，判斷可以顯示何種內容。
+
+</p>
+<p> 如要控制可見度等級，可以呼叫
+<code><a
+href="/reference/android/app/Notification.Builder.html#setVisibility(int)">Notification.Builder.setVisibility()</a></code>，並指定下列值之一：
+</p>
+
+<ul>
+  <li><code><a
+href="/reference/android/app/Notification.html#VISIBILITY_PUBLIC">VISIBILITY_PUBLIC</a></code>。
+顯示通知的完整內容。
+  如果未指定可見度，則這會是系統預設值。</li>
+  <li><code><a
+href="/reference/android/app/Notification.html#VISIBILITY_PRIVATE">VISIBILITY_PRIVATE</a></code>。
+在鎖定螢幕上，顯示這個通知存在的基本資訊，
+包括通知圖示和發佈通知的應用程式。通知詳細資料的其他部分則不會顯示。
+但請記住的下列幾點：
+  <ul>
+    <li> 如果您想要提供您通知的不同公用版本，
+以便顯示在安全鎖定螢幕上，
+請在 <code><a
+href="/reference/android/app/Notification.html#publicVersion">Notification.publicVersion</a></code>
+欄位中提供一個取代的「通知」物件。
+    <li> 此設定可以讓您的應用程式有機會建立內容的改編版本，非常實用但卻不會透露個人資訊。
+考慮簡訊應用程式的例子，
+其通知包含簡訊的文字和傳送者的姓名與連絡人圖示。
+此通知應該是 <code>VISIBILITY_PRIVATE</code>，但 <code>publicVersion</code> 仍包含像「3 個新訊息」等實用資訊，
+但卻又不提供任何其他可用來識別的詳細資料。
+
+  </ul>
+  </li>
+  <li><code><a
+href="/reference/android/app/Notification.html#VISIBILITY_SECRET">Notification.VISIBILITY_SECRET</a></code>。僅顯示最起碼的資訊，
+甚至連通知圖示都排除。</li>
+</ul>
+<h2 style="clear:both" id="notifications_on_android_wear">Android Wear 上的通知
+</h2>
+
+<p>預設情況下，通知和其<em>動作</em>會橋接至穿戴裝置。
+開發人員可以控制哪些通知可從電話橋接至手錶上，
+反之亦然。
+開發人員還可以控制哪些動作可以橋接。如果您的
+應用程式包含
+無法以單一點選完成的動作，
+請在您的穿戴通知上隱藏這些動作
+，或考慮將其連結至穿戴應用程式，
+讓使用者可以在手錶上完成動作。
+</p>
+
+<h4>橋接通知和動作</h4>
+
+<p>例如電話等已連線的裝置，
+可以橋接通知至穿戴裝置，讓通知可以在該處顯示。同樣的，也可以橋接動作，
+這樣使用者就可以直接從穿戴裝置對通知執行動作。</p>
+
+<p><strong>橋接</strong></p>
+
+<ul>
+  <li> 新的即時訊息</li>
+  <li> 例如 +1 等單點選動作，像 Heart</li>
+</ul>
+
+<img src="{@docRoot}images/android-5.0/notifications/WearBasic.png" width="156px" height="156px" alt="" />
+
+<p><strong>請勿橋接</strong></p>
+
+<ul>
+  <li> 新到播客的通知</li>
+  <li> 對應至手錶上不可能執行的動作</li>
+</ul>
+
+
+
+<p><h4>要在穿戴裝置上定義的獨特動作</h4></p>
+
+<p>有些動作只能在穿戴裝置上執行。這些動作包含：</p>
+
+<ul>
+  <li> 罐頭回應的快速清單，例如「會馬上回來」</li>
+  <li> 在手機上開啟</li>
+  <li> 帶出語音輸入畫面的「註解」或「回覆」動作</li>
+  <li> 啟動穿戴裝置特定的應用程式動作</li>
+</ul>
+
+<img src="{@docRoot}images/android-5.0/notifications/ReplyAction.png" width="156px" height="156px" alt="" />

@@ -1,0 +1,70 @@
+page.title=確認及確認完成
+page.tags=dialog,toast,notification
+@jd:body
+
+<p>在某些情況下，當使用者在您應用程式中呼叫一個動作時，最好是透過文字來「確認」(confirm) <em></em>或「確認完成」<em></em>(acknowledge)。</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_confirming.png">
+    <p><strong>確認</strong>是要求使用者確認真的要進行剛剛呼叫的動作。在某些情況下，確認訊息出現時會伴隨警告或需要使用者考量是否採取動作的相關重要資訊。</p>
+  </div>
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_acknowledge.png">
+    <p><strong>確認完成</strong>是顯示文字，讓使用者知道已經完成剛剛呼叫的動作。這會排除系統正在採取之隱式作業的不確定性。在某些情況下，確認完成出現時會伴隨復原動作的選項。</p>
+  </div>
+</div>
+
+<p>使用這種方式和使用者溝通有助於降低已發生或將發生事情的不確定性。確認或確認完成也可以防止使用者誤犯可能會後悔的錯誤。</p>
+
+<h2>確認或確認完成使用者動作的時機</h2>
+<p>並非所有的動作都能保證會執行確認或確認完成。使用此流程圖可以指引您的設計決策。</p>
+<img src="{@docRoot}design/media/confirm_ack_flowchart.png">
+
+<h2>確認</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>範例：Google Play 書籍</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>在此範例中，使用者已要求從其 Google Play 媒體庫中刪除一本書籍。顯示<a href="{@docRoot}design/building-blocks/dialogs.html#alerts">警示</a>來確認此動作，因為使用者必須了解將不再針對任何裝置提供這本書籍。</p>
+    <p>設計一個確認的對話方塊時，要讓標題具有意義就必須回應要求的動作。</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>範例：Android Beam</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>確認不一定要以具有兩個按鈕的警示來呈現。在啟動 Android Beam 之後，會提示使用者輕觸要共用的內容 (在此範例中是一張照片)。如果他們決定不進行，只要移開他們的電話即可。</p>
+  </div>
+</div>
+
+<h2>確認完成</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>範例：已儲存放棄的 Gmail 草稿</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
+    <p>在此範例中，如果使用者從 Gmail 撰寫畫面返回，可能會發生預期外的狀況：會自動儲存目前的草稿。以快顯通知 (toast) 形式出現的確認完成，會讓使用者明瞭此情況。確認完成會在幾秒鐘後淡出。</p>
+    <p>在此並不合適使用復原功能，因為儲存動作是由應用程式發起，而非使用者。瀏覽至草稿清單，就可以方便且快速地繼續撰寫。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+    <h4>範例：已刪除 Gmail 會話群組</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
+    <p>使用者從 Gmail 清單中刪除一個會話群組後，會出現確認完成訊息，並提供一個復原選項。確認完成會持續出現，直到使用者採取不相關的動作，例如捲動清單。</p>
+  </div>
+</div>
+
+<h2>無「確認」或「確認完成」</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>範例：+1 中</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>確認並非必要</strong>。如果使用者不小心按了 + 1 按鈕，這並不是什麼大問題。他們可以再次輕觸按鈕，復原此動作。</p>
+    <p><strong>確認完成並非必要</strong>。使用者將會看到 +1 彈起並變成紅色。這是個非常明確的訊號。</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>範例：從主螢幕移除應用程式</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <p><strong>確認並非必要</strong>。這是特意設計的動作：使用者必須拖曳項目放到相對較大且隔離的目標上。因此極不可能發生意外狀況。但如果使用者後悔所做的決定，只需幾秒鐘，就可以恢復原狀。</p>
+    <p><strong>確認完成並非必要</strong>。使用者會知道應用程式從主螢幕消失，因為是他們將應用程式拖曳離開，所以才會消失。</p>
+
+  </div>
+</div>
