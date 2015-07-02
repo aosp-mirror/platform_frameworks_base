@@ -1,0 +1,147 @@
+page.title=アクティビティの一時停止と再開
+page.tags=アクティビティのライフサイクル
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>このレッスンでの学習内容</h2>
+    <ol>
+      <li><a href="#Pause">アクティビティを一時停止する</a></li>
+      <li><a href="#Resume">アクティビティを再開する</a></li>
+    </ol>
+    
+    <h2>関連ドキュメント</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">アクティビティ</a>
+      </li>
+    </ul>
+
+<h2>試してみる</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">デモのダウンロード</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>通常のアプリの使用中、フォアグラウンドのアクティビティは、他のビジュアル コンポーネントによって隠される場合があり、これによりアクティビティが<em>一時停止</em>します。
+たとえば、半透明のアクティビティが開くと（ダイアログのスタイルなど）、以前のアクティビティは一時停止します。
+そのアクティビティは、まだ部分的に表示されていても、現在フォーカスされているアクティビティではない状態である限り、一時停止状態が維持されます。
+</p>
+
+<p>ただし、アクティビティが完全に隠され、表示されなくなった場合は、<em>停止</em>します（これについては次のレッスンで説明します）。
+</p>
+
+<p>アクティビティが一時停止状態に入ると、一時停止中は継続させない方が望ましい進行中のアクション（ビデオなど）を停止させたり、ユーザーがアプリを離れたままになった場合に備えて保存する必要のある情報すべてを保持したりできるよう、システムは {@link android.app.Activity} 上で {@link
+android.app.Activity#onPause onPause()} メソッドを呼び出します。ユーザーが一時停止状態からアクティビティに復帰した場合は、システムはアクティビティを再開し、{@link android.app.Activity#onResume onResume()} メソッドを呼び出します。
+
+
+
+</p>
+
+<p class="note"><strong>注:</strong> アクティビティが {@link
+android.app.Activity#onPause()} の呼び出しを受信した場合は、アクティビティが一瞬一時停止された後、ユーザーが同アクティビティにフォーカスを戻す可能性があることを示している場合があります。
+ただし、通常は、ユーザーがアクティビティを離れていることを最初に示すものです。
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-paused.png" />
+<p class="img-caption"><strong>図 1.</strong>半透明のアクティビティによって自分のアクティビティが隠されると、システムは {@link android.app.Activity#onPause onPause()} を呼び出し、アクティビティは一時停止の状態で待機します（1）。
+
+一時停止中にユーザーがアクティビティに復帰した場合、システムは {@link android.app.Activity#onResume onResume()} を呼び出します（2）。
+</p>
+
+
+<h2 id="Pause">アクティビティを一時停止する</h2>
+      
+<p>システムがアクティビティに対して {@link android.app.Activity#onPause()} を呼び出した場合、技術的にはアクティビティはまだ部分的に表示されていることを意味しますが、ほとんどの場合は、ユーザーがアクティビティを離れていて、ほどなく停止状態になる徴候を示しています。
+
+通常、以下を行う場合には、{@link android.app.Activity#onPause()} コールバックを使用する必要があります。
+</p>
+
+<ul>
+  <li>CPU を消費する可能性があるアニメーションや他の進行中のアクションを停止する。</li>
+  <li>ユーザーがアクティビティを離れた場合にも変更が永続的に保存されると期待するような場合（メールの下書きなど）でのみ、未保存の変更をコミットする。
+</li>
+  <li>放送用レシーバーなどのシステム リソース、（GPS
+などの）センサー処理や、アクティビティが一時停止され、ユーザーが必要としない間にバッテリー寿命に影響を与える可能性があるすべてのリソースを解放する。
+</li>
+</ul>
+
+<p>たとえば、アプリケーションが {@link android.hardware.Camera} を使用する場合、{@link android.app.Activity#onPause()} メソッドは、リソースの解放に適した手段です。
+</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    super.onPause();  // Always call the superclass method first
+
+    // Release the Camera because we don't need it when paused
+    // and other activities might need to use it.
+    if (mCamera != null) {
+        mCamera.release()
+        mCamera = null;
+    }
+}
+</pre>
+
+<p>一般的には、（フォームに入力された個人情報などの）ユーザーの変更を永続的なストレージに保存する目的の場合には、{@link android.app.Activity#onPause()} の使用は<strong>避ける</strong>必要があります。
+特定のユーザーが（メールの下書きのように）変更の自動保存を期待していると確信できる場合のみ、{@link android.app.Activity#onPause()}の期間内に永続的なストレージにユーザーの変更を保持する必要があります。ただし、{@link
+android.app.Activity#onPause()} メソッド中にはデータベースへの書き込みなどの CPU に高負荷をかける作業を行うことは避けてください。これにより、次のアクティビティへの表示上の遷移を遅らせる可能性があります（代わりに
+{@link android.app.Activity#onStop onStop()} メソッド中に高負荷のシャットダウン操作を実行する必要があります）。
+
+
+
+</p>
+
+<p>{@link android.app.Activity#onPause
+onPause()} メソッドで実行される処理量を比較的シンプルに抑えて、アクティビティが実際に停止している場合にユーザーの次の移動先への迅速な遷移を可能にする必要があります。
+</p>
+
+<p class="note"><strong>注:</strong> アクティビティが一時停止されると、{@link
+android.app.Activity} インスタンスはメモリに常駐し、アクティビティが再開されたときに再び呼び出されます。再開状態に導くいずれかのコールバック メソッドの間に作成されたコンポーネントを再初期化する必要はありません。
+
+</p>
+
+
+
+<h2 id="Resume">アクティビティを再開する</h2>
+
+<p>ユーザーが一時停止状態からアクティビティを再開した場合、システムは、{@link
+android.app.Activity#onResume()} メソッドを呼び出します。</p>
+
+<p>新規に作成された場合を含め、アクティビティがフォアグラウンドに表示されるたびに、システムがこのメソッドを呼び出すことに注意してください。
+したがって、{@link
+android.app.Activity#onPause()} メソッド中に解放したコンポーネントの初期化、およびアクティビティが再開状態になるたびに発生するその他の初期化（アニメーションの開始や、アクティビティがユーザーのフォーカスを取得したときにのみ使用されるコンポーネントの初期化など）を実行するように、{@link
+android.app.Activity#onResume()} を実装する必要があります。
+
+</p>
+
+<p>{@link android.app.Activity#onResume()} に関する次の例は、上記の
+{@link android.app.Activity#onPause()} に関する例に対応するものであり、アクティビティが一時停止したときに解放されたカメラ機能を初期化します。
+</p>
+
+<pre>
+&#64;Override
+public void onResume() {
+    super.onResume();  // Always call the superclass method first
+
+    // Get the Camera instance as the activity achieves full user focus
+    if (mCamera == null) {
+        initializeCamera(); // Local method to handle camera init
+    }
+}
+</pre>
+
+
+
+
+
+
+

@@ -1,0 +1,285 @@
+page.title=アクティビティを開始する
+page.tags=アクティビティのライフサイクル
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#lifecycle-states">ライフサイクル コールバックを理解する</a></li>
+  <li><a href="#launching-activity">アプリのランチャーのアクティビティを指定する</a></li>
+  <li><a href="#Create">新しいインスタンスを作成する</a></li>
+  <li><a href="#Destroy">アクティビティを破棄する</a></li>
+</ol>
+    
+    <h2>関連ドキュメント</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">アクティビティ</a></li>
+    </ul>
+
+<h2>試してみる</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">デモのダウンロード</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>{@code main()} メソッドを使用してアプリを起動する他のプログラミング パラダイムとは異なり、Android システムでは、そのライフサイクルの特定の段階に対応する特定のコールバック メソッドを呼び出すことによって、{@link android.app.Activity} インスタンスでコードを開始します。
+
+
+アクティビティを起動するコールバック メソッドのシーケンスと、アクティビティを破棄するコールバック メソッドのシーケンスがあります。
+</p>
+
+<p>このレッスンでは、最も重要なライフサイクル メソッドの概要を示し、アクティビティの新しいインスタンスを作成する最初のライフサイクル コールバックを扱う方法について説明します。
+</p>
+
+
+
+<h2 id="lifecycle-states">ライフサイクル コールバックを理解する</h2>
+
+<p>アクティビティの存続期間において、システムは、階段ピラミッド型のシーケンスで、ライフサイクル メソッドのコア セットを呼び出します。
+つまり、アクティビティのライフサイクルの各段階は、ピラミッドの個別の段です。
+システムが新しいアクティビティのインスタンスを作成すると、各コールバック メソッドはアクティビティ状態を 1 ステップ上に向かって移動させます。
+ピラミッドの頂点は、アクティビティがフォアグラウンドで実行されるポイントであり、ユーザーはそこで操作を行うことができます。
+</p>
+
+<p>ユーザーがアクティビティを離れる操作を始めると、システムはアクティビティを破棄するために、アクティビティ状態をピラミッドの下に向かって移動させる、別のメソッドを呼び出します。
+アクティビティがピラミッドの下に向かって途中まで移動し、待機する場合がありますが（ユーザーが別のアプリに切り替えた場合など）、そのポイントからアクティビティは頂点に戻ることができ（ユーザーがアクティビティに戻った場合）、アクティビティはユーザーが離れた場所から再開します。
+
+
+</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle.png" />
+<p class="img-caption"><strong>図 1.</strong> アクティビティのライフサイクルの簡略図は階段ピラミッドとして表現されます。
+ここでは、アクティビティを頂点の再開状態に向かって 1 ステップ移動させるために使用されるすべてのコールバックに対して、下に向かってアクティビティを移動させるコールバック メソッドがどのように分布しているかを示しています。
+
+アクティビティはまた、一時停止や停止の状態から再開した状態に復帰することができます。
+</p>
+
+
+<p>アクティビティの複雑さにもよりますが、すべてのライフサイクルメソッドを実装する必要はありません。
+ただし、それぞれを理解して、自分のアプリがユーザーの期待どおり動作するよう実装することが重要です。
+アクティビティのライフサイクル メソッドを正しく実装すると、自分のアプリが次を含めたいくつかの状態で良好に動作するようになります。
+</p>
+<ul>
+  <li>アプリの使用中にユーザーが電話を受けたり、別のアプリに切り替えた場合にもクラッシュしません。
+</li>
+  <li>ユーザーの使用頻度が低いときは、貴重なシステムリソースを消費しません。
+</li>
+  <li>ユーザーがアプリから離れ、後で復帰した場合でも、アプリを離れた時点における作業状態を失いません。
+</li>
+  <li>画面の向きが横長と縦長との間で切り替わったときも、クラッシュしたり、ユーザーの作業内容が失われることがありません。
+</li>
+</ul>
+
+<!--
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+methods.</p>
+<table>
+  <tr>
+    <th scope="col">Lifecycle State</th>
+    <th scope="col">Startup Method</th>
+    <th scope="col">Teardown Method</th>
+  </tr>
+  <tr>
+    <td>Created / Destroyed</td>
+    <td>{@link android.app.Activity#onCreate onCreate()}</td>
+    <td>{@link android.app.Activity#onDestroy()}</td>
+  </tr>
+  <tr>
+    <td>Started / Stopped</td>
+    <td>{@link android.app.Activity#onStart()}</td>
+    <td>{@link android.app.Activity#onStop()}</td>
+  </tr>
+  <tr>
+    <td>Resumed / Resumed</td>
+    <td>{@link android.app.Activity#onResume()}</td>
+    <td>{@link android.app.Activity#onPause()}</td>
+  </tr>
+</table>
+-->
+
+<p>次のレッスンで学習するように、図 1 に示されているさまざまな状態間で起きるアクティビティ遷移には、いくつかの状況があります。
+ただし、これらの状態のうち 3 つのみが静的なものとなります。
+すなわち、アクティビティが長期間にわたる場合、3 つの状態のいずれかで存在することになります。
+</p>
+<dl>
+  <dt>再開状態</dt>
+    <dd>この状態では、アクティビティがフォアグラウンドで実行され、ユーザーはそこで操作を行うことができます（「実行」状態とも呼ばれます）。
+</dd>
+  <dt>一時停止状態</dt>
+    <dd>この状態では、アクティビティは別のアクティビティによって部分的に隠されています。フォアグラウンドにある別のアクティビティは半透明になっているか、全画面をカバーしていません。
+一時停止したアクティビティはユーザーの入力を受信せず、一切のコードを実行できません。
+
+  <dt>停止状態</dt>
+    <dd>この状態では、アクティビティは完全に隠され、ユーザーには表示されません。バックグラウンドに存在するとみなされます。
+停止状態の間、アクティビティ インスタンスとメンバ変数のようなそのすべての状態情報は保持されますが、アクティビティ インスタンスは一切のコードを実行できません。
+</dd>
+</dl>
+
+<p>他の状態（作成や起動の状態）は一過性であり、システムはすぐに次のライフサイクル コールバック メソッドを呼び出して、次の状態に移動します。
+つまり、システムは
+{@link android.app.Activity#onCreate onCreate()} を呼び出した後、すぐに {@link
+android.app.Activity#onStart()} を呼び出しますが、この後で速やかに {@link
+android.app.Activity#onResume()} が続きます。</p>
+
+<p>以上が、アクティビティの基本ライフサイクルです。次に、特定のライフサイクルの動作のいくつかについて学習を開始しましょう。
+</p>
+
+
+
+<h2 id="launching-activity">アプリのランチャー アクティビティを指定する</h2> 
+
+<p>ユーザーがホーム画面からアプリのアイコンを選択すると、システムはアプリ内で「ランチャー」（または「メイン」）のアクティビティであると宣言された {@link android.app.Activity} に対して {@link
+android.app.Activity#onCreate onCreate()} メソッドを呼び出します。
+これは、アプリのユーザー インターフェースへのメインのエントリ ポイントとして機能するアクティビティです。
+</p>
+
+<p>プロジェクト ディレクトリのルートにある Android のマニフェスト ファイル、<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">{@code AndroidManifest.xml}</a> で、メインのアクティビティとして
+どのアクティビティを使用するが定義することができます。</p>
+
+<p>アプリのメインのアクティビティは、{@link
+android.content.Intent#ACTION_MAIN MAIN} アクションと {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} カテゴリを含む <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> を使用してマニフェストで宣言する必要があります。
+次に例を示します。</p> 
+
+<pre>
+&lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>注:</strong> Android SDK ツールを使用して新しい Android プロジェクトを作成すると、デフォルトのプロジェクト ファイルに、このフィルタを用いてマニフェストで宣言された {@link android.app.Activity} クラスが含まれます。
+
+</p>
+
+<p>自分のアクティビティの 1 つについて、{@link android.content.Intent#ACTION_MAIN MAIN} アクションまたは
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} カテゴリのいずれかが宣言されていない場合は、アプリのアイコンがホーム画面のアプリ リストに表示されません。
+</p>
+
+
+
+<h2 id="Create">新しいインスタンスを作成する</h2>
+
+<p>ほとんどのアプリには、ユーザーが異なるアクションを実行できるようにする、いくつかの異なるアクティビティが含まれます。あるアクティビティが、ユーザーがアプリのアイコンをクリックしたときに作成されるメインのアクティビティであっても、ユーザーのアクションに応答してアプリが開始する別のアクティビティであっても、システムはその {@link
+android.app.Activity#onCreate onCreate()} を呼び出すことにより、{@link android.app.Activity} の新しいインスタンスを毎回作成します。
+
+
+</p>
+
+<p>アクティビティの存続期間すべてにわたり、一度のみ発生すべき基本的なアプリの起動ロジックを実行するための 
+{@link android.app.Activity#onCreate onCreate()} メソッドを実装する必要があります。たとえば、
+{@link android.app.Activity#onCreate onCreate()} の実装では、ユーザー インターフェースを定義し、場合によってはいくつかのクラススコープの変数をインスタンス化する必要があります。
+</p>
+
+<p>たとえば、{@link android.app.Activity#onCreate onCreate()}メソッドに関する次の例では、（XML レイアウトファイルで定義される）ユーザー インターフェースを宣言したり、メンバ変数を定義したり、UI の一部を構成したりするなどの、アクティビティ用のいくつかの基本的なセットアップを実行する複数のコードを示しています。
+
+
+</p>
+
+<pre>
+TextView mTextView; // Member variable for text view in the layout
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Set the user interface layout for this Activity
+    // The layout file is defined in the project res/layout/main_activity.xml file
+    setContentView(R.layout.main_activity);
+    
+    // Initialize member TextView so we can manipulate it later
+    mTextView = (TextView) findViewById(R.id.text_message);
+    
+    // Make sure we're running on Honeycomb or higher to use ActionBar APIs
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        // For the main activity, make sure the app icon in the action bar
+        // does not behave as a button
+        ActionBar actionBar = getActionBar();
+        actionBar.setHomeButtonEnabled(false);
+    }
+}
+</pre>
+
+<p class="caution"><strong>警告: </strong>{@link android.os.Build.VERSION#SDK_INT} を使用すると、Android 2.0（API レベル 5）以降でのみこの方法で動作する新しい API が古いシステムで実行してしまうことを回避できます。
+
+古いバージョンでは、実行時の例外が発生します。</p>
+
+<p>{@link android.app.Activity#onCreate onCreate()} の実行が終了すると、システムが引き続き {@link android.app.Activity#onStart()} と {@link android.app.Activity#onResume()} メソッドを呼び出します。
+
+アクティビティは、作成や開始の状態で留まることはありません。技術的には、アクティビティは {@link android.app.Activity#onStart()} が呼び出されたときにユーザーに表示されますが、すぐに
+{@link android.app.Activity#onResume()} が続き、電話の着信やユーザーが別のアクティビティに移動したり、端末の画面がオフになったりした際のように、状態を変える状況が発生するまで、アクティビティは再開状態のままとなります。
+
+
+</p>
+
+<p>この後に続く他のレッスンでは、その他の起動メソッドである {@link
+android.app.Activity#onStart()} と {@link android.app.Activity#onResume()} が一時停止状態または停止状態からアクティビティを再開するために使用された場合、これらのメソッドがアクティビティのライフサイクル中にいかに有用であるかを説明します。
+</p>
+
+<p class="note"><strong>注:</strong> {@link android.app.Activity#onCreate onCreate()}メソッドには、<a href="recreating.html">アクティビティの再作成</a>についての後続のレッスンで説明している <code>savedInstanceState</code> と呼ぶパラメータが含まれています。
+
+</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-create.png" />
+<p class="img-caption"><strong>図 2.</strong> アクティビティの新しいインスタンスを作成する際に
+システムが順に呼び出す 3 つの主なコールバックである
+{@link android.app.Activity#onCreate onCreate()}、{@link
+android.app.Activity#onStart()}、{@link android.app.Activity#onResume()} を強調した、アクティビティのライフサイクル構造の別の図です。コールバックのこのシーケンスが完了すると、アクティビティは再開状態に達し、ユーザーは別のアクティビティに切り替えるまではこのアクティビティを操作できます。
+
+</p>
+
+
+
+
+
+
+
+<h2 id="Destroy">アクティビティを破棄する</h2>
+
+<p>アクティビティの最初のライフサイクル コールバックは、{@link android.app.Activity#onCreate
+onCreate()} であり、最終のコールバックは {@link android.app.Activity#onDestroy} です。システムは、アクティビティのインスタンスが完全にシステム メモリから削除される最終的な指示として、アクティビティでこのメソッドを呼び出します。
+
+</p>
+
+<p>ほとんどのアプリでは、このメソッドを実装する必要はありません。なぜなら、ローカルのクラス参照はアクティビティを使用して破棄され、自分のアクティビティでは、{@link
+android.app.Activity#onPause} と {@link android.app.Activity#onStop} の間にほぼすべてのクリーンアップを実行する必要があるからです。
+ただし、アクティビティに、{@link
+android.app.Activity#onCreate onCreate()} の間、または他の長時間実行中のリソースで作成された、正常に閉じないとメモリのリークを引き起こす可能性のあるバックグラウンド スレッドが含まれている場合、{@link
+android.app.Activity#onDestroy} の間にそれらを破棄する必要があります。
+
+</p>
+
+<pre>
+&#64;Override
+public void onDestroy() {
+    super.onDestroy();  // Always call the superclass
+    
+    // Stop method tracing that the activity started during onCreate()
+    android.os.Debug.stopMethodTracing();
+}
+</pre>
+
+<p class="note"><strong>注:</strong> ある状況を除くすべての状況では、システムは{@link android.app.Activity#onPause} と {@link
+android.app.Activity#onStop} を呼び出した後に {@link android.app.Activity#onDestroy}を呼び出します。ある状況とは、{@link android.app.Activity#onCreate onCreate()}メソッド内から {@link
+android.app.Activity#finish()} を呼び出したときです。
+
+自分のアクティビティが別のアクティビティを起動するための一時的な意思決定機能として動作する場合のようないくつかのケースでは、{@link
+android.app.Activity#onCreate onCreate()} 内から {@link android.app.Activity#finish()} を呼び出してアクティビティを破棄できます。
+この場合、システムは他のライフサイクルの任意のメソッドを呼び出すことなく、すぐに {@link android.app.Activity#onDestroy} を呼び出します。
+
+</p>

@@ -1,0 +1,317 @@
+page.title=在 SQL 資料庫中儲存資料
+page.tags=資料儲存空間
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#DefineContract">定義結構描述與合約</a></li>
+  <li><a href="#DbHelper">使用 SQL Helper 建立資料庫</a></li>
+  <li><a href="#WriteDbRow">將資訊置入資料庫中</a></li>
+  <li><a href="#ReadDbRow">讀取資料庫中的資訊</a></li>
+  <li><a href="#DeleteDbRow">刪除資料庫中的資訊</a></li>
+  <li><a href="#UpdateDbRow">更新資料庫</a></li>
+</ol>
+
+<h2>您也應該閱讀</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#db">使用資料庫</a></li>
+</ul>
+
+<!--
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/Sample.zip" class="button">Download the sample</a>
+  <p class="filename">Sample.zip</p>
+</div>
+-->
+
+</div>
+</div>
+
+
+<p>對於重複資料或結構化資料 (例如連絡資訊)，將其儲存至資料庫是理想的選擇。
+本課程假設您已大體熟悉 SQL 資料庫，並協助您開始在 Android 上使用 SQLite 資料庫。
+
+{@link android.database.sqlite} 套件中提供在 Android 上使用資料庫所需的 API。
+</p>
+
+
+<h2 id="DefineContract">定義結構描述與合約</h2>
+
+<p>SQL 資料庫的其中一項主要準則是結構描述，即針對資料庫組織方式的正式宣告。
+在您建立資料庫所用的 SQL 陳述式中，會反映結構描述。
+您可能會發現，建立伴隨類別 (也稱為<em>合約</em>類別) 會非常有益，該類別會以系統化的自我記錄方式，明確指定結構描述的配置。
+
+</p>
+
+<p>合約類別是常數 (可為 URI、表格與欄定義名稱) 的容器。
+藉由合約類別，您可在同一套件內的所有其他類別中使用相同的常數。
+您可藉此在一個位置變更欄名稱，然後將其傳播到全部程式碼中。
+</p>
+
+<p>組織合約類別的良好方式，是將適用於整個資料庫的全域定義置於類別的根層級，
+然後，針對列舉欄的每個表格建立內部類別。
+</p>
+
+<p class="note"><strong>注意：</strong>透過實作 {@link
+android.provider.BaseColumns} 介面，您的內部類別可繼承主索引鍵欄位 (稱為 {@code _ID})，某些 Android 類別 (諸如 cursor adaptor) 希望其具備該欄位。
+
+此操作並非必需的操作，但是可協助您的資料庫與 Android 架構協調運作。
+</p>
+
+<p>例如，以下程式碼片段會定義單一表格的表格名稱與欄名稱：
+</p>
+
+
+<pre>
+public final class FeedReaderContract {
+    // To prevent someone from accidentally instantiating the contract class,
+    // give it an empty constructor.
+    public FeedReaderContract() {}
+
+    /* Inner class that defines the table contents */
+    public static abstract class FeedEntry implements BaseColumns {
+        public static final String TABLE_NAME = &quot;entry&quot;;
+        public static final String COLUMN_NAME_ENTRY_ID = &quot;entryid&quot;;
+        public static final String COLUMN_NAME_TITLE = &quot;title&quot;;
+        public static final String COLUMN_NAME_SUBTITLE = &quot;subtitle&quot;;
+        ...
+    }
+}
+</pre>
+
+
+
+<h2 id="DbHelper">使用 SQL Helper 建立資料庫</h2>
+
+<p>定義資料庫的外觀之後，您應實作多種方法以建立並維護資料庫與表格。
+以下所示是可建立及刪除表格的某些典型陳述式：
+</P>
+
+<pre>
+private static final String TEXT_TYPE = &quot; TEXT&quot;;
+private static final String COMMA_SEP = &quot;,&quot;;
+private static final String SQL_CREATE_ENTRIES =
+    &quot;CREATE TABLE &quot; + FeedEntry.TABLE_NAME + &quot; (&quot; +
+    FeedEntry._ID + &quot; INTEGER PRIMARY KEY,&quot; +
+    FeedEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
+    FeedEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
+    ... // Any other options for the CREATE command
+    &quot; )&quot;;
+
+private static final String SQL_DELETE_ENTRIES =
+    &quot;DROP TABLE IF EXISTS &quot; + FeedEntry.TABLE_NAME;
+</pre>
+
+<p>如同在裝置的<a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">內部儲存空間</a>儲存檔案一樣，Android 會將您的資料庫儲存在與應用程式關聯的私用磁碟空間內。
+
+依預設，其他應用程式無法存取此區域，因此您的資料安全無虞。
+</p>
+
+<p>{@link
+android.database.sqlite.SQLiteOpenHelper} 類別中提供一組有用的 API。若使用此類別取得資料庫的參考，只有在需要執行且<em>並非處於應用程式啟動期間</em>時，系統才會執行資料庫的建立與更新操作 (執行時間可能很長)。
+
+
+
+您只需呼叫 {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} 或
+{@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase} 即可。
+</p>
+
+<p class="note"><strong>注意：</strong>由於這些操作的時間可能很長，因此請確保您在背景執行緒 (例如 {@link android.os.AsyncTask} 或 {@link android.app.IntentService}) 中呼叫 {@link
+android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} 或 {@link
+android.database.sqlite.SQLiteOpenHelper#getReadableDatabase}。
+
+</p>
+
+<p>若要使用 {@link android.database.sqlite.SQLiteOpenHelper}，請建立可覆寫 {@link
+android.database.sqlite.SQLiteOpenHelper#onCreate onCreate()}、{@link
+android.database.sqlite.SQLiteOpenHelper#onUpgrade onUpgrade()} 與 {@link
+android.database.sqlite.SQLiteOpenHelper#onOpen onOpen()} 回呼方法的子類別。
+您還可以實作 {@link android.database.sqlite.SQLiteOpenHelper#onDowngrade onDowngrade()}，但這並非必需的操作。
+
+</p>
+
+<p>例如，以下展示了 {@link
+android.database.sqlite.SQLiteOpenHelper} (使用上述某些命令) 的實作：</p>
+
+<pre>
+public class FeedReaderDbHelper extends SQLiteOpenHelper {
+    // If you change the database schema, you must increment the database version.
+    public static final int DATABASE_VERSION = 1;
+    public static final String DATABASE_NAME = &quot;FeedReader.db&quot;;
+
+    public FeedReaderDbHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(SQL_CREATE_ENTRIES);
+    }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // This database is only a cache for online data, so its upgrade policy is
+        // to simply to discard the data and start over
+        db.execSQL(SQL_DELETE_ENTRIES);
+        onCreate(db);
+    }
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+}
+</pre>
+
+<p>若要存取您的資料庫，請啟動 {@link
+android.database.sqlite.SQLiteOpenHelper} 的子類別：</p>
+
+<pre>
+FeedReaderDbHelper mDbHelper = new FeedReaderDbHelper(getContext());
+</pre>
+
+
+
+
+<h2 id="WriteDbRow">將資訊置入資料庫中</h2>
+
+<p>透過將 {@link android.content.ContentValues} 物件傳遞至 {@link android.database.sqlite.SQLiteDatabase#insert insert()} 方法，可將資料插入至資料庫：
+</p>
+
+<pre>
+// Gets the data repository in write mode
+SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+// Create a new map of values, where column names are the keys
+ContentValues values = new ContentValues();
+values.put(FeedEntry.COLUMN_NAME_ENTRY_ID, id);
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+values.put(FeedEntry.COLUMN_NAME_CONTENT, content);
+
+// Insert the new row, returning the primary key value of the new row
+long newRowId;
+newRowId = db.insert(
+         FeedEntry.TABLE_NAME,
+         FeedEntry.COLUMN_NAME_NULLABLE,
+         values);
+</pre>
+
+<p>{@link android.database.sqlite.SQLiteDatabase#insert insert()} 的第一個引數即為表格名稱。
+第二個引數將提供欄的名稱，
+ 在 {@link android.content.ContentValues} 為空時，架構可在該欄中插入 NULL (若您將其設為 {@code "null"}，則在無值時，架構不會插入列)。
+
+</p>
+
+
+
+
+<h2 id="ReadDbRow">讀取資料庫中的資訊</h2>
+
+<p>若要從資料庫進行讀取，請使用 {@link android.database.sqlite.SQLiteDatabase#query query()} 方法，然後向其傳遞您的選取條件與所需的欄。該方法會合併 {@link android.database.sqlite.SQLiteDatabase#insert insert()} 與 {@link android.database.sqlite.SQLiteDatabase#update update()} 的元素，對您希望擷取的資料 (而非要插入的資料) 進行定義的欄清單除外。
+
+
+
+將在 {@link android.database.Cursor} 物件中，為您傳回查詢結果。
+</p>
+
+<pre>
+SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+// Define a <em>projection</em> that specifies which columns from the database
+// you will actually use after this query.
+String[] projection = {
+    FeedEntry._ID,
+    FeedEntry.COLUMN_NAME_TITLE,
+    FeedEntry.COLUMN_NAME_UPDATED,
+    ...
+    };
+
+// How you want the results sorted in the resulting Cursor
+String sortOrder =
+    FeedEntry.COLUMN_NAME_UPDATED + " DESC";
+
+Cursor c = db.query(
+    FeedEntry.TABLE_NAME,  // The table to query
+    projection,                               // The columns to return
+    selection,                                // The columns for the WHERE clause
+    selectionArgs,                            // The values for the WHERE clause
+    null,                                     // don't group the rows
+    null,                                     // don't filter by row groups
+    sortOrder                                 // The sort order
+    );
+</pre>
+
+<p>若要查看游標指示的列，請使用其中一種 {@link android.database.Cursor} move 方法，您必須始終先呼叫該方法，然後再開始讀取值。
+一般而言，您應呼叫 {@link android.database.Cursor#moveToFirst} 來執行啟動，如此會將「讀取位置」置於結果中的第一個項目。
+
+對於每列，您可以呼叫其中一種 {@link android.database.Cursor} get 方法 (例如 {@link android.database.Cursor#getString
+getString()} 或 {@link android.database.Cursor#getLong getLong()})，以讀取欄的值。
+對於每種 get 方法，您必須傳遞所需欄的索引位置，可以呼叫 {@link android.database.Cursor#getColumnIndex getColumnIndex()} 或
+{@link android.database.Cursor#getColumnIndexOrThrow getColumnIndexOrThrow()} 取得該位置。例如：
+
+
+</p>
+
+<pre>
+cursor.moveToFirst();
+long itemId = cursor.getLong(
+    cursor.getColumnIndexOrThrow(FeedEntry._ID)
+);
+</pre>
+
+
+
+
+<h2 id="DeleteDbRow">刪除資料庫中的資訊</h2>
+
+<p>若要刪除表格中的列，您需要提供識別這些列的選取條件。
+資料庫 API 可提供建立選取條件的機制 (能防止 SQL 插入)。
+該機制會將選取規格分為選取子句與選取引數。
+子句可定義要查看的欄，您也可以藉此合併欄測試。
+
+引數是要測試的值，繫結在子句中。由於對結果的處理方式不同於規則 SQL 陳述式，因此結果不會遭受 SQL 插入。
+
+</p>
+
+<pre>
+// Define 'where' part of query.
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+// Specify arguments in placeholder order.
+String[] selectionArgs = { String.valueOf(rowId) };
+// Issue SQL statement.
+db.delete(table_name, selection, selectionArgs);
+</pre>
+
+
+
+<h2 id="UpdateDbRow">更新資料庫</h2>
+
+<p>若您需要修改資料庫值的子集，請使用 {@link
+android.database.sqlite.SQLiteDatabase#update update()} 方法。</p>
+
+<p>更新表格會合併 {@link
+android.database.sqlite.SQLiteDatabase#insert insert()} 的內容值語法與 {@link android.database.sqlite.SQLiteDatabase#delete delete()} 的 {@code where} 語法。
+</p>
+
+<pre>
+SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+// New value for one column
+ContentValues values = new ContentValues();
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+
+// Which row to update, based on the ID
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+String[] selectionArgs = { String.valueOf(rowId) };
+
+int count = db.update(
+    FeedReaderDbHelper.FeedEntry.TABLE_NAME,
+    values,
+    selection,
+    selectionArgs);
+</pre>
+

@@ -91,25 +91,60 @@ include the action bar on devices running Android 2.1 or higher."
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/activity-lifecycle/index.html"
+             es-lang=""
+             ja-lang="アクティビティのライフサイクル 管理"
+             ko-lang="액티비티 수명 주기 관리하기"
+             pt-br-lang="Como gerenciar o ciclo de vida da atividade"
+             ru-lang="Управление жизненным циклом операций"
+             zh-cn-lang="管理活动生命周期"
+             zh-tw-lang="管理應用行為顯示生命週期"
              description=
              "How Android activities live and die and how to create
              a seamless user experience by implementing lifecycle callback methods."
             >Managing the Activity Lifecycle</a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/starting.html">
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/starting.html"
+             es-lang=""
+             ja-lang="アクティビティを開始する"
+             ko-lang="액티비티 시작하기"
+             pt-br-lang="Iniciando uma atividade"
+             ru-lang="Запуск операции"
+             zh-cn-lang="开始活动"
+             zh-tw-lang="啟動應用行為顯示">
             Starting an Activity
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/pausing.html">
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/pausing.html"
+             es-lang=""
+             ja-lang=""
+             ko-lang=""
+             pt-br-lang=""
+             ru-lang=""
+             zh-cn-lang=""
+             zh-tw-lang="">
             Pausing and Resuming an Activity
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/stopping.html">
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/stopping.html"
+             es-lang=""
+             ja-lang="アクティビティの一時停止と再開"
+             ko-lang="액티비티 일시정지 및 재개하기"
+             pt-br-lang="Pausando e reiniciando uma atividade"
+             ru-lang="Приостановка и возобновление операции"
+             zh-cn-lang="暂停和继续活动"
+             zh-tw-lang="暫停並繼續應用行為顯示">
             Stopping and Restarting an Activity
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/recreating.html">
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/recreating.html"
+             es-lang=""
+             ja-lang="アクティビティを再作成する"
+             ko-lang="액티비티 재생성하기"
+             pt-br-lang="Recriando uma atividade"
+             ru-lang="Воссоздание операции"
+             zh-cn-lang="重新创建活动"
+             zh-tw-lang="重新建立應用行為顯示">
             Recreating an Activity
           </a>
           </li>
@@ -144,21 +179,49 @@ include the action bar on devices running Android 2.1 or higher."
 
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot?>training/basics/data-storage/index.html"
+             es-lang=""
+             ja-lang="データの保存"
+             ko-lang="데이터 저장하기"
+             pt-br-lang="Salvando dados"
+             ru-lang="Сохранение данных"
+             zh-cn-lang="保存数据"
+             zh-tw-lang="儲存資料"
              description=
              "How to save data on the device, whether it's temporary files, downloaded
              app assets, user media, structured data, or something else."
             >Saving Data</a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/data-storage/shared-preferences.html">
+          <li><a href="<?cs var:toroot ?>training/basics/data-storage/shared-preferences.html"
+             es-lang=""
+             ja-lang="キー値セットを保存する"
+             ko-lang="키-값 세트 저장하기"
+             pt-br-lang="Salvando conjuntos de valor-chave"
+             ru-lang="Сохранение наборов "\"ключ-значение\""
+             zh-cn-lang="保存键值集"
+             zh-tw-lang="儲存索引鍵值組">
             Saving Key-Value Sets
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/data-storage/files.html">
+          <li><a href="<?cs var:toroot ?>training/basics/data-storage/files.html"
+             es-lang=""
+             ja-lang="ファイルを保存する"
+             ko-lang="파일 저장하기"
+             pt-br-lang="Salvando arquivos"
+             ru-lang="Сохранение файлов"
+             zh-cn-lang="保存文件"
+             zh-tw-lang="儲存檔案">
             Saving Files
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/data-storage/databases.html">
+          <li><a href="<?cs var:toroot ?>training/basics/data-storage/databases.html"
+             es-lang=""
+             ja-lang="SQL データベースにデータを保存する"
+             ko-lang="SQL 데이터베이스에 데이터 저장하기"
+             pt-br-lang="Salvando dados em bancos de dados do SQL"
+             ru-lang="Сохранение данных в базах данных SQL"
+             zh-cn-lang="在 SQL 数据库中保存数据"
+             zh-tw-lang="在 SQL 資料庫中儲存資料">
             Saving Data in SQL Databases
           </a>
           </li>
@@ -168,6 +231,13 @@ include the action bar on devices running Android 2.1 or higher."
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/intents/index.html"
+             es-lang=""
+             ja-lang="他のアプリとの相互操作"
+             ko-lang="액티비티 수명 주기 관리하기"
+             pt-br-lang="Interagindo com outros aplicativos"
+             ru-lang="Взаимодействие с другими приложениями"
+             zh-cn-lang="与其他应用交互"
+             zh-tw-lang="與其他應用程式互動"
              description=
              "How to build a user experience that leverages other apps available
              on the device to perform advanced user tasks, such as capture a photo or view
@@ -175,15 +245,36 @@ include the action bar on devices running Android 2.1 or higher."
             >Interacting with Other Apps</a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/intents/sending.html">
+          <li><a href="<?cs var:toroot ?>training/basics/intents/sending.html"
+             es-lang=""
+             ja-lang="別のアプリにユーザーを送る"
+             ko-lang="다른 앱으로 사용자 보내기"
+             pt-br-lang="Enviando o usuário para outro aplicativo"
+             ru-lang="Направление пользователя в другое приложение"
+             zh-cn-lang="向另一个应用发送用户"
+             zh-tw-lang="將使用者傳送至其他應用程式">
             Sending the User to Another App
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/intents/result.html">
+          <li><a href="<?cs var:toroot ?>training/basics/intents/result.html"
+             es-lang=""
+             ja-lang="アクティビティから結果を取得する"
+             ko-lang="액티비티로부터 결과 가져오기"
+             pt-br-lang="Obtendo resultados de uma atividade"
+             ru-lang="Получение результата операции"
+             zh-cn-lang="获取活动的结果"
+             zh-tw-lang="從應用行為顯示取得結果">
             Getting a Result from the Activity
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/intents/filters.html">
+          <li><a href="<?cs var:toroot ?>training/basics/intents/filters.html"
+             es-lang=""
+             ja-lang="他のアプリからのアクティビティの開始を許可する"
+             ko-lang="다른 앱이 자신의 액티비티를 시작하도록 허용하기"
+             pt-br-lang="Permitindo que outros aplicativos iniciem sua atividade"
+             ru-lang="Разрешение другим приложениям на запуск вашей операции"
+             zh-cn-lang="允许其他应用开始您的活动"
+             zh-tw-lang="允許其他應用程式啟動您的應用行為顯示">
             Allowing Other Apps to Start Your Activity
           </a>
           </li>

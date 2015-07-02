@@ -1,0 +1,256 @@
+page.title=Enviando o usuário para outro aplicativo
+page.tags=intenções
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#Build">Criar uma intenção implícita</a></li>
+  <li><a href="#Verify">Confirmar se há um aplicativo para receber a intenção</a></li>
+  <li><a href="#StartActivity">Iniciar uma atividade com uma intenção</a></li>
+  <li><a href="#AppChooser">Mostrar um selecionador de aplicativo</a></li>
+</ol>
+
+<h2>Leia também</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">Compartilhando dados simples</a></li>
+</ul>
+
+  </div>
+</div>
+
+<p>Uma das características mais importantes do Android é a habilidade do aplicativo enviar o usuário para outro aplicativo
+com base em uma “ação” que gostaria de executar. Por exemplo, se
+o aplicativo tiver o endereço de um negócio que você gostaria de mostrar em um mapa, não é necessário criar
+uma atividade no aplicativo que mostre um mapa. Em vez disso, é possível criar uma solicitação para exibir o endereço
+usando {@link android.content.Intent}. O sistema Android inicia um aplicativo que possa mostrar
+o endereço em um mapa.</p>
+
+<p>Como explicado na primeira lição, <a href="{@docRoot}training/basics/firstapp/index.html">Criando
+seu primeiro aplicativo</a>, use intenções para navegar entre atividades no aplicativo. Geralmente
+isso é feito com <em>intenções explícitas</em>, que define o nome exato da classe do
+componente que deseja iniciar. No entanto, quando desejar que outro aplicativo execute uma ação, como
+“visualizar um mapa”, use uma <em>intenção implícita</em>.</p>
+
+<p>Esta lição mostra como criar uma intenção implícita para uma ação específica e como utilizá-la
+para iniciar uma atividade que executa a ação em outro aplicativo.</p>
+
+
+
+<h2 id="Build">Criar uma intenção implícita</h2>
+
+<p>Intenções implícitas não declaram o nome da classe do componente a iniciar, mas declaram uma
+ação a executar. A ação especifica o que deve ser feito, como <em>visualizar</em>,
+<em>editar</em>, <em>enviar</em> ou <em>obter</em> algo. Geralmente, as intenções incluem dados associados
+à ação, como o endereço que deseja visualizar ou a mensagem de email a ser enviada.
+Dependendo da intenção que deseja criar, os dados podem ser {@link android.net.Uri},
+um dos outros tipos de dados ou a intenção pode não precisar de dado algum.</p>
+
+<p>Se seu dados forem um {@link android.net.Uri}, há um simples construtor {@link
+android.content.Intent#Intent(String,Uri) Intent()} que pode ser usado para definir a ação e
+os dados.</p>
+
+<p>Este é um exemplo de como criar uma intenção para iniciar uma chamada telefônica usando os dados {@link
+android.net.Uri} para especificar o número de telefone:</p>
+
+<pre>
+Uri number = Uri.parse("tel:5551234");
+Intent callIntent = new Intent(Intent.ACTION_DIAL, number);
+</pre>
+
+<p>Quando o aplicativo invoca a intenção chamando {@link android.app.Activity#startActivity
+startActivity()}, o aplicativo Telefone inicia uma chamada para o número especificado.</p>
+
+<p>Estas são algumas outras intenções e suas ações e pares de dados {@link android.net.Uri}
+:</p>
+
+<ul>
+  <li>Visualizar um mapa:
+<pre>
+// Map point based on address
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+// Or map point based on latitude/longitude
+// Uri location = Uri.parse("geo:37.422219,-122.08364?z=14"); // z param is zoom level
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+</pre>
+  </li>
+  <li>Visualizar uma página da Web:
+<pre>
+Uri webpage = Uri.parse("http://www.android.com");
+Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+</pre>
+  </li>
+</ul>
+
+<p>Outros tipos de intenções implícitas exigem dados “extras” que fornecem diferentes tipos de dados,
+como uma cadeia de caracteres. É possível adicionar um ou mais dados extras utilizando vários métodos {@link
+android.content.Intent#putExtra(String,String) putExtra()}.</p>
+
+<p>Por padrão, o sistema determina o tipo MIME adequado que uma intenção exige com base nos dados
+{@link android.net.Uri} incluídos. Se você não incluir um {@link android.net.Uri} na
+intenção, sempre utilize {@link android.content.Intent#setType setType()} para especificar o tipo
+de dado associado à intenção. Definir o tipo de MIME especifica melhor que tipos de
+atividades receberão a intenção.</p>
+
+<p>Estas são mais algumas intenções que adicionam dados extra para especificar a intenção desejada:</p>
+
+<ul>
+  <li>Enviar um email com um anexo:
+<pre>
+Intent emailIntent = new Intent(Intent.ACTION_SEND);
+// The intent does not have a URI, so declare the "text/plain" MIME type
+emailIntent.setType(HTTP.PLAIN_TEXT_TYPE);
+emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"jon@example.com"}); // recipients
+emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Email subject");
+emailIntent.putExtra(Intent.EXTRA_TEXT, "Email message text");
+emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://path/to/email/attachment"));
+// You can also attach multiple items by passing an ArrayList of Uris
+</pre>
+  </li>
+  <li>Criar um evento de calendário:
+<pre>
+Intent calendarIntent = new Intent(Intent.ACTION_INSERT, Events.CONTENT_URI);
+Calendar beginTime = Calendar.getInstance().set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance().set(2012, 0, 19, 10, 30);
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis());
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
+calendarIntent.putExtra(Events.TITLE, "Ninja class");
+calendarIntent.putExtra(Events.EVENT_LOCATION, "Secret dojo");
+</pre>
+<p class="note"><strong>Observação:</strong> esta intenção para evento de calendário é suportada apenas com nível de API
+14 e superior.</p>
+  </li>
+</ul>
+
+<p class="note"><strong>Observação:</strong> é importante definir seu {@link
+android.content.Intent} para ser o mais específico possível. Por exemplo, se você deseja exibir uma imagem
+usando a intenção {@link android.content.Intent#ACTION_VIEW}, especifique o tipo de MIME do
+{@code image/*}. Isto evita que aplicativos que podem “exibir” outros tipos de dados (como um aplicativo de mapas) seja
+acionado pela intenção.</p>
+
+
+
+<h2 id="Verify">Confirmar se há um aplicativo para receber a intenção</h2>
+
+<p>Embora a plataforma do Android garanta que determinadas intenções sejam resolvidas com um dos
+ aplicativos embutidos (como aplicativo de Telefone, Email ou Agenda), sempre inclua uma
+etapa de confirmação antes de chamar uma intenção.</p>
+
+<p class="caution"><strong>Cuidado:</strong> se você invocar uma intenção e não houver aplicativo
+disponível no dispositivo para tratar a intenção, o aplicativo falhará.</p>
+
+<p>Para confirmar se há atividade disponível para responder à intenção, chame {@link
+android.content.pm.PackageManager#queryIntentActivities queryIntentActivities()} para obter uma lista
+de atividades que podem tratar a {@link android.content.Intent}. Se o {@link
+java.util.List} retornado não estiver vazio, a intenção poderá ser usada com segurança. Por exemplo:</p>
+
+<pre>
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
+boolean isIntentSafe = activities.size() > 0;
+</pre>
+
+<p>Se <code>isIntentSafe</code> for <code>true</code>, pelo menos um aplicativo responderá à
+intenção. Se for <code>false</code>, não há aplicativos disponíveis para responder à intenção.</p>
+
+<p class="note"><strong>Observação:</strong> faça essa verificação quando a atividade
+iniciar, caso seja necessário desabilitar a funcionalidade que usa a intenção antes do usuário tentar utilizá-
+la. Caso conheça um aplicativo específico que possa lidar com a intenção, forneça um link para que o
+usuário baixe o aplicativo (veja como <a href="{@docRoot}distribute/tools/promote/linking.html">vincular para seus produtos no Google
+Play</a>).</p>
+
+
+<h2 id="StartActivity">Iniciar uma atividade com uma intenção</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intents-choice.png" alt="" />
+  <p class="img-caption"><strong>Figura 1.</strong> Exemplo de diálogo de seleção que aparece
+quando mais de um aplicativo pode tratar uma intenção.</p>
+</div>
+
+<p>Quando tiver criado sua {@link android.content.Intent} e definido as informações extras, chame {@link
+android.app.Activity#startActivity startActivity()} para enviá-la ao sistema. Se o sistema
+identificar mais de uma atividade que pode tratar a intenção, um diálogo exibirá para que o usuário
+selecione qual aplicativo usar, como mostrado na figura 1. Se houver apenas uma atividade para tratar a
+intenção, o sistema a iniciará imediatamente.</p>
+
+<pre>
+startActivity(intent);
+</pre>
+
+<p>Este é um exemplo completo que mostra como criar uma intenção para exibir um mapa, confirmar se há
+um aplicativo para tratar a intenção e iniciar:</p>
+
+<pre>
+// Build the intent
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+
+// Verify it resolves
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(mapIntent, 0);
+boolean isIntentSafe = activities.size() > 0;
+
+// Start an activity if it's safe
+if (isIntentSafe) {
+    startActivity(mapIntent);
+}
+</pre>
+
+
+
+<h2 id="AppChooser">Mostrar um selecionador de aplicativo</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="" />
+  <p class="img-caption"><strong>Figura 2.</strong> Um diálogo seletor.</p>
+</div>
+
+<p>Observe que ao iniciar uma atividade passando seu {@link android.content.Intent} para {@link
+android.app.Activity#startActivity startActivity()} e quando há mais de um aplicativo que responde à
+intenção, o usuário pode selecionar qual aplicativo usar por padrão (marcando uma caixa de seleção na parte inferior
+do diálogo, veja a figura 1). Isto é bom quando se executa uma ação para qual o usuário
+deseja usar o mesmo aplicativo todas as vezes, como quando abre uma página da Web (o usuário
+geralmente usa apenas um navegador) ou para tirar fotos (o usuário prefere uma câmera).</p>
+
+<p>Contudo, se a ação a ser executada puder ser tratada por vários aplicativos e o usuário
+preferir um aplicativo diferente a cada vez, como a ação “compartilhar” onde os usuários podem ter vários
+aplicativos para compartilhar um item, você deve exibir explicitamente um diálogo seletor
+conforme mostrado na figura 2. O diálogo seletor
+força o usuário a selecionar qual aplicativo usar para a ação todas as vezes (o usuário não pode selecionar
+um aplicativo padrão para a ação).</p>
+
+<p>Para exibir o seletor, crie uma {@link android.content.Intent} usando {@link
+android.content.Intent#createChooser createChooser()} e transmita para {@link
+android.app.Activity#startActivity startActivity()}. Por exemplo:</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show chooser
+Intent chooser = Intent.createChooser(intent, title);
+
+// Verify the intent will resolve to at least one activity
+if (intent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>Isso exibe um diálogo com uma lista de aplicativos que respondem à intenção transmitida ao método {@link
+android.content.Intent#createChooser createChooser()} e utiliza o texto fornecido como
+título do diálogo.</p>
+
+
+

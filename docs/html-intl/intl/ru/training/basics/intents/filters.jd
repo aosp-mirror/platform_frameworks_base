@@ -1,0 +1,236 @@
+page.title=Разрешение другим приложениям на запуск вашей операции
+page.tags=намерения
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>Содержание этого урока</h2>
+<ol>
+  <li><a href="#AddIntentFilter">Добавление фильтра Intent</a></li>
+  <li><a href="#HandleIntent">Обработка объекта Intent в операции</a></li>
+  <li><a href="#ReturnResult">Возврат результата</a></li>
+</ol>
+
+<h2>См. также:</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">Общий доступ к простым данным</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">Общий доступ к файлам</a>
+</ul>
+  </div>
+</div>
+
+<p>Предыдущие два урока были посвящены одной теме – запуску операции вашего приложения
+в другом приложении. Однако если ваше приложение может выполнять операции, полезные другим приложениям,
+его нужно подготовить так, чтобы оно реагировало на запросы других приложений. Представьте, что вы разработали
+приложение для социальных сетей, позволяющее отправлять сообщения и фотографии друзьям пользователя. В этом случае в ваших интересах
+будет поддерживать объекты Intent (намерения) {@link android.content.Intent#ACTION_SEND}, чтобы пользователи могли
+поделиться контентом из другого приложения и запускать ваше приложение для выполнения требуемого действия.</p>
+
+<p>Чтобы разрешить другим приложениям запускать ваши операции, вам нужно добавить в ваш файл манифеста элемент <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+ для соответствующего элемента <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>.</p>
+
+<p>Если ваше приложение установлено на устройстве, система идентифицирует ваши
+фильтры Intent и добавляет информацию во внутренний каталог намерений, поддерживаемый всеми установленными приложениями.
+Когда приложение осуществляет вызов {@link android.app.Activity#startActivity
+startActivity()} или {@link android.app.Activity#startActivityForResult startActivityForResult()}
+с неявными объектами Intent, система определяет, какая операция (или какие операции) может отреагировать на объект
+Intent.</p>
+
+
+
+<h2 id="AddIntentFilter">Добавление фильтра Intent</h2>
+
+<p>Чтобы правильно определить, какие объекты Intent может обрабатывать ваша операция, каждый добавляемый вами фильтр Intent
+должен быть максимально определенным с точки зрения действий и данных, принимаемых
+операцией.</p>
+
+<p>Система может отправить указанный {@link android.content.Intent} в операцию, если у нее имеется
+фильтр Intent, соответствующий следующим критериям объекта {@link android.content.Intent}:</p>
+
+<dl>
+  <dt>Действие</dt>
+    <dd>Строка, называющая действие, которое необходимо выполнить. Обычно это одно из определяемых платформой значений,
+например, {@link android.content.Intent#ACTION_SEND} или {@link android.content.Intent#ACTION_VIEW}.
+    <p>Это следует указать в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>.
+Указанное в этом элементе значение должно представлять собой полное имя строки действия, а не
+постоянное значение API-интерфейса (см. примеры ниже).</p></dd>
+
+  <dt>Данные</dt>
+    <dd>Описание данных, связанных с объектом Intent.
+    <p>Указывается в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>. Используя один
+или несколько атрибутов в этом элементе, вы можете указать только тип MIME, только префикс URI,
+только схему URI или из сочетание, а также другие индикаторы типа
+принимаемых данных.</p>
+    <p class="note"><strong>Примечание.</strong> Если вам не нужно декларировать специфику данных
+{@link android.net.Uri}(например, когда операция использует другие виды дополнительных данных вместо
+URI), вы должны указать только атрибут {@code android:mimeType} для декларирования типа
+данных, с которыми работает ваша операция, например, {@code text/plain} или {@code image/jpeg}.</p>
+</dd>
+  <dt>Категория</dt>
+    <dd>Дополнительный способ описания характеристик операции, обрабатывающей объект Intent который обычно связан
+с жестом пользователя или местом запуска. Система поддерживает несколько разных категорий,
+но большинство из них используется редко. Однако по умолчанию все неявные объекты Intent определяются с
+{@link android.content.Intent#CATEGORY_DEFAULT}.
+    <p>Это указывается в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>
+.</p></dd>
+</dl>
+
+<p>В своем фильтре Intent вы можете декларировать критерии, принимаемые вашей операцией.
+Для этого нужно декларировать каждый из них с соответствующими элементами XML, вложенными в элемент <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+.</p>
+
+<p>Рассмотрим в качестве примера операцию с фильтром Intent, обрабатывающим объект {@link
+android.content.Intent#ACTION_SEND}, для текстовых или графических данных.</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+        &lt;data android:mimeType="image/*"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Каждый входящий объект Intent указывает только одно действие и только один тип данных, однако допускается декларирование нескольких
+экземпляров элементов <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> и <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> в каждом
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a>.</p>
+
+<p>Если поведение любых двух пар действий и данных является взаимоисключающим,
+необходимо создать отдельные фильтры Intent с указанием допустимых действий
+в сочетании с соответствующими типами данных.</p>
+
+<p>Допустим, ваша операция обрабатывает текст и изображения для объектов Intent {@link
+android.content.Intent#ACTION_SEND} и {@link
+android.content.Intent#ACTION_SENDTO}. В этом случае вам необходимо определить два отдельных фильтра Intent
+для двух действий, потому что объект Intent {@link
+android.content.Intent#ACTION_SENDTO} должен использовать данные {@link android.net.Uri} для указания
+адреса получателя с использованием схемы URI {@code send} или {@code sendto}. Например:</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;!-- filter for sending text; accepts SENDTO action with sms URI schemes -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SENDTO"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:scheme="sms" />
+        &lt;data android:scheme="smsto" />
+    &lt;/intent-filter>
+    &lt;!-- filter for sending text or images; accepts SEND action and text or image data -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>Примечание.</strong> Для получения неявных объектов Intent необходимо включить категорию
+{@link android.content.Intent#CATEGORY_DEFAULT} в фильтр Intent. Методы {@link
+android.app.Activity#startActivity startActivity()} и {@link
+android.app.Activity#startActivityForResult startActivityForResult()} обрабатывают все объекты Intent, как если бы они
+декларировали категорию {@link android.content.Intent#CATEGORY_DEFAULT}. Если вы не декларируете ее
+в своем фильтре Intent, никакие неявные объекты Intent не будут разрешаться в вашу операцию.</p>
+
+<p>Более подробную информацию об отправке и получении объектов {@link android.content.Intent#ACTION_SEND}
+Intent для социальных сетей и обмена данными см. в уроке <a href="{@docRoot}training/sharing/receive.html">Получение простых данных от других приложений</a>.</p>
+
+
+<h2 id="HandleIntent">Обработка объекта Intent в операции</h2>
+
+<p>Чтобы решить, какое действие выполнить в операции, можно прочитать объект {@link
+android.content.Intent}, использованный для ее запуска.</p>
+
+<p>При запуске операции нужно вызвать {@link android.app.Activity#getIntent()} для получения
+{@link android.content.Intent}, запустившего операцию. Это можно сделать в любое время в течение
+жизненного цикла операции, но обычно это делается при ранних обратных вызовах, например,
+{@link android.app.Activity#onCreate onCreate()} или {@link android.app.Activity#onStart()}.</p>
+
+<p>Например:</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.main);
+
+    // Get the intent that started this activity
+    Intent intent = getIntent();
+    Uri data = intent.getData();
+
+    // Figure out what to do based on the intent type
+    if (intent.getType().indexOf("image/") != -1) {
+        // Handle intents with image data ...
+    } else if (intent.getType().equals("text/plain")) {
+        // Handle intents with text ...
+    }
+}
+</pre>
+
+
+<h2 id="ReturnResult">Возврат результата</h2>
+
+<p>Если вы хотите возвратить результат операции, которая вызвала вашу операцию, просто вызовите {@link
+android.app.Activity#setResult(int,Intent) setResult()}, чтобы указать код результата и объект {@link
+android.content.Intent} результата. Когда ваша операция завершается, и пользователь должен вернуться к первоначальной
+операции, вызовите {@link android.app.Activity#finish()}, чтобы закрыть (и уничтожить) вашу операцию. Например:
+</p>
+
+<pre>
+// Create intent to deliver some kind of result data
+Intent result = new Intent("com.example.RESULT_ACTION", Uri.parse("content://result_uri");
+setResult(Activity.RESULT_OK, result);
+finish();
+</pre>
+
+<p>Вместе с результатом всегда нужно указывать код результата. Обычно этот код выглядит так: {@link
+android.app.Activity#RESULT_OK} или {@link android.app.Activity#RESULT_CANCELED}. После этого при
+необходимости можно указать дополнительные данные с помощью {@link android.content.Intent}.</p>
+
+<p class="note"><strong>Примечание.</strong> По умолчанию используется результат {@link
+android.app.Activity#RESULT_CANCELED}. Таким образом, если пользователь нажимает кнопку <em>Назад</em>
+до завершения действия и определения результата, первоначальная операция получает
+результат "Отменено".</p>
+
+<p>Если вам просто нужно возвратить целое число, указывающее один из нескольких вариантов результатов, вы можете установить
+для кода результата любое значение больше 0. Если вы используете код результата для передачи целого числа и вам
+не нужно включать {@link android.content.Intent}, можете вызвать метод {@link
+android.app.Activity#setResult(int) setResult()} и передать только код результата. Например:</p>
+
+<pre>
+setResult(RESULT_COLOR_RED);
+finish();
+</pre>
+
+<p>В этом случае может быть мало возможных результатов, и поэтому код результата представляет собой определяемое
+локально целое число (больше 0). Это хорошо работает, когда вы возвращаете результат операции
+в собственном приложении, поскольку получающая результат операция может ссылаться на общедоступное
+постоянное значение для определения значения кода результата.</p>
+
+<p class="note"><strong>Примечание.</strong> Не нужно проверять, запущена ли ваша операция,
+используя метод {@link
+android.app.Activity#startActivity startActivity()} или {@link
+android.app.Activity#startActivityForResult startActivityForResult()}. Просто вызовите метод {@link
+android.app.Activity#setResult(int,Intent) setResult()}, если запустивший вашу операцию объект Intent может
+ожидать результат. Если исходная операция вызвала метод {@link
+android.app.Activity#startActivityForResult startActivityForResult()}, система передаст
+ей результат, который вы передаете {@link android.app.Activity#setResult(int,Intent) setResult()}. В противном случае
+результат будет проигнорирован.</p>
+
+
+
+
+
+

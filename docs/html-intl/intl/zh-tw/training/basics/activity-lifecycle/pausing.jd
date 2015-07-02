@@ -1,0 +1,147 @@
+page.title=暫停並繼續應用行為顯示
+page.tags=應用行為顯示生命週期
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>本課程示範</h2>
+    <ol>
+      <li><a href="#Pause">暫停您的應用行為顯示</a></li>
+      <li><a href="#Resume">繼續您的應用行為顯示</a></li>
+    </ol>
+    
+    <h2>您也應該閱讀</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">應用行為顯示</a>
+      </li>
+    </ul>
+
+<h2>試試看</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">下載示範</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>在應用程式正常使用期間，有時前景應用行為顯示會受到其他視覺元件的遮蓋，導致該應用行為顯示<em>暫停</em>。
+例如，若開啟半透明的應用行為顯示 (諸如採用對話方塊風格的應用行為顯示)，前一個應用行為顯示會暫停。
+只要應用行為顯示仍部分可見，但目前並非焦點，就會保持暫停狀態。
+</p>
+
+<p>但是，若應用行為顯示完全遭遮蓋且不可見，則會<em>停止</em> (下一課將對此進行討論)。
+</p>
+
+<p>在您的應用行為顯示進入暫停狀態時，系統會針對您的 {@link android.app.Activity} 呼叫 {@link
+android.app.Activity#onPause onPause()} 方法，您可藉此停止在暫停時不應繼續的進行中行為 (例如影片)，或保留使用者持續離開您的應用程式時應永久儲存的資訊。若使用者從暫停狀態返回至您的應用行為顯示，系統會繼續執行該應用行為顯示，並呼叫 {@link android.app.Activity#onResume onResume()} 方法。
+
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>若您的應用行為顯示收到對 {@link
+android.app.Activity#onPause()} 的呼叫，可能表示該應用行為顯示將暫停片刻，隨後使用者會將焦點重新移到您的應用行為顯示上。
+但是，這通常首先表示使用者離開您的應用行為顯示。
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-paused.png" />
+<p class="img-caption"><strong>圖 1.</strong>若半透明的應用行為顯示遮蓋您的應用行為顯示，系統會呼叫 {@link android.app.Activity#onPause onPause()}，您的應用行為顯示會進行等候 (狀態為「已暫停」) (1)。
+
+若使用者在應用行為顯示仍處於暫停狀態時返回至應用行為顯示，系統將呼叫 {@link android.app.Activity#onResume onResume()} (2)。
+</p>
+
+
+<h2 id="Pause">暫停您的應用行為顯示</h2>
+      
+<p>若系統為您的應用行為顯示呼叫 {@link android.app.Activity#onPause()}，嚴格來說意味著您的應用行為顯示仍是部分可見，但多數情況下表示使用者離開應用行為顯示，該應用行為顯示很快將進入「已停止」狀態。
+
+通常，您應使用 {@link android.app.Activity#onPause()} 回呼執行以下操作：
+</p>
+
+<ul>
+  <li>停止動畫或會耗用 CPU 資源的其他進行中行為。</li>
+  <li>認可未儲存的變更，但是只有在使用者希望離開時永久儲存此類變更 (例如電子郵件草稿) 的情況下才執行此操作。
+</li>
+  <li>釋放系統資源，例如廣播接收器、感應器 (如 GPS) 的控點，或釋放在您的應用行為顯示暫停時可能影響電池使用壽命 (且使用者不再需要) 的資源。
+
+</li>
+</ul>
+
+<p>例如，若您的應用程式使用 {@link android.hardware.Camera}，則使用 {@link android.app.Activity#onPause()} 方法可以良好地將其釋放。
+</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    super.onPause();  // Always call the superclass method first
+
+    // Release the Camera because we don't need it when paused
+    // and other activities might need to use it.
+    if (mCamera != null) {
+        mCamera.release()
+        mCamera = null;
+    }
+}
+</pre>
+
+<p>一般而言，您<strong>不</strong>應使用 {@link android.app.Activity#onPause()} 將使用者變更 (例如表單中輸入的個人資訊) 儲存至永久儲存空間。
+只有在您確信使用者希望自動儲存變更 (例如在起草電子郵件的情況下) 時，才應將使用者變更保留在 {@link android.app.Activity#onPause()} 中的永久儲存空間內。但是在 {@link
+android.app.Activity#onPause()} 期間，您應避免執行耗用大量 CPU 資源的工作 (例如寫入至資料庫)，因為這會降低向下一個應用行為顯示進行視覺轉換的速度 (您應改為在 {@link android.app.Activity#onStop onStop()} 期間執行高負荷的關機作業)。
+
+
+
+
+</p>
+
+<p>對於使用 {@link android.app.Activity#onPause
+onPause()} 方法執行的作業，應保持相對簡單，以便在您的應用行為顯示實際正在停止的情況下，實現向使用者下一個目標的快速轉換。
+</p>
+
+<p class="note"><strong>注意：</strong>您的應用行為顯示暫停後，{@link
+android.app.Activity} 執行個體將保留在記憶體中，應用行為顯示繼續時將重新呼叫該執行個體。您無需重新初始化在使用回呼方法 (導致產生「已繼續」狀態) 期間建立的元件。
+
+</p>
+
+
+
+<h2 id="Resume">繼續您的應用行為顯示</h2>
+
+<p>若使用者從「已暫停」狀態繼續執行您的應用行為顯示，系統會呼叫 {@link
+android.app.Activity#onResume()} 方法。</p>
+
+<p>請注意，每次您的應用行為顯示進入前景時 (包括第一次建立該應用行為顯示時)，系統都會呼叫此方法。
+因此，您應實作 {@link
+android.app.Activity#onResume()}，以初始化您在 {@link
+android.app.Activity#onPause()} 期間釋放的元件，並執行每次應用行為顯示進入「已繼續」狀態時必須進行的其他初始化 (例如開始播放動畫，以及對只有在應用行為顯示具有使用者焦點時才使用的元件進行初始化)。
+
+</p>
+
+<p>以下 {@link android.app.Activity#onResume()} 範例是上述 {@link android.app.Activity#onPause()} 範例的對應，會針對應用行為顯示暫停時釋放的相機執行初始化。
+
+</p>
+
+<pre>
+&#64;Override
+public void onResume() {
+    super.onResume();  // Always call the superclass method first
+
+    // Get the Camera instance as the activity achieves full user focus
+    if (mCamera == null) {
+        initializeCamera(); // Local method to handle camera init
+    }
+}
+</pre>
+
+
+
+
+
+
+
