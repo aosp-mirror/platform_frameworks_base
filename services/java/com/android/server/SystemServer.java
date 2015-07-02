@@ -21,7 +21,6 @@ import android.app.ActivityThread;
 import android.app.IAlarmManager;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
-import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -401,7 +400,6 @@ public final class SystemServer {
         NetworkScoreService networkScore = null;
         NsdService serviceDiscovery= null;
         WindowManagerService wm = null;
-        BluetoothManagerService bluetooth = null;
         UsbService usb = null;
         SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
@@ -508,9 +506,8 @@ public final class SystemServer {
             } else if (disableBluetooth) {
                 Slog.i(TAG, "Bluetooth Service disabled by config");
             } else {
-                Slog.i(TAG, "Bluetooth Manager Service");
-                bluetooth = new BluetoothManagerService(context);
-                ServiceManager.addService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE, bluetooth);
+                Slog.i(TAG, "Bluetooth Service");
+                mSystemServiceManager.startService(BluetoothService.class);
             }
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
