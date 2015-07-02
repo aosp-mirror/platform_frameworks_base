@@ -531,14 +531,14 @@ public class AppTransition implements Dump {
 
             // Clip third of the from size of launch icon, expand to full width/height
             Animation clipAnimLR = new ClipRectLRAnimation(
-                    centerX - mNextAppTransitionStartWidth / 3,
-                    centerX + mNextAppTransitionStartWidth / 3,
+                    centerX - mNextAppTransitionStartWidth / 2,
+                    centerX + mNextAppTransitionStartWidth / 2,
                     0, appWidth);
             clipAnimLR.setInterpolator(mClipHorizontalInterpolator);
             clipAnimLR.setDuration((long) (DEFAULT_APP_TRANSITION_DURATION / 2.5f));
             Animation clipAnimTB = new ClipRectTBAnimation(
-                    centerY - mNextAppTransitionStartHeight / 3 - translationY,
-                    centerY + mNextAppTransitionStartHeight / 3 - translationY,
+                    centerY - mNextAppTransitionStartHeight / 2 - translationY,
+                    centerY + mNextAppTransitionStartHeight / 2 - translationY,
                     0, appHeight);
             clipAnimTB.setInterpolator(mTouchResponseInterpolator);
             clipAnimTB.setDuration(DEFAULT_APP_TRANSITION_DURATION);
