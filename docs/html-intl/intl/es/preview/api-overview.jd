@@ -1,6 +1,6 @@
 page.title=Información general de la API
-page.keywords=versión preliminar,sdk,compatibilidad
-page.tags=recursos de la versión preliminar, androidm
+page.keywords=preview,sdk,compatibility
+page.tags=previewresources, androidm
 sdk.platform.apiLevel=22-mnc
 page.image=images/cards/card-api-overview_16-9_2x.png
 @jd:body
@@ -125,7 +125,7 @@ Ejemplo de diálogo de huella dactilar</a>.</p>
 <p>Si está evaluando esta característica, siga estos pasos:</p>
 <ol>
 <li>Instale la Revisión de herramientas del SDK de Android versión 24.3, si todavía no la instaló.</li>
-<li>Registre una huella dactilar nueva en el emulador; para hacerlo, vaya a 
+<li>Registre una huella dactilar nueva en el emulador; para hacerlo, vaya a
 <strong>Settings &gt; Security &gt; Fingerprint</strong>, luego siga las instrucciones de registro.</li>
 <li>Use un emulador para emular eventos táctiles de huellas dactilares con el siguiente comando.
  Utilice el mismo comando para emular eventos táctiles de huellas dactilares en la pantalla de bloqueo o en su aplicación.
@@ -216,7 +216,7 @@ le permite compilar experiencias de conversaciones de voz en sus aplicaciones. L
 {@code android.app.Activity.isVoiceInteraction()} para determinar si su actividad se inició en respuesta a una acción de voz.
  De ser así, su aplicación puede utilizar la clase
 {@code android.app.VoiceInteractor} para solicitar una confirmación de voz por parte del usuario, realizar una selección de una lista de opciones y mucho más.
- Para obtener más información sobre cómo implementar acciones de voz, consulte el 
+ Para obtener más información sobre cómo implementar acciones de voz, consulte el
 <a href="https://developers.google.com/voice-actions/interaction/" class="external-link">sitio para desarrolladores de acciones de voz</a>.
 </p>
 
@@ -436,7 +436,7 @@ para desactivar el modo linterna. Cuando se cierra la última aplicación que ac
     <li>Deshabilitar o volver a habilitar la barra de estado (lo que incluye configuraciones rápidas, notificaciones y el gesto de navegación al deslizar el dedo hacia arriba para iniciar Google Now) con el método
 {@code DevicePolicyManager.setStatusBarEnabledState()}.
 </li>
-    <li>Deshabilitar o volver a habilitar el inicio seguro con la constante {@link android.os.UserManager} 
+    <li>Deshabilitar o volver a habilitar el inicio seguro con la constante {@link android.os.UserManager}
 {@code DISALLOW_SAFE_BOOT}.</li>
     <li>Evitar que se apague la pantalla mientras el dispositivo se encuentra conectado con la constante
   {@link android.provider.Settings.Global} {@code STAY_ON_WHILE_PLUGGED_IN}.</li>
