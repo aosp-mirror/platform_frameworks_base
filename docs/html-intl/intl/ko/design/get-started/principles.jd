@@ -1,0 +1,307 @@
+page.title=Android 디자인 원칙
+@jd:body
+
+<p>이러한 디자인 원칙은 사용자의 이익을 가장 염두에 두고 Android
+사용자 환경 팀(User Experience Team)에 의해서와 이 팀을 위해 개발되었습니다. Android 개발자 및 디자이너를
+위해 Android 사용자 환경 팀은 계속해서 여러
+유형의 기기를 위한 상세한 디자인 가이드라인의
+기저를 이루고 있습니다.</p>
+
+<p>
+본인의
+창의성과 디자인 사고를 적용할 때 이러한 원칙을 고려해 보시기 바랍니다. 목적을 가지고 여러 가지 참신한 발상을 실현해 보세요.
+</p>
+
+<h2 id="enchant-me">황홀하게 만들기</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="delight-me">놀라운 방식으로 기쁨을 주기</h4>
+<p>아름다운 표면, 신중하게 위치한 애니메이션 또는 시간적으로 잘 짜여진 소리 효과는 사람들에게 즐거운
+경험을 줍니다. 잔잔한 효과는 자연스러움을 느끼게 해주며, 강력한
+힘을 가지고 있다고 느끼게 해줍니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_delight.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="real-objects-more-fun">버튼 및 메뉴보다 더 흥미로운 실제 사물</h4>
+<p>사람들이 직접 앱 내 사물을 터치하고 조작할 수 있게 해보세요. 이는 태스크를 수행할 때
+필요한 인지 노력을 줄이는 동시에 정서적인 만족을 가져다 줍니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_real_objects.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-it-mine">내 것으로 만들게 하기</h4>
+<p>사람들은 개인적인 취향을 더하고 싶어 하는데, 그렇게 하면 마음이 편안해지고 통제할 수 있다고 느끼게 되기 때문입니다. 합리적이고
+아름다운 기본 설정을 제공하는 동시에
+주요 태스크를 저해하지 않는 범위에서 재미있고, 선택 가능한 맞춤 기능을 제공할 것을 고려해 보십시오.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_it_mine.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="get-to-know-me">사용자에 대해 파악하기</h4>
+<p>시간이 지남에 따라 사람들이 선호하는 것을 알아보세요. 똑같은 선택을 매번
+하도록 요구하기 보다는 이전 선택을 쉽게 접근할 수 있는 곳에 둡니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_get_to_know_me.png">
+
+  </div>
+</div>
+
+<h2 id="simplify-my-life">사용자의 생활을 단순하게 만들기</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="keep-it-brief">간결하게 만들기</h4>
+<p>간단한 단어로 이루어진 짧은 문구를 사용하세요. 문장이 길면 사람들이 보지 않고 넘길 가능성이 커집니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_keep_it_brief.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="pictures-faster-than-words">말보다 빠른 사진</h4>
+<p>생각을 전달하는 데 사진을 이용할 것을 고려해 보세요. 사람들의 시선을 끌고 말보다
+더 효과적일 수 있습니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_pictures.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="decide-for-me">사용자를 대신해서 결정해 주되 최종 결정권은 사용자에게 주기</h4>
+<p>먼저 물어보기 보다는 최선의 추측을 하고 조치를 취해 보세요. 선택하고 결정해야 하는 사항이 너무 많으면 사람들이
+짜증을 내게 됩니다. 만약을 대비해 '실행 취소' 기능을 제공합니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_decide_for_me.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="only-show-when-i-need-it">사용자가 필요로 할 때 필요한 사항만 보여주기</h4>
+<p>사람들은 한 번에 너무 많은 것을 보면 버거워합니다. 태스크 및 정보를 소화 가능한
+작은 크기로 나누세요. 현재 필요하지 않은 옵션은 숨기고 사람들의 작업 진행에 맞게 옵션을 표시하세요.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_information_when_need_it.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="always-know-where-i-am">사용자 자신이 현재 어디에 있는지 항상 알도록 하기</h4>
+<p>사람들에게 현재 자신이 어디에 있는지에 대한 확신을 주어야 합니다. 앱에서 장소가 명확하게 표시되게 하고,
+전환을 사용하여 화면 간 관계를 보여줍니다. 현재 작업 중인 태스크에 대한 피드백을 제공합니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_navigation.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="never-lose-my-stuff">사용자가 가지고 있는 것들을 절대 잃어버리지 않도록 하기</h4>
+<p>사람들이 공들여 만든 것을 저장하고 어디서든지 액세스할 수 있게 합니다. 휴대폰, 태블릿 및 컴퓨터에 걸쳐 설정,
+개인적 특색, 그리고 만든 것들이 저장되도록 합니다. 그렇게 하면 업그레이드가 세상에서
+가장 쉬워집니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="looks-same-should-act-same">똑같이 보이면 똑같이 동작되도록 하기</h4>
+<p>기능을 시각적으로 단순하게 만들기 보다는 눈에 띄게 만들어 사람들이 기능적 차이를 알아볼 수 있게 합니다.
+비슷하게 보이는 장소지만 같은 입력에 대해 다르게 실행되는 모드는 피하도록 합니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_looks_same.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="interrupt-only-if-important">중요할 때만 작업을 중단하기</h4>
+<p>유능한 개인 비서와 같이 중요하지 않은 일로 사람들의 작업을 중단하지 않도록 합니다. 사람들은
+작업에 계속 집중하기를 바라며, 중요하고 시간을 다투는 일을 제외하고는 작업이 중단되면 부담스럽고 짜증이 날 수 있습니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_important_interruption.png">
+
+  </div>
+</div>
+
+<h2 id="make-me-amazing">사용자를 놀래킬 수 있는 환경 만들기</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="give-me-tricks">어디서든 적용될 수 있는 팁 제공하기</h4>
+<p>사람들은 스스로 알아내는 것을 좋아합니다. 다른 Android 앱의 시각적 패턴과 머슬 메모리(muscle memory)를 활용하여
+앱을 쉽게 배울 수 있게 만드세요. 예를 들어 스와이프 제스처는
+좋은 탐색 지름길이 될 수 있습니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_tricks.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="its-not-my-fault">사용자가 자기 탓으로 느끼지 않게 하기</h4>
+<p>사람들의 실수를 바로잡아 줄 때는 부드럽게 합니다. 사람들은
+앱을 사용할 때 스마트하게 느끼고 싶어 합니다. 뭔가 잘못될 경우, 명확한 복구 지침을 제공하되, 기술적인 세부 사항은 제공하지 않습니다.
+사람들 모르게 복구할 수 있으면 더 좋습니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_error.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="sprinkle-encouragement">격려하기</h4>
+<p>복잡한 태스크를 쉽게 완료할 수 있도록 여러 단계로 나눕니다. 미묘한 반짝임일지라도
+작업에 대해서 피드백을 줍니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="do-heavy-lifting-for-me">힘든 건 대신해주기</h4>
+<p>초보자들이 할 수 있을 것이라 생각하지 못한 일들을 해서 전문가처럼 느낄 수 있게 합니다. 예를
+들어, 여러 사진 효과를 결합한 단축키 기능은 아마추어 사진이
+겨우 몇 단계를 거치는 것만으로 멋진 사진으로 보이게 할 수 있습니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_heavy_lifting.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-important-things-fast">중요한 일은 빨리 해결되도록 하기</h4>
+<p>모든 작업이 같지는 않습니다. 앱에서 가장 중요한 것이 무엇인지 결정한 후 쉽게 찾을 수 있고
+빨리 사용할 수 있도록 합니다. 일례로 카메라의 셔터 버튼이나 음악 플레이어의 일시정지 버튼이 이에 해당됩니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_important_fast.png">
+
+  </div>
+</div>
