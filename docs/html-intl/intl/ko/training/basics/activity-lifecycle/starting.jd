@@ -1,0 +1,285 @@
+page.title=액티비티 시작하기
+page.tags=activity lifecycle
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#lifecycle-states">수명 주기 콜백 이해하기</a></li>
+  <li><a href="#launching-activity">앱 시작 관리자 액티비티 지정하기</a></li>
+  <li><a href="#Create">새로운 인스턴스 생성하기</a></li>
+  <li><a href="#Destroy">액티비티 소멸하기</a></li>
+</ol>
+    
+    <h2>필독 항목</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">액티비티</a></li>
+    </ul>
+
+<h2>실습하기</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">데모 다운로드</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>{@code main()} 메서드로 앱이 실행되는 다른 프로그래밍 패러다임과는 달리,
+Android 시스템은 {@link android.app.Activity} 인스턴스 수명 주기의 특정 단계에 부합하는 특정
+콜백 메서드를 호출하여 해당 인스턴스 내 코드를
+실행합니다. 액티비티를 시작하는 순차적인 콜백 메서드가 있으며, 액티비티를 소멸시키는
+순차적인 콜백 메서드가 있습니다.</p>
+
+<p>이 과정에서는 가장 중요한 수명 주기 메서드에 대해 간략히 설명하며, 액티비티의 새 인스턴스를 생성하는 첫 번째 수명 주기 콜백을
+처리하는 방법을 보여줍니다.</p>
+
+
+
+<h2 id="lifecycle-states">수명 주기 콜백 이해하기</h2>
+
+<p>액티비티 수명 동안, 시스템은 계단식 피라미드와 비슷하게 수명 주기 메서드의 핵심 세트를
+순차적으로 호출합니다. 즉,
+액티비티 수명 주기의 각 단계는 피라미드의 각 계단과 같습니다. 시스템이 새 액티비티 인스턴스를 생성하면,
+각각의 콜백 메서드는 액티비티 상태를 한 단계 상향 이동합니다. 피라미드의 최상층은
+액티비티가 전면에서 실행 중이며 사용자가 이러한 액티비티와 상호 작용할 수 있는 단계를 뜻합니다.</p>
+
+<p>사용자가 액티비티를 나가면, 시스템은 액티비티를 해체하기 위해 액티비티
+상태를 피라미드에서 하향 이동하는 다른 메서드를 호출합니다. 경우에 따라, 액티비티가
+피라미드에서 완전히 하향 이동되지 않고 기다립니다(예: 사용자가 다른 앱으로 전환한 경우). 이런 경우,
+액티비티는 다시 피라미드 최상층으로 상향 이동될 수 있으며(사용자가 액티비티로 돌아갈 경우), 사용자는 종료한 지점에서
+작업을 재개할 수 있습니다.</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle.png" />
+<p class="img-caption"><strong>그림 1.</strong> 액티비티
+수명 주기를 계단식 피라미드로 간략하게 표현한 그림. 이 그림에서는 최상층에 있는
+재개됨(Resumed) 상태를 향하여 액티비티를 한 단계 상향 이동하는 데 사용되는 각 콜백마다 하위 단계로
+액티비티를 하향 이동하는 콜백 메서드가 있음을 보여줍니다. 액티비티는
+일시정지됨(Paused) 및 정지됨(Stopped) 상태에서도 재개 상태로 돌아갈 수 있습니다.</p>
+
+
+<p>액티비티의 복잡한 정도에 따라, 모든
+수명 주기 메서드를 구현할 필요가 없는 경우도 있습니다. 하지만 각각의 수명 주기 메서드를 이해하고, 사용자가 예상한 대로
+앱이 동작하도록 필요한 수명 주기 메서드를 구현하는 것이 중요합니다. 액티비티 수명 주기 메서드를 올바르게 구현하면, 다음을 포함하여 여러 가지 방법으로 앱이 제대로 동작하도록
+보장할 수 있습니다.</p>
+<ul>
+  <li>사용자가 앱을 사용하는
+도중에 전화가 걸려오거나 다른 앱으로 전환할 때 충돌하지 않도록 합니다.</li>
+  <li>사용자가 앱을 활발하게 사용하지 않는 경우, 소중한 시스템 리소스를 소비하지
+않도록 합니다.</li>
+  <li>사용자가 앱에서 나갔다가 나중에 돌아왔을 때 사용자의 진행 상태를
+손실하지 않도록 합니다.</li>
+  <li>화면이 가로 방향과 세로 방향 간에 회전할 경우, 충돌하거나 사용자의
+진행 상태를 손실하지 않도록 합니다.</li>
+</ul>
+
+<!--
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+methods.</p>
+<table>
+  <tr>
+    <th scope="col">Lifecycle State</th>
+    <th scope="col">Startup Method</th>
+    <th scope="col">Teardown Method</th>
+  </tr>
+  <tr>
+    <td>Created / Destroyed</td>
+    <td>{@link android.app.Activity#onCreate onCreate()}</td>
+    <td>{@link android.app.Activity#onDestroy()}</td>
+  </tr>
+  <tr>
+    <td>Started / Stopped</td>
+    <td>{@link android.app.Activity#onStart()}</td>
+    <td>{@link android.app.Activity#onStop()}</td>
+  </tr>
+  <tr>
+    <td>Resumed / Resumed</td>
+    <td>{@link android.app.Activity#onResume()}</td>
+    <td>{@link android.app.Activity#onPause()}</td>
+  </tr>
+</table>
+-->
+
+<p>다음 과정에서 확인할 수 있듯이, 액티비티가 그림 1에 나와 있는 상태 간을
+전환하는 여러 가지 상황이 있습니다. 하지만, 이들 상태
+중 세 가지만 유일하게 정적일 수 있습니다. 즉, 액티비티는
+이 세 가지 상태에 한하여 그중 하나에서 장시간 동안 존재할 수 있습니다.</p>
+<dl>
+  <dt>재개됨(Resumed)</dt>
+    <dd>이 상태에서는 액티비티가 전면에 있으며 사용자가 액티비티와 상호 작용할 수
+있습니다(경우에 따라 "실행 중" 상태라고도 함).</dd>
+  <dt>일시정지됨(Paused)</dt>
+    <dd>이 상태에서는 액티비티가 다른 액티비티로 인해 부분적으로 가려져 있습니다. 이런 경우, 전면에 있는
+다른 액티비티는 반투명이거나 전체 화면을 차지하지 않습니다. 일시정지된
+액티비티는 사용자 입력을 받지 않으며, 어떠한 코드도 실행할 수 없습니다.
+  <dt>정지됨(Stopped)</dt>
+    <dd>이 상태에서는 액티비티가 완전히 가려져서 사용자에게 보이지 않습니다. 이 상태는 액티비티가 백그라운드에 있는 것으로
+간주됩니다. 정지되어 있는 동안 액티비티 인스턴스 및 멤버 변수와 같은 모든 상태
+정보가 유지되지만, 어떠한 코드도 실행할 수 없습니다.</dd>
+</dl>
+
+<p>이외의 상태(생성됨(Created) 및 시작됨(Started))는 일시적이며, 시스템은 다음 수명 주기 콜백 메서드를 호출하여
+다음 상태로 신속하게 전환합니다. 즉, 시스템은
+{@link android.app.Activity#onCreate onCreate()}를 호출한 후 바로 {@link
+android.app.Activity#onStart()}를 호출하고, 또 그 즉시 {@link
+android.app.Activity#onResume()}을 호출합니다.</p>
+
+<p>이것으로 기본적인 액티비티 수명 주기에 대한 설명을 마칩니다. 이제,
+구체적인 수명 주기 동작에 대해 알아보도록 하겠습니다.</p>
+
+
+
+<h2 id="launching-activity">앱 시작 관리자 액티비티 지정하기</h2> 
+
+<p>사용자가 홈 화면에서 앱 아이콘을 선택하면, 시스템이 앱에서 "시작 관리자"(또는 "메인") 액티비티로 선언한 {@link android.app.Activity}에 대한 {@link
+android.app.Activity#onCreate onCreate()} 메서드를
+호출합니다. 이 액티비티는 앱의 사용자 인터페이스에 대한
+주 진입점 역할을 합니다.</p>
+
+<p>Android 매니페스트 파일인 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">{@code AndroidManifest.xml}</a>에 메인 액티비티로 사용할 액티비티를 정의할 수 있습니다. 이 파일은
+프로젝트 디렉터리의 루트에 있습니다.</p>
+
+<p>앱의 메인 액티비티는 {@link
+android.content.Intent#ACTION_MAIN MAIN} 작업 및{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 카테고리를 포함하는 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a>와 함께
+매니페스트 파일에 선언되어야 합니다. 예를 들면 다음과 같습니다.</p> 
+
+<pre>
+&lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>참고:</strong> Android SDK
+Tools를 사용하여 새 Android 프로젝트를 생성하는 경우, 매니페스트에서 이 필터와 함께
+선언된 {@link android.app.Activity} 클래스가 기본 프로젝트 파일에 포함됩니다.</p>
+
+<p>{@link android.content.Intent#ACTION_MAIN MAIN} 작업 또는
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 카테고리가
+액티비티 중 하나에 대해 선언되어 있지 않을 경우, 홈 화면의 앱 목록에 앱 아이콘이 표시되지 않습니다.</p>
+
+
+
+<h2 id="Create">새로운 인스턴스 생성하기</h2>
+
+<p>대부분의 앱은 사용자가 다양한 작업을 수행할 수 있도록 여러 액티비티를 포함하고 있습니다.
+액티비티가 사용자가 앱 아이콘을 클릭할 때 생성되는 메인 액티비티든, 사용자 작업에
+대한 응답으로 앱이 시작하는 다른 액티비티든 간에,
+시스템은 {@link
+android.app.Activity#onCreate onCreate()} 메서드를 호출하여 매번 {@link android.app.Activity}의 새 인스턴스를 생성합니다.</p>
+
+<p>액티비티의 전체 수명 주기 동안 한 번만 발생하는 기본
+애플리케이션 시작 논리를 수행하도록 {@link android.app.Activity#onCreate onCreate()} 메서드를 구현해야 합니다. 예를
+들어 {@link android.app.Activity#onCreate onCreate()}의 구현은
+사용자 인터페이스를 정의해야 하며, 몇몇 클래스 범위의 변수를 인스턴스화해야 할 수 있습니다.</p>
+
+<p>예를 들어 다음 {@link android.app.Activity#onCreate onCreate()}
+메서드에 대한 예제는
+사용자 인터페이스 선언(XML 레이아웃 파일에 정의), 멤버 변수 정의,
+몇몇 UI 구성과 같은 액티비티에 대한 몇 가지 기본 설정을 수행하는 코드를 보여줍니다.</p>
+
+<pre>
+TextView mTextView; // Member variable for text view in the layout
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Set the user interface layout for this Activity
+    // The layout file is defined in the project res/layout/main_activity.xml file
+    setContentView(R.layout.main_activity);
+    
+    // Initialize member TextView so we can manipulate it later
+    mTextView = (TextView) findViewById(R.id.text_message);
+    
+    // Make sure we're running on Honeycomb or higher to use ActionBar APIs
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        // For the main activity, make sure the app icon in the action bar
+        // does not behave as a button
+        ActionBar actionBar = getActionBar();
+        actionBar.setHomeButtonEnabled(false);
+    }
+}
+</pre>
+
+<p class="caution"><strong>주의:</strong> {@link android.os.Build.VERSION#SDK_INT}를 사용하여
+이전 시스템이 새 API를 실행하지 못하도록 방지하는 방법은 Android 2.0(API 레벨
+5) 이상에서만 가능합니다. 이전 버전에서는 런타임 예외가 발생합니다.</p>
+
+<p>{@link android.app.Activity#onCreate onCreate()}가 실행을 마치면 시스템은
+{@link android.app.Activity#onStart()} 및 {@link android.app.Activity#onResume()} 메서드를
+연달아 호출합니다. 액티비티가 생성됨(Created) 또는 시작됨(Started) 상태에서 머무르는 경우는 없습니다. 엄밀히 말하면
+{@link android.app.Activity#onStart()}가 호출되면 액티비티가 사용자에게 보이지만,
+{@link android.app.Activity#onResume()}이 바로 뒤따르고, 어떠한 상황(예: 전화가 오거나,
+사용자가 다른 액티비티로 전환하거나, 기기 화면이 꺼진 경우)이 발생하기 전까지는 액티비티가
+재개됨(Resumed) 상태로 유지됩니다.</p>
+
+<p>앞으로 진행되는 과정에서는 다른 시작 메서드인 {@link
+android.app.Activity#onStart()} 및 {@link android.app.Activity#onResume()}이 일시정지됨(Paused) 또는 정지됨(Stopped) 상태에서
+액티비티를 재개하기 위해 사용된 경우 액티비티의 수명 주기 동안 어떤 식으로 유용한지에 대해 설명합니다.</p>
+
+<p class="note"><strong>참고:</strong> {@link android.app.Activity#onCreate onCreate()}
+메서드는 <code>savedInstanceState</code>라고 하는 매개변수를 포함합니다. 이 매개변수는 <a href="recreating.html">액티비티 재생성하기</a>에 대한
+마지막 과정에서 설명합니다.</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-create.png" />
+<p class="img-caption"><strong>그림 2.</strong> 액티비티의 새 인스턴스를 생성할 때
+시스템이 순차적으로 호출하는 {@link android.app.Activity#onCreate onCreate()}, {@link android.app.Activity#onStart()} 및 {@link android.app.Activity#onResume()}의
+세 가지 메인 콜백을 강조하여 보여주는 액티비티의 수명 주기 구조에
+대한 또 다른 그림. 이러한 순차적인
+콜백이 완료되면, 액티비티는 재개됨(Resumed) 상태가 됩니다. 이 상태에서는 사용자가 다른
+액티비티로 전환하기 전까지 사용자가 액티비티와 상호 작용할 수 있습니다.</p>
+
+
+
+
+
+
+
+<h2 id="Destroy">액티비티 소멸하기</h2>
+
+<p>액티비티의 첫 번째 수명 주기 콜백은 {@link android.app.Activity#onCreate
+onCreate()}이고, 마지막 콜백은 {@link android.app.Activity#onDestroy}입니다. 시스템은
+시스템 메모리에서 액티비티 인스턴스가 완전히 제거된다는 내용의 마지막
+신호로 액티비티에서 이 메서드를 호출합니다.</p>
+
+<p>대부분의 앱은 이 메서드를 구현할 필요가 없습니다. 왜냐하면 액티비티와
+함께 로컬 클래스 참조가 소멸되고, 액티비티가 {@link
+android.app.Activity#onPause} 및 {@link android.app.Activity#onStop} 중에 대부분 정리 작업을 수행하기 때문입니다. 하지만
+액티비티가 {@link
+android.app.Activity#onCreate onCreate()} 중에 생성한 백그라운드 스레드 또는 제대로 닫지 않으면 메모리 누수를
+야기할 수 있는 다른 장시간 실행되는 리소스를 포함하는 경우, {@link
+android.app.Activity#onDestroy} 중에 액티비티를 중단시켜야 합니다.</p>
+
+<pre>
+&#64;Override
+public void onDestroy() {
+    super.onDestroy();  // Always call the superclass
+    
+    // Stop method tracing that the activity started during onCreate()
+    android.os.Debug.stopMethodTracing();
+}
+</pre>
+
+<p class="note"><strong>참고:</strong> 시스템은 한 가지 경우,
+즉 {@link android.app.Activity#onCreate onCreate()} 메서드에서 {@link
+android.app.Activity#finish()}를 호출하는 경우를 제외하고는, {@link android.app.Activity#onPause} 및 {@link
+android.app.Activity#onStop}을 먼저 호출한 후에 {@link android.app.Activity#onDestroy}를
+호출합니다. 경우에 따라(예: 액티비티가 다른 액티비티를
+실행하기 위한 임시 의사 결정자 역할을 할 경우), {@link
+android.app.Activity#onCreate onCreate()} 내에서 {@link android.app.Activity#finish()}를 호출하여 액티비티를 소멸시킬 수도 있습니다. 이 경우, 시스템이
+다른 수명 주기 메서드를 호출하지 않고 즉시
+{@link android.app.Activity#onDestroy}를 호출합니다.</p>

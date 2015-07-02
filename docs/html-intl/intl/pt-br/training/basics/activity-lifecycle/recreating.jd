@@ -1,0 +1,178 @@
+page.title=Recriando uma atividade
+page.tags=ciclo de vida da atividade
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>Esta lição ensina a</h2>
+    <ol>
+      <li><a href="#SaveState">Salvar o estado da atividade</a></li>
+      <li><a href="#RestoreState">Restaurar o estado da atividade</a></li>
+    </ol>
+    
+    <h2>Leia também</h2>
+    <ul>
+      <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">Compatibilidade
+ com diferentes telas</a></li>
+      <li><a href="{@docRoot}guide/topics/resources/runtime-changes.html">Tratar alterações no tempo de execução</a></li>
+      <li><a href="{@docRoot}guide/components/activities.html">Atividades</a>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<p>Estas são algumas possibilidade onde a atividade é destruída devido ao comportamento normal do aplicativo, como
+quando o usuário pressiona o botão <em>Voltar</em> ou sua atividade sinaliza sua própria destruição
+chamando {@link android.app.Activity#finish()}. O sistema também pode destruir a atividade se
+for interrompida e não tiver sido utilizada por um longo período de tempo ou a atividade do primeiro plano exigir mais
+recursos, então, o sistema deverá fechar processos de segundo plano para recuperar memória.</p>
+
+<p>Quando a atividade é destruída porque o usuário pressiona <em>Voltar</em> ou a atividade se
+encerra, o conceito do sistema de que a instância {@link android.app.Activity} se perde
+porque o comportamento indica que a atividade já não é necessária. No entanto, se o sistema destruir
+a atividade devido a limitações do sistema (em vez do comportamento normal do aplicativo), embora a instância real
+{@link android.app.Activity} tenha se perdido, o sistema lembra que ela existiu de forma que se
+o usuário navegar de volta, o sistema criará uma nova instância da atividade usando um conjunto
+de dados salvos que descrevem o estado da atividade quando foi destruída. Os dados salvos
+utilizados pelo sistema para restaurar o estado anterior é chamado de “estado da instância” e é uma coleção
+de pares de valores-chave armazenados no objeto {@link android.os.Bundle}.</p>
+
+<p class="caution"><strong>Cuidado:</strong> a atividade é destruída e recriada cada vez
+que o usuário girar a tela. Quando a tela altera a orientação, o sistema destrói e recria
+a atividade de primeiro plano porque a configuração da tela mudou e a atividade talvez precise
+carregar recursos alternativos (como o layout).</p>
+
+<p>Por padrão, o sistema usa o estado da instância {@link android.os.Bundle} para salvar informações
+sobre cada objeto {@link android.view.View} em seu layout de atividade (como o valor do texto informado
+em um objeto {@link android.widget.EditText}). Assim, se a instância da atividade for destruída e
+recriada, o estado do layout é restaurado em seu estado anterior sem
+que haja necessidade de códigos. No entanto, sua
+atividade pode conter mais informações de estado do que se deseja restaurar, como varáveis de membro que
+rastreiam o progresso do usuário na atividade.</p>
+
+<p class="note"><strong>Observação:</strong> para que o sistema Android restaure o estado das
+visualizações em sua atividade, <strong>cada visualização precisa ter uma ID exclusiva</strong>, fornecido pelo atributo 
+<a href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code
+android:id}</a>.</p>
+
+<p>Para salvar dados adicionais sobre o estado da atividade, substitua
+o método de retorno de chamada {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}.
+O sistema chama este método quando o usuário sai da atividade
+e transmite o objeto{@link android.os.Bundle}, que será salvo
+caso a atividade seja destruída inesperadamente. Se
+o sistema precisar recriar a instância da atividade posteriormente, transmitirá o mesmo objeto {@link
+android.os.Bundle} para ambos os métodos {@link android.app.Activity#onRestoreInstanceState
+onRestoreInstanceState()} e {@link android.app.Activity#onCreate onCreate()}
+.</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
+<p class="img-caption"><strong>Figura 2.</strong> Conforme o sistema começa a interromper a atividade, ele
+chama {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}(1) para que você possa especificar
+outros dados de estado que gostaria de salvar caso a instância {@link android.app.Activity} precise ser
+recriada.
+Se a atividade for destruída e a mesma instância precisar ser recriada, o sistema transmite os dados do
+estado definidos em (1) para ambos os métodos {@link android.app.Activity#onCreate onCreate()}
+(2) e {@link android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}
+(3).</p>
+
+
+
+<h2 id="SaveState">Salvar o estado da atividade</h2>
+
+<p>Conforme a atividade é interrompida, o sistema chama {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} para que a atividade possa salvar informações de estado com uma coleção de pares de
+valor-chave. A implementação padrão deste método salva informações sobre o estado da hierarquia de exibições
+da atividade, como o texto em um widget {@link android.widget.EditText} ou a posição de rolagem
+de um {@link android.widget.ListView}.</p>
+
+<p>Para salvar informações de estado adicionais para a atividade,
+implemente {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} e adicione
+pares de valor-chave ao objeto {@link android.os.Bundle}. Por exemplo:</p>
+
+<pre>
+static final String STATE_SCORE = "playerScore";
+static final String STATE_LEVEL = "playerLevel";
+...
+
+&#64;Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+    savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+    
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+</pre>
+
+<p class="caution"><strong>Cuidado:</strong> sempre chame a implementação de superclasse de {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} para que a implementação padrão
+possa salvar o estado da hierarquia de exibições.</p>
+
+
+
+<h2 id="RestoreState">Restaurar o estado da atividade</h2>
+
+<p>Quando a atividade é recriada depois de ter sido destruída, é possível recuperar o estado
+salvo do {@link android.os.Bundle} que o sistema
+transmitiu a atividade. Ambos os métodos de retorno de chamada {@link android.app.Activity#onCreate onCreate()} e {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} recebem
+o mesmo {@link android.os.Bundle} que contém informações do estado da instância.</p>
+
+<p>Como o método {@link android.app.Activity#onCreate onCreate()} é chamado se o
+sistema estiver criando uma nova instância da atividade ou recriando uma anterior, verifique
+se o {@link android.os.Bundle} do estado é null antes de tentar realizar a leitura. Se for null,
+o sistema estará criando uma nova instância da atividade em vez de restaurar uma anterior
+que tenha sido destruída.</p>
+
+<p>Por exemplo, esta é uma forma de restaurar alguns dados de estado no {@link android.app.Activity#onCreate
+onCreate()}:</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+   
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    } else {
+        // Probably initialize members with default values for a new instance
+    }
+    ...
+}
+</pre>
+
+<p>Em vez de restaurar o estado durante {@link android.app.Activity#onCreate onCreate()}, você
+pode implementar {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}, que o sistema chama
+depois do método {@link android.app.Activity#onStart()}. O sistema chama {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} se houver um estado
+salvo para ser restaurado. Portanto, não é necessário verificar se {@link android.os.Bundle} é null:</p>
+        
+<pre>
+public void onRestoreInstanceState(Bundle savedInstanceState) {
+    // Always call the superclass so it can restore the view hierarchy
+    super.onRestoreInstanceState(savedInstanceState);
+   
+    // Restore state members from saved instance
+    mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+    mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+</pre>
+
+<p class="caution"><strong>Cuidado:</strong> sempre chame a implementação de superclasse de {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} para que a implementação padrão
+possa restaurar o estado da hierarquia de exibições.</p>
+
+<p>Para saber mais sobre recriação de atividades devido a
+um evento de reinicialização no tempo de execução (como quando a tela gira), consulte <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Tratar alterações no tempo de execução</a>.</p>
+

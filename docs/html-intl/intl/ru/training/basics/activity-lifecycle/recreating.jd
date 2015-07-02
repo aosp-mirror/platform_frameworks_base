@@ -1,0 +1,178 @@
+page.title=Воссоздание операции
+page.tags=жизненный цикл операции
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>Содержание этого урока</h2>
+    <ol>
+      <li><a href="#SaveState">Сохранение состояния операции</a></li>
+      <li><a href="#RestoreState">Восстановление состояния операции</a></li>
+    </ol>
+    
+    <h2>См. также:</h2>
+    <ul>
+      <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">Поддержка
+различных экранов</a></li>
+      <li><a href="{@docRoot}guide/topics/resources/runtime-changes.html">Обработка изменений в режиме выполнения</a></li>
+      <li><a href="{@docRoot}guide/components/activities.html">Операции</a>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<p>Существуют ситуации, когда операция уничтожается в результате нормального поведения приложения. Например, это происходит,
+когда пользователь нажимает кнопку <em>Назад</em> или когда операция подает сигнал о своем уничтожении
+посредством вызова {@link android.app.Activity#finish()}. Система также может уничтожить операцию,
+если она остановлена и не используется в течение длительного времени, или если для выполнения операции на экране требуется больше
+системных ресурсов и системе нужно закрыть фоновые процессы для освобождения памяти.</p>
+
+<p>Если операция уничтожается при нажатии пользователем кнопки <em>Назад</em> или завершении
+операции, система считает, что экземпляр {@link android.app.Activity} исчезает навсегда,
+так как такое поведение указывает, что операция больше не нужна. Однако если система уничтожает
+операцию в связи с системными ограничениями (а не в процессе обычной работы приложения), хотя фактический
+{@link android.app.Activity} экземпляр исчезает, система помнит о его существовании, и если
+пользователь вернется к нему, система создаст новый экземпляр действия, используя набор
+сохраненных данных, описывающий состояние операции на момент ее уничтожения. Сохраненные данные, используемые
+системой для восстановления предыдущего состояния, называются "состоянием экземпляра" и представляют собой набор
+пар "ключ-значение", хранящийся в объекте {@link android.os.Bundle}.</p>
+
+<p class="caution"><strong>Внимание!</strong> Ваша операция будет уничтожаться и восстанавливаться каждый раз,
+когда пользователь вращает экран. При изменении ориентации экрана система уничтожает и заново создает
+активную операцию, поскольку конфигурация экрана меняется и операции может потребоваться
+загрузка альтернативных ресурсов (например нового макета).</p>
+
+<p>По умолчанию система использует состояние экземпляра {@link android.os.Bundle} для сохранения информации
+о каждом объекте {@link android.view.View} в макете операции (например, о текстовом значении,
+введенном в объект {@link android.widget.EditText}). Таким образом, если экземпляр вашей операции уничтожается и
+воссоздается заново, происходит восстановление предыдущего состояния макета,
+и при этом вам не нужно добавлять в приложение дополнительный код. Однако операция
+может содержать больше информации о состоянии, чем вы хотите восстановить, например переменные,
+отслеживающие ход выполнения операции пользователем.</p>
+
+<p class="note"><strong>Примечание.</strong> Чтобы система Android могла восстановить состояние
+представлений операции, <strong>каждое представление должно иметь уникальный идентификатор</strong>, предоставляемый атрибутом
+<a href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code
+android:id}</a>.</p>
+
+<p>Для сохранения дополнительных данных о состоянии операции, необходимо
+заменить метод обратного вызова {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}.
+Система вызывает этот метод, когда пользователь покидает операцию,
+и передает ему объект {@link android.os.Bundle}, который будет сохранен в
+случае, если операция будет неожиданно уничтожена. Если
+системе нужно будет воссоздать экземпляр экземпляра операции, она передаст тот же объект {@link
+android.os.Bundle} методам {@link android.app.Activity#onRestoreInstanceState
+onRestoreInstanceState()} и {@link android.app.Activity#onCreate onCreate()}.
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
+<p class="img-caption"><strong>Рисунок 2</strong>. Когда система начинает останавливать операцию, она
+вызывает {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} (1), чтобы вы могли указать
+дополнительные данные состояния, которые нужно сохранить на случай необходимости воссоздания экземпляра {@link android.app.Activity}.
+Если операция будет уничтожена,
+и системе нужно будет воссоздать тот же экземпляр, она передаст данные
+состояния, определенные в (1), методам {@link android.app.Activity#onCreate onCreate()}
+(2) и {@link android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}
+(3).</p>
+
+
+
+<h2 id="SaveState">Сохранение состояния операции</h2>
+
+<p>Когда начинается остановка операции, система вызывает метод {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}, чтобы операция могла сохранить информацию о состоянии с помощью набора пар
+"ключ-значение". По умолчанию при реализации этого метода сохраняется информация о состоянии иерархии
+представления операции, например текст в виджете {@link android.widget.EditText} или положение экрана
+для {@link android.widget.ListView}.</p>
+
+<p>Для сохранения дополнительной информации о состоянии операции
+необходимо реализовать {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} и добавить
+к объекту {@link android.os.Bundle} пары "ключ-значение". Например:</p>
+
+<pre>
+static final String STATE_SCORE = "playerScore";
+static final String STATE_LEVEL = "playerLevel";
+...
+
+&#64;Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+    savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+    
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+</pre>
+
+<p class="caution"><strong>Внимание!</strong> Реализацию суперкласса {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} следует вызывать во всех случаях, чтобы реализация
+по умолчанию могла сохранить состояние новой иерархии.</p>
+
+
+
+<h2 id="RestoreState">Восстановление состояния операции</h2>
+
+<p>В случае воссоздания операции после предыдущего уничтожения сохраненное
+состояние можно восстановить из {@link android.os.Bundle}, куда система
+передает данные операции. Методы обратного вызова {@link android.app.Activity#onCreate onCreate()} и {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} получают один и
+тот же {@link android.os.Bundle}, содержащий информацию о состоянии экземпляра.</p>
+
+<p>Поскольку метод {@link android.app.Activity#onCreate onCreate()} вызывается, если
+система создает новый экземпляр операции или восстанавливает предыдущий экземпляр, перед попыткой чтения необходимо убедиться,
+что {@link android.os.Bundle} имеет состояние null. В этом случае
+система создает новый экземпляр операции
+вместо восстановления ранее уничтоженного экземпляра.</p>
+
+<p>Приведем пример восстановления некоторых данных о состоянии в {@link android.app.Activity#onCreate
+onCreate()}:</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+   
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    } else {
+        // Probably initialize members with default values for a new instance
+    }
+    ...
+}
+</pre>
+
+<p>Вместо восстановления состояния в {@link android.app.Activity#onCreate onCreate()} вы
+можете реализовать метод {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}, который система вызывает
+после метода {@link android.app.Activity#onStart()}. Система вызывает {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} только при наличии сохраненного состояния
+для восстановления, и поэтому вам не нужно проверять, имеет ли {@link android.os.Bundle} значение null:</p>
+        
+<pre>
+public void onRestoreInstanceState(Bundle savedInstanceState) {
+    // Always call the superclass so it can restore the view hierarchy
+    super.onRestoreInstanceState(savedInstanceState);
+   
+    // Restore state members from saved instance
+    mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+    mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+</pre>
+
+<p class="caution"><strong>Внимание!</strong> Реализацию суперкласса {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} следует вызывать во всех случаях, чтобы реализация
+по умолчанию могла сохранить состояние новой иерархии.</p>
+
+<p>Более подробную информацию о воссоздании операции в связи
+с перезапуском во время исполнения (например при повороте экрана) можно найти в разделе <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Обработка изменений в режиме выполнения</a>.</p>
+

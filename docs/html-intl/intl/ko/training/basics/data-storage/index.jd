@@ -1,0 +1,57 @@
+page.title=데이터 저장하기
+page.tags=data storage,files,sql,database,preferences
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>종속관계 및 전제조건</h2>
+<ul>
+  <li>Android 1.6(API 레벨 4) 또는 그 이상</li>
+  <li>맵 키-값 컬렉션에 정통한 지식</li>
+  <li>Java file I/O API에 정통한 지식</li>
+  <li>SQL 데이터베이스에 정통한 지식</li>
+</ul>
+
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html">저장소 옵션</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>대부분의 Android 앱은 데이터를 저장해야 합니다. 하다못해 {@link android.app.Activity#onPause onPause()} 동안에도 사용자의 진행 상태가 손실되지 않도록
+앱 상태에 대한 정보만이라도 저장합니다. 또한, 대부분의
+단순하지 않은 앱은 사용자 설정을 저장해야 하며, 어떤 앱은 파일 및 데이터베이스에서 대량의
+정보를 관리해야 합니다. 이 클래스에서는 다음 사항을 포함해 Android의
+주요 데이터 저장소 옵션에 대해 소개합니다.</p>
+
+<ul>
+    <li>공유
+기본 설정 파일에 간단한 데이터 유형의 키-값 쌍 저장하기</li>
+    <li>Android 파일 시스템에 임의의 파일 저장하기</li>
+    <li>SQLite로 관리되는 데이터베이스 사용하기</li>
+</ul>
+
+
+<h2>과정</h2>
+
+<dl>
+  <dt><b><a href="shared-preferences.html">키-값 세트 저장하기</a></b></dt>
+    <dd>키-값 쌍
+내에 소량의 정보를 저장하기 위해 공유 기본 설정 파일을 사용하는 방법을 설명합니다.</dd>
+
+  <dt><b><a href="files.html">파일 저장하기</a></b></dt>
+    <dd>일반적으로 순서대로 읽혀지는
+긴 데이터 시퀀스를 저장하는 것과 같이 기본적인 파일 저장에 대해 설명합니다.</dd>
+
+ <dt><b><a href="databases.html">SQL 데이터베이스에 데이터 저장하기</a></b></dt>
+   <dd>SQLite 데이터베이스를 사용하여 구조화된 데이터를 읽고 쓰는 방법에 대해 설명합니다.</dd>
+
+</dl>

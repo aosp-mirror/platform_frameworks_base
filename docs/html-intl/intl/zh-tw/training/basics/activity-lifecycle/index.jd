@@ -1,0 +1,72 @@
+page.title=管理應用行為顯示生命週期
+page.tags=應用行為顯示生命週期
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+<h2>相依性和先決條件</h2>
+<ul>
+  <li>如何建立 Android 專案 (請參閱<a href="{@docRoot}training/basics/firstapp/creating-project.html">建立 Android
+專案</a>)</li>
+</ul>
+
+
+<h2>您也應該閱讀</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/activities.html">應用行為顯示</a></li>
+</ul>
+
+
+<h2>試試看</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">下載示範</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>使用者在應用程式內部、由內到外、由外到內執行導覽時，應用程式中的 {@link android.app.Activity} 執行個體會在生命週期的不同狀態之間進行轉換。
+
+例如，在您的應用行為顯示首次啟動時，會進入系統的前景，並成為使用者的焦點。
+
+在此過程中，Android 系統會針對設定使用者介面與其他元件所在的應用行為顯示，呼叫一系列生命週期方法。
+若使用者執行的行為會啟動其他應用行為顯示或切換至其他應用程式，系統會在您的應用行為顯示進入背景 (在此處應用行為顯示將不再可見，但執行個體及其狀態保持不變) 時，針對該應用行為顯示呼叫另一組生命週期方法。
+
+
+</p>
+
+<p>在生命週期回呼方法內，您可以宣告在使用者離開並重新進入應用行為顯示時，應用行為顯示採用的行為。
+例如，若您建置串流影片播放器，可能會在使用者切換至其他應用程式時暫停影片播放，並終止網路連線。在使用者返回時，您可以重新連接至網路，讓使用者從先前暫停的位置繼續播放影片。
+
+
+</p>
+
+<p>本課程將說明每個 {@link
+android.app.Activity} 執行個體都會接收的生命週期重要回呼方法，並說明如何使用這些方法，以便應用行為顯示的運作能符合使用者的預期，而且在應用行為顯示不需要系統資源時不耗用系統資源。
+</p>
+
+<h2>課程</h2>
+ 
+<dl>
+  <dt><b><a href="starting.html">啟動應用行為顯示</a></b></dt>
+  <dd>了解應用行為顯示生命週期的有關基本概念、使用者啟動應用程式的方式，以及建立基本應用行為顯示的執行方式。
+</dd>
+  <dt><b><a href="pausing.html">暫停並繼續應用行為顯示</a></b></dt>
+  <dd>了解應用行為顯示暫停 (遭部分遮蓋) 與繼續時的狀況，以及在這些狀態變更期間應執行的操作。
+</dd>
+  <dt><b><a href="stopping.html">停止並重新啟動應用行為顯示</a></b></dt>
+  <dd>了解在使用者完全離開應用行為顯示與返回應用行為顯示時的狀況。</dd>
+  <dt><b><a href="recreating.html">重新建立應用行為顯示</a></b></dt>
+  <dd>了解在應用行為顯示遭終結時的狀況，以及如何在需要時重新建置應用行為顯示狀態。
+</dd>
+</dl> 
+
