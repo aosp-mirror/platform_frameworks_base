@@ -15447,6 +15447,7 @@ package android.media {
     field public static final int ERROR_KEY_EXPIRED = 2; // 0x2
     field public static final int ERROR_NO_KEY = 1; // 0x1
     field public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
+    field public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
   }
 
   public static final class MediaCodec.CryptoInfo {
