@@ -160,16 +160,16 @@ public interface IActivityManager extends IInterface {
     public PendingIntent getRunningServiceControlPanel(ComponentName service)
             throws RemoteException;
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType, int userId) throws RemoteException;
+            String resolvedType, String callingPackage, int userId) throws RemoteException;
     public int stopService(IApplicationThread caller, Intent service,
             String resolvedType, int userId) throws RemoteException;
     public boolean stopServiceToken(ComponentName className, IBinder token,
             int startId) throws RemoteException;
     public void setServiceForeground(ComponentName className, IBinder token,
             int id, Notification notification, boolean keepNotification) throws RemoteException;
-    public int bindService(IApplicationThread caller, IBinder token,
-            Intent service, String resolvedType,
-            IServiceConnection connection, int flags, int userId) throws RemoteException;
+    public int bindService(IApplicationThread caller, IBinder token, Intent service,
+            String resolvedType, IServiceConnection connection, int flags,
+            String callingPackage, int userId) throws RemoteException;
     public boolean unbindService(IServiceConnection connection) throws RemoteException;
     public void publishService(IBinder token,
             Intent intent, IBinder service) throws RemoteException;
@@ -178,7 +178,8 @@ public interface IActivityManager extends IInterface {
     /* oneway */
     public void serviceDoneExecuting(IBinder token, int type, int startId,
             int res) throws RemoteException;
-    public IBinder peekService(Intent service, String resolvedType) throws RemoteException;
+    public IBinder peekService(Intent service, String resolvedType, String callingPackage)
+            throws RemoteException;
 
     public boolean bindBackupAgent(ApplicationInfo appInfo, int backupRestoreMode)
             throws RemoteException;

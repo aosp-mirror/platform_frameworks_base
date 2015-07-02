@@ -524,7 +524,7 @@ public abstract class BroadcastReceiver {
         try {
             service.prepareToLeaveProcess();
             binder = am.peekService(service, service.resolveTypeIfNeeded(
-                    myContext.getContentResolver()));
+                    myContext.getContentResolver()), myContext.getOpPackageName());
         } catch (RemoteException e) {
         }
         return binder;

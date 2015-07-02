@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.app.ActivityThread;
+import android.app.AppOpsManager;
 import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -302,8 +303,8 @@ public final class ActiveServices {
         return getServiceMap(callingUser).mServicesByName;
     }
 
-    ComponentName startServiceLocked(IApplicationThread caller, Intent service,
-            String resolvedType, int callingPid, int callingUid, int userId)
+    ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
+            int callingPid, int callingUid, String callingPackage, int userId)
             throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
@@ -324,7 +325,7 @@ public final class ActiveServices {
 
 
         ServiceLookupResult res =
-            retrieveServiceLocked(service, resolvedType,
+            retrieveServiceLocked(service, resolvedType, callingPackage,
                     callingPid, callingUid, userId, true, callerFg);
         if (res == null) {
             return null;
@@ -490,7 +491,7 @@ public final class ActiveServices {
         }
 
         // If this service is active, make sure it is stopped.
-        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
+        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType, null,
                 Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false);
         if (r != null) {
             if (r.record != null) {
@@ -508,8 +509,8 @@ public final class ActiveServices {
         return 0;
     }
 
-    IBinder peekServiceLocked(Intent service, String resolvedType) {
-        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
+    IBinder peekServiceLocked(Intent service, String resolvedType, String callingPackage) {
+        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType, callingPackage,
                 Binder.getCallingPid(), Binder.getCallingUid(),
                 UserHandle.getCallingUserId(), false, false);
 
@@ -694,8 +695,8 @@ public final class ActiveServices {
     }
 
     int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
-            String resolvedType, IServiceConnection connection, int flags, int userId)
-            throws TransactionTooLargeException {
+            String resolvedType, IServiceConnection connection, int flags,
+            String callingPackage, int userId) throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
@@ -746,7 +747,7 @@ public final class ActiveServices {
         final boolean callerFg = callerApp.setSchedGroup != Process.THREAD_GROUP_BG_NONINTERACTIVE;
 
         ServiceLookupResult res =
-            retrieveServiceLocked(service, resolvedType,
+            retrieveServiceLocked(service, resolvedType, callingPackage,
                     Binder.getCallingPid(), Binder.getCallingUid(), userId, true, callerFg);
         if (res == null) {
             return 0;
@@ -1022,7 +1023,7 @@ public final class ActiveServices {
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String resolvedType, int callingPid, int callingUid, int userId,
+            String resolvedType, String callingPackage, int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg) {
         ServiceRecord r = null;
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "retrieveServiceLocked: " + service
@@ -1112,7 +1113,18 @@ public final class ActiveServices {
                         + ", uid=" + callingUid
                         + " requires " + r.permission);
                 return new ServiceLookupResult(null, r.permission);
+            } else if (r.permission != null && callingPackage != null) {
+                final int opCode = AppOpsManager.permissionToOpCode(r.permission);
+                if (opCode != AppOpsManager.OP_NONE && mAm.mAppOpsService.noteOperation(
+                        opCode, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                    Slog.w(TAG, "Appop Denial: Accessing service " + r.name
+                            + " from pid=" + callingPid
+                            + ", uid=" + callingUid
+                            + " requires appop " + AppOpsManager.opToName(opCode));
+                    return null;
+                }
             }
+
             if (!mAm.mIntentFirewall.checkService(r.name, service, callingUid, callingPid,
                     resolvedType, r.appInfo)) {
                 return null;
