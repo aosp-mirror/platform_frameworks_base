@@ -187,12 +187,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Manifest.permission.CALL_PHONE);
     }
 
-    /** Action not restricted for the calling package. */
-    private static final int ACTION_RESTRICTION_NONE = 0;
-    /** Action restricted for the calling package by not granting a used permission. */
-    private static final int ACTION_RESTRICTION_PERMISSION = 1;
-    /** Action restricted for the calling package by not allowing a used permission's app op. */
-    private static final int ACTION_RESTRICTION_APPOP = 2;
+    /** Action restriction: launching the activity is not restricted. */
+    private static final int ACTIVITY_RESTRICTION_NONE = 0;
+    /** Action restriction: launching the activity is restricted by a permission. */
+    private static final int ACTIVITY_RESTRICTION_PERMISSION = 1;
+    /** Action restriction: launching the activity is restricted by an app op. */
+    private static final int ACTIVITY_RESTRICTION_APPOP = 2;
 
     /** Status Bar Service **/
     private IBinder mToken = new Binder();
@@ -1539,51 +1539,61 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return err;
         }
 
-        final int startAnyPerm = mService.checkPermission(
-                START_ANY_ACTIVITY, callingPid, callingUid);
-        final int componentPerm = mService.checkComponentPermission(aInfo.permission, callingPid,
-                callingUid, aInfo.applicationInfo.uid, aInfo.exported);
-        final int actionRestriction = getActionRestrictionForCallingPackage(
-                intent.getAction(), callingPackage, callingPid, callingUid);
-
-        if (startAnyPerm != PERMISSION_GRANTED && (componentPerm != PERMISSION_GRANTED
-                || actionRestriction == ACTION_RESTRICTION_PERMISSION)) {
-            if (resultRecord != null) {
-                resultStack.sendActivityResultLocked(-1,
-                    resultRecord, resultWho, requestCode,
-                    Activity.RESULT_CANCELED, null);
-            }
-            String msg;
-            if (actionRestriction == ACTION_RESTRICTION_PERMISSION) {
-                msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ")" + " with revoked permission "
-                        + ACTION_TO_RUNTIME_PERMISSION.get(intent.getAction());
-            } else if (!aInfo.exported) {
-                msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ")"
-                        + " not exported from uid " + aInfo.applicationInfo.uid;
-            } else {
-                msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ")"
-                        + " requires " + aInfo.permission;
-            }
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-
         boolean abort = false;
 
-        if (startAnyPerm != PERMISSION_GRANTED
-                && actionRestriction == ACTION_RESTRICTION_APPOP) {
-            String msg = "Permission Denial: starting " + intent.toString()
-                    + " from " + callerApp + " (pid=" + callingPid
-                    + ", uid=" + callingUid + ")"
-                    + " requires " + aInfo.permission;
-            Slog.w(TAG, msg);
-            abort = true;
+        final int startAnyPerm = mService.checkPermission(
+                START_ANY_ACTIVITY, callingPid, callingUid);
+
+        if (startAnyPerm != PERMISSION_GRANTED) {
+            final int componentRestriction = getComponentRestrictionForCallingPackage(
+                    aInfo, callingPackage, callingPid, callingUid);
+            final int actionRestriction = getActionRestrictionForCallingPackage(
+                    intent.getAction(), callingPackage, callingPid, callingUid);
+
+            if (componentRestriction == ACTIVITY_RESTRICTION_PERMISSION
+                    || actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {
+                if (resultRecord != null) {
+                    resultStack.sendActivityResultLocked(-1,
+                            resultRecord, resultWho, requestCode,
+                            Activity.RESULT_CANCELED, null);
+                }
+                String msg;
+                if (actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {
+                    msg = "Permission Denial: starting " + intent.toString()
+                            + " from " + callerApp + " (pid=" + callingPid
+                            + ", uid=" + callingUid + ")" + " with revoked permission "
+                            + ACTION_TO_RUNTIME_PERMISSION.get(intent.getAction());
+                } else if (!aInfo.exported) {
+                    msg = "Permission Denial: starting " + intent.toString()
+                            + " from " + callerApp + " (pid=" + callingPid
+                            + ", uid=" + callingUid + ")"
+                            + " not exported from uid " + aInfo.applicationInfo.uid;
+                } else {
+                    msg = "Permission Denial: starting " + intent.toString()
+                            + " from " + callerApp + " (pid=" + callingPid
+                            + ", uid=" + callingUid + ")"
+                            + " requires " + aInfo.permission;
+                }
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+
+            if (actionRestriction == ACTIVITY_RESTRICTION_APPOP) {
+                String message = "Appop Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ")"
+                        + " requires " + AppOpsManager.permissionToOp(
+                                ACTION_TO_RUNTIME_PERMISSION.get(intent.getAction()));
+                Slog.w(TAG, message);
+                abort = true;
+            } else if (componentRestriction == ACTIVITY_RESTRICTION_APPOP) {
+                String message = "Appop Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ")"
+                        + " requires appop " + AppOpsManager.permissionToOp(aInfo.permission);
+                Slog.w(TAG, message);
+                abort = true;
+            }
         }
 
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
@@ -1664,15 +1674,40 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return err;
     }
 
+    private int getComponentRestrictionForCallingPackage(ActivityInfo activityInfo,
+            String callingPackage, int callingPid, int callingUid) {
+        if (activityInfo.permission == null) {
+            return ACTIVITY_RESTRICTION_NONE;
+        }
+
+        if (mService.checkComponentPermission(activityInfo.permission, callingPid, callingUid,
+                activityInfo.applicationInfo.uid, activityInfo.exported)
+                == PackageManager.PERMISSION_DENIED) {
+            return ACTIVITY_RESTRICTION_PERMISSION;
+        }
+
+        final int opCode = AppOpsManager.permissionToOpCode(activityInfo.permission);
+        if (opCode == AppOpsManager.OP_NONE) {
+            return ACTIVITY_RESTRICTION_NONE;
+        }
+
+        if (mService.mAppOpsService.noteOperation(opCode, callingUid,
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return ACTIVITY_RESTRICTION_APPOP;
+        }
+
+        return ACTIVITY_RESTRICTION_NONE;
+    }
+
     private int getActionRestrictionForCallingPackage(String action,
             String callingPackage, int callingPid, int callingUid) {
         if (action == null) {
-            return ACTION_RESTRICTION_NONE;
+            return ACTIVITY_RESTRICTION_NONE;
         }
 
         String permission = ACTION_TO_RUNTIME_PERMISSION.get(action);
         if (permission == null) {
-            return ACTION_RESTRICTION_NONE;
+            return ACTIVITY_RESTRICTION_NONE;
         }
 
         final PackageInfo packageInfo;
@@ -1681,29 +1716,29 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     .getPackageInfo(callingPackage, PackageManager.GET_PERMISSIONS);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.i(TAG, "Cannot find package info for " + callingPackage);
-            return ACTION_RESTRICTION_NONE;
+            return ACTIVITY_RESTRICTION_NONE;
         }
 
         if (!ArrayUtils.contains(packageInfo.requestedPermissions, permission)) {
-            return ACTION_RESTRICTION_NONE;
+            return ACTIVITY_RESTRICTION_NONE;
         }
 
         if (mService.checkPermission(permission, callingPid, callingUid) ==
                 PackageManager.PERMISSION_DENIED) {
-            return ACTION_RESTRICTION_PERMISSION;
+            return ACTIVITY_RESTRICTION_PERMISSION;
         }
 
         final int opCode = AppOpsManager.permissionToOpCode(permission);
         if (opCode == AppOpsManager.OP_NONE) {
-            return ACTION_RESTRICTION_NONE;
+            return ACTIVITY_RESTRICTION_NONE;
         }
 
         if (mService.mAppOpsService.noteOperation(opCode, callingUid,
                 callingPackage) != AppOpsManager.MODE_ALLOWED) {
-            return ACTION_RESTRICTION_APPOP;
+            return ACTIVITY_RESTRICTION_APPOP;
         }
 
-        return ACTION_RESTRICTION_NONE;
+        return ACTIVITY_RESTRICTION_NONE;
     }
 
     ActivityStack computeStackFocus(ActivityRecord r, boolean newTask) {

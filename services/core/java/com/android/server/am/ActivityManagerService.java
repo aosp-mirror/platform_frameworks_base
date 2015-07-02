@@ -15580,11 +15580,16 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType, int userId) throws TransactionTooLargeException {
+            String resolvedType, String callingPackage, int userId)
+            throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
+        }
+
+        if (callingPackage == null) {
+            throw new IllegalArgumentException("callingPackage cannot be null");
         }
 
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
@@ -15594,20 +15599,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int callingUid = Binder.getCallingUid();
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(caller, service,
-                    resolvedType, callingPid, callingUid, userId);
+                    resolvedType, callingPid, callingUid, callingPackage, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
     }
 
-    ComponentName startServiceInPackage(int uid, Intent service, String resolvedType, int userId)
+    ComponentName startServiceInPackage(int uid, Intent service, String resolvedType,
+            String callingPackage, int userId)
             throws TransactionTooLargeException {
         synchronized(this) {
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                     "startServiceInPackage: " + service + " type=" + resolvedType);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(null, service,
-                    resolvedType, -1, uid, userId);
+                    resolvedType, -1, uid, callingPackage, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -15628,14 +15634,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public IBinder peekService(Intent service, String resolvedType) {
+    public IBinder peekService(Intent service, String resolvedType, String callingPackage) {
         enforceNotIsolatedCaller("peekService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
+
+        if (callingPackage == null) {
+            throw new IllegalArgumentException("callingPackage cannot be null");
+        }
+
         synchronized(this) {
-            return mServices.peekServiceLocked(service, resolvedType);
+            return mServices.peekServiceLocked(service, resolvedType, callingPackage);
         }
     }
 
@@ -15805,8 +15816,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public int bindService(IApplicationThread caller, IBinder token, Intent service,
-            String resolvedType, IServiceConnection connection, int flags, int userId)
-            throws TransactionTooLargeException {
+            String resolvedType, IServiceConnection connection, int flags, String callingPackage,
+            int userId) throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
 
         // Refuse possible leaked file descriptors
@@ -15814,9 +15825,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
+        if (callingPackage == null) {
+            throw new IllegalArgumentException("callingPackage cannot be null");
+        }
+
         synchronized(this) {
-            return mServices.bindServiceLocked(caller, token, service, resolvedType,
-                    connection, flags, userId);
+            return mServices.bindServiceLocked(caller, token, service,
+                    resolvedType, connection, flags, callingPackage, userId);
         }
     }
 
