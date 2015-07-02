@@ -77,7 +77,12 @@ public class KernelUidCpuTimeReader {
                 final int uid = Integer.parseInt(uidStr.substring(0, uidStr.length() - 1), 10);
                 final long userTimeUs = Long.parseLong(splitter.next(), 10);
                 final long systemTimeUs = Long.parseLong(splitter.next(), 10);
-                final long powerMaUs = Long.parseLong(splitter.next(), 10) / 1000;
+                final long powerMaUs;
+                if (splitter.hasNext()) {
+                    powerMaUs = Long.parseLong(splitter.next(), 10) / 1000;
+                } else {
+                    powerMaUs = 0;
+                }
 
                 if (callback != null) {
                     long userTimeDeltaUs = userTimeUs;
