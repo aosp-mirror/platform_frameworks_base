@@ -15990,8 +15990,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId) {
         enforceSystemOrPhoneCaller("grantPermissionsToEnabledCarrierApps");
         synchronized (mPackages) {
-            mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledCarrierAppsLPr(
-                    packageNames, userId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledCarrierAppsLPr(
+                        packageNames, userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
