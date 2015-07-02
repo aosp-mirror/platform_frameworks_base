@@ -390,6 +390,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
+            } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)) {
+                clearWipeProfileNotification();
             }
         }
     };
@@ -1066,6 +1068,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addDataScheme("package");
+        context.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
+        filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
 
         LocalServices.addService(DevicePolicyManagerInternal.class, mLocalService);
@@ -3407,6 +3412,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setStyle(new Notification.BigTextStyle().bigText(contentText))
                 .build();
         getNotificationManager().notify(PROFILE_WIPED_NOTIFICATION_ID, notification);
+    }
+
+    private void clearWipeProfileNotification() {
+        getNotificationManager().cancel(PROFILE_WIPED_NOTIFICATION_ID);
     }
 
     @Override
