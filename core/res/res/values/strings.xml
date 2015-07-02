@@ -2886,19 +2886,6 @@
     <!-- See USB_PREFERENCES. This is the message. -->
     <string name="usb_notification_message">Touch for more options.</string>
 
-    <!-- External media format dialog strings -->
-    <!-- This is the label for the activity, and should never be visible to the user. -->
-    <!-- See EXTMEDIA_FORMAT.  EXTMEDIA_FORMAT_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to format the SD card.  This is the title. [CHAR LIMIT=20] -->
-    <string name="extmedia_format_title" product="nosdcard">Format USB storage?</string>
-    <!-- See EXTMEDIA_FORMAT.  EXTMEDIA_FORMAT_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to format the SD card.  This is the title. -->
-    <string name="extmedia_format_title" product="default">Format SD card?</string>
-    <!-- See EXTMEDIA_FORMAT.   This is the message. [CHAR LIMIT=NONE] -->
-    <string name="extmedia_format_message" product="nosdcard">All files stored in your USB storage will be erased. This action can\'t be reversed!</string>
-    <!-- See EXTMEDIA_FORMAT.   This is the message. -->
-    <string name="extmedia_format_message" product="default">All data on your card will be lost.</string>
-    <!-- See EXTMEDIA_FORMAT.    This is the button text to format the sd card. -->
-    <string name="extmedia_format_button_format">Format</string>
-
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_title">USB debugging connected</string>
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
