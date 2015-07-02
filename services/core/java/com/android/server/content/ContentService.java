@@ -31,6 +31,7 @@ import android.content.SyncInfo;
 import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.database.IContentObserver;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
@@ -46,6 +47,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -153,6 +155,18 @@ public final class ContentService extends IContentService.Stub {
     /*package*/ ContentService(Context context, boolean factoryTest) {
         mContext = context;
         mFactoryTest = factoryTest;
+
+        // Let the package manager query for the sync adapters for a given authority
+        // as we grant default permissions to sync adapters for specifix authorities.
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        packageManagerInternal.setSyncAdapterPackagesprovider(
+                new PackageManagerInternal.SyncAdapterPackagesProvider() {
+            @Override
+            public String[] getPackages(String authority, int userId) {
+                return getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
+            }
+        });
     }
 
     public void systemReady() {
