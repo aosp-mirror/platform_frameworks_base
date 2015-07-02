@@ -6324,6 +6324,9 @@ public final class Settings {
        /** Timeout in milliseconds to wait for NTP server. {@hide} */
        public static final String NTP_TIMEOUT = "ntp_timeout";
 
+       /** {@hide} */
+       public static final String STORAGE_BENCHMARK_INTERVAL = "storage_benchmark_interval";
+
        /**
         * Whether the package manager should send package verification broadcasts for verifiers to
         * review apps prior to installation.
