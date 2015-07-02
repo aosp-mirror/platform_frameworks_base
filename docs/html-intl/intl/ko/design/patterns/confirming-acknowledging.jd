@@ -1,0 +1,70 @@
+page.title=확인 및 승인하기
+page.tags=dialog,toast,notification
+@jd:body
+
+<p>사용자가 앱에서 작업을 호출할 때와 같은 몇몇 상황에서는 텍스트를 통해 해당 작업을 <em>확인</em>하거나 <em>승인</em>하는 것이 좋습니다.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_confirming.png">
+    <p><strong>확인하기</strong>란, 사용자에게 방금 호출한 작업을 정말로 진행할 것인지 묻는 것입니다. 경우에 따라 확인은 고려해야 할 작업과 관련된 경고 또는 중요한 정보와 함께 표시됩니다.</p>
+  </div>
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/confirm_ack_acknowledge.png">
+    <p><strong>승인하기</strong>란, 사용자에게 방금 호출한 작업이 완료되었음을 알리는 텍스트를 표시하는 것입니다. 이는 시스템이 수행하는 암시적인 작업에 대한 불확실성을 제거해 줍니다. 경우에 따라 승인은 작업의 실행을 취소하는 옵션과 함께 표시됩니다.</p>
+  </div>
+</div>
+
+<p>이런 방식의 사용자와의 소통은 이미 일어난 일이나 일어날 일에 대한 불확실성을 완화시키는 데 도움이 될 수 있습니다. 또한, 확인하기 또는 승인하기는 사용자가 후회할지도 모르는 실수를 미연에 방지합니다.</p>
+
+<h2>사용자 작업을 확인 또는 승인하기 적절한 경우</h2>
+<p>모든 작업에 확인 또는 승인이 적합한 것은 아닙니다. 다음 순서도를 참고하여 디자인을 결정하는 데 도움을 받으세요.</p>
+<img src="{@docRoot}design/media/confirm_ack_flowchart.png">
+
+<h2>확인하기</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>예: Google Play 도서</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>이 예에서는 사용자가 Google Play 라이브러리에서 도서 삭제를 요청했습니다. 이 작업을 확인하기 위해 <a href="{@docRoot}design/building-blocks/dialogs.html#alerts">경고</a>가 나타납니다. 왜냐하면 해당 도서를 더 이상 어떠한 기기에서도 이용할 수 없다는 것을 알려야 하기 때문입니다.</p>
+    <p>확인 대화 상자를 작성할 때, 요청된 작업을 반향하여 제목을 의미 있게 만듭니다.</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>예: Android Beam</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>확인을 두 개의 버튼을 포함한 경고로 표시할 필요는 없습니다. Android Beam을 시작하면 사용자에게 공유할 콘텐츠를 터치하라는 메시지가 표시됩니다(이 예의 경우 사진). 진행하지 않기로 결정한 경우에는 휴대폰에서 벗어나면 됩니다.</p>
+  </div>
+</div>
+
+<h2>승인하기</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>예: 방치된 Gmail 초안 저장</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
+    <p>이 예에서는 사용자가 Gmail의 메일 작성 화면에서 뒤로 또는 위로 탐색을 수행하면 예상치 못한 일이 일어나는데, 그건 바로 현재 초안이 자동으로 저장되는 것입니다. 승인은 알림 메시지 형식으로 나타납니다. 그리고 몇 초 후 사라집니다.</p>
+    <p>이때, 저장이 사용자가 아닌 앱에 의해 이뤄졌기 때문에 실행 취소는 적합하지 않습니다. 그리고 초안 목록으로 이동하면 쉽고 빠르게 메일 작성을 재개할 수 있습니다.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+    <h4>예: Gmail 대화 삭제</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
+    <p>사용자가 Gmail 목록에서 대화를 삭제하면, 승인이 실행 취소 옵션과 함께 표시됩니다. 승인은 사용자가 목록을 스크롤하는 등의 관련 없는 작업을 수행하기 전까지 그대로 남아 있습니다.</p>
+  </div>
+</div>
+
+<h2>확인 또는 승인이 필요 없는 경우</h2>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>예: +1 누르기</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>확인이 필요 없습니다</strong>. 사용자가 실수로 +1을 누른 경우, 별문제가 되지 않습니다. 버튼을 다시 터치하여 해당 작업의 실행을 취소하면 됩니다.</p>
+    <p><strong>승인이 필요 없습니다</strong>. 사용자는 +1 버튼이 바운스되고 빨간색으로 바뀌는 것을 볼 수 있습니다. 이는 매우 분명한 신호입니다.</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <h4>예: 홈 화면에서 앱 제거하기</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <p><strong>확인이 필요 없습니다</strong>. 이는 의도적인 작업으로, 사용자는 상대적으로 크고 고립된 대상으로 항목을 끌어다 놓을 것입니다. 따라서 실수가 발생할 가능성이 매우 낮습니다. 하지만 사용자가 이 결정을 후회하는 경우, 다시 복구하는 데는 몇 초면 됩니다.</p>
+    <p><strong>승인이 필요 없습니다</strong>. 사용자는 앱이 홈 화면에서 사라진 것을 알게 되는데, 이는 앱을 외부로 끌어서 화면에서 사라지게 했기 때문입니다.</p>
+
+  </div>
+</div>

@@ -1,0 +1,186 @@
+page.title=Material Design
+page.tags=Material Design
+page.type=design
+page.image=design/material/images/MaterialLight.png
+
+@jd:body
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>Документация для разработчиков</h3>
+    <p>Создание приложений с помощью Material Design</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>Видеоролик</h3>
+    <p>Введение в Material Design</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>Видеоролик</h3>
+    <p>Бумага и чернила: материалы, имеющие первостепенное значение</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>Видеоролик</h3>
+    <p>Material Design в приложениях для конференции Google I/O</p>
+</div>
+</a>
+
+
+
+<p itemprop="description">Material Design представляет собой комплексную концепцию создания визуальных, движущихся и
+ интерактивных элементов для различных платформ и устройств. Теперь Android включает в себя поддержку
+приложений с элементами Material Design. Чтобы использовать элементы Material Design в своих приложениях под Android, руководствуйтесь инструкциями
+в <a href="http://www.google.com/design/spec">спецификации Material Design</a>, а также воспользуйтесь
+новыми компонентами и функциями, доступными в Android 5.0 (уровень API 21) и выше.</p>
+
+<p>Android предоставляет следующие элементы для построения приложений в соответствии с концепцией Material Design:</p>
+
+<ul>
+  <li>новую тему;</li>
+  <li>новые виджеты для сложных представлений;</li>
+  <li>новые API-интерфейсы для нестандартных теней и анимаций.</li>
+</ul>
+
+<p>Дополнительные сведения о реализации Material Design в Android см. в разделе
+<a href="{@docRoot}training/material/index.html">Создание приложений с помощью Material Design</a>.</p>
+
+
+<h3>Тема Material Design</h3>
+
+<p>Тема Material Design предоставляет новый стиль для ваших приложений, системные виджеты, для которых можно настраивать
+цветовую палитру, и анимации, выполняемые по умолчанию в качестве реакции на касание и при переходах между действиями.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Тема Material Design в темных тонах</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Тема Material Design в светлых тонах</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>Дополнительные сведения см. в разделе <a href="{@docRoot}training/material/theme.html">Использование темы
+Material Design</a>.</p>
+
+
+<h3>Списки и подсказки</h3>
+
+<p>Android предоставляет два новых виджета для отображения подсказок и списков с использованием стилей
+и анимаций Material Design:</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
+  <p>Виджет <code>RecyclerView</code> Представляет собой более гибкую версию <code>ListView</code>,
+которая поддерживает различные типы макетов и способствует повышению производительности.</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
+  <p>Виджет <code>CardView</code> позволяет отображать важные элементы информации внутри
+  подсказок, имеющие согласованный внешний вид и поведение.</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>Дополнительные сведения см. в разделе <a href="{@docRoot}training/material/lists-cards.html">Создание списков
+и подсказок</a>.</p>
+
+
+<h3>Тени представлений</h3>
+
+<p>Теперь, помимо свойств X и Y, представления в Android имеют свойство
+Z. Это новое свойство показывает, насколько представление "приподнято", иными словами, определяет</p>
+
+<ul>
+<li>размер тени: чем больше Z, тем больше тени, отбрасываемые представлением;</li>
+<li>порядок рисования: представления с более высокими значениями Z отображаются поверх других.</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>Для воспроизведения фильма нажмите на экран устройства</em>
+  </div>
+</div>
+
+<p>Дополнительные сведения см. в разделе <a href="{@docRoot}training/material/shadows-clipping.html">Определение
+теней и обрезка представлений</a>.</p>
+
+
+<h3>Анимация</h3>
+
+<p>Новые API-интерфейсы анимации позволяют создавать нестандартную анимацию для реакции на касание в элементах пользовательского интерфейса,
+изменения состояниия представления и переходов между действиями.</p>
+
+<p>Эти API-интерфейсы позволяют</p>
+
+<ul>
+<li style="margin-bottom:15px">
+реагировать на касание в представлениях, используя анимацию для <strong>реакции на касание</strong>;
+</li>
+<li style="margin-bottom:15px">
+скрывать и отображать представление с помощью анимации для <strong>кругового появления</strong>;
+</li>
+<li style="margin-bottom:15px">
+переключаться меду действиями с помощью настраиваемой анимации для <strong>переходов между действиями</strong>;
+</li>
+<li style="margin-bottom:15px">
+создавать более естественное движение с помощью анимации для <strong>перемещения по кривой</strong>;
+</li>
+<li style="margin-bottom:15px">
+анимировать изменение одного или нескольких свойств представления с помощью анимации для <strong>изменения состояния представления</strong>;
+</li>
+<li style="margin-bottom:15px">
+отображать анимацию в <strong>графических элементах списков состояний</strong> в помежутке между изменением состояний представления.
+</li>
+</ul>
+
+<p>Анимация для реакции на касание встроена а некоторые стандартные представления, например, кнопки. Новые API-интерфейсы
+позволяют разработчику настраивать эти анимации и добавлять их в свои нестандартные представления.</p>
+
+<p>Дополнительные сведения, см. в разделе <a href="{@docRoot}training/material/animations.html">Определение настраиваемой 
+анимации</a>.</p>
+
+
+<h3>Графические объекты</h3>
+
+<p>Следующие возможности по работе с графическими объектами облегчают реализацию приложений с элементами Material Design:</p>
+
+<ul>
+<li><strong>векторные объекты</strong> можно масштабировать без ущерба для четкости, и они отлично подходят
+в качестве одноцветных значков приложения;</li>
+<li><strong>тонирование графических объектов</strong> позволяет определять растровые изображения как альфа-маску и тонировать их
+нужным цветом во время выполнения;</li>
+<li><strong>извлечение цвета</strong> позволяет автоматически извлекать главные цвета из
+растровых изображений.</li>
+</ul>
+
+<p>Дополнительные сведения см. в разделе <a href="{@docRoot}training/material/drawables.html">Работа с 
+элементами дизайна</a>.</p>
