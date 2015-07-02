@@ -1,0 +1,123 @@
+page.title=Features
+page.metaDescription=Learn about the Android Studio features.
+page.tags=studio, features
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#trans-editor">Translations Editor</a></li>
+      <li><a href="#git-samples">Android Code Samples on GitHub</a></li>
+      <li><a href="#template-support">Expanded Template and Form Factor Support</a></li>
+      <li><a href="#project-settings">Android Studio and Project Settings</a></li>
+      <li><a href="#support-apis">Editor Support for the Latest Android APIs</a></li>
+    </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/workflow/index.html">Workflow</a></li>
+    <li><a href="{@docRoot}sdk/installing/studio-build.html">Build System</a></li>
+    <li><a href="{@docRoot}sdk/installing/studio-tips.html">Android Studio Tip & Tricks</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>If you're new to Android Studio or exploring recent updates, this
+page provides an introduction to some key Android Studio features.</p>
+
+<p>For specific Android Studio how-to documentation, see the pages in the <a href=
+"{@docRoot}tools/workflow/index.html">Workflow</a> section, such as
+<a href="{@docRoot}sdk/installing/create-project.html">Managing Projects from Android Studio</a>
+and
+<a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android Studio</a>. </p>
+
+
+
+<h2 id="trans-editor">Translations Editor</h2>
+<p>Multi-language support is enhanced with the Translations Editor plugin so you can easily add
+a variety of locales to the app's translation file. With
+<a href="https://tools.ietf.org/html/bcp47">BCP 47</a> support, the editor combines language and
+region codes into a single selection for targeted localizations. Color codes indicate whether a
+locale is complete or still missing string translations. </p>
+
+<p>To access the Translations Editor, open a <code>strings.xml</code> file and click the
+<strong>Open Editor</strong> link, or click the globe icon
+(<img src="{@docRoot}images/tools/studio-globe-icon.png" style="vertical-align:bottom;margin:0;height:19px" />) in the Design layout view.  </p>
+
+
+    <img src="{@docRoot}images/tools/studio-translationeditoropen.png" />
+    <p class="img-caption"><strong>Figure 1.</strong> Add locales and strings in the
+    Translations Editor.</p>
+
+
+
+<h2 id="git-samples">Android Code Samples on GitHub</h2>
+<p>Clicking <strong>Import Samples</strong> from the <strong>File</strong> menu or <em>Welcome</em>
+page provides seamless access to Google code samples on GitHub.</p>
+    <p><img src="{@docRoot}images/tools/studio-samples-githubaccess.png" /></p>
+    <p class="img-caption"><strong>Figure 2.</strong> Get code samples from GitHub.</p>
+
+
+    <p><img src="{@docRoot}images/tools/studio-sample-in-editor.png" /></p>
+    <p class="img-caption"><strong>Figure 3.</strong> Imported code sample.</p>
+
+
+
+<h2 id="template-support">Expanded Template and Form Factor Support</h2>
+<p>Android Studio supports templates for Google Services and expands the available device
+types. </p>
+
+    <h4> Android Wear and TV support</h4>
+    <p>For easy cross-platform development, the Project Wizard provides templates for
+    creating your apps for Android Wear and TV. </p>
+    <p><img src="{@docRoot}images/tools/studio-tvwearsupport.png"  />
+
+      <p class="img-caption"><strong>Figure 4.</strong> Supported form factors.</p>
+    <p>During app creation, the Project Wizard also displays an API Level dialog to help you choose
+    the best <em>minSdkVersion</em> for your project.</p>
+
+
+    <h4> Google App Engine integration (Google Cloud Platform/Messaging)</h4>
+    <p>Quick cloud integration. Using Google App Engine to connect to the Google cloud
+    and create a cloud end-point is as easy as selecting <em>File > New Module > App Engine Java
+    Servlet Module</em> and specifying the module, package, and client names. </p>
+    <p><img src="{@docRoot}images/tools/studio-cloudmodule.png" /></p>
+    <p class="img-caption"><strong>Figure 5</strong> Google App Engine integration.</p>
+
+
+<h2 id="project-settings">Android Studio and Project Settings</h2>
+<p>Android Studio provides setting dialogs so you can manage the most important Android Studio and
+project settings from the <strong>File &gt; Project Structure</strong> and
+<strong>File &gt; Settings</strong> menus. For example, you can use the
+<strong>File &gt; Project Structure</strong> menu or
+the <code>build.gradle</code> file to update your <code>productFlavor</code> settings.
+Additional settings from the <strong>File &gt; Project Structure</strong> menus include:
+<ul>
+ <li>SDK and JDK location </li>
+ <li>SDK version </li>
+ <li>Gradle and Android Plugin for Gradle versions </li>
+ <li>Build tools version </li>
+ <li>Multidex setting</li>
+ <li><code>buildTypes</code> </li>
+ <li>Dependencies </li>
+</ul>
+</p>
+
+<p>Use the <strong>File &gt; Settings</strong> menu to modify the Android Studio or project
+behavior, such a UI themes, system settings, and version control. </p>
+
+
+
+<h2 id="support-apis">Editor Support for the Latest Android APIs</h2>
+<p>Android Studio supports the
+<a href="{@docRoot}design/material/index.html">Material Design</a></li> themes, widgets, and
+graphics, such as shadow layers and API version rendering (showing the layout across different
+UI versions). Also, the drawable XML tags and attributes, such as <code>&lt;ripple&gt;</code>
+and <code>&lt;animated-selector&gt;</code>, are supported.</p>
+
+
+

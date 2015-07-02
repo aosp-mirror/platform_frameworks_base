@@ -4,9 +4,16 @@ page.title=Android Studio Tips and Tricks
 <div id="qv-wrapper">
 <div id="qv">
 
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#productivity-features">Productivity Shortcuts</a></li>
+      <li><a href="#intellij">Working with IntelliJ</a></li>
+      <li><a href="#key-commands">Key Commands</a></li>
+    </ol>
+
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}tools/sdk/index.html">Download Android Studio</a></li>
+    <li><a href="{@docRoot}sdk/index.html">Download Android Studio</a></li>
     <li><a href="http://wiki.jetbrains.net/intellij/Android">IntelliJ IDEA Android Tutorials</a></li>
     <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
   </ol>
@@ -19,170 +26,178 @@ provides some tips to help you get started with some of the most common tasks an
 enhancements. </p>
 
 
-     <h2>Smart Rendering</h2>
-     <p>With smart rendering, Android Studio displays links for quick fixes to rendering errors.
-     For example, if you add a button to the layout without specifying the <em>width</em> and
-     <em>height</em> attributes, Android Studio displays the rendering message <em>Automatically
-     add all missing attributes</em>. Clicking the message adds the missing attributes to the layout.</p>
+<h2 id="productivity-features">Productivity Shortcuts</h2>
+
+<p>Android Studio includes a number of features to help you be more productive in your coding.
+This section notes a few of the key features to help you work quickly and efficiently.
+</p>
 
 
-     <h2> Bitmap rendering in the debugger</h2>
-     <p>While debugging, you can now right-click on bitmap variables in your app and invoke
-     <em>View Bitmap</em>. This fetches the associated data from the debugged process and renders
-     the bitmap in the debugger. </p>
-    <p><img src="{@docRoot}images/tools/studio-bitmap-rendering.png" style="width:350px"/></p>
-    <p class="img-caption"><strong>Figure 13.</strong> Bitmap Rendering/p>
+<h3>Smart Rendering</h3>
+<p>With smart rendering, Android Studio displays links for quick fixes to rendering errors.
+For example, if you add a button to the layout without specifying the <em>width</em> and
+<em>height</em> attributes, Android Studio displays the rendering message <em>Automatically
+add all missing attributes</em>. Clicking the message adds the missing attributes to the layout.</p>
 
 
-     <h2>Output window message filtering</h2>
-     <p>When checking build results, you can filter messages by <em>message type</em> to quickly
-     locate messages of interest.</p>
-     <img src="{@docRoot}images/tools/studio-outputwindowmsgfiltering.png" style="width:200px"style="width:200px" />
-     <p class="img-caption"><strong>Figure 14.</strong> Filter Build Messages</p>
+<h3> Bitmap rendering in the debugger</h3>
+<p>While debugging, you can now right-click on bitmap variables in your app and invoke
+<em>View Bitmap</em>. This fetches the associated data from the debugged process and renders
+the bitmap in the debugger. </p>
+<p><img src="{@docRoot}images/tools/studio-bitmap-rendering.png" style="width:350px"/></p>
+<p class="img-caption"><strong>Figure 1.</strong> Bitmap Rendering</p>
 
 
-    <h2>Hierarchical parent setting</h2>
-    <p>The activity parent can now be set in the Activity Wizard when creating a new
-    activity. Setting a <em>hierarchal parent</em> sets the {@code Up} button to automatically
-    appear in the app's Action bar when viewing a child activity, so the {@code Up}
-    button no longer needs to be manually specified in the <em>menu.xml</em> file.</p>
+<h3>Creating new files</h3>
+<p>You can quickly add new code and resource files by clicking the appropriate directory in the
+<strong>Project</strong> pane and pressing <code>ALT + INSERT</code> on Windows and Linux or
+<code>COMMAND + N</code> on Mac. Based on the type of directory selected, Android Studio
+offers to create the appropriate file type.</p>
+
+<p>For example, if you select a layout directory, press <code>ALT + INSERT</code> on Windows,
+and select <strong>Layout resource file</strong>, a dialog opens so you can name the file
+(you can exclude the {@code .xml} suffix) and choose a root view element. The editor then
+switches to the layout design editor so you can begin designing your layout.</p>
 
 
-    <h2>Creating layouts</h2>
-    <p>Android Studio offers an advanced layout editor that allows you to drag-and-drop widgets
-    into your layout and preview your layout while editing the XML.</p>
-
-    <p>While editing in the <strong>Text</strong> view, you can preview the layout on devices by
-    opening the <strong>Preview</strong> pane available on the right side of the window. Within the
-    Preview pane, you can modify the preview by changing various options at the top of the pane,
-    including the preview device, layout theme, platform version and more. To preview the layout on
-    multiple devices simultaneously, select <strong>Preview All Screen Sizes</strong> from the
-    device drop-down.</p>
-    <p><img src="{@docRoot}images/tools/studio-previewall.png" style="width:350px"/></p>
-    <p class="img-caption"><strong>Figure 15.</strong> Preview All Screens/p>
-
-    <p>You can switch to the graphical editor by clicking <strong>Design</strong> at the
-    bottom of the window. While editing in the Design view, you can show and hide the
-    widgets available to drag-and-drop by clicking <strong>Palette</strong> on the left side of the
-    window. Clicking <strong>Designer</strong> on the right side of the window reveals a panel
-    with a layout hierarchy and a list of properties for each view in the layout.</p>
+<h3>Output window message filtering</h3>
+<p>When checking build results, you can filter messages by <em>message type</em> to quickly
+locate messages of interest.</p>
+<img src="{@docRoot}images/tools/studio-outputwindowmsgfiltering.png" style="width:200px"style="width:200px" />
+<p class="img-caption"><strong>Figure 2.</strong> Filter Build Messages</p>
 
 
-   <h3>Annotations</h3>
-   <p>Android Studio provides coding assistance for using annotations from the
-   {@link android.support.annotation Support-Annotations} library, part of the
-   Support Repository. Adding a dependency for this library enables you to decorate your code with
-   annotations to help catch bugs, such as null pointer exceptions and resource type conflicts.
-   You can also create enumerated annotations to, for example, check that a passed parameter value
-   matches a value from a defined set of constants. For more information, see
-   <a href="{@docRoot}tools/debugging/annotations.html#annotations">Improving Code Inspection with
-   Annotations</a>. </p>
+<h3>Hierarchical parent setting</h3>
+<p>The activity parent can now be set in the Activity Wizard when creating a new
+activity. Setting a <em>hierarchal parent</em> sets the {@code Up} button to automatically
+appear in the app's Action bar when viewing a child activity, so the {@code Up}
+button no longer needs to be manually specified in the <em>menu.xml</em> file.</p>
 
 
-   <h3>Java class decompiling</h3>
-   <p>Android Studio allows you to look at what’s inside Java libraries when you don’t have access
-   to the source code. </p>
+<h3>Creating layouts</h3>
+<p>Android Studio offers an advanced layout editor that allows you to drag-and-drop widgets
+into your layout and preview your layout while editing the XML.</p>
 
-   <p>The decompiler is built into Android Studio for easy access. To use this feature, right-click
-   a class, method, or field from a library for which you do not have source file access and select
-   <strong>decompile</strong>.</p> The decompiled source code appears. </p>
+<p>While editing in the <strong>Text</strong> view, you can preview the layout on devices by
+opening the <strong>Preview</strong> pane available on the right side of the window. Within the
+Preview pane, you can modify the preview by changing various options at the top of the pane,
+including the preview device, layout theme, platform version and more. To preview the layout on
+multiple devices simultaneously, select <strong>Preview All Screen Sizes</strong> from the
+device drop-down.</p>
+<p><img src="{@docRoot}images/tools/studio-previewall.png" style="width:350px"/></p>
+<p class="img-caption"><strong>Figure 3.</strong> Preview All Screens</p>
 
-   <p>To adjust the Java decompiler settings, select
-   <strong>File > Settings > Other Settings > Java Decompiler</strong>. </p>
-
-
-   <h3>Debugging and performance enhancements</h3>
-   <p>Android Studio offers debugging and performance enhancements such as:</p>
-   <ul>
-    <li>Auto detect an expanded set of code styles. To modify the current code style, choose
-      <strong>File &gt; Settings &gt; Code Styles</strong>.  </li>
-    <li>Support for high density (Retina) displays on Windows and Linux.  </li>
-    <li>Scratch files for quick prototyping without creating any project files.
-      <p>Choose <strong>Tools &gt; New Scratch File</strong> to open a scratch file to quickly
-      build and run code prototypes. Together with Android Studio coding assistance, scratch
-      files allow you to quickly run and debug code updates with the support of all file operations.
-      By embedding code created with scripting languages, you can run your code from within the
-      scratch file.</p> 
-    </li>
-  </ul>
+<p>You can switch to the graphical editor by clicking <strong>Design</strong> at the
+bottom of the window. While editing in the Design view, you can show and hide the
+widgets available to drag-and-drop by clicking <strong>Palette</strong> on the left side of the
+window. Clicking <strong>Designer</strong> on the right side of the window reveals a panel
+with a layout hierarchy and a list of properties for each view in the layout.</p>
 
 
+<h3>Annotations</h3>
+<p>Android Studio provides coding assistance for using annotations from the
+{@link android.support.annotation Support-Annotations} library, part of the
+Support Repository.
 
-<h2 id="intellij">Working with IntelliJ-based Coding Practices</h2>
-
-     <p>This section list just a few of the code editing
-     practices you should consider using when creating Android Studio apps. </p>
-
-     <p>For complete user documentation for the IntelliJ IDEA interface (upon which Android Studio
-     is based), refer to the
-     <a href="http://www.jetbrains.com/idea/documentation/index.jsp">IntelliJ IDEA documentation</a>.</p>
-
-     <h3><em>Alt + Enter</em> key binding</h3>
-     <p>For quick fixes to coding errors, the IntelliJ powered IDE implements the <em>Alt + Enter</em>
-     key binding to fix errors (missing imports, variable assignments, missing references, etc) when
-     possible, and if not, suggest the most probable solution. </p>
+Adding a dependency for this library enables you to decorate your code with annotations to help
+catch bugs, such as null pointer exceptions and resource type conflicts. You can also create
+enumerated annotations to, for example, check that a passed parameter value matches a value from
+a defined set of constants. For more information, see
+<a href="{@docRoot}tools/debugging/annotations.html#annotations">Improving Code Inspection with
+Annotations</a>.
+</p>
 
 
-    <h3><em>Ctrl + D</em> key binding</h3>
-    <p>The <em>Ctrl + D</em> key binding is great for quickly duplicating code lines or fragments.
-    Simply select the desired line or fragment and enter this key binding. </p>
+<h3>Java class decompiling</h3>
+<p>Android Studio allows you to look at what’s inside Java libraries when you don’t have access
+to the source code. </p>
 
-    <h3>Navigate menu</h3>
-    <p>In case you're not familiar with an API class, file or symbol, the <em>Navigate</em> menu lets
-    you jump directly to the class of a method or field name without having to search through
-    individual classes. </p>
+<p>The decompiler is built into Android Studio for easy access. To use this feature, right-click
+a class, method, or field from a library for which you do not have source file access and select
+<strong>decompile</strong>.</p> The decompiled source code appears. </p>
+
+<p>To adjust the Java decompiler settings, select
+<strong>File > Settings > Other Settings > Java Decompiler</strong>. </p>
 
 
-    <h3>Inspection scopes</h3>
-    <p>Scopes set the color of code segments for easy code identification and location. For example,
-    you can set a scope to identify all code related to a specific action bar.   </p>
+<h3>Debugging and performance enhancements</h3>
+<p>Android Studio offers debugging and performance enhancements such as:</p>
+<ul>
+  <li>Custom keymaps. To modify the current keymap, choose
+   <strong>File &gt; Settings &gt; Keymap</strong>.  </li>
+  <li>Support for high density (Retina) displays on Windows and Linux.  </li>
+  <li>Scratch files for quick prototyping without creating any project files.
+   <p>Choose <strong>Tools &gt; New Scratch File</strong> to open a scratch file to quickly
+   build and run code prototypes. Together with Android Studio coding assistance, scratch
+   files allow you to quickly run and debug code updates with the support of all file operations.
+   By embedding code created with scripting languages, you can run your code from within the
+   scratch file.</p> 
+  </li>
+</ul>
 
 
 
-    <h3>External annotations</h3>
-    <p>Specify annotations within the code or from an external annotation file. The Android Studio
-    IDE keeps track of the restrictions and validates compliance, for example setting the data type
-    of a string as not null.</p>
+<h2 id="intellij">Working with IntelliJ-based Coding Practices</h3>
+
+<p>This section list just a few of the code editing
+practices you should consider using when creating Android Studio apps. </p>
+
+<p>For complete user documentation for the IntelliJ IDEA interface (upon which Android Studio
+is based), refer to the
+<a href="http://www.jetbrains.com/idea/documentation/index.jsp">IntelliJ IDEA documentation</a>.</p>
 
 
-    <h3>Injecting languages</h3>
-    <p>With language injection, the Android Studio IDE allows you to work with islands of different
-    languages embedded in the source code. This extends the syntax, error highlighting and coding
-    assistance to the embedded language. This can be especially useful for checking regular expression
-    values inline, and validating XML and SQL statements.</p>
-
-    <h3>Code folding</h3>
-    <p>This allows you to selectively hide and display sections of the code for readability. For
-    example, resource expressions or code for a nested class can be folded or hidden in to one line
-    to make the outer class structure easier to read. The inner class can be later expanded for
-    updates. </p>
+<h3><em>Alt + Enter</em> key binding</h3>
+<p>For quick fixes to coding errors, the IntelliJ powered IDE implements the <em>Alt + Enter</em>
+key binding to fix errors (missing imports, variable assignments, missing references, etc) when
+possible, and if not, suggest the most probable solution. </p>
 
 
-    <h3>Image and color preview</h3>
-    <p>When referencing images and icons in your code, a preview of the image or icon appears
-    (in actual size at different densities) in the code margin to help you verify the image or icon
-    reference.  Pressing {@code F1} with the preview image or icon selected displays resource asset
-    details, such as the <em>dp</em> settings.   </p>
+<h3><em>Ctrl + D</em> key binding</h3>
+<p>The <em>Ctrl + D</em> key binding is great for quickly duplicating code lines or fragments.
+Simply select the desired line or fragment and enter this key binding. </p>
 
 
-    <h3>Quick F1 documentation</h3>
-    <p>You can now inspect theme attributes using <strong>View > Quick Documentation</strong>
-    (<strong>F1</strong>),
-    see the theme inheritance hierarchy, and resolve values for the various attributes.</p>
-
-    <p>If you invoke <strong> View > Quick Documentation</strong> (usually bound to F1) on the theme
-    attribute <em>?android:textAppearanceLarge</em>, you will see the theme inheritance hierarchy and
-    resolved values for the various attributes that are pulled in.</p>
+<h3>Navigate menu</h3>
+<p>In case you're not familiar with an API class, file or symbol, the <em>Navigate</em> menu lets
+you jump directly to the class of a method or field name without having to search through
+individual classes. </p>
 
 
+<h3>Inspection scopes</h3>
+<p>Scopes set the color of code segments for easy code identification and location. For example,
+you can set a scope to identify all code related to a specific action bar.   </p>
 
-     <h3>New Allocation Tracker integration in the Android/DDMS window</h3>
-     <p>You can now inspect theme attributes using <strong> View > Quick Documentation
-     </strong> <code>F1</code>, see the theme inheritance hierarchy, and resolved values for the
-     various attributes.</p>
-      <img src="{@docRoot}images/tools/studio-allocationtracker.png" style="width:300px" />
-      <p class="img-caption"><strong>Figure 16</strong> Allocation Tracker</p>
 
+<h3>Injecting languages</h3>
+<p>With language injection, the Android Studio IDE allows you to work with islands of different
+languages embedded in the source code. This extends the syntax, error highlighting and coding
+assistance to the embedded language. This can be especially useful for checking regular expression
+values inline, and validating XML and SQL statements.</p>
+
+
+<h3>Code folding</h3>
+<p>This allows you to selectively hide and display sections of the code for readability. For
+example, resource expressions or code for a nested class can be folded or hidden in to one line
+to make the outer class structure easier to read. The inner class can be later expanded for
+updates. </p>
+
+
+<h3>Image and color preview</h3>
+<p>When referencing images and icons in your code, a preview of the image or icon appears
+(in actual size at different densities) in the code margin to help you verify the image or icon
+reference. Pressing {@code F1} with the preview image or icon selected displays resource asset
+details, such as the <em>dp</em> settings.   </p>
+
+
+<h3>Quick F1 documentation</h3>
+<p>You can now inspect theme attributes using <strong>View > Quick Documentation</strong>
+(<strong>F1</strong>),
+see the theme inheritance hierarchy, and resolve values for the various attributes.</p>
+
+<p>If you invoke <strong> View > Quick Documentation</strong> (usually bound to F1) on the theme
+attribute <em>?android:textAppearanceLarge</em>, you will see the theme inheritance hierarchy and
+resolved values for the various attributes that are pulled in.</p>
 
 
 
@@ -288,13 +303,5 @@ using Mac OS X, update your keymap to use the Mac OS X 10.5+ version keymaps und
 </table>
 
 <p>For a complete keymap reference guide, see the
-<a href="http://www.jetbrains.com/idea/documentation/index.jsp">IntelliJ IDEA</a> documentation.</p>
-
-
-</div>
-
-
-</div>
-
-
-
+<a href="http://www.jetbrains.com/idea/documentation/index.jsp">IntelliJ IDEA</a>
+documentation.</p>
