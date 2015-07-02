@@ -1,0 +1,379 @@
+page.title=儲存檔案
+page.tags=資料儲存空間
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#InternalVsExternalStorage">選擇內部或外部儲存空間</a></li>
+  <li><a href="#GetWritePermission">取得外部儲存空間的權限</a></li>
+  <li><a href="#WriteInternalStorage">將檔案儲存在內部儲存空間</a></li>
+  <li><a href="#WriteExternalStorage">將檔案儲存在外部儲存空間</a></li>
+  <li><a href="#GetFreeSpace">查詢可用空間</a></li>
+  <li><a href="#DeleteFile">刪除檔案</a></li>
+</ol>
+
+<h2>您也應該閱讀</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">使用內部儲存空間</a>
+</li>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">使用外部儲存空間</a>
+</li>
+</ul>
+
+</div>
+</div>
+
+<p>Android 使用的檔案系統類似於其他平台上的磁碟式檔案系統。
+本課程將說明如何透過 Android 檔案系統，使用 {@link java.io.File}
+API 讀取並寫入檔案。
+</p>
+
+<p>{@link java.io.File} 物件適用於以從頭到尾的順序，無一略過地讀取或寫入大量資料。
+該物件的用途很廣，例如非常適用於影像檔案或透過網路交換的項目。
+</p>
+
+<p>本課程將顯示如何在您的應用程式中執行與檔案相關的基本任務。本課程假設您已熟悉 Linux 檔案系統的基本概念，以及 
+{@link java.io} 中的標準檔案輸入/輸出 API。
+</p>
+
+
+<h2 id="InternalVsExternalStorage">選擇內部或外部儲存空間</h2>
+
+<p>所有 Android 裝置都有兩個檔案儲存區域：「內部」與「外部」儲存空間。這些名稱源自 Android 發展的初期，當時大多數裝置都提供內建靜態記憶體 (內部儲存空間)，以及諸如 micro SD 卡等卸除式儲存媒體 (外部儲存空間)。有些裝置將永久儲存空間分為「內部」與「外部」分割區，因此即使沒有卸除式儲存媒體，也始終存在兩個儲存空間，不論外部儲存空間是否為卸除式媒體，API 行為都相同。以下清單將概述每個儲存空間的狀況。
+
+
+
+
+
+</p>
+
+<div class="col-5" style="margin-left:0">
+<p><b>內部儲存空間：</b></p>
+<ul>
+<li>裝置始終具備內部儲存空間。</li>
+<li>依預設，只有您的應用程式能存取此空間內儲存的檔案。</li>
+<li>使用者解除安裝您的應用程式時，系統會從內部儲存空間移除您應用程式的所有檔案。
+</li>
+</ul>
+<p>若您希望確保使用者與其他應用程式都無法存取您的檔案，使用內部儲存空間是最佳選擇。
+</p>
+</div>
+
+<div class="col-7" style="margin-right:0">
+<p><b>外部儲存空間：</b></p>
+<ul>
+<li>裝置並非始終具備外部儲存空間，因為使用者可以將外部儲存空間掛接為 USB 儲存裝置，在某些情況下也可以從裝置上移除外部儲存空間。
+</li>
+<li>其他應用程式可以讀取外部儲存空間，因此您可能無法對該空間內儲存的檔案遭讀取的情況進行控制。
+</li>
+<li>若使用者解除安裝您的應用程式，只有在您將應用程式的檔案儲存在 {@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()} 的目錄中時，系統才會從外部儲存空間移除您應用程式的檔案。
+</li>
+</ul>
+<p>對於不需要存取限制的檔案，以及您希望與其他應用程式共用的檔案，或允許使用者使用電腦存取的檔案，外部儲存空間是最佳的儲存位置。
+
+</p>
+</div>
+
+
+<p class="note" style="clear:both">
+<strong>秘訣：</strong>雖然應用程式依預設會安裝在內部儲存空間，但是您可以在宣示說明中指定 <a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code
+android:installLocation}</a> 屬性，以便可以將應用程式安裝在外部儲存空間。
+
+在 APK 的大小很大，且使用者的外部儲存空間大於內部儲存空間時，使用者非常喜歡使用該選項。
+如需詳細資訊，請參閱<a href="{@docRoot}guide/topics/data/install-location.html">應用程式安裝位置</a>。
+</p>
+
+
+<h2 id="GetWritePermission">取得外部儲存空間的權限</h2>
+
+<p>若要寫入至外部儲存空間，您必須在<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">宣示說明檔案</a>中要求 {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} 權限：
+</p>
+
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+
+<div class="caution"><p><strong>注意：</strong>
+目前，所有應用程式無需特殊權限即可讀取外部儲存空間。
+但是，此狀況在將來的版本中將有所變更。若您的應用程式需要讀取外部儲存空間 (但不寫入該空間)，您需要宣告 {@link
+android.Manifest.permission#READ_EXTERNAL_STORAGE} 權限。
+若要確保您的應用程式仍以預期方式運作，您應立即宣告此權限，然後變更即會生效。
+</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+<p>但是，若您的應用程式使用 {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} 權限，則也以隱含方式具備外部儲存空間讀取權限。
+</p>
+</div>
+
+<p>您無需任何權限即可將檔案儲存在內部儲存空間。
+您的應用程式始終具備內部儲存空間目錄中檔案的讀取與寫入權限。
+</p>
+
+
+
+
+
+<h2 id="WriteInternalStorage">將檔案儲存在內部儲存空間</h2>
+
+<p>將檔案儲存在內部儲存空間時，您可以呼叫以下兩種方法的其中之一，以
+{@link java.io.File} 擷取相應目錄：</p>
+
+<dl>
+  <dt>{@link android.content.Context#getFilesDir}</dt>
+  <dd>傳回代表您應用程式所用內部目錄的 {@link java.io.File}。</dd>
+  <dt>{@link android.content.Context#getCacheDir}</dt>
+  <dd>傳回代表您應用程式暫存快取檔案所用內部目錄的 {@link java.io.File}。
+請確保於不再需要檔案時刪除檔案，並針對您在任何指定時間所用的記憶體數量實作合理的大小限制，例如 1MB。
+
+若系統所用的儲存空間開始不足，可能會刪除您的快取檔案而不提供警告。
+</dd>
+</dl>
+
+<p>若要在上述其中一個目錄中建立新檔案，可以使用 {@link
+java.io.File#File(File,String) File()} 建構函式，然後傳送會指定您內部儲存空間目錄的 {@link java.io.File} (由上述其中一種方法提供)。
+例如：</p>
+
+<pre>
+File file = new File(context.getFilesDir(), filename);
+</pre>
+
+<p>或者，您可以呼叫 {@link
+android.content.Context#openFileOutput openFileOutput()}，以取得寫入內部目錄中檔案的 {@link java.io.FileOutputStream}。
+例如，以下展示了如何將某些文字寫入至檔案：
+</p>
+
+<pre>
+String filename = "myfile";
+String string = "Hello world!";
+FileOutputStream outputStream;
+
+try {
+  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+  outputStream.write(string.getBytes());
+  outputStream.close();
+} catch (Exception e) {
+  e.printStackTrace();
+}
+</pre>
+
+<p>或者，若您需要快取某些檔案，應改用 {@link
+java.io.File#createTempFile createTempFile()}。例如，以下方法會從 {@link java.net.URL} 中擷取檔案名稱，然後在您應用程式的內部快取目錄中建立具有該名稱的檔案：
+
+</p>
+
+<pre>
+public File getTempFile(Context context, String url) {
+    File file;
+    try {
+        String fileName = Uri.parse(url).getLastPathSegment();
+        file = File.createTempFile(fileName, null, context.getCacheDir());
+    catch (IOException e) {
+        // Error while creating file
+    }
+    return file;
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>
+您應用程式的內部儲存空間目錄由位於 Android 檔案系統特殊位置的應用程式套件名稱指定。嚴格來說，若將檔案模式設為可讀取，則其他應用程式可以讀取您的內部檔案。
+
+
+但是，其他應用程式也需要知道您的應用程式套件名稱與檔案名稱。
+除非您將檔案明確設為可讀取或可寫入，否則其他應用程式無法瀏覽您的內部目錄，也沒有讀取或寫入存取權。
+因此，只要您針對內部儲存空間中的檔案使用 {@link android.content.Context#MODE_PRIVATE}，其他應用程式將永遠無法存取這些檔案。
+
+</p>
+
+
+
+
+
+<h2 id="WriteExternalStorage">將檔案儲存在外部儲存空間</h2>
+
+<p>由於可能不具備外部儲存空間&mdash;例如使用者將儲存裝置掛接至 PC，或移除提供外部儲存空間的 SD 卡&mdash;，因此您始終應先驗證磁碟區可用，然後再對其執行存取。
+
+您可以呼叫 {@link android.os.Environment#getExternalStorageState}，以查詢外部儲存空間狀態。
+若傳回的狀態等於 {@link android.os.Environment#MEDIA_MOUNTED}，則可以讀取並寫入檔案。
+
+例如，以下方法可用於判斷儲存空間的可用性：
+</p>
+
+<pre>
+/* Checks if external storage is available for read and write */
+public boolean isExternalStorageWritable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state)) {
+        return true;
+    }
+    return false;
+}
+
+/* Checks if external storage is available to at least read */
+public boolean isExternalStorageReadable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state) ||
+        Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+        return true;
+    }
+    return false;
+}
+</pre>
+
+<p>雖然使用者與其他應用程式可以修改外部儲存空間，但是可在外部儲存空間儲存兩種類別的檔案：
+</p>
+
+<dl>
+  <dt>公用檔案</dt>
+  <dd>這些檔案將供其他應用程式及使用者自由使用。
+若使用者解除安裝您的應用程式，這些檔案仍可供使用者使用。
+
+  <p>例如，由您的應用程式拍攝的相片或下載的其他檔案都是公用檔案。</p>
+  </dd>
+  <dt>私用檔案</dt>
+  <dd>這些檔案本屬於您的應用程式，在使用者解除安裝您的應用程式時應予以刪除。雖然嚴格來說，由於這些檔案位於外部儲存空間，因此可供使用者與其他應用程式存取，但實際上這些檔案對於您應用程式之外的使用者並無價值。使用者解除安裝您的應用程式時，系統會刪除您應用程式外部私用目錄中的所有檔案。
+
+
+
+ 
+  <p>例如，您的應用程式下載的附加資源，或暫存媒體檔案都是私用檔案。</p>
+  </dd>
+</dl>
+
+<p>若您希望將公用檔案儲存在外部儲存空間，請使用 
+{@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} 方法取得代表外部儲存空間內相應目錄的 {@link java.io.File}。
+該方法採用對要儲存的檔案類型進行指定 (以便能合理區分這些檔案與其他公用檔案) 的引數，諸如 {@link android.os.Environment#DIRECTORY_MUSIC} 或 {@link
+android.os.Environment#DIRECTORY_PICTURES}。
+
+例如：</p>
+
+<pre>
+public File getAlbumStorageDir(String albumName) {
+    // Get the directory for the user's public pictures directory. 
+    File file = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+
+<p>若您希望儲存應用程式私用的檔案，可以呼叫 {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()}，然後向其傳送名稱 (表示您希望使用的目錄類型)，從而擷取相應目錄。
+
+以此方式建立的每個目錄都會新增至父系目錄 (該目錄會封裝您應用程式的所有外部儲存空間檔案)，並在使用者解除安裝您的應用程式時由系統刪除。
+
+</p>
+
+<p>例如，以下所示的方法可用於建立個別相簿的目錄：</p>
+
+<pre>
+public File getAlbumStorageDir(Context context, String albumName) {
+    // Get the directory for the app's private pictures directory. 
+    File file = new File(context.getExternalFilesDir(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+<p>若預先定義的任何子目錄名稱都不適用於您的檔案，您可以改為呼叫 {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} 並傳送 {@code null}。此操作
+會傳回外部儲存空間內您應用程式私用目錄的根目錄。</p>
+
+<p>請記住，{@link android.content.Context#getExternalFilesDir getExternalFilesDir()} 會在使用者解除安裝您的應用程式時所刪除的目錄中建立目錄。若您希望要儲存的檔案在使用者解除安裝您的應用程式後仍可用&mdash;例如您的應用程式是相機，而使用者希望保留相片&mdash;，應改用 {@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()}。
+
+
+
+</p>
+
+
+<p>不論是將 {@link
+android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} 用於共用的檔案，還是將 {@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()} 用於您應用程式私用的檔案，請務必使用由 API 常數 (例如 {@link android.os.Environment#DIRECTORY_PICTURES}) 提供的目錄名稱。
+
+
+這些目錄名稱可確保系統正確處理檔案。
+例如，系統媒體掃描程式會將 {@link
+android.os.Environment#DIRECTORY_RINGTONES} 中儲存的檔案視為鈴聲，而非音樂。
+</p>
+
+
+
+
+<h2 id="GetFreeSpace">查詢可用空間</h2>
+
+<p>若您預先知道要儲存的資料量，可以呼叫 {@link java.io.File#getFreeSpace} 或 {@link
+java.io.File#getTotalSpace} 以探明在不會導致 {@link
+java.io.IOException} 的情況下空間是否充足。
+上述方法可分別提供儲存磁碟區內目前可用空間量與空間總量。
+該資訊還可以用於避免填充的儲存磁碟區超過特定臨界值。
+</p>
+
+<p>但是，系統不保證您可以寫入 {@link java.io.File#getFreeSpace} 所示的位元組數量。
+若傳回的數值較您要儲存的資料量略大，或檔案系統的已使用空間不到 90%，則繼續寫入可能是安全的。否則，可能不應寫入儲存空間。
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>在儲存檔案之前，您無需檢查可用空間量。
+您可以嘗試立即寫入檔案，然後在發生 {@link java.io.IOException} 時執行捕捉即可。
+若您不知道需要的確切空間量，可能需要執行該作業。
+例如，若您在儲存檔案之前，將 PNG 影像轉化為 JPEG 以變更檔案的編碼，就不會預先知道檔案的大小。
+
+</p>
+
+
+
+
+<h2 id="DeleteFile">刪除檔案</h2>
+
+<p>不再需要檔案時，應一律刪除檔案。最直接的檔案刪除方式是讓開啟的檔案參考在自身上呼叫 {@link java.io.File#delete}。
+</p>
+
+<pre>
+myFile.delete();
+</pre>
+
+<p>若檔案儲存在內部儲存空間，您也可以呼叫 {@link android.content.Context#deleteFile deleteFile()}，讓 {@link android.content.Context} 尋找並刪除檔案：
+</p>
+
+<pre>
+myContext.deleteFile(fileName);
+</pre>
+
+<div class="note">
+<p><strong>注意：</strong>使用者解除安裝您的應用程式時，Android 系統會刪除以下檔案：
+</p> 
+<ul>
+<li>您在內部儲存空間儲存的所有檔案</li>
+<li>您使用 {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} 在外部儲存空間儲存的所有檔案。</li>
+</ul>
+<p>但是，您應定期手動刪除使用 {@link android.content.Context#getCacheDir()} 建立的所有快取檔案，並定期刪除不再需要的其他檔案。
+
+</p>
+</div>
+

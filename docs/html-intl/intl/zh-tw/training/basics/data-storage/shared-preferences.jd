@@ -1,0 +1,120 @@
+page.title=儲存索引鍵值組
+page.tags=資料儲存空間
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#GetSharedPreferences">取得 SharedPreferences 的控點</a></li>
+  <li><a href="#WriteSharedPreference">寫入至共用的偏好設定</a></li>
+  <li><a href="#ReadSharedPreference">從共用的偏好設定進行讀取</a></li>
+</ol>
+
+<h2>您也應該閱讀</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#pref">使用共用的偏好設定</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>若您希望儲存相對較小的索引鍵值集合，應使用 {@link android.content.SharedPreferences} API。
+{@link android.content.SharedPreferences} 物件指向包含索引鍵值配對的檔案，並提供讀取及寫入這些配對的簡單方法。
+
+每個 {@link android.content.SharedPreferences} 檔案都由架構管理，可以是公用或私用檔案。
+
+</p>
+
+<p>本課程將為您展示如何使用 {@link android.content.SharedPreferences} API 儲存及擷取簡單值。
+</p>
+
+<p class="note"><strong>注意：</strong>{@link android.content.SharedPreferences} API 僅用於讀取及寫入索引鍵值配對，不應將其與 {@link android.preference.Preference} API 混淆，後者可協助您建置應用程式設定的使用者介面 (然而這些 API 使用 {@link android.content.SharedPreferences} 作為其儲存應用程式設定的實作方式)。
+
+
+
+如需有關使用 {@link
+android.preference.Preference} API 的資訊，請參閱<a href="{@docRoot}guide/topics/ui/settings.html">設定</a>指南。</p>
+
+<h2 id="GetSharedPreferences">取得 SharedPreferences 的控點</h2>
+
+<p>您可以呼叫以下兩種方法的其中之一，以建立新的共用偏好設定檔案或存取既有的共用偏好設定檔案：
+</p>
+<ul>
+  <li>{@link android.content.Context#getSharedPreferences(String,int)
+getSharedPreferences()} &mdash; 若您需要使用多個共用偏好設定檔案 (根據名稱進行識別，第一個參數將指定名稱)，請使用此方法。
+您可以從應用程式中的任何 {@link android.content.Context} 呼叫此方法。
+</li>
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} &mdash; 若您只需針對應用行為顯示使用一個共用偏好設定檔案，請從 {@link android.app.Activity} 使用此方法。
+
+由於此方法會擷取屬於該應用行為顯示的預設共用偏好設定檔案，因此您無需提供名稱。
+</li>
+</ul>
+
+<p>例如，以下程式碼會在 {@link android.app.Fragment} 內執行。該程式碼會存取共用偏好設定檔案 (根據資源字串 {@code R.string.preference_file_key} 識別)，並使用私用模式開啟該檔案 (因此只有您的應用程式可以存取該檔案)。
+
+
+</p>
+
+<pre>
+Context context = getActivity();
+SharedPreferences sharedPref = context.getSharedPreferences(
+        getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+</pre>
+
+<p>對您的共用偏好設定檔案進行命名時，您應使用能唯一識別您應用程式的名稱，例如 {@code "com.example.myapp.PREFERENCE_FILE_KEY"}
+</p>
+
+<p>或者，若您針對應用行為顯示只需使用一個共用偏好設定檔案，可以使用 {@link android.app.Activity#getPreferences(int) getPreferences()} 方法：
+</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+</pre>
+
+<p class="caution"><strong>注意：</strong>若您使用 {@link android.content.Context#MODE_WORLD_READABLE} 或 {@link
+android.content.Context#MODE_WORLD_WRITEABLE} 建立共用偏好設定檔案，則知道檔案識別碼的其他任何應用程式都能存取您的資料。
+
+</p>
+
+
+<h2 id="WriteSharedPreference">寫入至共用的偏好設定</h2>
+
+<p>若要寫入至共用偏好設定檔案，請針對您的 {@link android.content.SharedPreferences} 呼叫 {@link
+android.content.SharedPreferences#edit}，以建立 {@link
+android.content.SharedPreferences.Editor}。</p>
+
+<p>傳遞您希望使用諸如 {@link
+android.content.SharedPreferences.Editor#putInt putInt()} 及 {@link
+android.content.SharedPreferences.Editor#putString putString()} 等方法寫入的索引鍵與值。然後呼叫 {@link
+android.content.SharedPreferences.Editor#commit} 以儲存變更。例如：</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+SharedPreferences.Editor editor = sharedPref.edit();
+editor.putInt(getString(R.string.saved_high_score), newHighScore);
+editor.commit();
+</pre>
+
+
+<h2 id="ReadSharedPreference">從共用的偏好設定進行讀取</h2>
+
+<p>若要擷取共用偏好設定檔案中的值，請呼叫諸如 {@link
+android.content.SharedPreferences#getInt getInt()} 與 {@link
+android.content.SharedPreferences#getString getString()} 等方法，然後針對您希望使用的值提供索引鍵，以及 (可選) 在索引鍵不存在時傳回的預設值。
+
+例如：</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
+long highScore = sharedPref.getInt(getString(R.string.saved_high_score), defaultValue);
+</pre>
+

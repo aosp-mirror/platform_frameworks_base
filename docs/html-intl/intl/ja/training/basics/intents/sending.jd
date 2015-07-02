@@ -1,0 +1,256 @@
+page.title=別のアプリにユーザーを送る
+page.tags=インテント
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#Build">暗黙的インテントをビルドする</a></li>
+  <li><a href="#Verify">インテントを受け取るアプリがあるか確認する</a></li>
+  <li><a href="#StartActivity">インテントを使ってアクティビティを開始する</a></li>
+  <li><a href="#AppChooser">アプリ チューザを表示する</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">単純なデータの共有</a></li>
+</ul>
+
+  </div>
+</div>
+
+<p>Android の最も重要な特長の一つに、ユーザーが実行を希望する「アクション」に基づいて、別のアプリにユーザーを送信するアプリの機能があります。
+たとえば、自分のアプリで地図上に表示したいお店やサービスの住所がある場合、アプリでマップを表示するアクティビティをビルドする必要はありません。
+
+代わりに {@link android.content.Intent} 使用して、住所を表示するための要求を作成することができます。
+Android システムは、マップ上に住所を表示できるアプリを起動します。
+</p>
+
+<p>第 1 回のクラス<a href="{@docRoot}training/basics/firstapp/index.html">初めてのアプリ作成</a>で説明したように、自分のアプリでのアクティビティ間を移動するためにインテントを使用する必要があります。通常それには、起動するコンポーネントの正確なクラス名を定義する、<em>明示的なインテント</em>を使用します。
+
+
+ただし、「マップを表示する」などのアクションを別のアプリに実行させたい場合、<em>暗黙的なインテント</em>を使用する必要があります。
+</p>
+
+<p>このレッスンでは、特定のアクションの暗黙的インテントを作成する方法や、他のアプリでアクションを実行するアクティビティを開始させる目的で、暗黙的インテントを使用する方法を示します。
+</p>
+
+
+
+<h2 id="Build">暗黙的インテントをビルドする</h2>
+
+<p>暗黙的インテントは、開始するコンポーネントのクラス名を宣言せず、代わりに実行するアクションを宣言します。
+アクションでは、<em>表示</em>、<em>編集</em>、<em>送信</em>や、<em>取得</em>などの、希望する操作を指定します。
+インテントは、多くの場合、表示対象の住所、送信対象の電子メール メッセージなど、アクションに関連するデータを含みます。作成するインテントにもよりますが、データは {@link android.net.Uri}、またはその他のいくつかのデータ タイプのいずれかとなるか、データ自体全く必要とならない場合もあります。
+
+
+</p>
+
+<p>データが {@link android.net.Uri} である場合は、単純な {@link
+android.content.Intent#Intent(String,Uri) Intent()} コンストラクタを使用してアクションとデータを定義することができます。
+</p>
+
+<p>ここでは、電話番号を指定するための {@link
+android.net.Uri} のデータを使用して、電話をかけるインテントを作成する方法について次の例を示します。</p>
+
+<pre>
+Uri number = Uri.parse("tel:5551234");
+Intent callIntent = new Intent(Intent.ACTION_DIAL, number);
+</pre>
+
+<p>{@link android.app.Activity#startActivity
+startActivity()} を呼び出すことにより、自分のアプリでインテントが起動されると、電話アプリは指定された電話番号への通話を開始します。</p>
+
+<p>ここでは他の 2 つのインテント、およびそのアクションと{@link android.net.Uri} データのペアの例を示します。
+</p>
+
+<ul>
+  <li>マップを表示する:
+<pre>
+// Map point based on address
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+// Or map point based on latitude/longitude
+// Uri location = Uri.parse("geo:37.422219,-122.08364?z=14"); // z param is zoom level
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+</pre>
+  </li>
+  <li>ウェブ ページを表示する:
+<pre>
+Uri webpage = Uri.parse("http://www.android.com");
+Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+</pre>
+  </li>
+</ul>
+
+<p>暗黙的インテントのその他の種類には、文字列などのさまざまなデータ タイプを提供する「特別」データを必要とします。
+さまざまな {@link
+android.content.Intent#putExtra(String,String) putExtra()} メソッドを使用して、特別データを 1 つ以上追加することができます。</p>
+
+<p>デフォルトでは、インテントに含まれる 
+{@link android.net.Uri} データに基づいて、インテントに必要な適切な MIME タイプをシステムが決定します。インテントに {@link android.net.Uri} が含まれていない場合は、通常は {@link android.content.Intent#setType setType()} を使用して、インテントに関連するデータのタイプを指定する必要があります。
+
+MIME タイプの詳細な指定により、どの種類のアクティビティがインテントを受け取るかが指定されます。
+</p>
+
+<p>ここでは、目的のアクションを指定するための特別データを追加しているインテントの例を示します。</p>
+
+<ul>
+  <li>添付ファイル付きのメールを送信する:
+<pre>
+Intent emailIntent = new Intent(Intent.ACTION_SEND);
+// The intent does not have a URI, so declare the "text/plain" MIME type
+emailIntent.setType(HTTP.PLAIN_TEXT_TYPE);
+emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"jon@example.com"}); // recipients
+emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Email subject");
+emailIntent.putExtra(Intent.EXTRA_TEXT, "Email message text");
+emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://path/to/email/attachment"));
+// You can also attach multiple items by passing an ArrayList of Uris
+</pre>
+  </li>
+  <li>カレンダーイベントを作成する:
+<pre>
+Intent calendarIntent = new Intent(Intent.ACTION_INSERT, Events.CONTENT_URI);
+Calendar beginTime = Calendar.getInstance().set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance().set(2012, 0, 19, 10, 30);
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis());
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
+calendarIntent.putExtra(Events.TITLE, "Ninja class");
+calendarIntent.putExtra(Events.EVENT_LOCATION, "Secret dojo");
+</pre>
+<p class="note"><strong>注:</strong> カレンダー イベント用のこのインテントは、API レベル 14 以降でのみサポートされています。
+</p>
+  </li>
+</ul>
+
+<p class="note"><strong>注:</strong> できるだけ具体的に {@link
+android.content.Intent} を定義することが重要です。たとえば、
+{@link android.content.Intent#ACTION_VIEW} のインテントを使用して画像を表示する場合、
+{@code image/*} の MIME タイプを指定する必要があります。これにより、他のタイプのデータを「表示」できる（マップ アプリのような）アプリがインテントによってトリガーされることを回避します。
+</p>
+
+
+
+<h2 id="Verify">インテントを受け取るアプリがあるか確認する</h2>
+
+<p>Android プラットフォームは、特定のインテント（電話、メール、カレンダーアプリなど）が内蔵のアプリのいずれかへ解決することを保証しますが、インテントを呼び出す前に常に検証ステップを含める必要があります。
+
+</p>
+
+<p class="caution"><strong>警告: </strong>インテントを呼び出した際、端末上で利用可能なインテントを処理できるアプリがない場合、アプリがクラッシュします。
+</p>
+
+<p>インテントに応答できる利用可能なアクティビティがあるかどうかを確認するには {@link
+android.content.pm.PackageManager#queryIntentActivities queryIntentActivities()} を呼び出して、
+{@link android.content.Intent} を処理できるアクティビティのリストを取得します。返された {@link
+java.util.List} が空ではない場合、安全にインテントを使用することができます。次に例を示します。</p>
+
+<pre>
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
+boolean isIntentSafe = activities.size() > 0;
+</pre>
+
+<p><code>isIntentSafe</code> が <code>true</code> であれば、少なくとも 1 つのアプリがインテントに応答します。
+<code>false</code> であれば、インテントを処理するアプリが存在しません。</p>
+
+<p class="note"><strong>注:</strong> ユーザーがインテントを使用する前にインテントを使用する機能を無効化する必要がある場合、アクティビティが最初に起動するときにこのチェックを実行する必要があります。
+
+インテントを処理できるアプリが具体的に分かっている場合、当該アプリをダウンロードするユーザーのためにリンクを提供することができます（<a href="{@docRoot}distribute/tools/promote/linking.html">Google
+Play 上の自分の製品にリンクする方法</a>を参照）。
+</p>
+
+
+<h2 id="StartActivity">インテントを使ってアクティビティを開始する</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intents-choice.png" alt="" />
+  <p class="img-caption"><strong>図 1.</strong> 複数のアプリがインテントを処理することができるときに表示される選択ダイアログの例です。
+</p>
+</div>
+
+<p>{@link android.content.Intent} を作成し、付加情報を設定したら、{@link
+android.app.Activity#startActivity startActivity()} を呼び出してシステムに送信します。システムがインテントを処理することができる複数のアクティビティを特定した場合、図 1 に示すように使用するアプリを選択できるダイアログをユーザーに表示します。
+
+インテントを処理できるアクティビティが 1 つのみの場合、システムはすぐにそのアクティビティを起動します。
+</p>
+
+<pre>
+startActivity(intent);
+</pre>
+
+<p>次に、マップを表示するためのインテントを作成し、そのインテントを処理するアプリが存在するかを確認してから起動する、一連の方法について例を示します。
+</p>
+
+<pre>
+// Build the intent
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+
+// Verify it resolves
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(mapIntent, 0);
+boolean isIntentSafe = activities.size() > 0;
+
+// Start an activity if it's safe
+if (isIntentSafe) {
+    startActivity(mapIntent);
+}
+</pre>
+
+
+
+<h2 id="AppChooser">アプリ チューザを表示する</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="" />
+  <p class="img-caption"><strong>図 2.</strong> チューザのダイアログ</p>
+</div>
+
+<p>自分の {@link android.content.Intent} を {@link
+android.app.Activity#startActivity startActivity()} に渡してアクティビティを開始した際に、インテントに応答できる複数のアプリがある場合、ユーザーがデフォルトで使用するアプリを選択できること（ダイアログの下部にあるチェックボックスを選択してこれを行います。図 1 参照）に注意してください。
+
+これは、（1 つのウェブ ブラウザのみを使用する傾向にあるユーザーが）ウェブ ページを開いたり、（1 つのカメラを選ぶ傾向にあるユーザーが）写真を撮影したりするときのように、ユーザーがアクション実行時に毎回同じアプリの使用を希望するような場合には有用です。
+
+</p>
+
+<p>一方、実行対象のアクションが複数のアプリによって処理できる場合、ユーザーは毎回異なるアプリを選ぶかもしれません。たとえば「共有」アクションなど、いくつかのアプリを介してアイテムを共有する可能性があります。この場合、図 2 に示すように、チューザのダイアログを明示的に表示する必要があります。
+
+
+チューザのダイアログは、アクションのたびに使用するアプリを選択するよう、ユーザーを強制します（ユーザーはアクションのデフォルトのアプリを選択することはできません）。
+
+</p>
+
+<p>チューザを表示するには、{@link
+android.content.Intent#createChooser createChooser()} を使用して {@link android.content.Intent} を作成し、{@link
+android.app.Activity#startActivity startActivity()} に渡します。次に例を示します。</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show chooser
+Intent chooser = Intent.createChooser(intent, title);
+
+// Verify the intent will resolve to at least one activity
+if (intent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>これにより、{@link
+android.content.Intent#createChooser createChooser()} メソッドに渡されたインテントに応答するアプリのリストを示すダイアログが表示され、指定されたテキストがダイアログのタイトルになります。
+</p>
+
+
+

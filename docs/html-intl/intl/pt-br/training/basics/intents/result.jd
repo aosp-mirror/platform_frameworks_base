@@ -1,0 +1,178 @@
+page.title=Obtendo resultados de uma atividade
+page.tags=intenções
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#StartActivity">Iniciar a atividade</a></li>
+  <li><a href="#ReceiveResult">Receber o resultado</a></li>
+</ol>
+
+<h2>Leia também</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">Compartilhando dados simples</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">Compartilhando arquivos</a>
+</ul>
+
+  </div>
+</div>
+
+<p>Iniciar outra atividade não precisa ser a única forma. Pode-se também iniciar outra atividade e
+receber um resultado de volta. Para receber um resultado, chame {@link android.app.Activity#startActivityForResult
+startActivityForResult()} (em vez de {@link android.app.Activity#startActivity
+startActivity()}).</p>
+
+<p>Por exemplo, o aplicativo pode iniciar um aplicativo de câmera e receber a foto capturada como resultado. Ou, 
+ao iniciar o aplicativo Pessoas para que o usuário selecione um
+contato, você receberá os detalhes do contato como resultado.</p>
+
+<p>Evidentemente a atividade que responde deve ser projetada para retornar um resultado. Quando isso acontecer, ela
+enviará o resultado para outro objeto {@link android.content.Intent}. A atividade recebe o resultado no
+retorno de chamada {@link android.app.Activity#onActivityResult onActivityResult()}.</p>
+
+<p class="note"><strong>Observação:</strong> pode-se usar intenções explícitas ou implícitas ao chamar
+{@link android.app.Activity#startActivityForResult startActivityForResult()}. Ao iniciar uma de
+suas próprias atividades que recebem um resultado, use uma intenção explícita para garantir que o
+resultado esperado será recebido.</p>
+
+
+<h2 id="StartActivity">Iniciar a atividade</h2>
+
+<p>Não há nada especial no objeto {@link android.content.Intent} utilizado para iniciar
+uma atividade para um resultado, mas é preciso transmitir um argumento de número inteiro adicional ao método {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.</p>
+
+<p>O argumento de número inteiro é um “código de pedido” que identifica o pedido. Quando você recebe o
+resultado {@link android.content.Intent}, o retorno de chamada fornece o mesmo código de pedido para que o
+aplicativo possa identificar adequadamente o resultado e determinar como responder a ele.</p>
+
+<p>Essa é uma forma de iniciar uma atividade que permite ao usuário escolher um contato:</p>
+
+<pre>
+static final int PICK_CONTACT_REQUEST = 1;  // The request code
+...
+private void pickContact() {
+    Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+    pickContactIntent.setType(Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+    startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
+}
+</pre>
+
+
+<h2 id="ReceiveResult">Receber o resultado</h2>
+
+<p>Quando o usuário termina a atividade subsequente e retorna, o sistema chama o método
+{@link android.app.Activity#onActivityResult onActivityResult()} da atividade. Esse método inclui três
+argumentos:</p>
+
+<ul>
+  <li>O código de pedido passado para {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.</li>
+  <li>Um código de resultado especificado pela segunda atividade. Se a operação for bem sucedida, será {@link
+android.app.Activity#RESULT_OK} ou {@link
+android.app.Activity#RESULT_CANCELED} se o usuário tiver desistido ou a operação tiver falhado por algum
+motivo.</li>
+  <li>Um {@link android.content.Intent} que transporta os dados do resultado.</li>
+</ul>
+
+<p>Esta é uma forma de responder ao resultado para a intenção “escolher um contato”:</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // The user picked a contact.
+            // The Intent's data Uri identifies which contact was selected.
+
+            // Do something with the contact here (bigger example below)
+        }
+    }
+}
+</pre>
+
+<p>Nesse exemplo, o resultado {@link android.content.Intent} retornado pelos
+aplicativos Contatos ou Pessoas do Android fornece um conteúdo {@link android.net.Uri} que identifica o
+contato escolhido pelo usuário.</p>
+
+<p>Para que o resultado seja tratado de forma adequada, é preciso saber o formato do resultado 
+{@link android.content.Intent}. Isso é fácil quando umas das suas atividades
+retorna o resultado. Os aplicativos incluídos na plataforma Android oferecem suas próprias APIs que
+podem ser usadas para dados de resultado específicos. Por exemplo, o aplicativo Pessoas (Contatos em algumas versões mais
+antigas) sempre retorna um resultado com URI de conteúdo que identifica o contato escolhido e o aplicativo
+Câmera retorna um {@link android.graphics.Bitmap} no {@code "data"} extra (consulte a lição
+<a href="{@docRoot}training/camera/index.html">Capturando fotografias</a>).</p>
+
+
+<h4>Bônus: Ler os dados do contato</h4>
+
+<p>O código acima que mostra como obter um resultado pelo aplicativo Pessoas não
+traz muitos detalhes sobre como exatamente ler os dados do resultado porque exige uma discussão mais avançada
+sobre <a href="{@docRoot}guide/topics/providers/content-providers.html">provedores
+de conteúdo</a>. No entanto, se você desejar saber mais, aqui estão alguns códigos que mostram como consultar os
+dados de resultado para obter o número de telefone do contato selecionado:</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request it is that we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // Get the URI that points to the selected contact
+            Uri contactUri = data.getData();
+            // We only need the NUMBER column, because there will be only one row in the result
+            String[] projection = {Phone.NUMBER};
+
+            // Perform the query on the contact to get the NUMBER column
+            // We don't need a selection or sort order (there's only one result for the given URI)
+            // CAUTION: The query() method should be called from a separate thread to avoid blocking
+            // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
+            // Consider using {@link android.content.CursorLoader} to perform the query.
+            Cursor cursor = getContentResolver()
+                    .query(contactUri, projection, null, null, null);
+            cursor.moveToFirst();
+
+            // Retrieve the phone number from the NUMBER column
+            int column = cursor.getColumnIndex(Phone.NUMBER);
+            String number = cursor.getString(column);
+
+            // Do something with the phone number...
+        }
+    }
+}
+</pre>
+
+<p class="note"><strong>Observação:</strong> antes do Android 2.3 (API nível 9), executar uma consulta
+no {@link android.provider.ContactsContract.Contacts Contacts Provider} (como mostrado
+acima) exige que o aplicativo declare a permissão {@link
+android.Manifest.permission#READ_CONTACTS} (consulte <a href="{@docRoot}guide/topics/security/security.html">Segurança e permissões</a>). Contudo, 
+iniciar com Android 2.3, o aplicativo Contatos/Pessoas dá ao aplicativo permissão
+temporária para ler no Provedor de Contatos quando retornar um resultado. A permissão temporária
+aplica-se apenas a pedidos de contato específicos, portanto, não é possível consultar um contato diferente daquele
+especificado pelo {@link android.net.Uri} da intenção, a menos que você declare a permissão {@link
+android.Manifest.permission#READ_CONTACTS}.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

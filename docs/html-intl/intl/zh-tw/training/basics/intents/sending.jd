@@ -1,0 +1,256 @@
+page.title=將使用者傳送至其他應用程式
+page.tags=意圖
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#Build">建置隱含意圖</a></li>
+  <li><a href="#Verify">驗證存在接收意圖的應用程式</a></li>
+  <li><a href="#StartActivity">使用意圖啟動應用行為顯示</a></li>
+  <li><a href="#AppChooser">顯示應用程式選擇器</a></li>
+</ol>
+
+<h2>您也應該閱讀</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">共用簡單資料</a></li>
+</ul>
+
+  </div>
+</div>
+
+<p>應用程式可以根據將要執行的「行為」，將使用者傳送至其他應用程式
+，這是 Android 最重要的功能之一。例如，若您希望在地圖上顯示應用程式中的企業地址，不必在應用程式中建置顯示地圖的應用行為顯示。
+
+您可以改為使用 {@link android.content.Intent} 建立檢視地址的要求。
+隨後，Android 系統會啟動能在地圖上顯示地址的應用程式。
+</p>
+
+<p>正如第一課<a href="{@docRoot}training/basics/firstapp/index.html">建置您的第一個應用程式</a>中所述，您必須使用意圖在您應用程式中的應用行為顯示之間進行導覽。您執行此作業時通常具有<em>明確意圖</em>，該意圖可定義您希望啟動的元件的確切類別名稱。
+
+
+但是，若您希望使用單獨的應用程式執行諸如「檢視地圖」等行為，則必須使用<em>隱含意圖</em>。
+</p>
+
+<p>本課程將為您展示如何針對特定行為建立隱含意圖，以及如何使用該意圖啟動在其他應用程式中執行該行為的應用行為顯示。
+</p>
+
+
+
+<h2 id="Build">建置隱含意圖</h2>
+
+<p>隱含意圖不會宣告要啟動元件的類別名稱，而是宣告要執行的行為。
+該行為將指定您希望執行的動作，例如<em>檢視</em>、<em>編輯</em>、<em>傳送</em>或<em>取得</em>項目。
+意圖通常還包括與行為關聯的資料，例如您希望檢視的地址或希望傳送的電子郵件。視您希望建立的意圖而定，該資料可能是 {@link android.net.Uri} 或其他多種資料類型的其中之一，意圖也可能完全不需要資料。
+
+
+</p>
+
+<p>若您的資料是 {@link android.net.Uri}，可以使用簡單的 {@link
+android.content.Intent#Intent(String,Uri) Intent()} 建構函式來定義行為與資料。
+</p>
+
+<p>例如，以下範例將展示如何建立啟動電話的意圖 (使用 {@link
+android.net.Uri} 資料指定電話號碼)：</p>
+
+<pre>
+Uri number = Uri.parse("tel:5551234");
+Intent callIntent = new Intent(Intent.ACTION_DIAL, number);
+</pre>
+
+<p>您的應用程式透過呼叫 {@link android.app.Activity#startActivity
+startActivity()} 來呼叫該意圖時，電話應用程式會啟動對指定電話號碼的撥號。</p>
+
+<p>以下將展示其他一些意圖及其行為與 {@link android.net.Uri} 資料配對：
+</p>
+
+<ul>
+  <li>檢視地圖：
+<pre>
+// Map point based on address
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+// Or map point based on latitude/longitude
+// Uri location = Uri.parse("geo:37.422219,-122.08364?z=14"); // z param is zoom level
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+</pre>
+  </li>
+  <li>檢視網頁：
+<pre>
+Uri webpage = Uri.parse("http://www.android.com");
+Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+</pre>
+  </li>
+</ul>
+
+<p>其他類型的隱含意圖需要「額外」資料提供其他資料類型 (例如字串)。
+您可以使用各種 {@link
+android.content.Intent#putExtra(String,String) putExtra()} 方法新增一或多項額外資料。</p>
+
+<p>依預設，系統會根據包括的 {@link android.net.Uri} 資料，判斷意圖所需的相應 MIME 類型。
+若您未將 {@link android.net.Uri} 包括在意圖中，通常應使用 {@link android.content.Intent#setType setType()} 指定意圖所關聯資料的類型。
+
+設定 MIME 類型會進一步指定哪些類型的應用行為顯示應接收意圖。
+</p>
+
+<p>以下展示的一些意圖將新增額外資料以指定所需行為：</p>
+
+<ul>
+  <li>傳送具有附件的電子郵件：
+<pre>
+Intent emailIntent = new Intent(Intent.ACTION_SEND);
+// The intent does not have a URI, so declare the "text/plain" MIME type
+emailIntent.setType(HTTP.PLAIN_TEXT_TYPE);
+emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"jon@example.com"}); // recipients
+emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Email subject");
+emailIntent.putExtra(Intent.EXTRA_TEXT, "Email message text");
+emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://path/to/email/attachment"));
+// You can also attach multiple items by passing an ArrayList of Uris
+</pre>
+  </li>
+  <li>建立行事曆事件：
+<pre>
+Intent calendarIntent = new Intent(Intent.ACTION_INSERT, Events.CONTENT_URI);
+Calendar beginTime = Calendar.getInstance().set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance().set(2012, 0, 19, 10, 30);
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis());
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
+calendarIntent.putExtra(Events.TITLE, "Ninja class");
+calendarIntent.putExtra(Events.EVENT_LOCATION, "Secret dojo");
+</pre>
+<p class="note"><strong>注意：</strong>針對行事曆事件的這一意圖僅支援至少為 14 的 API 級別。
+</p>
+  </li>
+</ul>
+
+<p class="note"><strong>注意：</strong>請儘可能具體地定義 {@link
+android.content.Intent}，這一點非常重要。例如，若您希望使用 {@link android.content.Intent#ACTION_VIEW} 意圖顯示影像，應將 MIME 類型指定為 {@code image/*}。
+
+如此可防止意圖觸發能「檢視」其他類型資料的應用程式 (例如地圖應用程式)。
+</p>
+
+
+
+<h2 id="Verify">驗證存在接收意圖的應用程式</h2>
+
+<p>雖然 Android 平台保證特定意圖將解析為內建應用程式 (例如電話、電子郵件或日曆應用程式) 的其中之一，但您應一律先納入驗證步驟，然後再呼叫意圖。
+
+</p>
+
+<p class="caution"><strong>注意：</strong>若您呼叫意圖，而裝置上不提供能處理該意圖的任何應用程式，
+則您的應用程式將當機。</p>
+
+<p>若要驗證存在可回應意圖的應用行為顯示，請呼叫 {@link
+android.content.pm.PackageManager#queryIntentActivities queryIntentActivities()} 以取得能處理 {@link android.content.Intent} 的應用行為顯示清單。
+若傳回的 {@link
+java.util.List} 非空，您可以安全使用意圖。例如：</p>
+
+<pre>
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
+boolean isIntentSafe = activities.size() > 0;
+</pre>
+
+<p>若 <code>isIntentSafe</code> 為 <code>true</code>，則至少有一個應用程式將回應意圖。
+若其為 <code>false</code>，則沒有任何應用程式能處理該意圖。</p>
+
+<p class="note"><strong>注意：</strong>對於使用該意圖的功能，若您需要在使用者嘗試使用該功能之前停用該功能，應在您的應用行為顯示第一次啟動時，執行這項檢查。
+
+若您知道能處理該意圖的特定應用程式，還可為使用者提供應用程式下載連結 (請參閱如何<a href="{@docRoot}distribute/tools/promote/linking.html">在 Google
+Play 上連結您的產品</a>)。
+</p>
+
+
+<h2 id="StartActivity">使用意圖啟動應用行為顯示</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intents-choice.png" alt="" />
+  <p class="img-caption"><strong>圖 1.</strong>選取對話方塊 (在多個應用程式可處理意圖時顯示) 的範例。
+</p>
+</div>
+
+<p>在您建立 {@link android.content.Intent} 並設定額外資訊後，請呼叫 {@link
+android.app.Activity#startActivity startActivity()} 將其傳送至系統。若系統識別出有多個應用行為顯示可以處理意圖，會顯示對話方塊，供使用者選取要使用的應用程式，如圖 1 所示。
+
+若只有一個應用行為顯示可以處理該意圖，系統會立即啟動該應用行為顯示。
+</p>
+
+<pre>
+startActivity(intent);
+</pre>
+
+<p>以下所示的完整範例將展示如何建立檢視地圖的意圖、驗證存在處理該意圖的應用程式，然後啟動該應用程式：
+</p>
+
+<pre>
+// Build the intent
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+
+// Verify it resolves
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(mapIntent, 0);
+boolean isIntentSafe = activities.size() > 0;
+
+// Start an activity if it's safe
+if (isIntentSafe) {
+    startActivity(mapIntent);
+}
+</pre>
+
+
+
+<h2 id="AppChooser">顯示應用程式選擇器</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="" />
+  <p class="img-caption"><strong>圖 2.</strong>選擇器對話方塊。</p>
+</div>
+
+<p>請注意，若您將 {@link android.content.Intent} 傳遞至 {@link
+android.app.Activity#startActivity startActivity()} 以啟動應用行為顯示，且有多個應用程式回應該意圖，則使用者可以選取依預設要使用的應用程式 (透過選取對話方塊底部的核取方塊，請參閱圖 1)。
+
+若在執行行為時使用者通常希望每次使用同一應用程式，例如開啟網頁 (使用者可能只使用一個網頁瀏覽器) 或拍攝相片 (使用者可能更喜歡使用一個相機)，則此功能非常有用。
+
+</p>
+
+<p>但是，若有多個應用程式可以處理要執行的行為，且使用者可能更希望每次使用不同的應用程式 (例如對於「共用」行為，使用者可能會透過多個應用程式來共用項目)，您應明確顯示選擇器對話方塊，如圖 2 所示。
+
+
+選擇器對話方塊會強制使用者選取行為每次使用的應用程式 (使用者無法選取行為的預設應用程式)。
+
+</p>
+
+<p>若要顯示選擇器，請使用 {@link
+android.content.Intent#createChooser createChooser()} 建立 {@link android.content.Intent}，並將其傳遞至 {@link
+android.app.Activity#startActivity startActivity()}。例如：</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show chooser
+Intent chooser = Intent.createChooser(intent, title);
+
+// Verify the intent will resolve to at least one activity
+if (intent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>以上範例會顯示對話方塊 (將回應意圖的應用程式清單傳遞至 {@link
+android.content.Intent#createChooser createChooser()} 方法)，並使用提供的文字作為對話方塊的標題。
+</p>
+
+
+

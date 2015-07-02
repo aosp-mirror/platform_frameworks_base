@@ -1,0 +1,256 @@
+page.title=다른 앱으로 사용자 보내기
+page.tags=intents
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#Build">암묵적인 인텐트 구축하기</a></li>
+  <li><a href="#Verify">인텐트를 수신할 앱이 있는지 확인하기</a></li>
+  <li><a href="#StartActivity">인텐트를 사용하여 액티비티 시작하기</a></li>
+  <li><a href="#AppChooser">앱 선택기 표시하기</a></li>
+</ol>
+
+<h2>필독 항목</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">간단한 데이터 공유하기</a></li>
+</ul>
+
+  </div>
+</div>
+
+<p>Android의 가장 중요한 특징 중 하나는 수행하고자 하는 "작업"을
+기반으로 사용자를 다른 앱으로 보낼 수 있는 앱의 기능입니다. 예를 들어
+지도에 나타내고자 하는 사업체의 주소가 앱에 있는 경우, 지도를 보여주는 액티비티를 앱 내에
+구축할 필요가 없습니다. 대신 {@link android.content.Intent}를
+사용하여 주소 보기 요청을 생성할 수 있습니다. 그러면 Android 시스템이 지도에
+주소를 표시할 수 있는 앱을 시작합니다.</p>
+
+<p>첫 번째 클래스인 <a href="{@docRoot}training/basics/firstapp/index.html">첫
+앱 구축</a>에서 설명했듯이, 인텐트를 사용하여 자체 앱 내에서 액티비티 간을 탐색해야 합니다. 일반적으로
+시작하고자 하는
+구성요소의 정확한 클래스 이름을 정의하는 <em>명시적인 인텐트</em>를 사용하여 이러한 작업을 수행합니다. 하지만 "지도 보기"와
+같은 작업을 별도의 앱에서 수행하도록 하기를 원할 경우, <em>암묵적인 인텐트</em>를 사용해야 합니다.</p>
+
+<p>이 과정에서는 특정 작업에 대한 암묵적인 인텐트를 생성하는 방법과 이를 사용하여
+다른 앱에서 작업을 수행하는 액티비티를 시작하는 방법에 대해 설명합니다.</p>
+
+
+
+<h2 id="Build">암묵적인 인텐트 구축하기</h2>
+
+<p>암묵적인 인텐트는 시작할 구성요소의 클래스 이름을 선언하지 않고, 그 대신 수행할
+작업을 선언합니다. 작업은 <em>보기</em>,
+<em>편집하기</em>, <em>보내기</em> 또는 <em>가져오기</em>와 같이 수행하고자 하는 동작을 지정합니다. 또한 인텐트는 보기 원하는 주소, 또는 전송하기 원하는 이메일 메시지와 같이 작업과
+연결된 데이터를 함께 포함하는 경우가 많습니다.
+생성하고자 하는 인텐트에 따라 데이터는 {@link android.net.Uri}이거나
+다른 여러 가지 데이터 유형 중 하나일 수 있으며, 인텐트가 데이터를 전혀 필요로 하지 않을 수도 있습니다.</p>
+
+<p>데이터가 {@link android.net.Uri}인 경우, 간단한 {@link
+android.content.Intent#Intent(String,Uri) Intent()} 생성자를 사용하여 액션 및
+데이터를 정의할 수 있습니다.</p>
+
+<p>다음은 {@link
+android.net.Uri} 데이터를 사용하여 전화번호를 지정하여 전화 걸기를 시작하는 인텐트를 생성하는 방법입니다.</p>
+
+<pre>
+Uri number = Uri.parse("tel:5551234");
+Intent callIntent = new Intent(Intent.ACTION_DIAL, number);
+</pre>
+
+<p>앱이 {@link android.app.Activity#startActivity
+startActivity()}를 호출하여 이 인텐트를 호출하면, 전화 앱이 주어진 전화번호로 전화를 겁니다.</p>
+
+<p>다음은 몇 가지 다른 인텐트와 해당 작업 및 {@link android.net.Uri} 데이터
+쌍입니다.</p>
+
+<ul>
+  <li>지도 보기:
+<pre>
+// Map point based on address
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+// Or map point based on latitude/longitude
+// Uri location = Uri.parse("geo:37.422219,-122.08364?z=14"); // z param is zoom level
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+</pre>
+  </li>
+  <li>웹 페이지 보기:
+<pre>
+Uri webpage = Uri.parse("http://www.android.com");
+Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+</pre>
+  </li>
+</ul>
+
+<p>다른 종류의 암묵적인 인텐트는 문자열과 같이
+여러 데이터 유형을 제공하는 "엑스트라" 데이터를 필요로 합니다. 다양한 {@link
+android.content.Intent#putExtra(String,String) putExtra()} 메서드를 사용하여 하나 이상의 엑스트라 데이터를 추가할 수 있습니다.</p>
+
+<p>기본적으로 시스템은 포함된
+{@link android.net.Uri} 데이터를 바탕으로 인텐트가 필요로 하는 적절한 MIME 유형을 결정합니다. {@link android.net.Uri}를 인텐트에
+포함하지 않을 경우, 일반적으로 {@link android.content.Intent#setType setType()}을 사용하여 인텐트와 관련된 데이터의
+유형을 지정해야 합니다. MME 유형을 설정하면 인텐트를 수신할
+액티비티의 종류도 지정됩니다.</p>
+
+<p>다음은 원하는 작업을 지정하기 위해 엑스트라 데이터를 추가하는 인텐트의 몇 가지 예제입니다.</p>
+
+<ul>
+  <li>첨부 파일과 함께 이메일 보내기:
+<pre>
+Intent emailIntent = new Intent(Intent.ACTION_SEND);
+// The intent does not have a URI, so declare the "text/plain" MIME type
+emailIntent.setType(HTTP.PLAIN_TEXT_TYPE);
+emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"jon@example.com"}); // recipients
+emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Email subject");
+emailIntent.putExtra(Intent.EXTRA_TEXT, "Email message text");
+emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://path/to/email/attachment"));
+// You can also attach multiple items by passing an ArrayList of Uris
+</pre>
+  </li>
+  <li>캘린더 이벤트 생성하기:
+<pre>
+Intent calendarIntent = new Intent(Intent.ACTION_INSERT, Events.CONTENT_URI);
+Calendar beginTime = Calendar.getInstance().set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance().set(2012, 0, 19, 10, 30);
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis());
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
+calendarIntent.putExtra(Events.TITLE, "Ninja class");
+calendarIntent.putExtra(Events.EVENT_LOCATION, "Secret dojo");
+</pre>
+<p class="note"><strong>참고:</strong> 캘린더 이벤트에 대한 이 인텐트는 API
+레벨 14 이상에서만 지원됩니다.</p>
+  </li>
+</ul>
+
+<p class="note"><strong>참고:</strong> {@link
+android.content.Intent}는 되도록 구체적으로 정의해야 합니다. 예를 들어 {@link android.content.Intent#ACTION_VIEW} 인텐트를
+사용하여 이미지를 표시하고자 할 경우,
+{@code image/*}의 MIME 유형을 지정해야 합니다. 그러면 지도 앱과 같이 다른 유형의 데이터를 "볼" 수 있는 앱이 인텐트에 의해
+트리거되는 것이 방지됩니다.</p>
+
+
+
+<h2 id="Verify">인텐트를 수신할 앱이 있는지 확인하기</h2>
+
+<p>Android 플랫폼은 전화, 이메일 또는 캘린더 앱과 같은
+내장 앱 중 하나로 특정 인텐트가 처리되도록 보장하지만, 인텐트를 호출하기 전에 항상
+확인 단계를 포함하는 것이 좋습니다.</p>
+
+<p class="caution"><strong>주의:</strong> 인텐트를 호출한 후 해당 인텐트를 처리할 수 있는 앱이
+기기에 없을 경우, 앱은 작동을 중단합니다.</p>
+
+<p>인텐트에 응답할 수 있는 액티비티가 있는지 확인하려면 {@link
+android.content.pm.PackageManager#queryIntentActivities queryIntentActivities()}를 호출하여 {@link android.content.Intent}를 처리할 수 있는 액티비티
+목록을 가져와야 합니다. 반환된 {@link
+java.util.List}가 비어있지 않을 경우, 안심하고 인텐트를 사용할 수 있습니다. 예를 들면 다음과 같습니다.</p>
+
+<pre>
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
+boolean isIntentSafe = activities.size() > 0;
+</pre>
+
+<p><code>isIntentSafe</code>가 <code>true</code>일 경우, 하나 이상의 앱이
+인텐트에 응답합니다. <code>false</code>일 경우, 인텐트를 처리할 수 있는 앱이 없는 것입니다.</p>
+
+<p class="note"><strong>참고:</strong> 사용자가 인텐트를
+사용하려고 하기 전에 이 인텐트를 사용하는 기능을 해제해야 할 경우, 액티비티가 처음
+시작될 때 이 확인 작업을 수행해야 합니다. 인텐트를 처리할 수 있는 앱을 알고 있을 경우,
+사용자가 앱을 다운로드할 수 있도록 링크를 제공할 수도 있습니다(<a href="{@docRoot}distribute/tools/promote/linking.html">Google
+Play에서 자신의 제품에 대한 링크를 제공</a>하는 방법 참조).</p>
+
+
+<h2 id="StartActivity">인텐트를 사용하여 액티비티 시작하기</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intents-choice.png" alt="" />
+  <p class="img-caption"><strong>그림 1.</strong> 인텐트를 처리할 수 있는 앱이 둘 이상 있을 경우 표시되는 선택 대화 상자의 예.
+</p>
+</div>
+
+<p>{@link android.content.Intent}를 생성하고 엑스트라 정보를 설정한 후에는 {@link
+android.app.Activity#startActivity startActivity()}를 호출하여 시스템에 보내야 합니다. 시스템이 인텐트를 처리할 수 있는 액티비티를 둘 이상
+식별하는 경우, 그림 1과 같이 사용자가 사용할 앱을
+선택할 수 있는 대화 상자를 표시합니다. 인텐트를
+처리할 수 있는 액티비티가 하나밖에 없을 경우, 시스템이 해당 액티비티를 바로 시작합니다.</p>
+
+<pre>
+startActivity(intent);
+</pre>
+
+<p>다음은 지도 보기 인텐트를 생성하고, 인텐트를 처리할 수 있는
+앱의 존재 여부를 확인하고, 앱을 시작하는 방법을 보여주는 완벽한 예제입니다.</p>
+
+<pre>
+// Build the intent
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+
+// Verify it resolves
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(mapIntent, 0);
+boolean isIntentSafe = activities.size() > 0;
+
+// Start an activity if it's safe
+if (isIntentSafe) {
+    startActivity(mapIntent);
+}
+</pre>
+
+
+
+<h2 id="AppChooser">앱 선택기 표시하기</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="" />
+  <p class="img-caption"><strong>그림 2.</strong> 선택기 대화 상자.</p>
+</div>
+
+<p>{@link android.content.Intent}를 {@link
+android.app.Activity#startActivity startActivity()}에 전달하여 액티비티를 시작하는데 인텐트에
+응답하는 앱이 둘 이상 있는 경우, 사용자는 어떤 앱을 기본으로 사용할지 선택할 수 있습니다(이는 대화 상자
+하단의 확인란을 선택하여 수행할 수 있음. 그림 1 참조). 이는 사용자가 일반적으로
+항상 동일한 앱을 사용하기 원하는 작업을 수행하는 경우에 유용합니다. 예를 들어 웹 페이지를 열 때(사용자는
+대개 하나의 웹 브라우저를 사용함) 또는 사진을 찍을 때(사용자는 대개 하나의 카메라를 선호함) 등이 있습니다.</p>
+
+<p>하지만 "공유" 작업과 같이 항목을 공유할 앱을
+여러 개 보유하고 있는 경우처럼, 수행할 작업을 처리할 수 있는 앱이 여러 개 있고 사용자가 매번 다른 앱을
+원할 수도 있습니다. 이런 경우, 그림 2와 같이
+선택기 대화 상자를 명시적으로 표시합니다. 선택기 대화 상자는
+사용자가 작업에 사용할 앱을 매번 선택하도록 합니다(사용자는 작업에 사용할
+기본 앱을 선택할 수 없음).</p>
+
+<p>선택기를 표시하려면 {@link
+android.content.Intent#createChooser createChooser()}를 사용하여 {@link android.content.Intent}를 생성한 후 {@link
+android.app.Activity#startActivity startActivity()}에 전달합니다. 예를 들면 다음과 같습니다.</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show chooser
+Intent chooser = Intent.createChooser(intent, title);
+
+// Verify the intent will resolve to at least one activity
+if (intent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>이 예제는 {@link
+android.content.Intent#createChooser createChooser()} 메서드에 전달된 인텐트에 응답하는 앱 목록이 포함된 대화 상자를 표시하고 제공된 텍스트를
+대화 상자 제목으로 사용합니다.</p>
+
+
+

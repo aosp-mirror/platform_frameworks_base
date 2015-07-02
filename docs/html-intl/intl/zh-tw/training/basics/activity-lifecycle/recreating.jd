@@ -1,0 +1,178 @@
+page.title=重新建立應用行為顯示
+page.tags=應用行為顯示生命週期
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>本課程示範</h2>
+    <ol>
+      <li><a href="#SaveState">儲存您的應用行為顯示狀態</a></li>
+      <li><a href="#RestoreState">還原您的應用行為顯示狀態</a></li>
+    </ol>
+    
+    <h2>您也應該閱讀</h2>
+    <ul>
+      <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">支援不同的螢幕</a>
+</li>
+      <li><a href="{@docRoot}guide/topics/resources/runtime-changes.html">處理執行階段變更</a></li>
+      <li><a href="{@docRoot}guide/components/activities.html">應用行為顯示</a>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<p>在某些情況下，您的應用行為顯示會因應用程式的正常行為 (例如使用者按下 <em>[返回]</em>按鈕) 而遭終結，或您的應用行為顯示透過呼叫 {@link android.app.Activity#finish()} 來示意自身發生毀損。
+
+此外，在您的應用行為顯示目前已停止並且已長時間未使用時，或者在系統因前景應用行為顯示需要更多資源而必須關閉背景程序以復原記憶體時，系統可能會終結您的應用行為顯示。
+
+</p>
+
+<p>若您的應用行為顯示因使用者按下 <em>[返回]</em>按鈕而遭終結，或應用行為顯示將自身終止，則系統中該 {@link android.app.Activity} 執行個體的概念將永遠無法實現，因為該行為表示不再需要此應用行為顯示。
+
+但是，若系統因系統限制 (而非因應用程式正常行為) 而終結應用行為顯示，則雖然實際的 {@link android.app.Activity} 執行個體不會執行，但系統會記住該執行個體曾經存在，因此若使用者重新導覽至該應用行為顯示，系統會使用對應用行為顯示遭終結時的狀態進行描述的一組已儲存資料，建立該應用行為顯示的新執行個體。
+
+
+
+系統用於還原先前狀態的已儲存資料稱為「執行個體狀態」，是 {@link android.os.Bundle} 物件中所儲存索引鍵值配對的集合。
+
+</p>
+
+<p class="caution"><strong>注意：</strong>使用者每次旋轉螢幕時，都會終結並重新建立您的應用行為顯示。
+螢幕變更方向時，系統會終結並重新建立前景應用行為顯示，因為螢幕組態已變更，您的應用行為顯示可能需要載入替代資源 (例如版面配置)。
+
+</p>
+
+<p>依預設，系統會使用 {@link android.os.Bundle} 執行個體狀態將每個 {@link android.view.View} 物件的有關資訊 (例如輸入至 {@link android.widget.EditText} 物件中的文字值) 儲存至您的應用行為顯示版面配置中。
+
+因此，若終結並重新建立您的應用行為顯示執行個體，會將版面配置的狀態還原為其先前的狀態，您無需輸入任何程式碼。
+
+但是，您可能希望還原更多的應用行為顯示狀態資訊，例如成員變數 (可追蹤應用行為顯示中使用者的進度)。
+
+</p>
+
+<p class="note"><strong>注意：</strong>若要讓 Android 系統還原應用行為顯示中檢視的狀態，
+<strong>每個檢視都必須具有唯一的 ID</strong> (由 <a href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code
+android:id}</a> 屬性提供)。
+</p>
+
+<p>若要儲存有關應用行為顯示狀態的其他資料，您必須覆寫 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} 回呼方法。系統會在使用者離開您的應用行為顯示時呼叫此方法，並向其傳遞 {@link android.os.Bundle} 物件 (在您的應用行為顯示遭到非預期終結時將儲存該物件)。
+
+
+
+若系統必須稍後重新建立應用行為顯示執行個體，會將同一 {@link
+android.os.Bundle} 物件傳遞至 {@link android.app.Activity#onRestoreInstanceState
+onRestoreInstanceState()} 與 {@link android.app.Activity#onCreate onCreate()} 方法。
+
+</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
+<p class="img-caption"><strong>圖 2.</strong>系統開始停止您的應用行為顯示時，會呼叫 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} (1)，因此您可以指定在必須重新建立 {@link android.app.Activity} 執行個體時希望儲存的其他狀態資料。若已終結應用行為顯示，且必須重新建立該執行個體，系統會將 (1) 中定義的狀態資料傳遞至 {@link android.app.Activity#onCreate onCreate()} 方法 (2) 與 {@link android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} 方法 (3)。
+
+
+
+
+
+
+</p>
+
+
+
+<h2 id="SaveState">儲存您的應用行為顯示狀態</h2>
+
+<p>在您的應用行為顯示開始停止時，系統會呼叫 {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}，因此您的應用行為顯示可將狀態資訊與索引鍵值配對的集合一併儲存。
+此方法的預設實作會儲存應用行為顯示的檢視層次狀態相關資訊 (例如 {@link android.widget.EditText} 小工具中的文字或 {@link android.widget.ListView} 的捲動位置)。
+
+</p>
+
+<p>若要儲存應用行為顯示的其他狀態資訊，您必須實作 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}，並將索引鍵值配對新增至 {@link android.os.Bundle} 物件。
+
+例如：</p>
+
+<pre>
+static final String STATE_SCORE = "playerScore";
+static final String STATE_LEVEL = "playerLevel";
+...
+
+&#64;Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+    savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+    
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+</pre>
+
+<p class="caution"><strong>注意：</strong>請始終呼叫 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} 的超級類別實作，以便預設實作可儲存檢視階層的狀態。
+</p>
+
+
+
+<h2 id="RestoreState">還原您的應用行為顯示狀態</h2>
+
+<p>在重新建立先前終結的應用行為顯示時，您可以從 {@link android.os.Bundle} 復原系統向您的應用行為顯示傳遞的已儲存狀態。
+
+{@link android.app.Activity#onCreate onCreate()} 與 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} 回呼方法會接收同一 {@link android.os.Bundle} (包含執行個體狀態資訊)。
+</p>
+
+<p>由於不論系統是建立應用行為顯示的新執行個體，還是重新建立先前的執行個體，都會呼叫 {@link android.app.Activity#onCreate onCreate()} 方法，因此您必須先檢查狀態 {@link android.os.Bundle} 是否為 null，然後再嘗試對其進行讀取。
+
+若其為 null，表示系統正在建立應用行為顯示的新執行個體，否則表示正在還原先前已終結的執行個體。
+
+</p>
+
+<p>例如，以下為您展示了如何在 {@link android.app.Activity#onCreate
+onCreate()} 中還原某些狀態資料：</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+   
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    } else {
+        // Probably initialize members with default values for a new instance
+    }
+    ...
+}
+</pre>
+
+<p>您可以選擇並非在 {@link android.app.Activity#onCreate onCreate()} 期間還原狀態，而是實作 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}，系統會在呼叫 {@link android.app.Activity#onStart()} 方法後呼叫該項目。
+
+只有存在要還原的已儲存狀態時，系統才會呼叫 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}，因此您無需檢查 {@link android.os.Bundle} 是否為 null：
+</p>
+        
+<pre>
+public void onRestoreInstanceState(Bundle savedInstanceState) {
+    // Always call the superclass so it can restore the view hierarchy
+    super.onRestoreInstanceState(savedInstanceState);
+   
+    // Restore state members from saved instance
+    mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+    mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+</pre>
+
+<p class="caution"><strong>注意：</strong>請始終呼叫 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} 的超級類別實作，以便預設實作可還原檢視階層的狀態。
+</p>
+
+<p>若要詳細了解因執行階段中的重新啟動事件 (例如在旋轉螢幕時) 而重新建立應用行為顯示，請閱讀<a href="{@docRoot}guide/topics/resources/runtime-changes.html">處理執行階段變更</a>。
+</p>
+
