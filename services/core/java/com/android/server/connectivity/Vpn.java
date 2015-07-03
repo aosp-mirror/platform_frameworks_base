@@ -1135,7 +1135,7 @@ public class Vpn {
                 final ConnectivityManager cm = ConnectivityManager.from(mContext);
                 for (Network network : cm.getAllNetworks()) {
                     final LinkProperties lp = cm.getLinkProperties(network);
-                    if (lp != null && mOuterInterface.equals(lp.getInterfaceName())) {
+                    if (lp != null && lp.getAllInterfaceNames().contains(mOuterInterface)) {
                         final NetworkInfo networkInfo = cm.getNetworkInfo(network);
                         if (networkInfo != null) mOuterConnection.set(networkInfo.getType());
                     }
