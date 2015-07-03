@@ -18152,6 +18152,7 @@ package android.net {
     method public deprecated void setNetworkPreference(int);
     method public static deprecated boolean setProcessDefaultNetwork(android.net.Network);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
+    method public void unregisterNetworkCallback(android.app.PendingIntent);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
     field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL";
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
