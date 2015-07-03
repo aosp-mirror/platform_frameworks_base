@@ -676,11 +676,6 @@
         Malicious apps may interfere with the performance or operation of your
         device when an emergency cell broadcast is received.</string>
 
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_accounts">Your accounts</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_accounts">Access the available accounts.</string>
-
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_subscribedFeedsRead">read subscribed feeds</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
