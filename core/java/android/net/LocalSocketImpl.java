@@ -27,6 +27,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructLinger;
 import android.system.StructTimeval;
+import android.util.MutableInt;
 
 /**
  * Socket implementation used for android.net.LocalSocket and
@@ -61,7 +62,13 @@ class LocalSocketImpl
             FileDescriptor myFd = fd;
             if (myFd == null) throw new IOException("socket closed");
 
-            return available_native(myFd);
+            MutableInt avail = new MutableInt(0);
+            try {
+                Os.ioctlInt(myFd, OsConstants.FIONREAD, avail);
+            } catch (ErrnoException e) {
+                throw e.rethrowAsIOException();
+            }
+            return avail.value;
         }
 
         /** {@inheritDoc} */
@@ -158,18 +165,31 @@ class LocalSocketImpl
         public void flush() throws IOException {
             FileDescriptor myFd = fd;
             if (myFd == null) throw new IOException("socket closed");
-            while(pending_native(myFd) > 0) {
+
+            // Loop until the output buffer is empty.
+            MutableInt pending = new MutableInt(0);
+            while (true) {
+                try {
+                    // See linux/net/unix/af_unix.c
+                    Os.ioctlInt(myFd, OsConstants.TIOCOUTQ, pending);
+                } catch (ErrnoException e) {
+                    throw e.rethrowAsIOException();
+                }
+
+                if (pending.value <= 0) {
+                    // The output buffer is empty.
+                    break;
+                }
+
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ie) {
-                    return;
+                    break;
                 }
             }
         }
     }
 
-    private native int pending_native(FileDescriptor fd) throws IOException;
-    private native int available_native(FileDescriptor fd) throws IOException;
     private native int read_native(FileDescriptor fd) throws IOException;
     private native int readba_native(byte[] b, int off, int len,
             FileDescriptor fd) throws IOException;
