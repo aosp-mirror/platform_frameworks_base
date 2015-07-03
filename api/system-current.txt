@@ -13425,7 +13425,6 @@ package android.hardware {
 
   public abstract class SensorManager {
     method public boolean cancelTriggerSensor(android.hardware.TriggerEventListener, android.hardware.Sensor);
-    method public boolean enableDataInjectionMode(boolean);
     method public boolean flush(android.hardware.SensorEventListener);
     method public static float getAltitude(float, float);
     method public static void getAngleChange(float[], float[], float[]);
@@ -13438,6 +13437,7 @@ package android.hardware {
     method public static void getRotationMatrixFromVector(float[], float[]);
     method public java.util.List<android.hardware.Sensor> getSensorList(int);
     method public deprecated int getSensors();
+    method public boolean initDataInjection(boolean);
     method public boolean injectSensorData(android.hardware.Sensor, float[], int, long);
     method public deprecated boolean registerListener(android.hardware.SensorListener, int);
     method public deprecated boolean registerListener(android.hardware.SensorListener, int, int);
