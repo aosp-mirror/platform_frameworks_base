@@ -1626,10 +1626,10 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
             ColorTextureVertex::set(vertex++, vertices[bx], vertices[by], u1, v1, colors[bx / 2]);
             ColorTextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1, colors[cx / 2]);
 
-            left = fminf(left, fminf(vertices[ax], fminf(vertices[bx], vertices[cx])));
-            top = fminf(top, fminf(vertices[ay], fminf(vertices[by], vertices[cy])));
-            right = fmaxf(right, fmaxf(vertices[ax], fmaxf(vertices[bx], vertices[cx])));
-            bottom = fmaxf(bottom, fmaxf(vertices[ay], fmaxf(vertices[by], vertices[cy])));
+            left = std::min(left, std::min(vertices[ax], std::min(vertices[bx], vertices[cx])));
+            top = std::min(top, std::min(vertices[ay], std::min(vertices[by], vertices[cy])));
+            right = std::max(right, std::max(vertices[ax], std::max(vertices[bx], vertices[cx])));
+            bottom = std::max(bottom, std::max(vertices[ay], std::max(vertices[by], vertices[cy])));
         }
     }
 
@@ -2127,8 +2127,8 @@ bool OpenGLRenderer::findBestFontTransform(const mat4& transform, SkMatrix* outM
     float sx, sy;
     transform.decomposeScale(sx, sy);
     outMatrix->setScale(
-            roundf(fmaxf(1.0f, sx)),
-            roundf(fmaxf(1.0f, sy)));
+            roundf(std::max(1.0f, sx)),
+            roundf(std::max(1.0f, sy)));
     return true;
 }
 
@@ -2551,10 +2551,10 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
         Vertex::set(vertex++, l, b);
         Vertex::set(vertex++, r, b);
 
-        left = fminf(left, l);
-        top = fminf(top, t);
-        right = fmaxf(right, r);
-        bottom = fmaxf(bottom, b);
+        left = std::min(left, l);
+        top = std::min(top, t);
+        right = std::max(right, r);
+        bottom = std::max(bottom, b);
     }
 
     if (clip && quickRejectSetupScissor(left, top, right, bottom)) {
