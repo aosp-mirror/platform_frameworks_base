@@ -567,8 +567,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onPanelRevealed(boolean clearEffects) {
-            EventLogTags.writeNotificationPanelRevealed();
+        public void onPanelRevealed(boolean clearEffects, int items) {
+            EventLogTags.writeNotificationPanelRevealed(items);
             if (clearEffects) {
                 clearEffects();
             }

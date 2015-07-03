@@ -1726,7 +1726,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 boolean clearNotificationEffects = !isPanelFullyCollapsed() &&
                     (mShowLockscreenNotifications ||
                         (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED));
-                mBarService.onPanelRevealed(clearNotificationEffects);
+                int notificationLoad = mNotificationData.getActiveNotifications().size();
+                if (mHeadsUpManager.hasPinnedHeadsUp() && isPanelFullyCollapsed())  {
+                    notificationLoad = 1;
+                } else {
+                    MetricsLogger.histogram(mContext, "note_load", notificationLoad);
+                }
+                mBarService.onPanelRevealed(clearNotificationEffects, notificationLoad);
             } else {
                 mBarService.onPanelHidden();
             }
