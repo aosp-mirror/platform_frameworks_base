@@ -82,15 +82,14 @@ public class SystemSensorManager extends SensorManager {
 
         // initialize the sensor list
         int i = 0;
-        while(true) {
+        do {
             Sensor sensor = new Sensor();
             i = nativeGetNextSensor(mNativeInstance, sensor, i);
-            if (i <= 0) {
-                break;
+            if (i >= 0) {
+                mFullSensorsList.add(sensor);
+                mHandleToSensor.append(sensor.getHandle(), sensor);
             }
-            mFullSensorsList.add(sensor);
-            mHandleToSensor.append(sensor.getHandle(), sensor);
-        }
+        } while (i > 0);
     }
 
 
