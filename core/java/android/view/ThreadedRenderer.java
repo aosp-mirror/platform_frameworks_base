@@ -434,7 +434,6 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static class ProcessInitializer {
         static ProcessInitializer sInstance = new ProcessInitializer();
-        static IGraphicsStats sGraphicsStatsService;
         private static IBinder sProcToken;
 
         private boolean mInitialized = false;
@@ -449,19 +448,19 @@ public class ThreadedRenderer extends HardwareRenderer {
         }
 
         private static void initGraphicsStats(Context context, long renderProxy) {
-            IBinder binder = ServiceManager.getService("graphicsstats");
-            if (binder == null) return;
-
-            sGraphicsStatsService = IGraphicsStats.Stub.asInterface(binder);
-            sProcToken = new Binder();
             try {
+                IBinder binder = ServiceManager.getService("graphicsstats");
+                if (binder == null) return;
+                IGraphicsStats graphicsStatsService = IGraphicsStats.Stub
+                        .asInterface(binder);
+                sProcToken = new Binder();
                 final String pkg = context.getApplicationInfo().packageName;
-                ParcelFileDescriptor pfd = sGraphicsStatsService.
+                ParcelFileDescriptor pfd = graphicsStatsService.
                         requestBufferForProcess(pkg, sProcToken);
                 nSetProcessStatsBuffer(renderProxy, pfd.getFd());
                 pfd.close();
-            } catch (Exception e) {
-                Log.w(LOG_TAG, "Could not acquire gfx stats buffer", e);
+            } catch (Throwable t) {
+                Log.w(LOG_TAG, "Could not acquire gfx stats buffer", t);
             }
         }
 
