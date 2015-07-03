@@ -199,156 +199,6 @@ socket_shutdown (JNIEnv *env, jobject object, jobject fileDescriptor,
     }
 }
 
-static bool
-java_opt_to_real(int optID, int* opt, int* level)
-{
-    switch (optID)
-    {
-        case 4098:
-            *opt = SO_RCVBUF;
-            *level = SOL_SOCKET;
-            return true;
-        case 4097:
-            *opt = SO_SNDBUF;
-            *level = SOL_SOCKET;
-            return true;
-        case 4102:
-            *opt = SO_SNDTIMEO;
-            *level = SOL_SOCKET;
-            return true;
-        case 128:
-            *opt = SO_LINGER;
-            *level = SOL_SOCKET;
-            return true;
-        case 1:
-            *opt = TCP_NODELAY;
-            *level = IPPROTO_TCP;
-            return true;
-        case 4:
-            *opt = SO_REUSEADDR;
-            *level = SOL_SOCKET;
-            return true;
-
-    }
-    return false;
-}
-
-static jint
-socket_getOption(JNIEnv *env, jobject object, jobject fileDescriptor, jint optID)
-{
-    int ret, value;
-    int opt, level;
-    int fd;
-
-    socklen_t size = sizeof(int);
-
-    if (!java_opt_to_real(optID, &opt, &level)) {
-        jniThrowIOException(env, -1);
-        return 0;
-    }
-
-    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-
-    if (env->ExceptionCheck()) {
-        return 0;
-    }
-
-    switch (opt)
-    {
-        case SO_LINGER:
-        {
-            struct linger lingr;
-            size = sizeof(lingr);
-            ret = getsockopt(fd, level, opt, &lingr, &size);
-            if (!lingr.l_onoff) {
-                value = -1;
-            } else {
-                value = lingr.l_linger;
-            }
-            break;
-        }
-        default:
-            ret = getsockopt(fd, level, opt, &value, &size);
-            break;
-    }
-
-
-    if (ret != 0) {
-        jniThrowIOException(env, errno);
-        return 0;
-    }
-
-    return value;
-}
-
-static void socket_setOption(
-        JNIEnv *env, jobject object, jobject fileDescriptor, jint optID,
-        jint boolValue, jint intValue) {
-    int ret;
-    int optname;
-    int level;
-    int fd;
-
-    if (!java_opt_to_real(optID, &optname, &level)) {
-        jniThrowIOException(env, -1);
-        return;
-    }
-
-    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-
-    if (env->ExceptionCheck()) {
-        return;
-    }
-
-    switch (optname) {
-        case SO_LINGER: {
-            /*
-             * SO_LINGER is special because it needs to use a special
-             * "linger" struct as well as use the incoming boolean
-             * argument specially.
-             */
-            struct linger lingr;
-            lingr.l_onoff = boolValue ? 1 : 0; // Force it to be 0 or 1.
-            lingr.l_linger = intValue;
-            ret = setsockopt(fd, level, optname, &lingr, sizeof(lingr));
-            break;
-        }
-        case SO_SNDTIMEO: {
-            /*
-             * SO_TIMEOUT from the core library gets converted to
-             * SO_SNDTIMEO, but the option is supposed to set both
-             * send and receive timeouts. Note: The incoming timeout
-             * value is in milliseconds.
-             */
-            struct timeval timeout;
-            timeout.tv_sec = intValue / 1000;
-            timeout.tv_usec = (intValue % 1000) * 1000;
-
-            ret = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
-                    (void *)&timeout, sizeof(timeout));
-
-            if (ret == 0) {
-                ret = setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO,
-                        (void *)&timeout, sizeof(timeout));
-            }
-
-            break;
-        }
-        default: {
-            /*
-             * In all other cases, the translated option level and
-             * optname may be used directly for a call to setsockopt().
-             */
-            ret = setsockopt(fd, level, optname, &intValue, sizeof(intValue));
-            break;
-        }
-    }
-
-    if (ret != 0) {
-        jniThrowIOException(env, errno);
-        return;
-    }
-}
 static jint socket_pending (JNIEnv *env, jobject object,
         jobject fileDescriptor)
 {
@@ -803,64 +653,11 @@ static jobject socket_get_peer_credentials(JNIEnv *env,
             creds.pid, creds.uid, creds.gid);
 }
 
-#if 0
-//TODO change this to return an instance of LocalSocketAddress
-static jobject socket_getSockName(JNIEnv *env,
-        jobject object, jobject fileDescriptor)
-{
-    int err;
-    int fd;
-
-    if (fileDescriptor == NULL) {
-        jniThrowNullPointerException(env, NULL);
-        return NULL;
-    }
-
-    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-
-    if (env->ExceptionCheck()) {
-        return NULL;
-    }
-
-    union {
-        struct sockaddr address;
-        struct sockaddr_un un_address;
-    } sa;
-
-    memset(&sa, 0, sizeof(sa));
-
-    socklen_t namelen = sizeof(sa);
-    err = getsockname(fd, &(sa.address), &namelen);
-
-    if (err < 0) {
-        jniThrowIOException(env, errno);
-        return NULL;
-    }
-
-    if (sa.address.sa_family != AF_UNIX) {
-        // We think we're an impl only for AF_UNIX, so this should never happen.
-
-        jniThrowIOException(env, EINVAL);
-        return NULL;
-    }
-
-    if (sa.un_address.sun_path[0] == '\0') {
-    } else {
-    }
-
-
-
-
-}
-#endif
-
 /*
  * JNI registration.
  */
 static JNINativeMethod gMethods[] = {
      /* name, signature, funcPtr */
-    {"getOption_native", "(Ljava/io/FileDescriptor;I)I", (void*)socket_getOption},
-    {"setOption_native", "(Ljava/io/FileDescriptor;III)V", (void*)socket_setOption},
     {"connectLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V",
                                                 (void*)socket_connect_local},
     {"bindLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V", (void*)socket_bind_local},
@@ -876,9 +673,6 @@ static JNINativeMethod gMethods[] = {
     {"getPeerCredentials_native",
             "(Ljava/io/FileDescriptor;)Landroid/net/Credentials;",
             (void*) socket_get_peer_credentials}
-    //,{"getSockName_native", "(Ljava/io/FileDescriptor;)Ljava/lang/String;",
-    //        (void *) socket_getSockName}
-
 };
 
 int register_android_net_LocalSocketImpl(JNIEnv *env)
