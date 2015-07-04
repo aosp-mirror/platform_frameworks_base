@@ -105,7 +105,7 @@ public class TrustManagerService extends SystemService {
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<AgentInfo>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
     private final Receiver mReceiver = new Receiver();
-    private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
+    private final SparseBooleanArray mUserHasAuthenticated = new SparseBooleanArray();
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
     private final LockPatternUtils mLockPatternUtils;
@@ -117,6 +117,9 @@ public class TrustManagerService extends SystemService {
 
     @GuardedBy("mDeviceLockedForUser")
     private final SparseBooleanArray mDeviceLockedForUser = new SparseBooleanArray();
+
+    @GuardedBy("mUserHasAuthenticatedSinceBoot")
+    private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
 
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_OWNER;
@@ -556,31 +559,34 @@ public class TrustManagerService extends SystemService {
     }
 
     private boolean getUserHasAuthenticated(int userId) {
-        synchronized (mUserHasAuthenticatedSinceBoot) {
-            return mUserHasAuthenticatedSinceBoot.get(userId);
-        }
+        return mUserHasAuthenticated.get(userId);
     }
 
     /**
      * @return whether the value has changed
      */
     private boolean setUserHasAuthenticated(int userId) {
-        synchronized (mUserHasAuthenticatedSinceBoot) {
-            if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
+        if (!mUserHasAuthenticated.get(userId)) {
+            mUserHasAuthenticated.put(userId, true);
+            synchronized (mUserHasAuthenticatedSinceBoot) {
                 mUserHasAuthenticatedSinceBoot.put(userId, true);
-                return true;
             }
-            return false;
+            return true;
         }
+        return false;
     }
 
     private void clearUserHasAuthenticated(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            mUserHasAuthenticated.clear();
+        } else {
+            mUserHasAuthenticated.put(userId, false);
+        }
+    }
+
+    private boolean getUserHasAuthenticatedSinceBoot(int userId) {
         synchronized (mUserHasAuthenticatedSinceBoot) {
-            if (userId == UserHandle.USER_ALL) {
-                mUserHasAuthenticatedSinceBoot.clear();
-            } else {
-                mUserHasAuthenticatedSinceBoot.put(userId, false);
-            }
+            return mUserHasAuthenticatedSinceBoot.get(userId);
         }
     }
 
@@ -734,7 +740,7 @@ public class TrustManagerService extends SystemService {
                     Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, null);
             long token = Binder.clearCallingIdentity();
             try {
-                return getUserHasAuthenticated(userId);
+                return getUserHasAuthenticatedSinceBoot(userId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -788,6 +794,9 @@ public class TrustManagerService extends SystemService {
             fout.print(": trusted=" + dumpBool(aggregateIsTrusted(user.id)));
             fout.print(", trustManaged=" + dumpBool(aggregateIsTrustManaged(user.id)));
             fout.print(", deviceLocked=" + dumpBool(isDeviceLockedInner(user.id)));
+            fout.print(", hasAuthenticated=" + dumpBool(getUserHasAuthenticated(user.id)));
+            fout.print(", hasAuthenticatedSinceBoot="
+                    + dumpBool(getUserHasAuthenticatedSinceBoot(user.id)));
             fout.println();
             fout.println("   Enabled agents:");
             boolean duplicateSimpleNames = false;
@@ -909,7 +918,7 @@ public class TrustManagerService extends SystemService {
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 int userId = getUserId(intent);
                 if (userId > 0) {
-                    mUserHasAuthenticatedSinceBoot.delete(userId);
+                    mUserHasAuthenticated.delete(userId);
                     synchronized (mUserIsTrusted) {
                         mUserIsTrusted.delete(userId);
                     }
