@@ -1,0 +1,872 @@
+page.title=Notificações
+page.tags="notifications","design","L"
+@jd:body
+
+ <a class="notice-developers" href="{@docRoot}training/notify-user/index.html">
+  <div>
+    <h3>Documentos do desenvolvedor</h3>
+    <p>Notificação ao usuário</p>
+  </div>
+</a>
+
+<a class="notice-designers" href="notifications_k.html">
+  <div>
+    <h3>Notificações no Android 4.4 e em anteriores</h3>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
+<div>
+    <h3>Vídeo</h3>
+    <p>DevBytes: Notificações na pré-visualização do desenvolvedor do Android L</p>
+</div>
+</a>
+
+<style>
+  .col-5, .col-6, .col-7 {
+    margin-left:0px;
+  }
+</style>
+
+<p>O sistema de notificações permite que os usuários se mantenham informados sobre eventos relevantes e
+imediatos
+no aplicativo, como novas mensagens de bate-papo de um amigo ou um evento de calendário.
+Pense nas notificações como um canal de notícias que alerta o usuário sobre eventos
+importantes à
+medida que acontecem ou sobre um registro que grava eventos enquanto o usuário não está prestando
+atenção &mdash; e que é sincronizado conforme apropriado em todos os dispositivos Android dele.</p>
+
+<h4 id="New"><strong>Novo no Android 5.0</strong></h4>
+
+<p>No Android 5.0, as notificações recebem atualizações importantes: em termos estruturais, visuais e
+funcionais:</p>
+
+<ul>
+  <li>As notificações passaram por mudanças visuais consistentes com o novo 
+tema do Material Design.</li>
+  <li> As notificações agora estão disponíveis na tela de bloqueio do dispositivo, enquanto que
+o conteúdo sensível ainda pode
+ficar oculto atrás dela.</li>
+  <li>Notificações de alta prioridade recebidas enquanto o dispositivo está em uso agora usam um novo formato, chamado de 
+notificações heads-up.</li>
+  <li>Notificações sincronizadas na nuvem: descartar uma notificação em um dos
+dispositivos Android a descarta
+também nos outros.</li>
+</ul>
+
+<p class="note"><strong>Observação:</strong> o projeto de notificação nesta versão do
+Android é uma mudança
+significativa em relação às versões anteriores. Para obter informações sobre o projeto de notificação em versões
+anteriores, consulte <a href="./notifications_k.html">Notificações no Android 4.4 ou em anteriores</a>.</p>
+
+<h2 id="Anatomy">Anatomia de uma notificação</h2>
+
+<p>Esta seção aborda as partes básicas de uma notificação e como elas 
+podem aparecer em diferentes tipos de dispositivos.</p>
+
+<h3 id="BaseLayout">Layout básico</h3>
+
+<p>No mínimo, todas as notificações consistem em um layout básico, incluindo:</p>
+
+<ul>
+  <li> O <strong>ícone</strong> da notificação. O ícone simboliza o
+aplicativo de origem. Ele também
+  pode indicar o tipo de notificação, caso o aplicativo gere mais de um
+tipo.</li>
+  <li> Um <strong>título</strong> da notificação e
+<strong>texto</strong> adicional.</li>
+  <li> Uma <strong>marcação de data e hora</strong>.</li>
+</ul>
+
+<p>Notificações criadas com {@link android.app.Notification.Builder Notification.Builder}
+para versões anteriores da plataforma têm a mesma aparência e o mesmo funcionamento no Android
+5.0, com apenas mudanças menores de estilo que o sistema
+entrega a você. Para obter mais informações sobre notificações em versões
+anteriores do Android, consulte 
+<a href="./notifications_k.html">Notificações no Android 4.4 ou em anteriores</a>.</p></p>
+
+
+    <img style="margin:20px 0 0 0" src="{@docRoot}images/android-5.0/notifications/basic_combo.png" alt="" width="700px" />
+
+
+<div style="clear:both;margin-top:20px">
+      <p class="img-caption">
+      Layout básico de uma notificação em dispositivo portátil (à esquerda) e a mesma notificação em Wear (à direita), 
+com uma foto do usuário e um ícone de notificação
+    </p>
+  </div>
+
+<h3 id="ExpandedLayouts">Layouts expandidos</h3>
+
+
+<p>Você pode escolher o nível de detalhe que as notificações de seu aplicativo
+devem fornecer. Elas podem mostrar as primeiras
+linhas de uma mensagem ou exibir uma visualização de imagem maior. As informações
+adicionais fornecem ao usuário mais
+contexto e &mdash; em alguns casos &mdash; podem permitir que o usuário leia uma mensagem
+em sua totalidade. O usuário pode
+pinçar para aproximar ou afastar a vista ou realizar deslizamento de um dedo para alternar entre os layouts
+compacto e expandido.
+ Para notificações de um evento, o Android fornece três modelos de layout
+expandido (texto, caixa de entrada e
+ imagem) para usar em seu aplicativo. As imagens a seguir mostram como 
+se parecem notificações de um evento em 
+ dispositivos portáteis (à esquerda) e usados junto ao corpo (à direita).</p>
+
+<img style="margin-top:30px"
+src="{@docRoot}images/android-5.0/notifications/expandedtext_combo.png"
+  alt="" width="700px" height;="284px" />
+<img style="margin-top:30px"
+src="{@docRoot}images/android-5.0/notifications/stack_combo.png"
+  alt="" width="700px" height;="284px" />
+<img style="margin-top:30px"
+src="{@docRoot}images/android-5.0/notifications/ExpandedImage.png"
+    alt="" width="311px" height;="450px" />
+
+<h3 id="actions" style="clear:both; margin-top:40px">Ações</h3>
+
+<p>O Android tem suporte para ações opcionais que são exibidas na parte inferior
+da notificação.
+Com ações, os usuários podem tratar as tarefas mais comuns para
+determinada notificação de dentro da sombra da notificação sem precisar abrir o
+aplicativo de origem.
+Isso acelera a interação e, em conjunto com deslizar-para-descartar, ajuda os usuários a
+se concentrarem em notificações que sejam importantes.</p>
+
+
+  <img src="{@docRoot}images/android-5.0/notifications/action_combo.png" alt="" width="700px" />
+
+
+
+<p style="clear:both">Tenha cuidado com o número de ações que inclui em uma
+notificação. Quanto mais
+ações incluir, maior será a complexidade cognitiva criada. Limite-se
+ao menor número possível
+de ações, incluindo apenas as ações efetivamente mais importantes e
+significativas.</p>
+
+<p>Boas candidatas a ações em notificações são ações que:</p>
+
+<ul>
+  <li> Sejam essenciais, frequentes e típicas para o tipo de conteúdo
+exibido
+  <li> Permitam que o usuário realize tarefas rapidamente
+</ul>
+
+<p>Evite ações que sejam:</p>
+
+<ul>
+  <li> Ambíguas
+  <li> Idênticas à ação padrão da notificação (como "Ler" ou
+"Abrir")
+</ul>
+
+
+
+<p>Você pode especificar no máximo três ações, cada uma consistindo em um ícone
+e um nome de ação.
+ Adicionar ações a um layout básico simples torna a notificação expansível,
+mesmo se a
+notificação não tiver um layout expandido. Como as ações são exibidas apenas para notificações 
+expandidas
+ e que ficam de outra forma ocultas, certifique-se de que qualquer ação que um
+usuário possa invocar de dentro de uma
+ notificação esteja disponível também dentro do aplicativo
+associado.</p>
+
+<h2 style="clear:left">Notificação heads-up</h2>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}images/android-5.0/notifications/hun-example.png" alt="" width="311px" />
+  <p class="img-caption">
+    Exemplo de uma notificação heads-up (chamada telefônica recebida, alta prioridade)
+que aparece sobre um
+aplicativo imersivo
+  </p>
+</div>
+
+<p>Quando uma notificação de alta prioridade chega (veja à direita), ela é apresentada
+aos usuários por
+um período curto com um layout expandido mostrando possíveis ações.</p>
+<p> Depois desse período, a notificação recua para a sombra
+de notificação. Se a <a href="#correctly_set_and_manage_notification_priority">prioridade</a> de uma notificação for
+marcada como Alta, Máxima ou tela cheia, ela receberá uma notificação heads-up.</p>
+
+<p><b>Bons exemplos de notificações heads-up</b></p>
+
+<ul>
+  <li> Chamada telefônica recebida durante o uso do dispositivo</li>
+  <li> Alarme durante o uso do dispositivo</li>
+  <li> Nova mensagem SMS</li>
+  <li> Bateria fraca</li>
+</ul>
+
+<h2 style="clear:both" id="guidelines">Diretrizes</h2>
+
+
+<h3 id="MakeItPersonal">Torne-a pessoal</h3>
+
+<p>Para notificações de itens enviados por outra pessoa (como uma mensagem ou
+atualização de status), inclua a imagem da pessoa usando 
+{@link android.app.Notification.Builder#setLargeIcon setLargeIcon()}. Anexe também informações sobre
+a pessoa nos metadados da notificação (consulte {@link android.app.Notification#EXTRA_PEOPLE}).</p>
+
+<p>O ícone principal de sua notificação ainda é mostrado, portanto, o usuário pode associá-lo
+ao ícone
+visível na barra de status.</p>
+
+
+<img src="{@docRoot}images/android-5.0/notifications/Triggered.png" alt="" width="311px" />
+<p style="margin-top:10px" class="img-caption">
+  Notificação que mostra a pessoa que a ativou e o conteúdo enviado.
+</p>
+
+
+<h3 id="navigate_to_the_right_place">Navegação para o lugar certo</h3>
+
+<p>Quando o usuário toca no corpo de uma notificação (fora dos botões
+de ação), abra o aplicativo
+no lugar em que o usuário possa visualizar e agir sobre os dados referenciados na
+notificação. Na maioria dos casos, será a exibição detalhada de um único item de dado, como uma mensagem,
+mas também poderá ser uma
+vista resumida se a notificação estiver empilhada. Se o aplicativo
+levar o usuário a qualquer lugar abaixo do nível superior do aplicativo, insira a navegação na pilha de retorno do aplicativo para que
+o usuário possa pressionar o botão Voltar do sistema para voltar ao nível superior. Para obter mais informações, consulte
+<em>Navegação para o seu aplicativo pelos widgets de página inicial e notificações</em> no padrão de projeto de <a href="{@docRoot}design/patterns/navigation.html#into-your-app">Navegação</a>.
+</p>
+
+<h3 id="correctly_set_and_manage_notification_priority">Definição e gerenciamento 
+corretos da prioridade das 
+notificações</h3>
+
+<p>O Android tem suporte para um sinalizador de prioridade para notificações. Esse sinalizador permite
+influenciar o local em que a notificação é exibida em relação a outras notificações e
+ajuda a garantir
+que os usuários sempre vejam primeiro as notificações mais importantes. Você pode escolher entre
+os seguintes
+níveis de prioridade ao publicar uma notificação:</p>
+<table>
+ <tr>
+    <td class="tab0">
+<p><strong>Prioridade</strong></p>
+</td>
+    <td class="tab0">
+<p><strong>Uso</strong></p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>MAX</code></p>
+</td>
+    <td class="tab1">
+<p>Use para notificações críticas e urgentes que alertam o usuário sobre uma condição
+que depende
+do tempo ou que precisa ser resolvida antes que o usuário possa continuar
+com uma determinada tarefa.</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>HIGH</code></p>
+</td>
+    <td class="tab1">
+<p>Use principalmente para comunicações importantes, como uma mensagem ou
+eventos de bate-papo com conteúdo particularmente interessante para o usuário.
+Notificações de alta prioridade acionam a exibição de uma notificação heads-up.</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>DEFAULT</code></p>
+</td>
+    <td class="tab1">
+<p>Use para todas as notificações que não recaiam em nenhuma das outras prioridades descritas aqui.</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>LOW</code></p>
+</td>
+    <td class="tab1">
+<p>Use para notificações sobre as quais deseja que o usuário seja informado, mas
+que sejam menos urgentes. Notificações de baixa prioridade tendem a ser exibidas na parte inferior da lista,
+o que as torna uma boa
+opção para coisas como atualizações públicas ou sociais não direcionadas: o usuário pediu para
+ser notificado sobre
+elas, mas essas notificações nunca devem ter precedência sobre comunicações
+urgentes ou diretas.</p>
+</td>
+ </tr>
+ <tr>
+    <td class="tab1">
+<p><code>MIN</code></p>
+</td>
+    <td class="tab1">
+<p>Use para informações contextuais ou de histórico, como informações sobre clima ou
+informações contextuais de localização.
+Notificações de prioridade mínima não aparecem na barra de status. O usuário
+as descobre expandindo a sombra da notificação.</p>
+</td>
+ </tr>
+</table>
+
+
+<h4 id="how_to_choose_an_appropriate_priority"><strong>Como escolher uma prioridade 
+adequada
+</strong></h4>
+
+<p><code>DEFAULT</code>, <code>HIGH</code> e <code>MAX</code> são níveis de prioridade de interrupção e arriscam 
+interromper a atividade
+do usuário. Para evitar irritar os usuários de seu aplicativo, reserve níveis de prioridade de interrupção para
+notificações que:</p>
+
+<ul>
+  <li> Envolvam outra pessoa</li>
+  <li> Dependam do tempo</li>
+  <li> Possam mudar imediatamente o comportamento do usuário no mundo real</li>
+</ul>
+
+<p>Notificações definidas como <code>LOW</code> e <code>MIN</code> ainda podem
+ser valiosas para o usuário: muitas, se não a maioria, das notificações não precisam demandar a atenção
+imediata do usuário, ou vibrar o pulso do usuário, mas ainda contêm informações que o usuário
+achará valiosas ao decidir procurar
+notificações. Os critérios para notificações de prioridade <code>LOW</code> e <code>MIN</code>
+incluem:</p>
+
+<ul>
+  <li> Não envolver outras pessoas</li>
+  <li> Não depender de tempo</li>
+  <li> Ter conteúdo no qual o usuário pode estar interessado, mas que pode decidir
+verificar no momento em que desejar</li>
+</ul>
+
+
+  <img src="{@docRoot}images/android-5.0/notifications/notifications_pattern_priority.png" alt="" width="700" />
+
+
+<h3 style="clear:both" id="set_a_notification_category">Definição de uma categoria
+de notificação</h3>
+
+<p>Se a sua notificação recair em uma das categorias predefinidas (veja
+abaixo), atribua-a
+adequadamente.  Aspectos da IU do sistema, como a sombra da notificação (ou qualquer
+outra escuta
+de notificação), podem usar essas informações para tomar decisões de classificação e filtragem.</p>
+<table>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_CALL">CATEGORY_CALL</a></code></p>
+</td>
+    <td>
+<p>Chamada recebida (voz ou vídeo) ou solicitação similar de 
+comunicação síncrona</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_MESSAGE">CATEGORY_MESSAGE</a></code></p>
+</td>
+    <td>
+<p>Mensagem direta recebida (SMS, mensagem instantânea etc.)</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_EMAIL">CATEGORY_EMAIL</a></code></p>
+</td>
+    <td>
+<p>Mensagens assíncronas em lote (e-mail)</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_EVENT">CATEGORY_EVENT</a></code></p>
+</td>
+    <td>
+<p>Evento de calendário</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_PROMO">CATEGORY_PROMO</a></code></p>
+</td>
+    <td>
+<p>Promoção ou publicidade</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_ALARM">CATEGORY_ALARM</a></code></p>
+</td>
+    <td>
+<p>Alarme ou cronômetro</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_PROGRESS">CATEGORY_PROGRESS</a></code></p>
+</td>
+    <td>
+<p>Andamento de uma operação de execução longa em segundo plano</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_SOCIAL">CATEGORY_SOCIAL</a></code></p>
+</td>
+    <td>
+<p>Atualização de rede social ou de compartilhamento</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_ERROR">CATEGORY_ERROR</a></code></p>
+</td>
+    <td>
+<p>Erro em operação de segundo plano ou no status de autenticação</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_TRANSPORT">CATEGORY_TRANSPORT</a></code></p>
+</td>
+    <td>
+<p>Controle de transporte de mídia para reprodução</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_SYSTEM">CATEGORY_SYSTEM</a></code></p>
+</td>
+    <td>
+<p>Atualização do sistema ou do status do dispositivo.  Reservado para uso do sistema.</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_SERVICE">CATEGORY_SERVICE</a></code></p>
+</td>
+    <td>
+<p>Indicação de serviço de segundo plano em execução</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_RECOMMENDATION">CATEGORY_RECOMMENDATION</a></code></p>
+</td>
+    <td>
+<p>Uma recomendação específica e oportuna para uma única coisa.  Por exemplo, um aplicativo
+de notícias pode querer
+recomendar uma notícia que acredita que o usuário desejará ler em seguida.</p>
+</td>
+ </tr>
+ <tr>
+    <td>
+<p><code><a
+href="/reference/android/app/Notification.html#CATEGORY_STATUS">CATEGORY_STATUS</a></code></p>
+</td>
+    <td>
+<p>Informações contínuas sobre o dispositivo ou o status contextual</p>
+</td>
+ </tr>
+</table>
+
+<h3 id="summarize_your_notifications">Resuma as notificações</h3>
+
+<p>Se uma notificação de um certo tipo já estiver pendente quando o aplicativo tentar enviar uma nova
+notificação do mesmo tipo, combine-as em uma única notificação de resumo para o aplicativo. Não
+crie um novo objeto.</p>
+
+<p>Uma notificação de resumo cria uma descrição resumida e permite que o
+usuário entenda quantas notificações
+de um determinado tipo estão pendentes.</p>
+
+<div class="col-6">
+
+<p><strong>O que não fazer</strong></p>
+  <img src="{@docRoot}images/android-5.0/notifications/Summarise_Dont.png" alt="" width="311px" />
+</div>
+
+<div>
+<p><strong>O que fazer</strong></p>
+
+  <img src="{@docRoot}images/android-5.0/notifications/Summarise_Do.png" alt="" width="311px" />
+</div>
+
+<p style="clear:left; padding-top:30px; padding-bottom:20px">Você pode fornecer
+mais detalhes sobre as notificações individuais que compõem um
+resumo usando o layout resumido expandido. Essa abordagem permite que os usuários 
+entendam melhor quais
+notificações estão pendentes e decidam se estão interessados o suficiente para lê-las
+em detalhes dentro
+do aplicativo associado.</p>
+<div class="col-6">
+  <img src="{@docRoot}images/android-5.0/notifications/Stack.png" style="margin-bottom:20px" alt="" width="311px" />
+  <p class="img-caption">
+  Notificação expandida e contraída que é um resumo (usando <code>InboxStyle</code>)
+  </p>
+</div>
+
+<h3 style="clear:both" id="make_notifications_optional">Torne as notificações
+opcionais</h3>
+
+<p>Os usuários devem sempre controlar as notificações. Permita que o usuário
+desative as notificações
+de seu aplicativo ou altere as propriedades de alerta, como som de alerta e 
+se a vibração será usada,
+adicionando um item de configuração da notificação nas configurações do aplicativo.</p>
+
+<h3 id="use_distinct_icons">Use ícones distintos</h3>
+<p>Ao olhar para a área de notificação, o usuário deverá ser capaz de discernir
+que tipos de 
+notificações estão atualmente pendentes.</p>
+
+<div class="figure">
+  <img src="{@docRoot}images/android-5.0/notifications/ProductIcons.png" alt="" width="420" />
+</div>
+
+  <div><p><strong>O que fazer</strong></p>
+    <p>Verifique os ícones de notificação que os aplicativos do Android já fornecem e crie
+ícones de notificação para o seu
+aplicativo que tenham aparência suficientemente distinta.</p>
+
+    <p><strong>O que fazer</strong></p>
+    <p>Use o <a href="/design/style/iconography.html#notification">estilo de ícone de notificação</a> apropriado
+ para ícones pequenos e o 
+    <a href="/design/style/iconography.html#action-bar">estilo de ícone de barra
+de ação</a> da luminosidade do Material para os ícones
+    de ação.</p>
+<p ><strong>O que fazer</strong></p>
+<p >Mantenha os ícones visualmente simples, evitando detalhes excessivos que sejam
+difíceis de discernir.</p>
+
+  <div><p><strong>O que não fazer</strong></p>
+    <p>Coloque um alfa adicional (esmaecimento ou redução de intensidade) nos ícones pequenos
+e nos ícones de
+    ação; eles podem ter bordas suavizadas, mas, como o Android usa esses
+ícones como máscaras (ou seja, somente
+    o canal alfa é usado), a imagem normalmente deve ser desenhada com
+opacidade total.</p>
+
+</div>
+<p style="clear:both"><strong>O que não fazer</strong></p>
+
+<p>Use cores para distinguir o seu aplicativo dos outros. Ícones de notificação devem 
+somente ser uma imagem com fundo branco sobre transparente.</p>
+
+
+<h3 id="pulse_the_notification_led_appropriately">Pisque o LED de notificação
+adequadamente</h3>
+
+<p>Muitos dispositivos Android contêm um LED de notificação, que é usado para manter o
+usuário informado sobre
+eventos enquanto a tela está desligada. Notificações com um nível de prioridade de <code>MAX</code>,
+<code>HIGH</code> ou <code>DEFAULT</code> devem
+fazer com que o LED brilhe, enquanto que os de prioridade mais baixa (<code>LOW</code> e
+<code>MIN</code>) não devem.</p>
+
+<p>O controle do usuário sobre as notificações deve se estender ao LED. Ao usar
+DEFAULT_LIGHTS, o
+LED brilhará na cor branca. Suas notificações não devem usar uma cor
+diferente, a não ser que o
+usuário as tenha explicitamente personalizado.</p>
+
+<h2 id="building_notifications_that_users_care_about">Criação de notificações
+que agradam aos usuários</h2>
+
+<p>Para criar um aplicativo que os usuários amem, é importante projetar as
+notificações cuidadosamente.
+As notificações personificam a voz do seu aplicativo e contribuem para
+a personalidade dele. Notificações indesejadas ou
+irrelevantes podem irritar o usuário ou fazer com que ele reprove a
+quantidade de atenção que o
+aplicativo exige. Portanto, use notificações de forma cuidadosa.</p>
+
+<h3 id="when_to_display_a_notification">Quando exibir uma notificação</h3>
+
+<p>Para criar um aplicativo que as pessoas gostem de usar, é importante
+reconhecer que a atenção e o foco
+do usuário são recursos que devem ser protegidos. Apesar de o sistema de 
+notificação do Android ter
+sido projetado para minimizar o impacto das notificações na atenção do usuário,
+ainda é
+importante ter ciência do fato de que as notificações interrompem o
+fluxo de tarefas do usuário.
+Ao planejar as notificações, pergunte-se se elas são importantes o suficiente para
+justificar uma interrupção. Se não tiver certeza, permita que o usuário decida se quer
+uma notificação usando as configurações de notificação do seu aplicativo ou ajuste
+o sinalizador de prioridade das notificações para <code>LOW</code> ou <code>MIN</code> para
+evitar distrair o usuário enquanto ele faz
+alguma outra coisa.</p>
+
+  <img src="{@docRoot}images/android-5.0/notifications/TimeSensitive.png" alt="" width="311px" />
+  <p style="margin-top:10px" class="img-caption">
+   Exemplos de notificação que depende de tempo
+  </p>
+
+<p>Apesar de aplicativos bem comportados geralmente se manifestarem apenas quando ocorre interação com eles, alguns 
+casos justificam que o aplicativo interrompa o usuário com uma notificação não solicitada.</p>
+
+<p>Use notificações principalmente para <strong>eventos que dependam de tempo</strong>, especialmente
+ se esses eventos síncronos <strong>envolverem outras pessoas</strong>. Por
+exemplo, um bate-papo recebido
+é uma forma síncrona em tempo real de comunicação: outro usuário
+espera ativamente a resposta. Eventos de calendário são outro exemplo bom de quando usar uma
+notificação e atrair a 
+atenção do usuário, pois o evento é iminente e eventos de calendário frequentemente
+envolvem outras pessoas.</p>
+
+<h3 style="clear:both" id="when_not_to_display_a_notification">Quando não exibir 
+uma notificação</h3>
+
+<div class="figure" style="margin-top:60px">
+  <img src="{@docRoot}images/android-5.0/notifications/AntiSample1.png" alt="" width="311px" />
+</div>
+
+<p>Em muitos outros casos, notificações não são adequadas:</p>
+
+<ul>
+  <li> Evite notificar o usuário sobre informações que não são especificamente
+direcionadas a ele ou
+que não dependam realmente de tempo. Por exemplo, as atualizações
+assíncronas e não direcionadas
+que fluem por uma rede social geralmente não justificam uma interrupção
+em tempo real. Para os usuários que se importam
+com elas, deixe que decidam recebê-las.</li>
+  <li> Não crie uma notificação se as informações novas relevantes estiverem 
+atualmente na tela. Em vez disso, 
+use a IU do próprio aplicativo para notificar o usuário das novas informações
+diretamente no contexto.
+  Por exemplo, um aplicativo de bate-papo não deve criar notificações de sistema enquanto o
+usuário estiver conversando ativamente com outro usuário.</li>
+  <li> Não interrompa o usuário para realizar operações técnicas de baixo nível, como salvar
+ou sincronizar informações, nem atualize um aplicativo se o aplicativo ou o sistema puder resolver
+o problema sem envolver o usuário.</li>
+  <li> Não interrompa o usuário para informar um erro se o aplicativo 
+puder se recuperar dele por conta própria, sem que o usuário 
+tome qualquer ação.</li>
+  <li> Não crie notificações que não tenham conteúdo real de notificação e
+que meramente anunciem o seu
+aplicativo. Uma notificação deve fornecer informações úteis, oportunas e novas e 
+não deve ser usada
+meramente para executar um aplicativo.</li>
+  <li> Não crie notificações supérfluas apenas para colocar sua marca na frente
+dos usuários.
+  Tais notificações frustram e provavelmente alienam seu público-alvo. A
+melhor forma de fornecer
+  pequenas quantidades de informações atualizadas e manter o usuário envolvido
+com o seu
+  aplicativo é desenvolver um widget que ele possa colocar na
+tela inicial.</li>
+</ul>
+
+<h2 style="clear:left" id="interacting_with_notifications">Interação com 
+notificações</h2>
+
+<p>Notificações são indicadas por ícones na barra de status e podem ser acessadas
+abrindo a
+gaveta de notificações.</p>
+
+<p>Tocar em uma notificação abre o aplicativo associado com o conteúdo
+detalhado que corresponde à notificação.
+Deslizar à esquerda ou à direita em uma notificação a remove da gaveta.</p>
+
+<h3 id="ongoing_notifications">Notificações contínuas</h3>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}images/android-5.0/notifications/MusicPlayback.png" alt="" width="311px" />
+      <p class="img-caption">
+    Notificação contínua devido à reprodução de música
+  </p>
+</div>
+<p>Notificações contínuas mantêm os usuários informados sobre um processo em andamento em
+segundo plano. 
+Por exemplo, reprodutores de música anunciam a faixa em reprodução no
+sistema de notificação e
+continuam a fazer isso até que o usuário interrompa a reprodução. Notificações contínuas também podem
+mostrar ao usuário
+feedback sobre tarefas mais longas, como o download de um arquivo ou a codificação de um vídeo. Um usuário não pode remover
+manualmente uma notificação contínua da gaveta de notificações.</p>
+
+<h3 id="ongoing_notifications">Reprodução de mídia</h3>
+<p>No Android 5.0, a tela de bloqueio não mostra controles de transporte por causa da classe 
+{@link android.media.RemoteControlClient} obsoleta. Mas ela <em>mostra</em> notificações, portanto, a notificação de reprodução
+de cada aplicativo agora é a forma
+principal para que os usuários controlem a reprodução em um estado bloqueado. Esse comportamento dá aos aplicativos mais
+controle sobre quais
+botões exibir e de que forma, ao mesmo tempo em que fornece uma experiência consistente
+para o usuário, com a tela bloqueada ou não.</p>
+
+<h3 style="clear:both"
+id="dialogs_and_toasts_are_for_feedback_not_notification">Diálogos
+e avisos</h3>
+
+<p>O seu aplicativo não deve criar uma caixa de diálogo ou um aviso se não estiver
+atualmente na tela. Uma caixa de diálogo ou um aviso
+ deve ser exibido somente como uma resposta imediata ao usuário tomando uma ação
+dentro do seu aplicativo.
+Para obter orientação adicional sobre o uso de caixas de diálogo e avisos, consulte
+<a href="/design/patterns/confirming-acknowledging.html">Confirmação e reconhecimento</a>.</p>
+
+<h3>Avaliação e classificação</h3>
+
+<p>Notificações são notícias e, portanto, são essencialmente exibidas
+em ordem cronológica inversa, com
+consideração especial para a 
+<a href="#correctly_set_and_manage_notification_priority">prioridade</a> da notificação declarada no aplicativo.</p>
+
+<p>Notificações são uma parte importante da tela de bloqueio e são exibidas proeminentemente
+sempre
+que a tela do dispositivo é exibida. O espaço na tela de bloqueio é restrito, portanto, 
+é mais importante
+do que nunca identificar as notificações mais urgentes ou relevantes. Por esse
+motivo, o Android tem um
+algoritmo de classificação mais sofisticado para notificações, levando em conta:</p>
+
+<ul>
+  <li> A marcação de data e hora e a prioridade declarada no aplicativo.</li>
+  <li> Se a notificação incomodou recentemente o usuário com som ou
+vibração (ou seja,
+  se o celular acabou de fazer um ruído e o usuário deseja saber "O que acabou de
+acontecer?", a tela de bloqueio
+  deve responder com um olhar rápido).</li>
+  <li> Qualquer pessoa anexada à notificação usando {@link android.app.Notification#EXTRA_PEOPLE}
+  e, em particular, se é contato especial (com estrelas).</li>
+</ul>
+
+<p>Para aproveitar ao máximo essa classificação, concentre-se na experiência
+do usuário que deseja
+criar, e não em um determinado local na lista.</p>
+
+  <img src="{@docRoot}images/android-5.0/notifications/AntiSample3.png" alt="" width="700px" />
+
+  <p class="img-caption" style="margin-top:10px">Notificações do Gmail têm
+prioridade padrão e normalmente
+  são classificadas abaixo de mensagens de um aplicativo de mensagem instantânea, como o Hangouts, mas
+recebem
+  uma promoção temporária quando novas mensagens chegam.
+  </p>
+
+
+<h3>Na tela de bloqueio</h3>
+
+<p>Como as notificações são visíveis na tela de bloqueio, a privacidade do usuário é uma consideração 
+especialmente
+ importante. Notificações frequentemente contêm informações sensíveis e 
+não devem necessariamente estar visíveis
+para qualquer pessoa que ligar a tela do dispositivo.</p>
+
+<ul>
+  <li> Para dispositivos que têm uma tela de bloqueio segura (PIN, padrão ou senha), a interface tem 
+partes públicas e privadas. A interface pública pode ser exibida em uma tela de bloqueio segura e,
+portanto, vista por qualquer pessoa. A interface privada é o mundo atrás da tela de bloqueio e
+só é revelada depois que o usuário faz login no dispositivo.</li>
+</ul>
+
+<h3>Controle do usuário sobre as informações exibidas na tela de bloqueio segura</h3>
+<div class="figure" style="width:311px">
+  <img src="{@docRoot}images/android-5.0/notifications/LockScreen@2x.png" srcset="{@docRoot}images/android-5.0/notifications/LockScreen.png 1x" alt="" width="311px" />
+      <p class="img-caption">
+    Notificações na tela de bloqueio com conteúdo revelado depois que o usuário desbloqueia o dispositivo.
+  </p>
+</div>
+
+<p>Ao definir uma tela de bloqueio segura, o usuário poderá escolher ocultar
+detalhes sensíveis da tela de bloqueio segura. Nesse caso, a IU do sistema
+considerará o <em>nível de visibilidade</em> da notificação para descobrir o que pode
+ser exibido com segurança.</p>
+<p> Para controlar o nível de visibilidade, chame
+<code><a
+href="/reference/android/app/Notification.Builder.html#setVisibility(int)">Notification.Builder.setVisibility()</a></code>
+e especifique um destes valores:</p>
+
+<ul>
+  <li><code><a
+href="/reference/android/app/Notification.html#VISIBILITY_PUBLIC">VISIBILITY_PUBLIC</a></code>.
+Exibe o conteúdo inteiro da notificação.
+  Esse é o padrão do sistema se a visibilidade não for especificada.</li>
+  <li><code><a
+href="/reference/android/app/Notification.html#VISIBILITY_PRIVATE">VISIBILITY_PRIVATE</a></code>.
+Na tela de bloqueio, exibe informações básicas sobre essa notificação, incluindo o
+ícone e o nome do aplicativo que a publicou. O restante dos detalhes da notificação não é exibido.
+Alguns pontos a ter em mente são:
+  <ul>
+    <li> Se você quer fornecer uma versão pública diferente da sua notificação
+para que o sistema a exiba em uma tela de bloqueio segura, forneça um objeto
+Notificação substituto no campo <code><a
+href="/reference/android/app/Notification.html#publicVersion">Notification.publicVersion</a></code>.
+
+    <li> Essa configuração dá ao aplicativo uma oportunidade de criar uma versão alternativa do
+conteúdo que ainda é útil, mas não revela informações pessoais. Considere o exemplo de um
+aplicativo de SMS cujas notificações incluem o texto da mensagem SMS, o nome do remetente e o ícone do contato.
+Essa notificação deve ser <code>VISIBILITY_PRIVATE</code>, mas <code>publicVersion</code> ainda pode
+conter informações úteis, como "3 novas mensagens", sem outros detalhes
+de identificação.
+  </ul>
+  </li>
+  <li><code><a
+href="/reference/android/app/Notification.html#VISIBILITY_SECRET">Notification.VISIBILITY_SECRET</a></code>. Mostra apenas as informações mínimas, excluindo até mesmo
+o ícone da notificação.</li>
+</ul>
+<h2 style="clear:both" id="notifications_on_android_wear">Notificações no
+Android Wear</h2>
+
+<p>Notificações e suas <em>ações</em> são enviadas a dispositivos Wear por padrão.
+Os desenvolvedores podem controlar que notificações são enviadas do
+celular ao relógio
+e vice-versa. Os desenvolvedores também podem controlar quais ações são transmitidas. Se o
+seu aplicativo inclui
+ações que não podem ser executadas com um toque, oculte essas ações 
+na sua notificação do Wear
+ou considere colocá-las em um aplicativo do Wear, permitindo que o usuário
+termine a ação
+no relógio.</p>
+
+<h4>Transmissão de notificações e ações</h4>
+
+<p>Um dispositivo conectado, como um celular, pode transmitir notificações para um dispositivo Wear para que as
+notificações sejam exibidas nele. De forma similar, ele pode transmitir ações para que o usuário possa agir
+sobre as notificações diretamente do dispositivo Wear.</p>
+
+<p><strong>Transmitir</strong></p>
+
+<ul>
+  <li> Novas mensagens instantâneas</li>
+  <li> Ações de um toque, como +1, Curtir, Coração</li>
+</ul>
+
+<img src="{@docRoot}images/android-5.0/notifications/WearBasic.png" width="156px" height="156px" alt="" />
+
+<p><strong>Não transmitir</strong></p>
+
+<ul>
+  <li> Notificações de podcasts recém-chegados</li>
+  <li> Ações que mapeiem para recursos que não são possíveis no relógio</li>
+</ul>
+
+
+
+<p><h4>Ações exclusivas a definir para Wear</h4></p>
+
+<p>Há algumas ações que só podem ser realizadas em Wear. Elas incluem:</p>
+
+<ul>
+  <li> Listas rápidas de respostas prontas, como "Volto logo"</li>
+  <li> Abrir no celular</li>
+  <li> Uma ação "Comentar" ou "Responder" que abre a tela de entrada de voz</li>
+  <li> Ações que executam aplicativos específicos de Wear</li>
+</ul>
+
+<img src="{@docRoot}images/android-5.0/notifications/ReplyAction.png" width="156px" height="156px" alt="" />

@@ -1,0 +1,307 @@
+page.title=Android 设计原则
+@jd:body
+
+<p>以下设计原则由 Android用户体验团队秉承用户利益至上的理念而制定。他们还会继续为 Android 开发者和设计者针对不同类型的设备制定更详细的设计准则。
+
+
+
+</p>
+
+<p>
+在您应用自己的创意和设计思路时，请考虑这些原则，
+切勿固执己见。
+</p>
+
+<h2 id="enchant-me">让我着迷</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="delight-me">以意想不到的方式让我眼前一亮</h4>
+<p>漂亮的界面、精心布置的动画，或恰到好处的声效，都会带来快乐的体验。
+精细的效果能产生一种轻松的氛围，让人感觉自己拥有强大的力量。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_delight.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="real-objects-more-fun">实际对象要比按钮和菜单更有趣</h4>
+<p>让用户可以直接触摸和操作您应用中的对象，让执行任务更轻松，让用户更满意。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_real_objects.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-it-mine">我的应用我做主</h4>
+<p>用户喜欢添加个性化手势，因为这样会让他们觉得更顺手并且一切尽在他们的掌控之中。提供感性、美观的默认手势，但也要考虑到趣味性，不要让可选的定制手势妨碍主要任务的操作。
+
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_it_mine.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="get-to-know-me">让应用了解我</h4>
+<p>逐渐了解用户的偏好。不要让用户反复做出相同的选择，将之前的选择列作快捷选择。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_get_to_know_me.png">
+
+  </div>
+</div>
+
+<h2 id="simplify-my-life">让我的生活更轻松</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="keep-it-brief">语言简洁</h4>
+<p>使用简单的字词组成简短的句子。用户往往会跳过冗长的句子。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_keep_it_brief.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="pictures-faster-than-words">图片比文字更直观</h4>
+<p>考虑以图示意。它们会吸引用户的注意力，并且比文字更高效。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_pictures.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="decide-for-me">为我决定，但最终由我做主</h4>
+<p>先提供您心目中的最佳选择，而不是先进行询问。太多的选择和决策会让人不悦。
+只是在您的选择可能不当时，才赋予用户“撤消”的权利。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_decide_for_me.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="only-show-when-i-need-it">仅在我需要时显示我所需要的</h4>
+<p>如果一次性看到过多内容，用户会感到无所适从。将任务和信息细分为更小、更容易接受的片段。
+隐藏当前不必要的选项，并在用户操作期间提供指导。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_information_when_need_it.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="always-know-where-i-am">我应该始终清楚自己在哪里</h4>
+<p>让用户感到轻车熟路。为应用中的不同场景赋予不同的外观，使用过渡效果来展现屏幕之间的关系。
+提供任务进度反馈。</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_navigation.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="never-lose-my-stuff">决不能让我的成果付诸东流</h4>
+<p>务必保存好用户耗费花时间创造的内容，让他们能随处访问这些内容。跨手机、平板电脑和计算机等平台，记住设置、个人手势和创作内容，
+让应用升级变得无比简单。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="looks-same-should-act-same">如果看上去一样，其行为也应当相同</h4>
+<p>通过视觉上的显著差异（而不是微妙差异）帮助用户区分不同的功能。避免使用固定模式，那样会导致外观相似的场景中，用户执行同样的输入，应用却给出不同的响应。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_looks_same.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="interrupt-only-if-important">只在确实对我很重要时才打断我</h4>
+<p>就像优秀的个人助理一样，不要让上司被一些无关紧要的琐事打扰。用户希望专注于核心任务，除非确实非常重要并且情况紧急，否则，打断用户会让人烦不胜烦。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_important_interruption.png">
+
+  </div>
+</div>
+
+<h2 id="make-me-amazing">给我惊喜</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="give-me-tricks">到处为我提供有用的诀窍</h4>
+<p>如果能自己摸索出花样来，用户总是很开心的。利用直观的图案以及其他 Android 应用中常见的习惯手势，让您的应用更容易学习。
+例如，滑动手势就是一种不错的导航快捷手势。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_tricks.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="its-not-my-fault">不是我的错</h4>
+<p>在提醒用户改正错误时要礼貌。他们希望在使用您的应用时感觉自己很聪明。如果用户操作出错，请提供清晰的恢复说明，而不要让他们咀嚼详细的技术信息。如果您能在后台修复错误，那当然更好。
+
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_error.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="sprinkle-encouragement">多多鼓励</h4>
+<p>将复杂的任务分解为可轻松完成的小步骤。对操作提供反馈，哪怕只是微弱的灯光，也聊胜于无。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="do-heavy-lifting-for-me">为我处理繁重事务</h4>
+<p>通过让新手完成他们认为自己不可能做到的事情，让他们感觉自己就像一名行家。例如，通过提供融合多种照片特效的快捷操作，只需几步，就可以让业余照片达到惊艳的效果。
+
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_heavy_lifting.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4 id="make-important-things-fast">让重要事项能更快地完成</h4>
+<p>不是所有操作都同样重要。确定应用中哪些功能是最重要的，将这些功能放在便于找到和使用的地方，例如相机的快门按钮，或者音乐播放器中的暂停按钮。
+</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_important_fast.png">
+
+  </div>
+</div>
