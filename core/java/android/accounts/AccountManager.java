@@ -489,7 +489,8 @@ public class AccountManager {
      * <p>It is safe to call this method from the main thread.
      *
      * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#GET_ACCOUNTS}.
+     * {@link android.Manifest.permission#GET_ACCOUNTS} or share a uid with the
+     * authenticator that owns the account type.
      *
      * @param type The type of accounts to return, null to retrieve all accounts
      * @return An array of {@link Account}, one per matching account.  Empty
@@ -615,7 +616,8 @@ public class AccountManager {
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
      * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#GET_ACCOUNTS}.
+     * {@link android.Manifest.permission#GET_ACCOUNTS} or share a uid with the
+     * authenticator that owns the account type.
      *
      * @param type The type of accounts to return, must not be null
      * @param features An array of the account features to require,
