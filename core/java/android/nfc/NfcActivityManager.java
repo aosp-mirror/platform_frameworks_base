@@ -406,7 +406,7 @@ public final class NfcActivityManager extends IAppCallback.Stub
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
         }
-        return new BeamShareData(message, uris, UserHandle.CURRENT, flags);
+        return new BeamShareData(message, uris, new UserHandle(UserHandle.myUserId()), flags);
     }
 
     /** Callback from NFC service, usually on binder thread */
