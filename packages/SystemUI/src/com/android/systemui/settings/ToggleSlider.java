@@ -43,7 +43,7 @@ public class ToggleSlider extends RelativeLayout {
     private boolean mTracking;
 
     private CompoundButton mToggle;
-    private SeekBar mSlider;
+    private ToggleSeekBar mSlider;
     private TextView mLabel;
 
     private ToggleSlider mMirror;
@@ -69,13 +69,13 @@ public class ToggleSlider extends RelativeLayout {
         mToggle = (CompoundButton) findViewById(R.id.toggle);
         mToggle.setOnCheckedChangeListener(mCheckListener);
 
-        mSlider = (SeekBar) findViewById(R.id.slider);
+        mSlider = (ToggleSeekBar) findViewById(R.id.slider);
         mSlider.setOnSeekBarChangeListener(mSeekListener);
 
         mLabel = (TextView) findViewById(R.id.label);
         mLabel.setText(a.getString(R.styleable.ToggleSlider_text));
 
-        setLabelFor(R.id.slider); // use our a11y text to annotate, not replace, the slider's
+        mSlider.setAccessibilityLabel(getContentDescription().toString());
 
         a.recycle();
     }
