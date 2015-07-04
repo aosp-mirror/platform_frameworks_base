@@ -18,9 +18,11 @@ package com.android.server;
 
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
+import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
+import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -56,7 +58,6 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -71,12 +72,14 @@ import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TimeUtils;
 import android.util.Xml;
 
 import libcore.io.IoUtils;
@@ -111,9 +114,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -182,7 +183,9 @@ class MountService extends IMountService.Stub
     private static final boolean WATCHDOG_ENABLE = false;
 
     private static final String TAG = "MountService";
+
     private static final String TAG_STORAGE_BENCHMARK = "storage_benchmark";
+    private static final String TAG_STORAGE_TRIM = "storage_trim";
 
     private static final String VOLD_TAG = "VoldConnector";
     private static final String CRYPTD_TAG = "CryptdConnector";
@@ -231,6 +234,7 @@ class MountService extends IMountService.Stub
         public static final int DISK_SIZE_CHANGED = 641;
         public static final int DISK_LABEL_CHANGED = 642;
         public static final int DISK_SCANNED = 643;
+        public static final int DISK_SYS_PATH_CHANGED = 644;
         public static final int DISK_DESTROYED = 649;
 
         public static final int VOLUME_CREATED = 650;
@@ -244,11 +248,7 @@ class MountService extends IMountService.Stub
 
         public static final int MOVE_STATUS = 660;
         public static final int BENCHMARK_RESULT = 661;
-
-        /*
-         * 700 series - fstrim
-         */
-        public static final int FstrimCompleted                = 700;
+        public static final int TRIM_RESULT = 662;
     }
 
     private static final int VERSION_INIT = 1;
@@ -265,6 +265,9 @@ class MountService extends IMountService.Stub
     private static final String ATTR_PART_GUID = "partGuid";
     private static final String ATTR_NICKNAME = "nickname";
     private static final String ATTR_USER_FLAGS = "userFlags";
+    private static final String ATTR_CREATED_MILLIS = "createdMillis";
+    private static final String ATTR_LAST_TRIM_MILLIS = "lastTrimMillis";
+    private static final String ATTR_LAST_BENCH_MILLIS = "lastBenchMillis";
 
     private final AtomicFile mSettingsFile;
 
@@ -321,7 +324,6 @@ class MountService extends IMountService.Stub
         throw new IllegalArgumentException("No volume found for ID " + id);
     }
 
-    @Deprecated
     private String findVolumeIdForPath(String path) {
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
@@ -334,6 +336,31 @@ class MountService extends IMountService.Stub
         throw new IllegalArgumentException("No volume found for path " + path);
     }
 
+    private VolumeRecord findRecordForPath(String path) {
+        synchronized (mLock) {
+            for (int i = 0; i < mVolumes.size(); i++) {
+                final VolumeInfo vol = mVolumes.valueAt(i);
+                if (vol.path != null && path.startsWith(vol.path)) {
+                    return mRecords.get(vol.fsUuid);
+                }
+            }
+        }
+        return null;
+    }
+
+    private String scrubPath(String path) {
+        if (path.startsWith(Environment.getDataDirectory().getAbsolutePath())) {
+            return "internal";
+        }
+        final VolumeRecord rec = findRecordForPath(path);
+        if (rec == null || rec.createdMillis == 0) {
+            return "unknown";
+        } else {
+            return "ext:" + (int) ((System.currentTimeMillis() - rec.createdMillis)
+                    / DateUtils.WEEK_IN_MILLIS) + "w";
+        }
+    }
+
     private VolumeInfo findStorageForUuid(String volumeUuid) {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
@@ -342,6 +369,24 @@ class MountService extends IMountService.Stub
             return storage.getPrimaryPhysicalVolume();
         } else {
             return storage.findEmulatedForPrivate(storage.findVolumeByUuid(volumeUuid));
+        }
+    }
+
+    private boolean shouldBenchmark() {
+        final long benchInterval = Settings.Global.getLong(mContext.getContentResolver(),
+                Settings.Global.STORAGE_BENCHMARK_INTERVAL, DateUtils.WEEK_IN_MILLIS);
+        synchronized (mLock) {
+            for (int i = 0; i < mVolumes.size(); i++) {
+                final VolumeInfo vol = mVolumes.valueAt(i);
+                final VolumeRecord rec = mRecords.get(vol.fsUuid);
+                if (vol.isMountedReadable() && rec != null) {
+                    final long benchAge = System.currentTimeMillis() - rec.lastBenchMillis;
+                    if (benchAge >= benchInterval) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
@@ -563,16 +608,17 @@ class MountService extends IMountService.Stub
                         Slog.e(TAG, "Unable to record last fstrim!");
                     }
 
+                    final boolean shouldBenchmark = shouldBenchmark();
                     try {
                         // This method must be run on the main (handler) thread,
                         // so it is safe to directly call into vold.
-                        mConnector.execute("fstrim", "dotrim");
-                        EventLogTags.writeFstrimStart(SystemClock.elapsedRealtime());
+                        mConnector.execute("fstrim", shouldBenchmark ? "dotrimbench" : "dotrim");
                     } catch (NativeDaemonConnectorException ndce) {
                         Slog.e(TAG, "Failed to run fstrim!");
                     }
 
                     // invoke the completion callback, if any
+                    // TODO: fstrim is non-blocking, so remove this useless callback
                     Runnable callback = (Runnable) msg.obj;
                     if (callback != null) {
                         callback.run();
@@ -896,6 +942,14 @@ class MountService extends IMountService.Stub
                 }
                 break;
             }
+            case VoldResponseCode.DISK_SYS_PATH_CHANGED: {
+                if (cooked.length != 3) break;
+                final DiskInfo disk = mDisks.get(cooked[1]);
+                if (disk != null) {
+                    disk.sysPath = cooked[2];
+                }
+                break;
+            }
             case VoldResponseCode.DISK_DESTROYED: {
                 if (cooked.length != 2) break;
                 final DiskInfo disk = mDisks.remove(cooked[1]);
@@ -984,17 +1038,46 @@ class MountService extends IMountService.Stub
                 onMoveStatusLocked(status);
                 break;
             }
-
             case VoldResponseCode.BENCHMARK_RESULT: {
+                if (cooked.length != 7) break;
+                final String path = cooked[1];
+                final String ident = cooked[2];
+                final long create = Long.parseLong(cooked[3]);
+                final long drop = Long.parseLong(cooked[4]);
+                final long run = Long.parseLong(cooked[5]);
+                final long destroy = Long.parseLong(cooked[6]);
+
                 final DropBoxManager dropBox = mContext.getSystemService(DropBoxManager.class);
-                dropBox.addText(TAG_STORAGE_BENCHMARK, raw);
+                dropBox.addText(TAG_STORAGE_BENCHMARK, scrubPath(path)
+                        + " " + ident + " " + create + " " + run + " " + destroy);
+
+                final VolumeRecord rec = findRecordForPath(path);
+                if (rec != null) {
+                    rec.lastBenchMillis = System.currentTimeMillis();
+                    writeSettingsLocked();
+                }
+
+                break;
+            }
+            case VoldResponseCode.TRIM_RESULT: {
+                if (cooked.length != 4) break;
+                final String path = cooked[1];
+                final long bytes = Long.parseLong(cooked[2]);
+                final long time = Long.parseLong(cooked[3]);
+
+                final DropBoxManager dropBox = mContext.getSystemService(DropBoxManager.class);
+                dropBox.addText(TAG_STORAGE_TRIM, scrubPath(path)
+                        + " " + bytes + " " + time);
+
+                final VolumeRecord rec = findRecordForPath(path);
+                if (rec != null) {
+                    rec.lastTrimMillis = System.currentTimeMillis();
+                    writeSettingsLocked();
+                }
+
                 break;
             }
 
-            case VoldResponseCode.FstrimCompleted: {
-                EventLogTags.writeFstrimFinish(SystemClock.elapsedRealtime());
-                break;
-            }
             default: {
                 Slog.d(TAG, "Unhandled vold event " + code);
             }
@@ -1106,6 +1189,7 @@ class MountService extends IMountService.Stub
             if (rec == null) {
                 rec = new VolumeRecord(vol.type, vol.fsUuid);
                 rec.partGuid = vol.partGuid;
+                rec.createdMillis = System.currentTimeMillis();
                 if (vol.type == VolumeInfo.TYPE_PRIVATE) {
                     rec.nickname = vol.disk.getDescription();
                 }
@@ -1385,6 +1469,9 @@ class MountService extends IMountService.Stub
         meta.partGuid = readStringAttribute(in, ATTR_PART_GUID);
         meta.nickname = readStringAttribute(in, ATTR_NICKNAME);
         meta.userFlags = readIntAttribute(in, ATTR_USER_FLAGS);
+        meta.createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
+        meta.lastTrimMillis = readLongAttribute(in, ATTR_LAST_TRIM_MILLIS);
+        meta.lastBenchMillis = readLongAttribute(in, ATTR_LAST_BENCH_MILLIS);
         return meta;
     }
 
@@ -1395,6 +1482,9 @@ class MountService extends IMountService.Stub
         writeStringAttribute(out, ATTR_PART_GUID, rec.partGuid);
         writeStringAttribute(out, ATTR_NICKNAME, rec.nickname);
         writeIntAttribute(out, ATTR_USER_FLAGS, rec.userFlags);
+        writeLongAttribute(out, ATTR_CREATED_MILLIS, rec.createdMillis);
+        writeLongAttribute(out, ATTR_LAST_TRIM_MILLIS, rec.lastTrimMillis);
+        writeLongAttribute(out, ATTR_LAST_BENCH_MILLIS, rec.lastBenchMillis);
         out.endTag(null, TAG_VOLUME);
     }
 
@@ -3289,11 +3379,9 @@ class MountService extends IMountService.Stub
         mConnector.dump(fd, pw, args);
         pw.decreaseIndent();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
         pw.println();
         pw.print("Last maintenance: ");
-        pw.println(sdf.format(new Date(mLastMaintenance)));
+        pw.println(TimeUtils.formatForLogging(mLastMaintenance));
     }
 
     /** {@inheritDoc} */

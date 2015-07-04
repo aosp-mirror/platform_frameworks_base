@@ -54,6 +54,7 @@ public class DiskInfo implements Parcelable {
     public String label;
     /** Hacky; don't rely on this count */
     public int volumeCount;
+    public String sysPath;
 
     public DiskInfo(String id, int flags) {
         this.id = Preconditions.checkNotNull(id);
@@ -66,6 +67,7 @@ public class DiskInfo implements Parcelable {
         size = parcel.readLong();
         label = parcel.readString();
         volumeCount = parcel.readInt();
+        sysPath = parcel.readString();
     }
 
     public @NonNull String getId() {
@@ -139,6 +141,8 @@ public class DiskInfo implements Parcelable {
         pw.printPair("flags", DebugUtils.flagsToString(getClass(), "FLAG_", flags));
         pw.printPair("size", size);
         pw.printPair("label", label);
+        pw.println();
+        pw.printPair("sysPath", sysPath);
         pw.decreaseIndent();
         pw.println();
     }
@@ -193,5 +197,6 @@ public class DiskInfo implements Parcelable {
         parcel.writeLong(size);
         parcel.writeString(label);
         parcel.writeInt(volumeCount);
+        parcel.writeString(sysPath);
     }
 }
