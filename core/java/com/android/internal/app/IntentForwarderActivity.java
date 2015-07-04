@@ -87,9 +87,9 @@ public class IntentForwarderActivity extends Activity  {
         if (canForward(newIntent, targetUserId)) {
             if (newIntent.getAction().equals(Intent.ACTION_CHOOSER)) {
                 Intent innerIntent = (Intent) newIntent.getParcelableExtra(Intent.EXTRA_INTENT);
-                innerIntent.setContentUserHint(callingUserId);
+                innerIntent.prepareToLeaveUser(callingUserId);
             } else {
-                newIntent.setContentUserHint(callingUserId);
+                newIntent.prepareToLeaveUser(callingUserId);
             }
 
             final android.content.pm.ResolveInfo ri = getPackageManager().resolveActivityAsUser(

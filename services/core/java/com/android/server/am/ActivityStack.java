@@ -2829,7 +2829,7 @@ final class ActivityStack {
                     + " res=" + resultCode + " data=" + resultData);
             if (resultTo.userId != r.userId) {
                 if (resultData != null) {
-                    resultData.setContentUserHint(r.userId);
+                    resultData.prepareToLeaveUser(r.userId);
                 }
             }
             if (r.info.applicationInfo.uid > 0) {
