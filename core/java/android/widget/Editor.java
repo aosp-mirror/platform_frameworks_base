@@ -1186,7 +1186,7 @@ public class Editor {
             final InputMethodManager imm = InputMethodManager.peekInstance();
             final boolean immFullScreen = (imm != null && imm.isFullscreenMode());
             if (mSelectionModifierCursorController != null && mTextView.hasSelection()
-                    && !immFullScreen) {
+                    && !immFullScreen && mTextActionMode != null) {
                 mSelectionModifierCursorController.show();
             }
         } else {
