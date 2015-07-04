@@ -702,8 +702,7 @@ public class Am extends BaseCommand {
             } else if (opt.equals("--receiver-permission")) {
                 mReceiverPermission = nextArgRequired();
             } else {
-                System.err.println("Error: Unknown option: " + opt);
-                return null;
+                throw new IllegalArgumentException("Unknown option: " + opt);
             }
         }
         intent.setDataAndType(data, type);
