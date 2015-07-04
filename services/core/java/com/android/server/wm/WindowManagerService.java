@@ -9630,6 +9630,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (w.mContentInsetsChanged
                     || w.mVisibleInsetsChanged
                     || winAnimator.mSurfaceResized
+                    || w.mOutsetsChanged
                     || configChanged) {
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                     Slog.v(TAG, "Resize reasons for w=" + w + ": "
@@ -9639,6 +9640,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " " + w.mVisibleInsets.toShortString()
                             + " stableInsetsChanged=" + w.mStableInsetsChanged
                             + " " + w.mStableInsets.toShortString()
+                            + " outsetsChanged=" + w.mOutsetsChanged
+                            + " " + w.mOutsets.toShortString()
                             + " surfaceResized=" + winAnimator.mSurfaceResized
                             + " configChanged=" + configChanged);
                 }
