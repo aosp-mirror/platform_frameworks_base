@@ -39,6 +39,20 @@ public abstract class PackageManagerInternal {
     }
 
     /**
+     * Provider for package names.
+     */
+    public interface SyncAdapterPackagesProvider {
+
+        /**
+         * Gets the sync adapter packages for given authority and user.
+         * @param authority The authority.
+         * @param userId The user id.
+         * @return The package names.
+         */
+        public String[] getPackages(String authority, int userId);
+    }
+
+    /**
      * Sets the location provider packages provider.
      * @param provider The packages provider.
      */
@@ -67,6 +81,12 @@ public abstract class PackageManagerInternal {
      * @param provider The packages provider.
      */
     public abstract void setDialerAppPackagesProvider(PackagesProvider provider);
+
+    /**
+     * Sets the sync adapter packages provider.
+     * @param provider The provider.
+     */
+    public abstract void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider);
 
     /**
      * Requests granting of the default permissions to the current default SMS app.
