@@ -1,0 +1,57 @@
+page.title=保存数据
+page.tags=数据存储、文件、SQL、数据库、首选项
+helpoutsWidget=true
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>依赖项和先决条件</h2>
+<ul>
+  <li>Android 1.6（API 级别 4）或更高</li>
+  <li>熟悉地图键值集合</li>
+  <li>熟悉 Java 文件 I/O API</li>
+  <li>熟悉 SQL 数据库</li>
+</ul>
+
+<h2>您还应阅读</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html">存储选项</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>大多数 Android 应用需要保存数据，即使仅保存在 {@link android.app.Activity#onPause onPause()} 过程中与应用状态有关的信息，以便用户进度不会丢失 。
+大多数非平凡应用也需要保存用户设置，并且有些应用必须在文件和数据库中管理大量的信息。
+
+本课向您介绍 Android 中的主要数据存储选项，包括：
+</p>
+
+<ul>
+    <li>在共享的首选项文件中保存简单数据类型的键值对
+</li>
+    <li>在 Android 的文件系统中保存任意文件</li>
+    <li>使用 SQLite 管理的数据库</li>
+</ul>
+
+
+<h2>课程</h2>
+
+<dl>
+  <dt><b><a href="shared-preferences.html">保存键值集</a></b></dt>
+    <dd>学习使用在键值对中存储少量信息的共享首选项文件。
+</dd>
+
+  <dt><b><a href="files.html">保存文件</a></b></dt>
+    <dd>学习保存基本文件，比如存储一般按顺序读取的较长数据序列 。
+</dd>
+
+ <dt><b><a href="databases.html">在 SQL 数据库中保存数据</a></b></dt>
+   <dd>学习使用 SQLite 数据库读写结构化数据。</dd>
+
+</dl>

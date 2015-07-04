@@ -1,0 +1,236 @@
+page.title=Permitindo que outros aplicativos iniciem sua atividade
+page.tags=intenções
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#AddIntentFilter">Adicionar um filtro de intenções</a></li>
+  <li><a href="#HandleIntent">Responder à intenção em sua atividade</a></li>
+  <li><a href="#ReturnResult">Retornar um resultado</a></li>
+</ol>
+
+<h2>Leia também</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">Compartilhando dados simples</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">Compartilhando arquivos</a>
+</ul>
+  </div>
+</div>
+
+<p>As duas lições anteriores enfatizaram um aspecto: iniciar a atividade de outro aplicativo pelo
+seu aplicativo. Mas se seu aplicativo puder executar uma ação que pode ser útil para outro aplicativo,
+ele precisa estar preparado para responder às solicitações de ação de outros aplicativos. Por exemplo, se
+construir um aplicativo social que compartilhe mensagens ou fotos com os amigos do usuário, é interessante
+que ele possa responder à intenção {@link android.content.Intent#ACTION_SEND} para que os usuários consigam iniciar uma
+ação de “compartilhar” por outro aplicativo e iniciar seu aplicativo para executar a ação.</p>
+
+<p>Para permitir que outros aplicativos iniciem sua atividade, adicione um elemento <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+em seu arquivo de manifesto para o elemento <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> correspondente.</p>
+
+<p>Quando seu aplicativo é instalado em um dispositivo, o sistema identifica seu filtro de
+intenções e adiciona a informação a um catálogo interno de intenções suportado por todos os aplicativos instalados.
+Quando um aplicativo chama {@link android.app.Activity#startActivity
+startActivity()} ou {@link android.app.Activity#startActivityForResult startActivityForResult()},
+com uma intenção implícita, o sistema encontra qual atividade (ou atividades) pode responder à
+intenção.</p>
+
+
+
+<h2 id="AddIntentFilter">Adicionar um filtro de intenções</h2>
+
+<p>Para definir adequadamente a quais intenções sua atividade responderá, cada filtro de intenções adicionado
+deverá ser o mais específico possível em termos de tipo de ação e dados aceitos pela
+atividade.</p>
+
+<p>O sistema pode enviar uma determinada {@link android.content.Intent} para uma atividade se ela tiver
+um filtro de intenções que atenda aos seguintes critérios do objeto {@link android.content.Intent}:</p>
+
+<dl>
+  <dt>Ação</dt>
+    <dd>Uma cadeia de caracteres que dá nome a ação a ser executada. Geralmente, um dos valores definidos para a plataforma
+como {@link android.content.Intent#ACTION_SEND} ou {@link android.content.Intent#ACTION_VIEW}.
+    <p>Especifique-o em seu filtro de intenções com o elemento <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>.
+O valor especificado neste elemento deve ser o nome completo da cadeia de caracteres para a ação e não a
+API constante (veja exemplos abaixo).</p></dd>
+
+  <dt>Dados</dt>
+    <dd>A descrição dos dados associados à intenção.
+    <p>Especifique-a em seu filtro de intenções com o elemento <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>. Através de um
+ou mais atributos neste elemento, você pode especificar apenas o tipo MIME, apenas um prefixo de URI,
+apenas um esquema de URI ou uma combinação destes e outros elementos que indicam o tipo de dados
+aceito.</p>
+    <p class="note"><strong>Observação:</strong> se não precisar especificar os dados
+{@link android.net.Uri} (como quando sua atividade responde a outros tipos de dados “extra”, em vez
+do URI), especifique apenas o atributo {@code android:mimeType} para declarar o tipo de
+dado que sua atividade trata, como {@code text/plain} ou {@code image/jpeg}.</p>
+</dd>
+  <dt>Categoria</dt>
+    <dd>Oferece uma outra forma de caracterizar a atividade que trata a intenção, geralmente relacionada
+ao gesto do usuário ou localização onde foi iniciada. Há diferentes categorias
+compatíveis com o sistema, mas a maioria raramente é utilizada. No entanto, todas as intenções implícitas são definidas com
+{@link android.content.Intent#CATEGORY_DEFAULT} por padrão.
+    <p>Especifique-a em seu filtro de intenções com o elemento <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>
+.</p></dd>
+</dl>
+
+<p>Em seu filtro de intenções, declare quais critérios serão aceitos por sua atividade
+informando cada um deles com elementos XML correspondentes aninhados no elemento <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+.</p>
+
+<p>Este é um exemplo de atividade com filtro de intenções que responde à intenção {@link
+android.content.Intent#ACTION_SEND} quando o tipo de dado é texto ou imagem:</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+        &lt;data android:mimeType="image/*"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Cada intenção em entrada especifica apenas uma ação e um tipo de dado, mas pode-se declarar
+múltiplas instâncias dos elementos <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> e <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> em cada
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a>.</p>
+
+<p>Se dois pares de ação e dados fores mutuamente exclusivos em
+seus comportamentos, crie filtros de intenções separados para especificar quais ações são aceitáveis
+quando pareadas com qual tipo de dado.</p>
+
+<p>Imagine que sua atividade responda à ambos, texto e imagem, para intenções {@link
+android.content.Intent#ACTION_SEND} e {@link
+android.content.Intent#ACTION_SENDTO}. Nesse caso, defina dois
+filtros de intenções separados para as duas ações porque uma intenção {@link
+android.content.Intent#ACTION_SENDTO} deve usar os dados {@link android.net.Uri} para especificar
+o endereço do destinatário utilizando o esquema do URI {@code send} ou {@code sendto}. Por exemplo:</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;!-- filter for sending text; accepts SENDTO action with sms URI schemes -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SENDTO"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:scheme="sms" />
+        &lt;data android:scheme="smsto" />
+    &lt;/intent-filter>
+    &lt;!-- filter for sending text or images; accepts SEND action and text or image data -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>Observação:</strong> para receber intenções implícitas, inclua a categoria
+{@link android.content.Intent#CATEGORY_DEFAULT} no filtro de intenções. Os métodos {@link
+android.app.Activity#startActivity startActivity()} e {@link
+android.app.Activity#startActivityForResult startActivityForResult()} tratam todas as intenções como se elas tivessem
+declarado a categoria {@link android.content.Intent#CATEGORY_DEFAULT}. Se você não a declarar
+em seu filtro de intenções, nenhuma intenção implícita resolverá sua atividade.</p>
+
+<p>Para obter mais informações sobre o envio e recebimento de intenções {@link android.content.Intent#ACTION_SEND}
+que realizam comportamentos de compartilhamento social, veja a lição <a href="{@docRoot}training/sharing/receive.html">Recebendo dados simples de outros aplicativos</a>.</p>
+
+
+<h2 id="HandleIntent">Responder à intenção em sua atividade</h2>
+
+<p>Para decidir qual ação tomar em sua atividade, leia a {@link
+android.content.Intent} utilizada para iniciá-la.</p>
+
+<p>Quando sua atividade iniciar, chame {@link android.app.Activity#getIntent()} para retomar a
+{@link android.content.Intent} que iniciou a atividade. Pode-se fazer isso a qualquer momento durante
+o ciclo de vida da atividade, mas recomenda-se fazê-lo no início do retorno de chamada como 
+{@link android.app.Activity#onCreate onCreate()} ou {@link android.app.Activity#onStart()}.</p>
+
+<p>Por exemplo:</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.main);
+
+    // Get the intent that started this activity
+    Intent intent = getIntent();
+    Uri data = intent.getData();
+
+    // Figure out what to do based on the intent type
+    if (intent.getType().indexOf("image/") != -1) {
+        // Handle intents with image data ...
+    } else if (intent.getType().equals("text/plain")) {
+        // Handle intents with text ...
+    }
+}
+</pre>
+
+
+<h2 id="ReturnResult">Retornar um resultado</h2>
+
+<p>Se você deseja retornar um resultado para a atividade que invocou a sua, simplesmente chame {@link
+android.app.Activity#setResult(int,Intent) setResult()} para especificar o código do resultado e o resultado {@link
+android.content.Intent}. Quando sua operação estiver concluída e o usuário retornar à atividade
+original, chame {@link android.app.Activity#finish()} para fechar (e destruir) a atividade. Por
+exemplo:</p>
+
+<pre>
+// Create intent to deliver some kind of result data
+Intent result = new Intent("com.example.RESULT_ACTION", Uri.parse("content://result_uri");
+setResult(Activity.RESULT_OK, result);
+finish();
+</pre>
+
+<p>Sempre especifique um código de resultado com o resultado. Geralmente é {@link
+android.app.Activity#RESULT_OK} ou {@link android.app.Activity#RESULT_CANCELED}. Pode-se fornecer
+dados adicionais com uma {@link android.content.Intent}, caso seja necessário.</p>
+
+<p class="note"><strong>Observação:</strong> o resultado é definido como {@link
+android.app.Activity#RESULT_CANCELED} por padrão. Portanto, se o usuário pressionar o botão <em>Voltar</em>
+antes de concluir a ação e definir o resultado, a atividade original recebe
+o resultado “cancelado”.</p>
+
+<p>Se você apenas precisar retornar um número inteiro que indique uma das várias opções de resultado, defina
+o código de resultados para qualquer valor maior que 0. Se você usar o código do resultado para fornecer um número inteiro e não
+houver necessidade de incluir {@link android.content.Intent}, chame {@link
+android.app.Activity#setResult(int) setResult()} e transmita apenas um código de resultado. Por exemplo:</p>
+
+<pre>
+setResult(RESULT_COLOR_RED);
+finish();
+</pre>
+
+<p>Nesse caso, talvez existam apenas alguns poucos resultados possíveis. Portanto, o código do resultado é um número inteiro definido
+localmente (maior que 0). Isso funciona bem ao retornar um resultado de uma atividade
+em seu próprio aplicativo porque a atividade que recebe o resultado pode fazer uma referência à constante pública
+para determinar o valor do código de resultado.</p>
+
+<p class="note"><strong>Observação:</strong> não há necessidade de verificar se sua atividade foi iniciada
+com {@link
+android.app.Activity#startActivity startActivity()} ou {@link
+android.app.Activity#startActivityForResult startActivityForResult()}. Simplesmente chame {@link
+android.app.Activity#setResult(int,Intent) setResult()} se a intenção que iniciou sua atividade
+estiver esperando um resultado. Se a atividade inicial tivesse chamado {@link
+android.app.Activity#startActivityForResult startActivityForResult()}, o sistema o forneceria
+o resultado para {@link android.app.Activity#setResult(int,Intent) setResult()}. Caso contrário,
+o resultado é ignorado.</p>
+
+
+
+
+
+

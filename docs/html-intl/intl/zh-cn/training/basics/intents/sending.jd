@@ -1,0 +1,256 @@
+page.title=向另一个应用发送用户
+page.tags=意向
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#Build">构建隐含意向</a></li>
+  <li><a href="#Verify">确认是否存在接收意向的应用</a></li>
+  <li><a href="#StartActivity">开始具有意向的活动</a></li>
+  <li><a href="#AppChooser">显示应用选择器</a></li>
+</ol>
+
+<h2>您还应阅读</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">共享简单数据</a></li>
+</ul>
+
+  </div>
+</div>
+
+<p>Android 最重要的功能之一是应用能够基于它要执行的“操作”向另一个应用发送用户。
+例如，如果您的应用有您要在地图上显示的公司地址，您无需在显示地图的应用中构建活动。
+
+而是可以创建使用
+ {@link android.content.Intent} 查看地址的请求。Android 系统之后启动可以在地图上显示该地址的应用。
+</p>
+
+<p>正如第一堂课<a href="{@docRoot}training/basics/firstapp/index.html">构建您的第一个应用</a>中所讲述的，您必须使用意向在自己应用中的活动之间进行导航。您通常使用<em>明确意向</em>执行此操作，该意向定义您希望启动的组件的确切类名称。
+
+
+但是，当您希望另一应用执行操作时，比如“查看地图”，您必须使用<em>隐含意向</em>。
+</p>
+
+<p>本课程向您展示如何针对特定操作创建隐含意向，以及如何使用该意向开始在另一个应用中执行操作的活动。
+</p>
+
+
+
+<h2 id="Build">构建隐含意向</h2>
+
+<p>隐含意向不声明要启动的组件的类名称，而是声明要执行的操作。
+该操作指定您要执行的操作，比如<em>查看</em>、<em>编辑</em>、<em>发送</em>或 <em>获取</em> 某项。
+意向通常还包含与操作关联的数据，比如您要查看的地址或您要发送的电子邮件消息。根据要创建的意向，数据可能是 {@link android.net.Uri}、多种其他数据类型之一，或意向可能根本就不需要数据。
+
+
+</p>
+
+<p>如果您的数据是 {@link android.net.Uri}，有一个简单的  {@link
+android.content.Intent#Intent(String,Uri) Intent()} 构造函数，您可用来定义操作和数据。
+</p>
+
+<p>例如，此处显示如何使用指定电话号码的 {@link
+android.net.Uri} 数据创建发起电话呼叫的意向：</p>
+
+<pre>
+Uri number = Uri.parse("tel:5551234");
+Intent callIntent = new Intent(Intent.ACTION_DIAL, number);
+</pre>
+
+<p>当您的应用通过调用 {@link android.app.Activity#startActivity
+startActivity()} 调用此意向时，“电话”应用会发起向指定电话号码的呼叫。</p>
+
+<p>这里有一些其他意向及其操作和 {@link android.net.Uri} 数据对：
+</p>
+
+<ul>
+  <li>查看地图：
+<pre>
+// Map point based on address
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+// Or map point based on latitude/longitude
+// Uri location = Uri.parse("geo:37.422219,-122.08364?z=14"); // z param is zoom level
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+</pre>
+  </li>
+  <li>查看网页：
+<pre>
+Uri webpage = Uri.parse("http://www.android.com");
+Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+</pre>
+  </li>
+</ul>
+
+<p>其他类型的隐含意向需要提供不同数据类型（比如，字符串）的“额外”数据。
+您可以使用各种 {@link
+android.content.Intent#putExtra(String,String) putExtra()} 方法添加一条或多条额外数据。</p>
+
+<p>默认情况下，系统基于所包含的
+{@link android.net.Uri} 数据确定意向需要的相应 MIME 类型。如果您未在意向中包含 {@link android.net.Uri}，您通常应使用 {@link android.content.Intent#setType setType()} 指定与意向关联的数据的类型。
+
+设置 MIME 类型可进一步指定哪些类型的活动应接收意向。
+</p>
+
+<p>﻿此处有更多添加额外数据以指定所需操作的意向：</p>
+
+<ul>
+  <li>发送带附件的电子邮件：
+<pre>
+Intent emailIntent = new Intent(Intent.ACTION_SEND);
+// The intent does not have a URI, so declare the "text/plain" MIME type
+emailIntent.setType(HTTP.PLAIN_TEXT_TYPE);
+emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"jon@example.com"}); // recipients
+emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Email subject");
+emailIntent.putExtra(Intent.EXTRA_TEXT, "Email message text");
+emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://path/to/email/attachment"));
+// You can also attach multiple items by passing an ArrayList of Uris
+</pre>
+  </li>
+  <li>创建日历事件：
+<pre>
+Intent calendarIntent = new Intent(Intent.ACTION_INSERT, Events.CONTENT_URI);
+Calendar beginTime = Calendar.getInstance().set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance().set(2012, 0, 19, 10, 30);
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis());
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
+calendarIntent.putExtra(Events.TITLE, "Ninja class");
+calendarIntent.putExtra(Events.EVENT_LOCATION, "Secret dojo");
+</pre>
+<p class="note"><strong>注意：</strong>只有 API 级别 14 或更高级别支持此日历事件意向。
+</p>
+  </li>
+</ul>
+
+<p class="note"><strong>注意：</strong>尽可能具体地定义您的 {@link
+android.content.Intent} 非常重要。例如，如果您想要使用 {@link android.content.Intent#ACTION_VIEW} 意向显示图像，您应指定
+{@code image/*}的 MIME 类型。
+这可防止可“查看”数据的其他类型的应用（比如地图应用）被意向触发。
+</p>
+
+
+
+<h2 id="Verify">确认是否存在接收意向的应用</h2>
+
+<p>尽管 Android 平台保证某些意向可以分解为内置应用之一（比如，“电话”、“电子邮件”或“日历”应用），您应在调用意向之前始终包含确认步骤。
+
+</p>
+
+<p class="caution"><strong>注意：</strong>如果您调用了意向，但设备上没有可用于处理意向的应用，您的应用将崩溃。
+</p>
+
+<p>要确认是否存在可响应意向的可用活动，请调用 {@link
+android.content.pm.PackageManager#queryIntentActivities queryIntentActivities()} 来获取能够处理您的{@link android.content.Intent} 的活动列表。
+如果返回的 {@link
+java.util.List} 不为空，您可以安全地使用该意向。例如：</p>
+
+<pre>
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
+boolean isIntentSafe = activities.size() > 0;
+</pre>
+
+<p>如果 <code>isIntentSafe</code> 是 <code>true</code>，则至少有一个应用将响应该意向。
+如果它是 <code>false</code>，则没有任何应用处理该意向。</p>
+
+<p class="note"><strong>注意：</strong>在您需要在用户尝试使用它之前禁用使用该意向的功能时，您应在活动初次开始时执行此检查。
+
+如果您了解可处理意向的特定应用，您还可以为用户提供下载该应用的链接（请参阅如何<a href="{@docRoot}distribute/tools/promote/linking.html">在 Google
+Play</a> 链接到您的产品）。
+</p>
+
+
+<h2 id="StartActivity">开始具有意向的活动</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intents-choice.png" alt="" />
+  <p class="img-caption"><strong>图 1.</strong>当多个应用可处理意向时显示的选择对话框示例。
+</p>
+</div>
+
+<p>一旦您已创建您的 {@link android.content.Intent} 并设置附加信息，调用 {@link
+android.app.Activity#startActivity startActivity()} 将其发送给系统 。如果系统识别可处理意向的多个活动，它会为用户显示对话框供其选择要使用的应用，如图 1 所示。
+
+如果只有一个活动处理意向，系统会立即开始这个活动。
+</p>
+
+<pre>
+startActivity(intent);
+</pre>
+
+<p>此处显示完整的示例：如何创建查看地图的意向，确认是否存在处理意向的应用，然后启动它：
+</p>
+
+<pre>
+// Build the intent
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+
+// Verify it resolves
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(mapIntent, 0);
+boolean isIntentSafe = activities.size() > 0;
+
+// Start an activity if it's safe
+if (isIntentSafe) {
+    startActivity(mapIntent);
+}
+</pre>
+
+
+
+<h2 id="AppChooser">显示应用选择器</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="" />
+  <p class="img-caption"><strong>图 2.</strong>选择器的对话框。</p>
+</div>
+
+<p>注意，当您通过将您的 {@link android.content.Intent} 传递至 {@link
+android.app.Activity#startActivity startActivity()} 而开始活动时，有多个应用响应意向，用户可以选择默认使用哪个应用（通过选中对话框底部的复选框；见图 1）。
+
+当执行用户通常希望每次使用相同应用进行的操作时，比如当打开网页（用户可能只使用一个网页浏览器）或拍照（用户可能习惯使用一个照相机）时，这非常有用。
+
+</p>
+
+<p>但是，如果要执行的操作可由多个应用处理并且用户可能习惯于每次选择不同的应用，&mdash;比如“共享”操作，用户有多个应用分享项目&mdash;，您应明确显示选择器对话框，如图 2 所示。
+
+
+选择器对话框强制用户选择用于每次操作的应用（用户不能对此操作选择默认的应用）。
+
+</p>
+
+<p>要显示选择器，使用 {@link
+android.content.Intent#createChooser createChooser()} 创建{@link android.content.Intent} 并将其传递至 {@link
+android.app.Activity#startActivity startActivity()}。例如：</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show chooser
+Intent chooser = Intent.createChooser(intent, title);
+
+// Verify the intent will resolve to at least one activity
+if (intent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>这将显示一个对话框，其中有响应传递给 {@link
+android.content.Intent#createChooser createChooser()} 方法的意向的应用列表，并且将提供的文本用作
+对话框标题。</p>
+
+
+

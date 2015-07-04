@@ -1,0 +1,178 @@
+page.title=Получение результата операции
+page.tags=объекты Intent
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>Содержание этого урока</h2>
+<ol>
+  <li><a href="#StartActivity">Запуск операции</a></li>
+  <li><a href="#ReceiveResult">Получение результата</a></li>
+</ol>
+
+<h2>См. также:</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">Общий доступ к простым данным</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">Общий доступ к файлам</a>
+</ul>
+
+  </div>
+</div>
+
+<p>Запуск другой операции не обязательно должен быть односторонним действием. Вы можете запустить другую операцию и
+получить от нее результат. Для получения результата нужно вызвать метод {@link android.app.Activity#startActivityForResult
+startActivityForResult()} (вместо {@link android.app.Activity#startActivity
+startActivity()}).</p>
+
+<p>Например, ваше приложение может запустить приложение для камеры и получить в качестве результата фотографию. Также вы
+можете запустить приложение "Люди", чтобы пользователь выбрал в нем
+контакт, и получить контактные данные в качестве результата.</p>
+
+<p>Разумеется, отвечающая операция должна быть способной возвратить результат. При возврате
+результат отправляется как другой объект {@link android.content.Intent}. Ваша операция получает
+его в обратном вызове {@link android.app.Activity#onActivityResult onActivityResult()}.</p>
+
+<p class="note"><strong>Примечание.</strong> Вы можете использовать явные и неявные результаты при вызове 
+{@link android.app.Activity#startActivityForResult startActivityForResult()}. При запуске собственной
+операции для получения результата вы должны использовать явные результаты, чтобы получить
+именно ожидаемый результат.</p>
+
+
+<h2 id="StartActivity">Запуск операции</h2>
+
+<p>В объекте {@link android.content.Intent}, используемом для запуска операции
+для получения результата, нет ничего особенного, однако нужно передать дополнительный целочисленный аргумент методы {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.</p>
+
+<p>Этот целочисленный аргумент представляет собой "код запроса", определяющий ваш запрос. Когда вы получите
+результат {@link android.content.Intent}, обратный вызов использует тот же самый код результата,
+чтобы ваше приложение могло правильно определить результат и понять, как его нужно обработать.</p>
+
+<p>Например, вот так можно запустить операцию, позволяющую пользователю выбрать контакт:</p>
+
+<pre>
+static final int PICK_CONTACT_REQUEST = 1;  // The request code
+...
+private void pickContact() {
+    Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+    pickContactIntent.setType(Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+    startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
+}
+</pre>
+
+
+<h2 id="ReceiveResult">Получение результата</h2>
+
+<p>Когда пользователь завершит последующую операцию и вернется, система вызовет метод вашей операции
+{@link android.app.Activity#onActivityResult onActivityResult()}. Этот метод содержит три
+аргумента:</p>
+
+<ul>
+  <li>Код запроса, переданный вами {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.</li>
+  <li>Полученный в качестве результата код, указанный второй операцией. Или {@link
+android.app.Activity#RESULT_OK}, если операция была успешной, или {@link
+android.app.Activity#RESULT_CANCELED}, если пользователь отказался или операцию не удалось выполнить по какой-либо
+причине.</li>
+  <li>{@link android.content.Intent}, переносящий полученные данные.</li>
+</ul>
+
+<p>Например, результаты для намерения "Выбрать контакт" могут обрабатываться следующим образом:</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // The user picked a contact.
+            // The Intent's data Uri identifies which contact was selected.
+
+            // Do something with the contact here (bigger example below)
+        }
+    }
+}
+</pre>
+
+<p>В этом примере результаты, {@link android.content.Intent} возвращаемые приложениями
+Android Контакты или Люди, предоставляют контент {@link android.net.Uri}, который идентифицирует
+выбранный пользователем контакт.</p>
+
+<p>Для успешной обработки результатов необходимо понимать, каким будет формат этих результатов 
+{@link android.content.Intent}. Это просто, если результат возвращается одной из ваших
+собственных операций. Приложения, входящие в состав платформы Android, имеют собственные прикладные интерфейсы, так что
+вы можете рассчитывать на получение определенных результатов. Например, приложение "Люди" (приложение "Контакты" в старых
+версиях) всегда возвращает результат с URI контента, идентифицирующий выбранный контакт, а приложение
+"Камера" возвращает {@link android.graphics.Bitmap} в дополнительном {@code "data"} (см. урок
+<a href="{@docRoot}training/camera/index.html">Съемка фотографий</a>).</p>
+
+
+<h4>Бонус: Чтение контактных данных</h4>
+
+<p>Приведенный выше код, показывающий как получить результаты из приложения "Люди", не описывает
+детально чтение данных результатов, потому что для этого нужно более
+подробно рассказать о <a href="{@docRoot}guide/topics/providers/content-providers.html">поставщиках
+контента</a>. Если вам все-таки интересно, вот еще код, показывающий как запрашивать
+данные результатов для получения номера телефона выбранного контакта:</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request it is that we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // Get the URI that points to the selected contact
+            Uri contactUri = data.getData();
+            // We only need the NUMBER column, because there will be only one row in the result
+            String[] projection = {Phone.NUMBER};
+
+            // Perform the query on the contact to get the NUMBER column
+            // We don't need a selection or sort order (there's only one result for the given URI)
+            // CAUTION: The query() method should be called from a separate thread to avoid blocking
+            // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
+            // Consider using {@link android.content.CursorLoader} to perform the query.
+            Cursor cursor = getContentResolver()
+                    .query(contactUri, projection, null, null, null);
+            cursor.moveToFirst();
+
+            // Retrieve the phone number from the NUMBER column
+            int column = cursor.getColumnIndex(Phone.NUMBER);
+            String number = cursor.getString(column);
+
+            // Do something with the phone number...
+        }
+    }
+}
+</pre>
+
+<p class="note"><strong>Примечание.</strong> До выхода версии Android 2.3 (API-интерфейс уровня 9) для выполнения
+запроса {@link android.provider.ContactsContract.Contacts Contacts Provider} (как
+показанный выше) ваше приложение должно было декларировать разрешение {@link
+android.Manifest.permission#READ_CONTACTS} (см. <a href="{@docRoot}guide/topics/security/security.html">Безопасность и разрешения</a>). Однако,
+начиная с версии Android 2.3, приложение "Контакты/Люди" дает вашему приложению временное
+разрешение на чтение данных Поставщика контактов при выводе результата. Это временное разрешение
+действует только в отношении конкретного запрошенного контакта, так что нельзя запрашивать другой контакт,
+кроме указанного объектом Intent {@link android.net.Uri}, если вы не хотите декларировать разрешение {@link
+android.Manifest.permission#READ_CONTACTS}.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

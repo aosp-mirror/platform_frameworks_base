@@ -1,0 +1,285 @@
+page.title=开始活动
+page.tags=活动生命周期
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#lifecycle-states">了解生命周期回调</a></li>
+  <li><a href="#launching-activity">指定您的应用的启动器活动</a></li>
+  <li><a href="#Create">创建一个新实例</a></li>
+  <li><a href="#Destroy">销毁活动</a></li>
+</ol>
+    
+    <h2>您还应阅读</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/components/activities.html">活动</a></li>
+    </ul>
+
+<h2>试一试</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip" class="button">下载演示</a>
+ <p class="filename">ActivityLifecycle.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>不同于使用 {@code main()} 方法启动应用的其他编程范例，Android 系统会通过调用对应于其生命周期中特定阶段的特定回调方法在 {@link android.app.Activity} 实例中启动代码。
+
+
+有一系列可启动活动的回调方法，以及一系列可分解活动的回调方法。
+</p>
+
+<p>本课程概述了最重要的生命周期方法，并向您展示如何处理创建活动新实例的第一个生命周期回调。
+</p>
+
+
+
+<h2 id="lifecycle-states">了解生命周期回调</h2>
+
+<p>在活动的生命周期中，系统会按类似于阶梯金字塔的顺序调用一组核心的生命周期方法。
+也就是说，活动生命周期的每个阶段就是金字塔上的一阶。
+当系统创建新活动实例时，每个回调方法会将活动状态向顶端移动一阶。
+金字塔的顶端是活动在前台运行并且用户可以与其交互的时间点。
+</p>
+
+<p>当用户开始离开活动时，系统会调用其他方法在金字塔中将活动状态下移，从而销毁活动。
+在有些情况下，活动将只在金字塔中部分下移并等待（比如，当用户切换到其他应用时），活动可从该点开始移回顶端（如果用户返回到该活动），并在用户停止的位置继续。
+
+
+</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle.png" />
+<p class="img-caption"><strong>图 1.</strong>简化的活动生命周期图示，以阶梯金字塔表示。
+此图示显示，对于用于将活动朝顶端的“继续”状态移动一阶的每个回调，有一种将活动下移一阶的回调方法。
+
+活动还可以从“暂停”和“停止”状态回到继续状态。
+</p>
+
+
+<p>根据活动的复杂程度，您可能不需要实现所有生命周期方法。
+但是，了解每个方法并实现确保您的应用按照用户期望的方式运行的方法非常重要。
+正确实现您的活动生命周期方法可确保您的应用按照以下几种方式良好运行，包括：
+</p>
+<ul>
+  <li>如果用户在使用您的应用时接听来电或切换到另一个应用，它不会崩溃。
+</li>
+  <li>在用户未主动使用它时不会消耗宝贵的系统资源。
+</li>
+  <li>如果用户离开您的应用并稍后返回，不会丢失用户的进度。
+</li>
+  <li>当屏幕在横向和纵向之间旋转时，不会崩溃或丢失用户的进度。
+</li>
+</ul>
+
+<!--
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+methods.</p>
+<table>
+  <tr>
+    <th scope="col">Lifecycle State</th>
+    <th scope="col">Startup Method</th>
+    <th scope="col">Teardown Method</th>
+  </tr>
+  <tr>
+    <td>Created / Destroyed</td>
+    <td>{@link android.app.Activity#onCreate onCreate()}</td>
+    <td>{@link android.app.Activity#onDestroy()}</td>
+  </tr>
+  <tr>
+    <td>Started / Stopped</td>
+    <td>{@link android.app.Activity#onStart()}</td>
+    <td>{@link android.app.Activity#onStop()}</td>
+  </tr>
+  <tr>
+    <td>Resumed / Resumed</td>
+    <td>{@link android.app.Activity#onResume()}</td>
+    <td>{@link android.app.Activity#onPause()}</td>
+  </tr>
+</table>
+-->
+
+<p>正如您将要在以下课程中要学习的，有活动会在图 1 所示不同状态之间过渡的几种情况。
+但是，这些状态中只有三种可以是静态。
+也就是说，活动只能在三种状态之一下存在很长时间。
+</p>
+<dl>
+  <dt>继续</dt>
+    <dd>在这种状态下，活动处于前台，且用户可以与其交互。（有时也称为“运行”状态。）
+</dd>
+  <dt>暂停</dt>
+    <dd>在这种状态下，活动被在前台中处于半透明状态或者未覆盖整个屏幕的另一个活动&mdash;部分阻挡。
+暂停的活动不会接收用户输入并且无法执行任何代码。
+
+  <dt>停止</dt>
+    <dd>在这种状态下，活动被完全隐藏并且对用户不可见；它被视为处于后台。
+停止时，活动实例及其诸如成员变量等所有状态信息将保留，但它无法执行任何代码。
+</dd>
+</dl>
+
+<p>其他状态（“创建”和“开始”）是瞬态，系统会通过调用下一个生命周期回调方法从这些状态快速移到下一个状态。
+也就是说，在系统调用 
+{@link android.app.Activity#onCreate onCreate()} 之后，它会快速调用 {@link
+android.app.Activity#onStart()}，紧接着快速调用 {@link
+android.app.Activity#onResume()}。</p>
+
+<p>基本生命周期部分到此为止。现在，您将开始学习特定生命周期行为的一些知识。
+</p>
+
+
+
+<h2 id="launching-activity">指定您的应用的启动器活动</h2> 
+
+<p>当用户从主屏幕选择您的应用图标时，系统会为您已声明为“启动器”（ 或“主要”）活动的应用中的 {@link android.app.Activity} 调用 {@link
+android.app.Activity#onCreate onCreate()} 方法。
+这是作为
+您的应用的用户界面主入口的活动。</p>
+
+<p>您可以在 Android 宣示说明文件中 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">{@code AndroidManifest.xml}</a> 定义哪个活动用作主活动，该说明文件位于您项目目录的根目录中。
+</p>
+
+<p>您的应用的主活动必须使用 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a>（包括 {@link
+android.content.Intent#ACTION_MAIN MAIN} 操作和
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 类别）在宣示说明中声明。例如：</p> 
+
+<pre>
+&lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p class="note"><strong>注意：</strong>当您使用 Android SDK工具创建新 Android 项目时，默认的项目文件包括使用过滤器在宣示说明中声明的 {@link android.app.Activity} 类。
+
+</p>
+
+<p>如果未对您的活动之一声明 {@link android.content.Intent#ACTION_MAIN MAIN} 操作或
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 类别，那么您的应用图标将不会出现在应用的主屏幕列表中。
+</p>
+
+
+
+<h2 id="Create">创建一个新实例</h2>
+
+<p>大多数应用包含若干个不同的活动，用户可通过这些活动执行不同的操作。无论活动是用户单击您的应用图标时创建的主活动还是您的应用在响应用户操作时开始的其他活动，系统都会通过调用其 {@link
+android.app.Activity#onCreate onCreate()} 方法创建 {@link android.app.Activity} 的每个新实例。
+
+
+</p>
+
+<p>您必须实现 {@link android.app.Activity#onCreate onCreate()} 方法执行只应在活动整个生命周期出现一次的基本
+应用启动逻辑。例如，您的 {@link android.app.Activity#onCreate onCreate()} 的实现应定义用户界面并且可能实例化某些类范围变量。
+
+</p>
+
+<p>例如，{@link android.app.Activity#onCreate onCreate()}
+方法的以下示例显示执行活动某些基本设置的一些代码，比如声明用户界面（在 XML 布局文件中定义）、定义成员变量，以及配置某些 UI。
+
+</p>
+
+<pre>
+TextView mTextView; // Member variable for text view in the layout
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Set the user interface layout for this Activity
+    // The layout file is defined in the project res/layout/main_activity.xml file
+    setContentView(R.layout.main_activity);
+    
+    // Initialize member TextView so we can manipulate it later
+    mTextView = (TextView) findViewById(R.id.text_message);
+    
+    // Make sure we're running on Honeycomb or higher to use ActionBar APIs
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        // For the main activity, make sure the app icon in the action bar
+        // does not behave as a button
+        ActionBar actionBar = getActionBar();
+        actionBar.setHomeButtonEnabled(false);
+    }
+}
+</pre>
+
+<p class="caution"><strong>注意：</strong>使用 {@link android.os.Build.VERSION#SDK_INT} 
+可防止旧版系统以这种方式仅在 Android 2.0 （API 级别5）和更高级别执行新 API 工作。
+较旧版本会遇到运行时异常。</p>
+
+<p>一旦 {@link android.app.Activity#onCreate onCreate()} 完成执行操作，系统会相继调用 {@link android.app.Activity#onStart()} 和 {@link android.app.Activity#onResume()} 方法。
+
+您的活动从不会驻留在“已创建”或“已开始”状态。在技术上，活动会在 {@link android.app.Activity#onStart()} 被调用时变得可见，但紧接着是
+{@link android.app.Activity#onResume()}，且活动保持“继续”状态，直到有事情发生使其发生变化，比如当接听来电时，用户导航至另一个活动，或设备屏幕关闭。
+
+
+</p>
+
+<p>在接下来的其他课程中，您将看到其他活动如何启动方法，当用于从“暂停”或“停止”状态继续活动时，{@link
+android.app.Activity#onStart()} 和 {@link android.app.Activity#onResume()} 在您的活动生命周期中特别有用。
+</p>
+
+<p class="note"><strong>注意：</strong>{@link android.app.Activity#onCreate onCreate()}
+方法包括一个称为 <code>savedInstanceState</code> 的参数，将在有关<a href="recreating.html">重新创建活动</a>的后续课程中讨论该参数。
+</p>
+
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-create.png" />
+<p class="img-caption"><strong>图 2.</strong>活动生命周期结构的另一个图示，其重点放在
+创建活动的新实例时系统依次调用的三大回调上：{@link android.app.Activity#onCreate onCreate()}、{@link
+android.app.Activity#onStart()} 和 {@link android.app.Activity#onResume()}。
+一旦这一系列回调完成，活动就进入“继续”状态，此时用户可与活动进行交互，直至用户切换到其他活动。
+
+</p>
+
+
+
+
+
+
+
+<h2 id="Destroy">销毁活动</h2>
+
+<p>当活动的第一个生命周期回调是 {@link android.app.Activity#onCreate
+onCreate()} 时，它最近的回调是 {@link android.app.Activity#onDestroy}。系统会对您的活动调用此方法，作为您的活动实例完全从系统内存删除的最终信号。
+
+</p>
+
+<p>大多数应用不需要实现此方法，因为本地类引用与活动一同销毁，并且您的活动应在 {@link
+android.app.Activity#onPause} 和 {@link android.app.Activity#onStop} 期间执行大多数清理操作。
+但是，如果您的活动包含您在 {@link
+android.app.Activity#onCreate onCreate()} 期间创建的后台线程或其他如若未正确关闭可能导致内存泄露的长期运行资源，您应在  {@link
+android.app.Activity#onDestroy} 期间终止它们。
+
+</p>
+
+<pre>
+&#64;Override
+public void onDestroy() {
+    super.onDestroy();  // Always call the superclass
+    
+    // Stop method tracing that the activity started during onCreate()
+    android.os.Debug.stopMethodTracing();
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>在所有情况下，系统在调用 {@link android.app.Activity#onPause} 和 {@link
+android.app.Activity#onStop} 之后都会调用 {@link android.app.Activity#onDestroy}
+，只有一个例外：当您从 {@link android.app.Activity#onCreate onCreate()}
+ 方法内调用 {@link
+android.app.Activity#finish()} 时。在有些情况下，比如当您的活动作为临时决策工具运行以启动另一个活动时，您可从 {@link
+android.app.Activity#onCreate onCreate()} 内调用 {@link android.app.Activity#finish()} 来销毁活动。
+在这种情况下，系统会立刻调用 {@link android.app.Activity#onDestroy}，而不调用任何其他 生命周期方法。
+
+</p>

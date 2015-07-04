@@ -1,0 +1,256 @@
+page.title=Направление пользователя в другое приложение
+page.tags=объекты Intent
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>Содержание этого урока</h2>
+<ol>
+  <li><a href="#Build">Создание явного объекта Intent</a></li>
+  <li><a href="#Verify">Проверка наличия приложения для получения объекта Intent</a></li>
+  <li><a href="#StartActivity">Запуск операции с объектом Intent</a></li>
+  <li><a href="#AppChooser">Отображение блока выбора приложения</a></li>
+</ol>
+
+<h2>См. также:</h2>
+<ul>
+    <li><a href="{@docRoot}training/sharing/index.html">Общий доступ к простым данным</a></li>
+</ul>
+
+  </div>
+</div>
+
+<p>Одна из наиболее важных возможностей системы Android – способность приложений направлять пользователя в другое приложение
+в зависимости от желаемого действия. Например, если
+ваше приложение содержит адрес компании, который нужно показать на карте, вам не нужно встраивать в приложение операцию
+вывода карты. Вместо этого можно создать запрос на просмотр адреса
+с помощью {@link android.content.Intent}. В этом случае система Android запускает приложение,
+которое показывает адрес на карте.</p>
+
+<p>Как объяснялось в первом уроке <a href="{@docRoot}training/basics/firstapp/index.html">Создание
+первого приложения</a>, объекты Intent нужно использовать для навигации между операциями в собственном приложении. Обычно
+для этого используются <em>явные объекты Intent</em>, определяющие точное имя класса
+компонента, который вы хотите запустить. Однако если вы хотите, чтобы действие (например
+просмотр карты) выполнялось отдельным приложением, следует использовать <em>неявный объект Intent</em>.</p>
+
+<p>На этом уроке вы узнаете, как создать неявный объект Intent для определенного действия и использовать его
+для запуска операции, выполняющей действие в другом приложении.</p>
+
+
+
+<h2 id="Build">Создание неявного объекта Intent</h2>
+
+<p>Неявные объекты Intent не декларируют имя класса запускаемого компонента, а декларируют
+выполняемое действие. Действие указывает задачу, которую вы хотите выполнить, например <em>просмотр</em>,
+<em>правка</em>,<em> отправка</em> или <em>получение</em> чего-либо. Объекты Intent часто также содержат данные, ассоциируемые
+с действием, например адрес для просмотра или электронное сообщение для отправки.
+В зависимости от того, какой объект Intent вы хотите создать, данные могут относиться к типу {@link android.net.Uri},
+одному из нескольких других типов данных, либо объекту могут вообще не требоваться данные.</p>
+
+<p>Если ваши данные относятся к типу {@link android.net.Uri}, вы можете использовать простой конструктор {@link
+android.content.Intent#Intent(String,Uri) Intent()} для определения действия и
+данных.</p>
+
+<p>Приведем пример создания объекта Intent для запуска телефонного звонка, в котором данные {@link
+android.net.Uri} используются для указания телефонного номера:</p>
+
+<pre>
+Uri number = Uri.parse("tel:5551234");
+Intent callIntent = new Intent(Intent.ACTION_DIAL, number);
+</pre>
+
+<p>Когда ваше приложение активирует этот объект Intent посредством вызова {@link android.app.Activity#startActivity
+startActivity()}, приложение "Телефон" инициирует звонок на указанный номер телефона.</p>
+
+<p>Вот еще несколько объектов Intent в сочетании с действиями и {@link android.net.Uri} парами
+данных:</p>
+
+<ul>
+  <li>Просмотр карты:
+<pre>
+// Map point based on address
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+// Or map point based on latitude/longitude
+// Uri location = Uri.parse("geo:37.422219,-122.08364?z=14"); // z param is zoom level
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+</pre>
+  </li>
+  <li>Просмотр веб-страницы:
+<pre>
+Uri webpage = Uri.parse("http://www.android.com");
+Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+</pre>
+  </li>
+</ul>
+
+<p>Другие виды неявных объектов Intent требуют дополнительные данные, предоставляющие разные типы данных,
+например строки. Вы можете добавить один или несколько элементов дополнительных данных с помощью разных методов {@link
+android.content.Intent#putExtra(String,String) putExtra()}.</p>
+
+<p>Система по умолчанию определяет соответствующий тип MIME, который требует объект Intent на базе включенных данных
+{@link android.net.Uri}. Если не включать {@link android.net.Uri} в объект
+Intent, обычно нужно использовать {@link android.content.Intent#setType setType()} для указания типа
+данных, связанного с объектом Intent. Установка типа MIME также определяет, какие виды
+действий должен получать объект Intent.</p>
+
+<p>Вот некоторые объекты Intent, добавляющие дополнительные данные для указания желаемого действия:</p>
+
+<ul>
+  <li>Отправка электронного письма с вложением:
+<pre>
+Intent emailIntent = new Intent(Intent.ACTION_SEND);
+// The intent does not have a URI, so declare the "text/plain" MIME type
+emailIntent.setType(HTTP.PLAIN_TEXT_TYPE);
+emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"jon@example.com"}); // recipients
+emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Email subject");
+emailIntent.putExtra(Intent.EXTRA_TEXT, "Email message text");
+emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://path/to/email/attachment"));
+// You can also attach multiple items by passing an ArrayList of Uris
+</pre>
+  </li>
+  <li>Создание события в календаре:
+<pre>
+Intent calendarIntent = new Intent(Intent.ACTION_INSERT, Events.CONTENT_URI);
+Calendar beginTime = Calendar.getInstance().set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance().set(2012, 0, 19, 10, 30);
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis());
+calendarIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis());
+calendarIntent.putExtra(Events.TITLE, "Ninja class");
+calendarIntent.putExtra(Events.EVENT_LOCATION, "Secret dojo");
+</pre>
+<p class="note"><strong>Примечание.</strong> Этот объект Intent для создания события в календаре поддерживается только
+API-интерфейсами уровня 14 и выше.</p>
+  </li>
+</ul>
+
+<p class="note"><strong>Примечание.</strong> Очень важно определять объекты {@link
+android.content.Intent} как можно более конкретно. Например, если вы хотите вывести изображение
+с помощью объекта Intent {@link android.content.Intent#ACTION_VIEW}, вам следует указать тип MIME
+{@code image/*}. Это не даст объекту Intent запускать приложения для просмотра других типов
+данных (например картографические приложения).</p>
+
+
+
+<h2 id="Verify">Проверка наличия приложения для получения объекта Intent</h2>
+
+<p>Хотя платформа Android гарантирует выполнение объектов Intent во
+встроенных приложениях (таких как "Телефон", "Электронная почта" или "Календарь"), перед активацией объекта Intent всегда следует добавлять шаг
+проверки.</p>
+
+<p class="caution"><strong>Внимание!</strong> Если вы активируете объект Intent, а на устройстве не
+будет приложения, способного его обработать, ваше приложение закроется с ошибкой.</p>
+
+<p>Чтобы убедиться в наличии операции, реагирующей на объект Intent, вызовите метод {@link
+android.content.pm.PackageManager#queryIntentActivities queryIntentActivities()} для получения списка
+операций, способных обработать ваш {@link android.content.Intent}. Если полученный в результате список {@link
+java.util.List} не пустой, вы можете безопасно использовать данный объект Intent. Например:</p>
+
+<pre>
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
+boolean isIntentSafe = activities.size() > 0;
+</pre>
+
+<p>Если<code>isIntentSafe</code> имеет значение <code>true</code>, то хотя бы одно приложение отреагирует на объект
+Intent. Если же он имеет значение <code>false</code>, то на устройстве нет приложений для обработки данного объекта Intent.</p>
+
+<p class="note"><strong>Примечание.</strong> Такую проверку следует выполнять при первом
+запуске операции на случай, если понадобится отключить функцию, обрабатывающую объект Intent, до того, как пользователь попытается использовать
+ее. Если вам известно определенное приложение, которое может обработать данный объект Intent, вы можете указать ссылку,
+по которой пользователь может загрузить приложение (посмотрите, как <a href="{@docRoot}distribute/tools/promote/linking.html">добавить ссылку на свой продукт в Google
+Play</a>).</p>
+
+
+<h2 id="StartActivity">Запуск операции с объектом Intent</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intents-choice.png" alt="" />
+  <p class="img-caption"><strong>Рисунок 1.</strong> Пример диалогового окна выбора,
+которое отображается, если объект Intent могут обработать разные приложения.</p>
+</div>
+
+<p>После создания {@link android.content.Intent} и установки дополнительной информации вызовите {@link
+android.app.Activity#startActivity startActivity()} для отправки в систему. Если система
+идентифицирует несколько операций, способных обработать объект Intent, она выводит для пользователя диалоговое окно
+выбора приложения, как показано на рисунке 1. Если объект Intent может быть обработан
+только одной операцией, система сразу же запускает ее.</p>
+
+<pre>
+startActivity(intent);
+</pre>
+
+<p>Вот полный пример, показывающий, как создать объект Intent для просмотра карты, убедиться в наличии
+приложения для его обработки и запустить это приложение:</p>
+
+<pre>
+// Build the intent
+Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
+Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
+
+// Verify it resolves
+PackageManager packageManager = {@link android.content.Context#getPackageManager()};
+List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(mapIntent, 0);
+boolean isIntentSafe = activities.size() > 0;
+
+// Start an activity if it's safe
+if (isIntentSafe) {
+    startActivity(mapIntent);
+}
+</pre>
+
+
+
+<h2 id="AppChooser">Отображение блока выбора приложения</h2>
+
+<div class="figure" style="width:200px;margin-top:-10px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="" />
+  <p class="img-caption"><strong>Рисунок 2</strong>. Диалог выбора.</p>
+</div>
+
+<p>Обратите внимание, что при запуске операции посредством передачи {@link android.content.Intent} в {@link
+android.app.Activity#startActivity startActivity()} и наличии нескольких приложений, реагирующих на
+объект Intent, пользователь может выбрать, какое из этих приложений использовать по умолчанию (для этого нужно установить флажок в нижней
+части диалогового окна; см. рисунок 1). Это удобно при выполнении действия, для которого
+пользователь обычно хочет всегда использовать одно и то же приложение, например при открытии веб-страницы (пользователи
+обычно используют один и тот же браузер) или создании снимка (пользователи обычно предпочитают одно и то же приложение камеры).</p>
+
+<p>Однако бывает так, что выполняемое действие может быть обработано несколькими приложениями, и пользователь
+каждый раз может использовать разные приложения &mdash; например, действие "Поделиться", для которого пользователи могут использовать разные
+приложения, &mdash; и в этом случае ваше приложение должно отображать диалоговое окно выбора приложения,
+как показано на рисунке 2. В диалоговом окне
+выбора приложения пользователь должен при каждом запуске выбирать, какое приложение использовать для действия (пользователь не
+может выбрать приложение по умолчанию).</p>
+
+<p>Чтобы отобразить блок выбора приложения, создайте {@link android.content.Intent} с помощью {@link
+android.content.Intent#createChooser createChooser()} и передайте его {@link
+android.app.Activity#startActivity startActivity()}. Например:</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show chooser
+Intent chooser = Intent.createChooser(intent, title);
+
+// Verify the intent will resolve to at least one activity
+if (intent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>В результате отобразится диалоговое окно со списком приложений, которые могут отреагировать на объект Intent, переданный методу {@link
+android.content.Intent#createChooser createChooser()} и используют указанный текст в качестве
+заголовка диалога.</p>
+
+
+
