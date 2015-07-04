@@ -305,7 +305,8 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                         break;
                     case ActivityManager.INTENT_SENDER_SERVICE:
                         try {
-                            owner.startServiceInPackage(uid, finalIntent, resolvedType, userId);
+                            owner.startServiceInPackage(uid, finalIntent,
+                                    resolvedType, key.packageName, userId);
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startService intent", e);
                         }

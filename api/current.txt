@@ -3859,6 +3859,8 @@ package android.app {
     method public void finishOp(java.lang.String, int, java.lang.String);
     method public int noteOp(java.lang.String, int, java.lang.String);
     method public int noteOpNoThrow(java.lang.String, int, java.lang.String);
+    method public int noteProxyOp(java.lang.String, java.lang.String);
+    method public int noteProxyOpNoThrow(java.lang.String, java.lang.String);
     method public static java.lang.String permissionToOp(java.lang.String);
     method public int startOp(java.lang.String, int, java.lang.String);
     method public int startOpNoThrow(java.lang.String, int, java.lang.String);

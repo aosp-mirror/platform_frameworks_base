@@ -463,7 +463,7 @@ public final class BroadcastQueue {
         }
     }
 
-    private final void deliverToRegisteredReceiverLocked(BroadcastRecord r,
+    private void deliverToRegisteredReceiverLocked(BroadcastRecord r,
             BroadcastFilter filter, boolean ordered) {
         boolean skip = false;
         if (filter.requiredPermission != null) {
@@ -477,9 +477,23 @@ public final class BroadcastQueue {
                         + " requires " + filter.requiredPermission
                         + " due to registered receiver " + filter);
                 skip = true;
+            } else {
+                final int opCode = AppOpsManager.permissionToOpCode(filter.requiredPermission);
+                if (opCode != AppOpsManager.OP_NONE
+                        && mService.mAppOpsService.noteOperation(opCode, r.callingUid,
+                                r.callerPackage) != AppOpsManager.MODE_ALLOWED) {
+                    Slog.w(TAG, "Appop Denial: broadcasting "
+                            + r.intent.toString()
+                            + " from " + r.callerPackage + " (pid="
+                            + r.callingPid + ", uid=" + r.callingUid + ")"
+                            + " requires appop " + AppOpsManager.permissionToOp(
+                                    filter.requiredPermission)
+                            + " due to registered receiver " + filter);
+                    skip = true;
+                }
             }
         }
-        if (!skip && r.requiredPermission != null) {
+        if (!skip) {
             int perm = mService.checkComponentPermission(r.requiredPermission,
                     filter.receiverList.pid, filter.receiverList.uid, -1, true);
             if (perm != PackageManager.PERMISSION_GRANTED) {
@@ -493,17 +507,42 @@ public final class BroadcastQueue {
                         + " (uid " + r.callingUid + ")");
                 skip = true;
             }
-        }
-        if (r.appOp != AppOpsManager.OP_NONE) {
-            int mode = mService.mAppOpsService.noteOperation(r.appOp,
-                    filter.receiverList.uid, filter.packageName);
-            if (mode != AppOpsManager.MODE_ALLOWED) {
-                if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
-                        "App op " + r.appOp + " not allowed for broadcast to uid "
-                        + filter.receiverList.uid + " pkg " + filter.packageName);
-                skip = true;
+            int appOp = AppOpsManager.OP_NONE;
+            if (r.requiredPermission != null) {
+                appOp = AppOpsManager.permissionToOpCode(r.requiredPermission);
+                if (appOp != AppOpsManager.OP_NONE
+                        && mService.mAppOpsService.noteOperation(appOp,
+                            filter.receiverList.uid, filter.packageName)
+                                != AppOpsManager.MODE_ALLOWED) {
+                    Slog.w(TAG, "Appop Denial: receiving "
+                            + r.intent.toString()
+                            + " to " + filter.receiverList.app
+                            + " (pid=" + filter.receiverList.pid
+                            + ", uid=" + filter.receiverList.uid + ")"
+                            + " requires appop " + AppOpsManager.permissionToOp(
+                                    r.requiredPermission)
+                            + " due to sender " + r.callerPackage
+                            + " (uid " + r.callingUid + ")");
+                    skip = true;
+                }
+            }
+            if (!skip && r.appOp != appOp && r.appOp != AppOpsManager.OP_NONE
+                    && mService.mAppOpsService.noteOperation(r.appOp,
+                            filter.receiverList.uid, filter.packageName)
+                                    != AppOpsManager.MODE_ALLOWED) {
+                    Slog.w(TAG, "Appop Denial: receiving "
+                            + r.intent.toString()
+                            + " to " + filter.receiverList.app
+                            + " (pid=" + filter.receiverList.pid
+                            + ", uid=" + filter.receiverList.uid + ")"
+                            + " requires appop " + AppOpsManager.permissionToOp(
+                            r.requiredPermission)
+                            + " due to sender " + r.callerPackage
+                            + " (uid " + r.callingUid + ")");
+                    skip = true;
             }
         }
+
         if (!skip) {
             skip = !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
                     r.callingPid, r.resolvedType, filter.receiverList.uid);
@@ -804,8 +843,23 @@ public final class BroadcastQueue {
                             + " due to receiver " + component.flattenToShortString());
                 }
                 skip = true;
+            } else if (info.activityInfo.permission != null) {
+                final int opCode = AppOpsManager.permissionToOpCode(info.activityInfo.permission);
+                if (opCode != AppOpsManager.OP_NONE
+                        && mService.mAppOpsService.noteOperation(opCode, r.callingUid,
+                                r.callerPackage) != AppOpsManager.MODE_ALLOWED) {
+                    Slog.w(TAG, "Appop Denial: broadcasting "
+                            + r.intent.toString()
+                            + " from " + r.callerPackage + " (pid="
+                            + r.callingPid + ", uid=" + r.callingUid + ")"
+                            + " requires appop " + AppOpsManager.permissionToOp(
+                                    info.activityInfo.permission)
+                            + " due to registered receiver "
+                            + component.flattenToShortString());
+                    skip = true;
+                }
             }
-            if (info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
+            if (!skip && info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
                 r.requiredPermission != null) {
                 try {
                     perm = AppGlobals.getPackageManager().
@@ -825,16 +879,35 @@ public final class BroadcastQueue {
                     skip = true;
                 }
             }
-            if (r.appOp != AppOpsManager.OP_NONE) {
-                int mode = mService.mAppOpsService.noteOperation(r.appOp,
-                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName);
-                if (mode != AppOpsManager.MODE_ALLOWED) {
-                    if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
-                            "App op " + r.appOp + " not allowed for broadcast to uid "
-                            + info.activityInfo.applicationInfo.uid + " pkg "
-                            + info.activityInfo.packageName);
+            int appOp = AppOpsManager.OP_NONE;
+            if (!skip && r.requiredPermission != null) {
+                appOp = AppOpsManager.permissionToOpCode(r.requiredPermission);
+                if (appOp != AppOpsManager.OP_NONE
+                        && mService.mAppOpsService.noteOperation(appOp,
+                               info.activityInfo.applicationInfo.uid, info.activityInfo.packageName)
+                                        != AppOpsManager.MODE_ALLOWED) {
+                    Slog.w(TAG, "Appop Denial: receiving "
+                            + r.intent + " to "
+                            + component.flattenToShortString()
+                            + " requires appop " + AppOpsManager.permissionToOp(
+                            r.requiredPermission)
+                            + " due to sender " + r.callerPackage
+                            + " (uid " + r.callingUid + ")");
                     skip = true;
                 }
+            }
+            if (!skip && r.appOp != appOp && r.appOp != AppOpsManager.OP_NONE
+                    && mService.mAppOpsService.noteOperation(r.appOp,
+                            info.activityInfo.applicationInfo.uid, info.activityInfo.packageName)
+                                    != AppOpsManager.MODE_ALLOWED) {
+                Slog.w(TAG, "Appop Denial: receiving "
+                        + r.intent + " to "
+                        + component.flattenToShortString()
+                        + " requires appop " + AppOpsManager.permissionToOp(
+                        r.requiredPermission)
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
             }
             if (!skip) {
                 skip = !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,

@@ -777,7 +777,7 @@ public class Am extends BaseCommand {
             return;
         }
         System.out.println("Starting service: " + intent);
-        ComponentName cn = mAm.startService(null, intent, intent.getType(), mUserId);
+        ComponentName cn = mAm.startService(null, intent, intent.getType(), null, mUserId);
         if (cn == null) {
             System.err.println("Error: Not found; no service started.");
         } else if (cn.getPackageName().equals("!")) {

@@ -1082,13 +1082,18 @@ public class AppOpsManager {
         private final long mTime;
         private final long mRejectTime;
         private final int mDuration;
+        private final int mProxyUid;
+        private final String mProxyPackageName;
 
-        public OpEntry(int op, int mode, long time, long rejectTime, int duration) {
+        public OpEntry(int op, int mode, long time, long rejectTime, int duration,
+                int proxyUid, String proxyPackage) {
             mOp = op;
             mMode = mode;
             mTime = time;
             mRejectTime = rejectTime;
             mDuration = duration;
+            mProxyUid = proxyUid;
+            mProxyPackageName = proxyPackage;
         }
 
         public int getOp() {
@@ -1115,6 +1120,14 @@ public class AppOpsManager {
             return mDuration == -1 ? (int)(System.currentTimeMillis()-mTime) : mDuration;
         }
 
+        public int getProxyUid() {
+            return  mProxyUid;
+        }
+
+        public String getProxyPackageName() {
+            return mProxyPackageName;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -1127,6 +1140,8 @@ public class AppOpsManager {
             dest.writeLong(mTime);
             dest.writeLong(mRejectTime);
             dest.writeInt(mDuration);
+            dest.writeInt(mProxyUid);
+            dest.writeString(mProxyPackageName);
         }
 
         OpEntry(Parcel source) {
@@ -1135,6 +1150,8 @@ public class AppOpsManager {
             mTime = source.readLong();
             mRejectTime = source.readLong();
             mDuration = source.readInt();
+            mProxyUid = source.readInt();
+            mProxyPackageName = source.readString();
         }
 
         public static final Creator<OpEntry> CREATOR = new Creator<OpEntry>() {
@@ -1379,6 +1396,33 @@ public class AppOpsManager {
     }
 
     /**
+     * Make note of an application performing an operation on behalf of another
+     * application when handling an IPC. Note that you must pass the package name
+     * of the application that is being proxied while its UID will be inferred from
+     * the IPC state; this function will verify that the calling uid and proxied
+     * package name match, and if not, return {@link #MODE_IGNORED}. If this call
+     * succeeds, the last execution time of the operation for the proxied app and
+     * your app will be updated to the current time.
+     * @param op The operation to note.  One of the OPSTR_* constants.
+     * @param proxiedPackageName The name of the application calling into the proxy application.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
+     */
+    public int noteProxyOp(String op, String proxiedPackageName) {
+        return noteProxyOp(strOpToOp(op), proxiedPackageName);
+    }
+
+    /**
+     * Like {@link #noteProxyOp(String, String)} but instead
+     * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     */
+    public int noteProxyOpNoThrow(String op, String proxiedPackageName) {
+        return noteProxyOpNoThrow(strOpToOp(op), proxiedPackageName);
+    }
+
+    /**
      * Report that an application has started executing a long-running operation.  Note that you
      * must pass in both the uid and name of the application to be checked; this function will
      * verify that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
@@ -1455,7 +1499,7 @@ public class AppOpsManager {
             return mService.checkOperation(op, uid, packageName);
         } catch (RemoteException e) {
         }
-        return MODE_IGNORED;
+        return MODE_ERRORED;
     }
 
     /**
@@ -1501,7 +1545,7 @@ public class AppOpsManager {
             return mService.checkAudioOperation(op, stream, uid, packageName);
         } catch (RemoteException e) {
         }
-        return MODE_IGNORED;
+        return MODE_ERRORED;
     }
 
     /**
@@ -1532,6 +1576,49 @@ public class AppOpsManager {
     }
 
     /**
+     * Make note of an application performing an operation on behalf of another
+     * application when handling an IPC. Note that you must pass the package name
+     * of the application that is being proxied while its UID will be inferred from
+     * the IPC state; this function will verify that the calling uid and proxied
+     * package name match, and if not, return {@link #MODE_IGNORED}. If this call
+     * succeeds, the last execution time of the operation for the proxied app and
+     * your app will be updated to the current time.
+     * @param op The operation to note. One of the OPSTR_* constants.
+     * @param proxiedPackageName The name of the application calling into the proxy application.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the proxy or proxied app has been configured to
+     * crash on this op.
+     *
+     * @hide
+     */
+    public int noteProxyOp(int op, String proxiedPackageName) {
+        int mode = noteProxyOpNoThrow(op, proxiedPackageName);
+        if (mode == MODE_ERRORED) {
+            throw new SecurityException("Proxy package " + mContext.getOpPackageName()
+                    + " from uid " + Process.myUid() + " or calling package "
+                    + proxiedPackageName + " from uid " + Binder.getCallingUid()
+                    + " not allowed to perform " + sOpNames[op]);
+        }
+        return mode;
+    }
+
+    /**
+     * Like {@link #noteProxyOp(int, String)} but instead
+     * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     * @hide
+     */
+    public int noteProxyOpNoThrow(int op, String proxiedPackageName) {
+        try {
+            return mService.noteProxyOperation(op, mContext.getOpPackageName(),
+                    Binder.getCallingUid(), proxiedPackageName);
+        } catch (RemoteException e) {
+        }
+        return MODE_ERRORED;
+    }
+
+    /**
      * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
      * @hide
@@ -1541,7 +1628,7 @@ public class AppOpsManager {
             return mService.noteOperation(op, uid, packageName);
         } catch (RemoteException e) {
         }
-        return MODE_IGNORED;
+        return MODE_ERRORED;
     }
 
     /** @hide */
@@ -1603,7 +1690,7 @@ public class AppOpsManager {
             return mService.startOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
         }
-        return MODE_IGNORED;
+        return MODE_ERRORED;
     }
 
     /** @hide */

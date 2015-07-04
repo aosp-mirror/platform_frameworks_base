@@ -921,8 +921,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IApplicationThread app = ApplicationThreadNative.asInterface(b);
             Intent service = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
+            String callingPackage = data.readString();
             int userId = data.readInt();
-            ComponentName cn = startService(app, service, resolvedType, userId);
+            ComponentName cn = startService(app, service, resolvedType, callingPackage, userId);
             reply.writeNoException();
             ComponentName.writeToParcel(cn, reply);
             return true;
@@ -976,9 +977,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String resolvedType = data.readString();
             b = data.readStrongBinder();
             int fl = data.readInt();
+            String callingPackage = data.readString();
             int userId = data.readInt();
             IServiceConnection conn = IServiceConnection.Stub.asInterface(b);
-            int res = bindService(app, token, service, resolvedType, conn, fl, userId);
+            int res = bindService(app, token, service, resolvedType, conn, fl,
+                    callingPackage, userId);
             reply.writeNoException();
             reply.writeInt(res);
             return true;
@@ -1568,7 +1571,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             Intent service = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
-            IBinder binder = peekService(service, resolvedType);
+            String callingPackage = data.readString();
+            IBinder binder = peekService(service, resolvedType, callingPackage);
             reply.writeNoException();
             reply.writeStrongBinder(binder);
             return true;
@@ -3656,7 +3660,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType, int userId) throws RemoteException
+            String resolvedType, String callingPackage, int userId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -3664,6 +3668,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(caller != null ? caller.asBinder() : null);
         service.writeToParcel(data, 0);
         data.writeString(resolvedType);
+        data.writeString(callingPackage);
         data.writeInt(userId);
         mRemote.transact(START_SERVICE_TRANSACTION, data, reply, 0);
         reply.readException();
@@ -3726,7 +3731,7 @@ class ActivityManagerProxy implements IActivityManager
     }
     public int bindService(IApplicationThread caller, IBinder token,
             Intent service, String resolvedType, IServiceConnection connection,
-            int flags, int userId) throws RemoteException {
+            int flags,  String callingPackage, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -3736,6 +3741,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(resolvedType);
         data.writeStrongBinder(connection.asBinder());
         data.writeInt(flags);
+        data.writeString(callingPackage);
         data.writeInt(userId);
         mRemote.transact(BIND_SERVICE_TRANSACTION, data, reply, 0);
         reply.readException();
@@ -3801,12 +3807,14 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public IBinder peekService(Intent service, String resolvedType) throws RemoteException {
+    public IBinder peekService(Intent service, String resolvedType, String callingPackage)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         service.writeToParcel(data, 0);
         data.writeString(resolvedType);
+        data.writeString(callingPackage);
         mRemote.transact(PEEK_SERVICE_TRANSACTION, data, reply, 0);
         reply.readException();
         IBinder binder = reply.readStrongBinder();
