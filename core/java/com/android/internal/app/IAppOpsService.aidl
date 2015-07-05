@@ -25,14 +25,14 @@ interface IAppOpsService {
     // be kept in sync with frameworks/native/include/binder/IAppOpsService.h
     int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName);
-    int noteProxyOperation(int code, String proxyPackageName,
-            int callingUid, String callingPackageName);
     int startOperation(IBinder token, int code, int uid, String packageName);
     void finishOperation(IBinder token, int code, int uid, String packageName);
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
     IBinder getToken(IBinder clientToken);
     int permissionToOpCode(String permission);
+    int noteProxyOperation(int code, String proxyPackageName,
+                int callingUid, String callingPackageName);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
