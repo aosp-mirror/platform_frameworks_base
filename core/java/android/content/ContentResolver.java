@@ -19,6 +19,7 @@ package android.content;
 import android.accounts.Account;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -428,9 +429,9 @@ public abstract class ContentResolver {
      * @return A Cursor object, which is positioned before the first entry, or null
      * @see Cursor
      */
-    public final @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
-            @Nullable String selection, @Nullable String[] selectionArgs,
-            @Nullable String sortOrder) {
+    public final @Nullable Cursor query(@RequiresPermission.Read @NonNull Uri uri,
+            @Nullable String[] projection, @Nullable String selection,
+            @Nullable String[] selectionArgs, @Nullable String sortOrder) {
         return query(uri, projection, selection, selectionArgs, sortOrder, null);
     }
 
@@ -468,9 +469,10 @@ public abstract class ContentResolver {
      * @return A Cursor object, which is positioned before the first entry, or null
      * @see Cursor
      */
-    public final @Nullable Cursor query(final @NonNull Uri uri, @Nullable String[] projection,
-            @Nullable String selection, @Nullable String[] selectionArgs,
-            @Nullable String sortOrder, @Nullable CancellationSignal cancellationSignal) {
+    public final @Nullable Cursor query(final @RequiresPermission.Read @NonNull Uri uri,
+            @Nullable String[] projection, @Nullable String selection,
+            @Nullable String[] selectionArgs, @Nullable String sortOrder,
+            @Nullable CancellationSignal cancellationSignal) {
         Preconditions.checkNotNull(uri, "uri");
         IContentProvider unstableProvider = acquireUnstableProvider(uri);
         if (unstableProvider == null) {
@@ -1220,7 +1222,8 @@ public abstract class ContentResolver {
      *               the field. Passing an empty ContentValues will create an empty row.
      * @return the URL of the newly created row.
      */
-    public final @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues values) {
+    public final @Nullable Uri insert(@RequiresPermission.Write @NonNull Uri url,
+                @Nullable ContentValues values) {
         Preconditions.checkNotNull(url, "url");
         IContentProvider provider = acquireProvider(url);
         if (provider == null) {
@@ -1283,7 +1286,8 @@ public abstract class ContentResolver {
      *               the field. Passing null will create an empty row.
      * @return the number of newly created rows.
      */
-    public final int bulkInsert(@NonNull Uri url, @NonNull ContentValues[] values) {
+    public final int bulkInsert(@RequiresPermission.Write @NonNull Uri url,
+                @NonNull ContentValues[] values) {
         Preconditions.checkNotNull(url, "url");
         Preconditions.checkNotNull(values, "values");
         IContentProvider provider = acquireProvider(url);
@@ -1315,7 +1319,7 @@ public abstract class ContentResolver {
                     (excluding the WHERE itself).
      * @return The number of rows deleted.
      */
-    public final int delete(@NonNull Uri url, @Nullable String where,
+    public final int delete(@RequiresPermission.Write @NonNull Uri url, @Nullable String where,
             @Nullable String[] selectionArgs) {
         Preconditions.checkNotNull(url, "url");
         IContentProvider provider = acquireProvider(url);
@@ -1350,8 +1354,9 @@ public abstract class ContentResolver {
      * @return the number of rows updated.
      * @throws NullPointerException if uri or values are null
      */
-    public final int update(@NonNull Uri uri, @Nullable ContentValues values,
-            @Nullable String where, @Nullable String[] selectionArgs) {
+    public final int update(@RequiresPermission.Write @NonNull Uri uri,
+            @Nullable ContentValues values, @Nullable String where,
+            @Nullable String[] selectionArgs) {
         Preconditions.checkNotNull(uri, "uri");
         IContentProvider provider = acquireProvider(uri);
         if (provider == null) {
