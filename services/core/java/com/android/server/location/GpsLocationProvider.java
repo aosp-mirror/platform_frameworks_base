@@ -481,7 +481,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     };
 
     private void subscriptionOrSimChanged(Context context) {
-        Log.d(TAG, "received SIM realted action: ");
+        Log.d(TAG, "received SIM related action: ");
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         String mccMnc = phone.getSimOperator();
