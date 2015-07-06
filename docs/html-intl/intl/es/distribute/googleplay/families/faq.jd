@@ -1,0 +1,329 @@
+page.title=Preguntas frecuentes
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=Preguntas y respuestas acerca de Diseñado para familias
+
+@jd:body
+
+    <style>
+  dt {
+    font-weight:bold;
+  }
+  </style>
+  
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>En este documento:</h2>
+<ol>
+  <li><a href="#review">Reseña e inclusión de aplicaciones</a></li>
+  <li><a href="#monetization">Monetización</a></li>
+  <li><a href="#other">Otras preguntas</a></li>
+</ol>
+</div>
+
+<p>
+  Las secciones a continuación proporcionan más información acerca de Diseñado para familias
+ y responde preguntas comunes que podrías tener.
+</p>
+
+
+<h2 id="review">Reseña e inclusión de aplicaciones</h2>
+
+<dl>
+<dt>¿Cómo incluyo mis aplicaciones?</dt>
+
+<dl>
+  <dd>
+    Puedes incluir tus aplicaciones en Diseñado para familias a través de la pestaña Fijación de precios y distribución
+ para tu aplicación en la Consola para desarrolladores de Google Play. Aquí te mostramos <a href="{@docRoot}distribute/googleplay/families/start.html">paso a paso
+ cómo hacerlo</a>.
+  </dd>
+
+  <dt>
+    ¿Dónde anuncio las funciones interactivas de mi aplicación? ¿Por qué recopilan
+ esta información?
+  </dt>
+
+  <dd>
+    El anuncio de las funciones interactivas forma parte del cuestionario sobre
+ clasificación de contenido. Tienes la oportunidad de revisar tus anuncios como
+ parte del flujo de inclusión en el programa Diseñado para familias. Recopilamos esta
+ información para que los usuarios puedan tomar decisiones informadas mientras evalúan tu
+ aplicación.
+  </dd>
+
+  <dt>
+    ¿Qué es COPPA?
+  </dt>
+
+  <dd>
+    COPPA es la Ley de Protección de la Privacidad Infantil en Internet de la
+ Comisión Federal de Comercio (FTC). Puedes encontrar más información en las <a href="http://www.ftc.gov/tips-advice/business-center/guidance/complying-coppa-frequently-asked-questions">
+ Preguntas frecuentes de la FTC acerca de COPPA</a>. Ten en cuenta que Google Play no puede proporcionar asesoramiento legal a los desarrolladores
+ acerca de cómo cumplir con COPPA u otros estatutos en relación con niños.
+  </dd>
+
+  <dt>
+    ¿Debo proporcionar una política de privacidad actualizada y dónde lo hago?
+  </dt>
+
+  <dd>
+    Sí, debes proporcionar un vínculo a una política de privacidad constante en
+ el directorio de tu tienda y confirmar el cumplimiento con los estatutos de privacidad locales
+ en la Consola para desarrolladores. Para agregar o revisar tu política de privacidad, selecciona tu
+ aplicación en la Consola para desarrolladores y luego desplázate a la parte inferior de la sección
+ <strong>Directorio de la tienda</strong>.
+  </dd>
+
+  <dt>
+    ¿Cuántos grupos de edades puedo seleccionar?
+  </dt>
+
+  <dd>
+    Puedes seleccionar hasta dos grupos de edades adyacentes. Los grupos de edades son los siguientes: 5 años y
+ menores, de 6 a 8 años y de 9 a 12 años. No obstante, si tu aplicación está orientada a públicos
+ de niños y adultos, debes seleccionar la categoría <em>Público
+ general</em>.
+  </dd>
+
+  <dt>
+    ¿Cuántas categorías de contenido puedo seleccionar en el programa
+ Diseñado para familias?
+  </dt>
+
+  <dd>
+    Puedes seleccionar una categoría como parte del programa Diseñado para familias
+ y otra categoría para la tienda general de Google Play.
+  </dd>
+
+  <dt>
+    ¿Cuáles son las categorías de Diseñado para familias?
+  </dt>
+
+<ul>
+<li><strong>Acción y aventura</strong>: Se trata de aplicaciones o juegos orientados a la acción e incluyen de todo
+ desde juegos de carreras, aventuras de cuentos de hadas y más.
+  </li>
+
+  <li style="list-style: none"><strong>Juegos de ingenio</strong>: Esta categoría incluye juegos que
+ hacen pensar al usuario e incluye rompecabezas, juegos de coincidencias y otros juegos
+ similares.
+  </li>
+
+  <li><strong>Creatividad</strong>: Se trata de aplicaciones o juegos que estimulan la creatividad.
+  Algunos ejemplos de los tipos de aplicaciones y juegos que esperamos ver en esta categoría incluyen dibujo,
+ pintura y otros juegos donde puedas crear cosas.
+  </li>
+
+  <li><strong>Educación</strong>: Se trata de aplicaciones o juegos con valor educativo e incluyen
+ matemática, ciencia, aprender el alfabeto, aprender a contar y muchos otros tipos de
+ contenido educativo, como geografía e historia.
+  </li>
+
+  <li><strong>Música y videos</strong> Se trata de aplicaciones o juegos que contienen un elemento musical o un
+ componente de video, e incluyen de todo desde tocar el
+ piano hasta ver videos y más.
+  </li>
+
+  <li><strong>Juego de roles</strong>: Se trata de aplicaciones o juegos en los que una persona puede fingir un
+ rol, como simular ser un cocinero o un médico.
+  </li>
+</ul>
+
+<dl>
+  <dt>
+    ¿Demorará mucho tiempo más la publicación de mi aplicación si decido incluirla en el programa
+ Diseñado para familias?
+  </dt>
+
+  <dd>
+    Cuando accedes a Diseñado para familias, Google Play revisa tu aplicación para
+ confirmar que es apta para familias. Suponiendo que tu aplicación cumple con todos los requisitos
+ del programa, prevemos que el tiempo de publicación no debería prolongarse
+ más allá de lo habitual; no obstante, puede haber una demora en la publicación de la aplicación si se
+ rechaza durante la revisión para la inclusión en Diseñado para familias. 
+  </dd>
+
+  <dt>
+    ¿Qué ocurre si se rechaza mi aplicación del programa Diseñado para familias?
+  </dt>
+
+  <dd>
+    Si se rechaza tu aplicación del programa Diseñado para familias, te
+ indicaremos el motivo en la Consola para desarrolladores y en detalle en un correo electrónico. Tendrás
+ la oportunidad de corregir los problemas y volver a enviar tu aplicación al programa,
+ o cambiar tu respuesta de inclusión. Ten en cuenta que si tienes una aplicación existente que
+ está activa en Google Play, solo se rechazará la actualización de la aplicación (la aplicación
+ continuará activa en la Play Store de Google). Si enviaste una nueva aplicación al
+ programa Diseñado para familias y no cumple con los requisitos,
+ se rechazará la presentación completa de la aplicación y no se publicará en
+ Google Play. Luego podrás abordar los problemas identificados y volver a enviar la aplicación al
+ programa Diseñado para familias o abandonar la idea de incluirla.
+  </dd>
+
+  <dt>
+    ¿Qué ocurre si se determina que mi aplicación no cumple con los
+ requisitos del programa Diseñado para familias después de haberse publicado?
+  </dt>
+
+  <dd>
+    Se puede eliminar o suspender tu aplicación de la Play Store de Google,
+ no solo del programa Diseñado para familias. En las aplicaciones eliminadas se pueden
+ utilizar las mismas soluciones que en las aplicaciones rechazadas. Las aplicaciones suspendidas se pueden apelar mediante el
+ proceso de apelación para desarrolladores.
+  </dd>
+
+  <dt>
+    ¿Si logro acceder al programa Diseñado para familias, puedo retirarme más adelante?
+  </dt>
+
+  <dd>
+    Sí, puedes retirarte del programa en cualquier momento. Ten en cuenta que al
+ retirarte perderás tu lugar en la nueva experiencia para la familia
+ y también los demás beneficios del programa.
+  </dd>
+
+  <dt>
+    ¿Qué ocurre cuando actualizo mi aplicación después de haber sido aceptada en el
+ programa?
+  </dt>
+
+  <dd>
+    Las aplicaciones que forman parte del programa Diseñado para familias deben
+ cumplir los requisitos de elegibilidad en todo momento. Si necesitas
+ editar los metadatos de Diseñado para familias asociados con tu aplicación, dirígete
+ a la sección Fijación de precios y distribución de la Consola para desarrolladores de Google Play
+ y edita esa información. Si la actualización de tu aplicación implica un
+ cambio de público, te recomendamos que alertes a los usuarios que ya
+ instalaron tu aplicación.
+  </dd>
+
+  <dt>
+    ¿Se pueden incluir las aplicaciones y los juegos que utilizan los servicios Google Sign-In o
+ Google Play Game en el programa Diseñado para familias?
+  </dt>
+
+  <dd>
+    Las aplicaciones que participan en el programa Diseñado para familias están centradas
+ exclusivamente en los niños; es decir, están orientadas a los siguientes grupos de edades: Los niños de 5 años y menores,
+ de 6 a 8 años o de 9 a 12 años <strong>no pueden</strong> usar los servicios Google+ Sign-in
+ o Google Play Game como experiencia de inicio de sesión para su
+ aplicación.
+
+    <p>
+      Las aplicaciones que participan en Diseñado para familias orientadas a un público
+ infantil y adulto pueden usar los servicios Google+ Sign-in o Google Play Game
+ como una función <strong>opcional</strong>. Los niños deben poder acceder a la totalidad de la aplicación
+ o el juego sin la necesidad de iniciar sesión en los servicios Google+ o Google Play Game.
+    </p>
+  </dd>
+
+  <dt>
+    Mi aplicación está incluida en Google Play for Education y está integrada a Google Sign-in
+; por lo tanto, los estudiantes pueden iniciar sesión con sus cuentas escolares. ¿Debo cambiar la manera en la que
+ funciona Google Sign-in en mi aplicación?
+   </dt>
+
+  <dd>
+    Las aplicaciones que participan en Google Play for Education pueden utilizar Google Sign-in para
+ las cuentas de estudiantes siempre que no sea un requisito limitador para todos los usuarios de la aplicación
+  </dd>
+</dl>
+
+<h2 id="monetization">
+  Monetización del programa Diseñado para familias
+</h2>
+
+<dl>
+  <dt>
+    ¿Pueden darme más detalles acerca de las políticas de publicidad para Diseñado
+ para familias?
+  </dt>
+
+  <dd>
+    Lee la <a href="https://support.google.com/googleplay/android-developer/answer/6184502#ads">
+política de anuncios publicitarios para Diseñado para familias</a>.
+  </dd>
+
+  <dt>
+    ¿Puede mi aplicación exhibir anuncios intersticiales?
+  </dt>
+
+  <dd>
+    Los anuncios intersticiales pueden ser adecuados para algunas aplicaciones. No obstante, el usuario debe
+ poder navegar a la actividad principal antes de que se exhiban anuncios publicitarios.
+  </dd>
+
+  <dt>
+    ¿Cómo sé si mi red de anuncios cumple con las políticas de
+ publicidad de Diseñado para familias?
+  </dt>
+
+  <dd>
+    Comunícate con tu red de publicidad para consultar acerca de sus políticas de contenido
+ y prácticas publicitarias. Si usas AdMob, consulta el <a href="https://support.google.com/admob/answer/3248194">Centro de ayuda de AdMob</a> para
+ obtener información detallada acerca de cómo etiquetar tu aplicación o una unidad de publicidad específica para indicar que
+ está orientada a niños. Es responsabilidad del desarrollador garantizar que la experiencia
+ de usuario global con publicidad en la aplicación cumpla con los requisitos del programa <a href="https://support.google.com/googleplay/android-developer/answer/6184502">Diseñado
+ para familias</a>.
+  </dd>
+
+  <dt>
+    ¿Puedo incluir compras integradas en la aplicación en mi aplicación?
+  </dt>
+
+  <dd>
+    No hay restricciones específicas con respecto a las compras integradas en la aplicación (IAP) para
+ las aplicaciones que participan del programa Diseñado para familias además del
+ cumplimiento con el <a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">
+ DDA de Diseñado para familias</a> y otros requisitos legales correspondientes, pero
+ Google Play se reserva el derecho de rechazar aplicaciones que empleen tácticas comerciales
+ extremadamente agresivas. Google Play aplicará la protección de IAP con contraseña en todas las aplicaciones
+ que participen del programa Diseñado para familias y que apunten principalmente
+ a un público infantil a fin de garantizar que los padres, no los niños, estén autorizando
+ las compras. Ten en cuenta que este tratamiento no se extiende a las aplicaciones
+ orientadas al público en general.
+  </dd>
+</dl>
+
+<h2 id="other">
+  Otras preguntas
+</h2>
+
+<dl>
+  <dt>
+    ¿Cuál es el público previsto para las aplicaciones que participan en Diseñado para
+ familias?
+  </dt>
+
+  <dd>
+    Nuestro objetivo es proporcionar una excelente experiencia de usuario en la Play Store de Google para
+ que padres y tutores descubran aplicaciones maravillosas para niños y
+ familias creadas por desarrolladores y marcas confiables.
+  </dd>
+
+  <dt>
+    ¿Está el programa Diseñado para familias disponible únicamente para desarrolladores
+ en ciertos países?
+  </dt>
+
+  <dd>
+    Diseñado para familias es un programa global.
+  </dd>
+
+  <dt>
+    ¿Qué ocurre con las aplicaciones que se publican en la categoría actual
+ Juegos para la familia?
+  </dt>
+
+  <dd>
+    La categoría actual Juegos para la familia quedará obsoleta en mayo de 2015. Las aplicaciones
+ que actualmente se encuentren en la categoría Juegos para la familia deberán
+ trasladarse a otra categoría en la tienda de Google Play. Las aplicaciones para las que no se haya seleccionado otra
+ categoría se asignarán a la categoría Juegos casuales.
+  </dd>
+</dl>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="https://docs.google.com/forms/d/1EtvUWqlkxS6RxHJjeI-3-7uzdbIZx6n9Cocy2D369B8/viewform" class="next-class-link">A continuación: Mantente en contacto</a>
+</div>

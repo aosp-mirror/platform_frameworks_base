@@ -1,0 +1,294 @@
+page.title=Google Play の可能性
+meta.tags="visibility, growth, distributing"
+page.tags="play, apps, distributing, publishing"
+page.metaDescription=1 か月で何十億回ものダウンロードに利用されています。利用者はさらに増加し続けています。Google 基準で、ユーザーにアプリを紹介しましょう。
+page.image=/distribute/images/about-play.jpg
+
+@jd:body
+
+<div id="qv-wrapper">           
+  <div id="qv">
+  <h2>Google Play について</h2>
+    <ol style="list-style-type:none;">
+      <li><a href="#reach">全世界のユーザーにアプローチ、急激な成長</a></li>
+      <li><a href="#ratings-reviews">ユーザーの評価とレビュー</a></li>
+      <li><a href="#category-browsing">カテゴリのブラウジング</a></li>
+      <li><a href="#search">検索</a></li>
+      <li><a href="#top-charts-and-lists">上位チャートと一覧</a></li>
+      <li><a href="#featured-staff-picks">おすすめ、スタッフのおすすめ、コレクション、バッジ</a></li>
+      <li><a href="#product-detail-pages">ストア情報掲載ページ</a></li>
+      <li><a href="#related-resources">関連リソース</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Google Play は Android アプリ配布用のメイン ストアです。Google Play 上にアプリを公開すると、世界中の 190 以上の国と地域に存在する、Android の利用者という広大な基盤にアプリを提示することになります。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-about-0.jpg" alt="Google Play on an Android Tablet" style="width:480px;position:relative" />
+</div>
+
+<p>
+  Google Play は Android エクスペリエンスの中核です。新しいユーザーはアプリ、ゲーム、その他の Google Play コンテンツでユーザーのデバイスをカスタマイズします。既存のユーザーは、流行のコンテンツや新しいコンテンツを求めて定期的にアクセスします。新しいアプリはとても簡単かつ高速でダウンロードできます。Google Play は、アプリをユーザーのデバイスにワイヤレスで即時に配布します。
+</p>
+
+<p>
+  また、Google Play は Web ユーザーにとってトップのアクセス先でもあります。ブラウザを使用しているユーザーはだれでも Web 上で Google Play 内を自由にアクセスできます。Android ユーザーは目的のアプリを購入してインストールすることもできます。Google Play はアプリを自動的にユーザーのデバイスに配布します。ケーブルは必要ありません。
+</p>
+
+<p>
+  Google Play Web サイトのアクセシビリティと利便性により、オンライン広告、Web 検索、クロス リンクなどの多くのソースから製品へのトラフィックを促進する新しい方法が実現します。Google Play は、優れたアプリとゲームをユーザーに結び付けるように設計されています。マーケットプレースでアプリに気づかせ、関心が集まるようにするための重要なチャネルを提供します。
+</p>
+
+<div class="headerLine">
+  <h2 id="ratings-reviews">
+    ユーザーの評価とレビュー
+  </h2>
+
+
+</div>
+
+<p>
+  見込みユーザーは、評価とレビューをアプリの品質を示す重要なベンチマークとして参照します。Android ユーザーはアプリを 1 個から 5 個の星で評価し、レビューを投稿して、ダウンロード済みのアプリの評価を示します。
+</p>
+
+<p>
+  Google Play の一覧と検索結果では、<strong>アプリの評価はそのランキングに影響する最も重要な要因の 1 つです</strong>。また、この評価は、編集チームがストアでのプロモーション用にアプリとゲームを整理する際に参照する主要な指標の 1 つでもあります。
+</p>
+
+<div class="img" style="padding: 1em auto;width:96%;">
+  <img src="{@docRoot}images/gp-rating-web.png" style="border:1px solid #ddd;">
+</div>
+
+<div class="headerLine">
+  <h2 id="category-browsing">
+    カテゴリのブラウジング
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play でアプリを公開する際に、ユーザーにアプリを見つけてほしいカテゴリを選択します。30 個以上のカテゴリを利用できます。各カテゴリ内で、評価、レビュー、ダウンロード数、国、その他の要因の組み合わせに基づいてアプリがランク付けされます。
+</p>
+
+<div class="headerLine">
+  <h2 id="search">
+    検索
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play での検索により、ユーザーはアプリやゲームを素早く特定することができます。検索では、ユーザーの入力に応じて語句を提案する強力なヒューリスティックを使用し、アプリへの直接リンクを提案として提供します。この結果、最も関連性が高く、最も人気のあるアプリが検索上位で見つかります。
+</p>
+
+<div class="headerLine">
+  <h2 id="top-charts-and-lists">
+    上位チャートと一覧
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-top.jpg">
+</div>
+
+<p>
+  上位チャートは、アプリとゲームのホーム ページから選択された、Android  ユーザーに人気があり話題となっているコンテンツが常に表示されます。上位チャートは最新状態を保ち、最新のダウンロード数に基づき、毎日複数回更新されています。アプリの評価が上がり、ダウンロード数が増えると、アプリはチャートの上位に移動します。
+</p>
+
+<p>
+  チャートを世界中のユーザーにできるだけ関連付けるために、このチャートは Google Play の最もユーザー数が多い主な国で、それぞれ異なります。ダウンロード数と評価でアプリが関心を集め、人気が加速してくると、アプリは 1 つ以上の上位チャートに入るようになり、さらに注目されるようになります。
+</p>
+
+<table style="width:50%;">
+  <tr>
+    <td>
+      人気（無料）
+    </td>
+    <td>
+      無料アプリと無料ゲームの一覧
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      人気（有料）
+    </td>
+    <td>
+      有料アプリと有料ゲームの一覧
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      人気（総合）
+    </td>
+    <td>
+      総合上位（無料/有料）
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      人気の新着（無料）
+    </td>
+    <td>
+      30 日以内
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      人気の新着（有料）
+    </td>
+    <td>
+      30 日以内
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      人気上昇中
+    </td>
+    <td>
+      インストール数が急増した新着アプリ
+    </td>
+  </tr>
+</table>
+
+<div class="headerLine">
+  <h2 id="featured-staff-picks">
+    おすすめ、スタッフのおすすめ、コレクション、バッジ
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play の編集チームは、優れたアプリにユーザーが注目できるようにして、ストア全体のアプリの品質を常に一定に保つことに専念します。このチームは Google Play 全体でアプリを定期的にレビューし、最も有名なアプリとゲームだけでなく、より多くのユーザーに体験してほしい「ダイヤの原石」も探し出します。チームは<em>おすすめ</em>、<em>スタッフのおすすめ</em>、その他のコレクションで、優れたアプリをプロモートします。
+</p>
+
+<p>
+  ご自分のアプリを優れたアプリとして推薦することはできませんが、編集チームは優れたアプリがないかどうか、常に Google Play をモニタリングしています。ユーザーが気に入るアプリを作成して、Android デバイスで問題なく動作している場合、編集チームが注目します。
+</p>
+
+<h3 id="featured-staff-picks2">
+  おすすめとスタッフのおすすめ
+</h3>
+
+<p>
+  Google Play の編集チームは新着アプリを毎週選出して、このアプリを多くの人が見る<em>おすすめ</em>と<em>スタッフのおすすめ</em>のコレクションで推薦します。
+</p>
+
+<p>
+  <em>おすすめ</em>のコレクションは、Android で入手できる最新かつ最高のアプリとゲームのタイトルをハイライトします。おすすめ一覧には上位カテゴリで優秀かつ最も人気のあるアプリも含まれています。<em>スタッフのおすすめ</em>は Google Play 上の最近のおすすめアプリとゲームのすべてを集めたものです。タブレット ユーザー向けには、特別な<em>スタッフのおすすめ</em>のコレクションで Android タブレット向けの優れたアプリがハイライトされます。
+</p>
+
+<table style="text-align:center;margin:1.5em 0;">
+  <tr>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks1.jpg">
+      <p>
+        おすすめ
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks2.jpg">
+      <p>
+        コレクション
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks3.jpg">
+      <p>
+        エディターのおすすめ
+      </p>
+    </td>
+  </tr>
+</table>
+
+<h3 id="collections">
+  アプリのコレクション
+</h3>
+
+<p>
+  編集チームはテーマや季節ごとのイベントに基づき、アプリとゲームのコレクションをまとめることがあります。ユーザーはこの一覧をよく利用し、タイムリーなコレクションに注目してアプリを選択します。
+</p>
+
+<p>
+  編集スタッフはコレクションのプロモーション用にアプリを選択します。これらのアプリは高品質であり、電話とタブレットで Android の魅力を最大限に引き出します。スタッフはコレクション全体に興味を起こさせる、または独自に関与するアプリも探し出します。
+</p>
+
+<h3 id="editors-choice">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/editorschoice_ann.png">エディターのおすすめ </h3>
+
+<p>
+  <em>エディターのおすすめ</em>とは Android 上で入手できる優秀なアプリの一部をハイライトした、独自の視点で収集されたアプリです。エディターは、品質と優れたユーザー インターフェイス、長期間に及ぶ人気の維持、Android 機能の革新的な使用という観点でこれらのアプリを選択します。
+</p>
+
+<p>
+  <em>エディターのおすすめ</em>に選出されたアプリには、アプリ名が Google Play に表示されると必ず表示されるバッジも付与されます。
+</p>
+
+<h3 id="top-developer">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/topdev_ann.png">トップ デベロッパー </h3>
+
+<p>
+  トップ デベロッパーとは Android の高品質かつ革新的なアプリのローンチへの尽力に対し、定評のある、高く評価されたデベロッパーを認定するバッジです。Google Play の編集スタッフは、デベロッパーが積み重ねた成果に基づき、トップ デベロッパーのバッジを適宜付与します。
+</p>
+
+<p>
+  トップ デベロッパーのバッジは、Google Play に表示される場合には常に、デベロッパーの名前の横に表示されます。このバッジは、デベロッパーのすべてのアプリが長期にわたって認められていることを意味します。これは、ユーザーがデベロッパーの製品に対して持つ、より高いレベルの信頼性を示しています。
+</p>
+
+<div class="headerLine">
+  <h2 id="product-detail-pages">
+    ストア情報掲載ページ
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-listing.jpg">
+</div>
+
+<p>
+  ご自分のアプリの Google Play でのトップ ページは、<em>ストア情報掲載ページ</em>です。このページは豊富な内容と多様な色使いでアプリをプロモートし、その評価とレビューをハイライトしてアプリの概要を示します。
+</p>
+
+<p>
+  ユーザーはストアの掲載情報にアクセスしてアプリの詳細を確認できます。検索結果、上位チャート、カテゴリ一覧、コレクションにアプリが含まれていると、1 回のタップでストアの掲載情報に直接移動できます。
+</p>
+
+<p>
+  いずれかの Web ブラウザで<a href="https://play.google.com/apps/publish/"> Google Play デベロッパー コンソール</a>から製品の詳細ページを管理します。サインイン後、ブランド アセットをアップロードまたは更新したり、マーケットの言語で製品の詳細を入力したりします。
+</p>
+
+<p>
+  アプリを公開すると、Google Play はアプリの評価、レビュー、他の製品へのリンクなどを追加します。さらに電話、タブレット、Web ブラウザでストア情報掲載ページが最も良く見えるようにします。
+</p>
+
+<p>
+  Web サイト、広告キャンペーン、レビュー、ソーシャル メディアの投稿などのGoogle Play 外部から、製品の詳細ページにWeb ユーザーを直接リンクできます。リンク方法については<a href="{@docRoot}distribute/tools/promote/linking.html">製品へのリンク</a>を参照してください。
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+<h2>関連リソース</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="4"></div>
+    </div>

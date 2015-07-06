@@ -1,0 +1,584 @@
+page.title=Consola para desarrolladores
+page.metaDescription=Aprende acerca de la Consola para desarrolladores, el lugar desde donde publicarás tu aplicación en Google Play.
+page.image=/distribute/images/developer-console.jpg
+Xnonavpage=true
+
+@jd:body
+    
+    <div id="qv-wrapper">           
+  <div id="qv">
+    <h2>Características de la publicación</h2>
+    <ol>
+      <li><a href="#allapps">Todas las aplicaciones</a></li>
+      <li><a href="#account-details">Detalles de tu cuenta</a></li>
+      <li><a href="#merchant-account">Cómo vincular tu cuenta de comerciante</a></li>
+      <li><a href="#multiple-user-accounts">Múltiples cuentas de usuario</a></li>
+      <li><a href="#alpha-beta">Pruebas alfa y beta</a></li>
+      <li><a href="#staged-rollouts">Implementaciones por fases</a></li>
+      <li><a href="#multiple-apk">Compatibilidad con múltiples APK</a></li>
+      <li><a href="#selling-pricing-your-products">Venta y fijación de precios</a></li>
+      <li><a href="#in-app-products">Productos ofrecidos en la aplicación</a></li>
+      <li><a href="#distribution-controls">Controles de distribución</a></li>
+      <li><a href="#reviews-reports">Reseñas de usuarios, informes de errores</a></li>
+      <li><a href="#app-stats">Estadísticas de la aplicación</a></li>
+      <li><a href="#related-resources">Recursos relacionados</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  La <a href="https://play.google.com/apps/publish/">Consola para desarrolladores de
+ Google Play</a> es el lugar donde realizas las operaciones de publicación y donde tienes tus herramientas.
+</p>
+<!-- <img src="{@docRoot}images/gp-dc-startscreen.jpg" style="width:480px;" /> -->
+<img src="{@docRoot}images/gp-devconsole-home.png" style="width:480px;">
+<p>
+  Carga aplicaciones, crea páginas para tus productos, configura precios y distribución, y
+ publica. Puedes administrar todas las fases de publicación en Google Play a través de la
+ Consola para desarrolladores, desde cualquier explorador web.
+</p>
+
+<p>
+  Una vez que te hayas <a href="{@docRoot}distribute/googleplay/start.html">registrado</a> y recibas la
+ verificación por correo electrónico, puedes iniciar sesión en tu Consola para desarrolladores de Google Play.
+</p>
+
+<div class="headerLine">
+  <h2 id="allapps">
+    Todas las aplicaciones
+  </h2>
+
+
+</div>
+
+<p>
+  Comienza en Todas las aplicaciones, que te proporciona un vistazo rápido de tus aplicaciones y
+ te permite saltar a estadísticas, reseñas y detalles del producto, o cargar una aplicación nueva.
+</p>
+
+<div style="padding:1em 0em 0em 0em;">
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine" style="margin-top:-6px">
+  <h2 id="account-details">
+    Detalles de tu cuenta
+  </h2>
+
+
+</div>
+
+<p>
+  Especifica información básica del perfil de desarrollador sobre ti o tu compañía en la
+ página de detalles de la cuenta. Esto te identifica ante Google Play y tus
+ clientes. Puedes volver en cualquier momento para editar la información y cambiar tu
+ configuración.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-profile.png" class="frame">
+</div>
+
+<p>
+  Tu perfil de desarrollador contiene lo siguiente:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Nombre del desarrollador, exhibido en la página del directorio de tu tienda y en otras partes de
+ Google Play.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Información de contacto, que solo Google utiliza y no está visible para tus
+ clientes.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      URL del sitio web, exhibida en la página del directorio de tu tienda.
+    </p>
+  </li>
+</ul>
+
+<p>
+  En la página de detalles de la cuenta, también puedes agregar acceso restringido para comerciantes
+ y otros equipos, registrar una cuenta de comerciante o configurar cuentas de prueba para obtener
+ licencias de Google Play.
+</p>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    Cómo vincular tu cuenta de comerciante
+  </h2>
+
+
+</div>
+
+<p>
+  Si quieres vender aplicaciones y productos integrados en la aplicación, vincula tu cuenta de comerciante en Google Wallet
+ a tu perfil de desarrollador. Google Play utiliza la cuenta de comerciante
+ vinculada para la identificación financiera e impositiva, como también para el procesamiento mensual de los pagos
+ provenientes de las ventas.
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-user-accounts">
+    Múltiples cuentas de usuario
+  </h2>
+
+
+</div>
+
+<p>
+  Configura cuentas de usuario para que otros miembros del equipo puedan acceder a diferentes partes de tu
+ Consola para desarrolladores.
+</p>
+
+<div style="width:550px;">
+  <img src="{@docRoot}images/gp-dc-invite.png" class="frame">
+</div>
+
+<p>
+  La primera cuenta registrada es la del <em>propietario de la cuenta</em>, con acceso pleno
+ a todas las partes de la consola. El propietario puede agregar <em>cuentas de usuario</em> y
+ administrar el acceso a la consola.
+</p>
+
+<p>
+  Por ejemplo, un propietario puede permitir el acceso de los usuarios a la configuración de publicación y de la
+ aplicación, pero no a los informes financieros. Aprende ahora a <a href="https://support.google.com/googleplay/android-developer/answer/2528691">configurar
+ múltiples cuentas</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="store-listing-details">
+    Detalles del directorio de la tienda
+  </h2>
+
+
+</div>
+
+<p>
+  Utiliza la Consola para desarrolladores para configurar una <em>página de Directorio de la tienda</em>. Esa página será
+ la página de inicio de tu aplicación en Google Play. Es la página que los usuarios ven en sus teléfonos
+ celulares o en la Web y donde obtienen información sobre tu aplicación y la descargan.
+</p>
+
+<p>
+  Carga recursos personalizados de la marca, capturas de pantalla y videos para destacar las
+ mejores características de tu aplicación. Proporciona una descripción localizada, agrega notas acerca de la última
+ versión y más. Puedes actualizar el directorio de tu tienda en cualquier momento.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-details.png" class="frame">
+</div>
+
+<div class="headerLine">
+  <h2 id="upload-instantly-publish">
+    Carga y publica instantáneamente
+  </h2>
+
+
+</div>
+
+<p>
+  Desde la Consola para desarrolladores, puedes cargar y publicar rápidamente un archivo de paquete de
+ una aplicación para Android lista para su lanzamiento. La aplicación es un <em>borrador</em> hasta que la
+ publicas, y en ese momento Google Play comienza a exhibir la página de directorio de tu tienda y la aplicación
+ a los usuarios; tu aplicación aparece en los directorios de tiendas en solo horas,
+ no semanas.
+</p>
+
+<p>
+  Una vez que se publica tu aplicación, puedes actualizarla cuantas veces quieras: Cambia
+ los precios, la configuración y las opciones de distribución en cualquier momento, sin la necesidad
+ de actualizar el archivo binario de la aplicación.
+</p>
+
+<p>
+  A medida que agregas funciones o abordas problemas de código, puedes publicar un archivo binario actualizado
+ en cualquier momento. La nueva versión estará disponible prácticamente de inmediato, y se les comunicará
+ a los clientes existentes que hay una actualización lista para descargar. Los usuarios también pueden
+ aceptar actualizaciones automáticas para tu aplicación, de modo que tus actualizaciones se entregan
+ e instalan ni bien las publicas. Puedes cancelar la publicación de tu aplicación en cualquier
+ momento.
+</p>
+
+<div class="headerLine">
+  <h2 id="alpha-beta">
+    Pruebas alfa y beta
+  </h2>
+
+
+</div>
+
+<p>
+  Siempre es bueno obtener la opinión real de los usuarios, especialmente antes del
+ lanzamiento. Google Play facilita la distribución de versiones de tu aplicación
+ previas al lanzamiento a grupos de prueba alfa y beta en cualquier parte del mundo.
+</p>
+
+<p>
+  En la sección <strong>APK</strong> de tu Consola para desarrolladores de Google Play
+ encontrarás las pestañas <strong>Pruebas alfa</strong> y <strong>Pruebas
+ beta</strong>. Aquí puedes cargar versiones de los archivos APK de tus aplicaciones
+ y definir una lista de evaluadores como un <a href="https://support.google.com/groups/answer/46601">Grupo de Google</a> o una <a href="https://support.google.com/plus/topic/2888488">Comunidad de Google+</a>. Una vez
+ que hagas esto, recibirás una URL que enviarás a tus evaluadores,
+ desde la cual podrán acceder al programa de prueba.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-ab.png" class="frame">
+</div>
+
+<p>
+  Una vez que accedan, los evaluadores se dirigirán a la página de producto de tu aplicación, y cuando
+ descarguen la aplicación, Google Play les proporcionará la versión alfa o beta
+, según corresponda. Por cierto, si un usuario accede a ambos grupos
+ de prueba, Google Play siempre les proporcionará la versión de prueba alfa.
+</p>
+
+<p>
+  Recuerda que los usuarios no pueden proporcionar comentarios ni reseñas en las versiones alfa
+ y beta de tus aplicaciones. Para obtener sus opiniones, puedes usar el <a href="https://support.google.com/groups/answer/46601">Grupo de Google</a> o la <a href="https://support.google.com/plus/topic/2888488">Comunidad de Google+</a>, o bien
+ configurar una dirección de correo electrónico o tu propio sitio web.
+</p>
+
+<p>
+  Puedes usar estos programas de prueba para <a href="{@docRoot}distribute/essentials/optimizing-your-app.html">optimizar tus
+ aplicaciones</a>, ayudar con la <a href="{@docRoot}distribute/users/expand-to-new-markets.html">implementación en nuevos
+ mercados</a> y comenzar <a href="{@docRoot}distribute/users/build-community.html">a crear tu
+ comunidad</a>. Puedes encontrar más información acerca de cómo usar la prueba beta en la
+ <a href="{@docRoot}distribute/tools/launch-checklist.html">Lista de comprobación
+ para el lanzamiento</a> y la <a href="{@docRoot}distribute/tools/localization-checklist.html">Lista de comprobación
+ para la localización</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="staged-rollouts">
+    Implementaciones por fases
+  </h2>
+
+
+</div>
+
+<p>
+  También puedes dividir la implementación de tus aplicaciones en fases mediante la pestaña Producción en la sección
+ APK de tu Consola para desarrolladores de Google Play. Allí podrás definir el
+ porcentaje de usuarios que podrán descargar tu aplicación.
+</p>
+
+<p>
+  Organizar tu implementación en fases te ayudará a limitar el impacto de errores imprevistos o de la carga del
+ servidor y te permitirá medir la respuesta de los usuarios a través de una muestra imparcial de usuarios.
+  Durante las implementaciones en fases, los usuarios pueden calificar y reseñar tus aplicaciones, de modo que
+ si estás indeciso, comienza la implementación en un porcentaje pequeño de usuarios. Asegúrate de estar atento
+ a las reseñas negativas y responderlas.
+</p>
+
+<p>
+  Ten en cuenta que no se admiten reversiones debido a los <a href="{@docRoot}tools/publishing/versioning.html">requisitos de versión para la aplicación</a>
+ de la plataforma Android. Si necesitas realizar una reversión, considera la posibilidad de lanzar un
+ APK anterior con un nuevo número de versión. No obstante, solo se debe recurrir a esta
+ práctica como último recurso ya que los usuarios perderán el acceso a las funciones nuevas y es posible
+ que tu aplicación anterior no sea directamente compatible con los cambios realizados en el servidor o los formatos de datos,
+ por lo que debes asegurarte de ejecutar <a href="#alpha-beta">pruebas alfa y beta</a> de tus
+ actualizaciones.
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-apk">
+    Compatibilidad con múltiples APK
+  </h2>
+
+
+</div>
+
+<p>
+  En la mayoría de los casos, todo lo que necesitas es un solo paquete de aplicaciones (APK), y generalmente es la manera
+ más sencilla de administrar y mantener la aplicación. Sin embargo, si necesitas
+ proporcionar un APK distinto para diferentes dispositivos, Google Play te 
+ permite hacerlo.
+</p>
+
+<p>
+  <em>Compatibilidad con múltiples APK</em> te permite crear múltiples paquetes de aplicaciones que utilizan
+ el mismo nombre de paquete pero difieren en sus formatos de compresión de texturas OpenGL,
+ en la compatibilidad con diferentes tamaños de pantalla o en las versiones de la plataforma Android admitidas. Puedes simplemente
+ cargar todos los APK en una misma lista de productos y Google Play seleccionará
+ los mejores para proporcionárselos a los usuarios en función de las características de sus
+ dispositivos.
+</p>
+
+<p>
+  También puedes cargar hasta dos descargas secundarias para cada APK publicado,
+ incluidos múltiples APK, mediante la opción <em>Archivos de expansión de APK</em>. Cada
+ archivo de expansión puede tener un tamaño máximo de 2 GB y contener cualquier tipo de código o recursos.
+  Google Play los aloja de forma gratuita y administra la descarga de los archivos como parte
+ de la instalación habitual de la aplicación.
+</p>
+
+<div class="headerLine">
+  <h2 id="selling-pricing-your-products">
+    Venta y fijación de precios de tus productos
+  </h2>
+
+
+</div>
+
+<div class="figure-right">
+  <img src="{@docRoot}images/gp-buyer-currency.png" class="frame">
+</div>
+
+<p>
+  Tienes las herramientas que necesitas para fijar los precios de tu aplicación y de los productos que ofreces en la aplicación. La descarga
+ de tu aplicación puede ser gratuita o paga, en cuyo caso se requerirá el pago antes de poder descargarla.
+</p>
+
+<ul>
+  <li>Si publicas tu aplicación como gratuita, debe <strong>continuar siendo gratuita durante toda su
+ vida útil</strong>. Todos los usuarios en Google Play pueden descargar aplicaciones gratuitas.
+  </li>
+
+  <li>Si la publicas como paga, más adelante puedes cambiarla a gratuita. Solo los usuarios
+ que hayan registrado un método de pago en Google Play pueden comprar
+ y descargar aplicaciones pagas.
+  </li>
+</ul>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      Consulta <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294&amp;topic=2365624&amp;ctx=topic">
+ Países admitidos para la distribución de aplicaciones</a> para obtener una lista de
+ los países donde puedes distribuir o vender tus aplicaciones.
+    </p>
+  </div>
+</div>
+
+<p>
+  También puedes ofrecer productos y suscripciones en la aplicación, independientemente
+ de que la aplicación sea gratuita o paga.  Fija precios de forma independiente para las aplicaciones pagas, los productos que se ofrecen en la aplicación y las
+ suscripciones.
+</p>
+
+<p>
+  Cuando los usuarios examinan las páginas de productos de tu aplicación o inician una compra, Google Play
+ les muestra el precio que deberán pagar en su moneda local.
+</p>
+
+<p>
+  Para cada producto, debes fijar inicialmente un precio predeterminado en tu propia moneda. Si
+ no haces más que eso, Google Play fijará automáticamente los precios locales para tu aplicación una vez al mes
+ en función del precio del dólar estadounidense.
+</p>
+
+<p>
+  No obstante, Google Play te ofrece el control total de la fijación de precios para tus
+ productos en cada país. Para comenzar, puedes establecer manualmente precios locales fijos
+ a partir del precio predeterminado mediante la función <strong>convertir precios automáticamente ahora</strong>
+. Luego puedes revisar esos precios y fijar precios nuevos para los países
+ que desees; el precio para cada país es independiente, por lo que puedes ajustar
+ un precio sin afectar los demás. Para la mayoría de los países, el precio que fijas es
+ el precio final que se cobra a los usuarios, con impuestos incluidos.
+</p>
+
+<p>
+  Para obtener más información sobre cómo fijar precios para tus aplicaciones, consulta <a href="{@docRoot}distribute/users/expand-to-new-markets.html#localize-your-google-play-listing">
+Expansión a nuevos mercados</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="in-app-products">
+    Productos ofrecidos en la aplicación
+  </h2>
+
+
+</div>
+
+<p>
+  Puedes vender productos y suscripciones en la aplicación mediante el uso de la <a href="{@docRoot}google/play/billing/index.html">Facturación integrada en la aplicación de Google Play</a> como
+ una forma de monetizar tus aplicaciones. Los productos que se ofrecen en la aplicación constituyen compras únicas, mientras que
+ las suscripciones son cargos recurrentes que se aplican mensualmente o anualmente.
+</p>
+
+<p>
+  En la sección <strong>Productos ofrecidos en la aplicación</strong> para un APK específico publicado o
+ en borrador, puedes:
+</p>
+
+<ul>
+  <li>Crear listas de productos para productos y suscripciones ofrecidos en la aplicación.
+  </li>
+
+  <li>Fijar precios.
+  </li>
+
+  <li>Publicar los productos en la aplicación o retirar los productos obsoletos.
+  </li>
+</ul>
+
+<p>
+  Para obtener información detallada acerca de cómo implementar la facturación integrada en la aplicación, consulta la documentación para desarrolladores <a href="{@docRoot}google/play/billing/index.html">Facturación integrada en la aplicación</a>
+. Puedes utilizar los productos que ofreces en la aplicación en los modelos de monetización <a href="{@docRoot}distribute/monetize/premium.html">Premium</a>, <a href="{@docRoot}distribute/monetize/freemium.html">Gratuitos</a> y <a href="{@docRoot}distribute/monetize/subscriptions.html">Suscripción</a>
+.
+</p>
+
+<div class="headerLine">
+  <h2 id="distribution-controls">
+    Controles de distribución
+  </h2>
+
+
+</div>
+
+<p>
+  Administra en qué países y territorios distribuirás tus aplicaciones. Para algunos
+ países, puedes elegir los operadores a los que quieres apuntar. También puedes ver
+ la lista de dispositivos compatibles con tu aplicación conforme a las
+ reglas de distribución declaradas en su archivo de manifiesto.
+</p>
+
+<h3 id="geotargeting">
+  Perfilamiento geográfico
+</h3>
+
+<p>
+  Puedes usar los controles de la Consola para desarrolladores de Google Play para administrar fácilmente
+ la distribución geográfica de tus aplicaciones, sin realizar ningún cambio en el
+ archivo binario de tu aplicación. Puedes especificar los países y territorios donde quieres
+ distribuir, e incluso los operadores (para algunos países).
+</p>
+
+<p>
+  Cuando los usuarios visitan la tienda, Google Play se asegura de que se encuentren en
+ uno de los países que seleccionaste antes de que puedan descargar tu aplicación. Puedes cambiar tu
+ selección de países y operadores en cualquier momento, para lo que simplemente deberás guardar los cambios en la
+ Consola para desarrolladores de Google Play.
+</p>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-supported-dev-requirements.png" class="frame">
+</div>
+
+<p>
+  Para optimizar la comercialización a usuarios alrededor del mundo, puedes <a href="{@docRoot}distribute/tools/launch-checklist.html#start-localization">localizar
+ el directorio de tu tienda</a> e incluir detalles y la descripción de tu aplicación, gráficos
+ promocionales, capturas de pantalla y más.
+</p>
+
+<h3 id="captargeting">
+  Perfilamiento de funcionalidades
+</h3>
+
+<p>
+  Google Play también te permite controlar la distribución de acuerdo con las funciones o capacidades de
+ los dispositivos en las que se base tu aplicación. Existen diversos tipos de
+ dependencias que la aplicación puede definir en su manifiesto, como características de
+ hardware, formatos de compresión de texturas OpenGL, bibliotecas, versiones de la plataforma Android
+ y otras.
+</p>
+
+<p>
+  Cuando cargas tu aplicación, Google Play lee las dependencias y configura las
+ reglas de distribución necesarias. Para obtener información técnica acerca de cómo declarar
+ dependencias, lee <a href="{@docRoot}google/play/filters.html">Filtros
+ en Google Play</a>.
+</p>
+
+<p>
+  Para determinar con precisión el control de la distribución, Google Play te permite ver todos los
+ dispositivos para los que tu aplicación está disponible en función de sus dependencias (si las hubiera). Desde la
+ Consola para desarrolladores de Google Play, puedes indicar los dispositivos admitidos e incluso
+ excluir dispositivos específicos si fuera necesario.
+</p>
+
+<div class="headerLine">
+  <h2 id="reviews-reports">
+    Reseñas de usuarios e informes de errores
+  </h2>
+
+
+</div>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-dc-reviews.png" class="frame">
+  <p class="img-caption">
+    La sección Reseñas de los usuarios te permite acceder a las reseñas de los usuarios para una aplicación
+ específica. Puedes filtrar reseñas de diversas maneras para identificar problemas con
+ mayor facilidad y brindar soporte a tus clientes de forma más eficaz.
+  </p>
+</div>
+
+<p>
+  Google Play permite a los usuarios enviar reseñas de tu aplicación de forma fácil
+ para el beneficio de otros usuarios. Las reseñas te brindan información sobre utilidad, solicitudes
+ de soporte y detalles acerca de problemas importantes de funcionalidad que
+ proporcionan tus clientes.
+</p>
+
+<p>
+  Utiliza informes de errores para depurar y mejorar tu aplicación. Puedes ver los informes
+ de errores mediante el seguimiento de la pila y otros datos, enviados automáticamente desde dispositivos
+ Android.
+</p>
+
+<div class="headerLine">
+  <h2 id="app-stats">
+    Estadísticas de la aplicación
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:500px">
+  <img src="{@docRoot}images/gp-dc-stats.png">
+  <p class="img-caption">
+    <b>Página de estadísticas de la aplicación</b>: Te muestra una variedad de estadísticas acerca del
+ rendimiento de una instalación específica de la aplicación.
+  </p>
+</div>
+
+<p>
+  Puedes obtener estadísticas detalladas acerca del rendimiento de la instalación de tu aplicación.
+</p>
+
+<p>
+  Consulta las métricas de instalación obtenidas por usuarios y por dispositivos
+ exclusivos. Visualiza la cantidad de instalaciones activas, instalaciones totales, actualizaciones, instalaciones y
+ desinstalaciones diarias, y métricas acerca de las calificaciones.
+</p>
+
+<p>
+  Sumérgete en los números de instalación por métrica, incluida la versión de
+ plataforma de Android, el dispositivo, el país, el idioma, la versión de la aplicación y el operador. Visualiza los
+ datos de instalación para cada dimensión en cuadros con línea de tiempo.
+</p>
+
+<p>
+  Esos cuadros resaltan los picos de instalación de tu aplicación y las tendencias a largo plazo,
+  y te ayudan a comprender el comportamiento de aceptación del usuario, a relacionar estadísticas con
+ promociones, a observar el efecto de las mejoras realizadas a la aplicación y otros factores. Concéntrate
+ en los datos de una dimensión al agregar puntos específicos a la línea de tiempo.
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">Recursos relacionados</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/developerconsole"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+  </div>

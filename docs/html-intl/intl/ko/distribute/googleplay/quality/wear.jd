@@ -1,0 +1,452 @@
+page.title=Wear 앱 품질
+page.tags="wear","wearables","quality","guidelines"
+page.metaDescription=웨어러블은 한 눈에 알아볼 수 있도록 만든 소형 장치로 적시에 정확한 정보를 제공하는 고유한 앱을 필요로 합니다.
+page.image=/distribute/images/gp-wear-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>품질 기준</h2>
+  <ol>
+    <li><a href="#ux">디자인 및 상호작용</a></li>
+    <li><a href="#fn">기능</a></li>
+    <li><a href="#faq">질문과 대답(FAQ)</a></li>
+  </ol>
+
+  <h2>필독 항목</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+     핵심 앱 품질</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+      앱 최적화</a></li>
+    <li><a href="{@docRoot}design/patterns/notifications.html">
+      알림</a></li>
+  </ol>
+</div>
+</div>
+
+<img src="{@docRoot}distribute/images/gp-wear-quality.png" style="width:480px;">
+
+<p>
+  Android Wear는 사용자에게 정확한 정보를 적시에 제공하는 것을 목표로 합니다. 뛰어난 Android Wear 경험은 자동으로 시작되고, 한 눈에 파악할 수 있으며, 사용자 상호작용이 전혀 또는 거의 필요하지 않습니다.
+
+ 웨어러블용 앱 디자인은 휴대폰이나 태블릿용 디자인과 본질적으로 다릅니다.
+ 휴대폰이나 태블릿용 디자인과 구별되는 장단점, 사용 사례 및 인간공학적인 측면을 고려해야 합니다.
+
+</p>
+
+<p>
+  Wear 사용자를 위한 뛰어난 경험을 만드는 첫 번째 단계는 최고의 Wear 앱 사용자 경험을 제공하는 방법에 대한 지침을 안내하는 <a href="{@docRoot}design/wear/index.html">Android Wear 디자인 가이드라인</a>을 읽는 것입니다.
+
+ 또한 <a href="{@docRoot}training/building-wearables.html">웨어러블 앱 작성</a> 교육 자료를 검토하여 기본적인 Wear 앱 구현 요구사항을 이해해야 합니다.
+
+
+</p>
+
+<p class="caution">
+  <strong>중요:</strong> 뛰어난 사용자 경험을 보장하려면, 웨어러블용 앱이 유용성에 대한 몇 가지 특정 요구사항을 충족해야 합니다.
+ 다음 품질 기준을 충족하는 앱만 Google Play에서 Android Wear 앱의 자격을 취득합니다.
+ Wear 앱 자격을 취득하면 Android Wear 사용자가 Google Play에서 더 쉽게 앱을 검색할 수 있게 됩니다.
+
+</p>
+
+<p class="note">
+ <strong>참고:</strong> Google Play에서 Wear 앱을 게시하는 방법은 <a href="{@docRoot}distribute/googleplay/wear.html">Android Wear에 배포</a>를 참조하십시오.
+</p>
+
+<div class="headerLine">
+  <h2 id="fn">
+  기능
+  </h2>
+
+
+</div>
+
+<p>
+  이 기준은 앱이 정확히 구성되고 예상되는 기능 동작을 제공하도록 보장합니다.
+
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    유형
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    설명
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="general">
+   일반
+  </td>
+
+  <td id="WR-GL">
+    WR-GL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      핸드헬드 앱이 Wear 장치에서 직접 실행되는 웨어러블 앱 또는 웨어러블 특정 기능을 사용하는 알림을 포함합니다.
+
+      (<a href="{@docRoot}training/building-wearables.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-VF">
+    WR-VF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      앱에 사용자에게 표시되는 Wear 기능이 있습니다.
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-BF">
+    WR-BF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Wear 기능이 예상대로 작동하거나 앱의 Google Play 스토어 목록에 설명된 대로 작동합니다.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="packaging">
+   패키징
+  </td>
+
+  <td id="WR-PK">
+    WR-PK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      기능이 핸드헬드 앱에 종속된 웨어러블 앱이 해당 핸드헬드 앱 내부에 패키지로 포함됩니다.
+
+      (<a href="{@docRoot}training/wearables/apps/packaging.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="functional-notifications">
+    알림
+  </td>
+
+  <td id="WR-FW">
+    WR-FW
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      웨어러블 특정 기능을 사용하는 알림이 {@code RemoteInput} 또는 {@code WearableExtender}를 사용합니다.
+
+      (<a href="{@docRoot}training/wearables/notifications/index.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FR">
+    WR-FR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      사용자가 메시징 앱의 알림을 사용하여 음성 입력이나 빠른 응답을 통해 회신할 수 있습니다.
+      (<a href="{@docRoot}training/wearables/notifications/voice-input.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FG">
+    WR-FG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      유사한 알림이 한 묶음으로 그룹화됩니다.
+      (<a href="{@docRoot}training/wearables/notifications/stacks.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="gestures">
+    제스처
+  </td>
+
+  <td id="WR-GP">
+    WR-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      전체 화면 작업에서 종료 확인 목적으로만 길게 누르기를 사용합니다.
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/exit.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-GD">
+    WR-GD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      앱이 전체 화면 작업에서 살짝 밀어서 해제하기 제스처를 비활성화한 경우 길게 눌러 해제하기 제스처에 응답합니다.
+
+      (<a href="{@docRoot}training/wearables/ui/exit.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="watchface">
+    Watch Face
+  </td>
+
+  <td id="WR-WF">
+    WR-WF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Watch Face를 포함하는 앱이 공식 Watch Face API를 사용합니다.
+      (<a href="{@docRoot}training/wearables/watch-faces/index.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="ux">
+  시각적 디자인 및 사용자 상호작용
+  </h2>
+
+
+</div>
+
+<p>
+  이 기준은 앱이 웨어러블에서 일관되고 직관적이며 즐거운 사용자 경험을 제공하는 핵심 디자인 및 상호작용 패턴을 따르도록 보장합니다.
+
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    유형
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    설명
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="layout">
+    레이아웃
+  </td>
+
+  <td id="WR-LS">
+    WR-LS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      앱 사용자 인터페이스가 정사각형 디스플레이에 알맞은 형식으로 구성됩니다. 앱 콘텐츠가 실제 디스플레이 영역 내에 배치되고 텍스트나 컨트롤이 화면 가장자리에서 잘리지 않습니다.
+
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/layouts.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-LR">
+    WR-LR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      앱 사용자 인터페이스가 화면 하단에 삽입물(또는 "턱")이 있는 장치를 포함한 둥근 디스플레이에 알맞은 형식으로 구성됩니다.
+ 앱 콘텐츠가 실제 디스플레이 영역 내에 배치되고 텍스트나 컨트롤이 화면 가장자리에서 잘리지 않습니다.
+
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/layouts.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-TC">
+    WR-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      앱 텍스트가 제안 최소 크기인 16sp로 크고 한 눈에 파악할 수 있습니다.
+      (<a href="{@docRoot}design/wear/style.html#Typography">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="launcher">
+    시작 관리자
+  </td>
+
+  <td id="WR-LN">
+    WR-LN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      앱 시작 관리자 문자열이 명령 구문이 아니라 앱 이름입니다.
+      (<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="notifications">
+    알림
+  </td>
+
+  <td id="WR-NC">
+    WR-NC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      앱이 필요한 경우 확인 애니메이션을 표시합니다. 
+      (<a href="{@docRoot}design/wear/patterns.html#Countdown">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-NR">
+    WR-NR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      알림 카드에 오른쪽 상단 가장자리에 표시되는 앱 아이콘이 있습니다. 한 가지 예외는 미디어 재생 카드처럼 알림 카드에 단일 작업 컨트롤이 있는 경우입니다.
+
+      <br/>
+      (<a href="{@docRoot}design/wear/style.html#Assets">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-WI">
+    WR-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      알림 작업에 흰색 아이콘, 작업 제목, 투명한 배경이 있습니다.
+      <br/>
+      (<a href="{@docRoot}training/wearables/notifications/creating.html#ActionButtons">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PB">
+    WR-PB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      알림 사진 배경이 카드 표시가 아니라 정보 전달용으로만 사용됩니다.
+      (<a href="{@docRoot}design/wear/style.html#Branding">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PR">
+    WR-PR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      알림 사진 배경의 해상도가 400x400 이상입니다.
+      (<a href="{@docRoot}training/wearables/notifications/creating.html#AddWearableFeatures">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="googleplay">
+    Google Play
+  </td>
+
+  <td id="WR-GS">
+    WR-GS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      앱이 Play 스토어 목록에 하나 이상의 Wear 스크린샷을 포함합니다.
+      (<a href="https://support.google.com/googleplay/android-developer/answer/1078870?hl=en">방법 알아보기</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="faq">
+  질문과 대답(FAQ)
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>Android Wear 검토용으로 제출한 앱이 Wear의 모든 요구사항을 충족하는지 여부를 어떻게 알 수 있습니까?</strong>
+
+</p>
+<p>
+  앱이 이 페이지에 설명된 유용성 요구사항을 충족하지 않는 경우 Play 스토어 팀이 해당 앱과 연관된 <a href="https://play.google.com/apps/publish/">Google Play 개발자 콘솔</a> 계정에 지정된 이메일 주소로 연락을 드립니다.
+
+
+</p>
+<p class="caution">
+  <strong>주의:</strong> 앱은 <a href="#fn">기능 요구사항</a>을 충족해야 합니다. 그렇지 않으면 Wear 앱으로 간주되지 않고 Wear <a href="#ux">디자인 및 상호작용</a>을 검토하지 않습니다.
+
+
+</p>
+<p class="note">
+ <strong>참고:</strong> Google Play에서 Wear 앱을 게시하는 방법은 <a href="{@docRoot}distribute/googleplay/wear.html">Android Wear에 배포</a>를 참조하십시오.
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>앱이 Wear 요구사항을 충족하지 않는 경우 신규 또는 업데이트된 앱이 휴대폰 및 태블릿용 Google Play에 계속 나타나고 웨어러블에 계속 설치할 수 있습니까?</strong>
+
+</p>
+<p>
+  예. 위에 설명된 요구사항은 앱이 Google Play에서 Android Wear 앱으로 식별되고 Android Wear 사용자가 더 쉽게 검색할 수 있는지 여부만 판별합니다.
+ Wear 앱으로 승인되지 않은 경우 휴대폰이나 태블릿 등 다른 장치 유형에서 계속 사용할 수 있고 웨어러블에 계속 설치할 수 있습니다.
+
+
+</p>

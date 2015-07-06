@@ -1,0 +1,623 @@
+page.title=タブレット アプリの品質
+page.metaDescription=タブレットはインストール ベースで Android の急成長分野であり、アプリに新たなチャンスをもたらします。
+page.image=/distribute/images/tablet-guidelines-color.jpg
+Xnonavpage=true
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>チェックリスト</h2>
+<ol>
+<li><a href="#core-app-quality">1.タブレット アプリの基本的な品質テスト</a></li>
+<li><a href="#optimize-layouts">2.レイアウトの最適化</a></li>
+<li><a href="#use-extra-space">3.余っている画面領域を活用する</a></li>
+<li><a href="#use-tablet-icons">4.タブレット向けに設計されたアセットを使用する</a></li>
+<li><a href="#adjust-font-sizes">5.フォント サイズとタッチ ターゲットを調整する</a></li>
+<li><a href="#adjust-widgets">6.ホーム画面のウィジェットのサイズを調整する</a></li>
+<li><a href="#offer-full-feature-set">7.機能のフル セットを提供する</a></li>
+<li><a href="#android-versions">8.ターゲットの Android のバージョンを正しく設定する</a></li>
+<li><a href="#hardware-requirements">9.ハードウェアの依存関係を正しく宣言する</a></li>
+<li><a href="#support-screens">10.タブレット画面のサポートを宣言する</a></li>
+<li><a href="#google-play">11.タブレット UI を紹介する</a></li>
+<li><a href="#google-play-best-practices">12.Google Play での公開に向けたベスト プラクティスに従う</a></li>
+
+</ol>
+<h2>テスト</h2>
+<ol>
+<li><a href="#test-environment">テスト環境の設定</a></li>
+</ol>
+</div></div>
+
+<div class="todp-right-float" style="padding-right:0;margin-bottom:1em;">
+  <img src="{@docRoot}distribute/images/tablet-guidelines-color.jpg" style="width:480px;">
+</div>
+
+<p>
+  タブレットは、インストール ベースでの Android の成長分野であり、<a href="{@docRoot}distribute/stories/tablets.html">ユーザー エンゲージメントと収益化</a>に新たなチャンスをもたらします。本書のガイドラインは、卓越した機能と直感的でわかりやすいデザインの UI で、タブレット ユーザーの期待に応えることに役立ちます。
+</p>
+
+<p>
+  ガイドラインには番号が振られていますが、どの項目から始めてもかまいません。各ガイドラインの推奨事項がアプリに適している範囲でその推奨事項に対処すべきですが、利用者に最高の製品を提供するためには、推奨事項にできるだけ従うようにしてください。
+</p>
+
+<p>
+  このドキュメントには、記載されている各推奨事項への対応に役立つリソースへのリンクが含まれています。
+</p>
+
+<div class="headerLine"><h2 id="core-app-quality">1.タブレット アプリの基本的な品質テスト</h2></div>
+
+<p>タブレット アプリの優れたエクスペリエンスを提供する最初のステップは、アプリがターゲットとしているすべてのデバイスとフォーム ファクタに対して、<em>アプリの中核品質基準</em>に適合していることを確認することです。詳細については、<a href="{@docRoot}distribute/essentials/quality/core.html">アプリの中核品質に関するガイドライン</a>を参照してください。 
+</p>
+
+<p>
+アプリは、公開前に、次のような基本的な技術上のチェックと、ローンチに関する基準に合格していることも必要です。
+</p>
+
+<ul>
+  <li><a href="#android-versions">適切な Android バージョンをターゲットにしている</a></li>
+  <li><a href="#hardware-requirements">ハードウェア依存関係を正しく指定している</a></li>
+  <li><a href="#support-screens">適切な画面のサポートを宣言している</a></li>
+  <li><a href="#use-extra-space">使用可能な画面サイズ全体を使用している</a></li>
+  <li><a href="#google-play">スクリーンショットが Google Play にアップロードされている</a></li>
+</ul>
+
+<p>アプリが Google Play デベロッパー コンソールに既にアップロードされている場合、<a href="#google-play-optimization-tips">[最適化のヒント]</a> ページにアクセスして、上記のチェックに対するアプリの対応状況を確認することができます。</p>
+
+
+<div class="headerLine">
+<h2 id="optimize-layouts">2.大きい画面用にレイアウトを最適化する</h2></div>
+
+<p>
+  Android では、さまざまなデバイス画面のサイズとフォーム ファクタで正しく実行されるアプリを簡単に開発できます。この多様な互換性により、すべての対象デバイスに幅広く提供できる単一アプリの設計が可能になるため、開発者の自由度が増します。ただし、各画面の設定（特にタブレット）で、ユーザーに最善のエクスペリエンスを提供するには、対象の画面設定ごとに、レイアウトとその他の UI コンポーネントを最適化する必要があります。タブレットで UI を最適化すると、新しい機能の提供、新しいコンテンツの表示、またはユーザー エンゲージメントをさらに深めるための他の方法でのエクスペリエンスの強化などに、利用可能な追加の画面を最大限に活用することができます。
+</p>
+
+<p>
+  ハンドセット用に開発したアプリをタブレットに配布する場合、レイアウト、フォント、文字間隔に若干の調整を行うことから始めます。7 インチ タブレットや大きなキャンバスを伴うゲームなどの場合、こうした調整だけで、アプリの外観を向上させることができる場合があります。より画面の大きいタブレットなどの場合、UI の構成要素を再設計して「引き延ばされた UI」を効果的な複数ペインの UI、容易なナビゲーション、追加のコンテンツに置き換えることができます。
+</p>
+
+
+<div style="width:500px;margin:1.5em;margin-top:-16px;">
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-bad.png" style="padding:4px;margin-bottom:0em;">
+<p class="img-caption"><span
+style="font-weight:500;">「引き延ばされた」UI を取り除く</span>: タブレットでは、単一画面のレイアウトの場合、見栄えの悪い空白や長すぎる行が発生します。パディングを使用して UI 要素の幅を減らし、複数画面のレイアウトを使用することを検討してください。</p>
+</div>
+
+<p>以下の提案を参照してください。</p>
+
+
+<ul>
+  <li>必要に応じて <code>large</code> と <code>xlarge</code> に対応するカスタム レイアウトを提供します。<a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">画面の最短寸法</a>または<a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">最小の幅と長さに</a>基づいてロードされるレイアウトも提供できます。
+  </li>
+
+  <li>少なくともフォント サイズ、マージン、文字間隔などの寸法をより大きい画面用にカスタマイズして、間隔の使用とコンテンツの視認性を改善します。
+  </li>
+
+  <li>UI コントロールの位置を調整し、タブレットが横長方向の場合に横向きにするなど、ユーザーがタブレットを手に持っている場合に簡単にアクセスできるようにします。
+  </li>
+
+  <li>UI 要素のパディングは、通常ハンドセットよりタブレット上の方が大きくなります。<a href="{@docRoot}design/style/metrics-grids.html#48dp-rhythm">48dp リズム</a>（および 16dp グリッド）をお勧めします。
+  </li>
+
+  <li>テキストのコンテンツを適切にパディングして、画面の縁に直接かからないようにします。画面の縁の近くにあるコンテンツには <code>16dp</code> 以上のパディングを使用します。
+  </li>
+</ul>
+
+<p>特に、レイアウトが画面全体に「引き延ばされて」表示されないようにしてください。</p>
+
+<ul>
+<li>テキストの行が長くなりすぎないようにします。1 行に最大 100 文字となるように最適化してください。50 文字から 75 文字が理想的です。</li>
+<li>ListViews とメニューは画面全体の幅を使用しないようにしてください。</li>
+<li>パディングを使用して画面上の要素の幅を管理したり、タブレット用の複数画面 UI に切り替えたりします（次のセクションを参照してください）。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/optimize"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="use-extra-space">3.余っている画面領域を活用する</h2></div>
+
+<div style="width:340px;float:right;margin:1.5em;margin-bottom:0;margin-top:0;">
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-good.png" style="padding:4px;margin-bottom:0em;">
+<p class="img-caption"><span
+style="font-weight:500;">複数ペインのレイアウト</span> は、タブレット画面でより見やすく、実用的で読みやすいレイアウトです。</p>
+</div>
+
+<p>タブレット画面は、特に横長方向の場合にアプリが画面をより自在に活用できるようになっています。特に 10 インチ タブレットでは領域が大幅に拡張されますが、7 インチ タブレットでも、コンテンツの表示やユーザーの操作に多くのスペースが提供されます。 </p>
+
+<p>タブレットで実行するアプリの UI を検討する際には、タブレットで利用できる画面の追加領域をフル活用するようにしてください。以下の提案を参照してください。</p>
+
+<ul>
+<li>追加のコンテンツを組み込んだり、既存のコンテンツを別の方法で使用する機会がないか検討します。</li>
+<li><a href="{@docRoot}design/patterns/multi-pane-layouts.html">複数ペインのレイアウト</a>をタブレット画面で使用して、単一のビューを組み合わせて複合ビューを形成します。これで追加の画面領域がより効果的に使用され、ユーザーがアプリをより簡単にナビゲートできるようになります。 </li>
+<li>画面の向きが変わったときに複合ビューのパネルを再編成する方法を計画します。</li>
+
+<div style="width:490px;margin:1.5em auto 1.5em 0;">
+<div style="">
+<img src="{@docRoot}images/home/wear-wordmark.png"> <img src="{@docRoot}images/home/wear.png">
+<p class="image-caption"
+style="padding:.5em"><span
+style="font-weight:500;">複合ビュー</span> では、ハンドセット UI の複数の単一ビュー<em>（上）</em>が組み合わされて、タブレット用<em>（下）</em>のより豊富で効果的な UI になります。 </p>
+</div>
+</div>
+
+<li>単一画面が {@link android.app.Activity} サブクラスとして実装されている場合、個々のコンテンツ パネルを{@link android.app.Fragment}サブクラスとして実装することを検討します。これで、コンテンツを共有する異なるフォーム ファクタと画面にわたってコードを最大限に再利用できるようになります。</li>
+<li>複数画面 UI を使用する画面サイズを決定し、次に適切な画面サイズ バケット（<code>large</code>/<code>xlarge</code> など）または画面の最小幅（<code>sw600dp</code>/<code>sw720</code> など）に異なるレイアウトを指定します。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/extrascreen"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="use-tablet-icons">4.タブレット画面向けに設計されたアセットを使用する</h2></div>
+
+<div><img src="{@docRoot}design/media/devices_displays_density@2x.png"></div>
+
+<p>アプリが最も見やすく表示されるようにするため、タブレットで通常サポートされる範囲で、密度ごとにアイコンとその他のビットマップ アセットを提供します。特にアクション バー、通知、ランチャーのアイコンについては、<a href="{@docRoot}design/style/iconography.html">アイコンのデザイン</a>のガイドラインに従って設計し、複数の密度で提供する必要があります。これで、不鮮明にならず、その他の拡大/縮小加工なしで、すべての画面で適切なサイズで表示されるようになります。</p>
+
+<p class="table-caption"><strong>表 1.</strong> アイコンのタイプ別未加工アセット サイズ<table>
+<tr>
+<th>密度</th>
+<th>ランチャー</th>
+<th>アクション バー</th>
+<th>小/状況依存</th>
+<th>通知</th>
+</tr>
+<tr>
+<td><code>mdpi</code></td>
+<td>48x48 ピクセル</td>
+<td>32x32 ピクセル</td>
+<td>16x16 ピクセル</td>
+<td>24x24 ピクセル</td>
+</tr>
+<tr>
+<td><code>hdpi</code></td>
+<td>72x72 ピクセル</td>
+<td>48x48 ピクセル</td>
+<td>24x24 ピクセル</td>
+<td>36x36 ピクセル</td>
+</tr>
+<tr>
+<td><code>tvdpi</code></td>
+<td><em>（hdpi を使用）</em></td>
+<td><em>（hdpi を使用）</em></td>
+<td><em>（hdpi を使用）</em></td>
+<td><em>（hdpi を使用）</em></td>
+</tr>
+<tr>
+<td><code>xhdpi</code></td>
+<td>96x96 ピクセル</td>
+<td>64x64 ピクセル</td>
+<td>32x32 ピクセル</td>
+<td>48x48 ピクセル</td>
+</tr>
+<tr>
+<td><code>xxhdpi</code></td>
+<td>144x144 ピクセル</td>
+<td>96x96 ピクセル</td>
+<td>48x48 ピクセル</td>
+<td>72x72 ピクセル</td>
+</tr>
+
+</table>
+
+<p>
+  少なくとも、次の一般的なタブレットの画面密度の<strong> 1 つ以上</strong>に対して最適化されたアイコンとビットマップ アセットのバージョンを用意してください。
+</p>
+<ul>
+  <li><code>hdpi</code></li>
+  <li><code>xhdpi</code></li>
+  <li><code>xxhdpi</code></li>
+</ul>
+
+<p>その他のヒント:</p>
+
+<ul>
+<li>アイコンを設計する際にはベクトル シェイプを使用して、アイコンのディテールやエッジの明瞭さが損なわれないで拡大/縮小されるようにします。</li>
+<li>密度固有の<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">リソース修飾子</a>を使用して、正しいアイコンが画面の密度ごとにロードされるようにします。</li>
+<li>タブレットや他の大画面デバイスでは、デバイスの実際の密度よりも大きい密度サイズのランチャー アイコンを必要とすることがあります。そのため、ランチャー アイコンはできるだけ高密度で提供するようにしてください。たとえば、タブレットの画面が {@code xhdpi} の場合、{@code xxhdpi} バージョンののランチャー アイコンが必要です。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/assets"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="adjust-font-sizes">5.フォント サイズとタッチ ターゲットを調整する</h2></div>
+
+<p>アプリをタブレットで使いやすくするには、ターゲットとしているすべての画面構成について、タブレット UI でフォント サイズとタッチ ターゲットを調整する必要があります。フォント サイズは<a href="{@docRoot}guide/topics/ui/themes.html">スタイル指定属性</a>や<a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">寸法リソース</a>による調整が可能で、タッチ ターゲットは上述のようにレイアウトとビットマップ画像による調整が可能です。 </p>
+
+<p>以下の考慮事項も参考にしてください。</p>
+<ul>
+<li>タブレットの画面サイズと密度で、テキストが大きすぎたり、小さすぎたりしないようにしてください。ラベルは対応する UI 要素に対して適切な大きさになっており、ラベル、タイトル、その他の要素で不適切な改行を起こさないようにしてください。</li>
+<li>オンスクリーン要素のタッチ ターゲットの推奨サイズは 48dp（最低 32dp）です。タブレット UI で調整が必要な場合があります。<a href="{@docRoot}design/style/metrics-grids.html">メトリックとグリッド</a>を参照して実装方法について理解し、ユーザーをできるだけサポートするようにします。特定のユーザーのアクセシビリティのニーズに適合させる場合、より大きなタッチ ターゲットの使用が適切な場合があります。 </li>
+<li>可能であれば、小さいアイコンの場合、{@link android.view.TouchDelegate} を使用してタッチ可能な領域を 48dp よりも拡大するか、透明なボタン内でアイコンを中央に配置します。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/fonts"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="adjust-widgets">6.ホーム画面のウィジェットのサイズを調整する</h2></div>
+
+<p>アプリにホーム画面のウィジェットが含まれている場合、タブレット画面で優れたユーザー エクスペリエンスを実現するため、以下の点を考慮してください。 </p>
+
+<ul>
+<li>ウィジェットのデフォルトの高さと幅をタブレット画面に合わせて設定します。最大と最小のリサイズの高さと幅についても設定します。
+</li>
+<li>ウィジェットは、5 以上のホーム画面の行（縦型ウィジェットまたは正方形ウィジェットの場合）または列（横型ウィジェットまたは正方形ウィジェットの場合）に広げられるように、420dp 以上にリサイズできるようにします。 </li>
+<li>9-patch 画像が正しくレンダリングされるようにします。</li>
+<li>デフォルトのシステム マージンを使用します。</li>
+<li>可能であれば、アプリの <code>targetSdkVersion</code> を 14 以上に設定します。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/widgets"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="offer-full-feature-set">7.タブレット ユーザー向けの機能のフル セット</h2></div>
+
+<div class="centered-full-image" style="width:600px;margin:1.5em"><img src="{@docRoot}images/gp-tablets-full-feature-set.png" alt="Tablet feature sets"></div>
+
+<p>タブレット ユーザーがアプリの機能を最大限に使用できるようにします。次の推奨事項を参照してください。</p>
+
+<ul>
+  <li>少なくとも電話と同じ機能セットをタブレットにも提供できるようにアプリを設計します。
+  </li>
+
+  <li>例外的な場合として、機能がほとんどのタブレットのハードウェアまたはユースケースでサポートされない場合、特定の機能を省略、または置き換えることがあります。次に例を示します。 <ul>
+      <li>ハンドセットが電話機能を使用するが、現在のタブレットで電話が使用できない場合、関連する機能を省略、または置き換えてもかまいません。
+      </li>
+
+      <li>多くのタブレットに GPS センサーが搭載されていますが、ほとんどのユーザーは、通常、走りながらタブレットを携行することはありません。電話アプリに、ユーザーが電話を携行しているときに走った GPS 軌跡をユーザーが記録できる機能があっても、タブレットでは、アプリはこの機能を提供する必要はありません。ユースケースに説得力がないためです。
+      </li>
+    </ul>
+  </li>
+
+  <li>タブレット UI から機能または性能を省く場合、省いたものにユーザーがアクセスできないようにするか、代替機能への「グレイスフル デグラデーション」が提供されるようにします（ハードウェア機能に関する下記のセクションも参照してください）。
+  </li>
+</ul>
+
+<div class="headerLine"><h2 id="android-versions">8.ターゲットの Android のバージョンを正しく設定する</h2></div>
+
+<p>
+  タブレットにアプリをできるだけ広く配布するには、タブレットをサポートする Android のバージョンをアプリが正しくターゲットにしている必要があります。タブレットに対する最初のサポートは <a href="{@docRoot}about/versions/android-3.0.html">Android 3.0</a>（API レベル 11）で追加されました。タブレット、電話、その他のデバイス向けの統合型 UI フレームワーク サポートは、<a href="{@docRoot}about/versions/android-4.0.html">Android 4.0</a> で導入されました。
+</p>
+
+<p>
+  アプリのターゲットである Android バージョンの範囲を、マニフェスト ファイルの <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> 要素で設定できます。多くの場合、この要素の <code>targetSdkVersion</code> 属性を最も高い API レベルに設定して、Android のバージョンを正しくターゲットにできます。
+</p>
+
+<p style="margin-bottom:.5em;">
+  少なくとも、<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> 要素について以下の項目を確認してください。
+</p>
+
+<ol style="list-style-type:lower-alpha;margin-top:0em;">
+  <li>
+    <code>targetSdkVersion</code> は 11 以上の値（推奨値は 14 以上）で宣言されている。または
+  </li>
+
+  <li>
+    <code>minSdkVersion</code> が 11 以上の値で宣言されている。
+  </li>
+
+  <li><code>maxSdkVersion</code> 属性が宣言されている場合、値が 11 以上である必要があります。通常は、<code>maxSdkVersion</code> の使用は<em>推奨されません</em>。
+  </li>
+</ol>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/versions"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="hardware-requirements">9.ハードウェア機能の依存関係を正しく宣言する</h2></div>
+
+<p>
+  ハンドセットとタブレットは、通常、センサー、カメラ、電話、その他の機能について、若干異なるハードウェア サポートを提供します。たとえば、多くのタブレットは電話サポートを含まない「Wi-Fi」設定で使用できます。
+</p>
+
+<p>
+  1 つの APK を電話とタブレットのずべての顧客基盤にわたって広く配布できるようにするため、アプリがタブレットで通常は使用できないハードウェア機能の要件を宣言していないことを確認してください。代わりにハードウェア機能を下記のようにアプリのマニフェストで<em>不要</em>として適切に宣言します。
+</p>
+
+<ul>
+<li>アプリのマニフェストで、<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> 要素を探します。特に、一部のタブレットで利用できない可能性のあるハードウェア機能を探します。たとえば次のようなものです。 <ul>
+<li><code>android.hardware.telephony</code></li>
+<li><code>android.hardware.camera</code>（背面カメラを意味します）、または</li>
+<li><code>android.hardware.camera.front</code></li>
+</ul></li>
+
+<li><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> 要素を、<code>android:required=”false”</code> 属性を含めることで<em>不要</em>と宣言します。 <p>
+  たとえば、電話機能を提供しないデバイスにも、アプリを広く配布できるように、<code>android.hardware.telephony</code> に従属関係を宣言する正しい方法を次に示します。
+</p>
+
+<pre>&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;</pre></li>
+
+<li>同様に、タブレットにふさわしくない<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">ハードウェア機能の要件を暗黙指定する </a><a href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> 要素があるか、マニフェストを確認します。このようなパーミッションが見つかった場合、機能に対応する <code>&lt;uses-feature&gt;</code> 要素を明示的に宣言し、<code>android:required=”false”</code> 属性を含めるようにします。</li>
+</ul>
+
+
+<p>
+  ハードウェア機能を<em>不要</em>として宣言してから、アプリをさまざまなデバイスでテストするようにしてください。アプリが使用するハードウェア機能が利用できない場合でも、アプリは通常に機能する必要があり、必要に応じて「グレイスフル デグラデーション」を提供して、代替機能を用意しておく必要があります。
+</p>
+
+<p>
+  たとえば、アプリがロケーションの設定に通常は GPS を使用する場合で GPS がデバイスでサポートされていない場合、代わりにアプリでユーザーがロケーションを手動で設定する場合があります。アプリは実行時にデバイスのハードウェア機能があるか確認し、必要に応じて対処します。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/hardware"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="support-screens">10.タブレット画面のサポートを宣言する</h2></div>
+
+<p>アプリをさまざまなタブレットに配布できるようにするには、アプリが次のようにそのマニフェスト ファイルでタブレットの画面サイズのサポートを宣言する必要があります。</p>
+
+<ul>
+  <li><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> 要素が宣言されている場合は、<code>android:largeScreens="false"</code> または <code>android:xlargeScreens="false"</code> を指定しないでください。</li>
+  <li>13 未満の <code>minSdkVersion</code> 値をターゲットにしているアプリの場合、<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> 要素を <code>android:largeScreens="true"</code> と <code>android:xlargeScreens="true"</code> の両方で宣言する必要があります。</li>
+</ul>
+
+<p>アプリがマニフェストに <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a> 要素を宣言している場合、その要素に、アプリがサポートする<em>タブレット画面のサイズと密度の組み合わせをすべて</em>指定する属性が含まれている必要があります。可能であれば、アプリで <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a> 要素の使用は避けてください。</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/tabletscreens"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="google-play">11.Google Play でタブレット UI を紹介する</h2></div>
+
+<p>
+  タブレット アプリ向けの豊富で最適化された UI を作成する作業が完了したら、利用者にその UI を知ってもらいましょう。タブレット アプリを Google Play でユーザーに宣伝する主な方法を以下に示します。
+</p>
+
+<div><img class="border-img" src="{@docRoot}images/gp-tablet-quality-4.jpg"></div>
+
+
+<h4>
+  タブレット UI のスクリーンショットをアップロードする
+</h4>
+
+<p>
+  タブレット ユーザーは、アプリが電話ではなくタブレット上でどのように見えるか知りたいと思っています。タブレット アプリを開発したら、タブレットの UI のスクリーンショットを Google Play デベロッパー コンソールにアップロードするようにしてください。以下にガイドラインを示します。
+  </p>
+
+<ul style="margin-top:0;">
+  <li>スタートアップ ページやサインイン ページではなく、アプリの中核となる機能を示します。ユーザーが多くの時間を費やす画面が何であっても、スクリーンショットで中核となる機能を示すようにしてください。
+  </li>
+
+  <li>7 インチ タブレットと 10 インチ タブレットの両方のスクリーンショットを追加します。
+  </li>
+
+  <li>横方向と縦方向の両方のスクリーンショットを追加します（可能な場合）。
+  </li>
+
+  <li>可能であればスクリーン キャプチャを使用します。スクリーンショットに実際のデバイスのハードウェアを表示しないようにしてください。</li>
+
+  <li>タブレットのスクリーンショットの推奨解像度はどの方向も <strong>1280 x 720</strong> 以上です。
+  </li>
+
+  <li>7 インチ タブレットの UI のスクリーンショットを 8 枚、10 インチ タブレット用にさらに 8 枚をアップロードします。
+  </li>
+</ul>
+
+<h4>
+  アプリの説明とリリース ノートを更新する
+</h4>
+
+<ul>
+  <li>アプリの説明の中で、アプリがタブレット用に最適化した UI と優れた機能をタブレット ユーザーに提供していることを強調するようにします。タブレット UI の動作とユーザーがこれを気に入る理由について詳しく述べたものを追加します。
+  </li>
+
+  <li>アプリのリリース ノートと更新情報に、タブレットのサポートに関する情報を含めます。
+  </li>
+</ul>
+
+<h4>
+  宣伝用動画を更新する
+</h4>
+
+<p>
+  多くのユーザーは、アプリの宣伝用動画を見て、アプリがどのようなもので、楽しめそうかどうかを判断します。タブレット ユーザー向けに、宣伝用動画でアプリのタブレット UI を強調することで、この関心にしっかり対応します。以下にヒントとガイドラインを示します。
+</p>
+
+<ul>
+  <li>タブレットで実行されているアプリのスクリーンショットを 1 枚以上追加します。タブレット ユーザーに最も効果的に訴えかけるには、電話 UI とほぼ同じ比率でタブレット UI の宣伝を行うことをお勧めします。
+  </li>
+
+  <li>タブレット UI をできるだけ早い段階で動画で示します。タブレット ユーザーが電話 UI での機能のひと通りの紹介を辛抱強く待つと想定しないでください。理想的には、最初の 10 秒以内にタブレット UI を示すか、電話 UI を紹介したときと同じ時点で示して、ユーザーの関心を引くことが望まれます。
+  </li>
+
+  <li>タブレット UI を示していることをはっきり伝えるには、ハンドヘルド タブレット デバイスで実行されているアプリのスクリーンショットを含めます。
+  </li>
+
+  <li>動画の台詞やナレーションでアプリのタブレット UI を強調します。
+  </li>
+</ul>
+
+<h4>
+  プロモーション キャンペーンでタブレット UI を大きく扱う
+</h4>
+
+<p>
+  プロモーション キャンペーン、Web サイト、ソーシャル メディアへの投稿、広告、その他のすべてで、タブレット UI についてタブレット ユーザーが認識できるようにします。以下の提案を参照してください。
+</p>
+
+<ul>
+  <li>タブレットでのアプリの使用を強調するマーケティング キャンペーンまたは広告キャンペーンを行う計画を立てます。</li>
+
+  <li>プロモーション キャンペーンに、タブレット アプリを一番良い状態で示します。<a href="{@docRoot}distribute/tools/promote/device-art.html">Device Art Generator</a> を利用すると、7 インチ タブレットまたは 10 インチ タブレットの宣伝用画像を、選択した向きで、ドロップ シャドウと画面の光の反射の有無を選択して簡単に作ることができます。キャプチャし、ドラッグ アンド ドロップするだけで出来上がります。
+  </li>
+
+  <li>オンライン プロモーションに Google Play バッジを含めて、リンクによってユーザーがアプリのストア掲載情報に直接アクセスできるようにします。<a href="{@docRoot}distribute/tools/promote/badges.html">バッジ ジェネレータ</a>を利用してさまざまな言語のバッジを作成できます。
+  </li>
+</ul>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/showcase"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine">
+  <h2 id="google-play-best-practices">
+    12.Google Play での公開に向けたベスト プラクティスに従う
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play でタブレット アプリの提供を成功に導くためのベスト プラクティスをいくつかご紹介します。
+</p>
+
+<div>
+  <img class="border-img" src="{@docRoot}images/gp-tablet-quality-5.jpg" style="1px solid #ddd">
+</div>
+
+<h4 id="google-play-optimization-tips">
+  アプリの最適化に関するヒントを確認する
+</h4>
+
+<p>Google Play デベロッパー コンソールに [最適化のヒント] ページが設けられ、タブレット アプリの配布と品質の基本的なガイドラインへのアプリの対応状況を簡単に確認できるようになりました。このページにアクセスするには、デベロッパー コンソールにサインインし、[すべてのアプリ] からアプリをロードして左のナビゲーションから [最適化のヒント] をクリックします。</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>フィードバックの送信方法</h2>
+
+<p>最適化のヒントに関するフィードバックを送信する場合や、手動による確認を依頼する場合、下記のリンクをご利用ください。</p>
+
+<p>タブレット アプリの品質に関するガイドラインの、関連するセクションをよくお読みになってからフィードバックを送信してください。</p>
+
+<p><strong><a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">タブレット向け設計に関するお問い合わせフォーム &raquo;</a></strong></p>
+</div>
+</div>
+
+<p>デベロッパー コンソールは、基本的な品質基準を確認する一連のチェックを実行して、アプリ用の [最適化のヒント] ページを作成します。チェック中に問題が見つかった場合は、[最適化のヒント] ページで「To Do」項目として通知されます。</p>
+
+<p>アプリでタブレット エクスペリエンスを開発した場合は、[最適化のヒント] ページにアクセスして、基本的なチェックに対するアプリの対応状況を確認してください。問題が挙げられていたら、必要に応じてアプリで対処し、配布用の新しいバイナリをアップロードすることをお勧めします。 </p>
+
+<p>[最適化のヒント] ページに、アプリに該当しない、またはタブレットの品質に影響しないと思われる「To Do」問題が挙がっている場合、<a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">タブレット向け設計に関するお問い合わせフォーム &raquo;</a>を使用して当社までお知らせください。当社でアプリを確認し、必要に応じて [最適化のヒント] ページを更新します。</p>
+
+
+<h4>アプリのフィルタリングを確認する</h4>
+
+<p>
+  <a href="https://play.google.com/apps/publish/">デベロッパー コンソール</a>にアプリをアップロードしたら、APK がサポートするデバイスの一覧を確認して、ターゲットとするタブレット デバイスでアプリが除外されていないことを確認してください。
+</p>
+
+<h4>単一の APK として配布する</h4>
+
+<p>
+  すべての画面サイズ（電話とタブレット）に対して、Google Play の掲載情報を 1 つだけ使用して、単一の APK としてアプリを公開することをお勧めします。このアプローチを利用すると次の複数のメリットがもたらされます。
+</p>
+
+<ul style="margin-top:.25em;">
+  <li>検索、ブラウジング、プロモーションでユーザーがアプリを見つけやすくなります。
+  </li>
+
+  <li>ユーザーが新しいデバイスを入手した場合、アプリの自動リストアが簡単になります。
+  </li>
+
+  <li>評価とダウンロードの統計がすべてのデバイスで統合されます。
+  </li>
+
+  <li>タブレットを 2 つ目の掲載情報に公開すると、ブランドに対する評価が希薄化されることがあります。
+  </li>
+</ul>
+
+<p>
+  必要に応じて<a href="{@docRoot}google/play/publishing/multiple-apks.html">複数の APK サポート</a>を使用してアプリを配布する方法を選択できますが、通常は単一の APK を使用してすべてのデバイスに到達する方法を強くお勧めします。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine">
+  <h2 id="test-environment">
+    タブレット用のテスト環境をセットアップする
+  </h2>
+
+
+</div>
+
+<p>
+  タブレット上のアプリの品質（アプリの中核品質とタブレット アプリの品質の両方）を、テスト用に適切なハードウェアまたはエミュレータ環境を使用して評価します。
+</p>
+
+<p>
+  アプリの中核品質基準に対するテスト用の<a href="{@docRoot}distribute/essentials/quality/core.html#test-environment">推奨されるテスト環境</a>に照らして、中サイズのタブレットと、より多いまたは少ないハードウェア/ソフトウェア機能を搭載したタブレットを含めます。
+</p>
+
+<p class="table-caption"><strong>表 1.</strong> 通常のタブレット テスト環境には、以下の表の行ごとに、リストされたいずれかのプラットフォーム バージョン、画面構成、ハードウェア機能構成を持つ、1 つまたは 2 つのデバイスが含まれます。</p>
+
+<table>
+<tr>
+<th>タイプ</th>
+<th>サイズ</th>
+<th>密度</th>
+<th>バージョン</th>
+<th>AVD スキン</th>
+</tr>
+
+<tr>
+<td>7 インチ タブレット</td>
+<td><span style="white-space:nowrap"><code>large</code> または</span><br /><code>-sw600</code></td>
+<td><code>hdpi</code>、<br /><code>tvdpi</code></td>
+<td>Android 4.0 以降（API レベル 14 以降）</td>
+<td>WXGA800-7in</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">10 インチ</span> タブレット</td>
+<td><span style="white-space:nowrap"><code>xlarge</code> または</span><br /><code>-sw800</code></td>
+<td><code>mdpi</code>、<br /><code>hdpi</code>、<br /><code>xhdpi</code></td>
+<td>Android 3.2 以降（API レベル 13 以降）</td>
+<td>WXGA800</td>
+</tr>
+</table>
+
+<div class="headerLine"><h2 id="related-resources">関連リソース</h2></div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
