@@ -4333,10 +4333,23 @@ final class Settings {
                 }
                 pw.print(prefix); pw.print("  "); pw.print(permissionState.getName());
                 pw.print(", granted="); pw.print(permissionState.isGranted());
-                    pw.print(", flags=0x"); pw.println(Integer.toHexString(
+                    pw.print(", flags="); pw.println(permissionFlagsToString(
                         permissionState.getFlags()));
             }
         }
+    }
+
+    private static String permissionFlagsToString(int flags) {
+        StringBuilder flagsString = new StringBuilder();
+        flagsString.append("[ ");
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            flagsString.append(PackageManager.permissionFlagToString(flag));
+            flagsString.append(' ');
+        }
+        flagsString.append(']');
+        return flagsString.toString();
     }
 
     void dumpInstallPermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
@@ -4351,7 +4364,7 @@ final class Settings {
                 }
                 pw.print(prefix); pw.print("  "); pw.print(permissionState.getName());
                     pw.print(", granted="); pw.print(permissionState.isGranted());
-                    pw.print(", flags=0x"); pw.println(Integer.toHexString(
+                    pw.print(", flags="); pw.println(permissionFlagsToString(
                         permissionState.getFlags()));
             }
         }
