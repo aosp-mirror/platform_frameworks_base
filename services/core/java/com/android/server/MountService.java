@@ -2888,7 +2888,8 @@ class MountService extends IMountService.Stub
                 Slog.i(TAG, "Trying to bind to DefaultContainerService");
 
             Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
-            if (mContext.bindService(service, mDefContainerConn, Context.BIND_AUTO_CREATE)) {
+            if (mContext.bindServiceAsUser(service, mDefContainerConn, Context.BIND_AUTO_CREATE,
+                    UserHandle.OWNER)) {
                 mBound = true;
                 return true;
             }

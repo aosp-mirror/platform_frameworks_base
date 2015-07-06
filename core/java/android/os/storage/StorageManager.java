@@ -586,6 +586,21 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public @NonNull List<VolumeInfo> getWritablePrivateVolumes() {
+        try {
+            final ArrayList<VolumeInfo> res = new ArrayList<>();
+            for (VolumeInfo vol : mMountService.getVolumes(0)) {
+                if (vol.getType() == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
+                    res.add(vol);
+                }
+            }
+            return res;
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
     public @NonNull List<VolumeRecord> getVolumeRecords() {
         try {
             return Arrays.asList(mMountService.getVolumeRecords(0));

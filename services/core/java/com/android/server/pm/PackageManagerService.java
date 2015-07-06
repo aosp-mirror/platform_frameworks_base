@@ -191,6 +191,7 @@ import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
@@ -428,6 +429,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Used for privilege escalation. MUST NOT BE CALLED WITH mPackages
     // LOCK HELD.  Can be called with mInstallLock held.
+    @GuardedBy("mInstallLock")
     final Installer mInstaller;
 
     /** Directory where installed third-party apps stored */
@@ -455,6 +457,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Keys are String (package name), values are Package.  This also serves
     // as the lock for the global state.  Methods that must be called with
     // this lock held have the prefix "LP".
+    @GuardedBy("mPackages")
     final ArrayMap<String, PackageParser.Package> mPackages =
             new ArrayMap<String, PackageParser.Package>();
 
@@ -1605,9 +1608,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
             if (vol.type == VolumeInfo.TYPE_PRIVATE) {
                 if (vol.state == VolumeInfo.STATE_MOUNTED) {
-                    // TODO: ensure that private directories exist for all active users
-                    // TODO: remove user data whose serial number doesn't match
+                    final String volumeUuid = vol.getFsUuid();
+
+                    // Clean up any users or apps that were removed or recreated
+                    // while this volume was missing
+                    reconcileUsers(volumeUuid);
+                    reconcileApps(volumeUuid);
+
+                    // Clean up any install sessions that expired or were
+                    // cancelled while this volume was missing
+                    mInstallerService.onPrivateVolumeMounted(volumeUuid);
+
                     loadPrivatePackages(vol);
+
                 } else if (vol.state == VolumeInfo.STATE_EJECTING) {
                     unloadPrivatePackages(vol);
                 }
@@ -1624,7 +1637,17 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         @Override
         public void onVolumeForgotten(String fsUuid) {
-            // TODO: remove all packages hosted on this uuid
+            // Remove any apps installed on the forgotten volume
+            synchronized (mPackages) {
+                final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(fsUuid);
+                for (PackageSetting ps : packages) {
+                    Slog.d(TAG, "Destroying " + ps.name + " because volume was forgotten");
+                    deletePackage(ps.name, new LegacyPackageDeleteObserver(null).getBinder(),
+                            UserHandle.USER_OWNER, PackageManager.DELETE_ALL_USERS);
+                }
+
+                mSettings.writeLPr();
+            }
         }
     };
 
@@ -2770,8 +2793,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.packageName = packageName;
                 pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
                 pkg.applicationInfo.privateFlags = ps.pkgPrivateFlags;
-                pkg.applicationInfo.dataDir = PackageManager.getDataDirForUser(ps.volumeUuid,
-                        packageName, userId).getAbsolutePath();
+                pkg.applicationInfo.dataDir = Environment
+                        .getDataUserPackageDirectory(ps.volumeUuid, userId, packageName)
+                        .getAbsolutePath();
                 pkg.applicationInfo.primaryCpuAbi = ps.primaryCpuAbiString;
                 pkg.applicationInfo.secondaryCpuAbi = ps.secondaryCpuAbiString;
             }
@@ -6615,8 +6639,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         } else {
             // This is a normal package, need to make its data directory.
-            dataPath = PackageManager.getDataDirForUser(pkg.volumeUuid, pkg.packageName,
-                    UserHandle.USER_OWNER);
+            dataPath = Environment.getDataUserPackageDirectory(pkg.volumeUuid,
+                    UserHandle.USER_OWNER, pkg.packageName);
 
             boolean uidError = false;
             if (dataPath.exists()) {
@@ -6770,6 +6794,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
         final int[] userIds = sUserManager.getUserIds();
         synchronized (mInstallLock) {
+            // Make sure all user data directories are ready to roll; we're okay
+            // if they already exist
+            if (!TextUtils.isEmpty(pkg.volumeUuid)) {
+                for (int userId : userIds) {
+                    if (userId != 0) {
+                        mInstaller.createUserData(pkg.volumeUuid, pkg.packageName,
+                                UserHandle.getUid(userId, pkg.applicationInfo.uid), userId,
+                                pkg.applicationInfo.seinfo);
+                    }
+                }
+            }
+
             // Create a native library symlink only if we have native libraries
             // and if the native libraries are 32 bit libraries. We do not provide
             // this symlink for 64 bit libraries.
@@ -11441,8 +11477,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         String pkgName = pkg.packageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installNewPackageLI: " + pkg);
-        final boolean dataDirExists = PackageManager.getDataDirForUser(volumeUuid, pkgName,
-                UserHandle.USER_OWNER).exists();
+        final boolean dataDirExists = Environment
+                .getDataUserPackageDirectory(volumeUuid, UserHandle.USER_OWNER, pkgName).exists();
         synchronized(mPackages) {
             if (mSettings.mRenamedPackages.containsKey(pkgName)) {
                 // A package with the same name is already installed, though
@@ -12299,6 +12335,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             final IPackageDeleteObserver2 observer, final int userId, final int flags) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(observer);
         final int uid = Binder.getCallingUid();
         if (UserHandle.getUserId(uid) != userId) {
             mContext.enforceCallingPermission(
@@ -15237,6 +15275,127 @@ public class PackageManagerService extends IPackageManager.Stub {
         sendResourcesChangedBroadcast(false, false, unloaded, null);
     }
 
+    /**
+     * Examine all users present on given mounted volume, and destroy data
+     * belonging to users that are no longer valid, or whose user ID has been
+     * recycled.
+     */
+    private void reconcileUsers(String volumeUuid) {
+        final File[] files = Environment.getDataUserDirectory(volumeUuid).listFiles();
+        if (ArrayUtils.isEmpty(files)) {
+            Slog.d(TAG, "No users found on " + volumeUuid);
+            return;
+        }
+
+        for (File file : files) {
+            if (!file.isDirectory()) continue;
+
+            final int userId;
+            final UserInfo info;
+            try {
+                userId = Integer.parseInt(file.getName());
+                info = sUserManager.getUserInfo(userId);
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Invalid user directory " + file);
+                continue;
+            }
+
+            boolean destroyUser = false;
+            if (info == null) {
+                logCriticalInfo(Log.WARN, "Destroying user directory " + file
+                        + " because no matching user was found");
+                destroyUser = true;
+            } else {
+                try {
+                    UserManagerService.enforceSerialNumber(file, info.serialNumber);
+                } catch (IOException e) {
+                    logCriticalInfo(Log.WARN, "Destroying user directory " + file
+                            + " because we failed to enforce serial number: " + e);
+                    destroyUser = true;
+                }
+            }
+
+            if (destroyUser) {
+                synchronized (mInstallLock) {
+                    mInstaller.removeUserDataDirs(volumeUuid, userId);
+                }
+            }
+        }
+
+        final UserManager um = mContext.getSystemService(UserManager.class);
+        for (UserInfo user : um.getUsers()) {
+            final File userDir = Environment.getDataUserDirectory(volumeUuid, user.id);
+            if (userDir.exists()) continue;
+
+            try {
+                UserManagerService.prepareUserDirectory(mContext, volumeUuid, user.id);
+                UserManagerService.enforceSerialNumber(userDir, user.serialNumber);
+            } catch (IOException e) {
+                Log.wtf(TAG, "Failed to create user directory on " + volumeUuid, e);
+            }
+        }
+    }
+
+    /**
+     * Examine all apps present on given mounted volume, and destroy apps that
+     * aren't expected, either due to uninstallation or reinstallation on
+     * another volume.
+     */
+    private void reconcileApps(String volumeUuid) {
+        final File[] files = Environment.getDataAppDirectory(volumeUuid).listFiles();
+        if (ArrayUtils.isEmpty(files)) {
+            Slog.d(TAG, "No apps found on " + volumeUuid);
+            return;
+        }
+
+        for (File file : files) {
+            final boolean isPackage = (isApkFile(file) || file.isDirectory())
+                    && !PackageInstallerService.isStageName(file.getName());
+            if (!isPackage) {
+                // Ignore entries which are not packages
+                continue;
+            }
+
+            boolean destroyApp = false;
+            String packageName = null;
+            try {
+                final PackageLite pkg = PackageParser.parsePackageLite(file,
+                        PackageParser.PARSE_MUST_BE_APK);
+                packageName = pkg.packageName;
+
+                synchronized (mPackages) {
+                    final PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps == null) {
+                        logCriticalInfo(Log.WARN, "Destroying " + packageName + " on + "
+                                + volumeUuid + " because we found no install record");
+                        destroyApp = true;
+                    } else if (!TextUtils.equals(volumeUuid, ps.volumeUuid)) {
+                        logCriticalInfo(Log.WARN, "Destroying " + packageName + " on "
+                                + volumeUuid + " because we expected it on " + ps.volumeUuid);
+                        destroyApp = true;
+                    }
+                }
+
+            } catch (PackageParserException e) {
+                logCriticalInfo(Log.WARN, "Destroying " + file + " due to parse failure: " + e);
+                destroyApp = true;
+            }
+
+            if (destroyApp) {
+                synchronized (mInstallLock) {
+                    if (packageName != null) {
+                        removeDataDirsLI(volumeUuid, packageName);
+                    }
+                    if (file.isDirectory()) {
+                        mInstaller.rmPackageDir(file.getAbsolutePath());
+                    } else {
+                        file.delete();
+                    }
+                }
+            }
+        }
+    }
+
     private void unfreezePackage(String packageName) {
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -15536,14 +15695,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Technically, we shouldn't be doing this with the package lock
             // held.  However, this is very rare, and there is already so much
             // other disk I/O going on, that we'll let it slide for now.
-            final StorageManager storage = StorageManager.from(mContext);
-            final List<VolumeInfo> vols = storage.getVolumes();
-            for (VolumeInfo vol : vols) {
-                if (vol.getType() == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
-                    final String volumeUuid = vol.getFsUuid();
-                    if (DEBUG_INSTALL) Slog.d(TAG, "Removing user data on volume " + volumeUuid);
-                    mInstaller.removeUserDataDirs(volumeUuid, userHandle);
-                }
+            final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                final String volumeUuid = vol.getFsUuid();
+                if (DEBUG_INSTALL) Slog.d(TAG, "Removing user data on volume " + volumeUuid);
+                mInstaller.removeUserDataDirs(volumeUuid, userHandle);
             }
         }
         mUserNeedsBadging.delete(userHandle);
@@ -15597,10 +15753,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /** Called by UserManagerService */
-    void createNewUserLILPw(int userHandle, File path) {
+    void createNewUserLILPw(int userHandle) {
         if (mInstaller != null) {
             mInstaller.createUserConfig(userHandle);
-            mSettings.createNewUserLILPw(this, mInstaller, userHandle, path);
+            mSettings.createNewUserLILPw(this, mInstaller, userHandle);
             applyFactoryDefaultBrowserLPw(userHandle);
         }
     }

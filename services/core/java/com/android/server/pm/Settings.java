@@ -3617,10 +3617,7 @@ final class Settings {
         }
     }
 
-    void createNewUserLILPw(PackageManagerService service, Installer installer,
-            int userHandle, File path) {
-        service.mContext.getSystemService(StorageManager.class)
-            .createNewUserDir(userHandle, path);
+    void createNewUserLILPw(PackageManagerService service, Installer installer, int userHandle) {
         for (PackageSetting ps : mPackages.values()) {
             if (ps.pkg == null || ps.pkg.applicationInfo == null) {
                 continue;
