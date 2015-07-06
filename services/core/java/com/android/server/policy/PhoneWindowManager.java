@@ -44,6 +44,9 @@ import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiPlaybackClient;
+import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -351,6 +354,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSystemReady;
     boolean mSystemBooted;
     boolean mHdmiPlugged;
+    HdmiControl mHdmiControl;
     IUiModeManager mUiModeManager;
     int mUiMode;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
@@ -1200,6 +1204,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void handleShortPressOnHome() {
+        // Turn on the connected TV and switch HDMI input if we're a HDMI playback device.
+        getHdmiControl().turnOnTv();
+
         // If there's a dream running then use home to escape the dream
         // but don't actually go home.
         if (mDreamManagerInternal != null && mDreamManagerInternal.isDreaming()) {
@@ -1209,6 +1216,46 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Go home!
         launchHomeFromHotKey();
+    }
+
+    /**
+     * Creates an accessor to HDMI control service that performs the operation of
+     * turning on TV (optional) and switching input to us. If HDMI control service
+     * is not available or we're not a HDMI playback device, the operation is no-op.
+     */
+    private HdmiControl getHdmiControl() {
+        if (null == mHdmiControl) {
+            HdmiControlManager manager = (HdmiControlManager) mContext.getSystemService(
+                        Context.HDMI_CONTROL_SERVICE);
+            HdmiPlaybackClient client = null;
+            if (manager != null) {
+                client = manager.getPlaybackClient();
+            }
+            mHdmiControl = new HdmiControl(client);
+        }
+        return mHdmiControl;
+    }
+
+    private static class HdmiControl {
+        private final HdmiPlaybackClient mClient;
+
+        private HdmiControl(HdmiPlaybackClient client) {
+            mClient = client;
+        }
+
+        public void turnOnTv() {
+            if (mClient == null) {
+                return;
+            }
+            mClient.oneTouchPlay(new OneTouchPlayCallback() {
+                @Override
+                public void onComplete(int result) {
+                    if (result != HdmiControlManager.RESULT_SUCCESS) {
+                        Log.w(TAG, "One touch play failed: " + result);
+                    }
+                }
+            });
+        }
     }
 
     private void handleLongPressOnHome(int deviceId) {
