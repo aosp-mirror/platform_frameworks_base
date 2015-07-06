@@ -62,6 +62,9 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     public static final String AUTHORITY = "com.android.externalstorage.documents";
 
+    private static final Uri BASE_URI =
+            new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY).build();
+
     // docId format: root:path/to/file
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
@@ -170,8 +173,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
         Log.d(TAG, "After updating volumes, found " + mRoots.size() + " active roots");
 
-        getContext().getContentResolver()
-                .notifyChange(DocumentsContract.buildRootsUri(AUTHORITY), null, false);
+        // Note this affects content://com.android.externalstorage.documents/root/39BD-07C5
+        // as well as content://com.android.externalstorage.documents/document/*/children,
+        // so just notify on content://com.android.externalstorage.documents/.
+        getContext().getContentResolver().notifyChange(BASE_URI, null, false);
     }
 
     private static String[] resolveRootProjection(String[] projection) {
