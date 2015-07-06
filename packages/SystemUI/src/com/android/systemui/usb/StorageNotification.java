@@ -499,8 +499,10 @@ public class StorageNotification extends SystemUI {
         final PendingIntent intent;
         if (privateVol != null && privateVol.getDisk() != null) {
             intent = buildWizardReadyPendingIntent(privateVol.getDisk());
-        } else {
+        } else if (privateVol != null) {
             intent = buildVolumeSettingsPendingIntent(privateVol);
+        } else {
+            intent = null;
         }
 
         final Notification notif = new Notification.Builder(mContext)
