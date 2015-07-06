@@ -1142,6 +1142,10 @@ public class ResolverActivity extends Activity {
             return mFilterLastUsed && mLastChosenPosition >= 0;
         }
 
+        public float getScore(DisplayResolveInfo target) {
+            return mResolverComparator.getScore(target.getResolvedComponentName());
+        }
+
         private void rebuildList() {
             List<ResolvedComponentInfo> currentResolveList = null;
 
