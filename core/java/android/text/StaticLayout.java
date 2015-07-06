@@ -103,6 +103,8 @@ public class StaticLayout extends Layout {
             b.mText = null;
             MeasuredText.recycle(b.mMeasuredText);
             b.mMeasuredText = null;
+            b.mLeftIndents = null;
+            b.mRightIndents = null;
             nFinishBuilder(b.mNativePtr);
             sPool.release(b);
         }
@@ -296,9 +298,10 @@ public class StaticLayout extends Layout {
          * @param leftIndents array of indent values for left margin, in pixels
          * @param rightIndents array of indent values for right margin, in pixels
          * @return this builder, useful for chaining
-         * @see android.widget.TextView#setIndents
          */
         public Builder setIndents(int[] leftIndents, int[] rightIndents) {
+            mLeftIndents = leftIndents;
+            mRightIndents = rightIndents;
             int leftLen = leftIndents == null ? 0 : leftIndents.length;
             int rightLen = rightIndents == null ? 0 : rightIndents.length;
             int[] indents = new int[Math.max(leftLen, rightLen)];
@@ -393,6 +396,8 @@ public class StaticLayout extends Layout {
         int mMaxLines;
         int mBreakStrategy;
         int mHyphenationFrequency;
+        int[] mLeftIndents;
+        int[] mRightIndents;
 
         Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -544,6 +549,9 @@ public class StaticLayout extends Layout {
         mLines = new int[mLineDirections.length];
         mMaximumVisibleLineCount = b.mMaxLines;
 
+        mLeftIndents = b.mLeftIndents;
+        mRightIndents = b.mRightIndents;
+
         generate(b, b.mIncludePad, b.mIncludePad);
     }
 
@@ -661,6 +669,23 @@ public class StaticLayout extends Layout {
             nSetupParagraph(b.mNativePtr, chs, paraEnd - paraStart,
                     firstWidth, firstWidthLineCount, restWidth,
                     variableTabStops, TAB_INCREMENT, b.mBreakStrategy, b.mHyphenationFrequency);
+            if (mLeftIndents != null || mRightIndents != null) {
+                // TODO(raph) performance: it would be better to do this once per layout rather
+                // than once per paragraph, but that would require a change to the native
+                // interface.
+                int leftLen = mLeftIndents == null ? 0 : mLeftIndents.length;
+                int rightLen = mRightIndents == null ? 0 : mRightIndents.length;
+                int indentsLen = Math.max(1, Math.min(leftLen, rightLen) - mLineCount);
+                int[] indents = new int[indentsLen];
+                for (int i = 0; i < indentsLen; i++) {
+                    int leftMargin = mLeftIndents == null ? 0 :
+                            mLeftIndents[Math.min(i + mLineCount, leftLen - 1)];
+                    int rightMargin = mRightIndents == null ? 0 :
+                            mRightIndents[Math.min(i + mLineCount, rightLen - 1)];
+                    indents[i] = leftMargin + rightMargin;
+                }
+                nSetIndents(b.mNativePtr, indents);
+            }
 
             // measurement has to be done before performing line breaking
             // but we don't want to recompute fontmetrics or span ranges the
@@ -1154,6 +1179,38 @@ public class StaticLayout extends Layout {
         return mLines[mColumns * line + HYPHEN] & 0xff;
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public int getIndentAdjust(int line, Alignment align) {
+        if (align == Alignment.ALIGN_LEFT) {
+            if (mLeftIndents == null) {
+                return 0;
+            } else {
+                return mLeftIndents[Math.min(line, mLeftIndents.length - 1)];
+            }
+        } else if (align == Alignment.ALIGN_RIGHT) {
+            if (mRightIndents == null) {
+                return 0;
+            } else {
+                return -mRightIndents[Math.min(line, mRightIndents.length - 1)];
+            }
+        } else if (align == Alignment.ALIGN_CENTER) {
+            int left = 0;
+            if (mLeftIndents != null) {
+                left = mLeftIndents[Math.min(line, mLeftIndents.length - 1)];
+            }
+            int right = 0;
+            if (mRightIndents != null) {
+                right = mRightIndents[Math.min(line, mRightIndents.length - 1)];
+            }
+            return (left - right) >> 1;
+        } else {
+            throw new AssertionError("unhandled alignment " + align);
+        }
+    }
+
     @Override
     public int getEllipsisCount(int line) {
         if (mColumns < COLUMNS_ELLIPSIZE) {
@@ -1250,4 +1307,6 @@ public class StaticLayout extends Layout {
         // breaks, widths, and flags should all have the same length
     }
 
+    private int[] mLeftIndents;
+    private int[] mRightIndents;
 }
