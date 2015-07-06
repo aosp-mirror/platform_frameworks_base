@@ -239,6 +239,13 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                                 "At least one digest algorithm must be specified");
                     }
                 }
+
+                // Check that user authentication related parameters are acceptable. This method
+                // will throw an IllegalStateException if there are issues (e.g., secure lock screen
+                // not set up).
+                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(),
+                        spec.isUserAuthenticationRequired(),
+                        spec.getUserAuthenticationValidityDurationSeconds());
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
