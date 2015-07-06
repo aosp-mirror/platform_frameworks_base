@@ -31,8 +31,11 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telecom.DefaultDialerManager;
+import android.util.IntArray;
 import android.util.Slog;
 
+import android.util.SparseBooleanArray;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telephony.SmsApplication;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -59,6 +62,41 @@ public class TelecomLoaderService extends SystemService {
                 }, 0);
                 SmsApplication.getDefaultMmsApplication(mContext, false);
                 ServiceManager.addService(Context.TELECOM_SERVICE, service);
+
+                synchronized (mLock) {
+                    if (mDefaultSmsAppRequests != null || mDefaultDialerAppRequests != null) {
+                        final PackageManagerInternal packageManagerInternal = LocalServices
+                                .getService(PackageManagerInternal.class);
+
+                        if (mDefaultSmsAppRequests != null) {
+                            ComponentName smsComponent = SmsApplication.getDefaultSmsApplication(
+                                    mContext, true);
+                            if (smsComponent != null) {
+                                final int requestCount = mDefaultSmsAppRequests.size();
+                                for (int i = requestCount - 1; i >= 0; i--) {
+                                    final int userid = mDefaultSmsAppRequests.get(i);
+                                    mDefaultSmsAppRequests.remove(i);
+                                    packageManagerInternal.grantDefaultPermissionsToDefaultSmsApp(
+                                            smsComponent.getPackageName(), userid);
+                                }
+                            }
+                        }
+
+                        if (mDefaultDialerAppRequests != null) {
+                            String packageName = DefaultDialerManager.getDefaultDialerApplication(
+                                    mContext);
+                            if (packageName != null) {
+                                final int requestCount = mDefaultDialerAppRequests.size();
+                                for (int i = requestCount - 1; i >= 0; i--) {
+                                    final int userId = mDefaultDialerAppRequests.get(i);
+                                    mDefaultDialerAppRequests.remove(i);
+                                    packageManagerInternal.grantDefaultPermissionsToDefaultDialerApp(
+                                            packageName, userId);
+                                }
+                            }
+                        }
+                    }
+                }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed linking to death.");
             }
@@ -76,7 +114,17 @@ public class TelecomLoaderService extends SystemService {
 
     private static final String SERVICE_ACTION = "com.android.ITelecomService";
 
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private IntArray mDefaultSmsAppRequests;
+
+    @GuardedBy("mLock")
+    private IntArray mDefaultDialerAppRequests;
+
     private final Context mContext;
+
+    @GuardedBy("mLock")
     private TelecomServiceConnection mServiceConnection;
 
     public TelecomLoaderService(Context context) {
@@ -98,23 +146,26 @@ public class TelecomLoaderService extends SystemService {
     }
 
     private void connectToTelecom() {
-        if (mServiceConnection != null) {
-            // TODO: Is unbinding worth doing or wait for system to rebind?
-            mContext.unbindService(mServiceConnection);
-            mServiceConnection = null;
-        }
+        synchronized (mLock) {
+            if (mServiceConnection != null) {
+                // TODO: Is unbinding worth doing or wait for system to rebind?
+                mContext.unbindService(mServiceConnection);
+                mServiceConnection = null;
+            }
 
-        TelecomServiceConnection serviceConnection = new TelecomServiceConnection();
-        Intent intent = new Intent(SERVICE_ACTION);
-        intent.setComponent(SERVICE_COMPONENT);
-        int flags = Context.BIND_IMPORTANT | Context.BIND_FOREGROUND_SERVICE
-                | Context.BIND_AUTO_CREATE;
+            TelecomServiceConnection serviceConnection = new TelecomServiceConnection();
+            Intent intent = new Intent(SERVICE_ACTION);
+            intent.setComponent(SERVICE_COMPONENT);
+            int flags = Context.BIND_IMPORTANT | Context.BIND_FOREGROUND_SERVICE
+                    | Context.BIND_AUTO_CREATE;
 
-        // Bind to Telecom and register the service
-        if (mContext.bindServiceAsUser(intent, serviceConnection, flags, UserHandle.OWNER)) {
-            mServiceConnection = serviceConnection;
+            // Bind to Telecom and register the service
+            if (mContext.bindServiceAsUser(intent, serviceConnection, flags, UserHandle.OWNER)) {
+                mServiceConnection = serviceConnection;
+            }
         }
     }
+
 
     private void registerDefaultAppProviders() {
         final PackageManagerInternal packageManagerInternal = LocalServices.getService(
@@ -125,6 +176,15 @@ public class TelecomLoaderService extends SystemService {
                 new PackageManagerInternal.PackagesProvider() {
             @Override
             public String[] getPackages(int userId) {
+                synchronized (mLock) {
+                    if (mServiceConnection == null) {
+                        if (mDefaultSmsAppRequests == null) {
+                            mDefaultSmsAppRequests = new IntArray();
+                        }
+                        mDefaultSmsAppRequests.add(userId);
+                        return null;
+                    }
+                }
                 ComponentName smsComponent = SmsApplication.getDefaultSmsApplication(
                         mContext, true);
                 if (smsComponent != null) {
@@ -139,6 +199,15 @@ public class TelecomLoaderService extends SystemService {
                 new PackageManagerInternal.PackagesProvider() {
             @Override
             public String[] getPackages(int userId) {
+                synchronized (mLock) {
+                    if (mServiceConnection == null) {
+                        if (mDefaultDialerAppRequests == null) {
+                            mDefaultDialerAppRequests = new IntArray();
+                        }
+                        mDefaultDialerAppRequests.add(userId);
+                        return null;
+                    }
+                }
                 String packageName = DefaultDialerManager.getDefaultDialerApplication(mContext);
                 if (packageName != null) {
                     return new String[]{packageName};
