@@ -13,6 +13,7 @@ page.tags=studio, features
       <li><a href="#template-support">Expanded Template and Form Factor Support</a></li>
       <li><a href="#project-settings">Android Studio and Project Settings</a></li>
       <li><a href="#finger-print">Fingerprint Support</a></li>
+      <li><a href="#dev-services">Developer Services</a></li>
       <li><a href="#support-apis">Editor Support for the Latest Android APIs</a></li>
       <li><a href="#test-module">Test APK Module</a></li>
     </ol>
@@ -138,6 +139,33 @@ as shown below. </p>
 
 <p>Your app should respond as if a user touched, and then removed their finger from, the
 fingerprint sensor. </p>
+
+
+<h2 id="dev-services">Developer Services</h2>
+<p>Android Studio supports enabling these developer services in your app: </p>
+<ul>
+  <li>Ads using <a href="https://developers.google.com/admob/">AdMob</a></li>
+  <li>Analytics <a href="https://developers.google.com/analytics/">Google Analytics</a></li>
+  <li>Authentication using <a href="https://developers.google.com/identity/sign-in/android/">Google
+    Sign-in</a> </li>
+  <li>Notifications using <a href="https://developers.google.com/cloud-messaging/">Google
+    Cloud Messaging</a> </li>
+</ul>
+
+<p>Enabling a developer service adds the required dependencies and, when applicable, also modifies
+the related configuration files. To activate the service, you must perform
+service-specific updates, such as loading an ad in the <code>MainActivity</code> class for ad
+display.</p>
+
+<p>To enable an Android developer service, select the <code>File &gt; Project Structure</code>
+menu option and click a service under the <em>Developer Services</em> sub-menu. The service
+configuration page appears. In the service configuration page, click the service check box to
+enable the service and click <strong>OK</strong>. Android Studio updates your library dependencies
+for the selected service and, for Analytics, updates the <code>AndroidManifest.xml</code> and
+other tracker configuration files. You can enable multiple services within the same app. For more
+detail about starting the services, refer to each service's specific activation instructions. </p>
+
+
 
 
 <h2 id="support-apis">Editor Support for the Latest Android APIs</h2>
