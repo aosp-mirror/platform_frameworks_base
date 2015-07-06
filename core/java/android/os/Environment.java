@@ -244,12 +244,34 @@ public class Environment {
     }
 
     /** {@hide} */
-    public static File getDataAppDirectory(String volumeUuid) {
+    public static File getDataDirectory(String volumeUuid) {
         if (TextUtils.isEmpty(volumeUuid)) {
-            return new File("/data/app");
+            return new File("/data");
         } else {
-            return new File("/mnt/expand/" + volumeUuid + "/app");
+            return new File("/mnt/expand/" + volumeUuid);
         }
+    }
+
+    /** {@hide} */
+    public static File getDataAppDirectory(String volumeUuid) {
+        return new File(getDataDirectory(volumeUuid), "app");
+    }
+
+    /** {@hide} */
+    public static File getDataUserDirectory(String volumeUuid) {
+        return new File(getDataDirectory(volumeUuid), "user");
+    }
+
+    /** {@hide} */
+    public static File getDataUserDirectory(String volumeUuid, int userId) {
+        return new File(getDataUserDirectory(volumeUuid), String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataUserPackageDirectory(String volumeUuid, int userId,
+            String packageName) {
+        // TODO: keep consistent with installd
+        return new File(getDataUserDirectory(volumeUuid, userId), packageName);
     }
 
     /**

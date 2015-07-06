@@ -42,6 +42,11 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -137,6 +142,8 @@ public class UserManagerService extends IUserManager.Stub {
     static final int WRITE_USER_MSG = 1;
     static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
 
+    private static final String XATTR_SERIAL = "user.serial";
+
     private final Context mContext;
     private final PackageManagerService mPm;
     private final Object mInstallLock;
@@ -146,7 +153,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final File mUsersDir;
     private final File mUserListFile;
-    private final File mBaseUserPath;
 
     private final SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
     private final SparseArray<Bundle> mUserRestrictions = new SparseArray<Bundle>();
@@ -210,7 +216,6 @@ public class UserManagerService extends IUserManager.Stub {
                 // Make zeroth user directory, for services to migrate their files to that location
                 File userZeroDir = new File(mUsersDir, "0");
                 userZeroDir.mkdirs();
-                mBaseUserPath = baseUserPath;
                 FileUtils.setPermissions(mUsersDir.toString(),
                         FileUtils.S_IRWXU|FileUtils.S_IRWXG
                         |FileUtils.S_IROTH|FileUtils.S_IXOTH,
@@ -1237,7 +1242,6 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                     int userId = getNextAvailableIdLocked();
                     userInfo = new UserInfo(userId, name, null, flags);
-                    File userPath = new File(mBaseUserPath, Integer.toString(userId));
                     userInfo.serialNumber = mNextSerialNumber++;
                     long now = System.currentTimeMillis();
                     userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
@@ -1252,7 +1256,19 @@ public class UserManagerService extends IUserManager.Stub {
                         }
                         userInfo.profileGroupId = parent.profileGroupId;
                     }
-                    mPm.createNewUserLILPw(userId, userPath);
+                    final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                    for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                        final String volumeUuid = vol.getFsUuid();
+                        try {
+                            final File userDir = Environment.getDataUserDirectory(volumeUuid,
+                                    userId);
+                            prepareUserDirectory(userDir);
+                            enforceSerialNumber(userDir, userInfo.serialNumber);
+                        } catch (IOException e) {
+                            Log.wtf(LOG_TAG, "Failed to create user directory on " + volumeUuid, e);
+                        }
+                    }
+                    mPm.createNewUserLILPw(userId);
                     userInfo.partial = false;
                     scheduleWriteUserLocked(userInfo);
                     updateUserIdsLocked();
@@ -1854,6 +1870,87 @@ public class UserManagerService extends IUserManager.Stub {
 
     private String packageToRestrictionsFileName(String packageName) {
         return RESTRICTIONS_FILE_PREFIX + packageName + XML_SUFFIX;
+    }
+
+    /**
+     * Create new {@code /data/user/[id]} directory and sets default
+     * permissions.
+     */
+    public static void prepareUserDirectory(File file) throws IOException {
+        if (!file.exists()) {
+            if (!file.mkdir()) {
+                throw new IOException("Failed to create " + file);
+            }
+        }
+        if (FileUtils.setPermissions(file.getAbsolutePath(), 0771, Process.SYSTEM_UID,
+                Process.SYSTEM_UID) != 0) {
+            throw new IOException("Failed to prepare " + file);
+        }
+    }
+
+    /**
+     * Enforce that serial number stored in user directory inode matches the
+     * given expected value. Gracefully sets the serial number if currently
+     * undefined.
+     *
+     * @throws IOException when problem extracting serial number, or serial
+     *             number is mismatched.
+     */
+    public static void enforceSerialNumber(File file, int serialNumber) throws IOException {
+        final int foundSerial = getSerialNumber(file);
+        Slog.v(LOG_TAG, "Found " + file + " with serial number " + foundSerial);
+
+        if (foundSerial == -1) {
+            Slog.d(LOG_TAG, "Serial number missing on " + file + "; assuming current is valid");
+            try {
+                setSerialNumber(file, serialNumber);
+            } catch (IOException e) {
+                Slog.w(LOG_TAG, "Failed to set serial number on " + file, e);
+            }
+
+        } else if (foundSerial != serialNumber) {
+            throw new IOException("Found serial number " + foundSerial
+                    + " doesn't match expected " + serialNumber);
+        }
+    }
+
+    /**
+     * Set serial number stored in user directory inode.
+     *
+     * @throws IOException if serial number was already set
+     */
+    private static void setSerialNumber(File file, int serialNumber)
+            throws IOException {
+        try {
+            final byte[] buf = Integer.toString(serialNumber).getBytes(StandardCharsets.UTF_8);
+            Os.setxattr(file.getAbsolutePath(), XATTR_SERIAL, buf, OsConstants.XATTR_CREATE);
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
+    }
+
+    /**
+     * Return serial number stored in user directory inode.
+     *
+     * @return parsed serial number, or -1 if not set
+     */
+    private static int getSerialNumber(File file) throws IOException {
+        try {
+            final byte[] buf = new byte[256];
+            final int len = Os.getxattr(file.getAbsolutePath(), XATTR_SERIAL, buf);
+            final String serial = new String(buf, 0, len);
+            try {
+                return Integer.parseInt(serial);
+            } catch (NumberFormatException e) {
+                throw new IOException("Bad serial number: " + serial);
+            }
+        } catch (ErrnoException e) {
+            if (e.errno == OsConstants.ENODATA) {
+                return -1;
+            } else {
+                throw e.rethrowAsIOException();
+            }
+        }
     }
 
     @Override

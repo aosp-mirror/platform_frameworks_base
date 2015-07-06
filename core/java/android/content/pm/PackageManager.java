@@ -4448,22 +4448,6 @@ public abstract class PackageManager {
     public abstract @NonNull PackageInstaller getPackageInstaller();
 
     /**
-     * Returns the data directory for a particular package and user.
-     *
-     * @hide
-     */
-    public static File getDataDirForUser(String volumeUuid, String packageName, int userId) {
-        // TODO: This should be shared with Installer's knowledge of user directory
-        final File base;
-        if (TextUtils.isEmpty(volumeUuid)) {
-            base = Environment.getDataDirectory();
-        } else {
-            base = new File("/mnt/expand/" + volumeUuid);
-        }
-        return new File(base, "user/" + userId + "/" + packageName);
-    }
-
-    /**
      * Adds a {@link CrossProfileIntentFilter}. After calling this method all intents sent from the
      * user with id sourceUserId can also be be resolved by activities in the user with id
      * targetUserId if they match the specified intent filter.
