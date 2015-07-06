@@ -20,7 +20,7 @@
     <string name="more_options_button" msgid="2243228396432556771">"Ďalšie možnosti"</string>
     <string name="label_destination" msgid="9132510997381599275">"Cieľ"</string>
     <string name="label_copies" msgid="3634531042822968308">"Kópie"</string>
-    <string name="label_copies_summary" msgid="3861966063536529540">"Počet kópií:"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"Kópie:"</string>
     <string name="label_paper_size" msgid="908654383827777759">"Veľkosť papiera"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Veľkosť papiera:"</string>
     <string name="label_color" msgid="1108690305218188969">"Farba"</string>
