@@ -72,7 +72,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"ID-ja e linjës së lidhur"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Kufizimi i ID-së së linjës së lidhur"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Transferimi i telefonatave"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"Telefonatë në pritje"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Pritja e telefonatave"</string>
     <string name="BaMmi" msgid="455193067926770581">"Bllokimi i telefonatave"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Ndryshimi i fjalëkalimit"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Ndryshim PIN-i"</string>
@@ -235,7 +235,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"dërgo dhe shiko mesazhet SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"qasu te fotografitë, media dhe skedarët në pajisje"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"qasu te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -490,7 +490,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Lejon zotëruesin të lidhet me ndërfaqen e nivelit të lartë të shërbimit të mesazheve të operatorit. Nuk nevojitet për aplikacione normale."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"lidhu me shërbimet e operatorit celular"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Lejon që mbajtësi të lidhet me shërbimet e operatorit celular. Nuk nevojitet për aplikacionet normale."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"qasje në \"Mos shqetëso\""</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"qasje te \"Mos shqetëso\""</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
@@ -503,7 +503,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe telefonin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Ndryshimin e kyçjes"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ndryshon kyçjen e ekranit."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Kyçje të ekranit"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Kyçjen e ekranit"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollon si dhe kur të kyçet ekrani."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Fshirjen e të dhënave"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Fshi të dhënat e tabletit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
@@ -628,7 +628,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Nënë"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Prind"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Referuar nga"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"I referuar"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"I afërm"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Motër"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Bashkëshort/e"</string>
@@ -1006,7 +1006,7 @@
     <string name="sim_added_message" msgid="7797975656153714319">"Rinise pajisjen për të pasur qasje në rrjetin celular."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Rifillo"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Cakto kohën"</string>
-    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Cakto datën"</string>
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Vendos datën"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Cakto"</string>
     <string name="date_time_done" msgid="2507683751759308828">"U krye!"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"E RE: "</font></string>
@@ -1040,12 +1040,7 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"I lidhur si instalues"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"U lidh me një ndihmës USB-je"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Prek për më shumë opsione."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Të formatohet USB-ja?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Të formatohet karta SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Të gjithë skedarët e ruajtur në USB do të fshihen. Ky veprim nuk mund të kthehet mbrapsht!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Të gjitha të dhënat e kartës do të humbasin."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së u lidh"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Prek për të çaktivizuar korrigjimin e gabimeve të USB-së."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Ndërro tastierë"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Zgjidh tastierat"</string>
@@ -1059,7 +1054,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Po përgatit <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Po kontrollon për gabime"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"U zbulua karta e re <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Për transferimin e fotografive dhe skedarëve \"media\""</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Për transferimin e fotografive dhe skedarëve të tjerë"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> e dëmtuar"</string>
     <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> është e dëmtuar. Prek për ta rregulluar."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> nuk mbështetet"</string>
@@ -1249,7 +1244,7 @@
     <string name="org_unit" msgid="7265981890422070383">"Njësia organizative:"</string>
     <string name="issued_by" msgid="2647584988057481566">"Lëshuar nga:"</string>
     <string name="validity_period" msgid="8818886137545983110">"Vlefshmëria:"</string>
-    <string name="issued_on" msgid="5895017404361397232">"Hedhur në qarkullim më:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Lëshuar më:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Skadon më:"</string>
     <string name="serial_number" msgid="758814067660862493">"Numri serik:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Shenjat e gishtave:"</string>
@@ -1461,7 +1456,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ekrani është i gozhduar. Anulimi i mbërthimit nuk lejohet nga organizata jote."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrani u gozhdua"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrani u hoq nga gozhdimi"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Kërko PIN-in para se ta zhgozhdosh."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Zhgozhdimi kërkon PIN-in"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Kërko model shkyçjeje para heqjes së gozhdimit"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Kërko fjalëkalim para heqjes nga gozhdimi."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"U instalua nga administratori yt"</string>

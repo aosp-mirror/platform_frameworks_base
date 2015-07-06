@@ -235,7 +235,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sms\'jes verzenden en bekijken"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Opslagruimte"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang tot foto\'s, media en bestanden op uw apparaat"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang krijgen tot foto\'s, media en bestanden op uw apparaat"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"audio opnemen"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
@@ -490,7 +490,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Hiermee wordt de houder toegestaan te binden aan de berichteninterface van een provider. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"binden aan providerservices"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Hiermee kan de houder binden aan providerservices. Nooit gebruikt voor normale apps."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"toegang tot Niet storen"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"toegang tot \'Niet storen\'"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Gekoppeld als installatieprogramma"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Aangesloten op een USB-accessoire"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Tik voor meer opties."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB-opslag formatteren?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD-kaart formatteren?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle bestanden die in uw USB-opslag zijn opgeslagen, worden gewist. Deze actie kan niet ongedaan worden gemaakt."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle gegevens op uw kaart worden gewist."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatteren"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-foutopsporing verbonden"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tik om USB-foutopsporing uit te schakelen."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Toetsenbord wijzigen"</string>
@@ -1461,7 +1456,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"App is vastgezet: losmaken is niet toegestaan op dit apparaat."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Scherm vastgezet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Scherm losgemaakt"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vraag PIN voor losmaken"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vraag pin voor losmaken"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vraag patroon voor losmaken"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vraag wachtwoord voor losmaken"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Geïnstalleerd door uw beheerder"</string>

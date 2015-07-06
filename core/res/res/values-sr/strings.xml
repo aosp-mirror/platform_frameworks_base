@@ -1047,11 +1047,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Повезан као инсталациони програм"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Повезано са USB додатком"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Додирните за још опција."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Желите да формат. USB меморију?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Желите ли да форматирате SD картицу?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Све датотеке ускладиштене на USB меморији биће избрисане. Ова радња не може да се опозове!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Сви подаци са картице биће изгубљени."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отклањање грешака са USB-а је успостављено"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Додирните да бисте онемогућили отклањање грешака са USB-а."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Промените тастатуру"</string>

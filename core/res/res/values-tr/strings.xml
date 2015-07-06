@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Yükleyici olarak bağlandı"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB aksesuarına bağlandı"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Daha fazla seçenek için dokunun."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB bellek biçimlendirilsin mi?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD kart biçimlendirilsin mi?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB belleğinizdeki tüm dosyalar silinecek. Bu işlem geri alınamaz!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Kartınızdaki tüm veriler kaybolacak."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Biçimlendir"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hata ayıklaması bağlandı"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB hata ayıklama özelliğini devre dışı bırakmak için dokunun."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klavyeyi değiştir"</string>

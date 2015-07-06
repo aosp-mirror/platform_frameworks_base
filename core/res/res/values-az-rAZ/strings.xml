@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Quraşdırıcı kimi qoşulub"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB aksesuara qoşuldu"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Əlavə seçimlər üçün toxunun."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB yaddaşına format atılsın?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD kart format edilsin?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB yaddaşınızda yerləşdirilmiş bütün fayllar silinəcək. Bu addım geri dönülməzdir."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Kartınızdakı bütün məlumatlar itəcək."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB sazlama qoşuludur"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB debaqı deaktivasiya etmək üçün toxunun."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviaturanı dəyişin"</string>

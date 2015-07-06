@@ -525,9 +525,9 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogući dio značajki zaklj. zaslona"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Sprječava upotrebu nekih značajki zaključavanja zaslona."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Početna"</item>
+    <item msgid="8901098336658710359">"Privatni"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
-    <item msgid="7897544654242874543">"Posao"</item>
+    <item msgid="7897544654242874543">"Službeni"</item>
     <item msgid="1103601433382158155">"Službeni faks"</item>
     <item msgid="1735177144948329370">"Faks kod kuće"</item>
     <item msgid="603878674477207394">"Dojavljivač"</item>
@@ -535,20 +535,20 @@
     <item msgid="9192514806975898961">"Prilagođeno"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Početna"</item>
-    <item msgid="7084237356602625604">"Posao"</item>
+    <item msgid="8073994352956129127">"Privatna"</item>
+    <item msgid="7084237356602625604">"Službena"</item>
     <item msgid="1112044410659011023">"Ostalo"</item>
     <item msgid="2374913952870110618">"Prilagođeno"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Početna"</item>
-    <item msgid="5629153956045109251">"Posao"</item>
+    <item msgid="6880257626740047286">"Privatna"</item>
+    <item msgid="5629153956045109251">"Službena"</item>
     <item msgid="4966604264500343469">"Ostalo"</item>
     <item msgid="4932682847595299369">"Prilagođeno"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Početna"</item>
-    <item msgid="1359644565647383708">"Posao"</item>
+    <item msgid="1738585194601476694">"Privatni"</item>
+    <item msgid="1359644565647383708">"Službeni"</item>
     <item msgid="7868549401053615677">"Ostalo"</item>
     <item msgid="3145118944639869809">"Prilagođeno"</item>
   </string-array>
@@ -568,9 +568,9 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Prilagođeno"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Početna"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Privatni"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobilni"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"Posao"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Službeni"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Službeni faks"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faks kod kuće"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Dojavljivač"</string>
@@ -584,7 +584,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Poslovni mobitel"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Službeni mobitel"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Poslovni dojavljivač"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Pomoćnik"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -593,17 +593,17 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Godišnjica"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Drugo"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Prilagođeno"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Početna"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"Posao"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Privatna"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Službena"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Ostalo"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobilni"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Prilagođeno"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Početna"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Posao"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Privatna"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Službena"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Ostalo"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Prilagođeno"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Početna"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"Posao"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Privatna"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Službeni"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Ostalo"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Prilagođeno"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
@@ -622,7 +622,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomoćnik"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dijete"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner u kućanstvu"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner u kućan."</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Otac"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Prijatelj"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Voditelj"</string>
@@ -634,8 +634,8 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Bračni partner"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Prilagođeno"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Početna"</string>
-    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Posao"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Privatna"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Službena"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Drugo"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Nema aplikacije za prikazivanje tog kontakta."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Unesite PIN kôd"</string>
@@ -1047,11 +1047,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Spojen kao instalacijski program"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Spojen na USB pribor"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Dodirnite za više opcija."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Format. USB pohranu?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formatirati SD karticu?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Sve datoteke pohranjene na vašoj USB pohrani bit će izbrisane. Ta se radnja ne može poništiti!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Svi podaci na kartici bit će izgubljeni."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za uklanjanje pogrešaka USB-om"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dodirnite da se onemogući otklanjanje pogrešaka USB-om."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Promjena tipkovnice"</string>

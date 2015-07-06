@@ -247,9 +247,9 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"触れたアイテムが読み上げられ、ジェスチャーで画面のガイドを利用できます。"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"タップしたアイテムが読み上げられ、ジェスチャーで画面のガイドを利用できます。"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ウェブアクセシビリティ拡張の有効化"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"アプリコンテンツのアクティビティをもっと向上させるためにスクリプトをインストールできます。"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"スクリプトをインストールしてアプリコンテンツにアクセスしやすくできます。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"入力テキストの監視"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"クレジットカードの番号やパスワードなどの個人データが含まれます。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"インストーラとして接続"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBアクセサリを接続しました"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"タップするとその他のオプションが表示されます。"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USBストレージをフォーマットしますか？"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SDカードをフォーマットしますか？"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USBストレージに保存されているファイルはすべて消去されます。この操作は元に戻せません。"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"カード内のすべてのデータが失われます。"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"フォーマット"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効化"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
@@ -1526,7 +1521,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"その他のオプション"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"オーバーフローを閉じる"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>個を選択中</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>個を選択中</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>件選択済み</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>件選択済み</item>
     </plurals>
 </resources>

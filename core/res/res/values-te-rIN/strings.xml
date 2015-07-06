@@ -227,21 +227,21 @@
     <string name="user_owner_label" msgid="2804351898001038951">"వ్యక్తిగతం"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"కార్యాలయం"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"పరిచయాలు"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"మీ పరిచయాలను ప్రాప్యత చేస్తుంది"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"మీ పరిచయాలను ప్రాప్యత చేయడానికి"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"స్థానం"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ఈ పరికర స్థానాన్ని ప్రాప్యత చేయడానికి అనుమతి"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ఈ పరికర స్థానాన్ని ప్రాప్యత చేయడానికి"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"క్యాలెండర్"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"మీ క్యాలెండర్‌ను ప్రాప్యత చేస్తుంది"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"మీ క్యాలెండర్‌ను ప్రాప్యత చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS సందేశాలను పంపుతుంది మరియు వీక్షిస్తుంది"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"నిల్వ"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను ప్రాప్యత చేస్తుంది"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను ప్రాప్యత చేయడానికి"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ఆడియోను రికార్డ్ చేస్తుంది"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"కెమెరా"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"చిత్రాలను తీస్తుంది మరియు వీడియోను రికార్డ్ చేస్తుంది"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ఫోన్"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లను చేస్తుంది మరియు నిర్వహిస్తుంది"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లను చేయడానికి మరియు నిర్వహించడానికి"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"శరీర సెన్సార్‌లు"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని ప్రాప్యత చేస్తుంది"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
@@ -272,7 +272,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"మీ పరికరం స్వీకరించిన సెల్ ప్రసార సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సెల్ ప్రసార హెచ్చరికలు అత్యవసర పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని స్థానాల్లో అందించబడతాయి. అత్యవసర సెల్ ప్రసారం స్వీకరించినప్పుడు హానికరమైన అనువర్తనాలు మీ పరికరం యొక్క పనితీరు లేదా నిర్వహణకు అంతరాయం కలిగించవచ్చు."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"చందా చేయబడిన ఫీడ్‌లను చదవడం"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ప్రస్తుతం సమకాలీకరించిన ఫీడ్‌ల గురించి వివరాలను పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS సందేశాలను పంపడానికి మరియు వీక్షించడానికి అనుమతి"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS సందేశాలను పంపడానికి మరియు వీక్షించడానికి"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS సందేశాలు పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఊహించని ఛార్జీలు విధించబడవచ్చు. హానికరమైన అనువర్తనాలు మీ నిర్ధారణ లేకుండానే సందేశాలను పంపడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"మీ వచన సందేశాలు (SMS లేదా MMS) చదవడం"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"మీ టాబ్లెట్ లేదా సిమ్ కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -501,14 +501,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌ను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది మరియు చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌ను తప్పుగా టైప్ చేసి ఉంటే టాబ్లెట్‌ను లాక్ చేస్తుంది లేదా ఈ వినియోగదారు యొక్క మొత్తం డేటాను తీసివేస్తుంది."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌ను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది మరియు చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌ను తప్పుగా టైప్ చేసి ఉంటే టీవీని లాక్ చేస్తుంది లేదా ఈ వినియోగదారు యొక్క మొత్తం డేటాను తీసివేస్తుంది."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌ను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది మరియు చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌ను తప్పుగా టైప్ చేసి ఉంటే ఫోన్‌ను లాక్ చేస్తుంది లేదా ఈ వినియోగదారు యొక్క మొత్తం డేటాను తీసివేస్తుంది."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"స్క్రీన్ లాక్‌ని మార్చండి"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"స్క్రీన్ లాక్ మార్చడానికి"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"స్క్రీన్ లాక్‌ని మారుస్తుంది."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"స్క్రీన్‌ను లాక్ చేయండి"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"స్క్రీన్‌ను ఎలా మరియు ఎప్పుడు లాక్ చేయాలనే దాన్ని నియంత్రించండి."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"మొత్తం డేటాను ఎరేజ్ చేయండి"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"స్క్రీన్‌ను లాక్ చేయడానికి"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"స్క్రీన్‌ను ఎలా మరియు ఎప్పుడు లాక్ చేయాలనే దాన్ని నియంత్రిస్తుంది."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"మొత్తం డేటాను ఎరేజ్ చేయడానికి"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే టాబ్లెట్ డేటాను ఎరేజ్ చేయండి."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరిక లేకుండానే టీవీ డేటాను తీసివేయండి."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే ఫోన్ డేటాను ఎరేజ్ చేయండి."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే ఫోన్ డేటాను ఎరేజ్ చేస్తుంది."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"వినియోగదారు డేటాను తీసివేయండి"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"హెచ్చరిక లేకుండానే ఈ టాబ్లెట్‌లో ఈ వినియోగదారు డేటాను తీసివేస్తుంది."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"హెచ్చరిక లేకుండానే ఈ టీవీలో ఈ వినియోగదారు డేటాను తీసివేస్తుంది."</string>
@@ -585,7 +585,7 @@
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"కార్యాలయ మొబైల్"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"కార్యాలయ పేజర్"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"సహాయకం"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"అసిస్టెంట్"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"అనుకూలం"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"పుట్టినరోజు"</string>
@@ -628,7 +628,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"తల్లి"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"తల్లిదండ్రులు"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"భాగస్వామి"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"వీరి ద్వారా సూచించబడింది"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"వీరు సూచించారు"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"బంధువు"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"సోదరి"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"జీవిత భాగస్వామి"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ఇన్‌స్టాలర్‌గా కనెక్ట్ చేయబడింది"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ఉపకరణానికి కనెక్ట్ చేయబడింది"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"మరిన్ని ఎంపికల కోసం తాకండి."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB నిల్వను ఫార్మాట్ చేయాలా?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD కార్డు‌ని ఫార్మాట్ చేయాలా?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"మీ USB నిల్వలో నిల్వ చేసిన అన్ని ఫైల్‌లు ఎరేజ్ చేయబడతాయి. ఈ చర్యను రద్దు చేసి పూర్వ స్థితికి తీసుకురావడం సాధ్యపడదు!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"మీ కార్డులోని మొత్తం డేటాను కోల్పోతారు."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ఫార్మాట్ చేయి"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB డీబగ్గింగ్ కనెక్ట్ చేయబడింది"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB డీబగ్గింగ్‌ను నిలిపివేయడానికి తాకండి."</string>
     <string name="select_input_method" msgid="8547250819326693584">"కీబోర్డ్‌ను మార్చు"</string>

@@ -1047,11 +1047,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectat ca program de instalare"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectat la un accesoriu USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Atingeți pentru mai multe opțiuni."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Format. stoc. USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formataţi cardul SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Toate fişierele stocate în stocarea USB vor fi şterse. Această acţiune nu poate fi anulată!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Toate datele de pe cardul dvs. se vor pierde."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formataţi"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depanarea USB este conectată"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Atingeţi pentru a dezactiva depanarea USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Schimbați tastatura"</string>

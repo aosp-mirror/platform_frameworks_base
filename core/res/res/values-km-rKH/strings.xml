@@ -1042,11 +1042,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"បាន​ភ្ជាប់​ជា​កម្មវិធី​ដំឡើង"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"ប៉ះដើម្បីបានជម្រើសថែមទៀត។"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"ធ្វើ​ទ្រង់ទ្រាយ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"ធ្វើ​ទ្រង់ទ្រាយ​កាត​អេសឌី?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ឯកសារ​ទាំងអស់​ដែល​បាន​រក្សាទុក​ក្នុង​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​នឹង​ត្រូវ​បាន​លុប។ សកម្មភាព​នេះ​មិន​អាច​ត្រឡប់​វិញ​បាន​ទេ!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ទិន្នន័យ​ទាំងអស់​ក្នុង​កាត​របស់​អ្នក​នឹង​បាត់បង់។"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ធ្វើ​ទ្រង់ទ្រាយ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​យូអេសប៊ី"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"ប៉ះ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ប្ដូរ​ក្ដារចុច"</string>

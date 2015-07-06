@@ -598,7 +598,7 @@
     <string name="emailTypeMobile" msgid="119919005321166205">"മൊബൈൽ"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"ഇഷ്‌ടാനുസൃതം"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"വീട്ടുവിലാസം"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"ഔദ്യോഗികവിലാസം"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"ജോലി വിലാസം"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"മറ്റുള്ളവ"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"ഇഷ്‌ടാനുസൃതം"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"വീട്ടിലെ IM വിലാസം"</string>
@@ -628,7 +628,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"മാതാവ്"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"രക്ഷിതാവ്"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"പങ്കാളി"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"ഇതുപ്രകാരം റഫർചെയ്‌തത്"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"റഫർചെയ്‌തത്"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"ബന്ധു"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"സഹോദരി"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"ജീവിതപങ്കാളി"</string>
@@ -785,7 +785,7 @@
     <string name="save_password_message" msgid="767344687139195790">"ബ്രൗസർ ഈ പാസ്‌വേഡ് ഓർക്കേണ്ടതുണ്ടോ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ഇപ്പോൾ വേണ്ട"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"ഓർമ്മിക്കുക"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"ഒരിക്കലുമില്ല"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"ഒരിക്കലും"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"ഈ പേജ് തുറക്കുന്നതിന് നിങ്ങൾക്ക് അനുമതിയില്ല."</string>
     <string name="text_copied" msgid="4985729524670131385">"ടെക്‌സ്റ്റ് ക്ലിപ്‍ബോർഡിലേക്ക് പകർത്തി."</string>
     <string name="more_item_label" msgid="4650918923083320495">"കൂടുതൽ"</string>
@@ -1039,15 +1039,10 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI-യ്‌ക്കായുള്ള USB"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ഇൻസ്‌റ്റാളറായി കണക്‌റ്റുചെയ്തു"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ഒരു USB ആക്‌സസ്സറി കണക്റ്റുചെയ്‌തു"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"കൂടുതൽ ഓപ്‌ഷനുകൾക്കായി സ്‌പർശിക്കുക."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB സംഭരണം ഫോർമാറ്റുചെയ്യണോ?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD കാർഡ് ഫോർമാറ്റുചെയ്യണോ?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB സംഭരണത്തിൽ ശേഖരിച്ചിട്ടുള്ള നിങ്ങളുടെ എല്ലാ ഫയലുകളും മായ്ക്കും. ഈ പ്രവർത്തനം പഴയപടിയാക്കാനാവില്ല!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"നിങ്ങളുടെ കാർഡിലുള്ള എല്ലാ ഡാറ്റയും നഷ്‌‌ടമാവും."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ഫോർമാറ്റുചെയ്യുക"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"കൂടുതൽ ഓപ്‌ഷനുകൾക്ക് സ്‌പർശിക്കൂ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ഡീബഗ്ഗിംഗ് ഓഫാക്കാൻ സ്‌പർശിക്കൂ."</string>
-    <string name="select_input_method" msgid="8547250819326693584">"കീബോർട്ട് മാറ്റുക"</string>
+    <string name="select_input_method" msgid="8547250819326693584">"കീബോഡ് മാറ്റുക"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"കീബോർഡുകൾ തിരഞ്ഞെടുക്കുക"</string>
     <string name="show_ime" msgid="9157568568695230830">"ടൈപ്പുചെയ്യൽ രീതി കാണിക്കുക"</string>
     <string name="hardware" msgid="7517821086888990278">"ഹാർഡ്‌വെയർ"</string>
@@ -1179,7 +1174,7 @@
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> എന്ന അക്കൗണ്ടിലെ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> എന്നതിനായി ഇല്ലാതാക്കിയ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> ഇനങ്ങളുണ്ട്. നിങ്ങൾ എന്തുചെയ്യാൻ താൽപ്പര്യപ്പെടുന്നു?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"ഇനങ്ങൾ ഇല്ലാതാക്കുക"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"ഇല്ലാതാക്കിയവ പഴയപടിയാക്കുക"</string>
-    <string name="sync_do_nothing" msgid="3743764740430821845">"ഇപ്പോൾ ഒന്നും ചെയ്യരുത്"</string>
+    <string name="sync_do_nothing" msgid="3743764740430821845">"ഇപ്പോൾ ഒന്നും ചെയ്യേണ്ടതില്ല"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക"</string>
     <string name="add_account_label" msgid="2935267344849993553">"ഒരു അക്കൗണ്ട് ചേർക്കുക"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"അക്കൗണ്ട് ചേർക്കുക"</string>
@@ -1461,7 +1456,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"അപ്ലിക്കേഷൻ പിൻ ചെയ്‌തു: ഈ ഉപകരണത്തിൽ അൺപിൻ ചെയ്യാനാവില്ല."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"സ്ക്രീൻ അൺപിൻ ചെയ്തു"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിന്നിനുമുമ്പ് പിൻ ആവശ്യപ്പെടൂ"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ചെയ്യുംമുമ്പ് പിൻ ചോദിക്കൂ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇൻസ്റ്റാളുചെയ്‌തു"</string>

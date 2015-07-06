@@ -503,8 +503,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt televizoru vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt tālruni vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Mainīt ekrāna bloķēšanas iestatījumus"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mainīt ekrāna bloķēšanas iestatījumu."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Ekrāna bloķēšana"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Maina ekrāna bloķēšanas iestatījumu."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloķēt ekrānu"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrolē, kā un kad ekrāns tiek bloķēts."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Dzēst visus datus"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Dzēš planšetdatora datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
@@ -1012,7 +1012,7 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM karte ir pievienota."</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Lai piekļūtu mobilajam tīklam, restartējiet ierīci."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Restartēt"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Laika iestatīšana"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Iestatīt laiku"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datuma iestatīšana"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Iestatīt"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Gatavs"</string>
@@ -1047,11 +1047,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Pievienots kā instalēšanas programma"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Ir izveidots savienojums ar USB piederumu."</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Citas opcijas"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Vai formatēt USB atmiņu?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vai formatēt SD karti?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Visi USB atmiņā saglabātie faili tiks dzēsti. Šo darbību nevar atsaukt."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Visi jūsu kartes dati tiks zaudēti."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatēt"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB atkļūdošana ir pievienota."</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Iespējot USB atkļūdošanu."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tastatūras maiņa"</string>
@@ -1470,7 +1465,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Lietotne ir piesprausta. Atspraušana šajā ierīcē nav atļauta."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrāns ir atsprausts"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pirms atspraušanas pieprasīt PIN"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prasīt PIN kodu pirms atspraušanas"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atslēgu"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pirms atspraušanas pieprasīt paroli"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalēja jūsu administrators"</string>

@@ -231,13 +231,13 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostęp do kontaktów"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokalizacja"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"dostęp do lokalizacji tego urządzenia"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"dostęp do informacji o lokalizacji tego urządzenia"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendarz"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłać i wyświetlać SMS-y"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS-ów"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"uzyskiwać dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nagrywanie dźwięku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Aparat"</string>
@@ -1054,11 +1054,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Podłączono jako nośnik instalacyjny."</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Podłączono akcesorium USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Kliknij, by zobaczyć więcej opcji."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Czy sformatować nośnik USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Czy sformatować kartę SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Wszystkie pliki zapisane na nośniku USB zostaną usunięte. Tej czynności nie można cofnąć."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Wszystkie dane na karcie zostaną utracone."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatuj"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Podłączono moduł debugowania USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotknij, aby wyłączyć debugowanie USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Zmień klawiaturę"</string>

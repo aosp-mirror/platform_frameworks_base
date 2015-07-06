@@ -246,9 +246,9 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"اپنی علامات حیات کے متعلق سنسر ڈیٹا تک رسائی حاصل کریں"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ونڈو مواد بازیافت کرنے کی"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"کسی ایسی ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کریں"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کرنے کی"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"ٹچ کیے ہوئے آئٹمز کو زور سے بولا جائے گا اور اشاروں کا استعمال کرکے اسکرین کو دریافت کیا جا سکتا ہے۔"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"‏بہتر ویب accessibility کو آن کریں"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"‏بہتر ویب accessibility کو آن کرنے کی"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ایپ کا مواد مزید قابل رسائی بنانے کیلئے اسکرپٹس کو انسٹال کیا جا سکتا ہے۔"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"آپکے ٹائپ کردہ متن کا مشاہدہ کرنے کی"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اس میں ذاتی ڈیٹا جیسے کریڈٹ کارڈ نمبرز اور پاس ورڈز شامل ہیں۔"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ایک انسٹالر کے بطور مربوط ہے"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏ایک USB لوازم سے مربوط ہے"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"مزید اختیارات کیلئے ٹچ کریں۔"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏USB اسٹوریج فارمیٹ کریں؟"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏SD کارڈ فارمیٹ کریں؟"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏آپ کی USB اسٹوریج میں اسٹور کردہ سبھی فائلوں کو ہٹا دیا جائے گا۔ اس کارروائی کو لوٹایا نہیں جا سکتا ہے!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"آپ کے کارڈ پر موجود سبھی ڈیٹا گم ہو جائے گا۔"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"فارمیٹ کریں"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏USB ڈیبگ کرنا مربوط ہو گیا"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏USB ڈیبگنگ کو غیر فعال کرنے کیلئے ٹچ کریں۔"</string>
     <string name="select_input_method" msgid="8547250819326693584">"کی بورڈ تبدیل کریں"</string>

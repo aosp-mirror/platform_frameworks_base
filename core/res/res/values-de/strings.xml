@@ -245,7 +245,7 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Körpersensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"Auf Sensordaten zu Ihren Vitaldaten zugreifen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Fensterinhalte abrufen"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters mit dem Sie interagieren werden abgerufen."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters, mit dem Sie interagieren, werden abgerufen."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Tippen &amp; Entdecken\" aktivieren"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Berührte Elemente werden laut vorgelesen und der Bildschirm kann über Gesten erkundet werden."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbesserte Web-Bedienung aktivieren"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Als Installationsprogramm angeschlossen"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Mit USB-Zubehör verbunden"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Für weitere Optionen tippen"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB-Speicher formatieren?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD-Karte formatieren?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle in Ihrem USB-Speicher abgelegten Dateien werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle Daten auf Ihrer Karte gehen verloren."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Zum Deaktivieren berühren"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tastatur ändern"</string>

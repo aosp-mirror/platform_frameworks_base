@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"நிறுவியாக இணைக்கப்பட்டது"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB துணைக்கருவியுடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"கூடுதல் விருப்பங்களுக்காகத் தொடவும்."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB சேமிப்பகத்தில் உள்ளவற்றை அழிக்கவா?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD கார்டில் உள்ளவற்றை அழிக்கவா?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB சேமிப்பகத்தில் சேமித்த எல்லா கோப்புகளும் அழிக்கப்படும். இந்தச் செயலைச் செயல்தவிர்க்க முடியாது."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"கார்டில் உள்ள எல்லா தரவையும் இழப்பீர்கள்."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"வடிவமைப்பு"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB பிழைத்திருத்தத்தை முடக்க, தொடவும்."</string>
     <string name="select_input_method" msgid="8547250819326693584">"விசைப்பலகையை மாற்று"</string>
