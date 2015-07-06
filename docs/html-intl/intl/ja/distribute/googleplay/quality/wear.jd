@@ -1,0 +1,398 @@
+page.title=Wear アプリの品質
+page.tags="wear","wearables","quality","guidelines"
+page.metaDescription=ウェアラブル デバイスは瞬時に情報を把握できることを追求して作成された小型のデバイスで、必要な情報を必要なタイミングで提供するために独自のアプリを必要とします。
+page.image=/distribute/images/gp-wear-quality.png
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>品質基準</h2>
+  <ol>
+    <li><a href="#ux">デザインとインタラクション</a></li>
+    <li><a href="#fn">機能</a></li>
+    <li><a href="#faq">よくある質問</a></li>
+  </ol>
+
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">アプリの中核品質</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">アプリを最適化する</a></li>
+    <li><a href="{@docRoot}design/patterns/notifications.html">通知</a></li>
+  </ol>
+</div>
+</div>
+
+<img src="{@docRoot}distribute/images/gp-wear-quality.png" style="width:480px;">
+
+<p>
+  Android Wear はユーザーに必要な情報を必要なタイミングで提供することを目指しています。優れた Android Wear エクスペリエンスは自動的に起動し、瞬時に情報を把握でき、ユーザーの操作は不要か、ほとんどありません。ウェアラブル デバイス向けアプリの設計は、電話やタブレット用の設計とは大きく異なります。強みと弱み、ユースケース、エルゴノミクスが異なり、これらを考慮する必要があります。
+</p>
+
+<p>
+  Wear ユーザー向けの優れたエクスペリエンスを作り出すための最初のステップは、Wear アプリ向けに最善のユーザー エクスペリエンスを作り出す方法について説明した <a href="{@docRoot}design/wear/index.html">Android Wear の設計ガイドライン</a>を確認し、これに従うことです。また、ウェアラブル デバイス向けアプリの実装の基本要件を理解するため、<a href="{@docRoot}training/building-wearables.html">Wear アプリの構築</a>トレーニングも確認する必要があります。
+</p>
+
+<p class="caution">
+  <strong>重要: </strong>優れたユーザー エクスペリエンスを実現するには、ウェアラブル デバイス向けのアプリがユーザビリティの複数の固有要件に適合している必要があります。次の品質基準に適合するアプリのみが Google Play で Android Wear アプリとして認められます。Wear アプリとして認定されると、Android Wear ユーザーは、アプリを Google Play で発見しやすくなります。
+</p>
+
+<p class="note">
+ <strong>注:</strong> Wear アプリを Google Play に公開する方法について詳しくは、<a href="{@docRoot}distribute/googleplay/wear.html">Android Wear への配布</a>を参照してください。
+</p>
+
+<div class="headerLine">
+  <h2 id="fn">
+  機能
+  </h2>
+
+
+</div>
+
+<p>
+  次の基準は、アプリが正しく設定されており、期待される機能動作が実現されていることを保証します。
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    タイプ
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    説明
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="general">
+   全般
+  </td>
+
+  <td id="WR-GL">
+    WR-GL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      ハンドヘルド デバイス用のアプリには、ウェアラブル固有の機能を使用した通知または Wear デバイス上で直接動作するウェアラブル アプリが組み込まれています。（<a href="{@docRoot}training/building-wearables.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-VF">
+    WR-VF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリにはユーザーに表示される Wear 機能が搭載されています。
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-BF">
+    WR-BF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Wear の機能が、期待どおりまたはアプリの Google Play ストアの掲載情報に記載されているとおりに機能します。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="packaging">
+   パッケージ化
+  </td>
+
+  <td id="WR-PK">
+    WR-PK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      ハンドヘルド デバイス用アプリに機能面で依存するウェアラブル デバイス用アプリは、そのハンドヘルド用アプリ内にパッケージ化されています。（<a href="{@docRoot}training/wearables/apps/packaging.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="functional-notifications">
+    通知
+  </td>
+
+  <td id="WR-FW">
+    WR-FW
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      ウェアラブル デバイス固有の機能を使用する通知は、{@code RemoteInput} または{@code WearableExtender} を使用します。（<a href="{@docRoot}training/wearables/notifications/index.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FR">
+    WR-FR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      メッセージング アプリ向け通知を使用すると、ユーザーは音声入力またはクイック応答で返答できるようになります。（<a href="{@docRoot}training/wearables/notifications/voice-input.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FG">
+    WR-FG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      同様の通知がスタック内にまとめられます。（<a href="{@docRoot}training/wearables/notifications/stacks.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="gestures">
+    ジェスチャー
+  </td>
+
+  <td id="WR-GP">
+    WR-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      フルスクリーン アクティビティでは操作終了の目的のみに長押しを使用します。 <br/> （<a href="{@docRoot}training/wearables/ui/exit.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-GD">
+    WR-GD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリがフルスクリーン アクティビティで「スワイプして消す」ジェスチャーを使用できないようにしている場合、そのアクティビティでは「長押しして消す」ジェスチャーにアプリが対応します。（<a href="{@docRoot}training/wearables/ui/exit.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="watchface">
+    ウォッチ フェイス
+  </td>
+
+  <td id="WR-WF">
+    WR-WF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      ウォッチ フェイスを含むアプリは正規のウォッチ フェイス API を使用しています。（<a href="{@docRoot}training/wearables/watch-faces/index.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="ux">
+  視覚デザインとユーザー インタラクション
+  </h2>
+
+
+</div>
+
+<p>
+  これらの基準は、ウェアラブル デバイスで整合性があり、直観的、かつ楽しめるユーザー エクスペリエンスを実現するために、アプリが厳格なデザインとインタラクション パターンに従っていることを保証します。
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    タイプ
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    説明
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="layout">
+    レイアウト
+  </td>
+
+  <td id="WR-LS">
+    WR-LS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリのユーザー インターフェイスは四角形ディスプレイ向けにフォーマットされます。アプリのコンテンツは物理的表示領域内に収まり、テキストやコントロールが画面の縁で切り捨てられることはありません。 <br/> （<a href="{@docRoot}training/wearables/ui/layouts.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-LR">
+    WR-LR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリのユーザー インターフェイスは、画面の下部はめこみ（または「アゴ」）があるデバイスを含む円形ディスプレイ向けにフォーマットされます。アプリのコンテンツは物理的表示領域内に収まり、テキストやコントロールが画面の縁で切り捨てられることはありません。 <br/> （<a href="{@docRoot}training/wearables/ui/layouts.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-TC">
+    WR-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリのテキストは大きめで見やすくなっており、推奨最小サイズは 16sp です。（<a href="{@docRoot}design/wear/style.html#Typography">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="launcher">
+    ランチャー
+  </td>
+
+  <td id="WR-LN">
+    WR-LN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリのランチャー ストリングはアプリの名前です。コマンド フレーズではありません。（<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="notifications">
+    通知
+  </td>
+
+  <td id="WR-NC">
+    WR-NC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリは必要に応じて確認の動画を表示します。（<a href="{@docRoot}design/wear/patterns.html#Countdown">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-NR">
+    WR-NR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      通知カードによって画面の右上隅にアプリのアイコンが表示されます。通知カードにメディアの再生カードなどの単一のアクション コントロールがある場合は、これは適用されません。 <br/> （<a href="{@docRoot}design/wear/style.html#Assets">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-WI">
+    WR-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      通知アクションは、白色アイコン、アクション タイトル、および透過背景を持ちます。 <br/> （<a href="{@docRoot}training/wearables/notifications/creating.html#ActionButtons">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PB">
+    WR-PB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      通知の画像背景は、情報を伝えるためにのみ使用されます。カードのブランドを表示するためには使用されません。（<a href="{@docRoot}design/wear/style.html#Branding">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PR">
+    WR-PR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      通知の画像背景には 400x400 以上の解像度を使用します。（<a href="{@docRoot}training/wearables/notifications/creating.html#AddWearableFeatures">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="googleplay">
+    Google Play
+  </td>
+
+  <td id="WR-GS">
+    WR-GS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリは Play のストア掲載情報に 1 つ以上の Wear のスクリーンショットを含みます。（<a
+href="https://support.google.com/googleplay/android-developer/answer/1078870?hl=en">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="faq">
+  よくある質問
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>アプリを Android Wear の審査用に提出した後で、一部の Wear の要件を満たしていない場合にどのように知ることができますか？</strong>
+</p>
+<p>
+  アプリがこのページに記載されているユーザビリティの要件を満たしていない場合、そのアプリに関連付けられた<a href="https://play.google.com/apps/publish/">Google Play デベロッパー コンソール</a> アカウントで指定したメール アドレス宛に Play ストア チームから連絡があります。
+</p>
+<p class="caution">
+  <strong>警告:</strong> アプリが<a href="#fn">機能の要件</a>に適合していることを確認してください。適合していないと、アプリは Wear アプリとはみなされず、Wear の<a href="#ux">デザインとインタラクション</a>について審査されません。
+</p>
+<p class="note">
+ <strong>注:</strong> Wear アプリを Google Play に公開する方法について詳しくは、<a href="{@docRoot}distribute/googleplay/wear.html">Android Wear への配布</a>を参照してください。
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>このアプリが Wear の要件に適合しない場合でも、新規アプリまたはアップデート版のアプリは電話/タブレット向けに Google Play に表示され、ウェアラブル デバイスにインストールできますか？</strong>
+</p>
+<p>
+  はい。上記の要件は、アプリが Google Play で Android Wear アプリとして識別され、Android Wear ユーザーが発見しやすくなるかどうかのみを判断するものです。アプリが Wear アプリとして承認されなくても、電話やタブレットなどの他のデバイス タイプで利用可能です。ウェアラブル端末へのインストールも可能です。
+</p> 

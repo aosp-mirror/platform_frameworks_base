@@ -1,0 +1,57 @@
+page.title=在 Google Play 上尋找成功
+page.metaDescription=協助您在 Google Play 上的應用程式或遊戲業務中尋找成功的指南。
+meta.tags="distribute", "bestpractices"
+page.tags="google play", "business", "monetize", "engagement"
+page.image=distribute/images/play_dev_guide.png
+
+@jd:body
+
+<p>
+  我們已建立可下載的指南，可協助您在 Google Play 上的應用程式或遊戲業務中尋找成功。該指南提供了功能、秘訣與最佳做法，以協助您建置有效的策略。
+</p>
+
+<p>
+  該指南分為以下各節：
+</p>
+<ul>
+  <li>
+    <strong>在 Google Play 上發行</strong> &mdash; 使用 Google Play Developer Console 將您的應用程式散佈至全球數量超過十億的 Android 使用者。
+  </li>
+
+  <li>
+    <strong>品質</strong> &mdash; 建置卓越應用程式的基本原則，以及對 Google Play 指導方針與政策的深刻見解。
+  </li>
+
+  <li>
+    <strong>可探尋性與範圍</strong> &mdash; 最大限度提高您應用程式的可探尋性，儘量爭取可能最廣泛的受眾。
+  </li>
+
+  <li>
+    <strong>吸引與挽留</strong> &mdash; 將潛在客戶轉化為活躍的使用者，並提高挽留使用者的能力。
+  </li>
+
+  <li>
+    <strong>獲利</strong> &mdash; 用於產生持續不斷、逐級攀升的營收串流的獲利策略。
+  </li>
+
+  <li>
+    <strong>使用 Google Analytics 進行量測</strong> &mdash; 了解使用者並改善使用者的應用程式體驗、轉變與行銷。
+  </li>
+
+  <li>
+    <strong>邁向全球</strong> &mdash; 在全球各地的市場推出您的應用程式。
+  </li>
+</ul>
+
+<p>
+  請按一下以下影像以下載該指南，或<a href="http://goo.gl/DFjbrS">在 Google Play 上取得該指南</a>。
+</p>
+
+<p>
+  在未來數月中，我們將發行該指南的多種語言版本。請定期回來查看此網站，因為我們會發佈有關新功能與最佳做法的資訊，以協助您實現應用程式的散佈與獲利。
+</p>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:play_dev_guide"
+    data-cardSizes="9x6"
+    data-maxResults="1">
+  </div> 

@@ -1,0 +1,70 @@
+page.title=Designed for Families へのオプトイン
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=ほんの数ステップで Designed for Families に参加できます。
+
+@jd:body
+
+<p>
+  子供や家族向けに設計されたアプリを作成する場合は、以下の操作を完了しておくだけで、<em></em>Designed for Families プログラムへのオプトインの準備が整います。
+</p>
+
+<ul>
+  <li>アプリのコンテンツ レーティングに関するアンケートに記入し、ESRB の Everyone、Everyone 10+ のレーティングに適合させる
+  </li>
+
+  <li>アプリの<strong> [ストアの掲載情報] </strong>ページにプライバシー ポリシーのリンクを追加する
+  </li>
+
+  <li>アプリをすべての <a href="https://support.google.com/googleplay/android-developer/answer/6184502">Designed for Families プログラムの要件</a>に適合させる
+  </li>
+</ul>
+
+<p>
+  これでアプリを公開する準備が整いました。<a href="https://play.google.com/apps/publish/">デベロッパー コンソール</a>から直接 Designed for Families にオプトインできます。オプトインは、Google Play ストアで選択したカテゴリだけではなく、Google Play 上の新しいファミリー層向けエクスペリエンスでアプリを利用できるようにすることを意味します。
+</p>
+
+<p>
+  オプトインでは、アプリが <a href="http://play.google.com/about/developer-content-policy.html">Google Play デベロッパー プログラム ポリシー</a>と、<a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">Designed for Families デベロッパー販売/配布契約の補足条項</a>を含む<a href="http://play.google.com/about/developer-distribution-agreement.html">デベロッパー販売/配布契約</a>に準拠していることも確認されます。こうしたポリシー関連の文書や補足条項を十分理解していない場合は、オプトインの前にそれらの文書をお読みください。
+</p>
+
+<p>
+  準備が完了したら、次の手順を実行して特定のアプリに対する Designed for Families へのオプトインを実行します。
+</p>
+
+<ol>
+<li>デベロッパー コンソールの<strong> [すべてのアプリ]</strong> ページでオプトインするアプリをクリックします。[価格と販売/配布地域] で<strong> [Designed for Families] と</strong>オプトイン チェックボックスまでスクロール ダウンします。<img src="/images/gp-dff-optin.png" style="border:2px solid #ddd;margin:1em 0;">
+  </li>
+
+  <li>オプトイン フローを開始し、アプリが利用資格の要件に適合していることを確認します。</li>
+  <li>アプリに広告が含まれている場合、広告ポリシーに適合していることを確認します。<img src="/images/gp-dff-appinfo.png" style="border:2px solid #ddd;margin:1em 0;"></li>
+  <li>対象年齢を5 歳以下、6 歳から 8 歳、9 歳から 12 歳、一般向け（子供とそれより上の年齢層）から選択します。アプリが複数の年齢層のグループを対象にしている場合、連続する 2 つの年齢層のグループを選択できます。ESRB 10+ レーティング付きのアプリは、対象に 9 歳から 12 歳または一般向けしか選択できません。
+  </li>
+
+  <li>Google Play での新たなファミリー向けエクスペリエンスのアプリに対するカテゴリを選択します。アプリは Google Play の既存のカテゴリからも見つけることができます。</li>
+  <li>リンク先のドキュメントを確認して同意し、<strong>[オプトイン]</strong> をクリックします。[価格と販売/配布地域] ページで<strong> [アップデートを送信] </strong>をクリックして、アプリを公開またはアップデートします。
+  </li>
+</ol>
+
+<p>
+  アプリをオプトインすると、Designed for Families プログラムに受諾される前に全体が審査にかけられます。
+</p>
+
+<p class="note">
+  <strong>注:</strong> Designed for Families プログラムで公開されたアプリは Google Play ですべてのユーザーも利用できます。 
+</p>
+
+<p>
+  初めて公開するアプリをオプトインする場合で、そのアプリが Designed for Families プログラムの要件に適合していない場合は、プログラムの要件に適合するようにアプリをアップデートするか、<strong>または</strong><strong></strong>オプトイン チェックボックスの選択を解除して Google Play の標準審査プロセスに合格するまで、Google Play で利用できません。
+</p>
+
+<p>
+  Google Play で既に公開されているアプリをオプトインし、そのアプリがプログラムの要件に適合していない場合は、すべてのユーザーが利用できますが、プログラムの要件に適合するようにアプリをアップデートするまでは新たなファミリー向けエクスペリエンスには追加されません。
+</p>
+
+<p>
+  Designed for Families にオプトインしているアプリに対するアップデートを公開した場合、アプリのアップデートが Designed for Families の審査に合格しないと、Google Play のすべてのユーザーはこのアップデートを利用できません。</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/faq.html" class="next-class-link">次のトピック:よくある質問</a>
+</div> 

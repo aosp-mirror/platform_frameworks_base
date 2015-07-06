@@ -1,0 +1,106 @@
+page.title=Designed for Families에 옵트인
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=간단한 몇 단계로 Designed for Families에 가입합니다.
+
+@jd:body
+
+<p>
+  아동과 가족용으로 디자인된 앱을 작성 중인 경우 Designed for Families 프로그램에 옵트인할 준비를 하기 <em>전에</em> 다음과 같은 몇 가지 작업을 수행해야 합니다.
+
+
+</p>
+
+<ul>
+  <li>앱 콘텐츠 등급 질문서를 작성하고 '전체 이용가' 또는 '10세 이상'의 ESRB 등급 충족해야 합니다.
+
+  </li>
+
+  <li>앱의 <strong>스토어 목록</strong> 페이지에 개인정보 보호정책 링크를 추가해야 합니다.
+
+  </li>
+
+  <li>앱이 <a href="https://support.google.com/googleplay/android-developer/answer/6184502">Designed for Families 프로그램 요구사항</a>을 모두 충족하는지 확인해야 합니다.
+
+  </li>
+</ul>
+
+<p>
+  앱을 게시할 준비가 되면 <a href="https://play.google.com/apps/publish/">개발자 콘솔</a>에서 직접 Designed for Families에 옵트인할 수 있습니다.
+ 옵트인은 Google Play 스토어에서 선택한 카테고리뿐만 아니라 Google Play의 새 가족 친화적인 환경에서 앱을 사용할 수 있도록 만드는 것을 의미합니다.
+
+
+
+</p>
+
+<p>
+  또한 옵트인은 앱이 <a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">Designed for Families DDA 추록</a>, <a href="http://play.google.com/about/developer-content-policy.html">Google Play 개발자 프로그램 정책</a> 및 <a href="http://play.google.com/about/developer-distribution-agreement.html">개발자 배포 계약</a>을 준수하는지 확인합니다.
+
+
+ 이러한 정책 문서나 추록에 익숙하지 않은 경우 옵트인하기 전에 읽어보십시오.
+
+</p>
+
+<p>
+  준비가 되면 특정 앱에 대해 Designed for Families에 옵트인하는 다음 방법을 따릅니다.
+</p>
+
+<ol>
+<li>개발자 콘솔 <strong>모든 애플리케이션</strong> 페이지에서 옵트인하려는 앱을 클릭합니다.
+ 가격 책정 및 배포에서 아래로 스크롤하여 <strong>Designed for  Families</strong> 및 옵트인 확인란을 찾습니다.<img src="/images/gp-dff-optin.png" style="border:2px solid #ddd;margin:1em 0;">
+
+  </li>
+
+  <li>옵트인 과정을 시작하고 앱이 자격 요구사항을 충족하는지 확인합니다.
+</li>
+  <li>앱에 광고가 있으면 광고 정책을 충족하는지 확인합니다.
+  <img src="/images/gp-dff-appinfo.png" style="border:2px solid #ddd;margin:1em 0;"></li>
+  <li>대상 연령층을 5세 이하, 6 - 8세 또는 9 - 12세 또는 모든 연령(앱이 아동과 성인을 대상으로 하는 경우) 중에서 선택합니다.
+
+ 앱의 대상 연령층이 두 개 이상인 경우 최대 2개의 인접한 연령층을 선택할 수 있습니다.
+ ESRB 10세 이상 등급의 앱은 9-12세 또는 모든 연령만 대상으로 선택할 수 있습니다.
+
+  </li>
+
+  <li>Google Play에서 새 가족 중심 앱 카테고리를 선택합니다.
+ Google Play의 기존 카테고리에서 앱을 검색할 수도 있습니다.
+</li>
+  <li>링크된 문서를 검토하고 동의한 다음 <strong>옵트인</strong>을 클릭합니다.
+ 마지막으로 가격 책정 및 배포 페이지에서 <strong>업데이트 제출</strong>을 클릭하여 앱을 게시하거나 업데이트합니다.
+
+  </li>
+</ol>
+
+<p>
+  옵트인한 앱은 Designed for Families 프로그램으로 채택되기 전에 철저한 검토 과정을 거칩니다.
+
+</p>
+
+<p class="note">
+  <strong>참고:</strong> Designed for Families 프로그램에 게시된 앱은 Google Play의 모든 사용자도 사용할 수 있습니다.
+ 
+</p>
+
+<p>
+  처음 게시하려는 앱을 옵트인하고 해당 앱이 Designed for Families 프로그램 요구사항을 충족하지 못하는 경우 앱이 프로그램 요구사항을 충족하도록 업데이트하기 전까지<strong>또는</strong><strong></strong> 옵트인 상자의 선택을 취소하고 Google Play의 기본 검토 프로세스를 통과하기 전까지 Google Play에서 앱을 사용할 수 없게 됩니다.
+
+
+
+
+</p>
+
+<p>
+  이미 Google Play에 게시된 앱을 옵트인하고 해당 앱이 Designed for Families 프로그램 요구사항을 충족하지 못하는 경우 모든 사용자가 계속 사용할 수 있지만 앱이 프로그램 요구사항을 충족하도록 업데이트하기 전까지 새 가족 중심 앱에 추가되지 않습니다.
+
+
+
+</p>
+
+<p>
+  Designed for Families에 옵트인된 앱의 업데이트를 게시하는 경우 먼저 앱 업데이트가 Designed for Families 검토를 통과해야 Google Play에서 모든 사용자가 사용할 수 있게 됩니다.
+
+</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/faq.html" class="next-class-link">다음: 질문과 대답(FAQ)</a>
+</div>

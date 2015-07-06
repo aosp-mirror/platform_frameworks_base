@@ -1,0 +1,156 @@
+page.title=开始发布
+page.metaDescription=注册开发者帐户，几分钟内即可在 Google Play 上开始发布。
+meta.tags="publishing"
+page.tags="google play", "publishing", "register", "signup"
+page.image=/distribute/images/getting-started.jpg
+
+@jd:body
+
+<div class="top-right-float" style="margin-right:24px;margin-top:-18px">
+  <a href="https://play.google.com/apps/publish/"><img src="{@docRoot}images/gp-start-button.png"></a>
+</div>
+
+<p>
+  完成以下步骤，几分钟内即可在 Google Play 上开始发布：
+</p>
+
+<ul>
+  <li>注册 Google Play 发布者帐户
+  </li>
+
+  <li>如果您要销售应用或应用内的产品，则设置 Google 电子钱包商家帐户。
+
+  </li>
+
+  <li>探索 <a href="https://play.google.com/apps/publish/">Google Play
+ 开发者控制台</a>和发布工具。
+  </li>
+</ul>
+
+<p>
+  当您做好准备时，点击“开始”按钮以转到开发者控制台。
+</p>
+
+<div class="headerLine">
+  <h2>
+    注册发布者帐户
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      提示
+    </h2>
+
+    <ul>
+      <li>需要 Google 帐户才能注册。可以在此过程中创建一个帐户。
+
+      </li>
+
+      <li>如果您是一家组织，请考虑注册新的 Google 帐户，而不是使用个人帐户。
+
+      </li>
+
+      <li>查看您可以分发和销售应用的<a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294">
+开发者国家/地区</a>和<a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">
+商家国家/地区</a>。
+      </li>
+    </ul>
+  </div>
+</div>
+
+<ol>
+  <li>访问 <a href="https://play.google.com/apps/publish/">Google Play 开发者控制台</a>。
+
+  </li>
+
+  <li>输入您的<strong>开发者身份</strong>
+的基本信息 &mdash; 名称、电子邮件地址等。以后可以修改此信息。
+
+  </li>
+
+  <li>阅读并接受针对您所在国家或地区的<strong>开发者分发协议</strong>。
+注意，您在 Google Play 上发布的应用和商店详情必须遵守开发者计划政策和美国出口法律。
+
+
+  </li>
+
+  <li>使用 Google 电子钱包支付 <strong>25 美元注册费</strong>。如果没有 Google 电子钱包帐户，则可以在此过程中快速设置一个。
+
+
+  </li>
+
+  <li>当您的注册获得验证时，将通过您在注册时输入的电子邮件地址通知您。
+
+  </li>
+</ol>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    设置 Google 电子钱包商家帐户
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:200px;">
+  <img src="{@docRoot}images/gp-start-wallet-icon.png">
+</div>
+
+<p>
+  如果您想销售付费应用、应用内的产品或订阅，则需要用Google 电子钱包商家帐户。
+您可以随时设置该帐户，但首先请查看<a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">
+商家国家/地区</a>名单。
+<br>
+  <br>
+  设置 Google 电子钱包商家帐户<br>
+  <br>
+</p>
+
+<ol>
+  <li>
+    <strong>登录</strong> Google Play 开发者控制台 <a href="https://play.google.com/apps/publish/" target="_blank">https://play.google.com/apps/publish/</a>。
+  </li>
+
+  <li>打开侧边导航栏上的<strong>财务报告</strong> <img src="{@docRoot}images/distribute/console-reports.png">。
+  </li>
+
+  <li>点击<strong>立即设置商家帐户</strong>。
+  </li>
+</ol>
+
+<p>
+  您将转到 Google 电子钱包网站；需要提供您或贵企业的信息来完成此步骤。
+
+</p>
+
+<div class="headerLine">
+  <h2>
+    探索开发者控制台
+  </h2>
+
+
+</div>
+
+<p>
+  在您的注册获得验证后，您就可以登录开发者控制台，这是您在 Google Play 上执行应用发布操作和使用工具的大本营。
+
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine">
+<h2 id="related-resources">相关资源</h2><hr />
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/gettingstarted"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

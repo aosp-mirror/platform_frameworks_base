@@ -1,0 +1,163 @@
+page.title=Android Auto への配布
+page.image=/design/auto/images/auto-overview.png
+meta.tags="auto", "publish", "quality"
+page.tags="auto", "publish", "googleplay"
+page.metaDescription=アプリとコンテンツを Android Auto に配布します。
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>参加方法</h2>
+<ol>
+<li><a href="#understand_guidelines">ガイドラインを把握する</a></li>
+<li><a href="#develop_app">Auto 向けに優れたアプリを開発する</a></li>
+<li><a href="#test_app">Auto アプリの品質をテストする</a></li>
+<li><a href="#opt_in">条項に同意する</a></li>
+<li><a href="#track_review">審査をトラッキングする</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  ユーザーは、Android Auto と Google Play を使用して、優れたアプリを車に搭載することができます。新規アプリや既存のアプリを Auto 向けに拡張し、Google Play の使いやすいツールとプロセスを使用して公開することができます。
+</p>
+
+<p>
+  まずこのドキュメントの各セクションでAuto アプリを Google Play からユーザーに配布する方法を確認してください。<a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>をお読みになり、アプリが遵守する必要のあるユーザビリティ、品質、安全に関するガイドラインの情報について確認してください。アプリの準備が完了したら、デベロッパー コンソールの条項を受諾し、APK を審査用にアップロードできます。
+</p>
+
+<h2 id="how_to_participate">
+  参加方法
+</h2>
+
+<p>
+  Google Play では、車載用アプリを配布できます。既存のデベロッパー コンソール アカウントと、現在の価格と販売/ 配布地域の設定を使用して、アプリを開発し、公開することができます。参加方法は簡単です。参加プロセスの概要は以下のセクションに記載されています。
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-auto-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1.ガイドラインと要件を把握する
+</h3>
+
+<p>
+  Android Auto でのローンチを成功させるため、初めに Auto で優れたエクスペリエンスを作成するためのガイドラインを確認します。アプリを Auto 用に拡張する場合の考え方、設計とユーザビリティの詳細については、<a href="{@docRoot}design/auto/index.html">Android Auto の設計ガイドライン</a>を参照してください。
+</p>
+
+<p>
+  Auto エクスペリエンスの設計を始める際には、Auto アプリの品質基準を読み、理解しておく必要があります。Auto で使用できるアプリのみが Google Play で Auto アプリとして指定されます。アプリが基本的な一連の品質基準に適合している場合に参加できます。詳細については<a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>を参照してください。
+</p>
+
+<h3 id="develop_app">2.Auto 向けに優れたアプリを開発する</h3>
+
+<p>
+  Auto 向けの優れたアプリは車での使用を想定して設計され、Android Auto の機能を活用します。このアプリは、オーディオ コンテンツの再生やメッセージへのアクセスなどの操作中に、ユーザーに高品質のエクスペリエンスを提供します。
+</p>
+
+<p>
+  Auto アプリを検討する際には<a href="{@docRoot}training/auto/start/index.html">デベロッパー向けドキュメント</a>とユーザビリティのガイドラインを確認し、最大限にサポートする計画を立ててください。優れたエクスペリエンスを設計し、ドライバーの注意散漫を防ぐための当社が定めたガイドラインを忠実に守るようにしてください。
+</p>
+
+<p>
+  Auto エクスペリエンスは、電話、タブレット、その他のデバイスの既存のアプリの一部として、同じパッケージ名とストア掲載情報を使用して配布する必要があります。
+</p>
+
+<h3 id="test_app">3.Auto アプリの品質をテストする</h3>
+
+<p>
+  Auto アプリは車内で正しく機能し、優れた外観を備えて、考えられる最高のユーザー エクスペリエンスを提供するように設計されていなければなりません。Google Play では、厳選された高品質の Auto アプリをユーザーが Google Play で簡単に発見できるようにアプリが紹介されます。ユーザーがその機能を存分に活用できる Android Auto アプリに参加したり、アプリを配布したりするには次の手順に従ってください。
+</p>
+
+<ul>
+  <li><a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>ガイドラインに適合させる <ul>
+      <li><a href="{@docRoot}training/auto/index.html">Auto アプリ開発</a>用に当社が定めたベスト プラクティスに従う</li>
+      <li>アプリをすべての <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>基準に適合させる</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="opt_in">4.Android Auto の条項に同意し公開する</h3>
+
+<p>
+  APK をアップロードしてアプリを審査用に公開する前に、デベロッパー アカウントの所有者はデベロッパー コンソールの <strong>[価格と販売 / 配布地域]</strong> セクションで<a href="https://play.google.com/about/auto/developer-distribution-agreement-addendum.html"> Android Auto の条項</a>に同意する必要があります。条項に同意することは、Android Auto ユーザーがアプリを Google Play から利用できるようにして、アプリが <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>ガイドラインに適合していることを意味します。
+</p>
+
+<p>
+  Auto アプリはこの条項に同意した後でのみアップロードできます。どのアプリが Auto アプリであると判断されるかを以下に示します。
+</p>
+
+<ul>
+  <li>アプリのマニフェストでは、アプリが使用する Auto 機能が含まれた、マニフェストの <code>com.google.android.gms.car.application</code> メタデータ エントリが宣言されている必要があります。Android Auto でアプリを使用するための設定について詳しくは、<a href="{@docRoot}training/auto/start/index.html#auto-metadata">Auto の概要（Getting Started with Auto）</a>を参照してください。
+  </li>
+</ul>
+
+<p>
+  リリース対応 APK を作成し、これが <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>ガイドラインのすべてに適合していることをテストして確認したら、デベロッパー コンソールにアップロードします。ストアの掲載情報を追加の Auto 機能情報で更新し、必要に応じて配布オプションを設定します。Google Play でのローンチに向けた準備方法について不明点がある場合は、<a href="{@docRoot}distribute/googleplay/publish/preparing.html">ローンチ チェックリスト</a>を参照してください。
+</p>
+
+<p>
+  条項に同意し変更内容を保存したら、アプリを通常どおりアップロードして公開できます。アプリを Android Auto ユーザーが利用できるようにする前に、Google Play はアプリを <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>基準に対する審査にかけ、その結果を通知します。アプリが承認されると、Google Play はそのアプリを Android Auto ユーザーが利用できるようにします。アプリの承認状況をトラッキングする方法の詳細については、次のセクションを参照してください。
+</p>
+
+<p>
+  審査は Google Play ストアの他のデバイス（電話やタブレットなど）に対するアプリの使用可能状況に影響することに注意してください。電話/タブレット コンポーネントに対するアップデートを含む既存のアプリがある場合、Android Auto コンポーネントが審査に合格しないと、アップデートされたアプリが Google Play ストアで利用できるようにはなりません。
+</p>
+
+<p>
+  デベロッパー コンソールで Android Auto の条項に同意するには、次の手順を実行します。
+</p>
+
+<ol>
+  <li>アプリがすべての <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>基準に適合していることを確認します。
+  </li>
+
+  <li><strong>[すべてのアプリ]</strong> ページで公開するアプリをクリックします。
+  </li>
+
+  <li><strong>[価格と販売 / 配布地域]</strong> で <em>Android Auto</em> とその条項へのリンクにスクロール ダウンします。
+  </li>
+
+  <li><em>条項</em>のリンクをクリックします。
+  </li>
+
+  <li>条項をよく読み、<em>[同意する]</em> をクリックします。
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-auto-opt-in.png">
+  <p class="caption">
+    <strong>Auto の条項に同意する: </strong>デベロッパー コンソールで条項に同意することにより、Android Auto にアプリが含まれます。
+  </p>
+</div>
+
+<h3 id="track_review">5.審査をトラッキングする</h3>
+
+<p>
+  アプリは、上記で説明したドライバーの注意散漫に関するガイドラインと、技術上の基準と品質基準に準拠しているかどうか審査されます。この詳細な審査プロセスは、電話アプリ/タブレット アプリを審査にかける際の通常のプロセスよりも時間がかかる場合があります。アプリが承認されるまで、アプリまたはアプリのアップデートは Google Play ストアに公開されません。審査が正常に終了すると、アプリが公開され、Google Play ストアで利用できるようになります。
+</p>
+
+<p>アプリが承認されない場合、<strong>デベロッパー アカウント アドレスに送られた通知メール</strong>を受け取ります。このメールには対処が必要な領域の要約が記載されています。必要な調整を行ったら、デベロッパー コンソールにアプリの新規バージョンをアップロードできます。
+</p>
+
+<p>
+  提出されたアプリが既存のアプリへのアップデートであり、アップデートされるアプリが審査基準に適合していない場合、アップデートは拒否され、既存のアプリが Google Play ストアに引き続き公開されます。
+</p>
+
+<p>アプリの評価方法の詳細については、<a href="{@docRoot}distribute/essentials/quality/auto.html">Auto アプリの品質</a>に関するドキュメントを参照してください。 </p>
+
+
+  <h3>関連リソース</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:autolanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div> 

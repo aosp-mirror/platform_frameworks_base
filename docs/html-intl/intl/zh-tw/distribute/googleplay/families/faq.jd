@@ -1,0 +1,233 @@
+page.title=常見問題
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=有關 Designed for Families 的問題與回答
+
+@jd:body
+
+<style>
+  dt {
+    font-weight:bold;
+  }
+  </style>
+  
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>本文件內容</h2>
+<ol>
+  <li><a href="#review">應用程式檢閱與選擇加入</a></li>
+  <li><a href="#monetization">獲利</a></li>
+  <li><a href="#other">其他問題</a></li>
+</ol>
+</div>
+
+<p>
+  以下各節提供有關 Designed for Families 的更多資訊，並回答您可能提出的有關 Designed for Families 的常見問題。
+</p>
+
+
+<h2 id="review">應用程式檢閱與選擇加入</h2>
+
+<dl>
+<dt>我如何選擇加入應用程式？</dt>
+
+<dl>
+  <dd>
+    在 Google Play Developer Console 中，您可以在應用程式的 [定價與散佈] 標籤上選擇加入 Designed for Families。<a href="{@docRoot}distribute/googleplay/families/start.html">逐步解說</a>如下所示。
+  </dd>
+
+  <dt>
+    我在何處展示應用程式的互動功能？您為何收集該資訊？
+  </dt>
+
+  <dd>
+    互動功能展示包含在內容評分問卷中。在 Designed for Families 計劃選擇加入流程中，您有機會對展示進行檢閱。我們收集此資訊，以便使用者評估您的應用程式時可以做出明智的選擇。
+  </dd>
+
+  <dt>
+    什麼是 COPPA？
+  </dt>
+
+  <dd>
+    COPPA 是美國聯邦貿易委員會 (FTC) 的兒童線上隱私權保護規章。<a href="http://www.ftc.gov/tips-advice/business-center/guidance/complying-coppa-frequently-asked-questions">FTC 的 COPPA 相關常見問題</a>中提供了更多項細資料。請注意，對於如何遵守 COPPA 或其他兒童法規，Google Play 無法為開發人員提供法律指引。
+  </dd>
+
+  <dt>
+    我是否需要提供最新的隱私權原則，在何處提供？
+  </dt>
+
+  <dd>
+    是，您需要在應用程式的市集清單上提供持續隱私權原則的連結，並在 Developer Console 內確認您遵守當地的隱私權法規。若要新增或檢閱您的隱私權原則，請在 Developer Console 中選擇您的應用程式，然後捲至<strong></strong> [市集清單] 區段的底部。
+  </dd>
+
+  <dt>
+    我可以選取多少個年齡段？
+  </dt>
+
+  <dd>
+    您最多可以選取兩個相鄰的年齡段。年齡段包括：不超過 5 歲、6-8 歲，以及 9-12 歲。但是，若您的應用程式針對的受眾包含兒童與年齡較兒童更大的受眾，您必須選取 [一般受眾] <em></em>類別。
+  </dd>
+
+  <dt>
+    在 Designed for Families 計劃中，我可以選取多少個內容類別？
+  </dt>
+
+  <dd>
+    在 Designed for Families 計劃中，您可以選取一個類別，對於一般 Google Play 市集，您可以選取另一個類別。
+  </dd>
+
+  <dt>
+    什麼是 Designed for Families 類別？
+  </dt>
+
+<ul>
+<li><strong>動作與冒險</strong>：這些是以動作為導向的應用程式/遊戲，包括諸如賽車遊戲、童話冒險等所有內容。
+  </li>
+
+  <li style="list-style: none"><strong>益智遊戲</strong>：此類別包含讓使用者思考的遊戲，包括拼圖、比對遊戲以及類似遊戲。
+  </li>
+
+  <li><strong>創意</strong>：這些是激發創意的應用程式/遊戲。此類別中應用程式/遊戲的範例類型包括繪畫、噴塗以及您可以進行創作的其他遊戲。
+  </li>
+
+  <li><strong>教育</strong>：這些是具有教育價值的應用程式/遊戲，包括數學、科學、學習字母表、學習計數，以及諸如地理與歷史等更多類型的教育內容。
+  </li>
+
+  <li><strong>音樂與影片</strong>：這些是包含音樂元素或影片元素的應用程式/遊戲，包括從彈奏鋼琴到觀看影片等所有內容。
+  </li>
+
+  <li><strong>角色扮演</strong>：這些是使用者可以扮演某種角色 (例如廚師或醫生) 的應用程式/遊戲。
+  </li>
+</ul>
+
+<dl>
+  <dt>
+    若我選擇加入 Designed for Families 計劃，發行應用程式是否需要更長時間？
+  </dt>
+
+  <dd>
+    在您選擇加入 Designed for Families 後，Google Play 會檢閱您的應用程式，以確認其是否適合家庭使用。若您的應用程式符合所有計劃需求，預計發行時間不會長於一般發行時間；但是，若在 Designed for Families 檢閱期間拒絕應用程式，則該應用程式的發行可能會出現延遲。 
+  </dd>
+
+  <dt>
+    若我的應用程式遭 Designed for Families 計劃拒絕，會發生什麼狀況？
+  </dt>
+
+  <dd>
+    若您的應用程式遭 Designed for Families 計劃拒絕，我們會在 Developer Console 以及詳細的電子郵件中告訴您原因。您有機會修正問題並將應用程式重新提交至計劃，或變更選擇加入回應。請注意，若您的既有應用程式在 Google Play 上處於有效狀態，則只會拒絕您的應用程式更新 (您的應用程式在 Play 市集內仍保持有效狀態)。若您已將不符合需求的新應用程式提交至 Designed for Families 計劃，則提交的整個應用程式都會遭拒，也不會在 Play 上發行該應用程式。此後您可以解決確認的問題，並向 Designed for Families 計劃重新提交應用程式，也可以選擇退出計劃。
+  </dd>
+
+  <dt>
+    若我的應用程式在發行後發現未遵循 Designed for Families 計劃的需求，會發生什麼狀況？
+  </dt>
+
+  <dd>
+    在 Google Play 市集 (不僅是 Designed for Families 計劃) 中，將移除或擱置您的應用程式。對於移除的應用程式，可以採用與遭拒應用程式相同的補救措施。對於擱置的應用程式，可以使用開發人員求助程序進行求助。
+  </dd>
+
+  <dt>
+    若我選擇加入 Designed for Families 計劃，稍後是否能選擇退出？
+  </dt>
+
+  <dd>
+    是，您隨時可以選擇退出該計劃。請注意，若您選擇退出，將失去在新家庭友好體驗中的位置，且無法再享有計劃帶來的其他受益。
+  </dd>
+
+  <dt>
+    若我在該計劃接受應用程式後對應用程式進行更新，會發生什麼狀況？
+  </dt>
+
+  <dd>
+    若應用程式已包含在 Designed for Families 計劃中，需要自始至終遵循資格需求。若您需要編輯與應用程式關聯的 Designed for Families 中繼資料，請移至 Google Play Developer Console 的 [定價與散佈] 區段以編輯該資訊。若更新您的應用程式導致目標受眾發生變更，建議您針對已安裝應用程式的使用者發出警示。
+  </dd>
+
+  <dt>
+    若應用程式及遊戲使用 Google sign-in 或 Google Play Game 服務，是否能選擇加入 Designed for Families 計劃？
+  </dt>
+
+  <dd>
+    參加 Designed for Families 計劃的應用程式完全面向兒童，即針對以下年齡段：不超過 5 歲，6 至 8 歲或 9 至 12 歲的兒童<strong>不可</strong>使用 Google+ Sign-in 或 Google Play Game 服務作為其應用程式的登入方式。 <p>
+      若參加 Designed for Families 的應用程式針對兒童與年齡較兒童更大的受眾，可將 Google+ Sign-in 或 Google Play Game 服務用作<strong>可選</strong>功能。兒童使用者必須能完整存取應用程式或遊戲，無需登入 Google+ 或 Google Play Game 服務。
+    </p>
+  </dd>
+
+  <dt>
+    我的應用程式已選擇加入 Google Play for Education，已與 Google sign-in 整合，因此學生可以使用其學校帳戶登入。我是否需要變更 Google sign-in 在應用程式中的運作方式？
+   </dt>
+
+  <dd>
+    參加 Google Play for Education 的應用程式可將 Google sign-in 用於學生帳戶，只要其不要求攔截應用程式的所有使用者即可。
+  </dd>
+</dl>
+
+<h2 id="monetization">
+  Designed for Families 計劃獲利
+</h2>
+
+<dl>
+  <dt>
+    您是否能提供有關 Designed for Families 廣告政策的更多詳細資料？
+  </dt>
+
+  <dd>
+    請閱讀 <a href="https://support.google.com/googleplay/android-developer/answer/6184502#ads">Designed for Families 的廣告政策</a>。
+  </dd>
+
+  <dt>
+    我的應用程式能否提供中介螢幕廣告？
+  </dt>
+
+  <dd>
+    中介螢幕廣告可能適用於某些應用程式。但是，在提供廣告之前，使用者必須能導覽至主要行為。
+  </dd>
+
+  <dt>
+    我如何知道我的廣告網是否遵循 Designed for Families 的廣告政策？
+  </dt>
+
+  <dd>
+    請連絡您的廣告網，詢問其內容政策與廣告政策。若您使用 AdMob，請參閱 <a href="https://support.google.com/admob/answer/3248194">AdMob 說明中心</a>，以了解有關如何為您的應用程式或特定廣告單元建立標籤 (以便進行以兒童為導向的處理) 的詳細資料。確保整體使用者體驗 (含應用程式內廣告) 符合 <a href="https://support.google.com/googleplay/android-developer/answer/6184502">Designed for Families 計劃需求</a>是開發人員的責任。
+  </dd>
+
+  <dt>
+    我的應用程式內能否具有應用程式內購買？
+  </dt>
+
+  <dd>
+    在參與 Designed for Families 計劃的應用程式內，除了遵循 <a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">Designed for Families DDA</a> 與其他適用法規需求外，關於應用程式內購買 (IAP) 沒有任何特定限制，但是 Play 會保留因商業策略過於激進而拒絕應用程式的權利。在參加 Designed for Families 計劃的所有應用程式 (主要針對兒童受眾) 中，Google Play 會強制執行 IAP 密碼保護，以確保父母 (而非兒童) 核准購買。請注意，針對一般受眾的應用程式不會採用此處理方式。
+  </dd>
+</dl>
+
+<h2 id="other">
+  其他問題
+</h2>
+
+<dl>
+  <dt>
+    對於參加 Designed for Families 的應用程式，預期的目標受眾是誰？
+  </dt>
+
+  <dd>
+    我們的目標是在 Google Play 市集內為父母與監護人提供卓越的體驗，以探尋由受信任品牌及開發人員提供且專為兒童與家庭設計的令人愉快的應用程式。
+  </dd>
+
+  <dt>
+    是否僅為特定國家/地區的開發人員提供 Designed for Families 計劃？
+  </dt>
+
+  <dd>
+    Designed for Families 是全球計劃。
+  </dd>
+
+  <dt>
+    目前家庭遊戲類別中所發行的應用程式會發生什麼狀況？
+  </dt>
+
+  <dd>
+    目前的家庭遊戲類別將在 2015 年 5 月過時。目前位於家庭遊戲類別中的應用程式必須選取 Play 市集內的其他類別。若應用程式未選取其他類別，會為該應用程式指定休閒遊戲類別。
+  </dd>
+</dl>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="https://docs.google.com/forms/d/1EtvUWqlkxS6RxHJjeI-3-7uzdbIZx6n9Cocy2D369B8/viewform" class="next-class-link">後續內容：隨時了解</a>
+</div>

@@ -1,0 +1,439 @@
+page.title=Google Play 필터
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>빨리 보기</h2>
+<ul>
+<li>Google Play는 스토어에서 애플리케이션을 다운로드할 수 있는 Android 장치를 제어하는 필터를 적용합니다.
+</li>
+<li>필터링은 앱의 호환성 요구사항을 충족하는 장치의 사용자만 앱을 사용할 수 있도록 보장합니다.
+<li>필터링은 앱의 매니페스트 파일에서 선언하는 구성 요구사항과 기타 요소에 의해 결정됩니다.
+</li>
+</ul>
+
+<h2>이 문서의 내용</h2>
+
+<ol>
+  <li><a href="#how-filters-work">Google Play에서 필터 작동 방식</a></li>
+  <li><a href="#manifest-filters">매니페스트 요소를 기반으로 필터링</a>
+  </li>
+  <li><a href="#other-filters">기타 필터</a></li>
+  <li><a href="#MultiApks">여러 필터를 사용하여 다중 APK 게시</a></li>
+</ol>
+
+<h2>참고 항목</h2>
+ <ol>
+<li><a href="{@docRoot}guide/practices/compatibility.html">Android 호환성</a></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</code></a></li>
+</ol>
+
+</div>
+</div>
+
+<p>사용자가 Google Play에서 다운로드할 앱을 검색하거나 탐색하면 애플리케이션이 장치와 호환되는지를 기준으로 결과가 필터링됩니다. 예를 들어, Google Play는 카메라가 필요한 앱을 카메라가 없는 장치에 표시하지 않습니다.
+
+
+ 이러한 <em>필터링</em>을 통해 개발자가 앱 배포를 관리하고 사용자에게 최고의 경험을 보장할 수 있습니다.
+
+</p>
+
+<p>Google Play의 필터링은 여러 유형의 앱 메타데이터 및 구성 설정을 기반으로 합니다. 여기에는 매니페스트 선언, 필수 라이브러리, 아키텍처 종속성, Google Play 개발자 콘솔에 설정된 배포 컨트롤(예: 대상 지역 지정, 가격 책정)이 포함됩니다.
+
+
+</p>
+
+<p>Google Play 필터링은 부분적으로 매니페스트 선언 및 Android 프레임워크의 기타 요소를 기반으로 하지만, 실제 필터링 동작은 프레임워크와 별개이며 특정 API 레벨로 바인딩되지 않습니다.
+
+ 이 문서는 Google Play에서 사용하는 현재 필터링 규칙을 설명합니다.
+</p>
+
+
+<h2 id="how-filters-work">Google Play에서 필터 작동 방식</h2>
+
+<p>Google Play는 아래 설명된 필터 제한을 사용하여 Google Play 앱에서 애플리케이션을 탐색 또는 검색 중인 사용자에게 애플리케이션을 표시할지 여부를 판별합니다.
+
+</p>
+
+<p>앱을 표시할지 여부를 판별할 때 Google Play는 장치의 하드웨어 및 소프트웨어 요구사항은 물론 통신사, 위치 및 기타 특성을 확인합니다.
+
+ 그런 다음 이들을 애플리케이션의 매니페스트 파일 및 게시 세부정보에 명시된 제한 및 종속성과 비교합니다.
+
+ </p>
+
+<p>애플리케이션이 필터 규칙에 따라 장치와 호환되면 Google Play가 사용자에게 애플리케이션을 표시합니다.
+ 그렇지 않은 경우 사용자가 Google Play 내에서 앱 ID를 직접 가리키는 딥 링크를 클릭하여 앱을 구체적으로 요청하더라도 Google Play가 검색 결과 및 카테고리 탐색에서 해당 앱을 숨깁니다.
+
+
+</p>
+
+<p>앱에서 사용 가능한 모든 필터 조합을 사용할 수 있습니다. 예를 들어, 앱에서 <code>minSdkVersion</code> 요구사항을 <code>"4"</code>로 설정하고 <code>smallScreens="false"</code>를 설정하면 앱을 Google Play에 업로드할 때 유럽 국가(통신사)만 대상으로 지정할 수 있습니다.
+
+
+ 따라서 Google Play 필터는 이러한 세 가지 요구사항 중 일부가 일치하지 않는 장치에서 애플리케이션을 사용하지 못하게 합니다.
+ </p>
+
+<p>모든 필터링 제한은 애플리케이션의 버전과 연관되어 있고 버전에 따라 변경할 수 있습니다.
+ 예를 들어, 사용자가 애플리케이션을 설치했는데 개발자가 사용자가 볼 수 없는 업데이트를 게시하면 사용자는 업데이트가 제공된다는 사실을 알지 못합니다.
+
+</p>
+
+<h4>Google Play 웹사이트에서 필터링</h4>
+
+<p>사용자가 <a href="http://play.google.com/apps">Google Play 웹사이트</a>를 탐색할 때 게시된 모든 애플리케이션을 볼 수 있습니다.
+ Google Play 웹사이트는 애플리케이션 요구사항을 사용자가 등록한 각 장치와 비교하여 호환성을 확인하고, 호환되는 장치에만 애플리케이션을 설치할 수 있도록 합니다.
+
+
+</p>
+
+<h2 id="manifest-filters">앱 매니페스트를 기반으로 필터링</h2>
+
+<p>매니페스트 파일의 모든 요소가 필터링을 트리거할 수 있는 것은 아니지만 애플리케이션의 매니페스트 파일 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a> 내의 요소가 대부분의 필터를 트리거합니다. 표 1에서는 필터링을 트리거하는 데 사용해야 하는 요소를 나열하고 각 요소의 필터링이 어떻게 작동하는지 설명합니다.
+
+
+
+</p>
+
+<p id="table1" class="table-caption"><strong>표 1.</strong> Google Play에서 필터링을 트리거하는 매니페스트 요소.
+</p>
+<table>
+  <tr>
+    <th>매니페스트 요소</th>
+    <th>필터 이름</th>
+    <th>작동 방식</th>
+  </tr>
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">화면 크기</td>
+    <td valign="top">
+
+<p>애플리케이션이 <code>&lt;supports-screens&gt;</code> 요소의 특성을 설정하여 지원할 수 있는 화면 크기를 나타냅니다.
+ 애플리케이션이 게시되면 Google Play는 해당 특성을 사용하여 장치의 화면 크기에 따라 애플리케이션을 사용자에게 표시할지 여부를 판별합니다.
+
+
+ </p>
+
+<p>일반적으로 Google Play는 장치의 플랫폼이 작은 레이아웃을 큰 화면에 적용할 수 있지만 큰 레이아웃을 작은 화면에 적용할 수는 없다고 가정합니다.
+
+ 따라서 애플리케이션이 "보통" 화면 크기만 지원하도록 선언하면, Google Play가 애플리케이션을 보통 화면 장치와 대형 화면 장치에서 사용할 수 있지만 소형 화면 장치에서는 사용할 수 없도록 필터링합니다.
+
+
+</p>
+
+<p>애플리케이션이 <code>&lt;supports-screens&gt;</code>에 대한 특성을 선언하지 않은 경우 Google Play는 해당 특성에 대해 기본값을 사용합니다. 기본값은 API 레벨에 따라 다릅니다.
+
+ 구체적인 사항은 다음과 같습니다. </p>
+
+<ul>
+<li><p><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:
+minSdkVersion</a></code> 또는 <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:
+targetSdkVersion</a></code>을 3 이하로 설정한 애플리케이션의 경우 <code>&lt;supports-screens&gt;</code> 요소 자체가 정의되지 않고 사용할 수 있는 특성이 없습니다.
+ 이 경우 Google Play는 해당 애플리케이션이 보통 크기 화면에 맞게 개발된 것으로 가정하고 보통 크기 이상의 화면을 가진 장치에 애플리케이션을 표시합니다.
+
+ </p>
+
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:
+minSdkVersion</a></code> 또는 <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:
+targetSdkVersion</a></code>을 4 이상으로 설정한 경우 모든 특성의 기본값은 <code>"true"</code>입니다.
+ 이러한 방식으로 해당 애플리케이션이 기본적으로 모든 화면 크기를 지원하는 것으로 간주됩니다.
+</li>
+</ul>
+
+    <p><strong>예 1</strong><br />
+    매니페스트가 <code>&lt;uses-sdk android:minSdkVersion="3"&gt;</code>을 선언하고 <code>&lt;supports-screens&gt;</code> 요소를 포함하지 않습니다.
+
+    <strong>결과</strong>: 다른 필터가 적용된 경우를 제외하고 Google Play가 소형 화면 장치 사용자에게는 앱을 표시하지 않지만, 보통 및 대형 화면 장치 사용자에게는 표시합니다.
+
+ </p>
+    <p><strong>예 2<br />
+    </strong>매니페스트가 <code>&lt;uses-sdk android:minSdkVersion="3"
+    android:targetSdkVersion="4"&gt;</code>를 선언하고 <code>&lt;supports-screens&gt;</code> 요소를 포함하지 않습니다.
+
+    <strong>결과</strong>: 다른 필터가 적용된 경우를 제외하고 Google Play가 모든 장치 사용자에게 앱을 표시합니다.
+ </p>
+    <p><strong>예 3<br />
+    </strong>매니페스트가 <code>&lt;uses-sdk android:minSdkVersion="4"&gt;</code>를 선언하고 <code>&lt;supports-screens&gt;</code> 요소를 포함하지 않습니다.
+
+    <strong>결과</strong>: 다른 필터가 적용된 경우를 제외하고 Google Play가 모든 사용자에게 앱을 표시합니다.
+ </p>
+    <p>애플리케이션에서 화면 크기 지원을 선언하는 자세한 방법은 <code><a
+    href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code> 및 <a href="{@docRoot}guide/practices/screens_support.html">다중 화면 지원</a>을 참조하십시오.
+
+
+</p>
+</td>
+  </tr>
+
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>
+      <!-- ##api level 3## --></td>
+    <td valign="top">장치 구성:
+ <br />
+    키보드, 탐색, 터치스크린</td>
+    <td valign="top"><p>애플리케이션이 특정 하드웨어 기능을 요청한 경우 Google Play는 요청한 하드웨어를 가진 장치에만 앱을 표시합니다.
+</p>
+      <p><strong>예 1<br />
+      </strong>매니페스트가 <code>&lt;uses-configuration android:reqFiveWayNav=&quot;true&quot; /&gt;</code>를 포함하고 사용자가 5방향 탐색 컨트롤이 없는 장치에서 앱을 검색 중입니다. <strong>결과</strong>: Google Play가 사용자에게 앱을 표시하지 않습니다. </p>
+      <p><strong>예 2<br />
+      </strong>매니페스트가 <code>&lt;uses-configuration&gt;</code> 요소를 포함하지 않습니다. <strong>결과</strong>: 다른 필터가 적용된 경우를 제외하고 Google Play가 모든 사용자에게 앱을 표시합니다.</p>
+<p>자세한 내용은 <a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a>을 참조하십시오.</p></td>
+  </tr>
+
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">장치 기능<br />
+      (<code>name</code>)</td>
+    <td valign="top"><p>애플리케이션이 장치에 특정 장치 기능을 요구할 수 있습니다.
+ 이 기능은 Android 2.0에 소개되었습니다(API
+레벨 5).</p>
+      <p><strong>예 1<br />
+      </strong>매니페스트가 <code>&lt;uses-feature
+android:name=&quot;android.hardware.sensor.light&quot; /&gt;</code>를 포함하고 사용자가 라이트 센서가 없는 장치에서 앱을 검색 중입니다. <strong>결과</strong>:
+
+ Google Play가 사용자에게 앱을 표시하지 않습니다. </p>
+      <p><strong>예 2<br />
+      </strong>매니페스트가 <code>&lt;uses-feature&gt;</code> 요소를 포함하지 않습니다.
+ <strong>결과</strong>: 다른 필터가 적용된 경우를 제외하고 Google Play가 모든 사용자에게 앱을 표시합니다.
+</p>
+      <p>자세한 내용은 <code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>를 참조하십시오.</p>
+      <p><em>내재된 기능을 기준으로 필터링:</em> 경우에 따라 Google Play는 <code>&lt;uses-permission&gt;</code> 요소를 통해 요청된 권한을 <code>&lt;uses-feature&gt;</code> 요소에 선언된 것과 동등한 기능 요구사항으로 해석합니다.
+
+
+ 아래 <a href="#uses-permission-filtering"><code>&lt;uses-permission&gt;</code></a>을 참조하십시오.
+</p>
+</td>
+  </tr>
+
+  <tr>
+    <td valign="top">OpenGL-ES
+    버전<br />
+(<code>openGlEsVersion</code>)</td>
+    <td valign="top"><p>애플리케이션이 <code>&lt;uses-feature
+        android:openGlEsVersion=&quot;int&quot;&gt;</code> 특성을 사용하여 장치가 특정 OpenGL-ES 버전을 지원하도록 요구할 수 있습니다.
+</p>
+      <p><strong>예 1<br />
+      </strong>앱이 매니페스트에서 <code>openGlEsVersion</code>을 여러 번 지정하는 방식으로 여러 OpenGL-ES 버전을 요청합니다.
+
+  <strong>결과</strong>: Google Play는 앱이 지정된 버전 중 가장 높은 버전을 요구하는 것으로 간주합니다.</p>
+<p><strong>예 2<br />
+</strong>앱이 OpenGL-ES 버전 1.1을 요청하고 사용자가 OpenGL-ES 버전 2.0을 지원하는 장치에서 앱을 검색 중입니다.
+ <strong>결과</strong>: 다른 필터가 적용된 경우를 제외하고 Google Play가 사용자에게 앱을 표시합니다. 장치가 OpenGL-ES 버전 <em>X</em>를 지원하는 것으로 보고하면 Google Play는 해당 장치가 <em>X</em> 이전 버전도 모두 지원하는 것으로 간주합니다.
+
+
+</p>
+<p><strong>예 3<br />
+</strong>사용자가 OpenGL-ES 버전을 보고하지 않은 장치(예: Android 1.5 이하 버전을 실행하는 장치)에서 앱을 검색 중입니다.
+ <strong>결과</strong>: Google Play는 해당 장치가 OpenGL-ES 1.0만 지원하는 것으로 간주합니다.
+ Google Play가 <code>openGlEsVersion</code>을 지정하지 않은 사용자 앱이나 1.0 이상의 OpenGL-ES 버전을 지정하지 않은 앱만 표시합니다. </p>
+      <p><strong>예 4<br />
+      </strong>매니페스트가 <code>openGlEsVersion</code>을 지정하지 않습니다. <strong>결과</strong>: 다른 필터가 적용된 경우를 제외하고 Google Play가 모든 사용자에게 앱을 표시합니다. </p>
+<p>자세한 내용은 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>를 참조하십시오.</p></td>
+  </tr>
+
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></td>
+    <td valign="top">소프트웨어 라이브러리</td>
+    <td valign="top"><p>애플리케이션이 장치에 특정 공유 라이브러리를 요구할 수 있습니다.
+ </p>
+      <p><strong>예 1<br />
+      </strong>앱이 <code>com.google.android.maps</code> 라이브러리를 요구하고 사용자가 <code>com.google.android.maps</code> 라이브러리가 없는 장치에서 앱을 검색 중입니다. <strong>결과</strong>: Google Play가 사용자에게 앱을 표시하지 않습니다. </p>
+      <p><strong>예 2</strong><br />
+        매니페스트가 <code>&lt;uses-library&gt;</code> 요소를 포함하지 않습니다. <strong>결과</strong>: 다른 필터가 적용된 경우를 제외하고 Google Play가 모든 사용자에게 앱을 표시합니다.</p>
+<p>자세한 내용은 <a href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>&lt;uses-library&gt;</code></a>를 참조하십시오.</p></td>
+  </tr>
+  <tr id="uses-permission-filtering">
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></td>
+    <td valign="top">&nbsp;</td>
+    <td valign="top">엄격히 말하자면 Google Play는 <code>&lt;uses-permission&gt;</code> 요소를 기준으로 필터링하지 않습니다.
+ 하지만 Google Play가 해당 요소를 읽고 <code>&lt;uses-feature&gt;</code> 요소에서 올바로 선언되지 않았을 수도 있는 하드웨어 기능 요구사항이 애플리케이션에 있는지 판별합니다.
+
+
+ 예를 들어, 애플리케이션이 <code>CAMERA</code> 권한을 요청하지만 <code>android.hardware.camera</code>에 대해 <code>&lt;uses-feature&gt;</code> 요소를 선언하지 않은 경우 Google Play는 애플리케이션이 카메라를 요구하는 것으로 간주하여 카메라를 제공하지 않는 장치의 사용자에게 애플리케이션을 표시하지 않습니다.
+
+
+
+</p>
+    <p>일반적으로 애플리케이션이 하드웨어 관련 권한을 요청하면 Google Play는 <code>&lt;uses-feature&gt;</code> 선언에 해당하는 기능이 없더라도 애플리케이션이 기본 하드웨어 기능을 요구하는 것으로 간주합니다.
+
+
+ 그런 다음 <code>&lt;uses-feature&gt;</code> 선언에 내재된 기능을 기준으로 필터링을 설정합니다.
+
+</p>
+    <p>하드웨어 기능을 내재하는 권한 목록은 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features"><code>&lt;uses-feature&gt;</code></a> 요소에 대한 문서를 참조하십시오.
+
+</p>
+</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code></td>
+    <td valign="top">최소 프레임워크 버전(<code>minSdkVersion</code>)</td>
+    <td valign="top"><p>애플리케이션이 최소 API 레벨을 요구할 수 있습니다.  </p>
+      <p><strong>예 1</strong><br />
+        매니페스트가 <code>&lt;uses-sdk
+      android:minSdkVersion=&quot;3&quot;&gt;</code>을 포함하고 앱이 API 레벨 3에서 소개된 API를 사용합니다. 사용자가 API 레벨 2를 가진 장치에서 앱을 검색 중입니다. <strong>결과</strong>: Google Play가 사용자에게 앱을 표시하지 않습니다. </p>
+      <p><strong>예 2</strong><br />
+      매니페스트가 <code>minSdkVersion</code>을 포함하지 않고 앱이 API 레벨 3에서 소개된 API를 사용합니다. 사용자가 API 레벨 2를 가진 장치에서 앱을 검색 중입니다. <strong>결과</strong>: Google Play는 <code>minSdkVersion</code>이 "1"이고 앱이 모든 Android 버전과 호환되는 것으로 간주합니다. Google Play가 사용자에게 앱을 표시하고 사용자가 앱을 다운로드하는 것을 허용합니다. 앱이 런타임에 작동 중단됩니다. </p>
+    <p>이 두 번째 시나리오를 피하려면 항상 <code>minSdkVersion</code>을 선언하는 것이 좋습니다. 자세한 내용은 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min"><code>android:minSdkVersion</code></a>을 참조하십시오.</p></td>
+  </tr>
+  <tr>
+    <td valign="top">최대 프레임워크 버전(<code>maxSdkVersion</code>)</td>
+    <td valign="top"><p><em>사용이 중단되었습니다.</em> Android 2.1 이상에서는 <code>maxSdkVersion</code>이 앱의 매니페스트에 설정된 경우 <code>maxSdkVersion</code> 특성을 검사하거나 적용하지 않고 SDK가 컴파일하지 않습니다.
+
+ 장치가 이미 <code>maxSdkVersion</code>으로 컴파일된 경우 Google Play가 이를 반영하고 필터링에 사용합니다.
+
+</p>
+<p> <code>maxSdkVersion</code> 선언은 권장되지 <em>않습니다</em>. 자세한 내용은 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#max"><code>android:maxSdkVersion</code></a>을 참조하십시오.</p></td>
+  </tr>
+</table>
+
+
+
+<h3 id="advanced-filters">고급 매니페스트 필터</h3>
+
+<p>Google Play는 <a href="#table1">표 1</a>의 매니페스트 요소뿐만 아니라 표 2의 고급 매니페스트 요소를 기준으로 애플리케이션을 필터링할 수도 있습니다.
+</p>
+
+<p>고급 매니페스트 요소와 이들이 트리거하는 필터링은 예외적인 사례에만 적용됩니다.
+ 이들은 애플리케이션 배포에서 엄격한 제어가 필요한 특정 유형의 고성능 게임 및 유사 애플리케이션용으로 고안되었습니다.
+ <strong>대부분의 애플리케이션은 이러한 필터를 사용하면 안 됩니다</strong>.
+</p>
+
+<p id="table2" class="table-caption"><strong>표 2.</strong> Google Play 필터링용 고급 매니페스트 요소.
+</p>
+<table>
+  <tr><th>매니페스트 요소</th><th>요약</th></tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens&gt;}</a></nobr></td>
+    <td>
+      <p>Google Play가 장치 화면
+크기와 밀도가 {@code
+&lt;compatible-screens&gt;} 요소에서 {@code &lt;screen&gt;} 요소가 선언한 화면 구성과 일치하지 않는 경우에 애플리케이션을 필터링합니다.</p>
+      <p class="caution"><strong>주의:</strong> 일반적으로 <strong>이 매니페스트 요소를 사용하면 안 됩니다</strong>.
+ 이 요소를 사용하면 목록에 없는 화면 크기와 밀도의 조합을 모두 제외시켜 애플리케이션의 잠재적 사용자 기반이 현저히 줄어들 수 있습니다.
+
+ 대신 위의 <a href="#table1">표 1</a>에 나오는 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> 매니페스트 요소를 사용하여 대체 리소스로 고려하지 않은 화면 구성에 대해 화면 호환성 모드를 활성화해야 합니다.
+
+</p>
+    </td>
+  </tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a></nobr></td>
+    <td>
+      <p>Google Play는 애플리케이션에서 지원되는 하나 이상의 GL 텍스처 압축 형식이 장치에서도 지원되는 경우를 제외하고 애플리케이션을 필터링합니다.
+ </p>
+    </td>
+  </tr>
+</table>
+
+
+
+<h2 id="other-filters">기타 필터</h2>
+
+<p>Google Play는 아래 표에 설명된 것처럼 다른 애플리케이션 특성을 사용하여 주어진 장치에서 특정 사용자에 대해 애플리케이션을 표시할지 또는 숨길지 판별합니다. </p>
+
+<p id="table3" class="table-caption"><strong>표 3.</strong> Google Play에서 필터링에 영향을 주는 애플리케이션 및 게시 특성.
+</p>
+<table> <tr>
+    <th>필터 이름</th> <th>작동 방식</th> </tr>
+
+  <tr>
+    <td valign="top">게시 상태</td> <td valign="top"><p>게시된 애플리케이션만 Google Play 내의 검색 및 탐색에 나타납니다.
+</p> <p>앱이 게시되지 않은 경우라도 사용자가 구입, 설치 또는 최근에 제거한 앱 중에 다운로드 영역에서 볼 수 있는 앱은 설치할 수 있습니다.
+
+</p> <p>애플리케이션이 일시 중단된 경우 다운로드 영역에 나타나더라도 사용자가 다시 설치허가나 업데이트할 수 없습니다.
+</p> </td></tr>
+  <tr>
+  <td valign="top">가격 책정 상태
+</td> <td valign="top"><p>모든 사용자가 유료 앱을 볼 수 있는 것은 아닙니다. 유료 앱을 표시하려면 SIM 카드가 있고 Android 1.1 이상을 실행하는 장치가 유료 앱을 사용할 수 있는 (SIM 통신사가 지정한) 국가에 있어야 합니다.
+
+</p></td>
+</tr> <tr>
+  <td valign="top">대상 국가 지정</td> <td valign="top"> <p>앱을 Google Play에 업로드할 때 <strong>가격 책정 및 배포</strong>에서 앱을 배포할 국가를 선택할 수 있습니다.
+
+ 그러면 선택한 국가에서만 앱을 사용할 수 있게 됩니다.
+</p>
+</td> </tr> <tr>
+  <td valign="top" style="white-space:nowrap;">CPU 아키텍처(ABI)</td>
+  <td valign="top"><p>특정 CPU 아키텍처(예: ARM EABI v7 또는 x86)를 대상으로 하는 네이티브 라이브러리를 포함한 앱은 해당 아키텍처를 지원하는 장치에만 표시됩니다.
+
+ NDK 및 네이티브 라이브러리 사용에 대한 자세한 내용은 <a href="{@docRoot}tools/sdk/ndk/index.html#overview">Android NDK란?</a>을 참조하십시오.
+
+</p> </tr> <tr>
+  <td valign="top">복사 방지 애플리케이션</td> <td valign="top"><p class="caution">Google Play는 개발자 콘솔에서 더 이상 복사 방지 기능을 지원하지 않으며 이를 기준으로 앱을 필터링하지 않습니다.
+
+ 앱의 보안을 유지하려면 대신 <a href="{@docRoot}google/play/licensing/index.html">애플리케이션 라이선싱</a>을 사용하십시오.
+ 자세한 내용은 <a href="{@docRoot}google/play/licensing/overview.html#CopyProtection">복사 방지 대안</a>을 참조하십시오.
+</p></td> </tr> </table>
+
+<h2 id="MultiApks">여러 필터를 사용하여 다중 APK 게시</h2>
+
+<p>일부 특정 Google Play 필터는 서로 다른 장치 구성에 서로 다른 APK를 제공하기 위해 동일한 애플리케이션에 대해 다중 APK 게시를 허용합니다.
+ 예를 들어, 고화질 그래픽 자산을 사용하는 동영상 게임을 제작 중인 경우 각각 서로 다른 텍스처 압축 형식을 지원하는 2개의 APK를 생성하고 싶은 경우가 있습니다.
+
+ 이러한 방식으로 각 장치 구성에 필요한 텍스처만 포함하여 APK 파일의 크기를 줄일 수 있습니다.
+
+ Google Play는 각 장치의 텍스처 압축 형식 지원에 따라 해당 장치를 지원하도록 선언한 APK를 제공합니다.
+</p>
+
+<p>현재 Google Play는 각 APK가 다음 구성에 따라 서로 다른 필터를 제공하는 경우에만 동일한 애플리케이션에 대해 다중 APK 게시를 허용합니다.
+</p>
+<ul>
+  <li>OpenGL 텍스처 압축 형식
+    <p><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a> 요소를 사용하여 필터링합니다.</p>
+  </li>
+  <li>화면 크기(및 선택적 화면 밀도)
+    <p><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> 또는 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens&gt;}</a> 요소를 사용하여 필터링합니다.</p>
+  </li>
+  <li>API 레벨
+    <p><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
+&lt;uses-sdk&gt;}</a> 요소를 사용하여 필터링합니다.</p>
+  </li>
+  <li>CPU 아키텍처(ABI)
+    <p>특정 CPU 아키텍처(예: ARM EABI v7 또는 x86)를 대상으로 하는 <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>로 작성된 네이티브 라이브러리를 포함하여 필터링합니다.
+</p>
+  </li>
+</ul>
+
+<p>다른 모든 필터는 계속 평소와 동일하게 작동하지만 이 4개의 필터는 Google Play의 동일한 애플리케이션 목록 내에서 APK를 서로 구별할 수 있는 유일한 필터입니다.
+ 예를 들어, 장치에 카메라가 있는지 여부에 따라서만 APK가 달라지는 경우 동일한 애플리케이션에 대해 다중 APK를 게시할 수 <em>없습니다</em>.
+
+</p>
+
+<p class="caution"><strong>주의:</strong> 동일한 애플리케이션에 대해 다중 APK 게시는 고급 기능으로 간주되며 <strong>대부분의 애플리케이션은 광범위한 장치 구성을 지원하는 단일 APK만 게시해야 합니다</strong>.
+
+ 다중 APK를 게시하려면 필터 내에서 특정 규칙을 따라야 하며 각 구성에 대해 적절한 업데이트 경로를 보장하기 위해 각 APK의 버전 코드에 특별한 주의를 기울여야 합니다.
+
+</p>
+
+<p>Google Play에서 다중 APK를 게시하는 자세한 방법은 <a href="{@docRoot}google/play/publishing/multiple-apks.html">다중 APK 지원</a>을 참조하십시오.</p>

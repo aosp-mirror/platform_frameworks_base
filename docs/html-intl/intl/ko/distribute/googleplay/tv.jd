@@ -1,0 +1,305 @@
+page.title=Android TV에 배포
+page.image=/design/tv/images/atv-home.jpg
+meta.tags="tv", "publish", "quality"
+page.tags="tv", "publish", "googleplay"
+page.metaDescription=앱, 게임 및 콘텐츠를 Android TV에 배포합니다.
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>참여 방법</h2>
+<ol>
+<li><a href="#understand_guidelines">가이드라인 이해</a></li>
+<li><a href="#develop_app">우수한 TV 앱 개발</a></li>
+<li><a href="#test_app">TV 앱 품질 테스트</a></li>
+<li><a href="#opt_in">옵트인</a></li>
+<li><a href="#track_review">검토 추적</a></li>
+</ol>
+
+<h2>필독 항목</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">핵심 앱 품질</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  Android TV 및 Google Play를 통해 우수한 앱이나 게임을 거실에 있는 사용자에게 제공할 수 있습니다.
+ TV에 최적화된 스토어 첫 화면에서 앱과 게임을 제공할 수 있습니다. 신규 또는 기존 TV 앱을 확장한 다음 Google Play에서 익숙한 도구와 프로세스를 사용하여 게시할 수 있습니다.
+
+
+
+</p>
+
+<p>
+  시작하려면 이 문서를 참조하여 Google Play를 통해 사용자에게 TV 앱을 배포하는 방법을 배우십시오.
+ 앱이 충족해야 하는 유용성 및 품질 표준에 대한 내용은 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a>을 참조하십시오.
+
+
+ 앱이 준비되면 개발자 콘솔에서 Android TV 스토어 첫 화면에 게시하도록 옵트인할 수 있습니다.
+
+</p>
+
+<h2 id="how_to_participate">
+  참여 방법
+</h2>
+
+<p>
+  Google Play를 통해 거실에 있는 신규 사용자에게 TV 앱을 소개할 수 있습니다.
+ 기존 개발자 콘솔 계정과 현재 배포 및 가격 책정 설정을 사용하여 개발하고 게시할 수 있습니다.
+ 쉽게 참여할 수 있습니다. 과정에 대한 간략한 설명은 아래 절을 참조하십시오.
+
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-tv-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1. 가이드라인 및 요구사항 이해
+</h3>
+
+<p>
+  Android TV에 성공적인 출시를 준비하려면 먼저 TV에서 뛰어난 앱 경험을 생성하는 방법에 대한 가이드라인을 자세히 읽어보십시오. 앱을 TV용으로 확장하는 아이디어와 디자인 및 유용성에 대한 자세한 내용은 <a href="{@docRoot}design/tv/index.html">Android TV 디자인 가이드라인</a>을 참조하십시오.
+
+
+</p>
+
+<p>
+  TV 경험 디자인 시작 시 TV 앱 품질 기준을 읽고 숙지하십시오.
+ Android TV용 Google Play 경험은 <strong>TV에서 사용할 수 있는 앱만 소개합니다.</strong>  앱이 기본 품질 기준 집합을 충족하는 경우에 참여할 수 있습니다.
+
+
+ 자세한 내용은 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a>을 참조하십시오.
+
+</p>
+
+<h3 id="develop_app">2. 우수한 TV 앱 개발</h3>
+
+<p>
+  우수한 TV 앱은 거실용으로 설계되었으며 Android TV 및 관련 입력 주변 기기(예: 게임 컨트롤러, D 패드 및 리모컨)의 기능을 활용합니다.
+
+ 앱은 대형 화면에서 사용자에게 세련된 고품질 경험을 제공하고 매력적인 기능을 제공하도록 개선됩니다.
+
+
+</p>
+
+<p>
+  TV 앱을 고려할 때는 <a href="{@docRoot}training/tv/start/index.html">개발자 문서</a> 및 유용성 가이드라인을 검토하고 최대한 지원 계획을 수립하십시오.
+
+ SDK에 포함된 린백 라이브러리로 사용자를 위한 뛰어난 린백 경험을 디자인하고 작성하십시오.
+ 앱의 다른 부분들을 TV용으로 최적화하기를 원할 경우 개발 과정 초기에 식별하는 것이 이상적입니다.
+
+
+</p>
+
+<p>
+  대부분의 경우에 동일한 패키지 이름과 스토어 목록을 사용하여 휴대폰, 태블릿 및 기타 장치용 기존 앱의 일부로 TV 경험을 제공하는 것이 좋습니다.
+
+ 이러한 방식으로 사용자가 TV 경험으로 매끄럽게 업그레이드할 수 있도록 하고, 휴대폰 및 태블릿용 앱에서 획득한 리뷰와 평점을 활용할 수 있습니다.
+
+
+</p>
+
+<p>
+  TV 인텐트, 린백 라이브러리, TV 특정 코드 및 리소스를 모든 지원되는 장치의 단일 APK 솔루션의 일부로 번들할 수 있습니다.
+ 필요한 경우 <a href="{@docRoot}google/play/publishing/multiple-apks.html">다중 APK 지원</a>을 사용하여 휴대폰 및 태블릿에 사용하는 것과 동일한 패키지 이름과 스토어 목록으로 Android TV 장치에 사용자 지정 바이너리를 제공할 수 있습니다.
+
+
+
+</p>
+
+<p>
+  디자인 및 개발 과정에서 사용자 경험의 프로토타입을 생성하고 테스트하기에 적합한 장치를 확보하는 것이 중요합니다.
+ 한 대 이상의 Android TV 장치나 에뮬레이터를 확보하고 최대한 신속하게 테스트 환경을 구축해야 합니다.
+
+ Android TV 환경에서 테스트용으로 권장되는 하드웨어 장치는 <a href="http://www.google.com/intl/all/nexus/player/">Google Play</a> 및 기타 스토어에서 구할 수 있는 Nexus Player입니다. 게임 컨트롤러 및 기타 TV 입력 장치도 확보해야 합니다.
+
+
+
+</p>
+
+<h3 id="test_app">3. TV 앱 품질 테스트</h3>
+
+<p>
+  TV 앱은 잘 작동하고 Android TV에서 멋있게 보이고 최고의 사용자 경험을 제공하도록 디자인해야 합니다.
+   Google Play는 사용자가 Google Play에서 쉽게 검색할 수 있도록 고품질 앱을 소개합니다.
+ 다음과 같은 방법으로 참여하여 사용자에게 멋진 Android TV 앱을 제공할 수 있습니다.
+
+</p>
+
+<ul>
+  <li>핵심 앱 품질 가이드라인을 충족합니다.
+    <ul>
+      <li><a href="{@docRoot}design/index.html">Android 디자인 가이드라인</a>을 따릅니다.
+ 앱에서 <a href="http://www.google.com/design/spec/material-design/introduction.html">머티리얼 디자인</a> 사용에 특히 주의를 기울입니다.
+
+      </li>
+
+      <li>앱이 <a href="{@docRoot}distribute/essentials/quality/core.html">핵심 앱 품질 가이드라인</a>을 충족하는지 테스트합니다.
+
+      </li>
+    </ul>
+  </li>
+  <li><a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a> 가이드라인을 충족합니다.
+
+    <ul>
+      <li>당사의 <a href="{@docRoot}training/tv/index.html">TV 앱 개발</a> 모범 사례를 따릅니다.
+</li>
+      <li>앱이 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a> 기준을 모두 충족하는지 확인합니다.</li>
+    </ul>
+  </li>
+  <li>단순성 및 최고의 유용성을 추구합니다.</li>
+</ul>
+
+<h3 id="opt_in">4. Android TV에 옵트인 및 게시</h3>
+
+<p>
+  릴리스 준비된 APK를 작성하여 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a> 가이드라인을 모두 충족하는지 테스트한 후에 개발자 콘솔로 업로드합니다.
+
+ TV 스크린샷 및 TV 배너를 포함한 스토어 목록을 업데이트하고 필요한 경우 배포 옵션을 설정합니다.
+
+ Google Play에서 출시를 준비하는 방법에 익숙하지 않은 경우 <a href="{@docRoot}distribute/googleplay/publish/preparing.html">출시 검사 목록</a>을 참조하십시오.
+
+
+</p>
+
+<p>
+  Android TV 사용자에게 게시하기 전에 개발자 콘솔의 <strong>가격 책정 및 배포</strong> 절에서 Android TV에 옵트인해야 합니다.
+
+ 옵트인은 Android TV 사용자가 Google Play를 통해 앱을 사용할 수 있고 앱이 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a> 가이드라인을 충족함을 의미합니다.
+
+
+
+</p>
+
+<p>
+  APK 업로드에서 자동으로 검사되는 다음 두 가지 예비 품질 기준을 충족하는 경우에만 옵트인할 수 있습니다.
+
+</p>
+
+<ul>
+  <li>앱 매니페스트가 <a href="{@docRoot}reference/android/content/Intent.html#CATEGORY_LEANBACK_LAUNCHER"><code>CATEGORY_LEANBACK_LAUNCHER</code></a> 카테고리와 함께 <a href="{@docRoot}reference/android/content/Intent.html#ACTION_MAIN"><code>ACTION_MAIN</code></a> 인텐트 유형을 포함해야 합니다.
+
+ 자세한 내용은 <a href="{@docRoot}training/tv/start/start.html#tv-activity">여기</a>를 참조하십시오.
+  </li>
+
+  <li>앱이 터치스크린이 필요하지 않음을 선언해야 합니다. 매니페스트가 <code>android.hardware.touchscreen</code> 하드웨어를 <code>android:required="false”</code>로 선언해야 합니다.
+
+ 자세한 내용은 <a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">여기</a>를 참조하십시오.
+  </li>
+</ul>
+
+<p>
+  앱이 예비 기준을 충족하면 아래와 같이 Android TV 옵트인 확인란이 표시됩니다.
+ 옵트인 확인란이 활성화되지 않으면 APK를 검토하여 예비 기준을 충족하는지 확인하십시오.
+
+</p>
+
+<p>
+  옵트인하고 변경 내용을 저장한 후에 평소처럼 앱을 게시할 수 있습니다.
+  Android TV 사용자에게 앱을 제공하기 전에 Google Play는 앱을 제출하여 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a> 기준을 충족하는지 검토한 후에 그 결과를 개발자에게 알려줍니다.
+
+ 앱의 승인 상태를 추적하는 방법은 다음 절을 참조하십시오.
+
+</p>
+
+<p>
+  앱이 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a>을 충족하면 Google Play에서 Android TV 사용자가 해당 앱을 사용할 수 있습니다.
+
+ 또한 앱 컬렉션 및 홍보에서 앱에 더 높은 우선순위가 부여됩니다.
+ 모든 장소의 사용자에게 앱이 Android TV용으로 디자인되었음을 알려주기 위해 Google Play는 앱의 스토어 목록을 TV 배지로 장식합니다.
+
+
+</p>
+
+<p>
+  옵트인 및 검토는 Google Play 스토어에서 다른 장치의 앱 사용 가능성에 영향을 주지 않습니다. 앱을 게시하는 즉시 가령 휴대폰이나 태블릿에서 사용할 수 있습니다.
+
+
+</p>
+
+<p>
+  다음은 개발자 콘솔에서 Android TV에 옵트인하는 단계입니다.
+</p>
+
+<ol>
+  <li>앱이 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a> 기준을 모두 충족하는지 확인합니다.
+  </li>
+
+  <li>앱의 스토어 목록에 TV 스크린샷과 배너 그래픽을 추가합니다.
+  </li>
+
+  <li><strong>모든 애플리케이션</strong> 페이지에서 옵트인하려는 앱을 클릭합니다.
+  </li>
+
+  <li><strong>가격 책정 및 배포</strong>에서 아래로 스크롤하여 <em>Android TV</em>와 옵트인 확인란을 찾습니다.
+
+  </li>
+
+  <li><em>Android TV에 앱 배포(Distribute your app to Android TV)</em> 옆의 확인란을 클릭합니다.
+  </li>
+
+  <li><strong>저장</strong>을 클릭하여 변경 내용을 저장합니다.
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-tv-opt-in.png">
+  <p class="caption">
+    <strong>TV 옵트인:</strong> 개발자 콘솔에서 옵트인하면 앱이 Android TV에 포함됩니다.
+
+  </p>
+</div>
+
+<h3 id="track_review">5. 검토 및 승인 추적</h3>
+
+<p>
+  위에서 설명한 Android TV 기술 및 품질 기준을 앱이 충족하면 사용자가 Android TV에서 앱을 사용할 수 있습니다. 앱이 이 기준을 충족하지 않으면 개발자는 해결해야 할 문제에 대한 요약이 포함된 <strong>알림 이메일을 개발자 계정 주소</strong>로 받게 됩니다.
+
+
+ 필요한 조정을 거친 후에 새로운 앱 버전을 개발자 콘솔에 업로드할 수 있습니다.
+
+ 
+</p>
+
+<p>
+  언제든지 개발자 콘솔에서 앱의 <strong>가격 책정 및 배포</strong> 페이지의 <em>Android TV</em>에서 앱의 검토 및 승인 상태를 확인할 수 있습니다.
+
+
+</p>
+
+<p>
+  승인 상태는 다음 3개로 구분됩니다.
+</p>
+
+<ul>
+  <li>
+    <em>보류 중</em> — 검토를 위해 앱을 보냈지만 검토가 아직 완료되지 않았습니다.
+
+  </li>
+
+  <li>
+    <em>승인됨</em> — 앱이 검토 후에 승인되었습니다. Android TV 사용자가 앱을 바로 사용할 수 있습니다.
+ 
+  </li>
+
+  <li>
+    <em>승인 안 함</em> — 앱이 검토 후에 승인되지 않았습니다. 앱이 승인되지 않은 이유는 알림 이메일을 참조하십시오.
+ 문제를 해결하고 다시 옵트인 및 게시하여 재검토를 요청할 수 있습니다.
+
+
+  </li>
+</ul>
+
+<p>앱이 어떻게 평가되는지 이해하려면 <a href="{@docRoot}distribute/essentials/quality/tv.html">TV 앱 품질</a> 문서를 참조하십시오. </p>
+
+
+  <h3>관련 자료</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:tvlanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div>
