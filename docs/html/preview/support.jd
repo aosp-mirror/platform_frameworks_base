@@ -17,44 +17,46 @@ page.image=images/cards/card-support_16-9_2x.png
 
 <h2 id="release-notes">Release Notes</h2>
 
-<!--
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>M Developer Preview, Revision 2</a> <em>(Month 2015)</em>
+      alt=""/>M Developer Preview 2</a> <em>(July 2015)</em>
   </p>
 
   <div class="toggle-content-toggleme">
 
     <dl>
 
-    <dt>Fix Category 1</dt>
+    <dt>API Name Changes:</dt>
     <dd>
       <ul>
-        <li>Fixed issue X.</li>
-        <li>Fixed issue Y.</li>
-        <li>Fixed issue Z.</li>
-      </ul>
-    </dd>
-
-    <dt>Fix Category 2</dt>
-    <dd>
-      <ul>
-        <li>Fixed issue X.</li>
-        <li>Fixed issue Y.</li>
-        <li>Fixed issue Z.</li>
+        <li>Moved the {@code android.app.AssistContent} class to a different package,
+          {@code android.app.assist.AssistContent} in the Assist API.</li>
+        <li>Moved the {@code android.app.AssistStructure} class to a different package,
+          {@code android.app.assist.AssistStructure} in the Assist API.</li>
+        <li>Replaced the {@code ScanResult.PasspointNetwork} property with the
+          {@code ScanResult.isPasspointNetwork()} method for HotSpot 2.0 support.</li>
+        <li>Replaced the {@code InputDevice.hasMic()} method with {@code InputDevice.hasMicrophone()}
+          for the Audio API.</li>
+        <li>Renamed the {@code View.OnStylusButtonPressListener} class to
+          {@code View.OnContextClickListener} for Bluetooth Stylus support.</li>
+        <li>Renamed the {@code GestureDetector.OnStylusButtonPressListener} class to
+          {@code GestureDetector.OnContextClickListener} for Bluetooth Stylus support.</li>
+        <li>Renamed the {@code android.app.usage.NetworkUsageStats} class to
+          {@code android.app.usage.NetworkStats}.</li>
+        <li>Renames the {@code android.app.usage.NetworkUsageStats.Bucket} class to
+          {@code android.app.usage.NetworkStats.Bucket}.</li>
       </ul>
     </dd>
 
     </dl>
   </div>
 </div>
--->
 
-<div class="toggle-content opened">
+<div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>M Developer Preview, Revision 1</a> <em>(May 2015)</em>
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>M Developer Preview 1</a> <em>(May 2015)</em>
   </p>
 
   <div class="toggle-content-toggleme">
