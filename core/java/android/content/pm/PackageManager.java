@@ -1924,7 +1924,6 @@ public abstract class PackageManager {
     *
     * @hide
     */
-    @SystemApi
     public static final int FLAG_PERMISSION_USER_SET = 1 << 0;
 
     /**
@@ -1934,7 +1933,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int FLAG_PERMISSION_USER_FIXED =  1 << 1;
 
     /**
@@ -1944,7 +1942,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int FLAG_PERMISSION_POLICY_FIXED =  1 << 2;
 
     /**
@@ -1957,7 +1954,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE =  1 << 3;
 
     /**
@@ -1966,8 +1962,18 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int FLAG_PERMISSION_SYSTEM_FIXED =  1 << 4;
+
+
+    /**
+     * Permission flag: The permission is granted by default because it
+     * enables app functionality that is expected to work out-of-the-box
+     * for providing a smooth user experience. For example, the phone app
+     * is expected to have the phone permission.
+     *
+     * @hide
+     */
+    public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT =  1 << 5;
 
     /**
      * Mask for all permission flags.
@@ -2474,7 +2480,8 @@ public abstract class PackageManager {
             FLAG_PERMISSION_USER_FIXED,
             FLAG_PERMISSION_POLICY_FIXED,
             FLAG_PERMISSION_REVOKE_ON_UPGRADE,
-            FLAG_PERMISSION_SYSTEM_FIXED})
+            FLAG_PERMISSION_SYSTEM_FIXED,
+            FLAG_PERMISSION_GRANTED_BY_DEFAULT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
 
@@ -4630,6 +4637,19 @@ public abstract class PackageManager {
             case DELETE_FAILED_OWNER_BLOCKED: return PackageInstaller.STATUS_FAILURE_BLOCKED;
             case DELETE_FAILED_ABORTED: return PackageInstaller.STATUS_FAILURE_ABORTED;
             default: return PackageInstaller.STATUS_FAILURE;
+        }
+    }
+
+    /** {@hide} */
+    public static String permissionFlagToString(int flag) {
+        switch (flag) {
+            case FLAG_PERMISSION_GRANTED_BY_DEFAULT: return "FLAG_PERMISSION_GRANTED_BY_DEFAULT";
+            case FLAG_PERMISSION_POLICY_FIXED: return "FLAG_PERMISSION_POLICY_FIXED";
+            case FLAG_PERMISSION_SYSTEM_FIXED: return "FLAG_PERMISSION_SYSTEM_FIXED";
+            case FLAG_PERMISSION_USER_SET: return "FLAG_PERMISSION_USER_SET";
+            case FLAG_PERMISSION_REVOKE_ON_UPGRADE: return "FLAG_PERMISSION_REVOKE_ON_UPGRADE";
+            case FLAG_PERMISSION_USER_FIXED: return "FLAG_PERMISSION_USER_FIXED";
+            default: return Integer.toString(flag);
         }
     }
 
