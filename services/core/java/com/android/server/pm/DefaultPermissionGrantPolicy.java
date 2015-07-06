@@ -202,7 +202,8 @@ final class DefaultPermissionGrantPolicy {
                             mService.grantRuntimePermission(pkg.packageName, permission, userId);
                             mService.updatePermissionFlags(permission, pkg.packageName,
                                     PackageManager.MASK_PERMISSION_FLAGS,
-                                    PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, userId);
+                                    PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
+                                    | PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, userId);
                             if (DEBUG) {
                                 Log.i(TAG, "Granted " + permission + " to system component "
                                         + pkg.packageName);
@@ -768,11 +769,13 @@ final class DefaultPermissionGrantPolicy {
                                 + pkg.packageName);
                     }
 
+                    int newFlags = PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
                     if (systemFixed) {
-                        mService.updatePermissionFlags(permission, pkg.packageName,
-                                PackageManager.FLAG_PERMISSION_SYSTEM_FIXED,
-                                PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, userId);
+                        newFlags |= PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
                     }
+
+                    mService.updatePermissionFlags(permission, pkg.packageName,
+                            newFlags, newFlags, userId);
                 }
             }
         }
