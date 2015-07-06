@@ -5546,7 +5546,6 @@ package android.app {
 
   public static class VoiceInteractor.AbortVoiceRequest extends android.app.VoiceInteractor.Request {
     ctor public VoiceInteractor.AbortVoiceRequest(android.app.VoiceInteractor.Prompt, android.os.Bundle);
-    ctor public deprecated VoiceInteractor.AbortVoiceRequest(java.lang.CharSequence, android.os.Bundle);
     method public void onAbortResult(android.os.Bundle);
   }
 
@@ -5557,24 +5556,20 @@ package android.app {
 
   public static class VoiceInteractor.CompleteVoiceRequest extends android.app.VoiceInteractor.Request {
     ctor public VoiceInteractor.CompleteVoiceRequest(android.app.VoiceInteractor.Prompt, android.os.Bundle);
-    ctor public deprecated VoiceInteractor.CompleteVoiceRequest(java.lang.CharSequence, android.os.Bundle);
     method public void onCompleteResult(android.os.Bundle);
   }
 
   public static class VoiceInteractor.ConfirmationRequest extends android.app.VoiceInteractor.Request {
     ctor public VoiceInteractor.ConfirmationRequest(android.app.VoiceInteractor.Prompt, android.os.Bundle);
-    ctor public deprecated VoiceInteractor.ConfirmationRequest(java.lang.CharSequence, android.os.Bundle);
     method public void onConfirmationResult(boolean, android.os.Bundle);
   }
 
   public static class VoiceInteractor.PickOptionRequest extends android.app.VoiceInteractor.Request {
     ctor public VoiceInteractor.PickOptionRequest(android.app.VoiceInteractor.Prompt, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
-    ctor public deprecated VoiceInteractor.PickOptionRequest(java.lang.CharSequence, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
     method public void onPickOptionResult(boolean, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
   }
 
   public static final class VoiceInteractor.PickOptionRequest.Option implements android.os.Parcelable {
-    ctor public VoiceInteractor.PickOptionRequest.Option(java.lang.CharSequence);
     ctor public VoiceInteractor.PickOptionRequest.Option(java.lang.CharSequence, int);
     method public android.app.VoiceInteractor.PickOptionRequest.Option addSynonym(java.lang.CharSequence);
     method public int countSynonyms();
