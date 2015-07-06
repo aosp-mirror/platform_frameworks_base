@@ -30,8 +30,8 @@ public class WakelockPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawUptimeUs,
-                             long rawRealtimeUs, int statsType) {
+    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+                             long rawUptimeUs, int statsType) {
         long wakeLockTimeUs = 0;
         final ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> wakelockStats =
                 u.getWakelockStats();
