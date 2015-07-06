@@ -462,6 +462,9 @@ public class VolumeDialog {
     }
 
     protected void dismissH(int reason) {
+        if (mMotion.isAnimating()) {
+            return;
+        }
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
         if (!mShowing) return;
