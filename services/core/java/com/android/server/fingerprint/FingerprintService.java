@@ -23,6 +23,7 @@ import android.app.IUserSwitchObserver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -418,9 +420,22 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 "Must have " + permission + " permission.");
     }
 
+    boolean isCurrentUserOrProfile(int userId) {
+        UserManager um = UserManager.get(mContext);
+
+        // Allow current user or profiles of the current user...
+        List<UserInfo> profiles = um.getEnabledProfiles(userId);
+        final int n = profiles.size();
+        for (int i = 0; i < n; i++) {
+            if (profiles.get(i).id == userId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean canUseFingerprint(String opPackageName) {
         checkPermission(USE_FINGERPRINT);
-
         return mAppOps.noteOp(AppOpsManager.OP_USE_FINGERPRINT, Binder.getCallingUid(),
                 opPackageName) == AppOpsManager.MODE_ALLOWED;
     }
@@ -664,8 +679,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         public void authenticate(final IBinder token, final long opId, final int groupId,
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
-
+            if (!isCurrentUserOrProfile(UserHandle.getCallingUserId())) {
+                Slog.w(TAG, "Can't authenticate non-current user");
+                return;
+            }
             if (!canUseFingerprint(opPackageName)) {
+                Slog.w(TAG, "Calling not granted permission to use fingerprint");
                 return;
             }
             final boolean restricted = isRestricted();
