@@ -219,27 +219,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         synchronized (mSessions) {
             readSessionsLocked();
 
-            final File internalStagingDir = buildInternalStagingDir();
-            final ArraySet<File> unclaimedStages = Sets.newArraySet(
-                    internalStagingDir.listFiles(sStageFilter));
+            reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL);
+
             final ArraySet<File> unclaimedIcons = Sets.newArraySet(
                     mSessionsDir.listFiles());
 
             // Ignore stages and icons claimed by active sessions
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                unclaimedStages.remove(session.stageDir);
                 unclaimedIcons.remove(buildAppIconFile(session.sessionId));
-            }
-
-            // Clean up orphaned staging directories
-            for (File stage : unclaimedStages) {
-                Slog.w(TAG, "Deleting orphan stage " + stage);
-                if (stage.isDirectory()) {
-                    mPm.mInstaller.rmPackageDir(stage.getAbsolutePath());
-                } else {
-                    stage.delete();
-                }
             }
 
             // Clean up orphaned icons
@@ -253,6 +241,36 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     public void systemReady() {
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mStorage = mContext.getSystemService(StorageManager.class);
+    }
+
+    private void reconcileStagesLocked(String volumeUuid) {
+        final File stagingDir = buildStagingDir(volumeUuid);
+        final ArraySet<File> unclaimedStages = Sets.newArraySet(
+                stagingDir.listFiles(sStageFilter));
+
+        // Ignore stages claimed by active sessions
+        for (int i = 0; i < mSessions.size(); i++) {
+            final PackageInstallerSession session = mSessions.valueAt(i);
+            unclaimedStages.remove(session.stageDir);
+        }
+
+        // Clean up orphaned staging directories
+        for (File stage : unclaimedStages) {
+            Slog.w(TAG, "Deleting orphan stage " + stage);
+            synchronized (mPm.mInstallLock) {
+                if (stage.isDirectory()) {
+                    mPm.mInstaller.rmPackageDir(stage.getAbsolutePath());
+                } else {
+                    stage.delete();
+                }
+            }
+        }
+    }
+
+    public void onPrivateVolumeMounted(String volumeUuid) {
+        synchronized (mSessions) {
+            reconcileStagesLocked(volumeUuid);
+        }
     }
 
     public void onSecureContainersAvailable() {
@@ -713,25 +731,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         throw new IllegalStateException("Failed to allocate session ID");
     }
 
-    private File buildInternalStagingDir() {
-        return new File(Environment.getDataDirectory(), "app");
+    private File buildStagingDir(String volumeUuid) {
+        return Environment.getDataAppDirectory(volumeUuid);
     }
 
-    private File buildStagingDir(String volumeUuid) throws FileNotFoundException {
-        if (volumeUuid == null) {
-            return buildInternalStagingDir();
-        } else {
-            final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
-            if (vol != null && vol.type == VolumeInfo.TYPE_PRIVATE
-                    && vol.isMountedWritable()) {
-                return new File(vol.path, "app");
-            } else {
-                throw new FileNotFoundException("Failed to find volume for UUID " + volumeUuid);
-            }
-        }
-    }
-
-    private File buildStageDir(String volumeUuid, int sessionId) throws FileNotFoundException {
+    private File buildStageDir(String volumeUuid, int sessionId) {
         final File stagingDir = buildStagingDir(volumeUuid);
         return new File(stagingDir, "vmdl" + sessionId + ".tmp");
     }
