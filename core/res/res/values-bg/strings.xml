@@ -227,21 +227,21 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Личен"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Служебен"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"достъп до контактите ви"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"има достъп до контактите ви"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Местоположение"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"достъп до местоположението на това устройство"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"получи достъп до местоположението на това устройство"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"достъп до календара ви"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"има достъп до календара ви"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"изпращане и преглед на SMS съобщения"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"изпраща и преглежда SMS съобщения"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Съхранение"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"достъп до снимките, мултимедията и файловете на устройството ви"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"има достъп до снимките, мултимедията и файловете на устройството ви"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запис на звук"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"правене на снимки и запис на видеоклипове"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"извършване и управление на телефонни обаждания"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"извършва телефонни обаждания и да ги управлява"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"достъп до сензорните данни за жизнените ви показатели"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Извличане на съдържанието от прозореца"</string>
@@ -1040,12 +1040,7 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Свързан като инсталационна програма"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Установена е връзка с аксесоар за USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Докоснете за още опции."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Да се форматира ли USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Да се форматира ли SD картата?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Всички файлове, съхранявани в USB хранилището ви, ще бъдат изтрити. Това действие не може да бъде отменено!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Всички данни на картата ви ще бъдат заличени."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Форматиране"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Активно отстраняване на грешки през USB"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Отстраняване на грешки през USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Докоснете за деактивиране"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Промяна на клавиатурата"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Избиране на клавиатури"</string>

@@ -1039,12 +1039,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB en mode MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connecté en tant que programme d\'installation"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connecté à un accessoire USB"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Appuyez pour afficher plus d\'options."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater mémoire ?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formater la carte SD ?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Tous les fichiers stockés sur la mémoire de stockage USB vont être effacés. Cette action est irréversible."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Toutes les données stockées sur votre carte seront perdues."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Appuyez pour afficher plus d\'options"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB activé"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Appuyez pour désact. débogage USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Changer de clavier"</string>
@@ -1467,7 +1462,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Supprimé par votre administrateur"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Pour améliorer l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil, et il désactive le vibreur, les services de localisation et la plupart des données en arrière-plan. La messagerie électronique, les SMS/MMS et les autres applications basées sur la synchronisation ne sont mises à jour que si vous les ouvrez.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Pour améliorer l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances et désactive le vibreur, les services de localisation et la plupart des données en arrière-plan. Les messageries électroniques ou autres applications utilisant la synchronisation pourraient ne pas se mettre à jour, sauf si vous les ouvrez.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque l\'appareil est en charge."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Pendant %1$d minute (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Pendant %1$d minutes (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

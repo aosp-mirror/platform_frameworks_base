@@ -191,7 +191,7 @@
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Naghahandang i-update…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Pinoproseso ang package ng update…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Nagre-restart…"</string>
-    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Pag-reset ng factory data"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"I-reset ang data ng factory"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Nagre-restart…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Nagsa-shut down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Mag-shut down ang iyong tablet."</string>
@@ -210,7 +210,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"I-off"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ulat sa bug"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Kunin ang ulat sa bug"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Mangongolekta ito ng impormasyon tungkol sa kasalukuyang katayuan ng iyong device, na ipapadala bilang mensaheng e-mail. Gugugol ito ng kaunting oras mula sa pagsisimula sa ulat sa bug hanggang sa handa na itong maipadala; mangyaring maging mapagpasensya."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Mangongolekta ito ng impormasyon tungkol sa kasalukuyang katayuan ng iyong device, na ipapadala bilang mensaheng e-mail. Gugugol ito ng kaunting oras mula sa pagsisimula ng ulat sa bug hanggang sa handa na itong maipadala; mangyaring magpasensya."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Silent mode"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Naka-OFF ang tunog"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Naka-ON ang sound"</string>
@@ -1040,15 +1040,10 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Nakakonekta bilang isang installer"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Nakakonekta sa isang accessory ng USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Pindutin para sa higit pang mga opsyon."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Iformat USB storage?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"I-format ang SD card?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Mabubura ang lahat ng file na nakaimbak sa iyong USB storage. Hindi mababawi ang pagkilos na ito!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Mawawala ang lahat ng data sa iyong card."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Konektado ang debugging ng USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Pindutin upang i-disable ang pagde-debug ng USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Baguhin ang keyboard"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Piliin ang mga keyboard"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Pumili ng mga keyboard"</string>
     <string name="show_ime" msgid="9157568568695230830">"Ipakita ang pamamaraan ng pag-input"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Pumili ng layout ng keyboard"</string>

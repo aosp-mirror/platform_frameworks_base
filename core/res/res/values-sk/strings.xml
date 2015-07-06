@@ -1054,15 +1054,10 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Pripojené ako inštalátor"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Pripojené k periférnemu zariadeniu USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Ďalšie možnosti zobrazíte klepnutím."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formátovať ukladací priestor USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formátovať SD kartu?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Všetky súbory uložené v ukladacom priestore USB budú vymazané. Táto akcia sa nedá vrátiť späť!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Všetky údaje na vašej karte budú stratené."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formát"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladenie cez USB pripojené"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Klepnutím zakážete ladenie USB"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Klepnutím zakážete ladenie cez USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Zmeniť klávesnicu"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrať klávesnice"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrať klávesnicu"</string>
     <string name="show_ime" msgid="9157568568695230830">"Zobraziť metódu vstupu"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardvér"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Zvoľte rozloženie klávesnice"</string>

@@ -229,7 +229,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactes"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedir als contactes"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ubicació"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"accedeix a la ubicació del dispositiu"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"accedir a la ubicació del dispositiu"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedir al calendari"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -241,7 +241,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fer fotos i vídeos"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telèfon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar les trucades telefòniques"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades telefòniques"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensors corporals"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedir a les dades del sensor sobre els signes vitals"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contingut de la finestra"</string>
@@ -531,7 +531,7 @@
     <item msgid="1735177144948329370">"Fax de casa"</item>
     <item msgid="603878674477207394">"Cercapersones"</item>
     <item msgid="1650824275177931637">"Altres"</item>
-    <item msgid="9192514806975898961">"Personalitzat"</item>
+    <item msgid="9192514806975898961">"Personalitza"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Casa"</item>
@@ -549,7 +549,7 @@
     <item msgid="1738585194601476694">"Casa"</item>
     <item msgid="1359644565647383708">"Feina"</item>
     <item msgid="7868549401053615677">"Altres"</item>
-    <item msgid="3145118944639869809">"Personalitzat"</item>
+    <item msgid="3145118944639869809">"Personalitza"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Feina"</item>
@@ -934,22 +934,22 @@
     <string name="volume_ringtone" msgid="6885421406845734650">"Volum del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volum de multimèdia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"S\'està reproduint a través de Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"S\'ha establert el to en silenci"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"S\'ha establert el so de silenci"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volum en trucada"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volum en trucada Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volum de l\'alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volum de notificació"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volum de Bluetooth"</string>
-    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volum del to"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volum del so"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volum de trucada"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volum de multimèdia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volum de notificació"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"To predeterminat"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"To predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"So predeterminat"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"So predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Cap"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Sons"</string>
-    <string name="ringtone_unknown" msgid="5477919988701784788">"To desconegut"</string>
+    <string name="ringtone_unknown" msgid="5477919988701784788">"So desconegut"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Xarxes Wi-Fi disponibles</item>
       <item quantity="one">Xarxa Wi-Fi disponible</item>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connectat com a instal·lador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connectat a un accessori USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca per veure més opcions."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formata l\'emmagatzematge USB"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vols formatar la targeta SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"S\'esborraran tots els fitxers emmagatzemats al dispositiu d\'emmagatzematge USB. Aquesta acció no es pot desfer."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Es perdran totes les dades d\'aquesta targeta."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formata"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Canvia el teclat"</string>

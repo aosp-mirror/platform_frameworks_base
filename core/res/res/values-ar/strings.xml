@@ -1068,11 +1068,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"التوصيل كأداة تثبيت"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏الاتصال بجهاز USB ملحق"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"المس للحصول على مزيد من الخيارات."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏تهيئة وحدة تخزين USB؟"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏هل تريد تنسيق بطاقة SD؟"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏سيتم مسح جميع الملفات المخزنة على وحدة تخزين USB. لا يمكن عكس هذا الإجراء!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ستفقد جميع البيانات على بطاقتك."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"تنسيق"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏تم توصيل تصحيح أخطاء USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏المس لتعطيل تصحيح أخطاء USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغيير لوحة المفاتيح"</string>

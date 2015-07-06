@@ -501,8 +501,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Registrer antallet af forkerte adgangskoder, der indtastes ved oplåsning af skærmen, og lås din tablet, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Registrer antallet af forkerte adgangskoder, der indtastes ved oplåsning af skærmen, og lås tv-adgangen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Registrer antallet af forkerte adgangskoder, der indtastes ved oplåsning af skærmen, og lås telefonen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Skift skærmlås"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skifte skærmlås"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Skifte skærmlås"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skifter skærmlås"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Låse skærmen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollerer, hvordan og hvornår skærmen låses."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slette alle data"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tilsluttet som et installationsprogram"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tilsluttet et USB-ekstraudstyr"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Tryk for at se flere muligheder."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater USB-lager?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vil du formatere SD-kortet?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle filer, der er gemt på dit USB-lager, slettes. Denne handling kan ikke fortrydes!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Du mister alle data på kortet."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formater"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning er tilsluttet"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tryk for at deaktivere USB-fejlretning."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Skift tastatur"</string>
@@ -1221,7 +1216,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Flere valgmuligheder"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Internt lager"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Intern lagerplads"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-kort"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"SD-kort fra <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB-drev"</string>
@@ -1526,7 +1521,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Flere valgmuligheder"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Luk overløb"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one">Der er valgt <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="other">Der er valgt <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>valgt</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valgt</item>
     </plurals>
 </resources>

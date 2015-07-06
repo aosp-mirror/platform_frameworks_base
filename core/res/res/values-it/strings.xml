@@ -210,7 +210,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Spegni"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Segnalazione di bug"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Apri segnalazione bug"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Raccoglierà informazioni sullo stato corrente del dispositivo che verranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Verranno raccolte informazioni sullo stato corrente del dispositivo che saranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modalità silenziosa"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Audio attivo"</string>
@@ -227,24 +227,24 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Personale"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Lavoro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatti"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accesso ai contatti"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posizione"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accesso al calendario"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedere al calendario"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"invio e lettura di SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"inviare e visualizzare SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Archiviazione"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"accesso a foto, contenuti multimediali e file sul dispositivo"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"accedere a foto, contenuti multimediali e file sul dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfono"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrazione audio"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrare audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"acquisizione di foto e registrazione di video"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"acquisire foto e registrare video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefono"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"esecuzione e gestione delle telefonate"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"eseguire e gestire le telefonate"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensori per il corpo"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accesso ai dati dei sensori sui tuoi parametri vitali"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti finestra"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedere ai dati dei sensori sui tuoi parametri vitali"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti della finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Gli elementi toccati verranno pronunciati ad alta voce e sarà possibile esplorare lo schermo utilizzando i gesti."</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Collegato come installer"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Collegato a un accessorio USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Tocca per visualizzare più opzioni."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formattare archivio USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formattare la scheda SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Tutti i file memorizzati nell\'archivio USB verranno cancellati. Questa azione non può essere annullata."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Tutti i dati sulla scheda andranno persi."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatta"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tocca per disattivare il debug USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambia tastiera"</string>

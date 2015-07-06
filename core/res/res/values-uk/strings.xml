@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Без назви&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Немає номера тел.)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Невідомо"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голос. пошта"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голосова пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Пробл. підключення чи недійсний код MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Операція лише для номерів фіксованого набору."</string>
@@ -510,7 +510,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Видалити всі дані"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Стирати дані планшетного ПК без попередження, відновлюючи заводські налаштування."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Без попередження стирати дані телевізора, відновлюючи заводські налаштування."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Стирати дані телефону без попередження, відновлюючи заводські налаштування."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Стирати дані телефона без попередження, відновивши заводські налаштування."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Видалення даних користувача"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Видаляйте дані користувача на цьому планшеті без попередження."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Видаляйте дані користувача на цьому телевізорі без попередження."</string>
@@ -590,7 +590,7 @@
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Помічник"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Указати"</string>
-    <string name="eventTypeBirthday" msgid="2813379844211390740">"День нар."</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"День народження"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Річниця"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Інші"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Указати"</string>
@@ -1054,11 +1054,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Під’єднано як програму встановлення"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Під’єднано до аксесуара USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Торкніться, щоб побачити більше опцій."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Форматув. носій USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Форматувати карту SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Усі файли, збережені у вашому носії USB, буде стерто. Цю дію не можна скасувати!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Усі дані на вашій карті буде втрачено."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Форматув."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Налагодження USB завершено"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Торкніться, щоб вимкнути налагодження USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Змінити клавіатуру"</string>

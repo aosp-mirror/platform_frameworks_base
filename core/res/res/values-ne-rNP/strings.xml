@@ -1046,11 +1046,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"एउटा स्थापनकर्ताको रूपमा जोडिएको छ"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB सहायकमा जोडिएको छ"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"थप विकल्पहरूका लागि छुनुहोस्।"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB भण्डारणलाई फर्म्याट  गर्न चाहनु हुन्छ?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD कार्ड फर्म्याट गर्ने?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"तपाईंको USBमा सङ्ग्रह भएका सबै फाइलहरू मेटिने छन्। यो कार्य उल्टाउन सकिँदैन!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"तपाईँको कार्डमा भएका सबै डेटाहरू हराउने छन्।"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"फर्म्याट गर्नुहोस्"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डिबग गर्ने जडित छ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डिबग गर्ने असक्षम पार्न छुनुहोस्।"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कुञ्जीपाटी परिवर्तन गर्नुहोस्"</string>

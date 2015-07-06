@@ -235,9 +235,9 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправка и просмотр SMS-сообщений"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправлять и просматривать SMS-сообщения"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фотографиям, файлам и мультимедийному контенту на вашем устройстве"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запись аудио"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
@@ -1054,11 +1054,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Подключен как установщик"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB-устройство подключено"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Ещё варианты"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Отформатировать USB-накопитель?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Отформатировать SD-карту?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Все файлы, сохраненные на USB-накопителе, будут удалены. Это действие невозможно отменить."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Все данные будут удалены с карты."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Нажмите, чтобы отключить отладку по USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Выбор раскладки"</string>

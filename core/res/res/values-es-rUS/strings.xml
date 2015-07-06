@@ -624,7 +624,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Pareja de hecho"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Padre"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Amigo"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Gerente"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Supervisor"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Madre"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Padre"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Socio"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como un instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver más opciones."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"¿Deseas formatear el almacenamiento USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"¿Deseas formatear la tarjeta SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Se borrarán todos los archivos guardados en el almacenamiento USB. Esta acción no se puede deshacer."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Se perderán todos los datos de tu tarjeta."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración por USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar la depuración por USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar el teclado"</string>

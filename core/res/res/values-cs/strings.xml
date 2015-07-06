@@ -246,8 +246,8 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"uskutečňování a spravování telefonních hovorů"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Tělesné senzory"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"přístup k údajům snímačů vašich životních funkcí"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načíst obsah okna"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Můžete prozkoumat obsah okna, se kterým pracujete."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítat obsah oken"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Může prozkoumávat obsah oken, se kterými pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnout funkci Prozkoumání dotykem"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Položky, na které klepnete, budou přečteny nahlas a obrazovku bude možné procházet pomocí gest."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Zapnout vylepšené usnadnění přístupu k webu"</string>
@@ -983,10 +983,10 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Povolit připojení?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikace %1$s se chce připojit k síti Wi-Fi %2$s."</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikace"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Přímé připojení sítě Wi-Fi"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Spustit přímé připojení sítě Wi-Fi. Tato možnost vypne provoz sítě Wi-Fi v režimu klient/hotspot."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Přímé připojení sítě Wi-Fi se nepodařilo spustit."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Přímé připojení sítě Wi-Fi je zapnuto"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Spustit Wi-Fi Direct. Tato možnost vypne provoz sítě Wi-Fi v režimu klient/hotspot."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct se nepodařilo spustit."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct je zapnuto"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Nastavení otevřete dotykem"</string>
     <string name="accept" msgid="1645267259272829559">"Přijmout"</string>
     <string name="decline" msgid="2112225451706137894">"Odmítnout"</string>
@@ -1054,11 +1054,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Připojeno jako instalátor"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Připojeno k perifernímu zařízení USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Klepnutím zobrazíte další možnosti."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formátovat úložiště USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formátovat kartu SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Všechny soubory uložené v úložišti USB budou vymazány. Tuto akci nelze vrátit zpět."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Všechna data na kartě budou ztracena."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotykem zakážete ladění USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Změna klávesnice"</string>
@@ -1560,9 +1555,9 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Další možnosti"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zavřít rozbalovací nabídku"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="few">Vybrány <xliff:g id="COUNT_1">%1$d</xliff:g> položky</item>
-      <item quantity="many">Vybráno <xliff:g id="COUNT_1">%1$d</xliff:g> položky</item>
-      <item quantity="other">Vybráno <xliff:g id="COUNT_1">%1$d</xliff:g> položek</item>
-      <item quantity="one">Vybrána <xliff:g id="COUNT_0">%1$d</xliff:g> položka</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> položky</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> položky</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> položek</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> položka</item>
     </plurals>
 </resources>

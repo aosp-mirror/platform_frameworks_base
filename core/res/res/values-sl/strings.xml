@@ -623,7 +623,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomočnik"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Otrok"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Domači partner"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Oče"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Prijatelj"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Vodja"</string>
@@ -1054,11 +1054,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Povezan kot namestitveni program"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Priključen na dodatek USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Za več možnosti se dotaknite."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Ali želite formatirati pomnilnik USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Želite formatirati kartico SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Vse datoteke, shranjene v v pomnilniku USB, bodo izbrisane. Tega dejanja ni mogoče razveljaviti!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Vsi podatki v napravi bodo izgubljeni."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatiraj"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje in odpravljanje napak USB je povezano"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotaknite se, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Sprememba tipkovnice"</string>

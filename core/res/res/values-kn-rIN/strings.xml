@@ -209,8 +209,8 @@
     <string name="global_action_lock" msgid="2844945191792119712">"ಪರದೆ ಲಾಕ್"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ಪವರ್ ಆಫ್ ಮಾಡು"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ದೋಷದ ವರದಿ"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"ದೋಷದ ವರದಿಯನ್ನು ತೆಗೆದುಕೊಳ್ಳಿ"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"ಇ-ಮೇಲ್ ಸಂದೇಶದ ರೂಪದಲ್ಲಿ ಕಳುಹಿಸಲು, ನಿಮ್ಮ ಸಾಧನದ ಪ್ರಸ್ತುತ ಸ್ಥಿತಿಯ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ಇದು ಸಂಗ್ರಹಿಸಿಕೊಳ್ಳುತ್ತದೆ. ಇದು ದೋಷ ವರದಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿದ ಸಮಯದಿಂದ ಅದನ್ನು ಕಳುಹಿಸುವವರೆಗೆ ಸ್ವಲ್ಪ ಸಮಯವನ್ನು ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ; ದಯವಿಟ್ಟು ತಾಳ್ಮೆಯಿಂದಿರಿ."</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"ದೋಷ ವರದಿ ರಚಿಸಿ"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"ನಿಮ್ಮ ಸಾಧನದ ಪ್ರಸ್ತುತ ಸ್ಥಿತಿಯ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ಸಂಗ್ರಹಿಸಿಕೊಳ್ಳುವುದರ ಜೊತೆ ಇ-ಮೇಲ್ ರೂಪದಲ್ಲಿ ನಿಮಗೆ ರವಾನಿಸುತ್ತದೆ. ಇದು ದೋಷ ವರದಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿದ ಸಮಯದಿಂದ ಅದನ್ನು ಕಳುಹಿಸುವವರೆಗೆ ಸ್ವಲ್ಪ ಸಮಯವನ್ನು ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ; ದಯವಿಟ್ಟು ತಾಳ್ಮೆಯಿಂದಿರಿ."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"ಶಾಂತ ಮೋಡ್"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ಶಬ್ಧ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ಶಬ್ಧ ಆನ್ ಆಗಿದೆ"</string>
@@ -227,21 +227,21 @@
     <string name="user_owner_label" msgid="2804351898001038951">"ವೈಯಕ್ತಿಕ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ಕಚೇರಿ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ಸ್ಥಳ"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳ ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ಕ್ಯಾಲೆಂಡರ್"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಮತ್ತು ನಿರ್ವಹಿಸಲು"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ಸಂಗ್ರಹಣೆ"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು, ಮಾಧ್ಯಮ ಮತ್ತು ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು, ಮಾಧ್ಯಮ ಮತ್ತು ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ಮೈಕ್ರೋಫೋನ್‌"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ಕ್ಯಾಮರಾ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ಚಿತ್ರಗಳನ್ನು ತೆಗೆಯಿರಿ ಹಾಗೂ ವೀಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ಫೋನ್"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ದೇಹ ಸೆನ್ಸರ್‌ಗಳು"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳುತ್ತದೆ"</string>
@@ -271,8 +271,8 @@
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ಸೆಲ್ ಪ್ರಸಾರದ ಸಂದೇಶಗಳನ್ನು ಓದಿರಿ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ನಿಮ್ಮ ಸಾಧನದಿಂದ ಸ್ವೀಕರಿಸಿದ ಸೆಲ್ ಪ್ರಸಾರ ಸಂದೇಶಗಳನ್ನು ರೀಡ್ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸೆಲ್ ಪ್ರಸಾರ ಎಚ್ಚರಿಕೆಗಳನ್ನು ತುರ್ತು ಸಂದರ್ಭಗಳಲ್ಲಿ ನಿಮಗೆ ಎಚ್ಚರಿಸುವ ಸಲುವಾಗಿ ಕೆಲವು ಸ್ಥಳಗಳಲ್ಲಿ ವಿತರಿಸಲಾಗುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‌‌‌ಗಳು ತುರ್ತು ಸೆಲ್ ಪ್ರಸಾರವನ್ನು ಸ್ವೀಕರಿಸುವಾಗ, ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆ ಇಲ್ಲವೇ ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ಹಸ್ತಕ್ಷೇಪ ಮಾಡಬಹುದು."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ಚಂದಾದಾರ ಫೀಡ್‌ಗಳನ್ನು ಓದಿ"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ಪ್ರಸ್ತುತವಾಗಿ ಸಿಂಕ್‌ ಮಾಡಲಾದ ಫೀಡ್‌ಗಳ ಕುರಿತು ವಿವರಗಳನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ಪ್ರಸ್ತುತ ಸಿಂಕ್‌ ಮಾಡಲಾದ ಫೀಡ್‌ಗಳ ಕುರಿತು ವಿವರಗಳನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಮತ್ತು ನಿರ್ವಹಿಸಲು"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ಅನಿರೀಕ್ಷಿತ ವೆಚ್ಚಗಳಿಗೆ ಕಾರಣವಾಗಬಹುದು. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ನಿಮ್ಮ ದೃಢೀಕರಣವಿಲ್ಲದೆಯೇ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸುವ ಮೂಲಕ ನಿಮ್ಮ ಹಣವನ್ನು ವ್ಯಯಿಸಬಹುದು."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ನಿಮ್ಮ ಪಠ್ಯ ಸಂದೇಶಗಳನ್ನು ಓದಿ (SMS ಅಥವಾ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅಥವಾ ಸಿಮ್‌ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ವಿಷಯ ಅಥವಾ ಗೌಪ್ಯತೆಯನ್ನು ಲೆಕ್ಕಿಸದೆಯೇ, ಎಲ್ಲಾ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -1040,12 +1040,7 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ಸ್ಥಾಪಕದಂತೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ಪರಿಕರಕ್ಕೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗೆ ಸ್ಪರ್ಶಿಸಿ."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಫಾರ್ಮ್ಯಾಟ್ ಮಾಡುವುದೇ?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD ಕಾರ್ಡ್‌ ಫಾರ್ಮ್ಯಾಟ್ ಮಾಡುವುದೇ?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ನಿಮ್ಮ USB ಸಂಗ್ರಹಣೆಯಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ ಎಲ್ಲಾ ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸಿಹಾಕಲಾಗುವುದು. ಈ ಕ್ರಿಯೆಯನ್ನು ಹಿಂತಿರುಗಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ನಿಮ್ಮ ಕಾರ್ಡ್‌ನಲ್ಲಿರುವ ಎಲ್ಲಾ ಡೇಟಾ ಕಳೆದುಹೋಗುತ್ತದೆ."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ಸ್ವರೂಪಿಸು"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ಡೀಬಗಿಂಗ್‌ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="select_input_method" msgid="8547250819326693584">"ಕೀಬೋರ್ಡ್ ಬದಲಿಸಿ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ಕೀಬೋರ್ಡ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1071,7 +1066,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ಇನ್ನೂ ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ತೆಗೆದುಹಾಕಬೇಡಿ"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"ಹೊಂದಿಸು"</string>
-    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಎಜೆಕ್ಟ್ ಮಾಡು"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಎಜೆಕ್ಟ್"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ಎಕ್ಸ್‌ಪ್ಲೋರ್‌‌"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ಕಾಣೆಯಾಗಿದೆ"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"ಈ ಸಾಧನವನ್ನು ಮರುಸೇರಿಸಿ"</string>
@@ -1144,7 +1139,7 @@
     <string name="tethered_notification_message" msgid="6857031760103062982">"ಹೊಂದಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="back_button_label" msgid="2300470004503343439">"ಹಿಂದೆ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ಮುಂದಿನದು"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"ಸ್ಕಿಪ್‌ ಮಾಡು"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"ಸ್ಕಿಪ್‌"</string>
     <string name="no_matches" msgid="8129421908915840737">"ಯಾವುದೇ ಹೊಂದಿಕೆಗಳಿಲ್ಲ"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ಪುಟದಲ್ಲಿ ಹುಡುಕಿ"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">

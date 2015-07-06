@@ -233,9 +233,9 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"캘린더 액세스"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS 메시지를 전송하고 봅니다."</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS 메시지 전송 및 보기"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"기기의 사진, 미디어, 파일에 액세스합니다."</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"기기 사진, 미디어, 파일 액세스"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"오디오 녹음"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"설치 프로그램으로 연결됨"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB 액세서리에 연결됨"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB 저장소를 포맷하시겠습니까?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD 카드를 포맷하시겠습니까?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB 저장소에 저장된 파일이 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"카드의 모든 데이터가 삭제됩니다."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"포맷"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB 디버깅을 사용하지 않으려면 터치하세요."</string>
     <string name="select_input_method" msgid="8547250819326693584">"키보드 변경"</string>

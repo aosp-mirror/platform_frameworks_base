@@ -231,11 +231,11 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરો"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"કૅલેન્ડર"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"તમારા કેલેન્ડરને ઍક્સેસ કરો"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS સંદેશા મોકલો અને જુઓ"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS સંદેશા મોકલો અને જોવાની"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"સ્ટોરેજ"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"તમારા ઉપકરણ પર ફોટા, મીડિયા અને ફાઇલો ઍક્સેસ કરો"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"તમારા ઉપકરણ પર ફોટા, મીડિયા અને ફાઇલો ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"માઇક્રોફોન"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ઑડિઓ રેકોર્ડ કરો"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"કૅમેરો"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ઇન્સ્ટોલર તરીકે કનેક્ટ કર્યું"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ઍક્સેસરીથી કનેક્ટ થયાં"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"વધુ વિકલ્પો માટે ટચ કરો."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB સંગ્રહને ફોર્મેટ કરીએ?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD કાર્ડ ફોર્મેટ કરીએ?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"તમારા USB સંગ્રહમાં સંગ્રહિત તમામ ફાઇલો કાઢી નાખવામાં આવશે. આ ક્રિયા પલટાવી શકાતી નથી!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"તમારા કાર્ડ પરનો બધો ડેટા ગુમ થઈ જશે."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ફોર્મેટ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ડીબગિંગ કનેક્ટ થયું."</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ડીબગિંગ અક્ષમ કરવા માટે ટચ કરો."</string>
     <string name="select_input_method" msgid="8547250819326693584">"કીબોર્ડ બદલો"</string>
