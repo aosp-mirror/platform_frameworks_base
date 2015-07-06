@@ -385,21 +385,22 @@ public abstract class Layout {
             int x;
             if (align == Alignment.ALIGN_NORMAL) {
                 if (dir == DIR_LEFT_TO_RIGHT) {
-                    x = left;
+                    x = left + getIndentAdjust(lineNum, Alignment.ALIGN_LEFT);
                 } else {
-                    x = right;
+                    x = right + getIndentAdjust(lineNum, Alignment.ALIGN_RIGHT);
                 }
             } else {
                 int max = (int)getLineExtent(lineNum, tabStops, false);
                 if (align == Alignment.ALIGN_OPPOSITE) {
                     if (dir == DIR_LEFT_TO_RIGHT) {
-                        x = right - max;
+                        x = right - max + getIndentAdjust(lineNum, Alignment.ALIGN_RIGHT);
                     } else {
-                        x = left - max;
+                        x = left - max + getIndentAdjust(lineNum, Alignment.ALIGN_LEFT);
                     }
                 } else { // Alignment.ALIGN_CENTER
                     max = max & ~1;
-                    x = (right + left - max) >> 1;
+                    x = ((right + left - max) >> 1) +
+                            getIndentAdjust(lineNum, Alignment.ALIGN_CENTER);
                 }
             }
 
@@ -545,9 +546,9 @@ public abstract class Layout {
         int x;
         if (align == Alignment.ALIGN_NORMAL) {
             if (dir == DIR_LEFT_TO_RIGHT) {
-                x = left;
+                x = left + getIndentAdjust(line, Alignment.ALIGN_LEFT);
             } else {
-                x = right;
+                x = right + getIndentAdjust(line, Alignment.ALIGN_RIGHT);
             }
         } else {
             TabStops tabStops = null;
@@ -565,14 +566,14 @@ public abstract class Layout {
             int max = (int)getLineExtent(line, tabStops, false);
             if (align == Alignment.ALIGN_OPPOSITE) {
                 if (dir == DIR_LEFT_TO_RIGHT) {
-                    x = right - max;
+                    x = right - max + getIndentAdjust(line, Alignment.ALIGN_RIGHT);
                 } else {
                     // max is negative here
-                    x = left - max;
+                    x = left - max + getIndentAdjust(line, Alignment.ALIGN_LEFT);
                 }
             } else { // Alignment.ALIGN_CENTER
                 max = max & ~1;
-                x = (left + right - max) >> 1;
+                x = (left + right - max) >> 1 + getIndentAdjust(line, Alignment.ALIGN_CENTER);
             }
         }
         return x;
@@ -745,6 +746,14 @@ public abstract class Layout {
         return 0;
     }
 
+    /**
+     * Returns the left indent for a line.
+     *
+     * @hide
+     */
+    public int getIndentAdjust(int line, Alignment alignment) {
+        return 0;
+    }
 
     /**
      * Returns true if the character at offset and the preceding character
