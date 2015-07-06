@@ -1,0 +1,937 @@
+page.title=현지화 검사 목록
+page.metaDescription=Android 및 Google Play에서 제공하는 전 세계 사용자를 활용하십시오. 제품을 전 세계 시장에 제공하는 방법을 알아보려면 이 검사 목록을 읽으십시오.
+meta.tags="localizing, publishing, disttools"
+page.tags="local, l10n, translation, language"
+page.image=/distribute/images/localization-checklist.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>검사 목록</h2>
+    <ol>
+      <li><a href="#identify-languages">1. 대상 언어 및 로캘 식별</a></li>
+      <li><a href="#design">2. 현지화를 위한 디자인</a></li>
+      <li><a href="#manage-strings">3. 현지화를 위한 문자열 관리</a></li>
+      <li><a href="#translate-strings">4. UI 문자열 및 기타 리소스 번역</a></li>
+      <li><a href="#test">5. 현지화된 앱 테스트</a></li>
+      <li><a href="#prepare-launch">6. 전 세계 출시 준비</a></li>
+      <li><a href="#support-users">7. 출시 후 전 세계 사용자 지원</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px">
+  <img src="{@docRoot}distribute/images/localization-checklist.jpg">
+</div>
+
+<p>
+  Android 및 Google Play는 한국, 일본, 인도, 브라질, 러시아 등의 국가에서 급속히 성장하는 사용자 기반을 통해 전 세계 사용자에게 앱을 소개합니다.
+
+ 현지화는 앱의 배포 잠재력을 극대화하여 전 세계 사용자로부터 평가를 받을 수 있으므로 적극 권장됩니다.
+
+
+</p>
+
+<p>
+  현지화는 앱 개발 주기 전체에 걸쳐 다양한 작업을 수반하므로 사전 계획이 필수입니다.
+ 이 문서는 개발자가 현지화의 핵심 측면을 파악하여 Google Play에서 앱을 전 세계에 성공적으로 출시할 준비를 하는 데 도움을 줍니다.
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="identify-languages">
+    1. 대상 언어 및 로캘 식별
+  </h2>
+
+
+</div>
+
+<p>
+  현지화 준비에서 중요한 기본 단계는 앱 배포 대상 국가와 해당 국가의 공용어를 식별하는 것입니다.
+
+  앱 현지화는 시장의 잠재력이 크고 영어 또는 기타 국제 언어가 널리 사용되지 않는 국가에서 특히 중요합니다.
+
+
+</p>
+
+<p>
+  전 세계 사용자를 위해 국가, 로캘 및 언어 등 세 가지 주요 차원에서 앱을 관리할 수 있습니다.
+ 그 중에서 언어는 현지화의 핵심 고려 사항입니다. (날짜, 시간, 통화 및 유사한 정보의 형식 차이 때문에 로캘도 중요합니다.)
+
+ 사용자는 Android 장치에서 사용되는 언어와 로캘을 모두 제어할 수 있으며 그에 따라 앱 표시 방식에 영향을 줍니다.
+
+
+</p>
+
+<p>
+  일반적으로 먼저 전체 시장 규모 및 기회, 앱 카테고리, 경쟁 구도, 현지 가격 책정 및 재무적 요소 등에 따라 대상 국가를 결정합니다.
+
+ 그런 다음 대상 국가에 따라 앱에서 지원해야 하는 언어를 결정합니다.
+
+
+</p>
+
+<p>
+  이어서 대상 국가의 일부 또는 전체 언어로 현지화기로 결정할 수 있습니다.
+ 주요 지역 언어부터 시작하고 사용자 기반이 성장함에 따라 다른 언어를 추가하는 것이 합리적일 수 있습니다.
+
+</p>
+
+<p>
+  대상 언어가 식별되면 개발, 번역, 테스트 및 마케팅을 해당 시장에 집중할 수 있습니다.
+
+</p>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/identifylocales"
+data-sortorder="-timestamp" data-cardsizes="9x3," data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="design">
+    2. 현지화를 위한 디자인
+  </h2>
+
+
+</div>
+
+<p>
+  현지화 대상 언어를 결정한 후에 앱에서 해당 언어를 지원하려면 무엇이 필요할지 평가하고 초기 작업 계획을 수립합니다.
+
+  각 언어에서 어휘 확장, 스크립트 요구사항, 문자 간격 및 텍스트 배치 제약조건, 왼쪽에서 오른쪽으로 읽기 및 오른쪽에서 왼쪽으로 읽기 지원, 기타 잠재적 요소를 고려합니다.
+
+
+</p>
+
+<h4>
+  <strong>유연한 단일 레이아웃 집합 디자인</strong>
+</h4>
+
+<p>
+  레이아웃을 생성할 때 텍스트를 보유한 모든 UI 요소가 자연스럽게 디자인되었는지 확인하십시오.
+ 다른 언어를 수용하려면 자국어에 필요한 공간보다 더 많은 공간(일반적으로 최대 30% 증가)을 허용하는 것이 좋습니다.
+
+</p>
+
+<p>
+  또한 요소를 가로 또는 세로로 확장하여 UI 문자열 또는 입력 텍스트의 너비와 높이의 편차를 수용할 수 있어야 합니다.
+
+  대상 언어에서 텍스트 문자열이 테두리나 화면 가장자리와 겹치면 안 됩니다.
+
+</p>
+
+<p>
+  UI를 세심하게 디자인하는 경우 일반적으로 지원하는 모든 언어에 대해 단일 레이아웃 집합을 사용할 수 있습니다.
+ 자세한 내용은 <a href="{@docRoot}training/basics/fragments/fragment-ui.html">유연한 UI 작성</a>을 참조하십시오.
+
+</p>
+
+<h4>
+  <strong>필요한 경우 대체 레이아웃 사용</strong>
+</h4>
+
+<p>
+  UI가 대상 언어 중 한 언어의 텍스트를 수용할 수 없는 경우 해당 언어에 대해서만 <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">대체 레이아웃</a>을 생성할 수 있습니다.
+
+ Android는 특정 언어, 로캘, 화면 크기 등에 대해 단순히 적절한 리소스 한정자로 태그를 지정하는 방식으로 로드할 레이아웃 및 기타 리소스 집합을 쉽게 선언할 수 있게 만듭니다.
+
+
+ 대체 레이아웃의 유연성이 존재하는 한 시간이 지남에 따라 앱을 유지 관리하기가 더욱 힘들어질 수도 있습니다.
+ 일반적으로 훨씬 유연한 단일 레이아웃을 사용하는 것이 좋습니다.
+
+</p>
+
+<h4>
+  <strong>RTL 레이아웃 및 텍스트 지원</strong>
+</h4>
+
+<p>
+  오른쪽에서 왼쪽으로 읽기(RTL) 스크립트를 사용하는 국가에 배포하는 경우 가능한 범위 내에서 RTL 레이아웃 및 텍스트 표시와 편집에 대한 지원을 구현하는 것을 고려해야 합니다.
+
+
+</p>
+
+<p>
+  Android 4.1은 앱이 왼쪽에서 오른쪽으로 읽기(LTR) 스크립트와 오른쪽에서 왼쪽으로 읽기(RTL) 스크립트에서 텍스트를 표시하고 편집할 수 있는 제한된 양방향 텍스트를 도입했습니다.
+
+ Android 4.2는 모든 사용자에게 동일한 뛰어난 앱 경험을 제공할 수 있도록 레이아웃 미러링을 포함한 <a href="http://android-developers.blogspot.fr/2013/03/native-rtl-support-in-android-42.html">완벽한 RTL 레이아웃 기본 지원</a>을 추가했습니다.
+
+
+</p>
+
+<p>
+  최소한 Android 4.2 사용자의 경우 기본 RTL 레이아웃 미러링을 간단히 추가할 수 있으며, 이는 RTL 사용자의 필요를 충족하는 데 큰 도움이 됩니다.
+
+</p>
+
+<h4>
+  <strong>시스템이 제공하는 날짜, 시간, 숫자 및 통화 형식 사용</strong>
+
+</h4>
+
+<p>
+  앱이 로캘에 따라 달라질 수 있는 날짜, 시간, 숫자, 통화 및 기타 항목을 지정하는 경우 앱 특정 형식 대신 시스템이 제공하는 형식을 사용하십시오.
+
+ 모든 로캘이 동일한 1000 단위 구분 기호, 소수 구분 기호 또는 퍼센트 기호를 사용하지 않는다는 점에 유의하십시오.
+
+</p>
+
+<p>
+  Android는 날짜에 대한 <a href="{@docRoot}reference/android/text/format/DateUtils.html">DateUtils</a> 및  <a href="{@docRoot}reference/java/text/DateFormat.html">DateFormat</a>, 숫자 및 통화에 대한 <a href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,%20java.lang.Object...)">String.format()</a> 또는 <a href="{@docRoot}reference/java/text/DecimalFormat.html">DecimalFormat</a>, 전화 번호에 대한  <a href="{@docRoot}reference/android/telephony/PhoneNumberUtils.html">PhoneNumberUtils</a> 등과 같이 로캘에 따라 패턴의 형식을 지정하고 변환할 수 있는 다양한 유틸리티를 제공합니다.
+
+
+
+
+
+  
+</p>
+
+<p>
+  사용자의 로캘에 대한 가정을 기반으로 형식을 하드코드하면 사용자가 다른 로캘로 변경할 때 문제가 발생할 수 있습니다.
+ 시스템이 제공하는 형식과 유틸리티를 사용하는 것이 좋습니다.
+.
+</p>
+
+<h4>
+  <strong>완전한 기본 리소스 집합 포함</strong>
+</h4>
+
+<p>
+  완전한 기본 리소스 집합을 제공하여 앱이 언어 또는 로캘에 상관없이 제대로 실행할 수 있는지 확인하십시오.
+ 앱의 기본 리소스는 임의의 언어 또는 로캘 한정자로 <em>표시되지 않는</em> 리소스입니다(예: res/drawable/ 및res/values/에 저장된 리소스).
+
+ 앱이 현재 언어 또는 기본 집합에서 사용할 수 없는 리소스를 로드하려고 하면 작동 중단될 수 있습니다.
+
+
+</p>
+
+<p>
+  앱에서 사용하는 기본 언어가 무엇이든 연관된 레이아웃, drawable 및 문자열을 언어 또는 로캘 한정자 없이 기본 리소스 디렉터리에 저장하십시오.
+
+
+</p>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/tools/loc/designforloc" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="manage-strings">
+    3. 현지화를 위한 문자열 관리
+  </h2>
+
+
+</div>
+
+<p>
+  사용자에게 뛰어난 경험을 제공하고 현지화를 간결하게 만들기 위해 앱의 UI 문자열을 올바로 관리하는 것이 중요합니다.
+
+</p>
+
+<h4>
+  <strong>모든 문자열을 strings.xml로 이동</strong>
+</h4>
+
+<p>
+  앱을 작성할 때 문자열을 하드코드하지 마십시오. 대신 <em>모든</em> 문자열을 기본 strings.xml 파일에서 리소스로 선언하여 업데이트 및 현지화를 쉽게 만드십시오.
+
+ strings.xml 파일의 문자열은 컴파일된 코드를 변경하지 않고 (적합한 한정자를 사용하여) 추출하여 번역해서 앱에 다시 통합할 수 있습니다.
+
+
+</p>
+
+<p>
+  텍스트를 포함한 이미지를 생성하는 경우 해당 문자열도 strings.xml에 넣고 번역 후에 이미지를 다시 생성하십시오.
+
+</p>
+
+<h4>
+  <strong>UI 문자열에 대한 Android 가이드라인 준수</strong>
+</h4>
+
+<p>
+  UI를 디자인하고 개발할 때 사용자와 대화하는 <em>방법</em>에 세심한 주의를 기울이십시오.
+ 일반적으로, 친숙하면서도 <a href="{@docRoot}design/style/writing.html">간결한 압축된 스타일</a>을 사용하고 UI 전체에서 일관된 스타일을 사용하십시오.
+
+</p>
+
+<p>
+  <a href="{@docRoot}design/style/writing.html">문장 스타일 및 단어 선택</a>에 대한 Android 디자인 권장사항을 읽고 따르십시오.
+
+ 그러면 앱이 더 세련되어 보이고 사용자가 UI를 더 빨리 이해할 수 있게 됩니다.
+
+</p>
+
+<p>
+  또한 "작업 모음", "옵션 메뉴", "시스템 모음", "알림" 등과 같은 UI 요소에 대해 가능하면 항상 Android 표준 용어를 사용하십시오.
+
+ Android 용어를 정확하고 일관성 있게 사용하면 번역이 쉬워지고 사용자에게 더 나은 최종 제품을 제공할 수 있습니다.
+
+</p>
+
+<h4>
+  <strong>선언된 문자열에 대해 충분한 컨텍스트 제공</strong>
+</h4>
+
+<p>
+  strings.xml 파일에서 문자열을 선언할 때, 해당 문자열이 사용된 컨텍스트를 기술하십시오.
+ 이 정보는 번역사가 번역 품질을 높이는 데 매우 귀중하며 개발자가 시간이 지남에 따라 더욱 효과적으로 문자열을 관리하는 데 도움이 됩니다.
+
+
+</p>
+
+<p>
+  예:
+</p>
+
+<pre class="prettyprint">
+&lt;!-- The action for submitting a form. This text is on a button that can fit 30 chars --&gt;
+&lt;string name="login_submit_button"&gt;Sign in&lt;/string&gt;
+</pre>
+<p>
+  다음을 포함한 컨텍스트 정보 제공을 고려하십시오.
+</p>
+
+<ul>
+  <li>
+    <p>
+      이 문자열의 용도는 무엇입니까? 언제/어디서 이 문자열이 사용자에게 표시됩니까?
+    </p>
+  </li>
+
+  <li>
+    <p>
+      이 문자열은 레이아웃의 어디에 있습니까? 예를 들어, 버튼은 텍스트 상자보다 번역의 유연성이 적습니다.
+
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>번역하지 않아야 하는 메시지 부분 표시</strong>
+</h4>
+
+<p>
+  종종 문자열에 다른 언어로 번역하지 않아야 하는 텍스트가 포함되어 있습니다.
+ 일반적인 예로는 코드, 값의 자리 표시자, 특수 기호, 이름 등이 있습니다.
+ 번역할 문자열을 준비할 때 번역하지 않고 그대로 두어야 하는 텍스트를 찾아 표시하여 번역사가 해당 텍스트를 변경하지 않도록 하십시오.
+
+
+</p>
+
+<p>
+  번역하지 않아야 하는 텍스트를 표시하려면 <code>&lt;xliff:g&gt;</code> 자리 표시자 태그를 사용하십시오.
+ 다음은 번역하는 과정에서 "%1$s" 텍스트가 변경되지 않도록 하는 태그입니다. (그렇지 않으면 메시지가 깨질 수 있습니다.)
+
+
+</p>
+
+<pre class="prettyprint">
+&lt;string name="countdown"&gt;
+    &lt;xliff:g id="time" example="5 days&gt;%1$s&lt;/xliff:g&gt;until holiday
+&lt;/string&gt;
+</pre>
+<p>
+  자리 표시자 태그를 선언할 때 항상 자리 표시자의 용도가 무엇인지 설명하는 id 특성을 추가하십시오.
+ 앱이 나중에 자리 표시자 값을 대체하는 경우 예로 든 특성을 제공하여 예상 용도를 명확히 하십시오.
+
+</p>
+
+<p>
+  다음은 자리 표시자 태그의 몇 가지 추가적인 예입니다.
+</p>
+
+<pre>
+&lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+
+&lt;!-- Example placeholder for a special unicode symbol --&gt;
+
+&lt;string name="star_rating"&gt;Check out our 5
+
+    &lt;xliff:g id="star"&gt;\u2605&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a for a URL --&gt;
+
+&lt;string name="app_homeurl"&gt;
+
+    Visit us at &lt;xliff:g id="application_homepage"&gt;http://my/app/home.html&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a name --&gt;
+
+&lt;string name="prod_name"&gt;
+
+    Learn more at &lt;xliff:g id="prod_gamegroup"&gt;Game Group&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a literal --&gt;
+
+&lt;string name="promo_message"&gt;
+
+    Please use the "&lt;xliff:g id="promotion_code"&gt;ABCDEFG&lt;/xliff:g&gt;” to get a discount.
+
+&lt;/string&gt;
+
+...
+
+&lt;/resources&gt;
+</pre>
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/managestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="translate-strings">
+    4. UI 문자열 및 기타 리소스 번역
+  </h2>
+
+
+</div>
+
+<p>
+  앱의 UI 문자열과 리소스를 대상 언어로 번역하는 것은 현지화의 핵심 단계로 가장 세심한 주의와 계획이 요구됩니다.
+
+
+</p>
+
+<p>
+  앱의 가치를 높여주는 고품질 번역을 보장하려면 전문 번역사와 함께 작업하는 것이 좋습니다(<a href="#gp-trans">전문 번역 의뢰</a> 참조). 옵션으로 제공되는 기계 번역은 사용자에게 좋은 경험을 제공하지 못할 가능성이 높습니다.
+
+
+</p>
+
+<h4>
+  <strong>번역 준비</strong>
+</h4>
+
+<p>
+  번역 품질은 부분적으로 원문의 품질에 의존하므로 strings.xml 파일이 체계적으로 구성되고 정확하고 주석이 충실한지 확인하십시오.
+
+
+</p>
+
+<p>
+  다음은 번역할 문자열을 준비하는 몇 가지 방법입니다.
+</p>
+
+<ul>
+  <li>
+    <p>
+      문자열의 서식이 정확하고 일관성 있게 지정되었는지 확인합니다.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      위의 <a href="#manage-strings">현지화를 위한 문자열 관리</a>에 나오는 문자열 권장사항을 따릅니다.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      strings.xml 파일을 정리하고 사용되지 않는 문자열을 제거합니다.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      번역사에 대한 특별 지침은 물론 파일의 소유자, 원본, 버전을 식별할 수 있도록 파일에 주석을 포함합니다.
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      기존 번역이 있는 경우 찾아서 번역사에게 보내는 zip 파일 또는 기타 패키지에 포함합니다.
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      번역이 필요한 drawable 또는 기타 리소스를 파악하여 번역사의 패키지에 포함합니다.
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      또한 앱 이름 및 설명, 릴리스 정보 등 앱의 스토어 목록 세부정보와 함께 국제 마케팅 자료의 번역을 고려합니다.
+
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      제품, 시장 또는 기본 기술에 나오는 핵심 용어의 의미와 용도를 설명하는 용어 목록을 만듭니다.
+ 해당 목록을 번역사의 패키지에 추가합니다.
+
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>번역할 문자열 보내기</strong>
+</h4>
+
+<p>
+  개발 주기의 초기에 전문 번역 회사에 문의하여 비용과 소요 시간을 알아보십시오.
+ 반복되는 문자열도 비용에 포함하십시오.
+ 온라인에서 번역 회사를 찾거나 Google Play 개발자 콘솔에서 직접 제공하는 번역 서비스를 이용할 수 있습니다(<a href="#gp-trans">전문 번역 의뢰</a> 참조).
+
+
+</p>
+
+<p>
+  번역이 완료되면 번역을 확인하십시오.
+ 모든 파일이 번역되었는지, 잠재적 인코딩 문제가 있는지, 선언 형식이 그대로인지 확인하십시오.
+
+</p>
+
+<p>
+  모두 양호한 것으로 판단되면 현지화된 디렉터리와 파일을 앱의 리소스로 신중히 이동하십시오.
+ 나중에 제대로 로드되도록 디렉터리를 해당 언어와 로캘 한정자로 태그 지정하십시오.
+
+
+</p>
+
+<p>
+  번역을 앱에 병합한 후에 <a href="#test">현지화된 앱 테스트</a>를 시작하십시오.
+</p>
+
+<h4 id="gp-trans">
+  <strong>Google Play를 통해 전문 번역 의뢰</strong>
+</h4>
+
+<p>
+  Google Play 앱 번역 서비스는 앱의 번역을 빠르게 의뢰할 수 있도록 도와줍니다. 개발자 콘솔에서 저렴한 가격에 고품질 번역을 제공할 수 있는 Google 인증 번역 회사 목록을 검색할 수 있습니다.
+
+
+ 번역하려는 문자열을 업로드하고 번역 대상 언어를 선택하고 시간과 가격을 기준으로 번역 회사를 선택할 수 있습니다.
+
+
+</p>
+
+<p>
+  번역을 의뢰하면 번역 회사로부터 이메일을 받습니다.
+  번역은 개발자와 번역 회사 간의 직접적인 비즈니스 계약입니다. 번역 프로세스와 결과물을 관리하고 지원 문제를 해결하기 위해 번역 회사와 긴밀히 협력해야 합니다.
+
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-localization-trans-0.png" class="border-img">
+</div>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/translatestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test">
+    5. 현지화된 앱 테스트
+  </h2>
+
+
+</div>
+
+<p>
+  번역된 문자열과 리소스를 받아서 앱으로 다시 이전한 후에 앱을 테스트하여 전 세계 사용자에게 배포할 준비가 되었는지 확인해야 합니다.
+
+
+</p>
+
+<p>
+  수동 테스트를 통해 레이아웃과 문자열에서 사용자 만족도와 궁극적으로 앱의 사용자 평점에 영향을 줄 수 있는 현지화 문제를 찾아낼 수 있습니다.
+
+
+</p>
+
+<h4>
+  <strong>테스트 환경 설정</strong>
+</h4>
+
+<p>
+  현지화된 앱을 테스트하려면 대상으로 삼은 시장과 폼 팩터에 따라 다양한 장치(또는 가상 장치)와 화면 크기로 구성된 환경을 설정해야 합니다.
+
+ 특정 지역에서 장치의 범위가 다를 수 있다는 점에 유의하십시오.
+ 가능하면 사용자가 사용할 가능성이 높은 실제 장치와 테스트 장치가 일치하도록 하십시오.
+
+</p>
+
+<h4>
+  <strong>일반적인 현지화 문제 찾기</strong>
+</h4>
+
+<p>
+  각 테스트 장치의 설정에서 언어 또는 로캘을 설정하십시오. 앱을 설치하고 실행한 다음 모든 UI 흐름, 대화 상자 및 사용자 상호작용을 탐색하십시오.
+
+ 입력에 텍스트를 입력하십시오. 다음을 비롯한 문제를 찾으십시오.
+</p>
+
+<ul>
+  <li>
+    <p>
+      잘린 텍스트 또는 화면이나 UI 요소 가장자리와 겹친 텍스트
+    </p>
+  </li>
+
+  <li>
+    <p>
+      잘못된 줄바꿈
+    </p>
+  </li>
+
+  <li>
+    <p>
+      잘못된 단어 분리 또는 문장 부호
+    </p>
+  </li>
+
+  <li>
+    <p>
+      잘못된 사전순 정렬
+    </p>
+  </li>
+
+  <li>
+    <p>
+      잘못된 레이아웃 방향 또는 텍스트 방향
+    </p>
+  </li>
+
+  <li>
+    <p>
+      번역되지 않은 텍스트 &mdash; 번역된 문자열 대신 기본 문자열이 표시되는 경우 해당 문자열의 번역 의뢰를 누락했거나 잘못된 언어 한정자로 리소스 디렉터리를 표시했을 가능성이 있습니다.
+
+
+
+    </p>
+  </li>
+</ul>
+
+<p>
+  번역에서 문자열이 확장되어 레이아웃에 맞지 않는 경우 기본 텍스트를 단순화하거나 기본 레이아웃을 조정할 수 있습니다.
+
+ 이러한 방법으로 문제가 해결되지 않으면 해당 언어에 대한 사용자 지정 레이아웃을 만들 수 있습니다.
+
+</p>
+
+<h4>
+  <strong>기본 리소스에 대한 테스트</strong>
+</h4>
+
+<p>
+  지원되는 모든 언어와 로캘에서 앱을 테스트한 후에 <em>지원되지 않는 언어</em>와 로캘에서 다시 테스트하십시오.
+
+  그러면 앱이 전체 기본 문자열 및 리소스 집합을 포함하고 있는지 확인할 수 있고, 따라서 모든 사용자가 기본 설정 언어에 상관없이 앱을 사용할 수 있습니다.
+
+
+</p>
+
+<h4>
+  <strong>원어민의 검토</strong>
+</h4>
+
+<p>
+  테스트 중이나 후에 현지화된 앱을 원어민에게 검토하게 하는 것이 좋습니다.
+ 이렇게 하는 한 가지 방법은 해당 지역 사용자에게 베타 테스트를 의뢰하는 것입니다. Google Play를 이 테스트를 진행할 수 있습니다.
+ <!-- </p>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/test"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div> -->
+</p>
+
+<div class="headerLine">
+  <h2 id="prepare-launch">
+    6. 전 세계 출시 준비
+  </h2>
+
+
+</div>
+
+<p>
+  앱 번역은 현지화의 핵심 부분이지만 제품을 사용자에게 매력적으로 보이게 하고 눈에 띄게 하려면 대상 국가에서 출시 준비를 하고 전 세계 사용자를 대상으로 더욱 광범위한 출시 및 마케팅 계획을 수립해야 합니다.
+
+
+
+</p>
+
+<h4>
+  <strong>Google Play 목록 현지화</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Google Play 목록 현지화
+    </h2>
+
+    <p>
+      Google Play 스토어 목록은 전 세계 사용자에게 앱을 선보이는 첫 관문입니다. 여기서 모든 사용자에게 앱의 장점을 적극 홍보해야 합니다!
+
+ 개발자 콘솔에서 다음 항목을 비롯한 목록을 현지화하십시오.
+
+    </p>
+
+    <ul>
+      <li>앱 이름 및 설명
+      </li>
+
+      <li>휴대폰과 태블릿의 앱 스크린샷
+      </li>
+
+      <li>홍보 그래픽 및 동영상
+      </li>
+    </ul>
+  </div>
+</div>
+
+<p>
+  앱이 국제 시장에서 성공하려면 Google Play 스토어 목록 현지화가 필수입니다.
+ 개발자 콘솔에서 현지화된 목록을 관리할 수 있습니다.
+
+</p>
+
+<p>
+  출시하기 전에 앱 이름, 설명, 홍보 문구, 마케팅 이름 및 프로그램, 기타 텍스트와 이미지를 결정하십시오.
+ 베타 테스트가 시작될 때 준비되어 있도록 번역할 목록 텍스트와 이미지를 조기에 의뢰하십시오.
+
+ 번역된 텍스트가 준비되면 개발자 콘솔을 통해 추가할 수 있습니다.
+
+</p>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Google Play 스토어 목록 번역
+    </h2>
+
+    <p>
+      Google Play의 앱 번역 서비스를 사용하여 스토어 목록을 번역할 수 있습니다.
+ 스토어 목록 정보가 담긴 XML 파일 준비하고 strings.xml 파일을 업로드할 때와 마찬가지로 업로드하십시오(<a href="#gp-trans">전문 번역 의뢰</a> 참조).
+
+    </p>
+  </div>
+</div>
+
+<p>
+  또한 뛰어난 현지화된 앱을 사용자에게 홍보하십시오!
+ 각 언어로 휴대폰과 7인치 및 10인치 태블릿용 UI 스크린샷을 찍으십시오.
+ 지원하는 각 언어별 스크린샷을 개발자 콘솔에 업로드할 수 있습니다.
+ 그러면 사용자가 자신의 언어로 앱 목록을 탐색할 때 매우 유용하게 활용할 수 있습니다.
+
+</p>
+
+<p>
+  현지화된 홍보 그래픽과 동영상 버전을 만드는 것도 필수입니다.
+ 예를 들어, 효율성을 극대화하기 위해 앱의 대표 그래픽에 번역해야 하는 텍스트를 포함하거나 국가마다 다른 시각적 접근방식을 적용하기를 원할 수도 있습니다.
+
+ 언어마다 서로 다른 홍보 그래픽 버전을 만들어 개발자 콘솔에 업로드할 수 있습니다.
+
+ 홍보 동영상을 제공하는 경우 개발자는 지원하는 각 언어로 현지화된 버전을 만든 다음 해당 동영상 링크를 추가할 수 있습니다.
+
+
+</p>
+
+<h4>
+  <strong>주요 국가에서 베타 릴리스 계획</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      간편한 베타 테스트
+    </h2>
+
+    <p>
+      이제 전 세계 어디에서나 Google Play에서 알파 및 베타 테스터 그룹을 설정할 수 있습니다.
+ 다음에 개발자 콘솔에 로그인할 때 이 강력한 기능을 확인하십시오.
+
+    </p>
+  </div>
+</div>
+
+<p>
+  앱을 출시하기 전에 사용자의 실제 피드백을 받는 것은 항상 중요합니다. 새로운 언어, 국가 또는 지역에서 앱을 출시하는 경우에는 더욱 중요합니다.
+
+ 이러한 경우에 주요 시장에서 사용자에게 앱의 시험판 버전을 배포하고 간편한 피드백 및 버그 보고 기능을 제공하는 것이 좋습니다.
+
+
+
+</p>
+
+<p>
+  Google Play에서 앱의 베타 프로그램을 설정할 수 있습니다. 개발자 콘솔에 로그인하여 APK를 업로드한 후에 앱의 알파 및 베타 테스트를 진행할 사용자 그룹을 설정할 수 있습니다. 소규모 알파 테스터 그룹부터 시작하여 더 큰 규모의 베타 테스터 그룹으로 이동할 수 있습니다.
+
+
+
+</p>
+
+<p>
+  테스터 그룹에 추가된 사용자는 앱의 스토어 목록에 액세스하여 앱을 설치합니다. <strong>알파 또는 베타 버전 사용자는 리뷰나 평점을 남길 수 없으므로</strong> Google Play에서 <strong>저조한 평점에 대한 위험이 없습니다.</strong> 하지만 이는 개발자가 테스터가 피드백을 제공할 수 있는 메커니즘을 설정해야 함을 의미합니다. <a href="http://www.google.com/+/business/">Google+</a> 페이지 또는 <a href="https://groups.google.com/forum/#!overview">Google 그룹</a>을 만드는 것을 고려해 보십시오.
+
+
+
+
+</p>
+
+<p>
+  개발자가 받는 피드백은 UI, 번역 및 스토어 목록을 조정하여 사용자에게 뛰어난 경험을 보장하는 데 도움이 됩니다.
+
+</p>
+
+<h4>
+  <strong>국제 마케팅 계획</strong>
+</h4>
+
+<p>
+  많은 국가에서 가장 많이 노출되게 하려면 국제 마케팅 또는 광고 캠페인을 고려하십시오.
+ 캠페인의 범위는 지원 가능한 예산에 따라 다르지만, 일반적으로 출시 시점과 그 후에 지역 또는 국가별 마케팅을 수행하는 것이 비용효율적이고 생산적입니다.
+
+
+</p>
+
+<h4>
+  <strong>현지화된 Google Play 배지 생성</strong>
+</h4>
+
+<p>
+  국제 마케팅을 준비 중인 경우 <a href="{@docRoot}distribute/tools/promote/badges.html">현지화된 Google Play 배지</a>를 포함하여 사용자에게 개발자가 Google Play에서 활동 중임을 알리십시오.
+ 배지 생성기를 사용하여 웹사이트나 마케팅 자료에서 사용할 수 있는 현지화된 배지를 신속하게 만들 수 있습니다.
+
+ 고해상도 자산도 사용할 수 있습니다.
+</p>
+
+<h4>
+  <strong>현지화된 장치 아트 생성</strong>
+</h4>
+
+<p>
+  Android 장치에서 실행되는 앱의 제품 샷을 홍보하는 경우 해당 샷이 Android 장치에서 멋있게 보이게 하고 최신 상태를 반영하십시오.
+
+  고품질 마케팅 자료를 만들려면 끌어서 놓기 방식의 <a href="{@docRoot}distribute/tools/promote/device-art.html">장치 아트 생성기</a>를 사용하여 Nexus 장치에서 스크린샷의 프레임을 빠르게 구현하십시오.
+
+
+</p>
+
+<h4>
+  <strong>최적화 팁 확인</strong>
+</h4>
+
+<p>
+  출시를 준비할 때 개발자 콘솔에 로그인하여 앱의 최적화 팁을 확인하십시오.
+ 최적화 팁은 현지화된 스토어 목록에서 누락된 부분이 있는 경우 알려주고 성공적으로 현지화된 출시를 위해 기타 유용한 알림을 제공합니다.
+
+
+</p>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/preplaunch"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users">
+    7. 출시 후 전 세계 사용자 지원
+  </h2>
+
+
+</div>
+
+<p>
+  앱을 전 세계에 출시한 후에 다양한 언어와 표준 시간대의 사용자를 지원할 준비를 해야 합니다.
+ 전 세계 사용자 지원 범위는 예산에 따라 다르지만 출시 후에 최소한 평점, 리뷰, 다운로드 통계를 주의 깊게 관찰해야 합니다.
+
+
+
+</p>
+
+<p>
+  다음은 몇 가지 제안입니다.
+</p>
+
+<ul>
+  <li>
+    <p>
+      개발자 콘솔에서 앱 통계를 사용하여 언어와 국가별로 다운로드 횟수, 설치 및 제거 횟수, 평점 비교&mdash;특정 언어나 국가에서 다운로드 횟수나 평점이 기대치에 미치지 못하면 제품을 개선하거나 마케팅 접근방식을 변경해 보십시오.
+
+
+
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      정기적으로 리뷰 확인&mdash;Google Play는 모든 사용자 리뷰를 번역하므로 개발자는 전 세계 사용자가 앱을 어떻게 평가하는지, 어떤 기능을 좋아하는지, 무슨 문제가 영향을 주는지 바로 확인할 수 있습니다.
+
+ 리뷰를 검토하여 특정 국가에서 사용자에게 영향을 줄 수 있는 기술적인 문제를 파악한 다음 앱을 수정하고 업데이트할 수 있습니다.
+
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      가급적 리뷰에 응답&mdash;가능하면 전 세계 사용자의 모국어나 공통 언어로 전 세계 사용자와 소통하는 것이 좋습니다.
+
+      그렇지 못한 경우 번역 도구를 사용할 수도 있지만 결과는 예측할 수 없습니다.
+ 특정 언어에서 앱의 인기가 높은 경우 원어민의 도움을 받는 것을 고려해 보십시오.
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      웹사이트에 모든 지원 자료에 대한 링크가 있는지 확인하십시오.
+      언어별 사용자 그룹, Google+ 커뮤니티 또는 기타 지원 포럼을 설정하는 것을 고려하십시오.
+
+    </p>
+  </li>
+</ul>
+
+<p>
+  이러한 앱 현지화 규범을 따르고 전 세계 사용자에게 홍보 및 마케팅을 진행하고 지속적으로 지원하여 앱이 많은 사용자의 관심을 끌고 사용자의 충성도를 유지할 수 있습니다.
+
+
+</p>
+
+<p>
+  Google Play에서 앱을 계획하고 작성 및 출시하는 자세한 방법은 <a href="{@docRoot}distribute/tools/launch-checklist.html">출시 검사 목록</a>을 참조하십시오.
+
+</p>
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/supportlaunch"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>
+

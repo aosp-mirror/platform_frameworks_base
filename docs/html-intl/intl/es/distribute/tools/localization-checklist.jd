@@ -1,0 +1,937 @@
+page.title=Lista de comprobación para la localización
+page.metaDescription=Aprovecha el público mundial que te ofrecen Android y Google Play. Lee esta lista de comprobación para obtener información general acerca de cómo distribuir tu producto en los mercados de todo el mundo.
+meta.tags="localizing, publishing, disttools"
+page.tags="local, l10n, translation, language"
+page.image=/distribute/images/localization-checklist.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>Lista de comprobación</h2>
+    <ol>
+      <li><a href="#identify-languages">1. Identifica idiomas y configuraciones regionales de destino</a></li>
+      <li><a href="#design">2. Diseña con la localización en mente</a></li>
+      <li><a href="#manage-strings">3. Administra cadenas para localización</a></li>
+      <li><a href="#translate-strings">4. Traduce las cadenas de la IU y otros recursos</a></li>
+      <li><a href="#test">5. Prueba tu aplicación localizada</a></li>
+      <li><a href="#prepare-launch">6. Prepárate para el lanzamiento internacional</a></li>
+      <li><a href="#support-users">7. Brinda soporte a los usuarios internacionales después del lanzamiento</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px">
+  <img src="{@docRoot}distribute/images/localization-checklist.jpg">
+</div>
+
+<p>
+  Android y Google Play te ofrecen un público global para tus aplicaciones con una
+ base de usuarios que puedes usar y que crece muy rápidamente en países como Japón,
+ Corea, India, Brasil y Rusia. Te alentamos firmemente a que localices, ya que
+ puede maximizar las posibilidades de distribución de tus aplicaciones y dar lugar a la obtención de calificaciones
+ de usuarios de todo el mundo.
+</p>
+
+<p>
+  La localización comprende una variedad de tareas durante el ciclo de
+ desarrollo de la aplicación, y la planificación anticipada es fundamental. Este documento te ayuda a identificar
+ aspectos clave de la localización para que dejes tu aplicación lista y capaz de un lanzamiento
+ exitoso en Google Play.
+</p>
+
+<div class="headerLine">
+  <h2 id="identify-languages">
+    1. Identifica idiomas y configuraciones regionales de destino
+  </h2>
+
+
+</div>
+
+<p>
+  Un paso básico pero importante en la preparación para la localización es identificar los
+ países en los que distribuirás tus aplicaciones y los idiomas que allí se hablan.
+  Es especialmente importante que localices tus aplicaciones en países donde
+ exista una gran oportunidad de mercado y no se use ampliamente el
+ inglés u otro idioma internacional.
+</p>
+
+<p>
+  Para los usuarios internacionales, puedes administrar tus aplicaciones en tres dimensiones principales:
+ país, configuración regional e idioma. De esas dimensiones, el idioma constituye una consideración clave
+ para la localización (la configuración regional también puede ser importante dadas las diferencias en
+ formatos de fecha, hora, moneda e información similar). Los usuarios controlan
+ el idioma y la configuración regional de sus dispositivos Android, y estos afectan
+ la manera en la que se visualiza tu aplicación.
+</p>
+
+<p>
+  Generalmente, primero deberás decidir en qué países quieres distribuir en función del tamaño del
+ mercado y las oportunidades, la categoría de la aplicación, el panorama competitivo, los precios
+ locales, factores financieros, etc. Luego, en función de tu selección de
+ países, deberás determinar los idiomas que debes admitir en tus
+ aplicaciones.
+</p>
+
+<p>
+  A continuación podrás decidir localizar en algunos o todos los idiomas del país de
+ destino. Quizá te convenga comenzar con un idioma regional principal y agregar
+ más idiomas a medida que crece la base de usuarios.
+</p>
+
+<p>
+  Una vez que identifiques tus idiomas objetivo, puedes concentrarte en el
+ desarrollo, la traducción, la prueba y la comercialización en esos mercados.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/identifylocales"
+data-sortorder="-timestamp" data-cardsizes="9x3," data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="design">
+    2. Diseña con la localización en mente
+  </h2>
+
+
+</div>
+
+<p>
+  Después de que determines tus idiomas objetivo para la localización, evalúa
+ qué necesitas hacer para admitirlos en tus aplicaciones y planifica el trabajo de forma temprana.
+  Ten en cuenta la expansión del vocabulario, los requisitos de script, el espaciado entre caracteres y las
+ limitaciones de ajuste de texto, admisión de texto de izquierda a derecha y de derecha a izquierda, y otros
+ factores potenciales en cada idioma.
+</p>
+
+<h4>
+  <strong>Crea un conjunto único de diseños flexibles</strong>
+</h4>
+
+<p>
+  Mientras creas tus diseños, asegúrate de que los elementos de la IU que contienen texto
+ se diseñen sin restricciones. Se recomienda dejar más espacio que el necesario
+ (hasta un 30% más es normal) para que tu idioma incorpore otros idiomas.
+</p>
+
+<p>
+  Asimismo, los elementos deben poder expandirse horizontalmente o verticalmente para
+ adaptarse a las variaciones en el ancho y la altura de las cadenas de la IU o el texto de entrada.
+  Las cadenas de texto no deben superponerse a los bordes ni al límite de la pantalla en ninguno de tus
+ idiomas objetivo.
+</p>
+
+<p>
+  Si diseñas la IU cuidadosamente, generalmente podrás usar un solo conjunto de
+ diseños para todos los idiomas que admitas. Consulta <a href="{@docRoot}training/basics/fragments/fragment-ui.html">Creación de una IU
+ flexible</a> para obtener más información.
+</p>
+
+<h4>
+  <strong>Cuando sea necesario, usa diseños alternativos</strong>
+</h4>
+
+<p>
+  Cuando tu IU no pueda incluir texto en uno de tus idiomas
+ objetivo, puedes crear un <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
+diseño alternativo</a> solo para ese idioma. Android facilita la
+ declaración de la carga de conjuntos de diseños y otros recursos para idiomas,
+ configuraciones regionales, tamaños de pantalla específicos, etc., al etiquetarlos con los
+ calificadores de recursos adecuados. Si bien la flexibilidad de diseños alternativos es real, también
+ podría hacer que tus aplicaciones sean más difíciles de mantener con el paso del tiempo. En general, se prefiere el uso
+ de un solo diseño más flexible.
+</p>
+
+<h4>
+  <strong>Admite diseños y texto RTL</strong>
+</h4>
+
+<p>
+  Si estás distribuyendo a países donde se usan scripts de derecha a izquierda (RTL),
+ debes considerar la implementación de compatibilidad con diseños y
+ visualización y edición de texto RTL en la mayor medida posible.
+</p>
+
+<p>
+  Android 4.1 introdujo compatibilidad limitada con texto bidireccional, que permite que las aplicaciones
+ exhiban y editen texto tanto en scripts de izquierda a derecha (LTR) como de derecha a izquierda (RTL)
+. Android 4.2 agregó <a href="http://android-developers.blogspot.fr/2013/03/native-rtl-support-in-android-42.html">
+compatibilidad nativa plena para diseños RTL</a>, que incluye la duplicación del diseño, de modo que
+ puedas proporcionar las mismas excelentes experiencias con la aplicación a todos tus usuarios.
+</p>
+
+<p>
+  Como mínimo, para los usuarios de Android 4.2, es fácil agregar duplicación básica de diseño
+ RTL, que es un gran avance hacia la satisfacción de las necesidades de los usuarios de RTL.
+</p>
+
+<h4>
+  <strong>Usa formatos proporcionados por el sistema para fechas, horas, números y
+ monedas</strong>
+</h4>
+
+<p>
+  Cuando tus aplicaciones especifiquen fechas, horas, números, monedas y otras entidades
+ que puedan variar según la configuración regional, asegúrate de usar los formatos proporcionados por el sistema, en lugar
+ de formatos específicos de la aplicación. Recuerda que no todas las configuraciones regionales usan el mismo
+ separador de miles, separador decimal o signo de porcentaje.
+</p>
+
+<p>
+  Android ofrece una variedad de utilidades para dar formatear y convertir
+ patrones entre diferentes configuraciones regionales, como <a href="{@docRoot}reference/android/text/format/DateUtils.html">DateUtils</a> y
+ <a href="{@docRoot}reference/java/text/DateFormat.html">DateFormat</a> para
+ fechas, <a href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,%20java.lang.Object...)">
+String.format()</a> o <a href="{@docRoot}reference/java/text/DecimalFormat.html">DecimalFormat</a> para
+ números y monedas, <a href="{@docRoot}reference/android/telephony/PhoneNumberUtils.html">PhoneNumberUtils</a>
+ para números de teléfono, y otros.
+</p>
+
+<p>
+  Codificar tus formatos en función de suposiciones acerca de la configuración regional del usuario puede
+ provocar problemas cuando el usuario pase a otra configuración regional. Se recomienda firmemente usar
+ los formatos y las utilidades que proporciona el sistema.
+</p>
+
+<h4>
+  <strong>Incluye un conjunto completo de recursos predeterminados</strong>
+</h4>
+
+<p>
+  Asegúrate de que tus aplicaciones puedan ejecutarse correctamente independientemente del idioma o la
+ configuración adicional al proporcionar un conjunto completo de recursos predeterminados. Los recursos predeterminados de la aplicación
+ son aquellos que <em>no están marcados</em> con ningún calificador de idioma o configuración regional;
+ por ejemplo, los que se guardan en res/drawable/ y res/values/. Si
+ tus aplicaciones intentan cargar un recurso que no está disponible en el idioma
+ actual o en el conjunto predeterminado, colapsarán.
+</p>
+
+<p>
+  Cualquiera sea el idioma predeterminado que uses en tus aplicaciones, asegúrate de
+ guardar los diseños, los recursos dibujables y las cadenas asociados en directorios
+ de recursos predeterminados, sin calificadores de idioma o configuraciones regionales.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/tools/loc/designforloc" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="manage-strings">
+    3. Administra cadenas para localización
+  </h2>
+
+
+</div>
+
+<p>
+  Es importante que administres correctamente las cadenas de la IU de tus aplicaciones de modo
+ que puedas proporcionar una excelente experiencia para los usuarios y permitir que la localización se realice sin inconvenientes.
+</p>
+
+<h4>
+  <strong>Mueve todas las cadenas a strings.xml</strong>
+</h4>
+
+<p>
+  Mientras creas aplicaciones, recuerda no codificar las cadenas. En su lugar, declara
+ <em>todas</em> las cadenas como recursos en un archivo strings.xml predeterminado que
+ facilite la actualización y la localización. Las cadenas en el archivo strings.xml se pueden
+ extraer, traducir y volver a integrar en tu aplicación (con los calificadores
+ adecuados) sin la necesidad de realizar cambios en el código compilado.
+</p>
+
+<p>
+  Si creas imágenes con texto, coloca también esas cadenas en el archivo strings.xml
+ y vuelve a generar las imágenes después de la traducción.
+</p>
+
+<h4>
+  <strong>Sigue las pautas de Android para las cadenas de la IU</strong>
+</h4>
+
+<p>
+  Mientras diseñas y desarrollas tus IU, asegúrate de prestar mucha atención a
+ <em>cómo</em> te diriges al usuario. En general, utiliza un <a href="{@docRoot}design/style/writing.html">estilo conciso y comprimido</a> que sea
+ amigable pero breve, y usa un estilo uniforme en todas tus IU.
+</p>
+
+<p>
+  Asegúrate de leer y seguir las recomendaciones de Diseño Android para el
+ <a href="{@docRoot}design/style/writing.html">estilo de escritura y la elección de
+ palabras</a>. Al hacerlo, tus aplicaciones se verán más pulidas y
+ esto ayudará a los usuarios a comprender tu IU más rápidamente.
+</p>
+
+<p>
+  Siempre que sea posible, usa la terminología estándar de Android; por ejemplo,
+ para los elementos de la IU como la "barra de acciones", el "menú de opciones", la "barra del sistema"
+, las "notificaciones", etc. El uso correcto y uniforme de los términos de Android
+ facilita la traducción y permite ofrecer un mejor producto final para los usuarios.
+</p>
+
+<h4>
+  <strong>Proporciona suficiente contexto para las cadenas declaradas</strong>
+</h4>
+
+<p>
+  Cuando declares cadenas en tu archivo strings.xml, asegúrate de describir
+ el contexto en el que se usa la cadena. Esta información será muy valiosa para los
+ traductores, dará lugar a una traducción de mejor calidad y también te ayudará a
+ administrar tus cadenas de forma más eficiente con el paso del tiempo.
+</p>
+
+<p>
+  Aquí te mostramos un ejemplo:
+</p>
+
+<pre class="prettyprint">
+&lt;!-- The action for submitting a form. This text is on a button that can fit 30 chars --&gt;
+&lt;string name="login_submit_button"&gt;Sign in&lt;/string&gt;
+</pre>
+<p>
+  Considera la posibilidad de proporcionar información contextual, que podría incluir:
+</p>
+
+<ul>
+  <li>
+    <p>
+      ¿Para qué sirve esta cadena? ¿Cuándo/dónde se le presenta al usuario?
+    </p>
+  </li>
+
+  <li>
+    <p>
+      ¿En qué parte del diseño se encuentra? Por ejemplo, si se trata de un botón, las traducciones
+ son menos flexibles que las de un cuadro de texto.
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>Marca las partes de un mensaje que no deben traducirse</strong>
+</h4>
+
+<p>
+  A menudo, las cadenas contienen texto que no se debe traducir a otros
+ idiomas. Algunos ejemplos comunes podrían incluir un código, un marcador de posición para un
+ valor, un símbolo especial o un nombre. Mientras preparas tus cadenas para la
+ traducción, busca y marca el texto que no debe traducirse
+ de modo que los traductores no lo cambien.
+</p>
+
+<p>
+  Para marcar texto que no debe traducirse, utiliza una etiqueta de marcador de posición
+ <code>&lt;xliff:g&gt;</code>. Aquí te mostramos un ejemplo de etiqueta que
+ garantiza que el texto "%1$s" no se modificará durante la traducción (de lo contrario,
+ rompería el mensaje):
+</p>
+
+<pre class="prettyprint">
+&lt;string name="countdown"&gt;
+    &lt;xliff:g id="time" example="5 days&gt;%1$s&lt;/xliff:g&gt;until holiday
+&lt;/string&gt;
+</pre>
+<p>
+  Cuando declaras una etiqueta de marcador de posición, agrega siempre un atributo de identificación que explique
+ para qué sirve el marcador de posición. Si tus aplicaciones luego reemplazarán el valor del
+ marcador de posición, asegúrate de proporcionar un atributo de ejemplo para aclarar el uso previsto.
+</p>
+
+<p>
+  Aquí te mostramos algunos ejemplos de etiquetas de marcadores de posición:
+</p>
+
+<pre>
+&lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+
+&lt;!-- Example placeholder for a special unicode symbol --&gt;
+
+&lt;string name="star_rating"&gt;Check out our 5
+
+    &lt;xliff:g id="star"&gt;\u2605&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a for a URL --&gt;
+
+&lt;string name="app_homeurl"&gt;
+
+    Visit us at &lt;xliff:g id="application_homepage"&gt;http://my/app/home.html&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a name --&gt;
+
+&lt;string name="prod_name"&gt;
+
+    Learn more at &lt;xliff:g id="prod_gamegroup"&gt;Game Group&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a literal --&gt;
+
+&lt;string name="promo_message"&gt;
+
+    Please use the "&lt;xliff:g id="promotion_code"&gt;ABCDEFG&lt;/xliff:g&gt;” to get a discount.
+
+&lt;/string&gt;
+
+...
+
+&lt;/resources&gt;
+</pre>
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/managestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="translate-strings">
+    4. Traduce las cadenas de la IU y otros recursos
+  </h2>
+
+
+</div>
+
+<p>
+  Traducir las cadenas de la IU y los recursos de tus aplicaciones a tus idiomas objetivo es
+ la fase clave de la localización y es la que requiere la mayor cantidad de atención
+ y planificación.
+</p>
+
+<p>
+  Te recomendamos que trabajes con un traductor profesional (consulta <a href="#gp-trans">Compra traducciones profesionales</a>) para asegurarte de contar con traducciones
+ de alta calidad que aumenten el valor de tu aplicación. Si bien las traducciones automáticas
+ son una opción, es posible que no produzcan una experiencia igual de buena para los usuarios.
+</p>
+
+<h4>
+  <strong>Prepárate para la traducción</strong>
+</h4>
+
+<p>
+  La calidad de la traducción dependerá, en parte, de la información que proporciones; por lo tanto, asegúrate
+ de que tu archivo strings.xml esté bien organizado, bien comentado y sea
+ preciso.
+</p>
+
+<p>
+  Aquí te indicamos algunas maneras de preparar tus cadenas para la traducción:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Asegúrate de haber formateado tus cadenas de forma correcta y uniforme.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Sigue las recomendaciones para cadenas que se indican más arriba en <a href="#manage-strings">Administra cadenas para localización</a>.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Limpia el archivo strings.xml y elimina las cadenas que no se utilicen.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Proporciona comentarios en el archivo para identificar al propietario, el origen y la versión
+ del archivo, y también instrucciones especiales para los traductores.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Identifica las traducciones existentes, si las hubiera, e inclúyelas en un archivo
+ comprimido saliente u otro paquete que envíes a los traductores.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Identifica los recursos dibujables u otros recursos que requieran traducción e
+ inclúyelos en el paquete para los traductores.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Además, considera la posibilidad de traducir los detalles del directorio de tienda de tus aplicaciones
+ (título y descripción de la aplicación, notas de lanzamiento, etc.)
+ y otros materiales de comercialización internacional.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Crea una lista terminológica que explique el significado y el uso de términos clave
+ que se encuentren en tu producto, tu mercado o la tecnología subyacente. Agrega la
+ lista al paquete para los traductores.
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>Envía tus cadenas para traducción</strong>
+</h4>
+
+<p>
+  Al inicio del ciclo de desarrollo, comunícate con traductores profesionales para tener
+ una idea del costo y el tiempo de entrega. Asegúrate de incluir múltiples
+ repeticiones acerca del costo. Puedes buscar traductores en línea o utilizar los
+ servicios de traducción disponibles directamente desde la Consola para desarrolladores de Google Play
+ (consulta <a href="#gp-trans">Compra traducciones profesionales</a>).
+</p>
+
+<p>
+  Cuando tus traducciones estén terminadas, échales un vistazo preliminar
+. Comprueba que se hayan traducido todos los archivos, busca posibles
+ problemas de codificación y asegúrate de que los formatos de la declaración estén intactos.
+</p>
+
+<p>
+  Si todo se ve bien, traslada cuidadosamente los directorios y archivos localizados
+ nuevamente a los recursos de tus aplicaciones. Asegúrate de etiquetar los directorios con
+ los calificadores de idioma y configuración regional correctos de modo que luego se carguen
+ de forma adecuada.
+</p>
+
+<p>
+  Después de insertar las traducciones en tu aplicación, comienza a <a href="#test">probar la aplicación localizada</a>.
+</p>
+
+<h4 id="gp-trans">
+  <strong>Compra traducciones profesionales en Google Play</strong>
+</h4>
+
+<p>
+  El Servicio de traducción de aplicaciones de Google Play puede ayudarte a encontrar y comprar
+ rápidamente traducciones de tu aplicación. En la Consola para desarrolladores, puedes examinar una lista de
+ proveedores externos precalificados por Google para ofrecer traducciones de
+ alta calidad a precios competitivos. Puedes cargar las cadenas que quieres
+ traducir, seleccionar los idiomas en los que quieres que se traduzcan y seleccionar el
+ traductor en función del tiempo y el precio.
+</p>
+
+<p>
+  Cuando compres traducciones, recibirás un correo electrónico del traductor.
+  Tus traducciones son un acuerdo comercial directo entre tú y tu
+ proveedor; deberás trabajar directamente con el traductor para administrar el
+ proceso de traducción y las entregas, y solucionar cualquier problema de soporte.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-localization-trans-0.png" class="border-img">
+</div>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/translatestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test">
+    5. Prueba tu aplicación localizada
+  </h2>
+
+
+</div>
+
+<p>
+  Una vez que recibas tus cadenas y recursos traducidos y los insertes en
+ tus aplicaciones, debes probar las aplicaciones para asegurarte de que estén
+ listas para distribución a tus usuarios internacionales.
+</p>
+
+<p>
+  La prueba manual puede ayudarte a detectar problemas de localización en tus diseños y
+ en las cadenas que puedan afectar la satisfacción del usuario y, en última instancia, la calificación del usuario para
+ tus aplicaciones.
+</p>
+
+<h4>
+  <strong>Configura un entorno de prueba</strong>
+</h4>
+
+<p>
+  Para probar tu aplicación localizada, debes configurar un entorno que conste
+ de múltiples dispositivos (o dispositivos virtuales) y tamaños de pantalla, en función de los
+ mercados y formatos a los que apuntes. Ten en cuenta que el rango de dispositivos en
+ regiones específicas podría ser diferente. Si fuera posible, empareja tus dispositivos de prueba a
+ los dispositivos reales que probablemente estén disponibles para los usuarios.
+</p>
+
+<h4>
+  <strong>Busca problemas comunes de localización</strong>
+</h4>
+
+<p>
+  En cada dispositivo de prueba, establece el idioma o la configuración regional en Configuración. Instala e
+ inicia la aplicación, y luego navega por todos los flujos de la IU, los diálogos y las
+ interacciones con los usuarios. Ingresa texto en las entradas. Algunas cosas que debes buscar incluyen:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Texto recortado o texto que se superpone al borde de los elementos de la IU o a la pantalla.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Ajuste de línea insuficiente
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Separación de palabras o puntuación incorrectas
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Orden alfabético incorrecto
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Orientación incorrecta del diseño o el texto
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Texto sin traducir: si se muestran tus cadenas predeterminadas en lugar
+ de cadenas traducidas, es posible que te hayas salteado esas cadenas
+ en la traducción o hayas marcado el directorio de recursos con un calificador de idioma
+ incorrecto.
+    </p>
+  </li>
+</ul>
+
+<p>
+  Cuando tus cadenas se hayan extendido debido a la traducción y ya no se ajusten a
+ tus diseños, te recomendamos que intentes simplificar el texto predeterminado, simplificar
+ el texto traducido o ajustar tus diseños predeterminados. Si ninguna de esas
+ opciones soluciona el problema, puedes crear un diseño personalizado para el idioma.
+</p>
+
+<h4>
+  <strong>Prueba tus recursos predeterminados</strong>
+</h4>
+
+<p>
+  Después de haber probado tus aplicaciones en todos los idiomas y las configuraciones regionales admitidos,
+ asegúrate de probarlas nuevamente en un <em>idioma y una configuración regional</em> no admitidos.
+  Esto te ayudará a asegurarte de que tus aplicaciones incluyen un conjunto completo de cadenas
+ y recursos predeterminados, de modo que todos los usuarios puedan utilizarlas, independientemente
+ de su idioma preferido.
+</p>
+
+<h4>
+  <strong>Realiza una revisión con hablantes nativos</strong>
+</h4>
+
+<p>
+  Durante o después de la prueba, se recomienda que hablantes nativos revisen
+ tus aplicaciones localizadas. Una forma de hacerlo es a través de pruebas beta con usuarios
+ regionales; Google Play puede ayudarte. <!-- </p>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/test"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div> -->
+</p>
+
+<div class="headerLine">
+  <h2 id="prepare-launch">
+    6. Prepárate para el lanzamiento internacional
+  </h2>
+
+
+</div>
+
+<p>
+  Traducir tus aplicaciones es una parte fundamental de la localización, pero para ayudar a tu
+ producto a atraer usuarios y ganar visibilidad, debes prepararte para el lanzamiento
+ en tus países objetivo y crear un lanzamiento y un plan de comercialización más amplios para
+ los usuarios internacionales.
+</p>
+
+<h4>
+  <strong>Localiza tu directorio en Google Play</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Localiza tu directorio en Google Play
+    </h2>
+
+    <p>
+      El directorio de la tienda en la Play Store de Google es la primera impresión que los usuarios internacionales
+ tendrán de tu aplicación. Debes resaltar qué hace que tu aplicación sea excelente
+ para todos tus usuarios. Localiza tu directorio en la Consola para desarrolladores,
+ incluido lo siguiente:
+    </p>
+
+    <ul>
+      <li>Título y descripción de la aplicación
+      </li>
+
+      <li>Capturas de pantalla de la aplicación en teléfonos y tablets
+      </li>
+
+      <li>Gráficos y videos promocionales
+      </li>
+    </ul>
+  </div>
+</div>
+
+<p>
+  Si quieres que tus aplicaciones tengan éxito en mercados internacionales, es fundamental
+ que localices el directorio de tu tienda en Google Play. Puedes administrar tu
+ directorio localizado en la Consola para desarrolladores.
+</p>
+
+<p>
+  Mucho tiempo antes del lanzamiento, decide el título de tu aplicación, una descripción, texto promocional,
+ nombres y programas de comercialización, y otros textos e imágenes. Envía el texto y las
+ imágenes de tu directorio para traducción con mucho tiempo de anticipación, de modo que estén listos cuando comiencen las
+ pruebas beta. Cuando recibas el texto traducido, puedes agregarlo
+ a través de la Consola para desarrolladores.
+</p>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Traducción del directorio de la tienda en Google Play
+    </h2>
+
+    <p>
+      Puedes usar el servicio de traducción de aplicaciones de Google Play para traducir
+ el directorio de tu tienda. Prepara un archivo XML con la información del directorio de la tienda
+ y cárgalo como lo harías con el archivo strings.xml file (consulta <a href="#gp-trans">Compra traducciones profesionales</a>).
+    </p>
+  </div>
+</div>
+
+<p>
+  Y ya que hiciste el esfuerzo de crear una excelente aplicación localizada, ¡haz
+ que los usuarios la conozcan! Toma capturas de pantalla de tu IU en cada idioma, para teléfonos y
+ tablets de 7 y 10 pulgadas. Puedes cargar capturas de pantalla a la Consola para desarrolladores
+ para cada idioma que admitas. Serán un recurso muy valioso para los usuarios que examinen
+ los directorios de tus aplicaciones en otros idiomas.
+</p>
+
+<p>
+  También es fundamental crear versiones localizadas de tus gráficos y videos
+ promocionales. Por ejemplo, el gráfico central de tus aplicaciones podría incluir texto que
+ debe traducirse para lograr la máxima eficacia, o quizá quieras utilizar
+ enfoques visuales distintos para diferentes países. Puedes
+ crear versiones diferentes de tus gráficos promocionales para cada idioma y
+ cargarlos a la Consola para desarrolladores. Si ofreces un video promocional, puedes
+ crear versiones localizadas y luego agregar un vínculo al video localizado
+ correspondiente para cada idioma que admitas.
+</p>
+
+<h4>
+  <strong>Planifica un lanzamiento beta en países clave</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Prueba beta sencilla
+    </h2>
+
+    <p>
+      Google Play ahora te permite configurar grupos de evaluadores alfa y beta
+ ubicados en cualquier lugar del mundo. La próxima vez que inicies sesión en la Consola
+ para desarrolladores, échale un vistazo a esta poderosa función.
+    </p>
+  </div>
+</div>
+
+<p>
+  Antes de lanzar tus aplicaciones, te recomendamos que obtengas la opinión real
+ de los usuarios; más aún cuando estés lanzando una aplicación en un nuevo
+ idioma, país o región. En esos casos, es altamente recomendable que
+ distribuyas una versión previa al lanzamiento de tus aplicaciones a los usuarios de tus mercados
+ clave, y les proporciones medios sencillos para que puedan brindarte su opinión e informar
+ errores.
+</p>
+
+<p>
+  Google Play puede ayudarte a configurar un programa beta para tus aplicaciones. Después de iniciar sesión
+ en la Consola para desarrolladores y cargar tu APK, puedes configurar grupos de
+ usuarios para que realicen pruebas alfa y beta en tu aplicación. Puedes comenzar con un grupo pequeño
+ de evaluadores alfa y luego avanzar a un grupo más grande de evaluadores beta.
+</p>
+
+<p>
+  Una vez que agregues los usuarios, estos podrán acceder al directorio de la tienda de tu aplicación e instalar la
+ aplicación.<strong> Los usuarios que utilicen las versiones alfa o beta no podrán escribir reseñas ni calificar
+ la aplicación</strong>, por lo que <strong>no corre riesgo tu calificación</strong> en
+ Google Play; no obstante, esto significa que deberás establecer un mecanismo para que los
+ evaluadores te proporcionen sus comentarios: considera la posibilidad de crear una página de <a href="http://www.google.com/+/business/">Google+</a> o <a href="https://groups.google.com/forum/#!overview">Google Groups</a>.
+</p>
+
+<p>
+  Los comentarios que recibas te ayudarán a ajustar tu IU, las traducciones y el
+ directorio de la tienda para garantizar una excelente experiencia para los usuarios.
+</p>
+
+<h4>
+  <strong>Planifica la comercialización internacional</strong>
+</h4>
+
+<p>
+  Para adquirir la máxima visibilidad en los diferentes países, considera la posibilidad de realizar una
+ campaña publicitaria o de comercialización internacional. El alcance de la campaña variará en función de la
+ insignia que puedas admitir, pero en general resulta rentable y productivo
+ realizar campañas de comercialización regionales o específicas para un país durante el lanzamiento y después.
+</p>
+
+<h4>
+  <strong>Crea insignias localizadas de Google Play</strong>
+</h4>
+
+<p>
+  Si estás preparando la comercialización internacional, asegúrate de incluir una <a href="{@docRoot}distribute/tools/promote/badges.html">insignia localizada de
+ Google Play</a> para indicarles a los usuarios que estás en Google Play. Puedes usar el generador de
+ de insignias para crear rápidamente insignias localizadas que puedes usar en sitios web o
+ en los materiales de comercialización. También se encuentran disponibles recursos en alta resolución.
+</p>
+
+<h4>
+  <strong>Crea material gráfico para los dispositivos localizados</strong>
+</h4>
+
+<p>
+  Si exhibes fotos de tus aplicaciones ejecutándose en dispositivos Android,
+ asegúrate de que esas fotos se vean magníficas y reflejen los dispositivos Android más modernos.
+  Para ayudarte a crear material de comercialización de alta calidad, usa el
+ <a href="{@docRoot}distribute/tools/promote/device-art.html">Generador de material gráfico
+ para dispositivos</a> con la función arrastrar y colocar para enmarcar rápidamente tu captura de pantalla en un dispositivo Nexus.
+</p>
+
+<h4>
+  <strong>Consulta las sugerencias para la optimización</strong>
+</h4>
+
+<p>
+  Mientras te preparas para el lanzamiento, asegúrate de iniciar sesión en la Consola para desarrolladores y
+ consultar las sugerencias para la optimización de tus aplicaciones. Las Sugerencias para la optimización te informan
+ cuando faltan partes del directorio localizado de tu tienda y te proporcionan
+ otros recordatorios útiles para un lanzamiento localizado exitoso.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/preplaunch"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users">
+    7. Brinda soporte a los usuarios internacionales después del lanzamiento
+  </h2>
+
+
+</div>
+
+<p>
+  Después de lanzar tus aplicaciones a nivel internacional, debes estar preparado para brindar
+ soporte a los usuarios en una variedad de idiomas y zonas horarias. El alcance del
+ soporte que brindes a los usuarios internacionales depende de tu presupuesto, pero como mínimo,
+ debes controlar cuidadosamente tus calificaciones, reseñas y estadísticas de descarga después del
+ lanzamiento.
+</p>
+
+<p>
+  Aquí te proporcionamos alguna sugerencias:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Usa las estadísticas de la aplicación en la Consola para desarrolladores para comparar tus descargas,
+ instalaciones, desinstalaciones y calificaciones entre diferentes idiomas
+ y países. Si tus descargas o calificaciones no se mantienen en
+ idiomas o países específicos, considera algunas opciones para mejorar tu
+ producto o cambiar el enfoque de comercialización.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Lee las reseñas con frecuencia. Google Play traduce todas las reseñas de los usuarios por
+ ti, de modo que puedas estar informado acerca de cómo se sienten los usuarios internacionales en relación con
+ tus aplicaciones, qué funciones les gustan y qué problemas los afectan. Al
+ leer las reseñas, puedes detectar problemas técnicos que podrían afectar a los usuarios en
+ un país determinado, luego solucionarlos y actualizar tus aplicaciones.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Responde las reseñas, si fuera posible. Te recomendamos que interactúes
+ con los usuarios internacionales en sus idiomas o en un idioma común, si fuera posible.
+      Si no lo es, puedes intentar utilizar herramientas de traducción, aunque es posible que no puedas
+ prever los resultados. Si tu aplicación se vuelve muy popular en un idioma, considera 
+ la posibilidad de obtener ayuda por parte de hablantes nativos para brindar soporte.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Asegúrate de que en tu sitio web haya un vínculo a cualquier recurso de soporte que tengas.
+      Puedes configurar grupos de usuarios para un idioma específico, comunidades de Google+
+ u otros foros de soporte.
+    </p>
+  </li>
+</ul>
+
+<p>
+  Al seguir estas prácticas para la localización de tus aplicaciones, la promoción
+ y comercialización a usuarios internacionales y la provisión de soporte continuo, puedes
+ atraer nuevos usuarios a tus aplicaciones y mantener su fidelidad.
+</p>
+
+<p>
+  Asegúrate de leer la <a href="{@docRoot}distribute/tools/launch-checklist.html">Lista de comprobación para el lanzamiento</a> para
+ obtener más información acerca de cómo planificar, crear y lanzar tu aplicación en Google Play.
+</p>
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/supportlaunch"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>
+

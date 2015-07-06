@@ -1,0 +1,329 @@
+page.title=질문과 대답(FAQ)
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+Designed for Families에 대한 질문과page.metaDescription= 대답
+
+@jd:body
+
+    <style>
+  dt {
+    font-weight:bold;
+  }
+  </style>
+  
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>이 문서의 내용</h2>
+<ol>
+  <li><a href="#review">앱 리뷰 및 옵트인</a></li>
+  <li><a href="#monetization">수익 창출</a></li>
+  <li><a href="#other">기타 질문</a></li>
+</ol>
+</div>
+
+<p>
+  이 절에서는 Designed for Families에 대한 자세한 정보를 제공하고 제기될 수 있는 일반적인 질문에 답변합니다.
+
+</p>
+
+
+<h2 id="review">앱 리뷰 및 옵트인</h2>
+
+<dl>
+<dt>앱을 어떻게 옵트인합니까?</dt>
+
+<dl>
+  <dd>
+    Google Play 개발자 콘솔에서 앱에 대한 가격 책정 및 배포 탭에서 Designed for Families에 옵트인할 수 있습니다.
+ 다음은 <a href="{@docRoot}distribute/googleplay/families/start.html">단계별 과정</a>입니다.
+
+  </dd>
+
+  <dt>
+    앱의 대화형 기능을 어디에 공개합니까? 이 정보를 왜 수집합니까?
+
+  </dt>
+
+  <dd>
+    대화형 기능 공개는 콘텐츠 등급 질문서의 일부입니다.
+ Designed for Families 프로그램 옵트인 과정의 일부로 대화형 기능 공개를 검토합니다.
+ 당사는 사용자가 앱 평가 시 정보에 근거하여 선택할 수 있도록 이 정보를 수집합니다.
+
+
+  </dd>
+
+  <dt>
+    COPPA란 무엇입니까?
+  </dt>
+
+  <dd>
+    COPPA는 FTC(Federal Trade Commission)의 아동 온라인 개인정보 보호법입니다.
+ 자세한 내용은 <a href="http://www.ftc.gov/tips-advice/business-center/guidance/complying-coppa-frequently-asked-questions">FTC의 COPPA FAQ</a>를 참조하십시오.
+ Google Play는 개발자에게 COPPA 또는 기타 아동법규를 준수하는 방법에 대해 법률 안내를 제공하지 않습니다.
+
+  </dd>
+
+  <dt>
+    최신 개인정보 보호정책을 제공해야 합니까? 그런 경우 어디에 제공합니까?
+  </dt>
+
+  <dd>
+    예, 앱 스토어 목록에 지속적인 개인정보 보호정책 링크를 제공하고 개발자 콘솔에서 현지 개인정보보호법을 준수하는지 확인해야 합니다.
+
+ 개인정보 보호정책을 추가하거나 검토하려면 개발자 콘솔에서 앱을 선택한 다음 <strong>스토어 목록</strong> 섹션 하단으로 스크롤하십시오.
+
+
+  </dd>
+
+  <dt>
+    몇 개의 연령층을 선택할 수 있습니까?
+  </dt>
+
+  <dd>
+    최대 두 개의 인접한 연령층을 선택할 수 있습니다. 연령층은 5세 이하, 6-8세, 9-12세가 있습니다.
+ 하지만 앱이 아동과 성인을 대상으로 하는 경우 <em>모든 연령</em> 카테고리를 선택해야 합니다.
+
+
+  </dd>
+
+  <dt>
+    Designed for Families 프로그램에서 몇 개의 콘텐츠 카테고리를 선택할 수 있습니까?
+
+  </dt>
+
+  <dd>
+    카테고리는 Designed for Families 프로그램의 일부로 하나를 선택하고, 전체 Google Play 스토어용으로 하나를 선택할 수 있습니다.
+
+  </dd>
+
+  <dt>
+    Designed for Families 카테고리란 무엇입니까?
+  </dt>
+
+<ul>
+<li><strong>액션 및 어드벤처</strong>: 레이싱 게임, 동화 어드벤처 등을 포함하는 액션 지향 앱/게임입니다.
+
+  </li>
+
+  <li style="list-style: none"><strong>두뇌 게임</strong>: 이 카테고리에는 생각하게 만드는 게임과 퍼즐, 짝 맞추기 게임 및 유사 게임이 포함됩니다.
+
+
+  </li>
+
+  <li><strong>창의력</strong>: 창의력을 촉진시키는 앱/게임입니다.
+  이 카테고리에서 예상되는 앱/게임 유형의 예로는 그리기, 색칠하기 및 만들기 게임이 포함됩니다.
+
+  </li>
+
+  <li><strong>교육</strong>: 수학, 과학, 글자 공부, 숫자 공부, 지리 및 역사와 같은 다양한 유형의 교육 콘텐츠 등 교육적 가치를 지닌 앱/게임입니다.
+
+
+  </li>
+
+  <li><strong>음악 및 동영상</strong>: 피아노 연주, 동영상 시청 등 음악적 요소나 동영상 구성요소를 포함하는 앱/게임입니다.
+
+
+  </li>
+
+  <li><strong>역할 놀이</strong>: 요리사나 의사 등 가상적인 역할을 수행할 수 있는 앱/게임입니다.
+
+  </li>
+</ul>
+
+<dl>
+  <dt>
+    Designed for Families 프로그램에 옵트인하면 앱을 게시하는 데 시간이 더 걸립니까?
+
+  </dt>
+
+  <dd>
+    Designed for Families에 옵트인하면 Google Play가 앱이 가족에게 적합한지 확인하기 위해 검토합니다.
+ 앱이 모든 프로그램 요구사항을 준수할 경우 게시 시간이 평소보다 오래 걸리지 않습니다. 하지만 Designed for Families 검토 중에 앱이 거부되면 게시가 지연될 수 있습니다.
+
+
+ 
+  </dd>
+
+  <dt>
+    앱이 Designed for Families 프로그램에서 거부되면 어떻게 됩니까?
+  </dt>
+
+  <dd>
+    앱이 Designed for Families 프로그램에서 거부되면 개발자 콘솔과 이메일을 통해 그 이유를 상세히 알려드립니다.
+ 개발자는 문제를 수정하여 앱을 다시 제출하거나 옵트인 응답을 변경할 수 있는 기회가 부여됩니다.
+
+ Google Play에 기존 활성 앱이 있는 경우 앱 업데이트만 거부됩니다(기존 앱은 Play 스토어에서 활성 상태를 유지함).
+
+ 요구사항을 충족하지 않는 신규 앱을 Designed for Families 프로그램에 제출하면 전체 앱 제출이 거부되고 Play에 게시되지 않습니다.
+
+
+ 개발자는 확인된 문제를 해결하여 앱을 Designed for Families 프로그램에 다시 제출하거나 프로그램에서 옵트아웃할 수 있습니다.
+
+  </dd>
+
+  <dt>
+    앱을 게시한 후에 Designed for Families 프로그램 요구사항을 준수하지 않는 것으로 확인되면 어떻게 됩니까?
+ 
+  </dt>
+
+  <dd>
+    해당 앱이 Designed for Families 프로그램은 물론 Google Play 스토어에서도 제거되거나 일시 중단됩니다.
+  제거된 앱은 거부된 앱과 동일한 해결 방법을 따를 수 있습니다.
+ 일시 중단된 앱은 개발자 이의 제기 과정을 통해 이의를 제기할 수 있습니다.
+
+  </dd>
+
+  <dt>
+    Designed for Families 프로그램에 옵트인했다가 나중에 옵트아웃할 수 있습니까?
+  </dt>
+
+  <dd>
+    예, 언제든지 해당 프로그램에서 옵트아웃할 수 있습니다. 옵트아웃하면 가족 친화적인 환경에서 앱을 사용할 수 없고 해당 프로그램의 기타 이점도 잃게 됩니다.
+
+
+  </dd>
+
+  <dt>
+    Designed for Families 프로그램에서 승인된 앱을 업데이트하면 어떻게 됩니까?
+    
+  </dt>
+
+  <dd>
+    Designed for Families 프로그램의 일부인 앱은 자격 요구사항을 항상 준수해야 합니다.
+ 앱과 연관된 Designed for Families 메타데이터를 편집해야 하는 경우 Google Play 개발자 콘솔의 가격 책정 및 배포 섹션으로 이동하여 해당 정보를 편집하십시오.
+
+
+ 앱을 업데이트하면서 대상 연령층이 변경되는 경우 이미 앱을 설치한 사용자에게 알리는 것이 좋습니다.
+
+
+  </dd>
+
+  <dt>
+    Google 로그인 또는 Google Play Game 서비스를 사용하는 앱이나 게임을 Designed for Families 프로그램에 옵트인할 수 있습니까?
+
+  </dt>
+
+  <dd>
+    5세 이하, 6-8세 또는 9-12세의 연령층을 대상으로 하는 아동 전용의 Designed for Families에 참가하는 앱은 애플리케이션의 로그인 경험으로 Google+ 로그인 또는 Google Play Game 서비스를 사용할 수 <strong>없습니다</strong>.
+
+
+
+
+
+    <p>
+      아동과 성인을 모두 대상으로 하는 Designed for Families에 참가하는 앱은 Google+ 로그인 또는 Google Play Game 서비스를 <strong>옵션</strong> 기능으로 사용할 수 있습니다.
+
+ 아동 사용자는 Google+ 또는 Google Play Game 서비스에 로그인하지 않고 앱 또는 게임에 완전히 액세스할 수 있어야 합니다.
+
+    </p>
+  </dd>
+
+  <dt>
+    학생들이 학교 계정으로 로그인할 수 있도록 앱을 Google Play for Education에 옵트인하고 Google 로그인과 통합한 경우
+ 앱에서 Google 로그인 작동 방식을 변경해야 합니까?
+
+   </dt>
+
+  <dd>
+    Google Play for Education에 참가하는 앱은 모든 앱 사용자에 대한 차단 요구사항이 아니라면 학생 계정용 Google 로그인을 사용할 수 있습니다.
+
+  </dd>
+</dl>
+
+<h2 id="monetization">
+  Designed for Families 프로그램 수익 창출
+</h2>
+
+<dl>
+  <dt>
+    Designed for Families의 광고 정책에 대해 자세한 정보를 제공해줄 수 있습니까?
+
+  </dt>
+
+  <dd>
+    <a href="https://support.google.com/googleplay/android-developer/answer/6184502#ads">Designed for Families의 광고 정책</a>을 참조하십시오.
+
+  </dd>
+
+  <dt>
+    앱에 중간 광고를 제공할 수 있습니까?
+  </dt>
+
+  <dd>
+    중간 광고는 일부 앱에만 적용됩니다. 하지만 광고가 제공되기 전에 사용자가 기본 작업으로 이동할 수 있어야 합니다.
+
+  </dd>
+
+  <dt>
+    광고 대행사가 Designed for Families의 광고 정책을 준수하는지 어떻게 알 수 있습니까?
+
+  </dt>
+
+  <dd>
+    콘텐츠 정책 및 광고 방식에 대한 내용은 광고 대행사에 문의하십시오.
+ AdMob을 사용하는 경우 앱 또는 특정 광고 단위에 아동 대상 서비스로 취급하도록 요청하는 태그를 지정하는 자세한 방법은 <a href="https://support.google.com/admob/answer/3248194">AdMob 도움말 센터</a>를 참조하십시오.
+
+ 인앱 광고를 포함한 전반적인 사용자 경험이 <a href="https://support.google.com/googleplay/android-developer/answer/6184502">Designed for Families 프로그램 요구사항</a>을 충족하도록 보장하는 것은 개발자의 책임입니다.
+
+ 
+  </dd>
+
+  <dt>
+    앱에 인앱 구매를 포함할 수 있습니까?
+  </dt>
+
+  <dd>
+    <a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">Designed for Families DDA</a> 및 기타 해당 법률 요구사항 준수 이외에 Designed for Families 프로그램에 참여하는 앱의 인앱 구매(IAP)와 관련된 특별한 제한사항은 없지만 Google Play는 지나치게 공격적인 상술을 구현하는 앱을 거부할 수 있습니다.
+
+
+
+
+ Google Play는 주로 아동을 대상으로 Designed for Families 프로그램에 참여하는 모든 앱에 대해 아동이 아니라 부모가 구매를 승인하도록 보장하기 위해 IAP 암호 보호를 적용합니다.
+
+
+ 이 취급 방침은 모든 연령을 대상으로 하는 앱에는 적용되지 않습니다.
+
+  </dd>
+</dl>
+
+<h2 id="other">
+  기타 질문
+</h2>
+
+<dl>
+  <dt>
+    Designed for Families 앱의 대상은 누구입니까?
+
+  </dt>
+
+  <dd>
+    당사는 부모와 보호자가 Google Play 스토어에서 신뢰할 수 있는 브랜드와 개발자가 제작한 우수한 아동 및 가족용 앱을 찾을 수 있도록 하는 것을 목표로 합니다. 
+
+
+  </dd>
+
+  <dt>
+    Designed for Families 프로그램은 특정 국가의 개발자만 이용할 수 있습니까?
+
+  </dt>
+
+  <dd>
+    Designed for Families는 글로벌 프로그램입니다.
+  </dd>
+
+  <dt>
+    가족 게임 카테고리에 현재 게시된 앱은 어떻게 됩니까?
+
+  </dt>
+
+  <dd>
+    가족 게임 카테고리는 2015년 5월부터 사용 중단됩니다. 현재 가족 게임 카테고리에 속한 앱은 Play 스토어에서 다른 카테고리를 선택해야 합니다.
+
+ 다른 카테고리를 선택하지 않은 앱은 캐주얼 게임 카테고리로 분류됩니다.
+
+  </dd>
+</dl>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="https://docs.google.com/forms/d/1EtvUWqlkxS6RxHJjeI-3-7uzdbIZx6n9Cocy2D369B8/viewform" class="next-class-link">다음: 관련 소식 받기</a>
+</div>

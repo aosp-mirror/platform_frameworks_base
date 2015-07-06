@@ -1,0 +1,156 @@
+page.title=Первые шаги в публикациях
+page.metaDescription=Зарегистрировав свою учетную запись разработчика в Google Play, вам потребуется всего несколько минут, чтобы начать публикации.
+meta.tags="publishing"
+page.tags="google play", "publishing", "register", "signup"
+page.image=/distribute/images/getting-started.jpg
+
+@jd:body
+
+<div class="top-right-float" style="margin-right:24px;margin-top:-18px">
+  <a href="https://play.google.com/apps/publish/"><img src="{@docRoot}images/gp-start-button.png"></a>
+</div>
+
+<p>
+  Чтобы уже через несколько минут начать публиковаться в Google Play, выполните следующие действия.
+</p>
+
+<ul>
+  <li>Зарегистрируйте учетную запись для публикации в Google Play.
+  </li>
+
+  <li>Если вы будете продавать приложения или какие-либо продукты в них, настройте учетную
+ запись продавца в Google Кошельке.
+  </li>
+
+  <li>Ознакомьтесь с <a href="https://play.google.com/apps/publish/">консолью разработчика
+ Google Play</a> и средствами публикации.
+  </li>
+</ul>
+
+<p>
+  Когда будете готовы, используйте кнопку Start (Пуск), чтобы перейти в консоль разработчика.
+</p>
+
+<div class="headerLine">
+  <h2>
+    Регистрация учетной записи для публикации
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Советы
+    </h2>
+
+    <ul>
+      <li>Для регистрации вам необходима учетная запись Google. Ее можно создать в ходе выполнения данного
+ процесса.
+      </li>
+
+      <li>Если вы представляете организацию, рекомендуем создать новую учетную
+ запись Google, чтобы не использовать свою личную запись.
+      </li>
+
+      <li>Выполните обзор <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294">
+ стран для разработки</a> и <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">
+ стран для продаж</a>, где вы сможете распространять или продавать свои приложения.
+      </li>
+    </ul>
+  </div>
+</div>
+
+<ol>
+  <li>Перейдите в <a href="https://play.google.com/apps/publish/">консоль разработчика
+ Google Play</a>.
+  </li>
+
+  <li>Введите основные сведения о себе, <strong>идентифицирующие вас как разработчика</strong>:
+ ваше имя, адрес электронной почты и т. д. Эту информацию затем можно будет
+ изменить.
+  </li>
+
+  <li>Прочтите и примите <strong>Соглашение о распространении ПО</strong> для
+ своей страны или региона. Обратите внимание, что приложения и их страницы каталога,
+ публикуемые в Google Play должны соответствовать правилам программы для разработчиков
+ и экспортному законодательству США.
+  </li>
+
+  <li>Оплатите <strong>регистрационный взнос 25 долларов США</strong> с помощью Google Кошелька. Если
+ у вас еще нет Google Кошелька, вы можете быстро организовать его прямо в ходе выполнения данного
+ процесса.
+  </li>
+
+  <li>Когда ваша регистрация будет подтверждена, вам придет уведомление на адрес электронной почты,
+ указанный в ходе регистрации.
+  </li>
+</ol>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    Настройка учетной записи продавца в Google Кошельке
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:200px;">
+  <img src="{@docRoot}images/gp-start-wallet-icon.png">
+</div>
+
+<p>
+  Если вы хотите продавать приложения по установленной цене, а также какие-либо продукты
+ или подписки в них, вам необходима учетная запись продавца в Google Кошельке. Создать такую учетную запись можно в любой момент времени, но сначала изучите
+ список <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">
+ стран для продаж</a>.<br>
+  <br>
+  Порядок настройки учетной записи продавца в Google Кошельке.<br>
+  <br>
+</p>
+
+<ol>
+  <li>
+    <strong>Войдите </strong> в свою консоль разработчика Google Play по адресу <a href="https://play.google.com/apps/publish/" target="_blank">https://play.google.com/apps/publish/</a>.
+  </li>
+
+  <li>На боковой панели навигации выберите <strong>Финансовые отчеты</strong> <img src="{@docRoot}images/distribute/console-reports.png">.
+  </li>
+
+  <li>Нажмите <strong>Создать учетную запись продавца</strong>.
+  </li>
+</ol>
+
+<p>
+  При этом будет выполнен переход на сайт Google Кошелька; до выполнения этого шага
+ вам необходимо приготовить информацию о своем предприятии.
+</p>
+
+<div class="headerLine">
+  <h2>
+    Знакомство с консолью разработчика
+  </h2>
+
+
+</div>
+
+<p>
+  Когда ваша регистрация будет подтверждена, можно выполнить вход в консоль
+ разработчика, являющуюся центром, где находятся основные инструменты разработчика
+ и откуда выполняются операции публикации приложений в Google Play.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine">
+<h2 id="related-resources">Связанные ресурсы</h2><hr />
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/gettingstarted"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

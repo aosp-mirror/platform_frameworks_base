@@ -1,0 +1,434 @@
+page.title=Auto 應用程式品質
+page.metaDescription=Auto 應用程式與車輛的輸入控制項及顯示進行整合，可最大限度減少駕駛員分心的狀況，從而提供絕佳的體驗。
+page.image=/distribute/images/gp-auto-quality.png
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>品質準則</h2>
+  <ol>
+    <li><a href="#core">核心應用程式品質</a></li>
+    <li><a href="#ux">視覺設計與互動</a></li>
+    <li><a href="#fn">功能</a></li>
+    <li><a href="#faq">常見問題</a></li>
+  </ol>
+
+  <h2>您也應閱讀</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">核心應用程式品質</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">最佳化您的應用程式</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">適用於音訊應用程式的 Android Auto UX 指導方針</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">適用於傳訊應用程式的 Android Auto UX 指導方針</a></li>
+  </ol>
+</div>
+</div>
+
+
+  <img src="{@docRoot}distribute/images/gp-auto-quality.png" style="width:480px;">
+
+
+<p>在您的應用程式中設計對 Android Auto 的支援時，避免駕駛員分心是高於一切的準則。若應用程式使用 Auto 使用者介面，應透過諸如語音命令或非常簡易的視覺設計等最佳做法，最大限度減少讓駕駛員分心的狀況。
+</p>
+
+<p>
+  絕佳的 Auto 體驗應具備可預測的特性。若應用程式支援 Android Auto，應該只有在資訊具有重大意義時，才向駕駛員顯示適時資訊，並針對常見任務使用可預測的簡易樣式。
+</p>
+
+<p class="caution">
+  <strong>重要說明：</strong>若應用程式在連接至 Android Auto 螢幕的裝置上執行，則本頁面中列出的準則適用於您應用程式的使用者介面及行為。應用程式必須符合這些準則，才能具備成為 Google Play 上 Android Auto 應用程式的資格。
+</p>
+
+
+<div class="headerLine">
+  <h2 id="core">
+  核心應用程式品質
+  </h2>
+
+<p>
+ 除了以下列出的 Auto 特定準則外，Auto 應用程式還應符合適用於 Android 平台的所有相關核心應用程式品質準則 (如<a href="{@docRoot}distribute/essentials/quality/core.html">核心應用程式品質</a>準則中所詳述)。請根據這些準則對您的應用程式進行測試，以確保應用程式符合 Android 的導覽與設計標準。然後，根據所有 Auto 特定準則對應用程式進行測試，請謹記，若您的應用程式在連接至 Android Auto 的裝置上執行，必須符合本頁面列出的需求。 <div class="headerLine">
+  <h2 id="ux">
+  視覺設計與使用者互動
+  </h2>
+
+</div>
+
+<p>
+  這些準則可確保您的應用程式遵循關鍵的設計與互動樣式，以確保在 Android Auto 上提供一致、直觀且充滿樂趣的使用者體驗。許多元素 (例如抽出式導覽面板、卡背景、字型與圖示顏色) 由系統設定並呈現。您自己的應用程式特定設計元素必須符合以下準則。
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    類型
+  </th>
+  <th style="width:54px;">
+    測試
+  </th>
+  <th>
+    描述
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="5" id="safety">
+    駕駛員注意力
+  </td>
+
+  <td id="AU-MV">
+    AU-MV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式不會在 Auto 螢幕上顯示動畫元素 (例如以動畫顯示的圖形、遊戲、影片或進度列)。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VA">
+    AU-VA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式不會在 Auto 螢幕上顯示任何形式的視覺廣告或文字廣告。只能接受音訊廣告。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-IM">
+    AU-IM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    應用程式元素不會在 Auto 螢幕上顯示任何影像。例外狀況包括：應用程式可能會針對消費螢幕 (例如專輯封面) 背景中的上下文內容，顯示單一靜態影像 ，應用程式可能會在內容抽出式導覽面板中顯示圖示。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-DS">
+    AU-DS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    應用程式不會包括導致駕駛員分心的任何功能。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VI">
+    AU-VI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    應用程式在 Android Auto 中處於使用中時，永遠不會在手機螢幕上顯示任何形式的視覺資訊 (通知、快顯通知、影片、影像、廣告等)。
+    </p>
+  </td>
+</tr>
+
+
+
+<tr>
+  <td rowspan="3" id="layout">
+    版面配置
+  </td>
+
+  <td id="AU-SC">
+    AU-SC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式不會顯示自動捲動的文字。
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td id="AU-FT">
+    AU-FT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式會使用預設 Roboto 字型 (以核准的兩種大小) 顯示所有字串。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-ST">
+    AU-ST
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式不會顯示長於 120 個字元的任何個別字串。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="4" id="contrast">
+    視覺對比
+  </td>
+
+  <td id="AU-DM">
+    AU-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式支援白晝模式 (在明亮背景中顯示深色的文字與控制項)。(<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NM">
+    AU-NM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式支援黑夜模式 (在深色背景中顯示明亮的文字與控制項)。(<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-WI">
+    AU-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式提供白色的圖示組，系統會將其設為彩色以提供自動對比補償。(<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-OC">
+    AU-OC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式提供顏色，系統可以最佳化顏色以便於在車內閱讀。(<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="interaction">
+    互動
+  </td>
+
+  <td id="AU-VC">
+    AU-VC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式必須支援語音命令。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-AB">
+    AU-AB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式特定按鈕回應使用者動作的延遲不超過兩秒。
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  功能
+  </h2>
+
+
+</div>
+
+<p>
+  這些準則可確保您的應用程式經過正確設定並提供預期的功能行為。
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    類型
+  </th>
+  <th style="width:54px;">
+    測試
+  </th>
+  <th>
+    描述
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="5" id="general">
+   一般
+  </td>
+
+  <td id="AU-LT">
+    AU-LT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式的載入時間不超過 10 秒。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-FP">
+    AU-FP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Auto 應用程式功能按預期運作，或按應用程式的 Google Play 市集清單中所述內容運作。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-RL">
+    AU-RL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式從主螢幕重新啟動後，可將狀態還原為盡可能接近先前的狀態。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SS">
+    AU-SS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式中完成任何任務都不超過六步。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-GO">
+    AU-GO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式的任何非功能按鈕或已停用按鈕都必須灰顯。
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="media">
+    媒體
+  </td>
+
+
+  <td id="AU-PA">
+    AU-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式最多具有四個主要動作與一個可選動作溢出開關 (若不使用動作溢出，可以有五個主要動作)。(<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SA">
+    AU-SA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     應用程式最多具有四個可選次要動作與一個動作溢出開關。(<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="notifications">
+    通知
+  </td>
+
+  <td id="AU-NA">
+    AU-NA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式不會透過通知顯示廣告。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NT">
+    AU-NT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     只有在通知與駕駛員的需求相關時，應用程式才顯示通知。
+   </p>
+   <p>
+    範例：<br /> 良好：通知使用者已送達新訊息。<br /> 不良：向使用者通知有關新專輯發行事宜。
+    </p>
+  </td>
+</tr>
+
+</table>
+
+<!--
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+-->
+
+<div class="headerLine">
+  <h2 id="faq">
+  常見問題
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>提交應用程式後，如何才能知道我的應用程式不符合 Android Auto 的所有需求？</strong>
+</p>
+<p>若您計劃開發適用於 Auto 的應用程式，建議您立即開始啟用並測試您的應用程式。但是，此時無法發行 Auto 啟用的應用程式。請加入 <a href="http://g.co/AndroidAutoDev" class="external-link">Auto 開發人員 Google+ 社群</a>，以及時了解您何時能提交 Auto 啟用的應用程式。</p>
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>我的應用程式針對的不僅是 Android Auto。若我的應用程式不符合 Auto 需求，我的新應用程式或更新後的應用程式是否仍顯示在 Google Play 中針對手機與平板電腦的位置？</strong>
+</p>
+<p>
+  否。Google 開始核准程序時，會對您的 Auto 應用程式執行駕駛員安全檢閱，在核准該應用程式之前，不可散佈該應用程式。由於該 APK 也是適用於手機與平板電腦的 APK，因此在 Auto 核准程序完成之前，將無法使用適用於這些裝置的 Play 市集更新。
+</p>
+
+<p class="caution">
+  <strong>重要說明：</strong>由於存在這一限制，因此您不應將生產 APK 用於 Auto 支援原型設計。
+</p> 

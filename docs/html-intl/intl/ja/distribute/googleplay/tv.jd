@@ -1,0 +1,210 @@
+page.title=Android TV への配布
+page.image=/design/tv/images/atv-home.jpg
+meta.tags="tv", "publish", "quality"
+page.tags="tv", "publish", "googleplay"
+page.metaDescription=アプリ、ゲーム、コンテンツを Android TV に配布します。
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>参加方法</h2>
+<ol>
+<li><a href="#understand_guidelines">ガイドラインを把握する</a></li>
+<li><a href="#develop_app">TV 向けに優れたアプリを開発する</a></li>
+<li><a href="#test_app">TV アプリの品質をテストする</a></li>
+<li><a href="#opt_in">オプトイン</a></li>
+<li><a href="#track_review">審査をトラッキングする</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">アプリの中核品質</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  Android TV と Google Play を使用して、優れたアプリまたはゲームをリビング ルームに届けることができます。TV 向けに最適化されたストア エクスペリエンスにアプリやゲームを提供できます。新規アプリや既存のアプリを TV 向けに拡張し、Google Play の使いやすいツールとプロセスを使用して公開することができます。
+</p>
+
+<p>
+  まずこのドキュメントの各セクションで TV アプリを Google Play からユーザーに配布する方法を確認してください。<a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>を読んで、アプリが適合する必要のあるユーザビリティと品質標準に関する情報について確認してください。アプリの準備が整ったら、デベロッパー コンソールから Android TV ストアでの公開にオプトインできます。
+</p>
+
+<h2 id="how_to_participate">
+  参加方法
+</h2>
+
+<p>
+  Google Play により、TV アプリをリビング ルームの新しいユーザーに届けることができます。既存のデベロッパー コンソール アカウントと、現在の価格と販売/ 配布地域の設定を使用して、アプリを開発し、公開することができます。参加方法は簡単です。参加プロセスの概要は以下のセクションに記載されています。
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-tv-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1.ガイドラインと要件を把握する
+</h3>
+
+<p>
+  Android TV でのローンチを成功させるため、TV で優れたアプリのエクスペリエンスを作成するためのガイドラインを確認することから始めます。アプリを TV 用に拡張する場合の考え方、設計とユーザビリティの詳細については、<a href="{@docRoot}design/tv/index.html">Android TV の設計ガイドライン</a>を参照してください。
+</p>
+
+<p>
+  TV エクスペリエンスの設計を始める際には、TV アプリの品質基準を読み、理解しておく必要があります。Android TV 向けの Google Play エクスペリエンスでは、<strong>TV で使用できるアプリのみが紹介</strong>されます。基本的な一連の品質基準に適合している場合に、アプリを参加させることができます。詳細については、<a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>を参照してください。
+</p>
+
+<h3 id="develop_app">2.TV 向けに優れたアプリを開発する</h3>
+
+<p>
+  TV 向けの優れたアプリはリビング ルームでの使用を想定して設計され、Android TV の機能と、ゲーム コントローラ、D-pad、リモート コントロールなどの入力関連アクセサリを活用します。アプリは、洗練された高品質なエクスペリエンスを大画面で実現できるように細かく調整され、魅力的な機能セットをユーザーに提供します。
+</p>
+
+<p>
+  TV アプリを検討する際には、<a href="{@docRoot}training/tv/start/index.html">デベロッパー向けドキュメント</a>とユーザビリティのガイドラインを確認し、最大限にサポートする計画を立ててください。ユーザー向けに優れた Leanback エクスペリエンスを設計し、SDK に含まれる Leanback ライブラリを活用してビルドします。TV 用ユースケースに対応するため、アプリの他の部分の最適化が必要となる場合があります。開発プロセスの早い段階でこのような部分を特定しておくことをお勧めします。
+</p>
+
+<p>
+  通常、TV エクスペリエンスは、既存の電話、タブレット、その他のデバイス用のアプリの一部として、同じパッケージ名とストアの掲載情報を使用して提供することをお勧めします。この方法により、ユーザーは TV エクスペリエンスをシームレスにアップグレードすることができます。また、電話やタブレット用のアプリで得たレビューや評価を活かすこともできます。
+</p>
+
+<p>
+  TV インテント、Leanback ライブラリ、TV 固有のコードとリソースを、サポート対象のすべてのデバイスに対する単一の APK ソリューションとしてバンドルできます。必要に応じて、<a href="{@docRoot}google/play/publishing/multiple-apks.html">複数の APK サポート</a>を利用し、電話とタブレットに使用するものと同じパッケージ名とストアの掲載情報の下で、カスタム バイナリを Android TV デバイスに提供できます。
+</p>
+
+<p>
+  設計と開発プロセスを通して、ユーザー エクスペリエンスの試作品の作成とテストに適したデバイスを用意することが重要です。できるだけ早い段階で、1 つ以上の Android TV デバイスまたはエミュレータを入手し、テスト環境をセットアップすることが必要です。Android TV 環境でのテストに推奨されるハードウェア デバイスは Nexus Player です。これは <a href="http://www.google.com/intl/all/nexus/player/">Google Play から入手可能</a>であり、他のストアからも入手できます。ゲーム コントローラとその他の TV 入力デバイスも用意しておく必要があります。
+</p>
+
+<h3 id="test_app">3.TV アプリの品質をテストする</h3>
+
+<p>
+  TV アプリは、Android TV 上で正しく機能して優れた外観を備え、考えられる最高のユーザー エクスペリエンスを提供するように設計されていなければなりません。Google Play は、高品質のアプリをユーザーが Google Play で簡単に発見できるように紹介します。ユーザーがその機能を存分に活用できる Android TV アプリに参加して、アプリを提供するには次の手順に従ってください。
+</p>
+
+<ul>
+  <li>アプリの中核品質に関するガイドラインに適合させる <ul>
+      <li><a href="{@docRoot}design/index.html">Android の設計ガイドライン</a>に従います。アプリでの<a href="http://www.google.com/design/spec/material-design/introduction.html">マテリアル デザイン</a>の使用には特別な注意を払うようにしてください。
+      </li>
+
+      <li><a href="{@docRoot}distribute/essentials/quality/core.html">アプリの中核品質に関するガイドライン</a>ついてアプリをテストします。
+      </li>
+    </ul>
+  </li>
+  <li><a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>に関するガイドラインに適合させる <ul>
+      <li><a href="{@docRoot}training/tv/index.html">TV アプリ開発</a>用に当社が定めたベスト プラクティスに従います。</li>
+      <li>アプリをすべての <a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>基準に適合させます。</li>
+    </ul>
+  </li>
+  <li>シンプルかつ高度なユーザビリティの実現を目指す</li>
+</ul>
+
+<h3 id="opt_in">4.Android TV にオプトインし、公開する</h3>
+
+<p>
+  リリース対応 APK を作成し、これが <a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>ガイドラインのすべてに適合していることをテストして確認したら、デベロッパー コンソールにアップロードします。ストアの掲載情報をTV のスクリーンショットと TV バナーで更新し、必要に応じて配布オプションを設定します。Google Play でのローンチに向けた準備方法について不明点がある場合は、<a href="{@docRoot}distribute/googleplay/publish/preparing.html">ローンチ チェックリスト</a>を参照してください。
+</p>
+
+<p>
+  Android TV のユーザーにアプリを公開する前に、デベロッパー コンソールの <strong>[価格と販売/ 配布地域]</strong> セクションから Android TV にオプトインする必要があります。オプトインは、Android TV ユーザーがアプリを Google Play から利用できるようにして、アプリが <a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>ガイドラインに適合していることを意味します。
+</p>
+
+<p>
+  オプトインは、APK のアップロード時に自動でチェックされる次の2 つの事前品質基準にアプリが適合している場合に限り可能です。
+</p>
+
+<ul>
+  <li>アプリのマニフェストには、インテント タイプ <a href="{@docRoot}reference/android/content/Intent.html#ACTION_MAIN"><code>ACTION_MAIN</code></a> が、カテゴリ <a href="{@docRoot}reference/android/content/Intent.html#CATEGORY_LEANBACK_LAUNCHER"><code>CATEGORY_LEANBACK_LAUNCHER</code></a> で含まれている必要があります。詳細については<a href="{@docRoot}training/tv/start/start.html#tv-activity">こちら</a>を参照してください。
+  </li>
+
+  <li>アプリはタッチスクリーンを必要としないことを宣言する必要があります。マニフェストでは、<code>android.hardware.touchscreen</code> ハードウェアを <code>android:required="false”</code> で宣言する必要があります。詳細については<a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">こちら</a>を参照してください。
+  </li>
+</ul>
+
+<p>
+  アプリが事前基準に適合している場合、以下に示す Android TV のオプトイン チェックボックスが表示されます。オプトイン チェックボックスが使用できない場合、APK が事前基準に適合していることを確認してください。
+</p>
+
+<p>
+  オプトインして変更内容を保存したら、アプリを通常どおり公開できます。アプリを Android TV ユーザーが利用できるようにする前に、Google Play はアプリを <a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>基準に対する審査にかけ、その結果を通知します。アプリの承認状況をトラッキングする方法の詳細については、次のセクションを参照してください。
+</p>
+
+<p>
+  アプリが <a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>基準に適合している場合、Google Play はそのアプリを Android TV ユーザーが利用できるようにします。また、アプリのコレクションとプロモーションで、注目されるように特別に扱われる可能性があります。アプリが Android TV 向けに設計されていることを Google Play の全ユーザーに通知するため、Google Play ではアプリのストア掲載情報をTV バッジで修飾します。
+</p>
+
+<p>
+  オプトインと審査は Google Play ストアでの他のデバイス（電話やタブレットなど）に対するアプリの使用可能状況に影響しないことに注意してください。アプリは公開後すぐに利用可能となります。
+</p>
+
+<p>
+  デベロッパー コンソールで Android TV にオプトインするには、次の手順を実行します。
+</p>
+
+<ol>
+  <li>アプリをすべての <a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>基準に適合させます。
+  </li>
+
+  <li>TV のスクリーンショットとバナー画像をアプリのストアの掲載情報に追加します。
+  </li>
+
+  <li><strong>[すべてのアプリ]</strong> ページでオプトインするアプリをクリックします。
+  </li>
+
+  <li><strong>[価格と販売/配布地域] </strong>で<em> [Android TV] </em>とオプトイン チェックボックスまでスクロール ダウンします。
+  </li>
+
+  <li><em>[アプリを Android TV に配布する]</em> の横にあるチェックボックスをクリックします。
+  </li>
+
+  <li><strong>[保存]</strong> をクリックして変更内容を保存します。
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-tv-opt-in.png">
+  <p class="caption">
+    <strong>TV のオプトイン: </strong>デベロッパー コンソールからオプトインすることにより、Android TV にアプリが含まれます。
+  </p>
+</div>
+
+<h3 id="track_review">5.審査と承認をトラッキングする</h3>
+
+<p>
+  アプリが上述の Android TV 向けの技術上の基準と品質基準に適合すると、ユーザーはそのアプリを Android TV で活用できるようになります。アプリが基準を満たしていない場合、<strong>デベロッパー アカウント アドレスに送られた通知メール</strong>を受け取ります。このメールには対処が必要な領域の要約が記載されています。必要な調整を行ったら、デベロッパー コンソールにアプリの新規バージョンをアップロードできます。 
+</p>
+
+<p>
+  アプリの審査状況と承認状況は、デベロッパー コンソールで、アプリの <strong>[価格と販売/配布地域]</strong> ページ内の <em>[Android TV]</em> の下で随時確認できます。
+</p>
+
+<p>
+  承認状況は次の 3 つのいずれかとなります。
+</p>
+
+<ul>
+  <li>
+    <em>保留</em> — アプリは審査部門に送られ、審査がまだ完了していません。
+  </li>
+
+  <li>
+    <em>承認</em> — アプリが審査され、承認されました。アプリは Android TV ユーザーが直接利用できるようになります。 
+  </li>
+
+  <li>
+    <em>却下</em> — アプリが審査され、承認されませんでした。アプリが承認されなかった理由について詳しくは通知メールを確認してください。問題に対処して、オプトインと公開を再度行って、別の審査を受けることができます。
+  </li>
+</ul>
+
+<p>アプリの評価方法の詳細については、<a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>に関するドキュメントを参照してください。 </p>
+
+
+  <h3>関連リソース</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:tvlanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div> 

@@ -1,0 +1,137 @@
+page.title=アプリを公開する
+page.metaDescription=デベロッパー アカウントを登録してすぐに Google Play で公開を開始します。
+meta.tags="publishing"
+page.tags="google play", "publishing", "register", "signup"
+page.image=/distribute/images/getting-started.jpg
+
+@jd:body
+
+<div class="top-right-float" style="margin-right:24px;margin-top:-18px">
+  <a href="https://play.google.com/apps/publish/"><img src="{@docRoot}images/gp-start-button.png"></a>
+</div>
+
+<p>
+  次の手順を実行するとすぐに Google Play にアプリを公開できます。
+</p>
+
+<ul>
+  <li>Google Play 公開者アカウントを登録します。
+  </li>
+
+  <li>Google ウォレット Merchant アカウントをセットアップします（アプリやアプリ内製品を販売する場合）。
+  </li>
+
+  <li><a href="https://play.google.com/apps/publish/">Google Play デベロッパー コンソール</a>と公開用ツールを活用します。
+  </li>
+</ul>
+
+<p>
+  準備ができたら [START] ボタンを使用してデベロッパー コンソールに移動します。
+</p>
+
+<div class="headerLine">
+  <h2>
+    パブリッシャー アカウントの登録
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      ヒント
+    </h2>
+
+    <ul>
+      <li>登録するには Google アカウントが必要です。このプロセスでアカウントを作成できます。
+      </li>
+
+      <li>組織の一員である場合は、個人用アカウントではなく Google アカウントを新たに登録することを検討してください。
+      </li>
+
+      <li><a
+href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294">デベロッパーの登録がサポートされている国や地域</a>と、<a
+href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">販売者の登録がサポートされている国や地域</a>で、アプリの配布と販売が可能な範囲を確認してください。
+      </li>
+    </ul>
+  </div>
+</div>
+
+<ol>
+  <li><a href="https://play.google.com/apps/publish/">Google Play デベロッパー コンソール</a>にアクセスします。
+  </li>
+
+  <li><strong>デベロッパー ID</strong> の基本情報（名前、メール アドレスなど）を入力します。この情報は後で変更できます。
+  </li>
+
+  <li>国または地域の<strong>デベロッパー販売/配布契約</strong>を確認して同意します。Google Play で公開するアプリとストア掲載情報は、デベロッパー プログラム ポリシーと米国輸出管理法に準拠している必要があることに注意してください。
+  </li>
+
+  <li>Google ウォレットを使用して<strong> 25 米ドルの登録料</strong>を支払います。Google ウォレット アカウントをお持ちでない場合はこのプロセスで簡単にセットアップできます。
+  </li>
+
+  <li>登録情報が確認されると、登録時に入力したメール アドレスに通知が送信されます。
+  </li>
+</ol>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    Google ウォレット Merchant アカウントのセットアップ
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:200px;">
+  <img src="{@docRoot}images/gp-start-wallet-icon.png">
+</div>
+
+<p>
+  有料アプリ、アプリ内製品、サブスクリプションを販売する場合は、Google ウォレット Merchant アカウントが必要となります。このアカウントはいつでもセットアップできます。まず<a
+href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">販売者の登録がサポートされている国や地域</a>の一覧を確認してください。<br>
+  <br>
+  Google ウォレット Merchant アカウントをセットアップするには、次の手順を実行します。<br>
+  <br>
+</p>
+
+<ol>
+  <li>
+    Google Play デベロッパー コンソール（<a href="https://play.google.com/apps/publish/" target="_blank"> https://play.google.com/apps/publish/</a>）に<strong>サインイン</strong>します。
+  </li>
+
+  <li>横のナビゲーションの<strong> [売上レポート] </strong><img src="{@docRoot}images/distribute/console-reports.png">を開きます。 </li>
+
+  <li><strong>[販売者アカウントを今すぐセットアップする] </strong>をクリックします。
+  </li>
+</ol>
+
+<p>
+  これで、Google ウォレットのサイトに移動します。この手順を完了するにはビジネスに関する情報が必要となります。
+</p>
+
+<div class="headerLine">
+  <h2>
+    デベロッパー コンソールを活用する
+  </h2>
+
+
+</div>
+
+<p>
+  登録が確認されると、デベロッパー コンソールにサインインできるようになります。ここが Google Play でのアプリ公開の操作とツールのホームとなります。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine">
+<h2 id="related-resources">関連リソース</h2><hr />
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/gettingstarted"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div> 

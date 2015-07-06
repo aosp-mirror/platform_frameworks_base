@@ -1,0 +1,106 @@
+page.title=Accede a Diseñado para familias
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=Únete a Diseñado para familias en pocos pasos sencillos.
+
+@jd:body
+
+<p>
+  Si estás creando una aplicación diseñada para niños y familias, hay algunas
+ cosas que debes hacer <em>antes</em> de que estés listo para acceder al programa Diseñado para
+ familias:
+</p>
+
+<ul>
+  <li>Completa el cuestionario de calificación de contenido para tu aplicación y cumple con una calificación
+ de ESRB, que puede ser Todos o Todos 10+.
+  </li>
+
+  <li>Agrega un vínculo de la política de privacidad a la página <strong>Directorio de la tienda</strong>
+ de tu aplicación.
+  </li>
+
+  <li>Asegúrate de que tu aplicación cumpla todos los <a href="https://support.google.com/googleplay/android-developer/answer/6184502">requisito
+ del programa Diseñado para familias.</a>
+  </li>
+</ul>
+
+<p>
+  Ahora que tu aplicación está lista para la publicación, puedes acceder a Diseñado para
+ familias directamente desde la <a href="https://play.google.com/apps/publish/">Consola para desarrolladores</a>. Acceder al programa
+ significa que quieres que tu aplicación esté disponible en la nueva experiencia
+ para la familia en Google Play, además de la categoría que hayas seleccionado en la
+ Play Store de Google.
+</p>
+
+<p>
+  La inclusión en el programa también confirma que tu aplicación cumple con las <a href="http://play.google.com/about/developer-content-policy.html">Políticas del programa para desarrolladores de
+ Google Play</a> y con el <a href="http://play.google.com/about/developer-distribution-agreement.html">Acuerdo de
+ distribución para desarrolladores</a>, incluido el<a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">
+ Anexo de DDA para Diseñado para familias</a>. Si no estás familiarizado con los documentos de
+ estas políticas o con el anexo, asegúrate de leerlos antes de solicitar la inclusión.
+</p>
+
+<p>
+  Cuando estés listo, sigue estas instrucciones de inclusión en Diseñado para familias para una aplicación específica:
+</p>
+
+<ol>
+<li>En la página <strong>Todas las aplicaciones</strong> de la Consola para desarrolladores, haz clic en la aplicación que quieres
+ incluir. En Fijación de precios y distribución, desplázate hacia abajo hasta encontrar <strong>Diseñado para
+ familias</strong> y la casilla de verificación para la inclusión.<img src="/images/gp-dff-optin.png" style="border:2px solid #ddd;margin:1em 0;">
+  </li>
+
+  <li>Comienza el flujo de inclusión y confirma que tu aplicación cumple los requisitos de
+ elegibilidad.</li>
+  <li>Si tu aplicación tiene anuncios publicitarios, confirma que cumplen con la política de anuncios publicitarios.
+<img src="/images/gp-dff-appinfo.png" style="border:2px solid #ddd;margin:1em 0;"></li>
+  <li>Selecciona tus grupos etarios objetivo entre los siguientes: 5 años y menores, de 6 a 8 años, de 9
+ a 12 años o Público general (para aplicaciones orientadas a niños y a públicos
+ mayores). Si tu aplicación está orientada a más de un grupo etario, puedes seleccionar hasta
+ dos grupos etarios adyacentes. Las aplicaciones con una calificación de ESRB de 10+ solo pueden seleccionar la
+ edad objetivo de 9 a 12 años o Público general.
+  </li>
+
+  <li>Selecciona una categoría para tu aplicación para la nueva experiencia centrada en la familia en
+ Google Play. Los usuarios también podrán encontrar tu aplicación en su categoría actual en
+ Google Play.</li>
+  <li>Lee y acepta los documentos vinculados y luego haz clic en
+ <strong>Incluir</strong>. Por último, haz clic en <strong>Enviar actualización</strong> en la página
+ Fijación de precios y distribución para publicar o actualizar tu aplicación.
+  </li>
+</ol>
+
+<p>
+  Una vez que hayas incluido tu aplicación, se la someterá a una revisión exhaustiva antes de recibir la
+ aprobación para el programa Diseñado para familias.
+</p>
+
+<p class="note">
+  <strong>Nota</strong>: Las aplicaciones publicadas en el programa Diseñado para familias
+ también están disponibles para todos los usuarios en Google Play. 
+</p>
+
+<p>
+  Si incluyes una aplicación que estás publicando por primera vez y no cumple
+ los requisitos del programa Diseñado para familias, no estará disponible
+ en Google Play hasta que actualices la aplicación para que cumpla
+ los requisitos del programa <strong>o</strong> canceles la selección de la casilla de verificación para la inclusión y
+ apruebes la revisión estándar de Google Play.
+</p>
+
+<p>
+  Si incluyes una aplicación que ya está publicada en Google Play y no cumple
+ los requisitos del programa, continuará estando disponible para todos los usuarios, pero no
+ se agregará a la nueva experiencia para la familia hasta que actualices la aplicación de modo que cumpla los
+ requisitos del programa.
+</p>
+
+<p>
+  Si publicas una actualización para una aplicación que ya forma parte de Diseñado para familias,
+ la actualización de la aplicación debe aprobar la revisión de Diseñado para familias antes de que
+ esté disponible para todos los usuarios en Google Play.</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/faq.html" class="next-class-link">A continuación: Preguntas frecuentes</a>
+</div>
