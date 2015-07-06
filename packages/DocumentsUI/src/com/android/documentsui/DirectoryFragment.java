@@ -50,6 +50,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
@@ -134,6 +136,8 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_IGNORE_STATE = "ignoreState";
 
     private final int mLoaderId = 42;
+
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
@@ -297,6 +301,21 @@ public class DirectoryFragment extends Fragment {
 
             @Override
             public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
+                if (result == null || result.exception != null) {
+                    // onBackPressed does a fragment transaction, which can't be done inside
+                    // onLoadFinished
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            final Activity activity = getActivity();
+                            if (activity != null) {
+                                activity.onBackPressed();
+                            }
+                        }
+                    });
+                    return;
+                }
+
                 if (!isAdded()) return;
 
                 mAdapter.swapResult(result);
