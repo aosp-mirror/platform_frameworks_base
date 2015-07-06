@@ -22,7 +22,7 @@ page.image=images/permissions_check.png
       <li><a href="#overview">Overview</a></li>
       <li><a href="#coding">Coding for Runtime Permissions</a></li>
       <li><a href="#testing">Testing Runtime Permissions</a></li>
-      <li><a href="#best-practices">Best Practices</a></li>
+      <li><a href="#best-practices">Best Practices and Usage Notes</a></li>
     </ol>
 
 <!--
@@ -82,15 +82,17 @@ page.image=images/permissions_check.png
   <li>
     <p><strong>Limited Permissions Granted at Install Time:</strong> When the
     user installs or updates the app, the system grants the app all
-    permissions that the app requests that fall under {@link
+    permissions listed in the manifest that fall under {@link
     android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}.
     For example, alarm clock and internet permissions fall under {@link
     android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}, so
-    they are automatically granted at install time.
+    they are automatically granted at install time. For more information about
+    how normal permissions are handled, see <a href="#normal">Normal
+    Permissions</a>.
     </p>
 
-    <p>The system may also grant the app signature and system permissions, as
-    described in <a href="#system-apps">System apps and signature
+    <p>The system may also grant the app signature permissions, as
+    described in <a href="#system-apps">System components and signature
     permissions</a>. The user is <em>not</em> prompted to grant any permissions
     at install time.</p>
   </li>
@@ -98,9 +100,7 @@ page.image=images/permissions_check.png
   <li>
     <strong>User Grants Permissions at Run-Time:</strong> When the app requests
     a permission, the system shows a dialog to the user, then calls the app's
-    callback function to notify it whether the permission was granted. If a
-    user grants a permission, the app is given all permissions in that
-    permission's functional area that were declared in the app manifest.
+    callback function to notify it whether the user granted the permission.
   </li>
 
 </ul>
@@ -117,7 +117,9 @@ page.image=images/permissions_check.png
     <strong>Always Check for Permissions:</strong> When the app needs to
     perform any action that requires a permission, it should first check
     whether it has that permission already. If it does not, it requests to be
-    granted that permission.
+    granted that permission. You do not need to check for permissions that
+    fall under {@link
+    android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}.
   </li>
 
   <li>
@@ -164,37 +166,58 @@ page.image=images/permissions_check.png
   to access that data.
 </p>
 
+<h3 id="perm-groups">Permission groups</h3>
+
+<p>
+  Related permissions are divided into <em>permission groups</em> to
+  allow users to grant related permissions to an app in a single action.
+  The user only has to grant permission once per app for each permission group.
+  If the app subsequently requests a permission from the same permission
+  group, the system automatically grants the permission without any action from
+  the user. The system calls your app's <code>onRequestPermissionsResult()</code>
+  method just as if the user had granted permission through the dialog box.
+</p>
+
+<p>
+  For example, suppose an app lists in its manifest that it needs the
+  <code>SEND_SMS</code> and <code>RECEIVE_SMS</code> permissions, which both
+  belong to <code>android.permission-group.SMS</code>. When the app needs to
+  send a message, it requests the <code>SEND_SMS</code> permission. The system
+  shows the user a dialog box asking if the app can have access to SMS. If the
+  user agrees, the system grants the app the <code>SEND_SMS</code> permission it
+  requested. Later, the app requests <code>RECEIVE_SMS</code>. The
+  system automatically grants this permission, since the user had already
+  approved a permission in the same permission group.
+</p>
+
 <h3 id="system-apps">
-  System apps and signature permissions
+  System components and signature permissions
 </h3>
 
 <p>
   Ordinarily, when the user installs an app, the system only grants the app the
+  permissions listed in the manifest that fall under
   {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL
   PROTECTION_NORMAL}. However, under some circumstances the system grants the
   app more permissions:
 </p>
 
 <ul>
-  <li>If an app is part of the system image, it is automatically granted all
-  the permissions listed in its manifest.
+  <li>System components automatically receive all
+  the permissions listed in their manifests. However, the user can still revoke
+  permissions at any time by going to the system's <strong>Settings</strong>
+  app and choosing <strong>Apps &gt;</strong> <i>app_name</i> <strong>&gt;
+  Permissions</strong>. Because users can revoke these permissions at will,
+  the app should continue to check for permissions at run
+  time and request them if necessary.
   </li>
 
   <li>If the app requests permissions in the manifest that fall under {@link
   android.content.pm.PermissionInfo#PROTECTION_SIGNATURE PROTECTION_SIGNATURE},
   and the app is signed with the same certificate as the app that declared
   those permissions, the system grants the requesting app those permissions on
-  installation.
-  </li>
+  installation. Apps cannot request signature permissions at runtime.</li>
 </ul>
-
-<p>
-  In both cases, the user can still revoke permissions at any time by going to
-  the system's <strong>Settings</strong> screen and choosing <strong>Apps
-  &gt;</strong> <i>app_name</i> <strong>&gt; Permissions</strong>. The app
-  should continue to check for permissions at run time and request them if
-  necessary.
-</p>
 
 <h3 id="compatibility">
   Forwards and backwards compatibility
@@ -545,7 +568,53 @@ page.image=images/permissions_check.png
     </td>
   </tr>
 
+  <tr>
+    <td>
+      <code>android.permission-group.STORAGE</code>
+    </td>
+    <td>
+      <ul>
+        <li>
+          <code>android.permission.READ_EXTERNAL_STORAGE</code>
+        </li>
+        <li>
+          <code>android.permission.WRITE_EXTERNAL_STORAGE</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
+
 </table>
+
+<h4 id="explain-need">Explain why the app needs permissions</h4>
+
+<p>
+  In some circumstances, you might want to help the user understand why your
+  app needs a permission. For example, if a user launches a photography app,
+  the user probably won't be surprised that the app asks for permission to use
+  the camera. But if the user turns down that permission request, then launches
+  the photography app again, that might indicate that the user needs some help
+  understanding why the permission is needed.
+</p>
+
+<p>
+  To help find the situations where you need to provide extra explanation, the
+  system provides the
+  <code>Activity.shouldShowRequestPermissionRationale(String)</code>
+  method. This
+  method returns <code>true</code> if the app has requested this permission
+  previously and the user denied the request.
+  That indicates that you should probably explain to the
+  user why you need the permission.
+</p>
+
+<p>
+  If the user turned down the permission request in the
+  past and chose the <em>Don't ask again</em> option in the permission request system
+  dialog, this method returns <code>false</code>. The method also returns
+  <code>false</code> if the device policy prohibits the app from having that
+  permission.
+</p>
 
 <h4 id="request-permissions">Request permissions if necessary</h4>
 
@@ -564,6 +633,13 @@ page.image=images/permissions_check.png
 <pre>
 if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
         != PackageManager.PERMISSION_GRANTED) {
+
+    // Should we show an explanation?
+    if (shouldShowRequestPermissionRationale(
+            Manifest.permission.READ_CONTACTS)) {
+        // Explain to the user why we need to read the contacts
+    }
+
     requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
             MY_PERMISSIONS_REQUEST_READ_CONTACTS);
 
@@ -612,11 +688,10 @@ public void onRequestPermissionsResult(int requestCode,
 }
 </pre>
 
-  <p>If the user grants a permission, the system gives the app all permissions
-  that the app manifest lists for that functional area. If the user denies the
-  request, you should take appropriate action. For example, you might disable
-  any menu actions that depend on this permission.
-  </li>
+<p>
+  If the user denies a permission request, your app should take appropriate
+  action. For example, your app might show a dialog explaining why it could not
+  perform the user's original request.
 </p>
 
 <p>
@@ -630,7 +705,6 @@ public void onRequestPermissionsResult(int requestCode,
 </p>
 
 <h2 id="testing">Testing Runtime Permissions</h2>
-
 
 <p>
   If your app targets the M Developer Preview, you must test that it
@@ -706,7 +780,7 @@ $ adb pm grant com.example.myapp android.permission.RECORD_AUDIO
 $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
 </pre>
 
-<h2 id="best-practices">Best Practices</h2>
+<h2 id="best-practices">Best Practices and Usage Notes</h2>
 
 <p>
   The new permissions model gives users a smoother experience, and makes it
@@ -794,3 +868,154 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
   tutorial, so you still need to check for and request permissions during the
   app's normal operation.
 </p>
+
+<h3 id="normal">Normal Permissions</h3>
+
+<p>
+  Many permissions are designated as {@link
+  android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL},
+  which indicates that
+  there's no great risk to the user's privacy or security in letting apps have
+  those permissions. For example, users would reasonably want to know whether
+  an app can read their contact information, so users have to grant this
+  permission explicitly. By contrast, there's no great risk in allowing an app
+  to vibrate the device, so that permission is designated as <em>normal.</em>
+</p>
+
+<p>
+  If an app declares in its
+  manifest that it needs a normal permission, the system automatically grants
+  the app
+  that permission at install time. The system does not prompt the user
+  to grant normal
+  permissions, and users cannot revoke these permissions.
+</p>
+
+<p>
+  If your app declares that it needs normal permissions, the app does not need to
+  call <code>Activity.checkSelfPermission()</code> or
+  <code>Activity.requestPermissions()</code> for
+  those permissions. Since you declared the permissions in the manifest, you
+  can be sure your app was granted those permissions at install time.
+</p>
+
+<p>Currently, the following permissions are classified as {@link
+    android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}:</p>
+
+<ul>
+  <li>
+    <code>android.permission.WRITE_USER_DICTIONARY</code>
+  </li>
+
+  <li>
+    <code>com.android.alarm.permission.SET_ALARM</code>
+  </li>
+
+  <li>
+    <code>android.permission.ACCESS_LOCATION_EXTRA_COMMANDS</code>
+  </li>
+
+  <li>
+    <code>android.permission.ACCESS_NETWORK_STATE</code>
+  </li>
+
+  <li>
+    <code>android.permission.ACCESS_WIFI_STATE</code>
+  </li>
+
+  <li>
+    <code>android.permission.ACCESS_WIMAX_STATE</code>
+  </li>
+
+  <li>
+    <code>android.permission.GET_ACCOUNTS</code>
+  </li>
+
+  <li>
+    <code>android.permission.VIBRATE</code>
+  </li>
+
+  <li>
+    <code>android.permission.FLASHLIGHT</code>
+  </li>
+
+  <li>
+    <code>android.permission.WAKE_LOCK</code>
+  </li>
+
+  <li>
+    <code>android.permission.TRANSMIT_IR</code>
+  </li>
+
+  <li>
+    <code>android.permission.MODIFY_AUDIO_SETTINGS</code>
+  </li>
+
+  <li>
+    <code>android.permission.READ_EXTERNAL_STORAGE</code>
+  </li>
+
+  <li>
+    <code>android.permission.REORDER_TASKS</code>
+  </li>
+
+  <li>
+    <code>android.permission.KILL_BACKGROUND_PROCESSES</code>
+  </li>
+
+  <li>
+    <code>android.permission.SET_WALLPAPER</code>
+  </li>
+
+  <li>
+    <code>android.permission.SET_WALLPAPER_HINTS</code>
+  </li>
+
+  <li>
+    <code>android.permission.SET_TIME_ZONE</code>
+  </li>
+
+  <li>
+    <code>android.permission.EXPAND_STATUS_BAR</code>
+  </li>
+
+  <li>
+    <code>android.permission.READ_SYNC_SETTINGS</code>
+  </li>
+
+  <li>
+    <code>android.permission.WRITE_SYNC_SETTINGS</code>
+  </li>
+
+  <li>
+    <code>android.permission.READ_SYNC_STATS</code>
+  </li>
+
+  <li>
+    <code>android.permission.WRITE_SETTINGS</code>
+  </li>
+
+  <li>
+    <code>android.permission.PERSISTENT_ACTIVITY</code>
+  </li>
+
+  <li>
+    <code>android.permission.GET_PACKAGE_SIZE</code>
+  </li>
+
+  <li>
+    <code>android.permission.RECEIVE_BOOT_COMPLETED</code>
+  </li>
+
+  <li>
+    <code>android.permission.BROADCAST_STICKY</code>
+  </li>
+
+  <li>
+    <code>android.permission.SUBSCRIBED_FEEDS_READ</code>
+  </li>
+
+  <li>
+    <code>android.permission.CHANGE_NETWORK_STATE</code>
+  </li>
+</ul>
