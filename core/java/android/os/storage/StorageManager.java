@@ -557,12 +557,20 @@ public class StorageManager {
 
     /** {@hide} */
     public @Nullable VolumeInfo findPrivateForEmulated(VolumeInfo emulatedVol) {
-        return findVolumeById(emulatedVol.getId().replace("emulated", "private"));
+        if (emulatedVol != null) {
+            return findVolumeById(emulatedVol.getId().replace("emulated", "private"));
+        } else {
+            return null;
+        }
     }
 
     /** {@hide} */
     public @Nullable VolumeInfo findEmulatedForPrivate(VolumeInfo privateVol) {
-        return findVolumeById(privateVol.getId().replace("private", "emulated"));
+        if (privateVol != null) {
+            return findVolumeById(privateVol.getId().replace("private", "emulated"));
+        } else {
+            return null;
+        }
     }
 
     /** {@hide} */
