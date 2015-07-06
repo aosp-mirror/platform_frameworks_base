@@ -21,9 +21,10 @@ import com.android.internal.annotations.GuardedBy;
 import android.annotation.Nullable;
 import android.util.Log;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -42,9 +43,9 @@ public class Hyphenator {
     private final static Object sLock = new Object();
 
     @GuardedBy("sLock")
-    static HashMap<Locale, Hyphenator> sMap = new HashMap<Locale, Hyphenator>();
+    final static HashMap<Locale, Hyphenator> sMap = new HashMap<Locale, Hyphenator>();
 
-    private long mNativePtr;
+    final private long mNativePtr;
 
     private Hyphenator(long nativePtr) {
         mNativePtr = nativePtr;
@@ -90,17 +91,13 @@ public class Hyphenator {
         String patternFilename = "hyph-"+languageTag.toLowerCase(Locale.US)+".pat.txt";
         File patternFile = new File(getSystemHyphenatorLocation(), patternFilename);
         try {
-            RandomAccessFile rf = new RandomAccessFile(patternFile, "r");
-            byte[] buf = new byte[(int)rf.length()];
-            rf.read(buf);
-            rf.close();
-            String patternData = new String(buf);
+            String patternData = IoUtils.readFileAsString(patternFile.getAbsolutePath());
             long nativePtr = StaticLayout.nLoadHyphenator(patternData);
             return new Hyphenator(nativePtr);
         } catch (IOException e) {
             Log.e(TAG, "error loading hyphenation " + patternFile, e);
+            return null;
         }
-        return null;
     }
 
     private static File getSystemHyphenatorLocation() {
