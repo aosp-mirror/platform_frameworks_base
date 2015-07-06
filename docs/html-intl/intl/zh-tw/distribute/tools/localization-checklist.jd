@@ -1,0 +1,716 @@
+page.title=當地語系化檢查清單
+page.metaDescription=利用 Android 與 Google Play 提供的全球受眾。請閱讀本檢查清單，以大致了解如何為全球市場提供您的產品。
+meta.tags="localizing, publishing, disttools"
+page.tags="local, l10n, translation, language"
+page.image=/distribute/images/localization-checklist.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>檢查清單</h2>
+    <ol>
+      <li><a href="#identify-languages">1.確定目標語言與地區設定</a></li>
+      <li><a href="#design">2.針對當地語系化進行設計</a></li>
+      <li><a href="#manage-strings">3.管理進行當地語系化的字串</a></li>
+      <li><a href="#translate-strings">4.翻譯 UI 字串與其他資源</a></li>
+      <li><a href="#test">5.對您的當地語系化應用程式進行測試</a></li>
+      <li><a href="#prepare-launch">6.準備面向全球推出產品</a></li>
+      <li><a href="#support-users">7.在推出後支援全球使用者</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px">
+  <img src="{@docRoot}distribute/images/localization-checklist.jpg">
+</div>
+
+<p>
+  Android 與 Google Play 可為您的應用程式提供遍佈全球的受眾，以及在諸如日本、韓國、印度、巴西與俄羅斯等國家/地區內快速擴充且可以連絡的使用者群體。我們強烈建議您執行當地語系化，因為這會最大限度提高您應用程式的散佈潛能，吸引全球的使用者進行評分。
+</p>
+
+<p>
+  當地語系化包含應用程式開發週期內的多項任務，預先的規劃不可或缺。本文件將協助您了解當地語系化的關鍵層面，讓您在 Google Play 上為面向全球成功推出應用程式而做好準備。
+</p>
+
+<div class="headerLine">
+  <h2 id="identify-languages">
+    1.確定目標語言與地區設定
+  </h2>
+
+
+</div>
+
+<p>
+  確定將應用程式散佈至哪些國家/地區以及當地使用者使用何種語言，這是當地語系化準備過程中基本但重要的一步。在市場商機巨大，但並未廣泛使用英語或其他國際語言的國家/地區，對應用程式進行當地語系化尤其重要。
+</p>
+
+<p>
+  對於全球使用者，您可以在以下三個主要方面管理應用程式：國家/地區、地區設定及語言。其中，語言是當地語系化的關鍵考量事項 (由於日期、時間、貨幣及類似資訊的格式存在不同，因此地區設定也非常重要)。使用者會控制其 Android 裝置上使用的語言與地區設定，這兩項轉而會影響應用程式的顯示方式。
+</p>
+
+<p>
+  通常，您會根據整體市場規模與商機、應用程式類別、競爭環境、當地定價及商業因素等，決定首先將哪些國家/地區作為目標。然後根據您針對的國家/地區，判斷應用程式中需要支援的語言。
+</p>
+
+<p>
+  隨後，您可以決定當地語系化為所針對國家/地區的部分或全部語言。首先當地語系化為主要地區語言，然後隨使用者群體的擴充新增更多語言，這可能是合理的舉措。
+</p>
+
+<p>
+  確定目標語言之後，您可以專注於針對這些市場的開發、翻譯、測試及行銷活動。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/identifylocales"
+data-sortorder="-timestamp" data-cardsizes="9x3," data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="design">
+    2.針對當地語系化進行設計
+  </h2>
+
+
+</div>
+
+<p>
+  在確定進行當地語系化的目標語言後，請評估為了在應用程式中支援這些語言而需要完成的工作，並及早開始規劃工作。請考慮每種語言中的字彙擴充、書寫體需求、字元間距及換行限制、從左向右及從右向左行文順序的支援以及可能存在的其他因素。
+</p>
+
+<h4>
+  <strong>設計一組彈性版面配置</strong>
+</h4>
+
+<p>
+  建立版面配置時，請確保將具有文字的 UI 元素設計為具有較大空間。良好的做法是，提供較您的語言通常所需空間更多 (正常狀況下多 30%) 的空間 ，以容納其他語言。
+</p>
+
+<p>
+  此外，元素應該能在水平或垂直方向擴充，以顧及 UI 字串或輸入文字寬度與高度的變化。在任何目標語言中，您的文字字串都不應與邊框或螢幕邊緣重疊。
+</p>
+
+<p>
+  若您仔細設計 UI，通常可以將一組版面配置用於您支援的所有語言。如需詳細資訊，請參閱<a href="{@docRoot}training/basics/fragments/fragment-ui.html">建置彈性 UI</a>。
+</p>
+
+<h4>
+  <strong>在需要時使用備用版面配置</strong>
+</h4>
+
+<p>
+  若您的 UI 無法容納其中一種目標語言的文字，可以僅針對該語言建立<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">備用版面配置</a>。藉由 Android，可以輕鬆宣告針對特定語言、地區設定、螢幕大小等而載入的多組版面配置與其他資源，只需以適當的資源識別碼為這些版面配置與資源建立標籤即可。雖然備用版面配置具備彈性，但是也會導致應用程式的維護難度隨時間演進而不斷升高。通常，使用彈性更優的單一版面配置是更穩妥的作法。
+</p>
+
+<h4>
+  <strong>支援 RTL 版面配置與文字</strong>
+</h4>
+
+<p>
+  若您要散佈至使用從右向左 (RTL) 行文順序的國家/地區，應考慮在可能的範圍內，實作對 RTL 版面配置與文字顯示及編輯的支援。
+</p>
+
+<p>
+  Android 4.1 已引入對雙向文字的有限支援，應用程式可藉此以從左向右 (LTR) 及從右向左 (RTL) 的行文順序顯示及編輯文字。Android 4.2 已新增<a href="http://android-developers.blogspot.fr/2013/03/native-rtl-support-in-android-42.html">對 RTL 版面配置的完備原生支援</a> (包括版面配置鏡像)，因此您可為所有使用者提供相同的絕佳應用程式體驗。
+</p>
+
+<p>
+  對於 Android 4.2 使用者，至少可以輕鬆地新增基本 RTL 版面配置鏡射，這對因應 RTL 使用者的需求大有幫助。
+</p>
+
+<h4>
+  <strong>使用系統提供的日期、時間、數字與貨幣的格式</strong>
+</h4>
+
+<p>
+  在您的應用程式指定因地區設定而異的日期、時間、數字、貨幣及其他實體時，請確保使用系統提供的格式，而非應用程式特定的格式。請謹記，並非所有地區設定都使用相同的千位分隔符號、小數分隔符號或百分比符號。
+</p>
+
+<p>
+  Android 提供多種公用程式，以設定格式及轉換不同地區設定中所用的模式，例如對日期使用 <a href="{@docRoot}reference/android/text/format/DateUtils.html">DateUtils</a> 與 <a href="{@docRoot}reference/java/text/DateFormat.html">DateFormat</a>；對數字與貨幣使用 <a href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,%20java.lang.Object...)">String.format()</a> 或 <a href="{@docRoot}reference/java/text/DecimalFormat.html">DecimalFormat</a>；對電話號碼使用 <a href="{@docRoot}reference/android/telephony/PhoneNumberUtils.html">PhoneNumberUtils</a>；等等。
+</p>
+
+<p>
+  若根據使用者地區設定的有關假設將格式設為固定值，則在使用者變更為其他地區設定時會引發問題。強烈建議您使用系統提供的格式與公用程式。
+</p>
+
+<h4>
+  <strong>納入完備的一組預設資源</strong>
+</h4>
+
+<p>
+  請透過提供完備的一組預設資源，確保不論採用何種語言或地區設定，您的應用程式都能正確執行。應用程式的預設資源是<em>並未以任何語言或地區設定識別碼予以標記</em>的資源，例如 res/drawable/ 與 res/values/ 中儲存的資源。若您的應用程式嘗試載入的資源不可用於目前語言或不在預設資源組內，則應用程式將當機。
+</p>
+
+<p>
+  不論您在應用程式內使用何種預設語言，都請確保將關聯的版面配置、可繪項目及字串儲存在預設資源目錄中 (無語言或地區設定識別碼)。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/tools/loc/designforloc" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="manage-strings">
+    3.管理進行當地語系化的字串
+  </h2>
+
+
+</div>
+
+<p>
+  請務必正確管理應用程式的 UI 字串，以便能為使用者提供出眾的體驗，並能直接執行當地語系化。
+</p>
+
+<h4>
+  <strong>將所有字串移至 strings.xml 中</strong>
+</h4>
+
+<p>
+  建置應用程式時，請謹記不要將任何字串設為固定程式碼，而是將<em>所有</em>字串宣告為預設 strings.xml 檔案中的資源，藉此可輕鬆執行更新與當地語系化。可以擷取、翻譯 strings.xml 檔案中的字串，然後將其重新整合至您的應用程式中 (包含適當的識別碼)，而無需對編譯的程式碼進行任何變更。
+</p>
+
+<p>
+  若您產生含文字的影像，也請將這些字串置於 strings.xml 中，在翻譯後重新產生影像。
+</p>
+
+<h4>
+  <strong>遵循針對 UI 字串的 Android 指導方針</strong>
+</h4>
+
+<p>
+  在設計並開發 UI 時，請確保密切注意與使用者談話的<em>方式</em>。通常，請使用<a href="{@docRoot}design/style/writing.html">簡明扼要</a>、友好但簡潔的談話風格，並在所有 UI 中使用一致的風格。
+</p>
+
+<p>
+  請確保您閱讀並遵循 Android 對於<a href="{@docRoot}design/style/writing.html">書寫風格及用字選詞</a>的設計建議。如此可提高您的應用程式對使用者的吸引力，並協助使用者更快了解您的 UI。
+</p>
+
+<p>
+  此外若可能，請始終使用 Android 標準術語，例如使用「動作列」、「選項功能表」、「系統列」、「通知」等表示 UI 元素。以正確無誤、前後一致的方式使用 Android 詞彙可降低翻譯難度，並為使用者提供更優的最終產品。
+</p>
+
+<h4>
+  <strong>為宣告的字串提供充分的背景資訊</strong>
+</h4>
+
+<p>
+  宣告 strings.xml 檔案中的字串時，請確保描述該字串的使用背景資訊。該資訊對翻譯者而言極具價值，可產生品質更優的翻譯，並能協助您隨時間演進以更有效的方式管理字串。
+</p>
+
+<p>
+  範例如下：
+</p>
+
+<pre class="prettyprint">
+&lt;!-- The action for submitting a form. This text is on a button that can fit 30 chars --&gt;
+&lt;string name="login_submit_button"&gt;Sign in&lt;/string&gt;
+</pre>
+<p>
+  請考慮提供可說明以下問題的背景資訊：
+</p>
+
+<ul>
+  <li>
+    <p>
+      該字串用於哪個項目？何時/何地向使用者顯示該字串？
+    </p>
+  </li>
+
+  <li>
+    <p>
+      該字串位於版面配置中的哪個位置？例如，翻譯按鈕時，其彈性低於對文字方塊的翻譯。
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>標記訊息中不應翻譯的部分</strong>
+</h4>
+
+<p>
+  通常，字串會包含不應翻譯為其他語言的文字。程式碼片段、值的預留位置、特殊符號或名稱都是此類文字的常見範例。在準備供翻譯的字串時，請尋找並標記應保持原狀不翻譯的文字，以便翻譯者不做變更。
+</p>
+
+<p>
+  若要標記不應翻譯的文字，請使用 <code>&lt;xliff:g&gt;</code> 預留位置標籤。以下所示的範例標籤將確保在翻譯時不會變更文字「%1$s」(否則會中斷訊息)：
+</p>
+
+<pre class="prettyprint">
+&lt;string name="countdown"&gt;
+    &lt;xliff:g id="time" example="5 days&gt;%1$s&lt;/xliff:g&gt;until holiday
+&lt;/string&gt;
+</pre>
+<p>
+  宣告預留位置標籤時，請一律新增對預留位置所針對項目進行說明的 id 屬性。若應用程式會在後來替換預留位置的值，請確保提供範例屬性以明確展示預期的用法。
+</p>
+
+<p>
+  以下提供了預留位置標籤的其他一些範例：
+</p>
+
+<pre>
+&lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+
+&lt;!-- Example placeholder for a special unicode symbol --&gt;
+
+&lt;string name="star_rating"&gt;Check out our 5
+
+    &lt;xliff:g id="star"&gt;\u2605&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a for a URL --&gt;
+
+&lt;string name="app_homeurl"&gt;
+
+    Visit us at &lt;xliff:g id="application_homepage"&gt;http://my/app/home.html&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a name --&gt;
+
+&lt;string name="prod_name"&gt;
+
+    Learn more at &lt;xliff:g id="prod_gamegroup"&gt;Game Group&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- Example placeholder for a literal --&gt;
+
+&lt;string name="promo_message"&gt;
+
+    Please use the "&lt;xliff:g id="promotion_code"&gt;ABCDEFG&lt;/xliff:g&gt;” to get a discount.
+
+&lt;/string&gt;
+
+...
+
+&lt;/resources&gt;
+</pre>
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/managestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="translate-strings">
+    4.翻譯 UI 字串與其他資源
+  </h2>
+
+
+</div>
+
+<p>
+  將應用程式的 UI 字串與資源翻譯為您的目標語言是當地語系化的關鍵階段，也是需要操作最小心、規劃最周密的環節。
+</p>
+
+<p>
+  建議您與專業的翻譯者合作 (請參閱<a href="#gp-trans">購買專業翻譯</a>)，以確保取得能提高應用程式價值的高品質翻譯，雖然可以選擇機器翻譯，但是機器翻譯可能不會為使用者提供良好的體驗。
+</p>
+
+<h4>
+  <strong>準備翻譯</strong>
+</h4>
+
+<p>
+  翻譯輸出的品質一部分取決於輸入，因此請確保您的 strings.xml 檔案井然有序、註解充分且準確無誤。
+</p>
+
+<p>
+  可以採用以下方式準備供翻譯的字串：
+</p>
+
+<ul>
+  <li>
+    <p>
+      請確保您的字串格式正確，前後一致。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      請遵循上述<a href="#manage-strings">管理進行當地語系化的字串</a>中列示的字串建議。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      清理 strings.xml 檔案，移除未使用的字串。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      在檔案中放置註解 (以確定檔案的所有者、原始來源與版本) 以及對翻譯者的所有特殊指示。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      確定既有的翻譯 (若有)，並將其包括在向翻譯者傳送的 zip 檔案或其他套件中。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      確定需要翻譯的可繪項目或其他資源，並將其包括在翻譯者的套件中。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      此外，請考慮翻譯應用程式的市集清單詳細資料 (應用程式標題與描述、版本資訊等) 以及其他國際行銷材料。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      請建立術語清單，以說明產品、市場或基本技術中關鍵詞彙的含意與用法。將清單新增至翻譯者的套件。
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>傳送供翻譯的字串</strong>
+</h4>
+
+<p>
+  在開發週期的早期，請連絡專業翻譯廠商，以了解成本與返回時間。請確保在成本中包括多次重複。您可以在網路上尋找翻譯廠商，也可以直接使用 Google Play Developer Console 提供的翻譯服務 (請參閱<a href="#gp-trans">購買專業翻譯</a>)。
+</p>
+
+<p>
+  翻譯完成後，請對翻譯進行初步檢查。請檢查是否所有檔案都已翻譯、是否存在潛在編碼問題，並確保宣告格式原封不動。
+</p>
+
+<p>
+  若一切毫無問題，請小心地將當地語系化的目錄與檔案重新移至應用程式的資源中。請確保以適當的語言及地區設定識別碼為目錄建立標籤，以便可以在後來正確載入這些目錄。
+</p>
+
+<p>
+  將翻譯重新整合至應用程式後，請開始<a href="#test">測試已當地語系化的應用程式</a>。
+</p>
+
+<h4 id="gp-trans">
+  <strong>透過 Google Play 購買專業翻譯</strong>
+</h4>
+
+<p>
+  Google Play 應用程式翻譯服務可以協助您快速尋找並購買應用程式的翻譯。在 Developer Console 中，您可以瀏覽第三方廠商的清單，這些廠商已預先具備 Google 授予的資格，能以極具競爭性的價格提供高品質的翻譯。您可以上傳希望翻譯的字串、選取希望翻譯的目標語言，並根據時間與價格選取翻譯廠商。
+</p>
+
+<p>
+  購買翻譯後，您將收到廠商傳送的電子郵件。您將針對翻譯與廠商直接簽署業務合約；您需要直接與廠商合作來管理翻譯程序及交付項目，並解決所有支援問題。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-localization-trans-0.png" class="border-img">
+</div>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/translatestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test">
+    5.對您的當地語系化應用程式進行測試
+  </h2>
+
+
+</div>
+
+<p>
+  收到已翻譯的字串與資源並將其重新移至應用程式後，您需要對應用程式進行測試，以確保為向全球使用者散佈應用程式做好準備。
+</p>
+
+<p>
+  手動測試可以協助您探尋版面配置與字串中會影響使用者滿意度 (最終影響您應用程式的使用者評分) 的當地語系化問題。
+</p>
+
+<h4>
+  <strong>設定測試環境</strong>
+</h4>
+
+<p>
+  若要對已當地語系化的應用程式進行測試，您需要根據您針對的市場與大小規格，設定包含多個裝置 (或虛擬裝置) 與螢幕大小的環境。請注意，特定地區的裝置範圍可能有所不同。若可能，請確保您的測試裝置與使用者可能使用的實際裝置相符。
+</p>
+
+<h4>
+  <strong>尋找常見的當地語系化問題</strong>
+</h4>
+
+<p>
+  在每個測試裝置上，於 [設定] 中設定語言或地區設定。安裝並啟動應用程式，然後在所有 UI 流程、對話方塊及使用者互動中進行導覽。在需要輸入的位置輸入文字。要尋找的問題包括：
+</p>
+
+<ul>
+  <li>
+    <p>
+      遭剪裁的文字，或者與 UI 元素或螢幕的邊緣重疊的文字
+    </p>
+  </li>
+
+  <li>
+    <p>
+      不良的換行
+    </p>
+  </li>
+
+  <li>
+    <p>
+      不正確的字彙中斷或標點
+    </p>
+  </li>
+
+  <li>
+    <p>
+      不正確的字母順序排序
+    </p>
+  </li>
+
+  <li>
+    <p>
+      不正確的版面配置方向或文字方向
+    </p>
+  </li>
+
+  <li>
+    <p>
+      未翻譯的文字 (若顯示預設字串而非已翻譯的字串，可能是因為您忽略了要翻譯的字串，或者標記資源目錄時使用了不正確的語言識別碼)。
+    </p>
+  </li>
+</ul>
+
+<p>
+  若譯文中的字串較原文更長，導致版面配置無法容納，建議您嘗試簡化預設文字、簡化翻譯後的文字，或調整預設的版面配置。若上述舉措都無法解決該問題，您可以針對該語言建立自訂版面配置。
+</p>
+
+<h4>
+  <strong>對預設資源進行測試</strong>
+</h4>
+
+<p>
+  在採用支援的所有語言與地區設定對應用程式進行測試後，請確保採用<em>不支援的語言</em>與地區設定再次對應用程式進行測試。這可協助您確保應用程式包括一組完備的預設字串與資源，如此您的應用程式可供所有使用者使用，不論使用者偏好何種語言，都是如此。
+</p>
+
+<h4>
+  <strong>與以當地語系為母語者一起檢閱</strong>
+</h4>
+
+<p>
+  在測試期間或測試之後，建議您讓以當地語系為母語的人員檢閱當地語系化的應用程式。執行此作業的一種方式是讓該地區的使用者執行 beta 測試 (Google Play 可以協助您實現此目標)。 <!-- </p>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/test"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div> -->
+</p>
+
+<div class="headerLine">
+  <h2 id="prepare-launch">
+    6.準備面向全球推出產品
+  </h2>
+
+
+</div>
+
+<p>
+  翻譯應用程式是當地語系化的關鍵環節，但是若要協助您的產品吸引使用者並贏得關注，您應準備在針對的國家/地區舉行推出活動，並針對全球使用者制定更廣泛的產品推出與行銷計劃。
+</p>
+
+<h4>
+  <strong>對您的 Google Play 清單執行當地語系化</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      對您的 Google Play 清單執行當地語系化
+    </h2>
+
+    <p>
+      Google Play 市集清單是全球使用者對您應用程式的第一印象，您應向所有使用者著重展示應用程式的卓越之處！請在 Developer Console 中對您的清單進行當地語系化，包括：
+    </p>
+
+    <ul>
+      <li>應用程式標題與描述
+      </li>
+
+      <li>手機與平板電腦上所用應用程式的螢幕擷取畫面
+      </li>
+
+      <li>推廣圖形與影片。
+      </li>
+    </ul>
+  </div>
+</div>
+
+<p>
+  若您希望應用程式在國際市場取得成功，需要對 Google Play 市集清單進行當地語系化。您可以在 Developer Console 中管理當地語系化的清單。
+</p>
+
+<p>
+  在推出之前，請決定應用程式標題、描述、推廣文字、行銷名稱與計劃，以及其他文字與影像。請及早傳送供翻譯的清單文字與影像，以便在開始 beta 測試時，可將這些文字與影像準備就緒。翻譯後的文字可用時，您可以透過 Developer Console 新增該文字。
+</p>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Google Play 中的市集清單翻譯
+    </h2>
+
+    <p>
+      您可以使用 Google Play 上的應用程式翻譯服務翻譯您的市集清單。請備妥包含您市集清單資訊的 XML 檔案，並在上傳 strings.xml 檔案時上傳該檔案 (請參閱<a href="#gp-trans">購買專業翻譯</a>)
+    </p>
+  </div>
+</div>
+
+<p>
+  此外，既然您已努力建立卓越的當地語系化應用程式，就讓使用者進行了解！請針對手機與 7 英寸及 10 英寸平板電腦，製作每種語言的 UI 螢幕擷取畫面。您可將所支援每種語言的螢幕擷取畫面上傳至 Developer Console。對於以其他語言瀏覽您應用程式清單的使用者而言，這些螢幕擷取畫面極具價值。
+</p>
+
+<p>
+  此外，還需要建立推廣圖形與影片的當地語系化版本。例如，您的應用程式功能圖形可能包括應翻譯的文字以取得最佳效果，或者您可能希望對於不同的國家/地區採用不同的視覺方法。您可以針對每種語言建立推廣圖形的不同版本，並將其上傳至 Developer Console。若您提供推廣影片，可以建立該影片的當地語系化版本，然後針對您支援的每種語言，新增正確的當地語系化影片的連結。
+</p>
+
+<h4>
+  <strong>在重要的國家/地區規劃 beta 版</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      輕鬆的 beta 測試
+    </h2>
+
+    <p>
+      現在藉由 Google Play，您可以在全球任何地點設定多組 alpha 與 beta 測試者。下次登入 Developer Console 時，請了解這項強大功能。
+    </p>
+  </div>
+</div>
+
+<p>
+  在推出應用程式之前，取得真實的使用者回饋通常極具價值，採用新的語言在新的國家/地區推出應用程式時更是如此。在這些情況下，強烈建議您向關鍵市場的使用者散佈應用程式的測試版，並提供簡易方式讓使用者提供回饋並報告錯誤。
+</p>
+
+<p>
+  Google Play 可以協助您設定應用程式的試用計劃。您登入 Developer Console 並上傳 APK 後，可以設定多組使用者對應用程式進行 alpha 與 beta 測試。您可以先設定 alpha 測試者的較小群組，然後設定 beta 測試者的較大群組。
+</p>
+
+<p>
+  新增使用者後，使用者可以存取您應用程式的市集清單並安裝應用程式。<strong>alpha 或 beta 版本的使用者無法發佈評論或評分</strong>，因此<strong>對 Google Play 上您的評分並無風險</strong>。但是，這意味著您需要設定某種機制供測試者為您提供回饋：請考慮建立 <a href="http://www.google.com/+/business/">Google+</a> 頁面或 <a href="https://groups.google.com/forum/#!overview">Google 群組</a>。
+</p>
+
+<p>
+  您收到的回饋將協助您調整 UI、翻譯與市集清單，以確保為使用者提供絕佳的體驗。
+</p>
+
+<h4>
+  <strong>規劃國際行銷</strong>
+</h4>
+
+<p>
+  若要在各個國家/地區贏得最多關注，請考慮舉辦國際行銷或廣告推廣活動。活動的範圍視您能承受的預算而異，但是對於產品推出期間及推出之後執行國家/地區特定的行銷而言，通常該活動都是符合成本效益並富有成效的舉措。
+</p>
+
+<h4>
+  <strong>建立當地語系化的 Google Play 徽章</strong>
+</h4>
+
+<p>
+  若您準備執行國際行銷，請確保將<a href="{@docRoot}distribute/tools/promote/badges.html">當地語系化的 Google Play 徽章</a>包括在內，以便告訴使用者您在 Google Play 上。您可以使用徽章產生器快速建置能在網站或行銷材料中使用的當地語系化徽章。此外，也可以使用高解析度資產。
+</p>
+
+<h4>
+  <strong>建立當地語系化的 Device Art</strong>
+</h4>
+
+<p>
+  若您提供 Android 裝置上所執行應用程式的產品螢幕擷取畫面，請確保這些螢幕擷取畫面具有良好的視覺效果並反映 Android 裝置的最新功能。為了協助您建立高品質的行銷材料，請您使用拖放式 <a href="{@docRoot}distribute/tools/promote/device-art.html">Device Art Generator</a> 在 Nexus 裝置上快速產生螢幕擷取畫面。
+</p>
+
+<h4>
+  <strong>檢查您的最佳化秘訣</strong>
+</h4>
+
+<p>
+  為推出產品進行準備時，請確保登入 Developer Console 並檢查應用程式的最佳化秘訣。最佳化秘訣可讓您了解遺失部分當地語系化市集清單的時間，並提供其他有用的提醒以成功推出當地語系化的產品。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/preplaunch"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users">
+    7.在推出後支援全球使用者
+  </h2>
+
+
+</div>
+
+<p>
+  面向全球推出應用程式後，您應準備支援使用各種語言、位於各個時區的使用者。提供全球使用者支援的程度取決於您的預算，但至少您應在推出產品後細心查看評分、評論並下載統計資料。
+</p>
+
+<p>
+  以下提供一些建議：
+</p>
+
+<ul>
+  <li>
+    <p>
+      在 Developer Console 中使用應用程式統計資料比較各語言、各國家/地區的下載、安裝、解除安裝及評分狀況，若無法保持特定語言或國家/地區的下載次數或評分，請考慮採用某些選項來改善產品或變更行銷方法。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      請定期檢查評論，Google Play 會為您翻譯所有使用者評論，因此您可以隨時了解全球使用者對您應用程式的感覺、他們最喜歡的功能以及對其有影響的問題。透過觀看評論，您可以確認可能對特定國家/地區的使用者有影響的技術問題，然後修正問題並更新應用程式。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      若可能，請回應評論，以使用者的語言或通用語言 (若可能) 與全球使用者交流會產生良好效果。若無法使用上述語言，您可以嘗試使用翻譯工具，但是結果可能無法預測。若您的應用程式在某種語言中備受青睞，請考慮從以該語言為母語者處取得支援協助。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      請確保網站上提供所有支援資源的連結。請考慮建立特定語言使用者群組、Google+ 社群或其他支援論壇。
+    </p>
+  </li>
+</ul>
+
+<p>
+  依據以上做法對應用程式進行當地語系化、向全球使用者推廣及行銷應用程式，並提供持續不斷的支援，您可藉此吸引許多新使用者使用您的應用程式，並保持其忠誠度。
+</p>
+
+<p>
+  請確保閱讀<a href="{@docRoot}distribute/tools/launch-checklist.html">推出檢查清單</a>，以詳細了解如何在 Google Play 上規劃、建置並推出應用程式。
+</p>
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/supportlaunch"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div> 

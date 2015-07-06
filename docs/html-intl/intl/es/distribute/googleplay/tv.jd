@@ -1,0 +1,305 @@
+page.title=Distribución para Android TV
+page.image=/design/tv/images/atv-home.jpg
+meta.tags="tv", "publish", "quality"
+page.tags="tv", "publish", "googleplay"
+page.metaDescription=Distribuye tus aplicaciones, juegos y contenido para Android TV.
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Cómo participar</h2>
+<ol>
+<li><a href="#understand_guidelines">Comprende las pautas</a></li>
+<li><a href="#develop_app">Desarrolla una aplicación excelente para TV</a></li>
+<li><a href="#test_app">Prueba la calidad de la aplicación para TV</a></li>
+<li><a href="#opt_in">Incluye la aplicación</a></li>
+<li><a href="#track_review">Realiza un seguimiento de tu revisión</a></li>
+</ol>
+
+<h2>También deberías leer</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las aplicaciones para TV</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">Calidad de la aplicación principal</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  Si creaste una aplicación o un juego genial, Android TV y Google Play pueden ayudarte
+ a llevarla directo a las salas de los usuarios. Podrás ofrecer tus
+ aplicaciones y juegos en una experiencia de vidriera optimizada para TV. Puedes
+ ampliar tus aplicaciones nuevas o existentes para TV y luego publicarlas en Google Play usando herramientas
+ y procesos ya conocidos.
+</p>
+
+<p>
+  Para comenzar, repasa las secciones de este documento para aprender a
+ distribuir a los usuarios tus aplicaciones para TV a través de Google Play. Asegúrate de leer
+ <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las aplicaciones para TV</a>
+ para obtener información sobre las pautas de utilidad y calidad que tu aplicación debe
+ cumplir. Cuando tu aplicación esté lista, puedes incluirla para su publicación en la vidriera de Android TV
+ de la Consola para desarrolladores.
+</p>
+
+<h2 id="how_to_participate">
+  Cómo participar
+</h2>
+
+<p>
+  Google Play te permite exhibir tus aplicaciones para TV frente a un nuevo público de usuarios en
+ sus salas. Puedes desarrollar y publicar mediante el uso de tu cuenta existente
+ de la Consola para desarrolladores y tu configuración actual para distribución y fijación de precios. Participar
+ es fácil; las siguientes secciones describen el proceso.
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-tv-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1. Comprende las pautas y los requisitos
+</h3>
+
+<p>
+  Para prepararte para un lanzamiento exitoso en Android TV, comienza por revisar las
+ pautas para crear experiencias de aplicación excelentes en TV. Consulta las <a href="{@docRoot}design/tv/index.html">pautas de diseño para Android TV</a> para obtener ideas
+ acerca de cómo ampliar tu aplicación para que sea compatible con TV y detalles sobre diseño y utilidad.
+</p>
+
+<p>
+  Cuando comiences a diseñar tu experiencia para TV, asegúrate de leer y
+ comprender los criterios de calidad de las aplicaciones para TV. La experiencia de Google Play para
+ Android TV <strong>solo exhibe aplicaciones que pueden usarse en un televisor</strong>
+  &mdash; tus aplicaciones pueden participar siempre que cumplan con un grupo de criterios de calidad
+ básicos. Consulta <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad
+ de las aplicaciones para TV</a> para obtener información detallada.
+</p>
+
+<h3 id="develop_app">2. Desarrolla una aplicación excelente para TV</h3>
+
+<p>
+  Una aplicación excelente para TV es la que se diseña para utilizar en la sala y aprovecha las
+ capacidades de Android TV y recursos de entrada relacionados como controladores
+ de juegos, mandos de dirección y mandos a distancia. La aplicación se pule para ofrecer una experiencia
+ nítida y de alta calidad en pantallas grandes y proporciona un conjunto de funciones
+ atractivas para los usuarios.
+</p>
+
+<p>
+  Mientras consideras la posibilidad de desarrollar una aplicación para TV, lee la <a href="{@docRoot}training/tv/start/index.html">documentación para desarrolladores</a> y las
+ pautas de utilidad, y considera aplicarlas en la mayor medida
+ posible. Asegúrate de diseñar una excelente experiencia relajada para los usuarios y créala
+ con la biblioteca Leanback que se incluye en el SDK. Te recomendamos que optimices
+ otras partes de tu aplicación para que puedan usarse en la TV y que las identifiques
+ al principio del proceso de desarrollo.
+</p>
+
+<p>
+  En la mayoría de los casos, recomendamos que ofrezcas tu experiencia para TV como parte de tu
+ aplicación actual para teléfonos, tablets y otros dispositivos con el mismo nombre de paquete
+ y el mismo directorio de la tienda. Este enfoque permite a los usuarios cambiar a tu experiencia de TV
+ sin inconvenientes y también te permite aprovechar las reseñas y calificaciones que obtuviste
+ en tu aplicación para teléfonos y tablets.
+</p>
+
+<p>
+  Puedes agrupar tus intentos para TV, la biblioteca Leanback, el código específico
+ para TV y los recursos en una sola solución de APK para todos los dispositivos admitidos. Si
+ fuera necesario, puedes usar la <a href="{@docRoot}google/play/publishing/multiple-apks.html">Compatibilidad con múltiples
+ APK</a> para proporcionar un archivo binario personalizado para dispositivos Android TV con el mismo nombre
+ de paquete y directorio de la tienda que usas para teléfonos y tablets.
+</p>
+
+<p>
+  Durante la fase de diseño y desarrollo, es importante que cuentes con un dispositivo adecuado
+ en el que puedas experimentar y probar tu experiencia de usuario. Debes adquirir uno
+ o más dispositivos Android TV o emuladores y configurar tu entorno de prueba
+ lo antes posible. El dispositivo de hardware recomendado para realizar las pruebas en el
+ entorno Android TV es Nexus Player, que está <a href="http://www.google.com/intl/all/nexus/player/">disponible en Google Play</a>
+ y en otras tiendas, y también debes adquirir un controlador para juegos y otros dispositivos de
+ entrada para TV.
+</p>
+
+<h3 id="test_app">3. Prueba la calidad de la aplicación para TV</h3>
+
+<p>
+  Tus aplicaciones para TV deben estar diseñadas para que funcionen bien, se vean increíbles en Android TV
+ y ofrezcan la mejor experiencia de usuario posible. Google Play exhibe
+ aplicaciones de alta calidad para que los usuarios puedan encontrarlas fácilmente en Google Play. Aquí te mostramos
+ cómo puedes participar y ofrecer una aplicación para Android TV que los usuarios disfrutarán.
+</p>
+
+<ul>
+  <li>Cumple las pautas de Calidad de la aplicación principal
+    <ul>
+      <li>Sigue las <a href="{@docRoot}design/index.html">pautas de 
+ Diseño Android</a>. Presta especial atención al uso de <a href="http://www.google.com/design/spec/material-design/introduction.html">Material
+ Design</a> en tu aplicación.
+      </li>
+
+      <li>Prueba tus aplicaciones conforme a las <a href="{@docRoot}distribute/essentials/quality/core.html">pautas de calidad de la aplicación
+ principal</a>.
+      </li>
+    </ul>
+  </li>
+  <li>Cumple las pautas de <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las aplicaciones
+ para TV</a>
+    <ul>
+      <li>Sigue nuestras mejores prácticas para el<a href="{@docRoot}training/tv/index.html">
+ desarrollo de aplicaciones para TV</a></li>
+      <li>Asegúrate de que tu aplicación cumpla todos los criterios de <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las aplicaciones para TV</a>.</li>
+    </ul>
+  </li>
+  <li>Apunta a la sencillez y la máxima utilidad</li>
+</ul>
+
+<h3 id="opt_in">4. Incluye tu aplicación en Android TV y publícala</h3>
+
+<p>
+  Una vez que hayas creado tu APK listo para el lanzamiento y lo hayas probado para asegurarte de que cumple
+ todas las pautas de <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las
+ aplicaciones para TV</a>, cárgalo a la Consola para desarrolladores. Actualiza el directorio de tu
+ tienda con capturas de pantalla y banners de tu aplicación para TV, y configura opciones de distribución,
+ según sea necesario. Si no sabes cómo prepararte para el lanzamiento en Google Play,
+ consulta la <a href="{@docRoot}distribute/googleplay/publish/preparing.html">Lista de comprobación
+ para el lanzamiento.</a>
+</p>
+
+<p>
+  Antes de que puedas publicar para usuarios de Android TV, debes acceder a Android
+ TV desde la sección <strong>Fijación de precios y distribución</strong> de la
+ Consola para desarrolladores. Acceder significa que quieres que tu aplicación esté disponible
+ para los usuarios de Android TV a través de Google Play, y que
+ tu aplicación cumple las pautas de <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad
+ de las aplicaciones para TV</a>.
+</p>
+
+<p>
+  Puedes acceder únicamente si tu aplicación cumple dos criterios
+ de calidad preliminares que se verifican automáticamente al cargar al APK:
+</p>
+
+<ul>
+  <li>El manifiesto de tu aplicación debe incluir un tipo de intento <a href="{@docRoot}reference/android/content/Intent.html#ACTION_MAIN"><code>ACTION_MAIN</code></a>
+ con la categoría <a href="{@docRoot}reference/android/content/Intent.html#CATEGORY_LEANBACK_LAUNCHER">
+ <code>CATEGORY_LEANBACK_LAUNCHER</code></a>. Obtén más información <a href="{@docRoot}training/tv/start/start.html#tv-activity">aquí</a>.
+  </li>
+
+  <li>Tu aplicación debe declarar que no requiere una pantalla táctil. El
+ manifiesto debe declarar el hardware <code>android.hardware.touchscreen</code>
+ con <code>android:required="false”</code>. Obtén más información <a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">aquí</a>.
+  </li>
+</ul>
+
+<p>
+  Si tu aplicación cumple los criterios preliminares, verás una casilla de verificación para inclusión para
+ Android TV, como se muestra a continuación. Si la casilla de verificación para inclusión no está habilitada, revisa
+ tu APK para asegurarte de que cumpla con los criterios preliminares.
+</p>
+
+<p>
+  Después de realizar la inclusión y guardar los cambios, puedes publicar tu aplicación como lo haces habitualmente.
+  Antes de que tu aplicación esté disponible para los usuarios de Android TV, Google Play envía
+ tu aplicación para revisión conforme a los criterios de <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las aplicaciones para TV</a>
+ y te notifica el resultado. Consulta la siguiente sección para obtener información detallada
+ sobre cómo realizar un seguimiento del estado de aprobación de tu aplicación.
+</p>
+
+<p>
+  Si tu aplicación cumple los criterios de <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las
+ aplicaciones para TV</a>, Google Play la exhibe a los usuarios de
+ Android TV. Tu aplicación también es elegible para acceder a una mayor visibilidad si se exhibe en
+ colecciones de aplicaciones y promociones. Para que los usuarios de todas partes sepan que tu aplicación está
+ diseñada para Android TV, Google Play decora el directorio de tienda de la aplicación con una
+ insignia de TV.
+</p>
+
+<p>
+  Ten en cuenta que la inclusión y la revisión no afectan la disponibilidad de tu aplicación para
+ otros dispositivos en la Play Store de Google; por
+ ejemplo, para teléfonos y tablets tu aplicación estará disponible ni bien la publiques.
+</p>
+
+<p>
+  Aquí te mostramos los pasos que debes seguir en la Consola para desarrolladores para incluir tu aplicación en Android TV:
+</p>
+
+<ol>
+  <li>Asegúrate de que tu aplicación cumpla todos los criterios de <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las aplicaciones para TV</a>.
+  </li>
+
+  <li>Agrega capturas de pantalla de tu aplicación para TV y gráficos de banner al directorio de tienda de la aplicación
+  </li>
+
+  <li>En la página <strong>Todas las aplicaciones</strong>, haz clic en la aplicación que quieres incluir.
+  </li>
+
+  <li>En <strong>Fijación de precios y distribución</strong>, desplázate hacia abajo hasta encontrar <em>Android TV</em> y la
+ casilla de verificación para la inclusión.
+  </li>
+
+  <li>Haz clic en la casilla de verificación junto a <em>Distribuye tu aplicación para Android TV</em>.
+  </li>
+
+  <li>Haz clic en <strong>Guardar</strong> para guardar tus cambios.
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-tv-opt-in.png">
+  <p class="caption">
+    <strong>Incluye la aplicación para TV:</strong> Incluye tu aplicación en Android TV desde la
+ Consola para desarrolladores.
+  </p>
+</div>
+
+<h3 id="track_review">5. Realiza un seguimiento de tu revisión y aprobación</h3>
+
+<p>
+  Si tu aplicación cumple los requisitos técnicos y de calidad para Android TV, como se describe más arriba,
+ estará disponible para que los usuarios la disfruten en Android TV. Si la aplicación no cumple
+ los criterios, recibirás una <strong>notificación por correo electrónico enviada a tu cuenta
+ de desarrollador</strong> con un resumen de las áreas que debes abordar. Una vez que realices
+ los ajustes necesarios, puedes cargar una nueva versión de tu aplicación a la Consola para
+ desarrolladores. 
+</p>
+
+<p>
+  En cualquier momento, puedes comprobar el estado de revisión y aprobación de tu aplicación en la
+ Consola para desarrolladores, bajo <em>Android TV</em> en la página <strong>Fijación de precios y distribución</strong>
+ de la aplicación.
+</p>
+
+<p>
+  Existen tres estados de aprobación:
+</p>
+
+<ul>
+  <li>
+    <em>Pendiente</em>: tu aplicación se envió a revisión pero la revisión aún no ha
+ finalizado.
+  </li>
+
+  <li>
+    <em>Aprobada</em>: se revisó tu aplicación y se aprobó. La aplicación
+ estará disponible de forma directa para los usuarios de Android TV. 
+  </li>
+
+  <li>
+    <em>No aprobada</em>: se revisó tu aplicación y no se aprobó. Lee el
+ correo electrónico de notificación para obtener información acerca de los motivos por los que no se aprobó la aplicación. Puedes
+ solucionar los problemas e incluirla y publicarla nuevamente para iniciar otra
+ revisión.
+  </li>
+</ul>
+
+<p>Para comprender cómo se evalúan tus aplicaciones, consulta el documento <a href="{@docRoot}distribute/essentials/quality/tv.html">Calidad de las aplicaciones para TV</a>. </p>
+
+
+  <h3>Recursos relacionados</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:tvlanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div>

@@ -1,0 +1,156 @@
+page.title=Comienza a publicar
+page.metaDescription=Comienza a publicar en Google Play en minutos al crear una cuenta de desarrollador.
+meta.tags="publishing"
+page.tags="google play", "publishing", "register", "signup"
+page.image=/distribute/images/getting-started.jpg
+
+@jd:body
+
+<div class="top-right-float" style="margin-right:24px;margin-top:-18px">
+  <a href="https://play.google.com/apps/publish/"><img src="{@docRoot}images/gp-start-button.png"></a>
+</div>
+
+<p>
+  Comienza a publicar en Google Play en minutos de la siguiente manera:
+</p>
+
+<ul>
+  <li>Regístrate para una cuenta de publicador en Google Play.
+  </li>
+
+  <li>Si piensas vender aplicaciones o productos integrados en la aplicación,
+ configura una cuenta de comerciante en Google Wallet.
+  </li>
+
+  <li>Explora la <a href="https://play.google.com/apps/publish/">Consola para desarrolladores
+ en Google Play</a> y las herramientas de publicación.
+  </li>
+</ul>
+
+<p>
+  Cuando estés listo, usa el botón Inicio para ingresar a la Consola para desarrolladores.
+</p>
+
+<div class="headerLine">
+  <h2>
+    Regístrate para una cuenta de publicador
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Sugerencias
+    </h2>
+
+    <ul>
+      <li>Para poder registrarte, necesitas una cuenta de Google. Puedes crear una durante el
+ proceso.
+      </li>
+
+      <li>Si eres una organización, considera la opción de registrar una nueva cuenta de Google
+ en lugar de usar una cuenta personal.
+      </li>
+
+      <li>Consulta los <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294">
+ países para desarrolladores</a> y los <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">
+países para comerciantes</a> en los que puedes distribuir y vender aplicaciones.
+      </li>
+    </ul>
+  </div>
+</div>
+
+<ol>
+  <li>Visita la <a href="https://play.google.com/apps/publish/">Consola para desarrolladores
+ de Google Play</a>.
+  </li>
+
+  <li>Ingresa información básica acerca de tu <strong>identidad como desarrollador </strong>
+  &mdash; por ejemplo, nombre, dirección de correo electrónico, etc. Puedes modificar esa información
+ más adelante.
+  </li>
+
+  <li>Lee y acepta el <strong>Acuerdo de distribución para desarrolladores</strong> para
+ tu país o región. Ten en cuenta que las aplicaciones y los directorios de tienda que publiques en
+ Google Play deben cumplir las políticas del programa para desarrolladores y las leyes de exportación de los
+ EE. UU.
+  </li>
+
+  <li>Paga un <strong>cargo de registro de $25 USD</strong> mediante Google Wallet. Si
+ no tienes una cuenta de Google Wallet, puedes configurar una rápidamente durante el
+ proceso.
+  </li>
+
+  <li>Una vez que se verifique tu registro, recibirás una notificación en la
+ dirección de correo electrónico que ingresaste durante el registro.
+  </li>
+</ol>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    Configura una cuenta de comerciante en Google Wallet
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:200px;">
+  <img src="{@docRoot}images/gp-start-wallet-icon.png">
+</div>
+
+<p>
+  Si quieres vender aplicaciones pagas, productos integrados en la aplicación o suscripciones, necesitarás
+ una cuenta de comerciante en Google Wallet. Puedes configurar una en cualquier momento, pero
+ primero consulta la lista de <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">
+ países para comerciantes</a>.<br>
+  <br>
+  Para configurar una cuenta de comerciante en Google Wallet:<br>
+  <br>
+</p>
+
+<ol>
+  <li>
+    <strong>Inicia sesión</strong> en tu Consola para desarrolladores de Google Play en <a href="https://play.google.com/apps/publish/" target="_blank">https://play.google.com/apps/publish/</a>.
+  </li>
+
+  <li>Abre <strong>Informes financieros</strong> <img src="{@docRoot}images/distribute/console-reports.png"> en el panel de navegación lateral.
+  </li>
+
+  <li>Haz clic en <strong>Configurar una cuenta de comerciante ahora</strong>.
+  </li>
+</ol>
+
+<p>
+  Esto te llevará al sitio de Google Wallet; para completar este paso, necesitarás información
+ acerca de tu negocio.
+</p>
+
+<div class="headerLine">
+  <h2>
+    Explora la Consola para desarrolladores
+  </h2>
+
+
+</div>
+
+<p>
+  Una vez que se haya verificado tu registro, podrás iniciar sesión en la Consola para
+ desarrolladores, que es el lugar de Google Play desde donde realizarás las operaciones de publicación de tu aplicación y donde encontrarás
+ herramientas.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine">
+<h2 id="related-resources">Recursos relacionados</h2><hr />
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/gettingstarted"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

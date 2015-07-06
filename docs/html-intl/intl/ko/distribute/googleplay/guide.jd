@@ -1,0 +1,70 @@
+page.title=Google Play에서 성공 모색
+page.metaDescription=Google Play에서 앱 또는 게임 비즈니스가 성공할 수 있도록 안내하는 가이드입니다.
+meta.tags="distribute", "bestpractices"
+page.tags="google play", "business", "monetize", "engagement"
+page.image=distribute/images/play_dev_guide.png
+
+@jd:body
+
+<p>
+  Google Play에서 앱 또는 게임 비즈니스가 성공할 수 있도록 안내하는 다운로드 가능한 가이드를 제작했습니다.
+ 여기에서 효과적인 전략 수립에 도움이 되는 기능과 팁 및 모범 사례를 찾을 수 있습니다.
+
+</p>
+
+<p>
+  이 가이드는 다음 절로 구성되어 있습니다.
+</p>
+<ul>
+  <li>
+    <strong>Google Play에 게시</strong> &mdash; Google Play 개발자 콘솔을 사용하여 전 세계 10억 명 이상의 Android 사용자에게 앱을 배포합니다.
+
+
+  </li>
+
+  <li>
+    <strong>품질</strong> &mdash; 뛰어난 앱 작성의 기초 및 Google Play 가이드라인 및 정책에 대한 통찰력 관련 정보를 제공합니다.
+
+  </li>
+
+  <li>
+    <strong>검색 가능성 및 접근성</strong> &mdash; 앱 검색 가능성을 극대화하고 최대한 광범위한 사용자에게 접근할 수 있는 방법을 안내합니다.
+
+  </li>
+
+  <li>
+    <strong>사용자 확보 및 유지</strong> &mdash; 앱을 설치한 사람을 실제 사용자로 확보하고 해당 사용자를 효율적으로 유지하는 방법을 안내합니다.
+    
+  </li>
+
+  <li>
+    <strong>수익 창출</strong> &mdash; 지속적으로 증가하는 수익 흐름을 생성하는 수익 창출 전략을 안내합니다.
+
+  </li>
+
+  <li>
+    <strong>Google Analytics를 통한 측정</strong> &mdash; 사용자 이해 및 앱 경험, 전환 및 마케팅 개선을 안내합니다.
+
+  </li>
+
+  <li>
+    <strong>세계화</strong> &mdash; 전 세계에 앱을 출시하는 방법을 안내합니다.
+
+  </li>
+</ul>
+
+<p>
+  가이드는 아래 이미지를 클릭하여 다운로드하거나 <a href="http://goo.gl/DFjbrS">Google Play에서 구할 수 있습니다</a>.
+</p>
+
+<p>
+  몇 개월 내에 더 많은 언어로 가이드를 릴리스할 예정입니다. 당사는 앱을 배포하고 수익을 창출하는 데 도움이 되는 새로운 기능 및 모범 사례에 대한 정보를 게시하므로 이 웹사이트를 정기적으로 확인하십시오.
+
+
+</p>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:play_dev_guide"
+    data-cardSizes="9x6"
+    data-maxResults="1">
+  </div>
+

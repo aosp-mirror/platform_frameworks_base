@@ -1,0 +1,452 @@
+page.title=Calidad de las aplicaciones para Wear
+page.tags="wear","wearables","quality","guidelines"
+page.metaDescription=Los dispositivos portátiles (wearables) son dispositivos más pequeños diseñados para permitir la captura de información de un vistazo y requieren aplicaciones exclusivas que proporcionen la información correcta en el momento adecuado.
+page.image=/distribute/images/gp-wear-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Criterios de calidad</h2>
+  <ol>
+    <li><a href="#ux">Diseño e interacción</a></li>
+    <li><a href="#fn">Funcionalidad</a></li>
+    <li><a href="#faq">Preguntas frecuentes</a></li>
+  </ol>
+
+  <h2>También deberías leer</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+Calidad de la aplicación principal</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+Optimiza tu aplicación</a></li>
+    <li><a href="{@docRoot}design/patterns/notifications.html">
+Notificaciones</a></li>
+  </ol>
+</div>
+</div>
+
+<img src="{@docRoot}distribute/images/gp-wear-quality.png" style="width:480px;">
+
+<p>
+  Android Wear tiene como objetivo proporcionar a los usuarios la información correcta en el momento adecuado. Las increíbles
+ experiencias de Android Wear se inician automáticamente, permiten captar información de un vistazo y prácticamente no requieren la interacción del
+ usuario. Diseñar aplicaciones para wearables es muy diferente a diseñar para teléfonos o
+ tablets. Hay fortalezas y debilidades diferentes, casos de uso diferentes y ergonomías
+ diferentes que se deben tener en cuenta.
+</p>
+
+<p>
+  El primer paso para crear una excelente experiencia para usuarios de Wear es leer las
+ <a href="{@docRoot}design/wear/index.html">pautas de diseño para Android Wear</a>, que proporcionan
+ instrucciones acerca de cómo crear aplicaciones para Wear que proporcionen la mejor experiencia de usuario. También debes leer la capacitación
+ <a href="{@docRoot}training/building-wearables.html">Cómo crear aplicaciones para dispositivos portátiles (wearables)</a> a fin de
+ comprender los requisitos de implementación básicos de una aplicación para Wear.
+</p>
+
+<p class="caution">
+  <strong>Importante:</strong> Para garantizar una excelente experiencia de usuario, las aplicaciones para wearables deben cumplir algunos
+ requisitos de utilidad específicos. Solo las aplicaciones que cumplan con los siguientes criterios de calidad
+ calificarán como una aplicación de Android Wear en Google Play. Si califica como aplicación de Wear, los usuarios de
+ Android Wear podrán descubrir de forma más fácil tu aplicación en Google Play.
+</p>
+
+<p class="note">
+ <strong>Nota:</strong> Para obtener información acerca de cómo publicar tus aplicaciones para Wear en Google Play, consulta <a href="{@docRoot}distribute/googleplay/wear.html">Distribución para Android Wear</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="fn">
+  Funcionalidad
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios garantizan que tu aplicación esté correctamente configurada y proporcione el comportamiento
+ funcional previsto.
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    Tipo
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    Descripción
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="general">
+   General
+  </td>
+
+  <td id="WR-GL">
+    WR-GL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación para dispositivos portátiles incluye notificaciones con funcionalidad específica para wearables o una aplicación
+ para wearables que se ejecuta directamente en el dispositivo Wear.
+      (<a href="{@docRoot}training/building-wearables.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-VF">
+    WR-VF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación posee funcionalidad Wear visible para el usuario.
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-BF">
+    WR-BF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La funcionalidad Wear funciona según lo previsto o descrito en el directorio de la tienda en la Play Store de Google.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="packaging">
+   Integración
+  </td>
+
+  <td id="WR-PK">
+    WR-PK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las aplicaciones para wearables que dependen de una aplicación para dispositivos portátiles para adquirir su plena funcionalidad están integradas dentro de esa
+ aplicación para wearables.
+      (<a href="{@docRoot}training/wearables/apps/packaging.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="functional-notifications">
+    Notificaciones
+  </td>
+
+  <td id="WR-FW">
+    WR-FW
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las notificaciones con funcionalidad específica para wearables usan un {@code RemoteInput} o
+ {@code WearableExtender}.
+      (<a href="{@docRoot}training/wearables/notifications/index.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FR">
+    WR-FR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las notificaciones para aplicaciones de mensajería permiten a los usuarios responder mediante entradas de voz o respuestas rápidas.
+      (<a href="{@docRoot}training/wearables/notifications/voice-input.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FG">
+    WR-FG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las notificaciones similares se agrupan en una pila.
+      (<a href="{@docRoot}training/wearables/notifications/stacks.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="gestures">
+    Gestos
+  </td>
+
+  <td id="WR-GP">
+    WR-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las actividades en pantalla completa usan el gesto de presión prolongada únicamente para salir.
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/exit.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-GD">
+    WR-GD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Si la aplicación deshabilita el gesto “deslizar para descartar” en una actividad en pantalla completa, responderá al
+ gesto “presionar de forma prolongada para descartar” en esa actividad.
+      (<a href="{@docRoot}training/wearables/ui/exit.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="watchface">
+    Cara de reloj
+  </td>
+
+  <td id="WR-WF">
+    WR-WF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las aplicaciones que incluyen caras de reloj usan la API oficial de Cara de reloj.
+      (<a href="{@docRoot}training/wearables/watch-faces/index.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="ux">
+  Diseño visual e interacción con el usuario
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios permiten que te asegures de que tu aplicación cumpla con los patrones clave de diseño e interacción a fin de proporcionar
+ una experiencia de usuario uniforme, intuitiva y agradable en wearables.
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    Tipo
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    Descripción
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="layout">
+    Diseño
+  </td>
+
+  <td id="WR-LS">
+    WR-LS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La interfaz de usuario de la aplicación tiene el formato correcto para pantallas cuadradas. El contenido de la aplicación
+ se ajusta al área física de la pantalla y no se visualiza texto ni controles cortados por los bordes de la pantalla.
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/layouts.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-LR">
+    WR-LR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La interfaz de usuario de la aplicación tiene el formato correcto para pantallas circulares, incluidos dispositivos con un
+ bajorrelieve (o “mentón”) en la parte inferior de la pantalla. El contenido de la aplicación se ajusta al área física
+ de la pantalla y no se visualiza texto ni controles cortados por los bordes de la pantalla.
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/layouts.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-TC">
+    WR-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      El texto en pantalla es grande y permite captar la información de un vistazo con un tamaño mínimo sugerido de 16 sp.
+      (<a href="{@docRoot}design/wear/style.html#Typography">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="launcher">
+    Lanzador
+  </td>
+
+  <td id="WR-LN">
+    WR-LN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La cadena del selector de la aplicación es el nombre de la aplicación y no una frase de comando.
+      (<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="notifications">
+    Notificaciones
+  </td>
+
+  <td id="WR-NC">
+    WR-NC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Cuando corresponde, la aplicación muestra animaciones de confirmación.
+      (<a href="{@docRoot}design/wear/patterns.html#Countdown">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-NR">
+    WR-NR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las tarjetas de notificación tienen el icono de la aplicación visible en el borde superior derecho. La única excepción es
+ cuando la tarjeta de notificación tiene controles de acción individual; por ejemplo, una tarjeta de reproducción multimedia.
+      <br/>
+      (<a href="{@docRoot}design/wear/style.html#Assets">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-WI">
+    WR-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las acciones de notificación tienen un icono blanco, un título de acción y fondo transparente.
+      <br/>
+      (<a href="{@docRoot}training/wearables/notifications/creating.html#ActionButtons">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PB">
+    WR-PB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Los fondos de las notificaciones con foto se utilizan únicamente para proporcionar información, no para exhibir una marca en una tarjeta.
+      (<a href="{@docRoot}design/wear/style.html#Branding">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PR">
+    WR-PR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Los fondos de las notificaciones con foto tienen una resolución de 400x400 como mínimo.
+      (<a href="{@docRoot}training/wearables/notifications/creating.html#AddWearableFeatures">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="googleplay">
+    Google Play
+  </td>
+
+  <td id="WR-GS">
+    WR-GS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación incluye al menos una captura de pantalla de Wear en su directorio en la Play Store.
+      (<a href="https://support.google.com/googleplay/android-developer/answer/1078870?hl=en">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="faq">
+  Preguntas frecuentes
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>Después de enviar mi aplicación para la revisión de Android Wear, ¿cómo sabré si mi aplicación no
+ cumple todos los requisitos para Wear?</strong>
+</p>
+<p>
+  Si tu aplicación no cumple los requisitos de utilidad que se describen en esta página, el equipo de la Play Store
+ se comunicará contigo a la dirección de correo electrónico que especificaste en la cuenta de la <a href="https://play.google.com/apps/publish/">Consola para desarrolladores de Google Play</a> asociada con
+ la aplicación.
+</p>
+<p class="caution">
+  <strong>Advertencia:</strong> Asegúrate de que tu aplicación cumpla los <a href="#fn">requisitos de
+ funcionalidad</a>, de lo contrario, la aplicación no se considerará una aplicación para Wear y no se revisará
+ para determinar si cumple con los requisitos de <a href="#ux">diseño e interacción</a> de Wear.
+</p>
+<p class="note">
+ <strong>Nota:</strong> Para obtener información acerca de cómo publicar tus aplicaciones para Wear en Google Play, consulta <a href="{@docRoot}distribute/googleplay/wear.html">Distribución para Android Wear</a>.
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>Si mi aplicación no cumple con los requisitos de Wear, ¿aparecerá todavía mi aplicación nueva o actualizada en
+ Google Play para teléfonos y tablets, y aún se podrá instalar en wearables?</strong>
+</p>
+<p>
+  Sí. Los requisitos antes descritos solo determinan si tu aplicación se identificará como una aplicación de
+ Android Wear en Google Play y si los usuarios de Android Wear podrán descubrirla de forma más fácil. Si tu aplicación no
+ se acepta como una aplicación para Wear, aún estará disponible para otros dispositivos, como teléfonos y
+ tablets, y aún podrá instalarse en wearables.
+</p>

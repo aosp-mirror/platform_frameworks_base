@@ -1,0 +1,509 @@
+page.title=Calidad de las aplicaciones para TV
+page.metaDescription=La televisión es un segmento en aumento de dispositivos Android que requiere atención específica en el diseño y la funcionalidad de las aplicaciones a fin de crear una excelente experiencia.
+page.image=/distribute/images/gp-tv-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Criterios de calidad</h2>
+  <ol>
+    <li><a href="#ux">Diseño e interacción</a></li>
+    <li><a href="#fn">Funcionalidad</a></li>
+    <li><a href="#faq">Preguntas frecuentes</a></li>
+  </ol>
+
+  <h2>También deberías leer</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+Calidad de la aplicación principal</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+Optimiza tu aplicación</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="top-right-float" style="padding-right:0;margin-bottom:1em;">
+  <img src="{@docRoot}distribute/images/gp-tv-quality.png" style="width:480px;">
+</div>
+
+<p>
+  Los usuarios tienen diferentes expectativas cuando miran televisión, en comparación con el uso de un teléfono o una tablet.
+  Un usuario de TV típico se sienta a aproximadamente 3 metros de distancia de la pantalla, por lo que los detalles pequeños son menos perceptibles
+ y el texto pequeño resulta difícil de leer. Dado que los usuarios se sientan lejos del televisor, deben usar un dispositivo de mando
+ a distancia para navegar y seleccionar, en lugar de tocar los elementos que aparecen en pantalla. Esas
+ diferencias cambian significativamente los requisitos de lo que sería una buena experiencia del usuario de TV.
+</p>
+
+<p>
+  El primer paso para crear una excelente experiencia para usuarios de TV es leer y seguir las
+ <a href="{@docRoot}design/tv/index.html">pautas de diseño para Android TV</a>, que proporcionan
+ instrucciones acerca de cómo crear aplicaciones para TV que proporcionen la mejor experiencia del usuario. También debes leer la capacitación
+ <a href="{@docRoot}training/tv/start/index.html">Cómo crear aplicaciones para TV</a> a fin de comprender
+ los requisitos de implementación básicos de una aplicación para TV.
+</p>
+
+<p class="caution">
+  <strong>Importante:</strong> Para garantizar una excelente experiencia del usuario, las aplicaciones para dispositivos de TV deben cumplir algunos
+ requisitos de utilidad específicos. Solo las aplicaciones que cumplan con los siguientes criterios de calidad
+ calificarán como una aplicación de Android TV en Google Play.
+</p>
+
+<p class="note"><strong>Nota:</strong> Para obtener información acerca de cómo publicar tus aplicaciones para TV en Google Play,
+ consulta <a href="{@docRoot}distribute/googleplay/tv.html">Distribución para Android TV</a>.</p>
+
+
+
+<div class="headerLine">
+  <h2 id="ux">
+  Diseño visual e interacción del usuario
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios permiten que te asegures de que tu aplicación cumpla con los patrones clave de diseño e interacción
+ a fin de garantizar una experiencia del usuario uniforme, intuitiva y agradable en dispositivos de TV.
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    Tipo
+  </th>
+  <th style="width:54px;">
+    Prueba
+  </th>
+  <th>
+    Descripción
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="4" id="launcher">
+    Lanzador
+  </td>
+
+  <td id="TV-LM">
+    TV-LM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación exhibe un icono del Lanzador de Android TV después de la instalación.
+      (<a href="{@docRoot}training/tv/start/start.html#tv-activity">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LB">
+    TV-LB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación exhibe un banner de 320 px x 180 px como su icono de Lanzador de Android TV.
+      (<a href="{@docRoot}design/tv/patterns.html#banner">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-BN">
+    TV-BN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      El banner de inicio de la aplicación contiene el nombre de la aplicación.
+      (<a href="{@docRoot}design/tv/patterns.html#banner">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LG">
+    TV-LG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Si la aplicación es un juego, aparece en la fila Juegos del Lanzador de Android TV.<br>
+      (<a href="{@docRoot}training/tv/games/index.html#manifest">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="layout">
+    Diseño
+  </td>
+
+  <td id="TV-LO">
+    TV-LO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Las interfaces de la aplicación se presentan en orientación horizontal.
+      (<a href="{@docRoot}training/tv/start/layouts.html#structure">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TC">
+    TV-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación exhibe el texto central en un tamaño de 16 sp o más grande.
+      (<a href="{@docRoot}design/tv/style.html#typography">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TA">
+    TV-TA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación exhibe todo el texto en un tamaño de 12 sp o más grande.
+      (<a href="{@docRoot}design/tv/style.html#typography">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-OV">
+    TV-OV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación no exhibe texto ni funcionalidades que estén parcialmente
+ cortados por los bordes de la pantalla.
+      (<a href="{@docRoot}training/tv/start/layouts.html#overscan">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TR">
+    TV-TR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación no opaca parcialmente otras aplicaciones. La aplicación ocupa toda la pantalla y tiene
+ un fondo que no es transparente.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="navigation">
+    Navegación
+  </td>
+
+  <td id="TV-DP">
+    TV-DP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La funcionalidad de la aplicación se puede navegar con los controles del mando de 5 direcciones, a menos que la aplicación
+ requiera un controlador para juegos como se especifica en <a href="#TV-GP">TV-GP</a>.
+      (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-DK">
+    TV-DK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación requiere un controlador para juegos, como se especifica en <a href="#TV-GP">TV-GP</a>; se puede
+ navegar por toda la funcionalidad con las teclas de un controlador para juegos de Android estándar.
+      (<a href="{@docRoot}training/game-controllers/controller-input.html#button">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-DM">
+    TV-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación no requiere que el mando a distancia tenga un botón de Menú para acceder a los controles de la
+ interfaz de usuario.
+      (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/tvqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  Funcionalidad
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios garantizan que tu aplicación esté correctamente configurada y proporcione el comportamiento
+ funcional previsto.
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    Tipo
+  </th>
+  <th style="width:54px;">
+    Prueba
+  </th>
+  <th>
+    Descripción
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="2" id="manifest">
+   Manifiesto
+  </td>
+
+  <td id="TV-ML">
+    TV-ML
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      El manifiesto de la aplicación establece un tipo previsto de {@link android.content.Intent#ACTION_MAIN} con la categoría
+ {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER}.
+      (<a href="{@docRoot}training/tv/start/start.html#tv-activity">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+</tr>
+  <td id="TV-MT">
+    TV-MT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      El manifiesto de la aplicación establece la característica de hardware {@code android.hardware.touchscreen} como no obligatoria.
+      (<a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">Obtén
+ más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="game-controllers">
+    Controladores para juegos
+  </td>
+
+  <td id="TV-GP">
+    TV-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Si la aplicación utiliza un controlador para juegos como su método de entrada principal, debe declarar el requisito
+ correspondiente con la etiqueta del manifiesto <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>.
+      (<a href="{@docRoot}training/tv/games/index.html#gamepad">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-GC">
+    TV-GC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Si la aplicación proporciona instrucciones visuales para el uso de controladores para juegos, las instrucciones
+ no deben contener recursos de marca y deben exhibir un diseño de botones compatible.
+      (<a href="{@docRoot}training/tv/games/index.html#ControllerHelp">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="4" id="advertising">
+    Publicidad
+  </td>
+
+  <td id="TV-AP">
+    TV-AP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación permite la interacción con anuncios publicitarios mediante el uso de los controles del mando de dirección.
+      (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AD">
+    TV-AD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Para la publicidad que utilice anuncios en pantalla completa que no sean en video, la aplicación le
+ permite al usuario omitir de inmediato el anuncio con los controles del mando de dirección.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AU">
+    TV-AU
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Para la publicidad que utilice anuncios que admitan clics, no ocupen la pantalla completa y no sean en video, la aplicación no permite que los
+ anuncios vinculen a una URL.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AA">
+    TV-AA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Para la publicidad que utilice anuncios que admitan clics, no ocupen la pantalla completa y no sean en video, la aplicación no permite que los
+ anuncios vinculen a otra aplicación que no está disponible para dispositivos de TV.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="web">
+    Contenido web
+  </td>
+
+  <td id="TV-WB">
+    TV-WB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Para el contenido web, la aplicación utiliza componentes {@link android.webkit.WebView} y no intenta
+ ejecutar una aplicación de explorador web.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="media-playback">
+    Reproducción multimedia
+  </td>
+
+  <td id="TV-NP">
+    TV-NP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Si la aplicación continúa reproduciendo sonido después de que el usuario sale de ella, la aplicación proporciona una tarjeta <em>Reproduciendo
+ ahora</em> en la fila de recomendación de la pantalla de inicio de modo que los usuarios puedan regresar a la aplicación
+ para controlar la reproducción.
+      (<a href="{@docRoot}training/tv/playback/now-playing.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-PA">
+    TV-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Si la aplicación proporciona una tarjeta <em>Reproduciendo ahora</em>, cuando el usuario la seleccione pasará a una
+ pantalla que permite pausar la reproducción.
+      (<a href="{@docRoot}training/tv/playback/now-playing.html">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-PP">
+    TV-PP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Si la aplicación reproduce contenido de video o música, alternará entre reproducción y pausado del contenido
+ multimedia cuando se envíe un evento clave de reproducción o pausado durante la reproducción.<br>
+      (<a href="{@docRoot}reference/android/view/KeyEvent.html#KEYCODE_MEDIA_PLAY_PAUSE">Obtén
+ más información</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/tvqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+<div class="headerLine">
+  <h2 id="faq">
+  Preguntas frecuentes
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>Después de enviar mi aplicación, ¿cómo sabré si mi aplicación no cumple todos los requisitos para
+ dispositivos de TV?</strong>
+</p>
+<p>
+  Si tu aplicación no cumple los requisitos de utilidad que se describen en esta página, el equipo de la Play Store
+ se comunicará contigo a la dirección de correo electrónico que especificaste en la cuenta principal de la <a href="https://play.google.com/apps/publish/">Consola para desarrolladores de Google Play</a> asociada con
+ la aplicación.
+</p>
+<p class="caution">
+  <strong>Advertencia:</strong> Asegúrate de que tu aplicación incluya las <a href="{@docRoot}preview/tv/start/index.html#tv-activity">entradas obligatorias del manifiesto</a> para dispositivos de TV;
+ de lo contrario, la aplicación no se considerará una aplicación para TV y no se revisará conforme a los requisitos de utilidad para
+ TV.
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>Mi aplicación abarca más que dispositivos de TV. Si mi aplicación no cumple con los
+ requisitos para dispositivos de TV, ¿aparecerá todavía mi aplicación nueva o actualizada en Google Play para teléfonos y
+ tablets?</strong>
+</p>
+<p>
+  Sí. Los requisitos que se describen más arriba solo restringen la distribución en la Play Store de Google para dispositivos
+ de TV. La distribución a otros tipos de dispositivos, como teléfonos, tablets, etc., no se verá
+ afectada.
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>Si mi aplicación cumple los requisitos de publicación, ¿cuándo estará disponible en la Play Store
+ de Google para dispositivos de TV?</strong>
+</p>
+
+<p>
+  Las aplicaciones que cumplen los requisitos para TV aparecerán en la Play Store de Google para dispositivos de TV
+ <em>después</em> del lanzamiento oficial de Android 5.0.
+</p>
