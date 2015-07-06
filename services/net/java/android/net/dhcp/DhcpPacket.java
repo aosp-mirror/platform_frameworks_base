@@ -155,6 +155,12 @@ abstract class DhcpPacket {
     protected Inet4Address mBroadcastAddress;
 
     /**
+     * DHCP Optional Type: Vendor specific information
+     */
+    protected static final byte DHCP_VENDOR_INFO = 43;
+    protected String mVendorInfo;
+
+    /**
      * DHCP Optional Type: DHCP Requested IP Address
      */
     protected static final byte DHCP_REQUESTED_IP = 50;
@@ -225,6 +231,16 @@ abstract class DhcpPacket {
      * DHCP Optional Type: DHCP Client Identifier
      */
     protected static final byte DHCP_CLIENT_IDENTIFIER = 61;
+
+    /**
+     * DHCP zero-length option code: pad
+     */
+    protected static final byte DHCP_OPTION_PAD = 0x00;
+
+    /**
+     * DHCP zero-length option code: end of options
+     */
+    protected static final byte DHCP_OPTION_END = (byte) 0xff;
 
     /**
      * The transaction identifier used in this particular DHCP negotiation
@@ -676,6 +692,7 @@ abstract class DhcpPacket {
         Inet4Address netMask = null;
         String message = null;
         String vendorId = null;
+        String vendorInfo = null;
         byte[] expectedParams = null;
         String hostName = null;
         String domainName = null;
@@ -810,8 +827,10 @@ abstract class DhcpPacket {
             try {
                 byte optionType = packet.get();
 
-                if (optionType == (byte) 0xFF) {
+                if (optionType == DHCP_OPTION_END) {
                     notFinishedOptions = false;
+                } else if (optionType == DHCP_OPTION_PAD) {
+                    // The pad option doesn't have a length field. Nothing to do.
                 } else {
                     int optionLen = packet.get() & 0xFF;
                     int expectedLen = 0;
@@ -885,6 +904,7 @@ abstract class DhcpPacket {
                             break;
                         case DHCP_VENDOR_CLASS_ID:
                             expectedLen = optionLen;
+                            // Embedded nulls are safe as this does not get passed to netd.
                             vendorId = readAsciiString(packet, optionLen, true);
                             break;
                         case DHCP_CLIENT_IDENTIFIER: { // Client identifier
@@ -892,6 +912,11 @@ abstract class DhcpPacket {
                             packet.get(id);
                             expectedLen = optionLen;
                         } break;
+                        case DHCP_VENDOR_INFO:
+                            expectedLen = optionLen;
+                            // Embedded nulls are safe as this does not get passed to netd.
+                            vendorInfo = readAsciiString(packet, optionLen, true);
+                            break;
                         default:
                             // ignore any other parameters
                             for (int i = 0; i < optionLen; i++) {
@@ -965,6 +990,7 @@ abstract class DhcpPacket {
         newPacket.mT1 = T1;
         newPacket.mT2 = T2;
         newPacket.mVendorId = vendorId;
+        newPacket.mVendorInfo = vendorInfo;
         return newPacket;
     }
 
@@ -1011,7 +1037,7 @@ abstract class DhcpPacket {
         results.dnsServers.addAll(mDnsServers);
         results.domains = mDomainName;
         results.serverAddress = mServerIdentifier;
-        results.vendorInfo = mVendorId;
+        results.vendorInfo = mVendorInfo;
         results.leaseDuration = (mLeaseTime != null) ? mLeaseTime : INFINITE_LEASE;
         return results;
     }
