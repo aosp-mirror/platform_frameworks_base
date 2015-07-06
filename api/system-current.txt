@@ -9675,11 +9675,6 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_WEBVIEW = "android.software.webview";
     field public static final java.lang.String FEATURE_WIFI = "android.hardware.wifi";
     field public static final java.lang.String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
-    field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
-    field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
-    field public static final int FLAG_PERMISSION_SYSTEM_FIXED = 16; // 0x10
-    field public static final int FLAG_PERMISSION_USER_FIXED = 2; // 0x2
-    field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
     field public static final int GET_ACTIVITIES = 1; // 0x1
     field public static final int GET_CONFIGURATIONS = 16384; // 0x4000
     field public static final int GET_DISABLED_COMPONENTS = 512; // 0x200
