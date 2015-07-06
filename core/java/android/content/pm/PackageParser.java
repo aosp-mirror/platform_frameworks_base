@@ -36,6 +36,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.PatternMatcher;
 import android.os.UserHandle;
@@ -4785,7 +4786,7 @@ public class PackageParser {
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = new ApplicationInfo(p.applicationInfo);
         ai.uid = UserHandle.getUid(userId, ai.uid);
-        ai.dataDir = PackageManager.getDataDirForUser(ai.volumeUuid, ai.packageName, userId)
+        ai.dataDir = Environment.getDataUserPackageDirectory(ai.volumeUuid, userId, ai.packageName)
                 .getAbsolutePath();
         if ((flags & PackageManager.GET_META_DATA) != 0) {
             ai.metaData = p.mAppMetaData;
@@ -4812,7 +4813,7 @@ public class PackageParser {
         // make a copy.
         ai = new ApplicationInfo(ai);
         ai.uid = UserHandle.getUid(userId, ai.uid);
-        ai.dataDir = PackageManager.getDataDirForUser(ai.volumeUuid, ai.packageName, userId)
+        ai.dataDir = Environment.getDataUserPackageDirectory(ai.volumeUuid, userId, ai.packageName)
                 .getAbsolutePath();
         if (state.stopped) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
