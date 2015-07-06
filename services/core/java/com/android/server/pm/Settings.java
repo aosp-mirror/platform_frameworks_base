@@ -3613,11 +3613,7 @@ final class Settings {
         }
     }
 
-    void createNewUserLILPw(PackageManagerService service, Installer installer,
-            int userHandle, File path) {
-        path.mkdir();
-        FileUtils.setPermissions(path.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
-                | FileUtils.S_IXOTH, -1, -1);
+    void createNewUserLILPw(PackageManagerService service, Installer installer, int userHandle) {
         for (PackageSetting ps : mPackages.values()) {
             if (ps.pkg == null || ps.pkg.applicationInfo == null) {
                 continue;
