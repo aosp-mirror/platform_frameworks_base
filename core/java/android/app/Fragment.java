@@ -1166,6 +1166,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * android.content.Context#checkSelfPermission(String)}.
      * </p>
      * <p>
+     * You cannot request a permission if your activity sets {@link
+     * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
+     * <code>true</code> because in this case the activity would not receive
+     * result callbacks including {@link #onRequestPermissionsResult(int, String[], int[])}.
+     * </p>
+     * <p>
      * A sample permissions request looks like this:
      * </p>
      * <code><pre><p>
@@ -1192,6 +1198,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @param permissions The requested permissions.
      * @param requestCode Application specific request code to match with a result
      *    reported to {@link #onRequestPermissionsResult(int, String[], int[])}.
+     *    Should be >= 0.
      *
      * @see #onRequestPermissionsResult(int, String[], int[])
      * @see android.content.Context#checkSelfPermission(String)
