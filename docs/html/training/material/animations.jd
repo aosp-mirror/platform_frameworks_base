@@ -81,8 +81,8 @@ reveal or hide a view.</p>
 View myView = findViewById(R.id.my_view);
 
 // get the center for the clipping circle
-int cx = (myView.getLeft() + myView.getRight()) / 2;
-int cy = (myView.getTop() + myView.getBottom()) / 2;
+int cx = myView.getWidth() / 2;
+int cy = myView.getHeight() / 2;
 
 // get the final radius for the clipping circle
 int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
@@ -103,8 +103,8 @@ anim.start();
 final View myView = findViewById(R.id.my_view);
 
 // get the center for the clipping circle
-int cx = (myView.getLeft() + myView.getRight()) / 2;
-int cy = (myView.getTop() + myView.getBottom()) / 2;
+int cx = myView.getWidth() / 2;
+int cy = myView.getHeight() / 2;
 
 // get the initial radius for the clipping circle
 int initialRadius = myView.getWidth();
