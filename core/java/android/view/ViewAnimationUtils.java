@@ -43,8 +43,10 @@ public final class ViewAnimationUtils {
      * on thread responsiveness.
      *
      * @param view The View will be clipped to the animating circle.
-     * @param centerX The x coordinate of the center of the animating circle.
-     * @param centerY The y coordinate of the center of the animating circle.
+     * @param centerX The x coordinate of the center of the animating circle, relative to
+     *                <code>view</code>.
+     * @param centerY The y coordinate of the center of the animating circle, relative to
+     *                <code>view</code>.
      * @param startRadius The starting radius of the animating circle.
      * @param endRadius The ending radius of the animating circle.
      */
