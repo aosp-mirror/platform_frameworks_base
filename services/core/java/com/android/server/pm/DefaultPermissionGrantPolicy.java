@@ -439,7 +439,7 @@ final class DefaultPermissionGrantPolicy {
                     getDefaultSystemHandlerActivityPackageLPr(deviceProvisionIntent, userId);
             if (deviceProvisionPackage != null
                     && doesPackageSupportRuntimePermissions(deviceProvisionPackage)) {
-                grantRuntimePermissionsLPw(contactsPackage, ACCOUNTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(deviceProvisionPackage, ACCOUNTS_PERMISSIONS, userId);
             }
 
             // Maps
