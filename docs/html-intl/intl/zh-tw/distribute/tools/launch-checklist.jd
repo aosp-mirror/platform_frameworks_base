@@ -1,0 +1,792 @@
+page.title=推出檢查清單
+page.metaDescription=為使用者提供應用程式這一完整程序的基本概述。請在開發時儘早閱讀本檢查清單，以協助您為實現在 Google Play 上成功推出應用程式而進行規劃。
+meta.tags="localizing, publishing, disttools"
+page.tags="launch, publishing, Google Play"
+page.image=/distribute/images/launch-checklist.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>檢查清單</h2>
+    <ol>
+      <li><a href="#understand-publishing">1.了解發行程序</a></li>
+      <li><a href="#understand-policies">2.了解 Google Play 政策</a></li>
+      <li><a href="#test-quality">3.測試核心應用程式品質</a></li>
+      <li><a href="#determine-rating">4.判斷內容評分</a></li>
+      <li><a href="#determine-country">5.判斷國家/地區散佈</a></li>
+      <li><a href="#confirm-size">6.確認整體大小</a></li>
+      <li><a href="#confirm-platform">7.確認平台與螢幕範圍</a></li>
+      <li><a href="#decide-price">8.決定免費還是付費</a></li>
+      <li><a href="#consider-billing">9.使用應用程式內交易</a></li>
+      <li><a href="#set-prices">10.為您的產品設定價格</a></li>
+      <li><a href="#start-localization">11.開始當地語系化</a></li>
+      <li><a href="#prepare-graphics">12.準備推廣圖形、螢幕擷取畫面及影片</a></li>
+      <li><a href="#build-upload">13.建置準備發行的 APK</a></li>
+      <li><a href="#plan-beta">14.規劃 Beta 版</a></li>
+      <li><a href="#complete-details">15.完成市集清單</a></li>
+      <li><a href="#use-badges">16.使用 Google Play 徽章與連結</a></li>
+      <li><a href="#final-checks">17.最終檢查及發行</a></li>
+      <li><a href="#support-users">18.在推出後支援使用者</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px"><img src="{@docRoot}distribute/images/launch-checklist.jpg"></div>
+
+<p>
+  在 Google Play 上發行應用程式及將其散佈至使用者之前，您需要準備好應用程式、對其進行測試，並準備推廣材料。
+</p>
+
+<p>
+  本頁面將協助您了解發行程序，並為在 Google Play 上成功推出產品做好準備。本頁面將概述您在 Google Play 上發行應用程式之前需要完成的某些任務，例如建立準備發行的已簽署應用程式套件 (APK)、了解應用程式的需求，以及為您的每個應用程式建立產品頁面與圖形資產。
+</p>
+
+<p>
+  準備與發行任務會進行編號，以便您可以大致了解任務序列。但是，您可以透過適用於您的任何順序來處理任務，可以視需要略過任何步驟。
+</p>
+
+<p>
+  為了發行應用程式而逐步完成工作時，您將取得多種支援資源。每個步驟中將提供相關連結。
+</p>
+
+<div class="headerLine">
+  <h2 id="understand-publishing">
+    1.了解發行程序
+  </h2>
+
+
+</div>
+
+<p>
+  您應先花一點時間閱讀並了解發行的整體工作流程，並熟悉該程序的運作方式，然後再開始執行本檢查清單中的步驟。尤其是您或您的開發團隊需要準備應用程式，以使用所有 Android 應用程式通用的程序進行發行。<a href="{@docRoot}tools/publishing/publishing_overview.html">發行工作流程文件</a>將提供有關發行如何運作以及如何準備好 APK 以執行發行的詳細資料。
+</p>
+
+<p>
+  通常在熟悉發行之後，請繼續進行閱讀，以了解在 Google Play 上發行應用程式時應考慮的問題。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/understanding"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="understand-policies">
+    2.了解 Google Play 政策與合約
+  </h2>
+
+
+</div>
+
+<p>
+  請確保您已了解並遵循在註冊時已接受的 Google Play 計劃政策。Google Play 會主動強制執行政策，任何違規都會導致您的應用程式擱置，若發生重複違規，會終止您的開發人員帳戶。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/policies" data-sortorder=
+"-timestamp" data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test-quality">
+    3.測試品質
+  </h2>
+
+
+</div>
+
+<p>
+  在 Google Play 上發行應用程式之前，請務必確保在您針對的所有裝置上，這些應用程式都能符合對所有 Android 應用程式的基本品質預期。您可以設定測試環境，並根據<strong>適用於所有應用程式的一組簡短的品質準則</strong>對應用程式進行測試，以檢查應用程式的品質。如需完備資訊，請參閱<a href="{@docRoot}distribute/essentials/quality/core.html">核心應用程式品質</a>指導方針。
+</p>
+
+<p>
+  若您的應用程式針對平板電腦裝置，請確保該應用程式能為平板電腦客戶提供引人注目的豐富體驗。請參閱<a href="{@docRoot}distribute/essentials/quality/tablets.html">平板電腦應用程式品質</a>指導方針，以了解針對平板電腦對您的應用程式執行最佳化所採用方式的有關建議。
+</p>
+
+<p>
+  若計劃讓您的應用程式可供 Google Play for Education 使用，您需要確保應用程式適合 K-12 教室，並確保其能提供出眾的教育價值。如需了解您的教育應用程式應展示特性的有關資訊，請參閱<a href="{@docRoot}distribute/essentials/gpfe-guidelines.html">教育指導方針</a>。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/quality" data-sortorder=
+"-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="determine-rating">
+    4.判斷您應用程式的內容評分
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 需要您設定應用程式的內容評分，該評分會向 Google Play 使用者通知應用程式的成熟度層級。發行之前，您應確認要使用的評分層級。可用的內容評分層級如下：
+</p>
+
+<ul>
+  <li>
+    <p>
+      所有人
+    </p>
+  </li>
+
+  <li>
+    <p>
+      低成熟度
+    </p>
+  </li>
+
+  <li>
+    <p>
+      中成熟度
+    </p>
+  </li>
+
+  <li>
+    <p>
+      高成熟度
+    </p>
+  </li>
+</ul>
+
+<p>
+  在 Android 裝置上，Android 使用者可以設定所需的成熟度層級以供瀏覽。隨後，Google Play 會根據該設定對應用程式進行篩選，因此您選取的內容評分可以影響應用程式向使用者的散佈。您可以在 Developer Console 中指派 (或變更) 應用程式的內容評分，不需要在您的二進位檔案中進行任何變更。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/rating" data-sortorder=
+"-timestamp" data-cardsizes="9x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="determine-country">
+    5.判斷國家/地區散佈
+  </h2>
+
+
+</div>
+
+<p>
+  藉由 Google Play，您可以控制將您的應用程式散佈至哪些國家/地區。為了實現最廣泛的散佈並擁有可能最大的客戶群，通常您會希望將應用程式散佈至能力所及的所有國家/地區。但是，由於業務需求、應用程式需求或推出相依性等原因，您可能希望將一或多個國家/地區排除在散佈範圍之外。
+</p>
+
+<p>
+  請務必儘早判斷散佈的確切國家/地區，因為這會影響以下項目：
+</p>
+
+<ul>
+  <li>
+    <p>
+      對應用程式中當地語系化資源的需求。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      對 Developer Console 中當地語系化應用程式描述的需求。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      可能特定於某些國家/地區的應用程式所遵循的法律需求。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      時區支援、本地定價等。
+    </p>
+  </li>
+</ul>
+
+<p>
+  對於您要針對的國家/地區，您應評估當地語系化需求 (從您的應用程式及其 Google Play 清單詳細資料兩方面)，並在您預期的推出日期之前開始當地語系化工作。
+</p>
+
+<p>
+  如需了解當地語系化程序的關鍵步驟與考量事項，請參閱<a href="{@docRoot}distribute/tools/localization-checklist.html">當地語系化檢查清單</a>。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/country" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="confirm-size">
+    6.確認應用程式的整體大小
+  </h2>
+
+
+</div>
+
+<p>
+  應用程式的整體大小會影響其設計以及在 Google Play 上的發行方式。目前，在 Google Play 上發行的最大 APK 大小為 <strong>50 MB</strong>。若您的應用程式超出該大小，或您希望提供次要下載，可以使用 <a href="{@docRoot}google/play/expansion-files.html">APK 擴充檔案</a>，Google Play 會在其伺服器基礎架構上免費主控這些檔案，並自動處理裝置的下載。
+</p>
+
+<ul>
+  <li>
+    <p>
+      在 Google Play 上發行的最大 APK 大小為 50 MB。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      對於每個 APK，您可以使用最多兩 (2) 個 APK 擴充檔案，每個最大為 2GB。
+    </p>
+  </li>
+</ul>
+
+<p>
+  使用 APK 擴充檔案是 散佈大型應用程式的極具成本效益的便利方式。但是，使用 APK 擴充檔案需要在您的應用程式二進位檔案中進行某些變更，因此您需要先進行這些變更，然後再建立準備發行的 APK。
+</p>
+
+<p>
+  若要最大限度降低應用程式二進位檔案的大小，請確保在建置準備發行的 APK 時，對您的程式碼執行 <a href="{@docRoot}tools/help/proguard.html">Proguard</a> 工具或類似擾亂器。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/size" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="confirm-platform">
+    7.確認應用程式的平台與螢幕相容性範圍
+  </h2>
+
+
+</div>
+
+<p>
+  在發行之前，請務必確保您的應用程式專為在您希望針對的 Android 平台版本與裝置螢幕大小上正確執行而設計。
+</p>
+
+<p>
+  從應用程式相容性的視角看來，Android 平台版本由 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API 層級</a>定義。您應確認應用程式與 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;minSdkVersion&gt;</a> 相容的最低版本，因為這會影響應用程式在發行後向 Android 裝置的散佈。
+</p>
+
+<p>
+  對於螢幕大小，您應確認在您希望支援的螢幕大小與像素密度範圍內，應用程式能正確執行並具有良好的外觀。您應遵循<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>中提供的建議，為多個螢幕大小提供可擴充的支援。但是，若您未能執行此操作，請使用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a> 宣告應用程式支援的最小螢幕。隨後 Google Play 會對應用程式的可用性進行相應限制，使其可供至少具有所宣告螢幕大小的裝置使用。
+</p>
+
+<p>
+  若要更好地了解 Android 平台版本的目前裝置滲透力及所有 Android 裝置中的螢幕大小，請參閱<a href="{@docRoot}about/dashboards/index.html">裝置儀表板</a>圖表。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/platform" data-sortorder=
+"-timestamp" data-cardsizes="6x3,6x3,6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="decide-price">
+    8.決定您的應用程式是免費還是付費
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-launch-checklist-1.png">
+</div>
+
+<p>
+  在 Google Play 上，您可以採用免費下載或付費下載的形式發行應用程式。免費應用程式可供 Google Play 中的任何 Android 使用者下載。只有位於支援付費下載的國家/地區，並已在 Google Play 中註冊付費形式 (例如信用卡或流動電訊商帳單付款服務) 的使用者，才能下載付費應用程式。
+</p>
+
+<p>
+  決定您的應用程式是免費還是付費非常重要，因為在 Google Play 上，<strong>免費應用程式必須始終免費</strong>。
+</p>
+
+<ul>
+  <li>
+    <p>
+      以免費應用程式的形式發行應用程式後，您無法將其變更為付費應用程式。但是，您仍可透過 Google Play 的<a href="{@docRoot}google/play/billing/index.html">應用程式內交易</a>服務，販售<a href="{@docRoot}google/play/billing/billing_overview.html#products">應用程式內的產品</a>與<a href="{@docRoot}google/play/billing/billing_subscriptions.html">訂閱</a>。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      若您以付費應用程式的形式發行應用程式，<em>可以</em>隨時將其變更為免費應用程式 (<strong>但此後無法再將其變更為付費應用程式</strong>)。此外，您也可以販售應用程式內產品與訂閱。
+    </p>
+  </li>
+</ul>
+
+<p>
+  若您的應用程式為付費，或您要販售應用程式內產品，需要先<a href="https://developers.google.com/wallet/digital/training/getting-started/merchant-setup">設定 Google Wallet Merchant Account (Google 電子錢包商家帳戶)</a>，然後才能發行。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/price" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="consider-billing">
+    9.考慮使用應用程式內交易
+  </h2>
+
+
+</div>
+
+<p>
+  藉由 Google Play <a href="{@docRoot}google/play/billing/index.html">應用程式內交易</a>，您可以販售應用程式內的數位內容。您可以使用該服務販售廣泛的內容，包括可下載的內容 (例如媒體檔案或相片) 與虛擬內容 (例如遊戲級別或藥劑)。藉由應用程式內交易服務，您可以從應用程式內販售一次性購買項目及訂閱項目。如此可協助您在應用程式的整個生命週期內，實現應用程式的獲利。
+</p>
+
+<p>
+  若您要尋求更多方式來實現應用程式的獲利並營造吸引力，應考慮採用應用程式內交易或立即購。這些服務在使用者與開發人員中已非常普遍。若要使用應用程式內交易或立即購，需要對您的應用程式二進位檔案進行變更，因此您需要先完成並測試您的實作，然後再建立準備發行的 APK。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/purchasemethod"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="set-prices">
+    10.為您的產品設定價格
+  </h2>
+
+
+</div>
+
+<p>
+  若您的應用程式為付費應用程式，或者您要販售應用程式內產品或實體產品，則藉由 Google Play，可為全球市場的使用者設定採用多種貨幣的產品價格。您可以個別設定採用不同貨幣的價格，因此可以根據市場狀況與匯率對價格進行靈活調整。
+</p>
+
+<p>
+  在發行之前，請考慮如何為您的產品設定價格，以及採用各種貨幣時的價格是多少。然後，可以透過 Developer Console 設定採用所有可用貨幣的價格。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/setprice" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,9x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="start-localization">
+    11.開始當地語系化
+  </h2>
+
+
+</div>
+
+<p>
+  對於您要針對的國家/地區，良好的想法是評估當地語系化需求，確保您的應用程式實現國際化，並在您預期的推出日期之前開始當地語系化工作。
+</p>
+
+<p>
+  除了應用程式設計外，至少需要考慮當地語系化的以下三個方面：
+</p>
+
+<ul>
+  <li>
+    <p>
+      對您應用程式中的字串、影像與其他資源執行當地語系化。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      對您的應用程式在 Google Play 上的市集清單詳細資料執行當地語系化。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      對市集清單隨附的應用程式圖形資產、螢幕擷取畫面與影片執行當地語系化。
+    </p>
+  </li>
+</ul>
+
+<p>
+  如需了解當地語系化程序的關鍵步驟與考量事項，請參閱<a href="{@docRoot}distribute/tools/localization-checklist.html">當地語系化檢查清單</a>。
+</p>
+
+<p>
+  若要對市集清單執行當地語系化，請先建立並完成應用程式標題、描述與推廣文字。收集並傳送供當地語系化的上述所有項目。此外，您也可以選擇翻譯「最近變更」文字，以說明應用程式的更新。隨後，您可在 Developer Console 中新增執行當地語系化的清單詳細資料，或者可以選擇讓 Google Play 將您的清單詳細資料自動翻譯為您支援的語言。
+</p>
+
+<p>
+  若要讓您的應用程式清單對全球客戶群具備吸引力，關鍵在於建立推廣圖形、螢幕擷取畫面及影片的當地語系化版本。例如，為了取得最大效益，您的應用程式功能圖形可能包括應翻譯的文字。您可以針對每種語言建立推廣圖形的不同版本，並將其上傳至 Developer Console。若您提供推廣影片，可以建立該影片的當地語系化版本，然後針對您支援的每種語言，新增正確的當地語系化影片的連結。
+</p>
+
+<p>
+  完成翻譯後，請視需要將其移至應用程式資源中，並測試其是否能正確載入。上傳資產並設定市集清單時，請儲存應用程式的已翻譯字串詳細資料以供稍後使用。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/localization"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="prepare-graphics">
+    12.準備推廣圖形、螢幕擷取畫面及影片
+  </h2>
+
+
+</div>
+
+<p>
+  在 Google Play 上發行時，您可以提供多種高品質圖形資產，以展示您的應用程式或品牌。在發行後，這些資產會顯示在您的市集清單頁面上、搜尋結果中以及其他位置。這些圖形資產是市集清單頁面成功吸引使用者的關鍵，因此您應考慮由專業人員來產生這些資產。螢幕擷取畫面與影片也非常重要，因為這些項目會展示應用程式的外觀、使用或播放方式，以及與眾不同之處。
+</p>
+
+<p>
+  所有圖形資產都應經過精心設計，以易於查看，並以色彩豐富、妙趣橫生的方式著重展示您的應用程式或品牌。這些資產參考的標誌與圖示應該與使用者下載應用程式後，在所有應用程式啟動器中看到的標誌與圖示相同。此外，您的圖形資產還應非常適合您所發行所有應用程式的圖形資產，使用者在您的市集清單頁面上也將看到您的圖形資產。
+</p>
+
+<p>
+  為了協助您以更有效的方式向全球受眾行銷您的應用程式，Google Play 可讓您建立推廣圖形、螢幕擷取畫面與影片的當地語系化版本，並將其上傳至 Developer Console。使用者造訪應用程式的市集清單時，Google Play 會顯示您針對使用者的語言而提供的推廣圖形、螢幕擷取畫面及影片。
+</p>
+
+<p>
+  若要對您的推廣圖形執行當地語系化，您可以翻譯內嵌文字、使用不同的圖像或簡報，或者變更行銷方法以最大限度因應特定語言使用者的需求。例如，若您的功能或推廣圖形包括內嵌的產品名稱或標語，您可以翻譯該文字，並將其新增至推廣圖形的當地語系化版本中。
+</p>
+
+<p>
+  由於當地語系化的圖形資產與影片非常重要，因此您應在預期的發行日期之前，就著手開始建立這些資產與影片，並對其執行當地語系化。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/graphics" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="build-upload">
+    13.建置並上傳準備發行的 APK
+  </h2>
+
+
+</div>
+
+<p>
+  若您對應用程式因應 UI、相容性及品質需求的狀況感到滿意，可以建置準備發行的應用程式版本。您可以將準備發行的 APK 上傳至 Developer Console，然後將其向使用者散佈。
+</p>
+
+<p>
+  對於所有應用程式而言，不論採用何種散佈方式，對準備發行的 APK 進行預備的程序都相同。一般該程序包括基本程式碼清理與最佳化、建置版本金鑰並使用版本金鑰登入，以及最終測試。
+</p>
+
+<p>
+  如需了解有關如何建立準備發行的應用程式版本的完備詳細資料，請閱讀<a href="{@docRoot}tools/publishing/preparing.html">準備發行</a>。
+</p>
+
+<p>
+  備妥準備發行的 APK 後，可以將其上傳至 Developer Console。若需要，可以在發行前使用更近的版本取代 APK。
+</p>
+<!--<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/launchchecklist/build"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>-->
+
+<div class="headerLine">
+  <h2 id="plan-beta">
+    14.規劃 Beta 版
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      輕鬆的 beta 測試
+    </h2>
+
+    <p>
+      藉由 Google Play，您可以在全球任何地點設定多組 alpha 與 beta 測試者。下次登入 Developer Console 時，請了解這項強大功能。
+    </p>
+  </div>
+</div>
+
+<p>
+  在推出應用程式之前，取得真實的使用者回饋通常極具價值，在推出新應用程式時更是如此。強烈建議您向關鍵市場的使用者散佈應用程式的測試版，並提供簡易方式讓使用者提供回饋並報告錯誤。
+</p>
+
+<p>
+  Google Play 可以協助您設定應用程式的試用計劃。您登入 Developer Console 並上傳 APK 後，可以設定多組使用者對應用程式進行 alpha 與 beta 測試。您可以先設定 alpha 測試者的較小群組，然後設定 beta 測試者的較大群組。新增使用者後，使用者可以存取您應用程式的市集清單並安裝應用程式。<strong>alpha 或 beta 版本的使用者無法發佈評論或評分</strong>，因此<strong>對 Google Play 上您的評分並無風險</strong>。您需要針對要提供的測試回饋安排某種機制，例如 Google Forum 或 Google+。
+</p>
+
+<p>
+  您收到的回饋將協助您調整 UI、翻譯與市集清單，以確保為使用者提供絕佳的體驗。
+</p>
+<!-- Related resources
+
+<table>
+  <tr>
+    <td>Beta-testing and Staged Rollouts
+See how you can facilitate testing with Google Play.</td>
+  </tr>
+</table> -->
+
+<div class="headerLine">
+  <h2 id="complete-details">
+    15.完成應用程式的市集清單
+  </h2>
+
+
+</div>
+
+<p>
+  在 Google Play 上，將在使用者的市集清單頁面、使用者為詳細了解您的應用程式而造訪的頁面，以及使用者為決定在其 Android 裝置或網頁上購買或下載您的應用程式 而瀏覽的頁面上，向使用者展示您應用程式的產品資訊。
+</p>
+
+<p>
+  Google Play 會在您的市集清單頁面上，為您提供多種方式 (從色彩豐富的圖形、螢幕擷取畫面與影片，到當地語系化的描述、版本詳細資料與其他應用程式連結) 以推廣應用程式並吸引使用者。在準備發行您的應用程式時，請確保利用產品詳細資料頁面能提供的所有資訊，盡可能提高您的應用程式對使用者的吸引力。
+</p>
+
+<p>
+  您應在預期的推出日期之前，開始規劃產品頁面，準備當地語系化的描述、高品質的圖形資產、螢幕擷取畫面與影片等。
+</p>
+
+<p>
+  在接近預期的發行日期時，您應熟悉 Developer Console 中與市集清單組態頁面關聯的所有欄位、選項與資產。在收集頁面的資訊與資產時，請確保可將其輸入或上傳至 Developer Console，直到頁面完成且可供發行為止。
+</p>
+
+<p>
+  在 Developer Console 中設定應用程式針對的地理位置後，請謹記針對您支援的所有語言，新增當地語系化的市集清單、推廣圖形等。
+</p>
+
+<p>
+  若您的應用程式針對平板電腦裝置，請確保納入平板電腦上所執行應用程式的至少一個螢幕擷取畫面，並在應用程式描述、版本資訊、推廣活動及其他位置著重展示您的應用程式對平板電腦的支援。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/productdetails"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="use-badges">
+    16.在推廣活動中使用 Google Play 徽章與連結
+  </h2>
+
+
+</div>
+
+<p>
+  擁有 Google Play 徽章，即可採用官方許可的方式向 Android 使用者推廣您的應用程式。使用 <a href="{@docRoot}distribute/tools/promote/badges.html">Google Play 徽章產生器</a>可以快速建立徽章，以便將使用者連結至透過網頁、廣告、評論等提供的產品。此外，您也可以使用特殊的<a href="{@docRoot}distribute/tools/promote/linking.html">連結格式</a>直接連結至您的市集清單頁面、產品清單或搜尋結果。
+</p>
+
+<p>
+  若要協助您的應用程式在推出後吸引關注，強烈建議您透過盡可能多的通路，在盡可能多的國家/地區舉行宣告產品的推廣活動，以便為推出產品提供支援。例如，您可以使用廣告投放、社交網路或部落格貼文、影片與其他媒體、採訪與評論或可以採用的其他任何通路對產品的推出進行推廣。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/badges" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="final-checks">
+    17.最終檢查及發行
+  </h2>
+
+
+</div>
+
+<p>
+  若您認為發行的準備事宜已就緒，請登入 Developer Console，然後花一點時間執行最後的幾項檢查。
+</p>
+
+<p>
+  請確保：
+</p>
+
+<ul>
+  <li>
+    <p>
+      您的開發人員簡介具有正確的資訊，並已連結至正確的 Google Wallet Merchant Account (Google 電子錢包商家帳戶) (若您要販售產品)。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      您上傳的應用程式版本正確無誤。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      市集清單的所有部分 (包括所有圖形資產、螢幕擷取畫面、影片、當地語系化的描述等) 都已準備就緒。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      您已將應用程式的定價設為免費或付費。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      您已設定所針對的國家/地區 (及電訊商)，並已設定以買家貨幣表示的產品價格 (若適用)
+    </p>
+  </li>
+
+  <li>
+    <p>
+      「相容裝置」會顯示您的應用程式將散佈至所針對的裝置。若並非如此，您應與開發團隊核對應用程式的需求與篩選規則。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      您已提供正確的網站連結及正確的支援電子郵件地址。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      您的應用程式並未違犯內容政策指導方針。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      您已確認應用程式符合 Google Play 上發佈 Android 內容的指導方針，並符合美國出口法規。
+    </p>
+  </li>
+</ul>
+
+<p>
+  您的應用程式現在即可發行！
+</p>
+
+<p>
+  若您要發行更新，請確保閱讀<a
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=113476&amp;topic=2365760&amp;ctx=topic">發行更新的需求</a>。
+</p>
+
+<p>
+  若您已準備就緒，請按一下 Developer Console 中的 [發行]<strong></strong> 按鈕。在數小時內，會向使用者提供您的應用程式，您的產品頁面會顯示在 Google Play 中，供瀏覽、搜尋或自您的推廣活動進行連結。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/finalchecks"
+data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users">
+    18.在推出後支援使用者
+  </h2>
+
+
+</div>
+
+<p>
+  在發行應用程式或應用程式更新後，為您的客戶提供支援是非常關鍵的舉措。快速及時、謙恭有禮的支援會為使用者提供更優的體驗，進而為您的產品帶來更高的評分與更積極的評論。若您積極回應使用者的需求與回饋，使用者可能對您的應用程式更有興趣並推薦該應用程式。尤其是若您採用協調一致的推廣活動，在發行後更是如此。
+</p>
+
+<p>
+  您可以採用多種方式與使用者保持連絡並為其提供支援。最基本的方式是在您的市集清單頁面上提供<em>支援電子郵件地址</em>。除此之外，您可以採用選擇的任何方式 (例如論壇、郵寄清單或 Google+ 頁面) 來提供支援。Google Play 團隊將針對下載、安裝與付費問題為使用者提供支援，但上述範圍之外的其他問題將由您負責解決。您可以支援的問題包括功能要求、應用程式的使用問題，以及相容性設定的有關問題。
+</p>
+
+<p>
+  在發行之後，請規劃以下事宜：
+</p>
+
+<ul>
+  <li>
+    <p>
+      在應用程式的市集清單頁面上，經常檢查對您的評分與評論。尋找暗示出現錯誤或其他問題的重複主題。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      留心新 Android 平台版本的推出，因為您應用程式的相容性設定可能需要更新。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      在您的網站上放置支援資源連結，並設定諸如論壇等其他任何支援。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      在您的市集清單頁面上提供適當的支援電子郵件地址，並在使用者花時間向您傳送電子郵件時予以回應。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      在 Google Play 所提供自動退款時段的基礎上，您自己的退款政策應慷慨大方，因為滿意的使用者更有可能在將來進行購買。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      確認並修正應用程式中的問題。這有助於讓您的應用程式清晰易懂，並有助於您在市集清單頁面上主動列出已知問題。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      盡可能地經常發行更新，同時避免因過於頻繁的更新而導致品質受損或讓使用者感到不快。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      在每次更新時，請確保提供所變更內容的摘要。您可以在 Developer Console 中輸入該資訊。使用者將閱讀該資訊，並會體會到您對提高應用程式的品質非常注重。
+    </p>
+  </li>
+</ul>
+</ul>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/launchchecklist/afterlaunch"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,9x3,9x3,9x3,9x3"
+  data-maxResults="6"></div> 

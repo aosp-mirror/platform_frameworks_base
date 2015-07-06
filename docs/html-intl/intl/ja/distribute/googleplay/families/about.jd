@@ -1,0 +1,39 @@
+page.title=Designed for Families
+page.metaDescription=Designed for Families を利用すると、ファミリー層がアプリとゲームを発見しやすくなります。
+page.image=distribute/images/about-dff-sm.jpg
+meta.tags="families, googleplay, distribution"
+page.tags="families"
+
+@jd:body
+
+<p>
+  Google Play 上のファミリー層に重点を置いた新たなエクスペリエンスにより、ファミリー向けの高品質アプリとゲームのブラウジング、検索、発見を容易に行うことができる新しい方法を今後数週間でユーザーにお届けします。
+</p>
+
+<p>
+  ファミリー層が使いやすいストアをサポートするため、デベロッパーはこの新しい Designed for Families プログラムに、ファミリー層に重点を置いたアプリとゲームをオプトインするように招待されます。<a href="https://support.google.com/googleplay/android-developer/answer/6184502">プログラムの要件</a>を満たすアプリは新しいファミリー エクスペリエンスに表示され、親たちは、適切で信頼性の高い高品質なアプリとゲームをより容易に見つけ出すことができるようになります。
+</p>
+
+<img src="{@docRoot}distribute/images/about-dff-sm.jpg">
+
+<p>
+  現在使用しているツールとプロセスを使用してアプリとゲームをすぐにオプトインし、アプリをデベロッパー コンソールで管理します。このプログラムに含まれるアプリは発見されやすくなるメリットを享受する一方で、既存のカテゴリ、ランキング、レビューは Google Play ストアの別の場所で維持されます。
+</p>
+
+<h2 id="elibibility">利用資格について</h2>
+
+<p>
+  Google Play 上のファミリー向けのエクスペリエンスに含まれるアプリは、年齢にふさわしいアプリを期待する親や家族がより発見しやすいものになっています。Designed for Families プログラムは子供向けに作成されたアプリと、家族全員で楽しめるアプリが含まれるように策定されています。このようなユーザーに対処するため、アプリが適合する必要のある詳細なガイドラインとポリシーが用意されています。これらはアプリのコンテンツ審査で評価されます。
+</p>
+
+<p>
+  アプリが準拠する必要のあるポリシーについて十分な認識が必要です。このポリシーには<a href="http://play.google.com/about/developer-content-policy.html">コンテンツ ポリシー</a>、<a href="http://play.google.com/about/developer-distribution-agreement.html">デベロッパー配布契約</a>、<a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">Designed for Families デベロッパー販売 / 配布契約の補足条項</a>が含まれます。
+</p>
+
+<p>
+  また、Google Play デベロッパー ヘルプ センターに含まれる <a href="https://support.google.com/googleplay/android-developer/answer/6184502">Designed for Families プログラムの要件</a>にも適合している必要があります。
+</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/start.html" class="next-class-link">次のトピック:オプトイン</a>
+</div> 
