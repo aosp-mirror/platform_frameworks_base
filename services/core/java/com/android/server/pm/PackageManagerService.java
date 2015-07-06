@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -2679,7 +2680,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (Process.isIsolated(uid)) {
             return Zygote.MOUNT_EXTERNAL_NONE;
         } else {
-            if (checkUidPermission(WRITE_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
+            if (checkUidPermission(WRITE_MEDIA_STORAGE, uid) == PERMISSION_GRANTED) {
+                return Zygote.MOUNT_EXTERNAL_DEFAULT;
+            } else if (checkUidPermission(WRITE_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
                 return Zygote.MOUNT_EXTERNAL_WRITE;
             } else if (checkUidPermission(READ_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
                 return Zygote.MOUNT_EXTERNAL_READ;
