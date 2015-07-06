@@ -1,0 +1,1023 @@
+page.title=Lista de comprobación para el lanzamiento
+page.metaDescription=Información general fundamental acerca del proceso completo de provisión de tu aplicación a los usuarios. Lee esta lista de comprobación desde el inicio del proceso de desarrollo para ayudarte con tu plan y así poder realizar un lanzamiento exitoso en Google Play.
+meta.tags="localizing, publishing, disttools"
+page.tags="launch, publishing, Google Play"
+page.image=/distribute/images/launch-checklist.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>Lista de comprobación</h2>
+    <ol>
+      <li><a href="#understand-publishing">1. Comprende el proceso de publicación</a></li>
+      <li><a href="#understand-policies">2. Comprende las políticas de Google Play</a></li>
+      <li><a href="#test-quality">3. Prueba la calidad de la aplicación principal</a></li>
+      <li><a href="#determine-rating">4. Determina la clasificación del contenido</a></li>
+      <li><a href="#determine-country">5. Determina los países de distribución</a></li>
+      <li><a href="#confirm-size">6. Confirma el tamaño general</a></li>
+      <li><a href="#confirm-platform">7. Confirma la plataforma y los rangos de pantalla</a></li>
+      <li><a href="#decide-price">8. Decide si será gratuita o paga</a></li>
+      <li><a href="#consider-billing">9. Utiliza Facturación integrada en la aplicación</a></li>
+      <li><a href="#set-prices">10. Fija los precios para tus productos</a></li>
+      <li><a href="#start-localization">11. Comienza la localización</a></li>
+      <li><a href="#prepare-graphics">12. Prepara gráficos, capturas de pantalla y videos promocionales</a></li>
+      <li><a href="#build-upload">13. Crea el APK listo para el lanzamiento</a></li>
+      <li><a href="#plan-beta">14. Planifica un lanzamiento beta</a></li>
+      <li><a href="#complete-details">15. Completa el directorio de tu tienda</a></li>
+      <li><a href="#use-badges">16. Utiliza insignias y vínculos de Google Play</a></li>
+      <li><a href="#final-checks">17. Comprobaciones finales y publicación</a></li>
+      <li><a href="#support-users">18. Brinda soporte a los usuarios después del lanzamiento</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px"><img src="{@docRoot}distribute/images/launch-checklist.jpg"></div>
+
+<p>
+  Antes de publicar tus aplicaciones en Google Play y distribuirlas a los usuarios, debes
+ tener listas las aplicaciones, probarlas y preparar el material
+ promocional.
+</p>
+
+<p>
+  Esta página te ayuda a comprender el proceso de publicación y a prepararte para un
+ lanzamiento exitoso de tu producto en Google Play. Aquí se resumen algunas de las tareas
+ que deberás realizar antes de publicar tu aplicación en Google Play, como
+ crear un paquete de la aplicación (APK) firmado y listo para el lanzamiento, comprender los
+ requisitos de la aplicación y crear la página de productos y recursos gráficos para
+ cada una de tus aplicaciones.
+</p>
+
+<p>
+  Las tareas de preparación y publicación están numeradas para brindarte una idea general de
+ secuencia. No obstante, puedes abordar las tareas en cualquier orden que funcione
+ para ti, o puedes omitir pasos según corresponda.
+</p>
+
+<p>
+  A medida que avances hacia la publicación, encontrarás una variedad de recursos de apoyo
+ disponibles. En cada paso se proporcionan vínculos relevantes.
+</p>
+
+<div class="headerLine">
+  <h2 id="understand-publishing">
+    1. Comprende el proceso de publicación
+  </h2>
+
+
+</div>
+
+<p>
+  Antes de comenzar los pasos que se indican en esta lista de comprobación, dedica un momento a
+ leer y comprender el flujo de trabajo general para la publicación y familiarízate con
+ el funcionamiento del proceso. En especial, tú o tu equipo de desarrollo deberán
+ preparar las aplicaciones para el lanzamiento mediante el uso de un proceso común para todas las aplicaciones de Android.
+  Los documentos acerca del flujo de trabajo de la <a href="{@docRoot}tools/publishing/publishing_overview.html">Publicación
+ </a>proporcionan información detallada acerca de cómo funciona la publicación y cómo
+ crear un APK listo para el lanzamiento.
+</p>
+
+<p>
+  Una vez que te familiarices con la publicación en general, continúa leyendo para
+ comprender los problemas que debes considerar al publicar aplicaciones en Google
+ Play.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/understanding"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="understand-policies">
+    2. Comprende las políticas y los acuerdos de Google Play
+  </h2>
+
+
+</div>
+
+<p>
+  Asegúrate de comprender y cumplir las políticas del programa
+ Google Play que aceptaste al registrarte. Google Play implementa activamente las
+ políticas; las violaciones de esas políticas pueden dar lugar a la suspensión de tus aplicaciones y
+ las violaciones reiteradas pueden generar la cancelación de tu cuenta de desarrollador.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/policies" data-sortorder=
+"-timestamp" data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test-quality">
+    3. Prueba de calidad
+  </h2>
+
+
+</div>
+
+<p>
+  Antes de publicar tus aplicaciones en Google Play, es importante que te asegures de que
+ cumplen las expectativas de calidad básicas para todas las aplicaciones de Android en todos
+ los dispositivos que quieras admitir. Puedes comprobar la calidad de tu aplicación al configurar
+ un entorno de prueba y someter a prueba la aplicación de acuerdo con un grupo reducido de
+ <strong>criterios de calidad que se aplican a todas las aplicaciones</strong>. Para obtener información
+ completa, consulta las pautas de <a href="{@docRoot}distribute/essentials/quality/core.html">Calidad de la aplicación principal</a>
+.
+</p>
+
+<p>
+  Si tu aplicación está orientada a tablets, asegúrate de que proporcione una experiencia
+ enriquecedora y atractiva a tus clientes de tablets. Consulta las pautas de <a href="{@docRoot}distribute/essentials/quality/tablets.html">Calidad de las aplicaciones para tablets</a>
+ para obtener recomendaciones acerca de cómo optimizar tu aplicación para tablets.
+</p>
+
+<p>
+  Si quieres que tus aplicaciones estén disponibles para Google Play for Education, deberás
+ asegurarte de que sean aptas para una clase K-12 y ofrezcan un
+ valor educativo excepcional. Consulta las <a href="{@docRoot}distribute/essentials/gpfe-guidelines.html">pautas para
+ Education</a> para obtener información acerca de las características que tus aplicaciones educativas
+ deben exhibir.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/quality" data-sortorder=
+"-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="determine-rating">
+    4. Determina la calificación del contenido de tu aplicación
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play requiere que establezcas una clasificación de contenido para tu aplicación, que le informa a los
+ usuarios de Google Play su nivel de madurez. Antes de publicar, debes
+ confirmar el nivel de madurez que quieres usar. Los niveles de clasificación de contenido
+ disponibles son los siguientes:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Todos
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Madurez baja
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Madurez media
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Madurez alta
+    </p>
+  </li>
+</ul>
+
+<p>
+  Los usuarios de Android pueden ajustar en sus dispositivos Android el nivel de madurez
+ deseado para la exploración. Luego, Google Play filtra aplicaciones en función de ese ajuste, de modo que la
+ clasificación de contenido que selecciones puede afectar la distribución de la aplicación a los usuarios. Puedes
+ asignar (o cambiar) la clasificación de contenido para tus aplicaciones en la Consola para desarrolladores.
+ No es necesario que realices cambios en el archivo binario de tu aplicación.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/rating" data-sortorder=
+"-timestamp" data-cardsizes="9x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="determine-country">
+    5. Determina los países de distribución
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play te permite controlar los países y territorios en los que
+ distribuirás tus aplicaciones. Para tener el mayor alcance y la base de clientes potenciales más amplia,
+ te recomendamos que distribuyas a todos los países y territorios disponibles.
+  No obstante, debido a necesidades comerciales, requisitos de la aplicación o dependencias de lanzamiento,
+ podría ser conveniente que excluyas uno o más países de tu distribución.
+</p>
+
+<p>
+  Es importante que determines los países de distribución exactos de forma temprana ya que
+ que esto puede afectar:
+</p>
+
+<ul>
+  <li>
+    <p>
+      La necesidad de recursos localizados en la aplicación.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      La necesidad de una descripción localizada de la aplicación en la Consola para desarrolladores.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Requisitos legales para la aplicación que podrían ser específicos de determinados países.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Soporte de zona horaria, fijación de precios en moneda local, etc.
+    </p>
+  </li>
+</ul>
+
+<p>
+  Con los países donde quieres distribuir en mente, debes evaluar tus necesidades de
+ localización, tanto para tus aplicaciones como para los detalles de sus directorios en Google Play, y comenzar
+ las tareas de localización mucho antes de la fecha de lanzamiento prevista.
+</p>
+
+<p>
+  Consulta <a href="{@docRoot}distribute/tools/localization-checklist.html">Lista de comprobación
+ para la localización</a> para acceder a pasos y consideraciones clave en el proceso de localización.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/country" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="confirm-size">
+    6. Confirma el tamaño total de la aplicación
+  </h2>
+
+
+</div>
+
+<p>
+  El tamaño total de tu aplicación puede afectar su diseño y la manera en la que la publicas en
+ Google Play. Actualmente, el tamaño máximo permitido de un APK publicado en Google Play
+ es de <strong>50 MB</strong>. Si tu aplicación supera ese tamaño, o si quieres
+ ofrecer una descarga secundaria, puedes usar <a href="{@docRoot}google/play/expansion-files.html">Archivos de expansión del APK</a>, que
+ Google Play alojará de forma gratuita en su infraestructura de servidores y administrará
+ automáticamente la descarga a los dispositivos.
+</p>
+
+<ul>
+  <li>
+    <p>
+      El tamaño máximo permitido para un APK publicado en Google Play es de 50 MB.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Para cada APK, puedes usar hasta dos (2) archivos de expansión de APK, cada uno de un tamaño máximo
+ de 2 GB.
+    </p>
+  </li>
+</ul>
+
+<p>
+  El uso de archivos de expansión del APK es un método conveniente y redituable
+ para la distribución de aplicaciones de gran tamaño. No obstante, el uso de archivos de expansión del APK requiere
+ que realices algunos cambios en el archivo binario de tu aplicación, de modo que deberás realizar esos cambios
+ antes de crear el APK listo para el lanzamiento.
+</p>
+
+<p>
+  Para minimizar el tamaño del archivo binario de tu aplicación, asegúrate de ejecutar la herramienta <a href="{@docRoot}tools/help/proguard.html">Proguard</a> o un ofuscador similar
+ en tu código al crear el APK listo para el lanzamiento.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/size" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="confirm-platform">
+    7. Confirma la plataforma de la aplicación y los rangos de compatibilidad de pantalla
+  </h2>
+
+
+</div>
+
+<p>
+  Antes de publicar, es importante que te asegures de que tus aplicaciones estén diseñadas para
+ ejecutarse correctamente en las diferentes versiones de la plataforma Android y en los tamaños de pantalla de los dispositivos
+ para los que quieres distribuir.
+</p>
+
+<p>
+  Desde una perspectiva de compatibilidad de la aplicación, las versiones de la plataforma Android se definen
+ por nivel de <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API
+</a>. Debes confirmar la versión mínima que admite tu aplicación
+ con <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;minSdkVersion&gt;</a>,
+ ya que eso afectará su distribución a dispositivos Android una vez que se publique.
+</p>
+
+<p>
+  Para los tamaños de pantalla, debes confirmar que la aplicación se ejecute correctamente y se vea
+ bien en el rango de tamaños de pantalla y densidades de píxeles que quieres
+ admitir. Debes seguir las sugerencias que se proporcionan en <a href="{@docRoot}guide/practices/screens_support.html">Admisión de múltiples
+ pantallas</a> para proporcionar soporte escalable para diferentes tamaños de pantalla. No obstante,
+ si no has podido hacerlo, declara el tamaño mínimo de pantalla que admiten
+ tus aplicaciones mediante <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a>.
+  Google Play luego limitará la disponibilidad de tus aplicaciones en función de esa información,
+ y las ofrecerá a los dispositivos con el tamaño de pantalla declarado o uno más grande.
+</p>
+
+<p>
+  Para comprender mejor la presencia actual de las versiones de la plataforma Android
+ y los tamaños de pantalla en todos los dispositivos Android, consulta los cuadros del
+ <a href="{@docRoot}about/dashboards/index.html">Panel de dispositivos</a>.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/platform" data-sortorder=
+"-timestamp" data-cardsizes="6x3,6x3,6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="decide-price">
+    8. Decide si tu aplicación será de uso gratuito o pago
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-launch-checklist-1.png">
+</div>
+
+<p>
+  En Google Play, puedes publicar aplicaciones de descarga gratuita o paga. Todos los usuarios
+ de Android pueden descargar las aplicaciones gratuitas en Google Play. A las aplicaciones pagas
+ solo pueden descargarlas los usuarios de un país que admita descargas pagas
+ y quienes tengan un método de pago registrado en Google Play, como una tarjeta de crédito
+ o Facturación directa del operador.
+</p>
+
+<p>
+  Es importante que decidas si tus aplicaciones serán gratuitas o pagas ya que en
+ Google Play <strong>las aplicaciones gratuitas deben continuar siendo gratuitas</strong>.
+</p>
+
+<ul>
+  <li>
+    <p>
+      Una vez que publicas una aplicación como gratuita, no puedes cambiarla a
+ paga. Sin embargo, aún puedes vender <a href="{@docRoot}google/play/billing/billing_overview.html#products">productos
+</a> y <a href="{@docRoot}google/play/billing/billing_subscriptions.html">suscripciones en la aplicación</a>
+ mediante el servicio de <a href="{@docRoot}google/play/billing/index.html">Facturación integrada en la aplicación</a> de Google Play.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Si publicas tu aplicación como paga, <em>puedes</em> convertirla en
+ cualquier momento en una aplicación gratuita (<strong>pero no podrás revertir este cambio para que vuelva a ser
+ paga</strong>). También puedes ofrecer productos y suscripciones integrados en la aplicación.
+    </p>
+  </li>
+</ul>
+
+<p>
+  Si tu aplicación será paga o si piensas vender productos integrados en la aplicación, deberás
+ <a href="https://developers.google.com/wallet/digital/training/getting-started/merchant-setup">
+configurar una cuenta de comerciante en Google Wallet</a> antes de publicar.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/price" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="consider-billing">
+    9. Considera la posibilidad de usar facturación integrada en la aplicación
+  </h2>
+
+
+</div>
+
+<p>
+  La <a href="{@docRoot}google/play/billing/index.html">Facturación integrada
+ en la aplicación</a> de Google Play te permite vender contenido digital en tus aplicaciones. Puedes usar
+ el servicio para vender una amplia variedad de contenido, incluido contenido apto para descargar,
+ como archivos multimedia o fotos, y contenido virtual, como niveles o partes de
+ juegos. El servicio de Facturación integrada en la aplicación te permite realizar ventas únicas y
+ ofrecer suscripciones dentro de la aplicación. Esto puede ayudarte a monetizar la aplicación
+ mientras el usuario la tenga instalada.
+</p>
+
+<p>
+  Si buscas otras maneras de monetizar tu aplicación e interactuar con los usuarios,
+ deberías considerar la Facturación integrada en la aplicación o la Compra inmediata. Estos servicios se han vuelto
+ muy populares entre usuarios y desarrolladores. Para usar la Facturación integrada en la aplicación o la Compra
+ inmediata, deberás realizar cambios en el archivo binario de tu aplicación, de modo que necesitarás
+ completar y probar tu implementación antes de crear el APK listo para el lanzamiento.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/purchasemethod"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="set-prices">
+    10. Fija los precios para tus productos
+  </h2>
+
+
+</div>
+
+<p>
+  Si tus aplicaciones son pagas o piensas vender productos físicos o integrados en la aplicación, Google
+ Play te permite fijar precios para tus productos en una variedad de monedas para los
+ usuarios de diferentes mercados del mundo. Puedes fijar precios de forma individual en
+ diferentes monedas, de modo que tienes la flexibilidad de ajustar el precio
+ de acuerdo con las condiciones del mercado y las tasas de cambio.
+</p>
+
+<p>
+  Antes de publicar, considera cómo vas a fijar los precios de tus productos y cuáles serán
+ los precios en las diferentes monedas. Más adelante, podrás fijar precios en
+ todas las monedas disponibles a través de la Consola para desarrolladores.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/setprice" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,9x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="start-localization">
+    11. Comienza la localización
+  </h2>
+
+
+</div>
+
+<p>
+  Con los países donde quieres distribuir en mente, te recomendamos que evalúes tus
+ necesidades de localización, que te asegures de que tus aplicaciones tengan alcance internacional y que
+ comiences las tareas de localización mucho antes de la fecha de lanzamiento prevista.
+</p>
+
+<p>
+  Además del diseño de tu aplicación, hay al menos tres aspectos de
+ localización que debes considerar:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Localización de las cadenas, las imágenes y otros recursos en tus aplicaciones.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Localización de los detalles del directorio de la tienda de tus aplicaciones en Google Play.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Localización de los recursos gráficos, las capturas de pantalla y los videos de tus aplicaciones
+ que acompañan el directorio de tu tienda.
+    </p>
+  </li>
+</ul>
+
+<p>
+  Consulta <a href="{@docRoot}distribute/tools/localization-checklist.html">Lista de comprobación
+ para la localización</a> para acceder a pasos y consideraciones clave en el proceso de localización.
+</p>
+
+<p>
+  Para localizar el directorio de tu tienda, primero debes crear y finalizar el título,
+ la descripción y el texto promocional de tu aplicación. Reúne y envía todo eso para
+ localización. Opcionalmente, también puedes traducir el texto de "Cambios recientes"
+ para las actualizaciones de la aplicación. Luego puedes agregar los detalles del directorio localizados en la
+ Consola para desarrolladores, o puedes permitir que Google Play traduzca los
+ detalles de tu directorio a los idiomas que admites.
+</p>
+
+<p>
+  Una parte fundamental para que tu directorio resulte atractivo a una base de clientes global es
+ la creación de versiones localizadas de tus gráficos, capturas de pantalla y videos
+ promocionales. Por ejemplo, el gráfico central de tu aplicación podría incluir
+ texto que debes traducir para lograr la máxima eficacia. Puedes crear diferentes
+ versiones de tus gráficos promocionales para cada idioma y cargarlos a la
+ Consola para desarrolladores. Si ofreces un video promocional, puedes crear
+ versiones localizadas y luego agregar un vínculo al video localizado correspondiente
+ para cada idioma que admitas.
+</p>
+
+<p>
+  Una vez que hayas finalizado las traducciones, trasládalas a los recursos de tu aplicación según
+ sea necesario y verifica que se hayan cargado correctamente. Guarda los detalles del directorio de tu aplicación
+ traducidos para más adelante, cuando cargues recursos y configures el directorio de la
+ tienda.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/localization"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="prepare-graphics">
+    12. Prepara gráficos, capturas de pantalla y videos promocionales
+  </h2>
+
+
+</div>
+
+<p>
+  Cuando publicas en Google Play, puedes proporcionar una variedad de recursos
+ gráficos de alta calidad para presentar tu aplicación o tu marca. Una vez que publiques, estos aparecerán
+ en la página de directorio de tu tienda, en los resultados de búsqueda y en otros lugares. Esos recursos
+ gráficos son partes fundamentales de una página de directorio de tienda exitosa que atraiga
+ e involucre a los usuarios, de modo que deberías considerar la posibilidad de que un profesional los produzca por
+ ti. Las capturas de pantalla y los videos también son muy importantes, ya que muestran
+ cómo se ven tus aplicaciones, cómo se usan o cómo se juega, y lo que las hace diferentes.
+</p>
+
+<p>
+  Todos tus recursos gráficos deben estar diseñados de forma tal que sean fáciles de
+ visualizar y resalten tus aplicaciones o tu marca de una forma colorida e interesante. Los recursos
+ deben hacer referencia al mismo logotipo e icono que los usuarios encontrarán en el selector
+ de Todas las aplicaciones una vez que descarguen la aplicación. Tus recursos gráficos también deben
+ ajustarse correctamente a los recursos gráficos de todas las aplicaciones que publicas, que
+ también se mostrarán a los usuarios en la página del directorio de tu tienda.
+</p>
+
+<p>
+  Para ayudarte a comercializar tus aplicaciones de forma más eficaz para un público global, Google
+ Play te permite crear versiones localizadas de tus gráficos, capturas
+ de pantalla y videos promocionales, y cargarlos a la Consola para desarrolladores. Cuando un usuario
+ visita el directorio de la tienda de tu aplicación, Google Play exhibe el gráfico, las capturas
+ de pantalla y los videos promocionales que proporcionaste en el idioma del usuario.
+</p>
+
+<p>
+  Para localizar tus gráficos promocionales, puedes traducir el texto integrado,
+ usar diferentes imágenes o presentaciones, o cambiar tu enfoque de comercialización para
+ abordar mejor las necesidades de los usuarios en idiomas específicos. Por ejemplo, si tu
+ gráfico central o promocional incluye un lema o un nombre de producto integrado,
+ puedes traducir ese texto para agregarlo a una versión localizada del
+ gráfico promocional.
+</p>
+
+<p>
+  Dado que tus videos y tus recursos gráficos localizados son tan importantes, debes
+ comenzar a crearlos y localizarlos mucho antes de la fecha de
+ publicación prevista.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/graphics" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="build-upload">
+    13. Crea y carga el APK listo para el lanzamiento
+  </h2>
+
+
+</div>
+
+<p>
+  Una vez que te asegures de que tus aplicaciones cumplen los requisitos de tu IU, compatibilidad
+ y calidad, puedes crear las versiones de las aplicaciones listas para el lanzamiento.
+  Cargas los APK listos para el lanzamiento a tu Consola para desarrolladores y los distribuyes a los
+ usuarios.
+</p>
+
+<p>
+  El proceso de preparación de un APK listo para el lanzamiento es el mismo que el que sigues para las aplicaciones,
+ independientemente de cómo se distribuyan. Generalmente, el proceso incluye la limpieza
+ y optimización de código básicas, la creación y la firma con tu clave de lanzamiento,
+ y la prueba final.
+</p>
+
+<p>
+  Para obtener información detallada completa acerca de cómo crear una versión de tu aplicación lista para el lanzamiento,
+ lee <a href="{@docRoot}tools/publishing/preparing.html">Preparación para el
+ lanzamiento</a>.
+</p>
+
+<p>
+  Una vez que tengas los APK listos para el lanzamiento a mano, puedes cargarlos en la
+ Consola para desarrolladores. Si fuera necesario, puedes reemplazar un APK con una versión
+ más recientes antes de la publicación.
+</p>
+<!--<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/launchchecklist/build"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>-->
+
+<div class="headerLine">
+  <h2 id="plan-beta">
+    14. Planifica un lanzamiento beta
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      Prueba beta sencilla
+    </h2>
+
+    <p>
+      Google Play te permite configurar grupos de evaluadores alfa y beta ubicados en cualquier
+ lugar del mundo. La próxima vez que inicies sesión en la Consola para
+ desarrolladores, échale un vistazo a esta función.
+    </p>
+  </div>
+</div>
+
+<p>
+  Antes de lanzar tus aplicaciones, te recomendamos que obtengas la opinión real
+ de los usuarios; más aún cuando estés lanzando aplicaciones nuevas. Es altamente
+ recomendable que distribuyas una versión previa al lanzamiento de tu aplicación a los
+ usuarios de tus mercados clave y les proporciones medios sencillos para que puedan
+ brindarte su opinión e informar errores.
+</p>
+
+<p>
+  Google Play puede ayudarte a configurar un programa beta para tu aplicación. Después de iniciar sesión
+ en tu Consola para desarrolladores y cargar tus APK, puedes configurar grupos
+ de usuarios alfa y beta que prueben tus aplicaciones. Puedes comenzar con un grupo pequeño
+ de evaluadores alfa y luego avanzar a un grupo más grande de evaluadores beta. Una vez que
+ agregues los usuarios, estos podrán acceder al directorio de la tienda de tu aplicación e instalarla.
+ <strong>Los usuarios que utilicen las versiones alfa o beta no podrán escribir reseñas ni
+ calificar la aplicación</strong>, por lo que <strong>no corre riesgo tu calificación</strong> en
+ Google Play. Deberás idear un mecanismo para poder recibir comentarios acerca de la evaluación,
+ como un Foro de Google o Google+.
+</p>
+
+<p>
+  Los comentarios que recibas te ayudarán a ajustar tu IU, las traducciones y el
+ directorio de la tienda para garantizar una excelente experiencia para los usuarios.
+</p>
+<!-- Related resources
+
+<table>
+  <tr>
+    <td>Beta-testing and Staged Rollouts
+See how you can facilitate testing with Google Play.</td>
+  </tr>
+</table> -->
+
+<div class="headerLine">
+  <h2 id="complete-details">
+    15. Completa el directorio de tienda de tus aplicaciones
+  </h2>
+
+
+</div>
+
+<p>
+  En Google Play, la información de los productos de tus aplicaciones se muestra en las
+páginas de directorio de la tienda, las páginas que tus usuarios visitan para obtener más información acerca de tus aplicaciones
+ y las páginas en las que decidirán comprar o descargar tus aplicaciones
+ en sus dispositivos Android o en la Web.
+</p>
+
+<p>
+  Google Play te ofrece una variedad de métodos para promover tus aplicaciones e interactuar con los
+ usuarios en las páginas de directorio de la tienda, desde gráficos coloridos, capturas de pantalla y
+ videos hasta descripciones localizadas, detalles del lanzamiento y vínculos a tus otras
+ aplicaciones. Mientras te preparas para publicar tus aplicaciones, asegúrate de aprovechar
+ todo lo que te ofrecen las páginas de detalles del producto, y haz que tus aplicaciones sean lo más
+ atractivas posible.
+</p>
+
+<p>
+  Debes comenzar a planificar tus páginas de productos mucho tiempo antes de la fecha de lanzamiento
+ prevista y asegurarte de contar con una descripción localizada, recursos gráficos de alta calidad,
+ capturas de pantalla y video, etc.
+</p>
+
+<p>
+  A medida que te acercas a la fecha de publicación prevista, debes familiarizarte con
+ todos los campos, las opciones y los recursos asociados con la página de configuración
+ del directorio de la tienda en la Consola para desarrolladores. Mientras reúnes la información
+ y los recursos para la página, asegúrate de que puedas ingresar a ella o cargarla a la
+ Consola para desarrolladores hasta que la página esté completa y lista para su publicación.
+</p>
+
+<p>
+  Una vez que configures el perfilamiento geográfico de tus aplicaciones en la Consola para desarrolladores,
+ recuerda agregar tu directorio de la tienda localizado, gráficos promocionales, etc.
+ para todos los idiomas que admites.
+</p>
+
+<p>
+  Si tu aplicación está orientada a las tablets, asegúrate de incluir al menos una
+ captura de pantalla de la aplicación ejecutándose en una tablet, y resalta la compatibilidad de tus aplicaciones
+ con las tablets en la descripción de la aplicación, las notas de lanzamiento, las campañas promocionales y
+ en cualquier otro sitio.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/productdetails"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="use-badges">
+    16. Utiliza insignias y vínculos de Google Play en tus campañas promocionales
+  </h2>
+
+
+</div>
+
+<p>
+  Las insignias de Google Play te proporcionan método con respaldo oficial para promocionar tus aplicaciones
+ a los usuarios de Android. Utiliza el generador de <a href="{@docRoot}distribute/tools/promote/badges.html">Insignias de Google Play
+</a> para crear rápidamente insignias que vincularán a tus usuarios con tus productos desde
+ páginas web, anuncios publicitarios, reseñas y más. También puedes usar <a href="{@docRoot}distribute/tools/promote/linking.html">formatos de vínculos</a> especiales para establecer un
+ vínculo directo a la página del directorio de tu tienda, a una lista de tus productos o a resultados
+ de búsqueda.
+</p>
+
+<p>
+  Para impulsar tus aplicaciones después de su lanzamiento, te recomendamos firmemente que
+ respaldes el lanzamiento con una campaña promocionar que anuncie tu producto
+ a través de la mayor cantidad de canales y en la mayor cantidad de países posible. Por
+ ejemplo, puedes promover un lanzamiento mediante anuncios publicitarios, publicaciones en redes sociales o blogs,
+ videos y otros medios, entrevistas y reseñas o cualquier otro canal
+ disponible.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/badges" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="final-checks">
+    17. Comprobaciones finales y publicación
+  </h2>
+
+
+</div>
+
+<p>
+  Cuando creas que estás listo para publicar, inicia sesión en la Consola para desarrolladores y
+ dedica un momento a realizar revisiones finales.
+</p>
+
+<p>
+  Asegúrate de lo siguiente:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Tu perfil de desarrollador contiene información correcta y está vinculado a la
+ cuenta de comerciante de Google Wallet adecuada (si vendes productos).
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Cargaste la versión correcta de las aplicaciones.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Están listas todas las partes del directorio de tu tienda, incluidos todos los recursos gráficos,
+ las capturas de pantalla, los videos, las descripciones localizadas, etc.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Configuraste tu aplicación para que sea gratuita o paga.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Configuraste tus países (y operadores) objetivo y fijaste los precios de tus productos (si
+ corresponde) en las monedas de los compradores.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      "Dispositivos compatibles" indica que tus aplicaciones están llegando a los dispositivos
+ a los que pretendías llegar. De lo contrario, deberás verificar con tu equipo de desarrollo 
+ los requisitos y las reglas de filtrado de las aplicaciones.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Proporcionaste el vínculo a tu sitio web correcto en
+ los requisitos y las reglas de filtrado de las aplicaciones.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Tus aplicaciones no violan las pautas de la política de contenido.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Aceptaste que tus aplicaciones cumplen con las pautas para contenido de Android
+ en Google Play y también con las leyes de exportación de los EE. UU.
+    </p>
+  </li>
+</ul>
+
+<p>
+  ¡Tus aplicaciones ya están listas para publicarse!
+</p>
+
+<p>
+  Si estás lanzando una actualización, asegúrate de leer los <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=113476&amp;topic=2365760&amp;ctx=topic">
+requisitos para la publicación de actualizaciones</a>.
+</p>
+
+<p>
+  Cuando estés listo, haz clic en el botón <strong>Publicar</strong> de la Consola para
+ desarrolladores. En pocas horas, tus aplicaciones estarán disponibles para los usuarios
+ y tu página de productos aparecerá en Google Play
+ para que puedan explorarla, realizar búsquedas o acceder a ella a través de tus campañas promocionales.
+</p>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/finalchecks"
+data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users">
+    18. Brinda soporte a los usuarios después del lanzamiento
+  </h2>
+
+
+</div>
+
+<p>
+  Después de publicar aplicaciones o actualizaciones para las aplicaciones, es fundamental que brindes soporte a tus
+ clientes. El soporte puntual y atento puede proporcionar una mejor experiencia para los
+ usuarios, que se traduce en mejores calificaciones y reseñas más positivas para tus
+ productos. Es probable que los usuarios interactúen más con tu aplicación y la recomienden
+ si respondes a sus necesidades y comentarios. Debes tener en cuenta esto especialmente
+ después de publicar si estás utilizando una campaña promocional coordinada.
+</p>
+
+<p>
+  Existen diferentes maneras de mantenerte en contacto con los usuarios y ofrecerles
+ soporte. Es fundamental que proporciones tu <em>dirección de correo electrónico
+ de soporte</em> en las páginas de directorio de tu tienda. Además, puedes ofrecer
+ soporte de cualquier forma que elijas, como un foro, lista de correo o una página de Google+
+. El equipo de Google Play ofrece soporte a los usuarios en relación con problemas de descarga, instalación
+ y pagos, pero tú serás responsable de los problemas que no pertenezcan a
+ estos temas. Algunos ejemplos de problemas para los que puedes ofrecer soporte incluyen: solicitudes de funciones,
+ preguntas acerca del uso de las aplicaciones y preguntas acerca de la configuración de compatibilidad.
+</p>
+
+<p>
+  Después de publicar, haz lo siguiente:
+</p>
+
+<ul>
+  <li>
+    <p>
+      Revisa tus calificaciones y reseñas con frecuencia en las páginas de directorio de la tienda
+ de tus aplicaciones. Presta atención a los temas recurrentes que podrían indicar la presencia de errores u otros problemas.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Presta atención a los lanzamientos de nuevas versiones de la plataforma Android, ya que quizá debas
+ actualizar la configuración de compatibilidad de tus aplicaciones.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Incluye un vínculo a tus recursos de soporte en tu sitio web y configura cualquier otro
+ medio de soporte, como foros.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Proporciona una dirección de correo electrónico de soporte adecuada en las páginas de directorio de la tienda
+ y respóndeles a los usuarios cuando estos dediquen tiempo a escribirte un correo electrónico.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Además de la ventana de reembolso automático que ofrece Google Play, sé generoso
+ con tu propia política de reembolso, ya que los usuarios satisfechos son más propensos a
+ comprar en el futuro.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Reconoce y soluciona los problemas que presenten tus aplicaciones Te recomendamos que seas transparente e
+ indiques de forma proactiva los problemas conocidos en las páginas de directorio de tu tienda.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Publica actualizaciones con la mayor frecuencia que puedas, sin sacrificar calidad
+ ni molestar a los usuarios con actualizaciones demasiado frecuentes.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Con cada actualización, asegúrate de proporcionar un resumen de lo que ha cambiado. Puedes
+ ingresar esa información en la Consola para desarrolladores. Los usuarios la leerán
+ y valorarán que seas serio con respecto a mejorar la calidad de tus
+ aplicaciones.
+    </p>
+  </li>
+</ul>
+</ul>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/launchchecklist/afterlaunch"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,9x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>

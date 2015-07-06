@@ -1,0 +1,584 @@
+page.title=개발자 콘솔
+page.metaDescription=Google Play의 앱 게시용 홈인 개발자 콘솔에 대해 알아봅니다.
+page.image=/distribute/images/developer-console.jpg
+Xnonavpage=true
+
+@jd:body
+    
+    <div id="qv-wrapper">           
+  <div id="qv">
+    <h2>게시 기능</h2>
+    <ol>
+      <li><a href="#allapps">모든 애플리케이션</a></li>
+      <li><a href="#account-details">계정 세부정보</a></li>
+      <li><a href="#merchant-account">판매자 계정 링크</a></li>
+      <li><a href="#multiple-user-accounts">다중 사용자 계정</a></li>
+      <li><a href="#alpha-beta">알파 및 베타 테스트</a></li>
+      <li><a href="#staged-rollouts">출시 준비</a></li>
+      <li><a href="#multiple-apk">다중 APK 지원</a></li>
+      <li><a href="#selling-pricing-your-products">판매 및 가격 책정</a></li>
+      <li><a href="#in-app-products">인앱 제품</a></li>
+      <li><a href="#distribution-controls">배포 컨트롤</a></li>
+      <li><a href="#reviews-reports">사용자 리뷰, 작동 중단 보고서</a></li>
+      <li><a href="#app-stats">앱 통계</a></li>
+      <li><a href="#related-resources">관련 자료</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  <a href="https://play.google.com/apps/publish/">Google Play 개발자 콘솔</a>은 게시 작업 및 도구를 지원하는 홈입니다.
+
+</p>
+<!-- <img src="{@docRoot}images/gp-dc-startscreen.jpg" style="width:480px;" /> -->
+<img src="{@docRoot}images/gp-devconsole-home.png" style="width:480px;">
+<p>
+  앱을 업로드하고 제품 페이지를 작성하고 가격 및 배포를 구성하고 게시합니다.
+ 웹 브라우저에서 개발자 콘솔을 통해 Google Play에 게시하는 모든 단계를 관리할 수 있습니다.
+
+</p>
+
+<p>
+  <a href="{@docRoot}distribute/googleplay/start.html">등록</a>하고 확인 이메일을 수신한 후에 Google Play 개발자 콘솔에 로그인할 수 있습니다.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="allapps">
+    모든 애플리케이션
+  </h2>
+
+
+</div>
+
+<p>
+  모든 애플리케이션에서 시작합니다. 여기에서 앱의 개요를 빠르게 살펴보거나 통계, 리뷰 및 제품 세부정보로 이동하거나 신규 앱을 업로드할 수 있습니다.
+
+</p>
+
+<div style="padding:1em 0em 0em 0em;">
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine" style="margin-top:-6px">
+  <h2 id="account-details">
+    계정 세부정보
+  </h2>
+
+
+</div>
+
+<p>
+  계정 세부정보 페이지에서 개발자나 개발 회사에 대한 기본 개발자 프로필 정보를 지정합니다.
+ Google Play와 고객이 이 정보를 통해 개발자를 식별합니다.
+ 개발자는 언제든지 여기로 돌아와서 정보를 편집하고 설정을 변경할 수 있습니다.
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-profile.png" class="frame">
+</div>
+
+<p>
+  개발자 프로필에는 다음 항목이 포함됩니다.
+</p>
+
+<ul>
+  <li>
+    <p>
+      개발자 이름:  Google Play의 스토어 목록 페이지 등에 표시됩니다.
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      연락처 정보: Google에서만 사용하고 고객은 이 정보를 볼 수 없습니다.
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      웹사이트 URL: 스토어 목록 페이지에 표시됩니다.
+    </p>
+  </li>
+</ul>
+
+<p>
+  계정 세부정보 페이지에서 마케터 및 다른 팀에 대해 제한된 액세스를 추가하거나 판매자 계정을 등록하거나 Google Play 라이선스에 대한 테스트 계정을 설정할 수도 있습니다.
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    판매자 계정 링크
+  </h2>
+
+
+</div>
+
+<p>
+  앱 또는 인앱 제품을 판매하려면 Google Wallet 판매자 계정을 개발자 프로필에 링크합니다.
+ Google Play는 재무 및 세금 확인과 월별 판매 대금 결제를 위해 링크된 판매자 계정을 사용합니다.
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-user-accounts">
+    다중 사용자 계정
+  </h2>
+
+
+</div>
+
+<p>
+  개발자 콘솔의 다른 부분에 액세스할 수 있도록 다른 팀원의 사용자 계정을 설정합니다.
+
+</p>
+
+<div style="width:550px;">
+  <img src="{@docRoot}images/gp-dc-invite.png" class="frame">
+</div>
+
+<p>
+  처음 등록되는 계정은 <em>계정 소유자</em>로 콘솔의 모든 부분에 액세스할 수 있습니다.
+ 소유자는 <em>사용자 계정</em>을 추가하고 콘솔 액세스 권한을 관리할 수 있습니다.
+
+</p>
+
+<p>
+  예를 들어, 소유자가 사용자에게 게시 및 앱 구성에 액세스할 수 있지만 재무 보고서에는 액세스하지 못하도록 권한을 부여할 수 있습니다.
+ 이제 <a href="https://support.google.com/googleplay/android-developer/answer/2528691">다중 계정을 설정</a>하는 방법을 알아봅시다.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="store-listing-details">
+    스토어 목록 세부정보
+  </h2>
+
+
+</div>
+
+<p>
+  개발자 콘솔을 사용하여 <em>스토어 목록 페이지</em>를 설정합니다. 이 페이지는 Google Play에서 앱의 홈입니다.
+ 사용자의 휴대폰이나 웹에 표시되는 페이지입니다. 사용자는 여기에서 앱에 대해 알아보고 다운로드할 수 있습니다.
+
+</p>
+
+<p>
+  앱의 장점을 강조하는 맞춤형 브랜드 자산, 스크린샷 및 동영상을 업로드합니다. 현지화된 설명, 최신 버전에 대한 정보 등을 제공합니다.
+
+ 언제든지 스토어 목록을 업데이트할 수 있습니다.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-details.png" class="frame">
+</div>
+
+<div class="headerLine">
+  <h2 id="upload-instantly-publish">
+    업로드 및 즉시 게시
+  </h2>
+
+
+</div>
+
+<p>
+  개발자 콘솔에서 릴리스 준비된 Android 애플리케이션 패키지 파일을 빠르게 업로드하고 게시할 수 있습니다.
+ 앱을 게시하기 전 <em>초안</em> 단계에서 Google Play가 스토어 목록 페이지를 만들고 사용자가 앱을 사용할 수 있게 만듭니다. 앱은 몇 주가 아니라 몇 시간 이내에 스토어 목록에 나타납니다.
+
+
+
+</p>
+
+<p>
+  앱이 게시된 후에 필요할 때마다 자주 업데이트할 수 있습니다. 앱 바이너리를 업데이트하지 않고 가격, 구성 및 배포 옵션을 언제든지 변경할 수 있습니다.
+
+
+</p>
+
+<p>
+  기능을 추가하거나 코드 문제를 수정한 경우 언제든지 업데이트된 바이너리를 게시할 수 있습니다.
+ 새 버전은 거의 즉시 사용할 수 있습니다. 기존 고객에게는 업데이트를 다운로드할 준비가 되었음을 알려줍니다.
+ 사용자가 앱의 자동 업데이트를 승인할 수도 있습니다. 그러면   업데이트를 게시하는 즉시 전송되고 설치됩니다.
+
+ 언제든지 앱의 게시를 취소할 수 있습니다.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="alpha-beta">
+    알파 및 베타 테스트
+  </h2>
+
+
+</div>
+
+<p>
+  출시하기 전에 사용자의 실제 피드백을 받는 것은 항상 중요합니다.
+ Google Play를 통해 전 세계 모든 지역의 알파 및 베타 테스트 그룹에 앱의 시험판 버전을 쉽게 배포할 수 있습니다.
+
+</p>
+
+<p>
+  Google Play 개발자 콘솔의 <strong>APK</strong> 섹션에 <strong>알파 테스트</strong> 및 <strong>베타 테스트</strong> 탭이 있습니다.
+
+ 여기에서 앱의 APK 파일 버전을 업로드하고 테스터 목록을 <a href="https://support.google.com/groups/answer/46601">Google 그룹</a> 또는 <a href="https://support.google.com/plus/topic/2888488">Google+ 커뮤니티</a>로 정의할 수 있습니다.
+ 이 과정이 완료되면 개발자는 테스터에게 전달할 URL을 받게 되며 그 URL을 사용하여 테스트 프로그램에 옵트인할 수 있습니다.
+
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-ab.png" class="frame">
+</div>
+
+<p>
+  옵트인 후에 테스터가 앱의 제품 페이지로 이동하여 앱을 다운로드하면 Google Play가 해당 알파 및 베타 버전을 제공합니다.
+
+ 실수로 사용자가 양쪽 테스트 그룹에 모두 옵트인하면 Google Play가 항상 알파 테스트 버전을 제공합니다.
+
+</p>
+
+<p>
+  알파 및 베타 버전 앱에서는 사용자가 피드백 및 리뷰를 제공할 수 없습니다.
+ 피드백을 받으려면 <a href="https://support.google.com/groups/answer/46601">Google 그룹</a> 또는 <a href="https://support.google.com/plus/topic/2888488">Google+ 커뮤니티</a>를 사용하거나 이메일 주소나 본인의 웹사이트를 설정하면 됩니다.
+
+</p>
+
+<p>
+  이러한 테스트 프로그램을 사용하여 <a href="{@docRoot}distribute/essentials/optimizing-your-app.html">앱을 최적화</a>하고 <a href="{@docRoot}distribute/users/expand-to-new-markets.html">신규 시장 출시</a>를 지원하고 <a href="{@docRoot}distribute/users/build-community.html">커뮤니티 구축</a>을 시작할 수 있습니다.
+
+
+ <a href="{@docRoot}distribute/tools/launch-checklist.html">출시 검사 목록</a> 및 <a href="{@docRoot}distribute/tools/localization-checklist.html">현지화 검사 목록</a>에서 베타 테스트 사용에 대한 추가 정보도 있습니다.
+
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="staged-rollouts">
+    출시 준비
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 개발자 콘솔의 APK 섹션에서 프로덕션 탭을 사용하여 앱의 출시를 준비할 수도 있습니다.
+ 여기에서 앱을 다운로드할 수 있는 사용자의 비율(%)을 정의할 수 있습니다.
+
+</p>
+
+<p>
+  출시 준비를 통해 예상치 않은 버그나 서버 부하의 영향을 제한하고 편향되지 않은 사용자 샘플로 사용자 피드백을 측정할 수 있습니다.
+
+  출시를 준비하는 동안 사용자가 앱의 평점을 매기고 리뷰할 수 있으므로 내키지 않은 경우 먼저 소규모 사용자에게 출시하십시오.
+ 부정적인 리뷰를 관찰하고 응답하십시오.
+
+</p>
+
+<p>
+  Android 플랫폼의 <a href="{@docRoot}tools/publishing/versioning.html">앱 버전 관리 요구사항</a> 때문에 롤백은 지원되지 않습니다.
+ 롤백이 필요한 경우 이전 APK를 새 버전 번호로 출시하는 것을 고려하십시오.
+ 하지만 이 방법은 사용자가 새로운 기능에 액세스할 수 없고 이전 앱이 서버 변경사항이나 데이터 형식과 호환되지 않을 수도 있으므로 마지막 수단으로만 사용하고 업데이트의 <a href="#alpha-beta">알파 및 베타 테스트</a>를 실행해야 합니다.
+
+
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-apk">
+    다중 APK 지원
+  </h2>
+
+
+</div>
+
+<p>
+  대부분의 경우 단일 앱 패키지(APK)만 필요하며 이는 앱을 관리 및 유지 관리하는 가장 쉬운 방법입니다. 하지만 다양한 장치에 다양한 APK를 제공할 필요가 있는 경우 Google Play는 그러한 방법을 제공합니다.
+
+
+
+</p>
+
+<p>
+  <em>다중 APK 지원</em>을 통해 패키지 이름은 동일하지만 OpenGL 텍스처 압축 형식, 화면 크기 지원 또는 지원되는 Android 플랫폼 버전은 다른 다중 앱 패키지를 생성할 수 있습니다.
+
+ 단순히 모든 APK를 단일 제품 목록 아래에 업로드하면 Google Play가 장치의 특징에 따라 가장 적합한 APK를 선택하여 사용자에게 제공합니다.
+
+
+
+</p>
+
+<p>
+  <em>APK 확장 파일</em> 옵션을 사용하여 각 게시된 APK에 대해 최대 2개의 부차적 다운로드(다중 APK 포함)를 업로드할 수도 있습니다.
+ 각 확장 파일의 크기는 최대 2GB이고 모든 유형의 코드나 자산을 포함할 수 있습니다.
+
+  Google Play는 이들을 무료로 호스팅하고 파일 다운로드를 정상적인 앱 설치의 일부로 처리합니다.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="selling-pricing-your-products">
+    제품 판매 및 가격 책정
+  </h2>
+
+
+</div>
+
+<div class="figure-right">
+  <img src="{@docRoot}images/gp-buyer-currency.png" class="frame">
+</div>
+
+<p>
+  앱 및 인앱 제품의 가격을 책정할 수 있는 도구가 있습니다. 앱을 무료 또는 유로로 다운로드하도록 설정할 수 있으며, 유료의 경우 다운로드하기 전에 결제가 필요합니다.
+
+</p>
+
+<ul>
+  <li>앱을 무료로 게시하는 경우 <strong>앱의 수명주기 동안 무료로 유지</strong>해야 합니다. 무료 앱은 Google Play에서 모든 사용자가 다운로드할 수 있습니다.
+
+  </li>
+
+  <li>앱을 유료로 게시하는 경우 나중에 무료로 변경할 수 있습니다. 유료 앱은 Google Play에서 결제 양식을 등록한 사용자만 구입하고 다운로드할 수 있습니다.
+
+
+  </li>
+</ul>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      앱을 배포하거나 판매할 수 있는 국가 목록은 <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294&amp;topic=2365624&amp;ctx=topic">애플리케이션 배포 지원 위치</a>를 참조하십시오.
+
+
+    </p>
+  </div>
+</div>
+
+<p>
+  앱이 무료이든 유로이든 상관없이 인앱 제품과 구독도 제공할 수 있습니다.
+ 유료 앱, 인앱 제품 및 구독에 대해 개별적으로 가격을 책정하십시오.
+
+</p>
+
+<p>
+  사용자가 앱 제품 페이지를 탐색하거나 구입을 시작하면 Google Play가 현지 통화로 결제할 가격을 표시합니다.
+
+</p>
+
+<p>
+  처음에는 개발자가 각 제품에 대해 자국 통화로 기본 가격을 책정합니다. 별도의 작업이 없으면 Google Play가 한 달에 한 번 앱의 미화 가격을 기준으로 현지 가격을 자동 책정합니다.
+
+
+</p>
+
+<p>
+  하지만 Google Play는 개발자에게 국가별 제품 가격을 책정할 수 있는 전권을 부여합니다.
+ 이를 적용하려면 <strong>지금 가격 자동 변환</strong> 기능을 사용하여 기본 가격에서 고정 현지 가격을 수동으로 책정할 수 있습니다.
+
+ 그런 다음 가격을 검토하고 원하는 국가에 대해 새로운 가격을 책정할 수 있습니다. 국가별 가격은 독립적이므로 다른 가격에 영향을 주지 않고 가격을 조정할 수 있습니다.
+
+ 대부분의 국가에서 책정 가격은 세금을 포함하여 사용자에게 청구되는 최종 가격입니다.
+
+</p>
+
+<p>
+  앱 가격 책정에 대한 자세한 내용은 <a href="{@docRoot}distribute/users/expand-to-new-markets.html#localize-your-google-play-listing">신규 시장 확장</a>을 참조하십시오.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="in-app-products">
+    인앱 제품
+  </h2>
+
+
+</div>
+
+<p>
+  앱을 통해 수익을 창출하는 수단으로 <a href="{@docRoot}google/play/billing/index.html">Google Play 인앱 결제</a>를 사용하여 인앱 제품 및 구독을 판매할 수 있습니다.
+ 인앱 제품은 일회 구매 방식이고 구독은 매달 또는 연간 단위로 반복 결제되는 방식입니다.
+
+</p>
+
+<p>
+  게시된 특정 APK 또는 초안 APK에 대해 <strong>인앱 제품</strong> 섹션에서 다음 작업을 수행합니다.
+
+</p>
+
+<ul>
+  <li>인앱 제품 및 구독에 대한 제품 목록을 생성합니다.
+  </li>
+
+  <li>가격을 책정합니다.
+  </li>
+
+  <li>앱을 포함한 제품을 게시하거나, 사용하지 않는 제품을 회수합니다. 
+  </li>
+</ul>
+
+<p>
+  인앱 결제를 구현하는 자세한 방법은 개발자용 <a href="{@docRoot}google/play/billing/index.html">인앱 결제</a> 문서를 참조하십시오.
+ <a href="{@docRoot}distribute/monetize/premium.html">Premium</a>, <a href="{@docRoot}distribute/monetize/freemium.html">Freemium</a> 및 <a href="{@docRoot}distribute/monetize/subscriptions.html">구독</a> 수익 모델에 인앱 제품을 활용합니다.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="distribution-controls">
+    배포 컨트롤
+  </h2>
+
+
+</div>
+
+<p>
+  앱의 배포 대상 국가와 지역을 관리합니다. 일부 국가의 경우 대상 통신사를 선택할 수 있습니다.
+ 매니페스트 파일에  선언된 배포 규칙에 따라 앱에서 사용할 수 있는 장치 목록을 확인할 수도 있습니다.
+
+
+</p>
+
+<h3 id="geotargeting">
+  대상 지역 지정
+</h3>
+
+<p>
+  Google Play 개발자 콘솔의 컨트롤을 사용하여 애플리케이션 바이너리를 변경하지 않고 앱의 지리적 배포를 손쉽게 관리할 수 있습니다.
+
+ 배포 대상 국가와 지역은 물론 (일부 국가의 경우) 통신사도 지정할 수 있습니다.
+
+</p>
+
+<p>
+  Google Play는 사용자가 스토어를 방문하면 사용자가 앱을 다운로드하기 전에 대상 국가로 지정된 국가에 소속되어 있는지 확인합니다. 대상 국가 및 통신사를 변경하려면 Google Play 개발자 콘솔에서 언제든지 변경하여 저장하면 됩니다.
+
+
+
+</p>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-supported-dev-requirements.png" class="frame">
+</div>
+
+<p>
+  전 세계 사용자를 대상으로 마케팅하려면 앱 세부정보 및 설명, 홍보 그래픽, 스크린샷 등을 포함한 <a href="{@docRoot}distribute/tools/launch-checklist.html#start-localization">스토어 목록을 현지화</a>하면 됩니다.
+
+
+</p>
+
+<h3 id="captargeting">
+  대상 기능 지정
+</h3>
+
+<p>
+  Google Play에서 앱이 사용하는 장치 기능 또는 성능에 따라 배포를 컨트롤할 수도 있습니다.
+ 하드웨어 기능, OpenGL 텍스처 압축 형식, 라이브러리, Android 플랫폼 버전 등 앱이 매니페스트에 정의할 수 있는 여러 유형의 종속성이 있습니다.
+
+
+
+</p>
+
+<p>
+  앱을 업로드하면 Google Play가 종속성을 읽고 필요한 배포 규칙을 설정합니다.
+ 종속성 선언에 대한 기술 정보는 <a href="{@docRoot}google/play/filters.html">Google Play 필터</a>를 참조하십시오.
+
+
+</p>
+
+<p>
+  정확한 배포 컨트롤을 위해 Google Play에서 종속성에 따라 앱이 사용할 수 있는 모든 장치를 확인할 수 있습니다(해당되는 경우).
+ Google Play 개발자 콘솔에서 지원되는 장치를 나열함은 물론 필요한 경우 특정 장치를 제외시킬 수도 있습니다.
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="reviews-reports">
+    사용자 리뷰 및 작동 중단 보고서
+  </h2>
+
+
+</div>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-dc-reviews.png" class="frame">
+  <p class="img-caption">
+    사용자 리뷰 섹션에서 특정 앱의 사용자 리뷰에 액세스할 수 있습니다. 다양한 방법으로 리뷰를 필터링하여 더 쉽게 문제를 찾아내고 더욱 효과적으로 고객을 지원할 수 있습니다.
+
+
+  </p>
+</div>
+
+<p>
+  Google Play에서 사용자가 다른 사용자에게 도움이 되는 앱 리뷰를 손쉽게 제출할 수 있습니다.
+ 리뷰는 고객이 직접 제공하는 유용성 피드백, 지원 요청 및 상세한 중요 기능 문제 정보입니다.
+
+
+</p>
+
+<p>
+  개발자는 작동 중단 보고서를 앱 디버깅 및 개선에 사용할 수 있습니다. Android 장치에서 자동으로 제출되는 스택 추적 및 기타 데이터가 포함된 작동 중단 보고서를 볼 수 있습니다.
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="app-stats">
+    앱 통계
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:500px">
+  <img src="{@docRoot}images/gp-dc-stats.png">
+  <p class="img-caption">
+    <b>앱 통계 페이지</b>: 특정 앱의 설치 성능에 대한 다양한 통계를 보여줍니다.
+
+  </p>
+</div>
+
+<p>
+  앱의 설치 성능에 대한 상세한 통계를 얻을 수 있습니다.
+</p>
+
+<p>
+  고유한 사용자는 물론 고유한 장치를 통해 측정된 설치 메트릭을 보여줍니다.
+ 활성 설치, 총 설치, 업그레이드, 일별 설치 및 제거, 평점에 대한 메트릭을 보여줍니다.
+
+</p>
+
+<p>
+  Android 플랫폼 버전, 장치, 국가, 언어, 앱 버전 및 통신사를 포함한 메트릭으로 설치 수를 상세히 보여줍니다.
+ 타임라인 차트의 각 차원에 대한 설치 데이터를 보여줍니다.
+
+</p>
+
+<p>
+  이 차트는 앱의 설치 최대치와 장기 동향을 강조하여 나타냅니다.
+  이를 통해 사용자의 채택 동작을 살펴보고 통계와 홍보의 상관관계, 앱 개선의 효과 및 기타 요소를 확인할 수 있습니다.
+ 타임라인에 특정 지점을 추가하여 차원 내의 데이터를 중점적으로 살펴봅니다.
+
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">관련 자료</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/developerconsole"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+  </div>

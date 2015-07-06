@@ -1,0 +1,294 @@
+page.title=Google Play商機
+meta.tags="visibility, growth, distributing"
+page.tags="play, apps, distributing, publishing"
+page.metaDescription=每月數十億次下載，此數量仍在攀升。憑藉 Google 的宏大規模向使用者呈現您的應用程式。
+page.image=/distribute/images/about-play.jpg
+
+@jd:body
+
+<div id="qv-wrapper">           
+  <div id="qv">
+  <h2>關於 Google Play</h2>
+    <ol style="list-style-type:none;">
+      <li><a href="#reach">範圍涵蓋全球，成長迅速</a></li>
+      <li><a href="#ratings-reviews">使用者評分與評論</a></li>
+      <li><a href="#category-browsing">類別瀏覽</a></li>
+      <li><a href="#search">搜尋</a></li>
+      <li><a href="#top-charts-and-lists">頂級排行圖表與清單</a></li>
+      <li><a href="#featured-staff-picks">特色精選、人員推薦、集合與徽章</a></li>
+      <li><a href="#product-detail-pages">市集清單頁面</a></li>
+      <li><a href="#related-resources">相關資源</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Google Play 是散佈 Android 應用程式的超級市集。在 Google Play 上發行時，您會向遍佈全球 190 多個國家/地區的龐大的 Android 客戶群呈現您的應用程式。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-about-0.jpg" alt="Google Play on an Android Tablet" style="width:480px;position:relative" />
+</div>
+
+<p>
+  Google Play 是 Android 體驗的核心環節。新使用者可以使用應用程式、遊戲及其他 Google Play 內容對其裝置進行個人化。既有使用者可以定期返回以查看其趨勢與新項目。下載新應用程式非常便利迅捷，Google Play 會使用空中通訊功能將應用程式快速推送至使用者的裝置。
+</p>
+
+<p>
+  Google Play 也是網路使用者的頂級目標。只要有瀏覽器，任何人都能在網路上查看 Google Play。Android 使用者甚至可以購買並安裝所需的應用程式，Google Play 無需任何纜線即可將應用程式自動推送至使用者的裝置。
+</p>
+
+<p>
+  Google Play 網站的可存取性與便利性可為您提供新方式，供您將許多來源 (例如線上廣告、網頁搜尋與交叉連結) 的流量吸引到您的產品上來。Google Play 專為關聯使用者與絕佳的應用程式及遊戲而設計，能提供關鍵的通路，讓您的應用程式在市場上引人注目且動力十足。
+</p>
+
+<div class="headerLine">
+  <h2 id="ratings-reviews">
+    使用者評分與評論
+  </h2>
+
+
+</div>
+
+<p>
+  潛在的使用者會將評分與評論視為應用程式品質的關鍵度量指標。Android 使用者可將應用程式評為一星至五星，並發佈評論，以展示其對所下載應用程式的欣賞程度。
+</p>
+
+<p>
+  在 Google Play 清單與搜尋結果中，<strong>您應用程式的評分是影響其排名的最重要的因素之一，</strong>也是在規劃應用程式及遊戲以便在市集內推廣時，編輯人員尋求的關鍵度量指標之一。
+</p>
+
+<div class="img" style="padding: 1em auto;width:96%;">
+  <img src="{@docRoot}images/gp-rating-web.png" style="border:1px solid #ddd;">
+</div>
+
+<div class="headerLine">
+  <h2 id="category-browsing">
+    類別瀏覽
+  </h2>
+
+
+</div>
+
+<p>
+  在 Google Play 中發行應用程式時，您可以點選類別 (希望使用者從該類別中找到您的應用程式)。可以使用 30 多個類別。在每個類別中，會根據評分、評論、下載次數、國家/地區與其他因素的組合確定應用程式的排名。
+</p>
+
+<div class="headerLine">
+  <h2 id="search">
+    搜尋
+  </h2>
+
+
+</div>
+
+<p>
+  藉由在 Google Play 中進行搜尋，使用者可以快速準確地找到應用程式或遊戲。搜尋會使用強大的啟發法對作為使用者類型的字詞提出建議，並提供所建議應用程式的直接連結。在結果中，使用者會找到相關度最高、最受青睞的應用程式 (位於頂部)。
+</p>
+
+<div class="headerLine">
+  <h2 id="top-charts-and-lists">
+    頂級排行圖表與清單
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-top.jpg">
+</div>
+
+<p>
+  透過 [應用程式] 及 [遊戲] 首頁右側的頂級排行圖表，使用者可以始終了解有關 Android 使用者的流行資訊與趨勢。這些圖表始終保持最新狀態，每天會根據最近的下載活動進行數次更新。若應用程式的評分與下載活動次數上升，應用程式在這些圖表中的排行也將升高。
+</p>
+
+<p>
+  為了讓這些圖表盡可能貼近全球的使用者，在使用 Google Play 的最普遍的國家/地區中，還提供這些國家/地區特定的頂級排行圖表。若您的應用程式動力十足，下載次數與評分快速上升，則會攀升到一或多個頂級排行圖表中，並獲得更多的展示機會。
+</p>
+
+<table style="width:50%;">
+  <tr>
+    <td>
+      免費頂級排行
+    </td>
+    <td>
+      免費應用程式與免費遊戲的清單
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      付費頂級排行
+    </td>
+    <td>
+      付費應用程式與付費遊戲的清單
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      總收入頂級排行
+    </td>
+    <td>
+      總體收入 (免費或付費)
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      新免費頂級排行
+    </td>
+    <td>
+      推出未滿 30 天
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      新付費頂級排行
+    </td>
+    <td>
+      推出未滿 30 天
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      趨勢
+    </td>
+    <td>
+      安裝次數快速上升的新生項目
+    </td>
+  </tr>
+</table>
+
+<div class="headerLine">
+  <h2 id="featured-staff-picks">
+    特色精選、人員推薦、集合與徽章
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 編輯團隊致力於讓使用者注意到最佳的應用程式，並設定市集內應用程式品質的基調。該團隊會經常檢閱 Google Play 中的應用程式，不僅會尋找非常知名的應用程式及遊戲，還會尋找希望更多人了解的「泥沙下的珍珠」。該團隊會在<em>特色精選</em>、<em>人員推薦</em>及其他集合中推廣出色的應用程式。
+</p>
+
+<p>
+  您無法將應用程式指定為精選應用程式，但是該團隊會始終關注 Google Play 以尋找出色的應用程式。若您建置的應用程式深受使用者喜愛，並在 Android 裝置上具有良好外觀，就會引起編輯團隊的注意。
+</p>
+
+<h3 id="featured-staff-picks2">
+  特色精選與人員推薦
+</h3>
+
+<p>
+  Google Play 編輯人員每週都會選取新的一組應用程式，在其大受歡迎的<em>特色精選</em>與<em>人員推薦</em>集合中予以推廣。
+</p>
+
+<p>
+  <em>特色精選</em>集合會著重展示可供 Android 使用的最新最優的應用程式與遊戲標題。該清單還包括頂級類別 (這些頂級類別也屬特色精選之列) 中品質最優、最受青睞的應用程式。<em>人員推薦</em>會收集 Google Play 上最近所有的特色精選應用程式與遊戲。為了聚焦平板電腦使用者，特殊的<em>人員推薦</em>集合會著重展示適用於 Android 平板電腦的最佳應用程式。
+</p>
+
+<table style="text-align:center;margin:1.5em 0;">
+  <tr>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks1.jpg">
+      <p>
+        特色精選
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks2.jpg">
+      <p>
+        集合
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks3.jpg">
+      <p>
+        編輯人員的選擇
+      </p>
+    </td>
+  </tr>
+</table>
+
+<h3 id="collections">
+  應用程式集合
+</h3>
+
+<p>
+  編輯人員經常會根據主題或季節性活動，將一組應用程式及遊戲整合在一起。此集合方式快速及時，受其吸引，使用者經常使用這些清單來選取應用程式。
+</p>
+
+<p>
+  編輯人員會選擇供集合推廣的應用程式，即在手機與平板電腦上展示 Android 最佳特性的高品質應用程式。此外，該人員還會尋找可對集合整體作出有趣或獨特貢獻的應用程式。
+</p>
+
+<h3 id="editors-choice">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/editorschoice_ann.png">編輯人員的選擇 </h3>
+
+<p>
+  <em>編輯人員的選擇</em>是規劃的應用程式集合，著重展示可在 Android 上使用的某些非常出色的應用程式。編輯人員選擇這些應用程式著眼於品質與絕佳的使用者體驗、長期受歡迎，以及 Android 功能的創新使用。
+</p>
+
+<p>
+  此外，<em>編輯人員的選擇</em>所選擇的應用程式還會收到徽章，該徽章顯示在 Google Play 中應用程式名稱所在的位置。
+</p>
+
+<h3 id="top-developer">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/topdev_ann.png">頂級開發人員 </h3>
+
+<p>
+  「頂級開發人員」徽章將授予因致力於推出 Android 上的高品質創新應用程式而取得認可、受人尊敬的開發人員。Google Play 編輯人員會根據開發人員的累計工作，不時頒發「頂級開發人員」徽章。
+</p>
+
+<p>
+  「頂級開發人員」徽章會顯示在 Google Play 中所顯示的開發人員名稱旁。該徽章意味著對開發人員所有應用程式的長期認可，預示著使用者對開發人員的產品具有更高的信任度。
+</p>
+
+<div class="headerLine">
+  <h2 id="product-detail-pages">
+    市集清單頁面
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-listing.jpg">
+</div>
+
+<p>
+  您應用程式的 Google Play 店面是其<em>市集清單頁面</em>：這是內容豐富的多彩頁面，您可藉此推廣應用程式、著重展示其評分與評論，並顯示應用程式的功能。
+</p>
+
+<p>
+  使用者將在您的市集清單內尋找您應用程式的所有相關資訊。若使用者在搜尋結果、頂級排行圖表、類別清單與集合內看到列示的應用程式，只需點選一次即可直接進入您的市集清單。
+</p>
+
+<p>
+  可以使用任何網頁瀏覽器透過 <a href="https://play.google.com/apps/publish/">Google Play Developer Console</a> 管理您的產品詳細資料頁面。登入以上傳或更新您的品牌資產，然後以市場的語言輸入您的產品詳細資料。
+</p>
+
+<p>
+  發行時，Google Play 會將您應用程式的評分、評論、連結新增至您的其他產品等項目。Google Play 還可以確保您的市集清單頁面在手機、平板電腦及網頁瀏覽器中具有良好外觀。
+</p>
+
+<p>
+  您可以從 Google Play 外部 (例如從您的網站、廣告活動、評論、社交媒體貼文等) 將網頁使用者直接連結至您的產品詳細資料頁面。請參閱<a href="{@docRoot}distribute/tools/promote/linking.html">連結至您的產品</a>以了解實現之道。
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+<h2>相關資源</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="4"></div>
+    </div>

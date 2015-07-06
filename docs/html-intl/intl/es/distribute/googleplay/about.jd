@@ -1,0 +1,367 @@
+page.title=La oportunidad de Google Play
+meta.tags="visibility, growth, distributing"
+page.tags="play, apps, distributing, publishing"
+page.metaDescription=Miles de millones de descargas por mes y en aumento. Exhibe tus aplicaciones a los usuarios en la escala de Google.
+page.image=/distribute/images/about-play.jpg
+
+@jd:body
+
+    <div id="qv-wrapper">           
+  <div id="qv">
+  <h2>Acerca de Google Play</h2>
+    <ol style="list-style-type:none;">
+      <li><a href="#reach">Alcance mundial, crecimiento rápido</a></li>
+      <li><a href="#ratings-reviews">Calificaciones y reseñas de usuarios</a></li>
+      <li><a href="#category-browsing">Exploración por categoría</a></li>
+      <li><a href="#search">Búsqueda</a></li>
+      <li><a href="#top-charts-and-lists">Cuadros y listas principales</a></li>
+      <li><a href="#featured-staff-picks">Aplicaciones destacadas, seleccionadas por el equipo, colecciones e insignias</a></li>
+      <li><a href="#product-detail-pages">Páginas de directorio de la tienda</a></li>
+      <li><a href="#related-resources">Recursos relacionados</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Google Play es la tienda más importante de distribución de aplicaciones para Android. Cuando
+ publicas en Google Play, exhibes tus aplicaciones a una enorme base de clientes activos
+ de Android en más de 190 países y territorios de todo el
+ mundo.
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-about-0.jpg" alt="Google Play on an Android Tablet" style="width:480px;position:relative" />
+</div>
+
+<p>
+  Google Play es una parte central de la experiencia Android. Los nuevos usuarios
+ personalizan su contenido con aplicaciones, juegos y otros contenidos de Google Play.
+  Los usuarios existentes regresan con frecuencia para ver qué hay de nuevo y las últimas tendencias. Descargar
+ nuevas aplicaciones es extremadamente cómodo y rápido; Google Play envía aplicaciones a los
+ dispositivos del usuario instantáneamente de forma inalámbrica.
+</p>
+
+<p>
+  Google Play es también el destino principal de los usuarios web. Cualquier persona que tenga un explorador
+ puede explorar Google Play en la Web. Los usuarios de Android incluso pueden comprar e instalar
+ las aplicaciones que deseen y Google Play las inserta automáticamente en sus dispositivos
+ sin la necesidad de utilizar cables.
+</p>
+
+<p>
+  La accesibilidad y conveniencia del sitio web de Google Play te ofrece nuevas
+ formas de dirigir tráfico a tus productos desde diferentes orígenes, como anuncios en línea,
+ búsquedas en la Web e interconexión. Google Play fue diseñado para conectar a los usuarios con
+ aplicaciones y juegos increíbles. Proporciona canales clave para que tu aplicación se destaque y
+ gane terreno en el mercado.
+</p>
+
+<div class="headerLine">
+  <h2 id="ratings-reviews">
+    Calificaciones y reseñas de usuarios
+  </h2>
+
+
+</div>
+
+<p>
+  Los usuarios potenciales toman en cuenta las calificaciones y las reseñas como indicadores clave de la calidad de una
+ aplicación. Mediante la calificación de aplicaciones en una escala de una a cinco estrellas y la publicación de reseñas, los usuarios de
+ Android muestran su agradecimiento por las aplicaciones que descargaron.
+</p>
+
+<p>
+  <strong>La calificación de tu aplicación es uno de los factores más importantes que influyen en
+ su clasificación</strong> en las listas de Google Play y en los resultados de búsqueda. También es
+ una de las métricas clave en las que se pone su atención el personal editorial para seleccionar aplicaciones
+ y juegos con el objetivo de promocionarlos en la tienda.
+</p>
+
+<div class="img" style="padding: 1em auto;width:96%;">
+  <img src="{@docRoot}images/gp-rating-web.png" style="border:1px solid #ddd;">
+</div>
+
+<div class="headerLine">
+  <h2 id="category-browsing">
+    Exploración por categoría
+  </h2>
+
+
+</div>
+
+<p>
+  Cuando publicas una aplicación en Google Play, seleccionas la categoría en la que quieres que los
+ usuarios encuentren tu aplicación. Hay más de 30 categorías disponibles. Dentro de cada
+ categoría, las aplicaciones se clasifican según una combinación de calificaciones, reseñas,
+ descargas, país y otros factores.
+</p>
+
+<div class="headerLine">
+  <h2 id="search">
+    Búsqueda
+  </h2>
+
+
+</div>
+
+<p>
+  La búsqueda en Google Play permite a los usuarios encontrar una aplicación o un juego rápidamente. La búsqueda utiliza
+ una heurística potente para sugerir términos a medida que el usuario escribe, y ofrece vínculos
+ directos a aplicaciones en forma de sugerencias. En los resultados, los usuarios encuentran en primer lugar las aplicaciones
+ más relevantes y populares.
+</p>
+
+<div class="headerLine">
+  <h2 id="top-charts-and-lists">
+    Cuadros y listas principales
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-top.jpg">
+</div>
+
+<p>
+  Los cuadros de las aplicaciones principales mantienen a los usuarios en contacto con lo que es popular y con las tendencias entre los usuarios de
+ Android, directamente desde las páginas de inicio de aplicaciones y juegos. Los cuadros se actualizan
+ varias veces por día en función de la actividad de descarga reciente. A medida que
+ aumentan las calificaciones y la actividad de descarga de una aplicación, esa aplicación puede ascender de posición en los cuadros.
+</p>
+
+<p>
+  Para lograr que los cuadros sean lo más relevantes posible para los usuarios alrededor del mundo, en los
+ países donde Google Play es más popular también hay cuadros específicos para el país. A medida que tus
+ aplicaciones van ganando terreno y generan un impulso en las descargas y las calificaciones, ascienden en
+ uno o más de los cuadros de las aplicaciones principales, e incluso adquieren mayor exposición.
+</p>
+
+<table style="width:50%;">
+  <tr>
+    <td>
+      Principales gratis
+    </td>
+    <td>
+      Listas de aplicaciones y juegos gratuitos
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Principales pagas
+    </td>
+    <td>
+      Listas de aplicaciones y juegos pagos
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Principales en ingresos
+    </td>
+    <td>
+      Ingresos brutos, gratis o pagas
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Principales nuevas gratis
+    </td>
+    <td>
+      Menos de 30 días de antigüedad
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Principales nuevas pagas
+    </td>
+    <td>
+      Menos de 30 días de antigüedad
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Tendencia
+    </td>
+    <td>
+      Recién llegadas con gran cantidad de instalaciones
+    </td>
+  </tr>
+</table>
+
+<div class="headerLine">
+  <h2 id="featured-staff-picks">
+    Destacadas, seleccionadas por el equipo, colecciones e insignias
+  </h2>
+
+
+</div>
+
+<p>
+  El equipo editorial de Google Play se dedica a captar la atención de los usuarios
+ con las mejores aplicaciones y marcar la pauta para la calidad de las aplicaciones en toda la tienda.
+  Evalúan constantemente aplicaciones en todo Google Play para encontrar no solo las
+ mejores aplicaciones y juegos, sino también "diamantes en bruto" que
+ desean que más personas vean. El equipo promociona aplicaciones excelentes en las colecciones
+ <em>Destacadas</em>, <em>Seleccionadas por el equipo</em>, y otras.
+</p>
+
+<p>
+  Tú no puedes nominar tu aplicación para que aparezca entre las destacadas, pero el equipo supervisa constantemente
+ Google Play para detectar aplicaciones de excelencia. Si creas una aplicación que los usuarios encuentren genial y que
+ se vea increíble en los dispositivos Android, el equipo editorial lo notará.
+</p>
+
+<h3 id="featured-staff-picks2">
+  Destacadas y seleccionadas por el equipo
+</h3>
+
+<p>
+  Cada semana, el personal editorial de Google Play selecciona un nuevo grupo de aplicaciones para
+ promocionar en sus colecciones populares <em>Destacadas</em> y <em>Seleccionadas por el equipo</em>
+.
+</p>
+
+<p>
+  Las colecciones <em>Destacadas</em> resaltan los títulos de aplicaciones y juegos más nuevos e increíbles
+ disponibles para Android. La lista también incluye las mejores aplicaciones y las
+ más populares en las principales categorías. <em>Seleccionadas por el equipo</em>
+ incluye todas las aplicaciones y los juegos recientemente destacados en Google Play. A fin de incluir a los
+ usuarios de tablets, una colección especial de <em>Seleccionadas por el equipo</em> destaca las mejores
+ aplicaciones para tablets Android.
+</p>
+
+<table style="text-align:center;margin:1.5em 0;">
+  <tr>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks1.jpg">
+      <p>
+        Destacadas
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks2.jpg">
+      <p>
+        Colección
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks3.jpg">
+      <p>
+        Selección de los editores
+      </p>
+    </td>
+  </tr>
+</table>
+
+<h3 id="collections">
+  Colecciones de aplicaciones
+</h3>
+
+<p>
+  De vez en cuando, el personal editorial reúne una colección de aplicaciones y
+ juegos en función de un tema o evento de temporada. Los usuarios, atraídos por la exactitud de la colección,
+ con frecuencia usan esas listas para seleccionar aplicaciones.
+</p>
+
+<p>
+  El personal editorial selecciona aplicaciones para la promoción de colecciones;
+ se trata de aplicaciones de alta calidad que exhiben lo mejor de Android en teléfonos y tablets. El
+ personal también busca aplicaciones que puedan realizar una contribución interesante o única
+ a la colección en su totalidad.
+</p>
+
+<h3 id="editors-choice">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/editorschoice_ann.png"> Selección de los editores
+</h3>
+
+<p>
+  <em>Selección de los editores</em> es una colección exclusiva de aplicaciones que destaca algunas
+ de las mejores aplicaciones disponibles en Android. Los editores seleccionan las aplicaciones por su
+ calidad y excelente interfaz de usuario, gran popularidad y uso innovador de las
+ funciones de Android.
+</p>
+
+<p>
+  Las aplicaciones escogidas para <em>Selección de los editores</em> también reciben una insignia que se
+ exhibe cada vez que se visualiza el nombre de la aplicación en Google Play.
+</p>
+
+<h3 id="top-developer">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/topdev_ann.png"> Desarrollador principal
+</h3>
+
+<p>
+  Desarrollador principal es una insignia que reconoce a los desarrolladores establecidos y respetados por su
+ compromiso con el lanzamiento de aplicaciones innovadoras y de alta calidad en Android.
+  El personal editorial de Google Play otorga la insignia de Desarrollador principal
+ periódicamente en función del historial de trabajo del desarrollador.
+</p>
+
+<p>
+  La insignia de Desarrollador principal aparece junto al nombre del desarrollador dondequiera que
+ se exhiba en Google Play. La insignia denota el reconocimiento continuo de todas las
+ aplicaciones del desarrollador. Implica un nivel adicional de confianza y seguridad
+ por parte de los usuarios en los productos de un desarrollador.
+</p>
+
+<div class="headerLine">
+  <h2 id="product-detail-pages">
+    Páginas de directorio de la tienda
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-listing.jpg">
+</div>
+
+<p>
+  La vidriera de tu aplicación en Google Play es su <em>página de directorio de la tienda</em>: una página
+ colorida y llena de contenido que te permite promocionar tu aplicación, que destaca sus calificaciones y
+ reseñas y muestra lo que tu aplicación puede hacer.
+</p>
+
+<p>
+  El directorio de tu tienda es a donde acuden tus usuarios para averiguar todo sobre la
+ aplicación. Cuando ven tu aplicación en los resultados de búsqueda, en los cuadros de las principales, en las listas
+ de categorías y en las colecciones, un solo toque los lleva directamente al directorio de la tienda.
+</p>
+
+<p>
+  Administra tu página de detalles del producto en la <a href="https://play.google.com/apps/publish/">Consola para desarrolladores de Google Play</a>
+ desde cualquier explorador. Inicia sesión para cargar o actualizar tus recursos de marca e
+ ingresa los detalles de tu producto en los idiomas de los mercados donde distribuyes.
+</p>
+
+<p>
+  Cuando realizas una publicación, Google Play agrega la calificación y las reseñas de tu aplicación, así como vínculos a tus
+ otros productos y más. También se asegura de que la página de directorio de tu tienda se vea
+ genial en teléfonos, tablets y en un explorador web.
+</p>
+
+<p>
+  Puedes vincular usuarios web directamente a tu página de detalles del producto desde fuera de
+ Google Play; por ejemplo, desde tu sitio web, y agregar campañas, reseñas, publicaciones en
+ redes sociales y más. Consulta <a href="{@docRoot}distribute/tools/promote/linking.html">Cómo vincular tus
+ productos</a> para averiguar cómo hacerlo.
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+<h2>Recursos relacionados</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="4"></div>
+    </div>

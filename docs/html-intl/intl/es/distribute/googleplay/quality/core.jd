@@ -1,0 +1,1148 @@
+page.title=Calidad de la aplicación principal
+page.metaDescription=La calidad de la aplicación afecta directamente el éxito a largo plazo de tu aplicación en términos de instalaciones, calificación y reseñas de los usuarios, interactividad y retención del usuario.
+page.image=/distribute/images/core-quality-guidelines.jpg
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Criterios de calidad</h2>
+  <ol>
+    <li><a href="#ux">Diseño e interacción</a></li>
+        <li><a href="#fn">Funcionalidad</a></li>
+        <li><a href="#ps">Rendimiento y estabilidad</a></li>
+        <li><a href="#listing">Google Play</a></li>
+
+  </ol>
+  
+  <h2>Prueba</h2>
+  <ol>
+    <li><a href="#test-environment">Configuración de un entorno de prueba</a></li>
+        <li><a href="#tests">Procedimientos de prueba</a></li>
+        </ol>
+
+  <h2>También deberías leer</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">Calidad de las aplicaciones para tablets</a></li>
+        <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">Optimiza tu aplicación</a></li>
+  </ol>
+  
+
+</div>
+</div>
+
+<div class="top-right-float">
+  <img src="{@docRoot}images/gp-core-quality.png" style="margin-left: 20px;">
+</div>
+
+<p>
+  Los usuarios de Android esperan aplicaciones de alta calidad. La calidad de la aplicación afecta
+ directamente el éxito a largo plazo de tu aplicación en términos de instalaciones, calificación y reseñas de los usuarios,
+ interactividad y retención del usuario.
+</p>
+
+<p>
+  Este documento te ayuda a evaluar los aspectos básicos de calidad en tu aplicación mediante un
+ conjunto compacto de criterios de calidad y pruebas relacionadas para la aplicación principal. Todas las aplicaciones para Android
+ deben cumplir esos criterios.
+</p>
+
+<p>
+  Antes de publicar tus aplicaciones, somételas a prueba de acuerdo con estos criterios para garantizar que
+ funcionen bien en diferentes dispositivos, cumplan las normas de Android para navegación
+ y diseño, y estén preparadas para las oportunidades de promoción en la Play Store
+ de Google. Tu prueba deberá abarcar más de lo que se describe aquí;
+ este documento tiene como objetivo especificar las características de calidad fundamentales que todas las aplicaciones
+ deben exhibir, de modo que puedas incluirlas en tus pruebas.
+</p>
+
+<p>
+  Si estás creando aplicaciones para tablets o Google Play for Education, hay
+ criterios de calidad adicionales que debes considerar y que se definen en las pautas de
+ <a href="{@docRoot}distribute/essentials/quality/tablets.html">Calidad de las aplicaciones
+ para tablets</a> y en las pautas para <a href="{@docRoot}distribute/essentials/gpfe-guidelines.html">Educación
+</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="ux">
+  Diseño visual e interacción del usuario
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios permiten que te asegures de que tu aplicación proporcione patrones estándar de diseño visual
+ e interacción para Android, cuando corresponda, a fin de garantizar una experiencia de usuario
+ uniforme e intuitiva.
+</p>
+
+<table>
+  <tr>
+    <th style="width:2px;">
+      Área
+    </th>
+    <th style="width:54px;">
+      ID
+    </th>
+    
+
+    <th>
+      Descripción
+    </th>
+    <th style="width:54px;">
+      Pruebas
+    </th>
+  </tr>
+  <tr id="UX-B1">
+  <td>Diseño estándar</td>
+  <td>
+    UX-B1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación cumple con las pautas de <a href="{@docRoot}design/index.html">Diseño Android</a>
+ y utiliza <a href="{@docRoot}design/patterns/index.html">patrones e iconos de IU</a> comunes:
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>La aplicación no redefine la función prevista de un icono del sistema (como
+ el botón Atrás).
+    </li>
+
+    <li>La aplicación no reemplaza un icono del sistema con un icono completamente diferente
+ si este activa el comportamiento estándar de la IU.
+    </li>
+
+    <li>Si la aplicación proporciona una versión personalizada de un icono estándar del sistema,
+ el icono debe parecerse al icono estándar del sistema y desencadenar el comportamiento estándar
+ del sistema.
+    </li>
+
+    <li>La aplicación no redefine ni utiliza de forma inadecuada patrones de la IU de Android, de modo que los
+ iconos o los comportamientos pudieran desorientar o confundir a los usuarios.
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-all</a>
+  </td>
+  </tr>
+
+  <tr>
+  <td rowspan="3">
+    Navegación
+  </td>
+  <td id="UX-N1">
+    UX-N1
+  </td>
+  <td>
+    <p>
+    La aplicación admite la <a href="{@docRoot}design/patterns/navigation.html">navegación estándar del sistema con el botón Atrás</a>
+ y no utiliza avisos personalizados en pantalla para el "botón Atrás".
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-3</a>
+  </td>
+  </tr>
+
+  <tr>
+  <td id="UX-N2">
+    UX-N2
+  </td>
+  <td>
+    <p>
+    Todos los diálogos pueden descartarse con el botón Atrás.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-3</a>
+  </td>
+  </tr>
+
+  <tr id="UX-N3">
+  <td>
+    UX-N3
+  </td>
+  <td>
+    Al presionar el botón de inicio en cualquier momento, se navega a la pantalla de inicio del
+ dispositivo.
+  </td>
+  <td>
+    <a href="#core">CR-1</a>
+  </td>
+  </tr>
+
+  <tr id="UX-S1">
+  <td rowspan="2">
+    Notificaciones
+  </td>
+  <td>
+    UX-S1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Las notificaciones siguen las <a href="{@docRoot}design/patterns/notifications.html">pautas</a> de Diseño Android. En
+ especial:
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>Se deben agrupar múltiples notificaciones en un solo objeto de
+ notificación, cuando sea posible.
+    </li>
+
+    <li>Las notificaciones solo son recurrentes si están relacionadas con eventos actuales
+ (como la reproducción de música o una llamada telefónica).
+    </li>
+
+    <li>Las notificaciones no contienen publicidad ni contenido que no esté relacionado con
+ la función central de la aplicación, a menos que el usuario lo permita.
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+
+  <tr id="UX-S2">
+  <td>
+    UX-S2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación utiliza notificaciones únicamente para lo siguiente:
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>Indicar un cambio de contexto relacionado con el usuario (como
+ un mensaje recibido) o
+    </li>
+
+    <li>Exponer información/controles relacionados con un evento actual (como la
+ reproducción de música o una llamada telefónica).
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/corequalityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,6x3,6x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="fn">
+  Funcionalidad
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios garantizan que tu aplicación proporcione el comportamiento funcional previsto
+ con el nivel adecuado de permisos.
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    Área
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    Descripción
+  </th>
+  <th style="width:54px;">
+    Pruebas
+  </th>
+  </tr>
+
+  <tr id="FN-P1">
+  <td rowspan="2">
+    Permisos
+  </td>
+  <td>
+    FN-P1
+  </td>
+  <td>
+    La aplicación solicita solo la cantidad <em>mínima absoluta</em> de permisos necesarios
+ para respaldar la funcionalidad central.
+  </td>
+  <td rowspan="2">
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+
+  <tr id="FN-P2">
+  <td>
+    FN-P2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación no solicita permisos para acceder a datos confidenciales (como
+ contratos o el registro del sistema) ni a servicios que puedan costarle dinero al usuario
+ (como el marcador o SMS), a menos que esté relacionado con una capacidad central de la
+ aplicación.
+    </p>
+  </td>
+  </tr>
+
+  <tr id="FN-L1">
+  <td>
+    Ubicación de la instalación
+  </td>
+  <td>
+    FN-L1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación funciona normalmente cuando se la instala en una tarjeta SD (si la aplicación lo admite).
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Se recomienda admitir la instalación en tarjetas SD para las aplicaciones más grandes
+ (10MB+). Consulta la guía para desarrolladores <a href="{@docRoot}guide/topics/data/install-location.html">Ubicación de la instalación
+ de la aplicación</a> para obtener información acerca de los tipos de aplicaciones
+ que deben admitir la instalación en tarjetas SD.
+    </p>
+  </td>
+  <td>
+    <a href="#SD-1">SD-1</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A1">
+  <td rowspan="4">
+    Audio
+  </td>
+  <td>
+    FN-A1
+  </td>
+  <td>
+    No se reproduce audio cuando la pantalla está apagada, a menos que sea una función central
+ (por ejemplo, la aplicación es un reproductor de música).
+  </td>
+  <td>
+    <a href="#core">CR-7</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A2">
+  <td>
+    FN-A2
+  </td>
+  <td>
+    No se reproduce<a href="http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html">
+ audio cuando la pantalla está bloqueada</a>, a menos que sea una función central.
+  </td>
+  <td>
+    <a href="#core">CR-8</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A3">
+  <td>
+    FN-A3
+  </td>
+  <td>
+    No se reproduce audio en la pantalla de inicio ni cuando está activa otra aplicación, a menos que sea
+ una función central.
+  </td>
+  <td>
+    <a href="#core">CR-1,<br>
+    CR-2</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A4">
+  <td>
+    FN-A4
+  </td>
+  <td>
+    La reproducción de audio continúa cuando la aplicación regresa a primer plano, o le indica al
+ usuario que la reproducción está pausada.
+  </td>
+  <td>
+    <a href="#core">CR-1, CR-8</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U1">
+  <td rowspan="3">
+    IU y gráficos
+  </td>
+  <td>
+    FN-U1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación admite tanto la orientación horizontal como vertical (si fuera posible).
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Las orientaciones exponen ampliamente las mismas funciones y acciones, y conservan
+ la paridad funcional. Se aceptan cambios mínimos en el contenido o las vistas.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U2">
+  <td>
+    FN-U2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación utiliza toda la pantalla en ambas orientaciones y no usa formato de pantalla ancha
+ para compensar los cambios de orientación.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Se acepta el uso mínimo de formato de pantalla ancha para compensar
+ pequeñas variaciones en la geometría de la pantalla.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U3">
+  <td>
+    FN-U3
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación resuelve correctamente las transiciones rápidas entre las orientaciones
+ de la pantalla sin presentar problemas.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-S1">
+  <td rowspan="2">
+    Estado del usuario/la aplicación
+  </td>
+  <td>
+    FN-S1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación no debe dejar ningún servicio en ejecución mientras se encuentre en
+ segundo plano, a menos que se relacione con una capacidad central de la aplicación.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Por ejemplo, la aplicación no debe dejar servicios en ejecución para mantener una
+ conexión de red para recibir notificaciones, para mantener una conexión
+ Bluetooth ni para mantener el GPS activado.
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-6</a>
+  </td>
+  </tr>
+
+  <tr id="FN-S2">
+  <td>
+    FN-S2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación preserva y restaura correctamente el estado del usuario o la aplicación.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    La aplicación preserva el estado del usuario o la aplicación cuando abandona el primer plano y
+ evita la pérdida accidental de datos a causa de la navegación hacia atrás y otros cambios
+ de estado. Cuando regresa al primer plano, la aplicación debe restaurar el
+ estado preservado y toda transacción de estado importante que haya quedado
+ pendiente, como cambios en campos editables, el progreso de un juego, menús,
+ videos y otras secciones de la aplicación o el juego.
+    </p>
+
+    <ol style="margin-bottom:.25em;list-style-type:lower-alpha">
+    <li>Cuando se reanuda la aplicación desde el conmutador de Aplicaciones recientes, la aplicación
+ regresa al usuario al estado exacto en que se encontraba la última vez que este la utilizó.
+    </li>
+
+    <li>Cuando se reanuda la aplicación después de la reactivación del dispositivo
+ (después de haber estado bloqueado), la aplicación regresa al usuario
+ al estado exacto en que se encontraba la última vez que este la utilizó.
+    </li>
+
+    <li>Cuando se reinicia desde el inicio o Todas las aplicaciones, la aplicación
+ restaura el estado de la aplicación al estado anterior con la mayor precisión posible.
+    </li>
+
+    <li>Cuando se presiona Atrás, la aplicación le da la opción al usuario de guardar el
+ estado de la aplicación o el usuario que, de lo contrario, se perdería al navegar hacia atrás.
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-1, CR-3, CR-5</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/corequalityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="ps">
+  Rendimiento y estabilidad
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios garantizan que las aplicaciones proporcionen el rendimiento,
+ la estabilidad y la capacidad de respuesta que los usuarios esperan.
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    Área
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    Descripción
+  </th>
+  <th style="width:54px;">
+    Pruebas
+  </th>
+  </tr>
+
+  <tr id="PS-S1">
+  <td>
+    Estabilidad
+  </td>
+  <td>
+    PS-S1
+  </td>
+  <td>
+    La aplicación no colapsa, no impone el cierre, no se inmoviliza ni funciona de ningún otro modo anormal
+ en ninguno de los dispositivos donde esté instalada.
+  </td>
+  <td>
+    <a href="#core">CR-all</a>, <a href="#SD-1">SD-1</a>, <a href="#HA-1">HA-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-P1">
+  <td rowspan="2">
+    Rendimiento
+  </td>
+  <td>
+    PS-P1
+  </td>
+  <td>
+    La aplicación se carga rápidamente o le proporciona al usuario información en pantalla (un indicador
+ de progreso o una señal similar) en caso de que demore más de dos segundos en
+ cargarse.
+  </td>
+  <td>
+    <a href="#core">CR-all</a>, <a href="#SD-1">SD-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-P2">
+  <td>
+    PS-P2
+  </td>
+  <td>
+    Cuando StrictMode está activado (consulta <a href="#strictmode">Prueba
+ StrictMode</a>, a continuación), no hay destellos rojos (advertencias de rendimiento de
+ StrictMode) visibles al ejecutar la aplicación, incluso durante un juego,
+ transiciones de animaciones y la IU, y cualquier otra parte de la aplicación.
+  </td>
+  <td>
+    <a href="#PM-1">PM-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-M1">
+  <td>
+    Medios
+  </td>
+  <td>
+    PS-M1
+  </td>
+  <td>
+    La reproducción de música y video es uniforme, sin quiebres, intermitencias ni otros
+ defectos durante el uso y la carga normales de la aplicación.
+  </td>
+  <td>
+    <a href="#core">CR-all</a>, <a href="#SD-1">SD-1</a>, <a href="#HA-1">HA-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-V1">
+  <td rowspan="2">
+    Calidad visual
+  </td>
+  <td>
+    PS-V1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación muestra gráficos, texto, imágenes y otros elementos de la IU sin
+ distorsión, esfumado ni pixelado notables.
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>La aplicación ofrece gráficos de alta calidad para todos los tamaños de pantalla y
+ formatos admitidos, incluidos aquellos para dispositivos con <a href="{@docRoot}distribute/essentials/quality/tablet.html">pantallas más grandes
+ como las tablets</a>.
+    </li>
+
+    <li>No se observa suavizado en los bordes de los menús, los botones ni otros
+ elementos de la IU.
+    </li>
+    </ol>
+  </td>
+  <td rowspan="2">
+    <a href="#core">CR-all</a>
+  </td>
+  </tr>
+
+  <tr id="PS-V2">
+  <td>
+    PS-V2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación muestra texto y bloques de texto de forma aceptable.
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>Se acepta la composición en todos los formatos admitidos, incluidos
+ aquellos para dispositivos con pantallas más grandes como las tablets.
+    </li>
+
+    <li>No se visualizan letras ni palabras cortadas.
+    </li>
+
+    <li>No se visualizan ajustes automáticos de línea incorrectos en botones ni iconos.
+    </li>
+
+    <li>Hay espacio suficiente entre el texto y los elementos que lo rodean.
+    </li>
+    </ol>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/core/performance" data-sortorder="-timestamp"
+data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="listing">
+  Google Play
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios garantizan que tus aplicaciones estén listas para su publicación en Google Play.
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    Área
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    Descripción
+  </th>
+  <th style="width:54px;">
+    Pruebas
+  </th>
+  </tr>
+
+  <tr id="GP-P1">
+  <td rowspan="2">
+    Políticas
+  </td>
+  <td>
+    GP-P1
+  </td>
+  <td>
+    La aplicación cumple estrictamente con los términos de la <a href="http://play.google.com/about/developer-content-policy.html">Política de contenido para desarrolladores
+ de Google Play</a> y no ofrece contenido inapropiado,
+ no utiliza propiedad intelectual ni marcas de otros, etc.
+  </td>
+  <td>
+    <a href="#gp">GP-all</a>
+  </td>
+  </tr>
+
+  <tr id="GP-P2">
+  <td>
+    GP-P2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    El nivel de madurez de la aplicación está establecido de forma correcta en función de las <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=188189">
+Pautas de calificación de contenido</a>.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Ten en cuenta especialmente que las aplicaciones que solicitan permiso
+ para usar la ubicación del dispositivo no pueden recibir el nivel de madurez "Todos".
+    </p>
+  </td>
+  <td>
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D1">
+  <td rowspan="3">
+    Página de detalles de la&nbsp; aplicación
+  </td>
+  <td>
+    GP-D1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    El gráfico central de la aplicación sigue las pautas que se describen en esta <a href="http://android-developers.blogspot.com/2011/10/android-market-featured-image.html">
+publicación del blog</a>. Asegúrate de lo siguiente:
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>El directorio de la aplicación incluye un gráfico central de alta calidad.
+    </li>
+
+    <li>El gráfico central no contiene imágenes de dispositivos, capturas de pantalla ni
+ texto pequeño que resulte ilegible cuando la aplicación se reduzca en tamaño para visualizarse en el
+ tamaño más pequeño de pantalla que tu aplicación admita.
+    </li>
+
+    <li>El gráfico central no se parece a un anuncio publicitario.
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#gp">GP-1, GP-2</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D2">
+  <td>
+    GP-D2
+  </td>
+  <td>
+    Las capturas de pantalla y los videos de la aplicación no muestran ni hacen referencia a dispositivos que no sean Android.
+  </td>
+  <td rowspan="2">
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D3">
+  <td>
+    GP-D3
+  </td>
+  <td>
+    Las capturas de pantalla o los videos de la aplicación no representan el contenido ni la experiencia que ofrece
+ tu aplicación de forma confusa.
+  </td>
+  </tr>
+
+  <tr id="GP-X1">
+  <td>
+    Soporte para el usuario
+  </td>
+  <td>
+    GP-X1
+  </td>
+  <td>
+    Los errores comunes informados por los usuarios en la pestaña Reseñas de la página de Google Play se
+ abordan siempre que se puedan reproducir y ocurran en muchos dispositivos diferentes.
+    Si se produce un error en unos pocos dispositivos, aún debes abordarlo en
+ caso de que esos dispositivos sean especialmente populares o nuevos.
+  </td>
+  <td>
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/core/play" data-sortorder="-timestamp"
+data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test-environment">
+  Configuración de un entorno de prueba
+  </h2>
+
+
+</div>
+
+<p>
+  Para evaluar la calidad de tu aplicación, debes configurar un entorno de hardware o
+ de simulación adecuado para la prueba.
+</p>
+
+<p>
+  El entorno de prueba ideal debería incluir poca cantidad de dispositivos de
+ hardware que representen formatos y combinaciones de hardware y software clave
+ actualmente disponibles para los consumidores. No es necesario realizar pruebas en
+ <em>todos</em> los dispositivos disponibles en el mercado, sino que debes concentrarte
+ en una pequeña cantidad de dispositivos representativos, incluso puedes usar uno o dos dispositivos
+ por formato.
+</p>
+
+<p>
+  Si no puedes obtener dispositivos de hardware reales para realizar las pruebas, debes
+ <a href="{@docRoot}tools/devices/index.html">configurar simuladores de dispositivos
+ (AVD)</a> para representar los formatos y las combinaciones de hardware y software más
+ comunes.
+</p>
+
+<p>
+  Para ir más allá de las pruebas básicas, puedes agregar más dispositivos, más formatos o
+ nuevas combinaciones de hardware y software a tu entorno de prueba. También puedes
+ aumentar la cantidad o la complejidad de las pruebas y los criterios de calidad.
+</p>
+
+<div class="headerLine">
+  <h2 id="tests">
+  Procedimientos de prueba
+  </h2>
+
+
+</div>
+
+<p>
+  Estos procedimientos de prueba te ayudan a descubrir varios tipos de problemas de calidad en
+ tu aplicación. Puedes combinar las pruebas o integrar grupos de pruebas en
+ tus propios planes de prueba. Consulta las secciones anteriores para obtener referencias que asocian
+ criterios específicos con pruebas específicas.
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    Tipo
+  </th>
+  <th style="width:54px;">
+    Prueba
+  </th>
+  <th>
+    Descripción
+  </th>
+  </tr>
+
+  <tr>
+  <td rowspan="12" id="core">
+    Conjunto central
+  </td>
+  <td>
+    CR-0
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Navega a todas las partes de la aplicación; es decir, a todas las pantallas, los diálogos,
+ las configuraciones y a todos los flujos de usuarios.
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>Si la aplicación admite la edición o la creación de contenido, jugar a un
+ juego o la reproducción multimedia, asegúrate de ingresar esos flujos para crear o
+ modificar contenido.
+    </li>
+
+    <li>Mientras pruebas la aplicación, introduce cambios transitorios en la conectividad
+ de red, la función de la batería, la disponibilidad de ubicación o GPS, la carga del
+ sistema, etc.
+    </li>
+    </ol>
+  </td>
+  </tr>
+
+  <tr id="tg2">
+  <td id="core2">
+    CR-1
+  </td>
+  <td>
+    Desde cada una de las pantallas de la aplicación, presiona la tecla de Inicio del dispositivo y luego reinicia la aplicación
+ desde la pantalla Todas las aplicaciones.
+  </td>
+  </tr>
+
+  <tr id="CR-2">
+  <td>
+    CR-2
+  </td>
+  <td>
+    Desde cada una de las pantallas de la aplicación, pasa a otra aplicación que se esté ejecutando y luego regresa a
+ la aplicación que estás probando con el conmutador de Aplicaciones recientes.
+  </td>
+  </tr>
+
+  <tr id="CR-3">
+  <td>
+    CR-3
+  </td>
+  <td>
+    Desde cada una de las pantallas (y diálogos) de la aplicación, presiona el botón Atrás.
+  </td>
+  </tr>
+
+  <tr id="CR-5">
+  <td>
+    CR-5
+  </td>
+  <td>
+    Desde cada una de las pantallas de la aplicación, gira el dispositivo entre las orientaciones horizontal y
+ vertical al menos tres veces.
+  </td>
+  </tr>
+
+  <tr id="CR-6">
+  <td>
+    CR-6
+  </td>
+  <td>
+    Cambia a otra aplicación para enviar la aplicación que estás probando a segundo plano. Ingresa en
+ Configuración y comprueba si la aplicación que estás probando tiene servicios ejecutándose mientras se encuentra
+ en segundo plano. En Android 4.0 y versiones posteriores, ingresa a la pantalla Aplicaciones y busca la
+ aplicación en la pestaña "En ejecución". En versiones anteriores, utiliza "Administrar
+ aplicaciones" para comprobar si hay servicios que se estén ejecutando.
+  </td>
+  </tr>
+
+  <tr id="CR-7">
+  <td>
+    CR-7
+  </td>
+  <td>
+    Presiona el botón de encendido para colocar el dispositivo en modo de hibernación y luego presiona nuevamente el botón
+ de encendido para reactivar la pantalla.
+  </td>
+  </tr>
+
+  <tr id="CR-8">
+  <td>
+    CR-8
+  </td>
+  <td>
+    Configura el dispositivo para que se bloquee al presionar el botón de encendido. Presiona el botón de
+ encendido para colocar el dispositivo en modo de hibernación, luego presiona nuevamente el botón de
+ encendido para reactivar la pantalla y desbloquea el dispositivo.
+  </td>
+  </tr>
+
+  <tr id="CR-9">
+  <!-- Hardware features -->
+
+  <td>
+    CR-9
+  </td>
+  <td>
+    Para los dispositivos que tienen teclados deslizantes, desliza el teclado hacia dentro y hacia fuera
+ al menos una vez. Para los dispositivos que tienen teclados acoplados, conecta el dispositivo
+ al teclado.
+  </td>
+  </tr>
+
+  <tr id="CR-10">
+  <td>
+    CR-10
+  </td>
+  <td>
+    Para los dispositivos que tienen un puerto para pantalla externa, conecta la pantalla
+ externa.
+  </td>
+  </tr>
+
+  <tr id="CR-11">
+  <td>
+    CR-11
+  </td>
+  <td>
+    Inicia la aplicación y observa en el cajón de notificaciones todos los tipos de notificaciones
+ que la aplicación puede mostrar. Cuando sea posible, expande las notificaciones (Android
+ 4.1 y superior) y toca todas las acciones ofrecidas.
+  </td>
+  </tr>
+
+  <tr id="CR-12">
+  <td>
+    CR-12
+  </td>
+  <td>
+    Examina los permisos que solicita la aplicación; para ello, ingresa a Configuración &gt;
+ Información de la aplicación.
+  </td>
+  </tr>
+
+  <tr id="tg3">
+  <td>
+    Instalación en tarjetas SD
+  </td>
+  <td>
+    SD-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Repite el <em>Conjunto central</em> con la aplicación instalada en la <a href="{@docRoot}guide/topics/data/install-location.html">tarjeta SD del dispositivo</a>
+ (si la aplicación lo admite).
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Para mover la aplicación a la tarjeta SD puedes usar Configuración &gt; Información de la aplicación &gt;
+ Mover a tarjeta SD.
+    </p>
+  </td>
+  </tr>
+
+  <tr id="tg32">
+  <td>
+    Aceleración de hardware
+  </td>
+  <td>
+    HA-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Repite el <em>Conjunto central</em> con la aceleración de hardware habilitada.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Para forzar la habilitación de la aceleración de hardware (cuando el dispositivo lo admita), agrega
+ <code>hardware-accelerated="true"</code> a
+ <code>&lt;application&gt;</code> en el manifiesto de la aplicación y vuelve a compilarla.
+    </p>
+  </td>
+  </tr>
+
+  <tr id="tg33">
+  <td>
+    Control del rendimiento
+  </td>
+  <td>
+    PM-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Repite el <em>Conjunto central</em> con la generación de perfiles de StrictMode habilitada <a href="#strictmode">como se describe a continuación</a>.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Presta mucha atención a la recolección de basura y su impacto en la
+ experiencia del usuario.
+    </p>
+  </td>
+  </tr>
+
+  <tr id="gp">
+  <td rowspan="3">
+    Google Play
+  </td>
+  <td>
+    GP-1
+  </td>
+  <td>
+    Inicia sesión en la <a href="https://play.google.com/apps/publish/">Consola
+ para desarrolladores</a> para revisar tu perfil de desarrollador, la descripción de la aplicación,
+ las capturas de pantalla, el gráfico central, la configuración de madurez y los comentarios de los usuarios.
+  </td>
+  </tr>
+
+  <tr id="GP-2">
+  <td>
+    GP-2
+  </td>
+  <td>
+    Descarga tu gráfico central y tus capturas de pantalla, y reduce su tamaño para que
+ coincidan con los tamaños de pantalla de los dispositivos y formatos que estás
+ probando.
+  </td>
+  </tr>
+
+  <tr id="GP-3">
+  <td>
+    GP-3
+  </td>
+  <td>
+    Revisa todos los elementos gráficos, los medios, el texto, las bibliotecas de códigos y otros
+ contenidos incluidos en la descarga de la aplicación o el archivo de expansión.
+  </td>
+  </tr>
+
+  <tr id="GP-4">
+  <td>
+    Pagos
+  </td>
+  <td>
+    GP-4
+  </td>
+  <td>
+    Navega a todas las pantallas de tu aplicación e ingresa a todos los flujos de compra integrados en la aplicación.
+  </td>
+  </tr>
+</table>
+
+<h3 id="strictmode">
+  Prueba con StrictMode
+</h3>
+
+<p>
+  Para la prueba de rendimiento, te recomendamos que habilites {@link android.os.StrictMode}
+ en tu aplicación y lo uses para detectar operaciones en el subproceso principal y en otros
+ subprocesos que podrían afectar el rendimiento, el acceso a la red, la lectura/escritura de archivos,
+ etc.
+</p>
+
+<p>
+  Puedes configurar una política de control por subproceso mediante {@link
+ android.os.StrictMode.ThreadPolicy.Builder} y habilitar todo el control
+ admitido en <code>ThreadPolicy</code> con {@link
+ android.os.StrictMode.ThreadPolicy.Builder#detectAll()}.
+</p>
+
+<p>
+  Asegúrate de habilitar la <strong>notificación visual</strong> de violaciones de la política
+ para <code>ThreadPolicy</code> mediante {@link
+ android.os.StrictMode.ThreadPolicy.Builder#penaltyFlashScreen()
+ penaltyFlashScreen()}.
+</p>

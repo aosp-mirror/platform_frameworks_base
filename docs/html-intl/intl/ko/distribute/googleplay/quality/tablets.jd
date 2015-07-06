@@ -1,0 +1,846 @@
+page.title=태블릿 앱 품질
+page.metaDescription=태블릿은 Android 설치 기반에서 빠르게 성장하는 분야로, 앱을 위한 새로운 기회를 제공합니다.
+page.image=/distribute/images/tablet-guidelines-color.jpg
+Xnonavpage=true
+
+@jd:body
+<div id="qv-wrapper"><div id="qv">
+<h2>검사 목록</h2>
+<ol>
+<li><a href="#core-app-quality">1. 기본 태블릿 앱 품질 테스트</a></li>
+<li><a href="#optimize-layouts">2. 레이아웃 최적화</a></li>
+<li><a href="#use-extra-space">3. 추가 화면 영역 사용</a></li>
+<li><a href="#use-tablet-icons">4. 태블릿용으로 디자인된 자산 사용</a></li>
+<li><a href="#adjust-font-sizes">5. 글꼴 및 터치 대상 조정</a></li>
+<li><a href="#adjust-widgets">6. 홈 화면 위젯 조정</a></li>
+<li><a href="#offer-full-feature-set">7. 완벽한 기능 집합 제공</a></li>
+<li><a href="#android-versions">8. 올바른 대상 Android 버전 지정</a></li>
+<li><a href="#hardware-requirements">9. 올바른 종속성 선언</a></li>
+<li><a href="#support-screens">10. 태블릿 화면 지원 선언</a></li>
+<li><a href="#google-play">11. 태블릿 UI 소개</a></li>
+<li><a href="#google-play-best-practices">12. Google Play에서 게시 모범 사례 준수</a></li>
+
+</ol>
+<h2>테스트</h2>
+<ol>
+<li><a href="#test-environment">테스트 환경 설정</a></li>
+</ol>
+</div></div>
+
+<div class="todp-right-float" style="padding-right:0;margin-bottom:1em;">
+  <img src="{@docRoot}distribute/images/tablet-guidelines-color.jpg" style="width:480px;">
+</div>
+
+<p>
+  태블릿은 Android 설치 기반에서 빠르게 성장하는 분야로, <a href="{@docRoot}distribute/stories/tablets.html">사용자 확보 및 수익 창출</a>을 위한 새로운 기회를 제공합니다.
+
+ 이 문서의 가이드라인은 매력적인 기능과 직관적이고 잘 디자인된 UI를 통해 태블릿 사용자의 기대치를 충족하는 데 도움이 됩니다.
+
+
+</p>
+
+<p>
+  가이드라인에 번호가 매겨져 있지만 원하는 순서로 진행할 수 있습니다. 앱에 해당하는 범위 내에서 각 가이드라인의 권장사항을 구현하면 되지만 고객에게 최고의 제품을 제공하려면 권장사항을 최대한 따르는 것이 좋습니다.
+
+
+
+
+</p>
+
+<p>
+  이 문서 전체에 걸쳐 각 권장사항을 구현하는 데 도움이 되는 자료의 링크가 제공됩니다.
+
+</p>
+
+<div class="headerLine"><h2 id="core-app-quality">1. 기본 태블릿 앱 품질 테스트</h2></div>
+
+<p>뛰어난 태블릿 앱 경험을 제공하는 첫 번째 단계는 앱이 대상으로 삼은 모든 장치 및 폼 팩터에 대한 <em>핵심 앱 품질 기준</em>을 충족하는지 확인하는 것입니다.
+
+ 자세한 내용은 <a href="{@docRoot}distribute/essentials/quality/core.html">핵심 앱 품질 가이드라인</a>을 참조하십시오. 
+</p>
+
+<p>
+게시하기 전에 앱이 다음과 같은 기본 기술 검사 및 출시 기준을 통과하는지 확인하십시오.
+</p>
+
+<ul>
+  <li><a href="#android-versions">적합한 대상 Android 버전 지정</a></li>
+  <li><a href="#hardware-requirements">올바른 하드웨어 종속성 지정</a></li>
+  <li><a href="#support-screens">적합한 화면 지원 선언</a></li>
+  <li><a href="#use-extra-space">사용 가능한 모든 화면 공간 사용</a></li>
+  <li><a href="#google-play">Google Play에 스크린샷 업로드</a></li>
+</ul>
+
+<p>이미 Google Play 개발자 콘솔에 앱을 업로드한 경우 <a href="#google-play-optimization-tips">최적화 팁 페이지</a>를 방문하여 이러한 검사가 어떻게 진행되고 있는지 확인할 수 있습니다.
+
+
+</p>
+
+
+<div class="headerLine">
+<h2 id="optimize-layouts">2. 대형 화면의 레이아웃 최적화</h2></div>
+
+<p>
+  Android를 통해 다양한 장치 화면 크기와 폼 팩터에서 제대로 실행되는 앱을 쉽게 개발할 수 있습니다.
+ 이 광범위한 호환성을 제대로 활용하면 모든 대상 장치에 널리 배포할 수 있는 단일 앱을 디자인하는 데 도움이 됩니다.
+
+ 하지만 사용자에게 (특히 태블릿의) 각 화면 구성에 대한 최고의 경험을 제공하려면 각 대상 화면 구성에 대한 레이아웃과 기타 UI 구성요소를 최적화해야 합니다.
+
+
+ 태블릿에서 UI를 최적화하여 새 기능 제공, 새 콘텐츠 제공 또는 사용자에게 매력적인 기타 특징 제공을 위해 사용 가능한 추가 화면을 충분히 활용할 수 있습니다.
+
+
+
+</p>
+
+<p>
+  핸드셋용으로 개발한 앱을 태블릿에 배포하려는 경우 레이아웃, 글꼴 및 간격의 사소한 조정부터 시작할 수 있습니다.
+
+ 어떤 경우(7인치 태블릿 또는 대형 캔버스를 사용하는 게임 등)에는 이러한 것만 조정해도 앱이 매력적으로 보일 수 있습니다.
+
+ 어떤 경우(대형 태블릿 등)에는 "늘어진 UI"를 효율적인 다중창 UI, 더 쉬운 탐색 및 추가 콘텐츠로 대체하기 위해 UI의 일부를 다시 디자인할 수 있습니다.
+
+
+</p>
+
+
+<div style="width:500px;margin:1.5em;margin-top:-16px;">
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-bad.png" style="padding:4px;margin-bottom:0em;">
+<p class="img-caption"><span
+style="font-weight:500;">"늘어진" UI 제거</span>: 태블릿에서 단일창 레이아웃은 어색한 공백과 지나치게 긴 줄로 나타납니다.
+ 여백을 사용하여 UI 요소의 너비를 줄이고 다중창 레이아웃 사용을 고려하십시오.
+</p>
+</div>
+
+<p>다음은 몇 가지 제안입니다.</p>
+
+
+<ul>
+  <li>필요한 경우 <code>large</code> 및 <code>xlarge</code> 화면에 대해 사용자 지정 레이아웃을 제공합니다.
+ 화면의 <a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">가장 짧은 치수</a> 또는 <a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">사용 가능한 최소 너비 및 높이</a>를 기준으로 로드되는 레이아웃을 제공할 수도 있습니다.
+
+
+
+  </li>
+
+  <li>최소한 대형 화면에 대해 글꼴 크기, 여백, 간격 등 치수를 사용자 지정하여 공백과 콘텐츠의 가독성을 개선합니다.
+
+  </li>
+
+  <li>사용자가 태블릿을 가로 방향 등 옆쪽으로 잡고 있을 때 쉽게 액세스할 수 있도록 UI 컨트롤의 배치를 조정합니다.
+
+
+  </li>
+
+  <li>UI 요소의 여백은 일반적으로 핸드셋보다 태블릿에서 더 커야 합니다.
+ <a href="{@docRoot}design/style/metrics-grids.html#48dp-rhythm">48dp 리듬</a>(및 16dp 그리드)을 권장합니다.
+
+  </li>
+
+  <li>텍스트 콘텐츠가 화면 가장자리에 정렬되지 않도록 텍스트 콘텐츠의 여백을 알맞게 조정합니다.
+ 화면 가장자리 근처의 콘텐츠 주위에 최소 <code>16dp</code> 여백을 사용합니다.
+
+  </li>
+</ul>
+
+<p>특히 레이아웃이 화면에서 "늘어져" 나타나지 않는지 확인하십시오.
+</p>
+
+<ul>
+<li>텍스트 줄이 지나치게 길면 안 됩니다. 줄당 최대 100자로 제한하고 50-75자 범위에서 최상의 결과를 나타내도록 최적화합니다.
+</li>
+<li>목록 보기와 메뉴는 전체 화면 너비를 사용해서는 안 됩니다.</li>
+<li>여백을 사용하여 화면 내 요소의 너비를 관리하거나 태블릿의 경우 다중창 UI로 전환합니다(다음 절 참조).
+</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/optimize"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="use-extra-space">3. 추가 화면 영역 사용</h2></div>
+
+<div style="width:340px;float:right;margin:1.5em;margin-bottom:0;margin-top:0;">
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-good.png" style="padding:4px;margin-bottom:0em;">
+<p class="img-caption"><span
+style="font-weight:500;">다중창 레이아웃은 태블릿 화면에서 시각적 균형감을 개선하고 효용성과 가독성을 높여줍니다.</span>
+</p>
+</div>
+
+<p>태블릿 화면은 특히 가로 방향일 때 앱에 더욱 뛰어난 현실감을 제공합니다.
+ 특히 10인치 태블릿은 상당히 확장된 영역을 제공하지만 7인치 태블릿도 콘텐츠를 표시하고 사용자가 활동할 수 있는 더 많은 공간을 제공합니다.
+
+ </p>
+
+<p>태블릿에서 실행되는 앱의 UI를 고려할 때 태블릿에서 사용할 수 있는 추가 화면 영역을 충분히 활용하는지 확인하십시오.
+ 다음은 몇 가지 제안입니다.
+</p>
+
+<ul>
+<li>추가 콘텐츠를 포함하거나 기존 콘텐츠의 대체 항목을 사용할 기회를 찾습니다.
+</li>
+<li>태블릿 화면에서 <a href="{@docRoot}design/patterns/multi-pane-layouts.html">다중창 레이아웃</a>을 사용하여 단일 보기를 복합 보기로 결합합니다.
+ 그러면 추가 화면 영역을 더욱 효율적으로 사용할 수 있고 사용자가 앱을 탐색하기가 더욱 쉬워집니다.
+
+ </li>
+<li>화면 방향이 변경될 때 복합 보기의 패널을 어떻게 재구성할지 계획을 세웁니다.
+</li>
+
+<div style="width:490px;margin:1.5em auto 1.5em 0;">
+<div style="">
+<img src="{@docRoot}images/ui-ex-single-panes.png" style="width:490px;padding:4px;margin-bottom:0em;" align="middle">
+<img src="{@docRoot}images/ui-ex-multi-pane.png" style="width:490px;padding:4px;margin-bottom:0em;">
+<p class="image-caption" style="padding:.5em"><span
+style="font-weight:500;">복합 보기는 핸드셋 UI의 여러 단일 보기<em>(위)</em>를 더욱 풍부하고 효율적인 태블릿용 UI<em>(아래)</em>로 결합합니다.</span>
+
+ </p>
+</div>
+</div>
+
+<li>단일 화면을 {@link android.app.Activity}
+서브클래스로 구현할 때 개별 콘텐츠 패널을 {@link
+android.app.Fragment} 서브클래스로 구현하는 것을 고려합니다. 그러면 서로 다른 폼 팩터와, 콘텐츠를 공유하는 화면에서 코드 재사용을 극대화할 수 있습니다.
+
+</li>
+<li>다중창 UI를 사용할 화면 크기를 결정한 다음 적합한 화면 크기 버킷(예: <code>large</code>/<code>xlarge</code>) 또는 최소 화면 너비(예: <code>sw600dp</code>/<code>sw720</code>)에서 서로 다른 레이아웃을 제공합니다.
+
+
+</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/extrascreen"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="use-tablet-icons">4. 태블릿 화면용으로 디자인된 자산 사용</h2></div>
+
+<div><img src="{@docRoot}design/media/devices_displays_density@2x.png"></div>
+
+<p>앱을 가장 멋진 모습으로 나타내려면 태블릿에서 공통적으로 지원되는 범위에서 각 밀도에 맞는 아이콘과 기타 비트맵 자산을 제공하십시오.
+ 특히 작업 모음, 알림 및 시작 관리자용 아이콘이 흐려지거나 기타 배율 관련 아티팩트를 발생시키지 않고 모든 화면에서 적절한 크기로 나타나도록 <a href="{@docRoot}design/style/iconography.html">아이콘 체계</a> 가이드라인에 따라 디자인하고 다양한 밀도로 이들을 제공해야 합니다.
+
+
+
+</p>
+
+<p class="table-caption"><strong>표 1</strong>. 아이콘 유형용 원시 자산 크기.<table>
+<tr>
+<th>밀도</th>
+<th>시작 관리자</th>
+<th>작업 모음</th>
+<th>작게/상황별</th>
+<th>알림</th>
+</tr>
+<tr>
+<td><code>mdpi</code></td>
+<td>48x48 px</td>
+<td>32x32 px</td>
+<td>16x16 px</td>
+<td>24x24 px</td>
+</tr>
+<tr>
+<td><code>hdpi</code></td>
+<td>72x72 px</td>
+<td>48x48 px</td>
+<td>24x24 px</td>
+<td>36x36 px</td>
+</tr>
+<tr>
+<td><code>tvdpi</code></td>
+<td><em>(hdpi 사용)</em></td>
+<td><em>(hdpi 사용)</em></td>
+<td><em>(hdpi 사용)</em></td>
+<td><em>(hdpi 사용)</em></td>
+</tr>
+<tr>
+<td><code>xhdpi</code></td>
+<td>96x96 px</td>
+<td>64x64 px</td>
+<td>32x32 px</td>
+<td>48x48 px</td>
+</tr>
+<tr>
+<td><code>xxhdpi</code></td>
+<td>144x144 px</td>
+<td>96x96 px</td>
+<td>48x48 px</td>
+<td>72x72 px</td>
+</tr>
+
+</table>
+
+<p>
+  최소한 다음 공통 태블릿 화면 밀도 중 <strong>하나 이상</strong>에 최적화된 각 아이콘 및 비트맵 자산의 버전을 제공하십시오.
+
+
+</p>
+<ul>
+  <li><code>hdpi</code></li>
+  <li><code>xhdpi</code></li>
+  <li><code>xxhdpi</code></li>
+</ul>
+
+<p>기타 팁:</p>
+
+<ul>
+<li>아이콘을 디자인할 때 세부정보나 가장자리 선명도를 잃지 않고 배율을 조정할 수 있도록 벡터 도형을 사용하십시오.</li>
+<li>밀도별 <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">리소스 한정자</a>를 사용하여 각 화면 밀도에 대해 적합한 아이콘이 로드되도록 하십시오.
+</li>
+<li>태블릿과 기타 대형 화면 장치는 종종 밀도 크기가 장치의 실제 밀도보다 큰 시작 관리자 아이콘을 요구하므로 가급적 가장 높은 밀도로 시작 관리자 아이콘을 제공해야 합니다.
+
+ 예를 들어, 태블릿 화면이 {@code xhdpi} 화면인 경우 태블릿이 시작 관리자 아이콘의 {@code xxhdpi} 버전을 요청합니다.
+</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/assets"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="adjust-font-sizes">5.
+글꼴 및 터치 대상 조정</h2></div>
+
+<p>앱을 태블릿에서 사용하기 쉽게 하려면 대상으로 삼은 모든 화면 구성에 대해 태블릿 UI에서 글꼴 크기와 터치 대상을 조정하십시오.
+
+ 위에 설명된 것처럼 <a href="{@docRoot}guide/topics/ui/themes.html">styleable 특성</a> 또는 <a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">치수 리소스</a>를 통해 글꼴 크기를 조정하고 레이아웃 및 비트맵 drawable을 통해 터치 대상을 조정할 수 있습니다.
+
+ </p>
+
+<p>다음은 몇 가지 고려사항입니다.</p>
+<ul>
+<li>태블릿 화면 크기와 밀도에서 텍스트가 너무 크거나 작으면 안 됩니다.
+ 해당 UI 요소에 대해 레이블 크기가 알맞게 조정되었는지 확인하고 레이블, 제목 및 기타 요소에서 잘못된 줄바꿈이 없는지 확인하십시오.
+
+</li>
+<li>화면 내 요소의 권장 터치 대상 크기는 48dp(최소 32dp)입니다. 태블릿 UI에서 일부 조정이 필요할 수도 있습니다. 대부분의 사용자에게 적합한 구현 전략에 대해 알아보려면 <a href="{@docRoot}design/style/metrics-grids.html">메트릭 및 그리드</a>를 참조하십시오.
+
+
+ 특정 사용자의 접근성 요구사항을 충족하려면 더 큰 터치 대상을 사용하는 것이 적절할 수도 있습니다.
+
+ </li>
+<li>가능하면 작은 아이콘의 경우 {@link android.view.TouchDelegate}를 사용하거나 투명한 버튼 내에 아이콘을 가운데 배치하여 터치 가능한 영역을 48dp 이상으로 확대하십시오.
+
+</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/fonts"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="adjust-widgets">6. 홈 화면 위젯 크기 조정</h2></div>
+
+<p>앱에 홈 화면 위젯이 포함된 경우 태블릿 화면에서 뛰어난 사용자 경험을 보장하기 위해 고려할 몇 가지 사항이 있습니다.
+ </p>
+
+<ul>
+<li>위젯의 기본 높이와 너비를 태블릿 화면에 맞게 적절히 설정하고 최소 및 최대 높이와 너비를 조정하십시오.
+
+</li>
+<li>위젯은 5개 이상의 홈 화면 행(세로 또는 사각형 위젯인 경우)이나 열(가로 또는 사각형 위젯인 경우)을 수용할 수 있도록 420dp 이상으로 크기를 조정할 수 있어야 합니다.
+
+ </li>
+<li>9 패치 이미지가 올바로 렌더링되는지 확인하십시오.</li>
+<li>기본 시스템 여백을 사용하십시오.</li>
+<li>가능하면 앱의 <code>targetSdkVersion</code>을 14 이상으로 설정하십시오.
+</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/widgets"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="offer-full-feature-set">7. 태블릿 사용자를 위한 완벽한 기능 집합</h2></div>
+
+<div class="centered-full-image" style="width:600px;margin:1.5em"><img src="{@docRoot}images/gp-tablets-full-feature-set.png" alt="Tablet feature sets"></div>
+
+<p>태블릿 사용자가 최고의 앱 기능을 경험할 수 있도록 하십시오. 다음은 몇 가지 권장사항입니다.
+</p>
+
+<ul>
+  <li>태블릿에서 최소한 휴대폰과 동일한 기능 집합을 제공하도록 앱을 디자인하십시오.
+
+  </li>
+
+  <li>예외적으로 하드웨어나 대부분의 태블릿 사용에서 지원되지 않는 경우 앱이 태블릿에서 특정 기능을 생략하거나 대체할 수 있습니다.
+
+ 예를 들면 다음과 같습니다.
+    <ul>
+      <li>핸드셋이 전화통신 기능을 사용하지만 현재 태블릿에서 전화통신을 사용할 수 없는 경우 관련 기능을 생략하거나 대체할 수 있습니다.
+
+      </li>
+
+      <li>대부분의 태블릿에 GPS 센서가 있지만 일반적으로 대부분의 사용자는 달릴 때 태블릿을 휴대하지 않습니다.
+ 휴대폰을 휴대한 사용자가 달릴 때 GPS 추적을 기록할 수 있는 앱의 기능이 태블릿에서는 꼭 필요하지는 않으므로 제공할 필요가 없습니다.
+
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>태블릿 UI에서 특정 기능을 생략하는 경우 사용자가 해당 기능에 액세스할 수 없는지 또는 대체 기능에 대해 “정상적인 성능 저하”를 제공하는지 확인하십시오(아래 하드웨어 기능 절 참조).
+
+
+  </li>
+</ul>
+
+<div class="headerLine"><h2 id="android-versions">8. 올바른 대상 Android 버전 지정</h2></div>
+
+<p>
+  최대한 광범위하게 태블릿에 배포하려면 앱이 태블릿을 지원하는 대상 Android 버전을 올바르게 지정하는지 확인하십시오.
+ <a href="{@docRoot}about/versions/android-3.0.html">Android 3.0</a>(API 레벨 11)부터 태블릿을 지원하기 시작했습니다.
+
+  <a href="{@docRoot}about/versions/android-4.0.html">Android 4.0</a>에서 태블릿, 휴대폰 및 기타 장치에 대한 통합 UI 프레임워크 지원이 도입되었습니다.
+
+
+</p>
+
+<p>
+  매니페스트 파일의 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> 요소에서 앱의 대상 Android 버전 범위를 설정할 수 있습니다.
+
+ 대부분의 경우 요소의 <code>targetSdkVersion</code> 특성을 사용 가능한 가장 높은 API 레벨로 설정하는 방식으로 대상 Android 버전을 올바르게 지정할 수 있습니다.
+
+
+</p>
+
+<p style="margin-bottom:.5em;">
+  최소한 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> 요소에서 다음 사항을 확인하십시오.
+
+</p>
+
+<ol style="list-style-type:lower-alpha;margin-top:0em;">
+  <li>
+    <code>targetSdkVersion</code>이 11 이상의 값으로 선언되었는지 여부(14 이상 권장) 또는
+
+  </li>
+
+  <li>
+    <code>minSdkVersion</code>이 11 이상의 값으로 선언되었는지 여부.
+  </li>
+
+  <li><code>maxSdkVersion</code> 특성이 선언된 경우 11 이상의 값을 가져야 합니다.
+ 일반적으로 <code>maxSdkVersion</code> 사용은 <em>권장되지 않습니다</em>.
+
+  </li>
+</ol>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/versions"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="hardware-requirements">9. 올바른 하드웨어 기능 종속성 선언</h2></div>
+
+<p>
+  핸드셋과 태블릿은 일반적으로 센서, 카메라, 전화통신 및 기타 기능에 대해 약간 다른 하드웨어 지원을 제공합니다.
+ 예를 들어, 대부분의 태블릿은 전화통신 지원을 포함하지 않는 "Wi-Fi" 구성에서 사용할 수 있습니다.
+
+</p>
+
+<p>
+  전체 휴대폰 및 태블릿 고객 기반에 단일 APK를 널리 배포할 수 있도록 태블릿에서 일반적으로 제공되지 않는 하드웨어 기능에 대한 요구사항을 앱에서 선언하지 마십시오.
+
+
+  대신 아래 설명된 것처럼 앱 매니페스트에서 하드웨어 기능을 <em>필요하지 않음</em>으로 선언하십시오.
+
+</p>
+
+<ul>
+<li>앱 매니페스트에서 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> 요소를 찾으십시오.
+ 특히 다음과 같이 일부 태블릿에서 제공되지 않을 수 있는 하드웨어 기능을 찾으십시오.
+
+
+<ul>
+<li><code>android.hardware.telephony</code></li>
+<li><code>android.hardware.camera</code> (후방 카메라 참조) 또는 </li>
+<li><code>android.hardware.camera.front</code></li>
+</ul></li>
+
+<li><code>android:required=”false”</code> 특성을 포함하여 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> 요소를 <em>필요하지 않음</em>으로 선언하십시오.
+
+
+
+<p>
+  예를 들어, 다음은 전화통신을 제공하지 않는 장치에도 앱을 널리 배포할 수 있도록 <code>android.hardware.telephony</code>에서 종속성을 선언하는 올바른 방법입니다.
+
+
+</p>
+
+<pre>&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;</pre></li>
+
+<li>마찬가지로, 태블릿에 적합하지 않은 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">하드웨어 기능 요구사항을 포함</a>하는  <a href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> 요소의 매니페스트를 확인하십시오.
+
+ 이러한 권한을 찾으면 해당 기능의 <code>&lt;uses-feature&gt;</code> 요소를 명시적으로 선언하고 <code>android:required=”false”</code> 특성을 포함하십시오.
+
+
+</li>
+</ul>
+
+
+<p>
+  하드웨어 기능을 <em>필요하지 않음</em>으로 선언한 후에 다양한 장치에서 앱을 테스트하십시오.
+ 앱이 사용하는 하드웨어 기능을 제공하지 않는 경우에도 앱은 정상적으로 작동해야 하며, 필요한 경우 "정상적인 성능 저하" 및 대체 기능을 제공해야 합니다.
+
+
+</p>
+
+<p>
+  예를 들어, 앱이 위치를 설정하기 위해 정상적으로 GPS를 사용하지만 장치에서 GPS가 지원되지 않는 경우 앱에서 사용자가 수동으로 위치를 설정하도록 할 수 있습니다.
+
+ 필요에 따라 앱이 런타임에 장치 하드웨어 기능을 점검하고 처리할 수 있습니다.
+
+</p>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/hardware"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="support-screens">10. 태블릿 화면 지원 선언</h2></div>
+
+<p>앱을 광범위한 태블릿에 배포할 수 있도록 보장하려면 앱이 다음과 같이 매니페스트 파일에서 태블릿 화면 크기 지원을 선언해야 합니다.
+</p>
+
+<ul>
+  <li><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> 요소는 선언된 경우 <code>android:largeScreens="false"</code> 또는 <code>android:xlargeScreens="false"</code>를 지정하면 안 됩니다.
+
+
+</li>
+  <li>13 미만의 <code>minSdkVersion</code> 값을 대상으로 하는 앱의 경우 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> 요소가 <code>android:largeScreens="true"</code> 및 <code>android:xlargeScreens="true"</code>와 함께 선언되어야 합니다.
+
+
+</li>
+</ul>
+
+<p>앱이 매니페스트에서 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a> 요소를 선언하는 경우 앱이 지원하는 <em>태블릿 화면의 모든 크기 및 밀도 조합</em>을 지정하는 특성을 해당 요소에 포함해야 합니다.
+
+
+
+ 가급적 앱에서 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a> 요소의 사용을 피하십시오.
+
+</p>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/tabletscreens"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="google-play">11. Google Play에 태블릿 UI 소개</h2></div>
+
+<p>
+  풍부하고 최적화된 태블릿 앱용 UI를 만드는 작업을 완료한 후에 고객에게 이러한 사실을 알리십시오!
+ 다음은 Google Play에서 태블릿 앱을 사용자에게 홍보하는 몇 가지 주요 방법입니다.
+
+</p>
+
+<div><img class="border-img" src="{@docRoot}images/gp-tablet-quality-4.jpg"></div>
+
+
+<h4>
+  태블릿 UI 스크린샷 업로드
+</h4>
+
+<p>
+  태블릿 사용자는 앱이 휴대폰이 아니라 태블릿 장치에서 어떤 모습으로 나타나는지 알고 싶어합니다.
+ 태블릿 앱을 개발한 경우 태블릿 UI의 스크린샷을 Google Play 개발자 콘솔에 업로드하십시오.
+ 다음은 몇 가지 가이드라인입니다.
+  </p>
+
+<ul style="margin-top:0;">
+  <li>시작 또는 로그인 페이지가 아니라 앱의 핵심 기능을 보여주십시오.
+ 사용자가 대부분의 시간을 보내는 앱 화면을 스크린샷해서 보여주어야 합니다.
+
+  </li>
+
+  <li>7인치 및 10인치 태블릿에서 찍은 스크린샷을 모두 추가하십시오.
+  </li>
+
+  <li>가능하면 가로 방향과 세로 방향으로 찍은 스크린샷을 모두 추가하십시오.
+
+  </li>
+
+  <li>가능하면 화면 캡처를 사용하십시오. 스크린샷에 실제 장치 하드웨어가 표시되지 않도록 하십시오.
+</li>
+
+  <li>각 방향에서 태블릿 스크린샷의 권장 해상도는 <strong>1280 x 720</strong> 이상입니다.
+
+  </li>
+
+  <li>7인치 태블릿의 경우 8개의 태블릿 UI 스크린샷을, 10인치 태블릿의 경우 추가로 8개의 태블릿 UI 스크린샷을 업로드하십시오.
+
+  </li>
+</ul>
+
+<h4>
+  앱 설명 및 릴리스 정보 업데이트
+</h4>
+
+<ul>
+  <li>앱 설명에서 앱이 태블릿 사용자를 위한 뛰어난 기능과 태블릿에 최적화된 UI를 제공함을 강조하십시오.
+ 태블릿 UI의 작동 방식과 장점에 대해 자세히 설명하십시오.
+
+  </li>
+
+  <li>앱의 릴리스 정보 및 업데이트 정보에 태블릿 지원 정보를 포함하십시오.
+
+  </li>
+</ul>
+
+<h4>
+  홍보 동영상 업데이트
+</h4>
+
+<p>
+  많은 사용자가 앱의 홍보 동영상을 보고 앱의 용도를 파악하고 사용할지 여부를 결정합니다.
+ 홍보 동영상에서 앱의 태블릿 UI를 강조하여 관심 있는 태블릿 사용자가 앱을 사용하도록 유도할 수 있습니다.
+ 다음은 몇 가지 팁과 가이드라인입니다.
+
+</p>
+
+<ul>
+  <li>태블릿에서 실행되는 앱의 샷을 하나 이상 추가하십시오. 가장 효율적으로 태블릿 사용자를 확보하려면 휴대폰 UI와 거의 동일한 비율로 태블릿 UI를 홍보하는 것이 좋습니다.
+
+
+  </li>
+
+  <li>가능하면 동영상에서 일찍 태블릿 UI를 보여주십시오. 태블릿 사용자가 휴대폰 UI의 기능 안내가 모두 끝날 때까지 인내심을 갖고 기다릴 것이라고 가정하지 마십시오. 이상적으로는 최초 10초 이내에 또는 휴대폰 UI 소개와 동시에 태블릿 UI를 보여주는 방식으로 태블릿 사용자와 즉시 소통해야 합니다.
+
+
+
+  </li>
+
+  <li>태블릿 UI를 명확히 보여주려면 핸드헬드 태블릿 장치에서 실행되는 앱의 샷을 포함하십시오.
+
+  </li>
+
+  <li>동영상 내레이션이나 보이스오버에서 앱의 태블릿 UI를 강조하십시오.
+  </li>
+</ul>
+
+<h4>
+  홍보 캠페인에서 태블릿 UI 강조
+</h4>
+
+<p>
+  홍보 캠페인, 웹사이트, 소셜 게시물, 광고 등을 통해 태블릿 사용자에게 태블릿 UI에 대해 알리십시오.
+ 다음은 몇 가지 제안입니다.
+
+</p>
+
+<ul>
+  <li>태블릿에서 앱 사용을 강조하는 마케팅 또는 광고 캠페인을 기획하십시오.
+</li>
+
+  <li>홍보 캠페인에서 태블릿 앱을 멋있게 소개하십시오. <a href="{@docRoot}distribute/tools/promote/device-art.html">장치 아트 생성기</a>를 사용하여 7인치 또는 10인치 태블릿에서 실행 중인 앱의 고품질 홍보 이미지를 그림자 및 화면 번쩍임에 상관없이 선택 방향에서 빠르게 생성할 수 있습니다.
+
+
+ 이미지 생성은 캡처, 끌기 및 놓기만큼 간단합니다.
+  </li>
+
+  <li>사용자가 앱의 스토어 목록에 바로 연결할 수 있도록 온라인 홍보에 Google Play 배지를 포함하십시오.
+ <a href="{@docRoot}distribute/tools/promote/badges.html">배지 생성기</a>를 사용하여 다양한 언어로 배지를 생성할 수 있습니다.
+
+  </li>
+</ul>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/showcase"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine">
+  <h2 id="google-play-best-practices">
+    12. Google Play에서 게시에 대한 모범 사례 준수
+  </h2>
+
+
+</div>
+
+<p>
+  다음은 Google Play에서 성공적인 태블릿 앱을 제공하기 위한 몇 가지 모범 사례입니다.
+
+</p>
+
+<div>
+  <img class="border-img" src="{@docRoot}images/gp-tablet-quality-5.jpg" style="1px solid #ddd">
+</div>
+
+<h4 id="google-play-optimization-tips">
+  앱의 최적화 팁 확인
+</h4>
+
+<p>이제 Google Play 개발자 콘솔에서 앱이 태블릿 앱 배포 및 품질에 대한 기본 가이드라인을 준수하는지 빠르게 확인할 수 있는 최적화 팁 페이지를 제공합니다.
+
+ 이 페이지를 방문하려면 개발자 콘솔에 로그인한 다음 모든 애플리케이션에서 앱을 로드하고 왼쪽 탐색에서 최적화 팁을 클릭하십시오.
+
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>피드백을 보내는 방법</h2>
+
+<p>피드백을 보내거나 최적화 팁의 수동 검토를 요청하려면 아래 링크를 사용하십시오.
+</p>
+
+<p>피드백을 보내기 전에 태블릿 앱 품질 가이드라인의 관련 절을 읽으십시오.
+</p>
+
+<p><strong><a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">태블릿용 디자인 관련 문의 &raquo;</a></strong></p>
+</div>
+</div>
+
+<p>개발자 콘솔은 기본 품질 기준을 확인하기 위해 일련의 검사를 실행하는 방식으로 앱의 최적화 팁 페이지를 생성합니다.
+
+ 문제가 발견되면 최적화 팁 페이지에서 "할 일" 항목으로 알려줍니다.
+</p>
+
+<p>태블릿용 앱을 개발한 경우 최적화 팁 페이지를 방문하여 앱의 기본 검사가 어떻게 진행되는지 확인하십시오.
+
+  문제가 있으면 앱에서 해결하고 필요한 경우 새 배포용 바이너리를 업로드하는 것이 좋습니다.
+
+ </p>
+
+<p>앱에 적용되지 않거나 태블릿에서 품질에 영향을 줄 수 있는 "할 일" 문제가 최적화 팁 페이지에 나열되면 <a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">태블릿용 디자인 관련 문의 &raquo;</a>를 사용하여 당사에 알려주십시오.
+
+ 당사는 앱을 검토하고 필요한 경우 최적화 팁 페이지를 업데이트합니다.
+
+</p>
+
+
+<h4>앱의 필터링 확인</h4>
+
+<p>
+  앱을 <a href="https://play.google.com/apps/publish/">개발자 콘솔</a>에 업로드한 후에 APK의 지원되는 장치 목록을 점검하고 대상으로 삼으려는 태블릿 장치에서 앱이 필터링되지 않는지 확인하십시오.
+
+
+</p>
+
+<h4>단일 APK로 배포</h4>
+
+<p>
+  모든 화면 크기(휴대폰 및 태블릿)에 대해 단일 Google Play 목록을 사용하여 단일 APK로 앱을 게시하는 것이 좋습니다.
+ 이 접근방식은 몇 가지 중요한 이점이 있습니다.
+
+</p>
+
+<ul style="margin-top:.25em;">
+  <li>사용자가 검색, 탐색 또는 홍보 자료에서 앱을 더 쉽게 찾을 수 있습니다.
+  </li>
+
+  <li>사용자가 새 장치를 사용하는 경우 더 쉽게 앱을 자동으로 복원할 수 있습니다.
+
+  </li>
+
+  <li>평점과 다운로드 통계가 모든 장치에서 통합됩니다.
+  </li>
+
+  <li>태블릿 앱을 두 번째 목록에 게시하면 브랜드의 등급을 저하시킬 수 있습니다.
+
+  </li>
+</ul>
+
+<p>
+  대부분의 경우에 단일 APK를 사용하여 모든 장치에 도달하는 것을 적극 권장하지만 필요에 따라 대안으로 <a href="{@docRoot}google/play/publishing/multiple-apks.html">다중 APK 지원</a>을 사용하여 앱을 제공할 수 있습니다.
+
+
+</p>
+
+<h3 class="rel-resources clearfloat">관련 자료</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine">
+  <h2 id="test-environment">
+    태블릿용 테스트 환경 설정
+  </h2>
+
+
+</div>
+
+<p>
+  테스트용으로 적합한 하드웨어 또는 에뮬레이터 환경을 통해 태블릿에서 앱의 품질(핵심 앱 품질 및 태블릿 앱 품질)을 평가하십시오.
+
+
+</p>
+
+<p>
+  핵심 앱 품질 기준 테스트에 대한 <a href="{@docRoot}distribute/essentials/quality/core.html#test-environment">권장 테스트 환경</a>과 비교하여 중간 크기 태블릿과 하드웨어/소프트웨어 기능이 더 많거나 적은 태블릿을 포함하십시오.
+
+
+
+</p>
+
+<p class="table-caption"><strong>표 1</strong>. 일반적인 태블릿 테스트 환경은 나열된 플랫폼 버전, 화면 구성 및 하드웨어 기능 구성 중 하나와 함께 아래 표의 각 행에 나열된 한두 대의 장치를 포함할 수 있습니다.
+
+</p>
+
+<table>
+<tr>
+<th>유형</th>
+<th>크기</th>
+<th>밀도</th>
+<th>버전</th>
+<th>AVD 스킨</th>
+</tr>
+
+<tr>
+<td>7인치 태블릿</td>
+<td><span style="white-space:nowrap"><code>large</code> 또는</span><br /><code>-sw600</code></td>
+<td><code>hdpi</code>,<br /><code>tvdpi</code></td>
+<td>Android 4.0 이상(API 레벨 14 이상)</td>
+<td>WXGA800-7in</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">10인치</span> 태블릿</td>
+<td><span style="white-space:nowrap"><code>xlarge</code> 또는</span><br /><code>-sw800</code></td>
+<td><code>mdpi</code>,<br /><code>hdpi</code>,<br /><code>xhdpi</code></td>
+<td>Android 3.2 이상(API 레벨 13 이상)</td>
+<td>WXGA800</td>
+</tr>
+</table>
+
+<div class="headerLine"><h2 id="related-resources">관련 자료</h2></div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

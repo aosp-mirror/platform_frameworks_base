@@ -1,0 +1,262 @@
+page.title=分发到 Android Wear
+page.image=/design/media/wear/ContextualExample.008_2x.png
+meta.tags="wear", "publish", "quality"
+page.tags="wear", "publish", "googleplay"
+page.metaDescription=将您的应用、游戏和内容分发到 Android Wear。
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>参加办法</h2>
+<ol>
+<li><a href="#understand_guidelines">了解准则</a></li>
+<li><a href="#develop_app">开发优秀的穿戴设备应用</a></li>
+<li><a href="#test_app">测试穿戴设备应用的质量</a></li>
+<li><a href="#opt_in">选择加入</a></li>
+<li><a href="#track_review">跟踪审查进度</a></li>
+</ol>
+
+<h2>您还应阅读</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用的质量</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">核心的应用质量</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  如果您有一款优秀的应用，Android Wear 和 Google Play 可以帮助您推送给用户。虽然所有应用都能向 Android Wear 设备发送基本通知，但您可以更进一步。
+
+  扩展您的应用以支持自定义的穿戴设备交互，并在所有穿戴设备上提供优化的互动式用户体验。
+如果您的应用符合手持设备的核心应用质量准则，并为 Android Wear 设备提供优质体验，则 Google Play 将展示您的应用以便用户轻松发现。
+
+
+</p>
+
+<p>
+  首先，查看本文档各部分，了解如何通过 Google Play 将您的穿戴设备应用分发给用户。
+一定要阅读<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用的质量</a>，了解有关您的应用应符合的可用性和质量标准的信息。
+当您的应用准备就绪时，可以在开发者控制台中加入此计划，以便指定为 Android Wear 应用。
+
+</p>
+
+<h2 id="how_to_participate">
+  参加办法
+</h2>
+
+<p>
+  Google Play 可使您的穿戴设备应用更容易被穿戴设备用户发现。您可以使用现有的开发者控制台帐户和当前的分发及定价设置来开发和发布应用。
+
+参加方法很简单 — 以下几部分概述了整个流程。
+</p>
+
+<h3 id="understand_guidelines">
+  1.了解准则和要求
+</h3>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-wear-process.png">
+</div>
+
+<p>
+  为了做好准备，以便在 Android Wear 上成功推出应用，首先要查阅在穿戴设备上提供出色应用体验的准则。
+请参考 <a href="{@docRoot}design/wear/index.html">Android 
+Wear 设计准则</a>，了解有关针对穿戴设备扩展应用的建议，以及有关设计和可用性的详情。
+
+</p>
+
+<p>
+  开始设计穿戴设备体验时，务必阅读并理解穿戴设备应用的质量标准。
+仅在穿戴设备上可使用的应用才能在 Google Play 上被指定为穿戴设备应用 — 如果您的应用符合一组基本的质量标准，则可以参加。
+参考<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用的质量</a>，了解详情。
+</p>
+
+<h3 id="develop_app">2.开发优秀的穿戴设备应用</h3>
+
+<p>
+在阅读了准则之后，下一步是开发您的应用。以下部分描述如何开始为穿戴设备打造优秀的应用体验。
+
+</p>
+
+<h4>设计第一</h4>
+
+<p>
+  Android Wear 的目的是在正确的时间为用户提供正确的信息。优秀的 Android Wear 体验应自动启动、便于查看，并且不需要或很少需要用户交互。
+
+虽然所有应用都无需修改即可向穿戴设备发送基本通知，但为穿戴设备打造的优秀应用是经优化的，可提供美观和优质的体验，在不同屏幕布局上运行，并为用户提供一组吸引人的功能。
+
+
+
+</p>
+
+<p>
+  在考虑您的穿戴设备应用时，请查看<a href="{@docRoot}training/building-wearables.html">开发者文档</a>和<a href="{@docRoot}design/wear/index.html">可用性准则</a>，并且尽可能利用这些准则。
+您可以通过 SDK 中提供的 API
+ 和支持库为用户设计一种出色的通知体验。您也可以选择构建一个直接在可穿戴设备上运行的应用。
+
+</p>
+
+<h4>将应用打包</h4>
+
+<p>
+  我们建议您使用相同的程序包名称和商品详情，将您的穿戴设备体验作为您针对手机、平板电脑和其他设备的现有应用的一部分来提交。
+这样让用户无缝升级到您的穿戴设备体验，也让您充分利用您在手机和平板电脑应用中获得的评价和评分。
+
+对于依赖某款应用来提供功能的可穿戴设备应用，始终应将其打包在该依赖应用内。
+要了解方法，请阅读<a href="{@docRoot}training/wearables/apps/packaging.html">将可穿戴设备应用打包</a>。
+</p>
+
+<h4>在各种设备上测试</h4>
+
+<p>
+  在整个设计和开发中，务必使用合适的设备来进行原型设计和测试您的用户体验。
+强烈建议您购买一个或多个 Android Wear 设备，或使用不同的模拟器配置进行开发，并尽早设置您的测试环境。
+
+务必同时针对方形和圆形布局来优化您的设计。
+</p>
+
+<h3 id="test_app">3.测试穿戴设备应用的质量</h3>
+
+<p>
+  您的穿戴设备应用应表现出色，在 Android Wear 上看起来引人入胜，并且提供尽可能最佳的用户体验。
+Google Play 将展示精选的优质穿戴设备应用，以便用户轻松发现。
+以下说明了您如何加入平台，提交用户喜爱的 
+Android Wear 应用：
+</p>
+
+<ul>
+  <li>符合核心应用质量的准则
+    <ul>
+      <li>遵循 <a href="{@docRoot}design/index.html">Android 设计准则</a>。
+特别注意在应用中使用<a href="http://www.google.com/design/spec/material-design/introduction.html">素材设计</a>。
+
+      </li>
+
+      <li>按照<a href="{@docRoot}distribute/essentials/quality/core.html">核心应用质量的准则</a>来测试您的应用。
+
+      </li>
+    </ul>
+  </li>
+  <li>符合<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用的质量</a>标准
+
+    <ul>
+      <li>遵循我们的<a href="{@docRoot}training/building-wearables.html">
+穿戴设备应用开发</a>最佳做法</li>
+      <li>确保您的应用符合<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用质量</a>的所有标准</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="opt_in">4.选择加入 Android Wear 并发布</h3>
+
+<p>
+  当您已创建可供发布的 APK 并且已测试确保它符合<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用质量</a>标准后，将其上传到开发者控制台。
+在您的商品详情中更新穿戴设备屏幕截图，并按需设置分发选项。
+如果不熟悉如何准备在 Google Play 上发布，请参考
+<a href="{@docRoot}distribute/googleplay/publish/preparing.html">发布操作检查单。</a>
+</p>
+
+<p>
+  在向用户发布之前，您可以在开发者控制台的<strong>定价和分发</strong>部分中加入 Android Wear。
+选择加入即表示您希望让 Android Wear 用户更容易通过 Google Play 发现该应用，并且您的应用符合<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用质量</a>标准。
+
+</p>
+
+<p>
+  在选择加入并保存更改之后，就可以像平常一样发布您的应用。此外，Google Play 会提交您的应用并对照<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用质量</a>标准进行审查，然后将结果通知您。
+
+参考下一部分以详细了解如何跟踪应用的审批状态。
+
+</p>
+
+<p>
+  如果应用符合所有<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用质量</a>标准，Google Play 使其更容易被 Android Wear 用户发现。
+您的应用还可以加入应用合集和推广，获得更高的知名度。
+
+</p>
+
+<p>
+  注意，选择加入和审查并不影响您的应用在 Google Play 商店中的可用性。
+&mdash; 应用在发布之后就立即可用。
+</p>
+
+<p>
+  以下是您在开发者控制台中加入 Android Wear 的步骤：
+</p>
+
+<ol>
+  <li>确保您的应用符合<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用质量</a>的所有标准
+  </li>
+
+  <li>将穿戴设备屏幕截图添加到应用的商店详情中
+  </li>
+
+  <li>在<strong>所有应用</strong>页面，点击您要加入的应用。
+  </li>
+
+  <li>在<strong>定价和分发</strong>下面，向下滚动找到 <em>Android Wear</em>
+ 和加入复选框。
+  </li>
+
+  <li>点击<em>将应用分发到 Android Wear</em> 旁边的复选框。
+  </li>
+
+  <li>点击<strong>保存</strong>以保存您对“定价和分发”的更改。
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-wear-opt-in.png">
+  <p class="caption">
+    <strong>选择加入穿戴设备：</strong>在开发者控制台中加入，将您的应用包括在 Android Wear 平台中。
+
+  </p>
+</div>
+
+<h3 id="track_review">5.跟踪审查和批准进度</h3>
+
+<p>
+  如果应用符合 Android Wear 的上述技术和质量标准，则该应用更容易被 Android Wear 上的用户发现。
+如果应用不符合这些标准，您的<strong>开发者帐户地址将收到电子邮件通知</strong>，概述您需要解决的问题区域。
+
+当您进行必要的调整后，
+就可以将应用的新版本上传到开发者控制台。
+</p>
+
+<p>
+  您随时可以在开发者控制台该应用的<strong>定价和分发</strong>
+页的 <em>Android Wear</em> 下面，检查应用的审查和批准状态。
+
+</p>
+
+<p>
+  有三种审批状态：
+</p>
+
+<ul>
+  <li>
+    <em>待定</em> — 您的应用已发送供审查并且审查尚未完成。
+  </li>
+
+  <li>
+    <em>已批准</em> — 您的应用已被审查并获得批准。该应用将更容易被 Android Wear 用户发现。
+
+  </li>
+
+  <li>
+    <em>未批准</em> — 您的应用已被审查但未获得批准。请查看通知电子邮件了解有关应用未被批准的原因的信息。
+您可以解决存在的问题，然后重新加入和发布，以启动另一次审查。
+
+  </li>
+</ul>
+
+<p>要了解如何评估您的应用，请参阅<a href="{@docRoot}distribute/essentials/quality/wear.html">穿戴设备应用质量</a>文档。 </p>
+
+
+  <h3>相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13"
+    data-query="collection:wearlanding"
+    data-cardSizes="6x2"
+    data-maxResults="3">
+  </div>

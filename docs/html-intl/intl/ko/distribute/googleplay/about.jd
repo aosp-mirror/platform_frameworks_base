@@ -1,0 +1,367 @@
+page.title=Google Play 활용 기회
+meta.tags="visibility, growth, distributing"
+page.tags="play, apps, distributing, publishing"
+page.metaDescription=매달 다운로드 건수가 수십억 이상이며 증가 추세에 있습니다. Google을 통해 앱을 사용자에게 소개하십시오.
+page.image=/distribute/images/about-play.jpg
+
+@jd:body
+
+    <div id="qv-wrapper">           
+  <div id="qv">
+  <h2>Google Play 정보</h2>
+    <ol style="list-style-type:none;">
+      <li><a href="#reach">전 세계에서 사용, 급속 성장</a></li>
+      <li><a href="#ratings-reviews">사용자 평점 및 리뷰</a></li>
+      <li><a href="#category-browsing">카테고리 검색</a></li>
+      <li><a href="#search">검색</a></li>
+      <li><a href="#top-charts-and-lists">인기 차트 및 목록</a></li>
+      <li><a href="#featured-staff-picks">추천, 직원 선정, 컬렉션 및 배지</a></li>
+      <li><a href="#product-detail-pages">스토어 목록 페이지</a></li>
+      <li><a href="#related-resources">관련 자료</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Google Play는 Android 앱 배포를 위한 최고의 스토어입니다. Google Play에 게시하면 전 세계 190개국 이상의 Android 사용자에게 앱을 소개할 수 있습니다.
+
+
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-about-0.jpg" alt="Google Play on an Android Tablet" style="width:480px;position:relative" />
+</div>
+
+<p>
+  Google Play는 Android를 경험할 수 있는 중심부입니다. 신규 사용자는 앱, 게임 및 기타 Google Play 콘텐츠를 장치에 개인 설정할 수 있습니다.
+
+  기존 사용자는 정기적으로 방문하여 인기 항목과 신규 항목을 확인할 수 있습니다. Google Play는 사용자의 장치에 무선으로 즉시 앱을 전송하므로 매우 편리하고 빠르게 신규 앱을 다운로드할 수 있습니다.
+
+
+</p>
+
+<p>
+  또한 Google Play는 웹 사용자가 가장 선호하는 장소입니다. 누구나 브라우저를 사용하여 웹에서 Google Play를 탐색할 수 있습니다.
+ Android 사용자는 원하는 앱을 구매하고 설치할 수 있으며 Google Play는 케이블을 사용하지 않고 사용자의 장치로 앱을 자동 전송합니다.
+
+
+</p>
+
+<p>
+  Google Play 웹사이트의 접근성과 편의성은 온라인 광고, 웹 검색 및 교차 링크 등 다양한 소스에서 사용자의 제품으로 트래픽을 전송하는 새로운 방식을 제공합니다.
+
+ Google Play는 우수한 앱과 게임을 사용자에게 제공하도록 고안되었습니다.
+ 이 통로를 활용하여 앱을 소개하여 인기를 얻을 수 있습니다.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="ratings-reviews">
+    사용자 평점 및 리뷰
+  </h2>
+
+
+</div>
+
+<p>
+  잠재적 사용자는 평점과 리뷰를 앱 품질의 핵심 척도로 간주합니다.
+ Android 사용자는 별 1-5개로 앱의 등급을 매기고 리뷰를 게시하여 다운로드한 앱을 평가합니다.
+
+</p>
+
+<p>
+  <strong>앱의 평점은 Google Play 목록 및 검색 결과의 순위에 영향을 미치는 가장 중요한 요소 중 하나입니다.</strong>
+ 또한 앱의 평점은 편집 담당자가 스토어에서 앱과 게임을 관리할 때 핵심적인 홍보 기준 중 하나입니다.
+
+
+</p>
+
+<div class="img" style="padding: 1em auto;width:96%;">
+  <img src="{@docRoot}images/gp-rating-web.png" style="border:1px solid #ddd;">
+</div>
+
+<div class="headerLine">
+  <h2 id="category-browsing">
+    카테고리 검색
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play에 앱을 게시할 때 30여 개의 앱 카테고리 중 하나를 선택합니다.
+ 각 카테고리 내에서 앱은 평점, 리뷰, 다운로드 횟수, 국가 및 기타 요소의 조합에 따라 순위가 매겨집니다.
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="search">
+    검색
+  </h2>
+
+
+</div>
+
+<p>
+  사용자는 Google Play에서 검색을 통해 앱이나 게임을 빠르고 정확하게 찾을 수 있습니다. 검색은 강력한 추론을 사용하여 사용자 유형에 따라 검색어를 제안하고 그 검색어와 일치하는 직접적인 앱 링크를 제공합니다.
+
+ 검색하면 가장 관련 있고 가장 인기 있는 앱이 맨 위에 표시됩니다.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="top-charts-and-lists">
+    인기 차트 및 목록
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-top.jpg">
+</div>
+
+<p>
+  인기 차트는 앱 및 게임 홈 페이지에서 인기 있는 앱을 Android 사용자에게 지속적으로 제공합니다.
+ 인기 차트는 최근 다운로드 횟수에 따라 매일 여러 번 업데이트하여 최신 상태를 유지합니다.
+ 앱의 평점과 다운로드 횟수가 증가하면 차트 순위가 상승할 수 있습니다.
+
+</p>
+
+<p>
+  또한 Google Play를 많이 사용하는 국가별로 차트를 제공하여 사용자와 밀접한 관련성이 있는 차트를 표시합니다.
+ 앱이 관심을 끌고 다운로드 횟수와 평점이 증가하면 하나 이상의 인기 차트에 오르고 더 많이 노출됩니다.
+
+
+</p>
+
+<table style="width:50%;">
+  <tr>
+    <td>
+      인기 무료
+    </td>
+    <td>
+      무료 앱 및 무료 게임 목록
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      인기 유료
+    </td>
+    <td>
+      유료 앱 및 유료 게임 목록
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      최고 매출
+    </td>
+    <td>
+      유료 또는 무료 총 매출액
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      신규 인기 무료
+    </td>
+    <td>
+      30일 미만
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      신규 인기 유료
+    </td>
+    <td>
+      30일 미만
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      인기 있는 앱
+    </td>
+    <td>
+      빠르게 설치가 늘어나는 신규 앱
+    </td>
+  </tr>
+</table>
+
+<div class="headerLine">
+  <h2 id="featured-staff-picks">
+    추천, 직원 선정, 컬렉션 및 배지
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 편집팀은 스토어에서 최고의 앱이 사용자의 주목을 받게 하고 앱 품질의 등급을 설정하기 위해 노력하고 있습니다.
+
+  편집팀은 가장 잘 알려진 앱과 게임은 물론 '진흙 속에 묻힌 보석'을 찾아 더 많은 사람들에게 소개하기 위해 Google Play의 앱을 지속적으로 검토합니다.
+
+ 편집팀은 <em>추천</em>, <em>직원 선정</em> 및 기타 컬렉션에서 우수한 앱을 소개합니다.
+
+</p>
+
+<p>
+  개발자는 자신의 앱을 직접 추천 후보로 올릴 수 없습니다. 편집팀이 항상 Google Play에서 우수한 앱을 찾기 위해 모니터링하고 있습니다.
+ 편집팀은 사용자에게 인기 있고 Android 장치에서 훌륭히 작동하는 앱을 주목합니다.
+
+</p>
+
+<h3 id="featured-staff-picks2">
+  추천 및 직원 선정
+</h3>
+
+<p>
+  Google Play 편집팀 직원이 매주 인기 있는 <em>추천</em> 및 <em>직원 선정</em> 컬렉션에서 소개할 신규 앱을 선정합니다.
+
+
+</p>
+
+<p>
+  <em>추천</em> 컬렉션은 Android에서 사용할 수 있는 가장 뛰어난 최신 앱과 게임 타이틀을 소개합니다.
+ 인기 카테고리에서 가장 뛰어나고 인기 있는 앱도 추천 목록에 포함됩니다.
+ <em>직원 선정</em>은 Google Play에서 최근에 추천된 모든 앱과 게임을 소개합니다.
+ 태블릿 사용자를 위해 특별 <em>직원 선정</em> 컬렉션은 최고의 Android 태블릿용 앱을 소개합니다.
+
+
+</p>
+
+<table style="text-align:center;margin:1.5em 0;">
+  <tr>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks1.jpg">
+      <p>
+        추천
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks2.jpg">
+      <p>
+        컬렉션
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks3.jpg">
+      <p>
+        에디터 추천
+      </p>
+    </td>
+  </tr>
+</table>
+
+<h3 id="collections">
+  앱 컬렉션
+</h3>
+
+<p>
+  때로는 편집팀 직원이 테마나 시즌 이벤트에 따라 앱 컬렉션을 따로 분류합니다
+ 사용자는 적시에 제공된 컬렉션에 매력을 느끼고 해당 목록에서 앱을 선택할 확률이 높습니다.
+
+</p>
+
+<p>
+  편집팀 직원은 휴대폰과 태블릿에서 Android의 성능을 가장 잘 보여주는 고품질 앱을 컬렉션에서 소개할 앱으로 선정합니다.
+ 또한 컬렉션 전체에 관심을 유도하고 고유하게 기여할 수 있는 앱을 찾습니다.
+
+
+</p>
+
+<h3 id="editors-choice">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/editorschoice_ann.png"> 에디터 추천
+</h3>
+
+<p>
+  <em>에디터 추천</em>은 Android에서 제공하는 최고의 앱을 집중 조명하는 선별된 앱 컬렉션입니다.
+ 에디터는 품질, 뛰어난 사용자 인터페이스, 장기간의 인기 및 Android 기능의 혁신적 사용을 기준으로 이러한 앱을 선정합니다.
+
+
+</p>
+
+<p>
+  <em>에디터 추천</em>에 선정된 앱은 Google Play에 앱 이름이 나타날 때마다 표시되는 배지도 받게 됩니다.
+
+</p>
+
+<h3 id="top-developer">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/topdev_ann.png"> 최고 개발자
+</h3>
+
+<p>
+  최고 개발자는 Android에서 혁신적인 고품질 앱을 출시하는 데 공헌한 명성 있고 존경받는 개발자에게 부여되는 배지입니다.
+
+  Google Play 편집팀 직원은 개발자의 누적된 작업에 따라 수시로 최고 개발자 배지를 수여합니다.
+
+</p>
+
+<p>
+  최고 개발자 배지는 개발자 이름이 Google Play에 표시될 때마다 그 옆에 나타납니다.
+ 이 배지는 개발자의 모든 앱을 장기적으로 인정함을 의미합니다.
+ 사용자는 이 배지가 있는 개발자의 제품을 신뢰할 수 있습니다.
+
+</p>
+
+<div class="headerLine">
+  <h2 id="product-detail-pages">
+    스토어 목록 페이지
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-listing.jpg">
+</div>
+
+<p>
+  Google Play 스토어 첫 화면은 풍부하고 화려한 <em>스토어 목록 페이지</em>이며 개발자는 여기서 앱을 홍보하고 평점과 리뷰를 소개하고 앱의 기능을 보여줄 수 있습니다.
+
+
+</p>
+
+<p>
+  스토어 목록은 사용자가 앱에 대한 모든 정보를 확인하는 장소입니다. 검색 결과, 인기 차트, 카테고리 목록 및 컬렉션에 나열된 앱을 한 번만 누르면 스토어 목록으로 이동합니다.
+
+
+</p>
+
+<p>
+  웹 브라우저에서 <a href="https://play.google.com/apps/publish/">Google Play 개발자 콘솔</a>을 통해 제품 세부정보 페이지를 관리할 수 있습니다.
+ 로그인하여 브랜드 자산을 업로드하거나 업데이트하고 해당 언어로 제품 세부정보를 입력하십시오.
+
+</p>
+
+<p>
+  게시하면 Google Play가 앱 평점, 리뷰, 다른 제품 링크 등을 추가합니다.
+ 또한 휴대폰, 태블릿 및 웹 브라우저에서 스토어 목록 페이지가 멋있게 보이도록 만듭니다.
+
+</p>
+
+<p>
+  개발자는 웹 사이트, 광고 캠페인, 리뷰, 소셜 미디어 게시물 등 Google Play 외부의 제품 세부정보 페이지에 대한 링크를 제공할 수 있습니다.
+
+ 자세한 내용은 <a href="{@docRoot}distribute/tools/promote/linking.html">제품 링크</a>를 참조하십시오.
+
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+<h2>관련 자료</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="4"></div>
+    </div>

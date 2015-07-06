@@ -1,0 +1,623 @@
+page.title=平板電腦應用程式品質
+page.metaDescription=安裝 Android 產品的平板電腦不斷增多，由此為您的應用程式帶來新的商機。
+page.image=/distribute/images/tablet-guidelines-color.jpg
+Xnonavpage=true
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>檢查清單</h2>
+<ol>
+<li><a href="#core-app-quality">1.測試基本平板電腦應用程式品質</a></li>
+<li><a href="#optimize-layouts">2.最佳化版面配置</a></li>
+<li><a href="#use-extra-space">3.使用更大的螢幕區域</a></li>
+<li><a href="#use-tablet-icons">4.使用專為平板電腦設計的資產</a></li>
+<li><a href="#adjust-font-sizes">5.調整字型與輕觸目標</a></li>
+<li><a href="#adjust-widgets">6.調整主螢幕小工具</a></li>
+<li><a href="#offer-full-feature-set">7.提供完備功能集</a></li>
+<li><a href="#android-versions">8.正確針對 Android 版本</a></li>
+<li><a href="#hardware-requirements">9.正確宣告相依性</a></li>
+<li><a href="#support-screens">10.宣告對平板電腦螢幕的支援</a></li>
+<li><a href="#google-play">11.展示您的平板電腦 UI</a></li>
+<li><a href="#google-play-best-practices">12.遵循在 Google Play 中發行的最佳做法</a></li>
+
+</ol>
+<h2>測試</h2>
+<ol>
+<li><a href="#test-environment">設定測試環境</a></li>
+</ol>
+</div></div>
+
+<div class="todp-right-float" style="padding-right:0;margin-bottom:1em;">
+  <img src="{@docRoot}distribute/images/tablet-guidelines-color.jpg" style="width:480px;">
+</div>
+
+<p>
+  安裝 Android 產品的平板電腦不斷增多，由此為<a href="{@docRoot}distribute/stories/tablets.html">使用者的參與及盈利</a>帶來新的機遇。本文件所述的指導方針將協助您透過引人注目的功能與良好設計的直覺式 UI，符合平板電腦使用者的預期。
+</p>
+
+<p>
+  雖然這些指導方針已編號，但是您能以任何順序對其進行了解。對於您應用程式適用的每項指導方針，您都應了解其建議，而為了向客戶提供最優產品，您應盡可能遵循這些建議。
+</p>
+
+<p>
+  本文件會經常提供資源連結，以協助您了解內含的每項建議。
+</p>
+
+<div class="headerLine"><h2 id="core-app-quality">1.測試基本平板電腦應用程式品質</h2></div>
+
+<p>提供平板電腦應用程式絕佳體驗的第一步，是確保其符合應用程式所針對所有裝置及尺寸規格的<em>核心應用程式品質準則</em>。如需完備資訊，請參閱<a href="{@docRoot}distribute/essentials/quality/core.html">核心應用程式品質指導方針</a>。 
+</p>
+
+<p>
+此外，在發行之前，請確保您的應用程式已通過基本技術檢查並符合推出條件，例如：
+</p>
+
+<ul>
+  <li><a href="#android-versions">以相應的 Android 版本為目標</a></li>
+  <li><a href="#hardware-requirements">正確指定硬體相依性</a></li>
+  <li><a href="#support-screens">宣告對相應螢幕的支援</a></li>
+  <li><a href="#use-extra-space">使用提供的所有螢幕空間</a></li>
+  <li><a href="#google-play">將螢幕擷取畫面上傳至 Google Play</a></li>
+</ul>
+
+<p>若已將應用程式上傳至 Google Play Developer Console，您可以造訪<a href="#google-play-optimization-tips">最佳化秘訣頁面</a>查看對應用程式執行檢查的結果。</p>
+
+
+<div class="headerLine">
+<h2 id="optimize-layouts">2.針對較大的螢幕最佳化版面配置</h2></div>
+
+<p>
+  藉由 Android，可以輕鬆開發針對諸多裝置螢幕大小與尺寸規格都能良好運作的應用程式。這一普遍相容性對您非常有利，因為您可以將其協助設計的單一應用程式廣泛散佈到針對的所有裝置上。但是，若要為每個螢幕組態 (尤其是平板電腦) 的使用者提供最佳體驗，對於每個所針對的螢幕組態，您需要最佳化版面配置及其他 UI 元件。在平板電腦上，透過最佳化 UI，可以充分利用提供的更大螢幕實現諸多目標，例如提供新功能、展示新內容或以其他方式改善體驗，以提高對使用者的吸引力。
+</p>
+
+<p>
+  若您已開發適用於手機的應用程式，現在希望將其散佈到平板電腦上，可以先對版面配置、字型及間距進行微小調整。在某些狀況下 (例如對於 7 英寸平板電腦或畫布很大的遊戲)，只需執行這些調整，應用程式即可擁有良好的外觀。在其他狀況下 (例如對於更大的平板電腦)，您可以重新設計 UI 部分，使用高效的多窗格 UI、更輕鬆的導覽及其他內容取代「延伸的 UI」。
+</p>
+
+
+<div style="width:500px;margin:1.5em;margin-top:-16px;">
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-bad.png" style="padding:4px;margin-bottom:0em;">
+<p class="img-caption"><span
+style="font-weight:500;">去除「延伸」的 UI</span>：在平板電腦上，單一窗格版面配置會產生很難處理的空白，並導致行過長。請使用邊框間距縮短 UI 元素的寬度，並考慮使用多窗格版面配置。</p>
+</div>
+
+<p>以下提供一些建議：</p>
+
+
+<ul>
+  <li>視需要為 <code>large</code> 與 <code>xlarge</code> 螢幕提供自訂版面配置。此外，您還可以提供根據螢幕的<a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">最短維度</a>或<a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">可用的最小寬度與高度</a>而載入的版面配置。
+  </li>
+
+  <li>對於較大的螢幕，請至少自訂諸如字型大小、邊界、間距等維度，以改善空間使用狀況與內容可讀性。
+  </li>
+
+  <li>請調整 UI 控制項的位置，以便使用者在手持平板電腦時能輕鬆存取，例如平板電腦方向為橫向時，將 UI 控制項的位置向兩邊調整。
+  </li>
+
+  <li>平板電腦上 UI 元素的邊框間距通常應大於手機上的該間距。建議使用<a href="{@docRoot}design/style/metrics-grids.html#48dp-rhythm"> 48dp 節奏</a> (與 16dp 網格)。
+  </li>
+
+  <li>充分填補文字內容，使其並非恰好沿螢幕邊緣對齊。在螢幕邊緣附近的內容周圍使用至少為 <code>16dp</code> 的邊框間距。
+  </li>
+</ul>
+
+<p>尤其是確保您的版面配置在螢幕上不會顯示為「延伸」狀態：</p>
+
+<ul>
+<li>文字行不應過長，應最佳化為每行最多 100 個字元，每行字元數介於 50 與 75 之間時可取得最佳效果。</li>
+<li>ListView 與功能表不應使用全螢幕寬度。</li>
+<li>請使用邊框間距來管理螢幕上元素的寬度，或切換至平板電腦的多窗格 UI (請參閱下一節)。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/optimize"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="use-extra-space">3.利用更大的螢幕區域</h2></div>
+
+<div style="width:340px;float:right;margin:1.5em;margin-bottom:0;margin-top:0;">
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-good.png" style="padding:4px;margin-bottom:0em;">
+<p class="img-caption"><span
+style="font-weight:500;">多窗格版面配置</span> 會在平板電腦螢幕上產生更佳的視覺平衡，同時提供更高的可用性與可讀性。</p>
+</div>
+
+<p>平板電腦螢幕能為您的應用程式提供大得多的螢幕顯示空間，尤其在平板電腦方向為橫向時，更是如此。特別是 10 英寸的平板電腦，能提供大幅擴展的區域，而即使是 7 英寸的平板電腦也能提供較大的空間，供您顯示內容並吸引使用者。 </p>
+
+<p>考慮平板電腦上所執行應用程式的 UI 時，請確保 UI 完全利用平板電腦上所提供的更大螢幕區域。以下提供一些建議：</p>
+
+<ul>
+<li>請尋求機會納入其他內容，或對既有內容使用其他處理方式。</li>
+<li>在平板電腦螢幕上使用<a href="{@docRoot}design/patterns/multi-pane-layouts.html">多窗格版面配置</a>，以便將多個單一檢視合併為複合檢視。藉此，您可以更高效地使用更大的螢幕區域，並降低使用者導覽應用程式的難度。 </li>
+<li>請對螢幕方向變更時，複合檢視中面板的重新排列狀況進行規劃。</li>
+
+<div style="width:490px;margin:1.5em auto 1.5em 0;">
+<div style="">
+<img src="{@docRoot}images/home/wear-wordmark.png"> <img src="{@docRoot}images/home/wear.png">
+<p class="image-caption"
+style="padding:.5em"><span
+style="font-weight:500;">複合檢視</span> 可將手機 UI 的多個單一檢視 <em>(上圖)</em> 合併為平板電腦更豐富、更高效的 UI <em>(下圖)</em>。 </p>
+</div>
+</div>
+
+<li>將單一螢幕實作為 {@link android.app.Activity} 子類別時，請考慮將個別內容面板實作為{@link android.app.Fragment}子類別。您可藉此在不同的大小規格與共用內容的螢幕之間最大限度重複使用程式碼。</li>
+<li>請決定使用多窗格 UI 的螢幕大小，然後在相應的螢幕大小貯體中提供不同的版面配置 (諸如 <code>large</code>/<code>xlarge</code>) 或最小螢幕寬度 (諸如 <code>sw600dp</code>/<code>sw720</code>)。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/extrascreen"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="use-tablet-icons">4.使用專為平板電腦螢幕設計的資產</h2></div>
+
+<div><img src="{@docRoot}design/media/devices_displays_density@2x.png"></div>
+
+<p>若要確保您的應用程式具有最佳的外觀，請為平板電腦通常所支援範圍中的每個密度提供圖示與其他點陣圖資產。具體而言，您應根據<a href="{@docRoot}design/style/iconography.html">圖表</a>指導方針來設計動作列、通知與啟動器的圖示，並在多個密度中提供這些圖示，以便其以適當的大小顯示在所有螢幕上 (沒有模糊或其他顯像偽差)。</p>
+
+<p class="table-caption"><strong>表格 1.</strong>圖示類型的原始資產大小。<table>
+<tr>
+<th>密度</th>
+<th>啟動器</th>
+<th>動作列</th>
+<th>小型/內容關聯式</th>
+<th>通知</th>
+</tr>
+<tr>
+<td><code>mdpi</code></td>
+<td>48x48 px</td>
+<td>32x32 px</td>
+<td>16x16 px</td>
+<td>24x24 px</td>
+</tr>
+<tr>
+<td><code>hdpi</code></td>
+<td>72x72 px</td>
+<td>48x48 px</td>
+<td>24x24 px</td>
+<td>36x36 px</td>
+</tr>
+<tr>
+<td><code>tvdpi</code></td>
+<td><em>(使用 hdpi)</em></td>
+<td><em>(使用 hdpi)</em></td>
+<td><em>(使用 hdpi)</em></td>
+<td><em>(使用 hdpi)</em></td>
+</tr>
+<tr>
+<td><code>xhdpi</code></td>
+<td>96x96 px</td>
+<td>64x64 px</td>
+<td>32x32 px</td>
+<td>48x48 px</td>
+</tr>
+<tr>
+<td><code>xxhdpi</code></td>
+<td>144x144 px</td>
+<td>96x96 px</td>
+<td>48x48 px</td>
+<td>72x72 px</td>
+</tr>
+
+</table>
+
+<p>
+  請至少提供每個圖示與點陣圖資產的一個版本 (已針對以下<strong>至少一個</strong>常用平板電腦螢幕密度進行最佳化)：
+</p>
+<ul>
+  <li><code>hdpi</code></li>
+  <li><code>xhdpi</code></li>
+  <li><code>xxhdpi</code></li>
+</ul>
+
+<p>其他秘訣：</p>
+
+<ul>
+<li>在設計圖示時，請使用向量形狀，以便在縮放時不會遺失詳細資料或邊緣捲曲。</li>
+<li>使用密度特定的<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">資源限定詞</a>以確保為每個螢幕密度載入正確的圖示。</li>
+<li>對於平板電腦與其他大螢幕裝置要求的啟動器圖示，其密度大小通常大於裝置的實際密度，因此您應提供最高密度的啟動器圖示。例如，若平板電腦使用 {@code xhdpi} 螢幕，將要求 {@code xxhdpi} 版本的啟動器圖示。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/assets"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="adjust-font-sizes">5.調整字型大小與輕觸目標</h2></div>
+
+<p>若要確保您的應用程式在平板電腦上易於使用，請花一些時間對您針對的所有螢幕組態，調整平板電腦 UI 的字型大小與輕觸目標。您可以透過<a href="{@docRoot}guide/topics/ui/themes.html">風格化屬性</a>或<a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">維度資源</a>來調整字型大小，透過版面配置與點陣圖可繪項目來調整輕觸目標，如上所述。 </p>
+
+<p>以下提供一些考慮事項：</p>
+<ul>
+<li>對於平板電腦螢幕的各種大小與密度，文字不應過大或過小。請確保針對標籤所對應的 UI 元素適當調整標籤大小，並確保標籤、標題與其他元素中沒有不適當的換行。</li>
+<li>對於螢幕上的元素，建議採用的輕觸目標大小是 48dp (至少為 32dp)，可能需要在平板電腦 UI 中進行某些調整。請閱讀<a href="{@docRoot}design/style/metrics-grids.html">計量與網格</a>了解實作策略，以便為大多數使用者提供協助。若要因應特定使用者的協助工具需求，可能需要使用更大的輕觸目標。 </li>
+<li>若可能，對於較小的圖示，請使用 {@link android.view.TouchDelegate} 將可觸區域擴大至 48dp 以上，或只是將圖示置於透明按鈕的中央。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/fonts"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="adjust-widgets">6.調整主螢幕小工具的大小</h2></div>
+
+<p>若您的應用程式包括主螢幕小工具，請考慮以下幾點，以確保平板電腦螢幕為使用者提供絕佳的體驗： </p>
+
+<ul>
+<li>針對平板電腦螢幕適當設定小工具的預設高度與寬度，以及重新調整高度及寬度的最大值與最小值。
+</li>
+<li>應將小工具的大小重新調整為至少 420dp，以涵蓋至少 5 個主螢幕列 (若是垂直或方形小工具) 或欄 (若是水平或方形小工具)。 </li>
+<li>確保 9 貼片影像能正確顯示。</li>
+<li>使用預設系統邊界。</li>
+<li>若可能，請將應用程式的 <code>targetSdkVersion</code> 設為至少是 14。</li>
+</ul>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/widgets"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="offer-full-feature-set">7.為平板電腦使用者提供完備功能集</h2></div>
+
+<div class="centered-full-image" style="width:600px;margin:1.5em"><img src="{@docRoot}images/gp-tablets-full-feature-set.png" alt="Tablet feature sets"></div>
+
+<p>請讓您的平板電腦使用者體驗應用程式的最佳功能。以下提供一些建議：</p>
+
+<ul>
+  <li>將應用程式設計為在平板電腦上至少提供在電話上提供的一組功能。
+  </li>
+
+  <li>在特殊狀況下，若多數平板電腦的硬體或使用狀況不支援某些功能，您的應用程式在平板電腦上可以略去或替換這些功能。範例： <ul>
+      <li>若手機使用電話語音功能，但目前平板電腦上不提供電話語音功能，您可以略去或替換相關功能。
+      </li>
+
+      <li>許多平板電腦具有 GPS 感應器，但是多數使用者在駕車時通常不會攜帶平板電腦。若使用者藉由您電話應用程式提供的功能，可以在攜帶電話時記錄其駕車的 GPS 路線，則應用程式不需要在平板電腦上提供該功能，因為該使用狀況不具備吸引力。
+      </li>
+    </ul>
+  </li>
+
+  <li>若您要略去平板電腦 UI 的某項功能，請確保使用者無法存取該功能，或確保為替換功能提供「優雅降級」(另請參閱以下有關硬體功能的一節)。
+  </li>
+</ul>
+
+<div class="headerLine"><h2 id="android-versions">8.正確針對 Android 版本</h2></div>
+
+<p>
+  若要確保散佈到可能最廣泛的平板電腦，請確保您的應用程式正確針對支援平板電腦的 Android 版本。<a href="{@docRoot}about/versions/android-3.0.html">Android 3.0</a> (API 層級為 11) 中已新增對平板電腦的初始支援。<a href="{@docRoot}about/versions/android-4.0.html">Android 4.0</a> 中已引入對平板電腦、電話及其他裝置的統一 UI 架構支援。
+</p>
+
+<p>
+  您可以在宣示說明檔案中的 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> 元素內設定應用程式所針對 Android 版本的範圍。在多數狀況下，您可以將元素的 <code>targetSdkVersion</code> 屬性設為可用的最高 API 層級，從而正確針對 Android 版本。
+</p>
+
+<p style="margin-bottom:.5em;">
+  請至少對 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> 元素進行檢查，以確保：
+</p>
+
+<ol style="list-style-type:lower-alpha;margin-top:0em;">
+  <li>
+    所宣告 <code>targetSdkVersion</code> 的值至少為 11 (建議至少為 14)，或
+  </li>
+
+  <li>
+    所宣告 <code>minSdkVersion</code> 的值至少為 11。
+  </li>
+
+  <li>若宣告 <code>maxSdkVersion</code> 屬性，其值必須至少為 11。請注意，一般<em>不建議</em>使用 <code>maxSdkVersion</code>。
+  </li>
+</ol>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/versions"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="hardware-requirements">9.正確宣告硬體功能相依性</h2></div>
+
+<p>
+  手機與平板電腦為感應器、相機、電話語音及其他功能提供的硬體支援通常稍有不同。例如，許多平板電腦可使用「Wi-Fi」組態，但該組態不包括電話語音支援。
+</p>
+
+<p>
+  為了能將單一 APK 廣泛散佈到您電話與平板電腦的整個客戶群，請確保您的應用程式不會宣告需要平板電腦上通常不提供的硬體功能。您應改為在應用程式的宣示說明中將這些硬體功能正確宣告為<em>不需要</em>，如下所述。
+</p>
+
+<ul>
+<li>在您的應用程式宣示說明中，尋找 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> 元素。尤其是尋找可能無法用於某些平板電腦的硬體功能，例如： <ul>
+<li><code>android.hardware.telephony</code></li>
+<li><code>android.hardware.camera</code> (請參閱後部相機)，或</li>
+<li><code>android.hardware.camera.front</code></li>
+</ul></li>
+
+<li>透過納入 <code>android:required=”false”</code> 屬性，將 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> 元素宣告為<em>不需要</em>。 <p>
+  例如，以下提供了 <code>android.hardware.telephony</code> 相依性的正確宣告方式，您藉此仍可以廣泛散佈應用程式，即使對於不提供電話語音功能的裝置，也是如此：
+</p>
+
+<pre>&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;</pre></li>
+
+<li>與此類似，請檢查宣示說明中是否存在表示對不適用於平板電腦的硬體功能有需求的 <a href="{@docRoot}guide/topics/manifest/permission-element.html"><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions"><code>&lt;permission&gt;</code></a></a> 元素。若您發現此類許可，請確保明確宣告這些功能的對應 <code>&lt;uses-feature&gt;</code> 元素，並納入 <code>android:required=”false”</code> 屬性。</li>
+</ul>
+
+
+<p>
+  將硬體功能宣告為<em>不需要</em>後，請確保在多種裝置上測試您的應用程式。應用程式在其使用的硬體功能無法提供時應正常運作，若合適，應提供「優雅降級」與替代功能。
+</p>
+
+<p>
+  例如，若應用程式通常使用 GPS 來設定位置，但是裝置上不支援 GPS，則應用程式可以讓使用者改為手動設定位置。應用程式可以在執行階段檢查裝置硬體功能，並視需要進行處理。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/hardware"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine"><h2 id="support-screens">10.宣告對平板電腦螢幕的支援</h2></div>
+
+<p>若要確保可以將您的應用程式散佈到多種平板電腦，您的應用程式應在宣示說明檔案中宣告對多種平板電腦螢幕大小的支援，如下所示：</p>
+
+<ul>
+  <li>若已宣告 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> 元素，則該元素不得指定 <code>android:largeScreens="false"</code> 或 <code>android:xlargeScreens="false"</code>。</li>
+  <li>對於所針對的 <code>minSdkVersion</code> 值小於 13 的應用程式，必須宣告 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> 元素與 <code>android:largeScreens="true"</code> 及 <code>android:xlargeScreens="true"</code>。</li>
+</ul>
+
+<p>若應用程式在宣示說明中宣告<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a>元素，則該元素應包括對應用程式所支援<em>平板電腦螢幕的所有大小與密度的組合</em>進行指定的屬性。請注意，若可能，應避免在應用程式中使用<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a>元素。</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/tabletscreens"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,6x3,6x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine"><h2 id="google-play">11.在 Google Play 中展示您的平板電腦 UI</h2></div>
+
+<p>
+  在執行工作為平板電腦應用程式建立豐富的最佳化 UI 後，請確保讓您的客戶了解這些 UI！以下展示了在 Google Play 上將您的平板電腦應用程式向使用者推廣的一些重要方式。
+</p>
+
+<div><img class="border-img" src="{@docRoot}images/gp-tablet-quality-4.jpg"></div>
+
+
+<h4>
+  上傳您平板電腦 UI 的螢幕擷取畫面
+</h4>
+
+<p>
+  平板電腦使用者希望了解您的應用程式在平板電腦裝置上 (而非在電話上) 的狀況。若您已開發平板電腦應用程式，請確保將平板電腦應用程式 UI 的螢幕擷取畫面上傳至 Google Play Developer Console。以下提供一些指導方針：
+  </p>
+
+<ul style="margin-top:0;">
+  <li>請顯示您應用程式的核心功能，而非啟動或登入頁面。對於使用者花費大部分時間了解的環節，您應使用螢幕擷取畫面予以展示。
+  </li>
+
+  <li>請新增在 7 英寸與 10 英寸平板電腦上拍攝的螢幕擷取畫面。
+  </li>
+
+  <li>若可能，請新增拍攝的橫向與直向螢幕擷取畫面。
+  </li>
+
+  <li>若可能，請使用螢幕擷取功能。避免在您的螢幕擷取畫面中顯示 實際的裝置硬體。</li>
+
+  <li>在每個方向，建議的平板電腦螢幕擷取畫面解析度為至少 <strong>1280 x 720</strong>。
+  </li>
+
+  <li>對於 7 英寸平板電腦，請上傳平板電腦 UI 的 8 個螢幕擷取畫面；對於 10 英寸平板電腦，請上傳其他 8 個螢幕擷取畫面。
+  </li>
+</ul>
+
+<h4>
+  更新應用程式的描述與版本資訊
+</h4>
+
+<ul>
+  <li>在您的應用程式描述中，請確保著重說明您的應用程式能為平板電腦使用者提供平板電腦最佳化 UI 與卓越的功能。請新增某些詳細資料，以說明您的平板電腦應用程式 UI 的運作方式，以及使用者喜歡該 UI 的原因所在。
+  </li>
+
+  <li>請在應用程式的版本資訊與更新資訊中納入平板電腦支援的有關資訊。
+  </li>
+</ul>
+
+<h4>
+  更新您的推廣影片
+</h4>
+
+<p>
+  許多使用者會觀看應用程式的推廣影片，以了解應用程式的狀況以及使用者是否喜歡該應用程式。對於平板電腦使用者，請在推廣影片中著重說明您應用程式的平板電腦 UI，以充分利用這一興趣。以下提供一些秘訣與指導方針：
+</p>
+
+<ul>
+  <li>新增平板電腦上所執行應用程式的一或多個螢幕擷取畫面。若要以最有效的方式吸引平板電腦使用者，建議您以與電話 UI 大致相等的比例，推廣平板電腦 UI。
+  </li>
+
+  <li>請在影片中儘早顯示平板電腦 UI。不要指望平板電腦使用者在了解電話 UI 的功能介紹時會耐心等候。最理想的狀況是，您應在前 10 秒內 (或至少在介紹電話 UI 時) 展示平板電腦 UI，以立即吸引使用者。
+  </li>
+
+  <li>若要清晰說明您正在展示平板電腦 UI，請將手持平板電腦裝置上所執行應用程式的螢幕擷取畫面包含在內。
+  </li>
+
+  <li>在影片的記述或畫外音中，請著重說明應用程式的平板電腦 UI。
+  </li>
+</ul>
+
+<h4>
+  在推廣活動中介紹您的平板電腦 UI
+</h4>
+
+<p>
+  請確保透過推廣活動、網站、社交貼文、廣告及其他方式，讓平板電腦使用者了解您的平板電腦 UI。以下提供一些建議：
+</p>
+
+<ul>
+  <li>規劃行銷或廣告活動，以著重說明在平板電腦上使用您的應用程式。</li>
+
+  <li>在推廣活動中展示平板電腦應用程式的最佳特性，使用 <a href="{@docRoot}distribute/tools/promote/device-art.html">Device Art Generator</a> 可快速產生 7 英寸或 10 英寸平板電腦上所執行應用程式的高品質推廣影像，視您的選擇而定，可以具有或不具有陰影及螢幕眩光。這與擷取、拖曳及釋放一樣簡單。
+  </li>
+
+  <li>請在您的線上推廣中納入 Google Play 徽章，以便使用者藉此可以直接連結至您應用程式的市集清單。使用 <a href="{@docRoot}distribute/tools/promote/badges.html">Badge Generator</a>，您可以產生多種語言的徽章。
+  </li>
+</ul>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/showcase"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>
+
+<div class="headerLine">
+  <h2 id="google-play-best-practices">
+    12.遵循在 Google Play 中發行的最佳做法
+  </h2>
+
+
+</div>
+
+<p>
+  以下展示了在 Google Play 上提供成功的平板電腦應用程式所採用的一些最佳做法。
+</p>
+
+<div>
+  <img class="border-img" src="{@docRoot}images/gp-tablet-quality-5.jpg" style="1px solid #ddd">
+</div>
+
+<h4 id="google-play-optimization-tips">
+  檢查您應用程式的最佳化秘訣
+</h4>
+
+<p>Google Play Developer Console 現在提供 [最佳化秘訣] 頁面，您可藉此根據平板電腦應用程式散佈與品質的基本指導方針，快速檢查應用程式的運作狀況。若要造訪該頁面，請登入 Developer Console，從 [所有應用程式] 載入應用程式，然後按一下左側導覽列中的 [最佳化秘訣]。</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>如何傳送回饋</h2>
+
+<p>請使用以下連結傳送回饋或要求手動檢閱您的最佳化秘訣。</p>
+
+<p>請確保先閱讀平板電腦應用程式品質指導方針的相關各節，然後傳送回饋。</p>
+
+<p><strong><a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">專為平板電腦而設計的連絡人表單&raquo;</a></strong></p>
+</div>
+</div>
+
+<p>Developer Console 會執行一系列檢查以驗證基本的品質準則，藉此建立您應用程式的 [最佳化秘訣] 頁面。若發現存在問題，會在 [最佳化秘訣] 頁面中以「待處理」項目的形式向您提出警示。</p>
+
+<p>若您已為應用程式開發平板電腦體驗，請確保造訪 [最佳化秘訣] 頁面，以根據基本檢查查看您應用程式的運作狀況。若列出問題，建議您先解決應用程式中的這些問題，然後上傳新的二進位檔案以供散佈 (若需要)。 </p>
+
+<p>對於 [最佳化秘訣] 頁面中列示的「待處理」問題，若您覺得不適用於您的應用程式或會影響在平板電腦上的品質，請使用<a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">專為平板電腦而設計的連絡人表單&raquo;</a>通知我們。我們會檢閱您的應用程式，並視需要更新您的 [最佳化秘訣] 頁面。</p>
+
+
+<h4>確認應用程式的篩選</h4>
+
+<p>
+  將應用程式上傳至 <a href="https://play.google.com/apps/publish/">Developer Console</a> 後，請檢查 APK 的支援裝置清單，以確保您希望針對的平板電腦裝置中未篩除該應用程式。
+</p>
+
+<h4>以單一 APK 的形式散佈</h4>
+
+<p>
+  建議您針對所有螢幕大小 (電話與平板電腦) 以單一 APK 的形式 (使用單一 Google Play 清單) 發行應用程式。此方法具有多項重要優點。
+</p>
+
+<ul style="margin-top:.25em;">
+  <li>使用者可以更輕鬆地透過搜尋、瀏覽或推廣找到您的應用程式
+  </li>
+
+  <li>使用者取得新裝置時，可以更輕鬆地自動還原您的應用程式。
+  </li>
+
+  <li>將合併所有裝置中您的評分與下載統計資料。
+  </li>
+
+  <li>在另一個清單中發行平板電腦應用程式會降低對您品牌的評分。
+  </li>
+</ul>
+
+<p>
+  雖然在多數狀況下，強烈建議您使用單一 APK 連絡所有裝置，但是若需要，您也可以改為選擇使用<a href="{@docRoot}google/play/publishing/multiple-apks.html">多 APK 支援</a>提供應用程式。
+</p>
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+
+<div class="headerLine">
+  <h2 id="test-environment">
+    設定平板電腦的測試環境
+  </h2>
+
+
+</div>
+
+<p>
+  憑藉用於測試的適用硬體或模擬器環境，評估您的應用程式在平板電腦上的品質 (包括核心應用程式品質與平板電腦應用程式品質)。
+</p>
+
+<p>
+  與<a href="{@docRoot}distribute/essentials/quality/core.html#test-environment">建議的測試環境</a>相較，根據核心應用程式品質準則進行測試，包括中型平板電腦以及具有更多或更少硬體/軟體功能的平板電腦。
+</p>
+
+<p class="table-caption"><strong>表格 1.</strong>一般平板電腦測試環境可能包括下表中每行內的一或兩項裝置，具有列示的其中一個平台版本、螢幕組態與硬體功能組態。</p>
+
+<table>
+<tr>
+<th>類型</th>
+<th>大小</th>
+<th>密度</th>
+<th>版本</th>
+<th>AVD 面板</th>
+</tr>
+
+<tr>
+<td>7 英寸平板電腦</td>
+<td><span style="white-space:nowrap"><code>large</code> 或</span><br /><code>-sw600</code></td>
+<td><code>hdpi</code>，<br /><code>tvdpi</code></td>
+<td>Android 4.0+ (API 層級至少為 14)</td>
+<td>WXGA800-7in</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">10 英寸</span> 平板電腦</td>
+<td><span style="white-space:nowrap"><code>xlarge</code> 或</span><br /><code>-sw800</code></td>
+<td><code>mdpi</code>，<br /><code>hdpi</code>，<br /><code>xhdpi</code></td>
+<td>Android 3.2+ (API 層級至少為 13)</td>
+<td>WXGA800</td>
+</tr>
+</table>
+
+<div class="headerLine"><h2 id="related-resources">相關資源</h2></div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/tabletguidelines"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
