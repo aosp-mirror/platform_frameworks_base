@@ -247,9 +247,9 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"触れたアイテムが読み上げられ、ジェスチャーで画面のガイドを利用できます。"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"タップしたアイテムが読み上げられ、ジェスチャーで画面のガイドを利用できます。"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ウェブアクセシビリティ拡張の有効化"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"アプリコンテンツのアクティビティをもっと向上させるためにスクリプトをインストールできます。"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"スクリプトをインストールしてアプリコンテンツにアクセスしやすくできます。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"入力テキストの監視"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"クレジットカードの番号やパスワードなどの個人データが含まれます。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMSメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"緊急警報SMSの読み取り"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信した緊急警報SMSの読み取りをアプリに許可します。緊急警報は、緊急事態を警告する目的で一部の地域に配信されます。緊急警報の受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"アカウント"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"利用可能なアカウントにアクセスします。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"登録したフィードの読み取り"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"現在同期されているフィードの詳細を取得することをアプリに許可します。"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMSメッセージの送信と表示"</string>
@@ -1529,7 +1527,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"その他のオプション"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"オーバーフローを閉じる"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>個を選択中</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>個を選択中</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>件選択済み</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>件選択済み</item>
     </plurals>
 </resources>

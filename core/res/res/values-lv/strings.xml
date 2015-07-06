@@ -271,8 +271,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ļauj lietotnei saņemt un apstrādāt multiziņas. Tas nozīmē, ka lietotne var pārraudzīt vai dzēst uz jūsu ierīci nosūtītos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"šūnu apraides ziņojumu lasīšana"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ļauj lietotnei lasīt ierīcē saņemtos šūnu apraides ziņojumus. Šūnu apraides brīdinājumi tiek piegādāti dažās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Jūsu konti"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Piekļūstiet pieejamajiem kontiem."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lasīt abonētās plūsmas"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ļauj lietotnei iegūt informāciju par pašlaik sinhronizētajām plūsmām."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"sūtīt un skatīt īsziņas"</string>
@@ -505,8 +503,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt televizoru vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt tālruni vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Mainīt ekrāna bloķēšanas iestatījumus"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mainīt ekrāna bloķēšanas iestatījumu."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Ekrāna bloķēšana"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Maina ekrāna bloķēšanas iestatījumu."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloķēt ekrānu"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrolē, kā un kad ekrāns tiek bloķēts."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Dzēst visus datus"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Dzēš planšetdatora datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
@@ -1014,7 +1012,7 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM karte ir pievienota."</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Lai piekļūtu mobilajam tīklam, restartējiet ierīci."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Restartēt"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Laika iestatīšana"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Iestatīt laiku"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datuma iestatīšana"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Iestatīt"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Gatavs"</string>
@@ -1473,7 +1471,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Lietotne ir piesprausta. Atspraušana šajā ierīcē nav atļauta."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrāns ir atsprausts"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pirms atspraušanas pieprasīt PIN"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prasīt PIN kodu pirms atspraušanas"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atslēgu"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pirms atspraušanas pieprasīt paroli"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalēja jūsu administrators"</string>

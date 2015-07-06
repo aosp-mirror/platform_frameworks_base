@@ -235,9 +235,9 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправка и просмотр SMS-сообщений"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправлять и просматривать SMS-сообщения"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фотографиям, файлам и мультимедийному контенту на вашем устройстве"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запись аудио"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
@@ -272,8 +272,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Приложение сможет получать и обрабатывать MMS. Это значит, что оно сможет отслеживать и удалять отправленные на ваше устройство сообщения, не показывая их."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Читать сообщения массовой рассылки"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Приложение получит доступ к сообщениям широковещательных SMS-служб, которые в некоторых странах используются для информирования населения об экстренных ситуациях. Вредоносные программы могут помешать работе устройства, на которое поступают такие сообщения."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ваши аккаунты"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Доступ к имеющимся аккаунтам."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Просмотр фидов пользователя"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Приложение сможет получать сведения о синхронизируемых в настоящее время фидах."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"отправка и просмотр SMS-сообщений"</string>

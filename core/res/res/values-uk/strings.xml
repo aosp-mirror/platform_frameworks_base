@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Без назви&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Немає номера тел.)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Невідомо"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голос. пошта"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голосова пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Пробл. підключення чи недійсний код MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Операція лише для номерів фіксованого набору."</string>
@@ -272,8 +272,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Дозволяє програмі отримувати й обробляти MMS-повідомлення. Це означає, що програма може відстежувати чи видаляти повідомлення, надіслані на ваш пристрій, навіть не показуючи їх вам."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"читати широкомовні повідомлення мережі"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Дозволяє програмі читати широкомовні повідомлення мережі, отримані пристроєм. Широкомовні сповіщення мережі надсилаються в деяких країнах для попередження про надзвичайні ситуації. Шкідливі програми можуть втручатися у швидкодію чи роботу пристрою під час отримання широкомовного повідомлення мережі про надзвичайну ситуацію."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ваші облікові записи"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Доступ до доступних обл. записів."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"читати підписані канали"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Дозволяє програмі отримувати відомості про поточно синхронізовані канали."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"надсилати та переглядати SMS-повідомлення"</string>
@@ -512,7 +510,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Видалити всі дані"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Стирати дані планшетного ПК без попередження, відновлюючи заводські налаштування."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Без попередження стирати дані телевізора, відновлюючи заводські налаштування."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Стирати дані телефону без попередження, відновлюючи заводські налаштування."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Стирати дані телефона без попередження, відновивши заводські налаштування."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Видалення даних користувача"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Видаляйте дані користувача на цьому планшеті без попередження."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Видаляйте дані користувача на цьому телевізорі без попередження."</string>
@@ -592,7 +590,7 @@
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Помічник"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Указати"</string>
-    <string name="eventTypeBirthday" msgid="2813379844211390740">"День нар."</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"День народження"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Річниця"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Інші"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Указати"</string>

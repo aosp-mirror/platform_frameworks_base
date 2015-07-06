@@ -233,9 +233,9 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"캘린더 액세스"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS 메시지를 전송하고 봅니다."</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS 메시지 전송 및 보기"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"기기의 사진, 미디어, 파일에 액세스합니다."</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"기기 사진, 미디어, 파일 액세스"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"오디오 녹음"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"앱이 MMS 메시지를 수신하고 처리할 수 있도록 허용합니다. 이는 앱이 사용자에게 표시하지 않고 기기로 전송된 메시지를 모니터링 또는 삭제할 수도 있다는 것을 의미합니다."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"셀 브로드캐스트 메시지 읽기"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"앱이 기기가 수신한 셀 브로드캐스트 메시지를 읽을 수 있도록 합니다. 비상 상황임을 알리기 위해 일부 지역에서 셀 브로드캐스트 경고가 전달됩니다. 비상 셀 브로드캐스트를 수신할 때 악성 앱이 기기의 성능이나 작동을 방해할 수 있습니다."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"계정"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"사용 가능한 계정에 액세스합니다."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"가입된 피드 읽기"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"앱이 현재 동기화된 피드에 대한 세부정보를 가져올 수 있도록 허용합니다."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS 메시지 전송 및 보기"</string>

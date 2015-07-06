@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permet à l\'application de recevoir et de traiter les MMS. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lire les messages reçus via un canal de diffusion cellulaire"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permet à l\'application de lire les messages que votre appareil reçoit via un canal de diffusion cellulaire. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Les applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lorsqu\'un message est reçu via un canal de diffusion cellulaire."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vos comptes"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accéder aux comptes disponibles"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lire les flux auxquels vous êtes abonné"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permet à l\'application d\'obtenir des informations sur les flux en cours de synchronisation."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"envoyer et consulter des SMS"</string>
@@ -1041,7 +1039,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB en mode MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connecté en tant que programme d\'installation"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connecté à un accessoire USB"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Appuyez pour afficher plus d\'options."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Appuyez pour afficher plus d\'options"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater mémoire ?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formater la carte SD ?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Tous les fichiers stockés sur la mémoire de stockage USB vont être effacés. Cette action est irréversible."</string>
@@ -1470,7 +1468,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Supprimé par votre administrateur"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Pour améliorer l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil, et il désactive le vibreur, les services de localisation et la plupart des données en arrière-plan. La messagerie électronique, les SMS/MMS et les autres applications basées sur la synchronisation ne sont mises à jour que si vous les ouvrez.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Pour améliorer l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances et désactive le vibreur, les services de localisation et la plupart des données en arrière-plan. Les messageries électroniques ou autres applications utilisant la synchronisation pourraient ne pas se mettre à jour, sauf si vous les ouvrez.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque l\'appareil est en charge."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Pendant %1$d minute (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Pendant %1$d minutes (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -235,7 +235,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sms\'jes verzenden en bekijken"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Opslagruimte"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang tot foto\'s, media en bestanden op uw apparaat"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang krijgen tot foto\'s, media en bestanden op uw apparaat"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"audio opnemen"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Hiermee kan de app MMS-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"infodienstberichten lezen"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Toestaan dat de app infodienstberichten leest die worden ontvangen op uw apparaat. Infodienstberichten worden verzonden naar bepaalde locaties om u te waarschuwen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van uw apparaat verstoren wanneer een infodienstbericht wordt ontvangen."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Uw accounts"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Toegang tot de beschikbare accounts."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Geabonneerde feeds lezen"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Hiermee kan de app details over de huidige gesynchroniseerde feeds achterhalen."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"sms\'jes verzenden en bekijken"</string>
@@ -492,7 +490,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Hiermee wordt de houder toegestaan te binden aan de berichteninterface van een provider. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"binden aan providerservices"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Hiermee kan de houder binden aan providerservices. Nooit gebruikt voor normale apps."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"toegang tot Niet storen"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"toegang tot \'Niet storen\'"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
@@ -1464,7 +1462,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"App is vastgezet: losmaken is niet toegestaan op dit apparaat."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Scherm vastgezet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Scherm losgemaakt"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vraag PIN voor losmaken"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vraag pin voor losmaken"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vraag patroon voor losmaken"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vraag wachtwoord voor losmaken"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Geïnstalleerd door uw beheerder"</string>

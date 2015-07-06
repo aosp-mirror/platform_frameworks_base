@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Võimaldab rakendusel vastu võtta ja töödelda multimeediumsõnumeid. See tähendab, et rakendus võib jälgida või kustutada teie seadmele saadetud sõnumeid neid teile näitamata."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"mobiilsidesõnumite lugemine"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Võimaldab rakendusel lugeda seadme vastu võetud mobiilsidesõnumeid. Mobiilsidemärguandeid edastatakse mõnes asukohas eriolukorrast teavitamiseks. Pahatahtlikud rakendused võivad segada seadme toimivust või tööd eriolukorra sõnumi vastuvõtmisel."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Teie kontod"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Juurdepääs saadaolevatele kontodele."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"loe tellitud kanaleid"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Võimaldab rakendusel saada üksikasju praegu sünkroonitavate voogude kohta."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"saata ja vaadata SMS-sõnumeid"</string>

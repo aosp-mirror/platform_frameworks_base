@@ -210,7 +210,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Spegni"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Segnalazione di bug"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Apri segnalazione bug"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Raccoglierà informazioni sullo stato corrente del dispositivo che verranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Verranno raccolte informazioni sullo stato corrente del dispositivo che saranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modalità silenziosa"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Audio attivo"</string>
@@ -227,24 +227,24 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Personale"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Lavoro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatti"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accesso ai contatti"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posizione"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accesso al calendario"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedere al calendario"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"invio e lettura di SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"inviare e visualizzare SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Archiviazione"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"accesso a foto, contenuti multimediali e file sul dispositivo"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"accedere a foto, contenuti multimediali e file sul dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfono"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrazione audio"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrare audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"acquisizione di foto e registrazione di video"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"acquisire foto e registrare video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefono"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"esecuzione e gestione delle telefonate"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"eseguire e gestire le telefonate"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensori per il corpo"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accesso ai dati dei sensori sui tuoi parametri vitali"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti finestra"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedere ai dati dei sensori sui tuoi parametri vitali"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti della finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Gli elementi toccati verranno pronunciati ad alta voce e sarà possibile esplorare lo schermo utilizzando i gesti."</string>
@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Consente all\'applicazione di ricevere ed elaborare messaggi MMS. Significa che l\'applicazione potrebbe monitorare o eliminare i messaggi inviati al tuo dispositivo senza mostrarteli."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lettura di messaggi cell broadcast"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Consente all\'applicazione di leggere i messaggi cell broadcast ricevuti dal dispositivo. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di eventuali situazioni di emergenza. Le applicazioni dannose potrebbero interferire con il rendimento o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"I tuoi account"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accedere agli account disponibili."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lettura feed sottoscritti"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Consente all\'applicazione di ottenere dettagli sui feed attualmente sincronizzati."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"invio e lettura di SMS"</string>

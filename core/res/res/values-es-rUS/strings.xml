@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría controlar o eliminar mensajes enviados al dispositivo sin mostrártelos."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Leer mensajes de difusión móvil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite a la aplicación leer los mensajes de difusión móvil que recibe tu dispositivo. En algunas ubicaciones, las alertas de difusión móvil se envían para informar situaciones de emergencia. Las aplicaciones maliciosas pueden afectar el rendimiento o funcionamiento de tu dispositivo cuando se recibe un un mensaje de difusión móvil de emergencia."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Tus cuentas"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acceder a las cuentas disponibles."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"leer canales suscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite que la aplicación obtenga detalles sobre los feeds sincronizados en este momento."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"enviar y ver mensajes SMS"</string>
@@ -626,7 +624,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Pareja de hecho"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Padre"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Amigo"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Gerente"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Supervisor"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Madre"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Padre"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Socio"</string>

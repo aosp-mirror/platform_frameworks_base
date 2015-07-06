@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允许该应用接收和处理彩信。这就意味着，该应用可能会监视发送到您设备的彩信，或删除发送到您设备的彩信而不向您显示。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"读取小区广播消息"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允许应用读取您的设备收到的小区广播消息。小区广播消息是在某些地区发送的、用于发布紧急情况警告的提醒信息。恶意应用可能会在您收到小区紧急广播时干扰您设备的性能或操作。"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帐户"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"访问可用的帐户。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"读取订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允许应用获取有关当前同步的 Feed 的详情。"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"发送和查看短信"</string>

@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理多媒體訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"讀取區域廣播訊息"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允許應用程式讀取您裝置收到的區域廣播訊息。某些地點會發出區域廣播警示，警告您有緊急狀況發生。請注意，惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的效能或運作。"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帳戶"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"存取可用帳戶。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"讀取訂閱資訊提供"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允許應用程式取得目前已同步處理的資訊提供詳細資料。"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"傳送及查看簡訊"</string>

@@ -210,7 +210,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Katkaise virta"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Virheraportti"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Luo virheraportti"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Toiminto kerää tietoja nykyisestä laitteen tilasta ja lähettää ne sähköpostitse. Kestää hetken aikaa, ennen kuin virheraportti on valmis lähetettäväksi, ole kärsivällinen."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Toiminto kerää tietoja laitteen tilasta ja lähettää ne sähköpostitse. Virheraportti on valmis lähetettäväksi hetken kuluttua - kiitos kärsivällisyydestäsi."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Äänetön tila"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Äänet ovat POISSA KÄYTÖSTÄ"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Äänet ovat KÄYTÖSSÄ"</string>
@@ -246,9 +246,9 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"käyttää anturitietoja elintoiminnoistasi"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Noutaa ikkunan sisältöä"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tarkistaa käyttämäsi ikkunan sisältö."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ottaa kosketuksella tutkiminen käyttöön"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ottaa kosketuksella tutkimisen käyttöön"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Kosketetut kohteet sanotaan ääneen ja ruudulla voi liikkua eleiden avulla."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ottaa parannettu verkon esteettömyys käyttöön"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ottaa verkon paremman esteettömyyden käyttöön"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Sovellus voi asentaa ohjelmia tehdäkseen sisällöstään esteettömämmän."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tarkkailla kirjoittamaasi tekstiä"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sisältää henkilökohtaisia tietoja, kuten luottokortin numeroita ja salasanoja."</string>
@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Antaa sovelluksen vastaanottaa ja käsitellä multimediaviestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lue tiedotteita"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Antaa sovelluksen lukea laitteesi vastaanottamia tiedotteita. Tiedotteiden avulla ilmoitetaan hätätilanteista joissakin paikoissa. Haitalliset sovellukset voivat häiritä laitteen toimintaa laitteen vastaanottaessa hätätiedotteen."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Omat tilit"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Käytä saatavilla olevia tilejä."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lukea tilattuja syötteitä"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Antaa sovelluksen saada tietoja tällä hetkellä synkronoitavista syötteistä."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"lähettää ja tarkastella tekstiviestejä"</string>
@@ -504,8 +502,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse televisio tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse puhelin tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Muuta näytön lukitus"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Muuta näytön lukitus."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Lukita ruutu"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Muuttaa näytön lukituksen"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Lukita ruudun"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoida, milloin ja miten ruutu lukittuu."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Pyyhkiä kaikki tiedot"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
@@ -698,7 +696,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Tilin lukituksen poisto"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Liikaa kuvionpiirtoyrityksiä"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Poista lukitus kirjautumalla sisään Google-tililläsi."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Käyttäjänimi (sähköposti)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Käyttäjätunnus (sähköposti)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Salasana"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Kirjaudu sisään"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Virheellinen käyttäjänimi tai salasana."</string>
@@ -1041,14 +1039,14 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB on MIDI-tilassa"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Kytketty asennusohjelmana"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Liitetty USB-laitteeseen"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Näet lisää vaihtoehtoja koskettamalla."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Lisää vaihtoehtoja koskettamalla"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Alusta USB-tila?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Alustetaanko SD-kortti?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Kaikki USB-tallennustilaan tallennetut tiedostot poistetaan. Tätä toimintoa ei voi kumota!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Kaikki kortilla olevat tiedot menetetään."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Muoto"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-vianetsintä yhdistetty"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Sulje USB-vianetsintä koskettamalla tätä."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Sulje USB-vianetsintä koskettamalla."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Vaihda näppäimistö"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Valitse näppäimistöt"</string>
     <string name="show_ime" msgid="9157568568695230830">"Näytä syöttötapa"</string>
@@ -1313,7 +1311,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-koodit eivät täsmää"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Liikaa kuvionpiirtoyrityksiä"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Poista lukitus kirjautumalla sisään Google-tililläsi."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Käyttäjänimi (sähköposti)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Käyttäjätunnus (sähköposti)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Salasana"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Kirjaudu sisään"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Virheellinen käyttäjänimi tai salasana."</string>
@@ -1464,7 +1462,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Sovellus on kiinnitetty. Irrottaminen ei ole sallittua tällä laitteella."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Näyttö kiinnitetty"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Näyttö irrotettu"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pyydä PIN-koodi ennen irrotusta"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pyydä PIN ennen irrotusta"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pyydä lukituksenpoistokuvio ennen irrotusta"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pyydä salasana ennen irrotusta"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Järjestelmänvalvoja on asentanut paketin."</string>

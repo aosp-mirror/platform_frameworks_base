@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría utilizar este permiso para controlar o eliminar mensajes enviados al dispositivo sin mostrárselos al usuario."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"leer mensajes de difusión móvil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite que la aplicación lea mensajes de difusión móvil que haya recibido el dispositivo. Las alertas de difusión móvil se envían en algunas ubicaciones para avisar de situaciones de emergencia. Es posible que las aplicaciones malintencionadas interfieran en el rendimiento o en el funcionamiento del dispositivo si se recibe una alerta de difusión móvil de emergencia."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Tus cuentas"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acceder a las cuentas disponibles"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"leer feeds a los que está suscrito el usuario"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite que la aplicación obtenga detalles sobre los feeds sincronizados actualmente."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"enviar y ver mensajes SMS"</string>
@@ -504,7 +502,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea la TV o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el teléfono o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambiar el bloqueo de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambia el bloqueo de pantalla."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambiar el bloqueo de pantalla"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
@@ -606,7 +604,7 @@
     <string name="imTypeHome" msgid="6241181032954263892">"Casa"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Trabajo"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Otro"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Personalizada"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Personalizado"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo!"</string>
@@ -619,13 +617,13 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Trabajo"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Otra"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Personalizada"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Personalizada"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Personalizado"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Asistente"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Hermano"</string>
-    <string name="relationTypeChild" msgid="1890746277276881626">"Hijo/a"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"Hijo"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Pareja de hecho"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Padre"</string>
-    <string name="relationTypeFriend" msgid="7313106762483391262">"Amigo/a"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Amigo"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Jefe"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Madre"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Padre/madre"</string>
@@ -891,7 +889,7 @@
     <string name="use_a_different_app" msgid="8134926230585710243">"Uitliza otra aplicación"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acción"</string>
-    <string name="chooseUsbActivity" msgid="6894748416073583509">"Seleccionar una aplicación para el dispositivo USB"</string>
+    <string name="chooseUsbActivity" msgid="6894748416073583509">"Elegir una aplicación para el dispositivo USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Ninguna aplicación puede realizar esta acción."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Se ha detenido la aplicación <xliff:g id="APPLICATION">%1$s</xliff:g>."</string>
@@ -1041,7 +1039,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB para MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Toca para obtener más opciones."</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Toca para obtener más opciones"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"¿Formatear USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"¿Formatear la tarjeta SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Se borrarán todos los archivos almacenados en el almacenamiento USB. Esta acción no se puede deshacer."</string>

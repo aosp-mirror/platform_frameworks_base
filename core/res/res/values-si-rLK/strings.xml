@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS පණිවිඩ සොයා ලබාගැනීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. යෙදුම නිරීක්ෂණය කරනු ලබන අතර ඔබට ලැබුන පණිවිඩ පෙන්වීමෙන් තොරවම මකා දැමිය හැකි බව මෙමඟින් අදහස් කරයි."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"සෙල් ප්‍රචාරණ පණිවිඩ කියවීම"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ඔබගේ උපාංගයට ලැබුණු සෙල් විකාශන පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. ඔබට හදිසි අවස්ථාවන් පිළිබඳ අනතුරු ඇඟවීමට සෙල් විකාශන පණිවිඩ ඇතැම් ස්ථානවල සිට යවනු ලබයි. හදිසි සෙල් විකාශන ලැබෙන අවස්ථාවකදී, අනිෂ්ට යෙදුම් මඟින් ඔබගේ උපාංගයට කාර්ය සාධනයට හෝ ක්‍රියකරණයට බාධා සිදුවිය හැක."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"ඔබගේ ගිණුම්"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ලබාගත හැකි ගිණුම් වලට ප්‍රවේශ වීම."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"දායක වූ සංග්‍රහ කියවීම"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"වර්තමාන සමමුහුර්ත සංග්‍රහ ගැන විස්තර ලැබීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>

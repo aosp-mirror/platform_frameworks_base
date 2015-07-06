@@ -272,8 +272,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Umožňuje aplikácii prijímať a spracovávať správy MMS. Znamená to, že aplikácia môže sledovať správy odoslané na vaše zariadenie alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čítať správy Cell Broadcast"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikácii čítať správy Cell Broadcast prijaté vaším zariadením. Upozornenia Cell Broadcast sú doručované na určitých miestach a upozorňujú na núdzové situácie. Škodlivé aplikácie môžu pri prijatí núdzovej správy Cell Broadcast narušiť výkonnosť alebo prevádzku vášho zariadenia."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaše účty"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Prístup k dostupným účtom."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čítať odoberané informačné kanály"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikácii získať podrobnosti o aktuálne synchronizovaných informačných kanáloch."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"posielať a zobrazovať SMS"</string>
@@ -1062,9 +1060,9 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Všetky údaje na vašej karte budú stratené."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formát"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladenie cez USB pripojené"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Klepnutím zakážete ladenie USB"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Klepnutím zakážete ladenie cez USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Zmeniť klávesnicu"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrať klávesnice"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrať klávesnicu"</string>
     <string name="show_ime" msgid="9157568568695230830">"Zobraziť metódu vstupu"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardvér"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Zvoľte rozloženie klávesnice"</string>
