@@ -1763,6 +1763,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void onViewAddedInternal(View child) {
+        updateHideSensitiveForChild(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
@@ -1772,6 +1773,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             // We need to do this to avoid a race where a clearable notification is added after the
             // dismiss animation is finished
             mDismissView.showClearButton();
+        }
+    }
+
+    private void updateHideSensitiveForChild(View child) {
+        if (mAmbientState.isHideSensitive() && child instanceof ExpandableView) {
+            ExpandableView expandableView = (ExpandableView) child;
+            expandableView.setHideSensitiveForIntrinsicHeight(true);
         }
     }
 
