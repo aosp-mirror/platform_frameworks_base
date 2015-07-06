@@ -1307,9 +1307,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (data != null) {
                         InstallArgs args = data.args;
                         PackageInstalledInfo res = data.res;
-                        final String packageName = res.pkg.applicationInfo.packageName;
 
                         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                            final String packageName = res.pkg.applicationInfo.packageName;
                             res.removedInfo.sendBroadcast(false, true, false);
                             Bundle extras = new Bundle(1);
                             extras.putInt(Intent.EXTRA_UID, res.uid);
