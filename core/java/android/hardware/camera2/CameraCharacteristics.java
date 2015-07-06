@@ -1954,8 +1954,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Camera devices that support FREEFORM cropping will support any crop region that
      * is inside of the active array. The camera device will apply the same crop region and
      * return the final used crop region in capture result metadata {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.</p>
-     * <p>FULL capability devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL) will support
-     * FREEFORM cropping. LEGACY capability devices will only support CENTER_ONLY cropping.</p>
+     * <p>LEGACY capability devices will only support CENTER_ONLY cropping.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #SCALER_CROPPING_TYPE_CENTER_ONLY CENTER_ONLY}</li>
@@ -1963,7 +1962,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
-     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see #SCALER_CROPPING_TYPE_CENTER_ONLY
@@ -2685,7 +2683,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR)</li>
      * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
      *   MANUAL_POST_PROCESSING)</li>
-     * <li>Arbitrary cropping region ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>==</code> FREEFORM)</li>
      * <li>At least 3 processed (but not stalling) format output streams
      *   ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
      * <li>The required stream configurations defined in android.scaler.availableStreamConfigurations</li>
@@ -2708,6 +2705,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * post-processing, arbitrary cropping regions, and has relaxed performance constraints.</p>
      * <p>Each higher level supports everything the lower level supports
      * in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.</p>
+     * <p>Note:
+     * Pre-API level 23, FULL devices also supported arbitrary cropping region
+     * ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>==</code> FREEFORM); this requirement was relaxed in API level 23,
+     * and FULL devices may only support CENTERED cropping.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}</li>
