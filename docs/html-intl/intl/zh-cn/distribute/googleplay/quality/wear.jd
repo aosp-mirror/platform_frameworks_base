@@ -1,0 +1,452 @@
+page.title=可穿戴设备应用的质量
+page.tags="wear","wearables","quality","guidelines"
+page.metaDescription=可穿戴设备较小，要便于扫视，并且需要独特的应用在正确的时间提供正确的信息。
+page.image=/distribute/images/gp-wear-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>质量标准</h2>
+  <ol>
+    <li><a href="#ux">设计和交互</a></li>
+    <li><a href="#fn">功能</a></li>
+    <li><a href="#faq">常见问题</a></li>
+  </ol>
+
+  <h2>您还应阅读</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+核心的应用质量</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+优化您的应用</a></li>
+    <li><a href="{@docRoot}design/patterns/notifications.html">
+通知</a></li>
+  </ol>
+</div>
+</div>
+
+<img src="{@docRoot}distribute/images/gp-wear-quality.png" style="width:480px;">
+
+<p>
+  Android Wear 的目的是在正确的时间为用户提供正确的信息。优秀的 Android Wear 体验应自动启动、便于查看，并且不需要或很少需要用户交互。
+
+设计可穿戴设备的应用与设计手机或平板电脑的应用截然不同。
+要考虑不同的强项和弱点、不同的用例和不同的人体工学。
+
+</p>
+
+<p>
+  为可穿戴设备用户创造优秀体验的第一步是阅读
+ <a href="{@docRoot}design/wear/index.html">Android Wear 设计准则</a>，其中提供了关于如何为可穿戴设备应用打造最佳用户体验的指导。
+您还应查看
+<a href="{@docRoot}training/building-wearables.html">构建可穿戴设备应用</a>培训，以了解可穿戴设备应用的基本实现要求。
+
+</p>
+
+<p class="caution">
+  <strong>重要说明：</strong>为确保优秀的用户体验，可穿戴设备的应用必须满足特定的可用性要求。
+只有符合下列质量标准的应用才能有资格在 Google Play 上作为 Android Wear 应用。
+若有资格作为可穿戴设备应用， Android Wear 用户更容易在 Google Play 上发现您的应用。
+
+</p>
+
+<p class="note">
+ <strong>注意：</strong>有关如何在 Google Play 中发布可穿戴设备应用的信息，请参见<a href="{@docRoot}distribute/googleplay/wear.html">分发到 Android Wear</a>。
+</p>
+
+<div class="headerLine">
+  <h2 id="fn">
+  功能
+  </h2>
+
+
+</div>
+
+<p>
+  遵循这些标准可确保您的应用进行正确配置，提供预期的功能行为。
+
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    类型
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    描述
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="general">
+   一般
+  </td>
+
+  <td id="WR-GL">
+    WR-GL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      手持类应用包括具有可穿戴设备特有功能的通知或直接在穿戴设备上运行的可穿戴类应用。
+ 
+      （<a href="{@docRoot}training/building-wearables.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-VF">
+    WR-VF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用具有用户可看到的穿戴设备功能。
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-BF">
+    WR-BF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      穿戴设备的功能符合预期或符合应用在 Google Play 商品详情中的描述。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="packaging">
+   打包
+  </td>
+
+  <td id="WR-PK">
+    WR-PK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      将依赖手持类应用来提供功能的可穿戴设备应用打包在该手持类应用内。
+
+      （<a href="{@docRoot}training/wearables/apps/packaging.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="functional-notifications">
+    通知
+  </td>
+
+  <td id="WR-FW">
+    WR-FW
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      可穿戴设备特有功能的通知使用{@code RemoteInput} 或
+{@code WearableExtender}。
+      （<a href="{@docRoot}training/wearables/notifications/index.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FR">
+    WR-FR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      消息应用的通知允许用户通过语音输入或快速响应来回复。
+      （<a href="{@docRoot}training/wearables/notifications/voice-input.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FG">
+    WR-FG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      将相似的通知组合在一个堆栈中。
+      （<a href="{@docRoot}training/wearables/notifications/stacks.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="gestures">
+    手势
+  </td>
+
+  <td id="WR-GP">
+    WR-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      在全屏活动中使用长按仅用于提示退出。
+      <br/>
+      （<a href="{@docRoot}training/wearables/ui/exit.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-GD">
+    WR-GD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      如果应用在全屏活动中禁用滑动消除手势，则在此活动中响应长按消除手势。
+
+      （<a href="{@docRoot}training/wearables/ui/exit.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="watchface">
+    表盘
+  </td>
+
+  <td id="WR-WF">
+    WR-WF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      包括表盘的应用使用官方的表盘 API。
+      （<a href="{@docRoot}training/wearables/watch-faces/index.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="ux">
+  视觉设计和用户交互
+  </h2>
+
+
+</div>
+
+<p>
+  这些标准可确保您的应用遵循标准设计和交互模式，以在可穿戴设备上提供一致、直观和愉悦的用户体验。
+
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    类型
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    描述
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="layout">
+    布局
+  </td>
+
+  <td id="WR-LS">
+    WR-LS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用的用户界面针对方形显示屏进行适当格式化。应用的内容适合放在物理显示区域内，没有文本或控件被屏幕边缘切断。
+
+      <br/>
+      （<a href="{@docRoot}training/wearables/ui/layouts.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-LR">
+    WR-LR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用的用户界面针对圆形显示屏进行适当格式化，包括屏幕底部有插边（或“下巴”）的设备。
+应用的内容适合放在物理显示区域内，没有文本或控件被屏幕边缘切断。
+
+      <br/>
+      （<a href="{@docRoot}training/wearables/ui/layouts.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-TC">
+    WR-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用文本较大并且便于查看，建议的最小大小为 16sp。
+      （<a href="{@docRoot}design/wear/style.html#Typography">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="launcher">
+    启动器
+  </td>
+
+  <td id="WR-LN">
+    WR-LN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用启动器字符串是应用的名称，而非命令短语。
+      （<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="notifications">
+    通知
+  </td>
+
+  <td id="WR-NC">
+    WR-NC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用在合适时显示确认动画。
+      （<a href="{@docRoot}design/wear/patterns.html#Countdown">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-NR">
+    WR-NR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      通知卡在右上边缘提供可见的应用图标。有个例外，如果通知卡具有单次操作控件，例如媒体播放卡。
+
+      <br/>
+      （<a href="{@docRoot}design/wear/style.html#Assets">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-WI">
+    WR-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      通知操作采用白色的图标、操作标题以及透明的背景。
+      <br/>
+      （<a href="{@docRoot}training/wearables/notifications/creating.html#ActionButtons">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PB">
+    WR-PB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      通知照片背景仅用于传达信息，而不是在卡上标注品牌。
+      （<a href="{@docRoot}design/wear/style.html#Branding">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PR">
+    WR-PR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      通知照片背景具有至少 400x400 的分辨率。
+      （<a href="{@docRoot}training/wearables/notifications/creating.html#AddWearableFeatures">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="googleplay">
+    Google Play
+  </td>
+
+  <td id="WR-GS">
+    WR-GS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用在其 Play 商店详情中包括至少一张穿戴设备截图。
+      （<a href="https://support.google.com/googleplay/android-developer/answer/1078870?hl=en">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="faq">
+  常见问题
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>在提交我的应用供 Android Wear 审查之后，怎样发现应用是否符合穿戴设备的所有要求？</strong>
+
+</p>
+<p>
+  如果您的应用不符合本页所述的可用性要求，Play 商店团队将通过与应用关联的 <a href="https://play.google.com/apps/publish/">Google Play 开发者控制台</a>帐户中指定的电子邮件地址与您联系。
+
+
+</p>
+<p class="caution">
+  <strong>注意：</strong>确保您的应用符合<a href="#fn">这些功能要求</a>，否则应用不会被视为穿戴设备应用，并且不会审查其穿戴设备<a href="#ux">设计和交互</a>。
+
+
+</p>
+<p class="note">
+ <strong>注意：</strong>有关如何在 Google Play 中发布可穿戴设备应用的信息，请参见<a href="{@docRoot}distribute/googleplay/wear.html">分发到 Android Wear</a>。
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>如果我的应用不符合穿戴设备的要求，是否仍会在 Google Play 
+上向手机和平板电脑显示我的新应用或更新版本并且仍可在可穿戴设备上安装？</strong>
+</p>
+<p>
+  是的。上述要求仅确定应用是否在 Google Play 上被标识为 Android Wear 应用，从而让 Android Wear 用户更容易发现。
+如果您的应用未被接受为穿戴设备应用，它仍可用于其他设备类型，如手机和平板电脑，并且仍可安装在穿戴设备上。
+
+
+</p>

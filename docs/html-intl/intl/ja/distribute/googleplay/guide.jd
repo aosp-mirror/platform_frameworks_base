@@ -1,0 +1,57 @@
+page.title=Google Play で成功を手にする
+page.metaDescription=Google Play でアプリまたはゲームのビジネスを成功に導くためのガイド。
+meta.tags="distribute", "bestpractices"
+page.tags="google play", "business", "monetize", "engagement"
+page.image=distribute/images/play_dev_guide.png
+
+@jd:body
+
+<p>
+  Google Play でアプリまたはゲームのビジネスを成功に導くためのガイドをダウンロードできます。このガイドに記載されている機能、ヒント、ベスト プラクティスを効率的な戦略の策定に役立ててください。
+</p>
+
+<p>
+  ガイドは次のセクションに分かれています。
+</p>
+<ul>
+  <li>
+    <strong>Google Play での公開</strong> &mdash; Google Play デベロッパー コンソールを使用して世界中の 10 億人の Android ユーザーにアプリを配布します。
+  </li>
+
+  <li>
+    <strong>高品質を実現する</strong> &mdash; 優れたアプリを作成するための基本について説明し、Google Play のガイドラインとポリシーの詳細を説明します。
+  </li>
+
+  <li>
+    <strong>見つけやすくしてアクセスを増やす</strong> &mdash; アプリをできるだけ見つけやすくして、可能な限り多くのユーザーがアクセスできるようにします。
+  </li>
+
+  <li>
+    <strong>エンゲージメントと保持率を高める</strong> &mdash; インストールをアクティブ ユーザーに繋げて、ユーザーの保持率を高めます。
+  </li>
+
+  <li>
+    <strong>収益化を図る</strong> &mdash; 成長し続ける収益源を創出するための収益化戦略を提供します。
+  </li>
+
+  <li>
+    <strong>Google Analytics を使用した測定を利用する</strong> &mdash; ユーザーを把握し、アプリのエクスペリエンス、コンバージョン、マーケティングを向上させます。
+  </li>
+
+  <li>
+    <strong>グローバル化を推進する</strong> &mdash; アプリを世界中のローカル マーケットに導入します。
+  </li>
+</ul>
+
+<p>
+  下の画像をクリックしてガイドをダウンロードできます。または<a href="http://goo.gl/DFjbrS">Google Play で入手</a>することもできます。
+</p>
+
+<p>
+  数ヶ月以内に各国語版のガイドをいくつかリリースする予定です。この Web サイトに、アプリの配布と収益化をサポートする新しい機能とベスト プラクティスに関する情報を随時投稿します。定期的にこのサイトをご確認ください。
+</p>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:play_dev_guide"
+    data-cardSizes="9x6"
+    data-maxResults="1">
+  </div> 

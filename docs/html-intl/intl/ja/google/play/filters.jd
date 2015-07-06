@@ -1,0 +1,266 @@
+page.title=Google Play 上のフィルタ
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>クイックビュー</h2>
+<ul>
+<li>Google Play はストアからアプリをダウンロードできる Android デバイスをコントロールするためにフィルタを適用します。</li>
+<li>フィルタリングにより、アプリの互換性要件に適合するデバイスのユーザーのみ、アプリを利用できるようになります。 <li>フィルタリングはアプリのマニフェスト ファイルで宣言する設定要件と他の要因で指定されます。</li>
+</ul>
+
+<h2>本書の内容</h2>
+
+<ol>
+  <li><a href="#how-filters-work">Google Play でのフィルタリングの仕組み</a></li>
+  <li><a href="#manifest-filters">マニフェスト要素に基づいたフィルタリング</a>
+  </li>
+  <li><a href="#other-filters">その他のフィルタ</a></li>
+  <li><a href="#MultiApks">異なるフィルタを使用した複数の APK の公開</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+ <ol>
+<li><a href="{@docRoot}guide/practices/compatibility.html">Android
+の互換性</a></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</code></a></li>
+</ol>
+
+</div>
+</div>
+
+<p>ユーザーが Google Play でダウンロードするアプリを検索したりブラウジングしたりすると、その結果はアプリと互換性のあるデバイスに基づいてフィルタリングされます。たとえば、アプリがカメラを必要とする場合、このアプリはカメラを搭載していないデバイスには表示されません。この<em>フィルタリング機能</em>により、デベロッパーはアプリの配布を管理し、ユーザーに可能な限り最善のエクスペリエンスを保証できます。</p>
+
+<p>Google Play でのフィルタリングは、複数のタイプのアプリ メタデータと設定を基準にしています。これには、マニフェストの宣言、必須ライブラリ、構造の依存関係、および対象地域や価格設定といった、Google Play デベロッパー コンソールで設定される一連の配布コントロールなどが含まれます。</p>
+
+<p>Google Play のフィルタリングは、一部をマニフェスト宣言と Android フレームワークの他の局面を基準にしていますが、実際のフィルタリング動作はこのフレームワークとは異なり、特定の API レベルに関係するものではありません。このドキュメントでは、Google Play が使用する現行のフィルタリング ルールを指定します。</p>
+
+
+<h2 id="how-filters-work">Google Play でのフィルタリングの仕組み</h2>
+
+<p>Google Play は以下に説明するフィルタ制限を使用して、Google Play アプリでアプリをブラウジングしたり、検索したりしているユーザーにアプリを表示するかどうかを決定します。</p>
+
+<p>Google Play は、アプリを表示するかどうかを決定する際に、デバイスのハードウェア要件とソフトウェア要件を確認し、同時にキャリア、ロケーション、他の特性も確認します。次にこれらをアプリのマニフェスト ファイル、および公開の詳細で指定されている制限事項と依存関係に対して比較します。 </p>
+
+<p>フィルタ ルールに準じてアプリがデバイスと互換性があれば、Google Play からそのアプリがユーザーに表示されます。互換性がなければ、Google Play は検索結果とカテゴリ ブラウジングでアプリを表示しません。Google Play 内でそのアプリの ID を直接示す詳細リンクをクリックしてアプリを明確に要求しても、表示されることはありません。</p>
+
+<p>アプリで選択可能なフィルタを自由に組み合わせて使用できます。たとえば、アプリで <code>minSdkVersion</code> 要件の <code>"4"</code> を設定し、<code>smallScreens="false"</code>に設定して、そのアプリを Google Play にアップロードして、ヨーロッパ諸国（キャリア）のみをターゲットにすることができます。このように、Google Play のフィルタは 3 つの要件すべてに適合しないとデバイスでアプリが使用できないようにします。 </p>
+
+<p>すべてのフィルタリングの制限事項はアプリのバージョンと関連付けられており、バージョン間で変えることができます。たとえば、あるユーザーがアプリをインストール済みであり、そのアプリをユーザーに表示しないアップデートを公開すると、ユーザーにはアップデートが利用可能であることがわかりません。</p>
+
+<h4>Google Play Web サイトでのフィルタリング</h4>
+
+<p>ユーザーが <a href="http://play.google.com/apps">Google Play Web サイト</a>をブラウジングする際には、公開されているすべてのアプリが表示されます。Google Play Web サイトでは、ユーザーが登録しているデバイスごとにアプリと互換性があるかどうかアプリの要件を比較し、デバイスと互換性のあるアプリだけをインストールできるようにします。</p>
+
+<h2 id="manifest-filters">アプリのマニフェストに基づくフィルタリング</h2>
+
+<p>フィルタの多くはアプリのマニフェスト ファイル <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a> 内の要素によってトリガーされます（このマニフェスト ファイル内のすべてがフィルタリングをトリガーするわけではありません）。表 1 では、フィルタリングをトリガーするために使用する必要のあるマニフェスト要素を示し、各要素のフィルタリングの仕組みについて説明しています。</p>
+
+<p id="table1" class="table-caption"><strong>表 1.</strong> Google Play でフィルタリングをトリガーするマニフェスト要素</p>
+<table>
+  <tr>
+    <th>マニフェスト要素</th>
+    <th>フィルタ名</th>
+    <th>フィルタの仕組み</th>
+  </tr>
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">画面サイズ</td>
+    <td valign="top">
+
+<p>アプリは、<code>&lt;supports-screens&gt;</code> 要素の属性を設定することでサポート可能な画面サイズを示します。アプリが公開されると、Google Play はこれらの属性を使用して、デバイスの画面サイズに基づき、アプリをユーザーに表示するかどうかを決定します。 </p>
+
+<p>一般的なルールとして、Google Play は、デバイスのプラットフォームが小さいレイアウトを大きな画面に表示できる一方で、大きなレイアウトを小さな画面に表示できるような調整はできないと想定しています。そのため、アプリが「通常の」画面サイズのみのサポートを宣言している場合、Google Play は通常画面サイズのデバイスと大きい画面サイズのデバイスの両方でアプリを使用できるようにしますが、小さい画面サイズのデバイスでアプリを使用できないようにフィルタリングします。</p>
+
+<p>アプリが<code>&lt;supports-screens&gt;</code> の属性を宣言していないと、Google Play はこの属性の規定値を使用します。規定値は API レベルによって異なります。特に次の場合に注意が必要です。 </p>
+
+<ul>
+<li><p><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:
+minSdkVersion</a></code> または <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:
+targetSdkVersion</a></code> が 3 以下に設定されているアプリの場合、<code>&lt;supports-screens&gt;</code> 要素自体が未定義となり、どの属性も使用できません。この場合、Google Play はアプリが通常の画面サイズ向けに設計されていると想定し、通常サイズ以上の画面のデバイスにアプリを表示します。 </p>
+
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:
+minSdkVersion</a></code> または <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:
+targetSdkVersion</a></code> が 4 以上に設定されているアプリの場合、すべての属性のデフォルトは <code>"true"</code> となります。この場合、アプリはデフォルトですべての画面サイズをサポートするとみなされます。</li>
+</ul>
+
+    <p><strong>例 1</strong><br /> マニフェストが <code>&lt;uses-sdk android:minSdkVersion="3"&gt;</code> を宣言し、<code>&lt;supports-screens&gt;</code> 要素を含んでいません。<strong>結果</strong>: Google Play は、他のフィルタが適用されない限り、小さい画面サイズのデバイスのユーザーにはアプリを表示しませんが、通常の画面サイズと大きい画面サイズのデバイスのユーザーには表示します。 </p>
+    <p><strong>例 2<br />
+    </strong>マニフェストが <code>&lt;uses-sdk android:minSdkVersion="3"
+    android:targetSdkVersion="4"&gt;</code> を宣言し、<code>&lt;supports-screens&gt;</code> 要素を含んでいません。<strong>結果</strong>: Google Play は、他のフィルタが適用されない限り、すべてのデバイスのユーザーにアプリを表示します。 </p>
+    <p><strong>例 3<br />
+    </strong>マニフェストが <code>&lt;uses-sdk android:minSdkVersion="4"&gt;</code> を宣言し、<code>&lt;supports-screens&gt;</code> 要素を含んでいません。<strong>結果</strong>: Google Play は、他のフィルタが適用されない限り、すべてのユーザーにアプリを表示します。 </p>
+    <p>アプリの画面サイズのサポートを宣言する方法については、<code><a
+    href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code> と <a href="{@docRoot}guide/practices/screens_support.html">複数の画面のサポート（Supporting Multiple Screens）</a>を参照してください。</p>
+</td>
+  </tr>
+
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>
+      <!-- ##api level 3## --></td>
+    <td valign="top">デバイス設定: <br /> キーボード、ナビゲーション、タッチスクリーン</td>
+    <td valign="top"><p>アプリは特定のハードウェア機能を要求することがあり、Google Play は要求されたハードウェアを備えたデバイスにのみアプリを表示します。</p>
+      <p><strong>例 1<br />
+      </strong>マニフェストが <code>&lt;uses-configuration android:reqFiveWayNav=&quot;true&quot; /&gt;</code> を含み、ユーザーが 5 方向ナビゲーション コントロールを備えていないデバイスでアプリを検索しています。<strong>結果</strong>: Google Play はユーザーにアプリを表示しません。 </p>
+      <p><strong>例 2<br />
+      </strong>マニフェストが <code>&lt;uses-configuration&gt;</code> 要素を含んでいません。<strong>結果</strong>: Google Play は、他のフィルタが適用されない限り、すべてのユーザーにアプリを表示します。</p>
+<p>詳細については、<a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a> をご覧ください。</p></td>
+  </tr>
+
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">デバイス機能<br /> （<code>name</code>）</td>
+    <td valign="top"><p>アプリをデバイスに表示するために、特定のデバイス機能を要求できます。この機能は Android 2.0（API レベル 5）で導入されました。</p>
+      <p><strong>例 1<br />
+      </strong>マニフェストに <code>&lt;uses-feature
+android:name=&quot;android.hardware.sensor.light&quot; /&gt;</code> が含まれていて、ユーザーが光センサーを備えていないデバイスでアプリを検索しています。<strong>結果</strong>: Google Play はユーザーにアプリを表示しません。 </p>
+      <p><strong>例 2<br />
+      </strong>マニフェストが <code>&lt;uses-feature&gt;</code> 要素を含んでいません。<strong>結果</strong>: Google Play は、他のフィルタが適用されない限り、すべてのユーザーにアプリを表示します。</p>
+      <p>詳細については <code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code> を参照してください。</p>
+      <p><em>暗黙的な機能に基づいたフィルタリング:</em> 場合によっては、Google Play は <code>&lt;uses-permission&gt;</code> 要素から要求されたパーミッションを、<code>&lt;uses-feature&gt;</code> 要素で宣言されたものと同等の機能要件として解釈します。以下の <a href="#uses-permission-filtering"><code>&lt;uses-permission&gt;</code></a> を参照してください。</p>
+</td>
+  </tr>
+
+  <tr>
+    <td valign="top">OpenGL-ES バージョン<br /> （<code>openGlEsVersion</code>）</td>
+    <td valign="top"><p>アプリは、<code>&lt;uses-feature
+        android:openGlEsVersion=&quot;int&quot;&gt;</code> 属性を使用して、デバイスが特定の OpenGL-ES バージョンをサポートすることを要求できます。</p>
+      <p><strong>例 1<br />
+      </strong>アプリは、マニフェストで <code>openGlEsVersion</code> を複数回指定して複数の OpenGL-ES バージョンを要求しています。<strong>結果</strong>: Google Play は、示されたバージョンの中で最も新しいものをアプリが要求していると想定します。</p>
+<p><strong>例 2<br />
+</strong>アプリが OpenGL-ES バージョン 1.1 を要求し、ユーザーは OpenGL-ES バージョン 2.0 をサポートするデバイスでアプリを検索しています。<strong>結果</strong>: Google Play は、他のフィルタが適用されない限り、ユーザーにアプリを表示します。デバイスが OpenGL-ES バージョン <em>X</em> をサポートすることを通知すると、Google Play は <em>X</em> よりも前のバージョンもデバイスがサポートすると想定します。
+</p>
+<p><strong>例 3<br />
+</strong>ユーザーが OpenGL-ES のバージョンを通知しないデバイス（Android 1.5 以下を実行しているデバイスなど）でアプリを検索しています。<strong>結果</strong>: Google Play は、デバイスが OpenGL-ES 1.0 のみをサポートすると想定します。Google Play は、<code>openGlEsVersion</code> を指定しないアプリ、またはOpenGL-ES バージョン 1.0 より新しいバージョンを指定していないアプリのみをユーザーに表示します。 </p>
+      <p><strong>例 4<br />
+      </strong>マニフェストが <code>openGlEsVersion</code> を指定していません。<strong>結果</strong>: Google Play は、他のフィルタが適用されない限り、すべてのユーザーにアプリを表示します。 </p>
+<p>詳細については、<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> をご覧ください。</p></td>
+  </tr>
+
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></td>
+    <td valign="top">ソフトウェア ライブラリ</td>
+    <td valign="top"><p>アプリは、デバイスで動作するために特定の共有ライブラリを要求できます。 </p>
+      <p><strong>例 1<br />
+      </strong>アプリが <code>com.google.android.maps</code> ライブラリを必要とし、ユーザーが <code>com.google.android.maps</code> ライブラリを持たないデバイスでアプリを検索しています。<strong>結果</strong>: Google Play はユーザーにアプリを表示しません。 </p>
+      <p><strong>例 2</strong><br /> マニフェストが <code>&lt;uses-library&gt;</code> 要素を含んでいません。<strong>結果</strong>: Google Play は、他のフィルタが適用されない限り、すべてのユーザーにアプリを表示します。</p>
+<p>詳細については、<a href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>&lt;uses-library&gt;</code></a> をご覧ください。</p></td>
+  </tr>
+  <tr id="uses-permission-filtering">
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></td>
+    <td valign="top">&nbsp;</td>
+    <td valign="top">厳密に言えば、Google Play は <code>&lt;uses-permission&gt;</code> 要素に基づいたフィルタリングを行いません。ただし、要素を読み込んで、アプリに <code>&lt;uses-feature&gt;</code> 要素で正しく宣言されていない可能性のあるハードウェア機能の要件を備えているかどうか判断します。たとえば、アプリが <code>CAMERA</code> パーミッションを要求しながら <code>android.hardware.camera</code> の <code>&lt;uses-feature&gt;</code> エレメントを宣言していないと、Google Play はアプリでカメラが必要であるとみなし、カメラが搭載されていないデバイスのユーザーにアプリを表示しません。</p>
+    <p>一般的には、アプリがハードウェア関連のパーミッションを要求する場合、Google Play は <code>&lt;uses-feature&gt;</code> 宣言に対応するものがない場合でも、基本的なハードウェア機能を必要としていると想定します。次に、Google Play は、<code>&lt;uses-feature&gt;</code> 宣言で暗黙指定される機能に基づき、フィルタリングを設定します。</p>
+    <p>ハードウェア機能を暗黙指定するパーミッションの一覧については、<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features"><code>&lt;uses-feature&gt;</code></a> 要素のドキュメントを参照してください。</p>
+</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code></td>
+    <td valign="top">最小フレームワーク バージョン（<code>minSdkVersion</code>）</td>
+    <td valign="top"><p>アプリケーションは最小 API レベルを要求できます。  </p>
+      <p><strong>例 1</strong><br /> マニフェストに <code>&lt;uses-sdk
+      android:minSdkVersion=&quot;3&quot;&gt;</code> が含まれ、アプリが API レベル 3 で導入された API を使用しています。ユーザーは API レベル 2 を備えたデバイスでアプリを検索しています。<strong>結果</strong>: Google Play はユーザーにアプリを表示しません。 </p>
+      <p><strong>例 2</strong><br /> マニフェストに <code>minSdkVersion</code> が含まれず、アプリが API レベル 3 で導入された API を使用しています。ユーザーは API レベル 2 を備えたデバイスでアプリを検索します。<strong>結果</strong>: Google Play は <code>minSdkVersion</code> が「1」で、アプリがすべてのバージョンの Android と互換性があると想定します。Google Play はユーザーにアプリを表示し、ユーザーがアプリをダウンロードできるようにします。アプリは実行時にクラッシュします。 </p>
+    <p>2 番目のシナリオが発生しないようにするため、<code>minSdkVersion</code> を常に宣言することをお勧めします。詳細については、<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min"><code>android:minSdkVersion</code></a> を参照してください。</p></td>
+  </tr>
+  <tr>
+    <td valign="top">最大フレームワーク バージョン（<code>maxSdkVersion</code>）</td>
+    <td valign="top"><p><em>廃止されました。</em>Android 2.1 以降は <code>maxSdkVersion</code> 属性の確認または適用を行わず、<code>maxSdkVersion</code> がアプリのマニフェストに設定されていても SDK はコンパイルしません。<code>maxSdkVersion</code> がコンパイルされているデバイスの場合、Google Play はこれを遵守し、フィルタリングに使用します。</p>
+<p> <code>maxSdkVersion</code> の宣言は推奨され<em>ません</em>。詳細については、<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#max"><code>android:maxSdkVersion</code></a> を参照してください。</p></td>
+  </tr>
+</table>
+
+
+
+<h3 id="advanced-filters">拡張マニフェスト フィルタ</h3>
+
+<p>Google Play では、<a href="#table1">表 1</a> のマニフェスト要素の他に、表 2 の拡張マニフェスト要素に基づいたアプリのフィルタリングも実行できます。</p>
+
+<p>これらのマニフェスト要素と、これらの要素がトリガーするフィルタリングは例外的なユースケースのみに対応します。これらの要素は、アプリの配布に厳密なコントロールが必要な特定のタイプの高性能ゲームと、同様のアプリ向けに設計されています。<strong>大半のアプリは、このフィルタを使用すべきではありません</strong>。</p>
+
+<p id="table2" class="table-caption"><strong>表 2.</strong> Google Play フィルタリング用拡張マニフェスト要素</p>
+<table>
+  <tr><th>マニフェスト要素</th><th>概要</th></tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code &lt;compatible-screens&gt;}</a></nobr></td>
+    <td>
+      <p>Google Play はデバイス画面サイズと密度が {@code &lt;compatible-screens&gt;} の要素の画面設定（{@code &lt;screen&gt;} 要素で宣言）のいずれにも適合しない場合、アプリをフィルタリングします。</p>
+      <p class="caution"><strong>警告:</strong> 通常は、<strong>このマニフェスト要素を使用すべきではありません</strong>。この要素を使用すると、指定していない画面サイズと密度のすべての組み合わせが除外されることになり、アプリの潜在的なユーザー ベースが大幅に減少する可能性があります。代わりに <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code &lt;supports-screens&gt;}</a> マニフェスト要素（<a href="#table1">表 1</a> に記載）を使用して、考慮に入れていない画面設定に対して、代替リソースを使用した画面の互換性モードを有効にすることをお勧めします。</p>
+    </td>
+  </tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code &lt;supports-gl-texture&gt;}</a></nobr></td>
+    <td>
+      <p>Google Play はアプリでサポートされる 1 つ以上の GL テクスチャ圧縮フォーマットがデバイスで同様にサポートされない場合、アプリをフィルタリングします。 </p>
+    </td>
+  </tr>
+</table>
+
+
+
+<h2 id="other-filters">その他のフィルタ</h2>
+
+<p>次の表で説明しているように、Google Play はその他のアプリ特性を使用して、所定のデバイスを使用している特定のユーザーについて、アプリの表示/非表示を判断します。 </p>
+
+<p id="table3" class="table-caption"><strong>表 3.</strong> Google Play でのフィルタリングに影響するアプリと公開の特性</p>
+<table> <tr>
+    <th>フィルタ名</th> <th>フィルタの仕組み</th> </tr>
+
+  <tr>
+    <td valign="top">公開状況</td> <td valign="top"><p>公開されているアプリのみが Google Play 内での検索とブラウジングに表示されます。</p> <p>アプリの公開が取り消されても、ユーザーの [ダウンロード] 領域で、購入したアプリ、インストールしたアプリ、または最近アンインストールしたアプリに表示されている場合、インストールが可能です。</p> <p>アプリが保留状態の場合、ユーザーの [ダウンロード] 領域に表示されていても、ユーザーは再インストールしたりアップデートしたりできません。</p> </td></tr>
+  <tr>
+  <td valign="top">価格設定状況</td> <td valign="top"><p>すべてのユーザーに有料アプリが表示されるわけではありません。有料アプリが表示されるためには、デバイスに SIM カードが搭載されていて、Android 1.1 以降を実行している必要があります。また、デバイスが有料アプリを使用できる国にある（SIM キャリアで判別）必要があります。</p></td>
+</tr> <tr>
+  <td valign="top">対象国の指定</td> <td valign="top"> <p>アプリを Google Play にアップロードすると、<strong> [価格と販売 / 配布地域] </strong> でアプリを配布する国を選択できます。これで、アプリは選択した国でのみ入手可能となります。</p>
+</td> </tr> <tr>
+  <td valign="top" style="white-space:nowrap;">CPU アーキテクチャ（ABI）</td>
+  <td valign="top"><p>特定の CPU アーキテクチャ（ARM EABI v7 または x86 など）をターゲットとするネイティブ ライブラリを含むアプリは、そのアーキテクチャをサポートするデバイスのみに表示されます。NDK とネイティブ ライブラリの使用について詳しくは<a href="{@docRoot}tools/sdk/ndk/index.html#overview">Andorid NDK について</a>を参照してください。</p> </tr> <tr>
+  <td valign="top">コピー保護されたアプリ</td> <td valign="top"><p class="caution">Google Play はデベロッパー コンソールのコピー保護機能をサポートしなくなりました。また、この機能に基づくアプリのフィルタリングも実行しません。アプリを安全に保護するには、代わりに<a href="{@docRoot}google/play/licensing/index.html">アプリのライセンス付与</a>を使用してください。詳細については、<a href="{@docRoot}google/play/licensing/overview.html#CopyProtection">コピー保護の置き換え（Replacement for Copy Protection）</a>を参照してください。</p></td> </tr> </table>
+
+<h2 id="MultiApks">異なるフィルタを使用した複数の APK の公開</h2>
+
+<p>一部の特定の Google Play フィルタにより、異なるデバイス構成に別の APK を提供するため、同じアプリの複数の APK を公開できるようになっています。たとえば、高品質のグラフィック アセットを使用するビデオ ゲームを作成している場合、別々のテクスチャ圧縮フォーマットをサポートする 2 つの APK を作成できます。この方法で、デバイスごとの設定に必要なテクスチャのみを含めることで、APK ファイルのサイズを小さくすることができます。テクスチャ圧縮フォーマットに対する各デバイスのサポート状況に応じて、Google Play は各デバイスに対して、そのデバイスのサポートを宣言した APK を配布します。</p>
+
+<p>現時点では、Google Play では各 APK が次の設定に基づいて別々のフィルタを提供する際にのみ、同じアプリの複数の APK を公開できます。</p>
+<ul>
+  <li>OpenGL テクスチャ圧縮フォーマット <p><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code &lt;supports-gl-texture&gt;}</a> 要素の使用による。</p>
+  </li>
+  <li>画面サイズ（画面密度も指定可能） <p><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code &lt;supports-screens&gt;}</a>要素または<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code &lt;compatible-screens&gt;}</a> 要素の使用による。</p>
+  </li>
+  <li>API レベル <p><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> 要素の使用による。</p>
+  </li>
+  <li>CPU アーキテクチャ（ABI） <p>特定の CPU アーキテクチャ（ARM EABI v7 または x86 など）を対象とする<a href="{@docRoot}tools/sdk/ndk/index.html"> Android NDK</a> で構築されたネイティブ ライブラリの組み込みによる。</p>
+  </li>
+</ul>
+
+<p>他のすべてのフィルタも通常通り機能しますが、ある APK を Google Play の同じアプリのリスト内の別の APK と区別できるのはこの 4 つのフィルタだけです。たとえば、デバイスにカメラが搭載されているかどうかのみを基準として異なる APK が存在する場合、同じアプリに複数の APK を公開することは<em>できません</em>。</p>
+
+<p class="caution"><strong>警告:</strong> 同じアプリに複数の APK を公開することは拡張機能とみなされます。<strong>大部分のアプリは、広範囲のデバイス設定をサポートする APK を 1 つだけ公開すべきです</strong>。複数の APK を公開する場合、フィルタ固有のルールに従う必要があります。また、設定ごとに適切なアップデート パスを確保するため、各 APK のバージョン コードに特別な注意を払う必要があります。</p>
+
+<p>Google Play で複数の APK を公開する方法について詳しくは、<a href="{@docRoot}google/play/publishing/multiple-apks.html">複数の APK サポート（Multiple APK Support）</a>をご覧ください。</p> 

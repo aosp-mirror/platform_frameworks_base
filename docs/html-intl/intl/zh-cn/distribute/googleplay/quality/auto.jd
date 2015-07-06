@@ -1,0 +1,488 @@
+
+page.title=汽车应用的质量
+page.metaDescription=汽车应用与车辆的输入控制和显示屏集成，并最大程度减少驾驶员分散注意力问题，以创造出色的体验。
+page.image=/distribute/images/gp-auto-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>质量标准</h2>
+  <ol>
+    <li><a href="#core">核心的应用质量</a></li>
+    <li><a href="#ux">视觉设计和交互</a></li>
+    <li><a href="#fn">功能</a></li>
+    <li><a href="#faq">常见问题</a></li>
+  </ol>
+
+  <h2>您还应阅读</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+核心的应用质量</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+优化您的应用</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">针对音频应用的 Android Auto 用户体验准则</a>
+</li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">针对消息应用的 Android Auto 用户体验准则</a>
+</li>
+  </ol>
+</div>
+</div>
+
+
+  <img src="{@docRoot}distribute/images/gp-auto-quality.png" style="width:480px;">
+
+
+<p>在应用中设计对 Android Auto 的支持时，避免驾驶员分散注意力高于一切。
+  采用汽车用户界面的应用应尽最大程度减少驾驶员所面临的注意力分散问题，可采用语音命令和非常简单的视觉设计等最佳做法。
+
+</p>
+
+<p>
+  优秀的汽车体验是可预料和预测的。支持 Android Auto 的应用仅在相关时向驾驶员显示及时信息，并且为常见任务采用简单、可预测的模式。
+
+
+</p>
+
+<p class="caution">
+  <strong>重要说明：</strong>本页列出的标准适用于应用在连接到 Android Auto 屏幕的设备上运行时，应用的用户界面和行为。
+应用必须符合标准，才能有资格在 Google Play 上作为 Android Auto 应用。
+
+</p>
+
+
+<div class="headerLine">
+  <h2 id="core">
+  核心的应用质量
+  </h2>
+
+<p>
+ 除了下面列出的汽车特有标准之外，汽车应用还应符合 Android 平台的所有相关核心应用质量标准，详情信息请参考
+<a href="{@docRoot}distribute/essentials/quality/core.html">核心应用质量</a>标准。
+对照这些标准测试您的应用，以确保应用符合有关导航和设计的 Android 标准。
+
+然后对照所有汽车特有标准来测试您的应用，记住，在连接到 Android 汽车的设备上运行时，应用必须符合本页列出的要求。
+
+
+
+
+
+<div class="headerLine">
+  <h2 id="ux">
+  视觉设计和用户交互
+  </h2>
+
+</div>
+
+<p>
+  这些标准可确保您的应用遵循标准设计和交互模式，以确保在 Android Auto 上实现一致、直观和愉悦的用户体验。
+许多元素由系统设置和呈现，例如导航抽屉、卡背景、字体和图标颜色等。
+
+应用特有的设计元素必须符合以下标准。
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    类型
+  </th>
+  <th style="width:54px;">
+    测试
+  </th>
+  <th>
+    描述
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="5" id="safety">
+    驾驶员注意力
+  </td>
+
+  <td id="AU-MV">
+    AU-MV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用不能在汽车屏幕上显示动画元素，例如动画图形、游戏、视频或进度条。
+
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VA">
+    AU-VA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用不能在汽车屏幕上显示任何形式的视觉或文字广告。只接受音频广告。
+
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-IM">
+    AU-IM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    应用元素不能在汽车屏幕上显示任何图像。例外情况：应用可显示单张静态图像作为活动屏幕背景中的内容关联，例如专辑封面，并且应用可以在内容导航抽屉中显示图标。
+
+
+
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-DS">
+    AU-DS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    应用不能包括任何分散驾驶员注意力的功能。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VI">
+    AU-VI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    当应用在 Android Auto 中运行时，应用不能在手机屏幕上显示任何形式的视觉信息，如通知、提醒、视频、图像、广告等。
+
+    </p>
+  </td>
+</tr>
+
+
+
+<tr>
+  <td rowspan="3" id="layout">
+    布局   
+  </td>
+
+  <td id="AU-SC">
+    AU-SC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用不能显示自动滚动文本。
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td id="AU-FT">
+    AU-FT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用使用两种批准大小的默认 Roboto 字体来显示所有字符串。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-ST">
+    AU-ST
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用不能显示任何超过 120 个字符的单个字符串。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="4" id="contrast">
+    视觉对比度
+  </td>
+
+  <td id="AU-DM">
+    AU-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用支持白天模式，在浅色背景上呈现深色文本和控件。
+     （<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NM">
+    AU-NM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用支持夜间模式，在深色背景上呈现浅色文本和控件。
+     （<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-WI">
+    AU-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用提供白色图标集，让系统进行着色以提供自动对比度补偿。
+
+     （<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-OC">
+    AU-OC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用提供系统可进行优化的颜色，以便在车内轻松阅读。
+     （<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="interaction">
+    交互
+  </td>
+
+  <td id="AU-VC">
+    AU-VC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用必须支持语音命令。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-AB">
+    AU-AB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用特有的按钮响应用户操作时，延迟不超过 2 秒。
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  功能
+  </h2>
+
+
+</div>
+
+<p>
+  遵循这些标准可确保您的应用进行正确配置，提供预期的功能行为。
+
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    类型
+  </th>
+  <th style="width:54px;">
+    测试
+  </th>
+  <th>
+    描述
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="5" id="general">
+   一般
+  </td>
+
+  <td id="AU-LT">
+    AU-LT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用加载时间不超过 10 秒。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-FP">
+    AU-FP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     汽车应用的功能符合预期或符合应用在 Google Play 商品详情中的描述。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-RL">
+    AU-RL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     当应用从主屏幕重新启动时，应用会尽可能恢复为与之前状态
+最接近的状态。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SS">
+    AU-SS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     在应用中没有需要超过六个步骤才能完成的任务。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-GO">
+    AU-GO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     不起作用或禁用的任何应用按钮必须显示灰色。
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="media">
+    媒体
+  </td>
+
+
+  <td id="AU-PA">
+    AU-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用不能有超过四个主要操作按钮加一个可选的“更多”操作切换按钮（或五个，若不使用更多操作按钮）。
+
+     （<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SA">
+    AU-SA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用不能有超过四个可选的辅助操作按钮加一个“更多”操作切换按钮。
+     （<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">了解方法</a>）
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="notifications">
+    通知
+  </td>
+
+  <td id="AU-NA">
+    AU-NA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      应用不能通过通知显示广告。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NT">
+    AU-NT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     应用只有在驾驶员需要时才显示通知。
+   </p>
+   <p>
+    示例：<br />
+    可取：通知用户已收到新消息。<br />
+    不好：通知用户有新专辑发布。
+    </p>
+  </td>
+</tr>
+
+</table>
+
+<!--
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+-->
+
+<div class="headerLine">
+  <h2 id="faq">
+  常见问题
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>在提交我的应用后，怎样发现应用是否符合 Android Auto 的所有要求？</strong>
+
+</p>
+<p>如果您打算为汽车开发应用，建议您现在开始启用相关功能并测试您的应用。
+但是，此时还不能发布汽车功能应用。加入
+<a href="http://g.co/AndroidAutoDev" class="external-link">汽车应用开发者 Google+ 社区</a>，获取有关何时能够提交汽车功能启用的更新信息。
+
+</p>
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>我的应用不仅仅针对 Android Auto。如果我的应用不符合汽车应用的要求，是否仍会在 Google Play 上向手机和平板电脑显示我的新应用或更新版本？</strong>
+
+
+</p>
+<p>
+  不会。当 Google 开始审批流程时，您的汽车应用将接受驾驶员安全审查，在应用获批准之前，不能进行分发。
+
+因为这是针对手机和平板电脑的同一 APK，针对这些设备的 Play 商店更新将不可用，直到汽车应用审批流程完成。
+
+
+</p>
+
+<p class="caution">
+  <strong>重要说明：</strong>由于此限制，请不要使用生产 APK 来进行汽车支持原型设计。
+
+</p>
+

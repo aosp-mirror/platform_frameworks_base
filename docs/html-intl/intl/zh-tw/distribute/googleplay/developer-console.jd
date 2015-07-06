@@ -1,0 +1,449 @@
+page.title=Developer Console
+page.metaDescription=了解在 Google Play 上執行應用程式發行的基地，即 Developer Console。
+page.image=/distribute/images/developer-console.jpg
+Xnonavpage=true
+
+@jd:body
+
+<div id="qv-wrapper">           
+  <div id="qv">
+    <h2>發行功能</h2>
+    <ol>
+      <li><a href="#allapps">所有應用程式</a></li>
+      <li><a href="#account-details">您的帳戶詳細資料</a></li>
+      <li><a href="#merchant-account">連結您的商家帳戶</a></li>
+      <li><a href="#multiple-user-accounts">多個使用者帳戶</a></li>
+      <li><a href="#alpha-beta">Alpha 與 Beta 測試</a></li>
+      <li><a href="#staged-rollouts">分階段首次亮相</a></li>
+      <li><a href="#multiple-apk">多 APK 支援</a></li>
+      <li><a href="#selling-pricing-your-products">販售與定價</a></li>
+      <li><a href="#in-app-products">應用程式內產品</a></li>
+      <li><a href="#distribution-controls">散佈控制項</a></li>
+      <li><a href="#reviews-reports">使用者評論，當機報告</a></li>
+      <li><a href="#app-stats">應用程式統計資料</a></li>
+      <li><a href="#related-resources">相關資源</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  <a href="https://play.google.com/apps/publish/">Google Play Developer Console</a> 是供您發行作業與工具的基地。
+</p>
+<!-- <img src="{@docRoot}images/gp-dc-startscreen.jpg" style="width:480px;" /> -->
+<img src="{@docRoot}images/gp-devconsole-home.png" style="width:480px;">
+<p>
+  上傳應用程式，建置您的產品頁面，設定價格與散佈，然後即可發行。透過 Developer Console，您可以從網頁瀏覽器中管理在 Google Play 上發行的所有階段。
+</p>
+
+<p>
+  在<a href="{@docRoot}distribute/googleplay/start.html">註冊</a>並收到電子郵件傳送的確認後，您可以登入至 Google Play Developer Console。
+</p>
+
+<div class="headerLine">
+  <h2 id="allapps">
+    所有應用程式
+  </h2>
+
+
+</div>
+
+<p>
+  請從 [所有應用程式] 開始，該項目將提供應用程式的快速概觀，您可藉此跳至統計資料、評論及產品詳細資料，或上傳新的應用程式。
+</p>
+
+<div style="padding:1em 0em 0em 0em;">
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine" style="margin-top:-6px">
+  <h2 id="account-details">
+    您的帳戶詳細資料
+  </h2>
+
+
+</div>
+
+<p>
+  在帳戶詳細資料頁面上指定關於您或貴公司的基本開發人員簡介資訊。Google Play 與您的客戶可根據該資訊識別您的身分。您隨時可以後退，以編輯該資訊或變更設定。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-profile.png" class="frame">
+</div>
+
+<p>
+  您的開發人員簡介包含以下項目：
+</p>
+
+<ul>
+  <li>
+    <p>
+      開發人員名稱 (顯示在您的市集清單頁面上及 Google Play 中的其他位置)。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      連絡資訊 (僅供 Google 使用，您的客戶不會看到該資訊)。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      網站 URL (顯示在您的市集清單頁面上)。
+    </p>
+  </li>
+</ul>
+
+<p>
+  在帳戶詳細資料頁面上，您還可為行銷人員及其他團隊新增受限的存取權限、註冊商家帳戶，或設定 Google Play 授權的測試帳戶。
+</p>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    連結您的商家帳戶
+  </h2>
+
+
+</div>
+
+<p>
+  若您希望販售應用程式或應用程式內產品，請將您的 Google Wallet Merchant Account (Google 電子錢包商家帳戶) 連結至您的開發人員簡介。Google Play 會將連結的商家帳戶用於財務或稅務身分識別，以及每月的銷售支出。
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-user-accounts">
+    多個使用者帳戶
+  </h2>
+
+
+</div>
+
+<p>
+  為其他團隊成員設定使用者帳戶，以存取 Developer Console 的不同部分。
+</p>
+
+<div style="width:550px;">
+  <img src="{@docRoot}images/gp-dc-invite.png" class="frame">
+</div>
+
+<p>
+  註冊的第一個帳戶是<em>帳戶所有者</em>，具有對 Developer Console 所有部分的完整存取權限。所有者可以新增<em>使用者帳戶</em>，並管理 Developer Console 的存取權限。
+</p>
+
+<p>
+  例如，所有者可以向使用者授予針對發行與應用程式組態 (但不針對財務報告) 的存取權限。現在請了解如何<a href="https://support.google.com/googleplay/android-developer/answer/2528691">設定多個帳戶</a>。
+</p>
+
+<div class="headerLine">
+  <h2 id="store-listing-details">
+    市集清單詳細資料
+  </h2>
+
+
+</div>
+
+<p>
+  使用 Developer Console 可以設定<em>市集清單頁面</em>。Developer Console 是您的應用程式在 Google Play 中的基地，使用者在手機或網頁上可以透過該頁面了解並下載您的應用程式。
+</p>
+
+<p>
+  上傳自訂的品牌資產、螢幕擷取畫面及影片，以著重展示您應用程式的卓越之處。提供當地語系化的描述，並新增有關最新版本的註解，等等。您隨時可以更新市集清單。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-details.png" class="frame">
+</div>
+
+<div class="headerLine">
+  <h2 id="upload-instantly-publish">
+    上傳與即時發行
+  </h2>
+
+
+</div>
+
+<p>
+  在 Developer Console 中，您可以快速上傳並發行做好發行準備的 Android 應用程式套件檔案。在發行之前，應用程式只是<em>草稿</em>，在發行時，Google Play 會向使用者提供您的市集清單頁面與應用程式，您的應用程式將在數小時 (而非數週) 內顯示在市集清單中。
+</p>
+
+<p>
+  發行應用程式後，您能以任意頻率對其進行更新：隨時變更價格、組態與散佈選項，無需更新應用程式二進位檔案。
+</p>
+
+<p>
+  新增功能或解決程式碼問題時，您隨時可以發行更新後的二進位檔案。新版本幾乎立即可用，既有客戶會收到更新可供下載的通知。此外，使用者也可以接受您應用程式的自動更新，如此您一旦發行更新，使用者會立即收到並安裝這些更新。您隨時可以取消應用程式的發行。
+</p>
+
+<div class="headerLine">
+  <h2 id="alpha-beta">
+    Alpha 與 Beta 測試
+  </h2>
+
+
+</div>
+
+<p>
+  取得真實的使用者回饋通常極具價值，在推出應用程式之前更是如此。藉由 Google Play，可將應用程式的測試版輕鬆散佈至全球任何位置的 alpha 與 beta 測試群組。
+</p>
+
+<p>
+  在 Google Play Developer Console 的 [APK] <strong></strong>區段中，您可以找到 [Alpha 測試]<strong></strong> 與 [Beta 測試]<strong></strong> 標籤。您可在其中上傳多個版本的應用程式 APK 檔案，並將測試者的清單定義為 <a href="https://support.google.com/groups/answer/46601">Google 群組</a>或 <a href="https://support.google.com/plus/topic/2888488">Google+ 社群</a>。完成此作業後，您將收到您向測試者轉寄的 URL，測試者可透過該 URL 選擇進入測試程式。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-ab.png" class="frame">
+</div>
+
+<p>
+  測試者選擇進入後，會移至您應用程式的產品頁面。在測試者下載應用程式時，Google Play 會為其提供 alpha 或 beta 版本 (若合適)。若使用者無意中同時選擇進入兩個測試群組，Google Play 會始終為其提供 alpha 測試版本。
+</p>
+
+<p>
+  請注意，使用者無法在應用程式的 alpha 與 beta 版本上提供回饋與評論。若要收集回饋，您可以使用 <a href="https://support.google.com/groups/answer/46601">Google 群組</a>或 <a href="https://support.google.com/plus/topic/2888488">Google+ 社群</a>，或者設定電子郵件地址或您自己的網站。
+</p>
+
+<p>
+  您可以使用這些測試程式來<a href="{@docRoot}distribute/essentials/optimizing-your-app.html">最佳化您的應用程式</a>、為<a href="{@docRoot}distribute/users/expand-to-new-markets.html">首次亮相新市場</a>提供協助，並開始<a href="{@docRoot}distribute/users/build-community.html">建置您的社群</a>。此外，<a href="{@docRoot}distribute/tools/launch-checklist.html">推出檢查清單</a>與<a href="{@docRoot}distribute/tools/localization-checklist.html">當地語系化檢查清單</a>中提供了有關使用 beta 測試的更多資訊。
+</p>
+
+<div class="headerLine">
+  <h2 id="staged-rollouts">
+    分階段首次亮相
+  </h2>
+
+
+</div>
+
+<p>
+  您也可以使用 Google Play Developer Console 中 [APK] 區段內的 [生產] 標籤，分階段完成應用程式的首次亮相。您可在此定義能下載您應用程式的使用者的百分比。
+</p>
+
+<p>
+  分階段首次亮相有助於限制非預期錯誤或伺服器負載帶來的影響，您可藉此根據部分無偏見使用者的意見來評估使用者的回饋。在分階段首次亮相期間，使用者可以對您的應用程式進行評分及評論，因此若您猶豫不定，請在使用者的小範圍內進行應用程式的首次亮相。請確保關注並回應任何負面評論。
+</p>
+
+<p>
+  請注意，由於 Android 平台的<a href="{@docRoot}tools/publishing/versioning.html">應用程式版本控制需求</a>有所規定，因此不支援復原。若您需要復原，請考慮以新的版本編號推出先前的 APK。但是，此作法應該用作最後的解決辦法，因為使用者將無法存取新功能，您的舊應用程式可能無法與伺服器變更或資料格式正向相容，因此，請確保對更新執行 <a href="#alpha-beta">alpha 與 beta 測試</a>。
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-apk">
+    多 APK 支援
+  </h2>
+
+
+</div>
+
+<p>
+  在多數狀況下，您只需要單一應用程式套件 (APK) 即可，這通常是最輕鬆的應用程式管理及維護方式。但是，若您需要為不同裝置提供不同 APK，Google Play 會提供此目標的實現之道。
+</p>
+
+<p>
+  藉由<em>多 APK 支援</em>，您可以建立多個應用程式套件，這些套件使用相同的名稱，但其 OpenGL 材質壓縮格式、螢幕大小支援或支援的 Android 平台版本並不相同。您只需在單一產品清單下上傳所有 APK 即可，Google Play 會根據裝置的特性，選取最佳的 APK 提供給使用者。
+</p>
+
+<p>
+  此外，對於發行的每個 APK (包括多個 APK)，您也可以使用 <em></em>[APK 擴充檔案] 選項，上傳最多兩個次要下載。每個擴充檔案最大為 2GB，可以包含任何類型的程式碼或資產。Google Play 會免費主控這些檔案，並在一般應用程式安裝過程中對這些檔案的下載進行處理。
+</p>
+
+<div class="headerLine">
+  <h2 id="selling-pricing-your-products">
+    對您的產品進行販售與定價
+  </h2>
+
+
+</div>
+
+<div class="figure-right">
+  <img src="{@docRoot}images/gp-buyer-currency.png" class="frame">
+</div>
+
+<p>
+  您可以使用工具設定應用程式及應用程式內產品的價格。您的應用程式可以免費下載，也可以付費下載 (需要先付費後下載)。
+</p>
+
+<ul>
+  <li>若以免費應用程式的形式發行您的應用程式，<strong>該應用程式在生命週期內必須始終免費</strong>。Google Play 中的所有使用者都可以下載免費應用程式。
+  </li>
+
+  <li>若以付費應用程式的形式發行您的應用程式，可以後來將其變更為免費。只有在 Google Play 中已註冊付費形式的使用者，才能購買並下載付費應用程式。
+  </li>
+</ul>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      如需可散佈或販售您應用程式的國家/地區清單，請參閱<a
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294&amp;topic=2365624&amp;ctx=topic">支援的應用程式散佈地點</a>。
+    </p>
+  </div>
+</div>
+
+<p>
+  此外，不論應用程式是免費還是付費，您都可以提供應用程式內產品與訂閱。請針對付費應用程式、應用程式內產品與訂閱分別設定價格。
+</p>
+
+<p>
+  使用者瀏覽您的應用程式產品頁面或開始購買時，Google Play 會為其顯示付費價格 (以使用者當地的貨幣表示)。
+</p>
+
+<p>
+  對於每項產品，您最初會設定預設價格 (以您自己的貨幣表示)。若您未設定其他價格，Google Play 會根據您應用程式的美元價格，每月一次自動設定當地價格。
+</p>
+
+<p>
+  但是，對於在每個國家/地區如何為您的產品定價，Google Play 會為您提供完備的控制項。開始時，您可以使用<strong>立即自動轉換價格</strong>功能，根據預設價格手動設定固定的當地價格。然後，您可以檢閱這些價格，並針對您希望的國家/地區設定新價格，每個國家/地區的價格彼此獨立，因此調整一個價格不會影響其他價格。對於多數國家/地區，您設定的價格即為使用者付費的最終價格 (含稅)。
+</p>
+
+<p>
+  如需有關對應用程式定價的詳細資訊，請參閱<a href="{@docRoot}distribute/users/expand-to-new-markets.html#localize-your-google-play-listing">開拓新市場</a>。
+</p>
+
+<div class="headerLine">
+  <h2 id="in-app-products">
+    應用程式內產品
+  </h2>
+
+
+</div>
+
+<p>
+  您可以使用 <a href="{@docRoot}google/play/billing/index.html">Google Play 應用程式內交易</a>作為應用程式的獲利方式，以販售應用程式內產品與訂閱。應用程式內產品需一次性付費購買，而訂閱可每月或每年逐次收費。
+</p>
+
+<p>
+  在特定的已發行 APK 或草稿 APK 的 [應用程式內產品]<strong></strong> 區段中，您可以：
+</p>
+
+<ul>
+  <li>為應用程式內產品及訂閱建立產品清單。
+  </li>
+
+  <li>設定價格。
+  </li>
+
+  <li>發行含應用程式的產品或撤回過時的產品。
+  </li>
+</ul>
+
+<p>
+  如需有關如何實作應用程式內交易的詳細資料，請參閱<a href="{@docRoot}google/play/billing/index.html">應用程式內交易</a>開發人員文件。您可以在<a href="{@docRoot}distribute/monetize/premium.html">加值</a>、<a href="{@docRoot}distribute/monetize/freemium.html">免費增值</a>及<a href="{@docRoot}distribute/monetize/subscriptions.html">訂閱</a>獲利模型中使用應用程式內產品
+</p>
+
+<div class="headerLine">
+  <h2 id="distribution-controls">
+    散佈控制項
+  </h2>
+
+
+</div>
+
+<p>
+  對您的應用程式散佈的目標國家/地區進行管理。對於某些國家/地區，您可以選擇希望針對的電訊商。此外，您還可以根據宣示說明檔案中宣告的散佈規則，查看可使用您應用程式的裝置清單。
+</p>
+
+<h3 id="geotargeting">
+  針對的國家/地區
+</h3>
+
+<p>
+  您可以使用 Google Play Developer Console 中的控制項輕鬆管理應用程式散佈的國家/地區，無需變更您的應用程式二進位檔案。您可以指定希望散佈至哪些國家/地區，甚至指定電訊商 (對於某些國家/地區)。
+</p>
+
+<p>
+  使用者造訪市集時，Google Play 會先確保其位於您針對的其中一個國家/地區內，然後再下載應用程式。您隨時可以變更針對的國家/地區及電訊商，只需在 Google Play Developer Console 中儲存變更即可。
+</p>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-supported-dev-requirements.png" class="frame">
+</div>
+
+<p>
+  若要協助向全球使用者行銷，您可以<a href="{@docRoot}distribute/tools/launch-checklist.html#start-localization">對市集清單</a> (包括應用程式詳細資料與描述、推廣圖形、螢幕擷取畫面等) 執行當地語系化。
+</p>
+
+<h3 id="captargeting">
+  針對的功能
+</h3>
+
+<p>
+  藉由 Google Play，您還可以根據應用程式依賴的裝置功能來控制散佈。應用程式可以在其宣示說明檔案中定義多種類型的相依性，例如硬體功能、OpenGL 材質壓縮格式、資源庫、Android 平台版本等。
+</p>
+
+<p>
+  在您上傳應用程式時，Google Play 會讀取相依性，並設定所需的散佈規則。如需有關宣告相依性的技術資訊，請閱讀 <a href="{@docRoot}google/play/filters.html">Google Play 上的篩選器</a>。
+</p>
+
+<p>
+  若要精確控制散佈，藉由 Google Play，您可以根據相依性 (若有)，查看可使用您應用程式的所有裝置。在 Google Play Developer Console 中，您可以列出支援的裝置，甚至在需要時將特定裝置排除在外。
+</p>
+
+<div class="headerLine">
+  <h2 id="reviews-reports">
+    使用者評論與當機報告
+  </h2>
+
+
+</div>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-dc-reviews.png" class="frame">
+  <p class="img-caption">
+    透過使用者評論區段可以存取特定應用程式的使用者評論。您可以使用多種方式篩選評論，以便更輕鬆地找到問題並更有效地支援客戶。
+  </p>
+</div>
+
+<p>
+  透過 Google Play，使用者可以輕鬆地提交對您應用程式的評論，從而讓其他使用者受益。藉由這些評論，您可以直接了解客戶提供的可用性回饋、支援要求，以及重要功能問題的詳細資料。
+</p>
+
+<p>
+  使用當機報告進行除錯並改進應用程式。您可以查看從 Android 裝置自動提交的當機報告 (含堆疊追蹤與其他資料)。
+</p>
+
+<div class="headerLine">
+  <h2 id="app-stats">
+    應用程式統計資料
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:500px">
+  <img src="{@docRoot}images/gp-dc-stats.png">
+  <p class="img-caption">
+    <b>應用程式統計資料頁面</b>：為您顯示有關特定應用程式安裝效能的各種統計資料。
+  </p>
+</div>
+
+<p>
+  您可以取得有關應用程式安裝效能的詳細統計資料。
+</p>
+
+<p>
+  查看依獨特使用者及獨特裝置量測的安裝度量指標。檢視有效安裝次數、安裝總體次數、升級次數、每日安裝次數與解除安裝次數，以及有關評分的度量指標。
+</p>
+
+<p>
+  依度量指標 (包括 Android 平台版本、裝置、國家/地區、語言、應用程式版本及電訊商) 詳細查看安裝次數。檢視時間軸圖表上每個維度的安裝資料。
+</p>
+
+<p>
+  這些圖表會著重展示您應用程式安裝的峰值與長期趨勢，可協助您了解使用者的採用行為、將統計資料與推廣項目建立關聯，並查看應用程式改進與其他因素的效果。透過將特定點新增至時間軸，可以聚焦於維度內的資料。
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">相關資源</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/developerconsole"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+  </div>

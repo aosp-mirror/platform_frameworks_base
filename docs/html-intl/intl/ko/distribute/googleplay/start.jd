@@ -1,0 +1,156 @@
+page.title=게시 시작하기
+page.metaDescription=잠시 시간을 내어 개발자 계정을 등록하여 Google Play에서 게시를 시작하십시오.
+meta.tags="publishing"
+page.tags="google play", "publishing", "register", "signup"
+page.image=/distribute/images/getting-started.jpg
+
+@jd:body
+
+<div class="top-right-float" style="margin-right:24px;margin-top:-18px">
+  <a href="https://play.google.com/apps/publish/"><img src="{@docRoot}images/gp-start-button.png"></a>
+</div>
+
+<p>
+  잠시 시간을 내어 다음과 같은 방법을 통해 Google Play에서 게시를 시작하십시오.
+</p>
+
+<ul>
+  <li>Google Play 게시자 계정을 등록합니다.
+  </li>
+
+  <li>앱 또는 인앱 제품을 판매할 예정인 경우 Google Wallet 판매자 계정을 설정합니다.
+
+  </li>
+
+  <li><a href="https://play.google.com/apps/publish/">Google Play 개발자 콘솔</a> 및 게시 도구를 탐색합니다.
+
+  </li>
+</ul>
+
+<p>
+  준비가 되면 시작(Start) 버튼을 눌러 개발자 콘솔로 이동하십시오.
+</p>
+
+<div class="headerLine">
+  <h2>
+    게시자 계정 등록
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      팁
+    </h2>
+
+    <ul>
+      <li>등록하려면 Google 계정이 필요합니다. 프로세스 진행 중에 계정을 만들 수 있습니다.
+
+      </li>
+
+      <li>조직인 경우 개인 계정을 사용하지 말고 새 Google 계정을 등록하십시오.
+
+      </li>
+
+      <li>앱을 배포하고 판매할 수 있는 <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294">개발자 등록 허용 국가</a> 및 <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">판매자 등록 허용 국가</a>를 검토하십시오.
+
+
+      </li>
+    </ul>
+  </div>
+</div>
+
+<ol>
+  <li><a href="https://play.google.com/apps/publish/">Google Play 개발자 콘솔</a>을 방문합니다.
+
+  </li>
+
+  <li><strong>개발자 ID</strong>에 대한 기본 정보(이름, 이메일 주소 등)를 입력합니다.
+ 이 정보는 나중에 수정할 수 있습니다.
+
+  </li>
+
+  <li>해당 국가 또는 지역의 <strong>개발자 배포 계약</strong>을 읽고 동의합니다.
+ Google Play에 게시하는 앱 및 스토어 목록은 개발자 프로그램 정책 및 미국 수출 법규를 준수해야 합니다.
+
+  
+  </li>
+
+  <li>Google Wallet을 사용하여 <strong>등록 수수료로 미화 25달러</strong>를 지불합니다. Google Wallet 계정이 없는 경우 프로세스 진행 중에 계정을 설정할 수 있습니다.
+
+
+  </li>
+
+  <li>등록이 확인되면 등록 시 입력한 이메일 주소로 통지됩니다.
+
+  </li>
+</ol>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    Google Wallet 판매자 계정 설정
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:200px;">
+  <img src="{@docRoot}images/gp-start-wallet-icon.png">
+</div>
+
+<p>
+  가격이 책정된 앱, 인앱 제품 또는 구독물을 판매하려면 Google Wallet 판매자 계정이 필요합니다.
+ 언제든지 계정을 설정할 수 있지만 먼저 <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=150324">판매자 등록 허용 국가</a> 목록을 검토하십시오.
+
+<br>
+  <br>
+  Google Wallet 판매자 계정을 설정하려면<br>
+  <br>
+</p>
+
+<ol>
+  <li>
+    <a href="https://play.google.com/apps/publish/" target="_blank">https://play.google.com/apps/publish/</a>에서 Google Play 개발자 콘솔에 <strong>로그인</strong>합니다.
+  </li>
+
+  <li>측면 탐색 창에서 <strong>재무 보고서</strong> <img src="{@docRoot}images/distribute/console-reports.png">를 엽니다.
+  </li>
+
+  <li><strong>지금 판매자 계정 설정</strong>을 클릭합니다.
+  </li>
+</ol>
+
+<p>
+  그러면 Google Wallet 사이트로 이동합니다. 이 단계를 완료하려면 비즈니스 정보가 필요합니다.
+
+</p>
+
+<div class="headerLine">
+  <h2>
+    개발자 콘솔 탐색
+  </h2>
+
+
+</div>
+
+<p>
+  등록이 확인되면 개발자 콘솔에 로그인할 수 있습니다. 이곳은 Google Play에서 앱 게시 작업 및 도구를 위한 홈입니다.
+
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine">
+<h2 id="related-resources">관련 자료</h2><hr />
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/gettingstarted"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
