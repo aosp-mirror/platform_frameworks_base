@@ -272,8 +272,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Aplikaciji omogoča prejemanje in obdelavo MMS-ov. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"branje sporočil oddaje v celici"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogoča aplikaciji branje sporočil oddaje v celici, ki jih prejme naprava. Opozorila oddaje v celici so dostavljena na nekaterih lokacijah, da vas opozorijo na izredne razmere. Zlonamerne aplikacije lahko vplivajo na delovanje naprave, ko dobi sporočilo oddaje v celici."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaši računi"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Dostop do razpoložljivih računov."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"branje naročenih virov"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Aplikaciji omogoča dobivanje podrobnosti o trenutno sinhroniziranih virih."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"pošiljanje in ogled sporočil SMS"</string>
@@ -625,7 +623,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomočnik"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Otrok"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Domači partner"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Oče"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Prijatelj"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Vodja"</string>

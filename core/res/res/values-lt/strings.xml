@@ -272,8 +272,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Leidžiama programai gauti ir apdoroti MMS pranešimus. Tai reiškia, kad programa gali stebėti ir ištrinti į jūsų įrenginį siunčiamus pranešimus jums jų neparodžiusi."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"skaityti mobiliuoju transliuojamus pranešimus"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Programai leidžiama skaityti mobiliuoju transliuojamus pranešimus, gaunamus jūsų įrenginyje. Mobiliuoju transliuojami įspėjimai pristatomi kai kuriose vietose, kad įspėtų apie kritines situacijas. Kai gaunamas  mobiliuoju transliuojamas pranešimas apie kritinę situaciją, kenkėjiškos programos gali trukdyti įrenginiui veikti ar jį naudoti."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Jūsų paskyros"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Pasiekite galimas paskyras."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"skaityti prenumeruojamus tiekimus"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Leidžiama programai gauti išsamios informacijos apie šiuo metu sinchronizuojamus sklaidos kanalus."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"siųsti ir peržiūrėti SMS pranešimus"</string>
@@ -505,7 +503,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite planšetinį kompiuterį arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite TV arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite telefoną arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekrano užrakto pakeitimas"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Pakeisti ekrano užraktą"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Pakeisti ekrano užraktą."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Užrakinti ekraną"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Valdyti, kaip ir kada užrakinamas ekranas."</string>
@@ -912,7 +910,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ neatsako. Ar norite ją uždaryti?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Procesas „<xliff:g id="PROCESS">%1$s</xliff:g>“ neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="force_close" msgid="8346072094521265605">"Gerai"</string>
-    <string name="report" msgid="4060218260984795706">"Ataskaita"</string>
+    <string name="report" msgid="4060218260984795706">"Pranešti"</string>
     <string name="wait" msgid="7147118217226317732">"Palaukti"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Puslapis neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Programa peradresuota"</string>
@@ -1563,9 +1561,9 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Daugiau parinkčių"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Uždaryti perpildymo sritį"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one">Pasirinktas <xliff:g id="COUNT_1">%1$d</xliff:g> elementas</item>
-      <item quantity="few">Pasirinkti <xliff:g id="COUNT_1">%1$d</xliff:g> elementai</item>
-      <item quantity="many">Pasirinkta <xliff:g id="COUNT_1">%1$d</xliff:g> elemento</item>
-      <item quantity="other">Pasirinkta <xliff:g id="COUNT_1">%1$d</xliff:g> elementų</item>
+      <item quantity="one">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
+      <item quantity="few">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
+      <item quantity="many">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
+      <item quantity="other">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
     </plurals>
 </resources>

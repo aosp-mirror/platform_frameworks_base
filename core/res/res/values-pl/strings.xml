@@ -231,13 +231,13 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostęp do kontaktów"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokalizacja"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"dostęp do lokalizacji tego urządzenia"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"dostęp do informacji o lokalizacji tego urządzenia"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendarz"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłać i wyświetlać SMS-y"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS-ów"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"uzyskiwać dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nagrywanie dźwięku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Aparat"</string>
@@ -272,8 +272,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Pozwala aplikacji na odbieranie i przetwarzanie MMS-ów. To oznacza, że aplikacja będzie mogła bez Twojej wiedzy monitorować i usuwać wiadomości wysyłane do Twojego urządzenia."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"odczyt komunikatów z sieci komórkowej"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Zezwala aplikacji na odczyt komunikatów z sieci komórkowej odebranych na urządzeniu. Komunikaty alarmowe z sieci komórkowej są dostarczane w niektórych lokalizacjach w celu ostrzeżenia Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na wydajność lub zakłócać działanie urządzenia po odebraniu komunikatu alarmowego z sieci komórkowej."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Twoje konta"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Dostęp do udostępnionych kont."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"czytanie subskrybowanych źródeł"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Pozwala aplikacji na pobieranie szczegółowych informacji na temat obecnie zsynchronizowanych kanałów."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"wysyłać i wyświetlać SMS-y"</string>

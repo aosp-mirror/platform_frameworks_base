@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"‏به برنامه اجازه می‌دهد پیام‌های MMS را دریافت و پردازش کند. این یعنی برنامه می‌تواند پیام‌های ارسالی به دستگاه شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"خواندن پیام‌های پخش سلولی"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‎های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"حساب‌های شما"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"به حساب‌های موجود دسترسی داشته باشید."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"خواندن فیدهای مشترک"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"‏به برنامه اجازه می‎دهد تا جزئیات مربوط به فیدهای همگام شده کنونی را دریافت کند."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"ارسال و نمایش پیام‌های پیامک"</string>
@@ -368,10 +366,10 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"به برنامه اجازه می‌دهد تا از فرستنده مادون قرمز رایانه لوحی استفاده کند."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"به برنامه اجازه می‌دهد تا از فرستنده مادون‌قرمز تلویزیون استفاده کند."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"به برنامه اجازه می‌دهد تا از فرستنده مادون قرمز تلفن استفاده کند."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"تنظیم تصویر زمینه"</string>
-    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"‏به برنامه اجازه می‎دهد تا تصویر زمینه سیستم را تنظیم کند."</string>
-    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"تنظیم اندازه تصویر زمینه"</string>
-    <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"‏به برنامه اجازه می‎دهد تا نکات اندازه تصویر زمینه سیستم را تنظیم کند."</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"تنظیم کاغذدیواری"</string>
+    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"‏به برنامه اجازه می‎دهد تا کاغذدیواری سیستم را تنظیم کند."</string>
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"تنظیم اندازه کاغذدیواری"</string>
+    <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"‏به برنامه اجازه می‎دهد تا نکات اندازه کاغذدیواری سیستم را تنظیم کند."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"تنظیم منطقهٔ زمانی"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"‏به برنامه اجازه می‎دهد تا منطقهٔ زمانی رایانهٔ لوحی را تغییر دهد."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"‏به برنامه اجازه می‎دهد منطقه زمانی تلویزیون را تغییر دهد."</string>
@@ -622,8 +620,8 @@
     <string name="relationTypeCustom" msgid="3542403679827297300">"سفارشی"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"دستیار"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"برادر"</string>
-    <string name="relationTypeChild" msgid="1890746277276881626">"کودک"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"شریک محلی"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"فرزند"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"هم‌خانه قانونی"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"پدر"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"دوست"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"مدیر"</string>
@@ -949,7 +947,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"میزان صدای اعلان"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"آهنگ زنگ پیش‌فرض"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"آهنگ زنگ پیش‌فرض (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"هیچکدام"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"هیچ‌کدام"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"آهنگ‌های زنگ"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"آهنگ زنگ ناشناس"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -968,7 +966,7 @@
     <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"برای گزینه‌ها لمس کنید"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏اتصال به Wi-Fi ممکن نیست"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" اتصال اینترنتی ضعیفی دارد."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"اتصال اجازه داده شود؟"</string>
+    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"اتصال مجاز است؟"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"‏برنامه %1$s می‌خواهد به شبکه Wifi ‏%2$s وصل شود"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"برنامه"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
@@ -976,8 +974,8 @@
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"‏Wi-Fi Direct شروع نشد."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"‏Wi-Fi Direct روشن است"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"لمس کردن برای تنظیمات"</string>
-    <string name="accept" msgid="1645267259272829559">"پذیرش"</string>
-    <string name="decline" msgid="2112225451706137894">"عدم پذیرش"</string>
+    <string name="accept" msgid="1645267259272829559">"پذیرفتن"</string>
+    <string name="decline" msgid="2112225451706137894">"نپذیرفتن"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"دعوت‌نامه ارسال شد"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"دعوت‌نامه برای اتصال"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"از:"</string>
@@ -990,8 +988,8 @@
     <string name="select_character" msgid="3365550120617701745">"درج نویسه"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"ارسال پیامک ها"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; در حال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
-    <string name="sms_control_yes" msgid="3663725993855816807">"اجازه دادن"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"ردکردن"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"مجاز است"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"اجازه ندارد"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"این مورد هزینه‌ای را به حساب دستگاه همراهتان می‌گذارد."</b></string>
@@ -999,7 +997,7 @@
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"لغو"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"این انتخاب را به خاطر بسپار"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"‏می‌توانید بعداً آن را در تنظیمات &gt; برنامه‌ها تغییر دهید"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"همیشه مجاز"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"همیشه مجاز است"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"همیشه غیرمجاز"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
     <string name="sim_removed_message" msgid="5450336489923274918">"تا زمانی که با یک سیم‌کارت معتبر دوباره راه‌اندازی نکنید شبکه تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
@@ -1115,17 +1113,17 @@
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست مجوز کرده‌اند."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"درخواست دسترسی"</string>
-    <string name="allow" msgid="7225948811296386551">"مجاز"</string>
-    <string name="deny" msgid="2081879885755434506">"رد کردن"</string>
+    <string name="allow" msgid="7225948811296386551">"ارزیابی‌شده"</string>
+    <string name="deny" msgid="2081879885755434506">"اجازه ندارد"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"مجوز درخواست شد"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"مجوز\nبرای حساب <xliff:g id="ACCOUNT">%s</xliff:g> درخواست شد."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"شما از این برنامه در خارج از نمایه کاری‌تان استفاده می‌کنید"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"از این برنامه در نمایه کاری‌تان استفاده می‌کنید"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"روش ورودی"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"همگام‌سازی"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"قابلیت دسترسی"</string>
-    <string name="wallpaper_binding_label" msgid="1240087844304687662">"تصویر زمینه"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"تغییر تصویر زمینه"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"دسترس‌پذیری"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"کاغذدیواری"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"تغییر کاغذدیواری"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"شنونده اعلان"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"ارائه‌دهنده وضعیت"</string>
     <string name="vpn_title" msgid="19615213552042827">"‏VPN فعال شد"</string>
@@ -1180,7 +1178,7 @@
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"از حد مجاز حذف فراتر رفت"</string>
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"‏<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> مورد حذف شده برای <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، حساب <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> وجود دارد. می‎خواهید چه کاری انجام دهید؟"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"حذف موارد"</string>
-    <string name="sync_undo_deletes" msgid="2941317360600338602">"لغو موارد حذف شده"</string>
+    <string name="sync_undo_deletes" msgid="2941317360600338602">"واگرد موارد حذف شده"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"اکنون کاری انجام نشود"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"انتخاب حساب"</string>
     <string name="add_account_label" msgid="2935267344849993553">"افزودن یک حساب"</string>
@@ -1334,9 +1332,9 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"حذف"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"برای فعال کردن قابلیت دسترسی، با دو انگشت خود همچنان به طرف پایین فشار دهید."</string>
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"برای فعال کردن دسترس‌پذیری، با دو انگشت خود همچنان به طرف پایین فشار دهید."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"قابلیت دسترسی فعال شد."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"قابلیت دسترسی لغو شد."</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"دسترس‌پذیری لغو شد."</string>
     <string name="user_switched" msgid="3768006783166984410">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"دارنده"</string>
@@ -1459,7 +1457,7 @@
     <string name="select_year" msgid="7952052866994196170">"انتخاب سال"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> حذف شد"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> محل کار"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"برای برداشتن پین این صفحه، هم‌زمان «بازگشت» و «نمای کلی» را لمس کنید و نگه دارید."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"برای برداشتن پین این صفحه، هم‌زمان «برگشت» و «نمای کلی» را لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"برای برداشتن پین این صفحه، «نمای کلی» را لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"برنامه پین شده است: برداشتن پین در این دستگاه مجاز نیست."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"صفحه پین شد"</string>

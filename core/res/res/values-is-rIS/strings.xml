@@ -270,8 +270,6 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Leyfir forriti að taka á móti og vinna úr MMS-skilaboðum. Þetta þýðir að forritið getur fylgst með eða eytt skilaboðum sem send eru í tækið án þess að birta þér þau."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lesa skilaboð frá endurvarpa"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Leyfir forriti að lesa skilaboð frá endurvarpa sem tækið móttekur. Viðvaranir frá endurvarpa berast á tilteknum stöðum til að vara þig við neyðarástandi. Spilliforrit geta truflað afköst eða virkni tækisins þegar neyðarboð berast frá endurvarpa."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Reikningarnir þínir"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Aðgangur að tiltækum reikningum."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lesa strauma í áskrift"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Leyfir forriti að fá upplýsingar um straumana sem samstilltir eru á hverjum tíma."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"senda og skoða SMS-skilaboð"</string>
