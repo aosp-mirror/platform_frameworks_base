@@ -150,6 +150,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1914,7 +1916,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 (NetworkCapabilities)msg.obj;
                         if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL) ||
                                 networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
-                            Slog.wtf(TAG, "BUG: " + nai + " has stateful capability.");
+                            Slog.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
                         }
                         if (nai.created && !nai.networkCapabilities.equalImmutableCapabilities(
                                 networkCapabilities)) {
@@ -2274,6 +2276,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     bestNetwork = network;
                 }
             }
+            if (!nri.isRequest && network.satisfiesImmutableCapabilitiesOf(nri.request)) {
+                updateSignalStrengthThresholds(network);
+            }
         }
         if (bestNetwork != null) {
             if (DBG) log("using " + bestNetwork.name());
@@ -2419,6 +2424,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // if this listen request applies and remove it.
                 for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
                     nai.networkRequests.remove(nri.request.requestId);
+                    if (nai.satisfiesImmutableCapabilitiesOf(nri.request)) {
+                        updateSignalStrengthThresholds(nai);
+                    }
                 }
             }
             callCallbackForRequest(nri, null, ConnectivityManager.CALLBACK_RELEASED);
@@ -3664,6 +3672,34 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private int[] getSignalStrengthThresholds(NetworkAgentInfo nai) {
+        final SortedSet<Integer> thresholds = new TreeSet();
+        synchronized (nai) {
+            for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+                if (nri.request.networkCapabilities.hasSignalStrength() &&
+                        nai.satisfiesImmutableCapabilitiesOf(nri.request)) {
+                    thresholds.add(nri.request.networkCapabilities.getSignalStrength());
+                }
+            }
+        }
+        // We can't just do something like:
+        //     return thresholds.toArray(new int[thresholds.size()]);
+        // because autoboxing does not work for primitive arrays.
+        final int[] out = new int[thresholds.size()];
+        int pos = 0;
+        for (Integer threshold : thresholds) {
+            out[pos] = threshold;
+            pos++;
+        }
+        return out;
+    }
+
+    private void updateSignalStrengthThresholds(NetworkAgentInfo nai) {
+        nai.asyncChannel.sendMessage(
+                android.net.NetworkAgent.CMD_SET_SIGNAL_STRENGTH_THRESHOLDS,
+                0, 0, getSignalStrengthThresholds(nai));
+    }
+
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType) {
@@ -4132,6 +4168,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 networkAgent.networkCapabilities = networkCapabilities;
             }
             rematchAllNetworksAndRequests(networkAgent, networkAgent.getCurrentScore(), nascent);
+            // TODO: reduce the number of callbacks where possible. For example, only send signal
+            // strength changes if the NetworkRequest used to register the callback specified a
+            // signalStrength.
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
     }
@@ -4593,6 +4632,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 // TODO: support proxy per network.
             }
+
+            // Whether a particular NetworkRequest listen should cause signal strength thresholds to
+            // be communicated to a particular NetworkAgent depends only on the network's immutable,
+            // capabilities, so it only needs to be done once on initial connect, not every time the
+            // network's capabilities change. Note that we do this before rematching the network,
+            // so we could decide to tear it down immediately afterwards. That's fine though - on
+            // disconnection NetworkAgents should stop any signal strength monitoring they have been
+            // doing.
+            updateSignalStrengthThresholds(networkAgent);
 
             // Consider network even though it is not yet validated.
             rematchNetworkAndRequests(networkAgent, NascentState.NOT_JUST_VALIDATED,

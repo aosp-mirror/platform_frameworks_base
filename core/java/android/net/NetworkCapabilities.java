@@ -48,6 +48,7 @@ public final class NetworkCapabilities implements Parcelable {
             mLinkUpBandwidthKbps = nc.mLinkUpBandwidthKbps;
             mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
             mNetworkSpecifier = nc.mNetworkSpecifier;
+            mSignalStrength = nc.mSignalStrength;
         }
     }
 
@@ -60,6 +61,7 @@ public final class NetworkCapabilities implements Parcelable {
         mNetworkCapabilities = mTransportTypes = 0;
         mLinkUpBandwidthKbps = mLinkDownBandwidthKbps = 0;
         mNetworkSpecifier = null;
+        mSignalStrength = SIGNAL_STRENGTH_UNSPECIFIED;
     }
 
     /**
@@ -300,6 +302,7 @@ public final class NetworkCapabilities implements Parcelable {
             return "unknown non-requestable capabilities " + Long.toHexString(mNetworkCapabilities);
         }
         if (mLinkUpBandwidthKbps != 0 || mLinkDownBandwidthKbps != 0) return "link bandwidth";
+        if (hasSignalStrength()) return "signalStrength";
         return null;
     }
 
@@ -569,6 +572,68 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
+     * Magic value that indicates no signal strength provided. A request specifying this value is
+     * always satisfied.
+     *
+     * @hide
+     */
+    public static final int SIGNAL_STRENGTH_UNSPECIFIED = Integer.MIN_VALUE;
+
+    /**
+     * Signal strength. This is a signed integer, and higher values indicate better signal.
+     * The exact units are bearer-dependent. For example, Wi-Fi uses RSSI.
+     */
+    private int mSignalStrength;
+
+    /**
+     * Sets the signal strength. This is a signed integer, with higher values indicating a stronger
+     * signal. The exact units are bearer-dependent. For example, Wi-Fi uses the same RSSI units
+     * reported by WifiManager.
+     * <p>
+     * Note that when used to register a network callback, this specifies the minimum acceptable
+     * signal strength. When received as the state of an existing network it specifies the current
+     * value. A value of code SIGNAL_STRENGTH_UNSPECIFIED} means no value when received and has no
+     * effect when requesting a callback.
+     *
+     * @param signalStrength the bearer-specific signal strength.
+     * @hide
+     */
+    public void setSignalStrength(int signalStrength) {
+        mSignalStrength = signalStrength;
+    }
+
+    /**
+     * Returns {@code true} if this object specifies a signal strength.
+     *
+     * @hide
+     */
+    public boolean hasSignalStrength() {
+        return mSignalStrength > SIGNAL_STRENGTH_UNSPECIFIED;
+    }
+
+    /**
+     * Retrieves the signal strength.
+     *
+     * @return The bearer-specific signal strength.
+     * @hide
+     */
+    public int getSignalStrength() {
+        return mSignalStrength;
+    }
+
+    private void combineSignalStrength(NetworkCapabilities nc) {
+        this.mSignalStrength = Math.max(this.mSignalStrength, nc.mSignalStrength);
+    }
+
+    private boolean satisfiedBySignalStrength(NetworkCapabilities nc) {
+        return this.mSignalStrength <= nc.mSignalStrength;
+    }
+
+    private boolean equalsSignalStrength(NetworkCapabilities nc) {
+        return this.mSignalStrength == nc.mSignalStrength;
+    }
+
+    /**
      * Combine a set of Capabilities to this one.  Useful for coming up with the complete set
      * @hide
      */
@@ -577,6 +642,7 @@ public final class NetworkCapabilities implements Parcelable {
         combineTransportTypes(nc);
         combineLinkBandwidths(nc);
         combineSpecifiers(nc);
+        combineSignalStrength(nc);
     }
 
     /**
@@ -593,7 +659,8 @@ public final class NetworkCapabilities implements Parcelable {
                 satisfiedByNetCapabilities(nc, onlyImmutable) &&
                 satisfiedByTransportTypes(nc) &&
                 (onlyImmutable || satisfiedByLinkBandwidths(nc)) &&
-                satisfiedBySpecifier(nc));
+                satisfiedBySpecifier(nc) &&
+                (onlyImmutable || satisfiedBySignalStrength(nc)));
     }
 
     /**
@@ -638,6 +705,7 @@ public final class NetworkCapabilities implements Parcelable {
         return (equalsNetCapabilities(that) &&
                 equalsTransportTypes(that) &&
                 equalsLinkBandwidths(that) &&
+                equalsSignalStrength(that) &&
                 equalsSpecifier(that));
     }
 
@@ -649,7 +717,8 @@ public final class NetworkCapabilities implements Parcelable {
                 ((int)(mTransportTypes >> 32) * 7) +
                 (mLinkUpBandwidthKbps * 11) +
                 (mLinkDownBandwidthKbps * 13) +
-                (TextUtils.isEmpty(mNetworkSpecifier) ? 0 : mNetworkSpecifier.hashCode() * 17));
+                (TextUtils.isEmpty(mNetworkSpecifier) ? 0 : mNetworkSpecifier.hashCode() * 17) +
+                (mSignalStrength * 19));
     }
 
     @Override
@@ -663,7 +732,9 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeInt(mLinkUpBandwidthKbps);
         dest.writeInt(mLinkDownBandwidthKbps);
         dest.writeString(mNetworkSpecifier);
+        dest.writeInt(mSignalStrength);
     }
+
     public static final Creator<NetworkCapabilities> CREATOR =
         new Creator<NetworkCapabilities>() {
             @Override
@@ -675,6 +746,7 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mLinkUpBandwidthKbps = in.readInt();
                 netCap.mLinkDownBandwidthKbps = in.readInt();
                 netCap.mNetworkSpecifier = in.readString();
+                netCap.mSignalStrength = in.readInt();
                 return netCap;
             }
             @Override
@@ -731,6 +803,8 @@ public final class NetworkCapabilities implements Parcelable {
         String specifier = (mNetworkSpecifier == null ?
                 "" : " Specifier: <" + mNetworkSpecifier + ">");
 
-        return "[" + transports + capabilities + upBand + dnBand + specifier + "]";
+        String signalStrength = (hasSignalStrength() ? " SignalStrength: " + mSignalStrength : "");
+
+        return "[" + transports + capabilities + upBand + dnBand + specifier + signalStrength + "]";
     }
 }

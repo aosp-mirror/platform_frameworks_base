@@ -128,6 +128,12 @@ public class NetworkAgentInfo {
                 request.networkCapabilities.satisfiedByNetworkCapabilities(networkCapabilities);
     }
 
+    public boolean satisfiesImmutableCapabilitiesOf(NetworkRequest request) {
+        return created &&
+                request.networkCapabilities.satisfiedByImmutableNetworkCapabilities(
+                        networkCapabilities);
+    }
+
     public boolean isVPN() {
         return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
     }
