@@ -21,14 +21,11 @@ import com.android.internal.R;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.Animator.AnimatorPauseListener;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 
 /**
  * This transition tracks changes to the visibility of target views in the
@@ -507,7 +504,8 @@ public abstract class Visibility extends Transition {
         private final int mFinalVisibility;
         private final ViewGroup mParent;
 
-        private boolean mEnded;
+        private boolean mLayoutSuppressed;
+        private boolean mFinalVisibilitySet = false;
         boolean mCanceled = false;
 
         public DisappearListener(View view, int finalVisibility, boolean isForcedVisibility) {
@@ -515,10 +513,8 @@ public abstract class Visibility extends Transition {
             this.mIsForcedVisibility = isForcedVisibility;
             this.mFinalVisibility = finalVisibility;
             this.mParent = (ViewGroup) view.getParent();
-            if (!isForcedVisibility && mParent != null) {
-                // Prevent a layout from including mView in its calculation.
-                mParent.suppressLayout(true);
-            }
+            // Prevent a layout from including mView in its calculation.
+            suppressLayout(true);
         }
 
         @Override
@@ -542,12 +538,10 @@ public abstract class Visibility extends Transition {
 
         @Override
         public void onAnimationRepeat(Animator animation) {
-
         }
 
         @Override
         public void onAnimationStart(Animator animation) {
-
         }
 
         @Override
@@ -562,37 +556,35 @@ public abstract class Visibility extends Transition {
 
         @Override
         public void onTransitionPause(Transition transition) {
-            if (mParent != null && !mIsForcedVisibility) {
-                mParent.suppressLayout(false);
-            }
+            suppressLayout(false);
         }
 
         @Override
         public void onTransitionResume(Transition transition) {
-            if (mParent != null && !mIsForcedVisibility) {
-                mParent.suppressLayout(true);
-            }
+            suppressLayout(true);
         }
 
         private void hideViewWhenNotCanceled() {
-            if (!mEnded) {
-                if (!mCanceled) {
-                    if (mIsForcedVisibility) {
-                        mView.setTransitionAlpha(0);
-                    } else {
-                        // Recreate the parent's display list in case it includes mView.
-                        mView.setTransitionVisibility(mFinalVisibility);
-                        if (mParent != null) {
-                            mParent.invalidate();
-                        }
+            if (!mCanceled) {
+                if (mIsForcedVisibility) {
+                    mView.setTransitionAlpha(0);
+                } else if (!mFinalVisibilitySet) {
+                    // Recreate the parent's display list in case it includes mView.
+                    mView.setTransitionVisibility(mFinalVisibility);
+                    if (mParent != null) {
+                        mParent.invalidate();
                     }
+                    mFinalVisibilitySet = true;
                 }
-                if (!mIsForcedVisibility && mParent != null) {
-                    // Layout is allowed now that the View is in its final state
-                    mParent.suppressLayout(false);
-                }
-                // Do this only once
-                mEnded = true;
+            }
+            // Layout is allowed now that the View is in its final state
+            suppressLayout(false);
+        }
+
+        private void suppressLayout(boolean suppress) {
+            if (mLayoutSuppressed != suppress && mParent != null && !mIsForcedVisibility) {
+                mLayoutSuppressed = suppress;
+                mParent.suppressLayout(suppress);
             }
         }
     }
