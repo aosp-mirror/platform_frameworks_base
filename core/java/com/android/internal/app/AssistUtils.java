@@ -20,6 +20,9 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -42,9 +45,10 @@ public class AssistUtils {
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
     }
 
-    public void showSessionForActiveService(IVoiceInteractionSessionShowCallback showCallback) {
+    public void showSessionForActiveService(Bundle args,
+            IVoiceInteractionSessionShowCallback showCallback) {
         try {
-            mVoiceInteractionManagerService.showSessionForActiveService(showCallback);
+            mVoiceInteractionManagerService.showSessionForActiveService(args, showCallback);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call showSessionForActiveService", e);
         }
@@ -118,11 +122,14 @@ public class AssistUtils {
         }
 
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, false, userId);
-        if (intent != null) {
-            return intent.getComponent();
+                .getAssistIntent(false);
+        PackageManager pm = mContext.getPackageManager();
+        ResolveInfo info = pm.resolveActivityAsUser(intent, PackageManager.MATCH_DEFAULT_ONLY,
+                userId);
+        if (info != null) {
+            return new ComponentName(info.activityInfo.applicationInfo.packageName,
+                    info.activityInfo.name);
         }
-
         return null;
     }
 

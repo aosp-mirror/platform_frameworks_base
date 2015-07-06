@@ -81,7 +81,6 @@ import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
@@ -106,7 +105,6 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.SwipeHelper;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -1045,8 +1043,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (shouldDisableNavbarGestures()) {
                 return false;
             }
-            mAssistManager.prepareBeforeInvocation();
-            mAssistManager.onGestureInvoked();
+            mAssistManager.startAssist(new Bundle() /* args */);
             awakenDreams();
             if (mNavigationBarView != null) {
                 mNavigationBarView.abortCurrentGesture();
