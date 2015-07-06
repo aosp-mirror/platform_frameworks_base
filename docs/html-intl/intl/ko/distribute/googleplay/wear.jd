@@ -1,0 +1,262 @@
+page.title=Android Wear에 배포
+page.image=/design/media/wear/ContextualExample.008_2x.png
+meta.tags="wear", "publish", "quality"
+page.tags="wear", "publish", "googleplay"
+page.metaDescription=Android Wear에 앱, 게임 및 콘텐츠를 배포합니다.
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>참여 방법</h2>
+<ol>
+<li><a href="#understand_guidelines">가이드라인 이해</a></li>
+<li><a href="#develop_app">우수한 Wear 앱 개발</a></li>
+<li><a href="#test_app">Wear 앱 품질 테스트</a></li>
+<li><a href="#opt_in">옵트인</a></li>
+<li><a href="#track_review">검토 추적</a></li>
+</ol>
+
+<h2>필독 항목</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">핵심 앱 품질</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  Android Wear 및 Google Play를 통해 우수한 앱을 사용자에게 제공할 수 있습니다. 모든 앱이 Android Wear 장치에 기본 알림을 보낼 수 있는데, 그 이상의 기능을 제공할 수 있습니다.
+
+  모든 Wear 장치에서 맞춤형 Wear 상호작용을 지원하고 세련되고 매력적인 사용자 경험을 제공하도록 앱을 확장하십시오.
+ 앱이 핸드셋에서 핵심 앱 품질 가이드라인을 충족하고 Android Wear 장치에 고품질 경험을 제공하면, Google Play가 앱을 쉽게 검색할 수 있도록 소개합니다.
+
+
+</p>
+
+<p>
+  시작하려면 이 문서를 참조하여 Google Play를 통해 사용자에게 Wear 앱을 배포하는 방법을 배우십시오.
+  앱이 충족해야 하는 유용성, 품질 표준에 대한 내용은 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a>을 참조하십시오.
+ 앱이 준비되면 개발자 콘솔에서 Android Wear 앱으로 지정하도록 옵트인할 수 있습니다.
+
+</p>
+
+<h2 id="how_to_participate">
+  참여 방법
+</h2>
+
+<p>
+  Google Play를 통해 Wear 앱을 더욱 쉽게 검색할 수 있습니다. 기존 개발자 콘솔 계정과 현재 배포 및 가격 설정을 사용하여 개발하고 게시할 수 있습니다.
+
+ 쉽게 참여할 수 있습니다. 과정에 대한 간략한 설명은 아래 절을 참조하십시오.
+</p>
+
+<h3 id="understand_guidelines">
+  1. 가이드라인 및 요구사항 이해
+</h3>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-wear-process.png">
+</div>
+
+<p>
+  Android Wear에 성공적인 출시를 준비하려면 먼저 Wear에서 뛰어난 경험을 생성하는 방법에 대한 가이드라인을 자세히 읽어보십시오.
+ 앱을 Wear용으로 확장하는 아이디어와 디자인 및 유용성에 대한 자세한 내용은 <a href="{@docRoot}design/wear/index.html">Android Wear 디자인 가이드라인</a>을 참조하십시오.
+
+
+</p>
+
+<p>
+  Wear 경험 디자인 시작 시 Wear 앱 품질 기준을 읽고 숙지하십시오.
+ Wear에서 사용할 수 있는 앱만 Google Play에서 Wear 앱으로 지정됩니다. 앱이 기본 품질 기준을 충족하는 경우에 참여할 수 있습니다.
+ 자세한 내용은 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a>을 참조하십시오.
+</p>
+
+<h3 id="develop_app">2. 우수한 Wear 앱 개발</h3>
+
+<p>
+가이드라인을 읽은 후 다음 단계는 앱을 개발하는 것입니다. 다음 절에서는 뛰어난 Wear 앱 경험을 구현하는 방법을 설명합니다.
+
+</p>
+
+<h4>디자인 우선</h4>
+
+<p>
+  Android Wear는 사용자에게 정확한 정보를 적시에 제공하는 것을 목표로 합니다. 뛰어난 Android Wear 경험은 자동으로 시작되고, 한 눈에 파악할 수 있으며, 사용자 상호작용이 전혀 또는 거의 필요하지 않습니다.
+
+ 모든 앱이 수정 없이 Wear 장치로 기본 알림을 보낼 수 있지만, Wear용으로 작성된 뛰어난 앱은 사용자에게 세련된 고품질 경험을 제공하고 서로 다른 화면 레이아웃에서 작동하고 매력적인 기능을 제공하도록 개선됩니다.
+
+
+
+</p>
+
+<p>
+  Wear 앱을 고려할 때는 <a href="{@docRoot}training/building-wearables.html">개발자 문서</a> 및 <a href="{@docRoot}design/wear/index.html">유용성 가이드라인</a>을 검토하고 최대한 활용할 계획을 수립하십시오.
+ SDK 및 지원 라이브러리에서 제공되는 API를 사용하여 사용자를 위한 뛰어난 알림 경험을 디자인할 수 있습니다.
+ 또한 웨어러블에서 직접 실행되는 앱을 작성할 수도 있습니다.
+
+</p>
+
+<h4>앱 패키징</h4>
+
+<p>
+  동일한 패키지 이름과 스토어 목록을 사용하여 휴대폰, 태블릿 및 기타 장치용 기존 앱의 일부로 Wear 경험을 제공하는 것이 좋습니다.
+ 그러면 사용자가 Wear 경험으로 매끄럽게 업그레이드하고 휴대폰 및 태블릿용 앱의 리뷰와 평점을 활용할 수 있습니다.
+
+ 기능을 앱에 의존하는 웨어러블 앱의 경우, 항상 해당 앱 내에 패키지로 만들어야 합니다. 방법은 <a href="{@docRoot}training/wearables/apps/packaging.html">웨어러블 앱 패키징</a>을 참조하십시오.
+
+</p>
+
+<h4>다양한 장치에서 테스트</h4>
+
+<p>
+  디자인 및 개발 과정에서 사용자 경험의 표준을 수립하고 테스트하기에 적합한 장치를 확보하는 것이 중요합니다.
+ 하나 이상의 Android Wear 장치를 확보하거나 서로 다른 에뮬레이터 구성을 사용하여 개발하고 최대한 신속하게 테스트 환경을 구축하는 것이 좋습니다.
+
+ 정사각형 및 원형 레이아웃에서 디자인을 최적화하는 것이 중요합니다.
+</p>
+
+<h3 id="test_app">3. Wear 앱 품질 테스트</h3>
+
+<p>
+  Wear 앱은 잘 작동하고 Android Wear에서 멋있게 보이고 최고의 사용자 경험을 제공하도록 디자인해야 합니다.
+   Google Play는 사용자가 쉽게 검색할 수 있도록 선정된 고품질 Wear 앱을 소개합니다.
+ 다음과 같은 방법으로 참여하여 사용자에게 멋진 Android Wear 앱을 제공할 수 있습니다.
+ 
+</p>
+
+<ul>
+  <li>핵심 앱 품질 가이드라인을 충족합니다.
+    <ul>
+      <li><a href="{@docRoot}design/index.html">Android 디자인 가이드라인</a>을 따릅니다.
+ 앱에서 <a href="http://www.google.com/design/spec/material-design/introduction.html">머티리얼 디자인</a> 사용에 특히 주의를 기울입니다.
+
+      </li>
+
+      <li>앱이 <a href="{@docRoot}distribute/essentials/quality/core.html">핵심 앱 품질 가이드라인</a>을 충족하는지 테스트합니다.
+
+      </li>
+    </ul>
+  </li>
+  <li><a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a> 기준을 충족합니다.
+
+    <ul>
+      <li>당사의 <a href="{@docRoot}training/building-wearables.html">Wear 앱 개발</a> 모범 사례를 따릅니다.
+</li>
+      <li>앱이 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a> 기준을 모두 충족하는지 확인합니다.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="opt_in">4. Android Wear에 옵트인 및 게시</h3>
+
+<p>
+  릴리스 준비된 APK를 작성하여 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a> 가이드라인을 모두 충족하는지 테스트한 후에 개발자 콘솔로 업로드합니다.
+ Wear 스크린샷으로 스토어 목록을 업데이트하고 필요한 경우 배포 옵션을 설정합니다.
+ Google Play에서 출시를 준비하는 방법에 익숙하지 않은 경우 <a href="{@docRoot}distribute/googleplay/publish/preparing.html">출시 검사 목록</a>을 참조하십시오.
+
+</p>
+
+<p>
+  사용자에게 게시하기 전에 개발자 콘솔의 <strong>가격 책정 및 배포</strong> 절에서 Android Wear에 옵트인할 수 있습니다.
+ 옵트인은 Android Wear 사용자가 Google Play를 통해 앱을 검색할 수 있고 앱이 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a> 기준을 충족함을 의미합니다.
+
+</p>
+
+<p>
+  옵트인하고 변경 내용을 저장한 후에 평소처럼 앱을 게시할 수 있습니다. 또한 Google Play는 앱을 제출하여 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a> 기준을 충족하는지 검토한 후에 그 결과를 개발자에게 알려줍니다.
+
+ 앱의 승인 상태를 추적하는 방법은 다음 절을 참조하십시오.
+
+</p>
+
+<p>
+  앱이 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a> 기준을 모두 충족하는 경우 Google Play에서 Android Wear 사용자가 앱을 더 쉽게 검색할 수 있습니다.
+ 또한 앱 컬렉션 및 홍보에서 앱에 더 높은 우선순위가 부여됩니다.
+
+</p>
+
+<p>
+  옵트인 및 검토는 Google Play 스토어에서 앱의 사용 가능성에 영향을 주지 않습니다. 앱은 게시되는 즉시 사용할 수 있습니다.
+
+</p>
+
+<p>
+  다음은 개발자 콘솔에서 Android Wear에 옵트인하는 단계입니다.
+</p>
+
+<ol>
+  <li>앱이 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a> 기준을 모두 충족하는지 확인합니다.
+  </li>
+
+  <li>앱의 스토어 목록에 Wear 스크린샷을 추가합니다.
+  </li>
+
+  <li><strong>모든 애플리케이션</strong> 페이지에서 옵트인하려는 앱을 클릭합니다.
+  </li>
+
+  <li><strong>가격 책정 및 배포</strong>에서 아래로 스크롤하여 <em>Android Wear</em>와 옵트인 확인란을 찾습니다.
+
+  </li>
+
+  <li><em>Android Wear에 앱 배포(Distribute your app on Android Wear)</em> 옆의 확인란을 클릭합니다.
+  </li>
+
+  <li><strong>저장</strong>을 클릭하여 가격 책정 및 배포 변경 내용을 저장합니다.
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-wear-opt-in.png">
+  <p class="caption">
+    <strong>Wear 옵트인:</strong> 개발자 콘솔에서 옵트인하면 앱이 Android Wear에 포함됩니다.
+
+  </p>
+</div>
+
+<h3 id="track_review">5. 검토 및 승인 추적</h3>
+
+<p>
+  위에서 설명한 Android Wear의 기술 및 품질 기준을 앱이 충족하면 사용자가 Android Wear에서 앱을 더 쉽게 검색할 수 있습니다.
+ 앱이 이 기준을 충족하지 않으면 개발자는 해결해야 할 문제에 대한 요약이 포함된 <strong>알림 이메일을 개발자 계정 주소</strong>로 받게 됩니다.
+
+ 필요한 조정을 거친 후에 새로운 앱 버전을 개발자 콘솔에 업로드할 수 있습니다.
+
+</p>
+
+<p>
+  언제든지 개발자 콘솔에서 앱의 <strong>가격 책정 및 배포</strong> 페이지의 <em>Android Wear</em>에서 앱의 검토 및 승인 상태를 확인할 수 있습니다.
+
+
+</p>
+
+<p>
+  승인 상태는 다음 3개로 구분됩니다.
+</p>
+
+<ul>
+  <li>
+    <em>보류 중</em> — 검토를 위해 앱을 보냈지만 검토가 아직 완료되지 않았습니다.
+  </li>
+
+  <li>
+    <em>승인됨</em> — 앱이 검토 후에 승인되었습니다. Android Wear 사용자가 앱을 더 쉽게 검색할 수 있습니다.
+
+  </li>
+
+  <li>
+    <em>승인 안 함</em> — 앱이 검토 후에 승인되지 않았습니다. 앱이 승인되지 않은 이유는 알림 이메일을 참조하십시오.
+ 문제를 해결하고 다시 옵트인 및 게시하여 재검토를 요청할 수 있습니다.
+
+  </li>
+</ul>
+
+<p>앱이 어떻게 평가되는지 이해하려면 <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear 앱 품질</a> 문서를 참조하십시오. </p>
+
+
+  <h3>관련 자료</h3>
+
+  <div class="resource-widget resource-flow-layout col-13"
+    data-query="collection:wearlanding"
+    data-cardSizes="6x2"
+    data-maxResults="3">
+  </div>

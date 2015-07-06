@@ -1,0 +1,448 @@
+page.title=電視應用程式品質
+page.metaDescription=在各種 Android 裝置中，電視的數量不斷攀升。為了提供絕佳的體驗，需要特別注意電視應用程式的設計與功能。
+page.image=/distribute/images/gp-tv-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>品質準則</h2>
+  <ol>
+    <li><a href="#ux">設計與互動</a></li>
+    <li><a href="#fn">功能</a></li>
+    <li><a href="#faq">常見問題</a></li>
+  </ol>
+
+  <h2>您也應閱讀</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">核心應用程式品質</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">最佳化您的應用程式</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="top-right-float" style="padding-right:0;margin-bottom:1em;">
+  <img src="{@docRoot}distribute/images/gp-tv-quality.png" style="width:480px;">
+</div>
+
+<p>
+  與使用手機及平板電腦相較，使用者觀看電視時具有不同的一組預期。通常，電視使用者與螢幕的距離大約為 10 英尺，因此微小的細節不太引人注目，而且小文字很難閱讀。由於使用者與電視之間有一段距離，因此必須使用遙控器執行導覽與選取，而非觸碰螢幕上的元素。這些不同之處導致為電視使用者提供良好體驗的構成要素具有顯著不同的需求。
+</p>
+
+<p>
+  為電視使用者提供絕佳體驗的第一步，是檢閱並遵循 <a href="{@docRoot}design/tv/index.html">Android 電視設計指導方針</a>，這些指導方針針對如何為電視應用程式建置最優的使用者體驗提供了指示。此外，您還應檢閱<a href="{@docRoot}training/tv/start/index.html">建置電視應用程式</a>訓練，以了解電視應用程式的基本實作需求。
+</p>
+
+<p class="caution">
+  <strong>重要說明：</strong>若要確保提供絕佳的使用者體驗，適用於電視裝置的應用程式必須符合可用性的某些特定需求。只有符合以下品質準則的應用程式，才有資格作為 Google Play 上的 Android 電視應用程式。
+</p>
+
+<p class="note"><strong>注意：</strong>如需有關如何在 Google Play 中發行電視應用程式的資訊，請參閱<a href="{@docRoot}distribute/googleplay/tv.html">散佈至 Android 電視</a>。</p>
+
+
+
+<div class="headerLine">
+  <h2 id="ux">
+  視覺設計與使用者互動
+  </h2>
+
+
+</div>
+
+<p>
+  這些準則可確保您的應用程式遵循關鍵的設計與互動樣式，以確保在電視裝置上提供一致、直觀且充滿樂趣的使用者體驗。
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    類型
+  </th>
+  <th style="width:54px;">
+    測試
+  </th>
+  <th>
+    描述
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="4" id="launcher">
+    啟動器
+  </td>
+
+  <td id="TV-LM">
+    TV-LM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式在安裝後，會在 Android 電視啟動器中顯示啟動器圖示。(<a href="{@docRoot}training/tv/start/start.html#tv-activity">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LB">
+    TV-LB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      在 Android 電視啟動器中，應用程式會顯示 320px x 180px 的完整大小橫幅作為其啟動器圖示。(<a href="{@docRoot}design/tv/patterns.html#banner">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-BN">
+    TV-BN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式啟動橫幅包含應用程式的名稱。(<a href="{@docRoot}design/tv/patterns.html#banner">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LG">
+    TV-LG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      若應用程式是遊戲，會顯示在 Android 電視啟動器的 [遊戲] 列中。<br>
+      (<a href="{@docRoot}training/tv/games/index.html#manifest">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="layout">
+    版面配置
+  </td>
+
+  <td id="TV-LO">
+    TV-LO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      所有應用程式介面都以橫向顯示。(<a href="{@docRoot}training/tv/start/layouts.html#structure">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TC">
+    TV-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式顯示的核心文字大小至少為 16sp。(<a href="{@docRoot}design/tv/style.html#typography">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TA">
+    TV-TA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式顯示的所有文字大小至少為 12sp。(<a href="{@docRoot}design/tv/style.html#typography">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-OV">
+    TV-OV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式不會顯示部分遭螢幕邊緣截斷的任何文字或功能。(<a href="{@docRoot}training/tv/start/layouts.html#overscan">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TR">
+    TV-TR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式不會部分遮蓋其他應用程式。應用程式會填滿整個螢幕，並具有不透明的背景。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="navigation">
+    導覽
+  </td>
+
+  <td id="TV-DP">
+    TV-DP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      除非應用程式如 <a href="#TV-GP">TV-GP</a> 中指定需要遊戲手把，否則可以使用 5 向 D-pad 控制裝置來導覽應用程式功能。(<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-DK">
+    TV-DK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      若應用程式如 <a href="#TV-GP">TV-GP</a> 中指定需要遊戲手把，則使用標準的 Android 遊戲手把按鍵可以導覽所有功能。(<a href="{@docRoot}training/game-controllers/controller-input.html#button">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-DM">
+    TV-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式不依賴具有 [功能表] 按鈕的遙控器也能存取使用者介面的控制項。(<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/tvqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  功能
+  </h2>
+
+
+</div>
+
+<p>
+  這些準則可確保您的應用程式經過正確設定並提供預期的功能行為。
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    類型
+  </th>
+  <th style="width:54px;">
+    測試
+  </th>
+  <th>
+    描述
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="2" id="manifest">
+   宣示說明
+  </td>
+
+  <td id="TV-ML">
+    TV-ML
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式宣示說明使用 {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} 類別設定 {@link android.content.Intent#ACTION_MAIN} 意圖類型。(<a href="{@docRoot}training/tv/start/start.html#tv-activity">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+</tr>
+  <td id="TV-MT">
+    TV-MT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式宣示說明將硬體功能 {@code android.hardware.touchscreen} 設為不需要。(<a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="game-controllers">
+    遊戲手把
+  </td>
+
+  <td id="TV-GP">
+    TV-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      若應用程式將遊戲手把用作主要輸入方式，會使用 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> 宣示說明標籤宣告相應的需求。(<a href="{@docRoot}training/tv/games/index.html#gamepad">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-GC">
+    TV-GC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      若應用程式提供使用遊戲手把的視覺指示，這些指示應不含品牌資訊，並顯示相容的按鈕版面配置。(<a href="{@docRoot}training/tv/games/index.html#ControllerHelp">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="4" id="advertising">
+    廣告推廣
+  </td>
+
+  <td id="TV-AP">
+    TV-AP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      應用程式允許使用 D-pad 控制裝置與廣告推廣互動。(<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AD">
+    TV-AD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      對於使用全螢幕非影片廣告的廣告推廣，應用程式允許使用者使用 D-pad 控制裝置立即關閉廣告。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AU">
+    TV-AU
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      對於使用可點選、非全螢幕、非影片廣告的廣告推廣，應用程式不允許廣告連結至網頁 URL。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AA">
+    TV-AA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      對於使用可點選、非全螢幕、非影片廣告的廣告推廣，應用程式不允許廣告連結至電視裝置上不可用的其他應用程式。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="web">
+    網頁內容
+  </td>
+
+  <td id="TV-WB">
+    TV-WB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      對於網頁內容，應用程式會使用 {@link android.webkit.WebView} 元件，不會嘗試啟動網頁瀏覽器應用程式。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="media-playback">
+    媒體播放
+  </td>
+
+  <td id="TV-NP">
+    TV-NP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      若應用程式在使用者離開後繼續播放聲音，應用程式會在主螢幕建議列提供<em>現在播放</em>卡，因此使用者可以返回至應用程式以控制播放。(<a href="{@docRoot}training/tv/playback/now-playing.html">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-PA">
+    TV-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      若應用程式提供<em>現在播放</em>卡，使用者選取此卡後，會進入可暫停播放的畫面。(<a href="{@docRoot}training/tv/playback/now-playing.html">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-PP">
+    TV-PP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      若應用程式播放視訊或音樂內容，則在播放期間傳送播放或暫停關鍵事件時，應用程式會在媒體的播放與暫停之間進行切換。<br>
+      (<a href="{@docRoot}reference/android/view/KeyEvent.html#KEYCODE_MEDIA_PLAY_PAUSE">進行了解</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">相關資源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/tvqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+<div class="headerLine">
+  <h2 id="faq">
+  常見問題
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>提交應用程式後，如何才能知道我的應用程式不符合電視裝置的所有需求？</strong>
+</p>
+<p>
+  若您的應用程式不符合本頁面所述的可用性需求，Play 市集團隊會透過主 <a href="https://play.google.com/apps/publish/">Google Play Developer Console</a> 帳戶 (與應用程式關聯) 中指定的電子郵件地址與您連絡。
+</p>
+<p class="caution">
+  <strong>注意：</strong>請確保您的應用程式包括電視裝置的<a href="{@docRoot}preview/tv/start/index.html#tv-activity">所需宣示說明項目</a>，否則不會將您的應用程式視為電視應用程式，也不會針對電視可用性需求對其進行檢閱。
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>我的應用程式針對的不僅是電視裝置。若我的應用程式不符合電視裝置需求，我的新應用程式或更新後的應用程式是否仍顯示在 Google Play 中針對手機與平板電腦的位置？</strong>
+</p>
+<p>
+  是。上述需求只會對散佈至 Google Play 市集的電視裝置進行限制。散佈至其他裝置類型 (例如手機、平板電腦及其他裝置) 不受影響。
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>若我的應用程式符合發行需求，對 Google Play 市集內的電視裝置何時才提供該應用程式？</strong>
+</p>
+
+<p>
+  在官方發行 Android 5.0 <em>後</em>，符合電視需求的應用程式將顯示在 Google Play 市集內的電視裝置上。
+</p>

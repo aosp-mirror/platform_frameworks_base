@@ -1,0 +1,449 @@
+page.title=TV アプリの品質
+page.metaDescription=TV は優れたエクスペリエンスを作り出すため、アプリのデザインと機能に特に注意を払う必要のある Android デバイスの成長分野です。
+page.image=/distribute/images/gp-tv-quality.png
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>品質基準</h2>
+  <ol>
+    <li><a href="#ux">デザインとインタラクション</a></li>
+    <li><a href="#fn">機能</a></li>
+    <li><a href="#faq">よくある質問</a></li>
+  </ol>
+
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">アプリの中核品質</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">アプリを最適化する</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="top-right-float" style="padding-right:0;margin-bottom:1em;">
+  <img src="{@docRoot}distribute/images/gp-tv-quality.png" style="width:480px;">
+</div>
+
+<p>
+  ユーザーは電話やタブレットを使用する場合と比べて、別の期待を持って TV を視聴します。通常の TV ユーザーは画面から 3 メートルほど離れて座るため、細かいディテールはそれほど重要ではなく小さなテキストは判読が困難です。ユーザーは TV から離れて座るため、画面要素にタッチするよりも、リモート コントロール デバイスを使用してナビゲーションを行ったり選択を行ったりします。こうした違いにより、優れた TV ユーザー エクスペリエンスを生み出すための要件が大きく異なります。
+</p>
+
+<p>
+  TV ユーザー向けの優れたエクスペリエンスを作り出すための最初のステップは、TV アプリ向けに最善のユーザー エクスペリエンスを作り出す方法について説明した <a href="{@docRoot}design/tv/index.html">Android TV の設計ガイドライン</a>を確認し、これに従うことです。また、TV アプリ実装の基本要件を理解するため、<a href="{@docRoot}training/tv/start/index.html">TV アプリの構築</a>トレーニングも確認する必要があります。
+</p>
+
+<p class="caution">
+  <strong>重要: </strong>優れたユーザー エクスペリエンスを実現するには、TV デバイス向けのアプリがユーザビリティの複数の固有要件に適合している必要があります。次の品質基準に適合するアプリのみが Google Play で Android TV アプリとして認められます。
+</p>
+
+<p class="note"><strong>注:</strong> TV アプリを Google Play に公開する方法について詳しくは、<a href="{@docRoot}distribute/googleplay/tv.html">Android TV への配布</a>を参照してください。</p>
+
+
+
+<div class="headerLine">
+  <h2 id="ux">
+  視覚デザインとユーザー インタラクション
+  </h2>
+
+
+</div>
+
+<p>
+  これらの基準は、TV デバイスで一貫性が高く直観的、かつ楽しめるユーザー エクスペリエンスを確保するため、アプリが厳格なデザインとインタラクション パターンに従っていることを保証します。
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    タイプ
+  </th>
+  <th style="width:54px;">
+    テスト
+  </th>
+  <th>
+    説明
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="4" id="launcher">
+    ランチャー
+  </td>
+
+  <td id="TV-LM">
+    TV-LM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリはインストール後に Android TV ランチャーにランチャー アイコンを表示します。（<a href="{@docRoot}training/tv/start/start.html#tv-activity">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LB">
+    TV-LB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリは 320px x 180px のフルサイズ バナーを Android TV ランチャーにランチャー アイコンとして表示します。（<a href="{@docRoot}design/tv/patterns.html#banner">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-BN">
+    TV-BN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリのランチャー バナーにアプリの名前が含まれています。（<a href="{@docRoot}design/tv/patterns.html#banner">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LG">
+    TV-LG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリがゲームの場合、Android TV ランチャーの [ゲーム] 行に表示されます。<br>
+      （<a href="{@docRoot}training/tv/games/index.html#manifest">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="layout">
+    レイアウト
+  </td>
+
+  <td id="TV-LO">
+    TV-LO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      すべてのアプリのインターフェイスが横長方向で表示されます。（<a href="{@docRoot}training/tv/start/layouts.html#structure">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TC">
+    TV-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリは 16sp 以上のサイズで主要テキストを表示します。（<a href="{@docRoot}design/tv/style.html#typography">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TA">
+    TV-TA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリは 12sp 以上のサイズですべてのテキストを表示します。（<a href="{@docRoot}design/tv/style.html#typography">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-OV">
+    TV-OV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリは画面の縁で部分的に切り捨てられるテキストまたは機能を表示しません。（<a href="{@docRoot}training/tv/start/layouts.html#overscan">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TR">
+    TV-TR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリでは他のアプリを部分的に隠しません。アプリは画面全体に表示され、背景は不透明です。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="navigation">
+    ナビゲーション
+  </td>
+
+  <td id="TV-DP">
+    TV-DP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリが <a href="#TV-GP">TV-GP</a> で指定されているゲームパッド コントローラを必要としない限り、アプリの機能は 5 方向 D-pad コントロールを使用してナビゲート可能です。（<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-DK">
+    TV-DK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリが <a href="#TV-GP">TV-GP</a> で指定されているゲーム コントローラを必要とする場合、すべての機能は標準の Android ゲーム コントローラ キーを使用してナビゲート可能です。（<a href="{@docRoot}training/game-controllers/controller-input.html#button">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-DM">
+    TV-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリはユーザー インターフェイス コントロールにアクセスするために、メニュー ボタンのあるリモート コントローラに依存しません。（<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/tvqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  機能
+  </h2>
+
+
+</div>
+
+<p>
+  次の基準は、アプリが正しく設定されており、期待される機能動作が実現されていることを保証します。
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    タイプ
+  </th>
+  <th style="width:54px;">
+    テスト
+  </th>
+  <th>
+    説明
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="2" id="manifest">
+   マニフェスト
+  </td>
+
+  <td id="TV-ML">
+    TV-ML
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリのマニフェストでは、インテント タイプ{@link android.content.Intent#ACTION_MAIN} を、カテゴリ {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} で設定しています。（<a href="{@docRoot}training/tv/start/start.html#tv-activity">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+</tr>
+  <td id="TV-MT">
+    TV-MT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリのマニフェストでは、ハードウェア機能 {@code android.hardware.touchscreen} を不要に設定しています。（<a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="game-controllers">
+    ゲーム コントローラ
+  </td>
+
+  <td id="TV-GP">
+    TV-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリがその主要な入力方式としてゲーム コントローラを使用する場合、<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> マニフェスト タグで適切な要件を宣言しています。（<a href="{@docRoot}training/tv/games/index.html#gamepad">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-GC">
+    TV-GC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリがゲーム コントローラの使用に関して視覚的な説明を提供する場合、その説明は特定のブランドとは無関係で互換性のあるボタンのレイアウトを示す必要があります。（<a href="{@docRoot}training/tv/games/index.html#ControllerHelp">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="4" id="advertising">
+    広告
+  </td>
+
+  <td id="TV-AP">
+    TV-AP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリでは D-pad コントロールを使用した広告とのインタラクションが可能です。（<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AD">
+    TV-AD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      全画面で表示し、動画ではない広告を表示する場合、アプリではユーザーが D-pad コントロールを使用して広告をすぐに消すことができます。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AU">
+    TV-AU
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      クリック可能であり、全画面表示ではなく、動画ではない広告を表示する場合、アプリは広告から Web URL へのリンクを許可しません。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AA">
+    TV-AA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      クリック可能であり、全画面表示ではなく、動画ではない広告を表示する場合、アプリは広告から TV デバイスに存在しない別のアプリへのリンクを許可しません。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="web">
+    Web コンテンツ
+  </td>
+
+  <td id="TV-WB">
+    TV-WB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Web コンテンツの場合、アプリは {@link android.webkit.WebView} コンポーネントを使用し、Web ブラウザ アプリを起動しようとしません。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="media-playback">
+    メディア再生
+  </td>
+
+  <td id="TV-NP">
+    TV-NP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      ユーザーがアプリから離れた後も音声の再生を継続する場合、アプリは<em>再生中</em>カードをホーム画面のおすすめ行に表示し、ユーザーは再生をコントロールするためアプリに戻ることができます。（<a href="{@docRoot}training/tv/playback/now-playing.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-PA">
+    TV-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリが<em>再生中</em>カードを表示する場合、このカードを選択すると、ユーザーは再生を一時停止できる画面に移動します。（<a href="{@docRoot}training/tv/playback/now-playing.html">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-PP">
+    TV-PP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリが動画または音楽コンテンツを再生する場合、再生または一時停止キーのイベントが再生中に送信されると、メディアの再生と一時停止が切り替わります。<br>
+      （<a href="{@docRoot}reference/android/view/KeyEvent.html#KEYCODE_MEDIA_PLAY_PAUSE">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/tvqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+<div class="headerLine">
+  <h2 id="faq">
+  よくある質問
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>アプリを提出した後で、一部の TV デバイスの要件を満たしていない場合にどのように知ることができますか？</strong>
+</p>
+<p>
+  アプリがこのページに記載されているユーザビリティの要件を満たしていない場合、そのアプリに関連付けられたメインの<a href="https://play.google.com/apps/publish/">Google Play デベロッパー コンソール</a> アカウントで指定したメール アドレス宛に  Play ストア チームから連絡があります。
+</p>
+<p class="caution">
+  <strong>警告:</strong> アプリに TV デバイスに<a href="{@docRoot}preview/tv/start/index.html#tv-activity">必要なマニフェスト エントリ</a>が含まれていることを確認してください。含まれていないと、アプリは TV アプリとはみなされず、TV のユーザビリティの要件について審査されません。
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>アプリのターゲットは TV デバイスだけではありません。このアプリが TV デバイスの要件に適合しない場合でも、新規アプリまたはアップデート版のアプリは電話/タブレット向けに Google Play に表示されますか？</strong>
+</p>
+<p>
+  はい。上記の要件は、TV デバイス上の Google Play ストアへの配布のみを制限します。電話、タブレット、その他のデバイスなど、他のデバイス タイプへの配布には影響しません。
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>アプリが公開に関する要件に適合した場合、TV デバイス上の Google Play ストアで入手できるようになるのはいつになりますか？</strong>
+</p>
+
+<p>
+  TV 向けの要件に適合するアプリは、Android 5.0 の正式リリース<em>後</em>、TV デバイス上の Google Play ストアに表示されます。
+</p>

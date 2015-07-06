@@ -1,0 +1,584 @@
+page.title=开发者控制台
+page.metaDescription=了解开发者控制台，这是您在 Google Play 上发布应用的大本营。
+page.image=/distribute/images/developer-console.jpg
+Xnonavpage=true
+
+@jd:body
+    
+    <div id="qv-wrapper">           
+  <div id="qv">
+    <h2>发布功能</h2>
+    <ol>
+      <li><a href="#allapps">所有应用</a></li>
+      <li><a href="#account-details">您的帐户详情</a></li>
+      <li><a href="#merchant-account">关联您的商家帐户</a></li>
+      <li><a href="#multiple-user-accounts">多个用户帐户</a></li>
+      <li><a href="#alpha-beta">Alpha 和 Beta 测试</a></li>
+      <li><a href="#staged-rollouts">分阶段发布</a></li>
+      <li><a href="#multiple-apk">多 APK 支持</a></li>
+      <li><a href="#selling-pricing-your-products">销售和定价</a></li>
+      <li><a href="#in-app-products">应用内产品</a></li>
+      <li><a href="#distribution-controls">分发控制</a></li>
+      <li><a href="#reviews-reports">用户评价、崩溃报告</a></li>
+      <li><a href="#app-stats">应用统计</a></li>
+      <li><a href="#related-resources">相关资源</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  <a href="https://play.google.com/apps/publish/">Google Play 开发者控制台</a>是您执行发布操作和获取发布工具的大本营。
+
+</p>
+<!-- <img src="{@docRoot}images/gp-dc-startscreen.jpg" style="width:480px;" /> -->
+<img src="{@docRoot}images/gp-devconsole-home.png" style="width:480px;">
+<p>
+  上传应用，建立产品页面，配置价格和分发，然后发布。
+您可以在任何网络浏览器上通过开发者控制台来管理在 Google Play 上发布应用的所有阶段。
+
+</p>
+
+<p>
+  在您<a href="{@docRoot}distribute/googleplay/start.html">注册</a>并收到电子邮件确认之后，就可以登录 Google Play 开发者控制台。
+
+</p>
+
+<div class="headerLine">
+  <h2 id="allapps">
+    所有应用
+  </h2>
+
+
+</div>
+
+<p>
+  “所有应用”部分让您能够快速浏览您的应用，您可以跳到统计信息、评价和产品详情页面，或者上传一个新应用。
+
+</p>
+
+<div style="padding:1em 0em 0em 0em;">
+  <img src="{@docRoot}images/gp-dc-home.png" class="border-img">
+</div>
+
+<div class="headerLine" style="margin-top:-6px">
+  <h2 id="account-details">
+    您的帐户详情
+  </h2>
+
+
+</div>
+
+<p>
+  在帐户详情页上指定有关您自己或贵公司的开发者基本资料信息。
+这让 Google Play 和您的客户能够识别您。
+您可以随时返回编辑此信息并更改您的设置。
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-profile.png" class="frame">
+</div>
+
+<p>
+  您的开发者资料包含：
+</p>
+
+<ul>
+  <li>
+    <p>
+      开发者名称 &mdash; 显示在您的商品详情页面上和 Google Play 的其他地方。
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      联系信息 &mdash; 仅供 Google 使用，您的客户看不到此信息。
+
+    </p>
+  </li>
+
+  <li>
+    <p>
+      网站 URL &mdash; 显示在您的商品详情页面上。
+    </p>
+  </li>
+</ul>
+
+<p>
+  在帐户详情页面上，您还可以为营销人员和其他团队添加受限的访问权限、注册一个商家帐户，或设置 Google Play 许可测试帐户。
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="merchant-account">
+    关联您的商家帐户
+  </h2>
+
+
+</div>
+
+<p>
+  如果您想销售应用或应用内的产品，可将您的 Google 电子钱包商家帐户与开发者资料关联。
+Google Play 使用关联的商家帐户来进行财务和税务识别，以及每月的销售款支付。
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-user-accounts">
+    多个用户帐户
+  </h2>
+
+
+</div>
+
+<p>
+  为其他团队成员设置用户帐户，以访问开发者控制台的不同部分。
+
+</p>
+
+<div style="width:550px;">
+  <img src="{@docRoot}images/gp-dc-invite.png" class="frame">
+</div>
+
+<p>
+  第一个注册帐户为<em>帐户所有者</em>，可完全访问控制台的所有部分。
+所有者可以添加<em>用户帐户</em>并管理控制台访问权限。
+
+</p>
+
+<p>
+  例如，所有者可以给用户授予发布和配置应用的权限，但不授予访问财务报告的权限。
+现在来了解如何<a href="https://support.google.com/googleplay/android-developer/answer/2528691">设置多个帐户</a>。
+
+</p>
+
+<div class="headerLine">
+  <h2 id="store-listing-details">
+    商品详情
+  </h2>
+
+
+</div>
+
+<p>
+  使用开发者控制台来设置<em>商品详情页面</em>。这是您的应用在 Google Play 中的大本营。
+这是用户在其手机上或在网页上看到并借此了解您的应用并下载应用的页面。
+
+</p>
+
+<p>
+  上传自定义品牌资料、屏幕截图和视频，突出您的应用所拥有的出色功能。
+提供本地化的说明，添加有关最新版本的备注等等。
+您可以随时更新商品详情。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-details.png" class="frame">
+</div>
+
+<div class="headerLine">
+  <h2 id="upload-instantly-publish">
+    上传和即时发布
+  </h2>
+
+
+</div>
+
+<p>
+  在开发者控制台中，可以快速上传和发布已准备好的 Android 应用程序包文件。
+在发布之前，应用处于<em>草稿</em>状态，发布后， Google Play 才将您的商品详情页面和应用提供给用户 &mdash; 您的应用将在几小时而不是数周内出现在商品详情页面上。
+
+
+
+</p>
+
+<p>
+  在发布应用之后，您可以随时进行更新：随时更改价格、配置和分发选项，无需更新应用的二进制文件。
+
+
+</p>
+
+<p>
+  当您添加功能或解决代码问题时，可以随时发布更新后的二进制文件。
+新版本几乎是立即上架，并且会通知现有客户，有更新可供他们下载。
+用户还可以接受应用的自动更新，在您发布更新时就立即推送和安装更新。
+
+您可以随时取消发布您的应用。
+
+</p>
+
+<div class="headerLine">
+  <h2 id="alpha-beta">
+    Alpha 和 Beta 测试
+  </h2>
+
+
+</div>
+
+<p>
+  获得用户的真实反馈总是很有价值的，特别是在发布之前。
+Google Play 使您能够轻松地将发布前的应用版本分发给全球任何地方的 alpha 和 beta 测试组。
+
+</p>
+
+<p>
+  在 Google Play 开发者控制台的 <strong>APK</strong> 部分，您会发现 <strong>Alpha 测试</strong>和 <strong>Beta 测试</strong>选项卡。
+
+您可以在此上传应用各版本的 APK 文件，并将测试人员列表定义为 <a href="https://support.google.com/groups/answer/46601">Google 群组</a>或<a href="https://support.google.com/plus/topic/2888488">Google+ 社区</a>。
+在完成此操作后，您将收到一个可转发给测试人员的 URL，测试人员可通过此 URL 选择加入测试计划。
+
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-dc-ab.png" class="frame">
+</div>
+
+<p>
+  测试人员选择加入之后，将转至应用的产品页面，当他们下载应用后，Google Play 将视情况给他们发送 alpha 或 beta 版本。
+
+顺便说一下，如果用户碰巧加入了您的两个测试组，则 Google Play 始终是向他们发送 alpha 测试版。
+
+</p>
+
+<p>
+  注意：用户不能对应用的 alpha 和 beta 版本提供反馈和评价。
+如要收集反馈，您可以使用<a href="https://support.google.com/groups/answer/46601">Google 群组</a>或<a href="https://support.google.com/plus/topic/2888488">Google+ 社区</a>，
+或者设置一个电子邮件地址，或使用您自己的网站。
+</p>
+
+<p>
+  您可以使用这些测试计划来<a href="{@docRoot}distribute/essentials/optimizing-your-app.html">优化您的应用</a>，帮助<a href="{@docRoot}distribute/users/expand-to-new-markets.html">发布到新市场</a>以及开始<a href="{@docRoot}distribute/users/build-community.html">建立您自己的社区</a>。
+
+
+在
+<a href="{@docRoot}distribute/tools/launch-checklist.html">发布
+检查单</a>和<a href="{@docRoot}distribute/tools/localization-checklist.html">本地化检查单</a>中，还提供了有关使用 beta 测试的更多信息。
+
+</p>
+
+<div class="headerLine">
+  <h2 id="staged-rollouts">
+    分阶段发布
+  </h2>
+
+
+</div>
+
+<p>
+  您还可以在 Google Play 开发者控制台的 APK 部分中，使用“生产”选项卡来分阶段发布您的应用。
+您可以在此定义能够下载您的应用的用户的百分比。
+
+</p>
+
+<p>
+  分阶段发布有助于限制意外错误的影响或服务器负载，并使您能够通过公正的用户抽样来衡量用户反馈。
+
+  在分阶段发布期间，用户可以对您的应用评级和评价，因此，如果您犹豫不定，可以先发布给较小比例的用户。
+一定要关注任何负面评价并及时回应。
+
+</p>
+
+<p>
+  注意：由于 Android 平台的<a href="{@docRoot}tools/publishing/versioning.html">应用版本控制要求</a>，不支持回滚。
+如果需要回滚，可考虑使用新版本号发布之前的 APK。
+但是，这种做法只能作为不得已的最后手段，因为用户将不能访问新功能，并且旧版应用可能无法向前兼容您的服务器更改或数据格式，所以一定要对更新执行 <a href="#alpha-beta">alpha 和 beta 测试</a>。
+
+
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="multiple-apk">
+    多 APK 支持
+  </h2>
+
+
+</div>
+
+<p>
+  在大多数情况下，您只需要提供单个应用软件包 (APK)，并且这通常是管理和维护应用的最简单方式。
+但是，如果需要为不同设备提供不同的 APK，Google Play 提供了实现方法。
+
+
+</p>
+
+<p>
+  <em>多 APK 支持</em>允许您创建多个应用软件包，使用相同的软件包名称，但 OpenGL 纹理压缩格式、屏幕大小支持或所支持的 Android 平台版本不同。
+
+只需在单个产品详情下上传所有 APK，Google Play 会根据用户设备的特性，选择最合适的文件提供给用户。
+
+
+
+</p>
+
+<p>
+  还可以使用 <em>APK 扩展文件</em>选项，为每个已发布的 APK（包括多 APK）上传最多两个辅助下载。
+每个扩展文件可达 2 GB 并且可以包含任何类型的代码或资产。
+
+  Google Play 免费托管这些文件，并将文件下载作为正常应用安装的一部分。
+
+</p>
+
+<div class="headerLine">
+  <h2 id="selling-pricing-your-products">
+    产品销售和定价
+  </h2>
+
+
+</div>
+
+<div class="figure-right">
+  <img src="{@docRoot}images/gp-buyer-currency.png" class="frame">
+</div>
+
+<p>
+  为您提供了工具以设置应用和应用内产品的价格。您的应用可以免费下载，或付费下载，即需要付款才能下载。
+
+</p>
+
+<ul>
+  <li>如果发布为免费应用，则必须<strong>在该应用的生存期内始终免费</strong>。
+免费应用可供 Google Play 的所有用户下载。
+  </li>
+
+  <li>如果发布为付费应用，也可以在以后更改为免费。付费应用只能由已在 Google Play中注册付款方式的用户购买和下载。
+
+
+  </li>
+</ul>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <p>
+      请参考<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=138294&amp;topic=2365624&amp;ctx=topic">
+支持分发应用的地区</a>，了解您可以分发或销售应用的国家或地区列表。
+
+    </p>
+  </div>
+</div>
+
+<p>
+  无论是免费还是付费应用，还可以在应用内提供产品和订阅。
+为付费应用、应用内的产品及订阅单独设置价格。
+
+</p>
+
+<p>
+  当用户浏览您的应用产品页面，或开始购买时，Google Play 以当地货币显示向他们收取的价格。
+
+</p>
+
+<p>
+  对于每个产品，您首先按自己的货币设置默认价格。如果您不再设置其他价格，Google Play 将根据美元价格，每月一次为您的应用自动设置当地价格。
+
+
+</p>
+
+<p>
+  但是，Google Play 让您能够完全控制您的产品在每个国家的定价方式。
+首先，您可以使用
+<strong>立即自动换算价格</strong>
+功能来手动设置与默认价格不同的固定本地价格。然后可以审查这些价格并为所需的任何国家设置新价格 &mdash; 每个国家的价格是独立的，因此可以调整一个价格，而不影响其他价格。
+
+对于大多数国家，您设置的价格是向用户收取的最终价格，包括税额。
+
+</p>
+
+<p>
+  有关应用定价的更多信息，请参阅<a href="{@docRoot}distribute/users/expand-to-new-markets.html#localize-your-google-play-listing">
+扩展到新市场</a>。
+</p>
+
+<div class="headerLine">
+  <h2 id="in-app-products">
+    应用内产品
+  </h2>
+
+
+</div>
+
+<p>
+  您可以使用 <a href="{@docRoot}google/play/billing/index.html">Google Play 的应用内结算</a>来销售应用内的产品和订阅，作为将应用货币化的一种方式。
+应用内产品是一次性购买，而订阅是每月或每年重复收费。
+
+</p>
+
+<p>
+  在特定的已发布或草稿 APK 的<strong>应用内产品</strong>部分，您可以：
+
+</p>
+
+<ul>
+  <li>创建应用内产品和订阅的产品详情。
+  </li>
+
+  <li>设置价格。
+  </li>
+
+  <li>和应用一起发布产品或撤消过时的产品。
+  </li>
+</ul>
+
+<p>
+  有关如何实现应用内结算的详情，请参考<a href="{@docRoot}google/play/billing/index.html">应用内结算</a>开发者文档。
+您可以按<a href="{@docRoot}distribute/monetize/premium.html">增值</a>、<a href="{@docRoot}distribute/monetize/freemium.html">免费增值</a>和<a href="{@docRoot}distribute/monetize/subscriptions.html">订阅</a>
+等盈利模式来充分利用应用内的产品
+</p>
+
+<div class="headerLine">
+  <h2 id="distribution-controls">
+    分发控制
+  </h2>
+
+
+</div>
+
+<p>
+  管理您的应用将分发到哪些国家和地区。对于一些国家，您可以选择您的目标运营商。
+还可以查看您的应用适合的设备列表，此列表基于其清单文件中声明的任何分发规则。
+
+
+</p>
+
+<h3 id="geotargeting">
+  设置地理目标
+</h3>
+
+<p>
+  您可以使用 Google Play 开发者控制台中的控件，轻松管理应用的地理区域分发，而无需更改应用的二进制文件。
+
+可以指定您希望分发到哪些国家和地区，甚至是哪些运营商（在某些国家）。
+
+</p>
+
+<p>
+  当用户访问商店时，Google Play 确保他们处于您的目标国家之一，才能下载您的应用。
+可以随时更改您的目标国家和运营商，只需在 Google Play 开发者控制台中保存更改。
+
+
+</p>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-supported-dev-requirements.png" class="frame">
+</div>
+
+<p>
+  为帮助您向全世界的用户营销，可以将<a href="{@docRoot}distribute/tools/launch-checklist.html#start-localization">您的商品详情本地化</a>，包括应用的详情和说明，宣传图形、屏幕截图等。
+
+
+</p>
+
+<h3 id="captargeting">
+  设置能力目标
+</h3>
+
+<p>
+  Google Play 还允许您根据应用所依赖的设备功能或能力来控制分发。
+应用可以在其清单文件中定义几种依赖条件，如硬件功能、OpenGL 纹理压缩格式、库、Android 平台的版本等。
+
+
+
+</p>
+
+<p>
+  当您上传应用后，Google Play 读取这些依赖条件，并设置任何必要的分发规则。
+如需有关声明依赖条件的技术信息，请阅读<a href="{@docRoot}google/play/filters.html"> Google Play 上的筛选条件</a>。
+
+
+</p>
+
+<p>
+  为了对分发进行精确控制，Google Play 允许您查看您的应用根据其依赖条件（若有）所适合的所有设备。
+在 Google Play 开发者控制台中，您可以列出受支持的设备，甚至可以排除特定的设备（若需要）。
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="reviews-reports">
+    用户评价和崩溃报告
+  </h2>
+
+
+</div>
+
+<div class="figure-right" style="width:500px;">
+  <img src="{@docRoot}images/gp-dc-reviews.png" class="frame">
+  <p class="img-caption">
+    用户评价部分能让您访问某一应用的用户评价。
+您可以用多种方式来筛选评价，以更轻松地找到问题和更有效地支持您的客户。
+
+  </p>
+</div>
+
+<p>
+  Google Play 使用户能够轻松提交对应用的评价，从而使其他用户受益。
+评价为您提供直接来自客户的可用性反馈、支持请求和重要功能问题的详情。
+
+
+</p>
+
+<p>
+  使用崩溃报告来调试和改进您的应用。您可以看到通过 Android 设备自动提交的、包含堆栈跟踪和其他数据的崩溃报告。
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="app-stats">
+    应用统计信息
+  </h2>
+
+
+</div>
+
+<div class="figure" style="width:500px">
+  <img src="{@docRoot}images/gp-dc-stats.png">
+  <p class="img-caption">
+    <b>应用统计信息页</b>：向您显示有关某一应用的安装性能的各种统计信息。
+
+  </p>
+</div>
+
+<p>
+  可获得您的应用安装性能的详细统计信息。
+</p>
+
+<p>
+  查看按独特用户和独特设备衡量的安装指标。
+查看主动安装量、总安装量、升级量、每日安装量和卸载量，以及有关评级的指标。
+
+</p>
+
+<p>
+  按各种指标详细了解安装数字，包括 Android 平台版本、设备、国家、语言、应用版本和运营商。
+在时间线图表上查看每个维度的安装数据。
+
+</p>
+
+<p>
+  这些图表突出说明您的应用的安装峰值和长期趋势。
+  可帮助您了解用户的采用行为、将统计信息与推广活动关联，了解应用改进的效果和其他因素。
+通过给时间线添加特定时点，以重点关注一个维度内的数据。
+
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">相关资源</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/developerconsole"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+  </div>

@@ -1,0 +1,70 @@
+page.title=選擇加入 Designed for Families
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=只需幾個簡易步驟即可加入 Designed for Families。
+
+@jd:body
+
+<p>
+  若您要建置專為兒童與家庭設計的應用程式，必須<em>先</em>執行以下幾項作業，然後再準備選擇加入 Designed for Families 計劃：
+</p>
+
+<ul>
+  <li>完成針對您應用程式的內容評分問卷，ESRB 評級應為 Everyone 或 Everyone 10+
+  </li>
+
+  <li>將隱私權原則連結新增至您應用程式的 [市集清單]<strong></strong> 頁面。
+  </li>
+
+  <li>確保您的應用程式符合所有 <a href="https://support.google.com/googleplay/android-developer/answer/6184502">Designed for Families 計劃需求</a>。
+  </li>
+</ul>
+
+<p>
+  現在您的應用程式已可供發行，您可以從<a href="https://play.google.com/apps/publish/"> Developer Console </a>直接選擇加入 Designed for Families。選擇加入意味著除了您在 Google Play 市集內已選取的類別外，您還希望您的應用程式可以在 Google Play 上用於新的家庭友好體驗。
+</p>
+
+<p>
+  選擇加入也會確認您的應用程式遵循 <a href="http://play.google.com/about/developer-content-policy.html">Google Play 開發人員計劃政策</a>以及<a href="http://play.google.com/about/developer-distribution-agreement.html">開發人員散佈合約</a> (包括<a href="https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html"> Designed for Families DDA 增補合約</a>)。若您不熟悉這些政策文件或增補合約，請確保在選擇加入之前仔細閱讀。
+</p>
+
+<p>
+  準備就緒後，針對特定應用程式，根據以下所述選擇加入 Designed for Families：
+</p>
+
+<ol>
+<li>在 Developer Console 的 [所有應用程式]<strong></strong> 頁面中，按一下您希望選擇加入的應用程式。在 [定價與散佈] 下，向下捲動以尋找 <strong>Designed for Families</strong> 及選擇加入核取方塊。<img src="/images/gp-dff-optin.png" style="border:2px solid #ddd;margin:1em 0;">
+  </li>
+
+  <li>開始選擇加入流程，確認您的應用程式符合資格需求。</li>
+  <li>若您的應用程式包含廣告，請確認其符合廣告政策。<img src="/images/gp-dff-appinfo.png" style="border:2px solid #ddd;margin:1em 0;"></li>
+  <li>從以下項目中選擇針對的年齡段：不超過 5 歲、6 至 8 歲、9 至 12 歲，或一般受眾 (若應用程式針對兒童與年齡較兒童更大的受眾)。若您的應用程式針對多個年齡段，您最多可以選擇兩個相鄰的年齡段。評級為 ESRB 10+ 的應用程式只能選擇針對 9 至 12 歲的年齡段或一般受眾。
+  </li>
+
+  <li>針對 Google Play 上面向家庭的新體驗，為您的應用程式選擇類別。此外，您的應用程式也將位於 Google Play 中的應用程式既有類別內。</li>
+  <li>檢閱並同意連結的文件，然後按一下 [選擇加入]<strong></strong>。最後，按一下 [定價與散佈] 頁面上的 [提交更新]<strong></strong> 以發行或更新您的應用程式。
+  </li>
+</ol>
+
+<p>
+  選擇加入您的應用程式後，Designed for Families 計劃會先對應用程式進行仔細檢閱，然後才會接受該應用程式。
+</p>
+
+<p class="note">
+  <strong>注意：</strong>Designed for Families 計劃中已發行的應用程式也可供 Google Play 上的所有使用者使用。 
+</p>
+
+<p>
+  若您選擇加入首次發行的應用程式，但該應用程式不符合 Designed for Families 計劃需求，則在 Google Play 上不會提供該應用程式，直到<strong></strong>您更新應用程式以符合計劃需求，<strong>或</strong>取消核取選擇加入方塊並通過 Google Play 的標準檢閱程序為止。
+</p>
+
+<p>
+  若您選擇加入 Google Play 上已發行的應用程式，但該應用程式不符合計劃需求，則該應用程式仍可供所有使用者使用，但不會新增至新的家庭體驗中，直到您更新應用程式以符合計劃需求為止。
+</p>
+
+<p>
+  若您發行應用程式的更新，並選擇該應用程式加入 Designed for Families，則應用程式更新需要先通過 Designed for Families 檢閱，然後才能供 Google Play 上的所有使用者使用。</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/faq.html" class="next-class-link">後續內容：常見問題</a>
+</div> 

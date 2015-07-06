@@ -1,0 +1,452 @@
+page.title=Качество приложений Android Wear
+page.tags="wear","wearables","quality","guidelines"
+page.metaDescription=Умные часы – это небольшие устройства, которые обладают предельно лаконичным интерфейсом и требуют уникальных приложений, предоставляющих только нужную информацию в нужное время.
+page.image=/distribute/images/gp-wear-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Критерии качества</h2>
+  <ol>
+    <li><a href="#ux">Дизайн и взаимодействие</a></li>
+    <li><a href="#fn">Функциональность</a></li>
+    <li><a href="#faq">Часто задаваемые вопросы</a></li>
+  </ol>
+
+  <h2>См. также:</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+Основные критерии качества приложений</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+Оптимизация приложений</a></li>
+    <li><a href="{@docRoot}design/patterns/notifications.html">
+Уведомления</a></li>
+  </ol>
+</div>
+</div>
+
+<img src="{@docRoot}distribute/images/gp-wear-quality.png" style="width:480px;">
+
+<p>
+  Операционная система Android Wear ориентирована на предоставление пользователям нужной информации в нужное время. Удобные
+ интерфейсы Android Wear запускаются автоматически, предельно лаконичны
+ и требуют минимального (или вообще не требуют) взаимодействия с пользователем. Дизайн приложений для часов существенно отличается от дизайна для телефонов или
+ планшетов. В этих видах дизайна необходимо учитывать разные достоинства и недостатки устройств,
+ разные сценарии использования и разные требования эргономики.
+</p>
+
+<p>
+  Первым шагом к созданию удобного интерфейса является изучение
+ <a href="{@docRoot}design/wear/index.html">Рекомендаций по разработке приложений для Android Wear</a>,
+ которые содержат инструкции по созданию оптимальных интерфейсов для приложений Android Wear. Также необходимо
+ ознакомиться с учебным материалом <a href="{@docRoot}training/building-wearables.html">Создание приложений для умных часов</a>,
+ чтобы понять основные требования к разработке приложений Android Wear.
+</p>
+
+<p class="caution">
+  <strong>Внимание!</strong> Чтобы интерфейс приложений для часов был удобен для пользователей, при их разработке
+ необходимо соблюдать определенные требования к эргономике. Только те приложения, которые соответствуют нижеприведенным критериям качества, могут быть
+ квалифицированы как приложения для Android Wear в Google Play. Приложение, квалифицированное для Android Wear,
+ может быть быстрее обнаружено пользователями в Google Play.
+</p>
+
+<p class="note">
+ <strong>Примечание.</strong> Информацию о публикации приложений Android Wear в Google Play см. в документе <a href="{@docRoot}distribute/googleplay/wear.html">Распространение приложений Android Wear</a>.
+</p>
+
+<div class="headerLine">
+  <h2 id="fn">
+  Функциональность
+  </h2>
+
+
+</div>
+
+<p>
+  Выполнение этих требований обеспечивает правильную конфигурацию приложения
+ и его ожидаемое функциональное поведение.
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    Тип
+  </th>
+  <th style="width:54px;">
+    ИД
+  </th>
+  <th>
+    Описание
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="general">
+   Общие
+  </td>
+
+  <td id="WR-GL">
+    WR-GL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложение должно быть предназначено для мобильных устройств и использовать
+ уведомления с функциями для умных часов, либо предназначено для часов и выполняться непосредственно на устройстве Android Wear.
+      (<a href="{@docRoot}training/building-wearables.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-VF">
+    WR-VF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложение должно иметь функции Android Wear, видимые пользователю.
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-BF">
+    WR-BF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Функции Android Wear должны работать в соответствии с требованиями или характеристиками, приведенными в каталоге Google Play.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="packaging">
+   Организация пакета приложения
+  </td>
+
+  <td id="WR-PK">
+    WR-PK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложения для часов, чья функциональность зависит от мобильного приложения,
+ должны быть упакованы внутри этого мобильного приложения.
+      (<a href="{@docRoot}training/wearables/apps/packaging.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="functional-notifications">
+    Уведомления
+  </td>
+
+  <td id="WR-FW">
+    WR-FW
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Уведомления, связанные с функциями для часов, должны использовать объекты {@code RemoteInput}
+ или {@code WearableExtender}.
+      (<a href="{@docRoot}training/wearables/notifications/index.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FR">
+    WR-FR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Уведомления в приложениях для обмена сообщениями должны предусматривать ответ пользователя голосом или с помощью функции быстрого ответа.
+      (<a href="{@docRoot}training/wearables/notifications/voice-input.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-FG">
+    WR-FG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Похожие уведомления должны объединяться в пакеты.
+      (<a href="{@docRoot}training/wearables/notifications/stacks.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="gestures">
+    Жесты
+  </td>
+
+  <td id="WR-GP">
+    WR-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      В полноэкранных действиях длинное нажатие должно использоваться только для запроса на выход.
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/exit.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-GD">
+    WR-GD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Если в приложении отключен жест сдвига для отмены в полноэкранном действии,
+ оно должно реагировать в этом действии на жест длинного нажатия для отмены.
+      (<a href="{@docRoot}training/wearables/ui/exit.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="watchface">
+    Циферблат
+  </td>
+
+  <td id="WR-WF">
+    WR-WF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложения, изменяющие циферблат, должны использовать официальный API Watch Face.
+      (<a href="{@docRoot}training/wearables/watch-faces/index.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Связанные ресурсы</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="ux">
+  Визуальный дизайн и взаимодействие с пользователем
+  </h2>
+
+
+</div>
+
+<p>
+  Соблюдение этих критериев означает, что приложение соответствует наиболее
+ важным шаблонам дизайна и взаимодействия, обеспечивая согласованный, интуитивно понятный и удобный пользовательский интерфейс часов.
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    Тип
+  </th>
+  <th style="width:54px;">
+    ИД
+  </th>
+  <th>
+    Описание
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="3" id="layout">
+    Макет
+  </td>
+
+  <td id="WR-LS">
+    WR-LS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Формат пользовательского интерфейса приложения должен соответствовать квадратным экранам. Контент приложения должен помещаться
+ внутри физического экрана, а текст и элементы управления не должны выходить за его границы.
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/layouts.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-LR">
+    WR-LR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Формат пользовательского интерфейса приложения должен соответствовать круглым экранам,
+ включая устройства со вставкой ("подбородком") в нижней части экрана. Контент приложения должен помещаться
+ внутри физического экрана, а текст и элементы управления не должны выходить за его границы.
+      <br/>
+      (<a href="{@docRoot}training/wearables/ui/layouts.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-TC">
+    WR-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Текст приложения должен быть крупным и читаемым с одного взгляда (размером не менее 16 независимых от масштабирования пикселей).
+      (<a href="{@docRoot}design/wear/style.html#Typography">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="launcher">
+    Средство запуска
+  </td>
+
+  <td id="WR-LN">
+    WR-LN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Строкой запуска приложения должно быть его название, а не команда.
+      (<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="notifications">
+    Уведомления
+  </td>
+
+  <td id="WR-NC">
+    WR-NC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      В приложении должна поддерживаться анимация подтверждений, если необходимо.
+      (<a href="{@docRoot}design/wear/patterns.html#Countdown">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-NR">
+    WR-NR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      В правом верхнем углу карточек уведомлений должен быть виден значок приложения. Единственным исключением из этого правила
+ являются карточки уведомлений с одним возможным действием, например, карточка воспроизведения мультимедийного контента.
+      <br/>
+      (<a href="{@docRoot}design/wear/style.html#Assets">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-WI">
+    WR-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Действия уведомления должны иметь белый значок, название действия и прозрачный фон.
+      <br/>
+      (<a href="{@docRoot}training/wearables/notifications/creating.html#ActionButtons">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PB">
+    WR-PB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Фотографии, используемые в качестве фона уведомления, должны использоваться только для передачи информации и не должны содержать информацию о бренде.
+      (<a href="{@docRoot}design/wear/style.html#Branding">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="WR-PR">
+    WR-PR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Фотографии, используемые в качестве фона уведомления, должны иметь разрешение не менее 400x400 пикселей.
+      (<a href="{@docRoot}training/wearables/notifications/creating.html#AddWearableFeatures">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="googleplay">
+    Google Play
+  </td>
+
+  <td id="WR-GS">
+    WR-GS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      На странице каталога приложения в Google Play должен быть представлен как минимум один снимок экрана с интерфейсом Android Wear.
+      (<a href="https://support.google.com/googleplay/android-developer/answer/1078870?hl=en">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Связанные ресурсы</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/wearqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="faq">
+  Часто задаваемые вопросы
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>Как после подачи приложения на проверку узнать, что оно не соответствует
+ всем требованиям Android Wear?</strong>
+</p>
+<p>
+  Если ваше приложение не отвечает требованиям к эргономике, описанным на этой странице,
+ сотрудники Google Play напишут вам по эл. почте на адрес, указанный в основной
+ учетной записи <a href="https://play.google.com/apps/publish/">консоли разработчика Google Play</a>, связанной с этим приложением.
+</p>
+<p class="caution">
+  <strong>Внимание!</strong> Убедитесь в соответствии приложения <a href="#fn">функциональным
+ требованиям</a>, в противном случае оно не будет считаться приложением для Android Wear
+ и не будет проверяться на соответствие <a href="#ux">критериям дизайна и взаимодействия</a>.
+</p>
+<p class="note">
+ <strong>Примечание.</strong> Информацию о публикации приложений Android Wear в Google Play см. в документе <a href="{@docRoot}distribute/googleplay/wear.html">Распространение приложений Android Wear</a>.
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>Если мое приложение не соответствует требованиям Android Wear, возможна ли его публикация
+ в Google Play для телефонов и планшетов? Возможна ли его установка на часах?</strong>
+</p>
+<p>
+  Да. Описанные выше требования определяют лишь возможность квалификации приложения
+ для Android Wear, позволяющей быстрее обнаружить его пользователям в Google Play. Если приложение не было принято
+ в качестве приложения для Android Wear, оно остается доступным для других устройств, таких как телефоны и планшеты,
+ и может быть установлено на часах.
+</p>
