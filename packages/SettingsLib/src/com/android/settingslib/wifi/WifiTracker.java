@@ -176,10 +176,7 @@ public class WifiTracker {
             mScanner = new Scanner();
         }
 
-        mScanResultCache.clear();
-        mSeenBssids.clear();
-        mScanId = 0;
-
+        mWorkHandler.sendEmptyMessage(WorkHandler.MSG_RESUME);
         if (mWifiManager.isWifiEnabled()) {
             mScanner.resume();
         }
@@ -249,6 +246,12 @@ public class WifiTracker {
         for (AccessPoint accessPoint : getAccessPoints()) {
             pw.println("  " + accessPoint);
         }
+    }
+
+    private void handleResume() {
+        mScanResultCache.clear();
+        mSeenBssids.clear();
+        mScanId = 0;
     }
 
     private Collection<ScanResult> fetchScanResults() {
@@ -544,6 +547,7 @@ public class WifiTracker {
     private final class WorkHandler extends Handler {
         private static final int MSG_UPDATE_ACCESS_POINTS = 0;
         private static final int MSG_UPDATE_NETWORK_INFO = 1;
+        private static final int MSG_RESUME = 2;
 
         public WorkHandler(Looper looper) {
             super(looper);
@@ -557,6 +561,9 @@ public class WifiTracker {
                     break;
                 case MSG_UPDATE_NETWORK_INFO:
                     updateNetworkInfo((NetworkInfo) msg.obj);
+                    break;
+                case MSG_RESUME:
+                    handleResume();
                     break;
             }
         }
