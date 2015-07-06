@@ -1,0 +1,434 @@
+page.title=Auto アプリの品質
+page.metaDescription=Auto アプリは車の入力コントロールおよびディスプレイと連携し、ドライバーの注意散漫をできるだけ少なくして優れたエクスペリエンスを実現します。
+page.image=/distribute/images/gp-auto-quality.png
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>品質基準</h2>
+  <ol>
+    <li><a href="#core">アプリの中核品質</a></li>
+    <li><a href="#ux">視覚デザインとインタラクション</a></li>
+    <li><a href="#fn">機能</a></li>
+    <li><a href="#faq">よくある質問</a></li>
+  </ol>
+
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">アプリの中核品質</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">アプリを最適化する</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Android Auto UX のガイドライン オーディオ アプリケーション向け</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">Android Auto UX のガイドライン メッセージ アプリケーション向け</a></li>
+  </ol>
+</div>
+</div>
+
+
+  <img src="{@docRoot}distribute/images/gp-auto-quality.png" style="width:480px;">
+
+
+<p>アプリに Android Auto 向けのサポートを設計する場合、何よりもまずドライバーの注意散漫を防ぐようにしてください。Auto ユーザー インターフェイスと連携するアプリは、音声コマンドや非常にシンプルな視覚設計などのベスト プラクティスにより、ドライバーが遭遇する注意散漫を最小限に抑える必要があります。
+</p>
+
+<p>
+  優れた Auto エクスペリエンスは予測性が高く予測可能です。Android Auto をサポートするアプリは、情報がドライバーに関係する場合のみタイムリーに表示し、一般的なタスクに対してはシンプルで予測可能なパターンを使用する必要があります。
+</p>
+
+<p class="caution">
+  <strong>重要:</strong>このページにリストされた基準は、Android Auto 画面に接続されたデバイスで実行している場合のアプリのユーザー インターフェイスと動作に適用されます。アプリは、これらの基準の適合し、Google Play 上の Android Auto アプリとして適格である必要があります。
+</p>
+
+
+<div class="headerLine">
+  <h2 id="core">
+  アプリの中核品質
+  </h2>
+
+<p>
+ Auto アプリは、下記に示す Auto 独自の基準の他に、Android プラットフォームに関係するアプリの中核品質基準すべてに適合している必要があります。詳細については<a href="{@docRoot}distribute/essentials/quality/core.html">アプリの中核品質</a>基準を参照してください。これらの基準についてアプリをテストして、ナビゲーションと設計に関する Android 標準に適合しているかどうか確認します。次に Auto 独自の基準すべてについてアプリをテストします。Android Auto に接続しているデバイス上で実行する際には、アプリがこのページにリストされている要件に適合している必要があることを忘れないようにしてください。 <div class="headerLine">
+  <h2 id="ux">
+  視覚デザインとユーザー インタラクション
+  </h2>
+
+</div>
+
+<p>
+  これらの基準は Android Auto で一貫性が高く直観的、かつ楽しめるユーザー エクスペリエンスを確保するため、アプリが厳格なデザインとインタラクション パターンに従っていることを保証します。ナビゲーション ドロワー、カード バックグラウンド、フォント、アイコンの色などの多くの要素がシステムによって設定され、レンダリングされます。アプリ固有の設計要素は次の基準に適合している必要があります。
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    タイプ
+  </th>
+  <th style="width:54px;">
+    テスト
+  </th>
+  <th>
+    説明
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="5" id="safety">
+    ドライバーの注意
+  </td>
+
+  <td id="AU-MV">
+    AU-MV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリは、Auto 画面に動画グラフィック、ゲーム、ビデオ、進行バーなどの動画要素を表示しません。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VA">
+    AU-VA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリは Auto 画面にあらゆるフォーマットの視覚広告またはテキスト広告を表示しません。音声広告のみ許可されます。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-IM">
+    AU-IM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリ要素は Auto 画面に画像を一切表示しません。例外として、アプリ使用画面の背景にアプリがアルバム アートなどのコンテンツのコンテキストに合わせた単一の固定画像を表示する場合があります。また、コンテンツのナビゲーション ドロワーにアイコンを表示する場合があります。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-DS">
+    AU-DS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリにはドライバーの注意をそらす機能は含まれていません。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VI">
+    AU-VI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリが Android Auto でアクティブになっている間は、電話画面にいかなるフォームの視覚情報（通知、トースト、ビデオ、画像、広告など）も表示しません。
+    </p>
+  </td>
+</tr>
+
+
+
+<tr>
+  <td rowspan="3" id="layout">
+    レイアウト
+  </td>
+
+  <td id="AU-SC">
+    AU-SC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリは自動スクロール テキストを表示しません。
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td id="AU-FT">
+    AU-FT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリは 2 とおりのサイズが認められているデフォルトの Roboto フォントを使用してすべてのストリングを表示します。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-ST">
+    AU-ST
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリは 1 つのストリングにつき 120 文字までしか表示しません。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="4" id="contrast">
+    視覚コントラスト
+  </td>
+
+  <td id="AU-DM">
+    AU-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリは濃い色のテキストをレンダリングし、薄い色の背景でコントロールする日中モードをサポートします。（<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NM">
+    AU-NM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリは薄い色のテキストをレンダリングし、濃い色の背景でコントロールする夜間モードをサポートします。（<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-WI">
+    AU-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリはシステムが着色してコントラスト補正を自動的に行えるようにする白のアイコン セットを提供します。（<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-OC">
+    AU-OC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリはシステムが車内での読みやすさを最適化できる色を提供します。（<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="interaction">
+    インタラクション
+  </td>
+
+  <td id="AU-VC">
+    AU-VC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリは音声コマンドをサポートする必要があります。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-AB">
+    AU-AB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリ固有のボタンは、最長 2 秒の遅延でユーザー アクションに応答します。
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  機能
+  </h2>
+
+
+</div>
+
+<p>
+  次の基準は、アプリが正しく設定されており、期待される機能動作が実現されていることを保証します。
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    タイプ
+  </th>
+  <th style="width:54px;">
+    テスト
+  </th>
+  <th>
+    説明
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="5" id="general">
+   全般
+  </td>
+
+  <td id="AU-LT">
+    AU-LT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリは最長 10 秒でロードされます。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-FP">
+    AU-FP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Auto アプリの機能が予測どおりまたはアプリの Google Play ストア一覧に記載されているとおりに機能します。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-RL">
+    AU-RL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリがホーム画面から再起動される場合、アプリは前の状態にできるだけ近い状態で復元されます。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SS">
+    AU-SS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリのタスクはすべて 6 ステップ以内に完了します。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-GO">
+    AU-GO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     機能しない、または無効なアプリ ボタンはグレー表示されている必要があります。
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="media">
+    メディア
+  </td>
+
+
+  <td id="AU-PA">
+    AU-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリには 4 個以内の主要なアクションと 1 個のオプションのアクション オーバーフローの切り替えがあります（アクション オーバーフローが使用されない場合は主要アクションは 5 個以内）。（<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SA">
+    AU-SA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリには 4 個以内のオプションの 2 次アクションと 1 個のアクション オーバーフローの切り替えがあります。（<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">こちらを参照してください</a>）
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="notifications">
+    通知
+  </td>
+
+  <td id="AU-NA">
+    AU-NA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      アプリは通知を使用して広告を表示しません。
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NT">
+    AU-NT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     アプリはドライバーのニーズに関係した場合のみ通知を表示します。
+   </p>
+   <p>
+    例：<br /> 良い例：新しいメッセージが到着したことをユーザーに通知します。<br /> 悪い例：新しいアルバムのリリースについてユーザーに通知します。
+    </p>
+  </td>
+</tr>
+
+</table>
+
+<!--
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+-->
+
+<div class="headerLine">
+  <h2 id="faq">
+  よくある質問
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>アプリを提出した後で、Android Auto の要件を満たしていない部分がある場合はどのように知ることができますか？</strong>
+</p>
+<p>Auto 向けアプリの開発を計画している場合、すぐにアプリを有効にしてテストを開始することをお勧めします。ただし、この時点では Auto 対応アプリは公開できません。<a href="http://g.co/AndroidAutoDev" class="external-link">Auto Developers Google+ コミュニティ</a>に参加して、Auto 対応アプリをいつ提出できるようになるかについて、最新情報を確認してください。</p>
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>アプリのターゲットは Android Auto だけではありません。このアプリが Auto の要件に適合しない場合でも、新規アプリまたはアップデート版のアプリは電話/タブレット向けに Google Play に表示されますか？</strong>
+</p>
+<p>
+  いいえ。Google が承認プロセスを開始すると、Auto アプリはドライバーの安全に関する審査を受け、アプリが承認されるまで配布できません。これは電話/タブレット向けの APK と同じ APK であるため、これらのデバイスに関する Play ストアのアップデートは Auto 承認プロセスが完了するまで使用できません。
+</p>
+
+<p class="caution">
+  <strong>重要: </strong>この制限のため、Auto サポートのプロトタイプの作成に、実働 APK を使用してはなりません。
+</p> 

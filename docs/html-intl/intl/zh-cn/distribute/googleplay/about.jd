@@ -1,0 +1,367 @@
+page.title=Google Play 蕴藏的机会
+meta.tags="visibility, growth, distributing"
+page.tags="play, apps, distributing, publishing"
+page.metaDescription=每月数十亿下载并且不断增长。让您的应用呈现在所有 Google 用户面前。
+page.image=/distribute/images/about-play.jpg
+
+@jd:body
+
+    <div id="qv-wrapper">           
+  <div id="qv">
+  <h2>关于 Google Play</h2>
+    <ol style="list-style-type:none;">
+      <li><a href="#reach">全球影响力，快速增长</a></li>
+      <li><a href="#ratings-reviews">用户评级和评价</a></li>
+      <li><a href="#category-browsing">类别浏览</a></li>
+      <li><a href="#search">搜索</a></li>
+      <li><a href="#top-charts-and-lists">排行榜和列表</a></li>
+      <li><a href="#featured-staff-picks">精选应用、店员推荐、合集和徽章</a></li>
+      <li><a href="#product-detail-pages">商品详情页</a></li>
+      <li><a href="#related-resources">相关资源</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Google Play 是分发 Android 应用的首要商店。当您在 Google Play 上发布应用时，您的应用将呈现在 Android 庞大的活跃客户面前，这些客户分布在全球 190 多个国家和地区。
+
+
+
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-about-0.jpg" alt="Google Play on an Android Tablet" style="width:480px;position:relative" />
+</div>
+
+<p>
+  Google Play 是 Android 体验的核心部分。新用户通过应用、游戏和其他 Google Play 内容将自己的设备个性化。
+
+  老用户则定期回来查看有什么最新趋势和新应用。下载新应用非常方便快捷&mdash; Google Play 通过网络即时将应用推送到用户的设备上。
+
+
+</p>
+
+<p>
+  Google Play 也是 Web 用户的首选目的地。任何人都可以使用浏览器在网页上浏览 Google Play。
+Android 用户甚至可以购买和安装所需的应用，Google Play 会将应用自动推送到其设备上，无需数据线。
+
+
+</p>
+
+<p>
+  访问 Google Play 网站非常方便，让您通过新的方式从许多来源为您的产品带来流量，例如在线广告、网页搜索和交叉链接。
+
+Google Play 的宗旨是把用户与优秀的应用和游戏连接起来。
+它提供了让您的应用受到关注并在市场上提升吸引力的关键渠道。
+
+</p>
+
+<div class="headerLine">
+  <h2 id="ratings-reviews">
+    用户评级和评价
+  </h2>
+
+
+</div>
+
+<p>
+  潜在用户将评级和评论视为应用质量的关键标准。
+通过给应用评 1 星到 5 星并发表评价，Android 用户可表达他们对已下载的应用的看法。
+
+</p>
+
+<p>
+  <strong>应用的评级是影响其</strong>在 Google Play 列表和搜索结果中的排名的最重要因素之一。
+它也是编辑人员在策划在商店中推广应用和游戏时查看的关键指标之一。
+
+
+</p>
+
+<div class="img" style="padding: 1em auto;width:96%;">
+  <img src="{@docRoot}images/gp-rating-web.png" style="border:1px solid #ddd;">
+</div>
+
+<div class="headerLine">
+  <h2 id="category-browsing">
+    类别浏览
+  </h2>
+
+
+</div>
+
+<p>
+  当您在 Google Play 上发布应用时，选择您希望用户在哪个类别中查找您的应用。
+有 30 多个类别。在每个类别内，应用的排名基于评级、评价、下载量、国家/地区和其他因素的组合。
+
+
+</p>
+
+<div class="headerLine">
+  <h2 id="search">
+    搜索
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 上的“搜索”可让用户快速而准确地找到应用或游戏。搜索使用强大的启发式算法，在用户输入时建议搜索词，并且提供应用的直接链接作为建议。
+
+在结果中，用户会发现最相关、最热门的应用位于顶部。
+
+</p>
+
+<div class="headerLine">
+  <h2 id="top-charts-and-lists">
+    排行榜和列表
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-top.jpg">
+</div>
+
+<p>
+  排行榜让用户直接从应用和游戏的首页上随时了解 Android 用户的热门应用和趋势。
+排行榜随时更新，根据最近的下载活动每天更新数次。
+随着评级和下载活动增加，应用在排行榜中的排名可能上升。
+
+</p>
+
+<p>
+  为使排行榜尽可能与全球各地的用户息息相关，在 Google Play 的最热门国家中，排行榜还针对具体国家列出。
+随着您的应用获得吸引力并积累下载量和评级，它们将登上一个或多个排行榜，并获得更多关注。
+
+
+</p>
+
+<table style="width:50%;">
+  <tr>
+    <td>
+      热门免费
+    </td>
+    <td>
+      免费应用和免费游戏列表
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      热门付费
+    </td>
+    <td>
+      收费应用和收费游戏列表
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      创收最高
+    </td>
+    <td>
+      免费或付费应用的总收入
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      热门免费新应用
+    </td>
+    <td>
+      30 天内发布的应用
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      热门付费新应用
+    </td>
+    <td>
+      30 天内发布的应用
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      上升最快
+    </td>
+    <td>
+      安装量快速增长的新应用
+    </td>
+  </tr>
+</table>
+
+<div class="headerLine">
+  <h2 id="featured-staff-picks">
+    精选应用、店员推荐、合集和徽章
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 编辑团队致力于让最佳的应用获得用户关注，并为整个商店的应用质量设定基调。
+
+  该团队不断审查整个 Google Play 上的应用，不仅发现最知名的应用和游戏，还找出他们希望更多人看到的“浑金璞玉”。
+
+该团队在
+ <em>精选应用</em>、<em>店员推荐</em>和其他合集中推广优秀的应用。
+</p>
+
+<p>
+  您不能提名自己的应用加入精选应用，但该团队随时都在监测 Google Play，从中发现优秀应用。
+如果您开发了用户喜爱并且在 Android 设备上表现很好的应用，编辑团队将会注意到。
+
+</p>
+
+<h3 id="featured-staff-picks2">
+  精选应用和店员推荐
+</h3>
+
+<p>
+  每周 Google Play 编辑人员都会选择一组新的应用，在深受欢迎的<em>精选应用</em>和<em>店员推荐</em>
+合集中加以推广。
+
+</p>
+
+<p>
+  <em>精选应用</em>合集重点介绍 Android 可用的最新、最优秀的应用及游戏名称。
+此列表还包括热门类别中的最佳和最热门的应用，这些应用也收入到精选应用中。
+<em>店员推荐</em>
+收集 Google Play 上最近推荐的所有应用和游戏。为了重视平板电脑用户，有一个专门的<em>店员推荐</em>合集重点介绍了适用于 Android 平板电脑的最佳应用。
+
+
+</p>
+
+<table style="text-align:center;margin:1.5em 0;">
+  <tr>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks1.jpg">
+      <p>
+        精选应用
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks2.jpg">
+      <p>
+        合集
+      </p>
+    </td>
+    <td style="border:none;">
+      <img src="{@docRoot}images/gp-about-picks3.jpg">
+      <p>
+        编辑精选
+      </p>
+    </td>
+  </tr>
+</table>
+
+<h3 id="collections">
+  应用合集
+</h3>
+
+<p>
+  编辑人员不时根据一个主题或季节性活动将一组应用和游戏放在一起。
+用户经常被及时更新的合集吸引，并使用这些列表来选择应用。
+
+</p>
+
+<p>
+  编辑人员选择在合集中推广的应用 &mdash;
+ 在手机和平板电脑上表现 Android 最佳效果的高质量应用。编辑人员还寻找可以为整个合集提供有趣或独特内容的应用。
+
+
+</p>
+
+<h3 id="editors-choice">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/editorschoice_ann.png">编辑精选
+</h3>
+
+<p>
+  <em>编辑精选</em>是一组精心策划的应用，重点介绍 Android 上提供的一些最佳应用。
+编辑在选择这些应用时，重点考虑质量和出色的用户界面、长期受欢迎程度以及对 Android 功能的创新使用。
+
+
+</p>
+
+<p>
+  入选<em>编辑精选</em>的应用还会得到一个徽章，将在 Google Play 上显示应用名称的任何位置显示此徽章。
+
+</p>
+
+<h3 id="top-developer">
+  <img style="margin-right:.25em;margin-bottom:.5em;" src="{@docRoot}images/topdev_ann.png"> 热门开发者
+</h3>
+
+<p>
+  热门开发者是一个徽章，旨在表彰知名的、备受推崇的开发者不遗余力在 Android 上推出优质和创新应用。
+
+  Google Play 编辑人员根据开发者的累计成果不时授予热门开发者徽章。
+
+</p>
+
+<p>
+  热门开发者徽章将显示在 Google Play 上显示开发者名称的任何位置旁边。
+此徽章意味着对开发者开发的全部应用的长期认可。
+它象征着用户对此开发者的产品有着额外的信任和信心。
+
+</p>
+
+<div class="headerLine">
+  <h2 id="product-detail-pages">
+    商品详情页
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-about-listing.jpg">
+</div>
+
+<p>
+  您的应用在 Google Play 上的店面就是<em>商品详情页</em>：一个丰富多彩的页面，让您宣传推广自己的应用、突出其评级和评价，以及显示应用的功能。
+
+
+</p>
+
+<p>
+  您的商品详情是用户查找有关您的应用的所有信息的地方。
+当用户在搜索结果、排行榜、类别列表和合集上看到您的应用时，点击一下就能直接进入您的商品详情。
+
+</p>
+
+<p>
+  使用任何网络浏览器通过 <a href="https://play.google.com/apps/publish/">Google Play 开发者控制台</a>
+来管理您的产品详情页面。登录以上传或更新品牌资料，以您所在市场使用的语言输入产品详情。
+
+</p>
+
+<p>
+  当您发布资料时，Google Play 将添加您的应用的评级、评价、您其他产品的链接等信息。
+它还确保商品详情页在手机、平板电脑和网络浏览器上看上去很不错。
+
+</p>
+
+<p>
+  您可以将 Web 用户从 Google Play 之外直接链接到您的产品详情页面，例如从您的网站、广告活动、测评、社交媒体帖子等地方链接过来。
+
+参考<a href="{@docRoot}distribute/tools/promote/linking.html">链接您的产品</a>以了解操作方法。
+
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+<h2>相关资源</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="4"></div>
+    </div>

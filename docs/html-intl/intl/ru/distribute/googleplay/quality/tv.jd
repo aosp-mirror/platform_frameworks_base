@@ -1,0 +1,509 @@
+page.title=Качество телеприложений
+page.metaDescription=Телевидение – растущий сегмент рынка устройств Android, для которого характерно особое внимание к дизайну и функциональности приложений для максимального удобства работы.
+page.image=/distribute/images/gp-tv-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Критерии качества</h2>
+  <ol>
+    <li><a href="#ux">Дизайн и взаимодействие</a></li>
+    <li><a href="#fn">Функциональность</a></li>
+    <li><a href="#faq">Часто задаваемые вопросы</a></li>
+  </ol>
+
+  <h2>См. также:</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+Основные критерии качества приложений</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+Оптимизация приложений</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="top-right-float" style="padding-right:0;margin-bottom:1em;">
+  <img src="{@docRoot}distribute/images/gp-tv-quality.png" style="width:480px;">
+</div>
+
+<p>
+  Ожидания пользователей, смотрящих обычный телевизор, как правило, значительно отличаются от ожиданий пользователям телефонов или планшетов.
+  При просмотре телевизора зритель обычно находится в 3 метрах от экрана, так что
+ мелкие детали для него малозаметны, а мелкий текст трудноразличим. Поскольку зрители находятся вдали от телевизора, им нужен пульт дистанционного
+ управления для переключения программ, которые нельзя выбрать простым касанием экрана. Эти
+ различия существенно меняют те требования, которые предъявляются к удобству при просмотре телепрограмм.
+</p>
+
+<p>
+  Первым шагом к созданию удобного телезрителям интерфейса будет изучение и
+ соблюдение <a href="{@docRoot}design/tv/index.html">Рекомендаций по разработке приложений для Android TV</a>,
+ в которых представлены инструкции по созданию оптимальных теле-приложений. Также необходимо
+ ознакомиться с учебным материалом <a href="{@docRoot}training/tv/start/index.html">Создание телеприложений</a>, чтобы понять основные
+ требования к разрабатываемым телеприложениям.
+</p>
+
+<p class="caution">
+  <strong>Внимание!</strong> Чтобы обеспечить удобство работы с приложениями для ТВ-устройств, при их разработке
+ необходимо соблюдать определенные требования к эргономике. Только те приложения, которые соответствуют следующим критериям качества, могут быть
+ квалифицированы как приложения для электронной витрины Android TV в Google Play.
+</p>
+
+<p class="note"><strong>Примечание.</strong> Информацию о том, как публиковать телеприложения в Google Play, см. в документе
+ <a href="{@docRoot}distribute/googleplay/tv.html">Распространение приложений в Android TV</a>.</p>
+
+
+
+<div class="headerLine">
+  <h2 id="ux">
+  Визуальный дизайн и взаимодействие с пользователем
+  </h2>
+
+
+</div>
+
+<p>
+  Соблюдение этих критериев означает, что приложение соответствует наиболее важным шаблонам дизайна и взаимодействия,
+ обеспечивая согласованный, интуитивно понятный и удобный телезрителям интерфейс.
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    Тип
+  </th>
+  <th style="width:54px;">
+    Тест
+  </th>
+  <th>
+    Описание
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="4" id="launcher">
+    Значок запуска
+  </td>
+
+  <td id="TV-LM">
+    TV-LM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      После установки приложения, его значок запуска отображается на экране Android TV Launcher.
+      (<a href="{@docRoot}training/tv/start/start.html#tv-activity">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LB">
+    TV-LB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Для приложения в качестве значка запуска на экране Android TV Launcher отображается полноразмерный баннер 320x180 пикселей.
+      (<a href="{@docRoot}design/tv/patterns.html#banner">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-BN">
+    TV-BN
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Баннер запуска приложения содержит его название.
+      (<a href="{@docRoot}design/tv/patterns.html#banner">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LG">
+    TV-LG
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Если приложение – игра, оно отображается в строке "Игры" в Android TV Launcher.<br>
+      (<a href="{@docRoot}training/tv/games/index.html#manifest">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="5" id="layout">
+    Макет
+  </td>
+
+  <td id="TV-LO">
+    TV-LO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Всех интерфейсы приложения поддерживают работу в альбомной ориентации экрана.
+      (<a href="{@docRoot}training/tv/start/layouts.html#structure">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TC">
+    TV-TC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Весь основной текст на экране имеет размер не менее 16 независимых от масштабирования пикселей.
+      (<a href="{@docRoot}design/tv/style.html#typography">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TA">
+    TV-TA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Весь текст на экране имеет размер не менее 12 пикселей (независимых от масштаба).
+      (<a href="{@docRoot}design/tv/style.html#typography">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-OV">
+    TV-OV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Весь текст и функциональные элементы приложения отображаются полностью,
+ без обрезания по краям экрана.
+      (<a href="{@docRoot}training/tv/start/layouts.html#overscan">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-TR">
+    TV-TR
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложение никак не препятствует отображению других приложений. Приложение занимает полностью весь экран и имеет
+ непрозрачный фон.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="navigation">
+    Навигация
+  </td>
+
+  <td id="TV-DP">
+    TV-DP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Управление приложением осуществляется 5-позиционной навигационной клавишей, если
+ только для приложения не требуется джойстик, как это указано в тесте <a href="#TV-GP">TV-GP</a>.
+      (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-DK">
+    TV-DK
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Для управления приложением требуется джойстик, как указано в тесте <a href="#TV-GP">TV-GP</a>, все
+ функции доступны с помощью стандартных клавиш игрового котроллера Android.
+      (<a href="{@docRoot}training/game-controllers/controller-input.html#button">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-DM">
+    TV-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложение не зависит от пульта ДУ и наличия в нем кнопки меню для доступа к
+ элементам управления пользовательского интерфейса.
+      (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Связанные ресурсы</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/tvqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  Функциональность
+  </h2>
+
+
+</div>
+
+<p>
+  Выполнение этих требований обеспечивает правильную конфигурацию приложения
+ и его ожидаемое функциональное поведение.
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    Тип
+  </th>
+  <th style="width:54px;">
+    Тест
+  </th>
+  <th>
+    Описание
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="2" id="manifest">
+   Манифест
+  </td>
+
+  <td id="TV-ML">
+    TV-ML
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      В манифесте приложения для объекта Intent установлен тип {@link android.content.Intent#ACTION_MAIN} с категорией
+ {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER}.
+      (<a href="{@docRoot}training/tv/start/start.html#tv-activity">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+</tr>
+  <td id="TV-MT">
+    TV-MT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      В манифесте приложения аппаратная возможность {@code android.hardware.touchscreen} указана как необязательная.
+      (<a href="{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">См. как
+ это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="game-controllers">
+    Игровые контроллеры
+  </td>
+
+  <td id="TV-GP">
+    TV-GP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Если приложение использует игровой контроллер в качестве основного устройства ввода,
+ это требование должно быть задекларировано в теге манифеста <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>.
+      (<a href="{@docRoot}training/tv/games/index.html#gamepad">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-GC">
+    TV-GC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Если в приложении есть наглядные инструкции по работе с игровыми контроллерами,
+ в них нужно показывать совместимые элементы управления и не должны упоминаться бренды.
+      (<a href="{@docRoot}training/tv/games/index.html#ControllerHelp">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="4" id="advertising">
+    Реклама
+  </td>
+
+  <td id="TV-AP">
+    TV-AP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложение поддерживает работу с рекламой с помощью навигационных клавиш.
+      (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AD">
+    TV-AD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложение позволяет пользователю с помощью навигационной клавиши мгновенно убрать
+ с экрана рекламу, занимающую весь экран, если она не является видеорекламой.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AU">
+    TV-AU
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      В интерактивной рекламе, которая не занимает весь экран и не является видеорекламой,
+ приложение не позволяет открывать веб-страницы по URL-адресам в рекламе.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-AA">
+    TV-AA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      В интерактивной рекламе, которая не занимает весь экран и не является видеорекламой,
+ приложение не позволяет вызывать другое приложение, недоступное для данных устройств.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="1" id="web">
+    Веб-содержимое
+  </td>
+
+  <td id="TV-WB">
+    TV-WB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Приложение использует компоненты {@link android.webkit.WebView} для обработки веб-контента
+ и не пытается запускать приложение веб-браузера.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="3" id="media-playback">
+    Воспроизведение медиаданных
+  </td>
+
+  <td id="TV-NP">
+    TV-NP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Если воспроизведение звука не прекращается после того как пользователь вышел из
+ приложения, должна выводиться карточка <em>Воспроизводится сейчас</em> в строке
+ рекомендаций главного экрана, позволяющая пользователю вернуться в приложение для контроля за воспроизведением.
+      (<a href="{@docRoot}training/tv/playback/now-playing.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-PA">
+    TV-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Если приложение показывает карточку <em>Воспроизводится сейчас</em>, то после ее выбора
+ пользователь попадает на экран, где можно приостановить воспроизведение.
+      (<a href="{@docRoot}training/tv/playback/now-playing.html">См. как это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-PP">
+    TV-PP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Если приложение воспроизводит видео или музыку, происходит переключение режимов
+ паузы и воспроизведения медиаданных при отправке событий нажатия этих клавиш.<br>
+      (<a href="{@docRoot}reference/android/view/KeyEvent.html#KEYCODE_MEDIA_PLAY_PAUSE">См. как
+ это сделать</a>)
+    </p>
+  </td>
+</tr>
+
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Связанные ресурсы</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/tvqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+<div class="headerLine">
+  <h2 id="faq">
+  Часто задаваемые вопросы
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>Как после отправки приложения на проверку узнать, что оно не соответствует всем
+ требованиям ТВ-устройств?</strong>
+</p>
+<p>
+  Если ваше приложение не отвечает требованиям к эргономике, описанным на этой странице,
+ сотрудники Google Play напишут вам по эл. почте на адрес, указанный в основной
+ учетной записи <a href="https://play.google.com/apps/publish/">консоли разработчика Google Play</a>, связанной с этим приложением.
+</p>
+<p class="caution">
+  <strong>Внимание!</strong> Обязательно проверьте, что приложение содержит <a href="{@docRoot}preview/tv/start/index.html#tv-activity">записи в манифесте, требуемые</a>
+ ТВ-устройствами, иначе приложение не будет считаться телевизионным
+ и не будет проверяться на выполнение требований для работы на ТВ-устройствах.
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>Мое приложение предназначено не только для ТВ-устройств. Если мое приложение не соответствует требованиям
+ для ТВ-устройств, возможна ли его публикация в Google Play для телефонов и
+ планшетов?</strong>
+</p>
+<p>
+  Да. Описанные выше требования ограничивают распространение приложений в магазине
+ Google Play только для ТВ-устройств. На распространение приложения на других устройствах, таких как телефоны, планшеты и
+ прочие устройства это никак не влияет.
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>Если мое приложение соответствует требованиям к публикации, когда оно будет
+ доступно в магазине Google Play для ТВ-устройств?</strong>
+</p>
+
+<p>
+  Приложения, соответствующие требованиям к телеприложениям, появятся в магазине
+ Google Play для ТВ-устройств <em>после</em> официального выхода Android 5.0.
+</p>

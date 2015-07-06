@@ -47,8 +47,15 @@
   </li>
 
   <li class="nav-section">
-  <div class="nav-section-header empty"><a href="<?cs var:toroot ?>google/play/filters.html">
-          <span class="en">Filters on Google Play</span></a>
+  <div class="nav-section-header empty"><a href="<?cs var:toroot ?>google/play/filters.html"
+       es-lang="Filtros en Google Play"
+       ja-lang="Google Play 上のフィルタ"
+       ko-lang="Google Play 필터"
+       pt-br-lang="Filtros no Google Play"
+       ru-lang="Фильтры в Google Play"
+       zh-cn-lang="Google Play 上的筛选器"
+       zh-tw-lang="Google Play 上的篩選器">
+          Filters on Google Play</a>
       </div>
   </li>
 

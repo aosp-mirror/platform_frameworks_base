@@ -1,0 +1,488 @@
+
+page.title=Calidad de las aplicaciones para Auto
+page.metaDescription=Las aplicaciones para Auto se integran con los controles de entrada y la pantalla del vehículo, y minimizan la distracción del conductor para crear una excelente experiencia.
+page.image=/distribute/images/gp-auto-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Criterios de calidad</h2>
+  <ol>
+    <li><a href="#core">Calidad de la aplicación principal</a></li>
+    <li><a href="#ux">Diseño visual e interacción</a></li>
+    <li><a href="#fn">Funcionalidad</a></li>
+    <li><a href="#faq">Preguntas frecuentes</a></li>
+  </ol>
+
+  <h2>También deberías leer</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+Calidad de la aplicación principal</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+Optimiza tu aplicación</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Pautas de la Experiencia de usuario de Android Auto
+ para aplicaciones de audio</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">Pautas de la Experiencia de usuario de Android Auto
+ para aplicaciones de mensajería</a></li>
+  </ol>
+</div>
+</div>
+
+
+  <img src="{@docRoot}distribute/images/gp-auto-quality.png" style="width:480px;">
+
+
+<p>Al abordar la compatibilidad de tu aplicación con Android Auto, evita la distracción del conductor por sobre todas las cosas.
+  Las aplicaciones que funcionan con la interfaz de usuario Auto deben minimizar las distracciones a las que está expuesto el conductor;
+ esto se logra mediante la aplicación de las mejores prácticas, como comandos de voz y un diseño visual muy simple.
+</p>
+
+<p>
+  Las mejores experiencias para Auto son predictivas y predecibles.  Las aplicaciones compatibles con Android Auto
+ deben mostrar información oportuna al conductor solo cuando sea relevante, y deben usar
+ patrones simples y predecibles para las tareas comunes.
+</p>
+
+<p class="caution">
+  <strong>Importante:</strong> Los criterios que se indican en esta página corresponden a la interfaz de usuario y al comportamiento
+ de tu aplicación cuando se ejecuta en dispositivos conectados a una pantalla de Android Auto. Las aplicaciones deben cumplir esos
+ criterios para poder calificar como una aplicación Android Auto en Google Play.
+</p>
+
+
+<div class="headerLine">
+  <h2 id="core">
+  Calidad de la aplicación principal
+  </h2>
+
+<p>
+ Además de los criterios específicos para Auto antes mencionados, las aplicaciones para Auto deben cumplir todos los criterios de calidad
+ de la aplicación principal para la plataforma Android, tal como se detalla en los
+ criterios de <a href="{@docRoot}distribute/essentials/quality/core.html">Calidad de la aplicación principal</a>. Prueba
+ tu aplicación en función de esos criterios para asegurarte de que cumple con los estándares de Android para navegación y
+ diseño. Luego prueba tu aplicación nuevamente en función de los criterios específicos para Auto, y recuerda que
+ al ejecutar la aplicación en un dispositivo conectado a Android Auto, esta debe cumplir los requisitos
+ que se indican en esta página.
+
+
+
+<div class="headerLine">
+  <h2 id="ux">
+  Diseño visual e interacción del usuario
+  </h2>
+
+</div>
+
+<p>
+  Estos criterios permiten que te asegures de que tu aplicación cumpla con los patrones clave de diseño e interacción
+ a fin de garantizar una experiencia de usuario uniforme, intuitiva y agradable en Android Auto. Muchos elementos,
+ como cajón de navegación, fondos de tarjetas, fuentes y colores de iconos, son establecidos y proporcionados
+ por el sistema. Tus elementos de diseño propios, específicos para la aplicación, deben cumplir los siguientes criterios.
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    Tipo
+  </th>
+  <th style="width:54px;">
+    Prueba
+  </th>
+  <th>
+    Descripción
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="5" id="safety">
+    Atención del conductor
+  </td>
+
+  <td id="AU-MV">
+    AU-MV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación no se muestra en los elementos animados de la pantalla Auto, como gráficos animados, juegos, video o
+ barras de progreso.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VA">
+    AU-VA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación no muestra ningún tipo de publicidad visual o textual en la pantalla Auto.  Solo se aceptan
+ anuncios publicitarios en audio.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-IM">
+    AU-IM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Los elementos de la aplicación no muestran imágenes en la pantalla Auto. Excepciones: la aplicación puede mostrar
+ una sola imagen fija como
+ contexto del contenido en el fondo de la pantalla de consumo, como la tapa de un álbum, y la aplicación puede
+ mostrar iconos en el cajón de navegación del contenido.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-DS">
+    AU-DS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación no incluye funciones que pueden distraer al conductor.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VI">
+    AU-VI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    La aplicación no presenta ninguna forma de información visual (notificaciones, alertas, video, imágenes,
+ publicidad, etc.) en la pantalla del teléfono mientras se encuentra activa en Android Auto.
+    </p>
+  </td>
+</tr>
+
+
+
+<tr>
+  <td rowspan="3" id="layout">
+    Diseño
+  </td>
+
+  <td id="AU-SC">
+    AU-SC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación no muestra texto con desplazamiento automático.
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td id="AU-FT">
+    AU-FT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación muestra todas las cadenas con las fuentes Roboto predeterminadas en los dos tamaños aprobados.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-ST">
+    AU-ST
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación no muestra una cadena individual que contenga más de 120 caracteres.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="4" id="contrast">
+    Contraste visual
+  </td>
+
+  <td id="AU-DM">
+    AU-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación admite el modo día, que muestra texto y controles oscuros sobre un fondo claro.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NM">
+    AU-NM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación admite el modo noche, que muestra texto y controles claros sobre un fondo oscuro.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-WI">
+    AU-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación ofrece conjuntos de iconos blancos que el sistema colorea para proporcionar
+ compensación de contraste automática.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-OC">
+    AU-OC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación ofrece colores que el sistema puede optimizar para facilitar la lectura en el vehículo.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td rowspan="2" id="interaction">
+    Interacción
+  </td>
+
+  <td id="AU-VC">
+    AU-VC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación debe admitir comandos de voz.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-AB">
+    AU-AB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Los botones específicos de la aplicación responden a las acciones del usuario en no más de dos segundos.
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Recursos relacionados</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  Funcionalidad
+  </h2>
+
+
+</div>
+
+<p>
+  Estos criterios garantizan que tu aplicación esté correctamente configurada y proporcione el comportamiento
+ funcional previsto.
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    Tipo
+  </th>
+  <th style="width:54px;">
+    Prueba
+  </th>
+  <th>
+    Descripción
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="5" id="general">
+   General
+  </td>
+
+  <td id="AU-LT">
+    AU-LT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación se carga en 10 segundos como máximo.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-FP">
+    AU-FP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La funcionalidad Auto de la aplicación funciona según lo previsto o descrito en el directorio de la tienda de la aplicación en la Play Store de Google.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-RL">
+    AU-RL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Cuando se reinicia la aplicación desde la pantalla de inicio, esta restaura su estado al estado anterior
+ con la mayor precisión posible.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SS">
+    AU-SS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Ninguna de las tareas de la aplicación requieren más de seis pasos para completarse.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-GO">
+    AU-GO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Los botones de la aplicación que no funcionen o estén inhabilitados deben visualizarse de color gris.
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="media">
+    Medios
+  </td>
+
+
+  <td id="AU-PA">
+    AU-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación no tiene más de cuatro acciones principales más una alternancia de desbordamiento de acciones optativa (o cinco si
+ no se utiliza el desbordamiento de acciones).
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SA">
+    AU-SA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación no tiene más de cuatro acciones secundarias opcionales más una alternancia de desbordamiento de acciones.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Obtén más información</a>)
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="notifications">
+    Notificaciones
+  </td>
+
+  <td id="AU-NA">
+    AU-NA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      La aplicación no presenta anuncios publicitarios mediante notificaciones.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NT">
+    AU-NT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     La aplicación muestra notificaciones solo cuando es relevante para las necesidades del conductor.
+   </p>
+   <p>
+    Ejemplos:<br />
+    Está bien: Notificar al usuario acerca de un nuevo mensaje que acaba de recibir.<br />
+    Está mal: Notificar al usuario acerca del lanzamiento de un nuevo álbum.
+    </p>
+  </td>
+</tr>
+
+</table>
+
+<!--
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+-->
+
+<div class="headerLine">
+  <h2 id="faq">
+  Preguntas frecuentes
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>Después de enviar mi aplicación, ¿cómo sabré si mi aplicación no cumple todos
+ los requisitos para Android Auto?</strong>
+</p>
+<p>Si estás pensando en desarrollar aplicaciones para Auto, te alentamos a que empieces a habilitar y probar
+ tus aplicaciones ahora mismo. No obstante, en este momento no se pueden publicar aplicaciones compatibles con Auto. Únete a la
+ <a href="http://g.co/AndroidAutoDev" class="external-link">comunidad de
+ desarrolladores de Auto en Google+</a> para acceder a actualizaciones acerca de cuándo podrás enviar
+ tus aplicaciones compatibles con Auto.</p>
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>Mi aplicación abarca más allá de Android Auto. Si mi aplicación no cumple con los
+ requisitos de Auto, ¿aún aparecerá mi aplicación nueva o actualizada en Google Play para teléfonos y
+ tablets?</strong>
+</p>
+<p>
+  No. Cuando Google inicie el proceso de aprobación, tu aplicación para Auto se someterá a una revisión de
+ seguridad del conductor y no estará
+ disponible para distribución hasta que se apruebe. Dado que es el mismo APK que el
+ que utilizas para teléfonos y tablets, tus actualizaciones en la Play Store para esos dispositivos no estará disponible hasta que 
+ finalice el proceso de aprobación para Auto.
+</p>
+
+<p class="caution">
+  <strong>Importante:</strong> Debido a esta restricción, no debes utilizar tu APK
+ de producción en las pruebas de compatibilidad con Auto.
+</p>
+

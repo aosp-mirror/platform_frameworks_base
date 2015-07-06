@@ -1,0 +1,230 @@
+page.title=分发到 Android Auto
+page.image=/design/auto/images/auto-overview.png
+meta.tags="auto", "publish", "quality"
+page.tags="auto", "publish", "googleplay"
+page.metaDescription=将您的应用和内容分发到 Android Auto。
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>参加办法</h2>
+<ol>
+<li><a href="#understand_guidelines">了解准则</a></li>
+<li><a href="#develop_app">开发优秀的汽车应用</a></li>
+<li><a href="#test_app">测试汽车应用的质量</a></li>
+<li><a href="#opt_in">同意条款</a></li>
+<li><a href="#track_review">跟踪审查进度</a></li>
+</ol>
+
+<h2>您还应阅读</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用的质量</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  如果您有一款优秀的应用，Android Auto 和 Google Play 可以帮助您直接推送到用户的汽车上。
+您可以扩展您的新旧汽车应用，然后在 Google Play 上使用熟悉的工具和流程来发布应用。
+
+
+</p>
+
+<p>
+  首先，查看本文档各部分，了解如何通过 Google Play 将您的汽车应用分发给用户。
+一定要阅读
+<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用的质量</a>
+，了解有关您的应用应符合的可用性、质量和安全相关准则的信息。
+当您的应用准备就绪时，您可以在开发者控制台中接受条款，并上传您的 APK 供审查。
+
+</p>
+
+<h2 id="how_to_participate">
+  参加办法
+</h2>
+
+<p>
+  Google Play 让您交付在汽车中使用的应用。您可以使用现有的开发者控制台帐户和当前的分发及定价设置来开发和发布应用。
+参加方法很简单 — 以下几部分概述了整个流程。
+
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-auto-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1.了解准则和要求
+</h3>
+
+<p>
+  为了做好准备，以便在 Android Auto 上成功推出应用，首先要查阅在汽车上提供出色体验的准则。
+请参考 <a href="{@docRoot}design/auto/index.html">Android Auto 设计准则</a>，了解有关扩展汽车应用的建议，以及有关设计和可用性的详情。
+
+</p>
+
+<p>
+  开始设计汽车体验时，务必阅读并理解汽车应用的质量标准。
+仅在汽车上使用的应用才能在 Google Play 上被指定为汽车应用 &mdash; 如果您的应用符合一组基本的质量标准，则可以参加。
+
+参考
+<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用的质量</a>，了解详情。
+
+</p>
+
+<h3 id="develop_app">2.开发优秀的汽车应用</h3>
+
+<p>
+  出色的汽车应用专为汽车而设计，并充分利用 Android Auto 的功能。
+当用户在外出时，应用可提供高质量的体验，例如提供音频内容的播放或访问各种消息。
+
+</p>
+
+<p>
+  在考虑您的汽车应用时，请查看<a href="{@docRoot}training/auto/start/index.html">开发者文档</a>和可用性准则，并且尽可能支持这些准则。
+
+确保设计一种出色的体验，并遵守我们有关防止驾驶员分散注意力的准则。
+
+</p>
+
+<p>
+  您必须使用相同的程序包名称和商品详情，将您的汽车体验作为您针对手机、平板电脑和其他设备的现有应用的一部分来提交。
+
+</p>
+
+<h3 id="test_app">3.测试汽车应用的质量</h3>
+
+<p>
+  您的汽车应用应表现出色，在汽车上看起来很棒，并且提供尽可能最佳的用户体验。
+Google Play 将展示精选的优质汽车应用，以便用户能够在 Google Play 中轻松发现。
+以下说明了您如何加入平台，提交用户喜爱的 Android Auto 应用：
+
+</p>
+
+<ul>
+  <li>符合<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用质量</a>的准则
+
+    <ul>
+      <li>遵循我们的<a href="{@docRoot}training/auto/index.html">
+汽车应用开发</a>最佳做法</li>
+      <li>确保您的应用符合<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用质量</a>的所有标准</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="opt_in">4.同意 Android Auto 条款并发布</h3>
+
+<p>
+  在上传您的 APK 和发布应用供审查之前，开发者帐户所有者必须在开发者控制台的
+<strong>定价和分发</strong>部分同意
+ <a href="https://play.google.com/about/auto/developer-distribution-agreement-addendum.html">Android Auto 条款</a>。
+
+同意这些条款即表示您希望将应用通过 Google Play 提供给 Android Auto 用户，并且您的应用符合<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用质量</a>准则。
+
+
+
+</p>
+
+<p>
+  只有在同意条款之后，才能上传您的汽车应用。下面说明了哪些应用被确定为汽车应用：
+
+</p>
+
+<ul>
+  <li>您的应用必须在清单文件中声明 <code>com.google.android.gms.car.application</code>
+ 元数据条目，说明此应用所使用的汽车功能。有关配置应用与 Android Auto 配合使用的更多信息，请参考
+<a href="{@docRoot}training/auto/start/index.html#auto-metadata">汽车应用入门</a>。
+
+  </li>
+</ul>
+
+<p>
+  当您已创建可供发布的 APK 并且已测试确保它符合所有
+<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用质量</a>准则后，将其上传到开发者控制台。
+在您的商品详情中更新任何额外的汽车功能信息，并按需设置分发选项。
+
+如果不熟悉如何准备在 Google Play 上发布，请参考<a href="{@docRoot}distribute/googleplay/publish/preparing.html">发布操作检查单。</a>
+
+
+</p>
+
+<p>
+  在同意条款并保存更改之后，就可以像平常一样上传和发布您的应用。
+  在将应用提供给 Android Auto 用户之前，Google Play 会提交您的应用并对照<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用质量</a>标准进行审查，然后将结果通知您。
+
+如果应用获得批准，Google Play 便将应用提供给 Android Auto 用户。
+参考下一部分以详细了解如何跟踪应用的审批状态。
+
+</p>
+
+<p>
+  注意，审查结果会影响您的应用在 Google Play 商店中对其他设备的可用性，&mdash;例如，手机和平板电脑上。
+
+  如果您的现有应用包括了对手机/平板电脑组件的更新，则 Android Auto 组件必须通过审查，才能在 Google Play 商店上提供更新后的应用。
+
+
+</p>
+
+<p>
+  以下是您在开发者控制台中同意 Android Auto 条款的步骤：
+</p>
+
+<ol>
+  <li>确保您的应用符合<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用质量</a>的所有标准
+  </li>
+
+  <li>在<strong>所有应用</strong>页面，单击您要发布的应用。
+  </li>
+
+  <li>在<strong>定价和分发</strong>下面，向下滚动找到 <em>Android Auto</em> 和条款的链接。
+
+  </li>
+
+  <li>单击<em>条款</em>链接。
+  </li>
+
+  <li>仔细阅读条款并点击<em>同意</em>。
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-auto-opt-in.png">
+  <p class="caption">
+    <strong>同意汽车应用的条款：</strong>在开发者控制台中同意条款，将您的应用包括在 Android Auto 中。
+
+  </p>
+</div>
+
+<h3 id="track_review">5.跟踪审查进度</h3>
+
+<p>
+  您的应用将接受审查，以确定它是否符合司机分散注意力准则以及上文所述的技术和质量标准。
+此详细审查过程所需的时间可能超过您在提交手机/平板电脑应用时已习惯的时间。
+
+  在应用得到批准之前，应用或应用更新不会发布到 Google Play 商店。
+  在成功通过审查之后，应用将被发布并在 Google Play商店中提供。
+
+</p>
+
+<p>如果应用未被接受，您的<strong>开发者帐户地址将收到电子邮件通知</strong>，概述您需要解决的问题区域。
+当您进行必要的调整后，可以将应用的新版本上传到开发者控制台。
+
+
+</p>
+
+<p>
+  注意：如果提交的应用是现有应用的更新并且更新后的应用不符合审查标准，则更新会被拒绝，但现有应用仍然发布在 Google Play 商店中。
+
+
+</p>
+
+<p>要了解如何评估您的应用，请参阅<a href="{@docRoot}distribute/essentials/quality/auto.html">汽车应用质量</a>文档。 </p>
+
+
+  <h3>相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:autolanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div>
