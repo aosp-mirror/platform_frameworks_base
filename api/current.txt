@@ -2716,7 +2716,8 @@ package android.accounts {
     method public java.lang.String getUserData(android.accounts.Account, java.lang.String);
     method public android.accounts.AccountManagerFuture<java.lang.Boolean> hasFeatures(android.accounts.Account, java.lang.String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler);
     method public void invalidateAuthToken(java.lang.String, java.lang.String);
-    method public static android.content.Intent newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, java.lang.String[], boolean, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle);
+    method public static deprecated android.content.Intent newChooseAccountIntent(android.accounts.Account, java.util.List<android.accounts.Account>, java.lang.String[], boolean, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle);
+    method public static android.content.Intent newChooseAccountIntent(android.accounts.Account, java.util.List<android.accounts.Account>, java.lang.String[], java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle);
     method public boolean notifyAccountAuthenticated(android.accounts.Account);
     method public java.lang.String peekAuthToken(android.accounts.Account, java.lang.String);
     method public deprecated android.accounts.AccountManagerFuture<java.lang.Boolean> removeAccount(android.accounts.Account, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler);
