@@ -28,6 +28,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
@@ -314,7 +315,7 @@ class MountService extends IMountService.Stub
         throw new IllegalArgumentException("No disk found for ID " + id);
     }
 
-    private VolumeInfo findVolumeById(String id) {
+    private VolumeInfo findVolumeByIdOrThrow(String id) {
         synchronized (mLock) {
             final VolumeInfo vol = mVolumes.get(id);
             if (vol != null) {
@@ -324,7 +325,7 @@ class MountService extends IMountService.Stub
         throw new IllegalArgumentException("No volume found for ID " + id);
     }
 
-    private String findVolumeIdForPath(String path) {
+    private String findVolumeIdForPathOrThrow(String path) {
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
@@ -361,10 +362,10 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private VolumeInfo findStorageForUuid(String volumeUuid) {
+    private @Nullable VolumeInfo findStorageForUuid(String volumeUuid) {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
-            return findVolumeById(VolumeInfo.ID_EMULATED_INTERNAL);
+            return storage.findVolumeById(VolumeInfo.ID_EMULATED_INTERNAL);
         } else if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
             return storage.getPrimaryPhysicalVolume();
         } else {
@@ -1537,18 +1538,18 @@ class MountService extends IMountService.Stub
 
     @Override
     public int mountVolume(String path) {
-        mount(findVolumeIdForPath(path));
+        mount(findVolumeIdForPathOrThrow(path));
         return 0;
     }
 
     @Override
     public void unmountVolume(String path, boolean force, boolean removeEncryption) {
-        unmount(findVolumeIdForPath(path));
+        unmount(findVolumeIdForPathOrThrow(path));
     }
 
     @Override
     public int formatVolume(String path) {
-        format(findVolumeIdForPath(path));
+        format(findVolumeIdForPathOrThrow(path));
         return 0;
     }
 
@@ -1557,7 +1558,7 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
-        final VolumeInfo vol = findVolumeById(volId);
+        final VolumeInfo vol = findVolumeByIdOrThrow(volId);
         if (vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_PRIVATE) {
             enforceUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
         }
@@ -1573,7 +1574,7 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
-        final VolumeInfo vol = findVolumeById(volId);
+        final VolumeInfo vol = findVolumeByIdOrThrow(volId);
 
         // TODO: expand PMS to know about multiple volumes
         if (vol.isPrimaryPhysical()) {
@@ -1602,7 +1603,7 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         waitForReady();
 
-        final VolumeInfo vol = findVolumeById(volId);
+        final VolumeInfo vol = findVolumeByIdOrThrow(volId);
         try {
             mConnector.execute("volume", "format", vol.id, "auto");
         } catch (NativeDaemonConnectorException e) {
@@ -1829,10 +1830,18 @@ class MountService extends IMountService.Stub
                 resetIfReadyAndConnectedLocked();
 
             } else {
-                final VolumeInfo from = Preconditions.checkNotNull(
-                        findStorageForUuid(mPrimaryStorageUuid));
-                final VolumeInfo to = Preconditions.checkNotNull(
-                        findStorageForUuid(volumeUuid));
+                final VolumeInfo from = findStorageForUuid(mPrimaryStorageUuid);
+                final VolumeInfo to = findStorageForUuid(volumeUuid);
+
+                if (from == null) {
+                    Slog.w(TAG, "Failing move due to missing from volume " + mPrimaryStorageUuid);
+                    onMoveStatusLocked(PackageManager.MOVE_FAILED_INTERNAL_ERROR);
+                    return;
+                } else if (to == null) {
+                    Slog.w(TAG, "Failing move due to missing to volume " + volumeUuid);
+                    onMoveStatusLocked(PackageManager.MOVE_FAILED_INTERNAL_ERROR);
+                    return;
+                }
 
                 try {
                     mConnector.execute("volume", "move_storage", from.id, to.id);
