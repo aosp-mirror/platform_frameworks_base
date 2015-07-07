@@ -20,6 +20,14 @@ package com.android.systemui.recents;
  * Constants
  */
 public class Constants {
+
+    public static class Metrics {
+        // DO NOT MODIFY THE ORDER OF THESE METRICS
+        public static final int DismissSourceKeyboard = 0;
+        public static final int DismissSourceSwipeGesture = 1;
+        public static final int DismissSourceHeaderButton = 2;
+    }
+
     public static class DebugFlags {
         // Enable this with any other debug flag to see more info
         public static final boolean Verbose = false;
