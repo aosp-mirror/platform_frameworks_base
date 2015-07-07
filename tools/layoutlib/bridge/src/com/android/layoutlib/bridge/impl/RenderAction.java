@@ -27,6 +27,7 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.Density;
 import com.android.resources.ResourceType;
 import com.android.resources.ScreenOrientation;
+import com.android.resources.ScreenRound;
 import com.android.resources.ScreenSize;
 
 import android.content.res.Configuration;
@@ -376,6 +377,25 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             }
         } else {
             config.orientation = Configuration.ORIENTATION_UNDEFINED;
+        }
+
+        try {
+            ScreenRound roundness = hardwareConfig.getScreenRoundness();
+            if (roundness != null) {
+                switch (roundness) {
+                    case ROUND:
+                        config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
+                        break;
+                    case NOTROUND:
+                        config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_NO;
+                }
+            } else {
+                config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_UNDEFINED;
+            }
+        } catch (NoSuchMethodError ignored) {
+            // getScreenRoundness was added in later stages of API 15. So, it's not present on some
+            // preview releases of API 15.
+            // TODO: Remove the try catch around Oct 2015.
         }
 
         // TODO: fill in more config info.
