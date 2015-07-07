@@ -178,6 +178,17 @@ public abstract class ViewStructure {
     public abstract void setTextStyle(float size, int fgColor, int bgColor, int style);
 
     /**
+     * Set line information for test that was previously supplied through
+     * {@link #setText(CharSequence)}.  This provides the line breaking of the text as it
+     * is shown on screen.  This function takes ownership of the provided arrays; you should
+     * not make further modification to them.
+     *
+     * @param charOffsets The offset in to {@link #setText} where a line starts.
+     * @param baselines The baseline where the line is drawn on screen.
+     */
+    public abstract void setTextLines(int[] charOffsets, int[] baselines);
+
+    /**
      * Set optional hint text associated with this view; this is for example the text that is
      * shown by an EditText when it is empty to indicate to the user the kind of text to input.
      */
