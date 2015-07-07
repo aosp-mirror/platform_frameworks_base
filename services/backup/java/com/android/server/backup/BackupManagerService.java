@@ -7514,7 +7514,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // of it is process-local and therefore synchronous.  That means that the
                 // next-state message (RUNNING_QUEUE) is already enqueued.  Only if we're
                 // unable to proceed with running the queue do we remove that pending
-                // message and jump straight to the FINAL state.
+                // message and jump straight to the FINAL state.  Because this was
+                // synchronous we also know that we should cancel the pending timeout
+                // message.
+                mBackupHandler.removeMessages(MSG_TIMEOUT);
 
                 // Verify that the backup set includes metadata.  If not, we can't do
                 // signature/version verification etc, so we simply do not proceed with
