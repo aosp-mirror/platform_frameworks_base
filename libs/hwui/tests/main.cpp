@@ -111,8 +111,6 @@ public:
         for (int i = 0; i < animation.getFrameCount(); i++) {
             testContext.waitForVsync();
 
-            // workaround b/20853441
-            proxy->fence();
             ATRACE_NAME("UI-Draw Frame");
             nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
             UiFrameInfoBuilder(proxy->frameInfo())
