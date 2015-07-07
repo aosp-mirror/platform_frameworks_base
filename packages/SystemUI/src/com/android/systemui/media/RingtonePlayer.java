@@ -92,7 +92,8 @@ public class RingtonePlayer extends SystemUI {
 
     private IRingtonePlayer mCallback = new IRingtonePlayer.Stub() {
         @Override
-        public void play(IBinder token, Uri uri, AudioAttributes aa) throws RemoteException {
+        public void play(IBinder token, Uri uri, AudioAttributes aa, float volume, boolean looping)
+                throws RemoteException {
             if (LOGD) {
                 Log.d(TAG, "play(token=" + token + ", uri=" + uri + ", uid="
                         + Binder.getCallingUid() + ")");
@@ -107,6 +108,8 @@ public class RingtonePlayer extends SystemUI {
                     mClients.put(token, client);
                 }
             }
+            client.mRingtone.setLooping(looping);
+            client.mRingtone.setVolume(volume);
             client.mRingtone.play();
         }
 
@@ -135,6 +138,19 @@ public class RingtonePlayer extends SystemUI {
             } else {
                 return false;
             }
+        }
+
+        @Override
+        public void setPlaybackProperties(IBinder token, float volume, boolean looping) {
+            Client client;
+            synchronized (mClients) {
+                client = mClients.get(token);
+            }
+            if (client != null) {
+                client.mRingtone.setVolume(volume);
+                client.mRingtone.setLooping(looping);
+            }
+            // else no client for token when setting playback properties but will be set at play()
         }
 
         @Override
