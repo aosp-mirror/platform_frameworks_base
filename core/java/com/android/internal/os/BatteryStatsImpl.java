@@ -183,6 +183,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public interface ExternalStatsSync {
         void scheduleSync(String reason);
         void scheduleWifiSync(String reason);
+        void scheduleCpuSyncDueToRemovedUid(int uid);
     }
 
     public final MyHandler mHandler;
@@ -2522,11 +2523,26 @@ public final class BatteryStatsImpl extends BatteryStats {
         mIsolatedUids.put(isolatedUid, appUid);
     }
 
-    public void removeIsolatedUidLocked(int isolatedUid, int appUid) {
+    /**
+     * Schedules a read of the latest cpu times before removing the isolated UID.
+     * @see #removeIsolatedUidLocked(int)
+     */
+    public void scheduleRemoveIsolatedUidLocked(int isolatedUid, int appUid) {
         int curUid = mIsolatedUids.get(isolatedUid, -1);
         if (curUid == appUid) {
-            mIsolatedUids.delete(isolatedUid);
+            if (mExternalSync != null) {
+                mExternalSync.scheduleCpuSyncDueToRemovedUid(isolatedUid);
+            }
         }
+    }
+
+    /**
+     * This should only be called after the cpu times have been read.
+     * @see #scheduleRemoveIsolatedUidLocked(int, int)
+     */
+    public void removeIsolatedUidLocked(int isolatedUid) {
+        mIsolatedUids.delete(isolatedUid);
+        mKernelUidCpuTimeReader.removeUid(isolatedUid);
     }
 
     public int mapUid(int uid) {
