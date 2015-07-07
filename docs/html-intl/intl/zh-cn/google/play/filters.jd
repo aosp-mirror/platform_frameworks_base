@@ -1,0 +1,439 @@
+page.title=Google Play 上的筛选器
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>内容快览</h2>
+<ul>
+<li>Google Play 使用筛选器来控制哪些 Android 设备可以从商店中下载您的应用。
+</li>
+<li>筛选可确保您的应用仅供其设备符合应用兼容性要求的用户使用。
+<li>筛选是由您在应用清单文件中声明的配置要求以及其他因素决定的。
+</li>
+</ul>
+
+<h2>本文内容</h2>
+
+<ol>
+  <li><a href="#how-filters-work">Google Play 上的筛选器工作方式</a></li>
+  <li><a href="#manifest-filters">根据清单文件的元素进行筛选</a>
+  </li>
+  <li><a href="#other-filters">其他筛选器</a></li>
+  <li><a href="#MultiApks">发布多个采用不同筛选器的 APK</a></li>
+</ol>
+
+<h2>另请参阅</h2>
+ <ol>
+<li><a href="{@docRoot}guide/practices/compatibility.html">Android 兼容性</a></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</code></a></li>
+</ol>
+
+</div>
+</div>
+
+<p>当用户在 Google Play 上搜索或浏览应用以下载时，会根据哪些应用与其设备兼容来筛选搜索结果。
+
+例如，如果应用需要摄像头，Google Play 不会在没有摄像头的设备上显示该应用。
+这种<em>筛选</em>帮助开发者管理其应用的分发，并且有助于确保为用户提供最佳的体验。
+
+</p>
+
+<p>Google Play 中的筛选基于多种类型的应用元数据和配置设置，包括清单文件声明、所需的库、架构依赖关系以及 Google
+Play 开发者控制台中设置的分发控制，例如地理区域定向、定价等。
+
+</p>
+
+<p>Google Play 筛选在某种程度上基于清单文件声明和
+ Android 框架的其他方面，但实际筛选行为与该框架不同，并且不限于特定的 API 级别。
+本文说明了 Google Play 目前使用的筛选规则。
+</p>
+
+
+<h2 id="how-filters-work">Google Play 上的筛选器工作方式</h2>
+
+<p>Google Play 使用下述筛选限制来确定是否将您的应用显示给正在 Google Play 应用中浏览和搜索应用的用户。
+
+</p>
+
+<p>在确定是否显示您的应用时，Google Play 检查设备的硬件和软件要求，以及其运营商、地点和其他特性。
+
+然后将这些条件与应用的清单文件和发布详情中说明的限制和依赖条件比较。
+
+ </p>
+
+<p>如果根据筛选规则该应用与设备兼容，则 Google Play 向用户显示该应用。
+否则，Google Play从搜索结果和类别浏览中隐藏您的应用，即使用户在 Google Play 内点击直接指向该应用 ID 的深层链接，明确请求该应用，该应用也不会显示。
+
+
+</p>
+
+<p>可以为您的应用使用各种可用筛选器的任意组合。例如，您可以在应用中设置<code>"4"</code>的
+<code>minSdkVersion</code>要求，并设置<code>smallScreens="false"</code>，然后在将应用上传到 Google Play 时，您可以只针对欧洲国家（运营商）。
+
+因此。Google Play 的筛选器能够防止不符合所有这三项要求的任何设备使用该应用。
+ </p>
+
+<p>所有筛选限制均与一个应用的版本关联，并且可在各版本之间更改。
+例如，如果用户已安装您的应用，而您发布了使应用对该用户不可见的更新，则用户不会看到有更新可用。
+
+</p>
+
+<h4>Google Play 网站上的筛选</h4>
+
+<p>当用户浏览 <a href="http://play.google.com/apps">Google Play 网站
+</a>时，他们可以看到所有已发布的应用。Google Play 网站将各项应用要求与用户的每个注册设备相比较以了解兼容性，并且只有在应用与用户的设备兼容时，才允许用户安装该应用。
+
+
+</p>
+
+<h2 id="manifest-filters">根据应用清单文件进行筛选</h2>
+
+<p>大多数筛选器由应用清单文件 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>
+内的元素触发（尽管并非清单文件中的所有元素均可以触发筛选）。
+
+表 1 列出了您应用于触发筛选的清单文件元素，并解释了每个元素的筛选工作方式。
+</p>
+
+<p id="table1" class="table-caption"><strong>表 1.</strong>在 Google Play 上触发筛选的清单文件元素。
+</p>
+<table>
+  <tr>
+    <th>清单文件元素</th>
+    <th>筛选器名称</th>
+    <th>工作方式</th>
+  </tr>
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">屏幕尺寸</td>
+    <td valign="top">
+
+<p>应用通过设置 <code>&lt;supports-screens&gt;</code> 元素的属性来指明它能够支持的屏幕尺寸。
+当应用发布时，Google Play 使用这些属性，根据用户设备的屏幕尺寸来确定是否向用户显示该应用。
+
+
+ </p>
+
+<p>作为一般规则，Google Play 假定设备上的平台可以让较小的布局适应较大的屏幕，但不能让较大布局适应较小的屏幕。
+
+因此，如果应用只声明支持“正常”屏幕尺寸，Google Play 则使该应用可用于正常屏幕和大屏幕设备，但将对该应用进行筛选，使其不可用于小屏幕设备。
+
+
+</p>
+
+<p>如果应用未声明
+<code>&lt;supports-screens&gt;</code>属性，则 Google Play 使用这些属性的默认值，默认值因 API 级别而异。
+具体而言： </p>
+
+<ul>
+<li><p>对于 <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:
+minSdkVersion</a></code> 或 <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:
+targetSdkVersion</a></code> 设置为 3 或更小的应用，<code>&lt;supports-screens&gt;</code> 元素本身未定义，并且无属性可用。
+在这种情况下，Google Play 假定应用是为正常尺寸屏幕设计的，并且向正常或更大屏幕的设备显示该应用。
+
+ </p>
+
+<li>当 <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:
+minSdkVersion</a></code> 或 <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:
+targetSdkVersion</a></code> 设置为 4 或更大时，所有属性的默认值均为
+<code>"true"</code>。这样，应用被视为默认支持所有屏幕尺寸。
+</li>
+</ul>
+
+    <p><strong>示例 1</strong><br />
+    清单文件声明 <code>&lt;uses-sdk android:minSdkVersion="3"&gt;</code>
+并且不包括 <code>&lt;supports-screens&gt;</code> 元素。
+    <strong>结果</strong>：Google Play 不会向小屏幕设备的用户显示该应用，但会向正常屏幕和大屏幕设备的用户显示，除非还有其他筛选器。
+
+ </p>
+    <p><strong>示例 2<br />
+    </strong>清单文件声明 <code>&lt;uses-sdk android:minSdkVersion="3"
+    android:targetSdkVersion="4"&gt;</code> 并且不包括 
+<code>&lt;supports-screens&gt;</code> 元素。
+    <strong>结果</strong>：Google Play 将向所有设备的用户显示该应用，除非还有其他筛选器。
+ </p>
+    <p><strong>示例 3<br />
+    </strong>清单文件声明 <code>&lt;uses-sdk android:minSdkVersion="4"&gt;</code>
+并且不包括 <code>&lt;supports-screens&gt;</code> 元素。
+    <strong>结果</strong>：Google Play 将向所有用户显示该应用，除非还有其他筛选器。
+ </p>
+    <p>有关如何在应用中声明屏幕尺寸支持参数的更多信息，请参考<code><a
+    href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
+和<a href="{@docRoot}guide/practices/screens_support.html">支持多种屏幕</a>。
+
+</p>
+</td>
+  </tr>
+
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>
+      <!-- ##api level 3## --></td>
+    <td valign="top">设备配置：
+ <br />
+    键盘、导航、触摸屏</td>
+    <td valign="top"><p>应用可以请求某些硬件功能，Google Play 将只在具备所需硬件的设备上显示该应用。
+</p>
+      <p><strong>示例 1<br />
+      </strong>清单文件包括 <code>&lt;uses-configuration android:reqFiveWayNav=&quot;true&quot; /&gt;</code>，而用户在没有五向导航控制键的设备上搜索应用。<strong>结果</strong>：Google Play 不会向用户显示该应用。 </p>
+      <p><strong>示例 2<br />
+      </strong>清单文件不包括 <code>&lt;uses-configuration&gt;</code> 元素。<strong>结果</strong>：Google Play 将向所有用户显示该应用，除非还有其他筛选器。</p>
+<p>有关更多详情，请参阅<a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a>。</p></td>
+  </tr>
+
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">设备功能<br />
+      (<code>name</code>)</td>
+    <td valign="top"><p>应用可以要求设备具有某些功能。
+Android 2.0（API 级别 5）中引入了此功能。
+</p>
+      <p><strong>示例 1<br />
+      </strong>清单文件包括 <code>&lt;uses-feature
+android:name=&quot;android.hardware.sensor.light&quot; /&gt;</code>，而用户在没有光线传感器的设备上搜索应用。
+
+<strong>结果</strong>：Google Play 不会向用户显示该应用。 </p>
+      <p><strong>示例 2<br />
+      </strong>清单文件不包括 <code>&lt;uses-feature&gt;</code>
+ 元素。<strong>结果</strong>：Google Play 将向所有用户显示该应用，除非还有其他筛选器。
+</p>
+      <p>有关完整信息，请参阅<code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>。</p>
+      <p><em>根据隐含功能进行筛选：</em>在某些情况下，Google
+Play 将通过
+<code>&lt;uses-permission&gt;</code>元素请求的权限解释为与 <code>&lt;uses-feature&gt;</code> 元素所声明要求等效的功能要求。
+请参阅下面的<a href="#uses-permission-filtering"><code>&lt;uses-permission&gt;</code></a>
+。</p>
+</td>
+  </tr>
+
+  <tr>
+    <td valign="top">OpenGL-ES
+版本<br />
+(<code>openGlEsVersion</code>)</td>
+    <td valign="top"><p>应用可以使用<code>&lt;uses-feature
+        android:openGlEsVersion=&quot;int&quot;&gt;</code>属性，以要求设备支持特定的 OpenGL-ES 版本。
+</p>
+      <p><strong>示例 1<br />
+      </strong>应用通过在清单文件中多次指定<code>openGlEsVersion</code>，以要求多个 OpenGL-ES 版本。
+
+<strong>结果</strong>：Google Play 假定该应用需要所指明的最高版本。</p>
+<p><strong>示例 2<br />
+</strong>应用请求 OpenGL-ES 版本 1.1，而用户在支持 OpenGL-ES 版本 2.0 的设备上搜索应用。
+<strong>结果</strong>：Google Play 将向用户显示该应用，除非还有其他筛选器。如果设备报告它支持 OpenGL-ES 版本 <em>X</em>，Google Play 假定它也支持比 <em>X</em> 更早的任何版本。
+
+
+</p>
+<p><strong>示例 3<br />
+</strong>用户在没有报告 OpenGL-ES 版本的设备（例如，运行 Android 1.5 或更早版本的设备）上搜索应用。
+<strong>结果</strong>：Google Play 假定该设备仅支持 OpenGL-ES 1.0。
+Google Play 将只向该用户显示没有指定 <code>openGlEsVersion</code> 的应用，或者没有指定 OpenGL-ES 1.0 以上版本的应用。 </p>
+      <p><strong>示例 4<br />
+      </strong>清单文件没有指定 <code>openGlEsVersion</code>。<strong>结果</strong>：Google Play 将向所有用户显示该应用，除非还有其他筛选器。 </p>
+<p>有关更多详情，请参阅<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>。</p></td>
+  </tr>
+
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></td>
+    <td valign="top">软件库</td>
+    <td valign="top"><p>应用可以要求设备上具有特定的共享库。
+ </p>
+      <p><strong>示例 1<br />
+      </strong>应用需要 <code>com.google.android.maps</code> 库，而用户在没有 <code>com.google.android.maps</code> 库的设备上搜索应用。<strong>结果</strong>：Google Play 不会向用户显示该应用。 </p>
+      <p><strong>示例 2</strong><br />
+        清单文件不包括 <code>&lt;uses-library&gt;</code> 元素。<strong>结果</strong>：Google Play 将向所有用户显示该应用，除非还有其他筛选器。</p>
+<p>有关更多详情，请参阅<a href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>&lt;uses-library&gt;</code></a>。</p></td>
+  </tr>
+  <tr id="uses-permission-filtering">
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></td>
+    <td valign="top">&nbsp;</td>
+    <td valign="top">严格地说，Google Play 不根据
+<code>&lt;uses-permission&gt;</code>元素来进行筛选。但是，它会读取这些元素来确定应用是否具有
+<code>&lt;uses-feature&gt;</code>
+元素中可能没有正确声明的硬件功能要求。
+例如，如果应用请求<code>CAMERA</code>
+权限，但没有针对<code>android.hardware.camera</code>声明<code>&lt;uses-feature&gt;</code>元素，
+Google Play 认为该应用需要摄像头，并且不应向没有摄像头的设备用户显示。
+
+</p>
+    <p>通常，如果应用请求硬件相关权限，Google Play 假定该应用需要基础的硬件功能，即使可能没有对应
+<code>&lt;uses-feature&gt;</code> 声明。
+
+Google Play 然后根据
+ <code>&lt;uses-feature&gt;</code>
+声明暗示的功能来设置筛选。</p>
+    <p>有关暗示硬件功能的权限列表，请参见
+ <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features"><code>&lt;uses-feature&gt;</code></a>
+元素的文档。</p>
+</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code></td>
+    <td valign="top">最低框架版本 (<code>minSdkVersion</code>)</td>
+    <td valign="top"><p>应用可以要求最低 API 级别。  </p>
+      <p><strong>示例 1</strong><br />
+        清单文件包括 <code>&lt;uses-sdk
+      android:minSdkVersion=&quot;3&quot;&gt;</code>，而应用使用 API 级别 3 中引入的 API。用户在采用 API 级别 2 的设备上搜索应用。<strong>结果</strong>：Google Play 不会向用户显示该应用。 </p>
+      <p><strong>示例 2</strong><br />
+      清单文件不包括 <code>minSdkVersion</code>，而应用使用 API 级别 3 中引入的 API。用户在采用 API 级别 2 的设备上搜索应用。<strong>结果</strong>：Google Play 假定 <code>minSdkVersion</code> 为“1”并假定该应用与所有 Android 版本兼容。Google Play 向用户显示该应用并允许用户下载该应用。应用在运行时崩溃。 </p>
+    <p>由于您希望避免第二种情况，我们建议您始终声明 <code>minSdkVersion</code>。有关详情，请参阅 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min"><code>android:minSdkVersion</code></a>。</p></td>
+  </tr>
+  <tr>
+    <td valign="top">最高框架版本 (<code>maxSdkVersion</code>)</td>
+    <td valign="top"><p><em>已弃用。</em>Android
+ 2.1 和更新版本不检查、不执行 <code>maxSdkVersion</code> 属性，并且如果应用的清单文件中设置了 <code>maxSdkVersion</code>，SDK 将不会编译。
+对于已通过
+ <code>maxSdkVersion</code> 编译的设备，Google Play 将予以考虑并使用它
+来进行筛选。</p>
+<p> <em>不</em>建议声明<code>maxSdkVersion</code>。有关详情，请参阅 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#max"><code>android:maxSdkVersion</code></a>。</p></td>
+  </tr>
+</table>
+
+
+
+<h3 id="advanced-filters">高级清单文件筛选器</h3>
+
+<p>除了<a href="#table1">表 1</a> 中的清单文件元素之外，Google Play 还可以根据表 2 中的高级清单文件元素来筛选应用。
+</p>
+
+<p>这些清单文件元素及其触发的筛选仅针对例外的用例。
+这些元素针对某些类型的高性能游戏，以及需要严格控制应用分发的类似应用。
+<strong>大多数应用永远都不会使用这些筛选器</strong>。
+</p>
+
+<p id="table2" class="table-caption"><strong>表 2.</strong>用于 Google Play 筛选的高级清单文件元素。
+</p>
+<table>
+  <tr><th>清单文件元素</th><th>摘要</th></tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens&gt;}</a></nobr></td>
+    <td>
+      <p>如果设备屏幕尺寸和密度不符合
+ {@code
+&lt;compatible-screens&gt;} 元素中的任何屏幕配置（由{@code &lt;screen&gt;} 元素声明），则 Google Play 会将该应用筛选掉。</p>
+      <p class="caution"><strong>注意：</strong>正常情况下，<strong>不能使用此清单文件元素</strong>。
+使用此元素可能会显著减少应用的潜在用户群，因为排除了您未列出的所有屏幕尺寸和密度组合。
+
+应当改用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> 清单文件元素（上面<a href="#table1">表
+1</a> 所述），通过替代资源为您没有考虑的屏幕配置启用屏幕兼容模式。
+</p>
+    </td>
+  </tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a></nobr></td>
+    <td>
+      <p>除非应用所支持的一种或多种 GL 纹理压缩格式也受到设备支持，否则 Google Play 将应用筛选掉。
+ </p>
+    </td>
+  </tr>
+</table>
+
+
+
+<h2 id="other-filters">其他筛选器</h2>
+
+<p>Google Play 使用其他应用特性来决定向指定设备上的特定用户显示应用还是隐藏应用，如下表所述。 </p>
+
+<p id="table3" class="table-caption"><strong>表 3.</strong>影响 Google Play 筛选结果的应用和发布特性。
+</p>
+<table> <tr>
+    <th>筛选器名称</th> <th>工作方式</th> </tr>
+
+  <tr>
+    <td valign="top">发布状态</td> <td valign="top"><p>Google Play 内的搜索和浏览操作将只出现已发布的应用。
+</p> <p>即使应用被取消发布，如果用户在其下载区域的已购买、已安装或最近卸载应用中看到此应用，也可安装。
+
+</p> <p>如果应用被暂停，即使应用在用户的“下载”中出现，用户也不能重新安装或更新此应用。
+</p> </td></tr>
+  <tr>
+  <td valign="top">定价状态
+</td> <td valign="top"><p>并非所有用户均可看到付费应用。要显示付费应用，设备必须有 SIM 卡并运行 Android 1.1 或更新版本，并且必须处于可使用付费应用的国家（由 SIM 运营商决定）。
+
+</p></td>
+</tr> <tr>
+  <td valign="top">确定目标国家</td> <td valign="top"> <p>当您将应用上传到 Google Play 时，可以在<strong>定价和分发</strong>下面选择在哪些国家分发应用。
+
+然后该应用将只对您所选国家的用户可用。
+</p>
+</td> </tr> <tr>
+  <td valign="top" style="white-space:nowrap;">CPU 架构 (ABI)</td>
+  <td valign="top"><p>如果应用包括针对特定 CPU 架构（例如 ARM EABI v7 或 x86）的原生库，则它只在支持该架构的设备上可见。
+
+有关 NDK 和使用原生库的详情，请参考<a href="{@docRoot}tools/sdk/ndk/index.html#overview">什么是
+ Android NDK？</a>
+</p> </tr> <tr>
+  <td valign="top">有复制保护的应用</td> <td valign="top"><p class="caution">Google
+  Play 在开发者控制台中不再支持复制保护功能，并且不再根据此条件来筛选应用。
+要保护您的应用，请改用<a href="{@docRoot}google/play/licensing/index.html">
+应用程序许可</a>。参考<a href="{@docRoot}google/play/licensing/overview.html#CopyProtection">
+复制保护的替代方法</a>了解详情。</p></td> </tr> </table>
+
+<h2 id="MultiApks">发布多个采用不同筛选器的 APK</h2>
+
+<p>Google Play 某些特定筛选器允许您为同一应用发布多个 APK，以便向不同的设备配置提供不同 APK。
+例如，如果您在创建一款使用高清图形资源的视频游戏，您可能想创建两个 APK，每个 APK 支持不同的纹理压缩格式。
+
+这样，您可以只包括每种设备配置所需的纹理，从而减小
+APK 文件的大小。
+根据每个设备是否支持您的纹理压缩格式，Google Play 
+将向其提供您已声明支持该设备的 APK。</p>
+
+<p>目前，只有在每个 APK 根据以下配置提供不同筛选时，Google Play 
+才允许您为同一应用发布多个 APK：</p>
+<ul>
+  <li>OpenGL 纹理压缩格式
+    <p>使用 <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a> 元素。</p>
+  </li>
+  <li>屏幕尺寸（以及可选的屏幕密度）
+    <p>使用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> 或 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens&gt;}</a> 元素。</p>
+  </li>
+  <li>API 级别
+    <p>使用 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
+&lt;uses-sdk&gt;}</a> 元素。</p>
+  </li>
+  <li>CPU 架构 (ABI)
+    <p>包括针对特定 CPU 架构（例如 ARM EABI v7 或 x86）的、通过 <a href="{@docRoot}tools/sdk/ndk/index.html">Android
+ NDK</a> 构建的原生库。</p>
+  </li>
+</ul>
+
+<p>所有其他筛选器仍像平常一样工作，但只有这四个筛选器能够在
+ Google Play 的同一应用详情内使一个 APK 与另一个区分。例如，如果 APK 仅在设备是否有摄像头这一条件上不同，则<em>无法</em>为同一应用发布多个 APK。
+
+</p>
+
+<p class="caution"><strong>注意：</strong>为同一应用发布多个 APK 被视为高级功能，<strong>大多数应用只应发布一个支持各种设备配置的
+APK</strong>。
+发布多个 APK要求您遵循筛选器内的具体规则，并且要特别注意每个 APK 的版本代码，以确保每个配置有正确的更新路径。
+
+</p>
+
+<p>如果需要有关如何在 Google Play 上发布多个 APK 的更多信息，请阅读<a href="{@docRoot}google/play/publishing/multiple-apks.html">多 APK 支持</a>。</p>

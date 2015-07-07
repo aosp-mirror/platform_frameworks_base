@@ -1,0 +1,262 @@
+page.title=Distribución para Android Wear
+page.image=/design/media/wear/ContextualExample.008_2x.png
+meta.tags="wear", "publish", "quality"
+page.tags="wear", "publish", "googleplay"
+page.metaDescription=Distribuye tus aplicaciones, juegos y contenido para Android Wear.
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Cómo participar</h2>
+<ol>
+<li><a href="#understand_guidelines">Comprende las pautas</a></li>
+<li><a href="#develop_app">Desarrolla una aplicación excelente para Wear</a></li>
+<li><a href="#test_app">Prueba la calidad de la aplicación para Wear</a></li>
+<li><a href="#opt_in">Incluye la aplicación</a></li>
+<li><a href="#track_review">Realiza un seguimiento de tu revisión</a></li>
+</ol>
+
+<h2>También deberías leer</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">Calidad de la aplicación principal</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  Si desarrollaste una aplicación excelente, Android Wear y Google Play pueden ayudarte a acercarla a los usuarios. Si bien todas las
+ aplicaciones pueden enviar notificaciones básicas para dispositivos Android Wear, puedes ir mucho más allá.
+  Extiende tus aplicaciones para que admitan interacciones personalizadas con Wear y ofrezcan una experiencia de usuario refinada e
+ interactiva en todos los dispositivos Wear. Si tu aplicación cumple las pautas de calidad de la aplicación principal en dispositivos portátiles y
+ proporciona una experiencia de alta calidad para los dispositivos Android Wear, Google Play exhibirá tus aplicaciones
+ y facilitará su descubrimiento.
+</p>
+
+<p>
+  Para comenzar, repasa las secciones de este documento para aprender a distribuir a los usuarios tus aplicaciones
+ para Wear a través de Google Play. Asegúrate de leer <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a> para obtener información sobre
+ las pautas de utilidad y calidad que tus aplicaciones deben cumplir. Cuando tu aplicación esté lista, puedes
+ incluirla para su designación como aplicación de Android Wear en la Consola para desarrolladores.
+</p>
+
+<h2 id="how_to_participate">
+  Cómo participar
+</h2>
+
+<p>
+  Google Play permite que tus aplicaciones para Wear sean más fáciles de descubrir para los usuarios de Wear. Puedes desarrollar y
+ publicar mediante el uso de tu cuenta existente de la Consola para desarrolladores y tu configuración actual para distribución y fijación de
+ precios. Participar es fácil; las siguientes secciones describen el proceso.
+</p>
+
+<h3 id="understand_guidelines">
+  1. Comprende las pautas y los requisitos
+</h3>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-wear-process.png">
+</div>
+
+<p>
+  Si quieres prepararte para un lanzamiento exitoso en Android Wear, comienza por revisar las pautas para
+ crear experiencias excelentes en Wear. Consulta las <a href="{@docRoot}design/wear/index.html">Pautas
+ de diseño para Android Wear</a> para obtener ideas acerca de cómo ampliar tu aplicación para que sea compatible con Wear y detalles sobre diseño y
+ utilidad.
+</p>
+
+<p>
+  Cuando comiences a diseñar tu experiencia para Wear, asegúrate de leer y comprender los criterios
+ de calidad de las aplicaciones para Wear. Únicamente las aplicaciones compatibles con Wear se designarán aplicaciones Wear en
+ Google Play; tus aplicaciones pueden participar si cumplen con un conjunto de criterios de calidad básicos. Consulta <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a> para obtener información detallada.
+</p>
+
+<h3 id="develop_app">2. Desarrolla una aplicación excelente para Wear</h3>
+
+<p>
+Una vez que hayas leído las pautas, el paso siguientes es desarrollar tu aplicación. Las siguientes secciones
+ describen cómo comenzar a crear una aplicación para Wear que proporcione una excelente experiencia.
+</p>
+
+<h4>Primero el diseño</h4>
+
+<p>
+  Android Wear tiene como objetivo proporcionar a los usuarios la información correcta en el momento adecuado. Las increíbles
+ experiencias de Android Wear se inician automáticamente, permiten captar de información de un solo vistazo y
+ prácticamente no requieren la interacción del usuario. Si bien todas las aplicaciones pueden enviar notificaciones básicas a dispositivos Wear
+ sin la necesidad de realizar modificaciones, las aplicaciones excelentes creadas para Wear se refinan para ofrecer una experiencia pulida y
+ de alta calidad, admitir diferentes diseños de pantalla y proporcionar a los usuarios un conjunto de aplicaciones
+ atractivas.
+</p>
+
+<p>
+  Mientras consideras la posibilidad de desarrollar una aplicación para Wear, lee la <a href="{@docRoot}training/building-wearables.html">documentación para desarrolladores</a> y las<a href="{@docRoot}design/wear/index.html"> pautas de utilidad</a>, y considera aplicarlas en la
+ mayor medida posible. Puedes diseñar una magnífica experiencia de notificación para los usuarios con las API
+ que se proporcionan en el SDK y la biblioteca de soporte. También puedes optar por crear una aplicación que
+ pueda ejecutarse directamente en el wearable.
+</p>
+
+<h4>Integra tu aplicación</h4>
+
+<p>
+  Te recomendamos que ofrezcas tu experiencia para Wear como parte de tu aplicación actual para teléfonos,
+ tablets y otros dispositivos con el mismo nombre de paquete y el mismo directorio de la tienda. Este enfoque
+ permite a los usuarios cambiar a tu experiencia de Wear sin inconvenientes, y también te permite aprovechar las reseñas y
+ calificaciones que obtuviste en tu aplicación para teléfonos y tablets. Las aplicaciones para wearables que dependen de una
+ aplicación para adquirir su plena funcionalidad deben estar integradas a esa aplicación. Para aprender a hacerlo, lee <a href="{@docRoot}training/wearables/apps/packaging.html">Integración de aplicaciones para wearables</a>.
+</p>
+
+<h4>Realiza pruebas en diferentes dispositivos</h4>
+
+<p>
+  Durante la fase de diseño y desarrollo, es importante que cuentes con dispositivos adecuados en los que puedas
+ experimentar y probar tu experiencia de usuario. Te recomendamos enfáticamente que adquieras uno o más dispositivos Android Wear
+ o desarrolles con diferentes configuraciones de simulación y configures tu entorno de prueba
+ lo antes posible. Es importante que optimices tu diseño para formatos cuadrados y circulares.
+</p>
+
+<h3 id="test_app">3. Prueba la calidad de la aplicación para Wear</h3>
+
+<p>
+  Tus aplicaciones para Wear deben estar diseñadas para que funcionen bien y se vean increíbles en Android Wear
+, y deben ofrecer la mejor experiencia de usuario posible. Google Play exhibirá aplicaciones para Wear
+ seleccionadas de alta calidad a fin de que los usuarios puedan encontrarlas fácilmente. Aquí te mostramos cómo puedes participar y ofrecer una aplicación para Android Wear que
+ los usuarios disfrutarán:
+</p>
+
+<ul>
+  <li>Cumple las pautas de Calidad de la aplicación principal.
+    <ul>
+      <li>Sigue las <a href="{@docRoot}design/index.html">pautas de 
+Diseño Android</a>. Presta especial atención al uso de <a href="http://www.google.com/design/spec/material-design/introduction.html">Material
+ Design</a> en tu aplicación.
+      </li>
+
+      <li>Prueba tus aplicaciones conforme a las <a href="{@docRoot}distribute/essentials/quality/core.html">pautas de calidad de la aplicación
+ principal</a>.
+      </li>
+    </ul>
+  </li>
+  <li>Cumple los criterios de <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las
+ aplicaciones para Wear</a>.
+    <ul>
+      <li>Sigue nuestras mejores prácticas para el <a href="{@docRoot}training/building-wearables.html">
+desarrollo de aplicaciones para Wear</a>.</li>
+      <li>Asegúrate de que tu aplicación cumpla todos los criterios de <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a>.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="opt_in">4. Incluye tu aplicación en Android Wear y publícala</h3>
+
+<p>
+  Una vez que hayas creado tu APK listo para el lanzamiento y lo hayas probado para asegurarte de que cumple todos los criterios de <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a>, cárgalo
+ a la Consola para desarrolladores. Actualiza el directorio de tu tienda con capturas de pantalla de tu aplicación para Wear y configura opciones
+ de distribución, según sea necesario. Si no sabes cómo prepararte para el lanzamiento en Google Play, consulta la 
+<a href="{@docRoot}distribute/googleplay/publish/preparing.html">Lista de comprobación para el lanzamiento.</a>
+</p>
+
+<p>
+  Antes de que puedas publicar para los usuarios, debes incluir la aplicación para Android Wear desde la sección <strong>Fijación de precios
+ y distribución</strong> de la Consola para desarrolladores. Inclusión significa que quieres que tu aplicación sea
+ más fácil de encontrar para los usuarios de Android Wear a través de Google Play, y que tu aplicación cumple los criterios de <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a>.
+</p>
+
+<p>
+  Después de realizar la inclusión y guardar los cambios, puedes publicar tu aplicación como lo haces habitualmente. Además, Google
+ Play envía tu aplicación para revisión conforme a los criterios de <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a> y
+ te notifica el resultado. Consulta la siguiente sección para obtener información detallada sobre cómo realizar un seguimiento del estado de aprobación
+ de tu aplicación.
+</p>
+
+<p>
+  Si tu aplicación cumple todos los criterios de <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las
+ aplicaciones para Wear</a>, Google Play permite que sea más fácil de descubrir para los usuarios de Android Wear. Tu aplicación también
+ es elegible para acceder a una mayor visibilidad si se exhibe en colecciones de aplicaciones y promociones.
+</p>
+
+<p>
+  Ten en cuenta que la inclusión y la revisión no afectan la disponibilidad de tu aplicación en la Play Store de Google;
+ es decir, tu aplicación estará disponible ni bien la publiques.
+</p>
+
+<p>
+  Aquí te mostramos los pasos que debes seguir en la Consola para desarrolladores para incluir tu aplicación en Android Wear:
+</p>
+
+<ol>
+  <li>Asegúrate de que tu aplicación cumpla todos los criterios de <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a>.
+  </li>
+
+  <li>Agrega capturas de pantalla de tu aplicación para Wear al directorio de tienda de la aplicación
+  </li>
+
+  <li>En la página <strong>Todas las aplicaciones</strong>, haz clic en la aplicación que quieres incluir.
+  </li>
+
+  <li>En <strong>Fijación de precios y distribución</strong>, desplázate hacia abajo hasta encontrar <em>Android Wear</em>
+ y la casilla de verificación para la inclusión.
+  </li>
+
+  <li>Haz clic en la casilla de verificación junto a <em>Distribuye tu aplicación para Android Wear</em>.
+  </li>
+
+  <li>Haz clic en <strong>Guardar</strong> para guardar los cambios que realizaste en Fijación de precios y distribución.
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-wear-opt-in.png">
+  <p class="caption">
+    <strong>Incluye la aplicación para Wear:</strong> Incluye tu aplicación en Android Wear desde la
+ Consola para desarrolladores.
+  </p>
+</div>
+
+<h3 id="track_review">5. Realiza un seguimiento de tu revisión y aprobación</h3>
+
+<p>
+  Si tu aplicación cumple los requisitos técnicos y de calidad para Android Wear, como se describe más arriba,
+ será más fácil de descubrir para los usuarios en Android Wear. Si la aplicación no cumple los
+ criterios, recibirás una <strong>notificación por correo electrónico enviada a tu cuenta
+ de desarrollador</strong> con un resumen de las áreas que debes abordar. Una vez que realices
+ los ajustes necesarios, puedes cargar una nueva versión de tu aplicación a la Consola para desarrolladores.
+</p>
+
+<p>
+  En cualquier momento, puedes comprobar el estado de revisión y aprobación de tu aplicación en la Consola para desarrolladores,
+ bajo <em>Android Wear</em> en la página <strong>Fijación de precios y distribución</strong>
+ de la aplicación.
+</p>
+
+<p>
+  Existen tres estados de aprobación:
+</p>
+
+<ul>
+  <li>
+    <em>Pendiente</em>: tu aplicación se envió a revisión pero la revisión aún no ha finalizado.
+  </li>
+
+  <li>
+    <em>Aprobada</em>: se revisó tu aplicación y se aprobó. La aplicación será más fácil de descubrir
+ para los usuarios de Android Wear.
+  </li>
+
+  <li>
+    <em>No aprobada</em>: se revisó tu aplicación y no se aprobó. Lee el correo electrónico de notificación
+ para obtener información acerca de los motivos por los que no se aprobó la aplicación. Puedes solucionar los problemas e incluirla y
+ publicarla nuevamente para iniciar otra revisión.
+  </li>
+</ul>
+
+<p>Para comprender cómo se evalúan tus aplicaciones, consulta el documento <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a>. </p>
+
+
+  <h3>Recursos relacionados</h3>
+
+  <div class="resource-widget resource-flow-layout col-13"
+    data-query="collection:wearlanding"
+    data-cardSizes="6x2"
+    data-maxResults="3">
+  </div>

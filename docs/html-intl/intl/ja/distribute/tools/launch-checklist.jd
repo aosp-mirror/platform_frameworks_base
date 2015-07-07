@@ -1,0 +1,792 @@
+page.title=ローンチ チェックリスト
+page.metaDescription=アプリをユーザーに配布する全プロセスの重要な概要。このチェックリストを開発の初期に確認し、Google Play でのローンチを成功させる計画を立てる際に役立ててください。
+meta.tags="localizing, publishing, disttools"
+page.tags="launch, publishing, Google Play"
+page.image=distribute/images/launch-checklist.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>チェックリスト</h2>
+    <ol>
+      <li><a href="#understand-publishing">1.公開プロセスを理解する</a></li>
+      <li><a href="#understand-policies">2.Google Play ポリシーを理解する</a></li>
+      <li><a href="#test-quality">3.アプリの中核品質をテストする</a></li>
+      <li><a href="#determine-rating">4.コンテンツ レーティングを決定する</a></li>
+      <li><a href="#determine-country">5.配布する国を決定する</a></li>
+      <li><a href="#confirm-size">6.全体のサイズを確認する</a></li>
+      <li><a href="#confirm-platform">7.プラットフォームと画面範囲を確認する</a></li>
+      <li><a href="#decide-price">8.無料にするか有料にするか判断する</a></li>
+      <li><a href="#consider-billing">9.アプリ内課金を使用する</a></li>
+      <li><a href="#set-prices">10.商品の価格を設定する</a></li>
+      <li><a href="#start-localization">11.ローカライズを開始する</a></li>
+      <li><a href="#prepare-graphics">12.宣伝用画像、スクリーンショット、動画を準備する</a></li>
+      <li><a href="#build-upload">13.リリース対応 APK をビルドする</a></li>
+      <li><a href="#plan-beta">14.ベータ版リリースを計画する</a></li>
+      <li><a href="#complete-details">15.ストア掲載情報を完成させる</a></li>
+      <li><a href="#use-badges">16.Google Play のバッジとリンクを使用する</a></li>
+      <li><a href="#final-checks">17.最終チェックと行い公開する</a></li>
+      <li><a href="#support-users">18.ローンチ後にユーザーをサポートする</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px"><img src="{@docRoot}distribute/images/launch-checklist.jpg"></div>
+
+<p>
+  Google Play にアプリを公開してユーザーに配布する前に、アプリを動作可能状態にしてテストし、宣伝素材を準備する必要があります。
+</p>
+
+<p>
+  このページを利用して、Google Play でのアプリの公開プロセスを理解し、製品のローンチを成功させる準備を整えることができます。署名済みのリリース対応アプリケーション パッケージ（APK）の作成、アプリの要件の把握、各アプリの製品ページとグラフィック アセットの作成などの、Google Play でアプリを公開する前に完了しておく必要のあるいくつかの作業についてまとめています。
+</p>
+
+<p>
+  準備作業と公開作業に番号を振り、作業の流れを大まかに把握できるようにしています。都合が良い順序で作業を進めても構いません。また、適宜手順をスキップしても構いません。
+</p>
+
+<p>
+  公開に向けての手順では、さまざまなサポート リソースがご利用になれます。関連リンクは手順ごとに提供されます。
+</p>
+
+<div class="headerLine">
+  <h2 id="understand-publishing">
+    1.公開プロセスを理解する
+  </h2>
+
+
+</div>
+
+<p>
+  このチェックリストの各手順を開始する前に、公開までのワークフロー全体を読んで把握し、プロセスの仕組みを理解してください。特に、開発チームはすべての Android アプリに共通するプロセスを使用して、アプリのリリース準備を整える必要があります。<a href="{@docRoot}tools/publishing/publishing_overview.html">公開までのワークフローのドキュメント</a>に、公開の仕組みと APK のリリース準備を整える方法が詳しく記載されています。
+</p>
+
+<p>
+  公開プロセスの概要を理解したら、さらに読み進めて Google Play にアプリを公開する際に考慮すべき問題を把握してください。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/understanding"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="understand-policies">
+    2.Google Play ポリシーと合意事項を理解する
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 登録時に了承したプログラム ポリシーを理解し、これに従う必要があります。Google Play はポリシーを適用し、ポリシー違反があった場合はアプリを保留にしたり、違反を繰り返した場合はデベロッパー アカウントを停止したりすることがあります。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/policies" data-sortorder=
+"-timestamp" data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test-quality">
+    3.品質をテストする
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play にアプリを公開する前に、そのアプリが、ターゲットとしているすべてのデバイスですべての Android アプリの基本的な品質基準を満たしているか確認することが重要です。テスト環境を設定し、一連の簡潔な<strong>すべてのアプリに適用される品質基準</strong>に対してアプリをテストすることで、アプリの品質を確認できます。詳細については、<a href="{@docRoot}distribute/essentials/quality/core.html">アプリの中核品質</a>ガイドラインを参照してください。
+</p>
+
+<p>
+  アプリがタブレット デバイスをターゲットとしている場合、タブレットの利用者に豊富で魅力的なエクスペリエンスを提供する必要があります。<a href="{@docRoot}distribute/essentials/quality/tablets.html">タブレット アプリの品質</a>ガイドラインを参照してください。タブレット用にアプリを最適化する際の推奨事項が記載されています。
+</p>
+
+<p>
+  アプリを Google Play for Education で利用できるようにする予定の場合、幼稚園から高校に至る授業に適したものであり、卓越した教育的価値を提供する必要があります。教育アプリが示すべき特徴については、<a href="{@docRoot}distribute/essentials/gpfe-guidelines.html">教育ガイドライン</a>を参照してください。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/quality" data-sortorder=
+"-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="determine-rating">
+    4.アプリのコンテンツ レーティングを決定する
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play では、アプリ向けにコンテンツ レーティングを設定する必要があります。これは、Google Play ユーザーにユーザー成熟度を通知するものです。アプリを公開する前に、使用するレーティング レベルを確定する必要があります。次のコンテンツ レーティング レベルが使用できます。
+</p>
+
+<ul>
+  <li>
+    <p>
+      全ユーザー対象
+    </p>
+  </li>
+
+  <li>
+    <p>
+      ユーザー成熟度 - 低
+    </p>
+  </li>
+
+  <li>
+    <p>
+      ユーザー成熟度 - 中
+    </p>
+  </li>
+
+  <li>
+    <p>
+      ユーザー成熟度 - 高
+    </p>
+  </li>
+</ul>
+
+<p>
+  Android ユーザーは、Android デバイス上でブラウジングに必要なユーザー成熟度を設定できます。Google Play はその設定に基づきアプリをフィルタリングするため、選択したコンテンツ レーティングがユーザーへのアプリの配布に影響することがあります。デベロッパー コンソールでアプリのコンテンツ レーティングを割り当てる（または変更する）ことができます。アプリのライブラリでは変更は不要です。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/rating" data-sortorder=
+"-timestamp" data-cardsizes="9x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="determine-country">
+    5.配布する国を決定する
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play では、アプリの配布先の国と地域を管理できます。幅広い地域でアクセスされ、最大級の潜在的利用者ベースを得るために、通常は配布が可能なすべての国と地域にアプリを配布できます。ただし、ビジネス ニーズ、アプリの要件、ローンチに関する依存関係により、配布先から 1 つ以上の国を除外する必要がある場合があります。
+</p>
+
+<p>
+  次の項目に影響するため、早期にアプリの配布先の国を正確に指定することが重要です。
+</p>
+
+<ul>
+  <li>
+    <p>
+      アプリのローカライズ リソースの必要性
+    </p>
+  </li>
+
+  <li>
+    <p>
+      デベロッパー コンソールでのアプリの説明のローカライズの必要性
+    </p>
+  </li>
+
+  <li>
+    <p>
+      特定の国で固有である可能性があるアプリの法的要件
+    </p>
+  </li>
+
+  <li>
+    <p>
+      タイム ゾーン サポート、現地価格設定など
+    </p>
+  </li>
+</ul>
+
+<p>
+  ターゲットに予定している国について、アプリと Google Play の掲載情報の詳細の両方でローカライズの必要性を判断し、ローンチ予定日までの十分な余裕を持ってローカライズ作業を開始します。
+</p>
+
+<p>
+  ローカライズ プロセスの主要な手順と考慮事項については<a href="{@docRoot}distribute/tools/localization-checklist.html">ローカライズのチェックリスト</a>を参照してください。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/country" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="confirm-size">
+    6.アプリ全体のサイズを確認する
+  </h2>
+
+
+</div>
+
+<p>
+  アプリ全体のサイズは、そのデザインと Google Play での公開方法に影響する場合があります。現時点では、Google Play に公開される APK の最大サイズは<strong> 50 MB </strong>です。アプリがこのサイズよりも大きい場合や、2 次ダウンロードを提供したい場合、<a href="{@docRoot}google/play/expansion-files.html">APK 拡張ファイル</a>を使用できます。これは、Google Play がサーバー インフラストラクチャに無料でホスティングし、デバイスへのダウンロードを自動で処理するものです。
+</p>
+
+<ul>
+  <li>
+    <p>
+      Google Play に公開される APK の最大サイズは 50 MB です。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      最大 2 個の APK 拡張ファイルを使用できます。各 APK に対する各拡張ファイルの最大サイズは 2GB です。
+    </p>
+  </li>
+</ul>
+
+<p>
+  APK 拡張ファイルの使用は、サイズの大きいアプリを配信する便利でコスト効率の高い方法です。ただし、APK 拡張ファイルを使用するには、アプリのバイナリに変更を加える必要があるため、この変更を行ってからリリース対応 APK を作成する必要があります。
+</p>
+
+<p>
+  アプリのバイナリのサイズを最小化するには、リリース対応 APK を作成するときに、コード上で <a href="{@docRoot}tools/help/proguard.html">Proguard</a> ツールまたは同等の難読化ツールを実行する必要があります。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/size" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="confirm-platform">
+    7.アプリのプラットフォームと画面互換性範囲を確認する
+  </h2>
+
+
+</div>
+
+<p>
+  アプリを公開する前に、アプリがターゲットとしている Android プラットフォームの各バージョンとデバイスの画面サイズで正しく実行できるように設計されているか確認することが重要です。
+</p>
+
+<p>
+  Android プラットフォームのバージョンは、アプリの互換性の観点から<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels"> API レベル</a>で定義されます。<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;minSdkVersion&gt;</a> を使用して、アプリと互換性のある最低限のバージョンを確定する必要があります。これは、アプリが公開される際の Android デバイスへのアプリの配布に影響します。
+</p>
+
+<p>
+  画面サイズについては、サポート対象の画面サイズ幅とピクセル密度の範囲で、アプリが正しく動作し、表示も問題ないことを確認する必要があります。複数の画面サイズに対応するスケーラブルなサポートを提供するため、<a href="{@docRoot}guide/practices/screens_support.html">複数画面のサポート</a>に記載されているアドバイスに従う必要があります。スケーラブルなサポートを提供できない場合、<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a> を使用してアプリがサポートする最小画面サイズを宣言してください。これに応じて Google Play はアプリの利用可能性を限定し、宣言された画面サイズ以上のデバイスでアプリが利用できるようにします。
+</p>
+
+<p>
+  すべての Android デバイスにわたる Android プラットフォームのバージョンと画面サイズに関する最新のデバイス普及率をさらに理解するには、<a href="{@docRoot}about/dashboards/index.html">デバイス ダッシュボード</a>のグラフを参照してください。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/platform" data-sortorder=
+"-timestamp" data-cardsizes="6x3,6x3,6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="decide-price">
+    8.アプリを無料にするか有料にするか判断する
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-launch-checklist-1.png">
+</div>
+
+<p>
+  Google Play では、アプリを無料ダウンロードまたは有料ダウンロードとして公開できます。無料アプリは Google Play のすべての Android ユーザーがダウンロードできます。有料アプリをダウンロードできるのは、有料ダウンロードをサポートする国のユーザーで、クレジット カードやキャリア直接課金などの Google Play での支払い方法を登録しているユーザーだけです。
+</p>
+
+<p>
+  アプリの無料/有料を決定することは重要です。Goolgle Play では<strong>無料アプリは永続的に無料にする必要がある</strong>ためです。
+</p>
+
+<ul>
+  <li>
+    <p>
+      無料アプリとしてアプリを公開すると、これを有料アプリに変更することはできません。ただし、Google Play の<a href="{@docRoot}google/play/billing/index.html">アプリ内課金</a>サービスを使用して、<a href="{@docRoot}google/play/billing/billing_overview.html#products">アプリ内製品</a>と<a href="{@docRoot}google/play/billing/billing_subscriptions.html">サブスクリプション</a>の販売は引き続き可能です。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      有料アプリとしてアプリを公開すると、いつでも無料アプリに変えることが<em>できます</em>（<strong>ただし無料から有料に戻すことはできません</strong>）。アプリ内製品とサブスクリプションの販売は引き続き可能です。
+    </p>
+  </li>
+</ul>
+
+<p>
+  アプリが有料の場合、またはアプリ内製品を販売する場合、公開前に <a href="https://developers.google.com/wallet/digital/training/getting-started/merchant-setup">Google ウォレット Merchant アカウントを設定する</a>必要があります。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/price" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="consider-billing">
+    9.アプリ内課金の使用を検討する
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play の<a href="{@docRoot}google/play/billing/index.html">アプリ内課金</a>により、アプリ内でデジタル コンテンツを販売できます。このサービスを使用すると、メディア ファイルや写真といったダウンロード可能なコンテンツや、ゲームのレベルやポーションのような仮想コンテンツなどの幅広いコンテンツを販売できます。アプリ内課金サービスを利用して、アプリ内から 1 回限りの購入とサブスクリプションを販売できます。これはアプリがインストールされている間のアプリの収益化に役立ちます。
+</p>
+
+<p>
+  アプリを収益化し、エンゲージメントを構築する方法をいくつか探している場合は、アプリ内課金や Instant Buy を検討してください。これらのサービスはユーザーとデベロッパーのどちらでも非常に一般的になっています。アプリ内課金や Instant Buyを使用する場合は、アプリのバイナリに変更を加える必要があるため、実装を完了してテストしてからリリース対応 APK を作成する必要があります。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/purchasemethod"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="set-prices">
+    10.商品の価格を設定する
+  </h2>
+
+
+</div>
+
+<p>
+  アプリが有料の場合、またはアプリ内製品や物理的商品を販売する場合、Google Play では世界中のマーケットのユーザー向けにさまざまな通貨で製品の価格を設定できます。価格は個別に別々の通貨で設定できるため、マーケットの状況や為替レートに応じて価格を柔軟に設定できます。
+</p>
+
+<p>
+  公開の前に、商品の価格を設定する方法とさまざまな通貨での価格を検討してください。追って、デベロッパー コンソールを使用して利用可能なすべての通貨で価格を設定できます。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/setprice" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,9x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="start-localization">
+    11.ローカライズを開始する
+  </h2>
+
+
+</div>
+
+<p>
+  ターゲットに予定している国について、ローカライズの必要性を調査し、アプリが国際化対応であることを確認し、ローンチ予定日までの十分な余裕を持ってローカライズ作業を開始することをお勧めします。
+</p>
+
+<p>
+  アプリの設計の他に、ローカライズに関して次の 3 点を考慮してください。
+</p>
+
+<ul>
+  <li>
+    <p>
+      アプリのストリング、画像、その他のリソースのローカライズ。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Google Play に掲載する、アプリのストア掲載情報の詳細のローカライズ。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      ストア掲載情報に添付するアプリの画像アセット、スクリーンショット、動画のローカライズ。
+    </p>
+  </li>
+</ul>
+
+<p>
+  ローカライズ プロセスの主要な手順と考慮事項については<a href="{@docRoot}distribute/tools/localization-checklist.html">ローカライズのチェックリスト</a>を参照してください。
+</p>
+
+<p>
+  ストア掲載情報をローカライズするには、アプリのタイトル、説明、宣伝用テキストを新規に作成して最終版を決定します。これらすべてを収集してローカライズ作業に回します。アプリにアップデートがあった場合の「最新の変更」テキストも翻訳できます（任意）。追って、ローカライズした掲載情報の詳細をデベロッパー コンソールに追加するか、掲載情報の詳細をサポート対象言語へ自動翻訳する Google Play の機能を使うこともできます。
+</p>
+
+<p>
+  グローバルな顧客基盤に対してアプリの掲載情報を魅力的なものにするには、宣伝用画像、スクリーンショット、動画のローカライズ版を作成することが重要です。たとえば、アプリのメイン ビジュアルには、最大限の宣伝効果を得るために翻訳が必要なテキストが含まれていることがあります。言語ごとに異なるバージョンの宣伝用画像を作成し、これをデベロッパー コンソールにアップロードできます。宣伝用の動画を提供する場合、そのローカライズ版を作成し、サポートする言語ごとに適切なローカライズ動画へのリンクを追加できます。
+</p>
+
+<p>
+  翻訳が完了したら、それを必要に応じてアプリ リソースに移動し、正しく読み込まれるかどうかテストします。アプリの掲載情報詳細の翻訳版を保存し、追ってアセットをアップロードしてストア掲載情報を設定する際に使用します。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/localization"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="prepare-graphics">
+    12.宣伝用画像、スクリーンショット、動画を準備する
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 上に公開する際に、アプリやブランドを紹介するさまざまな高品質の画像アセットを提供できます。公開後、これらの画像はストアの情報掲載ページ、検索結果などあらゆる場所に表示されます。これらの画像アセットは、ユーザーを引き付ける優れたストアの情報掲載ページの重要な部分となるため、このアセットの制作をプロに依頼することの検討をお勧めします。スクリーンショットと動画も、アプリの外観や使用方法、遊び方やアプリの特長を示すものであるため、非常に重要です。
+</p>
+
+<p>
+  すべての画像アセットは、見やすく、カラフルで関心を引く方法でアプリやブランドを強調するように設計してください。アセットは、ユーザーがダウンロードしたら [すべてのアプリ] ランチャーで見つけるものと同じロゴとアイコンを示す必要があります。また、画像アセットは、自分のストア情報掲載ページに表示される公開しているすべてのアプリの画像アセットと調和している必要があります。
+</p>
+
+<p>
+  全世界のユーザーにより効果的にアプリを売り込めるようにするため、Google Play では宣伝用画像、スクリーンショット、動画のローカライズ版の作成が可能であり、これらをデベロッパー コンソールにアップロードできます。ユーザーがアプリのストア掲載情報にアクセスすると、Google Play には、ユーザーの言語向けに提供した宣伝用画像、スクリーンショット、動画が表示されます。
+</p>
+
+<p>
+  宣伝用画像をローカライズするには、任意の組み込みテキストを翻訳したり、別の画像やプレゼンテーションを使用したりできます。また、特定の言語のユーザーのニーズに最適に対応するようにマーケティングのアプローチを変更できます。たとえば、メイン ビジュアルまたは宣伝用画像に商品名またはスローガンが含まれている場合、そのテキストを翻訳し、これを宣伝用画像のローカライズ版に追加できます。
+</p>
+
+<p>
+  ローカライズされた画像アセットと動画は非常に重要であるため、公開予定日までの十分な余裕を持って作成とローカライズに着手することをお勧めします。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/graphics" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="build-upload">
+    13.リリース対応 APK をビルドしてアップロードする
+  </h2>
+
+
+</div>
+
+<p>
+  アプリが UI、互換性、品質の各要件に適合していると判断したら、アプリのリリース対応バージョンを作成できます。リリース対応 APK をデベロッパー コンソールにアップロードし、ユーザーに配布します。
+</p>
+
+<p>
+  リリース対応 APK の準備プロセスは、配布方法に関係なく、すべてのアプリで同じです。一般的に、このプロセスは、基本的なコードのクリーンアップと最適化、リリース キーによるビルドと署名、最終テストで構成されます。
+</p>
+
+<p>
+  アプリのリリース対応バージョンをビルドする方法について詳しくは、<a href="{@docRoot}tools/publishing/preparing.html">リリースの準備（Preparing for Release）</a>を参照してください。
+</p>
+
+<p>
+  リリース対応 APK が用意できたら、これらをデベロッパー コンソールにアップロードできます。公開前に、必要に応じて APK をより新しいバージョンに置き換えることができます。
+</p>
+<!--<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/launchchecklist/build"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>-->
+
+<div class="headerLine">
+  <h2 id="plan-beta">
+    14.ベータ版リリースを計画する
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right;">
+  <div class="sidebox">
+    <h2>
+      簡単なベータ版テスト
+    </h2>
+
+    <p>
+      Google Play では、アルファ テスターとベータ テスターのグループを世界規模で設定できます。次回デベロッパー コンソールにサインインするときに、この強力な機能を確認してください。
+    </p>
+  </div>
+</div>
+
+<p>
+  アプリをローンチする前は、必ずユーザーから実際のフィードバックを入手することが重要です。新しいアプリをローンチする際には特に重要です。アプリのリリース前バージョンを複数の主要なマーケットにわたってユーザーに配布し、ユーザーがフィードバックを提供してバグを報告するための簡単な手段を用意することを強くお勧めします。
+</p>
+
+<p>
+  Google Play では、アプリのベータ プログラムの設定が可能です。デベロッパー コンソールにサインインして APK をアップロードした後に、アルファ版とベータ版のアプリをテストするためのユーザー グループを設定できます。アルファ テスターの小さなグループから始めて、ベータ テスターの大きなグループに移行できます。追加されたユーザーは、アプリのストア掲載情報にアクセスしてアプリをインストールします。<strong>アルファ バージョンまたはベータ バージョンのユーザーはレビューまたは評価を残すことができないため、</strong>Google Play 上の<strong>評価に対するリスクはありません</strong>。Google フォーラムや Google+ など、テストのフィードバックが提供されるためのメカニズムを準備する必要があります。
+</p>
+
+<p>
+  受け取ったフィードバックは、優れたエクスペリエンスをユーザーに保証するための UI、翻訳、ストア掲載情報の調整に役立てられます。
+</p>
+<!-- Related resources
+
+<table>
+  <tr>
+    <td>Beta-testing and Staged Rollouts
+See how you can facilitate testing with Google Play.</td>
+  </tr>
+</table> -->
+
+<div class="headerLine">
+  <h2 id="complete-details">
+    15.アプリのストア掲載情報を完成させる
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play では、アプリの製品情報はアプリのストア情報掲載ページでユーザーに表示されます。このページは、Android デバイスまたは Web で、ユーザーがアプリについてさらによく理解するためにアクセスしたり、アプリを購入またはダウンロードすることを決定したりするページです。
+</p>
+
+<p>
+  Google Play は、カラフルな画像、スクリーンショット、動画から、ローカライズされた説明、リリースの詳細、他のアプリへのリンクまで、ストア情報掲載ページでアプリを宣伝したり、ユーザーと関わったりするためのさまざまな方法を提供します。アプリの公開を準備する際には、商品の詳細ページから提供される要素を最大限に活用し、アプリをユーザーにできる限り魅力的にする必要があります。
+</p>
+
+<p>
+  商品ページの計画はアプリのローンチ予定日までの余裕を持って着手し、ローカライズされた説明、高品質な画像アセット、スクリーンショット、動画などの調整を進めることをお勧めします。
+</p>
+
+<p>
+  アプリのローンチ予定日が近くなったら、デベロッパー コンソールのストア掲載情報設定ページに関連するすべてのフィールド、オプション、アセットに精通している必要があります。このページ用に情報とアセットを収集する際には、このページが完成して公開の準備が完了するまでに、デベロッパー コンソールに入力またはアップロードできるようにしてください。
+</p>
+
+<p>
+  デベロッパー コンソールでアプリの配布地域を設定したら、ローカライズされたストア掲載情報、宣伝用画像などを、サポートするすべての言語向けに追加することを忘れないでください。
+</p>
+
+<p>
+  アプリがタブレット デバイスを対象としている場合、タブレット上で実行されているアプリのスクリーンショットを最低 1 枚は用意し、アプリの説明、リリース情報、プロモーション キャンペーンなどすべての場所で、タブレット向けのアプリのサポートを強調するようにしてください。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/productdetails"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="use-badges">
+    16.プロモーション キャンペーンで Google Play のバッジとリンクを使用する
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play のバッジにより、アプリを Android ユーザーに宣伝するための正式な商標を表示できます。<a href="{@docRoot}distribute/tools/promote/badges.html">Google Play バッジジェネレータ</a>を使用すると、バッジを簡単に作成できます。これで Web ページ、広告、レビューなどから商品にリンクするバナーを作成できます。特別な<a href="{@docRoot}distribute/tools/promote/linking.html">リンク フォーマット</a>を使用して、ストア情報掲載ページ、商品の一覧や検索結果に直接リンクすることもできます。
+</p>
+
+<p>
+  ローンチ後にアプリが注目されるためには、できるだけ多くのチャネルを介したできるだけ多くの国で商品を紹介するプロモーション キャンペーンでローンチをサポートすることを強くお勧めします。たとえば、プレースメント広告、ソーシャル ネットワークやブログの投稿、動画や他のメディア、インタビューとレビュー、その他の利用可能なすべてのチャネルを活用してローンチを宣伝できます。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/badges" data-sortorder=
+"-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="final-checks">
+    17.最終チェックと行い公開する
+  </h2>
+
+
+</div>
+
+<p>
+  アプリの公開の準備が整ったと判断したら、デベロッパー コンソールにサインインして、短時間で完了するいくつかの最終チェックを行います。
+</p>
+
+<p>
+  次の点を確認してください。
+</p>
+
+<ul>
+  <li>
+    <p>
+      デベロッパー プロファイルの情報が正しく、正しい Google ウォレット Merchant アカウントにリンクしている（商品を販売している場合）。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      正しいバージョンのアプリをアップロードしている。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      すべての画面アセット、スクリーンショット、動画、ローカライズされた説明など、ストア掲載情報のすべての部分が準備完了状態である。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      アプリの価格設定を無料または有料に設定している。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      公開ターゲットの国（とキャリア）を設定し、商品の価格を購入者の通貨に設定している（該当する場合）。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      [互換性のあるデバイス] で、ターゲットにしているデバイスにアプリが適合していることが示されている。示されていない場合、アプリの要件とフィルタリング ルールについて、開発チームと協力して確認する必要があります。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Web サイトへの正しいリンクと、正しいサポート メール アドレスを提供している。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      アプリがコンテンツ ポリシーのガイドラインに違反していない。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      アプリが Google Play での Android コンテンツのガイドラインと米国の輸出法に適合していることを確認済みである。
+    </p>
+  </li>
+</ul>
+
+<p>
+  これでアプリを公開する準備が整いました。
+</p>
+
+<p>
+  アップデートをリリースする場合は、<a
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=113476&amp;topic=2365760&amp;ctx=topic">アップデートの公開の要件</a>をよくお読みください。
+</p>
+
+<p>
+  公開する準備ができたらデベロッパーコンソールで <strong>[今すぐ公開する]</strong> ボタンをクリックします。数時間でユーザーがアプリを入手できるようになり、Google Play に製品ページが表示されます。これにより、ブラウジング、検索、プロモーション キャンペーンからのリンクが可能になります。
+</p>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/launchchecklist/finalchecks"
+data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users">
+    18.ローンチ後にユーザーをサポートする
+  </h2>
+
+
+</div>
+
+<p>
+  アプリまたはアプリのアップデートを公開した後で、アプリの利用者をサポートすることが極めて重要です。迅速で丁寧なサポートにより、ユーザーに優れたエクスペリエンスが提供され、製品の評価が高くなり好意的なレビューを得ることができます。ユーザーのニーズとフィードバックに責任を持って対応すれば、ユーザーはアプリをさらに利用し、お勧めのアプリとすることでしょう。これは特に組織的なプロモーション キャンペーンを使用している場合の公開後に当てはまります。
+</p>
+
+<p>
+  ユーザーに対する窓口を維持し、ユーザーにサポートを提供するにはたくさんの方法があります。最も基本的なものとしては、ストア情報掲載ページで<em>サポートのメール アドレス</em>を提供する方法があります。その他に、フォーラムやメーリング リスト、Google+ ページなどでサポートを提供する方法があります。Google Play のチームは、ダウンロード、インストール、支払いに関する問題についてユーザーのサポートを提供できます。これらのトピックに該当しない問題はアプリの作成者が対処します。アプリの作成者がサポート可能な問題の例として、機能リクエスト、アプリの使用に関する質問、互換性設定に関する質問などがあります。
+</p>
+
+<p>
+  公開後に次の作業を計画してください。
+</p>
+
+<ul>
+  <li>
+    <p>
+      評価とレビューをアプリのストア情報掲載ページで高い頻度で確認します。バグやその他の問題を知らせるテーマが繰り返し投稿されていないか監視します。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Android プラットフォームの新バージョンがローンチされていないか常に注意を払います。アプリの互換性設定のアップデートが必要となる場合があります。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Web サイトにサポート リソースへのリンクを配置し、フォーラムなどの他のサポートを設定します。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      ストア情報掲載ページに適切なサポートのメール アドレスを提供し、ユーザーからメールが送られてきた場合に対応します。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Google Play が提供する自動返金期間ではなく、独自の寛大な返金ポリシーで対応し、満足したユーザーからの今後の購入を期待します。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      アプリの問題を認識し、修正します。これにより透明性が向上します。既知の問題は、ストア掲載情報ページに積極的にリストします。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      アップデートは、品質を損なわずに可能な限り頻繁に行います。頻度が高すぎるアップデートでユーザーにうっとうしい印象を与えないようにします。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      毎回のアップデートで、アップデートでの変更内容の要約を提供するようにします。この情報はデベロッパー コンソールで入力できます。ユーザーはこれを読み、アプリの品質向上が真剣に行われていることを評価します。
+    </p>
+  </li>
+</ul>
+</ul>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/launchchecklist/afterlaunch"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,9x3,9x3,9x3,9x3"
+  data-maxResults="6"></div> 

@@ -1,0 +1,1014 @@
+page.title=アプリの中核品質
+page.metaDescription=アプリの品質は、インストール、ユーザーの評価とレビュー、使用頻度、ユーザーによる保持の観点から、アプリの長期間にわたる成功に直接反映します。
+page.image=/distribute/images/core-quality-guidelines.jpg
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>品質基準</h2>
+  <ol>
+    <li><a href="#ux">デザインとインタラクション</a></li>
+        <li><a href="#fn">機能</a></li>
+        <li><a href="#ps">パフォーマンスと安定度</a></li>
+        <li><a href="#listing">Google Play</a></li>
+
+  </ol>
+  
+  <h2>テスト</h2>
+  <ol>
+    <li><a href="#test-environment">テスト環境の設定</a></li>
+        <li><a href="#tests">テスト手順</a></li>
+        </ol>
+
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">タブレットのアプリ品質</a></li>
+        <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">アプリを最適化する</a></li>
+  </ol>
+  
+
+</div>
+</div>
+
+<div class="top-right-float">
+  <img src="{@docRoot}images/gp-core-quality.png" style="margin-left: 20px;">
+</div>
+
+<p>
+  Android ユーザーは高品質アプリを期待しています。アプリの品質は、インストール、ユーザーの評価とレビュー、使用頻度、ユーザーによる保持の観点から、アプリの長期間にわたる成功に直接反映します。
+</p>
+
+<p>
+  このドキュメントは、簡潔にまとめられた一連のアプリの中核品質基準と関連するテストを介してアプリの品質の基本的側面を評価する際のガイドとなります。すべての Android アプリはこれらの基準に適合している必要があります。
+</p>
+
+<p>
+  アプリを公開する前に、この基準についてテストし、アプリが多くのデバイスで正しく機能し、ナビゲーションとデザインの Android 標準に適合し、Google Play ストアでのプロモーションの機会に向けた準備が整っていることを確認します。実際のテストはここに記載されている内容をはるかに超えて行われます。このドキュメントの目的は、テスト プランですべてのアプリが示すべき重要な品質特性を網羅できるように、これらの特性を指定することです。
+</p>
+
+<p>
+  アプリをタブレット、または Google Play for Education、あるいはこの両方向けに作成している場合、さらに考慮が必要な品質基準があります。この基準は、<a href="{@docRoot}distribute/essentials/quality/tablets.html">タブレット アプリの品質</a>と<a href="{@docRoot}distribute/essentials/gpfe-guidelines.html">教育ガイドライン</a>に定義されています。
+</p>
+
+<div class="headerLine">
+  <h2 id="ux">
+  視覚デザインとユーザー インタラクション
+  </h2>
+
+
+</div>
+
+<p>
+  次の基準は、一貫性が高く直観的なユーザー エクスペリエンスを実現するため、アプリが標準の Android 視覚デザインとインタラクション パターンを必要に応じて提供することを保証します。
+</p>
+
+<table>
+  <tr>
+    <th style="width:2px;">
+      分野
+    </th>
+    <th style="width:54px;">
+      ID
+    </th>
+    
+
+    <th>
+      説明
+    </th>
+    <th style="width:54px;">
+      テスト
+    </th>
+  </tr>
+  <tr id="UX-B1">
+  <td>標準デザイン</td>
+  <td>
+    UX-B1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリは <a href="{@docRoot}design/index.html">Android の設計</a>ガイドラインに従い、共通する <a href="{@docRoot}design/patterns/index.html">UI パターンとアイコン</a>を使用します。
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>アプリはシステム アイコンの予想機能（[戻る] ボタンなど）を再定義しません。
+    </li>
+
+    <li>アプリは全く異なるアイコンが標準 UI の動作を発生させる場合、システム アイコンをこのアイコンに置き換えません。
+    </li>
+
+    <li>アプリが標準システム アイコンのカスタマイズ バージョンを提供する場合、そのアイコンはシステム アイコンに非常に類似しており、標準のシステム動作を発生させます。
+    </li>
+
+    <li>アプリは、アイコンや動作がユーザーの誤解を招いたりユーザーを混乱させたりするような Android UI パターンを再定義したり誤用したりしません。
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-all</a>
+  </td>
+  </tr>
+
+  <tr>
+  <td rowspan="3">
+    ナビゲーション
+  </td>
+  <td id="UX-N1">
+    UX-N1
+  </td>
+  <td>
+    <p>
+    アプリは標準システムの<a href="{@docRoot}design/patterns/navigation.html">[戻る] ボタンのナビゲーション</a>をサポートし、画面上に表示されるカスタムの [戻る] ボタン機能のプロンプトを一切利用しません。
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-3</a>
+  </td>
+  </tr>
+
+  <tr>
+  <td id="UX-N2">
+    UX-N2
+  </td>
+  <td>
+    <p>
+    すべてのダイアログは [戻る] ボタンを使用して取り消すことができます。
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-3</a>
+  </td>
+  </tr>
+
+  <tr id="UX-N3">
+  <td>
+    UX-N3
+  </td>
+  <td>
+    [ホーム] ボタンを押すと、常にデバイスのホーム画面に移動します。
+  </td>
+  <td>
+    <a href="#core">CR-1</a>
+  </td>
+  </tr>
+
+  <tr id="UX-S1">
+  <td rowspan="2">
+    通知
+  </td>
+  <td>
+    UX-S1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    通知は Android の設計<a href="{@docRoot}design/patterns/notifications.html">ガイドライン</a>に従います。特に次のガイドラインを遵守します。
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>複数の通知は可能な限り 1 個の通知オブジェクトに蓄積されます。
+    </li>
+
+    <li>通知が持続するのは、進行中のイベント（音楽の再生や通話など）に関連している場合だけです。
+    </li>
+
+    <li>通知には、ユーザーがオプトインしない限り、広告やアプリの中核機能に関連しないコンテンツが含まれません。
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+
+  <tr id="UX-S2">
+  <td>
+    UX-S2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリは次の目的でのみ通知を使用します。
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>ユーザーに個人的に関係するコンテキストに変更があったことを示す（メッセージの着信など）、または
+    </li>
+
+    <li>進行中のイベント（音楽の再生や通話など）に関係する情報/コントロールを表示する
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/corequalityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,6x3,6x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="fn">
+  機能
+  </h2>
+
+
+</div>
+
+<p>
+  次の基準は、期待される機能動作が適切なパーミッション レベルで実現されることを保証します。
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    分野
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    説明
+  </th>
+  <th style="width:54px;">
+    テスト
+  </th>
+  </tr>
+
+  <tr id="FN-P1">
+  <td rowspan="2">
+    パーミッション
+  </td>
+  <td>
+    FN-P1
+  </td>
+  <td>
+    アプリは中核機能をサポートする必要がある<em>最低限の</em>パーミッションのみを要求します。
+  </td>
+  <td rowspan="2">
+    <a href="#core">CR-11</a>
+  </td>
+  </tr>
+
+  <tr id="FN-P2">
+  <td>
+    FN-P2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリの中核機能に関連しない限り、アプリは機密性の高いデータ（連絡先やシステム ログなど）や課金の可能性があるサービス（ダイヤラーや SMS など）にアクセスするパーミッションを要求しません。
+    </p>
+  </td>
+  </tr>
+
+  <tr id="FN-L1">
+  <td>
+    インストール場所
+  </td>
+  <td>
+    FN-L1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリは SD カード（アプリでサポートされている場合）にインストールされている場合に通常どおり機能します。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    サイズの大きいアプリ（10MB 以上）には、SD カードへのインストールのサポートが推奨されます。SD カードへのインストールをサポートする必要のあるアプリのタイプについては、<a href="{@docRoot}guide/topics/data/install-location.html">アプリのインストール ロケーション</a>デベロッパー ガイドを参照してください。
+    </p>
+  </td>
+  <td>
+    <a href="#SD-1">SD-1</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A1">
+  <td rowspan="4">
+    オーディオ
+  </td>
+  <td>
+    FN-A1
+  </td>
+  <td>
+    画面がオフの場合、オーディオは、中核機能（アプリが音楽プレーヤーである場合など）でない限り、再生されることはありません。
+  </td>
+  <td>
+    <a href="#core">CR-7</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A2">
+  <td>
+    FN-A2
+  </td>
+  <td>
+    オーディオは、中核機能でない限り<a href="http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html">ロック画面の背後で再生</a>されることはありません。
+  </td>
+  <td>
+    <a href="#core">CR-8</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A3">
+  <td>
+    FN-A3
+  </td>
+  <td>
+    オーディオは、中核機能でない限り、ホーム画面上や別のアプリより優先して再生されることはありません。
+  </td>
+  <td>
+    <a href="#core">CR-1、<br>
+    CR-2</a>
+  </td>
+  </tr>
+
+  <tr id="FN-A4">
+  <td>
+    FN-A4
+  </td>
+  <td>
+    オーディオは、アプリがフォアグラウンドに戻ると再開されます。または、再生が一時停止状態となっていることをユーザーに知らせます。
+  </td>
+  <td>
+    <a href="#core">CR-1、CR-8</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U1">
+  <td rowspan="3">
+    UI とグラフィック
+  </td>
+  <td>
+    FN-U1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリは横方向と縦方向の両方をサポートします（可能な場合）。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    両方向ともほぼ同じ機能とアクションをサポートし、同等の機能を維持します。コンテンツやビューの若干の変更は認められます。
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U2">
+  <td>
+    FN-U2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリは両方向で全画面をサポートし、方向の変更に応じてレターボックスを付けません。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    画面の形状の若干のばらつきを補正するための若干のレターボックス付けは認められます。
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-U3">
+  <td>
+    FN-U3
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリはレンダリングの問題を生じることなく表示の方向間の迅速な遷移を正しく処理します。
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-5</a>
+  </td>
+  </tr>
+
+  <tr id="FN-S1">
+  <td rowspan="2">
+    ユーザー/アプリの状態
+  </td>
+  <td>
+    FN-S1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリがバックグラウンドになると、アプリの中核機能に関連していない限り、どのサービスも実行中のままにしません。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    たとえば、アプリは通知用のネットワーク接続を維持したり、Bluetooth 接続を維持したり、GPS のオン状態を維持するサービスを実行中のままにしません。
+    </p>
+  </td>
+  <td>
+    <a href="#core">CR-6</a>
+  </td>
+  </tr>
+
+  <tr id="FN-S2">
+  <td>
+    FN-S2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリはユーザーまたはアプリの状態を正しく保持し、復元します。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    アプリがフォアグラウンドから抜ける場合にユーザーまたはアプリの状態を保持し、バック ナビゲーションやその他の状態の変更による予期しないデータの損失を防ぎます。アプリがフォアグラウンドに戻ると、保持していた状態を復元し、編集可能なフィールドへの変更内容、ゲームの進行、メニュー、ビデオ、アプリやゲームのその他のセクションなどの、保留中だった重要なステートフル トランザクションも復元する必要があります。
+    </p>
+
+    <ol style="margin-bottom:.25em;list-style-type:lower-alpha">
+    <li>最近使ったアプリの切り替え機能からアプリが再開された場合、アプリは最後に使用された状態と全く同じ状態にユーザーを戻します。
+    </li>
+
+    <li>デバイスがスリープ（ロック）状態から復帰した後でアプリが再開された場合、アプリは最後に使用された状態と全く同じ状態にユーザーを戻します。
+    </li>
+
+    <li>アプリが [ホーム] または [すべてのアプリ] から再起動された場合、アプリは前の状態にできるだけ近い状態に復元されます。
+    </li>
+
+    <li>[戻る] キーが押されると、アプリまたはユーザーの状態を保存するオプションがアプリからユーザーに対して提供されます。このオプションを選択しないと、バック ナビゲーションでアプリまたはユーザーの状態が失われることになります。
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#core">CR-1、CR-3、CR-5</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/corequalityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="ps">
+  パフォーマンスと安定度
+  </h2>
+
+
+</div>
+
+<p>
+  次の基準で、ユーザーが期待するパフォーマンス、安定度、応答性がアプリから提供されることが保証されます。
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    分野
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    説明
+  </th>
+  <th style="width:54px;">
+    テスト
+  </th>
+  </tr>
+
+  <tr id="PS-S1">
+  <td>
+    安定度
+  </td>
+  <td>
+    PS-S1
+  </td>
+  <td>
+    アプリはターゲット デバイスでクラッシュ、強制終了、フリーズせず、それ以外の場合でも異常に機能しません。
+  </td>
+  <td>
+    <a href="#core">CR-all</a>、<a href="#SD-1">SD-1</a>、<a href="#HA-1">HA-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-P1">
+  <td rowspan="2">
+    パフォーマンス
+  </td>
+  <td>
+    PS-P1
+  </td>
+  <td>
+    アプリは素早くロードされます。アプリがロードに 2 秒以上かかる場合、オンスクリーンのフィードバック（進行インディケータや同等の指示）をユーザーに提供します。
+  </td>
+  <td>
+    <a href="#core">CR-all</a>、<a href="#SD-1">SD-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-P2">
+  <td>
+    PS-P2
+  </td>
+  <td>
+    StrictMode が有効になっている場合（下記の <a href="#strictmode">StrictMode のテスト</a>を参照）、ゲームのプレイ中、アニメーションや UI 遷移、アプリの他の部分など、アプリを実行しているときに、赤の点滅（StrictMode からのパフォーマンスに関する警告）は表示されません。
+  </td>
+  <td>
+    <a href="#PM-1">PM-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-M1">
+  <td>
+    メディア
+  </td>
+  <td>
+    PS-M1
+  </td>
+  <td>
+    音楽とビデオの再生は、通常のアプリの使用とロード時には、雑音や画面のちらつき、またはその他の症状もなくスムーズに行われます。
+  </td>
+  <td>
+    <a href="#core">CR-all</a>、<a href="#SD-1">SD-1</a>、<a href="#HA-1">HA-1</a>
+  </td>
+  </tr>
+
+  <tr id="PS-V1">
+  <td rowspan="2">
+    視覚品質
+  </td>
+  <td>
+    PS-V1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリはグラフィック、テキスト、画像、その他の UI 要素を著しい歪曲、ぼやけ、ピクセル化なしで表示します。
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>アプリは、<a href="{@docRoot}distribute/essentials/quality/tablet.html">タブレットなどのより大きい画面のデバイス</a>向けを含む、すべてのターゲットの画面のサイズとフォーム ファクタに高品質グラフィックを提供します。
+    </li>
+
+    <li>メニュー、ボタン、その他の UI 要素の境界部にエイリアシングは表示されません。
+    </li>
+    </ol>
+  </td>
+  <td rowspan="2">
+    <a href="#core">CR-all</a>
+  </td>
+  </tr>
+
+  <tr id="PS-V2">
+  <td>
+    PS-V2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリはテキストとテキスト ブロックを次の常識的な方法で表示します。
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>配置、構成は、タブレットなどのより大きい画面のデバイス向けを含む、サポート対象のすべてのフォーム ファクタで許容範囲内です。
+    </li>
+
+    <li>文字または語句は切り捨てられて表示されることはありません。
+    </li>
+
+    <li>ボタンまたはアイコン内で不適切に改行されて表示されることはありません。
+    </li>
+
+    <li>テキストと周囲の要素との間に十分なスペースを配置します。
+    </li>
+    </ol>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/core/performance" data-sortorder="-timestamp"
+data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="listing">
+  Google Play
+  </h2>
+
+
+</div>
+
+<p>
+  次の基準は、アプリが Google Play に公開する準備ができていることを保証します。
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    エリア
+  </th>
+  <th style="width:54px;">
+    ID
+  </th>
+  <th>
+    説明
+  </th>
+  <th style="width:54px;">
+    テスト
+  </th>
+  </tr>
+
+  <tr id="GP-P1">
+  <td rowspan="2">
+    ポリシー
+  </td>
+  <td>
+    GP-P1
+  </td>
+  <td>
+    アプリは <a href="http://play.google.com/about/developer-content-policy.html">Google Play デベロッパー コンテンツ ポリシー</a>の条項に厳密に従い、不適切なコンテンツを提供しません。また、他者の知的財産、ブランドなどを使用しません。
+  </td>
+  <td>
+    <a href="#gp">GP-all</a>
+  </td>
+  </tr>
+
+  <tr id="GP-P2">
+  <td>
+    GP-P2
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリのユーザー成熟度は、<a
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&amp;answer=188189">コンテンツのレーティングに関するガイドライン</a>に基づき、適切に設定されます。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    特に、デバイスのロケーションを使用するためにパーミッションを要求するアプリには、「全ユーザー対象」のユーザー成熟度を指定できないことに注意してください。
+    </p>
+  </td>
+  <td>
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D1">
+  <td rowspan="3">
+    アプリの詳細ページ
+  </td>
+  <td>
+    GP-D1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリのメイン ビジュアルは、<a href="http://android-developers.blogspot.com/2011/10/android-market-featured-image.html">このブログの投稿</a>に示されているガイドラインに従います。次の点を確認してください。
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>アプリの掲載情報には高品質なメイン ビジュアルが含まれています。
+    </li>
+
+    <li>メイン ビジュアルは、縮小表示され、アプリがターゲットにしている最小画面サイズで表示されるときに、判別できなくなるデバイス画像、スクリーンショット、小さいテキストは含まれません。
+    </li>
+
+    <li>メイン ビジュアルは、広告とは異なります。
+    </li>
+    </ol>
+  </td>
+  <td>
+    <a href="#gp">GP-1、GP-2</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D2">
+  <td>
+    GP-D2
+  </td>
+  <td>
+    アプリのスクリーンショットとビデオは Android 以外のデバイスを表示または参照しません。
+  </td>
+  <td rowspan="2">
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+
+  <tr id="GP-D3">
+  <td>
+    GP-D3
+  </td>
+  <td>
+    アプリのスクリーンショットまたはビデオは、アプリのコンテンツとエクスペリエンスを誤解を招く恐れのある方法で示しません。
+  </td>
+  </tr>
+
+  <tr id="GP-X1">
+  <td>
+    ユーザーのサポート
+  </td>
+  <td>
+    GP-X1
+  </td>
+  <td>
+    Google Play ページのレビューのタブにある、ユーザーによってレポートされた一般的なバグが、再現可能で異なる多くのデバイスで発生する場合、これらのバグに対処します。バグがごく少数のデバイスでのみ発生する場合でも、そのデバイスが特に人気があるか、新しいデバイスである場合にはバグに対処する必要があります。
+  </td>
+  <td>
+    <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+</table>
+
+<h3 class="rel-resources clearfloat">関連リソース</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/core/play" data-sortorder="-timestamp"
+data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test-environment">
+  テスト環境の設定
+  </h2>
+
+
+</div>
+
+<p>
+  アプリの品質を評価するには、テスト用に適切なハードウェアまたはエミュレータ環境を設定する必要があります。
+</p>
+
+<p>
+  理想的なテスト環境には、利用者が現在使用できる重要なフォーム ファクタとハードウェア/ソフトウェアの組み合わせを表す実際のハードウェア デバイスがいくつか含まれます。市場に出回っている<em>すべての</em>デバイスでテストする必要はありません。フォーム ファクタごとに 少数のデバイスを使用して、代表的ないくつかのデバイスを重点的にテストします。
+</p>
+
+<p>
+  テスト用に実際のハードウェア デバイスを入手できない場合は、最も一般的なフォーム ファクタとハードウェア/ソフトウェアの組み合わせを表す<a href="{@docRoot}tools/devices/index.html">エミュレーションされたデバイス（AVD）を設定する</a>必要があります。
+</p>
+
+<p>
+  基本テスト以上のテストを行うために、より多くのデバイス、フォーム ファクタ、新しいハードウェア/ソフトウェアの組み合わせをテスト環境に追加できます。テストと品質基準の数または複雑度を上げることもできます。
+</p>
+
+<div class="headerLine">
+  <h2 id="tests">
+  テスト手順
+  </h2>
+
+
+</div>
+
+<p>
+  次のテスト手順は、アプリ内の品質に関するさまざまなタイプの問題を発見する際に役立ちます。複数のテストを組み合わせたり、独自のテスト プランに複数のテストのグループを統合したりできます。特定の基準と特定のテストの関連については、上記の各セクションをご覧ください。
+</p>
+
+<table>
+  <tr>
+  <th style="width:2px;">
+    タイプ
+  </th>
+  <th style="width:54px;">
+    テスト
+  </th>
+  <th>
+    説明
+  </th>
+  </tr>
+
+  <tr>
+  <td rowspan="12" id="core">
+    コア スイート
+  </td>
+  <td>
+    CR-0
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    アプリのすべての部分（すべての画面、ダイアログ、設定、すべてのユーザー フロー）にナビゲートします。
+    </p>
+
+    <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+    <li>アプリで編集、コンテンツの作成、ゲームのプレイ、メディアの再生が可能になっている場合、これらのフローを開始して、コンテンツの作成や変更を行うようにしてください。
+    </li>
+
+    <li>アプリの実行中に、ネットワーク接続、バッテリー機能、GPS またはロケーションの利用可能性、システム ロードなどに一過性の変更を加えます。
+    </li>
+    </ol>
+  </td>
+  </tr>
+
+  <tr id="tg2">
+  <td id="core2">
+    CR-1
+  </td>
+  <td>
+    各アプリ画面でデバイスの [ホーム] キーを押して [すべてのアプリ] 画面からアプリを再起動します。
+  </td>
+  </tr>
+
+  <tr id="CR-2">
+  <td>
+    CR-2
+  </td>
+  <td>
+    各アプリ画面で別の実行中のアプリに切り替え、最近使ったアプリの切り替え機能を使用して、テスト中のアプリに戻ります。
+  </td>
+  </tr>
+
+  <tr id="CR-3">
+  <td>
+    CR-3
+  </td>
+  <td>
+    各アプリ画面（とダイアログ）で [戻る] ボタンを押します。
+  </td>
+  </tr>
+
+  <tr id="CR-5">
+  <td>
+    CR-5
+  </td>
+  <td>
+    各アプリ画面で横方向と縦方向の間でデバイスを 3 回以上回転します。
+  </td>
+  </tr>
+
+  <tr id="CR-6">
+  <td>
+    CR-6
+  </td>
+  <td>
+    別のアプリに切り替え、テスト対象アプリをバックグラウンドに送ります。[設定] に移動して、テスト アプリがバックグラウンドになっているときに、サービスが実行されているかどうか確認します。Android 4.0 以上では、[アプリ] 画面に進み、[実行中] タブでアプリを見つけます。これより前のバージョンでは、[アプリケーション管理] を使用して実行中のサービスを確認します。
+  </td>
+  </tr>
+
+  <tr id="CR-7">
+  <td>
+    CR-7
+  </td>
+  <td>
+    電源ボタンを押してデバイスをスリープ状態にし、次に電源ボタンをもう一度押して画面を復帰させます。
+  </td>
+  </tr>
+
+  <tr id="CR-8">
+  <td>
+    CR-8
+  </td>
+  <td>
+    電源ボタンを押したときにロックするようにデバイスを設定します。電源ボタンを押してデバイスをスリープ状態にし、次に電源ボタンをもう一度押して画面を復帰させ、デバイスのロックを解除します。
+  </td>
+  </tr>
+
+  <tr id="CR-9">
+  <!-- Hardware features -->
+
+  <td>
+    CR-9
+  </td>
+  <td>
+    スライド式キーボードのあるデバイスの場合は、キーボードを 1 回以上スライドさせます。キーボード ドックのあるデバイスの場合は、そのキーボード ドックにデバイスを接続します。
+  </td>
+  </tr>
+
+  <tr id="CR-10">
+  <td>
+    CR-10
+  </td>
+  <td>
+    外部ディスプレイ ポートのあるデバイスの場合は外部ディスプレイを接続します。
+  </td>
+  </tr>
+
+  <tr id="CR-11">
+  <td>
+    CR-11
+  </td>
+  <td>
+    アプリが表示できるすべてのタイプの通知を通知ドローワで発生させ、監視します。可能な場合は通知を展開し（Android 4.1 以上）、示されるすべてのアクションをタップします。
+  </td>
+  </tr>
+
+  <tr id="CR-12">
+  <td>
+    CR-12
+  </td>
+  <td>
+    [設定] &gt; [アプリ情報] に進んでアプリが要求したパーミッションを確認します。
+  </td>
+  </tr>
+
+  <tr id="tg3">
+  <td>
+    SD カードへのインストール
+  </td>
+  <td>
+    SD-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    <a href="{@docRoot}guide/topics/data/install-location.html">デバイスの SD カード</a>（アプリでサポートされている場合）にインストールされているアプリで<em>コア スイート</em>を繰り返します。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    アプリを SD カードに移動する場合、[設定] &gt; [アプリ情報] &gt; [SD カードに移動] を使用します。
+    </p>
+  </td>
+  </tr>
+
+  <tr id="tg32">
+  <td>
+    ハードウェア アクセラレーション
+  </td>
+  <td>
+    HA-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    ハードウェア アクセラレーションを有効にして<em>コア スイート</em>を繰り返します。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    ハードウェア アクセラレーション（デバイスでサポートされている場合）を強制的に有効にするには、<code>hardware-accelerated="true"</code> をアプリのマニフェストの <code>&lt;application&gt;</code> に追加して再度コンパイルします。
+    </p>
+  </td>
+  </tr>
+
+  <tr id="tg33">
+  <td>
+    パフォーマンスのモニタリング
+  </td>
+  <td>
+    PM-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    <a href="#strictmode">以下に記載するとおりに</a> StrictMode プロファイリングを有効にして<em>コア スイート</em>を繰り返します。
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    ガベージ コレクションと、ユーザー エクスペリエンスでのそのインパクトに注目します。
+    </p>
+  </td>
+  </tr>
+
+  <tr id="gp">
+  <td rowspan="3">
+    Google Play
+  </td>
+  <td>
+    GP-1
+  </td>
+  <td>
+    <a href="https://play.google.com/apps/publish/">デベロッパー コンソール</a>にサインインし、デベロッパーのプロファイル、アプリの説明、スクリーンショット、メイン ビジュアル、ユーザー成熟度設定、ユーザーのフィードバックを確認します。
+  </td>
+  </tr>
+
+  <tr id="GP-2">
+  <td>
+    GP-2
+  </td>
+  <td>
+    メイン ビジュアルとスクリーンショットをダウンロードし、ターゲットにしているデバイスとフォーム ファクタのディスプレイ サイズに合致するよう縮小します。
+  </td>
+  </tr>
+
+  <tr id="GP-3">
+  <td>
+    GP-3
+  </td>
+  <td>
+    アプリまたは拡張ファイル ダウンロードに含まれているグラフィック アセット、メディア、テキスト、コード ライブラリ、その他のコンテンツをすべて確認します。
+  </td>
+  </tr>
+
+  <tr id="GP-4">
+  <td>
+    課金
+  </td>
+  <td>
+    GP-4
+  </td>
+  <td>
+    アプリのすべての画面にナビゲートし、すべてのアプリ内課金フローを開始します。
+  </td>
+  </tr>
+</table>
+
+<h3 id="strictmode">
+  StrictMode を使用したテスト
+</h3>
+
+<p>
+  パフォーマンスのテストの場合、アプリで {@link android.os.StrictMode} を有効にしてこれを使用することをお勧めします。これで、メインスレッドおよびパフォーマンス、ネットワーク アクセス、ファイルの読み取り/書き込みなどに影響する可能性のあるその他のスレッド上の操作を捕捉できます。
+</p>
+
+<p>
+  {@link android.os.StrictMode.ThreadPolicy.Builder}を使用してスレッドごとにモニタリング ポリシーを設定し、{@link android.os.StrictMode.ThreadPolicy.Builder#detectAll()} を使用して<code>ThreadPolicy</code>でサポート対象のモニタリングをすべて有効にします。
+</p>
+
+<p>
+  {@link android.os.StrictMode.ThreadPolicy.Builder#penaltyFlashScreen() penaltyFlashScreen()}  を使用して<code>ThreadPolicy</code> に対するポリシー違反の<strong>視覚通知</strong>を有効にします。
+</p> 
