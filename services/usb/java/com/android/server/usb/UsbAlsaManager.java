@@ -35,6 +35,7 @@ import android.util.Slog;
 
 import com.android.internal.alsa.AlsaCardsParser;
 import com.android.internal.alsa.AlsaDevicesParser;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.audio.AudioService;
 
 import libcore.io.IoUtils;
@@ -502,14 +503,14 @@ public final class UsbAlsaManager {
     //
     // Logging
     //
-    public void dump(FileDescriptor fd, PrintWriter pw) {
-        pw.println("  USB Audio Devices:");
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("USB Audio Devices:");
         for (UsbDevice device : mAudioDevices.keySet()) {
-            pw.println("    " + device.getDeviceName() + ": " + mAudioDevices.get(device));
+            pw.println("  " + device.getDeviceName() + ": " + mAudioDevices.get(device));
         }
-        pw.println("  USB MIDI Devices:");
+        pw.println("USB MIDI Devices:");
         for (UsbDevice device : mMidiDevices.keySet()) {
-            pw.println("    " + device.getDeviceName() + ": " + mMidiDevices.get(device));
+            pw.println("  " + device.getDeviceName() + ": " + mMidiDevices.get(device));
         }
     }
 
