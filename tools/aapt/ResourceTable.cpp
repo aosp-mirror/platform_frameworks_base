@@ -2893,8 +2893,9 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
     for (size_t i = 0; i < basePackageCount; i++) {
         size_t packageId = table.getBasePackageId(i);
         String16 packageName(table.getBasePackageName(i));
-        if (packageId > 0x01 && packageId != 0x7f &&
-                packageName != String16("android")) {
+        if (packageId > 0x01 && packageId != 0x7f && packageId != 0x3f &&
+                packageName != String16("android")
+                && packageName != String16("lineageos.platform")) {
             libraryPackages.add(sp<Package>(new Package(packageName, packageId)));
         }
     }
