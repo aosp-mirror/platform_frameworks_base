@@ -199,80 +199,6 @@ socket_shutdown (JNIEnv *env, jobject object, jobject fileDescriptor,
     }
 }
 
-static jint socket_pending (JNIEnv *env, jobject object,
-        jobject fileDescriptor)
-{
-    int fd;
-
-    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-
-    if (env->ExceptionCheck()) {
-        return (jint)-1;
-    }
-
-    int pending;
-    int ret = ioctl(fd, TIOCOUTQ, &pending);
-
-    // If this were a non-socket fd, there would be other cases to worry
-    // about...
-
-    //ALOGD("socket_pending, ioctl ret:%d, pending:%d", ret, pending);
-    if (ret < 0) {
-        jniThrowIOException(env, errno);
-        return (jint) 0;
-    }
-
-    return (jint)pending;
-}
-static jint socket_available (JNIEnv *env, jobject object,
-        jobject fileDescriptor)
-{
-    int fd;
-
-    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-
-    if (env->ExceptionCheck()) {
-        return (jint)-1;
-    }
-
-#if 1
-    int avail;
-    int ret = ioctl(fd, FIONREAD, &avail);
-
-    // If this were a non-socket fd, there would be other cases to worry
-    // about...
-
-    if (ret < 0) {
-        jniThrowIOException(env, errno);
-        return (jint) 0;
-    }
-
-    return (jint)avail;
-#else
-// there appears to be a bionic bug that prevents this version from working.
-
-    ssize_t ret;
-    struct msghdr msg;
-
-    memset(&msg, 0, sizeof(msg));
-
-    do {
-        ret = recvmsg(fd, &msg, MSG_PEEK | MSG_DONTWAIT | MSG_NOSIGNAL);
-    } while (ret < 0 && errno == EINTR);
-
-
-    // MSG_PEEK returns 0 on EOF and EWOULDBLOCK on none available
-    if (ret < 0 && errno == EWOULDBLOCK) {
-        return 0;
-    } if (ret < 0) {
-        jniThrowIOException(env, errno);
-        return -1;
-    }
-
-    return (jint)ret;
-#endif
-}
-
 /**
  * Processes ancillary data, handling only
  * SCM_RIGHTS. Creates appropriate objects and sets appropriate
@@ -664,8 +590,6 @@ static JNINativeMethod gMethods[] = {
     {"listen_native", "(Ljava/io/FileDescriptor;I)V", (void*)socket_listen},
     {"accept", "(Ljava/io/FileDescriptor;Landroid/net/LocalSocketImpl;)Ljava/io/FileDescriptor;", (void*)socket_accept},
     {"shutdown", "(Ljava/io/FileDescriptor;Z)V", (void*)socket_shutdown},
-    {"available_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_available},
-    {"pending_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_pending},
     {"read_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_read},
     {"readba_native", "([BIILjava/io/FileDescriptor;)I", (void*) socket_readba},
     {"writeba_native", "([BIILjava/io/FileDescriptor;)V", (void*) socket_writeba},
