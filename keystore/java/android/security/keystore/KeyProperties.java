@@ -210,10 +210,6 @@ public abstract class KeyProperties {
                 int keymasterAlgorithm, int keymasterDigest) {
             switch (keymasterAlgorithm) {
                 case KeymasterDefs.KM_ALGORITHM_AES:
-                    if (keymasterDigest != -1) {
-                        throw new IllegalArgumentException("Digest not supported for AES key: "
-                                + Digest.fromKeymaster(keymasterDigest));
-                    }
                     return KEY_ALGORITHM_AES;
                 case KeymasterDefs.KM_ALGORITHM_HMAC:
                     switch (keymasterDigest) {
