@@ -304,11 +304,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final int MAX_SCREENSHOT_RETRIES = 3;
 
-    // The flag describing a full screen app window (where the app takes care of drawing under the
-    // SystemUI bars)
-    private static final int SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
@@ -3457,29 +3452,21 @@ public class WindowManagerService extends IWindowManager.Stub
             DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
             final int width = displayInfo.appWidth;
             final int height = displayInfo.appHeight;
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "applyAnimation: atoken="
-                    + atoken);
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                    "applyAnimation: atoken=" + atoken);
 
             // Determine the visible rect to calculate the thumbnail clip
             WindowState win = atoken.findMainWindow();
             Rect containingFrame = new Rect(0, 0, width, height);
             Rect contentInsets = new Rect();
             Rect appFrame = new Rect(0, 0, width, height);
-            boolean isFullScreen = true;
-            if (win != null) {
-                if (win.mContainingFrame != null) {
-                    containingFrame.set(win.mContainingFrame);
-                }
-                if (win.mContentInsets != null) {
-                    contentInsets.set(win.mContentInsets);
-                }
-                if (win.mFrame != null) {
-                    appFrame.set(win.mFrame);
-                }
-                isFullScreen =
-                        ((win.mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN) ==
-                                SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN) ||
-                                ((win.mAttrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0);
+            if (win != null && win.isFullscreen(width, height)) {
+                // For fullscreen windows use the window frames and insets to set the thumbnail
+                // clip. For none-fullscreen windows we use the app display region so the clip
+                // isn't affected by the window insets.
+                containingFrame.set(win.mContainingFrame);
+                contentInsets.set(win.mContentInsets);
+                appFrame.set(win.mFrame);
             }
 
             if (atoken.mLaunchTaskBehind) {
@@ -3490,7 +3477,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height,
                     mCurConfiguration.orientation, containingFrame, contentInsets, appFrame,
-                    isFullScreen, isVoiceInteraction);
+                    isVoiceInteraction);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
