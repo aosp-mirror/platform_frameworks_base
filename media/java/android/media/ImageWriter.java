@@ -40,8 +40,8 @@ import java.util.List;
  * Several Android API classes can provide input {@link android.view.Surface
  * Surface} objects for ImageWriter to produce data into, including
  * {@link MediaCodec MediaCodec} (encoder),
- * {@link android.hardware.camera2.CameraDevice CameraDevice} (reprocessing
- * input), {@link ImageReader}, etc.
+ * {@link android.hardware.camera2.CameraCaptureSession CameraCaptureSession}
+ * (reprocessing input), {@link ImageReader}, etc.
  * </p>
  * <p>
  * The input Image data is encapsulated in {@link Image} objects. To produce
@@ -64,7 +64,14 @@ import java.util.List;
  * {@link android.hardware.camera2.CameraDevice}) to consume the Images. If the
  * downstream components cannot consume the Images at least as fast as the
  * ImageWriter production rate, the {@link #dequeueInputImage} call will
- * eventually block and the application will have to drop input frames. </p>
+ * eventually block and the application will have to drop input frames.
+ * </p>
+ * <p>
+ * If the consumer component that provided the input {@link android.view.Surface Surface}
+ * abandons the {@link android.view.Surface Surface}, {@link #queueInputImage queueing}
+ * or {@link #dequeueInputImage dequeueing} an {@link Image} will throw an
+ * {@link IllegalStateException}.
+ * </p>
  */
 public class ImageWriter implements AutoCloseable {
     private final Object mListenerLock = new Object();
@@ -188,7 +195,9 @@ public class ImageWriter implements AutoCloseable {
      * @return The next available input Image from this ImageWriter.
      * @throws IllegalStateException if {@code maxImages} Images are currently
      *             dequeued, or the ImageWriter format is
-     *             {@link ImageFormat#PRIVATE PRIVATE}.
+     *             {@link ImageFormat#PRIVATE PRIVATE}, or the input
+     *             {@link android.view.Surface Surface} has been abandoned by the
+     *             consumer component that provided the {@link android.view.Surface Surface}.
      * @see #queueInputImage
      * @see Image#close
      */
@@ -254,6 +263,11 @@ public class ImageWriter implements AutoCloseable {
      *
      * @param image The Image to be queued back to ImageWriter for future
      *            consumption.
+     * @throws IllegalStateException if the image was already queued previously,
+     *            or the image was aborted previously, or the input
+     *            {@link android.view.Surface Surface} has been abandoned by the
+     *            consumer component that provided the
+     *            {@link android.view.Surface Surface}.
      * @see #dequeueInputImage()
      */
     public void queueInputImage(Image image) {
@@ -699,7 +713,7 @@ public class ImageWriter implements AutoCloseable {
         }
 
         private void clearSurfacePlanes() {
-            if (mIsImageValid) {
+            if (mIsImageValid && mPlanes != null) {
                 for (int i = 0; i < mPlanes.length; i++) {
                     if (mPlanes[i] != null) {
                         mPlanes[i].clearBuffer();
