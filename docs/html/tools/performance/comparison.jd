@@ -86,13 +86,14 @@ page.article=true
     <h2 id="HeapViewer">Heap Viewer</h2>
 
   <div class="figure" style="">
-    <img src="{@docRoot}images/tools/performance/compare_HeapViewer.png"
+    <img src="{@docRoot}images/tools/studio-hprof-viewer.png"
          alt=""
          height="" />
     <p class="img-caption">
       <strong>Figure 2. </strong>Heap Viewer.
     </p>
   </div>
+
 
   <ul>
     <li>Shows snapshots of a number of objects allocated by type.</li>

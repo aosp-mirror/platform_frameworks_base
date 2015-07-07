@@ -206,6 +206,25 @@ runtime window to launch the Android runtime window. Click the <strong>Memory</s
 <img src="{@docRoot}images/tools/studio-memory-monitor.png" srcset="{@docRoot}images/tools/studio-memory-monitor_2x.png 2x" width"635" height="171" alt="" />
     <p class="img-caption"><strong>Figure 4.</strong> Monitor memory and CPU usage.</p>
 
+<h4 id="heap-dump">Heap dump </h4>
+<p>When you're monitoring memory usage in Android Studio you can, at the same time, initiate
+garbage collection and dump the Java heap to a heap snapshot in an Android-specific HPROF binary
+format file. The HPROF viewer displays classes, instances of each class, and a reference tree to
+help you track memory usage and find memory leaks. </p>
+
+<img src="{@docRoot}images/tools/studio-hprof-viewer.png" alt="" />
+    <p class="img-caption"><strong>Figure 5.</strong> HPROF viewer with heap dump.</p>
+
+<p>To create a snapshot of the Android app heap memory, click the
+Dump Java Heap icon (<img src="{@docRoot}images/tools/studio-dump-heap-icon.png" style="vertical-align:bottom;margin:0;height:17px"/>)
+in the Memory Monitor. Android Studio creates the heap snapshot file with the filename
+<code>Snapshot-yyyy.mm.dd-hh.mm.ss.hprof</code>
+in the <em>Captures</em> tab. Double-click the heap snapshot file to open the HPROF viewer.</p>
+
+<p>To convert a heap dump to standard HPROF format in Android Studio, right-click a heap
+snapshot in the <em>Captures</em> view and select <strong>Export to standard .hprof</strong>. </p>
+
+
 
 <h3>Data file access</h3>
 <p>The Android SDK tools, such as <a href="{@docRoot}tools/help/systrace.html">Systrace</a>,

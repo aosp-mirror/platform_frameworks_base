@@ -24,22 +24,22 @@ page.tags=memory,OutOfMemoryError
 
 
 <p>Because Android is designed for mobile devices, you should always be careful about how much
-random-access memory (RAM) your application uses. Although Dalvik and ART perform
-routine garbage collection (GC), this doesn’t mean you can ignore when and where your application allocates and
+random-access memory (RAM) your app uses. Although Dalvik and ART perform
+routine garbage collection (GC), this doesn’t mean you can ignore when and where your app allocates and
 releases memory. In order to provide a stable user experience that allows the system to quickly
-switch between apps, it is important that your application does not needlessly consume memory when the user
+switch between apps, it is important that your app does not needlessly consume memory when the user
 is not interacting with it.</p>
 
 <p>Even if you follow all the best practices for <a href="{@docRoot}training/articles/memory.html"
 >Managing Your App Memory</a> during
 development (which you should), you still might leak objects or introduce other memory bugs. The
-only way to be certain your application is using as little memory as possible is to analyze your app’s
+only way to be certain your app is using as little memory as possible is to analyze your app’s
 memory usage with tools. This guide shows you how to do that.</p>
 
 
 <h2 id="LogMessages">Interpreting Log Messages</h2>
 
-<p>The simplest place to begin investigating your application’s memory usage is the runtime log messages.
+<p>The simplest place to begin investigating your app’s memory usage is the runtime log messages.
 Sometimes when a GC occurs, a message is printed to
 <a href="{@docRoot}tools/help/logcat.html">logcat</a>. The logcat output is also available in the
 Device Monitor or directly in IDEs such as Eclipse and Android Studio.</p>
@@ -68,8 +68,8 @@ include:
 <dd>A concurrent GC that frees up memory as your heap begins to fill up.</dd>
 
 <dt><code>GC_FOR_MALLOC</code></dt>
-<dd>A GC caused because your application attempted to allocate memory when your heap was
-already full, so the system had to stop your application and reclaim memory.</dd>
+<dd>A GC caused because your app attempted to allocate memory when your heap was
+already full, so the system had to stop your app and reclaim memory.</dd>
 
 <dt><code>GC_HPROF_DUMP_HEAP</code></dt>
 <dd>A GC that occurs when you request to create an HPROF file to analyze your heap.</dd>
@@ -107,9 +107,9 @@ a memory leak.</p>
 
 <h3 id="ARTLogMessages">ART Log Messages</h3>
 
-<p>Unlike Dalvik, ART doesn't log messqages for GCs that were not explicity requested. GCs are only
+<p>Unlike Dalvik, ART doesn't log messqages for GCs that were not explicitly requested. GCs are only
 printed when they are they are deemed slow. More precisely, if the GC pause exceeds than 5ms or
-the GC duration exceeds 100ms. If the application is not in a pause perceptible process state,
+the GC duration exceeds 100ms. If the app is not in a pause perceptible process state,
 then none of its GCs are deemed slow. Explicit GCs are always logged.</p>
 
 <p>ART includes the following information in its garbage collection log messages:</p>
@@ -131,15 +131,15 @@ What triggered the GC and what kind of collection it is. Reasons that may appear
 include:
 <dl>
 <dt><code>Concurrent</code></dt>
-<dd>A concurrent GC which does not suspend application threads. This GC runs in a background thread
+<dd>A concurrent GC which does not suspend app threads. This GC runs in a background thread
 and does not prevent allocations.</dd>
 
 <dt><code>Alloc</code></dt>
-<dd>The GC was initiated because your application attempted to allocate memory when your heap
+<dd>The GC was initiated because your app attempted to allocate memory when your heap
 was already full. In this case, the garbage collection occurred in the allocating thread.</dd>
 
 <dt><code>Explicit</code>
-<dd>The garbage collection was explicitly requested by an application, for instance, by
+<dd>The garbage collection was explicitly requested by an app, for instance, by
 calling {@link java.lang.System#gc()} or {@link java.lang.Runtime#gc()}. As with Dalvik, in ART it is
 recommended that you trust the GC and avoid requesting explicit GCs if possible. Explicit GCs are
 discouraged since they block the allocating thread and unnecessarily was CPU cycles. Explicit GCs
@@ -153,13 +153,13 @@ RenderScript allocation objects.</dd>
 <dd>The collection was caused by a heap transition; this is caused by switching the GC at run time.
 Collector transitions consist of copying all the objects from a free-list backed
 space to a bump pointer space (or visa versa). Currently collector transitions only occur when an
-application changes process states from a pause perceptible state to a non pause perceptible state
+app changes process states from a pause perceptible state to a non pause perceptible state
 (or visa versa) on low RAM devices.
 </dd>
 
 <dt><code>HomogeneousSpaceCompact</code></dt>
 <dd>Homogeneous space compaction is free-list space to free-list space compaction which usually
-occurs when an application is moved to a pause imperceptible process state. The main reasons for doing
+occurs when an app is moved to a pause imperceptible process state. The main reasons for doing
 this are reducing RAM usage and defragmenting the heap.
 </dd>
 
@@ -230,13 +230,39 @@ The moving GCs have a long pause which lasts for the majority of the GC duration
 {@code 25MB/38MB} value in the above example). If this value continues to increase and doesn't
 ever seem to get smaller, you could have a memory leak. Alternatively, if you are seeing GC which
 are for the reason "Alloc", then you are already operating near your heap capacity and can expect
-OOM exceptios in the near future. </p>
+OOM exceptions in the near future. </p>
 
 <h2 id="ViewHeap">Viewing Heap Updates</h2>
 
-<p>To get a little information about what kind of memory your application is using and when, you can view
-real-time updates to your app's heap in the Device Monitor:</p>
+<p>To get a little information about what kind of memory your app is using and when, you
+can view real-time updates to your app's heap in Android Studio's
+<a href="{@docRoot}tools/studio/index.html#heap-dump">HPROF viewer</a> or in the Device Monitor:</p>
 
+<h3>Memory Monitor in Android Studio</h3>
+<p>Use Android Studio to view your app's memory use: </p>
+<ul>
+  <li>Start your app on a connected device or emulator.</li>
+  <li>Open the Android run-time window, and view the free and allocated memory in the Memory
+    Monitor. </li>
+  <li>Click the Dump Java Heap icon
+    (<img src="{@docRoot}images/tools/studio-dump-heap-icon.png" style="vertical-align:bottom;margin:0;height:21px"/>)
+    in the Memory Monitor toolbar.
+    <p>Android Studio creates the heap snapshot file with the filename
+    <code>Snapshot-yyyy.mm.dd-hh.mm.ss.hprof</code> in the <em>Captures</em> tab. </p>
+     </li>
+  <li>Double-click the heap snapshot file to open the HPROF viewer.
+  <p class="note"><strong>Note:</strong> To convert a heap dump to standard HPROF format in
+  Android Studio, right-click a heap snapshot in the <em>Captures</em> view and select
+  <strong>Export to standard .hprof</strong>.</p> </li>
+  <li>Interact with your app and click the
+    (<img src="{@docRoot}images/tools/studio-garbage-collect.png" style="vertical-align:bottom;margin:0;height:17px"/>)
+    icon to cause heap allocation.
+   </li>
+  <li>Identify which actions in your app are likely causing too much allocation and determine where
+   in your app you should try to reduce allocations and release resources.
+</ul>
+
+<h3>Device Monitor </h3>
 <ol>
 <li>Open the Device Monitor.
 <p>From your <code>&lt;sdk>/tools/</code> directory, launch the <code>monitor</code> tool.</p>
@@ -254,8 +280,9 @@ GC. To see the first update, click the <strong>Cause GC</strong> button.</p>
 showing the <strong>[1] Update Heap</strong> and <strong>[2] Cause GC</strong> buttons.
 The Heap tab on the right shows the heap results.</p>
 
-<p>Continue interacting with your application to watch your heap allocation update with each garbage
-collection. This can help you identify which actions in your application are likely causing too much
+
+<p>Continue interacting with your app to watch your heap allocation update with each garbage
+collection. This can help you identify which actions in your app are likely causing too much
 allocation and where you should try to reduce allocations and release
 resources.</p>
 
@@ -266,9 +293,9 @@ resources.</p>
 <p>As you start narrowing down memory issues, you should also use the Allocation Tracker to
 get a better understanding of where your memory-hogging objects are allocated. The Allocation
 Tracker can be useful not only for looking at specific uses of memory, but also to analyze critical
-code paths in an application such as scrolling.</p>
+code paths in an app such as scrolling.</p>
 
-<p>For example, tracking allocations when flinging a list in your application allows you to see all the
+<p>For example, tracking allocations when flinging a list in your app allows you to see all the
 allocations that need to be done for that behavior, what thread they are on, and where they came
 from. This is extremely valuable for tightening up these paths to reduce the work they need and
 improve the overall smoothness of the UI.</p>
@@ -281,7 +308,7 @@ improve the overall smoothness of the UI.</p>
 <li>In the DDMS window, select your app's process in the left-side panel.</li>
 <li>In the right-side panel, select the <strong>Allocation Tracker</strong> tab.</li>
 <li>Click <strong>Start Tracking</strong>.</li>
-<li>Interact with your application to execute the code paths you want to analyze.</li>
+<li>Interact with your app to execute the code paths you want to analyze.</li>
 <li>Click <strong>Get Allocations</strong> every time you want to update the
 list of allocations.</li>
  </ol>
@@ -293,7 +320,7 @@ thread, in which class, in which file and at which line.</p>
 
 <img src="{@docRoot}images/tools/monitor-tracker@2x.png" width="760" alt="" />
 <p class="img-caption"><strong>Figure 2.</strong> The Device Monitor tool,
-showing recent application allocations and stack traces in the Allocation Tracker.</p>
+showing recent app allocations and stack traces in the Allocation Tracker.</p>
 
 
 <p class="note"><strong>Note:</strong> You will always see some allocations from {@code
@@ -458,7 +485,7 @@ with all the others.</p>
 </dd>
 
 <dt><code>.so mmap</code> and <code>.dex mmap</code></dt>
-<dd>The RAM being used for mmapped <code>.so</code> (native) and <code>.dex</code> (Dalvik or ART)
+<dd>The RAM being used for mapped <code>.so</code> (native) and <code>.dex</code> (Dalvik or ART)
 code. The <code>Pss Total</code> number includes platform code shared across apps; the
 <code>Private Clean</code> is your app’s own code. Generally, the actual mapped size will be much
 larger—the RAM here is only what currently needs to be in RAM for code that has been executed by
@@ -544,7 +571,7 @@ window, so this can help you identify memory leaks involving dialogs or other wi
 </dd>
 
 <dt><code>AppContexts</code> and <code>Activities</code></dt>
-<dd>The number of application {@link android.content.Context} and {@link android.app.Activity} objects that
+<dd>The number of app {@link android.content.Context} and {@link android.app.Activity} objects that
 currently live in your process. This can be useful to quickly identify leaked {@link
 android.app.Activity} objects that can’t be garbage collected due to static references on them,
 which is common. These objects often have a lot of other allocations associated with them and so
@@ -553,7 +580,7 @@ are a good way to track large memory leaks.</dd>
 <p class="note"><strong>Note:</strong> A {@link android.view.View} or {@link
 android.graphics.drawable.Drawable} object also holds a reference to the {@link
 android.app.Activity} that it's from, so holding a {@link android.view.View} or {@link
-android.graphics.drawable.Drawable} object can also lead to your application leaking an {@link
+android.graphics.drawable.Drawable} object can also lead to your app leaking an {@link
 android.app.Activity}.</p>
 
 </dd>
@@ -573,7 +600,12 @@ android.app.Activity}.</p>
 HPROF. Your app's heap dump provides information about the overall state of your app's heap so you
 can track down problems you might have identified while viewing heap updates.</p>
 
-<p>To retrieve your heap dump:</p>
+
+<p>To retrieve your heap dump from within Android Studio, use the
+<a href="{@docRoot}tools/studio/index.html#me-cpu">Memory Monitor</a> and
+<a href="{@docRoot}tools/studio/index.html#heap-dump">HPROF viewer</a>.  
+
+<p>You can also still perform these procedures in the Android monitor:</p>
 <ol>
 <li>Open the Device Monitor.
 <p>From your <code>&lt;sdk>/tools/</code> directory, launch the <code>monitor</code> tool.</p>
@@ -589,13 +621,13 @@ then click <strong>Save</strong>.</li>
 showing the <strong>[1] Dump HPROF file</strong> button.</p>
 
 <p>If you need to be more precise about when the dump is created, you can also create a heap dump
-at the critical point in your application code by calling {@link android.os.Debug#dumpHprofData
+at the critical point in your app code by calling {@link android.os.Debug#dumpHprofData
 dumpHprofData()}.</p>
 
 <p>The heap dump is provided in a format that's similar to, but not identical to one from the Java
 HPROF tool. The major difference in an Android heap dump is due to the fact that there are a large
 number of allocations in the Zygote process. But because the Zygote allocations are shared across
-all application processes, they don’t matter very much to your own heap analysis.</p>
+all app processes, they don’t matter very much to your own heap analysis.</p>
 
 <p>To analyze your heap dump, you can use a standard tool like jhat or the <a href=
 "http://www.eclipse.org/mat/downloads.php">Eclipse Memory Analyzer Tool</a> (MAT). However, first
@@ -609,7 +641,7 @@ hprof-conv heap-original.hprof heap-converted.hprof
 </pre>
 
 <p class="note"><strong>Note:</strong> If you're using the version of DDMS that's integrated into
-Eclipse, you do not need to perform the HPROF converstion—it performs the conversion by
+Eclipse, you do not need to perform the HPROF conversion—DDMS performs the conversion by
 default.</p>
 
 <p>You can now load the converted file in MAT or another heap analysis tool that understands
@@ -660,7 +692,7 @@ showing what your largest objects are. Below this chart, are links to couple of 
 
   <p class="note"><strong>Note:</strong> Most apps will show an instance of
   {@link android.content.res.Resources} near the top with a good chunk of heap, but this is
-  usually expected when your application uses lots of resources from your {@code res/} directory.</p>
+  usually expected when your app uses lots of resources from your {@code res/} directory.</p>
   </li>
 </ul>
 
@@ -699,19 +731,19 @@ to inspect the changes in memory allocation. To compare two heap dumps using MAT
 
 <h2 id="TriggerLeaks">Triggering Memory Leaks</h2>
 
-<p>While using the tools described above, you should aggressively stress your application code and try
-forcing memory leaks. One way to provoke memory leaks in your application is to let it
+<p>While using the tools described above, you should aggressively stress your app code and try
+forcing memory leaks. One way to provoke memory leaks in your app is to let it
 run for a while before inspecting the heap. Leaks will trickle up to the top of the allocations in
-the heap. However, the smaller the leak, the longer you need to run the application in order to see it.</p>
+the heap. However, the smaller the leak, the longer you need to run the app in order to see it.</p>
 
 <p>You can also trigger a memory leak in one of the following ways:</p>
 <ol>
 <li>Rotate the device from portrait to landscape and back again multiple times while in different
-activity states. Rotating the device can often cause an application to leak an {@link android.app.Activity},
+activity states. Rotating the device can often cause an app to leak an {@link android.app.Activity},
 {@link android.content.Context}, or {@link android.view.View} object because the system
-recreates the {@link android.app.Activity} and if your application holds a reference
+recreates the {@link android.app.Activity} and if your app holds a reference
 to one of those objects somewhere else, the system can't garbage collect it.</li>
-<li>Switch between your application and another application while in different activity states (navigate to
+<li>Switch between your app and another app while in different activity states (navigate to
 the Home screen, then return to your app).</li>
 </ol>
 
