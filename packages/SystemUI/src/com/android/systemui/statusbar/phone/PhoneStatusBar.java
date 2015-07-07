@@ -3035,11 +3035,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         final int N = newlyVisible.size();
-        String[] newlyVisibleKeyAr = new String[N];
-        for (int i = 0; i < N; i++) {
-            newlyVisibleKeyAr[i] = newlyVisibleAr[i].key;
+        if (N > 0) {
+            String[] newlyVisibleKeyAr = new String[N];
+            for (int i = 0; i < N; i++) {
+                newlyVisibleKeyAr[i] = newlyVisibleAr[i].key;
+            }
+
+            setNotificationsShown(newlyVisibleKeyAr);
         }
-        setNotificationsShown(newlyVisibleKeyAr);
     }
 
     // State logging
