@@ -952,10 +952,6 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
   </li>
 
   <li>
-    <code>android.permission.READ_EXTERNAL_STORAGE</code>
-  </li>
-
-  <li>
     <code>android.permission.REORDER_TASKS</code>
   </li>
 
