@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.provider.Telephony.Sms.Intents;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -362,6 +363,15 @@ final class DefaultPermissionGrantPolicy {
                         grantDefaultPermissionsToDefaultSystemSmsAppLPr(smsPackage, userId);
                     }
                 }
+            }
+
+            // Cell Broadcast Receiver
+            Intent cbrIntent = new Intent(Intents.SMS_CB_RECEIVED_ACTION);
+            PackageParser.Package cbrPackage =
+                    getDefaultSystemHandlerActivityPackageLPr(cbrIntent, userId);
+
+            if (cbrPackage != null && doesPackageSupportRuntimePermissions(cbrPackage)) {
+                grantRuntimePermissionsLPw(cbrPackage, SMS_PERMISSIONS, false, userId);
             }
 
             // Calendar
