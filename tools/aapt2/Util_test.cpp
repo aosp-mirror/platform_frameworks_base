@@ -38,6 +38,13 @@ TEST(UtilTest, StringStartsWith) {
     EXPECT_TRUE(util::stringStartsWith<char>("hello.xml", "he"));
 }
 
+TEST(UtilTest, StringBuilderSplitEscapeSequence) {
+    EXPECT_EQ(StringPiece16(u"this is a new\nline."),
+            util::StringBuilder().append(u"this is a new\\")
+                                 .append(u"nline.")
+                                 .str());
+}
+
 TEST(UtilTest, StringBuilderWhitespaceRemoval) {
     EXPECT_EQ(StringPiece16(u"hey guys this is so cool"),
             util::StringBuilder().append(u"    hey guys ")

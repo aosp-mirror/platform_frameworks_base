@@ -162,6 +162,7 @@ private:
     std::u16string mStr;
     bool mQuote = false;
     bool mTrailingSpace = false;
+    bool mLastCharWasEscape = false;
     std::string mError;
 };
 

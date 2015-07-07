@@ -175,7 +175,51 @@ StringBuilder& StringBuilder::append(const StringPiece16& str) {
     const char16_t* start = str.begin();
     const char16_t* current = start;
     while (current != end) {
-        if (*current == u'"') {
+        if (mLastCharWasEscape) {
+            switch (*current) {
+                case u't':
+                    mStr += u'\t';
+                    break;
+                case u'n':
+                    mStr += u'\n';
+                    break;
+                case u'#':
+                    mStr += u'#';
+                    break;
+                case u'@':
+                    mStr += u'@';
+                    break;
+                case u'?':
+                    mStr += u'?';
+                    break;
+                case u'"':
+                    mStr += u'"';
+                    break;
+                case u'\'':
+                    mStr += u'\'';
+                    break;
+                case u'\\':
+                    mStr += u'\\';
+                    break;
+                case u'u': {
+                    current++;
+                    Maybe<char16_t> c = parseUnicodeCodepoint(&current, end);
+                    if (!c) {
+                        mError = "invalid unicode escape sequence";
+                        return *this;
+                    }
+                    mStr += c.value();
+                    current -= 1;
+                    break;
+                }
+
+                default:
+                    // Ignore.
+                    break;
+            }
+            mLastCharWasEscape = false;
+            start = current + 1;
+        } else if (*current == u'"') {
             if (!mQuote && mTrailingSpace) {
                 // We found an opening quote, and we have
                 // trailing space, so we should append that
@@ -208,52 +252,7 @@ StringBuilder& StringBuilder::append(const StringPiece16& str) {
             }
             mStr.append(start, current - start);
             start = current + 1;
-
-            current++;
-            if (current != end) {
-                switch (*current) {
-                    case u't':
-                        mStr += u'\t';
-                        break;
-                    case u'n':
-                        mStr += u'\n';
-                        break;
-                    case u'#':
-                        mStr += u'#';
-                        break;
-                    case u'@':
-                        mStr += u'@';
-                        break;
-                    case u'?':
-                        mStr += u'?';
-                        break;
-                    case u'"':
-                        mStr += u'"';
-                        break;
-                    case u'\'':
-                        mStr += u'\'';
-                        break;
-                    case u'\\':
-                        mStr += u'\\';
-                        break;
-                    case u'u': {
-                        current++;
-                        Maybe<char16_t> c = parseUnicodeCodepoint(&current, end);
-                        if (!c) {
-                            mError = "invalid unicode escape sequence";
-                            return *this;
-                        }
-                        mStr += c.value();
-                        current -= 1;
-                        break;
-                    }
-
-                    default:
-                        // Ignore.
-                        break;
-                }
-                start = current + 1;
-            }
+            mLastCharWasEscape = true;
         } else if (!mQuote) {
             // This is not quoted text, so look for whitespace.
             if (isspace16(*current)) {
