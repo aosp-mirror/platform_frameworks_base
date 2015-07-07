@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -741,6 +742,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                         }
                     } else if (v == mHeaderView.mDismissButton) {
                         dismissTask();
+                        // Keep track of deletions by the dismiss button
+                        MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
+                                Constants.Metrics.DismissSourceHeaderButton);
                     } else if (v == mHeaderView.mMoveTaskButton) {
                         if (mCb != null) {
                             mCb.onTaskResize(tv);
