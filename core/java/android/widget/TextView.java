@@ -46,7 +46,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.inputmethodservice.ExtractEditText;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -116,6 +115,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.ViewStructure;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
@@ -5819,6 +5819,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return super.getBaseline();
         }
 
+        return getBaselineOffset() + mLayout.getLineBaseline(0);
+    }
+
+    int getBaselineOffset() {
         int voffset = 0;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
             voffset = getVerticalOffset(true);
@@ -5828,7 +5832,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             voffset -= getOpticalInsets().top;
         }
 
-        return getExtendedPaddingTop() + voffset + mLayout.getLineBaseline(0);
+        return getExtendedPaddingTop() + voffset;
     }
 
     /**
@@ -8763,7 +8767,79 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
         if (!isPassword) {
-            structure.setText(getText(), getSelectionStart(), getSelectionEnd());
+            if (mLayout == null) {
+                assumeLayout();
+            }
+            Layout layout = mLayout;
+            final int lineCount = layout.getLineCount();
+            if (lineCount <= 1) {
+                // Simple case: this is a single line.
+                structure.setText(getText(), getSelectionStart(), getSelectionEnd());
+            } else {
+                // Complex case: multi-line, could be scrolled or within a scroll container
+                // so some lines are not visible.
+                final int[] tmpCords = new int[2];
+                getLocationInWindow(tmpCords);
+                final int topWindowLocation = tmpCords[1];
+                View root = this;
+                ViewParent viewParent = getParent();
+                while (viewParent instanceof View) {
+                    root = (View) viewParent;
+                    viewParent = root.getParent();
+                }
+                final int windowHeight = root.getHeight();
+                final int topLine;
+                final int bottomLine;
+                if (topWindowLocation >= 0) {
+                    // The top of the view is fully within its window; start text at line 0.
+                    topLine = getLineAtCoordinateUnclamped(0);
+                    bottomLine = getLineAtCoordinateUnclamped(windowHeight-1);
+                } else {
+                    // The top of hte window has scrolled off the top of the window; figure out
+                    // the starting line for this.
+                    topLine = getLineAtCoordinateUnclamped(-topWindowLocation);
+                    bottomLine = getLineAtCoordinateUnclamped(windowHeight-1-topWindowLocation);
+                }
+                // We want to return some contextual lines above/below the lines that are
+                // actually visible.
+                int expandedTopLine = topLine - (bottomLine-topLine)/2;
+                if (expandedTopLine < 0) {
+                    expandedTopLine = 0;
+                }
+                int expandedBottomLine = bottomLine + (bottomLine-topLine)/2;
+                if (expandedBottomLine >= lineCount) {
+                    expandedBottomLine = lineCount-1;
+                }
+                // Convert lines into character offsets.
+                int expandedTopChar = layout.getLineStart(expandedTopLine);
+                int expandedBottomChar = layout.getLineEnd(expandedBottomLine);
+                // Take into account selection -- if there is a selection, we need to expand
+                // the text we are returning to include that selection.
+                final int selStart = getSelectionStart();
+                final int selEnd = getSelectionEnd();
+                if (selStart < selEnd) {
+                    if (selStart < expandedTopChar) {
+                        expandedTopChar = selStart;
+                    }
+                    if (selEnd > expandedBottomChar) {
+                        expandedBottomChar = selEnd;
+                    }
+                }
+                // Get the text and trim it to the range we are reporting.
+                CharSequence text = getText();
+                if (expandedTopChar > 0 || expandedBottomChar < text.length()) {
+                    text = text.subSequence(expandedTopChar, expandedBottomChar);
+                }
+                structure.setText(text, selStart-expandedTopChar, selEnd-expandedTopChar);
+                final int[] lineOffsets = new int[bottomLine-topLine+1];
+                final int[] lineBaselines = new int[bottomLine-topLine+1];
+                final int baselineOffset = getBaselineOffset();
+                for (int i=topLine; i<=bottomLine; i++) {
+                    lineOffsets[i-topLine] = layout.getLineStart(i);
+                    lineBaselines[i-topLine] = layout.getLineBaseline(i) + baselineOffset;
+                }
+                structure.setTextLines(lineOffsets, lineBaselines);
+            }
 
             // Extract style information that applies to the TextView as a whole.
             int style = 0;
@@ -9196,24 +9272,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * If provided, this ActionMode.Callback will be used to create the ActionMode when text
      * selection is initiated in this View.
      *
-     * The standard implementation populates the menu with a subset of Select All, Cut, Copy,
+     * <p>The standard implementation populates the menu with a subset of Select All, Cut, Copy,
      * Paste, Replace and Share actions, depending on what this View supports.
      *
-     * A custom implementation can add new entries in the default menu in its
-     * {@link android.view.ActionMode.Callback#onPrepareActionMode(ActionMode, Menu)} method. The
-     * default actions can also be removed from the menu using
+     * <p>A custom implementation can add new entries in the default menu in its
+     * {@link android.view.ActionMode.Callback#onPrepareActionMode(ActionMode, android.view.Menu)}
+     * method. The default actions can also be removed from the menu using
      * {@link android.view.Menu#removeItem(int)} and passing {@link android.R.id#selectAll},
      * {@link android.R.id#cut}, {@link android.R.id#copy}, {@link android.R.id#paste},
      * {@link android.R.id#replaceText} or {@link android.R.id#shareText} ids as parameters.
      *
-     * Returning false from
-     * {@link android.view.ActionMode.Callback#onCreateActionMode(ActionMode, Menu)} will prevent
-     * the action mode from being started.
+     * <p>Returning false from
+     * {@link android.view.ActionMode.Callback#onCreateActionMode(ActionMode, android.view.Menu)}
+     * will prevent the action mode from being started.
      *
-     * Action click events should be handled by the custom implementation of
-     * {@link android.view.ActionMode.Callback#onActionItemClicked(ActionMode, MenuItem)}.
+     * <p>Action click events should be handled by the custom implementation of
+     * {@link android.view.ActionMode.Callback#onActionItemClicked(ActionMode,
+     * android.view.MenuItem)}.
      *
-     * Note that text selection mode is not started when a TextView receives focus and the
+     * <p>Note that text selection mode is not started when a TextView receives focus and the
      * {@link android.R.attr#selectAllOnFocus} flag has been set. The content is highlighted in
      * that case, to allow for quick replacement.
      */
@@ -9440,6 +9517,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Clamp the position to inside of the view.
         y = Math.max(0.0f, y);
         y = Math.min(getHeight() - getTotalPaddingBottom() - 1, y);
+        y += getScrollY();
+        return getLayout().getLineForVertical((int) y);
+    }
+
+    int getLineAtCoordinateUnclamped(float y) {
+        y -= getTotalPaddingTop();
         y += getScrollY();
         return getLayout().getLineForVertical((int) y);
     }
