@@ -25,7 +25,9 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
 import com.android.layoutlib.bridge.impl.ParserFactory;
+import com.android.layoutlib.bridge.util.ReflectionUtils;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
@@ -112,14 +114,8 @@ public final class BridgeInflater extends LayoutInflater {
             }
 
             // Finally try again using the custom view loader
-            try {
-                if (view == null) {
-                    view = loadCustomView(name, attrs);
-                }
-            } catch (ClassNotFoundException e) {
-                // If the class was not found, we throw the exception directly, because this
-                // method is already expected to throw it.
-                throw e;
+            if (view == null) {
+                view = loadCustomView(name, attrs);
             }
         } catch (Exception e) {
             // Wrap the real exception in a ClassNotFoundException, so that the calling method
@@ -241,6 +237,25 @@ public final class BridgeInflater extends LayoutInflater {
                     int value = Integer.parseInt(scrollPos.substring(0, scrollPos.length() - 2));
                     bc.setScrollYPos(view, value);
                 }
+            }
+            if (ReflectionUtils.isInstanceOf(view, RecyclerViewUtil.CN_RECYCLER_VIEW)) {
+                Integer resourceId = null;
+                String attrVal = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI,
+                        BridgeConstants.ATTR_LIST_ITEM);
+                if (attrVal != null && !attrVal.isEmpty()) {
+                    ResourceValue resValue = bc.getRenderResources().findResValue(attrVal, false);
+                    if (resValue.isFramework()) {
+                        resourceId = Bridge.getResourceId(resValue.getResourceType(),
+                                resValue.getName());
+                    } else {
+                        resourceId = mLayoutlibCallback.getResourceId(resValue.getResourceType(),
+                                resValue.getName());
+                    }
+                }
+                if (resourceId == null) {
+                    resourceId = 0;
+                }
+                RecyclerViewUtil.setAdapter(view, bc, mLayoutlibCallback, resourceId);
             }
         }
     }
