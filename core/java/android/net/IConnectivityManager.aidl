@@ -114,7 +114,7 @@ interface IConnectivityManager
 
     void startLegacyVpn(in VpnProfile profile);
 
-    LegacyVpnInfo getLegacyVpnInfo();
+    LegacyVpnInfo getLegacyVpnInfo(int userId);
 
     VpnInfo[] getAllVpnInfo();
 

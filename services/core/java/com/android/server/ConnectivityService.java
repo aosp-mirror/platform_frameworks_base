@@ -3112,11 +3112,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * are checked in Vpn class.
      */
     @Override
-    public LegacyVpnInfo getLegacyVpnInfo() {
+    public LegacyVpnInfo getLegacyVpnInfo(int userId) {
+        enforceCrossUserPermission(userId);
         throwIfLockdownEnabled();
-        int user = UserHandle.getUserId(Binder.getCallingUid());
         synchronized(mVpns) {
-            return mVpns.get(user).getLegacyVpnInfo();
+            return mVpns.get(userId).getLegacyVpnInfo();
         }
     }
 
