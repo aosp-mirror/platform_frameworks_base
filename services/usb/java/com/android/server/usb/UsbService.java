@@ -27,6 +27,9 @@ import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
@@ -36,6 +39,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
 import java.io.File;
@@ -78,6 +82,7 @@ public class UsbService extends IUsbManager.Stub {
 
     private UsbDeviceManager mDeviceManager;
     private UsbHostManager mHostManager;
+    private UsbPortManager mPortManager;
     private final UsbAlsaManager mAlsaManager;
 
     private final Object mLock = new Object();
@@ -109,6 +114,9 @@ public class UsbService extends IUsbManager.Stub {
         }
         if (new File("/sys/class/android_usb").exists()) {
             mDeviceManager = new UsbDeviceManager(context, mAlsaManager);
+        }
+        if (mHostManager != null || mDeviceManager != null) {
+            mPortManager = new UsbPortManager(context);
         }
 
         setCurrentUser(UserHandle.USER_OWNER);
@@ -159,6 +167,9 @@ public class UsbService extends IUsbManager.Stub {
         }
         if (mHostManager != null) {
             mHostManager.systemReady();
+        }
+        if (mPortManager != null) {
+            mPortManager.systemReady();
         }
     }
 
@@ -346,29 +357,258 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public UsbPort[] getPorts() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mPortManager != null ? mPortManager.getPorts() : null;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public UsbPortStatus getPortStatus(String portId) {
+        Preconditions.checkNotNull(portId, "portId must not be null");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mPortManager != null ? mPortManager.getPortStatus(portId) : null;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void setPortRoles(String portId, int powerRole, int dataRole) {
+        Preconditions.checkNotNull(portId, "portId must not be null");
+        UsbPort.checkRoles(powerRole, dataRole);
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mPortManager != null) {
+                mPortManager.setPortRoles(portId, powerRole, dataRole, null);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        pw.println("USB Manager State:");
-        pw.increaseIndent();
-        if (mDeviceManager != null) {
-            mDeviceManager.dump(pw);
-        }
-        if (mHostManager != null) {
-            mHostManager.dump(pw);
-        }
-        mAlsaManager.dump(pw);
-
-        synchronized (mLock) {
-            for (int i = 0; i < mSettingsByUser.size(); i++) {
-                final int userId = mSettingsByUser.keyAt(i);
-                final UsbSettingsManager settings = mSettingsByUser.valueAt(i);
-                pw.println("Settings for user " + userId + ":");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (args == null || args.length == 0 || "-a".equals(args[0])) {
+                pw.println("USB Manager State:");
                 pw.increaseIndent();
-                settings.dump(pw);
-                pw.decreaseIndent();
+                if (mDeviceManager != null) {
+                    mDeviceManager.dump(pw);
+                }
+                if (mHostManager != null) {
+                    mHostManager.dump(pw);
+                }
+                if (mPortManager != null) {
+                    mPortManager.dump(pw);
+                }
+                mAlsaManager.dump(pw);
+
+                synchronized (mLock) {
+                    for (int i = 0; i < mSettingsByUser.size(); i++) {
+                        final int userId = mSettingsByUser.keyAt(i);
+                        final UsbSettingsManager settings = mSettingsByUser.valueAt(i);
+                        pw.println("Settings for user " + userId + ":");
+                        pw.increaseIndent();
+                        settings.dump(pw);
+                        pw.decreaseIndent();
+                    }
+                }
+            } else if (args.length == 4 && "set-port-roles".equals(args[0])) {
+                final String portId = args[1];
+                final int powerRole;
+                switch (args[2]) {
+                    case "source":
+                        powerRole = UsbPort.POWER_ROLE_SOURCE;
+                        break;
+                    case "sink":
+                        powerRole = UsbPort.POWER_ROLE_SINK;
+                        break;
+                    case "no-power":
+                        powerRole = 0;
+                        break;
+                    default:
+                        pw.println("Invalid power role: " + args[2]);
+                        return;
+                }
+                final int dataRole;
+                switch (args[3]) {
+                    case "host":
+                        dataRole = UsbPort.DATA_ROLE_HOST;
+                        break;
+                    case "device":
+                        dataRole = UsbPort.DATA_ROLE_DEVICE;
+                        break;
+                    case "no-data":
+                        dataRole = 0;
+                        break;
+                    default:
+                        pw.println("Invalid data role: " + args[3]);
+                        return;
+                }
+                if (mPortManager != null) {
+                    mPortManager.setPortRoles(portId, powerRole, dataRole, pw);
+                    // Note: It might take some time for the side-effects of this operation
+                    // to be fully applied by the kernel since the driver may need to
+                    // renegotiate the USB port mode.  If this proves to be an issue
+                    // during debugging, it might be worth adding a sleep here before
+                    // dumping the new state.
+                    pw.println();
+                    mPortManager.dump(pw);
+                }
+            } else if (args.length == 3 && "add-port".equals(args[0])) {
+                final String portId = args[1];
+                final int supportedModes;
+                switch (args[2]) {
+                    case "ufp":
+                        supportedModes = UsbPort.MODE_UFP;
+                        break;
+                    case "dfp":
+                        supportedModes = UsbPort.MODE_DFP;
+                        break;
+                    case "dual":
+                        supportedModes = UsbPort.MODE_DUAL;
+                        break;
+                    case "none":
+                        supportedModes = 0;
+                        break;
+                    default:
+                        pw.println("Invalid mode: " + args[2]);
+                        return;
+                }
+                if (mPortManager != null) {
+                    mPortManager.addSimulatedPort(portId, supportedModes, pw);
+                    pw.println();
+                    mPortManager.dump(pw);
+                }
+            } else if (args.length == 5 && "connect-port".equals(args[0])) {
+                final String portId = args[1];
+                final int mode;
+                final boolean canChangeMode = args[2].endsWith("?");
+                switch (canChangeMode ? removeLastChar(args[2]) : args[2]) {
+                    case "ufp":
+                        mode = UsbPort.MODE_UFP;
+                        break;
+                    case "dfp":
+                        mode = UsbPort.MODE_DFP;
+                        break;
+                    default:
+                        pw.println("Invalid mode: " + args[2]);
+                        return;
+                }
+                final int powerRole;
+                final boolean canChangePowerRole = args[3].endsWith("?");
+                switch (canChangePowerRole ? removeLastChar(args[3]) : args[3]) {
+                    case "source":
+                        powerRole = UsbPort.POWER_ROLE_SOURCE;
+                        break;
+                    case "sink":
+                        powerRole = UsbPort.POWER_ROLE_SINK;
+                        break;
+                    default:
+                        pw.println("Invalid power role: " + args[3]);
+                        return;
+                }
+                final int dataRole;
+                final boolean canChangeDataRole = args[4].endsWith("?");
+                switch (canChangeDataRole ? removeLastChar(args[4]) : args[4]) {
+                    case "host":
+                        dataRole = UsbPort.DATA_ROLE_HOST;
+                        break;
+                    case "device":
+                        dataRole = UsbPort.DATA_ROLE_DEVICE;
+                        break;
+                    default:
+                        pw.println("Invalid data role: " + args[4]);
+                        return;
+                }
+                if (mPortManager != null) {
+                    mPortManager.connectSimulatedPort(portId, mode, canChangeMode,
+                            powerRole, canChangePowerRole, dataRole, canChangeDataRole, pw);
+                    pw.println();
+                    mPortManager.dump(pw);
+                }
+            } else if (args.length == 2 && "disconnect-port".equals(args[0])) {
+                final String portId = args[1];
+                if (mPortManager != null) {
+                    mPortManager.disconnectSimulatedPort(portId, pw);
+                    pw.println();
+                    mPortManager.dump(pw);
+                }
+            } else if (args.length == 2 && "remove-port".equals(args[0])) {
+                final String portId = args[1];
+                if (mPortManager != null) {
+                    mPortManager.removeSimulatedPort(portId, pw);
+                    pw.println();
+                    mPortManager.dump(pw);
+                }
+            } else if (args.length == 1 && "reset".equals(args[0])) {
+                if (mPortManager != null) {
+                    mPortManager.resetSimulation(pw);
+                    pw.println();
+                    mPortManager.dump(pw);
+                }
+            } else if (args.length == 1 && "ports".equals(args[0])) {
+                if (mPortManager != null) {
+                    mPortManager.dump(pw);
+                }
+            } else {
+                pw.println("Dump current USB state or issue command:");
+                pw.println("  ports");
+                pw.println("  set-port-roles <id> <source|sink|no-power> <host|device|no-data>");
+                pw.println("  add-port <id> <ufp|dfp|dual|none>");
+                pw.println("  connect-port <id> <ufp|dfp><?> <source|sink><?> <host|device><?>");
+                pw.println("    (add ? suffix if mode, power role, or data role can be changed)");
+                pw.println("  disconnect-port <id>");
+                pw.println("  remove-port <id>");
+                pw.println("  reset");
+                pw.println();
+                pw.println("Example USB type C port role switch:");
+                pw.println("  dumpsys usb set-port-roles \"default\" source device");
+                pw.println();
+                pw.println("Example USB type C port simulation with full capabilities:");
+                pw.println("  dumpsys usb add-port \"matrix\" dual");
+                pw.println("  dumpsys usb connect-port \"matrix\" ufp? sink? device?");
+                pw.println("  dumpsys usb ports");
+                pw.println("  dumpsys usb disconnect-port \"matrix\"");
+                pw.println("  dumpsys usb remove-port \"matrix\"");
+                pw.println("  dumpsys usb reset");
+                pw.println();
+                pw.println("Example USB type C port where only power role can be changed:");
+                pw.println("  dumpsys usb add-port \"matrix\" dual");
+                pw.println("  dumpsys usb connect-port \"matrix\" dfp source? host");
+                pw.println("  dumpsys usb reset");
+                pw.println();
+                pw.println("Example USB OTG port where id pin determines function:");
+                pw.println("  dumpsys usb add-port \"matrix\" dual");
+                pw.println("  dumpsys usb connect-port \"matrix\" dfp source host");
+                pw.println("  dumpsys usb reset");
+                pw.println();
+                pw.println("Example USB device-only port:");
+                pw.println("  dumpsys usb add-port \"matrix\" ufp");
+                pw.println("  dumpsys usb connect-port \"matrix\" ufp sink device");
+                pw.println("  dumpsys usb reset");
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private static final String removeLastChar(String value) {
+        return value.substring(0, value.length() - 1);
     }
 }
