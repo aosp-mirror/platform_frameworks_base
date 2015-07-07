@@ -1527,10 +1527,6 @@
     <permission android:name="android.permission.SET_SCREEN_COMPATIBILITY"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to access all multi-user external storage @hide -->
-    <permission android:name="android.permission.ACCESS_ALL_EXTERNAL_STORAGE"
-        android:protectionLevel="signature" />
-
     <!-- @SystemApi Allows an application to modify the current configuration, such
          as locale. -->
     <permission android:name="android.permission.CHANGE_CONFIGURATION"
