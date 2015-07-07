@@ -30,10 +30,12 @@ page.image=images/cards/card-support_16-9_2x.png
     <dt>API Name Changes:</dt>
     <dd>
       <ul>
-        <li>Moved the {@code android.app.AssistContent} class to a different package,
-          {@code android.app.assist.AssistContent} in the Assist API.</li>
-        <li>Moved the {@code android.app.AssistStructure} class to a different package,
-          {@code android.app.assist.AssistStructure} in the Assist API.</li>
+        <li>Moved the {@code android.app.AssistContent} class into the new package,
+          {@code android.app.assist} in the Assist API. The full class
+          name is now {@code android.app.assist.AssistContent}.</li>
+        <li>Moved the {@code android.app.AssistStructure} class to the new package,
+          {@code android.app.assist} in the Assist API. The full class name
+          is now {@code android.app.assist.AssistStructure}.</li>
         <li>Replaced the {@code ScanResult.PasspointNetwork} property with the
           {@code ScanResult.isPasspointNetwork()} method for HotSpot 2.0 support.</li>
         <li>Replaced the {@code InputDevice.hasMic()} method with {@code InputDevice.hasMicrophone()}
@@ -44,7 +46,7 @@ page.image=images/cards/card-support_16-9_2x.png
           {@code GestureDetector.OnContextClickListener} for Bluetooth Stylus support.</li>
         <li>Renamed the {@code android.app.usage.NetworkUsageStats} class to
           {@code android.app.usage.NetworkStats}.</li>
-        <li>Renames the {@code android.app.usage.NetworkUsageStats.Bucket} class to
+        <li>Renamed the {@code android.app.usage.NetworkUsageStats.Bucket} class to
           {@code android.app.usage.NetworkStats.Bucket}.</li>
       </ul>
     </dd>
