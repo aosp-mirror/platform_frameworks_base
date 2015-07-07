@@ -10054,7 +10054,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
 
                         winAnimator.setSurfaceBoundariesLocked(recoveringMemory);
+                    }
 
+                    // Check the draw state of the window, but only if it is visible to the user.
+                    if (!w.isHiddenFromUserLocked()) {
                         final AppWindowToken atoken = w.mAppToken;
                         if (DEBUG_STARTING_WINDOW && atoken != null
                                 && w == atoken.startingWindow) {
