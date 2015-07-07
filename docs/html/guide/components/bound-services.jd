@@ -649,8 +649,7 @@ clients.</p>
 <p>Additionally, if your service is started and accepts binding, then when the system calls
 your {@link android.app.Service#onUnbind onUnbind()} method, you can optionally return
 {@code true} if you would like to receive a call to {@link android.app.Service#onRebind
-onRebind()} the next time a client binds to the service (instead of receiving a call to {@link
-android.app.Service#onBind onBind()}). {@link android.app.Service#onRebind
+onRebind()} the next time a client binds to the service. {@link android.app.Service#onRebind
 onRebind()} returns void, but the client still receives the {@link android.os.IBinder} in its
 {@link android.content.ServiceConnection#onServiceConnected onServiceConnected()} callback.
 Below, figure 1 illustrates the logic for this kind of lifecycle.</p>
