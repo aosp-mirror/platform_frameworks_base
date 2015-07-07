@@ -202,7 +202,8 @@ public final class MediaSessionManager {
                 Log.w(TAG, "Attempted to add session listener twice, ignoring.");
                 return;
             }
-            SessionsChangedWrapper wrapper = new SessionsChangedWrapper(sessionListener, handler);
+            SessionsChangedWrapper wrapper = new SessionsChangedWrapper(mContext, sessionListener,
+                    handler);
             try {
                 mService.addSessionsListener(wrapper.mStub, notificationListener, userId);
                 mListeners.put(sessionListener, wrapper);
@@ -229,6 +230,8 @@ public final class MediaSessionManager {
                     mService.removeSessionsListener(wrapper.mStub);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error in removeOnActiveSessionsChangedListener.", e);
+                } finally {
+                    wrapper.release();
                 }
             }
         }
@@ -317,11 +320,14 @@ public final class MediaSessionManager {
         public void onActiveSessionsChanged(@Nullable List<MediaController> controllers);
     }
 
-    private final class SessionsChangedWrapper {
-        private final OnActiveSessionsChangedListener mListener;
-        private final Handler mHandler;
+    private static final class SessionsChangedWrapper {
+        private Context mContext;
+        private OnActiveSessionsChangedListener mListener;
+        private Handler mHandler;
 
-        public SessionsChangedWrapper(OnActiveSessionsChangedListener listener, Handler handler) {
+        public SessionsChangedWrapper(Context context, OnActiveSessionsChangedListener listener,
+                Handler handler) {
+            mContext = context;
             mListener = listener;
             mHandler = handler;
         }
@@ -333,17 +339,25 @@ public final class MediaSessionManager {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            ArrayList<MediaController> controllers
-                                    = new ArrayList<MediaController>();
-                            int size = tokens.size();
-                            for (int i = 0; i < size; i++) {
-                                controllers.add(new MediaController(mContext, tokens.get(i)));
+                            if (mListener != null) {
+                                ArrayList<MediaController> controllers
+                                        = new ArrayList<MediaController>();
+                                int size = tokens.size();
+                                for (int i = 0; i < size; i++) {
+                                    controllers.add(new MediaController(mContext, tokens.get(i)));
+                                }
+                                mListener.onActiveSessionsChanged(controllers);
                             }
-                            mListener.onActiveSessionsChanged(controllers);
                         }
                     });
                 }
             }
         };
+
+        private void release() {
+            mContext = null;
+            mListener = null;
+            mHandler = null;
+        }
     }
 }
