@@ -2606,102 +2606,76 @@
   <!-- ===============================================================
        Resources added in version MNC of the platform
        =============================================================== -->
-  <eat-comment />
+    <eat-comment />
 
-  <public type="attr" name="trackTint" />
-  <public type="attr" name="trackTintMode" />
-  <public type="attr" name="start" />
-  <public type="attr" name="end" />
-  <public type="attr" name="windowLightStatusBar" />
-  <public type="attr" name="numbersInnerTextColor" />
+    <public type="attr" name="trackTint" id="0x010104d9" />
+    <public type="attr" name="trackTintMode" id="0x010104da" />
+    <public type="attr" name="start" id="0x010104db" />
+    <public type="attr" name="end" id="0x010104dc" />
+    <public type="attr" name="breakStrategy" id="0x010104dd" />
+    <public type="attr" name="hyphenationFrequency" id="0x010104de" />
+    <public type="attr" name="allowUndo" id="0x010104df" />
+    <public type="attr" name="windowLightStatusBar" id="0x010104e0" />
+    <public type="attr" name="numbersInnerTextColor" id="0x010104e1" />
+    <public type="attr" name="colorBackgroundFloating" id="0x010104e2" />
+    <public type="attr" name="titleTextColor" id="0x010104e3" />
+    <public type="attr" name="subtitleTextColor" id="0x010104e4" />
+    <public type="attr" name="thumbPosition" id="0x010104e5" />
+    <public type="attr" name="scrollIndicators" id="0x010104e6" />
+    <public type="attr" name="contextClickable" id="0x010104e7" />
+    <public type="attr" name="fingerprintAuthDrawable" id="0x010104e8" />
+    <public type="attr" name="logoDescription" id="0x010104e9" />
+    <public type="attr" name="extractNativeLibs" id="0x010104ea" />
+    <public type="attr" name="fullBackupContent" id="0x010104eb" />
+    <public type="attr" name="usesCleartextTraffic" id="0x010104ec" />
+    <public type="attr" name="lockTaskMode" id="0x010104ed" />
+    <public type="attr" name="autoVerify" id="0x010104ee" />
+    <public type="attr" name="showForAllUsers" id="0x010104ef" />
+    <public type="attr" name="supportsAssist" id="0x010104f0" />
+    <public type="attr" name="supportsLaunchVoiceAssistFromKeyguard" id="0x010104f1" />
 
-  <attr name="__reserved2" format="boolean" />
-  <public type="attr" name="__reserved2" />
-  <attr name="__reserved3" format="boolean" />
-  <public type="attr" name="__reserved3" />
-  <attr name="__reserved4" format="boolean" />
-  <public type="attr" name="__reserved4" />
-  <attr name="__reserved5" format="boolean" />
-  <public type="attr" name="__reserved5" />
-  <attr name="__reserved6" format="boolean" />
-  <public type="attr" name="__reserved6" />
-  <attr name="__reserved7" format="boolean" />
-  <public type="attr" name="__reserved7" />
+    <public type="style" name="Widget.Material.Button.Colored" id="0x010302d3" />
+    <public type="style" name="TextAppearance.Material.Widget.Button.Inverse" id="0x010302d4" />
+    <public type="style" name="Theme.Material.Light.LightStatusBar" id="0x010302d5" />
+    <public type="style" name="ThemeOverlay.Material.Dialog" id="0x010302d6" />
+    <public type="style" name="ThemeOverlay.Material.Dialog.Alert" id="0x010302d7" />
 
-  <public type="attr" name="fullBackupContent" />
+    <public type="id" name="pasteAsPlainText" id="0x01020031" />
+    <public type="id" name="undo" id="0x01020032" />
+    <public type="id" name="redo" id="0x01020033" />
+    <public type="id" name="replaceText" id="0x01020034" />
+    <public type="id" name="shareText" id="0x01020035" />
+    <public type="id" name="accessibilityActionShowOnScreen" id="0x01020036" />
+    <public type="id" name="accessibilityActionScrollToPosition" id="0x01020037" />
+    <public type="id" name="accessibilityActionScrollUp" id="0x01020038" />
+    <public type="id" name="accessibilityActionScrollLeft" id="0x01020039" />
+    <public type="id" name="accessibilityActionScrollDown" id="0x0102003a" />
+    <public type="id" name="accessibilityActionScrollRight" id="0x0102003b" />
+    <public type="id" name="accessibilityActionContextClick" id="0x0102003c" />
 
-  <public type="style" name="Widget.Material.Button.Colored" />
-  <public type="style" name="Theme.Material.DayNight" />
-  <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
-  <public type="style" name="Theme.Material.DayNight.Dialog" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.Alert" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.MinWidth" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar.MinWidth" />
-  <public type="style" name="Theme.Material.DayNight.Dialog.Presentation" />
-  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge" />
-  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.NoActionBar" />
-  <public type="style" name="Theme.Material.DayNight.NoActionBar" />
-  <public type="style" name="Theme.Material.DayNight.NoActionBar.Fullscreen" />
-  <public type="style" name="Theme.Material.DayNight.NoActionBar.Overscan" />
-  <public type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
-  <public type="style" name="Theme.Material.DayNight.Panel" />
-  <public type="style" name="Theme.Material.Light.LightStatusBar" />
-  <public type="style" name="ThemeOverlay.Material.Dialog" />
-  <public type="style" name="TextAppearance.Material.Widget.Button.Inverse" />
-  <public type="style" name="ThemeOverlay.Material.Dialog.Alert" />
-  <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
-  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
+  <!-- ===============================================================
+       Resources added in version N of the platform
+       =============================================================== -->
+    <eat-comment />
 
-  <public type="id" name="pasteAsPlainText" />
-  <public type="id" name="undo" />
-  <public type="id" name="redo" />
-  <public type="id" name="replaceText" />
-  <public type="id" name="accessibilityActionShowOnScreen" />
-  <public type="id" name="accessibilityActionScrollToPosition" />
-  <public type="id" name="accessibilityActionScrollUp" />
-  <public type="id" name="accessibilityActionScrollLeft" />
-  <public type="id" name="accessibilityActionScrollDown" />
-  <public type="id" name="accessibilityActionScrollRight" />
-  <public type="id" name="accessibilityActionSetProgress" />
-  <public type="id" name="shareText" />
-  <public type="id" name="accessibilityActionContextClick" />
+    <public type="style" name="Theme.Material.DayNight" />
+    <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
+    <public type="style" name="Theme.Material.DayNight.Dialog" />
+    <public type="style" name="Theme.Material.DayNight.Dialog.Alert" />
+    <public type="style" name="Theme.Material.DayNight.Dialog.MinWidth" />
+    <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar" />
+    <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar.MinWidth" />
+    <public type="style" name="Theme.Material.DayNight.Dialog.Presentation" />
+    <public type="style" name="Theme.Material.DayNight.DialogWhenLarge" />
+    <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.NoActionBar" />
+    <public type="style" name="Theme.Material.DayNight.NoActionBar" />
+    <public type="style" name="Theme.Material.DayNight.NoActionBar.Fullscreen" />
+    <public type="style" name="Theme.Material.DayNight.NoActionBar.Overscan" />
+    <public type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
+    <public type="style" name="Theme.Material.DayNight.Panel" />
+    <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
+    <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
 
-  <public type="attr" name="allowUndo" />
-  <public type="attr" name="colorBackgroundFloating" />
-  <public type="attr" name="extractNativeLibs" />
-  <public type="attr" name="usesCleartextTraffic" />
+    <public type="id" name="accessibilityActionSetProgress" />
 
-  <!--IntentFilter auto verification -->
-  <public type="attr" name="autoVerify" />
-  <public type="attr" name="breakStrategy" />
-
-  <public type="attr" name="supportsAssist" />
-  <public type="attr" name="thumbPosition" />
-
-  <!-- Placeholder for a removed attribute. Remove this before M release. -->
-  <public type="attr" name="removeBeforeMRelease" />
-
-  <public type="attr" name="lockTaskMode" />
-
-  <!-- Placeholder for a removed attribute. Remove this before M release. -->
-  <public type="attr" name="__removeBeforeMRelease_leftIndents" />
-  <public type="attr" name="__removeBeforeMRelease_rightIndents" />
-
-  <public type="attr" name="showForAllUsers" />
-
-  <attr name="__reserved1" format="boolean" />
-  <public type="attr" name="__reserved1" />
-
-  <attr name="__reserved0" format="boolean" />
-  <public type="attr" name="__reserved0" />
-
-  <public type="attr" name="contextClickable" />
-  <public type="attr" name="supportsLaunchVoiceAssistFromKeyguard" />
-  <public type="attr" name="scrollIndicators" />
-  <public type="attr" name="hyphenationFrequency" />
-  <public type="attr" name="fingerprintAuthDrawable" />
-  <public type="attr" name="logoDescription" />
-  <public type="attr" name="titleTextColor" />
-  <public type="attr" name="subtitleTextColor" />
 </resources>
