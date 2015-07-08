@@ -69,7 +69,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     private AtomicInteger mSequenceNumber;
 
-    private static final int DEFAULT_TIMEOUT = 1 * 60 * 1000; /* 1 minute */
+    private static final long DEFAULT_TIMEOUT = 1 * 60 * 1000; /* 1 minute */
     private static final long WARN_EXECUTE_DELAY_MS = 500; /* .5 sec */
 
     /** Lock held whenever communicating with native daemon. */
@@ -337,7 +337,12 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public NativeDaemonEvent execute(String cmd, Object... args)
             throws NativeDaemonConnectorException {
-        final NativeDaemonEvent[] events = executeForList(cmd, args);
+        return execute(DEFAULT_TIMEOUT, cmd, args);
+    }
+
+    public NativeDaemonEvent execute(long timeoutMs, String cmd, Object... args)
+            throws NativeDaemonConnectorException {
+        final NativeDaemonEvent[] events = executeForList(timeoutMs, cmd, args);
         if (events.length != 1) {
             throw new NativeDaemonConnectorException(
                     "Expected exactly one response, but received " + events.length);
@@ -372,7 +377,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public NativeDaemonEvent[] executeForList(String cmd, Object... args)
             throws NativeDaemonConnectorException {
-            return execute(DEFAULT_TIMEOUT, cmd, args);
+        return executeForList(DEFAULT_TIMEOUT, cmd, args);
     }
 
     /**
@@ -387,7 +392,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      *             {@link NativeDaemonEvent#isClassClientError()} or
      *             {@link NativeDaemonEvent#isClassServerError()}.
      */
-    public NativeDaemonEvent[] execute(int timeout, String cmd, Object... args)
+    public NativeDaemonEvent[] executeForList(long timeoutMs, String cmd, Object... args)
             throws NativeDaemonConnectorException {
         final long startTime = SystemClock.elapsedRealtime();
 
@@ -418,7 +423,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
         NativeDaemonEvent event = null;
         do {
-            event = mResponseQueue.remove(sequenceNumber, timeout, logCmd);
+            event = mResponseQueue.remove(sequenceNumber, timeoutMs, logCmd);
             if (event == null) {
                 loge("timed-out waiting for response to " + logCmd);
                 throw new NativeDaemonTimeoutException(logCmd, event);
@@ -606,7 +611,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
         // note that the timeout does not count time in deep sleep.  If you don't want
         // the device to sleep, hold a wakelock
-        public NativeDaemonEvent remove(int cmdNum, int timeoutMs, String logCmd) {
+        public NativeDaemonEvent remove(int cmdNum, long timeoutMs, String logCmd) {
             PendingCmd found = null;
             synchronized (mPendingCmds) {
                 for (PendingCmd pendingCmd : mPendingCmds) {
