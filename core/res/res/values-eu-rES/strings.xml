@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Instalatzaile gisa konektatua"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB osagarri batera konektatuta"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Ukitu aukera gehiago ikusteko."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB memoria formateatu?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD txartela formateatu?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB memorian dauden fitxategi guztiak ezabatuko dira. Ezin izango duzu ekintza hori desegin!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Txarteleko datu guztiak galduko dira."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formateatu"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB arazketa konektatuta"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB arazketa desgaitzeko, ukitu hau."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Aldatu teklatua"</string>

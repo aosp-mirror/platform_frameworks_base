@@ -507,7 +507,7 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Изменять блокировку экрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокировка экрана"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Управлять способом и временем блокировки экрана."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Удалить все данные"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Удаление всех данных"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Удалять все данные на планшетном ПК без предупреждения путем сброса настроек."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сброс настроек и удаление всех данных на телевизоре без предупреждения."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Удалять все данные на телефоне без предупреждения путем сброса настроек."</string>
@@ -630,7 +630,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Мать"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Родитель"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Партнер"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Рекомендуют:"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Рекомендован"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Родственник"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Сестра"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Супруг(а)"</string>
@@ -1054,11 +1054,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Подключен как установщик"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB-устройство подключено"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Ещё варианты"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Отформатировать USB-накопитель?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Отформатировать SD-карту?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Все файлы, сохраненные на USB-накопителе, будут удалены. Это действие невозможно отменить."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Все данные будут удалены с карты."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Нажмите, чтобы отключить отладку по USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Выбор раскладки"</string>
@@ -1237,7 +1232,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Ещё"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Внутр. память"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Внутр. накопитель"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-карта"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"SD-карта <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB-накопитель"</string>

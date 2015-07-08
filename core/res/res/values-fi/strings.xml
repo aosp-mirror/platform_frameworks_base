@@ -504,7 +504,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Muuta näytön lukitus"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Muuttaa näytön lukituksen"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lukita ruudun"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoida, milloin ja miten ruutu lukittuu."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoi, milloin ja miten ruutu lukittuu."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Pyyhkiä kaikki tiedot"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Palauta tehdasasetukset ja poista television tiedot ilman varoitusta."</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Kytketty asennusohjelmana"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Liitetty USB-laitteeseen"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Lisää vaihtoehtoja koskettamalla"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Alusta USB-tila?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Alustetaanko SD-kortti?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Kaikki USB-tallennustilaan tallennetut tiedostot poistetaan. Tätä toimintoa ei voi kumota!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Kaikki kortilla olevat tiedot menetetään."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Muoto"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-vianetsintä yhdistetty"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Sulje USB-vianetsintä koskettamalla."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Vaihda näppäimistö"</string>

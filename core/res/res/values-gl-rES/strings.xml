@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver máis opcións."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Queres formatar o almacenamento USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Queres formatar a tarxeta SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Borraranse todos os ficheiros gardados no teu almacenamento USB. Esta acción non se pode desfacer."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Perderanse todos os datos da túa tarxeta."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar a depuración de erros de USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>

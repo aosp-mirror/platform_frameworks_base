@@ -1042,11 +1042,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Imeunganishwa kama kisakinishi"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Imeunganishwa kwa kifuasi cha USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Gusa kwa chaguo zaidi."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Fomati hifadhi ya USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Ungependa kutayarisha kadi ya SD ili iweze kutumika?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Faili zote zilizohifadhiwa katika hifadhi yako ya USB zitafutwa. Hatua hii haiwezi kubadilishwa!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Data yote kwenye kadi yako itapotea."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Fomati"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Utatuaji wa USB umeunganishwa"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Gusa ili uzime utatuaji wa USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Badilisha kibodi"</string>

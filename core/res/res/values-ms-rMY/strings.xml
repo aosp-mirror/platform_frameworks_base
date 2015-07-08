@@ -227,21 +227,21 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Peribadi"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Tempat Kerja"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kenalan"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"akses kenalan anda"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"mengakses kenalan anda"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"akses lokasi peranti ini"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"mengakses lokasi peranti ini"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"akses kalendar anda"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"mengakses kalendar"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"hantar dan lihat mesej SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"menghantar dan melihat mesej SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Storan"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"akses foto, media dan fail pada peranti anda"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"mengakses foto, media dan fail pada peranti anda"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"rakam audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ambil gambar dan rakam video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"buat dan urus panggilan telefon"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"membuat dan mengurus panggilan telefon"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Penderia Badan"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"akses data penderia tentang tanda vital anda"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Dapatkan kembali kandungan tetingkap"</string>
@@ -504,7 +504,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Tukar kunci skrin"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Tukar kunci skrin."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Kunci skrin"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengawal cara dan bila skrin dikunci."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengawal cara dan masa skrin dikunci."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Padam data TV tanpa amaran dengan melakukan tetapan semula data kilang."</string>
@@ -524,7 +524,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Lumpuhkan beberapa ciri kunci skrin"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Halang penggunaan sesetengah ciri kunci skrin."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Laman Utama"</item>
+    <item msgid="8901098336658710359">"Rumah"</item>
     <item msgid="869923650527136615">"Mudah alih"</item>
     <item msgid="7897544654242874543">"Kerja"</item>
     <item msgid="1103601433382158155">"Faks Kerja"</item>
@@ -546,7 +546,7 @@
     <item msgid="4932682847595299369">"Peribadi"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Laman Utama"</item>
+    <item msgid="1738585194601476694">"Rumah"</item>
     <item msgid="1359644565647383708">"Kerja"</item>
     <item msgid="7868549401053615677">"Lain-lain"</item>
     <item msgid="3145118944639869809">"Peribadi"</item>
@@ -567,7 +567,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Peribadi"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Laman Utama"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Rumah"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mudah Alih"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Kerja"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Faks Kerja"</string>
@@ -597,11 +597,11 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"Lain-lain"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mudah Alih"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Peribadi"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Laman Utama"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Rumah"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Kerja"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Lain-lain"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Peribadi"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Laman Utama"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Rumah"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Kerja"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Lain-lain"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Peribadi"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Disambungkan sebagai pemasang"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Disambungkan kepada aksesori USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Sentuh untuk mendapatkan lagi pilihan."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Format storan USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Format kad SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Semua fail yang disimpan dalam storan USB anda akan dipadamkan. Tindakan ini tidak boleh diterbalikkan!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Semua data pada kad anda akan hilang."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Penyahpepijatan USB disambungkan"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Sentuh untuk melumpuhkan penyahpepijatan USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tukar papan kekunci"</string>

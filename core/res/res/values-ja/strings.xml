@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"インストーラとして接続"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBアクセサリを接続しました"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"タップするとその他のオプションが表示されます。"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USBストレージをフォーマットしますか？"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SDカードをフォーマットしますか？"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USBストレージに保存されているファイルはすべて消去されます。この操作は元に戻せません。"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"カード内のすべてのデータが失われます。"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"フォーマット"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効化"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>

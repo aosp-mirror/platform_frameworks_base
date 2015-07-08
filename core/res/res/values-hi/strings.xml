@@ -505,10 +505,10 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"स्‍क्रीन लॉक को बदलें."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"स्‍क्रीन लॉक करें"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"नियंत्रित करें कि स्‍क्रीन कैसे और कब लॉक हो."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"सभी डेटा मिटाएं"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"फ़ैक्टरी डेटा रीसेट करके, बिना चेतावनी के टेबलेट का डेटा मिटाएं."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना टीवी का डेटा मिटा दें."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"फ़ैक्‍टरी डेटा रीसेट करके, बिना चेतावनी के फ़ोन का डेटा मिटाएं."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"सभी डेटा हटाएं"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"फ़ैक्टरी डेटा रीसेट करके, बिना चेतावनी के टेबलेट का डेटा हटाएं."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना टीवी का डेटा हटाएं."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"फ़ैक्‍टरी डेटा रीसेट करके, बिना चेतावनी के फ़ोन का डेटा हटाएं."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"उपयोगकर्ता डेटा मिटाएं"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"इस टैबलेट पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"इस टीवी पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
@@ -937,7 +937,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"मौन रिंगटोन सेट है"</string>
     <string name="volume_call" msgid="3941680041282788711">"कॉल के दौरान वॉल्‍यूम"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"ब्लूटूथ कॉल के दौरान वॉल्‍यूम"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"अलार्म आवाज़"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"अलार्म वॉल्‍यूम"</string>
     <string name="volume_notification" msgid="2422265656744276715">"नोटिफिकेशन वॉल्‍यूम"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"आवाज़"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ब्लूटूथ वॉल्‍यूम"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"किसी इंस्‍टॉलर के रूप में कनेक्‍ट किया गया"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB सहायक सामग्री से कनेक्‍ट कि‍या गया"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"और विकल्पों के लिए स्पर्श करें."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB मेमोरी फ़ॉर्मेट करें?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD कार्ड प्रारूपित करें?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"आपके USB मेमोरी में संग्रहीत सभी फ़ाइलें मिट जाएंगी. यह क्रिया पूर्ववत नहीं की जा सकती!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"आपके कार्ड का सभी डेटा खो जाएगा."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"प्रारूपित करें"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग कनेक्ट किया गया"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डीबग करना अक्षम करने के लिए स्‍पर्श करें."</string>
     <string name="select_input_method" msgid="8547250819326693584">"कीबोर्ड बदल सकता है"</string>

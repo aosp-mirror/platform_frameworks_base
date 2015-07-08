@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connecté en tant que programme d\'installation"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connecté à un accessoire USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Touchez pour afficher plus d\'options."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater mémoire?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formater la carte SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Tous les fichiers stockés sur la mémoire de stockage USB vont être effacés. Cette action est irréversible."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Toutes les données stockées sur votre carte seront perdues."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Mise en forme"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB connecté"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Appuyez pour désactiver le débogage USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Changer de clavier"</string>

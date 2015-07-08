@@ -367,7 +367,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Aplikaciji omogućuje upotrebu infracrvenog odašiljača tableta."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Aplikaciji omogućuje upotrebu infracrvenih odašiljača televizora."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Aplikaciji omogućuje upotrebu infracrvenog odašiljača telefona."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"postavi pozadinsku sliku"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"postavi pozadinu"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Aplikaciji omogućuje postavljanje pozadinskih slika sustava."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"prilagođavanje veličine pozadinske slike"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Aplikaciji omogućuje postavljanje savjeta za veličinu sistemske pozadinske slike."</string>
@@ -1047,11 +1047,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Spojen kao instalacijski program"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Spojen na USB pribor"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Dodirnite za više opcija."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Format. USB pohranu?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formatirati SD karticu?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Sve datoteke pohranjene na vašoj USB pohrani bit će izbrisane. Ta se radnja ne može poništiti!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Svi podaci na kartici bit će izgubljeni."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za uklanjanje pogrešaka USB-om"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dodirnite da se onemogući otklanjanje pogrešaka USB-om."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Promjena tipkovnice"</string>

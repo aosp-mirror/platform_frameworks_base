@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"একটি ইনস্টলার হিসাবে সংযুক্ত হয়েছে"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"একটি USB যন্ত্রাংশতে সংযুক্ত হয়েছে"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"আরো বিকল্পের জন্য স্পর্শ করুন৷"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB সঞ্চয়স্থান ফরম্যাট করবেন?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD ফরম্যাট করবেন?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"আপনার USB সঞ্চয়স্থানে সংরক্ষিত সমস্ত ফাইল মুছে ফেলা হবে৷ এই ক্রিয়াটিকে পূর্বাবস্থায় ফেরানো যাবে না!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"আপনার কার্ডের সমস্ত ডেটা হারিয়ে যাবে৷"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ফর্ম্যাট করুন"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ডিবাগিং সংযুক্ত হয়েছে"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ডিবাগিং অক্ষম করতে স্পর্শ করুন৷"</string>
     <string name="select_input_method" msgid="8547250819326693584">"কীবোর্ড পরিবর্তন করুন"</string>

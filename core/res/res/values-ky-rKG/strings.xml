@@ -1384,12 +1384,6 @@
     <skip />
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB аксессуарга байланышты"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Көбүрөөк параметр үчүн тийип коюңуз."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB сактагычы форматталсынбы?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD карта форматталсынбы?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB сактагычыңызда сакталган бардык файлдар тазаланып салынат. Бул аракетти артка кайтаруу мүмкүн эмес!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Картаңыздагы дайындардын баары жоголот."</string>
-    <!-- no translation found for extmedia_format_button_format (4131064560127478695) -->
-    <skip />
     <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
     <skip />
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB мүчүлүштүктөрдү жоюу мүмкүнчүлүгүн өчүрүү үчүн тийип коюңуз."</string>
