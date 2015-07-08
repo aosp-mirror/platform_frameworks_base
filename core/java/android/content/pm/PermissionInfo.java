@@ -83,6 +83,20 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_FLAG_PRE23 = 0x80;
 
     /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>installer</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_INSTALLER = 0x100;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>verifier</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_VERIFIER = 0x200;
+
+    /**
      * Mask for {@link #protectionLevel}: the basic protection type.
      */
     public static final int PROTECTION_MASK_BASE = 0xf;
@@ -90,7 +104,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /**
      * Mask for {@link #protectionLevel}: additional flag bits.
      */
-    public static final int PROTECTION_MASK_FLAGS = 0xf0;
+    public static final int PROTECTION_MASK_FLAGS = 0xff0;
 
     /**
      * The level of access this permission is protecting, as per
