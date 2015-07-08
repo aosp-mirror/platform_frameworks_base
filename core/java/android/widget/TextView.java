@@ -5232,7 +5232,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // - onFocusChanged cannot start it when focus is given to a view with selected text (after
         //   a screen rotation) since layout is not yet initialized at that point.
         if (mEditor != null && mEditor.mCreatedWithASelection) {
-            mEditor.startSelectionActionMode();
+            if (mEditor.extractedTextModeWillBeStarted()) {
+                mEditor.checkFieldAndSelectCurrentWord();
+            } else {
+                mEditor.startSelectionActionMode();
+            }
             mEditor.mCreatedWithASelection = false;
         }
 

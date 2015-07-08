@@ -1121,7 +1121,6 @@ public class Editor {
                 if (mTemporaryDetach) mPreserveDetachedSelection = false;
                 downgradeEasyCorrectionSpans();
             }
-
             // No need to create the controller
             if (mSelectionModifierCursorController != null) {
                 mSelectionModifierCursorController.resetTouchOffsets();
@@ -1793,7 +1792,7 @@ public class Editor {
      *
      * @return true if there already was a selection or if the current word was selected.
      */
-    private boolean checkFieldAndSelectCurrentWord() {
+    boolean checkFieldAndSelectCurrentWord() {
         if (!mTextView.canSelectText() || !mTextView.requestFocus()) {
             Log.w(TextView.LOG_TAG,
                     "TextView does not support text selection. Selection cancelled.");
@@ -1840,7 +1839,7 @@ public class Editor {
         return selectionStarted;
     }
 
-    private boolean extractedTextModeWillBeStarted() {
+    boolean extractedTextModeWillBeStarted() {
         if (!(mTextView.isInExtractedMode())) {
             final InputMethodManager imm = InputMethodManager.peekInstance();
             return  imm != null && imm.isFullscreenMode();
