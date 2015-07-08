@@ -921,7 +921,8 @@ public final class Call {
      */
     public void registerCallback(Callback callback, Handler handler) {
         unregisterCallback(callback);
-        if (callback != null && handler != null) {
+        // Don't allow new callback registration if the call is already being destroyed.
+        if (callback != null && handler != null && mState != STATE_DISCONNECTED) {
             mCallbackRecords.add(new CallbackRecord<Callback>(callback, handler));
         }
     }
@@ -932,7 +933,8 @@ public final class Call {
      * @param callback A {@code Callback}.
      */
     public void unregisterCallback(Callback callback) {
-        if (callback != null) {
+        // Don't allow callback deregistration if the call is already being destroyed.
+        if (callback != null && mState != STATE_DISCONNECTED) {
             for (CallbackRecord<Callback> record : mCallbackRecords) {
                 if (record.getCallback() == callback) {
                     mCallbackRecords.remove(record);
@@ -1087,7 +1089,6 @@ public final class Call {
         // DISCONNECTED Call while still relying on the existence of that Call in the Phone's list.
         if (mState == STATE_DISCONNECTED) {
             fireCallDestroyed();
-            mPhone.internalRemoveCall(this);
         }
     }
 
@@ -1103,7 +1104,6 @@ public final class Call {
             mState = Call.STATE_DISCONNECTED;
             fireStateChanged(mState);
             fireCallDestroyed();
-            mPhone.internalRemoveCall(this);
         }
     }
 
@@ -1199,13 +1199,42 @@ public final class Call {
     }
 
     private void fireCallDestroyed() {
-        for (CallbackRecord<Callback> record: mCallbackRecords) {
-            final Call call = this;
+        /**
+         * To preserve the ordering of the Call's onCallDestroyed callback and Phone's
+         * onCallRemoved callback, we remove this call from the Phone's record
+         * only once all of the registered onCallDestroyed callbacks are executed.
+         * All the callbacks get removed from our records as a part of this operation
+         * since onCallDestroyed is the final callback.
+         */
+        final Call call = this;
+        if (mCallbackRecords.isEmpty()) {
+            // No callbacks registered, remove the call from Phone's record.
+            mPhone.internalRemoveCall(call);
+        }
+        for (final CallbackRecord<Callback> record : mCallbackRecords) {
             final Callback callback = record.getCallback();
             record.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    callback.onCallDestroyed(call);
+                    boolean isFinalRemoval = false;
+                    RuntimeException toThrow = null;
+                    try {
+                        callback.onCallDestroyed(call);
+                    } catch (RuntimeException e) {
+                            toThrow = e;
+                    }
+                    synchronized(Call.this) {
+                        mCallbackRecords.remove(record);
+                        if (mCallbackRecords.isEmpty()) {
+                            isFinalRemoval = true;
+                        }
+                    }
+                    if (isFinalRemoval) {
+                        mPhone.internalRemoveCall(call);
+                    }
+                    if (toThrow != null) {
+                        throw toThrow;
+                    }
                 }
             });
         }
