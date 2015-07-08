@@ -1,0 +1,207 @@
+page.title=Configuração do Preview SDK
+page.image=images/cards/card-set-up_16-9_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Neste documento</h2>
+      <ol>
+        <li><a href="#get-as13">Obter o Android Studio 1.3</a></li>
+        <li><a href="#get-sdk">Obter o Preview SDK</a></li>
+        <li><a href="#create-update">Criar ou atualizar um projeto</a></li>
+        <li><a href="#setup-test">Configurar para teste</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>O M Developer Preview SDK está disponível a partir do Android SDK Manager.
+Este documento assume que você está familiarizado com o desenvolvimento de aplicativos do Android,
+como o uso do Android SDK Manager e criação de projetos. Caso seja novo no
+Android, consulte a lição de treinamento <a href="{@docRoot}training/basics/firstapp/index.html">Como criar o primeiro
+aplicativo</a> primeiro.</a></p>
+
+<h2 id="get-as13">Obter o Android Studio 1.3</h2>
+
+<p>A prévia de desenvolvedor é melhor usada com o Android Studio 1.3, que está no estado
+de prévia. É altamente recomendado que você instale a versão de prévia
+do Android Studio 1.3 para que funcione com o Preview SDK.</p>
+
+<p class="caution"><strong>Cuidado:</strong> a prévia canário do Android
+Studio 1.3 ainda está em desenvolvimento ativo. Caso esteja usando a máquina de desenvolvimento principal
+para testar a prévia de desenvolvedor, é possível criar uma segunda instalação
+do Android Studio para usar em testes.</p>
+
+<p>Para instalar a prévia do Android Studio 1.3:</p>
+
+<ol>
+  <li>Faça o download e inicie o <a href="{@docRoot}tools/studio/index.html">Android
+ Studio</a>.
+  </li>
+
+  <li>Abra a janela <strong>Settings (Configurações)</strong> (no Windows, é possível fazer isto
+ escolhendo <strong>File (Arquivo) &gt; Settings (Configurações)</strong>). Escolha o painel
+ <strong>Appearance &amp; Behavior (Aparência e comportamento) &gt; System
+ Settings (Configurações do sistema) &gt; Updates (Atualizações)</strong>.
+
+    <p class="aside">No OSX, é possível encontrar o painel <strong>Appearance &amp;
+ Behavior (Aparência e comportamento)</strong>
+ na janela <strong>Preferences (Preferências)</strong> do Android Studio.</p>
+  </li>
+
+  <li> No painel <strong>Updates (Atualizações)</strong>, escolha a opção
+ <strong>Automatically check updates for: Canary Channel (Verificar atualizações automaticamente para: canal canário)</strong>.
+  </li>
+
+  <li>No painel <strong>Updates (Atualizações)</strong>, selecione <strong>Check Now (Verificar agora)</strong>
+ para verificar a versão mais recente da versão canário. Faça o download e instale a versão
+ quando solicitado.
+  </li>
+</ol>
+
+<h2 id="get-sdk">Obter o Preview SDK</h2>
+
+<p>Para adicionar os componentes do Preview SDK ao ambiente de desenvolvimento:</p>
+
+<ol>
+  <li>Inicie a prévia do Android Studio 1.3.
+  </li>
+
+  <li>Abra a janela <strong>Settings (Configurações)</strong> (no Windows, é possível fazer isto
+ escolhendo <strong>File (Arquivo) &gt; Settings (Configurações)</strong>). Escolha o painel
+ <strong>Appearance &amp; Behavior (Aparência e comportamento) &gt; System
+ Settings (Configurações do sistema) &gt; Updates (Atualizações)</strong>.
+
+    <p class="aside">No OSX, é possível encontrar o painel <strong>Appearance &amp;
+ Behavior (Aparência e comportamento)</strong>
+ na janela <strong>Preferences (Preferências)</strong> do Android Studio.</p>
+  </li>
+
+  <li>No painel <strong>Updates (Atualizações)</strong>, escolha a opção
+ <strong>Automatically check updates for: Canary Channel (Verificar atualizações automaticamente para: canal canário)</strong> e
+ <strong>Automatically check atualização for Android SDK: Preview Channel (Verificar atualizações automaticamente para: canal de pré-visualização)</strong>.
+  </li>
+
+  <li>Inicie o <strong>Android SDK Manager</strong>. (Com o Android Studio 1.3,
+ o SDK Manager está integrado no Android Studio, em vez de ser
+ um aplicativo independente.)
+  </li>
+
+  <li>Na seção <strong>Platforms (Plataformas)</strong>, selecione <strong>Android MNC
+ Preview</strong>.
+  </li>
+
+  <li>Na seção <strong>Tools (Ferramentas)</strong>, selecione o Android <strong>
+SDK Tools</strong>, <strong>Platform-tools</strong> e 
+<strong>Build-tools</strong> mais recentes.
+  </li>
+
+  <li>Clique em <strong>Install packages (Instalar pacotes)</strong> e aceite o contrato de licença
+ para todos os pacotes.
+  </li>
+
+  <li>Verifique se o M Developer Preview está instalado abrindo a janela <strong>
+Settings (Configurações)</strong> e escolhendo o painel <strong>Appearance &amp; Behavior (Aparência e comportamento) 
+&gt; System Settings (Configurações do sistema) &gt; Android SDK</strong>.</li>
+
+  <li>No painel <strong>Android SDK</strong>, escolha
+ a guia <strong>SDK Platforms (Plataformas SDK)</strong>. <strong>Android MNC
+ Preview</strong> deve estar listado como <em>Installed (Instalado)</em>. Além disso, abra a guia
+ <strong>SDK Tools (Ferramentas SDK)</strong> para verificar se as ferramentas mais recentes
+ estão instaladas.
+  </li>
+</ol>
+<p>Após concluir estas etapas, os componentes de prévia estarão disponíveis
+ no ambiente de desenvolvimento. </p>
+
+
+<h2 id="create-update">Criar ou atualizar um projeto</h2>
+
+<p>
+  Para usar as APIs de prévia, deve-se criar ou atualizar um projeto de desenvolvimento para usar
+ os componentes de prévia.
+</p>
+
+
+<h3 id="create">Criar um novo projeto</h3>
+
+<p>
+  Recomendamos o uso do Android Studio para criar um projeto com a prévia. Siga as etapas
+ descritas em <a href="{@docRoot}sdk/installing/create-project.html">Criar um projeto</a>
+ até chegar na tela <em>Form Factors (Novas especificações)</em> no assistente do projeto. Em seguida,
+ realize as seguintes etapas para criar um projeto configurado para a prévia.
+</p>
+
+<ul>
+  <li>Verifique <strong>Phone and Tablet (Telefone e tablet)</strong>.</li>
+  <li>Selecione <strong>MNC: Android M (Preview)</strong> em <strong>Minimum
+ SDK (SDK mínimo)</strong>.</li>
+</ul>
+
+
+<h3 id="update">Atualizar um projeto existente</h3>
+
+<p>
+  Para projetos existentes, deve-se modificar a configuração de projeto para ativar as APIs de prévia. No
+ ambiente de desenvolvimento, abra o arquivo <code>build.gradle</code> para o módulo
+ e defina estes valores da seguinte forma:
+</p>
+
+<ul>
+  <li><code>compileSdkVersion</code> para <code>'android-MNC'</code></li>
+  <li><code>minSdkVersion</code> para <code>'MNC'</code></li>
+  <li><code>targetSdkVersion</code> para <code>'MNC'</code></li>
+</ul>
+
+
+<h2 id="setup-test">Configurar para teste</h2>
+
+<p>
+  Testar um aplicativo com a prévia requer que você tenha um dispositivo ou dispositivo virtual configurado
+ com a versão de prévia da plataforma. Caso tenha um dispositivo compatível, é possível instalar a plataforma
+ de prévia para teste. Caso contrário, é possível configurar um dispositivo virtual para o teste.
+</p>
+
+<h3 id="setup-device">Configurar um dispositivo físico</h3>
+
+<p>
+  Caso tenha um Nexus 5, Nexus 6, Nexus 9 ou Android TV, é possível instalar uma imagem do sistema
+ de prévia nestes dispositivos para testar o aplicativo.
+ É possível configurar um dispositivo virtual com a versão de prévia da plataforma a partir do Android Studio
+ usando a ferramenta Android Virtual Device Manager.
+</p>
+
+<p class="caution">
+  <strong>Importante:</strong> instalar uma imagem de prévia em um dispositivo <em>remove todos os dados
+ dele</em>. Portanto, deve-se realizar o backup de quaisquer dados antes de instalar uma imagem de prévia.
+</p>
+
+<h3 id="setupAVD">Configurar um dispositivo virtual</h3>
+
+<p>
+  É possível configurar um dispositivo virtual com a versão de prévia da plataforma dentro do Android Studio
+ usando a ferramenta Android Virtual Device Manager.
+</p>
+
+<p>Para criar um AVD com o AVD Manager:</p>
+
+<ol>
+  <li>Instale o Preview SDK no ambiente de desenvolvimento, como descrito
+ em <a href="{@docRoot}preview/setup-sdk.html">Configurar o Preview
+ SDK.</a></li>
+  <li>Siga as etapas em
+ <a href="{@docRoot}tools/devices/managing-avds.html">Como gerenciar AVDs com
+ o Gerenciador de AVD</a>. Use as seguintes configurações:
+    <ul>
+      <li><strong>Dispositivo:</strong> Nexus 5, Nexus 6, Nexus 9 ou Android TV</li>
+      <li><strong>Alvo:</strong>
+       Android M (Preview) - Nível da API M</li>
+      <li><strong>ABI:</strong> x86</li>
+    </ul>
+  </li>
+</ol>
+
+<p>
+  Para obter mais informações sobre como criar dispositivos virtuais para teste, consulte <a href="{@docRoot}tools/devices/index.html">Gerenciamento de dispositivos virtuais</a>.
+</p>
