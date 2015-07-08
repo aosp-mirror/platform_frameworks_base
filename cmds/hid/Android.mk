@@ -6,6 +6,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 LOCAL_MODULE := hid
 LOCAL_JNI_SHARED_LIBRARIES := libhidcommand_jni
+LOCAL_REQUIRED_MODULES := libhidcommand_jni
 include $(BUILD_JAVA_LIBRARY)
 
 include $(CLEAR_VARS)
