@@ -197,46 +197,34 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                         }
                     }
                 }
-                if (spec.isDigestsSpecified()) {
-                    // Digest(s) explicitly specified in the spec
-                    mKeymasterDigests = KeyProperties.Digest.allToKeymaster(spec.getDigests());
-                    if (mKeymasterDigest != -1) {
-                        // Key algorithm implies a digest -- ensure it's specified in the spec as
-                        // first digest.
-                        if (!com.android.internal.util.ArrayUtils.contains(
-                                mKeymasterDigests, mKeymasterDigest)) {
+
+                if (mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
+                    // JCA HMAC key algorithm implies a digest (e.g., HmacSHA256 key algorithm
+                    // implies SHA-256 digest). Because keymaster HMAC key is authorized only for
+                    // one digest, we don't let algorithm parameter spec override the digest implied
+                    // by the key. If the spec specifies digests at all, it must specify only one
+                    // digest, the only implied by key algorithm.
+                    mKeymasterDigests = new int[] {mKeymasterDigest};
+                    if (spec.isDigestsSpecified()) {
+                        // Digest(s) explicitly specified in the spec. Check that the list
+                        // consists of exactly one digest, the one implied by key algorithm.
+                        int[] keymasterDigestsFromSpec =
+                                KeyProperties.Digest.allToKeymaster(spec.getDigests());
+                        if ((keymasterDigestsFromSpec.length != 1)
+                                || (keymasterDigestsFromSpec[0] != mKeymasterDigest)) {
                             throw new InvalidAlgorithmParameterException(
-                                    "Digests specified in algorithm parameters ("
-                                    + Arrays.asList(spec.getDigests()) + ") must include "
-                                    + " the digest "
+                                    "Unsupported digests specification: "
+                                    + Arrays.asList(spec.getDigests()) + ". Only "
                                     + KeyProperties.Digest.fromKeymaster(mKeymasterDigest)
-                                    + " implied by key algorithm");
-                        }
-                        if (mKeymasterDigests[0] != mKeymasterDigest) {
-                            // The first digest is not the one implied by the key algorithm.
-                            // Swap the implied digest with the first one.
-                            for (int i = 0; i < mKeymasterDigests.length; i++) {
-                                if (mKeymasterDigests[i] == mKeymasterDigest) {
-                                    mKeymasterDigests[i] = mKeymasterDigests[0];
-                                    mKeymasterDigests[0] = mKeymasterDigest;
-                                    break;
-                                }
-                            }
+                                    + " supported for this HMAC key algorithm");
                         }
                     }
                 } else {
-                    // No digest specified in the spec
-                    if (mKeymasterDigest != -1) {
-                        // Key algorithm implies a digest -- use that digest
-                        mKeymasterDigests = new int[] {mKeymasterDigest};
+                    // Key algorithm does not imply a digest.
+                    if (spec.isDigestsSpecified()) {
+                        mKeymasterDigests = KeyProperties.Digest.allToKeymaster(spec.getDigests());
                     } else {
                         mKeymasterDigests = EmptyArray.INT;
-                    }
-                }
-                if (mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
-                    if (mKeymasterDigests.length == 0) {
-                        throw new InvalidAlgorithmParameterException(
-                                "At least one digest algorithm must be specified");
                     }
                 }
 
