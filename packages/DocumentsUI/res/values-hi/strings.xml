@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"दस्तावेज़"</string>
     <string name="title_open" msgid="4353228937663917801">"यहां से खोलें"</string>
-    <string name="title_save" msgid="2433679664882857999">"यहां जोड़ें"</string>
+    <string name="title_save" msgid="2433679664882857999">"यहां सहेजें"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"फ़ोल्डर बनाएं"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ग्रिड दृश्य"</string>
     <string name="menu_list" msgid="7279285939892417279">"सूची दृश्य"</string>
