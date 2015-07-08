@@ -112,29 +112,6 @@ socket_bind_local (JNIEnv *env, jobject object, jobject fileDescriptor,
     }
 }
 
-/* private native void shutdown(FileDescriptor fd, boolean shutdownInput) */
-
-static void
-socket_shutdown (JNIEnv *env, jobject object, jobject fileDescriptor,
-                    jboolean shutdownInput)
-{
-    int ret;
-    int fd;
-
-    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-
-    if (env->ExceptionCheck()) {
-        return;
-    }
-
-    ret = shutdown(fd, shutdownInput ? SHUT_RD : SHUT_WR);
-
-    if (ret < 0) {
-        jniThrowIOException(env, errno);
-        return;
-    }
-}
-
 /**
  * Processes ancillary data, handling only
  * SCM_RIGHTS. Creates appropriate objects and sets appropriate
@@ -523,7 +500,6 @@ static JNINativeMethod gMethods[] = {
     {"connectLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V",
                                                 (void*)socket_connect_local},
     {"bindLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V", (void*)socket_bind_local},
-    {"shutdown", "(Ljava/io/FileDescriptor;Z)V", (void*)socket_shutdown},
     {"read_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_read},
     {"readba_native", "([BIILjava/io/FileDescriptor;)I", (void*) socket_readba},
     {"writeba_native", "([BIILjava/io/FileDescriptor;)V", (void*) socket_writeba},
