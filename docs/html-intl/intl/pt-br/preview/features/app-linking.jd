@@ -1,0 +1,123 @@
+page.title=Links de aplicativos
+page.image=images/cards/card-app-linking_2x.png
+page.keywords=applinking, deeplinks, intents
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Neste documento</h2>
+      <ol>
+        <li><a href="#web-assoc">Declarar uma associação de site</a></li>
+        <li><a href="#verfy-links">Solicitar verificação de link de aplicativo</a></li>
+        <li><a href="#user-manage">Gerenciar configurações de link de aplicativo</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  O sistema de intenções do Android é um mecanismo flexível para possibilitar que aplicativos lidem com conteúdos e solicitações.
+  Vários aplicativos podem declarar padrões de URI correspondentes em seus filtros de intenções. Quando um usuário clica em um
+ link da web que não tem um manipulador de inicialização padrão, a plataforma pode exibir um diálogo para
+ o usuário selecionar entre uma lista de aplicativos que declararam filtros de intenções correspondentes.
+</p>
+
+<p>
+  O Android M Developer Preview introduz suporte para links de aplicativos, que aprimora
+ a manipulação de links existentes, permitindo que desenvolvedores de aplicativos associem um aplicativo a um domínio da web pertencente a eles. Quando
+ os desenvolvedores criam esta associação, a plataforma pode automaticamente determinar o aplicativo padrão usado
+ para lidar com um link da web particular e ignorar a solicitação aos usuários.
+</p>
+
+
+<h2 id="web-assoc">Declarar uma associação de site</h2>
+
+<p>
+  Os donos de sites da web devem declarar as associações aos aplicativos para estabelecer um link de aplicativo. O dono do site
+ declara a relação com um aplicativo hospedando um arquivo JSON chamado {@code statements.json} no
+ local bem conhecido no domínio:
+</p>
+
+<pre>http://&lt;domain&gt;:&lt;optional port&gt;/.well-known/statements.json</pre>
+
+<p class="note">
+  <strong>Observação:</strong>
+  durante o período do M Developer Preview, o arquivo JSON é verificado por meio de protocolo http. Para
+ o lançamento oficial da plataforma, o arquivo é verificado com o protocolo http criptografado.
+</p>
+
+<p>
+  Este arquivo JSON indica o aplicativo do Android que deve ser usado como o manipulador padrão para URLs
+ neste domínio. Ele identifica o aplicativo com base nestes campos:
+</p>
+
+<ul>
+  <li>{@code package_name}: o nome do pacote declarado no manifesto do arquivo.</li>
+
+  <li>{@code sha256_cert_fingerprints}: a impressão digital SHA256 do certificado assinado do aplicativo.
+    É possível usar o Java Keytool para gerar a impressão digital usando o seguinte comando:
+    <pre>keytool -list -v -keystore my-release-key.keystore</pre>
+  </li>
+</ul>
+
+<p>
+  A seguinte lista de arquivos exibe um exemplo de conteúdo e formato
+ de um arquivo {@code statements.json}:
+</p>
+
+<pre>
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "<strong>&lt;package name&gt;</strong>",
+    "sha256_cert_fingerprints": ["<strong>6C:EC:C5:0E:34:AE....EB:0C:9B</strong>"]
+  }
+}]
+</pre>
+
+
+<h2 id="verfy-links">Solicitar verificação de link de aplicativo</h2>
+
+<p>
+  Um aplicativo pode solicitar que a plataforma verifique automaticamente quaisquer links de aplicativo relacionados aos arquivos {@code statements.json}
+ hospedados nos respectivos domínios da web que são definidos pelos nomes de host
+ nos elementos de dados dos seus filtros de intenções. Para solicitar a verificação de link de aplicativo, adicione um atributo {@code android:autoVerify}
+ a cada filtro de intenção desejado no manifesto, como exibido no seguinte fragmento
+ de código do manifesto:
+</p>
+
+<pre>
+&lt;activity ...&gt;
+    &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;data android:scheme="http" android:host="www.android.com" /&gt;
+        &lt;data android:scheme="https" android:host="www.android.com" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>
+  Quando o atributo {@code android:autoVerify} está presente em um manifesto do aplicativo, a plataforma
+ tenta verificar os links do aplicativo quando o aplicativo é instalado. Se a plataforma não conseguir
+ verificar os links do aplicativo, o aplicativo não será definido como o aplicativo preferencial para lidar com os links da web. Na próxima vez
+ que um usuário tentar abrir um dos links, a plataforma voltará a apresentar ao usuário
+ uma caixa de diálogo.
+</p>
+
+<p class="note">
+  <strong>Observação:</strong> no teste, há chances de ocorrer um falso positivo se a verificação
+ falhar, mas o usuário explicitamente permitiu que o aplicativo abrisse links sem solicitar, usando
+ o aplicativo do sistema Settings (Configurações). Neste caso, nenhum diálogo é exibido e o link vai direto para o
+ aplicativo, mas somente devido à configuração do usuário, e não porque a verificação foi bem-sucedida.
+</p>
+
+
+<h2 id="user-manage">Gerenciar configurações de link de aplicativo</h2>
+
+<p>
+  Os usuários podem alterar as configurações de link de aplicativo para que os URLs sejam tratados da maneira que preferirem. É possível revisar e
+ gerenciar os links de aplicativo no aplicativo Settings (Configurações) do sistema, em <strong>Settings (Configurações) &gt; Apps (Aplicativos) &gt; App Info (Informações do aplicativo) &gt;
+ Open by default (Abrir por padrão)</strong>.
+</p>
