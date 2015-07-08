@@ -1,0 +1,656 @@
+page.title=测试显示性能
+page.image=images/cards/card-test-performance_2x.png
+page.keywords=性能, fps, 工具
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文内容</h2>
+      <ol>
+        <li><a href="#measure">测量 UI 性能</a>
+          <ul>
+            <li><a href="#aggregate">聚合帧统计信息</a></li>
+            <li><a href="#timing-info">精确的帧时间信息</a></li>
+            <li><a href="#timing-dump">简单的帧时间转储</a></li>
+            <li><a href="#collection-window">控制统计信息收集的时段</a></li>
+            <li><a href="#diagnose">诊断性能回归</a></li>
+            <li><a href="#resources">其他资源</a></li>
+          </ul>
+        </li>
+        <li><a href="#automate">自动化 UI 性能测试</a>
+          <ul>
+            <li><a href="#ui-tests">设置 UI 测试</a></li>
+            <li><a href="#automated-tests">设置自动化 UI 测试</a></li>
+            <li><a href="#triage">分类并解决观察到的问题</a></li>
+          </ul>
+        </li>
+      </ol>
+  </div>
+</div>
+
+
+<p>
+  用户界面 (UI) 性能测试可确保您的应用不仅满足其功能要求，同时确保用户与应用之间的交互顺畅无比，能够以每秒连续 60 帧（<a href="https://www.youtube.com/watch?v=CaMTIgxCSqU&amp;index=25&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">为什么选择 60fps？</a>）的帧速运行，而不会出现任何帧丢失或延迟的现象，也就是我们通常所说的“卡顿”。<em></em>
+
+
+本文档介绍可用于测量 UI 性能的工具并提出一种将 UI 性能测量集成到测试实践中的方法。
+
+
+</p>
+
+
+<h2 id="measure">测量 UI 性能</h2>
+
+<p>
+  为了改善性能，您首先必须能够测量系统性能，然后诊断并识别可能来自管道各个部分的问题。
+
+
+</p>
+
+<p>
+  <a href="https://source.android.com/devices/tech/debug/dumpsys.html">dumpsys</a> 是一种在设备上运行并转储感兴趣的系统服务状态信息的 Android 工具。<em></em>
+
+通过向 dumpsys 传递“gfxinfo”命令，可以提供 logcat 格式的输出，其中包含有关与录制阶段期间发生的动画帧相关的性能信息。
+
+<em></em>
+</p>
+
+<pre>
+&gt; adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt;
+</pre>
+
+<p>
+  此命令可以生成多个不同表达形式的帧时间数据。
+</p>
+
+<h3 id="aggregate">聚合帧统计信息</h3>
+
+<p>
+  借助 M 预览版，该命令可将在整个进程生命周期中收集的帧数据的聚合分析打印输出到 logcat。
+例如：
+</p>
+
+<pre class="noprettyprint">
+Stats since: 752958278148ns
+Total frames rendered: 82189
+Janky frames: 35335 (42.99%)
+90th percentile: 34ms
+95th percentile: 42ms
+99th percentile: 69ms
+Number Missed Vsync: 4706
+Number High input latency: 142
+Number Slow UI thread: 17270
+Number Slow bitmap uploads: 1542
+Number Slow draw: 23342
+</pre>
+
+<p>
+  这些高级统计信息可以较高水平地传达应用的呈现性能及其在多个帧之间的稳定性。
+
+</p>
+
+
+<h3 id="timing-info">精确的帧时间信息</h3>
+
+<p>
+  M 预览版附带提供了一个适用于 gfxinfo 的新命令，即：framestats，该命令根据最近的帧提供非常详细的帧时间信息，让您能够更准确地查出并调试问题。<em></em>
+
+
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; framestats
+</pre>
+
+<p>
+  此命令根据应用生成的最后 120 帧，打印输出带有纳秒时间戳的帧时间信息。以下是来自 adb dumpsys gfxinfo &lt;软件包名称&gt; framestats 的原始输出示例：
+
+
+</p>
+
+<pre class="noprettyprint">
+0,49762224585003,49762241251670,9223372036854775807,0,49762257627204,49762257646058,49762257969704,49762258002100,49762265541631,49762273951162,49762300914808,49762303675954,
+0,49762445152142,49762445152142,9223372036854775807,0,49762446678818,49762446705589,49762447268818,49762447388037,49762453551527,49762457134131,49762474889027,49762476150120,
+0,49762462118845,49762462118845,9223372036854775807,0,49762462595381,49762462619287,49762462919964,49762462968454,49762476194547,49762476483454,49762480214964,49762480911527,
+0,49762479085548,49762479085548,9223372036854775807,0,49762480066370,49762480099339,49762481013089,49762481085850,49762482232152,49762482478350,49762485657620,49762486116683,
+</pre>
+
+<p>
+  每行输出均代表应用生成的一帧。每行都有固定的列数，用于描述帧生成管道的每个阶段所花的时间。
+下文将详细描述此格式，包括每列代表的具体内容。
+
+</p>
+
+
+<h4 id="fs-data-format">Framestats 数据格式</h4>
+
+<p>
+  由于数据块是 CSV 格式的输出，因此将其粘贴到所选的电子表格工具或使用脚本进行收集和解析非常简单。
+下表解释了输出数据列的格式。
+所有时间戳均以纳秒计。
+</p>
+
+<ul>
+  <li>标志
+    <ul>
+      <li>“标志”列带有“0”的行可以通过从 FRAME_COMPLETED 列中减去 INTENDED_VSYNC 列计算得出总帧时间。
+
+      </li>
+
+      <li>该列为非零值的行将被忽略，因为其对应的帧已被确定为偏离正常性能，其布局和绘制时间预计超过 16 毫秒。
+
+可能出现这种情况有如下几个原因：
+        <ul>
+          <li>窗口布局发生变化（例如，应用的第一帧或在旋转后）
+
+          </li>
+
+          <li>此外，如果帧的某些值包含无意义的时间戳，则也可能跳过该帧。
+例如，如果帧的运行速度超过 60fps，或者如果屏幕上的所有内容最终都准确无误，则可能跳过该帧，这不一定表示应用中存在问题。
+
+
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>INTENDED_VSYNC
+    <ul>
+      <li>帧的预期起点。如果此值不同于 VSYNC，则表示 UI 线程中发生的工作使其无法及时响应垂直同步信号。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>VSYNC
+    <ul>
+      <li>所有垂直同步侦听器中使用的时间值和帧绘图（Choreographer 帧回调、动画、View.getDrawingTime() 等等）
+
+      </li>
+
+      <li>如需进一步了解 VSYNC 及其对应用产生的影响，请观看<a href="https://www.youtube.com/watch?v=1iaHxmfZGGc&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=23">了解 VSYNC</a> 视频。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>OLDEST_INPUT_EVENT
+    <ul>
+      <li>输入队列中最早输入事件的时间戳或 Long.MAX_VALUE（如果帧没有输入事件）。
+
+      </li>
+
+      <li>此值主要用于平台工作，对应用开发者的作用有限。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>NEWEST_INPUT_EVENT
+    <ul>
+      <li>输入队列中最新输入事件的时间戳或 0（如果帧没有输入事件）。
+
+      </li>
+
+      <li>此值主要用于平台工作，对应用开发者的作用有限。
+
+      </li>
+
+      <li>但是，可以通过查看 (FRAME_COMPLETED - NEWEST_INPUT_EVENT) 大致了解应用增加的延迟时间。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>HANDLE_INPUT_START
+    <ul>
+      <li>将输入事件分派给应用的时间戳。
+      </li>
+
+      <li>通过观察此时间戳与 ANIMATION_START 之间的时差，可以测量应用处理输入事件所花的时间。
+
+      </li>
+
+      <li>如果这个数字较高（&gt; 2 毫秒），则表明应用处理 View.onTouchEvent() 等输入事件所花的时间太长，这意味着此工作需要进行优化或转交给其他线程。
+
+请注意，有些情况下（例如，启动新Activity或类似活动的点击事件），这个数字较大是预料之中并且可以接受的。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>ANIMATION_START
+    <ul>
+      <li>在 Choreographer 中注册的动画运行的时间戳。
+      </li>
+
+      <li>通过观察此时间戳与 PERFORM_TRANVERSALS_START 之间的时差，可以确定评估正在运行的所有动画（ObjectAnimator、ViewPropertyAnimator 和通用转换）所需的时间。
+
+
+      </li>
+
+      <li>如果这个数字较高（&gt; 2 毫秒），请检查您的应用是否编写了任何自定义动画，或检查 ObjectAnimator 在对哪些字段设置动画并确保它们适用于动画。
+
+
+      </li>
+
+      <li>如需了解有关 Choreographer 的更多信息，请观看<a href="https://developers.google.com/events/io/sessions/325418001">利弊</a>视频。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>PERFORM_TRAVERSALS_START
+    <ul>
+      <li>如果您从此值中扣除 DRAW_START，则可推断出完成布局和测量阶段所需的时间（请注意，在滚动或动画期间，您会希望此时间接近于零）。
+
+
+      </li>
+
+      <li>如需了解有关呈现管道的测量和布局阶段的更多信息，请观看<a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">失效、布局和性能</a>视频。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>DRAW_START
+    <ul>
+      <li>performTraversals 绘制阶段的开始时间。这是记录任何失效视图的显示列表的起点。
+
+      </li>
+
+      <li>此时间与 SYNC_START 之间的时差就是对树中的所有失效视图调用 View.draw() 所需的时间。
+
+      </li>
+
+      <li>如需了解有关绘图模型的详细信息，请参阅<a href="{@docRoot}guide/topics/graphics/hardware-accel.html#hardware-model">硬件加速</a>或<a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">失效、布局和性能</a>视频。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>SYNC_START
+    <ul>
+      <li>绘制同步阶段的开始时间。
+      </li>
+
+      <li>如果此时间与 ISSUE_DRAW_COMMANDS_START 之间的时差较大（约 &gt; 0.4 毫秒），则通常表示绘制了大量必须上传到 GPU 的新位图。
+
+
+      </li>
+
+      <li>如需进一步了解同步阶段，请观看 <a href="https://www.youtube.com/watch?v=VzYkVL1n4M8&amp;index=24&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu">GPU 呈现模式分析</a>视频。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>ISSUE_DRAW_COMMANDS_START
+    <ul>
+      <li>硬件呈现器开始向 GPU 发出绘图命令的时间。
+      </li>
+
+      <li>此时间与 FRAME_COMPLETED 之间的时差让您可以大致了解应用生成的 GPU 工作量。
+绘制过度或呈现效果不佳等问题都会在此显示出来。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>SWAP_BUFFERS
+    <ul>
+      <li>调用 eglSwapBuffers 的时间，此调用不属于平台工作，相对乏味。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>FRAME_COMPLETED
+    <ul>
+      <li>全部完成！处理此帧所花的总时间可以通过执行 FRAME_COMPLETED - INTENDED_VSYNC 计算得出。
+
+      </li>
+    </ul>
+  </li>
+
+</ul>
+
+<p>
+  您可以通过不同的方法使用此数据。一种简单却有用的可视化方式就是在不同的延迟时段中显示帧时间 (FRAME_COMPLETED - INTENDED_VSYNC) 分布的直方图（参见下图）。
+
+此图直观地表明，大部分帧非常有效，截止时间远低于 16 毫秒（显示为红色），但是少数帧明显超出了截止时间。
+
+我们可以观察此直方图中的变化趋势，了解所产生的整体变化或新异常值。
+此外，您还可以根据数据中的多个时间戳绘制表示输入延迟、布局所用时间或其他类似关注指标的图形。
+
+
+</p>
+
+<img src="{@docRoot}preview/images/perf-test-framestats.png">
+
+
+<h3 id="timing-dump">简单的帧时间转储</h3>
+
+<p>
+  如果在“开发者选项”中将 <strong>GPU 呈现模式分析</strong>设置为<strong>在 adb shell dumpsys gfxinfo 中</strong>，则 <code>adb shell dumpsys gfxinfo</code> 命令会打印输出最近 120 帧的时间信息，这些信息分为几个不同的类别，其相应的值以制表符分隔。
+
+
+这些数据可以用于大致表明绘图管道的哪些部分可能速度较慢。
+
+</p>
+
+<p>
+  与上述 <a href="#fs-data-format">framestats</a> 类似，将其粘贴到所选的电子表格工具或使用脚本进行收集和解析同样非常简单。
+
+下图详细显示了应用生成的许多帧的具体时间分布。
+
+</p>
+
+<img src="{@docRoot}preview/images/perf-test-frame-latency.png">
+
+<p>
+  运行 gfxinfo、复制输出、将其粘贴到电子表格应用并将数据绘制成堆积条形图的结果。
+
+</p>
+
+<p>
+  每个垂直条均代表一个动画帧；其高度代表计算该动画帧所需的毫秒数。
+垂直条的每个彩色分段均代表呈现管道的一个不同阶段，因此您可以看到应用的哪些部分可能会出现瓶颈。
+
+如需了解有关呈现管道的详细信息，请参阅<a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;index=27&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">失效、布局和性能</a>视频。
+
+
+</p>
+
+
+<h3 id="collection-window">控制统计信息收集的时段</h3>
+
+<p>
+  Framestats 和简单的帧计时均可在极短的时间内（相当于约呈现 2 秒）收集数据。
+要精确控制此时间范围（例如，将数据限制于特定动画），您可以重置所有计数器并汇总收集的统计信息。
+
+
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; reset
+</pre>
+
+<p>
+  这也可以与转储命令结合使用来定期进行收集和重置，从而持续捕获时间范围不到 2 秒的帧。
+
+
+</p>
+
+
+<h3 id="diagnose">诊断性能回归</h3>
+
+<p>
+  要查出问题并保持应用运行状况良好，第一步最好是识别回归。
+但是，dumpsys 仅确定是否存在问题及其相对严重性。
+您仍需诊断性能问题的具体原因并找到适当的解决方法。
+为此，我们强烈建议您使用 <a href="{@docRoot}tools/help/systrace.html">systrace</a> 工具。
+
+</p>
+
+
+<h3 id="resources">其他资源</h3>
+
+<p>
+  如需了解有关 Android 呈现管道的工作原理、可能存在的常见问题以及如何解决这些问题的详细信息，以下其他资源可能对您有所帮助：
+
+
+</p>
+
+<ul>
+  <li>呈现性能 101
+  </li>
+  <li>为什么选择 60fps？
+  </li>
+  <li>Android UI 和 GPU
+  </li>
+  <li>失效、布局和性能
+  </li>
+  <li>使用 Systrace 分析 UI 性能
+  </li>
+</ul>
+
+
+<h2 id="automate">自动化 UI 性能测试</h2>
+
+<p>
+  UI 性能测试方法之一是让测试人员对目标应用执行一系列用户操作，并目视检查是否存在卡顿现象，或花费大量时间使用工具驱动型方法来查明是否存在卡顿现象。
+
+但是，这种人工方法充满风险：人为感知帧率变化的能力参差不齐，并且此过程又费时、繁琐且易于出错。
+
+
+</p>
+
+<p>
+  更为有效的方法是记录并分析自动化 UI 测试中的关键性能指标。
+Android M 开发者预览版包括新的日志记录功能。利用这些功能，您可以轻松确定应用动画中的卡顿数量和严重性，您还可以使用这些功能构建严格的流程，用于确定当前性能并跟踪未来的性能目标。
+
+
+
+</p>
+
+<p>
+  本文将向您介绍一种使用这些数据自动化性能测试的推荐方法。
+
+</p>
+
+<p>
+  此方法主要分为两个关键操作。首先，确定测试对象和测试方法；其次，设置和维护自动化测试环境。
+
+
+</p>
+
+
+<h3 id="ui-tests">设置 UI 测试</h3>
+
+<p>
+  在开始进行自动化测试之前，您必须做出一些较高层次的决策，以便准确了解测试空间和可能存在的需求。
+
+</p>
+
+<h4>
+  识别要测试的关键动画/流程
+</h4>
+
+<p>
+  请记住，流畅的动画中断时，用户对低劣性能的感触最深。
+因此，在识别要测试的 UI 操作类型时，集中精力处理用户最常见或对用户体验最为重要的关键动画非常有用。
+
+例如，以下是对识别有所帮助的一些常见场景：
+</p>
+
+<ul>
+  <li>滚动主要的 ListView 或 RecyclerView
+  </li>
+
+  <li>异步等待周期内的动画
+  </li>
+
+  <li>可能涉及位图加载/操纵的所有操作
+  </li>
+
+  <li>包括 Alpha 值混合处理在内的动画
+  </li>
+
+  <li>使用画布绘制的自定义视图
+  </li>
+</ul>
+
+<p>
+  与团队中的工程师、设计师和产品经理开展合作，优先处理测试覆盖范围内的这些关键产品动画。
+
+</p>
+
+<h4>
+  定义未来的目标并予以跟踪
+</h4>
+
+<p>
+  从较高层面来看，确定具体的性能目标、专注于编写测试并收集相关数据至关重要。
+例如：
+</p>
+
+<ul>
+  <li>您是否只是首次想要开始跟踪 UI 性能以了解详情？
+  </li>
+
+  <li>您是否想要防止未来可能引入的性能回归？
+  </li>
+
+  <li>您当前是否有 90% 的帧运行顺畅且希望在本季度达到 98%？
+  </li>
+
+  <li>您是否有 98% 的帧运行顺畅且不希望出现性能回归？
+  </li>
+
+  <li>提高低端设备上的性能是否为您的目标？
+  </li>
+</ul>
+
+<p>
+  在所有这些情况下，您都将需要进行历史跟踪，以显示多个应用版本中的性能。
+
+</p>
+
+<h4>
+  识别用于测试的设备
+</h4>
+
+<p>
+  应用性能因其所在设备而异。某些设备的内存可能更少，GPU 功能略弱或 CPU 芯片速度较慢。
+这意味着动画在一套硬件上表现良好，但在其他硬件上可能并非如此，而且可能因为其他管道部分中出现的瓶颈表现更为糟糕。
+
+因此，考虑到用户可能会看到的这种变化，请选取各种设备（包括当前的高端设备、低端设备、平板电脑等）来执行测试。
+
+找出 CPU 性能、RAM、屏幕密度、尺寸等方面的变化。
+在高端设备上顺利通过的测试在低端设备上可能会失败。
+
+</p>
+
+<h4>
+  基本的 UI 测试框架
+</h4>
+
+<p>
+  <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a> 和 <a href="{@docRoot}training/testing/ui-testing/espresso-testing.html">Espresso</a> 等测试套件是为了帮助自动化用户使用应用过程中的操作而构建。
+
+这些套件是模拟用户与您的设备进行交互的简单框架。
+要使用这些框架，您需要有效创建通过一组用户操作运行的独特脚本，并在设备中演示这些脚本。
+
+
+</p>
+
+<p>
+  通过结合这些自动化测试以及 <code>dumpsys gfxinfo</code>，您可以快速创建可再生成的系统，然后您可使用此系统执行测试并测量特定条件的性能信息。
+
+
+</p>
+
+
+<h3 id="automated-tests">设置自动化 UI 测试</h3>
+
+<p>
+  您能够执行 UI 测试并拥有从单一测试收集数据的管道后，下一个重要步骤就是采用可以在多种设备上多次执行该测试的框架，并汇总生成的性能数据，以供开发团队做进一步分析。
+
+
+
+</p>
+
+<h4>
+  测试自动化框架
+</h4>
+
+<p>
+  有一点值得注意，UI 测试框架（例如，<a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a>）直接在目标设备/模拟器上运行，
+而性能信息收集则是由主机通过 ADB 发送命令来驱动 dumpsys gfxinfo 完成的。<em></em>
+为帮助桥接这些单独实体的自动化，我们开发了 <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">MonkeyRunner</a> 框架；这是一款在主机上运行的脚本编写系统，可以向一组连接设备发出命令并从中接收数据。
+
+
+
+</p>
+
+<p>
+  为正确自动化 UI 性能测试而构建一套脚本时，至少应当能够利用 monkeyRunner 完成以下任务：
+
+</p>
+
+<ul>
+  <li>向一个或多个目标设备或模拟器加载并启动所需的 APK。
+  </li>
+
+  <li>启动 UI Automator 的 UI 测试并允许执行该测试
+  </li>
+
+  <li>通过 dumpsys gfxinfo 收集性能信息。<em></em><em></em>
+  </li>
+
+  <li>汇总信息并以有效的方式重新向开发者显示。
+  </li>
+</ul>
+
+
+<h3 id="triage">分类并解决观察到的问题</h3>
+
+<p>
+  一旦确定问题模式或回归，下一步就是识别和应用修复。
+如果自动化测试框架保持帧的精确时间分解，则可帮助您审查最近的可疑代码/布局更改（出现回归时），或在切换到人工调查时缩小分析的系统范围。
+
+
+对于人工调查，<a href="{@docRoot}tools/help/systrace.html">systrace</a> 是一个很好的着手点，它可显示有关呈现管道的每个阶段、系统中的每个线程和核心以及您定义的任何自定义事件标记的精确时间信息。
+
+
+</p>
+
+<h4>
+  准确分析时间
+</h4>
+
+<p>
+  需要注意的是，获取和测量呈现性能所需的时间并非易事。
+就其本质而言，这些数字不具有确定性，往往会随系统状态、可用内存量、热节流以及太阳耀斑到达地面的最后时间而波动。
+
+问题在于，尽管同一测试可以运行两次，但获得的结果可能略有不同，它们彼此接近，却并不完全相同。
+
+
+</p>
+
+<p>
+  以这种方式准确收集和分析数据意味着多次运行同一测试，且以平均值或中值的形式累积结果（为了简单起见，我们将其称为“批处理”）。这可为您提供测试性能的粗略近似值，而无需确切的时间。
+
+
+
+</p>
+
+<p>
+  您可对代码更改前和更改后的应用均使用批处理，了解这些更改对性能产生的相对影响。
+如果更改前批处理的平均帧率大于更改后批处理的平均帧率，则此特定更改通常可为您带来全面的性能优势。
+
+
+</p>
+
+<p>
+  这意味着您执行的任何自动化 UI 测试均应考虑这一概念以及测试期间可能出现的任何异常。
+例如，如果应用性能因某些设备问题（不是由应用引起）骤降，则您可能需要重新运行批处理以便获得更精确的时间。
+
+
+
+</p>
+
+<p>
+  那么，在获得更有意义的测量结果之前，您应运行多少次测试？至少应运行 10 次，次数越多（例如 50 或 100 次）获得的结果更精确（当然，您现在是牺牲时间换取精确度）
+
+
+</p>

@@ -1,0 +1,123 @@
+page.title=应用链接
+page.image=images/cards/card-app-linking_2x.png
+page.keywords=应用链接, 深层链接, 意向
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文内容</h2>
+      <ol>
+        <li><a href="#web-assoc">声明网站关联</a></li>
+        <li><a href="#verfy-links">请求应用链接验证</a></li>
+        <li><a href="#user-manage">管理应用链接设置</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android 意向系统是一种让应用能够处理内容和请求的灵活机制。
+  可能会有多个应用在其意向过滤器中声明一致的 URI 模式。如果用户点击的 Web 链接没有默认的启动处理程序，平台可能会显示一个对话框，让用户从一系列已声明一致意向过滤器的应用中进行选择。
+
+
+</p>
+
+<p>
+  Android M 开发者预览版引入了对应用链接的支持，后者在现有链接处理方式基础上进行了改进，允许应用开发者将应用与他们拥有的 Web 域进行关联。
+当开发者创建此关联时，平台可以自动确定在处理特定 Web 链接时默认使用的应用，略过询问用户的步骤。
+
+
+</p>
+
+
+<h2 id="web-assoc">声明网站关联</h2>
+
+<p>
+  网站所有者必须声明与应用的关联才能建立应用链接。网站所有者可以通过在域上众所周知的位置承载一个名为 {@code statements.json} 的 JSON 文件声明与应用的关系：
+
+
+</p>
+
+<pre>http://&lt;domain&gt;:&lt;optional port&gt;/.well-known/statements.json</pre>
+
+<p class="note">
+  <strong>注：</strong>
+  在 M 开发者预览版运行期间，系统会通过 HTTP 协议对该 JSON 文件进行验证。当平台正式发布后，系统将通过 HTTPS 加密协议对该文件进行验证。
+
+</p>
+
+<p>
+  该 JSON 文件指定应作为该域下 URL 默认处理程序使用的 Android 应用。
+它根据以下字段标识该应用：
+</p>
+
+<ul>
+  <li>{@code package_name}：该应用的清单文件中声明的软件包名称；</li>
+
+  <li>{@code sha256_cert_fingerprints}：应用签名证书的 SHA256 指纹。
+    您可以利用 Java 密钥工具，通过以下命令生成该指纹：
+    <pre>keytool -list -v -keystore my-release-key.keystore</pre>
+  </li>
+</ul>
+
+<p>
+  以下文件清单显示的是一个 
+{@code statements.json} 文件的内容和格式示例：
+</p>
+
+<pre>
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "<strong>&lt;package name&gt;</strong>",
+    "sha256_cert_fingerprints": ["<strong>6C:EC:C5:0E:34:AE....EB:0C:9B</strong>"]
+  }
+}]
+</pre>
+
+
+<h2 id="verfy-links">请求应用链接验证</h2>
+
+<p>
+  应用可以请求平台自动根据相应 Web 域上承载的 {@code statements.json} 文件验证由其意向过滤器数据元素内的主机名称定义的任何应用链接。
+
+要请求应用链接验证，请按以下清单文件代码段中所示向清单文件中所需的每个意向过滤器添加一个 {@code android:autoVerify}
+ 属性：
+
+</p>
+
+<pre>
+&lt;activity ...&gt;
+    &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;data android:scheme="http" android:host="www.android.com" /&gt;
+        &lt;data android:scheme="https" android:host="www.android.com" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>
+  如果应用清单文件中存在 {@code android:autoVerify} 属性，平台会在安装应用时尝试验证应用链接。
+如果平台无法成功验证应用链接，则不会将应用设置为处理 Web 链接的首选应用。
+用户下一次打开其中一个链接时，平台将退回原有模式，向用户显示一个对话框。
+
+
+</p>
+
+<p class="note">
+  <strong>注：</strong>在测试时，如果验证失败，但用户已经使用系统的“设置”应用显式允许应用在不询问用户的情况下打开受支持的链接，则可能会出现误报。在这种情况下，不会显示对话框，链接会直接指向您的应用，不过这完全是由于用户设置的缘故，并不是因为验证成功。
+
+
+
+</p>
+
+
+<h2 id="user-manage">管理应用链接设置</h2>
+
+<p>
+  用户可以更改应用链接设置，让系统按首选方式处理 URL。您可以在系统“设置”应用的<strong>设置 &gt; 应用 &gt; 应用信息 &gt; 默认打开</strong>下查看和管理应用链接。
+
+
+</p>
