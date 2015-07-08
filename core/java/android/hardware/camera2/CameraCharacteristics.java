@@ -738,7 +738,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
-     * <p>Full-capability camera devices must always support OFF; all devices will list FAST.</p>
+     * <p>Full-capability camera devices must always support OFF; camera devices that support
+     * YUV_REPROCESSING or PRIVATE_REPROCESSING will list ZERO_SHUTTER_LAG; all devices will
+     * list FAST.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#EDGE_MODE android.edge.mode}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
@@ -1176,6 +1178,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>List of noise reduction modes for {@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode} that are supported
      * by this camera device.</p>
      * <p>Full-capability camera devices will always support OFF and FAST.</p>
+     * <p>Camera devices that support YUV_REPROCESSING or PRIVATE_REPROCESSING will support
+     * ZERO_SHUTTER_LAG.</p>
      * <p>Legacy-capability camera devices will only support FAST mode.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}</p>
