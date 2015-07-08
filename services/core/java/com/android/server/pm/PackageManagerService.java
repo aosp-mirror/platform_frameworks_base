@@ -4566,8 +4566,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private List<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPr(
             int flags, List<ResolveInfo> candidates, CrossProfileDomainInfo xpDomainInfo) {
-        if (DEBUG_PREFERRED) {
-            Slog.v("TAG", "Filtering results with prefered activities. Candidates count: " +
+        if (DEBUG_PREFERRED || DEBUG_DOMAIN_VERIFICATION) {
+            Slog.v("TAG", "Filtering results with preferred activities. Candidates count: " +
                     candidates.size());
         }
 
@@ -4580,9 +4580,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         synchronized (mPackages) {
             final int count = candidates.size();
-            // First, try to use the domain preferred app. Partition the candidates into four lists:
+            // First, try to use linked apps. Partition the candidates into four lists:
             // one for the final results, one for the "do not use ever", one for "undefined status"
-            // and finally one for "Browser App type".
+            // and finally one for "browser app type".
             for (int n=0; n<count; n++) {
                 ResolveInfo info = candidates.get(n);
                 String packageName = info.activityInfo.packageName;
@@ -4596,11 +4596,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // Try to get the status from User settings first
                     int status = getDomainVerificationStatusLPr(ps, userId);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
+                        if (DEBUG_DOMAIN_VERIFICATION) {
+                            Slog.i(TAG, "  + always: " + info.activityInfo.packageName);
+                        }
                         alwaysList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+                        if (DEBUG_DOMAIN_VERIFICATION) {
+                            Slog.i(TAG, "  + never: " + info.activityInfo.packageName);
+                        }
                         neverList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED ||
                             status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK) {
+                        if (DEBUG_DOMAIN_VERIFICATION) {
+                            Slog.i(TAG, "  + ask: " + info.activityInfo.packageName);
+                        }
                         undefinedList.add(info);
                     }
                 }
@@ -4648,17 +4657,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
 
-                // If there is nothing selected, add all candidates and remove the ones that the User
-                // has explicitely put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state
+                // If there is nothing selected, add all candidates and remove the ones that the user
+                // has explicitly put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state
                 if (result.size() == 0) {
                     result.addAll(candidates);
                     result.removeAll(neverList);
                 }
             }
         }
-        if (DEBUG_PREFERRED) {
-            Slog.v("TAG", "Filtered results with prefered activities. New candidates count: " +
+        if (DEBUG_PREFERRED || DEBUG_DOMAIN_VERIFICATION) {
+            Slog.v(TAG, "Filtered results with preferred activities. New candidates count: " +
                     result.size());
+            for (ResolveInfo info : result) {
+                Slog.v(TAG, "  + " + info.activityInfo);
+            }
         }
         return result;
     }
