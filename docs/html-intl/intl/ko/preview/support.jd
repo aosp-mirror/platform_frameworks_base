@@ -1,0 +1,67 @@
+page.title=지원
+page.image=images/cards/card-support_16-9_2x.png
+
+@jd:body
+
+<p>
+  M 개발자 미리 보기에서 버그가 발생했거나 이에 대한 피드백을 보내려면 문제 추적기에서 <a href="https://code.google.com/p/android-developer-preview/">문제를 생성</a>해 주십시오.
+
+
+</p>
+
+<p>
+  더 많은 지원이 필요하시면 <a href="http://g.co/dev/AndroidMDevPreview">M 개발자 미리 보기 Google+ 커뮤니티</a>에 가입하여 여러분의 개발 경험에 대해 논의해보시면 좋습니다.
+
+
+</p>
+
+<h2 id="release-notes">릴리스 노트</h2>
+
+<!--
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>M Developer Preview, Revision 2</a> <em>(Month 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+
+    <dt>Fix Category 1</dt>
+    <dd>
+      <ul>
+        <li>Fixed issue X.</li>
+        <li>Fixed issue Y.</li>
+        <li>Fixed issue Z.</li>
+      </ul>
+    </dd>
+
+    <dt>Fix Category 2</dt>
+    <dd>
+      <ul>
+        <li>Fixed issue X.</li>
+        <li>Fixed issue Y.</li>
+        <li>Fixed issue Z.</li>
+      </ul>
+    </dd>
+
+    </dl>
+  </div>
+</div>
+-->
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)"><img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt="" />M 개발자 미리 보기, 수정 버전 1</a> <em>(2015년 5월)</em>
+
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>최초 릴리스입니다.</dt>
+    </dl>
+  </div>
+</div>
+
+
