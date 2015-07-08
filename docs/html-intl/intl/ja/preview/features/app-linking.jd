@@ -1,0 +1,123 @@
+page.title=App Links
+page.image=images/cards/card-app-linking_2x.png
+page.keywords=applinking,deeplinks,intents
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本書の内容</h2>
+      <ol>
+        <li><a href="#web-assoc">ウェブサイトの関連を宣言する</a></li>
+        <li><a href="#verfy-links">App Link の検証を要求する</a></li>
+        <li><a href="#user-manage">App Link 設定を管理する</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android インテント システムは、アプリでコンテンツや要求を処理できるようにする柔軟なメカニズムです。
+  複数のアプリが、それぞれのインテント フィルタに一致する URI パターンを宣言できます。デフォルトのローンチ ハンドラを持たないウェブリンクをユーザーがクリックしたとき、一致するインテント フィルタが宣言されているアプリの一覧から選択するダイアログがプラットフォームによってユーザーに表示されます。
+
+
+</p>
+
+<p>
+  Android M Developer Preview でサポートされる App Links では、既存のリンク処理が改善され、アプリ開発者が所有するウェブドメインとアプリを関連付けられるようになりました。
+デベロッパーがこの関連を作成すると、プラットフォームが特定のウェブリンクの処理に使用するデフォルトのアプリを自動的に決めることができ、ユーザーにアプリを選択させる操作をスキップできます。
+
+
+</p>
+
+
+<h2 id="web-assoc">ウェブサイトの関連付けを宣言する</h2>
+
+<p>
+  ウェブサイトのオーナーは、アプリのリンクを設定するための関連を宣言する必要があります。サイトのオーナーは、ドメインのよく知られた場所で {@code statements.json} という名前の JSON ファイルをホストすることで、アプリとの関係を宣言します。
+
+
+</p>
+
+<pre>http://&lt;domain&gt;:&lt;optional port&gt;/.well-known/statements.json</pre>
+
+<p class="note">
+  <strong>注:</strong> 
+  M Developer Preview の間、JSON ファイルは http プロトコルを介して検証されます。プラットフォームの正式リリースでは、ファイルは暗号化された https プロトコルで検証されます。
+
+</p>
+
+<p>
+  この JSON ファイルは、このドメイン下の URL のデフォルトのハンドラとして使用する必要のある Android アプリを示します。
+アプリは、次のフィールドに基づいて識別されます。
+</p>
+
+<ul>
+  <li>{@code package_name}:アプリのマニフェストで宣言されたパッケージ名。</li>
+
+  <li>{@code sha256_cert_fingerprints}:アプリの署名証明書の SHA256 のフィンガープリント。
+    Java Keytool を使用して、次のコマンドでフィンガープリントを生成できます。
+    <pre>keytool -list -v -keystore my-release-key.keystore</pre>
+  </li>
+</ul>
+
+<p>
+  次のファイル一覧は、
+{@code statements.json} ファイルのコンテンツと形式の例を示しています。
+</p>
+
+<pre>
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "<strong>&lt;package name&gt;</strong>",
+    "sha256_cert_fingerprints": ["<strong>6C:EC:C5:0E:34:AE....EB:0C:9B</strong>"]
+  }
+}]
+</pre>
+
+
+<h2 id="verfy-links">App Link の検証を要求する</h2>
+
+<p>
+  アプリから、インテント フィルタのデータ エレメントのホスト名で定義されたアプリのリンクを、それぞれのウェブドメインでホストされる {@code statements.json} ファイルに対してプラットフォームが自動的に検証するよう要求できます。
+
+アプリリンクの検証を要求するには、次のマニフェスト コード スニペットのように {@code android:autoVerify}
+ 属性をマニフェスト内の目的のインテント フィルタに追加します。
+
+</p>
+
+<pre>
+&lt;activity ...&gt;
+    &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;data android:scheme="http" android:host="www.android.com" /&gt;
+        &lt;data android:scheme="https" android:host="www.android.com" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>
+  {@code android:autoVerify} 属性がアプリ マニフェストに存在する場合、プラットフォームはアプリのインストール時にアプリのリンクを検証しようとします。
+プラットフォームがアプリのリンクを正常に検証できない場合、アプリはウェブリンクの処理に適したアプリとして設定されません。
+次回ユーザーがいずれかのリンクを開いたとき、プラットフォームはユーザーに再度ダイアログを表示します。
+
+
+</p>
+
+<p class="note">
+  <strong>注:</strong> テスト時に、ユーザーがシステムの設定アプリを使ってサポートされているリンクを開くアプリを明示的に有効にしていると、誤検出が原因で検証が失敗する場合があります。この場合、ダイアログは表示されず、リンクは直接アプリに送られますが、これは検証が成功したからではなく、ユーザーの設定に基づいて動作したからです。
+
+
+
+</p>
+
+
+<h2 id="user-manage">App Link 設定を管理する</h2>
+
+<p>
+  ユーザーが希望する方法で URL を処理するように、ユーザー側でアプリのリンク設定を変更できます。アプリのリンクは、システムの設定アプリの <strong>[設定] &gt; [アプリ] &gt; [アプリ情報] &gt; [デフォルトでの起動]</strong> で確認、管理できます。
+
+
+</p>
