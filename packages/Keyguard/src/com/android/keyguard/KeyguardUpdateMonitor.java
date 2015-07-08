@@ -56,6 +56,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
@@ -118,11 +119,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 327;
     private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 328;
     private static final int MSG_AIRPLANE_MODE_CHANGED = 329;
+    private static final int MSG_SERVICE_STATE_CHANGE = 330;
 
     private static KeyguardUpdateMonitor sInstance;
 
     private final Context mContext;
     HashMap<Integer, SimData> mSimDatas = new HashMap<Integer, SimData>();
+    HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
 
     private int mRingMode;
     private int mPhoneState;
@@ -225,6 +228,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_AIRPLANE_MODE_CHANGED:
                     handleAirplaneModeChanged();
+                    break;
+                case MSG_SERVICE_STATE_CHANGE:
+                    handleServiceStateChange(msg.arg1, (ServiceState) msg.obj);
                     break;
             }
         }
@@ -503,6 +509,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mHandler.sendEmptyMessage(MSG_AIRPLANE_MODE_CHANGED);
             } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
                 dispatchBootCompleted();
+            } else if (TelephonyIntents.ACTION_SERVICE_STATE_CHANGED.equals(action)) {
+                ServiceState serviceState = ServiceState.newFromBundle(intent.getExtras());
+                int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                        SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                if (DEBUG) {
+                    Log.v(TAG, "action " + action + " serviceState=" + serviceState + " subId="
+                            + subId);
+                }
+                mHandler.sendMessage(
+                        mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
             }
         }
     };
@@ -738,6 +754,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         context.registerReceiver(mBroadcastReceiver, filter);
@@ -1053,6 +1070,30 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 if (cb != null) {
                     cb.onSimStateChanged(subId, slotId, state);
                 }
+            }
+        }
+    }
+
+    /**
+     * Handle {@link #MSG_SERVICE_STATE_CHANGE}
+     */
+    private void handleServiceStateChange(int subId, ServiceState serviceState) {
+        if (DEBUG) {
+            Log.d(TAG,
+                    "handleServiceStateChange(subId=" + subId + ", serviceState=" + serviceState);
+        }
+
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            Log.w(TAG, "invalid subId in handleServiceStateChange()");
+            return;
+        }
+
+        mServiceStates.put(subId, serviceState);
+
+        for (int j = 0; j < mCallbacks.size(); j++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
+            if (cb != null) {
+                cb.onRefreshCarrierInfo();
             }
         }
     }
