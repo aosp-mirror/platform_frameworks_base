@@ -273,6 +273,13 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void setUsbDataUnlocked(boolean unlocked) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        // If attempt to change USB function while file transfer is restricted, ensure that
+        // usb data is always locked, and return.
+        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
+            if (mDeviceManager != null) mDeviceManager.setUsbDataUnlocked(false);
+            return;
+        }
         mDeviceManager.setUsbDataUnlocked(unlocked);
     }
 
