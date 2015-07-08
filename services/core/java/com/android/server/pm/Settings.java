@@ -1058,36 +1058,8 @@ final class Settings {
             }
             return false;
         }
+
         current.setDomainVerificationStatusForUser(status, userId);
-
-        if (current.getIntentFilterVerificationInfo() == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG,
-                        "No IntentFilterVerificationInfo known: " + packageName);
-            }
-            return false;
-        }
-
-        // Then, if we set a ALWAYS status, then put NEVER status for Apps whose IntentFilter
-        // domains overlap the domains of the current package
-        ArraySet<String> currentDomains = current.getIntentFilterVerificationInfo().getDomains();
-        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-            for (PackageSetting ps : mPackages.values()) {
-                if (ps == null || ps.pkg == null || packageName.equals(ps.pkg.packageName)) {
-                    continue;
-                }
-                IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-                if (ivi == null) {
-                    continue;
-                }
-                ArraySet<String> set = ivi.getDomains();
-                set.retainAll(currentDomains);
-                if (set.size() > 0) {
-                    ps.setDomainVerificationStatusForUser(
-                            INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER, userId);
-                }
-            }
-        }
         return true;
     }
 
