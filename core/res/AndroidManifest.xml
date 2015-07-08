@@ -1526,7 +1526,7 @@
     <permission android:name="android.permission.WRITE_SETTINGS"
         android:label="@string/permlab_writeSettings"
         android:description="@string/permdesc_writeSettings"
-        android:protectionLevel="signature|system|appop|pre23" />
+        android:protectionLevel="dangerous" />
 
     <!-- @SystemApi Allows an application to modify the Google service map.
     <p>Not for use by third-party applications. -->
