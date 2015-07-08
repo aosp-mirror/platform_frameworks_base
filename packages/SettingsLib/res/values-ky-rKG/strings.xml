@@ -30,15 +30,11 @@
     <!-- no translation found for wifi_not_in_range (1136191511238508967) -->
     <skip />
     <string name="wifi_no_internet" msgid="9151470775868728896">"Интернетке кирүү мүмкүнчүлүгү табылган жок, андыктан автоматтык түрдө кайра туташпайт."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> тарабынан сакталды"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi жардамчысы аркылуу туташып турат"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s аркылуу жеткиликтүү"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s аркылуу жеткиликтүү"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Туташып турат, Интернет жок"</string>
     <!-- no translation found for bluetooth_disconnected (6557104142667339895) -->
     <skip />
     <!-- no translation found for bluetooth_disconnecting (8913264760027764974) -->
@@ -63,8 +59,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Байланышты бөлүшүү үчүн колдонуу"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Интернет байланышын бөлүшүү"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Билдирүү алмашуу"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM картаны пайдалануу мүмкүнчүлүгү"</string>
     <!-- no translation found for bluetooth_a2dp_profile_summary_connected (963376081347721598) -->
     <skip />
     <!-- no translation found for bluetooth_headset_profile_summary_connected (7661070206715520671) -->
@@ -72,8 +67,7 @@
     <!-- no translation found for bluetooth_opp_profile_summary_connected (2611913495968309066) -->
     <skip />
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"MAP\'ка байланышты"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP\'ка туташып турат"</string>
     <!-- no translation found for bluetooth_opp_profile_summary_not_connected (1267091356089086285) -->
     <skip />
     <!-- no translation found for bluetooth_hid_profile_summary_connected (3381760054215168689) -->
@@ -85,8 +79,7 @@
     <!-- no translation found for bluetooth_pan_profile_summary_use_for (5664884523822068653) -->
     <skip />
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"MAP үчүн колдонуу"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM картаны пайдалануу үчүн колдонуу"</string>
     <!-- no translation found for bluetooth_a2dp_profile_summary_use_for (4630849022250168427) -->
     <skip />
     <!-- no translation found for bluetooth_headset_profile_summary_use_for (8705753622443862627) -->

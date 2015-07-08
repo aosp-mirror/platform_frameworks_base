@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem me vërtetimin"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Nuk është brenda rrezes"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"Nuk u diktua qasje në internet. Lidhja nuk do të realizohet automatikisht."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"E ruajtur nga <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"I lidhur nëpërmjet ndihmësit të Wi‑Fi"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"E lidhur përmes %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"E mundshme përmes %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"U lidh, nuk ka internet"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Shkëputur"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Po shkëputet..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Po lidhet..."</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Përdore për ndarjen e kontakteve"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Ndarja e lidhjes së internetit"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Qasja në mesazhe"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Qasje në kartën SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"U lidh me audion e medias"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"U lidh me audion e telefonit"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"U lidh me serverin e transferimit të skedarëve"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"U lidh me hartën"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Lidhur me SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Nuk u lidh me serverin e transferimit të skedarëve"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"U lidh me pajisjen e hyrjes"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Lidhur me pajisjen për qasje në internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Po ndan lidhjen lokale të internetit me pajisjen"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Përdor për qasje në internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Përdore për hartën"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Përdor për qasje në kartën SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Përdor për audion e medias"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Përdor për audion e telefonit"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Përdor për transferimin e skedarëve"</string>

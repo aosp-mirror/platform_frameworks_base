@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ບັນຫາການພິສູດຢືນຢັນ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ບໍ່ຢູ່ໃນໄລຍະທີ່ເຊື່ອມຕໍ່ໄດ້"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"​ບໍ່​ພົບ​ການ​ເຊື່ອມ​ຕໍ່​ອິນ​ເຕີ​ເນັດ​, ຈະ​ບໍ່​ຖືກ​ເຊື່ອມ​ຕໍ່​ໃໝ່​ໂດຍ​ອັດ​ຕະ​ໂນ​ມັດ."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"ບັນທຶກ​​​ໂດຍ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"ເຊື່ອມ​ຕໍ່​ຜ່ານ Wi‑Fi ຕົວ​ຊ່ວຍ​ແລ້ວ"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"​ເຊື່ອມຕໍ່​ຜ່ານ %1$s ​ແລ້ວ"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"ມີ​ໃຫ້​ຜ່ານ %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"​ເຊື່ອມ​ຕໍ່​ແລ້ວ,​ ບໍ່​ມີ​ອິນ​ເຕີ​ເນັດ"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ຕັດການເຊື່ອມຕໍ່ແລ້ວ"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"ກຳລັງຢຸດການເຊື່ອມຕໍ່..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"ກຳລັງເຊື່ອມຕໍ່..."</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"​ໃຊ້​ສຳ​ລັບການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ການແບ່ງປັນການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"ການ​ເຂົ້າ​ເຖິງ​ຂໍ້​ຄວາມ"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ການ​ເຂົ້າ​ເຖິງ SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"ເຊື່ອມຕໍ່ກັບສື່ດ້ານສຽງແລ້ວ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ເຊື່ອມຕໍ່ກັບສຽງໂທລະສັບແລ້ວ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ເຊື່ອມຕໍ່ກັບເຊີບເວີໂອນຍ້າຍໄຟລ໌ແລ້ວ"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"ເຊື່ອມ​ຕໍ່​ກັບ​ແຜນ​ທີ່ແລ້ວ"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"ເຊື່ອມ​ຕໍ່​ກັບ SAP ​ແລ້ວ"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ບໍ່ໄດ້ເຊື່ອມຕໍ່ຫາເຊີບເວີໂອນຍ້າຍໄຟລ໌"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ເຊື່ອມຕໍ່ກັບອຸປະກອນປ້ອນຂໍ້ມູນແລ້ວ"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"ເຊື່ອມຕໍ່ກັບອຸປະກອນເພື່ອເຂົ້າເຖິງອິນເຕີເນັດແລ້ວ"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"ກຳລັງແບ່ງປັນການເຊື່ອມຕໍ່ອິນເຕີເນັດກັບອຸປະກອນ"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ໃຊ້ເພື່ອເຂົ້າອິນເຕີເນັດ"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"ໃຊ້ສຳລັບແຜນທີ່"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"ການ​ໃຊ້​ສໍາ​ລັບ​ການ​ເຂົ້າ​ເຖິງ SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"ໃຊ້ສຳລັບສື່ດ້ານສຽງ"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ໃຊ້ສຳລັບລະບົບສຽງຂອງໂທລະສັບ"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ໃຊ້ເພື່ອໂອນຍ້າຍໄຟລ໌"</string>

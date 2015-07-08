@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"စစ်မှန်ကြောင်းအတည်ပြုရန်၌ ပြသနာရှိခြင်း"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"စက်ကွင်းထဲတွင် မဟုတ်ပါ"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"မည်သည့် အင်တာနက်မျှမရှိပါ၊ အလိုအလျောက် ပြန်လည်မချိတ်ဆက်ပါ။"</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> မှသိမ်းဆည်းခဲ့သည်"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"ကြိုးမဲ့ကူညီသူမှတဆင့် ချိတ်ဆက်၏"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s မှတစ်ဆင့်ရနိုင်သည်"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"ချိတ်ဆက်ထားသည်၊ အင်တာနက်မရှိ"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ချိတ်ဆက်မှုပြတ်တောက်သည်"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"အဆက်အသွယ်ဖြတ်တောက်သည်"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"ချိတ်ဆက်နေသည်"</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"အဆက်အသွယ်ကို မျှဝေရန် အတွက် သုံးရန်"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"အင်တာနက်ဆက်သွယ်မှု မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"သတင်းရယူမှု"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM အသုံးပြုခြင်း"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"မီဒီယာအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ဖုန်းအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ဖိုင်လွှဲပြောင်းမည့်ဆာဗာနှင့် ချိတ်ဆက်ထားပြီး"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"မြေပုံနှင့် ချိတ်ဆက်ရန်"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP သို့ချိတ်ဆက်ထားသည်"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ဖိုင်လွှဲပြောင်းမည့်ဆာဗာနှင့် ချိတ်ဆက်မထားပါ"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ထည့်သွင်းထားသောစက်ကို ချိတ်ဆက်မည်"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"အင်တာနက်ဆက်သွယ်မှုရရန် စက်နှင်ချိတ်ဆက်မည်"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"စက်နှင့် ပုံမှန်အင်တာနက်ဆက်သွယ်မှုအား မျှဝေစေရန်"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"အင်တာနက်ချိတ်ဆက်ရန်အသုံးပြုသည်"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"မြေပုံအတွက်သုံးရန်"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM အသုံးပြုမှုအတွက် အသုံးပြုမည်"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"မီဒီယာအသံအတွက်အသုံးပြုရန်"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ဖုန်းအသံအားအသုံးပြုရန်"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ဖိုင်လွဲပြောင်းရန်အတွက်အသုံးပြုရန်"</string>

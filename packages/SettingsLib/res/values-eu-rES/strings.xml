@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentifikazio-arazoa"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Urrunegi"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"Ez da hauteman Interneterako sarbiderik. Ez da automatikoki berriro konektatuko."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> aplikazioak gorde du"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi laguntzailearen bidez konektatuta"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s bidez konektatuta"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s bidez erabilgarri"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Konektatuta, ez dago Interneteko konexiorik"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Deskonektatuta"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Deskonektatzen…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Konektatzen…"</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Erabili kontaktuak partekatzeko"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Interneteko konexioa partekatzea"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Mezuetarako sarbidea"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM txartelerako sarbidea"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Euskarriaren audiora konektatuta"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Telefonoaren audiora konektatuta"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Fitxategi-transferentziako zerbitzarira konektatuta"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Mapara konektatuta"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP sarbide-puntura konektatuta"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Fitxategi-transferentziako zerbitzarira konektatu gabe"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Sarrerako gailura konektatuta"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Gailura konektatuta Interneteko sarbiderako"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Tokiko Interneteko konexioa gailu batekin partekatzea"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Erabili Interneteko sarbiderako"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Erabili maparako"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Erabili SIM txartelerako sarbiderako"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Erabili euskarriaren audiorako"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Erabili telefonoaren audiorako"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Erabili fitxategi-transferentziarako"</string>

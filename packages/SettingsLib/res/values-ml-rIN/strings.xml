@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ആധികാരികമാക്കുന്നതിലെ പ്രശ്‌നം"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"പരിധിയിലില്ല"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"ഇന്റർനെറ്റ് ആക്സസ്സൊന്നും കണ്ടെത്താത്തതിനാൽ സ്വയം വീണ്ടും കണക്‌റ്റുചെയ്യില്ല."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> സംരക്ഷിച്ചത്"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi അസിസ്റ്റന്റ് മുഖേന കണക്‌റ്റുചെയ്തു"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s വഴി ബന്ധിപ്പിച്ചു"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s വഴി ലഭ്യം"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"കണക്റ്റുചെയ്തിരിക്കുന്നു, ഇന്റർനെറ്റില്ല"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"വിച്ഛേദിച്ചു"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"വിച്‌ഛേദിക്കുന്നു..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"കണക്‌റ്റുചെയ്യുന്നു..."</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"കോൺടാക്‌റ്റ് പങ്കിടലിനായി ഉപയോഗിക്കുക"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ഇന്റർനെറ്റ് കണക്ഷൻ പങ്കിടൽ"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"ആക്‌സസ്സ് നിയന്ത്രിക്കുക"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM ആക്സസ്"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"മീഡിയ ഓഡിയോയിലേക്ക് കണ‌ക്റ്റുചെയ്‌തു"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ഫോൺ ഓഡിയോയിൽ കണ‌ക്റ്റുചെ‌യ്‌തു"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ഫയൽ കൈമാറ്റ സെർവറിലേക്ക് കണ‌ക്റ്റുചെ‌യ്‌തു"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"മാപ്പിലേക്ക് കണക്റ്റുചെയ്‌തു"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP-യിലേക്ക് ബന്ധിപ്പിച്ചു"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ഫയൽ കൈമാറ്റ സെർവറിൽ കണ‌ക്റ്റുചെയ്‌തിട്ടില്ല"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ഇൻപുട്ട് ഉപകരണത്തിൽ കണക്റ്റുചെയ്‌തു"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"ഇന്റ‌ർനെറ്റ് ആക്‌‌സസ്സിനായി ഉപകരണത്തിൽ കണ‌ക്‌റ്റുചെയ്‌തു"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"ഉപകരണവുമായി പ്രദേശിക ഇന്റ‌ർനെറ്റ്‌ കണക്ഷൻ പങ്കിടുന്നു"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ഇന്റ‌ർനെറ്റ് ആക്‌‌സസ്സിനായി ഉപയോഗിക്കുന്നു"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"മാപ്പിനായി ഉപയോഗിക്കുക"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM ആക്സസിന് ഉപയോഗിക്കുക"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"മീഡിയ ഓഡിയോയ്ക്കായി ഉപയോഗിക്കുക"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ഫോൺ ഓഡിയോയ്ക്കായി ഉപയോഗിക്കുക"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ഫയൽ കൈമാറ്റത്തിനായി ഉപയോഗിക്കുന്നു"</string>
