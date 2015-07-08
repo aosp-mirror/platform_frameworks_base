@@ -155,8 +155,7 @@ void Matrix4::load(const float* v) {
 }
 
 void Matrix4::load(const Matrix4& v) {
-    memcpy(data, v.data, sizeof(data));
-    mType = v.getType();
+    *this = v;
 }
 
 void Matrix4::load(const SkMatrix& v) {

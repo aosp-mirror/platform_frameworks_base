@@ -85,10 +85,6 @@ public:
         load(v);
     }
 
-    Matrix4(const Matrix4& v) {
-        load(v);
-    }
-
     Matrix4(const SkMatrix& v) {
         load(v);
     }
