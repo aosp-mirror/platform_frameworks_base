@@ -34,10 +34,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <ctype.h>
-
-#ifdef HAVE_MALLOC_H
 #include <malloc.h>
-#endif
 
 namespace android
 {
@@ -128,32 +125,20 @@ struct stats_t {
 
 static jlong android_os_Debug_getNativeHeapSize(JNIEnv *env, jobject clazz)
 {
-#ifdef HAVE_MALLOC_H
     struct mallinfo info = mallinfo();
     return (jlong) info.usmblks;
-#else
-    return -1;
-#endif
 }
 
 static jlong android_os_Debug_getNativeHeapAllocatedSize(JNIEnv *env, jobject clazz)
 {
-#ifdef HAVE_MALLOC_H
     struct mallinfo info = mallinfo();
     return (jlong) info.uordblks;
-#else
-    return -1;
-#endif
 }
 
 static jlong android_os_Debug_getNativeHeapFreeSize(JNIEnv *env, jobject clazz)
 {
-#ifdef HAVE_MALLOC_H
     struct mallinfo info = mallinfo();
     return (jlong) info.fordblks;
-#else
-    return -1;
-#endif
 }
 
 // Container used to retrieve graphics memory pss
