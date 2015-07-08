@@ -46,7 +46,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="file://$ANDROID_SRC$/tools/base/common/src/main/java" />
+          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/tools-common/tools-common-prebuilt-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
