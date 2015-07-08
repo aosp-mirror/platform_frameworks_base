@@ -141,18 +141,18 @@ nativeCreate
     return (jlong) new SensorManager(String16(opPackageNameUtf.c_str()));
 }
 
-static jint
-nativeGetNextSensor(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sensor, jint next)
+static jboolean
+nativeGetSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sensor, jint index)
 {
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
 
     Sensor const* const* sensorList;
     size_t count = mgr->getSensorList(&sensorList);
-    if (size_t(next) >= count) {
-        return -1;
+    if (size_t(index) >= count) {
+        return false;
     }
 
-    Sensor const* const list = sensorList[next];
+    Sensor const* const list = sensorList[index];
     const SensorOffsets& sensorOffsets(gSensorOffsets);
     jstring name = getInternedString(env, &list->getName());
     jstring vendor = getInternedString(env, &list->getVendor());
@@ -177,8 +177,7 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sens
         jstring stringType = getInternedString(env, &list->getStringType());
         env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
     }
-    next++;
-    return size_t(next) < count ? next : 0;
+    return true;
 }
 
 static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong sensorManager) {
@@ -352,9 +351,9 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
              "(Ljava/lang/String;)J",
              (void*)nativeCreate },
 
-    {"nativeGetNextSensor",
-            "(JLandroid/hardware/Sensor;I)I",
-            (void*)nativeGetNextSensor },
+    {"nativeGetSensorAtIndex",
+            "(JLandroid/hardware/Sensor;I)Z",
+            (void*)nativeGetSensorAtIndex },
 
     {"nativeIsDataInjectionEnabled",
             "(J)Z",
