@@ -773,8 +773,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public boolean canChildBeDismissed(View v) {
-        final View veto = v.findViewById(R.id.veto);
-        return (veto != null && veto.getVisibility() != View.GONE);
+        return StackScrollAlgorithm.canChildBeDismissed(v);
     }
 
     @Override
@@ -2610,8 +2609,27 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setDismissAllInProgress(boolean dismissAllInProgress) {
         mDismissAllInProgress = dismissAllInProgress;
         mDismissView.setDismissAllInProgress(dismissAllInProgress);
+        mAmbientState.setDismissAllInProgress(dismissAllInProgress);
         if (dismissAllInProgress) {
             disableClipOptimization();
+        }
+        handleDismissAllClipping();
+    }
+
+    private void handleDismissAllClipping() {
+        final int count = getChildCount();
+        boolean previousChildWillBeDismissed = false;
+        for (int i = 0; i < count; i++) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (child.getVisibility() == GONE) {
+                continue;
+            }
+            if (mDismissAllInProgress && previousChildWillBeDismissed) {
+                child.setMinClipTopAmount(child.getClipTopAmount());
+            } else {
+                child.setMinClipTopAmount(0);
+            }
+            previousChildWillBeDismissed = canChildBeDismissed(child);
         }
     }
 
