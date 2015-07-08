@@ -53,18 +53,6 @@ public class MtpStorage {
         return mStorageId;
     }
 
-    /**
-     * Generates a storage ID for storage of given index.
-     * Index 0 is for primary external storage
-     *
-     * @return the storage ID
-     */
-    public static int getStorageIdForIndex(int index) {
-        // storage ID is 0x00010001 for primary storage,
-        // then 0x00020001, 0x00030001, etc. for secondary storages
-        return ((index + 1) << 16) + 1;
-    }
-
    /**
      * Returns the file path for the storage unit's storage in the file system
      *
