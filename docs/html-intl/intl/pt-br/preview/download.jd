@@ -1,0 +1,348 @@
+page.title=Downloads
+page.image=images/cards/card-download_16-9_2x.png
+
+@jd:body
+
+<div style="position:relative; min-height:600px">
+
+  <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
+
+    <p class="sdk-terms-intro">Antes de fazer o download ou instalar componentes do Android Preview
+ SDK, você deve concordar com os seguintes termos e condições.</p>
+
+    <h2 class="norule">Termos e condições</h2>
+
+    <div class="sdk-terms" onfocus="this.blur()" style="width:678px">
+Este é o contrato de licença do Android SDK Preview (o “Contrato de Licença”).
+
+1. Introdução
+
+1.1 O Android SDK Preview (que este Contrato de licença chama de "Preview", incluindo especificamente os arquivos de sistema do Android, APIs integradas e arquivos da biblioteca Preview, se e quando estiverem disponíveis) é licenciado por meio da concordância com os termos deste contrato. O Contrato de licença forma um vínculo contratual legal entre o contratante e a Google em relação ao uso do Preview.
+
+1.2 "Android" se refere à pilha de software do Android para dispositivos, conforme disponibilizado no Projeto de código aberto do Android, localizado no URL a seguir: http://source.android.com/, atualizado periodicamente.
+
+1.3 "Google" refere-se à Google Inc, uma corporação de Delaware, com sede em 1600 Amphitheatre Parkway, Mountain View, CA 94043, Estados Unidos.
+
+2. Aceitação do Contrato de Licença
+
+2.1 A fim de usar o Preview, é necessário concordar com este Contrato de licença. O uso do Preview é proibido àqueles que não concordam com este Contrato de licença.
+
+2.2 Ao clicar em aceitar e/ou usar o Preview, você concorda com os termos do Contrato de licença
+
+2.3 É proibido o uso do Preview e a aceitação deste contrato pelo indivíduo que tenha impedimento legal sobre o recebimento do Preview sob as leis dos Estados Unidos ou de outros países, incluindo o país de residência ou no qual usa o Preview.
+
+2.4 Se for usar o Preview internamente na empresa ou organização, você deverá concordar com o vínculo com este contrato em nome do empregador ou de outra entidade e declarar e garantir que tem total autoridade legal para tanto. Se você não tem a autoridade necessária, não deve concordar com este contrato nem usar o Preview em nome do empregador ou de outra entidade.
+
+3. Licença do Preview da Google
+
+3.1 Sujeito aos termos do Contrato de licença, a Google confere uma licença limitada, revogável, livre de taxas, intransmissível, não sub-licenciável e não exclusiva para o uso apenas do Preview, pessoal ou internamente dentro da sua empresa ou organização, para fins de desenvolvimento de aplicativos executados na plataforma do Android.
+
+3.2 Você concorda que a Google ou terceiros detêm todos os direitos legais, títulos e interesses relativos ao Preview, incluindo quaisquer direitos de propriedade intelectual que subsistam no Preview. "Direitos de propriedade intelectual" se referem a todo e qualquer direito sob as leis de patentes, de direitos autorais, de segredo comercial, de marca registrada e todos os outros direitos de propriedade. A Google reserva todos os direitos não conferidos expressamente a você.
+
+3.3 O uso do Preview não é autorizado para qualquer finalidade não expressamente permitida por este Contrato de licença. Salvo na extensão exigida por licenças aplicáveis de terceiros, é proibido: (a) copiar (exceto para fins de cópia de segurança), modificar, adaptar, redistribuir, descompilar, fazer engenharia reversa, desmontar ou criar trabalhos derivados do Preview ou qualquer parte dele; ou (b) carregar qualquer parte do Preview em um aparelho celular ou outro dispositivo de hardware, exceto em computador pessoal, combinar qualquer parte do Preview com outros softwares ou distribuir qualquer software ou dispositivo que contenha uma parte do Preview.
+
+3.4 Você concorda que não tomará quaisquer medidas que possam causar ou resultar em fragmentação do Android, incluindo, sem limitar-se, a distribuição e a participação na criação ou na promoção, sob quaisquer formas, de um conjunto de desenvolvimento de software derivado do Preview.
+
+3.5 O uso, a reprodução e a distribuição de componentes do Preview licenciado sob licença de software de código aberto são regidos exclusivamente pelos termos daquela licença de software de código aberto, e não por este Contrato de licença. Você concorda em manter uma licença em bom estado para as licenças de software de código aberto sob todos os direitos concedidos e deter quaisquer ações que possam limitar, suspender ou romper tais direitos.
+
+3.6 Você concorda que a forma e a natureza do SDK que a Google fornece podem mudar sem aviso prévio e que as versões futuras do SDK podem ser incompatíveis com aplicativos desenvolvidos em versões anteriores do SDK. Você concorda que a Google pode cessar (permanente ou temporariamente) o fornecimento do Preview (ou quaisquer recursos dentro dele) a você ou a usuários em geral sob critério exclusivo da Google, sem aviso prévio.
+
+3.7 Nada neste Contrato de licença confere o direito de uso de quaisquer nomes comerciais, marcas comerciais, marcas de serviço, logomarcas, nomes de domínios e outros recursos de marcas especiais da Google.
+
+3.8 Você concorda que não removerá, ocultará nem alterará quaisquer observações de direitos de propriedade (incluindo observações de direitos autorais e de marcas registradas) que possam estar afixadas ou contidas no Preview.
+
+4. Uso do Preview por você
+
+4.1 A Google compreende que nada no Contrato de licença dá a ela direito, título nem interesse no usuário (ou em seus licenciadores), sob o presente Contrato de licença, no que tange ao desenvolvimento de aplicativos de software através do uso do Preview, incluindo quaisquer direitos de propriedade intelectual que subsistam nos referidos aplicativos.
+
+4.2 Você concorda em usar o Preview e desenvolver aplicativos somente para as finalidades permitidas por (a) este Contrato de licença e (b) quaisquer leis, normas, diretrizes geralmente aceitas ou orientações aplicáveis nas jurisdições relevantes (incluindo quaisquer leis acerca da exportação e da importação de dados ou softwares nos Estados Unidos ou em outros países relevantes).
+
+4.3 Você concorda que, se usar o Preview para o desenvolvimento de aplicativos, deverá proteger a privacidade e os direitos legais destes usuários. Se nomes de usuário, senhas ou outras informações de acesso ou informações pessoais forem fornecidos ao aplicativo, deve-se informá-los de que tais dados estarão disponíveis para o aplicativo, além de fornecer observações de privacidade e proteção legalmente adequadas a esses usuários. Se o aplicativo armazenar informações pessoais ou confidenciais fornecidas pelos usuários, deve fazê-lo com segurança. Se o usuário fornecer informações da conta do Google, o aplicativo poderá usar essas informações exclusivamente para acessar a conta da Google do usuário quando houver autorização para fazê-lo e para os fins limitados pela autorização.
+
+4.4 Você concorda que não se envolverá em qualquer atividade com o Preview, incluindo o desenvolvimento e a distribuição de um aplicativo que interfira, perturbe, danifique ou acesse, de modo não autorizado, servidores, redes ou outras propriedades ou serviços da Google ou qualquer outro terceiro.
+
+4.5 Você concorda que é exclusivamente responsável por (e que a Google não tem qualquer responsabilidade com você ou terceiro) quaisquer dados, conteúdo ou recursos que criar, transmitir ou exibir por meio do Android e/ou de aplicativos do Android e pelas consequências que suas ações (incluindo perda ou dano que a Google possa sofrer) podem gerar.
+
+4.6 Você concorda que é exclusivamente responsável por (e que a Google não tem qualquer responsabilidade com você ou terceiro) qualquer violação das obrigações exigidas neste Contrato de licença, qualquer contrato ou termos de serviço aplicáveis a terceiros, qualquer lei ou norma aplicável e pelas consequências (incluindo a perda ou dano que a Google ou qualquer terceiro possa sofrer) de quaisquer violações.
+
+4.7 O Preview está em desenvolvimento e o seu teste e feedback são uma parte importante deste processo. Ao usar o Preview, você está ciente de que a implementação de alguns recursos ainda estão em desenvolvimento e que não se deve confiar que o Preview tem a funcionalidade completa de uma versão estável. Você concorda em não distribuir nem enviar publicamente quaisquer aplicativos usando este Preview, pois ele não será mais suportado após o lançamento oficial do Android SDK.
+
+5. Suas credenciais de desenvolvedor
+
+5.1 Você é responsável pela manutenção da confidencialidade de quaisquer credenciais de desenvolvedor que possam ser emitidas pela Google ou escolhidas por você e será o único responsável por todos os aplicativos que forem desenvolvidos sob suas credenciais de desenvolvedor.
+
+6. Privacidade e informações
+
+6.1 A fim de inovar e aprimorar continuamente o Preview, a Google pode coletar certas estatísticas de uso do software, incluindo, sem limitar-se, um identificador exclusivo, endereço IP associado, número de versão do software e informações sobre quais ferramentas e/ou serviços no Preview estão sendo usados e como estão sendo usados. Antes de coletar quaisquer dessas informações, o Preview o notificará e buscará seu consentimento. Se você recusar, as informações não serão coletadas.
+
+6.2 Os dados coletados são examinados coletivamente para aprimorar o Preview e são mantidos em conformidade com a Política de privacidade da Google acessível em http://www.google.com/policies/privacy/.
+
+7. Aplicativos de terceiros
+
+7.1 Ao usar o Preview para executar aplicativos desenvolvidos por terceiros ou que acessam dados, conteúdo ou recursos fornecidos por terceiros, você concorda que a Google não é responsável por tais aplicativos, dados, conteúdo ou recursos. Você compreende que quaisquer dados, conteúdo ou recursos passíveis de aceitação por meio de tais aplicativos de terceiros imputam responsabilidade exclusiva ao indivíduo que os originou. A Google não é responsável por qualquer perda ou dano que possa ocorrer como resultado do uso ou acesso de quaisquer aplicativos, dados, conteúdo ou recursos de terceiros.
+
+7.2 Você deve estar ciente de que os dados, conteúdo e recursos apresentados a você por aplicativos de terceiros podem ser protegidos pelos direitos de propriedade intelectual de posse dos fornecedores (ou de outras pessoas ou empresas em seus nomes). Não é permitido modificar, alugar, arrendar, emprestar, vender, distribuir nem criar trabalhos derivados com base nestes dados, conteúdo ou recursos (na totalidade ou em parte), salvo se houver permissão explícita especificada pelos respectivos detentores de direitos.
+
+7.3 Você reconhece que o uso de tais aplicativos, dados, conteúdo ou recursos de terceiros pode estar sujeito a termos adicionais entre você e o terceiro em questão.
+
+8. Uso de APIs da Google
+
+8.1 APIs da Google
+
+8.1.1 Ao usar qualquer API para recuperar dados da Google, você reconhece que eles podem ser protegidos por direitos de propriedade intelectual de posse da Google ou dos terceiros que fornecem os dados (ou de pessoas ou empresas em nomes deles). O uso de tal API pode estar sujeito a termos de serviço adicionais. Não é permitido modificar, alugar, arrendar, emprestar, vender, distribuir nem criar trabalhos derivados baseados nesses dados (na totalidade ou em parte), salvo se permitido pelos termos de serviço pertinentes.
+
+8.1.2 Se você usar qualquer API para recuperar dados de um usuário a partir da Google, reconhece e concorda que deve recuperar dados somente com consentimento explícito do usuário e somente quando, e para os fins limitados aos quais, o usuário conceder permissão para fazê-lo.
+
+9. Rescisão do Contrato de licença
+
+9.1 O Contrato de licença continuará a se aplicar até que ocorra uma rescisão sua ou da Google, como definido abaixo.
+
+9.2 Caso queira rescindir o Contrato de licença, você pode fazer isto cessando o uso do Preview e de qualquer credencial de desenvolvedor relevante.
+
+9.3 A Google pode, a qualquer momento, rescindir o Contrato de licença, com ou sem causa, com uma notificação.
+
+9.4 O Contrato de licença será encerrado automaticamente sem aviso ou outras ações na ocorrência de:
+(A) a Google interromper o fornecimento do Preview ou de determinadas partes do Preview aos usuários no país em que você reside ou de onde o serviço é usado; e
+(B) a Google emitir uma versão de lançamento final do Android SDK.
+
+9.5 Quando o Contrato de licença é rescindido, a licença concedida a você no Contrato de licença é finalizada, todo o uso do Preview será interrompido e as provisões dos parágrafos 10, 11, 12 e 14 deverão permanecer indefinidamente.
+
+10. EXCLUSÕES
+
+10.1 VOCÊ COMPREENDE E CONCORDA EXPRESSAMENTE QUE O RISCO DO USO DO PREVIEW É EXCLUSIVAMENTE SEU E QUE O PREVIEW É FORNECIDO NA FORMA EM QUE SE ENCONTRA E COMO DISPONIBILIZADO, SEM GARANTIA DE QUALQUER TIPO DA GOOGLE.
+
+10.2 O USO DO PREVIEW E DE QUALQUER MATERIAL BAIXADO OU OBTIDO DE OUTRO MODO PELO USO DO PREVIEW ESTÁ A SEU CRITÉRIO E RISCO E VOCÊ É O ÚNICO RESPONSÁVEL POR QUALQUER DANO AO SEU SISTEMA OPERACIONAL OU OUTRO DISPOSITIVO OU PELA PERDA DE DADOS QUE RESULTEM DE TAL USO. SEM LIMITAR OS PRECEDENTES, VOCÊ ENTENDE QUE O PREVIEW NÃO É UMA VERSÃO ESTÁVEL E QUE PODE CONTER ERROS, DEFEITOS E VULNERABILIDADES DE SEGURANÇA QUE PODEM RESULTAR EM DANOS SIGNIFICANTES, INCLUINDO A PERDA IRRECUPERÁVEL OU COMPLETA DO USO DO SISTEMA DO COMPUTADOR OU DE OUTROS DISPOSITIVOS.
+
+10.3 A GOOGLE EXCLUI EXPRESSAMENTE TODAS AS GARANTIAS E CONDIÇOES DE QUALQUER TIPO, EXPRESSAS OU IMPLÍCITAS, INCLUINDO, MAS NÃO LIMITADO A, GARANTIAS E CONDIÇÕES DE COMERCIALIZAÇÃO IMPLÍCITAS, ADEQUAÇÃO A UMA FINALIDADE PARTICULAR E A NÃO VIOLAÇÃO.
+
+11. LIMITAÇÃO DE RESPONSABILIDADE
+
+11.1 VOCÊ COMPREENDE E CONCORDA EXPRESSAMENTE QUE A GOOGLE, SUAS SUBSIDIÁRIAS, AFILIADAS E SEUS LICENCIADORES NÃO SERÃO RESPONSABILIZADOS POR VOCÊ SOB QUALQUER TEORIA DE RESPONSABILIDADE POR QUAISQUER DANOS, SEJAM ELES DIRETOS, INDIRETOS, INCIDENTAIS, ESPECIAIS, CONSEQUENCIAIS OU DE EXEMPLO QUE POSSAM INCORRER, INCLUINDO QUALQUER PERDA DE DADOS, INDEPENDENTE DE AVISO À GOOGLE OU A SEUS REPRESENTANTES OU DA NECESSIDADE DE AVISO SOBRE A POSSIBILIDADE DA INCORRÊNCIA DE TAIS PERDAS.
+
+12. Indenização
+
+12.1 Ao limite máximo permitido por lei, você concorda em defender, indenizar e isentar a Google, suas afiliadas e respectivos conselheiros, diretores, empregados e agentes com relação a todas e quaisquer reivindicações, ações, processos ou procedimentos, bem como todas e quaisquer perdas, responsabilidades, danos, custos e despesas (incluindo honorários advocatícios) decorrentes ou provenientes de: (a) seu uso do Preview, (b) qualquer aplicativo desenvolvido no Preview que infrinja direitos de propriedade intelectual de qualquer pessoa, difame qualquer pessoa ou viole seus direitos de publicidade ou privacidade e (c) qualquer não cumprimento deste Contrato de licença.
+
+13. Mudanças no Contrato de licença
+
+13.1 A Google pode realizar mudanças no Contrato de licença à medida que distribui novas versões do Preview. Quando essas mudanças forem realizadas, a Google fará uma nova versão do Contrato de licença disponível no site em que o Preview estiver disponível.
+
+14. Termos legais gerais
+
+14.1 Esse Contrato de licença constitui o contrato legal integral entre você e a Google e rege o uso do Preview (excluindo quaisquer serviços que a Google possa fornecer a você sob um contrato escrito em separado), e substitui inteiramente quaisquer contratos anteriores entre você e a Google em relação ao Preview.
+
+14.2 Você concorda que, se a Google não exercer nem impetrar qualquer direito ou recurso legal que esteja contido no Contrato de licença (ou que a Google detenha direitos nos termos de qualquer lei aplicável), não se considerará esse fato como uma renúncia formal aos direitos da Google e esses direitos ou recursos continuarão disponíveis à Google.
+
+14.3 Se qualquer tribunal de justiça que tiver a competência para decidir sobre esse tema determinar que qualquer cláusula do Contrato de licença é inválida, tal cláusula será removida do contrato sem afetar as cláusulas restantes ou sua vigência. As cláusulas restantes do Contrato de licença continuarão válidas e obrigatórias.
+
+14.4 Você reconhece e concorda que cada membro do grupo de empresas das quais a Google é a empresa controladora deve ser beneficiário terceiro do Contrato de licença e que essas outras empresas terão o poder de aplicar diretamente, e apoiar-se em, qualquer cláusula do Contrato de licença que confira um direito (ou direitos em favor) deles. Além disso, nenhuma outra pessoa nem empresa deve ser beneficiário terceiro do Contrato de licença.
+
+14.5 RESTRIÇÕES DE EXPORTAÇÃO. O PREVIEW ESTÁ SUJEITO ÀS LEIS E NORMAS DE EXPORTAÇÃO DOS ESTADOS UNIDOS. VOCÊ DEVE CUMPRIR TODAS AS LEIS E NORMAS DOMÉSTICAS E INTERNACIONAIS QUE SE APLICAREM AO PREVIEW. ESSAS LEIS INCLUEM RESTRIÇÕES SOBRE DESTINOS, USUÁRIOS FINAIS E USO FINAL.
+
+14.6 O Contrato de licença não pode ser atribuído nem transferido por você sem a aprovação prévia por escrito da Google. Qualquer tentativa de atribuição sem a aprovação será inválida. Você não deve delegar as próprias responsabilidades ou obrigações nos termos do Contrato de licença sem aprovação prévia por escrito da Google.
+
+14.7 O Contrato de licença e sua relação com a Google nos termos do contrato serão regidos pelas leis do estado da Califórnia sem considerar conflitos de disposições legais. Você e a Google concordam em se submeter à competência exclusiva dos tribunais localizados na comarca de Santa Clara, Califórnia, para dirimir quaisquer questões legais decorrentes do Contrato de licença. Não obstante a isso, você concorda que a Google continua habilitada a impetrar medidas cautelares (ou mecanismo legal urgente equivalente) em qualquer jurisdição.
+  </div><!-- sdk terms -->
+
+
+
+    <div id="sdk-terms-form">
+      <p>
+        <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+        <label id="agreeLabel" for="agree">Li e concordo com todos os termos e condições expressos acima</label>
+      </p>
+      <p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+    </div>
+
+
+  </div><!-- end TOS -->
+
+
+  <div id="landing">
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Neste documento</h2>
+      <ol>
+        <li><a href="#sdk">Preview SDK</a></li>
+        <li><a href="#docs">Documentação do desenvolvedor</a></li>
+        <li><a href="#images">Imagens do sistema de hardware</a></li>
+      </ol>
+  </div>
+</div>
+
+
+<p>
+  O Android M Preview SDK inclui ferramentas de desenvolvimento, arquivos de sistema do Android e arquivos da biblioteca
+ para ajudar você a testar o aplicativo e novas APIs da próxima versão da plataforma. Este documento
+ descreve como adquirir os componentes disponíveis para download da prévia para o teste do aplicativo.
+</p>
+
+
+<h2 id="sdk">Preview SDK</h2>
+
+<p>
+  O Preview SDK está disponível para download no <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>. Para obter mais informações
+ sobre o download e a configuração do Preview SDK, consulte <a href="{@docRoot}preview/setup-sdk.html#downloadSdk">Configuração do Preview SDK</a>.
+</p>
+
+
+<h2 id="docs">Documentação do desenvolvedor</h2>
+
+<p>
+  O pacote de download da documentação do desenvolvedor fornece informações de referência de API detalhadas e um relatório de diferença de API para a prévia.
+</p>
+
+<table>
+  <tr>
+    <th scope="col">Descrição</th>
+    <th scope="col">Download / Somas de verificação</th>
+  </tr>
+  <tr id="docs-dl">
+    <td>Android M Preview<br>Documentações do desenvolvedor</td>
+    <td><a href="#top" onclick="onDownload(this)">m-preview-1-developer-docs.zip</a><br>
+      MD5: b65201b0d35416f5a1b7a071b52854a7<br>
+      SHA-1: d47e856aa65e06897e6edd902ad8d2b1f05ac3ec
+    </td>
+  </tr>
+<table>
+
+
+<h2 id="images">Imagens do sistema de hardware</h2>
+
+<p>
+  Essas imagens do sistema permitem que você instale uma versão de prévia da plataforma em um dispositivo físico
+para fins de teste. Ao configurar um dispositivo com uma dessas imagens, é possível instalar e testar o aplicativo
+ para verificar o seu desempenho na próxima versão da plataforma. O processo de instalação de uma imagem do sistema
+ em um dispositivo <em>remove todos os dados do dispositivo</em>. Portanto, deve-se realizar um backup dos dados
+ antes de instalar uma imagem do sistema.
+</p>
+
+<p class="warning">
+  <b>Aviso:</b> as seguintes imagens do sistema Android são prévias e estão sujeitas a alterações. O uso
+ dessas imagens do sistema são governadas pelo Contrato de licença do Android SDK Preview. As imagens do sistema do Android Preview
+ não são versões estáveis e podem conter erros e defeitos que podem resultar
+ em danos aos sistemas do computador, aos dispositivos e aos dados. As imagens do sistema Android Preview
+ não estão sujeitas ao mesmo teste do sistema operacional de fábrica e podem fazer com que o telefone e aplicativos e os serviços
+ instalados parem de funcionar.
+</p>
+
+<table>
+  <tr>
+    <th scope="col">Dispositivo</th>
+    <th scope="col">Download / Somas de verificação</th>
+  </tr>
+  <tr id="hammerhead">
+    <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
+    <td><a href="#top" onclick="onDownload(this)">hammerhead-MPZ44Q-preview-55d76d3a.tgz</a><br>
+      MD5: 9e2631b06c6525e401ceaae3677ff320<br>
+      SHA-1: 55d76d3a379b18f3363f28d8a462c236ab96fc36
+    </td>
+  </tr>
+  <tr id="shamu">
+    <td>Nexus 6 <br>"shamu"</td>
+    <td><a href="#top" onclick="onDownload(this)">shamu-MPZ44Q-preview-c1d6506a.tgz</a><br>
+      MD5: 307cbf9dab0a38df4ab2639d02be12aa<br>
+      SHA-1: c1d6506a74094bdb2f4b8677c7fe4967334f9ea8
+    </td>
+  </tr>
+  <tr id="volantis">
+    <td>Nexus 9 <br>"volantis"</td>
+    <td><a href="#top" onclick="onDownload(this)">volantis-MPZ44Q-preview-d15ad483.tgz</a><br>
+      MD5: fae40377fd999d2b09128665c915264d<br>
+      SHA-1: 7ab05f96093b2cb370b226f65931202714cbc2ca
+    </td>
+  </tr>
+  <tr id="fugu">
+    <td>Nexus Player <br>"fugu"</td>
+    <td><a href="#top" onclick="onDownload(this)">fugu-MPZ44Q-preview-2406ba05.tgz</a><br>
+      MD5: 815902141a85cc65e7725f005cad31d5<br>
+      SHA-1: 2406ba0598dea1e69110497ac0bc8e16789bc8fb
+    </td>
+  </tr>
+</table>
+
+<h3 id="install-image">Instalar uma imagem no dispositivo</h3>
+
+<p>
+  Para usar uma imagem de dispositivo para testes, deve-se instalá-lo em um dispositivo compatível. Siga
+ as instruções abaixo para instalar uma imagem de sistema.
+</p>
+
+<ol>
+  <li>Faça o download e descompacte um dos pacotes de imagem do sistema listados aqui.</li>
+  <li>Faça um backup dos dados do dispositivo que deseja preservar.</li>
+  <li>Siga as instruções em
+ <a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
+  para programar em flash a imagem no dispositivo.</li>
+</ol>
+
+<p class="note">
+  <strong>Observação:</strong> ao programar em flash a imagem do sistema de prévia no dispositivo de desenvolvimento,
+ ele é atualizado automaticamente com o próximo lançamento da prévia por meio de atualizações over-the-air (OTA).
+</p>
+
+<h3 id="revertDevice">Reverter um dispositivo para as especificações de fábrica</h3>
+
+<p>
+  Caso queira desinstalar a prévia e reverter o dispositivo para as especificações de fábrica, acesse
+ <a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a> e
+ faça o download da imagem que deseja programar em flash no dispositivo. Siga as instruções nesta página
+ para programar em flash a imagem no dispositivo.
+</p>
+
+  </div><!-- landing -->
+
+</div><!-- relative wrapper -->
+
+
+
+<script>
+  var urlRoot = "http://storage.googleapis.com/androiddevelopers/shareables/preview/";
+  function onDownload(link) {
+
+    $("#downloadForRealz").html("Download " + $(link).text());
+    $("#downloadForRealz").attr('href', urlRoot + $(link).text());
+
+    $("#tos").fadeIn('fast');
+    $("#landing").fadeOut('fast');
+
+    return true;
+  }
+
+
+  function onAgreeChecked() {
+    /* verify that the TOS is agreed */
+    if ($("input#agree").is(":checked")) {
+      /* reveal the download button */
+      $("a#downloadForRealz").removeClass('disabled');
+    } else {
+      $("a#downloadForRealz").addClass('disabled');
+    }
+  }
+
+  function onDownloadForRealz(link) {
+    if ($("input#agree").is(':checked')) {
+    /*
+      $("#tos").fadeOut('fast');
+      $("#landing").fadeIn('fast');
+    */
+
+      ga('send', 'event', 'M Preview', 'System Image', $("#downloadForRealz").html());
+
+    /*
+      location.hash = "";
+    */
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  $(window).hashchange( function(){
+    if (location.hash == "") {
+      location.reload();
+    }
+  });
+
+</script>
