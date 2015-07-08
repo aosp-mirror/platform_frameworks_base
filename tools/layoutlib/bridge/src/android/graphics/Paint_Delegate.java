@@ -1171,8 +1171,9 @@ public class Paint_Delegate {
         float[] advances = new float[count];
         native_getTextRunAdvances(nativePaint, nativeTypeface, text, start, count,
                 contextStart, contextEnd - contextStart, isRtl, advances, 0);
+        int startOffset = offset - start;  // offset from start.
         float sum = 0;
-        for (int i = 0; i < offset; i++) {
+        for (int i = 0; i < startOffset; i++) {
             sum += advances[i];
         }
         return sum;
