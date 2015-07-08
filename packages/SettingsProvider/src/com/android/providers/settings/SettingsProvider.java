@@ -1774,6 +1774,26 @@ public class SettingsProvider extends ContentProvider {
             Uri uri = getNotificationUriFor(key, name);
 
             sendNotify(uri, userId);
+            if (isSecureSettingsKey(key)) {
+                maybeNotifyProfiles(userId, uri, name, sSecureCloneToManagedSettings);
+            } else if (isSystemSettingsKey(key)) {
+                maybeNotifyProfiles(userId, uri, name, sSystemCloneToManagedSettings);
+            }
+        }
+
+        private void maybeNotifyProfiles(int userId, Uri uri, String name,
+                Set<String> keysCloned) {
+            if (keysCloned.contains(name)) {
+                List<UserInfo> profiles = mUserManager.getProfiles(userId);
+                int size = profiles.size();
+                for (int i = 0; i < size; i++) {
+                    UserInfo profile = profiles.get(i);
+                    // the notification for userId has already been sent.
+                    if (profile.id != userId) {
+                        sendNotify(uri, profile.id);
+                    }
+                }
+            }
         }
 
         private int makeKey(int type, int userId) {
