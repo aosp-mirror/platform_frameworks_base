@@ -168,6 +168,11 @@ Este es el Contrato de licencia de la versión preliminar del SDK de Android (el
         <li><a href="#docs">Documentación para desarrolladores</a></li>
         <li><a href="#images">Imágenes del sistema de hardware</a></li>
       </ol>
+
+      <h2>Legacy downloads</h2>
+        <ol>
+           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview Archive</a></li>
+        </ol>
   </div>
 </div>
 
@@ -195,17 +200,18 @@ Este es el Contrato de licencia de la versión preliminar del SDK de Android (el
 
 <table>
   <tr>
-    <th scope="col">Descripción</th>
-    <th scope="col">Descarga/sumas de comprobación</th>
+    <th scope="col">Description</th>
+    <th scope="col">Download / Checksums</th>
   </tr>
   <tr id="docs-dl">
-    <td>Versión preliminar de Android M<br>Documentos para desarrolladores</td>
-    <td><a href="#top" onclick="onDownload(this)">m-preview-1-developer-docs.zip</a><br>
-      MD5: b65201b0d35416f5a1b7a071b52854a7<br>
-      SHA-1: d47e856aa65e06897e6edd902ad8d2b1f05ac3ec
+    <td>Android M Preview 2<br>Developer Docs</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >m-preview-2-developer-docs.zip</a><br>
+      MD5: 1db6fff9c722b0339757e1cdf43663a8<br>
+      SHA-1: 5a4ae88d644e63824d21b0e18f8e3977a7665157
     </td>
   </tr>
-<table>
+</table>
 
 
 <h2 id="images">Imágenes del sistema de hardware</h2>
@@ -229,37 +235,41 @@ Este es el Contrato de licencia de la versión preliminar del SDK de Android (el
 
 <table>
   <tr>
-    <th scope="col">Dispositivo</th>
-    <th scope="col">Descarga/sumas de comprobación</th>
+    <th scope="col">Device</th>
+    <th scope="col">Download / Checksums</th>
   </tr>
   <tr id="hammerhead">
     <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
-    <td><a href="#top" onclick="onDownload(this)">hammerhead-MPZ44Q-preview-55d76d3a.tgz</a><br>
-      MD5: 9e2631b06c6525e401ceaae3677ff320<br>
-      SHA-1: 55d76d3a379b18f3363f28d8a462c236ab96fc36
+    <td><a href="#top" onclick="onDownload(this)"
+      >hammerhead-MPZ79M-preview-b1f4bde4.tgz</a><br>
+      MD5: 2ca9f18bf47a061b339bab52647ceb0d<br>
+      SHA-1: b1f4bde447eccbf8ce5d9b8b8ba954e3eac8e939
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
-    <td><a href="#top" onclick="onDownload(this)">shamu-MPZ44Q-preview-c1d6506a.tgz</a><br>
-      MD5: 307cbf9dab0a38df4ab2639d02be12aa<br>
-      SHA-1: c1d6506a74094bdb2f4b8677c7fe4967334f9ea8
+    <td><a href="#top" onclick="onDownload(this)"
+      >shamu-MPZ79M-preview-e1024040.tgz</a><br>
+      MD5: 24a2118da340b9afedfbdfc026f6ff81<br>
+      SHA-1: e10240408859d5188c4aae140e1c539130ba614b
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantis-MPZ44Q-preview-d15ad483.tgz</a><br>
-      MD5: fae40377fd999d2b09128665c915264d<br>
-      SHA-1: 7ab05f96093b2cb370b226f65931202714cbc2ca
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantis-MPZ79M-preview-9f305342.tgz</a><br>
+      MD5: 9edabf0a4c61b247f1cbb9dfdc0a899e<br>
+      SHA-1: 9f30534216f10899a6a75495fc7e92408ea333a7
     </td>
   </tr>
+
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td><a href="#top" onclick="onDownload(this)">fugu-MPZ44Q-preview-2406ba05.tgz</a><br>
-      MD5: 815902141a85cc65e7725f005cad31d5<br>
-      SHA-1: 2406ba0598dea1e69110497ac0bc8e16789bc8fb
+    <td>
+      <em>Coming soon</em>
     </td>
   </tr>
+
 </table>
 
 <h3 id="install-image">Instalar una imagen en un dispositivo</h3>
