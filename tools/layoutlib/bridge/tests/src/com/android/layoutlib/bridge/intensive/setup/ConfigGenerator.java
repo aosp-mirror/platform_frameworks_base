@@ -181,7 +181,7 @@ public class ConfigGenerator {
 
     public HardwareConfig getHardwareConfig() {
         return new HardwareConfig(mScreenWidth, mScreenHeight, mDensity, mXdpi, mYdpi, mSize,
-                mOrientation, mSoftButtons);
+                mOrientation, null, mSoftButtons);
     }
 
     public static Map<String, String> loadProperties(File path) {
