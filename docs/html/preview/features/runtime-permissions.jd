@@ -909,115 +909,41 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
     android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}:</p>
 
 <ul>
-  <li>
-    <code>android.permission.WRITE_USER_DICTIONARY</code>
-  </li>
-
-  <li>
-    <code>com.android.alarm.permission.SET_ALARM</code>
-  </li>
-
-  <li>
-    <code>android.permission.ACCESS_LOCATION_EXTRA_COMMANDS</code>
-  </li>
-
-  <li>
-    <code>android.permission.ACCESS_NETWORK_STATE</code>
-  </li>
-
-  <li>
-    <code>android.permission.ACCESS_WIFI_STATE</code>
-  </li>
-
-  <li>
-    <code>android.permission.ACCESS_WIMAX_STATE</code>
-  </li>
-
-  <li>
-    <code>android.permission.GET_ACCOUNTS</code>
-  </li>
-
-  <li>
-    <code>android.permission.VIBRATE</code>
-  </li>
-
-  <li>
-    <code>android.permission.FLASHLIGHT</code>
-  </li>
-
-  <li>
-    <code>android.permission.WAKE_LOCK</code>
-  </li>
-
-  <li>
-    <code>android.permission.TRANSMIT_IR</code>
-  </li>
-
-  <li>
-    <code>android.permission.MODIFY_AUDIO_SETTINGS</code>
-  </li>
-
-  <li>
-    <code>android.permission.REORDER_TASKS</code>
-  </li>
-
-  <li>
-    <code>android.permission.KILL_BACKGROUND_PROCESSES</code>
-  </li>
-
-  <li>
-    <code>android.permission.SET_WALLPAPER</code>
-  </li>
-
-  <li>
-    <code>android.permission.SET_WALLPAPER_HINTS</code>
-  </li>
-
-  <li>
-    <code>android.permission.SET_TIME_ZONE</code>
-  </li>
-
-  <li>
-    <code>android.permission.EXPAND_STATUS_BAR</code>
-  </li>
-
-  <li>
-    <code>android.permission.READ_SYNC_SETTINGS</code>
-  </li>
-
-  <li>
-    <code>android.permission.WRITE_SYNC_SETTINGS</code>
-  </li>
-
-  <li>
-    <code>android.permission.READ_SYNC_STATS</code>
-  </li>
-
-  <li>
-    <code>android.permission.WRITE_SETTINGS</code>
-  </li>
-
-  <li>
-    <code>android.permission.PERSISTENT_ACTIVITY</code>
-  </li>
-
-  <li>
-    <code>android.permission.GET_PACKAGE_SIZE</code>
-  </li>
-
-  <li>
-    <code>android.permission.RECEIVE_BOOT_COMPLETED</code>
-  </li>
-
-  <li>
-    <code>android.permission.BROADCAST_STICKY</code>
-  </li>
-
-  <li>
-    <code>android.permission.SUBSCRIBED_FEEDS_READ</code>
-  </li>
-
-  <li>
-    <code>android.permission.CHANGE_NETWORK_STATE</code>
-  </li>
+  <li><code>android.permission.ACCESS_LOCATION_EXTRA_COMMANDS</code></li>
+  <li><code>android.permission.ACCESS_NETWORK_STATE</code></li>
+  <li><code>android.permission.ACCESS_WIFI_STATE</code></li>
+  <li><code>android.permission.ACCESS_WIMAX_STATE</code></li>
+  <li><code>android.permission.BLUETOOTH</code></li>
+  <li><code>android.permission.BLUETOOTH_ADMIN</code></li>
+  <li><code>android.permission.BROADCAST_STICKY</code></li>
+  <li><code>android.permission.CHANGE_NETWORK_STATE</code></li>
+  <li><code>android.permission.CHANGE_WIFI_MULTICAST_STATE</code></li>
+  <li><code>android.permission.CHANGE_WIFI_STATE</code></li>
+  <li><code>android.permission.DISABLE_KEYGUARD</code></li>
+  <li><code>android.permission.EXPAND_STATUS_BAR</code></li>
+  <li><code>android.permission.FLASHLIGHT</code></li>
+  <li><code>android.permission.GET_ACCOUNTS</code></li>
+  <li><code>android.permission.GET_PACKAGE_SIZE</code></li>
+  <li><code>android.permission.INTERNET</code></li>
+  <li><code>android.permission.KILL_BACKGROUND_PROCESSES</code></li>
+  <li><code>android.permission.MODIFY_AUDIO_SETTINGS</code></li>
+  <li><code>android.permission.NFC</code></li>
+  <li><code>android.permission.PERSISTENT_ACTIVITY</code></li>
+  <li><code>android.permission.READ_SYNC_SETTINGS</code></li>
+  <li><code>android.permission.READ_SYNC_STATS</code></li>
+  <li><code>android.permission.READ_USER_DICTIONARY</code></li>
+  <li><code>android.permission.RECEIVE_BOOT_COMPLETED</code></li>
+  <li><code>android.permission.REORDER_TASKS</code></li>
+  <li><code>android.permission.SET_TIME_ZONE</code></li>
+  <li><code>android.permission.SET_WALLPAPER</code></li>
+  <li><code>android.permission.SET_WALLPAPER_HINTS</code></li>
+  <li><code>android.permission.SUBSCRIBED_FEEDS_READ</code></li>
+  <li><code>android.permission.TRANSMIT_IR</code></li>
+  <li><code>android.permission.VIBRATE</code></li>
+  <li><code>android.permission.WAKE_LOCK</code></li>
+  <li><code>android.permission.WRITE_SETTINGS</code></li>
+  <li><code>android.permission.WRITE_SYNC_SETTINGS</code></li>
+  <li><code>android.permission.WRITE_USER_DICTIONARY</code></li>
+  <li><code>com.android.alarm.permission.SET_ALARM</code></li>
+  <li><code>com.android.launcher.permission.INSTALL_SHORTCUT</code></li>
 </ul>
