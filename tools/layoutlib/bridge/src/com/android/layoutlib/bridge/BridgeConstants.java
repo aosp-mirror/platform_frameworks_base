@@ -41,6 +41,7 @@ public class BridgeConstants {
 
     /** App auto namespace */
     public final static String NS_APP_RES_AUTO = "http://schemas.android.com/apk/res-auto";
+    public final static String NS_TOOLS_URI = "http://schemas.android.com/tools";
 
     public final static String R = "com.android.internal.R";
 
@@ -50,5 +51,5 @@ public class BridgeConstants {
     public final static String WRAP_CONTENT = "wrap_content";
 
     /** Attribute in the tools namespace used to specify layout manager for RecyclerView. */
-    public static final String ATTR_LAYOUT_MANAGER_TYPE = "layoutManager";
+    public static final String ATTR_LIST_ITEM = "list_item";
 }
