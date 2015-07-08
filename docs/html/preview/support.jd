@@ -1,72 +1,334 @@
 page.title=Support
+page.tags="preview", "developer preview"
 page.image=images/cards/card-support_16-9_2x.png
 
 @jd:body
 
+<div class="cols" style=
+"background-color:#ffebc3; padding: 5px 0;margin-bottom:1em; text-align:center;">
+<h3>
+    Developer Preview 2 is now available
+  </h3>
+
+ <ul class="dac-section-links">
+    <li class="dac-section-link">
+      <a href="#preview2-notes">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Release notes</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="#preview2-get">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get the Update</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Report Issues</a>
+    </li>
+  </ul>
+</div>
+
 <p>
-  If you've encountered bugs or have feedback about the M Developer Preview,
-  <a href="https://code.google.com/p/android-developer-preview/">create an issue</a>
-  on our issue tracker.
+  Two primary support channels are available to you when developing and testing
+  with the Android M Developer Preview. If you've encountered bugs or have
+  feedback about the M Developer Preview, you can <a href=
+  "https://code.google.com/p/android-developer-preview/">create an issue</a> on
+  our issue tracker. We'll triage the issue for further review and provide
+  updates as needed.
 </p>
 
 <p>
-  For more support, join the
-  <a href="http://g.co/dev/AndroidMDevPreview">M Developer
-  Preview Google+ community</a> to discuss your development experiences.
+  To discuss issues or ideas with other developers working with Android M, join
+  the <a href="http://g.co/dev/AndroidMDevPreview">M Developer Preview Google+
+  community</a>.
 </p>
 
-<h2 id="release-notes">Release Notes</h2>
+<h2 id="preview2-notes">
+  Developer Preview 2
+</h2>
 
-<div class="toggle-content opened">
-  <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>M Developer Preview 2</a> <em>(July 2015)</em>
-  </p>
-
-  <div class="toggle-content-toggleme">
-
-    <dl>
-
-    <dt>API Name Changes:</dt>
-    <dd>
-      <ul>
-        <li>Moved the {@code android.app.AssistContent} class into the new package,
-          {@code android.app.assist} in the Assist API. The full class
-          name is now {@code android.app.assist.AssistContent}.</li>
-        <li>Moved the {@code android.app.AssistStructure} class to the new package,
-          {@code android.app.assist} in the Assist API. The full class name
-          is now {@code android.app.assist.AssistStructure}.</li>
-        <li>Replaced the {@code ScanResult.PasspointNetwork} property with the
-          {@code ScanResult.isPasspointNetwork()} method for HotSpot 2.0 support.</li>
-        <li>Replaced the {@code InputDevice.hasMic()} method with {@code InputDevice.hasMicrophone()}
-          for the Audio API.</li>
-        <li>Renamed the {@code View.OnStylusButtonPressListener} class to
-          {@code View.OnContextClickListener} for Bluetooth Stylus support.</li>
-        <li>Renamed the {@code GestureDetector.OnStylusButtonPressListener} class to
-          {@code GestureDetector.OnContextClickListener} for Bluetooth Stylus support.</li>
-        <li>Renamed the {@code android.app.usage.NetworkUsageStats} class to
-          {@code android.app.usage.NetworkStats}.</li>
-        <li>Renamed the {@code android.app.usage.NetworkUsageStats.Bucket} class to
-          {@code android.app.usage.NetworkStats.Bucket}.</li>
-      </ul>
-    </dd>
-
-    </dl>
+<div class="wrap">
+  <div class="cols">
+    <div class="col-5of12">
+      <p>
+        <em>Date: July 2015<br>
+        Build: MPZ79M<br>
+        Hardware support: Nexus 5,6,9, Player<br>
+        Emulator support: ARM 32/64-bit<br>
+        Google Play services: 7.5</em>
+      </p>
+    </div>
   </div>
 </div>
 
-<div class="toggle-content closed">
-  <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
-      alt=""/>M Developer Preview 1</a> <em>(May 2015)</em>
-  </p>
+<p>
+  Android M Developer Preview 2 is an <strong>incremental update</strong> to
+  the Android M preview platform that was originally released in May 2015. The
+  update includes a variety of enhancements and bug fixes made across the
+  system, including those related to issues reported by developers through the
+  external issue tracker.
+</p>
 
-  <div class="toggle-content-toggleme">
+<p>
+  If you are currently developing or testing on Android M, you should
+  <strong>update your environment</strong> to Developer Preview 2 as soon as
+  possible. This ensures that you are building with the latest platform APIs
+  and testing against the latest behaviors. If you are just getting started
+  with the Android M Developer Preview SDK, follow the instructions in <a href=
+  "/preview/setup-sdk.html">Set up the Preview SDK</a>, then update your
+  environment for Developer Preview 2.
+</p>
 
-    <dl>
-    <dt>Initial release.</dt>
-    </dl>
+<h3>
+  What's included
+</h3>
+
+<p>
+  Developer Preview 2 includes an updated SDK with system images,
+  documentation, and samples for developing against the latest Android M
+  platform.
+</p>
+
+<ul>
+  <li>
+    <strong>SDK platform</strong> and <strong>system images</strong> (Nexus and
+    emulator) for building and testing. You can download the updated tools from
+    the SDK Manager, and the system images are available by over-the-air (OTA)
+    update or download (see below).
+  </li>
+
+  <li>
+    <strong>Updated documentation</strong>. The <a href=
+    "/preview/behavior-changes.html">Behavior Changes</a>, <a href=
+    "/preview/api-overview.html">API Overview</a>, and <a href=
+    "/preview/features/runtime-permissions.html">Permissions</a> documents have
+    been updated to reflect the latest changes in the platform. An updated
+    <a href="/preview/download.html">Developer Documentation download
+    package</a> is available, including full reference docs and API diff
+    reports.
+  </li>
+
+  <li>
+    <strong>Translations</strong> of the documentation are now available. Use
+    the language selector at the bottom right corner of any page to switch
+    languages. Note that some of the translated docs are not yet updated for
+    Developer Preview 2 (coming soon).
+  </li>
+
+  <li>The <a href="/preview/samples.html">Android M code samples</a> are also
+  updated to account for API and behavior changes:
+    <ul>
+      <li>
+        <a href=
+        "https://github.com/googlesamples/android-RuntimePermissions">RuntimePermissions</a>
+        / <a href=
+        "https://github.com/googlesamples/android-RuntimePermissionsBasic">RuntimePermissionsBasic</a>
+        are updated to reflect latest permissions API changes, including
+        <code>shouldShowRequestPermissionRationale()</code>.
+      </li>
+
+      <li>
+        <a href=
+        "https://github.com/googlesamples/android-FingerprintDialog">FingerprintDialog</a>
+        adds a flow to ask for passwords when new fingerprints are added as
+        well as a preference if the app will use fingerprints as a method of
+        authentication.
+      </li>
+
+      <li>The Android Wear samples (<a href=
+      "https://github.com/googlesamples/android-AgendaData">AgendaData</a> /
+      <a href=
+      "https://github.com/googlesamples/android-DataLayer">DataLayer</a> /
+      <a href="https://github.com/googlesamples/android-Quiz">Quiz</a> /
+      <a href="https://github.com/googlesamples/android-XYZTouristAttractions">
+        XYZTouristAttractions</a>) show a simplified usage of Data Items.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="changes">
+  Key changes
+</h3>
+
+<ul>
+  <li>Permissions changes
+    <ul>
+      <li>The <code>android.permission.USE_FINGERPRINT</code> permission now
+      has "normal" protection level, so it is no longer necessary to request
+      this permission directly from the user. The <code>USE_FINGERPRINT</code>
+      permission enables fingerprints to be enabled for authentication, but
+      does not give the requesting app access to the enrollment/fingerprint
+      administration flow.
+      </li>
+
+      <li>The <code>android.permission.WRITE_EXTERNAL_STORAGE</code> permission
+      has protection level "dangerous", meaning that apps wanting to write to
+      external storage will need to request permission from the user at
+      runtime. Both <code>WRITE_EXTERNAL_STORAGE</code> and
+      <code>WRITE_EXTERNAL_STORAGE</code> are members of the
+      <code>STORAGE</code> permission group.
+      </li>
+
+      <li>Remote Bluetooth/Wi-Fi MAC's now require either the
+      <code>android.permission.LOCATION_FINE</code> or
+      <code>android.permission.LOCATION_COURSE</code> permission.
+      </li>
+
+      <li>Some accounts and identity permissions are moved to
+      <code>CONTACTS</code> permissions group and others are removed or granted
+      based on account type. In particular,
+      <code>android.permission.USE_CREDENTIALS</code>,
+      <code>android.permission.MANAGE_ACCOUNTS</code>, and
+      <code>android.permission.AUTHENTICATE_ACCOUNTS</code> are ungrouped
+      pending further changes in a later release.
+      </li>
+
+      <li>The Wi-Fi permissions
+      <code>android.permission.CHANGE_WIFI_STATE</code>,
+      <code>android.permission.CHANGE_WIMAX_STATE</code>, and
+      <code>android.permission.CHANGE_WIFI_MULTICAST_STATE</code> now have
+      protection level "normal".
+      </li>
+
+      <li>The Bluetooth permissions <code>android.permission.BLUETOOTH</code>
+      and <code>android.permission.BLUETOOTH_ADMIN</code> now have protection
+      level "normal".
+      </li>
+
+      <li>Bookmarks and subscribed feeds permissions are removed.
+      </li>
+
+      <li>Apps included in the system image are no longer granted dangerous
+      permissions automatically. All apps should check for and request
+      permissions at runtime.
+      </li>
+
+      <li>Introduces the utility method
+      <code>Activity.shouldShowRequestPermissionRationale(String)</code>, which
+      lets your app see whether users have previously rejected a permission
+      request. This lets you know that your app should explain the the user why
+      it needs that permission. For more information see the <a href=
+      "/preview/features/runtime-permissions.html#explain-need">Permissions</a>
+      developer guide.
+      </li>
+    </ul>
+  </li>
+
+  <li>Other changes
+    <ul>
+      <li>The <code>android.app.AssistContent</code> and
+      <code>android.app.AssistStructure</code> classes are moved into a new
+      package, <code>android.app.assist</code>.
+      </li>
+
+      <li>Bluetooth Stylus APIs are updated and include new callback events.
+      The <code>View.OnStylusButtonPressListener</code> class is renamed to
+      <code>View.OnContextClickListener</code> and
+      <code>GestureDetector.OnStylusButtonPressListener</code> class to <code>
+        GestureDetector.OnContextClickListener</code>.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>
+  For a complete list of changes, including renamed and removed APIs, please
+  refer to the API Diff Reports included in the <a href=
+  "/preview/download.html#docs">Developer Documentation download package</a>.
+</p>
+
+<h3 id="ki">
+  Known issues
+</h3>
+
+<ul>
+  <li>The system Messenger app crashes on the 64-bit emulator.
+  </li>
+
+  <li>After updating to Developer Preview 2, Contacts sync experiences
+  intermittent issues. The workaround is to clear and re-sync Contact Storage
+  data after update. To clear data, go to <strong>Settings &gt; Apps &gt; Show
+  system &gt; Contacts Storage</strong>. Select "Storage" and then
+  <strong>Clear data</strong>.
+  </li>
+
+  <li>In YouTube app, it's not possible to share a video. The share window is
+  blank.
+  </li>
+
+  <li>Android For Work Profile setup is not working properly, so you won't be
+  able to create a new Work Profile after you update. As a workaround, make
+  sure to create the Work Profiles you need in Developer Preview 1 before
+  updating to Developer Preview 2.
+  </li>
+</ul>
+
+<p>
+  For a complete list of reported issues, please refer to the <a href=
+  "https://code.google.com/p/android/issues/list">open issues list</a> on the
+  Developer Preview <a href=
+  "https://code.google.com/p/android-developer-preview/">issue tracker</a>.
+</p>
+
+<h3 id="preview2-get">
+  Get Developer Preview 2
+</h3>
+
+<p>
+  You can download the Developer Preview 2 platform and emulator images from
+  the SDK Manager.
+</p>
+
+<p>
+  Developer Preview 2 system images for supported Nexus devices are available
+  by download and by over-the-air (OTA) update. The OTA update is available
+  only to supported devices that are currently running Developer Preview 1. If
+  your devices is running Developer Preview 1, you should automatically receive
+  the OTA update within a few days of availability.
+</p>
+
+<p>
+  If you are just getting started with Android M Developer Preview you want to
+  receive Developer Preview 2 by OTA, first download Developer Preview 1 and
+  flash it to your device. Leave the device powered on for several hours until
+  the device is registered and receives the update.
+</p>
+
+<p>
+  For instructions on how to download and flash your device to the Developer
+  Preview, see the links and instructions on the <a href=
+  "/preview/download.html">Downloads</a> page.
+</p>
+
+<p>
+  For instructions on how to start developing and testing with Android M, read
+  <a href="/preview/setup-sdk.html">Setting up the SDK</a>
+</p>
+
+<h2 id="preview1-notes">
+  Developer Preview 1
+</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-5of12">
+      <p>
+        <em>Date: May 2015<br>
+        Build: MPZ44Q<br>
+        Hardware support: Nexus 5,6,9, Player<br>
+        Emulator support: x86 & ARM (32/64-bit)<br>
+        Google Play services: 7.5</em>
+      </p>
+    </div>
   </div>
 </div>
+
+<p>
+  Initial release.
+</p>
 
 
