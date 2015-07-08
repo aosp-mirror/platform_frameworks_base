@@ -28,6 +28,10 @@ footer.hide=1
           <span class="dac-sprite dac-auto-chevron"></span>
           Get started
         </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Update to Developer Preview 2
+        </a><br>
       </div>
     </div>
     <div class="dac-section dac-small">
