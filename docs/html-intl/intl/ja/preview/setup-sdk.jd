@@ -1,0 +1,207 @@
+page.title=Preview SDK のセットアップ
+page.image=images/cards/card-set-up_16-9_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本書の内容</h2>
+      <ol>
+        <li><a href="#get-as13">Android Studio 1.3 を入手する</a></li>
+        <li><a href="#get-sdk">Preview SDK を入手する</a></li>
+        <li><a href="#create-update">プロジェクトを作成または更新する</a></li>
+        <li><a href="#setup-test">テスト用にセットアップする</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>M Developer Preview SDK は、Android SDK Manager から入手できます。このドキュメントは、Android SDK Manager の使用方法やプロジェクトの作成方法などの Android アプリ開発についての知識をお持ちの方を対象にしています。
+
+Android アプリを初めて開発する場合は、まず <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a> のトレーニング レッスンをご覧ください。</a>
+
+</p>
+
+<h2 id="get-as13">Android Studio 1.3 を入手する</h2>
+
+<p>Developer Preview は、現在プレビュー段階にある Android Studio 1.3 に最適化されています。
+Preview SDK をご使用になる場合は、Android Studio 1.3 のプレビュー版をインストールすることをお勧めします。
+</p>
+
+<p class="caution"><strong>注意:</strong> Android Studio 1.3 の Canary プレビューは、現在も開発中です。
+メインの開発用マシンを Developer Preview のテストに使用する場合、テスト用に 2 つ目の Android Studio をインストールできます。
+
+</p>
+
+<p>Android Studio 1.3 プレビューをインストールするには: </p>
+
+<ol>
+  <li><a href="{@docRoot}tools/studio/index.html">Android Studio</a> をダウンロードして起動します。
+
+  </li>
+
+  <li>[<strong>Settings</strong>] ウィンドウを開きます（Windows では、 <strong>[File] &gt; [Settings]</strong> を選択すると開くことができます）。
+<strong>[Appearance &amp; Behavior] &gt; [System Settings] &gt; [Updates]</strong> を選択します。
+
+
+
+    <p class="aside">OSX では、Android Studio の [<strong>Preferences</strong>] ウィンドウで、[<strong>Appearance &amp; Behavior</strong>] パネルを見つけることができます。
+
+</p>
+  </li>
+
+  <li> [<strong>Updates</strong>] パネルで、<strong>[Automatically check updates for:] に
+[Canary Channel]</strong> を選択します。
+  </li>
+
+  <li>[<strong>Updates</strong>] パネルで、[<strong>Check Now</strong>] を選択して最新の Canary ビルドの有無を確認します。
+メッセージが表示されたら、最新の Canary ビルドをダウンロードしてインストールします。
+
+  </li>
+</ol>
+
+<h2 id="get-sdk">Preview SDK を入手する</h2>
+
+<p>開発環境に Preview SDK コンポーネントを追加するには: </p>
+
+<ol>
+  <li>Android Studio 1.3 プレビューを起動します。
+  </li>
+
+  <li>[<strong>Settings</strong>] ウィンドウを開きます（Windows では、 <strong>[File] &gt; [Settings]</strong> を選択すると開くことができます）。
+<strong>[Appearance &amp; Behavior] &gt; [System Settings] &gt; [Updates]</strong> を選択します。
+
+
+
+    <p class="aside">OSX では、Android Studio の [<strong>Preferences</strong>] ウィンドウで、[<strong>Appearance &amp; Behavior</strong>] パネルを見つけることができます。
+
+</p>
+  </li>
+
+  <li>[<strong>Updates</strong>] パネルで、<strong>[Automatically check updates for:] に
+[Canary Channel]</strong> を、<strong>[Automatically check updates for Android SDK:] に
+[Preview Channel]</strong> を選択します。
+  </li>
+
+  <li>[<strong>Android SDK Manager</strong>] を起動します。（Android Studio 1.3 では、SDK Manager はスタンドアロン アプリケーションではなくなり Android Studio に統合されました。）
+
+
+  </li>
+
+  <li>[<strong>Platforms</strong>] セクションで、[<strong>Android MNC Preview</strong>] を選択します。
+
+  </li>
+
+  <li>[<strong>Tools</strong>] セクションで、最新の Android [<strong>SDK Tools</strong>]、[<strong>Platform-tools</strong>]、[<strong>Build-tools</strong>] を選択します。
+
+
+  </li>
+
+  <li>[<strong>Install packages</strong>] をクリックし、すべてのパッケージの使用許諾契約に同意します。
+
+  </li>
+
+  <li>[<strong>Settings</strong>] ウィンドウを開き、<strong>[Appearance &amp; Behavior] &gt; [System Settings] &gt; [Android SDK]</strong> を選択し、M Developer Preview がインストールされていることを確認します。
+
+</li>
+
+  <li>[<strong>Android SDK</strong>] パネルで、[<strong>SDK Platforms</strong>] を選択します。
+[<strong>Android MNC Preview</strong>] が [<em>Installed</em>] と表示されているはずです。
+また、[<strong>SDK Tools</strong>] タブを開き、最新のツールがインストールされていることを確認します。
+
+
+  </li>
+</ol>
+<p>上記の手順を完了すると、開発環境でプレビュー コンポーネントを利用できるようになります。
+ </p>
+
+
+<h2 id="create-update">プロジェクトを作成または更新する</h2>
+
+<p>
+  プレビュー API を使用するには、プレビュー コンポーネントを使用するために開発プロジェクトを作成または更新する必要があります。
+
+</p>
+
+
+<h3 id="create">新しいプロジェクトを作成する</h3>
+
+<p>
+  Preview SDK を使用してプロジェクトを作成するときには、Android Studio を使用することをお勧めします。<a href="{@docRoot}sdk/installing/create-project.html">Creating a Project</a> に記載されている手順に従い、プロジェクト ウィザードで [<em>Form Factors</em>] 画面が表示されるまで操作を進めます。
+
+次に、以下の手順に従い、Preview SDK 用に構成されたプロジェクトを作成します。
+
+</p>
+
+<ul>
+  <li>[<strong>Phone and Tablet</strong>] をチェックします。</li>
+  <li>[<strong>Minimum SDK</strong>] で、[<strong>MNC: Android M (Preview)</strong>] を選択します。
+</li>
+</ul>
+
+
+<h3 id="update">既存のプロジェクトを更新する</h3>
+
+<p>
+  既存のプロジェクトを使用する場合は、プロジェクト構成を変更してプレビュー API を有効にする必要があります。開発環境で、モジュールの <code>build.gradle</code> ファイルを開き、次のように値を設定します。
+
+
+</p>
+
+<ul>
+  <li><code>compileSdkVersion</code> に <code>'android-MNC'</code> を設定します。</li>
+  <li><code>minSdkVersion</code> に <code>'MNC'</code> を設定します。</li>
+  <li><code>targetSdkVersion</code> に <code>'MNC'</code> を設定します。</li>
+</ul>
+
+
+<h2 id="setup-test">テスト用にセットアップする</h2>
+
+<p>
+  Preview SDK でアプリをテストするには、プレビュー版のプラットフォームを使用して構成した端末または仮想端末が必要です。
+互換端末をお持ちの場合、テスト用にプレビュー プラットフォームをインストールできます。
+互換端末をお持ちでない場合は、テスト用に仮想端末を構成できます。
+</p>
+
+<h3 id="setup-device">物理端末をセットアップする</h3>
+
+<p>
+  Nexus 5、Nexus 6、Nexus 9、Android TV をお持ちの場合は、アプリのテスト用にこれらの端末にプレビュー システム イメージをインストールできます。Android Virtual Device Manager ツールを使用すると、Android Studio 内から仮想端末をプレビュー版のプラットフォームでセットアップできます。
+
+
+
+</p>
+
+<p class="caution">
+  <strong>重要:</strong> 端末にプレビュー イメージをインストールすると、<em>端末からすべてのデータが削除されます</em>。そのため、プレビュー イメージをインストールする前にすべてのデータをバックアップする必要があります。
+
+</p>
+
+<h3 id="setupAVD">仮想端末をセットアップする</h3>
+
+<p>
+  Android Virtual Device Manager ツールを使用すると、Android Studio 内からプレビュー版のプラットフォームで仮想端末をセットアップできます。
+
+</p>
+
+<p>AVD マネージャーで AVD を作成するには: </p>
+
+<ol>
+  <li><a href="{@docRoot}preview/setup-sdk.html">Preview SDK のセットアップ</a>の説明に従って、開発環境に Preview SDK をインストールします。
+
+</li>
+  <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a> の手順に従います。
+
+以下の設定を使用します。
+    <ul>
+      <li><strong>端末:</strong> Nexus 5、Nexus 6、Nexus 9、Android TV</li>
+      <li><strong>対象:</strong> 
+       Android M (Preview) - API Level M</li>
+      <li><strong>ABI:</strong> x86</li>
+    </ul>
+  </li>
+</ol>
+
+<p>
+  テスト用の仮想端末の作成についての詳細は、<a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a> をご覧ください。
+</p>
