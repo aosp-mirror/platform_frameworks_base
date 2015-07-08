@@ -25,8 +25,6 @@ import com.android.systemui.statusbar.StatusBarState;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A class to handle notifications and their corresponding groups.
@@ -143,7 +141,7 @@ public class NotificationGroupManager {
             return true;
         }
         NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
-        if (group != null && group.expanded) {
+        if (group != null && (group.expanded || group.summary == null)) {
             return true;
         }
         return false;
