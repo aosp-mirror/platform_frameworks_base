@@ -119,7 +119,7 @@ Patch::Patch(const float bitmapWidth, const float bitmapHeight,
         }
 
         float vOffset = y1 == y2 ? 0.0f : 0.5 - (0.5 * segment / (y2 - y1));
-        float v2 = fmax(0.0f, stepY - vOffset) / bitmapHeight;
+        float v2 = std::max(0.0f, stepY - vOffset) / bitmapHeight;
         v1 += vOffset / bitmapHeight;
 
         if (stepY > 0.0f) {
@@ -167,7 +167,7 @@ void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& v
         }
 
         float uOffset = x1 == x2 ? 0.0f : 0.5 - (0.5 * segment / (x2 - x1));
-        float u2 = fmax(0.0f, stepX - uOffset) / bitmapWidth;
+        float u2 = std::max(0.0f, stepX - uOffset) / bitmapWidth;
         u1 += uOffset / bitmapWidth;
 
         if (stepX > 0.0f) {
