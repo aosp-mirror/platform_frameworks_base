@@ -1,4 +1,4 @@
-page.title=Downloads
+page.title=Developer Preview Archive
 page.image=images/cards/card-download_16-9_2x.png
 
 @jd:body
@@ -164,15 +164,10 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#sdk2">Developer Preview 2 SDK</a></li>
-        <li><a href="#docs2">Developer Documentation</a></li>
-        <li><a href="#images2">Hardware System Images</a></li>
+        <li><a href="#sdk">Developer Preview 1 SDK</a></li>
+        <li><a href="#docs">Developer Documentation</a></li>
+        <li><a href="#images">Hardware System Images</a></li>
       </ol>
-
-     <h2>Legacy downloads</h2>
-        <ol>
-           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview Archive</a></li>
-        </ol>
   </div>
 </div>
 
@@ -184,7 +179,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </p>
 
 
-<h2 id="sdk2">Developer Preview 2 SDK</h2>
+<h2 id="sdk">Developer Preview 1 SDK</h2>
 
 <p>
   The Preview SDK is available for download through the <a href=
@@ -194,7 +189,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </p>
 
 
-<h2 id="docs2">Developer Documentation</h2>
+<h2 id="docs">Developer Documentation</h2>
 
 <p>
   The developer documentation download package provides detailed API reference information and an API difference report for the preview.
@@ -206,17 +201,17 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
     <th scope="col">Download / Checksums</th>
   </tr>
   <tr id="docs-dl">
-    <td>Android M Preview 2<br>Developer Docs</td>
+    <td>Android M Preview 1<br>Developer Docs</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-2-developer-docs.zip</a><br>
-      MD5: 1db6fff9c722b0339757e1cdf43663a8<br>
-      SHA-1: 5a4ae88d644e63824d21b0e18f8e3977a7665157
+      >m-preview-1-developer-docs.zip</a><br>
+      MD5: b65201b0d35416f5a1b7a071b52854a7<br>
+      SHA-1: d47e856aa65e06897e6edd902ad8d2b1f05ac3ec
     </td>
   </tr>
 <table>
 
 
-<h2 id="images2">Hardware System Images</h2>
+<h2 id="images">Hardware System Images</h2>
 
 <p>
   These system images allow you to install a preview version of the platform on a physical device for
@@ -243,35 +238,35 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="hammerhead">
     <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPZ79M-preview-b1f4bde4.tgz</a><br>
-      MD5: 2ca9f18bf47a061b339bab52647ceb0d<br>
-      SHA-1: b1f4bde447eccbf8ce5d9b8b8ba954e3eac8e939
+      >hammerhead-MPZ44Q-preview-55d76d3a.tgz</a><br>
+      MD5: 9e2631b06c6525e401ceaae3677ff320<br>
+      SHA-1: 55d76d3a379b18f3363f28d8a462c236ab96fc36
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPZ79M-preview-e1024040.tgz</a><br>
-      MD5: 24a2118da340b9afedfbdfc026f6ff81<br>
-      SHA-1: e10240408859d5188c4aae140e1c539130ba614b
+      >shamu-MPZ44Q-preview-c1d6506a.tgz</a><br>
+      MD5: 307cbf9dab0a38df4ab2639d02be12aa<br>
+      SHA-1: c1d6506a74094bdb2f4b8677c7fe4967334f9ea8
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPZ79M-preview-9f305342.tgz</a><br>
-      MD5: 9edabf0a4c61b247f1cbb9dfdc0a899e<br>
-      SHA-1: 9f30534216f10899a6a75495fc7e92408ea333a7
+      >volantis-MPZ44Q-preview-d15ad483.tgz</a><br>
+      MD5: fae40377fd999d2b09128665c915264d<br>
+      SHA-1: 7ab05f96093b2cb370b226f65931202714cbc2ca
     </td>
   </tr>
-
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td>
-      <em>Coming soon</em>
+    <td><a href="#top" onclick="onDownload(this)"
+      >fugu-MPZ44Q-preview-2406ba05.tgz</a><br>
+      MD5: 815902141a85cc65e7725f005cad31d5<br>
+      SHA-1: 2406ba0598dea1e69110497ac0bc8e16789bc8fb
     </td>
   </tr>
-
 </table>
 
 <h3 id="install-image">Install an Image to a Device</h3>
@@ -289,14 +284,9 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   to flash the image onto your device.</li>
 </ol>
 
-<h3 id="update-image">Updating a Device with the Preview</h3>
-
-<p>
-  Once you have installed a preview system image on a development device, the device is upgraded
-  automatically with the next preview release through over-the-air (OTA) updates. When the update
-  is available, the device displays notification that an update is available and allows you to
-  install it. You can also manually install the next preview image by repeating the procedure in
-  the previous section.
+<p class="note">
+  <strong>Note:</strong> Once you have flashed a development device the preview system image,
+  it is upgraded automatically with the next preview release through over-the-air (OTA) updates.
 </p>
 
 <h3 id="revertDevice">Revert a Device to Factory Specifications</h3>
