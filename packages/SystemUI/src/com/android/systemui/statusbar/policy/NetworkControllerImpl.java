@@ -340,7 +340,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
             updateConnectivity();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
-            mConfig = Config.readConfig(mContext);
             handleConfigurationChanged();
         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
             refreshLocale();
@@ -374,8 +373,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
     }
 
-    @VisibleForTesting
-    void handleConfigurationChanged() {
+    public void handleConfigurationChanged() {
+        mConfig = Config.readConfig(mContext);
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.setConfiguration(mConfig);
         }
