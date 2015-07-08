@@ -1,0 +1,327 @@
+page.title=앱용 자동 백업
+page.tags=backup, previewresources, androidm
+page.keywords=백업, 자동 백업, 미리 보기
+page.image=images/cards/card-auto-backup_2x.png
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>이 문서의 내용</h2>
+      <ol>
+        <li><a href="#overview">개요</a></li>
+        <li><a href="#configuring">데이터 백업 구성</a></li>
+        <li><a href="#testing">백업 구성 테스트</a></li>
+        <li><a href="#issues">알려진 문제</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  사용자는 앱 내에서 데이터를 생성하고 기본 설정을 설정하는 데 상당한 시간과 노력을 들이는 경우가 빈번합니다.
+ 사용자가 고장 난 기기를 교체하거나 새것으로 업그레이드하면 그러한 데이터를 보존해 두는 것이 훌륭한 사용자 환경을 보장하는 데 중요한 부분을 차지합니다.
+ Android M 미리 보기 시스템에서 실행되는 기기는 이러한 상황에서 사용자에게 좋은 환경을 보장하는 데 도움을 주기 위해 앱 데이터를 Google Drive에 자동으로 백업합니다.
+
+ 이런 앱 데이터는 사용자가 기기를 바꾸거나 업그레이드하면 자동으로 복원됩니다.
+
+</p>
+
+<p>
+  자동 백업 기능은 Android M 미리 보기에서 실행되는 기기에 설치된 모든 앱에 활성화되어 있습니다. 달리 앱 코드를 추가하지 않아도 됩니다.
+ 시스템은 사용자에게 자동 데이터 백업에서 옵트아웃할 수도 있습니다.
+ 앱에서 어떤 데이터를 백업할지 제한하는 쪽을 선택할 수도 있습니다.
+</p>
+
+<p>
+  이 문서에서는 새로운 시스템 동작과 앱에 대해 어느 데이터를 백업할지 지정하는 방법을 설명합니다.
+
+</p>
+
+<h2 id="overview">개요</h2>
+
+<p>
+  자동 백업 기능은 앱이 사용자 기기에서 생성한 데이터를 보존하기 위해 해당 데이터를 사용자의 Google Drive 계정에 업로드하고 암호화합니다.
+ 데이터 저장에 대해 개발자나 사용자에게 아무런 요금도 부과하지 않고, 저장된 데이터는 사용자 개인의 Drive 할당량을 사용한 것으로 감안하지 않습니다.
+ M 미리 보기 시행 기간 중 사용자는 Android 앱 한 개당 최대 25MB까지 저장할 수 있습니다.
+
+</p>
+
+<p>
+  자동 백업은 24시간마다 한 번씩, 기기가 유휴 상태일 때, 충전 중일 때 및 Wi-Fi 네트워크에 연결될 때마다 수행합니다.
+ 이러한 조건에 부합하면 백업 관리자 서비스가 이용 가능한 모든 백업 데이터를 클라우드에 업로드합니다.
+ 사용자가 새 기기로 전환하거나 백업된 앱을 제거했다가 다시 설치하면 복원 작업이 백업된 데이터를 새로 설치된 앱의 데이터 디렉터리 안에 복사합니다.
+
+
+</p>
+
+<p class="note">
+  <strong>참고:</strong> 레거시 <a href="{@docRoot}google/backup/index.html">Android 백업 서비스</a>를 이용하는 앱의 경우, 이 새 동작이 적용되지 않고 기존 백업 동작이 평소처럼 작동합니다.
+
+
+</p>
+
+
+<h3 id="auto-exclude">자동으로 배제된 데이터 파일</h3>
+
+<p>
+  데이터 중에는 예를 들어 임시 파일과 캐시 등 백업하지 않아도 되는 것도 있습니다. 따라서 자동 백업 서비스는 특정 데이터 파일을 기본적으로 배제합니다.
+
+</p>
+
+<ul>
+  <li>디렉터리 내의 파일 중 {@link android.content.Context#getCacheDir
+    getCacheDir()} 및 {@link android.content.ContextWrapper#getCodeCacheDir getCodeCacheDir()}
+ 메서드로 참조되는 파일.
+  </li>
+
+  <li>외부 저장소에 위치한 파일 중(디렉터리에 상주하는 것이 아닌 한) 
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+ 메서드로 참조되는 파일.
+  </li>
+
+  <li>디렉터리에 위치한 파일 중 
+{@link android.content.Context#getNoBackupFilesDir getNoBackupFilesDir()} 메서드로 참조되는 파일.
+  </li>
+</ul>
+
+<h2 id="configuring">데이터 백업 구성</h2>
+
+<p>
+  M 미리 보기 기기에 설치된 앱이 생성한 데이터는 모두 백업됩니다. 다만 이전 섹션에서 나열한 자동으로 배제되는 파일만은 예외입니다.
+ 앱에서 어느 데이터를 백업할지 좀 더 상세하게 제한하고 구성하려면 앱 매니페스트에 있는 설정을 사용하면 됩니다.
+
+</p>
+
+<h3 id="include-exclude">데이터 포함 또는 배제</h3>
+
+<p>
+  앱에 필요한 데이터가 무엇이며 어떤 식으로 저장하는지에 따라 특정 파일이나 디렉터리를 포함 또는 배제하기 위해 특정한 규칙을 설정해야 할 수 있습니다.
+ 자동 백업 서비스는 이러한 백업 규칙 설정을 지원하는 데 XML 구성 파일과 앱 매니페스트를 사용하는 방식을 씁니다.
+
+ 앱 매니페스트에서는 다음 예에서 표시된 것처럼 백업 구성표 구성 파일을 지정하면 됩니다.
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>
+  이 예시 코드에서는 <code>android:fullBackupContent</code> 특성이 XML 파일을 나타냅니다. 이는 앱 개발 프로젝트의 <code>res/xml/</code> 디렉터리 내에 위치하며, 일명 <code>mybackupscheme.xml</code>이라고 합니다.
+
+ 이 구성 파일에는 어느 파일이 백업되는지에 대한 규칙이 포함되어 있습니다.
+ 다음 예시 코드는 특정 파일을 백업에서 배제하는 구성 파일을 나타낸 것입니다.
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;full-backup-content&gt;
+    &lt;exclude domain="database" path="device_info.db"/&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  이 예에서의 백업 구성은 특정 데이터베이스 파일만 백업되지 않게 배제합니다.
+  나머지 파일은 모두 백업됩니다.
+</p>
+
+<h4>백업 구성 구문</h4>
+
+<p>
+  백업 서비스 구성을 사용하면 구체적으로 어느 파일을 백업에 포함시키고 백업에서 배제할지 지정할 수 있게 해줍니다.
+ 데이터 백업 구성 XML 파일에 사용되는 구문은 다음과 같습니다.
+</p>
+
+<pre>
+&lt;full-backup-content&gt;
+    &lt;include domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+    &lt;exclude domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  다음의 요소와 특성을 사용하면 어느 파일을 백업에 포함시키거나 백업에서 배제할지 지정할 수 있게 해줍니다.
+
+</p>
+
+<ul>
+  <li>
+  <code>&lt;include&gt;</code>. 이 요소는 일련의 리소스를 백업하기로 지정하는 경우 사용하십시오. 시스템이 기본적으로 앱 안의 모든 데이터를 백업하는 대신 이 방식을 쓰면 됩니다.
+ 예를 들어 <code>&lt;include&gt;</code> 태그를 지정하면 시스템은 이 요소로 <em>지정된 리소스만</em> 백업합니다.
+
+
+  </li>
+
+  <li>
+  <code>&lt;exclude&gt;</code>. 이 요소는 일련의 리소스를 백업에서 배제하기로 지정하는 데 사용하세요.
+ 시스템이 앱 안의 모든 데이터를 백업하되, 이 요소로 지정된 리소스만 제외합니다.
+
+  </li>
+
+  <li>
+  <code>domain.</code> 백업에 포함시키거나 백업에서 배제하고자 하는 리소스 유형입니다. 이 특성에 대해 지정할 수 있는 유효한 값에는 다음과 같은 것들이 있습니다.
+
+  </li>
+
+  <li style="list-style: none">
+  <ul>
+    <li>
+    <code>root</code>. 리소스가 앱의 루트 디렉터리에 있음을 나타냅니다.
+    </li>
+
+    <li>
+    <code>file</code>. 디렉터리 내에 있는 리소스 중 
+    {@link android.content.Context#getFilesDir getFilesDir()} 메서드에 의해 반환된 것에 상응합니다.
+    </li>
+
+    <li>
+    <code>database</code>. 
+    {@link android.content.Context#getDatabasePath getDatabasePath()} 메서드에 의해, 또는 
+    {@link android.database.sqlite.SQLiteOpenHelper} 클래스를 사용하여 반환된 데이터베이스에 상응합니다.
+    </li>
+
+    <li>
+    <code>sharedpref</code>. {@link android.content.Context#getSharedPreferences getSharedPreferences()}
+ 메서드에 의해 반환된 {@link android.content.SharedPreferences} 객체에
+ 상응합니다.
+    </li>
+
+    <li>
+    <code>external</code>. 리소스가 외부 저장소에 있으며, 디렉터리 내의 파일 중 {@link android.content.Context#getExternalFilesDir getExternalFilesDir()} 메서드에 의해 반환된 것에 상응합니다.
+
+
+    </li>
+
+    <li>
+    <code>path</code>. 백업에 포함시키거나 백업에서 배제하고자 하는 리소스로 이어지는 파일 경로입니다.
+
+    </li>
+  </ul>
+  </li>
+</ul>
+
+
+<h3 id="prohibit">데이터 백업 금지하기</h3>
+
+<p>
+  앱 데이터 중 어떤 것이라도 자동 백업을 방지하기로 선택할 수도 있습니다. 매니페스트의 앱 요소에서 <code>android:allowBackup</code> 특성을 <code>false</code>로 설정하면 됩니다.
+
+ 이 설정은 다음 예시 코드로 설명해 놓았습니다.
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:allowBackup="false"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="testing">백업 구성 테스트</h2>
+
+<p>
+  백업 구성을 만들었으면 앱이 데이터를 저장하고 제대로 복구되는지 확인하기 위해 테스트해보는 것이 좋습니다.
+
+</p>
+
+
+<h4>백업 로깅 활성화</h4>
+
+<p>
+  백업 기능이 XML 파일을 구문 분석하는 방법을 결정하는 데 도움이 되는 방법으로 테스트 백업을 수행하기 전에 로깅을 활성화하는 방안이 있습니다.
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell setprop log.tag.BackupXmlParserLogging VERBOSE
+</pre>
+
+<h4>백업 테스트</h4>
+
+<p>수동으로 백업을 실행하려면, 우선 다음과 같은 명령을 호출하여 백업 관리자를 초기화해야 합니다.
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr run
+</pre>
+
+<p>
+  다음으로, 다음과 같은 명령을 사용하여 애플리케이션을 수동으로 백업하되 앱의 패키지 이름을 <code>&lt;PACKAGE&gt;</code> 매개변수로 지정합니다.
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr fullbackup &lt;PACKAGE&gt;</pre>
+
+
+<h4>복구 테스트</h4>
+
+<p>
+  앱 데이터를 백업한 다음 수동으로 복구를 시작하려면, 다음 명령을 호출하되, 앱에 대한 패키지 이름을 <code>&lt;PACKAGE&gt;</code> 매개변수로 지정하십시오.
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr restore &lt;PACKAGE&gt;
+</pre>
+
+<p class="warning">
+  <b>경고:</b> 이 작업을 수행하면 앱이 중지되고 복구 작업을 수행하기 전에 데이터를 지워버립니다.
+
+</p>
+
+<p>
+  앱의 복구 프로세스를 시작하려면 앱을 제거했다가 다시 설치하면 됩니다. 앱 데이터는 앱 설치가 완료되면 클라우드에서 자동으로 복원됩니다.
+
+</p>
+
+
+<h4>백업 문제 해결</h4>
+
+<p>
+  문제에 직면하면 백업 데이터와 관련 메타데이터를 지우면 됩니다. 그러려면 <strong>설정 &gt; 백업</strong>에서 백업을 껐다가 켜거나, 기기를 공장 재설정하거나 아니면 다음의 명령을 호출하십시오.
+
+
+</p>
+
+<pre>$ adb shell bmgr wipe &lt;TRANSPORT&gt; &lt;PACKAGE&gt;</pre>
+
+<p>
+  <code>&lt;TRANSPORT&gt;</code> 값이 <code>com.google.android.gms</code>로 접두사가 붙어있어야 합니다.
+  전송 목록을 가져오려면 다음과 같은 명령을 호출하면 됩니다.
+</p>
+
+<pre>$ adb shell bmgr list transports</pre>
+
+<h2 id="issues">알려진 문제</h2>
+
+<p>다음은 자동 백업 서비스에 대해 알려진 문제입니다.</p>
+
+<ul>
+  <li><strong>Google Cloud 메시지</strong> - 푸시 알림에 Google Cloud 메시지를 사용하는 앱의 경우, Google Cloud 메시지 등록에 의해 반환된 등록 ID를 백업하면 복원된 앱에 대한 푸시 알림을 끊게 되는 문제가 알려져 있습니다. 새 기기에 설치된 다음에는 새 등록 ID에 대하여 API를 쿼리하는 것이 중요합니다. 이것은 기존 등록 ID가 백업된 경우는 해당되지 않습니다.
+
+
+
+
+ 이 문제를 피하려면 백업된 파일 집합에서 등록 ID를 배제하십시오.
+
+  </li>
+</ul>
