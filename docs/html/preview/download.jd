@@ -203,9 +203,9 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="docs-dl">
     <td>Android M Preview<br>Developer Docs</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-1-developer-docs.zip</a><br>
-      MD5: b65201b0d35416f5a1b7a071b52854a7<br>
-      SHA-1: d47e856aa65e06897e6edd902ad8d2b1f05ac3ec
+      >m-preview-2-developer-docs.zip</a><br>
+      MD5: xxxxx<br>
+      SHA-1: xxxxx
     </td>
   </tr>
 <table>
@@ -238,33 +238,33 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="hammerhead">
     <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPZ44Q-preview-55d76d3a.tgz</a><br>
-      MD5: 9e2631b06c6525e401ceaae3677ff320<br>
-      SHA-1: 55d76d3a379b18f3363f28d8a462c236ab96fc36
+      >hammerhead-MPZ44Q-preview-xxxxx.tgz</a><br>
+      MD5: xxxxx<br>
+      SHA-1: xxxxx
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPZ44Q-preview-c1d6506a.tgz</a><br>
-      MD5: 307cbf9dab0a38df4ab2639d02be12aa<br>
-      SHA-1: c1d6506a74094bdb2f4b8677c7fe4967334f9ea8
+      >shamu-MPZ44Q-preview-xxxxx.tgz</a><br>
+      MD5: xxxxx<br>
+      SHA-1: xxxxx
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPZ44Q-preview-d15ad483.tgz</a><br>
-      MD5: fae40377fd999d2b09128665c915264d<br>
-      SHA-1: 7ab05f96093b2cb370b226f65931202714cbc2ca
+      >volantis-MPZ44Q-preview-xxxxx.tgz</a><br>
+      MD5: xxxxx<br>
+      SHA-1: xxxxx
     </td>
   </tr>
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-MPZ44Q-preview-2406ba05.tgz</a><br>
-      MD5: 815902141a85cc65e7725f005cad31d5<br>
-      SHA-1: 2406ba0598dea1e69110497ac0bc8e16789bc8fb
+      >fugu-MPZ44Q-preview-xxxxx.tgz</a><br>
+      MD5: xxxxx<br>
+      SHA-1: xxxxx
     </td>
   </tr>
 </table>
@@ -284,9 +284,14 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   to flash the image onto your device.</li>
 </ol>
 
-<p class="note">
-  <strong>Note:</strong> Once you have flashed a development device the preview system image,
-  it is upgraded automatically with the next preview release through over-the-air (OTA) updates.
+<h3 id="update-image">Updating a Device with the Preview</h3>
+
+<p>
+  Once you have installed a preview system image on a development device, the device is upgraded
+  automatically with the next preview release through over-the-air (OTA) updates. When the update
+  is available, the device displays notification that an update is available and allows you to
+  install it. You can also manually install the next preview image by repeating the procedure in
+  the previous section.
 </p>
 
 <h3 id="revertDevice">Revert a Device to Factory Specifications</h3>
