@@ -35,12 +35,23 @@ page.image=images/permissions_check.png
 <!--
   <h2>See also</h2>
   <ol>
-    <li></li>
+    <li>
+    </li>
   </ol>
 -->
+
   </div> <!-- qv -->
 </div> <!-- qv-wrapper -->
 
+<!-- video box -->
+<a class="notice-developers-video"
+    href="https://www.youtube.com/watch?v=f17qe9vZ8RM">
+<div>
+    <h3>Video</h3>
+    <p>Google I/O 2015—Android M Permissions: Best Practices for
+      Developers</p>
+</div>
+</a>
 
 <p>
   The M Developer Preview introduces a new app permissions model which
@@ -204,12 +215,7 @@ page.image=images/permissions_check.png
 
 <ul>
   <li>System components automatically receive all
-  the permissions listed in their manifests. However, the user can still revoke
-  permissions at any time by going to the system's <strong>Settings</strong>
-  app and choosing <strong>Apps &gt;</strong> <i>app_name</i> <strong>&gt;
-  Permissions</strong>. Because users can revoke these permissions at will,
-  the app should continue to check for permissions at run
-  time and request them if necessary.
+  the permissions listed in their manifests.
   </li>
 
   <li>If the app requests permissions in the manifest that fall under {@link
