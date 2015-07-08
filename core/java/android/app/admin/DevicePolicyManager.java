@@ -3975,6 +3975,8 @@ public class DevicePolicyManager {
      *   This setting is only available from {@link android.os.Build.VERSION_CODES#MNC} onwards
      *   and can only be set if {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
      * <li>{@link Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li>
+     *   This setting is only available from {@link android.os.Build.VERSION_CODES#MNC} onwards.
+     *   </li>
      * </ul>
      * <p>Changing the following settings has no effect as of
      * {@link android.os.Build.VERSION_CODES#MNC}:
