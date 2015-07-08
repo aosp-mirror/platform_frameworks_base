@@ -436,12 +436,25 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public INetworkStatsSession openSession() {
-        return openSessionForUsageStats(null);
+        return createSession(null, /* poll on create */ false);
     }
 
     @Override
     public INetworkStatsSession openSessionForUsageStats(final String callingPackage) {
+        return createSession(callingPackage, /* poll on create */ true);
+    }
+
+    private INetworkStatsSession createSession(final String callingPackage, boolean pollOnCreate) {
         assertBandwidthControlEnabled();
+
+        if (pollOnCreate) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                performPoll(FLAG_PERSIST_ALL);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
 
         // return an IBinder which holds strong references to any loaded stats
         // for its lifetime; when caller closes only weak references remain.
@@ -522,6 +535,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     return getUidComplete().getHistory(template, uid, set, tag, fields);
                 } else {
                     return getUidTagComplete().getHistory(template, uid, set, tag, fields);
+                }
+            }
+
+            @Override
+            public NetworkStatsHistory getHistoryIntervalForUid(
+                    NetworkTemplate template, int uid, int set, int tag, int fields,
+                    long start, long end) {
+                enforcePermissionForManagedAdmin(mCallingPackage);
+                if (tag == TAG_NONE) {
+                    return getUidComplete().getHistory(template, uid, set, tag, fields, start, end);
+                } else {
+                    return getUidTagComplete().getHistory(template, uid, set, tag, fields,
+                            start, end);
                 }
             }
 
