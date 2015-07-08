@@ -83,7 +83,7 @@ interface ISub {
     List<SubscriptionInfo> getActiveSubscriptionInfoList(String callingPackage);
 
     /**
-     * @param callingPackage The package maing the call.
+     * @param callingPackage The package making the call.
      * @return the number of active subscriptions
      */
     int getActiveSubInfoCount(String callingPackage);
@@ -97,57 +97,50 @@ interface ISub {
      * Add a new SubscriptionInfo to subinfo database if needed
      * @param iccId the IccId of the SIM card
      * @param slotId the slot which the SIM is inserted
-     * @param callingPackage The package maing the call.
      * @return the URL of the newly created row or the updated row
      */
-    int addSubInfoRecord(String iccId, int slotId, String callingPackage);
+    int addSubInfoRecord(String iccId, int slotId);
 
     /**
      * Set SIM icon tint color by simInfo index
      * @param tint the icon tint color of the SIM
      * @param subId the unique SubscriptionInfo index in database
-     * @param callingPackage The package maing the call.
      * @return the number of records updated
      */
-    int setIconTint(int tint, int subId, String callingPackage);
+    int setIconTint(int tint, int subId);
 
     /**
      * Set display name by simInfo index
      * @param displayName the display name of SIM card
      * @param subId the unique SubscriptionInfo index in database
-     * @param callingPackage The package maing the call.
      * @return the number of records updated
      */
-    int setDisplayName(String displayName, int subId, String callingPackage);
+    int setDisplayName(String displayName, int subId);
 
     /**
      * Set display name by simInfo index with name source
      * @param displayName the display name of SIM card
      * @param subId the unique SubscriptionInfo index in database
      * @param nameSource, 0: DEFAULT_SOURCE, 1: SIM_SOURCE, 2: USER_INPUT
-     * @param callingPackage The package maing the call.
      * @return the number of records updated
      */
-    int setDisplayNameUsingSrc(String displayName, int subId, long nameSource,
-            String callingPackage);
+    int setDisplayNameUsingSrc(String displayName, int subId, long nameSource);
 
     /**
      * Set phone number by subId
      * @param number the phone number of the SIM
      * @param subId the unique SubscriptionInfo index in database
-     * @param callingPackage The package maing the call.
      * @return the number of records updated
      */
-    int setDisplayNumber(String number, int subId, String callingPackage);
+    int setDisplayNumber(String number, int subId);
 
     /**
      * Set data roaming by simInfo index
      * @param roaming 0:Don't allow data when roaming, 1:Allow data when roaming
-     * @param callingPackage The package maing the call.
      * @param subId the unique SubscriptionInfo index in database
      * @return the number of records updated
      */
-    int setDataRoaming(int roaming, int subId, String callingPackage);
+    int setDataRoaming(int roaming, int subId);
 
     int getSlotId(int subId);
 
@@ -155,7 +148,7 @@ interface ISub {
 
     int getDefaultSubId();
 
-    int clearSubInfo(String callingPackage);
+    int clearSubInfo();
 
     int getPhoneId(int subId);
 
@@ -175,7 +168,7 @@ interface ISub {
 
     void setDefaultSmsSubId(int subId);
 
-    void clearDefaultsForInactiveSubIds(String callingPackage);
+    void clearDefaultsForInactiveSubIds();
 
     int[] getActiveSubIdList();
 
