@@ -59,6 +59,8 @@ import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ChooserActivity extends ResolverActivity {
@@ -97,7 +99,10 @@ public class ChooserActivity extends ResolverActivity {
                                 + " Have you considered returning results faster?");
                         break;
                     }
-                    mChooserListAdapter.addServiceResults(sri.originalTarget, sri.resultTargets);
+                    if (sri.resultTargets != null) {
+                        mChooserListAdapter.addServiceResults(sri.originalTarget,
+                                sri.resultTargets);
+                    }
                     unbindService(sri.connection);
                     mServiceConnections.remove(sri.connection);
                     if (mServiceConnections.isEmpty()) {
@@ -485,10 +490,13 @@ public class ChooserActivity extends ResolverActivity {
         private Drawable mDisplayIcon;
         private final Intent mFillInIntent;
         private final int mFillInFlags;
+        private final float mModifiedScore;
 
-        public ChooserTargetInfo(DisplayResolveInfo sourceInfo, ChooserTarget chooserTarget) {
+        public ChooserTargetInfo(DisplayResolveInfo sourceInfo, ChooserTarget chooserTarget,
+                float modifiedScore) {
             mSourceInfo = sourceInfo;
             mChooserTarget = chooserTarget;
+            mModifiedScore = modifiedScore;
             if (sourceInfo != null) {
                 final ResolveInfo ri = sourceInfo.getResolveInfo();
                 if (ri != null) {
@@ -520,6 +528,11 @@ public class ChooserActivity extends ResolverActivity {
             mDisplayIcon = other.mDisplayIcon;
             mFillInIntent = fillInIntent;
             mFillInFlags = flags;
+            mModifiedScore = other.mModifiedScore;
+        }
+
+        public float getModifiedScore() {
+            return mModifiedScore;
         }
 
         @Override
@@ -632,8 +645,15 @@ public class ChooserActivity extends ResolverActivity {
         public static final int TARGET_SERVICE = 1;
         public static final int TARGET_STANDARD = 2;
 
+        private static final int MAX_SERVICE_TARGETS = 8;
+
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
+
+        private float mLateFee = 1.f;
+
+        private final BaseChooserTargetComparator mBaseTargetComparator
+                = new BaseChooserTargetComparator();
 
         public ChooserListAdapter(Context context, List<Intent> payloadIntents,
                 Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
@@ -703,12 +723,12 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getCount() {
-            return super.getCount() + mServiceTargets.size() + mCallerTargets.size();
+            return super.getCount() + getServiceTargetCount() + getCallerTargetCount();
         }
 
         @Override
         public int getUnfilteredCount() {
-            return super.getUnfilteredCount() + mServiceTargets.size() + mCallerTargets.size();
+            return super.getUnfilteredCount() + getServiceTargetCount() + getCallerTargetCount();
         }
 
         public int getCallerTargetCount() {
@@ -716,7 +736,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public int getServiceTargetCount() {
-            return mServiceTargets.size();
+            return Math.min(mServiceTargets.size(), MAX_SERVICE_TARGETS);
         }
 
         public int getStandardTargetCount() {
@@ -726,13 +746,13 @@ public class ChooserActivity extends ResolverActivity {
         public int getPositionTargetType(int position) {
             int offset = 0;
 
-            final int callerTargetCount = mCallerTargets.size();
+            final int callerTargetCount = getCallerTargetCount();
             if (position < callerTargetCount) {
                 return TARGET_CALLER;
             }
             offset += callerTargetCount;
 
-            final int serviceTargetCount = mServiceTargets.size();
+            final int serviceTargetCount = getServiceTargetCount();
             if (position - offset < serviceTargetCount) {
                 return TARGET_SERVICE;
             }
@@ -755,13 +775,13 @@ public class ChooserActivity extends ResolverActivity {
         public TargetInfo targetInfoForPosition(int position, boolean filtered) {
             int offset = 0;
 
-            final int callerTargetCount = mCallerTargets.size();
+            final int callerTargetCount = getCallerTargetCount();
             if (position < callerTargetCount) {
                 return mCallerTargets.get(position);
             }
             offset += callerTargetCount;
 
-            final int serviceTargetCount = mServiceTargets.size();
+            final int serviceTargetCount = getServiceTargetCount();
             if (position - offset < serviceTargetCount) {
                 return mServiceTargets.get(position - offset);
             }
@@ -774,13 +794,47 @@ public class ChooserActivity extends ResolverActivity {
         public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets) {
             if (DEBUG) Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
                     + " targets");
+            final float parentScore = getScore(origTarget);
+            Collections.sort(targets, mBaseTargetComparator);
+            float lastScore = 0;
             for (int i = 0, N = targets.size(); i < N; i++) {
-                mServiceTargets.add(new ChooserTargetInfo(origTarget, targets.get(i)));
+                final ChooserTarget target = targets.get(i);
+                float targetScore = target.getScore();
+                targetScore *= parentScore;
+                targetScore *= mLateFee;
+                if (i > 0 && targetScore >= lastScore) {
+                    // Apply a decay so that the top app can't crowd out everything else.
+                    // This incents ChooserTargetServices to define what's truly better.
+                    targetScore = lastScore * 0.95f;
+                }
+                insertServiceTarget(new ChooserTargetInfo(origTarget, target, targetScore));
+
+                if (DEBUG) {
+                    Log.d(TAG, " => " + target.toString() + " score=" + targetScore
+                            + " base=" + target.getScore()
+                            + " lastScore=" + lastScore
+                            + " parentScore=" + parentScore
+                            + " lateFee=" + mLateFee);
+                }
+
+                lastScore = targetScore;
             }
 
-            // TODO: Maintain sort by ranking scores.
+            mLateFee *= 0.95f;
 
             notifyDataSetChanged();
+        }
+
+        private void insertServiceTarget(ChooserTargetInfo chooserTargetInfo) {
+            final float newScore = chooserTargetInfo.getModifiedScore();
+            for (int i = 0, N = mServiceTargets.size(); i < N; i++) {
+                final ChooserTargetInfo serviceTarget = mServiceTargets.get(i);
+                if (newScore > serviceTarget.getModifiedScore()) {
+                    mServiceTargets.add(i, chooserTargetInfo);
+                    return;
+                }
+            }
+            mServiceTargets.add(chooserTargetInfo);
         }
 
         private void pruneServiceTargets() {
@@ -792,6 +846,14 @@ public class ChooserActivity extends ResolverActivity {
                     mServiceTargets.remove(i);
                 }
             }
+        }
+    }
+
+    static class BaseChooserTargetComparator implements Comparator<ChooserTarget> {
+        @Override
+        public int compare(ChooserTarget lhs, ChooserTarget rhs) {
+            // Descending order
+            return (int) Math.signum(lhs.getScore() - rhs.getScore());
         }
     }
 
