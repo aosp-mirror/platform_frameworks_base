@@ -102,4 +102,13 @@ final class AppErrorDialog extends BaseErrorDialog {
             dismiss();
         }
     };
+
+    @Override
+    public void dismiss() {
+        if (!mResult.mHasResult) {
+            // We are dismissing and the result has not been set...go ahead and set.
+            mResult.set(FORCE_QUIT);
+        }
+        super.dismiss();
+    }
 }
