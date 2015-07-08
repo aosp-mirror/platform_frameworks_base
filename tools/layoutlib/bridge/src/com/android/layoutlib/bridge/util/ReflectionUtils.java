@@ -52,6 +52,22 @@ public class ReflectionUtils {
     }
 
     /**
+     * Check if the object is an instance of a class named {@code className}. This doesn't work
+     * for interfaces.
+     */
+    public static boolean isInstanceOf(Object object, String className) {
+        Class superClass = object.getClass();
+        while (superClass != null) {
+            String name = superClass.getName();
+            if (name.equals(className)) {
+                return true;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        return false;
+    }
+
+    /**
      * Wraps all reflection related exceptions. Created since ReflectiveOperationException was
      * introduced in 1.7 and we are still on 1.6
      */
