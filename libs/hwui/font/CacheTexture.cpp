@@ -314,7 +314,7 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
 #endif
             }
 
-            if (cacheBlock->mHeight < fmin(glyphH, glyphW)) {
+            if (cacheBlock->mHeight < std::min(glyphH, glyphW)) {
                 // If remaining space in this block is too small to be useful, remove it
                 mCacheBlocks = CacheBlock::removeBlock(mCacheBlocks, cacheBlock);
             }
