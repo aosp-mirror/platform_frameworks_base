@@ -1,0 +1,70 @@
+page.title=Ejemplos
+page.image=images/cards/samples-new_2x.png
+@jd:body
+
+<p>
+  Los siguientes códigos de ejemplo se proporcionan para M Developer Preview. Para descargar los ejemplos en Android Studio, seleccione la opción del menú <b>File &gt; Import Samples</b>.
+
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Estos proyectos que se pueden descargar están diseñados para usarlos con Gradle y Android Studio.
+
+</p>
+
+
+<h3 id="RuntimePermissions">Permisos de tiempo de ejecución</h3>
+
+<p>
+ Android M modifica la manera en que funcionan los permisos del sistema. Los usuarios deben aprobar solicitudes de permiso durante la ejecución, en lugar de durante la instalación.
+ Este ejemplo muestra cómo solicitar estos permisos.
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-RuntimePermissions">Obtener en GitHub</a></p>
+
+<h3 id="ConfirmCredentials">Confirmar credencial</h3>
+
+<p>
+ Este ejemplo muestra cómo usar las credenciales del dispositivo como método de autenticación en su aplicación.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ConfirmCredential">Obtener en GitHub</a>
+</p>
+
+<h3 id="FingerprintDialog">Diálogo de huellas dactilares</h3>
+
+<p>
+ Este ejemplo muestra cómo reconocer huellas dactilares registradas para autenticar al usuario en su aplicación.
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-FingerprintDialog">Obtener en GitHub</a></p>
+
+<h3 id="AutomaticBackup">Copia de seguridad automática para aplicaciones</h3>
+
+<p>
+ Android M incorpora la copia de seguridad automática para las configuraciones de la aplicación. Este ejemplo muestra cómo agregar reglas de filtrado en una aplicación para administrar la copia de seguridad de las configuraciones.
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-AutoBackupForApps">Obtener en GitHub</a></p>
+
+<h3 id="CameraRaw">Camera 2 Raw</h3>
+
+<p>
+  Muestra cómo usar la API <code>Camera2</code> para capturar imágenes fotográficas RAW y guardarlas como archivos <code>DNG</code>.
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-Camera2Raw">Obtener en GitHub</a></p>
+
+<h3 id="ActiveNotification">Notificación activa</h3>
+
+<p>
+  Este ejemplo muestra cómo <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a> puede indicarle cuántas notificaciones está mostrando actualmente su aplicación.
+
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ActiveNotifications">Obtener en GitHub</a></p>
