@@ -429,6 +429,8 @@ final class DefaultPermissionGrantPolicy {
             if (contactsProviderPackage != null) {
                 grantRuntimePermissionsLPw(contactsProviderPackage, CONTACTS_PERMISSIONS,
                         true, userId);
+                grantRuntimePermissionsLPw(contactsProviderPackage, PHONE_PERMISSIONS,
+                        true, userId);
                 grantRuntimePermissionsLPw(contactsProviderPackage, ACCOUNTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(contactsProviderPackage, STORAGE_PERMISSIONS, userId);
             }
