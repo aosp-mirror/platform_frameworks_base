@@ -23,8 +23,11 @@ import java.util.Objects;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.text.TextUtils;
 import android.text.method.SingleLineTransformationMethod;
@@ -47,6 +50,8 @@ public class CarrierText extends TextView {
     private final boolean mIsEmergencyCallCapable;
 
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
+    private WifiManager mWifiManager;
 
     private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
         @Override
@@ -93,23 +98,45 @@ public class CarrierText extends TextView {
             a.recycle();
         }
         setTransformationMethod(new CarrierTextTransformationMethod(mContext, useAllCaps));
+
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
     protected void updateCarrierText() {
         boolean allSimsMissing = true;
+        boolean anySimReadyAndInService = false;
         CharSequence displayText = null;
 
         List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
         final int N = subs.size();
         if (DEBUG) Log.d(TAG, "updateCarrierText(): " + N);
         for (int i = 0; i < N; i++) {
-            State simState = mKeyguardUpdateMonitor.getSimState(subs.get(i).getSubscriptionId());
+            int subId = subs.get(i).getSubscriptionId();
+            State simState = mKeyguardUpdateMonitor.getSimState(subId);
             CharSequence carrierName = subs.get(i).getCarrierName();
             CharSequence carrierTextForSimState = getCarrierTextForSimState(simState, carrierName);
-            if (DEBUG) Log.d(TAG, "Handling " + simState + " " + carrierName);
+            if (DEBUG) {
+                Log.d(TAG, "Handling (subId=" + subId + "): " + simState + " " + carrierName);
+            }
             if (carrierTextForSimState != null) {
                 allSimsMissing = false;
                 displayText = concatenate(displayText, carrierTextForSimState);
+            }
+            if (simState == IccCardConstants.State.READY) {
+                ServiceState ss = mKeyguardUpdateMonitor.mServiceStates.get(subId);
+                if (ss != null && ss.getDataRegState() == ServiceState.STATE_IN_SERVICE) {
+                    // hack for WFC (IWLAN) not turning off immediately once
+                    // Wi-Fi is disassociated or disabled
+                    if (ss.getRilDataRadioTechnology() != ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN
+                            || (mWifiManager.isWifiEnabled()
+                                    && mWifiManager.getConnectionInfo() != null
+                                    && mWifiManager.getConnectionInfo().getBSSID() != null)) {
+                        if (DEBUG) {
+                            Log.d(TAG, "SIM ready and in service: subId=" + subId + ", ss=" + ss);
+                        }
+                        anySimReadyAndInService = true;
+                    }
+                }
             }
         }
         if (allSimsMissing) {
@@ -152,7 +179,10 @@ public class CarrierText extends TextView {
                         getContext().getText(R.string.keyguard_missing_sim_message_short), text);
             }
         }
-        if (WirelessUtils.isAirplaneModeOn(mContext)) {
+
+        // APM (airplane mode) != no carrier state. There are carrier services
+        // (e.g. WFC = Wi-Fi calling) which may operate in APM.
+        if (!anySimReadyAndInService && WirelessUtils.isAirplaneModeOn(mContext)) {
             displayText = getContext().getString(R.string.airplane_mode);
         }
         setText(displayText);
