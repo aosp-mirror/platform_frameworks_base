@@ -264,9 +264,9 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
-    public int moveCompleteApp(String fromUuid, String toUuid, String packageName,
+    public int copyCompleteApp(String fromUuid, String toUuid, String packageName,
             String dataAppName, int appId, String seinfo) {
-        StringBuilder builder = new StringBuilder("mvcompleteapp");
+        StringBuilder builder = new StringBuilder("cpcompleteapp");
         builder.append(' ');
         builder.append(escapeNull(fromUuid));
         builder.append(' ');
