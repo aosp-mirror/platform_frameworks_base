@@ -45,6 +45,7 @@ public class FloatingActionMode extends ActionMode {
     private final Rect mPreviousContentRectOnWindow;
     private final int[] mViewPosition;
     private final int[] mPreviousViewPosition;
+    private final int[] mRootViewPosition;
     private final Rect mViewRect;
     private final Rect mPreviousViewRect;
     private final Rect mScreenRect;
@@ -80,6 +81,7 @@ public class FloatingActionMode extends ActionMode {
         mPreviousContentRectOnWindow = new Rect();
         mViewPosition = new int[2];
         mPreviousViewPosition = new int[2];
+        mRootViewPosition = new int[2];
         mViewRect = new Rect();
         mPreviousViewRect = new Rect();
         mScreenRect = new Rect();
@@ -137,7 +139,9 @@ public class FloatingActionMode extends ActionMode {
         checkToolbarInitialized();
 
         mOriginatingView.getLocationInWindow(mViewPosition);
+        mOriginatingView.getRootView().getLocationInWindow(mRootViewPosition);
         mOriginatingView.getGlobalVisibleRect(mViewRect);
+        mViewRect.offset(mRootViewPosition[0], mRootViewPosition[1]);
 
         if (!Arrays.equals(mViewPosition, mPreviousViewPosition)
                 || !mViewRect.equals(mPreviousViewRect)) {
