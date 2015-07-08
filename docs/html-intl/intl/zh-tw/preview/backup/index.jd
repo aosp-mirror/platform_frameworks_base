@@ -1,0 +1,327 @@
+page.title=針對應用程式進行自動備份
+page.tags=backup, previewresources, androidm
+page.keywords=backup, autobackup, preview
+page.image=images/cards/card-auto-backup_2x.png
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文件內容</h2>
+      <ol>
+        <li><a href="#overview">總覽</a></li>
+        <li><a href="#configuring">設定資料備份</a></li>
+        <li><a href="#testing">測試備份設定</a></li>
+        <li><a href="#issues">已知問題</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  使用者通常會在應用程式中花費很多時間精力建立資料和設定偏好設定。
+如果使用者換掉壞掉的裝置或升級到新的裝置時，能夠保存裝置上的資料，就能夠讓使用者獲得良好的體驗。
+執行 Android M 預覽版系統的裝置可以協助在上述情況自動將應用程式資料備份到 Google 雲端硬碟，讓使用者獲得良好的體驗。
+
+如果使用者變更或升級裝置，應用程式資料會自動儲存。
+
+</p>
+
+<p>
+  在執行 Android M 預覽版的裝置上安裝的所有應用程式，預設都會啟用自動備份。不需要任何額外的應用程式程式碼。
+系統則提供使用者不進行自動備份資料的選項。
+您也可以選擇限制要備份應用程式的哪些資料。
+</p>
+
+<p>
+  本文件說明新的系統行為，以及如何指定備份應用程式的哪些資料。
+
+</p>
+
+<h2 id="overview">總覽</h2>
+
+<p>
+  自動備份功能保存應用程式資料的方法，是將使用者裝置上建立的資料上傳到使用者的 Google 雲端硬碟帳戶，然後將資料加密。
+儲存資料不會向您或使用者收費，儲存的資料也不會計入使用者個人雲端硬碟的容量配額。
+在 M 預覽版期間，使用者最多可以為每個 Android 應用程式儲存 25 MB 的資料。
+
+</p>
+
+<p>
+  當裝置閒置、正在充電且連線到 Wi-Fi 網路時，每 24 小時會執行一次自動備份。
+當符合上述情況時，備份管理員服務就會將所有可用的備份資料上傳到雲端。
+當使用者轉換到新的裝置，或者解除安裝又重新安裝已備份的應用程式時，系統會進行一項還原作業，將備份的資料複製到新安裝之應用程式的資料目錄。
+
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>如果您的應用程式使用舊版
+ <a href="{@docRoot}google/backup/index.html">Android 備份服務</a>，這個新的行為就不適用，現有的備份行為還是如往常運作。
+
+</p>
+
+
+<h3 id="auto-exclude">自動排除的資料檔案</h3>
+
+<p>
+  並非所有應用程式資料都需要備份，例如暫存檔案和快取，因此自動備份服務預設會排除某些資料檔案：
+
+</p>
+
+<ul>
+  <li>{@link android.content.Context#getCacheDir
+getCacheDir()} 和 {@link android.content.ContextWrapper#getCodeCacheDir getCodeCacheDir()}
+方法所參考目錄中的檔案。
+  </li>
+
+  <li>位於外部儲存空間的檔案，除非這些檔案位於
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+方法所參考的目錄中。
+  </li>
+
+  <li>{@link android.content.Context#getNoBackupFilesDir getNoBackupFilesDir()} 方法所參考目錄中的檔案。
+
+  </li>
+</ul>
+
+<h2 id="configuring">設定資料備份</h2>
+
+<p>
+  除了上一節所列自動排除的檔案之外，其餘由 M 預覽版裝置上安裝的任何應用程式所建立的資料一律都會備份。
+您可以使用應用程式宣示說明中的設定，進一步限制和設定要備份應用程式的哪些資料。
+
+</p>
+
+<h3 id="include-exclude">納入或排除資料</h3>
+
+<p>
+  根據您的應用程式需要的資料和您儲存資料的方式，您可能需要設定特定的規則來納入或排除某些檔案或目錄。
+自動備份服務支援使用 XML 設定檔和應用程式宣示說明來設定這些備份規則。
+
+在應用程式宣示說明中，您可以依照下列範例指定備份配置設定檔：
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>
+  在此範例程式碼中，<code>android:fullBackupContent</code> 屬性指定應用程式開發專案的 <code>res/xml/</code> 目錄中，名為
+<code>mybackupscheme.xml</code> 的 XML 檔案。
+此設定檔包含要備份哪些檔案的規則。
+下列範例程式碼顯示排除特定檔案不要進行備份的設定檔：
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;full-backup-content&gt;
+    &lt;exclude domain="database" path="device_info.db"/&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  此範例備份設定只排除特定資料庫檔案不要進行備份。
+  其他所有檔案都會備份。
+</p>
+
+<h4>備份設定語法</h4>
+
+<p>
+  您可以使用備份服務設定指定要將哪些檔案納入或排除備份。
+資料備份設定 XML 檔案的語法如下所示：
+</p>
+
+<pre>
+&lt;full-backup-content&gt;
+    &lt;include domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+    &lt;exclude domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  您可以使用下列元素和屬性指定要將哪些檔案納入備份或從備份排除：
+
+</p>
+
+<ul>
+  <li>
+  <code>&lt;include&gt;</code>。如果您想要指定備份一組資源，請使用此元素，而不要讓系統預設備份應用程式的所有資料。
+當您指定
+<code>&lt;include&gt;</code> 標籤時，系統只會備份此元素「指定的資源」<em></em>。
+
+  </li>
+
+  <li>
+  <code>&lt;exclude&gt;</code>。如果您想要指定一組資源不要進行備份，請使用此元素。
+系統會備份應用程式中除了此元素指定之資源以外的其他所有資料。
+
+  </li>
+
+  <li>
+  <code>domain.</code> 您想要納入或排除備份的資源類型。此屬性可以指定的有效值包括：
+
+  </li>
+
+  <li style="list-style: none">
+  <ul>
+    <li>
+    <code>root</code>。指定資源位於應用程式的根目錄。
+    </li>
+
+    <li>
+    <code>file</code>。位於
+{@link android.content.Context#getFilesDir getFilesDir()} 方法傳回的目錄中的資源。
+    </li>
+
+    <li>
+    <code>database</code>。{@link android.content.Context#getDatabasePath getDatabasePath()} 方法或使用
+{@link android.database.sqlite.SQLiteOpenHelper} 類別傳回的資料庫。
+
+    </li>
+
+    <li>
+    <code>sharedpref</code>。{@link android.content.Context#getSharedPreferences getSharedPreferences()}
+方法傳回的 {@link android.content.SharedPreferences} 物件。
+
+    </li>
+
+    <li>
+    <code>external</code>。指定資源位於外部儲存空間，並且位於
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()} 方法傳回的目錄中的檔案。
+
+    </li>
+
+    <li>
+    <code>path</code>。您想要納入或排除備份的資源檔案路徑。
+
+    </li>
+  </ul>
+  </li>
+</ul>
+
+
+<h3 id="prohibit">禁止資料備份</h3>
+
+<p>
+  您可以在應用程式的宣示說明元素中將
+<code>android:allowBackup</code> 屬性設定為 <code>false</code>，選擇不要對任何應用程式資料進行自動備份。
+此設定如下列範例程式碼所示：
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:allowBackup="false"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="testing">測試備份設定</h2>
+
+<p>
+  如果您建立了備份設定，就要進行測試，以確保您的應用程式能正確儲存和還原資料。
+
+</p>
+
+
+<h4>啟用備份記錄</h4>
+
+<p>
+  如要協助判斷備份功能如何剖析您的 XML 檔案，請在執行測試備份之前先啟用記錄功能：
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell setprop log.tag.BackupXmlParserLogging VERBOSE
+</pre>
+
+<h4>測試備份</h4>
+
+<p>如要手動執行備份，首先您必須呼叫下列命令以初始化備份管理員：
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr run
+</pre>
+
+<p>
+  接著，您要使用下列命令，將 <code>&lt;PACKAGE&gt;</code> 參數指定為您應用程式的套件名稱，手動備份您的應用程式：
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr fullbackup &lt;PACKAGE&gt;</pre>
+
+
+<h4>測試還原</h4>
+
+<p>
+  如要在應用程式資料備份之後手動啟動還原，請呼叫下列命令，將 <code>&lt;PACKAGE&gt;</code> 參數指定為您應用程式的套件名稱：
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr restore &lt;PACKAGE&gt;
+</pre>
+
+<p class="warning">
+  <b>警告：</b>這個動作在執行還原作業之前會先停止您的應用程式，然後清除其中的資料。
+
+</p>
+
+<p>
+  如果解除安裝又重新安裝應用程式，就會針對應用程式啟動還原程序。應用程式安裝完成之後，就會自動從雲端還原應用程式資料。
+
+</p>
+
+
+<h4>疑難排解備份</h4>
+
+<p>
+  如果您遇到問題，可以在 [設定] &gt; [備份]<strong></strong> 中關閉備份再開啟、將裝置重設為出廠值，或是呼叫下列命令，清除備份資料及相關的中繼資料：
+
+
+</p>
+
+<pre>$ adb shell bmgr wipe &lt;TRANSPORT&gt; &lt;PACKAGE&gt;</pre>
+
+<p>
+  <code>&lt;TRANSPORT&gt;</code> 值前面必須加上 <code>com.google.android.gms</code>。
+  如要取得傳輸清單，請呼叫下列命令：
+</p>
+
+<pre>$ adb shell bmgr list transports</pre>
+
+<h2 id="issues">已知問題</h2>
+
+<p>以下是自動備份服務的已知問題：</p>
+
+<ul>
+  <li><strong>Google 雲端通訊</strong> - 使用「Google 雲端通訊」推送通知的應用程式有一個已知問題，亦即備份由「Google 雲端通訊」註冊程序傳回的註冊 ID，會讓還原後的應用程式無法傳送推送通知。在新裝置安裝 API 之後，需要向 API 查詢新的註冊 ID，因此如果之前備份了舊的註冊 ID，就會發生問題。
+
+
+
+
+如要避免發生這個情況，請不要備份包含註冊 ID 的檔案。
+
+  </li>
+</ul>

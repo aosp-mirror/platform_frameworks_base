@@ -1,0 +1,207 @@
+page.title=設定預覽版 SDK
+page.image=images/cards/card-set-up_16-9_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文件內容</h2>
+      <ol>
+        <li><a href="#get-as13">取得 Android Studio 1.3</a></li>
+        <li><a href="#get-sdk">取得預覽版 SDK</a></li>
+        <li><a href="#create-update">建立或更新專案</a></li>
+        <li><a href="#setup-test">設定以進行測試</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>M 開發人員預覽版 SDK 可以從 Android SDK Manager 取得。本文件假設您熟悉 Android 應用程式開發工作，例如使用 Android SDK Manager 和建立專案。
+
+如果您是 Android 的新手，請先參閱<a href="{@docRoot}training/basics/firstapp/index.html">建置您的第一個應用程式</a>訓練課程。
+</a>
+</p>
+
+<h2 id="get-as13">取得 Android Studio 1.3</h2>
+
+<p>開發人員預覽版最適合與處於預覽版狀態的 Android Studio 1.3 一起使用。
+強烈建議您安裝 Android Studio 1.3 預覽版與開發人員預覽版一起使用。
+</p>
+
+<p class="caution"><strong>注意：</strong>Android Studio 1.3 的測試預覽版仍在持續開發中。
+如果您使用主要開發電腦來測試開發人員預覽版，可以建立第二個 Android Studio 安裝以用於測試。
+
+</p>
+
+<p>如要安裝 Android Studio 1.3 預覽版：</p>
+
+<ol>
+  <li>下載並啟動 <a href="{@docRoot}tools/studio/index.html">Android Studio</a>。
+
+  </li>
+
+  <li>開啟 [Settings] (設定) 視窗 (在 Windows 上，您可以選擇 [檔案] &gt; [設定] 來執行此動作)。<strong>
+</strong><strong></strong>選擇 [Appearance &amp; Behavior] (外觀和行為) &gt; [System Settings] (系統設定) &gt; [Updates] (更新) 面板。<strong></strong>
+
+
+
+    <p class="aside">在 OSX 上，您可以在 Android Studio 的「Preferences」(偏好設定) 視窗中，找到 [Appearance &amp; Behavior] (外觀和行為) 面板。<strong></strong><strong></strong>
+
+</p>
+  </li>
+
+  <li> 在「Updates」(更新) 面板上，選擇以下選項：[Automatically check updates for: (自動檢查以下的可用更新：)
+<strong></strong><strong>Canary Channel] (測試版管道)。</strong>
+  </li>
+
+  <li>在「Updates」(更新) 面板上，選取 [Check Now] (立即檢查) 以檢查是否有可用的最新測試版建置。<strong></strong><strong></strong>
+版本請在系統提示您時，下載並安裝該版本。
+
+  </li>
+</ol>
+
+<h2 id="get-sdk">取得預覽版 SDK</h2>
+
+<p>如要將預覽版 SDK 元件新增至您的開發環境：</p>
+
+<ol>
+  <li>啟動 Android Studio 1.3 預覽版。
+  </li>
+
+  <li>開啟 [Settings] (設定) 視窗 (在 Windows 上，您可以選擇 [檔案] &gt; [設定] 來執行此動作)。<strong></strong><strong></strong>
+選擇 [Appearance &amp; Behavior] (外觀和行為) &gt; [System Settings] (系統設定) &gt; [Updates] (更新) 面板。<strong></strong>
+
+
+
+    <p class="aside">在 OSX 上，您可以在 Android Studio 的「Preferences」(偏好設定) 視窗中，找到 [Appearance &amp; Behavior] (外觀和行為) 面板。<strong></strong><strong></strong>
+
+</p>
+  </li>
+
+  <li>在「Updates」(更新) 面板上，選擇以下選項：[Automatically check updates for: (自動檢查以下的可用更新：)
+<strong></strong><strong></strong>Canary Channel] (測試版管道) 以及 [Automatically check updates for Android SDK: (自動檢查 Android SDK 的可用更新：)<strong>
+Preview Channel] (預覽版管道)。</strong>
+  </li>
+
+  <li>啟動 <strong>Android Studio Manager</strong>。(使用 Android Studio 1.3，SDK Manager 會與 Android Studio 整合，而不是獨立的應用程式。)
+
+
+  </li>
+
+  <li>在「Platforms」(平台) 區段下，選取 [Android MNC Preview] (Android MNC 預覽版)。<strong></strong><strong></strong>
+
+  </li>
+
+  <li>在「Tools」(工具) 區段中，選擇最新的 Android SDK 工具、平台工具以及建置工具。<strong></strong><strong></strong><strong></strong><strong></strong>
+
+
+  </li>
+
+  <li>按一下 [Install packages] (安裝套件) 並接受所有套件的授權合約。<strong></strong>
+
+  </li>
+
+  <li>開啟 [Settings] (設定) 視窗，然後選擇 [Appearance &amp; Behavior] (外觀和行為) &gt; [System Settings] (系統設定) &gt; [Android SDK] 面板，來驗證已安裝 M 開發人員預覽版。<strong></strong><strong></strong>
+
+</li>
+
+  <li>在「Android SDK」面板上，選擇 [SDK Platforms] (SDK 平台) 索引標籤。<strong></strong><strong></strong>
+「Android MNC Preview」(Android MNC 預覽版) 應該會列在「Installed」(已安裝)。<strong></strong><em></em>
+此外，開啟 [SDK Tools] (SDK 工具) 索引標籤以確認已經安裝最新的工具。<strong></strong>
+
+
+  </li>
+</ol>
+<p>完成這些步驟之後，就能在您的開發環境中使用預覽版元件。
+ </p>
+
+
+<h2 id="create-update">建立或更新專案</h2>
+
+<p>
+  為了使用預覽版 API，您必須建立或更新開發專案，才能使用預覽版元件。
+
+</p>
+
+
+<h3 id="create">建立新專案</h3>
+
+<p>
+  建議您使用 Android Studio 搭配預覽版來建立專案。依照<a href="{@docRoot}sdk/installing/create-project.html">建立專案</a>中所述的步驟執行，直到您到達專案精靈中的「大小」畫面。
+
+<em></em>接著，執行下列步驟以建立為預覽版設定的專案。
+
+</p>
+
+<ul>
+  <li>核取 [Phone and Tablet] (手機與平板電腦)。<strong></strong></li>
+  <li>選取 [MNC：<strong></strong>Android M (Preview)] (Android M (預覽版))，它位於 [Minimum SDK] (SDK 最低版本)。<strong></strong>
+</li>
+</ul>
+
+
+<h3 id="update">更新現有的專案</h3>
+
+<p>
+  對於現有專案，您必須修改專案設定以啟用預覽版 API。在您的開發環境中，開啟模組的 <code>build.gradle</code> 檔案，然後將這些值設定如下：
+
+
+</p>
+
+<ul>
+  <li>將 <code>compileSdkVersion</code> 設定為 <code>'android-MNC'</code></li>
+  <li>將 <code>minSdkVersion</code> 設定為 <code>'MNC'</code></li>
+  <li>將 <code>targetSdkVersion</code> 設定為 <code>'MNC'</code></li>
+</ul>
+
+
+<h2 id="setup-test">設定以進行測試</h2>
+
+<p>
+  利用預覽版測試應用程式，需要您將裝置或虛擬裝置設定為使用平台的預覽版本。
+如果您有相容的裝置，您可以安裝預覽版平台以用於測試。
+否則，您可以設定虛擬裝置以用於測試。
+</p>
+
+<h3 id="setup-device">設定實體裝置</h3>
+
+<p>
+  如果您有 Nexus 5、Nexus 6、Nexus 9 或 Android 電視，您可以在這些裝置上安裝預覽版系統映像，以測試您的應用程式。您可以使用 Android Virtual Device Manager (Android 虛擬裝置管理員) 工具，從 Android Studio 內設定使用平台預覽版本的虛擬裝置。
+
+
+
+</p>
+
+<p class="caution">
+  <strong>重要說明：</strong>在裝置上安裝預覽版映像，會「移除當中的所有資料」，因此您應該在安裝預覽版映像之前備份任何資料。<em></em>
+
+</p>
+
+<h3 id="setupAVD">設定虛擬裝置</h3>
+
+<p>
+  您可以使用 Android Virtual Device Manager (Android 虛擬裝置管理員) 工具，從 Android Studio 內設定使用平台預覽版本的虛擬裝置。
+
+</p>
+
+<p>如要使用 AVD Manager 來建立 AVD：</p>
+
+<ol>
+  <li>請在您的開發環境中安裝預覽版 SDK，如<a href="{@docRoot}preview/setup-sdk.html">設定預覽版 SDK</a> 中所述。
+
+</li>
+  <li>依照<a href="{@docRoot}tools/devices/managing-avds.html">使用 AVD Manager 來管理 AVD</a>中的步驟執行。
+
+使用下列設定：
+    <ul>
+      <li><strong>裝置：</strong>Nexus 5、Nexus 6、Nexus 9 或 Android 電視</li>
+      <li><strong>目標：</strong>
+       Android M (預覽版) - API 級別 M</li>
+      <li><strong>ABI：</strong> x86</li>
+    </ul>
+  </li>
+</ol>
+
+<p>
+  如需建立虛擬裝置以用於測試的詳細資訊，請參閱<a href="{@docRoot}tools/devices/index.html">管理虛擬裝置</a>。
+</p>
