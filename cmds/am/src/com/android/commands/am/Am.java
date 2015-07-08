@@ -74,6 +74,8 @@ import java.util.List;
 
 public class Am extends BaseCommand {
 
+    private static final String SHELL_PACKAGE_NAME = "com.android.shell";
+
     private IActivityManager mAm;
 
     private int mStartFlags = 0;
@@ -777,7 +779,8 @@ public class Am extends BaseCommand {
             return;
         }
         System.out.println("Starting service: " + intent);
-        ComponentName cn = mAm.startService(null, intent, intent.getType(), null, mUserId);
+        ComponentName cn = mAm.startService(null, intent, intent.getType(),
+                SHELL_PACKAGE_NAME, mUserId);
         if (cn == null) {
             System.err.println("Error: Not found; no service started.");
         } else if (cn.getPackageName().equals("!")) {
