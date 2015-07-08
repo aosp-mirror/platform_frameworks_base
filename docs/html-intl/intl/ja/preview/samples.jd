@@ -1,0 +1,70 @@
+page.title=サンプル
+page.image=images/cards/samples-new_2x.png
+@jd:body
+
+<p>
+  以下のコードサンプルは、M Developer Preview 用に提供しています。サンプルを Android Studio でダウンロードするには、<b>[File] &gt; [Import Samples]</b> メニュー オプションを選択します。
+
+</p>
+
+<p class="note">
+  <strong>注:</strong> 以下のダウンロード可能なプロジェクトは、Gradle と Android Studio でご利用いただくために提供しています。
+
+</p>
+
+
+<h3 id="RuntimePermissions">実行時パーミッション</h3>
+
+<p>
+ Android M では、システムのパーミッションの仕組みが変わります。ユーザーは、パーミッション要求の承認をインストール時ではなく、実行時に求められるようになります。
+このサンプルでは、このパーミッションの要求方法を紹介しています。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-RuntimePermissions">GitHub でサンプルを入手</a></p>
+
+<h3 id="ConfirmCredentials">資格情報の確認</h3>
+
+<p>
+ このサンプルでは、アプリで端末の資格情報を認証手段として使用する方法を紹介しています。
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ConfirmCredential">GitHub でサンプルを入手</a>
+</p>
+
+<h3 id="FingerprintDialog">指紋ダイアログ</h3>
+
+<p>
+ このサンプルでは、ユーザーを認証するために登録された指紋をアプリで識別する方法を紹介しています。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-FingerprintDialog">GitHub でサンプルを入手</a></p>
+
+<h3 id="AutomaticBackup">アプリの自動バックアップ</h3>
+
+<p>
+ Android M では、アプリの設定の自動バックアップが導入されました。このサンプルでは、設定のバックアップを管理するためにアプリにフィルタリング ルールを追加する方法を紹介しています。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-AutoBackupForApps">GitHub でサンプルを入手</a></p>
+
+<h3 id="CameraRaw">Camera 2 Raw</h3>
+
+<p>
+  このサンプルでは、<code>Camera2</code> API を使用して、RAW カメラバッファをキャプチャし、<code>DNG</code> ファイルとして保存する方法を紹介しています。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-Camera2Raw">GitHub でサンプルを入手</a></p>
+
+<h3 id="ActiveNotification">アクティブ通知</h3>
+
+<p>
+  このサンプルでは、その時点でアプリに表示されている通知の数を <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a> を使って調べる方法を紹介しています。
+
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ActiveNotifications">GitHub でサンプルを入手</a></p>
