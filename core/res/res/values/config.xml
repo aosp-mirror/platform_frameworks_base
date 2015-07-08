@@ -1262,11 +1262,14 @@
     <bool name="config_sms_capable">true</bool>
 
     <!-- Default SMS Application. This will be the default SMS application when
-         the phone first boots. The user can then change the default app to oe
+         the phone first boots. The user can then change the default app to one
          of their choosing.
          This can be overridden for devices where a different default SMS
-         application is desired. -->
-    <string name="default_sms_application" translatable="false">com.android.mms</string>
+         application is desired.
+
+         If this string is empty or the specified package does not exist, then
+         the platform will search for an SMS app and use that (if there is one)-->
+    <string name="default_sms_application" translatable="false"></string>
 
     <!-- Default web browser.  This is the package name of the application that will
          be the default browser when the device first boots.  Afterwards the user
