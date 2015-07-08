@@ -680,7 +680,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
                 // Optionally show app shortcuts in the nav bar "shelf" area.
-                if (res.getBoolean(com.android.internal.R.bool.config_enableAppShelf)) {
+                if (shouldShowAppShelf()) {
                     mNavigationBarView = (NavigationBarView) View.inflate(
                             context, R.layout.navigation_bar_with_apps, null);
                 } else {
@@ -911,6 +911,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
 
         return mStatusBarView;
+    }
+
+    /** Returns true if the app shelf should be shown in the nav bar. */
+    private boolean shouldShowAppShelf() {
+        // Allow adb to override the default shelf behavior:
+        // adb shell settings put system demo_app_shelf 0  # Zero forces it off.
+        // adb shell settings put system demo_app_shelf 1  # Non-zero forces it on.
+        final int DEFAULT = -1;
+        final int shelfOverride =
+                Settings.System.getInt(mContext.getContentResolver(), "demo_app_shelf", DEFAULT);
+        if (shelfOverride != DEFAULT) {
+            return shelfOverride != 0;
+        }
+        // Otherwise default to the build setting.
+        return mContext.getResources().getBoolean(R.bool.config_enableAppShelf);
     }
 
     private void clearAllNotifications() {
