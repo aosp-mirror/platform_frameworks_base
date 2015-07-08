@@ -164,9 +164,9 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#sdk2">Developer Preview 2 SDK</a></li>
-        <li><a href="#docs2">Developer Documentation</a></li>
-        <li><a href="#images2">Hardware System Images</a></li>
+        <li><a href="#sdk">Developer Preview 2 SDK</a></li>
+        <li><a href="#docs">Developer Documentation</a></li>
+        <li><a href="#images">Hardware System Images</a></li>
       </ol>
 
      <h2>Legacy downloads</h2>
@@ -184,7 +184,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </p>
 
 
-<h2 id="sdk2">Developer Preview 2 SDK</h2>
+<h2 id="sdk">Developer Preview 2 SDK</h2>
 
 <p>
   The Preview SDK is available for download through the <a href=
@@ -194,7 +194,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </p>
 
 
-<h2 id="docs2">Developer Documentation</h2>
+<h2 id="docs">Developer Documentation</h2>
 
 <p>
   The developer documentation download package provides detailed API reference information and an API difference report for the preview.
@@ -216,7 +216,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <table>
 
 
-<h2 id="images2">Hardware System Images</h2>
+<h2 id="images">Hardware System Images</h2>
 
 <p>
   These system images allow you to install a preview version of the platform on a physical device for
