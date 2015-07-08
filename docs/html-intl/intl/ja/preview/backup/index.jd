@@ -1,0 +1,327 @@
+page.title=アプリの自動バックアップ
+page.tags=バックアップ, previewresources, androidm
+page.keywords=バックアップ,自動バックアップ,プレビュー
+page.image=images/cards/card-auto-backup_2x.png
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本書の内容</h2>
+      <ol>
+        <li><a href="#overview">概要</a></li>
+        <li><a href="#configuring">データのバックアップを設定する</a></li>
+        <li><a href="#testing">バックアップ設定をテストする</a></li>
+        <li><a href="#issues">既知の問題</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  アプリ内のデータ作成や環境設定は、多大な労力と時間を必要とする作業です。
+端末が破損したり、新しい端末にアップグレードしたりする場合に、そのデータを保持することが、快適な操作性を提供する上で非常に重要です。
+Android M Preview を実行する端末では、アプリデータを Google ドライブに自動的にバックアップすることで、前述のような状況でも快適な操作性を実現できます。
+
+アプリデータは、ユーザーが端末を変更したりアップグレードしたりした場合に自動的に復元されます。
+
+</p>
+
+<p>
+  自動バックアップは、Android M Preview を実行する端末にインストールされているすべてのアプリで有効になっています。追加のアプリコードは必要ありません。
+ユーザーは、自動データ バックアップを使用しないよう選択することもできます。
+また、バックアップするアプリのデータを制限することもできます。
+</p>
+
+<p>
+  このドキュメントでは、新しいシステムの動作と、バックアップするアプリデータを指定する方法について説明します。
+
+</p>
+
+<h2 id="overview">概要</h2>
+
+<p>
+  自動バックアップ機能では、アプリがユーザーの端末上に作成するデータを、ユーザーの Google ドライブ アカウントにアップロードして暗号化することで、そのデータを保持します。
+開発者やユーザーにデータ ストレージの費用が発生することはなく、保存されたデータはユーザー個人のドライブ容量にはカウントされません。
+M Preview の期間中、ユーザーは 1 つの Android アプリにつき最大 25 MB までのデータを保存できます。
+
+</p>
+
+<p>
+  自動バックアップは、端末がアイドル中で、電源に接続されていて、Wi-Fi に接続されている場合に、24 時間ごとに実行されます。
+これらの条件を満たしたとき、バックアップ マネージャー サービスが利用可能なすべてのバックアップ データをクラウドにアップロードします。
+ユーザーが新しい端末に切り替えたり、バックアップされたアプリをアンインストールしたり再インストールしたりした場合、復元操作によりバックアップされたデータが新しくインストールされたアプリのデータ ディレクトリにコピーされます。
+
+
+</p>
+
+<p class="note">
+  <strong>注:</strong> アプリが以前の <a href="{@docRoot}google/backup/index.html">Android バックアップ サービス</a>を利用している場合、この新しい動作は適用されず、既存のバックアップ動作が引き続き適用されます。
+
+
+</p>
+
+
+<h3 id="auto-exclude">自動的に除外されたデータファイル</h3>
+
+<p>
+  一時ファイルやキャッシュなど、バックアップする必要のないアプリデータもあるため、自動バックアップ サービスではデフォルトで一部のデータ ファイルを除外します。
+
+</p>
+
+<ul>
+  <li>{@link android.content.Context#getCacheDir
+    getCacheDir()} メソッドと {@link android.content.ContextWrapper#getCodeCacheDir getCodeCacheDir()}
+ メソッドに参照されるディレクトリ内のファイル。
+  </li>
+
+  <li>
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+ メソッドに参照されるディレクトリ内のものを除く、外部ストレージ内のファイル。
+  </li>
+
+  <li>
+{@link android.content.Context#getNoBackupFilesDir getNoBackupFilesDir()} メソッドに参照されるディレクトリ内のファイル。
+  </li>
+</ul>
+
+<h2 id="configuring">データのバックアップを設定する</h2>
+
+<p>
+  前のセクションの自動除外ファイル一覧にあるものを除いて、M Preview 端末にインストールされたすべてのアプリで作成されるデータがバックアップ対象です。
+そこからさらに、アプリ マニフェストの設定を使用して、アプリからバックアップするデータを制限したり設定したりできます。
+
+</p>
+
+<h3 id="include-exclude">対象データと除外データ</h3>
+
+<p>
+  アプリに必要なデータとその保存方法によって、特定のファイルやディレクトリを対象とするか、除外するかの明確なルールが必要になる場合があります。
+自動バックアップ サービスでは、XML 構成ファイルとアプリ マニフェストを使ってそのようなバックアップ ツールを設定できます。
+
+アプリ マニフェストでは、次の例のように、バックアップ スキームの構成ファイルを指定できます。
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>
+  このサンプル コードでは、<code>android:fullBackupContent</code> 属性がアプリの開発プロジェクトの <code>res/xml/</code> ディレクトリにある <code>mybackupscheme.xml</code> という名前の XML ファイルを指定しています。
+
+この構成ファイルには、バックアップ対象とするファイルのルールが含まれています。
+次のサンプル コードは、バックアップから特定のファイルを除外する構成ファイルを示しています。
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;full-backup-content&gt;
+    &lt;exclude domain="database" path="device_info.db"/&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  この例のバックアップ構成では、特定のデータベース ファイルのみをバックアップから除外しています。
+  それ以外のファイルはすべてバックアップされます。
+</p>
+
+<h4>バックアップ設定の構文</h4>
+
+<p>
+  バックアップ サービスの設定では、バックアップに含める、または除外するファイルを指定できます。
+データ バックアップ設定の xml ファイルの構文は次のとおりです。
+</p>
+
+<pre>
+&lt;full-backup-content&gt;
+    &lt;include domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+    &lt;exclude domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  次のエレメントと属性を使って、バックアップに含める、または除外するファイルを指定できます。
+
+</p>
+
+<ul>
+  <li>
+  <code>&lt;include&gt;</code>。システムにデフォルトでアプリのすべてのデータをバックアップさせるのではなく、バックアップするリソースを自身で指定する場合、このエレメントを使用します。
+<code>&lt;include&gt;</code> タグを指定すると、システムはこのエレメントで<em>指定されたリソースのみ</em>をバックアップします。
+
+
+  </li>
+
+  <li>
+  <code>&lt;exclude&gt;</code>。バックアップから除外するリソースを指定するには、このエレメントを使用します。
+システムは、このエレメントで指定されたリソース以外のすべてのアプリ データをバックアップします。
+
+  </li>
+
+  <li>
+  <code>domain.</code> バックアップに含める、または除外するリソースのタイプ。この属性を指定する際に有効な値: 
+
+  </li>
+
+  <li style="list-style: none">
+  <ul>
+    <li>
+    <code>root</code>。リソースがアプリのルート ディレクトリにあることを指定します。
+    </li>
+
+    <li>
+    <code>file</code>。
+{@link android.content.Context#getFilesDir getFilesDir()} メソッドで返されるディレクトリ内のリソースに相当します。
+    </li>
+
+    <li>
+    <code>database</code>。
+{@link android.content.Context#getDatabasePath getDatabasePath()} メソッドや 
+{@link android.database.sqlite.SQLiteOpenHelper} クラスを使用して返されるデータベースに相当します。
+    </li>
+
+    <li>
+    <code>sharedpref</code>。
+{@link android.content.Context#getSharedPreferences getSharedPreferences()} メソッドで返される 
+{@link android.content.SharedPreferences} オブジェクトに相当します。
+    </li>
+
+    <li>
+    <code>external</code>。リソースが外部ストレージにあることを指定し、
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+ メソッドで返されるディレクトリ内のファイルに相当します。
+    </li>
+
+    <li>
+    <code>path</code>。バックアップに含める、または除外するリソースへのファイルパス。
+
+    </li>
+  </ul>
+  </li>
+</ul>
+
+
+<h3 id="prohibit">データ バックアップの禁止</h3>
+
+<p>
+  マニフェストのアプリ エレメントにある <code>android:allowBackup</code> 属性を <code>false</code> に設定すると、一切のデータを自動バックアップしないように選択できます。
+
+この設定を、次のサンプル コードで示します。
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:allowBackup="false"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="testing">バックアップ設定をテストする</h2>
+
+<p>
+  バックアップ設定を作成したら、アプリでデータが保存され、正常に復元されることをテストして確認する必要があります。
+
+</p>
+
+
+<h4>バックアップのログの有効化</h4>
+
+<p>
+  バックアップで XML ファイルがどのように解析されるかを確認するため、テストのバックアップを実行する前にログ機能を有効にします。
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell setprop log.tag.BackupXmlParserLogging VERBOSE
+</pre>
+
+<h4>バックアップのテスト</h4>
+
+<p>手動でバックアップを実行するには、まず次のコマンドを呼び出してバックアップ マネージャーを初期化する必要があります。
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr run
+</pre>
+
+<p>
+  次に、次のコマンドを使って、アプリのパッケージ名を <code>&lt;PACKAGE&gt;</code> パラメータで指定して手動でアプリケーションをバックアップします。
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr fullbackup &lt;PACKAGE&gt;</pre>
+
+
+<h4>復元のテスト</h4>
+
+<p>
+  アプリのバックアップ後に手動で復元を開始するには、アプリのパッケージ名を <code>&lt;PACKAGE&gt;</code> パラメータで指定します。
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr restore &lt;PACKAGE&gt;
+</pre>
+
+<p class="warning">
+  <b>警告:</b> このアクションを実行すると、アプリが停止し、復元操作を実行する前にデータが消去されます。
+
+</p>
+
+<p>
+  アプリをアンインストールしてから再インストールすることで、アプリの復元プロセスを開始します。アプリのインストールが完了すると、アプリデータが自動的にクラウドから復元されます。
+
+</p>
+
+
+<h4>バックアップのトラブルシューティング</h4>
+
+<p>
+  問題が発生した場合は、<strong>[設定] &gt; [バックアップ]</strong>でバックアップをオン/オフに切り替え、端末を工場出荷時の状態にリセットするか、次のコマンドを呼び出して、バックアップ データと関連メタデータを消去できます。
+
+
+</p>
+
+<pre>$ adb shell bmgr wipe &lt;TRANSPORT&gt; &lt;PACKAGE&gt;</pre>
+
+<p>
+  <code>&lt;TRANSPORT&gt;</code> には、<code>com.google.android.gms</code> というプレフィクスが付く必要があります。
+  Transport の一覧を取得するには、次のコマンドを呼び出します。
+</p>
+
+<pre>$ adb shell bmgr list transports</pre>
+
+<h2 id="issues">既知の問題</h2>
+
+<p>自動バックアップ サービスには、次のような既知の問題があります。</p>
+
+<ul>
+  <li><strong>Google Cloud Messaging</strong> - プッシュ通知に Google Cloud Messaging を使用するアプリの場合、Messaging の登録時に返された登録 ID をバックアップすると、復元されたアプリのプッシュ通知が破損することがあるという既知の問題があります。古い登録 ID がバックアップされている場合を除いて、新しい端末へのインストール後は、新しい 登録 ID 用の API を照会することが重要です。
+
+
+
+
+これを回避するには、バックアップ対象ファイルから登録 ID を除外します。
+
+  </li>
+</ul>
