@@ -57,7 +57,7 @@ import com.android.internal.R;
  * {@link #setTextAppearance(android.content.Context, int) textAppearance} and the related
  * setTypeface() methods control the typeface and style of label text, whereas the
  * {@link #setSwitchTextAppearance(android.content.Context, int) switchTextAppearance} and
- * the related seSwitchTypeface() methods control that of the thumb.
+ * the related setSwitchTypeface() methods control that of the thumb.
  *
  * <p>See the <a href="{@docRoot}guide/topics/ui/controls/togglebutton.html">Toggle Buttons</a>
  * guide.</p>
