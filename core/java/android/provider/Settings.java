@@ -574,7 +574,22 @@ public final class Settings {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_OVERLAY_PERMISSION =
-            "android.settings.MANAGE_OVERLAY_PERMISSION";
+            "android.settings.action.MANAGE_OVERLAY_PERMISSION";
+
+    /**
+     * Activity Action: Show settings to toggle permission to allow app to
+     * read/write system settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_WRITE_SETTINGS =
+            "android.settings.action.MANAGE_WRITE_SETTINGS";
 
     /**
      * Activity Action: Show screen of details about a particular application.
