@@ -56,7 +56,7 @@ public class FingerprintUtils {
     }
 
     public void addFingerprintForUser(Context ctx, int fingerId, int userId) {
-        getStateForUser(ctx, userId).addFingerprint(fingerId);
+        getStateForUser(ctx, userId).addFingerprint(fingerId, userId);
     }
 
     public void removeFingerprintIdForUser(Context ctx, int fingerId, int userId) {

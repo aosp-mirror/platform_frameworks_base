@@ -68,9 +68,9 @@ class FingerprintsUserState {
         }
     }
 
-    public void addFingerprint(int fingerId) {
+    public void addFingerprint(int fingerId, int groupId) {
         synchronized (this) {
-            mFingerprints.add(new Fingerprint(getDefaultFingerprintName(fingerId), 0, fingerId, 0));
+            mFingerprints.add(new Fingerprint(getUniqueName(), groupId, fingerId, 0));
             scheduleWriteStateLocked();
         }
     }
@@ -107,8 +107,30 @@ class FingerprintsUserState {
         }
     }
 
-    private String getDefaultFingerprintName(int fingerId) {
-        return mCtx.getString(com.android.internal.R.string.fingerprint_name_template, fingerId);
+    /**
+     * Finds a unique name for the given fingerprint
+     * @return unique name
+     */
+    private String getUniqueName() {
+        int guess = 1;
+        while (true) {
+            // Not the most efficient algorithm in the world, but there shouldn't be more than 10
+            String name = mCtx.getString(com.android.internal.R.string.fingerprint_name_template,
+                    guess);
+            if (isUnique(name)) {
+                return name;
+            }
+            guess++;
+        }
+    }
+
+    private boolean isUnique(String name) {
+        for (Fingerprint fp : mFingerprints) {
+            if (fp.getName().equals(name)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static File getFileForUser(int userId) {
