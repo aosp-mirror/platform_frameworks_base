@@ -11276,7 +11276,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_INSTALL) Slog.d(TAG, "Moving " + move.packageName + " from "
                     + move.fromUuid + " to " + move.toUuid);
             synchronized (mInstaller) {
-                if (mInstaller.moveCompleteApp(move.fromUuid, move.toUuid, move.packageName,
+                if (mInstaller.copyCompleteApp(move.fromUuid, move.toUuid, move.packageName,
                         move.dataAppName, move.appId, move.seinfo) != 0) {
                     return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
                 }
@@ -11291,14 +11291,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         int doPreInstall(int status) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
-                cleanUp();
+                cleanUp(move.toUuid);
             }
             return status;
         }
 
         boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
-                cleanUp();
+                cleanUp(move.toUuid);
                 return false;
             }
 
@@ -11315,8 +11315,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         int doPostInstall(int status, int uid) {
-            if (status != PackageManager.INSTALL_SUCCEEDED) {
-                cleanUp();
+            if (status == PackageManager.INSTALL_SUCCEEDED) {
+                cleanUp(move.fromUuid);
+            } else {
+                cleanUp(move.toUuid);
             }
             return status;
         }
@@ -11331,32 +11333,28 @@ public class PackageManagerService extends IPackageManager.Stub {
             return (resourceFile != null) ? resourceFile.getAbsolutePath() : null;
         }
 
-        private boolean cleanUp() {
-            if (codeFile == null || !codeFile.exists()) {
-                return false;
+        private boolean cleanUp(String volumeUuid) {
+            final File codeFile = new File(Environment.getDataAppDirectory(volumeUuid),
+                    move.dataAppName);
+            Slog.d(TAG, "Cleaning up " + move.packageName + " on " + volumeUuid);
+            synchronized (mInstallLock) {
+                // Clean up both app data and code
+                removeDataDirsLI(volumeUuid, move.packageName);
+                if (codeFile.isDirectory()) {
+                    mInstaller.rmPackageDir(codeFile.getAbsolutePath());
+                } else {
+                    codeFile.delete();
+                }
             }
-
-            if (codeFile.isDirectory()) {
-                mInstaller.rmPackageDir(codeFile.getAbsolutePath());
-            } else {
-                codeFile.delete();
-            }
-
-            if (resourceFile != null && !FileUtils.contains(codeFile, resourceFile)) {
-                resourceFile.delete();
-            }
-
             return true;
         }
 
         void cleanUpResourcesLI() {
-            cleanUp();
+            throw new UnsupportedOperationException();
         }
 
         boolean doPostDeleteLI(boolean delete) {
-            // XXX err, shouldn't we respect the delete flag?
-            cleanUpResourcesLI();
-            return true;
+            throw new UnsupportedOperationException();
         }
     }
 
