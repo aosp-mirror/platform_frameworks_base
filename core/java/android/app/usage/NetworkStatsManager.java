@@ -97,7 +97,7 @@ public class NetworkStatsManager {
 
         Bucket bucket = null;
         NetworkStats stats = new NetworkStats(mContext, template, startTime, endTime);
-        bucket = stats.getDeviceSummaryForNetwork(startTime, endTime);
+        bucket = stats.getDeviceSummaryForNetwork();
 
         stats.close();
         return bucket;
@@ -106,7 +106,7 @@ public class NetworkStatsManager {
     /**
      * Query network usage statistics summaries. Result is summarised data usage for all uids
      * belonging to calling user. Result is a single Bucket aggregated over time, state and uid.
-     * This means the bucket's start and end timestamp are going to be the same as the 'startTime' 
+     * This means the bucket's start and end timestamp are going to be the same as the 'startTime'
      * and 'endTime' parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid
      * {@link NetworkStats.Bucket#UID_ALL}.
      *
@@ -130,7 +130,7 @@ public class NetworkStatsManager {
 
         NetworkStats stats;
         stats = new NetworkStats(mContext, template, startTime, endTime);
-        stats.startSummaryEnumeration(startTime, endTime);
+        stats.startSummaryEnumeration();
 
         stats.close();
         return stats.getSummaryAggregate();
@@ -140,7 +140,7 @@ public class NetworkStatsManager {
      * Query network usage statistics summaries. Result filtered to include only uids belonging to
      * calling user. Result is aggregated over time, hence all buckets will have the same start and
      * end timestamps. Not aggregated over state or uid. This means buckets' start and end
-     * timestamps are going to be the same as the 'startTime' and 'endTime' parameters, state and 
+     * timestamps are going to be the same as the 'startTime' and 'endTime' parameters, state and
      * uid are going to vary.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
@@ -163,7 +163,7 @@ public class NetworkStatsManager {
 
         NetworkStats result;
         result = new NetworkStats(mContext, template, startTime, endTime);
-        result.startSummaryEnumeration(startTime, endTime);
+        result.startSummaryEnumeration();
 
         return result;
     }
@@ -173,6 +173,9 @@ public class NetworkStatsManager {
      * Result is aggregated over state but not aggregated over time. This means buckets' start and
      * end timestamps are going to be between 'startTime' and 'endTime' parameters, state is going
      * to be {@link NetworkStats.Bucket#STATE_ALL} and uid the same as the 'uid' parameter.
+     * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
+     * interpolate across partial buckets. Since bucket length is in the order of hours, this
+     * method cannot be used to measure data usage on a fine grained time scale.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -205,6 +208,9 @@ public class NetworkStatsManager {
      * calling user. Result is aggregated over state but not aggregated over time or uid. This means
      * buckets' start and end timestamps are going to be between 'startTime' and 'endTime'
      * parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid will vary.
+     * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
+     * interpolate across partial buckets. Since bucket length is in the order of hours, this
+     * method cannot be used to measure data usage on a fine grained time scale.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
