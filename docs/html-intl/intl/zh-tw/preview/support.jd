@@ -1,0 +1,67 @@
+page.title=支援
+page.image=images/cards/card-support_16-9_2x.png
+
+@jd:body
+
+<p>
+  如果您遇到錯誤或有關於 M 開發人員預覽版的意見反應，請在我們的問題追蹤器上<a href="https://code.google.com/p/android-developer-preview/">建立問題</a>。
+
+
+</p>
+
+<p>
+  如需更多支援，請加入 <a href="http://g.co/dev/AndroidMDevPreview">M 開發人員預覽版 Google+ 社群</a>來討論您的開發體驗。
+
+
+</p>
+
+<h2 id="release-notes">版本資訊</h2>
+
+<!--
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>M Developer Preview, Revision 2</a> <em>(Month 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+
+    <dt>Fix Category 1</dt>
+    <dd>
+      <ul>
+        <li>Fixed issue X.</li>
+        <li>Fixed issue Y.</li>
+        <li>Fixed issue Z.</li>
+      </ul>
+    </dd>
+
+    <dt>Fix Category 2</dt>
+    <dd>
+      <ul>
+        <li>Fixed issue X.</li>
+        <li>Fixed issue Y.</li>
+        <li>Fixed issue Z.</li>
+      </ul>
+    </dd>
+
+    </dl>
+  </div>
+</div>
+-->
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+<img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt="" />M 開發人員預覽版，修訂版 1</a> (2015 年 5 月)<em></em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>初始版本。</dt>
+    </dl>
+  </div>
+</div>
+
+

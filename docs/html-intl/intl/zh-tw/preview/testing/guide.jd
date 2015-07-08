@@ -1,0 +1,187 @@
+page.title=測試指南
+page.image=images/cards/card-build_16x9_2x.png
+page.keywords=previewresources,androidm,testing,permissions
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文件內容</h2>
+      <ol>
+        <li><a href="#runtime-permissions">測試權限</a></li>
+        <li><a href="#doze-standby">測試休眠與應用程式待命</a></li>
+        <li><a href="#ids">自動備份與裝置識別碼</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android M 開發人員預覽版能夠讓您有機會確保您的應用程式能搭配下一個版本的平台運作。
+此預覽版包含許多 API 和足以影響應用程式的行為變更，如 <a href="{@docRoot}preview/api-overview.html">API 總覽</a>和<a href="{@docRoot}preview/behavior-changes.html">行為變更</a>中所述。
+
+使用預覽版測試應用程式時，您必須著重在許多特定的系統變更，以確保使用者都能擁有良好的體驗。
+
+
+</p>
+
+<p>
+  本指南說明對應用程式測試預覽功能的內容與方法。您應優先測試這些特定的預覽功能，因為這些功能可能會對您的應用程式行為有非常大的影響：
+
+
+</p>
+
+<ul>
+  <li><a href="#runtime-permissions">權限</a>
+  </li>
+  <li><a href="#doze-standby">休眠與應用程式待命</a>
+  </li>
+  <li><a href="#ids">自動備份與裝置識別碼</a></li>
+</ul>
+
+<p>
+  如需有關如何設定使用預覽版系統映像的裝置或虛擬裝置以進行測試的詳細資訊，請參閱<a href="{@docRoot}preview/setup-sdk.html">設定預覽版 SDK</a>。
+
+</p>
+
+
+<h2 id="runtime-permissions">測試權限</h2>
+
+<p>
+  新的<a href="{@docRoot}preview/features/runtime-permissions.html">權限</a>模型改變使用者對您的應用程式分配權限的方式。
+以前在安裝過程中會授與所有權限，現在您的應用程式則必須在執行階段向使用者要求個別的權限。
+
+對於使用者而言，這個行為能夠對每個應用程式的Activity提供更細膩的控制，而且也能更瞭解應用程式為何要要求特定權限。
+使用者可以隨時個別對應用程式授與或撤銷權限。
+預覽版的這個功能最有可能影響到您應用程式的行為，而且可能會導致應用程式某些功能無法正常運作，或者這些功能會以降級的狀態運作。
+
+
+</p>
+
+<p class="caution">
+  這個變更會影響在新平台上執行的所有應用程式，甚至影響並非針對新平台版本開發的應用程式。
+平台會對舊版應用程式提供有限的相容性行為，但是您最好還是立即開始規劃將應用程式移轉到新的權限模型，以便能在官方平台上市時發佈更新的應用程式版本。
+
+
+</p>
+
+
+<h3 id="permission-test-tips">測試祕訣</h3>
+
+<p>
+  使用下列測試祕訣，可以幫助您使用新的權限行為，規劃和執行應用程式測試。
+
+</p>
+
+<ul>
+  <li>辨別應用程式目前的權限與相關的程式碼路徑。</li>
+  <li>針對所有權限保護的服務與資料測試使用者流程。</li>
+  <li>測試各種組合的授與/撤銷權限。</li>
+  <li>從命令列使用 {@code adb} 工具管理權限：
+    <ul>
+      <li>依群組列出權限與狀態：
+        <pre>adb shell pm list permissions -d -g</pre>
+      </li>
+      <li>使用下列語法授與或撤銷一或多個權限：<br>
+        <pre>adb shell pm [grant|revoke] &lt;permission.name&gt; ...</pre>
+      </li>
+    </ul>
+  </li>
+  <li>分析使用權限的應用程式服務。</li>
+</ul>
+
+<h3 id="permission-test-strategy">測試策略</h3>
+
+<p>
+  權限變更會影響應用程式的結構和設計，同時也會影響使用者的體驗以及您提供給使用者的流程。
+您應該評估應用程式目前的權限作法，然後開始規劃您要提供的新流程。
+官方版本的平台會提供相容性行為，但是您最好規劃更新您的應用程式，而不要依賴這些行為。
+
+
+</p>
+
+<p>
+  辨別您的應用程式實際需要且使用到的權限，然後找出使用受權限保護之服務的各種程式碼路徑。
+您可以在新平台上測試，並且進行程式碼分析，來達到上述目的。
+測試時，您應該變更應用程式的 {@code targetSdkVersion} 為預覽版本，著重在加入執行階段權限。
+如需詳細資訊，請參閱<a href="{@docRoot}preview/setup-sdk.html#">設定預覽版 SDK</a>。
+
+</p>
+
+<p>
+  測試各種撤銷/加入權限的組合，著重在依據這些權限的使用者流程。
+如果相依性不明顯或邏輯不清楚時，您可以考慮重新分解或劃分流程以消除相依性，或是更清楚為何需要某個權限。
+
+
+</p>
+
+<p>
+  如需有關執行階段權限行為、測試和建議做法的詳細資訊，請參閱 <a href="{@docRoot}preview/features/runtime-permissions.html">權限</a>開發人員預覽版頁面。
+
+
+</p>
+
+
+<h2 id="doze-standby">測試休眠與應用程式待命</h2>
+
+<p>
+  當裝置處於閒置狀態，或者當您的應用程式不在使用中時，「休眠」與「應用程式待命」的省電功能會限制應用程式可以執行的背景處理量。
+系統可能加諸在應用程式的限制，包括網路受到限制或沒有網路、背景工作暫停、通知暫停、喚醒要求被略過，以及警示被略過。
+
+如要確保您的應用程式能正確運作，而且這些省電功能也達到最好的效益，您應該透過模擬這些低電量狀態，測試您的應用程式。
+
+
+</p>
+
+<h4 id="doze">搭配休眠測試應用程式</h4>
+
+<p>對您的應用程式測試休眠：</p>
+
+<ol>
+<li>設定 M 預覽版系統映像的硬體裝置或虛擬裝置。</li>
+<li>將裝置連線到您的開發電腦並安裝您的應用程式。</li>
+<li>執行您的應用程式並讓應用程式保持使用中。</li>
+<li>執行下列命令，模擬裝置進入「休眠」模式：
+
+<pre>
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+
+  </li>
+  <li>觀察當裝置重新啟動時的應用程式行為。當裝置結束「休眠」時，確定應用程式順利回復。
+</li>
+</ol>
+
+
+<h4 id="standby">搭配應用程式待命測試應用程式</h4>
+
+<p>對您的應用程式測試應用程式待命模式：</p>
+
+<ol>
+  <li>設定 M 預覽版系統映像的硬體裝置或虛擬裝置。</li>
+  <li>將裝置連線到您的開發電腦並安裝您的應用程式。</li>
+  <li>執行您的應用程式並讓應用程式保持使用中。</li>
+  <li>執行下列命令，模擬應用程式進入待命模式：
+
+<pre>
+$ adb shell am broadcast -a android.os.action.DISCHARGING
+$ adb shell am set-idle &lt;packageName&gt; true
+</pre>
+
+  </li>
+  <li>使用下列命令，模擬喚醒應用程式：
+    <pre>$ adb shell am set-idle &lt;packageName&gt; false</pre>
+  </li>
+  <li>觀察當應用程式被喚醒時的行為。確定應用程式順利從待命模式回復。
+您尤其要檢查應用程式通知與背景工作是否有如預期般繼續運作
+。</li>
+</ol>
+
+<h2 id="ids">針對應用程式進行自動備份與裝置特定識別碼</h2>
+
+<p>如果您的應用程式在內部儲存空間存有任何裝置特定識別碼，例如 Google
+雲端通訊註冊 ID，請確認按照建議做法排除這些儲存位置不要進行自動備份，如<a href="{@docRoot}preview/backup/index.html">針對應用程式進行自動備份</a>中所述。
+
+
+ </p>
