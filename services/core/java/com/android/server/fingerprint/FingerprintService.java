@@ -539,8 +539,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 }
             } else {
                 result = true; // client not listening
-            }
-            if (fpId <= 0) {
+	    }
+	    if (fpId == 0) {
                 FingerprintUtils.vibrateFingerprintError(getContext());
                 result |= handleFailedAttempt(this);
             } else {
