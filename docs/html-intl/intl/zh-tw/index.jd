@@ -1,92 +1,89 @@
 fullpage=true
-page.viewport_width=970excludeFromSuggestions=true
-page.metaDescription=適用於 Android 開發人員的官方網站。提供適用於應用程式開發人員與設計師的 Android SDK 與文件。
-page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" /> 
+excludeFromSuggestions=true
+page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
+page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" />
 
 @jd:body
 
-<div class="home-new-carousel-1">
-  <div class="fullscreen-carousel-content">
-    <div class="vcenter">
-      <div class="wrap clearfix">
+<!-- <div class="dac-hero-carousel" data-carousel-query="collection:index/carousel">
+</div> -->
+<section class="dac-hero-carousel">
 
-        <div class="static resource-flow-layout wrap col-16">
-          <div class="resource resource-card resource-card-18x6">
+<!-- <article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);"> -->
+<article class="dac-expand dac-hero dac-invert active" style="background-color: #455A64;">
+<a href="/preview/index.html">
+  <div class="wrap" style="max-width:1100px;">
+    <div class="cols dac-hero-content">
+      <div class="col-10of16 col-push-6of16 dac-hero-figure">
+        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png"
+             srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
+             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
+      </div>
+      <div class="col-6of16 col-pull-10of16">
+        <div class="dac-hero-tag"></div>
 
-      <div class="landing-section-header">
-            <div class="col-10"><img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="510" style="margin:20px 30px 0 30px"></div>
-            <div class="col-5" style=" margin-top:70px ">
-            <h3 stye="font-weight:300;">Android 5.0 棒棒糖</h3>
-            <p>Android 5.0 更新新增了許多新功能到您的應用程式，例如鎖定螢幕上的通知、全新的相機 API、OpenGL ES 3.1、新的材料設計介面，還有更多其他功能。</p>
-            <a href="{@docRoot}about/versions/lollipop.html" class="landing-button landing-primary">深入了解</a>
-            </div>
-          </div>
-          </div>
-        </div>
-       <h2>&nbsp;</h2>
-        <div style="margin-top:20px;height:115px" class="resource-widget resource-flow-layout wrap col-16
-        no-section" data-query="collection:index/primary" data-resourcestyle="card"
-        data-sortorder="-timestamp" data-maxresults="3" data-cardsizes="6x2,6x2,6x2"></div> <!-- end .resource-widget -->
-      </div> <!-- end .wrap -->
-    </div> <!-- end .vcenter -->
-  </div> <!-- end .fullscreen-carousel-content -->
-</div> <!-- end .fullscreen-carousel -->
+        <h1 class="dac-hero-title">Android M Developer Preview</h1>
+        <p class="dac-hero-description">準備使用新版 Android。在 Nexus 5、6、9 和 
+        Player 上測試您的應用程式。 </p>
 
-<div class="actions-bar" style="margin-top:20px">
-  <div class="wrap">
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          開始使用！
+        </a>
+      </div>
+    </div>
+  </div>
+</a>
+</article></section>
+
+<div class="actions-bar dac-expand dac-invert">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
     <div class="actions">
-      <div><a href="{@docRoot}sdk/index.html">取得 SDK</a></div>
-      <div><a href="{@docRoot}samples/index.html">瀏覽範例</a></div>
-      <div><a href="//www.youtube.com/user/androiddevelopers">觀賞影片</a></div>
-      <div><a href="{@docRoot}distribute/googleplay/developer-console.html">管理您的應用程式</a></div>
+      <div><a href="{@docRoot}sdk/index.html">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Get the SDK
+      </a></div>
+      <div><a href="{@docRoot}samples/index.html">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Browse Samples
+      </a></div>
+      <div><a href="//www.youtube.com/user/androiddevelopers">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Watch Videos
+      </a></div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
 </div><!-- end .actions-bar -->
 
 
 
-<div class="landing-rest-of-page">
-  <div class="landing-section">
-    <div class="wrap">
-      <div class="landing-section-header">
+<section class="dac-section dac-section-light" id="build-apps"><div class="wrap">
+  <h1 class="dac-section-title">Build Beautiful Apps</h1>
+  <div class="dac-section-subtitle">
+    Resources to get you started with designing and developing for Android.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:index/primary"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>
 
-            <div class="landing-h1" style="margin-top:0px">針對多螢幕世界建置</div>
-        <div class="landing-subhead" style="margin-top: 20px;">
-          Android 在全球數百萬部手持式裝置上執行， <br>
+<div class="dac-hero-carousel" data-carousel-query="collection:index/secondary/carousel">
+</div>
+
+<section class="dac-section dac-gray"><div class="wrap">
+  <div class="cols"><div class="col-10of12 col-push-1of12">
+    <h1 class="dac-section-title">針對多螢幕世界建置</h1>
+    <div class="dac-section-subtitle">
+      Android 在全球數百萬部手持式裝置上執行， <br>
           而且它現在支援這些令人興奮、各種尺寸的裝置。
-        </div>
-      </div>
-      <div class="landing-body" style="margin-top: 50px;">
-        <div class="landing-breakout cols">
-          <div class="col-3-wide">
-              <img src="{@docRoot}images/home/wear-wordmark.png"> <img src="{@docRoot}images/home/wear.png">
-              <p class="landing-small">
-                為您的使用者提供可隨時隨地存取的資訊。
-            </p>
-            <p class="landing-small">
-              <a href="{@docRoot}wear/index.html">了解 Android Wear</a>
-            </p>
-          </div>
-          <div class="col-3-wide">
-              <img src="{@docRoot}images/home/tv-wordmark.png"> <img src="{@docRoot}images/home/tv.png">
-              <p class="landing-small">
-                為大螢幕建置您的應用程式，並將您的內容帶到生活中。
-              </p>
-            <p class="landing-small">
-              <a href="{@docRoot}tv/index.html">了解 Android TV</a>
-
-            </p>
-          </div>
-          <div class="col-3-wide">
-              <img src="{@docRoot}images/home/auto-wordmark.png"> <img src="{@docRoot}images/home/auto.png">
-              <p class="landing-small">
-                將您的音樂應用程式延伸到車用娛樂系統。
-             </p>
-            <p class="landing-small">
-              <a href="{@docRoot}auto/index.html">了解 Android Auto</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>  <!-- end .wrap -->
-  </div> <!-- end .landing-section -->
+    </div>
+  </div></div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:index/multiscreen"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>
