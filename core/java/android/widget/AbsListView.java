@@ -6613,8 +6613,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         void addScrapView(View scrap, int position) {
             final AbsListView.LayoutParams lp = (AbsListView.LayoutParams) scrap.getLayoutParams();
             if (lp == null) {
-                // Can't recycle, skip the scrap heap.
-                getSkippedScrap().add(scrap);
+                // Can't recycle, but we don't know anything about the view.
+                // Ignore it completely.
                 return;
             }
 
@@ -6624,8 +6624,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // should otherwise not be recycled.
             final int viewType = lp.viewType;
             if (!shouldRecycleViewType(viewType)) {
-                // Can't recycle, skip the scrap heap.
-                getSkippedScrap().add(scrap);
+                // Can't recycle. If it's not a header or footer, which have
+                // special handling and should be ignored, then skip the scrap
+                // heap and we'll fully detach the view later.
+                if (viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
+                    getSkippedScrap().add(scrap);
+                }
                 return;
             }
 
