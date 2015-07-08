@@ -41,6 +41,7 @@ import android.os.WorkSource;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
+import android.util.IntArray;
 import android.util.Slog;
 
 import android.util.TimeUtils;
@@ -82,6 +83,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         public static final int MSG_SYNC_EXTERNAL_STATS = 1;
         public static final int MSG_WRITE_TO_DISK = 2;
         private int mUpdateFlags = 0;
+        private IntArray mUidsToRemove = new IntArray();
 
         public BatteryStatsHandler(Looper looper) {
             super(looper);
@@ -98,6 +100,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         mUpdateFlags = 0;
                     }
                     updateExternalStats((String)msg.obj, updateFlags);
+                    synchronized (this) {
+                        synchronized (mStats) {
+                            final int numUidsToRemove = mUidsToRemove.size();
+                            for (int i = 0; i < numUidsToRemove; i++) {
+                                mStats.removeIsolatedUidLocked(mUidsToRemove.get(i));
+                            }
+                        }
+                        mUidsToRemove.clear();
+                    }
                     break;
 
                 case MSG_WRITE_TO_DISK:
@@ -111,21 +122,31 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         @Override
         public void scheduleSync(String reason) {
-            scheduleSyncImpl(reason, UPDATE_ALL);
+            synchronized (this) {
+                scheduleSyncLocked(reason, UPDATE_ALL);
+            }
         }
 
         @Override
         public void scheduleWifiSync(String reason) {
-            scheduleSyncImpl(reason, UPDATE_WIFI);
+            synchronized (this) {
+                scheduleSyncLocked(reason, UPDATE_WIFI);
+            }
         }
 
-        private void scheduleSyncImpl(String reason, int updateFlags) {
+        @Override
+        public void scheduleCpuSyncDueToRemovedUid(int uid) {
             synchronized (this) {
-                if (mUpdateFlags == 0) {
-                    sendMessage(Message.obtain(this, MSG_SYNC_EXTERNAL_STATS, reason));
-                }
-                mUpdateFlags |= updateFlags;
+                scheduleSyncLocked("remove-uid", UPDATE_CPU);
+                mUidsToRemove.add(uid);
             }
+        }
+
+        private void scheduleSyncLocked(String reason, int updateFlags) {
+            if (mUpdateFlags == 0) {
+                sendMessage(Message.obtain(this, MSG_SYNC_EXTERNAL_STATS, reason));
+            }
+            mUpdateFlags |= updateFlags;
         }
     }
 
@@ -220,7 +241,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     void removeIsolatedUid(int isolatedUid, int appUid) {
         synchronized (mStats) {
-            mStats.removeIsolatedUidLocked(isolatedUid, appUid);
+            mStats.scheduleRemoveIsolatedUidLocked(isolatedUid, appUid);
         }
     }
 
