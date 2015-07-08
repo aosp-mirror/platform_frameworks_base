@@ -220,6 +220,12 @@
              {@link android.os.Build.VERSION_CODES#MNC} (before runtime permissions
              were introduced). -->
         <flag name="pre23" value="0x80" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to system apps that install packages. -->
+        <flag name="installer" value="0x100" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to system apps that verify packages. -->
+        <flag name="verifier" value="0x200" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

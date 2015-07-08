@@ -928,7 +928,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final String TAG_DEFAULT_APPS = "da";
     private static final String TAG_INTENT_FILTER_VERIFICATION = "iv";
 
-    private final String mRequiredVerifierPackage;
+    final String mRequiredVerifierPackage;
+    final String mRequiredInstallerPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
 
@@ -2262,6 +2263,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     SystemClock.uptimeMillis());
 
             mRequiredVerifierPackage = getRequiredVerifierLPr();
+            mRequiredInstallerPackage = getRequiredInstallerLPr();
 
             mInstallerService = new PackageInstallerService(context, this);
 
@@ -2326,6 +2328,39 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return requiredVerifier;
+    }
+
+    private String getRequiredInstallerLPr() {
+        Intent installerIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+        installerIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        installerIntent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
+
+        final List<ResolveInfo> installers = queryIntentActivities(installerIntent,
+                PACKAGE_MIME_TYPE, 0, 0);
+
+        String requiredInstaller = null;
+
+        final int N = installers.size();
+        for (int i = 0; i < N; i++) {
+            final ResolveInfo info = installers.get(i);
+            final String packageName = info.activityInfo.packageName;
+
+            if (!info.activityInfo.applicationInfo.isSystemApp()) {
+                continue;
+            }
+
+            if (requiredInstaller != null) {
+                throw new RuntimeException("There must be one required installer");
+            }
+
+            requiredInstaller = packageName;
+        }
+
+        if (requiredInstaller == null) {
+            throw new RuntimeException("There must be one required installer");
+        }
+
+        return requiredInstaller;
     }
 
     private ComponentName getIntentFilterVerifierComponentNameLPr() {
@@ -8438,6 +8473,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             // If this was a previously normal/dangerous permission that got moved
             // to a system permission as part of the runtime permission redesign, then
             // we still want to blindly grant it to old apps.
+            allowed = true;
+        }
+        if (!allowed && (bp.protectionLevel & PermissionInfo.PROTECTION_FLAG_INSTALLER) != 0
+                && pkg.packageName.equals(mRequiredInstallerPackage)) {
+            // If this permission is to be granted to the system installer and
+            // this app is an installer, then it gets the permission.
+            allowed = true;
+        }
+        if (!allowed && (bp.protectionLevel & PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0
+                && pkg.packageName.equals(mRequiredVerifierPackage)) {
+            // If this permission is to be granted to the system verifier and
+            // this app is a verifier, then it gets the permission.
             allowed = true;
         }
         if (!allowed && (bp.protectionLevel

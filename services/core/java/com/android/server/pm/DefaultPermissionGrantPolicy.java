@@ -54,7 +54,6 @@ final class DefaultPermissionGrantPolicy {
     private static final String TAG = "DefaultPermGrantPolicy"; // must be <= 23 chars
     private static final boolean DEBUG = false;
 
-    private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
     private static final String AUDIO_MIME_TYPE = "audio/mpeg";
 
     private static final Set<String> PHONE_PERMISSIONS = new ArraySet<>();
@@ -125,19 +124,6 @@ final class DefaultPermissionGrantPolicy {
     private static final Set<String> SETTINGS_PERMISSIONS = new ArraySet<>();
     static {
         SETTINGS_PERMISSIONS.add(Manifest.permission.WRITE_SETTINGS);
-    }
-
-    private static final Set<String> INSTALLER_PERMISSIONS = new ArraySet<>();
-    static {
-        INSTALLER_PERMISSIONS.add(Manifest.permission.GRANT_REVOKE_PERMISSIONS);
-        INSTALLER_PERMISSIONS.add(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
-        INSTALLER_PERMISSIONS.add(Manifest.permission.CLEAR_APP_USER_DATA);
-        INSTALLER_PERMISSIONS.add(Manifest.permission.KILL_UID);
-    }
-
-    private static final Set<String> VERIFIER_PERMISSIONS = new ArraySet<>();
-    static {
-        INSTALLER_PERMISSIONS.add(Manifest.permission.GRANT_REVOKE_PERMISSIONS);
     }
 
     private final PackageManagerService mService;
@@ -250,30 +236,20 @@ final class DefaultPermissionGrantPolicy {
                 syncAdapterPackagesProvider.getPackages(CalendarContract.AUTHORITY, userId) : null;
 
         synchronized (mService.mPackages) {
-            // Installers
-            Intent installerIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-            installerIntent.addCategory(Intent.CATEGORY_DEFAULT);
-            installerIntent.setDataAndType(Uri.fromFile(new File("foo.apk")),
-                    PACKAGE_MIME_TYPE);
-            List<PackageParser.Package> installerPackages =
-                    getPrivilegedHandlerActivityPackagesLPr(installerIntent, userId);
-            final int installerCount = installerPackages.size();
-            for (int i = 0; i < installerCount; i++) {
-                PackageParser.Package installPackage = installerPackages.get(i);
-                grantInstallPermissionsLPw(installPackage, INSTALLER_PERMISSIONS, userId);
-                grantRuntimePermissionsLPw(installPackage, STORAGE_PERMISSIONS, true, userId);
+            // Installer
+            PackageParser.Package installerPackage = getSystemPackageLPr(
+                    mService.mRequiredInstallerPackage);
+            if (installerPackage != null
+                    && doesPackageSupportRuntimePermissions(installerPackage)) {
+                grantRuntimePermissionsLPw(installerPackage, STORAGE_PERMISSIONS, true, userId);
             }
 
-            // Verifiers
-            Intent verifierIntent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
-            verifierIntent.setType(PACKAGE_MIME_TYPE);
-            List<PackageParser.Package> verifierPackages =
-                    getPrivilegedHandlerReceiverPackagesLPr(verifierIntent, userId);
-            final int verifierCount = verifierPackages.size();
-            for (int i = 0; i < verifierCount; i++) {
-                PackageParser.Package verifierPackage = verifierPackages.get(i);
-                grantInstallPermissionsLPw(verifierPackage, VERIFIER_PERMISSIONS, userId);
-                grantRuntimePermissionsLPw(verifierPackage, STORAGE_PERMISSIONS, userId);
+            // Verifier
+            PackageParser.Package verifierPackage = getSystemPackageLPr(
+                    mService.mRequiredVerifierPackage);
+            if (verifierPackage != null
+                    && doesPackageSupportRuntimePermissions(verifierPackage)) {
+                grantRuntimePermissionsLPw(verifierPackage, STORAGE_PERMISSIONS, true, userId);
             }
 
             // SetupWizard
@@ -638,39 +614,10 @@ final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private List<PackageParser.Package> getPrivilegedHandlerReceiverPackagesLPr(
-            Intent intent, int userId) {
-        List<ResolveInfo> handlers = mService.queryIntentReceivers(
-                intent, intent.resolveTypeIfNeeded(mService.mContext.getContentResolver()),
-                0, userId);
-        return getPrivilegedPackages(handlers);
-    }
-
-    private List<PackageParser.Package> getPrivilegedHandlerActivityPackagesLPr(
-            Intent intent, int userId) {
-        List<ResolveInfo> handlers = mService.queryIntentActivities(
-                intent, intent.resolveTypeIfNeeded(mService.mContext.getContentResolver()),
-                0, userId);
-        return getPrivilegedPackages(handlers);
-    }
-
-    private List<PackageParser.Package> getPrivilegedPackages(List<ResolveInfo> resolveInfos) {
-        List<PackageParser.Package> handlerPackages = new ArrayList<>();
-        final int handlerCount = resolveInfos.size();
-        for (int i = 0; i < handlerCount; i++) {
-            ResolveInfo handler = resolveInfos.get(i);
-            PackageParser.Package handlerPackage = getPrivilegedPackageLPr(
-                    handler.activityInfo.packageName);
-            if (handlerPackage != null) {
-                handlerPackages.add(handlerPackage);
-            }
-        }
-        return handlerPackages;
-    }
-
     private PackageParser.Package getDefaultSystemHandlerActivityPackageLPr(
             Intent intent, int userId) {
-        List<ResolveInfo> handlers = mService.queryIntentActivities(intent, null, 0, userId);
+        List<ResolveInfo> handlers = mService.queryIntentActivities(intent,
+                intent.resolveType(mService.mContext.getContentResolver()), 0, userId);
         final int handlerCount = handlers.size();
         for (int i = 0; i < handlerCount; i++) {
             ResolveInfo handler = handlers.get(i);
@@ -730,18 +677,9 @@ final class DefaultPermissionGrantPolicy {
         return null;
     }
 
-    private PackageParser.Package getPrivilegedPackageLPr(String packageName) {
-        PackageParser.Package pkg = mService.mPackages.get(packageName);
-        if (pkg != null && pkg.applicationInfo.isPrivilegedApp()) {
-            return !isSysComponentOrPersistentPrivApp(pkg) ? pkg : null;
-        }
-        return null;
-    }
-
     private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
             int userId) {
         grantRuntimePermissionsLPw(pkg, permissions, false, userId);
-
     }
 
     private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
@@ -778,36 +716,6 @@ final class DefaultPermissionGrantPolicy {
 
                     mService.updatePermissionFlags(permission, pkg.packageName,
                             newFlags, newFlags, userId);
-                }
-            }
-        }
-    }
-
-    private void grantInstallPermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
-            int userId) {
-        List<String> requestedPermissions = pkg.requestedPermissions;
-
-        if (pkg.isUpdatedSystemApp()) {
-            PackageSetting sysPs = mService.mSettings.getDisabledSystemPkgLPr(pkg.packageName);
-            if (sysPs != null) {
-                requestedPermissions = sysPs.pkg.requestedPermissions;
-            }
-        }
-
-        final int permissionCount = requestedPermissions.size();
-        for (int i = 0; i < permissionCount; i++) {
-            String permission = requestedPermissions.get(i);
-            if (permissions.contains(permission)) {
-                final int flags = mService.getPermissionFlags(permission, pkg.packageName, userId);
-
-                // If any flags are set to the permission, then it is either set in
-                // its current state by the system or device/profile owner or the user.
-                // In all these cases we do not want to clobber the current state.
-                if (flags == 0) {
-                    mService.grantInstallPermissionLPw(permission, pkg);
-                    if (DEBUG) {
-                        Log.i(TAG, "Granted install " + permission + " to " + pkg.packageName);
-                    }
                 }
             }
         }
