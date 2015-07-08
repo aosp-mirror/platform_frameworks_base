@@ -3137,6 +3137,28 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.PERMISSION_DENIED;
     }
 
+    @Override
+    public boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "isPermissionRevokedByPolicy for user " + userId);
+        }
+
+        if (checkPermission(permission, packageName, userId)
+                == PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final int flags = getPermissionFlags(permission, packageName, userId);
+            return (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     /**
      * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS
      * or INTERACT_ACROSS_USERS_FULL permissions, if the userid is not for the caller.
