@@ -590,6 +590,18 @@
         android:description="@string/permdesc_callPhone"
         android:protectionLevel="dangerous" />
 
+    <!-- Allows an application to access the IMS call service: making and
+         modifying a call
+        <p>Protection level: signature|system
+        @hide
+    -->
+    <permission android:name="android.permission.ACCESS_IMS_CALL_SERVICE"
+        android:permissionGroup="android.permission-group.PHONE"
+        android:permissionFlags="hide"
+        android:label="@string/permlab_accessImsCallService"
+        android:description="@string/permdesc_accessImsCallService"
+        android:protectionLevel="signature|system" />
+
     <!-- Allows an application to read the user's call log.
          <p class="note"><strong>Note:</strong> If your app uses the
          {@link #READ_CONTACTS} permission and <em>both</em> your <a
