@@ -149,6 +149,7 @@ public final class BridgeContext extends Context {
     private SharedPreferences mSharedPreferences;
     private ClassLoader mClassLoader;
     private IBinder mBinder;
+    private PackageManager mPackageManager;
 
 
     /**
@@ -904,6 +905,14 @@ public final class BridgeContext extends Context {
         return mApplicationInfo.packageName;
     }
 
+    @Override
+    public PackageManager getPackageManager() {
+        if (mPackageManager == null) {
+            mPackageManager = new BridgePackageManager();
+        }
+        return mPackageManager;
+    }
+
     // ------------- private new methods
 
     /**
@@ -1361,12 +1370,6 @@ public final class BridgeContext extends Context {
 
     @Override
     public String getPackageCodePath() {
-        // pass
-        return null;
-    }
-
-    @Override
-    public PackageManager getPackageManager() {
         // pass
         return null;
     }
