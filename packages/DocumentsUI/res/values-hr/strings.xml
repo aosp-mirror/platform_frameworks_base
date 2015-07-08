@@ -43,7 +43,7 @@
     <string name="button_select" msgid="527196987259139214">"Odaberi"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopiraj"</string>
     <string name="button_move" msgid="2202666023104202232">"Premjesti"</string>
-    <string name="sort_name" msgid="9183560467917256779">"Po korisniku"</string>
+    <string name="sort_name" msgid="9183560467917256779">"Po nazivu"</string>
     <string name="sort_date" msgid="586080032956151448">"Po datumu izmjene"</string>
     <string name="sort_size" msgid="3350681319735474741">"Po veličini"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Prikaži korijene"</string>

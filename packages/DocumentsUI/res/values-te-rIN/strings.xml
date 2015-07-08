@@ -52,7 +52,7 @@
     <string name="create_error" msgid="3735649141335444215">"ఫోల్డర్‌ను సృష్టించడంలో విఫలమైంది"</string>
     <string name="query_error" msgid="1222448261663503501">"పత్రాల కోసం ప్రశ్నించడంలో విఫలమైంది"</string>
     <string name="root_recent" msgid="4470053704320518133">"ఇటీవల"</string>
-    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ఉచితం"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ఖాళీ"</string>
     <string name="root_type_service" msgid="2178854894416775409">"నిల్వ పరికరాలు"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"సత్వరమార్గాలు"</string>
     <string name="root_type_device" msgid="7121342474653483538">"పరికరాలు"</string>
