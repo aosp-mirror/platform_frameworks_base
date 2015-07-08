@@ -76,6 +76,10 @@ public class Ringtone {
             .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build();
+    // playback properties, use synchronized with mPlaybackSettingsLock
+    private boolean mIsLooping = false;
+    private float mVolume = 1.0f;
+    private final Object mPlaybackSettingsLock = new Object();
 
     /** {@hide} */
     public Ringtone(Context context, boolean allowRemote) {
@@ -133,6 +137,52 @@ public class Ringtone {
      */
     public AudioAttributes getAudioAttributes() {
         return mAudioAttributes;
+    }
+
+    /**
+     * @hide
+     * Sets the player to be looping or non-looping.
+     * @param looping whether to loop or not
+     */
+    public void setLooping(boolean looping) {
+        synchronized (mPlaybackSettingsLock) {
+            mIsLooping = looping;
+            applyPlaybackProperties_sync();
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the volume on this player.
+     * @param volume a raw scalar in range 0.0 to 1.0, where 0.0 mutes this player, and 1.0
+     *   corresponds to no attenuation being applied.
+     */
+    public void setVolume(float volume) {
+        synchronized (mPlaybackSettingsLock) {
+            if (volume < 0.0f) { volume = 0.0f; }
+            if (volume > 1.0f) { volume = 1.0f; }
+            mVolume = volume;
+            applyPlaybackProperties_sync();
+        }
+    }
+
+    /**
+     * Must be called synchronized on mPlaybackSettingsLock
+     */
+    private void applyPlaybackProperties_sync() {
+        if (mLocalPlayer != null) {
+            mLocalPlayer.setVolume(mVolume);
+            mLocalPlayer.setLooping(mIsLooping);
+        } else if (mAllowRemote && (mRemotePlayer != null)) {
+            try {
+                mRemotePlayer.setPlaybackProperties(mRemoteToken, mVolume, mIsLooping);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Problem setting playback properties: ", e);
+            }
+        } else {
+            Log.w(TAG,
+                    "Neither local nor remote player available when applying playback properties");
+        }
     }
 
     /**
@@ -221,6 +271,9 @@ public class Ringtone {
         try {
             mLocalPlayer.setDataSource(mContext, mUri);
             mLocalPlayer.setAudioAttributes(mAudioAttributes);
+            synchronized (mPlaybackSettingsLock) {
+                applyPlaybackProperties_sync();
+            }
             mLocalPlayer.prepare();
 
         } catch (SecurityException | IOException e) {
@@ -257,8 +310,14 @@ public class Ringtone {
             }
         } else if (mAllowRemote && (mRemotePlayer != null)) {
             final Uri canonicalUri = mUri.getCanonicalUri();
+            final boolean looping;
+            final float volume;
+            synchronized (mPlaybackSettingsLock) {
+                looping = mIsLooping;
+                volume = mVolume;
+            }
             try {
-                mRemotePlayer.play(mRemoteToken, canonicalUri, mAudioAttributes);
+                mRemotePlayer.play(mRemoteToken, canonicalUri, mAudioAttributes, volume, looping);
             } catch (RemoteException e) {
                 if (!playFallbackRingtone()) {
                     Log.w(TAG, "Problem playing ringtone: " + e);
@@ -349,6 +408,9 @@ public class Ringtone {
                                     afd.getDeclaredLength());
                         }
                         mLocalPlayer.setAudioAttributes(mAudioAttributes);
+                        synchronized (mPlaybackSettingsLock) {
+                            applyPlaybackProperties_sync();
+                        }
                         mLocalPlayer.prepare();
                         startLocalPlayer();
                         afd.close();
