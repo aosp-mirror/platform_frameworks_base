@@ -201,8 +201,6 @@ class LocalSocketImpl
             int namespace) throws IOException;
     private native void bindLocal(FileDescriptor fd, String name, int namespace)
             throws IOException;
-    private native void listen_native(FileDescriptor fd, int backlog)
-            throws IOException;
     private native void shutdown(FileDescriptor fd, boolean shutdownInput);
     private native Credentials getPeerCredentials_native(
             FileDescriptor fd) throws IOException;
@@ -326,8 +324,11 @@ class LocalSocketImpl
         if (fd == null) {
             throw new IOException("socket not created");
         }
-
-        listen_native(fd, backlog);
+        try {
+            Os.listen(fd, backlog);
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
     }
 
     /**
