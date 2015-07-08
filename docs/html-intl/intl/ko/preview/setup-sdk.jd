@@ -1,0 +1,207 @@
+page.title=미리 보기 SDK 설정하기
+page.image=images/cards/card-set-up_16-9_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>이 문서의 내용</h2>
+      <ol>
+        <li><a href="#get-as13">Android Studio 1.3 가져오기</a></li>
+        <li><a href="#get-sdk">미리 보기 SDK 가져오기</a></li>
+        <li><a href="#create-update">프로젝트 생성 또는 업데이트</a></li>
+        <li><a href="#setup-test">테스트를 위해 설정</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>M 개발자 미리 보기 SDK는 Android SDK Manager에서 이용할 수 있습니다. 이 문서에서는 독자 여러분이 Android 앱 개발, 예를 들어 Android SDK Manager 사용이나 프로젝트 생성 등에 익숙하다고 가정합니다.
+
+ Android를 처음 사용하시는 경우, 우선 <a href="{@docRoot}training/basics/firstapp/index.html">첫 앱 구축하기</a> 학습 단원부터 참조하십시오.</a>
+
+</p>
+
+<h2 id="get-as13">Android Studio 1.3 가져오기</h2>
+
+<p>개발자 미리 보기는 역시 미리 보기 상태인 Android Studio 1.3과 함께 사용하는 것이 가장 좋습니다.
+ Android Studio 1.3의 미리 보기 버전을 설치하여 미리 보기 SDK 작업에 사용하는 것을 적극 추천합니다.
+</p>
+
+<p class="caution"><strong>주의:</strong> Android Studio 1.3의 카나리아 미리 보기는 아직도 활발히 개발 중인 상태입니다.
+ 기본 개발 머신을 사용하여 개발자 미리 보기를 테스트하는 경우, 두 번째 Android Studio 설치를 하나 더 생성해 테스트에 사용하면 됩니다.
+
+</p>
+
+<p>Android Studio 1.3 미리 보기를 설치하려면 다음과 같이 하면 됩니다.</p>
+
+<ol>
+  <li><a href="{@docRoot}tools/studio/index.html">Android Studio</a>를 다운로드하여 시작합니다.
+
+  </li>
+
+  <li><strong>설정</strong> 창을 엽니다(또는 Windows의 경우 <strong>파일 &gt; 설정</strong>을 선택해도 됩니다).
+ <strong>외관 및 동작 &gt; 시스템 &gt; 설정 &gt; 업데이트</strong> 패널을 선택하십시오.
+
+
+
+    <p class="aside">OSX의 경우, <strong>외관 및 동작</strong> 패널은 Android Studio의 <strong>기본 설정</strong> 창에 있습니다.
+
+</p>
+  </li>
+
+  <li> <strong>업데이트</strong> 패널에서 <strong>다음에 대해 업데이트 자동 확인:
+ Canary 채널</strong>이라는 선택 사항을 선택합니다.
+  </li>
+
+  <li><strong>업데이트</strong> 패널에서 <strong>지금 확인</strong>을 선택하여 최신 카나리아 빌드를 확인합니다.
+ 메시지가 표시되면 빌드를 다운로드하고 설치하십시오.
+
+  </li>
+</ol>
+
+<h2 id="get-sdk">미리 보기 SDK 가져오기</h2>
+
+<p>개발 환경에 미리 보기 SDK 구성 요소를 추가하려면 다음과 같이 하면 됩니다.</p>
+
+<ol>
+  <li>Android Studio 1.3 미리 보기를 시작합니다.
+  </li>
+
+  <li><strong>설정</strong> 창을 엽니다(또는 Windows의 경우 <strong>파일 &gt; 설정</strong>을 선택해도 됩니다).
+ <strong>외관 및 동작 &gt; 시스템 &gt; 설정 &gt; 업데이트</strong> 패널을 선택하십시오.
+
+
+
+    <p class="aside">OSX의 경우, <strong>외관 및 동작</strong> 패널은 Android Studio의 <strong>기본 설정</strong> 창에 있습니다.
+
+</p>
+  </li>
+
+  <li><strong>업데이트</strong> 패널에서 <strong>다음에 대해 업데이트 자동 확인:
+ Canary 채널</strong> 및 <strong>Android SDK에 대한 업데이트 자동 확인:
+ 미리 보기 채널</strong> 선택 사항을 선택합니다.
+  </li>
+
+  <li><strong>Android SDK Manager</strong>를 시작합니다 (Android Studio 1.3에서는 SDK Manager가 독립 실행형 애플리케이션이 아니고 Android Studio에 통합되어 있습니다).
+
+
+  </li>
+
+  <li><strong>플랫폼</strong> 섹션 아래에서 <strong>Android MNC 미리 보기</strong>를 선택하십시오.
+
+  </li>
+
+  <li><strong>도구</strong> 섹션에서 최신 Android <strong>SDK 도구</strong>, <strong>플랫폼-도구</strong>, 및 <strong>빌드-도구</strong>를 선택합니다.
+
+
+  </li>
+
+  <li><strong>패키지 설치</strong>를 클릭하고 패키지 전체에 대해 라이선스 사용 계약을 수락합니다.
+
+  </li>
+
+  <li>M 개발자 미리 보기가 설치되었는지 확인하려면 <strong>설정</strong> 창을 열고 <strong>외관 및 동작 &gt; 시스템 설정 &gt; Android SDK</strong> 패널을 선택하면 됩니다.
+
+</li>
+
+  <li><strong>Android SDK</strong> 패널에서 <strong>SDK 플랫폼</strong> 탭을 선택합니다.
+ <strong>Android MNC 미리 보기</strong>가 <em>설치됨</em> 아래 목록으로 나열되어 있는 것이 정상입니다.
+ 또한, <strong>SDK 도구</strong> 탭을 열어 최신 도구가 설치되었는지 확인하십시오.
+
+
+  </li>
+</ol>
+<p>이러한 단계를 완료하고 나면 미리 보기 구성 요소를 본인의 개발 환경에서 이용할 수 있습니다.
+ </p>
+
+
+<h2 id="create-update">프로젝트 생성 또는 업데이트</h2>
+
+<p>
+  미리 보기 API를 사용하려면 개발 프로젝트를 하나 생성하거나 업데이트하여 미리 보기 구성 요소를 사용해야 합니다.
+
+</p>
+
+
+<h3 id="create">새 프로젝트 생성하기</h3>
+
+<p>
+  미리 보기로 프로젝트를 생성하려면 Android Studio를 사용할 것을 권장합니다. <a href="{@docRoot}sdk/installing/create-project.html">프로젝트 생성하기</a>에 설명되어 있는 단계를 쭉 따라가다 보면 프로젝트 마법사의 <em>폼 팩터</em> 화면에 도달합니다.
+
+ 그러면 다음과 같은 단계를 따라 미리 보기에 맞게 구성된 프로젝트를 생성하면 됩니다.
+
+</p>
+
+<ul>
+  <li><strong>전화기 및 태블릿</strong>을 확인합니다.</li>
+  <li><strong>MNC: Android M(미리 보기)</strong>를 선택합니다. 이것은 <strong>최소 SDK</strong> 안에 있습니다.
+</li>
+</ul>
+
+
+<h3 id="update">기존 프로젝트 업데이트</h3>
+
+<p>
+  기존 프로젝트의 경우, 미리 보기 API를 활성화하려면 프로젝트 구성을 수정해야 합니다. 개발 환경에서 본인의 모듈에 대한 <code>build.gradle</code> 파일을 열고 다음의 값을 다음과 같이 설정합니다.
+
+
+</p>
+
+<ul>
+  <li><code>compileSdkVersion</code>을 <code>'android-MNC'</code>로 설정</li>
+  <li><code>minSdkVersion</code>을 <code>'MNC'</code>로 설정</li>
+  <li><code>targetSdkVersion</code>을 <code>'MNC'</code>로 설정</li>
+</ul>
+
+
+<h2 id="setup-test">테스트를 위해 설정</h2>
+
+<p>
+  앱을 미리 보기로 테스트하려면 플랫폼의 미리 보기 버전으로 구성한 기기 또는 가상 기기가 있어야 합니다.
+ 호환되는 기기를 가지고 있으면 미리 보기 플랫폼을 설치하여 테스트에 쓰면 됩니다.
+ 그렇지 않은 경우, 가상 기기를 구성하여 테스트에 사용할 수도 있습니다.
+</p>
+
+<h3 id="setup-device">물리적 기기 설정</h3>
+
+<p>
+  Nexus 5, Nexus 6, Nexus 9 또는 Android TV를 가지고 있는 경우, 이들 기기에 미리 보기 시스템 이미지를 설치하여 앱을 테스트하는 데 쓸 수 있습니다. 플랫폼의 미리 보기 버전으로 가상 기기를 설정하려면 Android Studio 내에서 해당 버전을 다운로드하면 됩니다. 이때 Android 가상 기기 관리자 도구를 사용하십시오.
+
+
+
+</p>
+
+<p class="caution">
+  <strong>중요:</strong> 기기에 미리 보기 이미지를 설치하면 <em>기기에서 모든 데이터를 제거하므로</em>, 미리 보기 이미지를 설치하기에 앞서 데이터를 모두 백업하는 것이 좋습니다.
+
+</p>
+
+<h3 id="setupAVD">가상 기기 설정</h3>
+
+<p>
+  플랫폼의 미리 보기 버전으로 가상 기기를 설정하려면 Android Studio 내에서 해당 버전을 다운로드하면 됩니다. 이때 Android 가상 기기 관리자 도구를 사용하십시오.
+
+</p>
+
+<p>AVD Manager로 AVD를 생성하려면 다음과 같이 하면 됩니다.</p>
+
+<ol>
+  <li><a href="{@docRoot}preview/setup-sdk.html">미리 보기 SDK 설정하기</a>에 설명된 바에 따라 개발 환경에 미리 보기 SDK를 설치합니다.
+
+</li>
+  <li><a href="{@docRoot}tools/devices/managing-avds.html">AVD Manager로 AVD 관리하기</a>에 나온 단계를 따르십시오.
+
+ 다음과 같은 설정을 사용하면 됩니다.
+    <ul>
+      <li><strong>기기:</strong> Nexus 5, Nexus 6, Nexus 9 또는 Android TV</li>
+      <li><strong>대상:</strong>
+       Android M(미리 보기) - API 레벨 M</li>
+      <li><strong>ABI:</strong> x86</li>
+    </ul>
+  </li>
+</ol>
+
+<p>
+  테스트를 위해 가상 기기를 생성하는 데 대한 자세한 정보는 <a href="{@docRoot}tools/devices/index.html">가상 기기 관리하기</a>를 참조하십시오.
+</p>
