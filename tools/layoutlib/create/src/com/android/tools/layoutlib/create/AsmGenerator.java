@@ -94,8 +94,14 @@ public class AsmGenerator {
         ListIterator<Class<?>> iter = injectedClasses.listIterator();
         while (iter.hasNext()) {
             Class<?> clazz = iter.next();
-            for (Class<?> aClass : clazz.getDeclaredClasses()) {
-                iter.add(aClass);
+            try {
+                int i = 1;
+                while(i < 100) {
+                    iter.add(Class.forName(clazz.getName() + "$" + i));
+                    i++;
+                }
+            } catch (ClassNotFoundException ignored) {
+                // Expected.
             }
         }
         mInjectClasses = injectedClasses.toArray(new Class<?>[0]);
