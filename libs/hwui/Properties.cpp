@@ -17,7 +17,7 @@
 
 #include "Debug.h"
 
-#include <cmath>
+#include <algorithm>
 #include <cutils/log.h>
 
 namespace android {
@@ -117,19 +117,19 @@ void Properties::overrideProperty(const char* name, const char* value) {
         ALOGD("profile bars %s", sDisableProfileBars ? "disabled" : "enabled");
         return;
     } else if (!strcmp(name, "ambientRatio")) {
-        overrideAmbientRatio = fmin(fmax(atof(value), 0.0), 10.0);
+        overrideAmbientRatio = std::min(std::max(atof(value), 0.0), 10.0);
         ALOGD("ambientRatio = %.2f", overrideAmbientRatio);
         return;
     } else if (!strcmp(name, "lightRadius")) {
-        overrideLightRadius = fmin(fmax(atof(value), 0.0), 3000.0);
+        overrideLightRadius = std::min(std::max(atof(value), 0.0), 3000.0);
         ALOGD("lightRadius = %.2f", overrideLightRadius);
         return;
     } else if (!strcmp(name, "lightPosY")) {
-        overrideLightPosY = fmin(fmax(atof(value), 0.0), 3000.0);
+        overrideLightPosY = std::min(std::max(atof(value), 0.0), 3000.0);
         ALOGD("lightPos Y = %.2f", overrideLightPosY);
         return;
     } else if (!strcmp(name, "lightPosZ")) {
-        overrideLightPosZ = fmin(fmax(atof(value), 0.0), 3000.0);
+        overrideLightPosZ = std::min(std::max(atof(value), 0.0), 3000.0);
         ALOGD("lightPos Z = %.2f", overrideLightPosZ);
         return;
     } else if (!strcmp(name, "ambientShadowStrength")) {

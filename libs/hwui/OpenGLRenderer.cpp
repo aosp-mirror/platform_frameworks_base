@@ -1670,10 +1670,10 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, cons
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    Rect uv(fmax(0.0f, src.left / texture->width),
-            fmax(0.0f, src.top / texture->height),
-            fmin(1.0f, src.right / texture->width),
-            fmin(1.0f, src.bottom / texture->height));
+    Rect uv(std::max(0.0f, src.left / texture->width),
+            std::max(0.0f, src.top / texture->height),
+            std::min(1.0f, src.right / texture->width),
+            std::min(1.0f, src.bottom / texture->height));
 
     const int textureFillFlags = (bitmap->colorType() == kAlpha_8_SkColorType)
             ? TextureFillFlags::IsAlphaMaskTexture : TextureFillFlags::None;
@@ -2450,7 +2450,7 @@ void OpenGLRenderer::drawTextDecorations(float underlineWidth, float x, float y,
 
         if (CC_LIKELY(underlineWidth > 0.0f)) {
             const float textSize = paintCopy.getTextSize();
-            const float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
+            const float strokeWidth = std::max(textSize * kStdUnderline_Thickness, 1.0f);
 
             const float left = x;
             float top = 0.0f;

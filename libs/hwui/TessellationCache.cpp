@@ -244,8 +244,8 @@ static void tessellateShadows(
         const Vertex& point2d = casterVertices2d[i];
         casterPolygon[i] = (Vector3){point2d.x, point2d.y, 0};
         mapPointFakeZ(casterPolygon[i], casterTransformXY, casterTransformZ);
-        minZ = fmin(minZ, casterPolygon[i].z);
-        maxZ = fmax(maxZ, casterPolygon[i].z);
+        minZ = std::min(minZ, casterPolygon[i].z);
+        maxZ = std::max(maxZ, casterPolygon[i].z);
     }
 
     // map the centroid of the caster into 3d
