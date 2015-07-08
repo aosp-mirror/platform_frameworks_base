@@ -8430,7 +8430,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 || (compareSignatures(mPlatformPackage.mSignatures, pkg.mSignatures)
                         == PackageManager.SIGNATURE_MATCH);
         if (!allowed && (bp.protectionLevel
-                & PermissionInfo.PROTECTION_FLAG_SYSTEM) != 0) {
+                & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
             if (isSystemApp(pkg)) {
                 // For updated system applications, a system permission
                 // is granted only if it had been defined by the original application.
@@ -8467,31 +8467,39 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
-        if (!allowed && (bp.protectionLevel
-                & PermissionInfo.PROTECTION_FLAG_PRE23) != 0
-                && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.MNC) {
-            // If this was a previously normal/dangerous permission that got moved
-            // to a system permission as part of the runtime permission redesign, then
-            // we still want to blindly grant it to old apps.
-            allowed = true;
-        }
-        if (!allowed && (bp.protectionLevel & PermissionInfo.PROTECTION_FLAG_INSTALLER) != 0
-                && pkg.packageName.equals(mRequiredInstallerPackage)) {
-            // If this permission is to be granted to the system installer and
-            // this app is an installer, then it gets the permission.
-            allowed = true;
-        }
-        if (!allowed && (bp.protectionLevel & PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0
-                && pkg.packageName.equals(mRequiredVerifierPackage)) {
-            // If this permission is to be granted to the system verifier and
-            // this app is a verifier, then it gets the permission.
-            allowed = true;
-        }
-        if (!allowed && (bp.protectionLevel
-                & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
-            // For development permissions, a development permission
-            // is granted only if it was already granted.
-            allowed = origPermissions.hasInstallPermission(perm);
+        if (!allowed) {
+            if (!allowed && (bp.protectionLevel
+                    & PermissionInfo.PROTECTION_FLAG_PRE23) != 0
+                    && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.MNC) {
+                // If this was a previously normal/dangerous permission that got moved
+                // to a system permission as part of the runtime permission redesign, then
+                // we still want to blindly grant it to old apps.
+                allowed = true;
+            }
+            if (!allowed && (bp.protectionLevel & PermissionInfo.PROTECTION_FLAG_INSTALLER) != 0
+                    && pkg.packageName.equals(mRequiredInstallerPackage)) {
+                // If this permission is to be granted to the system installer and
+                // this app is an installer, then it gets the permission.
+                allowed = true;
+            }
+            if (!allowed && (bp.protectionLevel & PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0
+                    && pkg.packageName.equals(mRequiredVerifierPackage)) {
+                // If this permission is to be granted to the system verifier and
+                // this app is a verifier, then it gets the permission.
+                allowed = true;
+            }
+            if (!allowed && (bp.protectionLevel
+                    & PermissionInfo.PROTECTION_FLAG_PREINSTALLED) != 0
+                    && isSystemApp(pkg)) {
+                // Any pre-installed system app is allowed to get this permission.
+                allowed = true;
+            }
+            if (!allowed && (bp.protectionLevel
+                    & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
+                // For development permissions, a development permission
+                // is granted only if it was already granted.
+                allowed = origPermissions.hasInstallPermission(perm);
+            }
         }
         return allowed;
     }
