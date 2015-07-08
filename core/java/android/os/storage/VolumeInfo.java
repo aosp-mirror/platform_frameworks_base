@@ -147,15 +147,11 @@ public class VolumeInfo implements Parcelable {
     public String path;
     public String internalPath;
 
-    /** Framework state */
-    public final int mtpIndex;
-
-    public VolumeInfo(String id, int type, DiskInfo disk, String partGuid, int mtpIndex) {
+    public VolumeInfo(String id, int type, DiskInfo disk, String partGuid) {
         this.id = Preconditions.checkNotNull(id);
         this.type = type;
         this.disk = disk;
         this.partGuid = partGuid;
-        this.mtpIndex = mtpIndex;
     }
 
     public VolumeInfo(Parcel parcel) {
@@ -175,7 +171,6 @@ public class VolumeInfo implements Parcelable {
         fsLabel = parcel.readString();
         path = parcel.readString();
         internalPath = parcel.readString();
-        mtpIndex = parcel.readInt();
     }
 
     public static @NonNull String getEnvironmentForState(int state) {
@@ -308,7 +303,6 @@ public class VolumeInfo implements Parcelable {
         final boolean removable;
         final boolean emulated;
         final boolean allowMassStorage = false;
-        final int mtpStorageId = MtpStorage.getStorageIdForIndex(mtpIndex);
         final String envState = getEnvironmentForState(state);
 
         File userPath = getPathForUser(userId);
@@ -326,9 +320,15 @@ public class VolumeInfo implements Parcelable {
 
         long mtpReserveSize = 0;
         long maxFileSize = 0;
+        int mtpStorageId = StorageVolume.STORAGE_ID_INVALID;
 
         if (type == TYPE_EMULATED) {
             emulated = true;
+
+            if (isPrimary()) {
+                mtpStorageId = StorageVolume.STORAGE_ID_PRIMARY;
+            }
+
             mtpReserveSize = StorageManager.from(context).getStorageLowBytes(userPath);
 
             if (ID_EMULATED_INTERNAL.equals(id)) {
@@ -341,6 +341,14 @@ public class VolumeInfo implements Parcelable {
             emulated = false;
             removable = true;
 
+            if (isPrimary()) {
+                mtpStorageId = StorageVolume.STORAGE_ID_PRIMARY;
+            } else {
+                // Since MediaProvider currently persists this value, we need a
+                // value that is stable over time.
+                mtpStorageId = buildStableMtpStorageId(fsUuid);
+            }
+
             if ("vfat".equals(fsType)) {
                 maxFileSize = 4294967295L;
             }
@@ -352,6 +360,24 @@ public class VolumeInfo implements Parcelable {
         return new StorageVolume(id, mtpStorageId, userPath, description, isPrimary(), removable,
                 emulated, mtpReserveSize, allowMassStorage, maxFileSize, new UserHandle(userId),
                 fsUuid, envState);
+    }
+
+    public static int buildStableMtpStorageId(String fsUuid) {
+        if (TextUtils.isEmpty(fsUuid)) {
+            return StorageVolume.STORAGE_ID_INVALID;
+        } else {
+            int hash = 0;
+            for (int i = 0; i < fsUuid.length(); ++i) {
+                hash = 31 * hash + fsUuid.charAt(i);
+            }
+            hash = (hash ^ (hash << 16)) & 0xffff0000;
+            // Work around values that the spec doesn't allow, or that we've
+            // reserved for primary
+            if (hash == 0x00000000) hash = 0x00020000;
+            if (hash == 0x00010000) hash = 0x00020000;
+            if (hash == 0xffff0000) hash = 0xfffe0000;
+            return hash | 0x0001;
+        }
     }
 
     // TODO: avoid this layering violation
@@ -402,7 +428,6 @@ public class VolumeInfo implements Parcelable {
         pw.println();
         pw.printPair("path", path);
         pw.printPair("internalPath", internalPath);
-        pw.printPair("mtpIndex", mtpIndex);
         pw.decreaseIndent();
         pw.println();
     }
@@ -469,6 +494,5 @@ public class VolumeInfo implements Parcelable {
         parcel.writeString(fsLabel);
         parcel.writeString(path);
         parcel.writeString(internalPath);
-        parcel.writeInt(mtpIndex);
     }
 }
