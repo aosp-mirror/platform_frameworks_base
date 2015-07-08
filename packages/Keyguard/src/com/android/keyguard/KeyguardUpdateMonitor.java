@@ -356,9 +356,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintAuthFailed() {
-        // FingerprintManager will allow us to retry a few times before finally giving up.
-        // TODO: Figure out the proper logic to stop this call when max tries is reached.
+        stopListeningForFingerprint();
         handleFingerprintHelp(-1, mContext.getString(R.string.fingerprint_not_recognized));
+        updateFingerprintListeningState();
     }
 
     private void handleFingerprintAuthenticated() {
