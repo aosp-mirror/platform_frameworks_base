@@ -38,10 +38,7 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public NetworkCapabilities() {
         clearAll();
-        mNetworkCapabilities =
-                (1 << NET_CAPABILITY_NOT_RESTRICTED) |
-                (1 << NET_CAPABILITY_TRUSTED) |
-                (1 << NET_CAPABILITY_NOT_VPN);
+        mNetworkCapabilities = DEFAULT_CAPABILITIES;
     }
 
     public NetworkCapabilities(NetworkCapabilities nc) {
@@ -186,6 +183,36 @@ public final class NetworkCapabilities implements Parcelable {
     private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_CAPTIVE_PORTAL;
 
     /**
+     * Network capabilities that are expected to be mutable, i.e., can change while a particular
+     * network is connected.
+     */
+    private static final long MUTABLE_CAPABILITIES =
+            // TRUSTED can change when user explicitly connects to an untrusted network in Settings.
+            // http://b/18206275
+            (1 << NET_CAPABILITY_TRUSTED) |
+            (1 << NET_CAPABILITY_VALIDATED) |
+            (1 << NET_CAPABILITY_CAPTIVE_PORTAL);
+
+    /**
+     * Network capabilities that are not allowed in NetworkRequests. This exists because the
+     * NetworkFactory / NetworkAgent model does not deal well with the situation where a
+     * capability's presence cannot be known in advance. If such a capability is requested, then we
+     * can get into a cycle where the NetworkFactory endlessly churns out NetworkAgents that then
+     * get immediately torn down because they do not have the requested capability.
+     */
+    private static final long NON_REQUESTABLE_CAPABILITIES =
+            (1 << NET_CAPABILITY_VALIDATED) |
+            (1 << NET_CAPABILITY_CAPTIVE_PORTAL);
+
+    /**
+     * Capabilities that are set by default when the object is constructed.
+     */
+    private static final long DEFAULT_CAPABILITIES =
+            (1 << NET_CAPABILITY_NOT_RESTRICTED) |
+            (1 << NET_CAPABILITY_TRUSTED) |
+            (1 << NET_CAPABILITY_NOT_VPN);
+
+    /**
      * Adds the given capability to this {@code NetworkCapability} instance.
      * Multiple capabilities may be applied sequentially.  Note that when searching
      * for a network to satisfy a request, all capabilities requested must be satisfied.
@@ -258,13 +285,40 @@ public final class NetworkCapabilities implements Parcelable {
         this.mNetworkCapabilities |= nc.mNetworkCapabilities;
     }
 
-    private boolean satisfiedByNetCapabilities(NetworkCapabilities nc) {
-        return ((nc.mNetworkCapabilities & this.mNetworkCapabilities) == this.mNetworkCapabilities);
+    /**
+     * Convenience function that returns a human-readable description of the first mutable
+     * capability we find. Used to present an error message to apps that request mutable
+     * capabilities.
+     *
+     * @hide
+     */
+    public String describeFirstNonRequestableCapability() {
+        if (hasCapability(NET_CAPABILITY_VALIDATED)) return "NET_CAPABILITY_VALIDATED";
+        if (hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) return "NET_CAPABILITY_CAPTIVE_PORTAL";
+        // This cannot happen unless the preceding checks are incomplete.
+        if ((mNetworkCapabilities & NON_REQUESTABLE_CAPABILITIES) != 0) {
+            return "unknown non-requestable capabilities " + Long.toHexString(mNetworkCapabilities);
+        }
+        if (mLinkUpBandwidthKbps != 0 || mLinkDownBandwidthKbps != 0) return "link bandwidth";
+        return null;
+    }
+
+    private boolean satisfiedByNetCapabilities(NetworkCapabilities nc, boolean onlyImmutable) {
+        long networkCapabilities = this.mNetworkCapabilities;
+        if (onlyImmutable) {
+            networkCapabilities = networkCapabilities & ~MUTABLE_CAPABILITIES;
+        }
+        return ((nc.mNetworkCapabilities & networkCapabilities) == networkCapabilities);
     }
 
     /** @hide */
     public boolean equalsNetCapabilities(NetworkCapabilities nc) {
         return (nc.mNetworkCapabilities == this.mNetworkCapabilities);
+    }
+
+    private boolean equalsNetCapabilitiesImmutable(NetworkCapabilities that) {
+        return ((this.mNetworkCapabilities & ~MUTABLE_CAPABILITIES) ==
+                (that.mNetworkCapabilities & ~MUTABLE_CAPABILITIES));
     }
 
     /**
@@ -516,7 +570,7 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Combine a set of Capabilities to this one.  Useful for coming up with the complete set
-     * {@hide}
+     * @hide
      */
     public void combineCapabilities(NetworkCapabilities nc) {
         combineNetCapabilities(nc);
@@ -526,15 +580,55 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Check if our requirements are satisfied by the given Capabilities.
-     * {@hide}
+     * Check if our requirements are satisfied by the given {@code NetworkCapabilities}.
+     *
+     * @param nc the {@code NetworkCapabilities} that may or may not satisfy our requirements.
+     * @param onlyImmutable if {@code true}, do not consider mutable requirements such as link
+     *         bandwidth, signal strength, or validation / captive portal status.
+     *
+     * @hide
+     */
+    private boolean satisfiedByNetworkCapabilities(NetworkCapabilities nc, boolean onlyImmutable) {
+        return (nc != null &&
+                satisfiedByNetCapabilities(nc, onlyImmutable) &&
+                satisfiedByTransportTypes(nc) &&
+                (onlyImmutable || satisfiedByLinkBandwidths(nc)) &&
+                satisfiedBySpecifier(nc));
+    }
+
+    /**
+     * Check if our requirements are satisfied by the given {@code NetworkCapabilities}.
+     *
+     * @param nc the {@code NetworkCapabilities} that may or may not satisfy our requirements.
+     *
+     * @hide
      */
     public boolean satisfiedByNetworkCapabilities(NetworkCapabilities nc) {
-        return (nc != null &&
-                satisfiedByNetCapabilities(nc) &&
-                satisfiedByTransportTypes(nc) &&
-                satisfiedByLinkBandwidths(nc) &&
-                satisfiedBySpecifier(nc));
+        return satisfiedByNetworkCapabilities(nc, false);
+    }
+
+    /**
+     * Check if our immutable requirements are satisfied by the given {@code NetworkCapabilities}.
+     *
+     * @param nc the {@code NetworkCapabilities} that may or may not satisfy our requirements.
+     *
+     * @hide
+     */
+    public boolean satisfiedByImmutableNetworkCapabilities(NetworkCapabilities nc) {
+        return satisfiedByNetworkCapabilities(nc, true);
+    }
+
+    /**
+     * Checks that our immutable capabilities are the same as those of the given
+     * {@code NetworkCapabilities}.
+     *
+     * @hide
+     */
+    public boolean equalImmutableCapabilities(NetworkCapabilities nc) {
+        if (nc == null) return false;
+        return (equalsNetCapabilitiesImmutable(nc) &&
+                equalsTransportTypes(nc) &&
+                equalsSpecifier(nc));
     }
 
     @Override
