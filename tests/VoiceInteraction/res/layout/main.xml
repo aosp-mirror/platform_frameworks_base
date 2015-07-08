@@ -30,9 +30,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="64dp"
-            android:paddingBottom="64dp"
             android:text="@string/asyncStructure"
             />
+
+    <EditText android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingTop="64dp"
+            android:paddingBottom="64dp"
+            android:text="@string/largetext" />
 
 </LinearLayout>
 

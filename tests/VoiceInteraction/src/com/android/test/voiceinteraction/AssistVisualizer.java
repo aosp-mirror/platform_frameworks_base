@@ -38,6 +38,9 @@ public class AssistVisualizer extends View {
         final Matrix matrix;
         final String className;
         final CharSequence text;
+        final int scrollY;
+        final int[] lineCharOffsets;
+        final int[] lineBaselines;
 
         TextEntry(AssistStructure.ViewNode node, int parentLeft, int parentTop, Matrix matrix) {
             int left = parentLeft+node.getLeft();
@@ -48,16 +51,19 @@ public class AssistVisualizer extends View {
             this.matrix = new Matrix(matrix);
             this.className = node.getClassName();
             this.text = node.getText() != null ? node.getText() : node.getContentDescription();
+            this.scrollY = node.getScrollY();
+            this.lineCharOffsets = node.getTextLineCharOffsets();
+            this.lineBaselines = node.getTextLineBaselines();
         }
     }
 
     AssistStructure mAssistStructure;
     final Paint mFramePaint = new Paint();
+    final Paint mFrameBaselinePaint = new Paint();
     final Paint mFrameNoTransformPaint = new Paint();
     final ArrayList<Matrix> mMatrixStack = new ArrayList<>();
     final ArrayList<TextEntry> mTextRects = new ArrayList<>();
     final int[] mTmpLocation = new int[2];
-    final float[] mTmpMatrixPoint = new float[2];
 
     public AssistVisualizer(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -65,6 +71,9 @@ public class AssistVisualizer extends View {
         mFramePaint.setColor(0xffff0000);
         mFramePaint.setStyle(Paint.Style.STROKE);
         mFramePaint.setStrokeWidth(0);
+        mFrameBaselinePaint.setColor(0xa0b0b000);
+        mFrameBaselinePaint.setStyle(Paint.Style.STROKE);
+        mFrameBaselinePaint.setStrokeWidth(0);
         float density = getResources().getDisplayMetrics().density;
         mFramePaint.setShadowLayer(density, density, density, 0xff000000);
         mFrameNoTransformPaint.setColor(0xff0000ff);
@@ -106,6 +115,14 @@ public class AssistVisualizer extends View {
                     + " in " + te.parentLeft + "," + te.parentTop
                     + " matrix=" + te.matrix.toShortString() + ": "
                     + te.text);
+            if (te.lineCharOffsets != null && te.lineBaselines != null) {
+                final int num = te.lineCharOffsets.length < te.lineBaselines.length
+                        ? te.lineCharOffsets.length : te.lineBaselines.length;
+                for (int j=0; j<num; j++) {
+                    Log.d(TAG, "  Line #" + j + ": offset=" + te.lineCharOffsets[j]
+                            + " baseline=" + te.lineBaselines[j]);
+                }
+            }
         }
     }
 
@@ -171,6 +188,13 @@ public class AssistVisualizer extends View {
             canvas.concat(te.matrix);
             canvas.drawRect(0, 0, te.bounds.right - te.bounds.left, te.bounds.bottom - te.bounds.top,
                     mFramePaint);
+            if (te.lineBaselines != null) {
+                for (int j=0; j<te.lineBaselines.length; j++) {
+                    canvas.drawLine(0, te.lineBaselines[j] - te.scrollY,
+                            te.bounds.right - te.bounds.left, te.lineBaselines[j] - te.scrollY,
+                            mFrameBaselinePaint);
+                }
+            }
             canvas.restore();
         }
     }

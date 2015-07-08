@@ -61,37 +61,53 @@ public class AssistStructure implements Parcelable {
 
     final static class ViewNodeText {
         CharSequence mText;
-        int mTextSelectionStart;
-        int mTextSelectionEnd;
-        int mTextColor;
-        int mTextBackgroundColor;
         float mTextSize;
         int mTextStyle;
+        int mTextColor = ViewNode.TEXT_COLOR_UNDEFINED;
+        int mTextBackgroundColor = ViewNode.TEXT_COLOR_UNDEFINED;
+        int mTextSelectionStart;
+        int mTextSelectionEnd;
+        int[] mLineCharOffsets;
+        int[] mLineBaselines;
         String mHint;
 
         ViewNodeText() {
         }
 
-        ViewNodeText(Parcel in) {
-            mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-            mTextSelectionStart = in.readInt();
-            mTextSelectionEnd = in.readInt();
-            mTextColor = in.readInt();
-            mTextBackgroundColor = in.readInt();
-            mTextSize = in.readFloat();
-            mTextStyle = in.readInt();
-            mHint = in.readString();
+        boolean isSimple() {
+            return mTextBackgroundColor == ViewNode.TEXT_COLOR_UNDEFINED
+                    && mTextSelectionStart == 0 && mTextSelectionEnd == 0
+                    && mLineCharOffsets == null && mLineBaselines == null && mHint == null;
         }
 
-        void writeToParcel(Parcel out) {
+        ViewNodeText(Parcel in, boolean simple) {
+            mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            mTextSize = in.readFloat();
+            mTextStyle = in.readInt();
+            mTextColor = in.readInt();
+            if (!simple) {
+                mTextBackgroundColor = in.readInt();
+                mTextSelectionStart = in.readInt();
+                mTextSelectionEnd = in.readInt();
+                mLineCharOffsets = in.createIntArray();
+                mLineBaselines = in.createIntArray();
+                mHint = in.readString();
+            }
+        }
+
+        void writeToParcel(Parcel out, boolean simple) {
             TextUtils.writeToParcel(mText, out, 0);
-            out.writeInt(mTextSelectionStart);
-            out.writeInt(mTextSelectionEnd);
-            out.writeInt(mTextColor);
-            out.writeInt(mTextBackgroundColor);
             out.writeFloat(mTextSize);
             out.writeInt(mTextStyle);
-            out.writeString(mHint);
+            out.writeInt(mTextColor);
+            if (!simple) {
+                out.writeInt(mTextBackgroundColor);
+                out.writeInt(mTextSelectionStart);
+                out.writeInt(mTextSelectionEnd);
+                out.writeIntArray(mLineCharOffsets);
+                out.writeIntArray(mLineBaselines);
+                out.writeString(mHint);
+            }
         }
     }
 
@@ -252,9 +268,10 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_LARGE_COORDS = 0x04000000;
         static final int FLAGS_HAS_CONTENT_DESCRIPTION = 0x02000000;
         static final int FLAGS_HAS_TEXT = 0x01000000;
-        static final int FLAGS_HAS_EXTRAS = 0x00800000;
-        static final int FLAGS_HAS_ID = 0x00400000;
-        static final int FLAGS_HAS_CHILDREN = 0x00200000;
+        static final int FLAGS_HAS_COMPLEX_TEXT = 0x00800000;
+        static final int FLAGS_HAS_EXTRAS = 0x00400000;
+        static final int FLAGS_HAS_ID = 0x00200000;
+        static final int FLAGS_HAS_CHILDREN = 0x00100000;
         static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
         int mFlags;
@@ -316,7 +333,7 @@ public class AssistStructure implements Parcelable {
                 mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             }
             if ((flags&FLAGS_HAS_TEXT) != 0) {
-                mText = new ViewNodeText(in);
+                mText = new ViewNodeText(in, (flags&FLAGS_HAS_COMPLEX_TEXT) == 0);
             }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 mExtras = in.readBundle();
@@ -356,6 +373,9 @@ public class AssistStructure implements Parcelable {
             }
             if (mText != null) {
                 flags |= FLAGS_HAS_TEXT;
+                if (!mText.isSimple()) {
+                    flags |= FLAGS_HAS_COMPLEX_TEXT;
+                }
             }
             if (mExtras != null) {
                 flags |= FLAGS_HAS_EXTRAS;
@@ -403,7 +423,7 @@ public class AssistStructure implements Parcelable {
                 TextUtils.writeToParcel(mContentDescription, out, 0);
             }
             if ((flags&FLAGS_HAS_TEXT) != 0) {
-                mText.writeToParcel(out);
+                mText.writeToParcel(out, (flags&FLAGS_HAS_COMPLEX_TEXT) == 0);
             }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
@@ -703,6 +723,26 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
+         * Return per-line offsets into the text returned by {@link #getText()}.  Each entry
+         * in the array is a formatted line of text, and the value it contains is the offset
+         * into the text string where that line starts.  May return null if there is no line
+         * information.
+         */
+        public int[] getTextLineCharOffsets() {
+            return mText != null ? mText.mLineCharOffsets : null;
+        }
+
+        /**
+         * Return per-line baselines into the text returned by {@link #getText()}.  Each entry
+         * in the array is a formatted line of text, and the value it contains is the baseline
+         * where that text appears in the view.  May return null if there is no line
+         * information.
+         */
+        public int[] getTextLineBaselines() {
+            return mText != null ? mText.mLineBaselines : null;
+        }
+
+        /**
          * Return additional hint text associated with the node; this is typically used with
          * a node that takes user input, describing to the user what the input means.
          */
@@ -898,6 +938,13 @@ public class AssistStructure implements Parcelable {
             t.mTextBackgroundColor = bgColor;
             t.mTextSize = size;
             t.mTextStyle = style;
+        }
+
+        @Override
+        public void setTextLines(int[] charOffsets, int[] baselines) {
+            ViewNodeText t = getNodeText();
+            t.mLineCharOffsets = charOffsets;
+            t.mLineBaselines = baselines;
         }
 
         @Override
