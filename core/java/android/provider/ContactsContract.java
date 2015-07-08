@@ -5963,7 +5963,9 @@ public final class ContactsContract {
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
                     CharSequence label) {
-                if ((type == TYPE_CUSTOM || type == TYPE_ASSISTANT) && !TextUtils.isEmpty(label)) {
+                if (type == TYPE_CUSTOM) {
+                    return (label != null ? label : "");
+                } else if (type == TYPE_ASSISTANT && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
                     final int labelRes = getTypeLabelResource(type);
