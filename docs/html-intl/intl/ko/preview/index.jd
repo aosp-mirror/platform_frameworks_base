@@ -1,0 +1,67 @@
+page.title=Android M 개발자 미리 보기
+page.tags="preview",
+meta.tags="preview, M preview", androidm
+fullpage=true
+section.landing=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<section class="dac-expand dac-hero dac-light" >
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-9of16 col-push-7of16 dac-hero-figure">
+        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png" srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
+             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
+      </div>
+      <div class="col-7of16 col-pull-9of16">
+        <h1 class="dac-hero-title">Android M 개발자 미리 보기</h1>
+        <p class="dac-hero-description">
+          Android의 다음 버전을 만나볼 준비가 되셨습니까? 여러분의 앱을 Nexus 5, 6, 9 및 Player에서 테스트해보십시오.
+ 새로운 내용은 무엇인지 둘러보십시오. <strong>런타임 권한</strong>, <strong>Doze</strong> 및 <strong>앱 대기 모드</strong> 절전 기능, 새로 나온 <strong>지원 기술</strong>, 이외에도 많은 것이 있습니다.
+
+
+        </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          지금 시작하세요!
+</a><br>
+      </div>
+    </div>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:preview/landing/resources"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>
+    </div>
+  </div>
+</section>
+
+<section class="dac-section dac-gray"><div class="wrap">
+  <h1 class="dac-section-title">리소스</h1>
+  <div class="dac-section-subtitle">
+    앱을 Android M에 대비시키는 데 유용한 중요 정보입니다.
+  </div>
+ 
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:preview/landing/more"
+       data-cardSizes="6x6"
+       data-maxResults="16"></div>
+
+    <ul class="dac-section-links">
+      <li class="dac-section-link">
+        <a href="https://code.google.com/p/android-developer-preview/">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          문제 보고
+</a>
+      </li> 
+      <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
+        <span class="dac-sprite dac-auto-chevron"></span>
+        G+ 커뮤니티 가입
+</a>
+      </li>
+    </ul>
+  </div>
+</section>
+
