@@ -1,0 +1,70 @@
+page.title=示例
+page.image=images/cards/samples-new_2x.png
+@jd:body
+
+<p>
+  以下是 M 开发者预览版的代码示例。要在 Android Studio 中下载示例，请选择<b>文件 &gt; 导入示例</b>菜单选项。
+
+</p>
+
+<p class="note">
+  <strong>注：</strong>这些可下载的项目设计用于与 Gradle 和 Android Studio 结合使用。
+
+</p>
+
+
+<h3 id="RuntimePermissions">运行时权限</h3>
+
+<p>
+ Android M 改变了系统权限运行的方式。系统会在运行时（而不是安装期间）要求用户批准权限请求。
+此示例显示了如何请求这些权限。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-RuntimePermissions">在 GitHub 中获取</a></p>
+
+<h3 id="ConfirmCredentials">确认凭据</h3>
+
+<p>
+ 此示例演示了在您的应用中如何使用设备凭据作为身份验证方法。
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ConfirmCredential">在 GitHub 中获取</a>
+</p>
+
+<h3 id="FingerprintDialog">指纹对话框</h3>
+
+<p>
+ 此示例演示了在您的应用中如何识别已注册的指纹以验证用户的身份。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-FingerprintDialog">在 GitHub 中获取</a></p>
+
+<h3 id="AutomaticBackup">自动备份应用</h3>
+
+<p>
+ Android M 引入了自动备份应用设置功能。此示例演示如何向应用添加筛选规则，以管理设置备份。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-AutoBackupForApps">在 GitHub 中获取</a></p>
+
+<h3 id="CameraRaw">相机 2 RAW</h3>
+
+<p>
+  演示如何使用 <code>Camera2</code> API 捕获 RAW 相机缓冲区并将其另存为 <code>DNG</code> 文件。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-Camera2Raw">在 GitHub 中获取</a></p>
+
+<h3 id="ActiveNotification">活动通知</h3>
+
+<p>
+  此示例演示 <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a>
+ 如何让您了解应用当前显示的通知数量。
+
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ActiveNotifications">在 GitHub 中获取</a></p>
