@@ -197,6 +197,12 @@ class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSp
             return;
         }
 
+        if (!"AES".equalsIgnoreCase(params.getAlgorithm())) {
+            throw new InvalidAlgorithmParameterException(
+                    "Unsupported AlgorithmParameters algorithm: " + params.getAlgorithm()
+                    + ". Supported: AES");
+        }
+
         IvParameterSpec ivSpec;
         try {
             ivSpec = params.getParameterSpec(IvParameterSpec.class);
