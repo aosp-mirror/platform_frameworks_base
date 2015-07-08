@@ -36,7 +36,6 @@ public class VolumeDialogMotion {
 
     private static final float ANIMATION_SCALE = 1.0f;
     private static final int PRE_DISMISS_DELAY = 50;
-    private static final int POST_SHOW_DELAY = 200;
 
     private final Dialog mDialog;
     private final View mDialogView;
@@ -70,12 +69,7 @@ public class VolumeDialogMotion {
                 if (D.BUG) Log.d(TAG, "mDialog.onShow");
                 final int h = mDialogView.getHeight();
                 mDialogView.setTranslationY(-h);
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startShowAnimation();
-                    }
-                }, POST_SHOW_DELAY);
+                startShowAnimation();
             }
         });
     }
