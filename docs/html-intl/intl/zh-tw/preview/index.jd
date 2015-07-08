@@ -1,0 +1,67 @@
+page.title=Android M 開發人員預覽版
+page.tags="preview",
+meta.tags="preview, M preview", androidm
+fullpage=true
+section.landing=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<section class="dac-expand dac-hero dac-light" >
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-9of16 col-push-7of16 dac-hero-figure">
+        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png" srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
+             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
+      </div>
+      <div class="col-7of16 col-pull-9of16">
+        <h1 class="dac-hero-title">Android M 開發人員預覽版</h1>
+        <p class="dac-hero-description">
+          準備使用新版 Android。在 Nexus 5、6、9 和 Player 上測試您的應用程式。
+瞭解新功能 &mdash; <strong>執行階段權限</strong>、<strong>休眠</strong>、<strong>應用程式待命</strong>等省電功能、新的<strong>輔助技術</strong>，以及其他功能。
+
+
+        </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          開始使用！
+</a><br>
+      </div>
+    </div>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:preview/landing/resources"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>
+    </div>
+  </div>
+</section>
+
+<section class="dac-section dac-gray"><div class="wrap">
+  <h1 class="dac-section-title">資源</h1>
+  <div class="dac-section-subtitle">
+    以下重要資訊可幫助您的應用程式準備好使用 Android M。
+  </div>
+ 
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:preview/landing/more"
+       data-cardSizes="6x6"
+       data-maxResults="16"></div>
+
+    <ul class="dac-section-links">
+      <li class="dac-section-link">
+        <a href="https://code.google.com/p/android-developer-preview/">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          回報問題
+</a>
+      </li> 
+      <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
+        <span class="dac-sprite dac-auto-chevron"></span>
+        參加 G+ 社群
+</a>
+      </li>
+    </ul>
+  </div>
+</section>
+

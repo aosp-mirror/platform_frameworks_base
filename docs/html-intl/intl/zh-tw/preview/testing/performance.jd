@@ -1,0 +1,656 @@
+page.title=測試顯示效能
+page.image=images/cards/card-test-performance_2x.png
+page.keywords=效能, fps, 工具
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文件內容</h2>
+      <ol>
+        <li><a href="#measure">測量 UI 效能</a>
+          <ul>
+            <li><a href="#aggregate">彙總畫面統計資料</a></li>
+            <li><a href="#timing-info">精確畫面計時資訊</a></li>
+            <li><a href="#timing-dump">簡易畫面計時傾印</a></li>
+            <li><a href="#collection-window">控制統計資料收集時間</a></li>
+            <li><a href="#diagnose">診斷效能回復</a></li>
+            <li><a href="#resources">其他資源</a></li>
+          </ul>
+        </li>
+        <li><a href="#automate">自動化 UI 效能測試</a>
+          <ul>
+            <li><a href="#ui-tests">設定 UI 測試</a></li>
+            <li><a href="#automated-tests">設定自動化 UI 測試</a></li>
+            <li><a href="#triage">分類和修正觀察到的問題</a></li>
+          </ul>
+        </li>
+      </ol>
+  </div>
+</div>
+
+
+<p>
+  使用者介面效能測試可確保您的應用程式不只符合功能需求，與使用者與應用程式的互動也無比順暢，執行時每秒一致有 60 個畫面 (<a href="https://www.youtube.com/watch?v=CaMTIgxCSqU&amp;index=25&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">為什麼 60fps？</a>)，任何畫面都不會遺漏或延遲，或稱為「閃避」<em></em>現象。
+
+
+本文件說明可用以測量 UI 效能的工具，以及呈現可將 UI 效能測量與測試做法整合的方法。
+
+
+</p>
+
+
+<h2 id="measure">測量 UI 效能</h2>
+
+<p>
+  為改善效能，首先您需要測量系統效能的能力，接著在管道的各部分發生問題時加以診斷和辨識。
+
+
+</p>
+
+<p>
+  <em><a href="https://source.android.com/devices/tech/debug/dumpsys.html">dumpsys</a></em> 是一種 Android 工具，可在裝置上執行和傾印有關系統服務狀態的有趣資訊。
+
+將 <em>gfxinfo</em> 命令傳送至 dumpsys，會將錄製階段所發生與動畫的畫面相關的效能資訊以 logcat 提供輸出。
+
+
+</p>
+
+<pre>
+&gt; adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt;
+</pre>
+
+<p>
+  此命令會產生多種不同的畫面計時資料。
+</p>
+
+<h3 id="aggregate">彙總畫面統計資料</h3>
+
+<p>
+  使用 M 預覽版，命令會在程序的生命週期全程收集畫面資料，並將彙總的分析列印到 logcat。
+例如：
+</p>
+
+<pre class="noprettyprint">
+Stats since: 752958278148ns
+Total frames rendered: 82189
+Janky frames: 35335 (42.99%)
+90th percentile: 34ms
+95th percentile: 42ms
+99th percentile: 69ms
+Number Missed Vsync: 4706
+Number High input latency: 142
+Number Slow UI thread: 17270
+Number Slow bitmap uploads: 1542
+Number Slow draw: 23342
+</pre>
+
+<p>
+  這些高階統計資料是以高階方式轉換應用程式的轉譯效能，還有其在許多畫面的穩定性。
+
+</p>
+
+
+<h3 id="timing-info">精確畫面計時資訊</h3>
+
+<p>
+  M 預覽版隨附新的命令 gfxinfo，而 <em>framestats</em> 可從最近的畫面提供相當詳細的畫面計時資訊，讓您可以追蹤並更準確進行除錯。
+
+
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; framestats
+</pre>
+
+<p>
+  此命令會從應用程式所產生至少 120 個畫面當中，加上奈秒時間戳記印出畫面計時資訊。以下範例是 adb dumpsys gfxinfo &lt;PACKAGE_NAME&gt; framestats 的原始輸出：
+
+
+</p>
+
+<pre class="noprettyprint">
+0,49762224585003,49762241251670,9223372036854775807,0,49762257627204,49762257646058,49762257969704,49762258002100,49762265541631,49762273951162,49762300914808,49762303675954,
+0,49762445152142,49762445152142,9223372036854775807,0,49762446678818,49762446705589,49762447268818,49762447388037,49762453551527,49762457134131,49762474889027,49762476150120,
+0,49762462118845,49762462118845,9223372036854775807,0,49762462595381,49762462619287,49762462919964,49762462968454,49762476194547,49762476483454,49762480214964,49762480911527,
+0,49762479085548,49762479085548,9223372036854775807,0,49762480066370,49762480099339,49762481013089,49762481085850,49762482232152,49762482478350,49762485657620,49762486116683,
+</pre>
+
+<p>
+  這裡的每一行輸出都代表應用程式產生的一個畫面。每行都有固定的資料欄編號，描述畫面產生管道的各階段所花費的時間。
+下一節會詳細說明此格式，包括各資料欄代表的意義。
+
+</p>
+
+
+<h4 id="fs-data-format">Framestats 資料格式</h4>
+
+<p>
+  由於資料區塊是以 CSV 格式輸出，所以可以直接將它貼到選擇的試算表工具，或使用指令碼來收集和剖析。
+下表說明輸出資料欄的格式。
+所有時間戳記都以奈秒為單位。
+</p>
+
+<ul>
+  <li>FLAGS
+    <ul>
+      <li>FLAGS 資料欄的資料列均為 0，從 FRAME_COMPLETED 資料欄減去 INTENDED_VSYNC 資料欄可計算得出總畫面時間。
+
+      </li>
+
+      <li>如果這個值非零，應該略過該資料列，因為從正常效能來判斷，畫面已是極端值，版面配置與繪製預期都要花費 16ms 以上的時間。
+
+以下是發生這種情況的幾個原因：
+        <ul>
+          <li>視窗版面配置改變 (例如應用程式的第一個畫面或經過旋轉)
+
+          </li>
+
+          <li>也可能是略過畫面，在這種情況下，某些值會含有記憶體回收的時間戳記。
+例如，如果畫面速度超過 60fps，或如果螢幕上空無一物，最後卻有所改變，就可能會略過畫面，這不一定是應用程式發生問題的徵兆。
+
+
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>INTENDED_VSYNC
+    <ul>
+      <li>預期的畫面起始點。如果這個值和VSYNC 不同，表示 UI 執行緒中發生的工作使它無法即時回應 vsync 訊號。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>VSYNC
+    <ul>
+      <li>用於所有 vsync 接聽器和繪製畫面的時間值 (Choreographer 畫面回呼、動畫、View.getDrawingTime() 等等)
+
+      </li>
+
+      <li>如要深入瞭解有關 VSYNC 和它如何影響您的應用程式，請參閱<a href="https://www.youtube.com/watch?v=1iaHxmfZGGc&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=23">瞭解 VSYNC</a> 影片。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>OLDEST_INPUT_EVENT
+    <ul>
+      <li>輸入佇列中最舊輸入事件的時間戳記，或為 Long.MAX_VALUE，若沒有該畫面的輸入事件的話。
+
+      </li>
+
+      <li>這個值主要用於平台工作，對應用程式開發人員用處不大。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>NEWEST_INPUT_EVENT
+    <ul>
+      <li>輸入佇列中最新輸入事件的時間戳記，或為 0，若沒有該畫面的輸入事件的話。
+
+      </li>
+
+      <li>這個值主要用於平台工作，對應用程式開發人員用處不大。
+
+      </li>
+
+      <li>不過，透過查看 (FRAME_COMPLETED - NEWEST_INPUT_EVENT)，可以大略知道應用程式還會延遲多少時間。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>HANDLE_INPUT_START
+    <ul>
+      <li>將輸入事件分配給應用程式時的時間戳記。
+      </li>
+
+      <li>查看這個值與 ANIMATION_START 之間的時間，即可測量出應用程式花費在處理輸入事件的時間。
+
+      </li>
+
+      <li>如果這個數字很高 (&gt;2ms)，這表示應用程式花費在處理輸入事件(例如 View.onTouchEvent()) 的時間過長，指出需要將這項工作最佳化，或卸載交由其他執行緒處理。
+
+請注意，還有一些情況本就預期且可接受這個數字較大，例如會啟動新活動或類似工作的點擊事件。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>ANIMATION_START
+    <ul>
+      <li>向 Choreographer 註冊的動畫執行時的時間戳記。
+      </li>
+
+      <li>查看這個值與 PERFORM_TRANVERSALS_START 之間的時間，即可判斷它花費多久的時間評估所有執行中的動畫器 (常見的有 ObjectAnimator、ViewPropertyAnimator 及 Transitions)。
+
+
+      </li>
+
+      <li>如果這個數字很高 (&gt;2ms)，可查看您的應用程式是否撰寫任何自訂動畫器，或 ObjectAnimators 正進行動畫處理的資料欄，並確定它們都適用於動畫。
+
+
+      </li>
+
+      <li>如要深入瞭解 Choreographer，請參閱<a href="https://developers.google.com/events/io/sessions/325418001">順滑流暢與否</a>影片。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>PERFORM_TRAVERSALS_START
+    <ul>
+      <li>如果您從這個值中減去 DRAW_START，就可以得知版面配置和測量階段花費多久的時間完成。(請注意，在捲動或動畫期間，您會希望這個值趨近於零。)
+
+
+      </li>
+
+      <li>如要深入瞭解轉譯管道的測量與版面配置階段，請參閱<a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">無效判定、版面配置及效能</a>影片。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>DRAW_START
+    <ul>
+      <li>performTraversals 的繪製階段開始的時間。這是判定無效的任何檢視顯示清單的記錄起始點。
+
+      </li>
+
+      <li>這個值與 SYNC_START 之間的時間，就是對樹狀結構中所有無效判定檢視呼叫 View.draw() 所花費的時間。
+
+      </li>
+
+      <li>如需繪製模型的詳細資訊，請參閱<a href="{@docRoot}guide/topics/graphics/hardware-accel.html#hardware-model">硬體加速</a>或<a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">無效判定、版面配置及效能</a>影片。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>SYNC_START
+    <ul>
+      <li>繪製的同步階段開始的時間。
+      </li>
+
+      <li>如果這個值與 ISSUE_DRAW_COMMANDS_START 之間的時間相當長 (約為 &gt;0.4ms )，通常代表已繪製許多必須上傳至 GPU 的新點陣圖。
+
+
+      </li>
+
+      <li>如要深入瞭解同步階段，請參閱<a href="https://www.youtube.com/watch?v=VzYkVL1n4M8&amp;index=24&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu">設定檔 GPU 轉譯</a>影片。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>ISSUE_DRAW_COMMANDS_START
+    <ul>
+      <li>硬體轉譯器開始對 GPU 發出繪製命令的時間。
+      </li>
+
+      <li>這個值與 FRAME_COMPLETED 之間的時間大約就是應用程式產生的 GPU 工作量。
+太過度繪製或無效轉譯效果之類的問題都會顯示於此。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>SWAP_BUFFERS
+    <ul>
+      <li>相對於無趣的平台工作以外，呼叫 eglSwapBuffers 的時間。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>FRAME_COMPLETED
+    <ul>
+      <li>全部完成！花費在處理這個畫面的總時間，計算方法是 FRAME_COMPLETED - INTENDED_VSYNC。
+
+      </li>
+    </ul>
+  </li>
+
+</ul>
+
+<p>
+  您能以不同的方式使用這項資料。顯示不同延遲貯體中畫面時間分布的長條圖就是一種簡單但實用的方式，請見下圖。
+
+本圖可一目瞭然地告訴我們，大部分畫面都低於 16ms 的上限 (紅色除外)，但只有幾個畫面明顯超過上限。
+
+我們可以查看此長條圖一段時間的變化，觀察出現的大規模位移或產生新的極端值。
+您也能根據資料中的許多時間戳記將輸入延遲、花費在版面配置的時間或其他類似的有趣度量指標繪成圖表。
+
+
+</p>
+
+<img src="{@docRoot}preview/images/perf-test-framestats.png">
+
+
+<h3 id="timing-dump">簡易畫面計時傾印</h3>
+
+<p>
+  如果 [開發人員選項] 中的 [設定檔 GPU 轉譯]<strong></strong> 設定為 [In adb shell dumpsys gfxinfo]<strong></strong>
+，<code>adb shell dumpsys gfxinfo</code> 命令會印出最近 120 個畫面的計時資訊，以定位鍵分隔值分成數個不同類別。
+
+這項資料非常適合用來指出可能是繪製管道的哪個部分太慢。
+
+</p>
+
+<p>
+  類似於上述的 <a href="#fs-data-format">framestats</a>，可以直接將它貼到選擇的試算表工具，或使用指令碼來收集和剖析。
+
+下圖顯示許多由應用程式產生的畫面花費時間的分類細項。
+
+</p>
+
+<img src="{@docRoot}preview/images/perf-test-frame-latency.png">
+
+<p>
+  執行 gfxinfo、複製輸出、將輸出貼入試算表應用程式，然後將資料繪製成堆疊長條圖的結果。
+
+</p>
+
+<p>
+  每個直條都代表動畫的一個畫面，其高度代表計算該畫面所花費的毫秒數。
+長條的每個色塊都代表轉譯管道的不同階段，好讓您看出應用程式的哪部分可能產生瓶頸。
+
+如需瞭解繪製管道以及如何最佳化的詳細資訊，請參閱硬體加速或<a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;index=27&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">無效判定、版面配置及效能</a>影片。
+
+
+</p>
+
+
+<h3 id="collection-window">控制統計資料收集時間</h3>
+
+<p>
+  framestats 與簡單的畫面計時都會收集極短時間內的資料 – 轉譯約需兩秒。
+為了精確控制這段時間，例如只限特定動畫的資料，您可以重設所有計數器，然後彙總收集的統計資料。
+
+
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; reset
+</pre>
+
+<p>
+  這也能和傾印命令本身結合使用，定期收集和重設，持續擷取兩秒時間內的畫面。
+
+
+</p>
+
+
+<h3 id="diagnose">診斷效能回復</h3>
+
+<p>
+  識別回復是追蹤問題和維護應用程式健康情況的第一步。
+不過，dumpsys 只能識別有問題存在與相關的嚴重性。
+您仍需要診斷造成效能問題的特定原因，以及找出適當的修正方式。
+因此，強烈建議您使用 <a href="{@docRoot}tools/help/systrace.html">systrace</a> 工具。
+
+</p>
+
+
+<h3 id="resources">其他資源</h3>
+
+<p>
+  如需 Android 的轉譯管道如何運作、常見問題以及如何修正的詳細資訊，下列的一些資訊可能會很實用：
+
+
+</p>
+
+<ul>
+  <li>轉譯效能 101
+  </li>
+  <li>為什麼 60fps？
+  </li>
+  <li>Android UI 和 GPU
+  </li>
+  <li>無效判定、版面配置及效能
+  </li>
+  <li>利用 Systrace 分析 UI 效能
+  </li>
+</ul>
+
+
+<h2 id="automate">自動化 UI 效能測試</h2>
+
+<p>
+  UI 效能測試的方法之一就是讓測試人員對目標應用程式執行一組使用者操作，並以肉眼查看，或花費很長一段時間使用工具導向的方法，尋找閃避現象。
+
+但這種靠人工的方式充滿危險，人類對畫面率變化的感知能力因人而異，而且這種方法也很費時、繁瑣且容易出錯。
+
+
+</p>
+
+<p>
+  較有效率的方法是從自動化的 UI 測試中記錄和分析重要效能度量指標。
+Android M 開發人員預覽版包含新的記錄功能，能夠輕鬆判斷應用程式動畫中閃避現象的數量與嚴重程度，還能用來建置嚴謹的程序，判斷目前的效能並追蹤未來的效能目標。
+
+
+
+</p>
+
+<p>
+  本文會逐步說明建議用來使用資料以自動化效能測試的方法。
+
+</p>
+
+<p>
+  這種方法大多分成兩個主要動作。首先，識別您要測試的項目，以及測試的方法。其次是設定和維護自動化測試環境。
+
+
+</p>
+
+
+<h3 id="ui-tests">設定 UI 測試</h3>
+
+<p>
+  在您開始進行自動化測試之前，務必要決定幾個高階決策，才能適當瞭解您的測試空間與可能會有的需求。
+
+</p>
+
+<h4>
+  識別要測試的主要動畫 / 流程
+</h4>
+
+<p>
+  請記住，流暢的動畫有所中斷時，就是使用者最容易看見效能低落的時候。
+因此，識別要測試哪種類型的 UI 動作時，最好著重在使用者最常看見或對他們的體驗最重要的主要動畫。
+
+例如，以下是一些可能有利於識別的常見情況：
+</p>
+
+<ul>
+  <li>捲動主要的 ListView 或 RecyclerView
+  </li>
+
+  <li>非同步等待週期內的動畫
+  </li>
+
+  <li>當中會載入 / 操縱點陣圖的任何動畫
+  </li>
+
+  <li>包含 Alpha 透明混色的動畫
+  </li>
+
+  <li>使用畫布繪製的自訂檢視
+  </li>
+</ul>
+
+<p>
+  和您團隊的工程人員、設計師及產品經理合作，優先考慮將這些主要產品動畫放入測試涵蓋範圍內。
+
+</p>
+
+<h4>
+  定義未來目標並予以追蹤
+</h4>
+
+<p>
+  從高階觀點來看，重要的是識別特定的效能目標，並著重在撰寫測試及收集相關資料。
+例如：
+</p>
+
+<ul>
+  <li>您是否只想初次開始追蹤 UI 效能以深入瞭解？
+  </li>
+
+  <li>您是否想要避免可能在未來導入的回復？
+  </li>
+
+  <li>今日有 90% 的順暢畫面並想要在本季達到 98%？
+  </li>
+
+  <li>今日有 98% 的順暢畫面且不想要回復？
+  </li>
+
+  <li>您的目標是改善低階裝置上的效能嗎？
+  </li>
+</ul>
+
+<p>
+  在上述的這些情況中，您會想要有歷史追蹤功能，來顯示不同應用程式版本間的效能。
+
+</p>
+
+<h4>
+  識別測試要用的裝置
+</h4>
+
+<p>
+  應用程式效能會因其執行所在裝置而異。有些裝置包含的記憶體較少、GPU 較不強大或 CPU 晶片速度較慢。
+這表示可在某組硬體上執行良好的動畫，在其他組合上不一定能執行良好，更糟的是可能會在管道的不同部分產生瓶頸。
+
+使用者所見可能會不同，為將這點列入考量，請挑選涵蓋當前高階裝置、低階裝置、平板電腦等的一系列裝置執行測試。
+
+尋找 CPU 效能、RAM、畫面密度、大小等方面的變化。
+高階裝置上通過的測試，在低階裝置上可能會失敗。
+
+</p>
+
+<h4>
+  UI 測試的基本架構
+</h4>
+
+<p>
+  工具套件 (例如 <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a> 和 <a href="{@docRoot}training/testing/ui-testing/espresso-testing.html">Espresso</a>) 是為協助將使用者在您的應用程式四處移動的動作自動化而建置。
+
+這些都是模擬使用者與裝置互動的簡單架構。
+如要使用這些架構，您要有效地建立會逐一執行一組使用者動作的獨特指令碼，然後在裝置上自行播放。
+
+
+</p>
+
+<p>
+  連同 <code>dumpsys gfxinfo</code>，再結合這些自動化測試，您可快速建立可重現系統，讓您執行測試並測量該特定情況下的效能資訊。
+
+
+</p>
+
+
+<h3 id="automated-tests">設定自動化 UI 測試</h3>
+
+<p>
+  在您能夠執行 UI 測試，還有可從單一測試收集資料的管道後，下一個重要步驟是利用可多次執行該項測試的架構，然後彙總產生的效能資料，以供您的開發團隊進一步分析。
+
+
+
+</p>
+
+<h4>
+  測試自動化的架構
+</h4>
+
+<p>
+  直接在目標裝置/模擬器上執行的 UI 測試架構 (例如 <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a>) 毫無價值。
+因為效能收集資訊是由主控機器透過 ADB 傳送命令驅動 <em>dumpsys gfxinfo</em> 來完成。
+<a href="{@docRoot}tools/help/monkeyrunner_concepts.html">MonkeyRunner</a> 架構是為了協助橋接這些個別實體開發。在主控機器上執行的指令碼處理系統可對一組連接的裝置發出命令，也能接收來自這些裝置的資料。
+
+
+
+</p>
+
+<p>
+  建置一組指令碼以適當自動化 UI 效能測試，至少應能利用 monkeyRunner 來完成下列工作：
+
+</p>
+
+<ul>
+  <li>對目標裝置或模擬器載入和啟動所需的 APK。
+  </li>
+
+  <li>啟動並允許執行 UI Automator UI 測試
+  </li>
+
+  <li>透過 dumpsys gfxinfo 收集效能資訊。<em></em><em></em>
+  </li>
+
+  <li>彙總資訊並以對開發人員有用的方式顯示。
+  </li>
+</ul>
+
+
+<h3 id="triage">分類和修正觀察到的問題</h3>
+
+<p>
+  在辨識出問題模式與回復之後，下一個步驟是辨識和套用修正。
+如果您的自動化測試架構會為畫面保留精確的計時分類細項，可幫助您詳細審察目前可疑的程式碼/版面配置變化 (在回復的情況下)，或在您切換為靠人工探究時縮小要分析的系統部分。
+
+
+如需靠人工探究時，<a href="{@docRoot}tools/help/systrace.html">systrace</a> 是開始進行的好地方，顯示轉譯管道各階段、系統中每個執行緒與核心，還有您所定義任何自訂事件標記的精確計時資訊。
+
+
+</p>
+
+<h4>
+  適當分析暫時的計時
+</h4>
+
+<p>
+  請務必注意，從轉譯效能中取得和測量計時的困難度。
+這些數字不具決定性且通常受系統狀態、可用記憶體數目、溫度調節，還有上次太陽閃焰何時衝擊您所在地區影響。
+
+重點是您執行相同的測試兩次，而每次得到的數字都有些微不同，數字很接近但不會完全相同。
+
+
+</p>
+
+<p>
+  以這種方式適當收集和分析資料，表示執行相同的測試多次，並累積結果取平均值或中間值。(為了簡單起見，我們稱之為「批次」) 這可讓您粗略計算測試的效能，而不需要精確的計時。
+
+
+
+</p>
+
+<p>
+  在變更的程式碼之間使用批次，可看出那些變更對效能的影響。
+如果前次變更批次的平均畫面率大於後來變更批次，您通常會有那項特定變更的整體 win wrt 效能。
+
+
+</p>
+
+<p>
+  這表示您執行的任何自動化 UI 測試都應將此概念列入考量，同時考量可能會在測試期間發生的任何異常情況。
+例如，您的應用程式效能若因為某些裝置問題而突然下降 (並非由您的應用程式引起)，您可能會想要重新執行批次，以讓取得的計時較不混亂。
+
+
+
+</p>
+
+<p>
+  應該執行多少次測試才能獲得有意義的測量結果呢？最少應執行 10 次，若執行更多次 (像是 50 或 100 次) 可以產生更準確的結果 (當然您現在是以時間換取準確度)。
+
+
+</p>
