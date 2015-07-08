@@ -13459,6 +13459,7 @@ package android.hardware.camera2 {
     field public static final int EDGE_MODE_FAST = 1; // 0x1
     field public static final int EDGE_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int EDGE_MODE_OFF = 0; // 0x0
+    field public static final int EDGE_MODE_ZERO_SHUTTER_LAG = 3; // 0x3
     field public static final int FLASH_MODE_OFF = 0; // 0x0
     field public static final int FLASH_MODE_SINGLE = 1; // 0x1
     field public static final int FLASH_MODE_TORCH = 2; // 0x2
@@ -13487,6 +13488,7 @@ package android.hardware.camera2 {
     field public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int NOISE_REDUCTION_MODE_MINIMAL = 3; // 0x3
     field public static final int NOISE_REDUCTION_MODE_OFF = 0; // 0x0
+    field public static final int NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG = 4; // 0x4
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE = 0; // 0x0
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6; // 0x6
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO = 9; // 0x9
