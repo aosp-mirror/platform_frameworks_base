@@ -39,6 +39,8 @@ import android.util.MutableBoolean;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -453,6 +455,9 @@ public class Recents extends SystemUI
             return;
         }
 
+        // Keep track of actually launched affiliated tasks
+        MetricsLogger.count(mContext, "overview_affiliated_task_launch", 1);
+
         // Launch the task
         if (toTask.isActive) {
             // Bring an active task to the foreground
@@ -465,11 +470,15 @@ public class Recents extends SystemUI
 
     @Override
     public void showNextAffiliatedTask() {
+        // Keep track of when the affiliated task is triggered
+        MetricsLogger.count(mContext, "overview_affiliated_task_next", 1);
         showRelativeAffiliatedTask(true);
     }
 
     @Override
     public void showPrevAffiliatedTask() {
+        // Keep track of when the affiliated task is triggered
+        MetricsLogger.count(mContext, "overview_affiliated_task_prev", 1);
         showRelativeAffiliatedTask(false);
     }
 

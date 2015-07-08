@@ -43,7 +43,7 @@ public class MetricsLogger implements MetricsConstants {
     public static final int SYSTEM_ALERT_WINDOW_APPS = 221;
     public static final int DREAMING = 222;
     public static final int DOZING = 223;
-
+    public static final int OVERVIEW_ACTIVITY = 224;
     // Temporary constants go here, to await migration to MetricsConstants.
 
     public static void visible(Context context, int category) throws IllegalArgumentException {

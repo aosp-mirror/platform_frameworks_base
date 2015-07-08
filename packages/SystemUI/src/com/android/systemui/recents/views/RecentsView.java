@@ -37,6 +37,7 @@ import android.view.WindowInsets;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
@@ -589,10 +590,21 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                         if (mCb != null) {
                             mCb.onTaskLaunchFailed();
                         }
+
+                        // Keep track of failed launches
+                        MetricsLogger.count(getContext(), "overview_task_launch_failed", 1);
                     }
                 }
             }
         };
+
+        // Keep track of the index of the task launch
+        int taskIndexFromFront = 0;
+        int taskIndex = stack.indexOfTask(task);
+        if (taskIndex > -1) {
+            taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
+        }
+        MetricsLogger.histogram(getContext(), "overview_task_launch_index", taskIndexFromFront);
 
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
         if (tv == null) {
@@ -644,6 +656,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         mCb.onAllTaskViewsDismissed();
+
+        // Keep track of all-deletions
+        MetricsLogger.count(getContext(), "overview_task_all_dismissed", 1);
     }
 
     /** Final callback after Recents is finally hidden. */

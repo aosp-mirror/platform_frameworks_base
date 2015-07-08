@@ -23,6 +23,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -452,6 +453,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setTouchEnabled(true);
         // Remove the task view from the stack
         mSv.onTaskViewDismissed(tv);
+        // Keep track of deletions by keyboard
+        MetricsLogger.histogram(tv.getContext(), "overview_task_dismissed_source",
+                Constants.Metrics.DismissSourceSwipeGesture);
     }
 
     @Override
