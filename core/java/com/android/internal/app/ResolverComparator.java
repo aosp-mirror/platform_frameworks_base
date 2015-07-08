@@ -191,6 +191,14 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         return mCollator.compare(sa.toString().trim(), sb.toString().trim());
     }
 
+    public float getScore(ComponentName name) {
+        final ScoredTarget target = mScoredTargets.get(name);
+        if (target != null) {
+            return target.score;
+        }
+        return 0;
+    }
+
     static class ScoredTarget {
         public final ComponentInfo componentInfo;
         public float score;
