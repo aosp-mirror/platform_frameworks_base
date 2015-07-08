@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
@@ -1238,10 +1237,6 @@ class WindowStateAnimator {
             mDtDx = 0;
             mDsDy = 0;
             mDtDy = mWin.mGlobalScale;
-            if (appTransformation == null) {
-                mHasClipRect = false;
-                mClipRect.setEmpty();
-            }
         }
     }
 
@@ -1313,9 +1308,9 @@ class WindowStateAnimator {
             applyDecorRect(w.mDecorFrame);
         }
 
-        // By default, the clip rect is the system decor.
+        // By default, the clip rect is the system decor if the transformation doesn't specify one.
         final Rect clipRect = mTmpClipRect;
-        clipRect.set(w.mSystemDecorRect);
+        clipRect.set((mHasClipRect) ? mClipRect : w.mSystemDecorRect);
 
         // Expand the clip rect for surface insets.
         final WindowManager.LayoutParams attrs = w.mAttrs;
@@ -1323,28 +1318,6 @@ class WindowStateAnimator {
         clipRect.top -= attrs.surfaceInsets.top;
         clipRect.right += attrs.surfaceInsets.right;
         clipRect.bottom += attrs.surfaceInsets.bottom;
-
-        // If we have an animated clip rect, intersect it with the clip rect.
-        // However, the clip rect animation effect should be applied on app windows that inset
-        // decor only. If applying on non-inset decor one, the top region of this window will
-        // be clipped on the end of animation, e.g. dialog activities.
-        if (mHasClipRect && (w.mAttrs.flags & LayoutParams.FLAG_LAYOUT_INSET_DECOR) != 0) {
-            // NOTE: We are adding a temporary workaround due to the status bar
-            // not always reporting the correct system decor rect. In such
-            // cases, we take into account the specified content insets as well.
-            if ((w.mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN)
-                    == SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN
-                    || (w.mAttrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
-                // Don't apply the workaround to apps explicitly requesting
-                // fullscreen layout or when the bars are transparent.
-                clipRect.intersect(mClipRect);
-            } else {
-                final int offsetTop = Math.max(clipRect.top, w.mContentInsets.top);
-                clipRect.offset(0, -offsetTop);
-                clipRect.intersect(mClipRect);
-                clipRect.offset(0, offsetTop);
-            }
-        }
 
         // The clip rect was generated assuming (0,0) as the window origin,
         // so we need to translate to match the actual surface coordinates.
