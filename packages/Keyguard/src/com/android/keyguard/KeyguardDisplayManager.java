@@ -105,7 +105,8 @@ public class KeyguardDisplayManager {
 
             if (mPresentation == null && presentationDisplay != null) {
                 if (DEBUG) Slog.i(TAG, "Keyguard enabled on display: " + presentationDisplay);
-                mPresentation = new KeyguardPresentation(mContext, presentationDisplay);
+                mPresentation = new KeyguardPresentation(mContext, presentationDisplay,
+                        R.style.keyguard_presentation_theme);
                 mPresentation.setOnDismissListener(mOnDismissListener);
                 try {
                     mPresentation.show();
@@ -141,11 +142,12 @@ public class KeyguardDisplayManager {
             }
         };
 
-        public KeyguardPresentation(Context context, Display display) {
-            super(context, display);
+        public KeyguardPresentation(Context context, Display display, int theme) {
+            super(context, display, theme);
             getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         }
 
+        @Override
         public void onDetachedFromWindow() {
             mClock.removeCallbacks(mMoveTextRunnable);
         }
