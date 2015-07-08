@@ -78,7 +78,7 @@ public:
     void setOpaque(bool opaque);
     void makeCurrent();
     void processLayerUpdate(DeferredLayerUpdater* layerUpdater);
-    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo);
+    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued);
     void draw();
     void destroy();
 

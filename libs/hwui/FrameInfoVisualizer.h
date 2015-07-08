@@ -59,10 +59,8 @@ private:
     void drawGraph(OpenGLRenderer* canvas);
     void drawThreshold(OpenGLRenderer* canvas);
 
-    inline float duration(size_t index, FrameInfoIndex start, FrameInfoIndex end) {
-        nsecs_t ns_start = mFrameSource[index][start];
-        nsecs_t ns_end = mFrameSource[index][end];
-        float duration = ((ns_end - ns_start) * 0.000001f);
+    inline float durationMS(size_t index, FrameInfoIndex start, FrameInfoIndex end) {
+        float duration = mFrameSource[index].duration(start, end) * 0.000001f;
         // Clamp to large to avoid spiking off the top of the screen
         duration = duration > 50.0f ? 50.0f : duration;
         return duration > 0.0f ? duration : 0.0f;

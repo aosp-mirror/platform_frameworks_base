@@ -85,6 +85,7 @@ private:
     std::vector< sp<DeferredLayerUpdater> > mLayers;
 
     int mSyncResult;
+    int64_t mSyncQueued;
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 };

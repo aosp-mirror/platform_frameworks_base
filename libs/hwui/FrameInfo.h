@@ -41,6 +41,8 @@ enum class FrameInfoIndex {
     DrawStart,
     // End of UI frame info
 
+    SyncQueued,
+
     SyncStart,
     IssueDrawCommandsStart,
     SwapBuffers,
@@ -117,8 +119,7 @@ public:
     }
 
     inline int64_t operator[](FrameInfoIndex index) const {
-        if (index == FrameInfoIndex::NumIndexes) return 0;
-        return mFrameInfo[static_cast<int>(index)];
+        return get(index);
     }
 
     inline int64_t operator[](int index) const {
@@ -127,10 +128,20 @@ public:
     }
 
     inline int64_t duration(FrameInfoIndex start, FrameInfoIndex end) const {
-        int64_t endtime = mFrameInfo[static_cast<int>(end)];
-        int64_t starttime = mFrameInfo[static_cast<int>(start)];
+        int64_t endtime = get(end);
+        int64_t starttime = get(start);
         int64_t gap = endtime - starttime;
         gap = starttime > 0 ? gap : 0;
+        if (end > FrameInfoIndex::SyncQueued &&
+                start < FrameInfoIndex::SyncQueued) {
+            // Need to subtract out the time spent in a stalled state
+            // as this will be captured by the previous frame's info
+            int64_t offset = get(FrameInfoIndex::SyncStart)
+                    - get(FrameInfoIndex::SyncQueued);
+            if (offset > 0) {
+                gap -= offset;
+            }
+        }
         return gap > 0 ? gap : 0;
     }
 
@@ -138,11 +149,16 @@ public:
         return duration(FrameInfoIndex::IntendedVsync, FrameInfoIndex::FrameCompleted);
     }
 
-private:
     inline int64_t& set(FrameInfoIndex index) {
         return mFrameInfo[static_cast<int>(index)];
     }
 
+    inline int64_t get(FrameInfoIndex index) const {
+        if (index == FrameInfoIndex::NumIndexes) return 0;
+        return mFrameInfo[static_cast<int>(index)];
+    }
+
+private:
     int64_t mFrameInfo[static_cast<int>(FrameInfoIndex::NumIndexes)];
 };
 

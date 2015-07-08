@@ -69,6 +69,7 @@ int DrawFrameTask::drawFrame() {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
     mSyncResult = kSync_OK;
+    mSyncQueued = systemTime(CLOCK_MONOTONIC);
     postAndWait();
 
     return mSyncResult;
@@ -119,7 +120,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
         mContext->processLayerUpdate(mLayers[i].get());
     }
     mLayers.clear();
-    mContext->prepareTree(info, mFrameInfo);
+    mContext->prepareTree(info, mFrameInfo, mSyncQueued);
 
     // This is after the prepareTree so that any pending operations
     // (RenderNode tree state, prefetched layers, etc...) will be flushed.

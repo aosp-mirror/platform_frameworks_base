@@ -160,7 +160,7 @@ static bool wasSkipped(FrameInfo* info) {
     return info && ((*info)[FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame);
 }
 
-void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
+void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued) {
     mRenderThread.removeFrameCallback(this);
 
     // If the previous frame was dropped we don't need to hold onto it, so
@@ -169,6 +169,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
         mCurrentFrameInfo = &mFrames.next();
     }
     mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
+    mCurrentFrameInfo->set(FrameInfoIndex::SyncQueued) = syncQueued;
     mCurrentFrameInfo->markSyncStart();
 
     info.damageAccumulator = &mDamageAccumulator;
@@ -293,7 +294,7 @@ void CanvasContext::doFrame() {
                 mRenderThread.timeLord().latestVsync());
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, mRenderThread.renderState());
-    prepareTree(info, frameInfo);
+    prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC));
     if (info.out.canDrawThisFrame) {
         draw();
     }

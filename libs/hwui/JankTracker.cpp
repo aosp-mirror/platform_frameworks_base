@@ -31,7 +31,7 @@ static const char* JANK_TYPE_NAMES[] = {
         "High input latency",
         "Slow UI thread",
         "Slow bitmap uploads",
-        "Slow draw",
+        "Slow issue draw commands",
 };
 
 struct Comparison {
@@ -223,7 +223,7 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     mData->jankFrameCount++;
 
     for (int i = 0; i < NUM_BUCKETS; i++) {
-        int64_t delta = frame[COMPARISONS[i].end] - frame[COMPARISONS[i].start];
+        int64_t delta = frame.duration(COMPARISONS[i].start, COMPARISONS[i].end);
         if (delta >= mThresholds[i] && delta < IGNORE_EXCEEDING) {
             mData->jankTypeCounts[i]++;
         }

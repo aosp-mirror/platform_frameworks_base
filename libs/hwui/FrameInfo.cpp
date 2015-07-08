@@ -30,6 +30,7 @@ const std::string FrameInfoNames[] = {
     "AnimationStart",
     "PerformTraversalsStart",
     "DrawStart",
+    "SyncQueued",
     "SyncStart",
     "IssueDrawCommandsStart",
     "SwapBuffers",

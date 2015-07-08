@@ -189,7 +189,7 @@ void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex en
         // Set the bottom to the old top (build upwards)
         rect[ri + 3] = rect[ri + 1];
         // Move the top up by the duration
-        rect[ri + 1] -= mVerticalUnit * duration(fi, start, end);
+        rect[ri + 1] -= mVerticalUnit * durationMS(fi, start, end);
     }
 }
 
@@ -253,10 +253,10 @@ void FrameInfoVisualizer::dumpData(int fd) {
         }
         mLastFrameLogged = mFrameSource[i][FrameInfoIndex::IntendedVsync];
         fprintf(file, "\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
-                duration(i, FrameInfoIndex::IntendedVsync, FrameInfoIndex::SyncStart),
-                duration(i, FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart),
-                duration(i, FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers),
-                duration(i, FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted));
+                durationMS(i, FrameInfoIndex::IntendedVsync, FrameInfoIndex::SyncStart),
+                durationMS(i, FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart),
+                durationMS(i, FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers),
+                durationMS(i, FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted));
     }
 
     fflush(file);
