@@ -197,18 +197,25 @@ public class WindowAnimator {
         final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
         final AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
                 null : winShowWhenLocked.mAppToken;
-        final boolean hideWhenLocked =
-                !(((win.mIsImWindow || imeTarget == win) && showImeOverKeyguard)
-                        || (appShowWhenLocked != null && (appShowWhenLocked == win.mAppToken
-                        // Show all SHOW_WHEN_LOCKED windows while they're animating
-                        || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.isAnimatingLw()
-                        // Show error dialogs over apps that dismiss keyguard.
-                        || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
+
+        boolean allowWhenLocked = false;
+        // Show IME over the keyguard if the target allows it
+        allowWhenLocked |= (win.mIsImWindow || imeTarget == win) && showImeOverKeyguard;
+        // Show SHOW_WHEN_LOCKED windows that turn on the screen
+        allowWhenLocked |= (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.mTurnOnScreen;
+
+        if (appShowWhenLocked != null) {
+            allowWhenLocked |= appShowWhenLocked == win.mAppToken
+                    // Show all SHOW_WHEN_LOCKED windows while they're animating
+                    || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.isAnimatingLw()
+                    // Show error dialogs over apps that dismiss keyguard.
+                    || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
+        }
 
         // Only hide windows if the keyguard is active and not animating away.
         boolean keyguardOn = mPolicy.isKeyguardShowingOrOccluded()
                 && mForceHiding != KEYGUARD_ANIMATING_OUT;
-        return keyguardOn && hideWhenLocked && (win.getDisplayId() == Display.DEFAULT_DISPLAY);
+        return keyguardOn && !allowWhenLocked && (win.getDisplayId() == Display.DEFAULT_DISPLAY);
     }
 
     private void updateWindowsLocked(final int displayId) {
