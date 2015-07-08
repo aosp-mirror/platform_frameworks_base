@@ -22,7 +22,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -32,8 +31,14 @@ import android.util.Log;
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -220,6 +225,31 @@ public class NotificationUsageStats {
         return result;
     }
 
+    public synchronized JSONObject dumpJson(DumpFilter filter) {
+        JSONObject dump = new JSONObject();
+        if (ENABLE_AGGREGATED_IN_MEMORY_STATS) {
+            try {
+                JSONArray aggregatedStats = new JSONArray();
+                for (AggregatedStats as : mStats.values()) {
+                    if (filter != null && !filter.matches(as.key))
+                        continue;
+                    aggregatedStats.put(as.dumpJson());
+                }
+                dump.put("current", aggregatedStats);
+            } catch (JSONException e) {
+                // pass
+            }
+        }
+        if (ENABLE_SQLITE_LOG) {
+            try {
+                dump.put("historical", mSQLiteLog.dumpJson(filter));
+            } catch (JSONException e) {
+                // pass
+            }
+        }
+        return dump;
+    }
+
     public synchronized void dump(PrintWriter pw, String indent, DumpFilter filter) {
         if (ENABLE_AGGREGATED_IN_MEMORY_STATS) {
             for (AggregatedStats as : mStats.values()) {
@@ -250,6 +280,7 @@ public class NotificationUsageStats {
 
         private final Context mContext;
         public final String key;
+        private final long mCreated;
         private AggregatedStats mPrevious;
 
         // ---- Updated as the respective events occur.
@@ -285,6 +316,7 @@ public class NotificationUsageStats {
         public AggregatedStats(Context context, String key) {
             this.key = key;
             mContext = context;
+            mCreated = SystemClock.elapsedRealtime();
         }
 
         public void countApiUse(NotificationRecord record) {
@@ -449,6 +481,47 @@ public class NotificationUsageStats {
                     indent + "  numPeopleCacheMiss=" + numPeopleCacheMiss + ",\n" +
                     indent + "  numBlocked=" + numBlocked + ",\n" +
                     indent + "}";
+        }
+
+        public JSONObject dumpJson() throws JSONException {
+            JSONObject dump = new JSONObject();
+            dump.put("key", key);
+            dump.put("duration", SystemClock.elapsedRealtime() - mCreated);
+            maybePut(dump, "numPostedByApp", numPostedByApp);
+            maybePut(dump, "numUpdatedByApp", numUpdatedByApp);
+            maybePut(dump, "numRemovedByApp", numRemovedByApp);
+            maybePut(dump, "numPeopleCacheHit", numPeopleCacheHit);
+            maybePut(dump, "numPeopleCacheMiss", numPeopleCacheMiss);
+            maybePut(dump, "numWithStaredPeople", numWithStaredPeople);
+            maybePut(dump, "numWithValidPeople", numWithValidPeople);
+            maybePut(dump, "numBlocked", numBlocked);
+            maybePut(dump, "numWithActions", numWithActions);
+            maybePut(dump, "numPrivate", numPrivate);
+            maybePut(dump, "numSecret", numSecret);
+            maybePut(dump, "numPriorityMax", numPriorityMax);
+            maybePut(dump, "numPriorityHigh", numPriorityHigh);
+            maybePut(dump, "numPriorityLow", numPriorityLow);
+            maybePut(dump, "numPriorityMin", numPriorityMin);
+            maybePut(dump, "numInterrupt", numInterrupt);
+            maybePut(dump, "numWithBigText", numWithBigText);
+            maybePut(dump, "numWithBigPicture", numWithBigPicture);
+            maybePut(dump, "numForegroundService", numForegroundService);
+            maybePut(dump, "numOngoing", numOngoing);
+            maybePut(dump, "numAutoCancel", numAutoCancel);
+            maybePut(dump, "numWithLargeIcon", numWithLargeIcon);
+            maybePut(dump, "numWithInbox", numWithInbox);
+            maybePut(dump, "numWithMediaSession", numWithMediaSession);
+            maybePut(dump, "numWithTitle", numWithTitle);
+            maybePut(dump, "numWithText", numWithText);
+            maybePut(dump, "numWithSubText", numWithSubText);
+            maybePut(dump, "numWithInfoText", numWithInfoText);
+            return dump;
+        }
+
+        private void maybePut(JSONObject dump, String name, int value) throws JSONException {
+            if (value > 0) {
+                dump.put(name, value);
+            }
         }
     }
 
@@ -780,14 +853,51 @@ public class NotificationUsageStats {
             mWriteHandler.sendMessage(mWriteHandler.obtainMessage(MSG_DISMISS, notification));
         }
 
-        public void printPostFrequencies(PrintWriter pw, String indent, DumpFilter filter) {
+        private JSONArray JsonPostFrequencies(DumpFilter filter) throws JSONException {
+            JSONArray frequencies = new JSONArray();
             SQLiteDatabase db = mHelper.getReadableDatabase();
-            long nowMs = System.currentTimeMillis();
+            long midnight = getMidnightMs();
             String q = "SELECT " +
                     COL_EVENT_USER_ID + ", " +
                     COL_PKG + ", " +
-                    // Bucket by day by looking at 'floor((nowMs - eventTimeMs) / dayMs)'
-                    "CAST(((" + nowMs + " - " + COL_EVENT_TIME + ") / " + DAY_MS + ") AS int) " +
+                    // Bucket by day by looking at 'floor((midnight - eventTimeMs) / dayMs)'
+                    "CAST(((" + midnight + " - " + COL_EVENT_TIME + ") / " + DAY_MS + ") AS int) " +
+                    "AS day, " +
+                    "COUNT(*) AS cnt " +
+                    "FROM " + TAB_LOG + " " +
+                    "WHERE " +
+                    COL_EVENT_TYPE + "=" + EVENT_TYPE_POST +
+                    " AND " + COL_EVENT_TIME + " > " + filter.since +
+                    " GROUP BY " + COL_EVENT_USER_ID + ", day, " + COL_PKG;
+            Cursor cursor = db.rawQuery(q, null);
+            try {
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    int userId = cursor.getInt(0);
+                    String pkg = cursor.getString(1);
+                    if (filter != null && !filter.matches(pkg)) continue;
+                    int day = cursor.getInt(2);
+                    int count = cursor.getInt(3);
+                    JSONObject row = new JSONObject();
+                    row.put("user_id", userId);
+                    row.put("package", pkg);
+                    row.put("day", day);
+                    row.put("count", count);
+                    frequencies.put(row);
+                }
+            } finally {
+                cursor.close();
+            }
+            return frequencies;
+        }
+
+        public void printPostFrequencies(PrintWriter pw, String indent, DumpFilter filter) {
+            SQLiteDatabase db = mHelper.getReadableDatabase();
+            long midnight = getMidnightMs();
+            String q = "SELECT " +
+                    COL_EVENT_USER_ID + ", " +
+                    COL_PKG + ", " +
+                    // Bucket by day by looking at 'floor((midnight - eventTimeMs) / dayMs)'
+                    "CAST(((" + midnight + " - " + COL_EVENT_TIME + ") / " + DAY_MS + ") AS int) " +
                         "AS day, " +
                     "COUNT(*) AS cnt " +
                     "FROM " + TAB_LOG + " " +
@@ -808,6 +918,13 @@ public class NotificationUsageStats {
             } finally {
                 cursor.close();
             }
+        }
+
+        private long getMidnightMs() {
+            GregorianCalendar midnight = new GregorianCalendar();
+            midnight.set(midnight.get(Calendar.YEAR), midnight.get(Calendar.MONTH),
+                    midnight.get(Calendar.DATE), 23, 59, 59);
+            return midnight.getTimeInMillis();
         }
 
         private void writeEvent(long eventTimeMs, int eventType, NotificationRecord r) {
@@ -873,6 +990,16 @@ public class NotificationUsageStats {
 
         public void dump(PrintWriter pw, String indent, DumpFilter filter) {
             printPostFrequencies(pw, indent, filter);
+        }
+
+        public JSONObject dumpJson(DumpFilter filter) {
+            JSONObject dump = new JSONObject();
+            try {
+                dump.put("post_frequency", JsonPostFrequencies(filter));
+            } catch (JSONException e) {
+                // pass
+            }
+            return dump;
         }
     }
 }
