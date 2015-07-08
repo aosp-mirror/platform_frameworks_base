@@ -43,6 +43,7 @@ public class AmbientState {
     private int mTopPadding;
     private boolean mShadeExpanded;
     private float mMaxHeadsUpTranslation;
+    private boolean mDismissAllInProgress;
 
     public int getScrollY() {
         return mScrollY;
@@ -182,5 +183,13 @@ public class AmbientState {
     public ExpandableNotificationRow getTopHeadsUpEntry() {
         HeadsUpManager.HeadsUpEntry topEntry = mHeadsUpManager.getTopEntry();
         return topEntry == null ? null : topEntry.entry.row;
+    }
+
+    public void setDismissAllInProgress(boolean dismissAllInProgress) {
+        mDismissAllInProgress = dismissAllInProgress;
+    }
+
+    public boolean isDismissAllInProgress() {
+        return mDismissAllInProgress;
     }
 }
