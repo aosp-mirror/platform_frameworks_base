@@ -91,13 +91,13 @@ void PathCache::computePathBounds(const SkPath* path, const SkPaint* paint,
 
 void PathCache::computeBounds(const SkRect& bounds, const SkPaint* paint,
         float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
-    const float pathWidth = fmax(bounds.width(), 1.0f);
-    const float pathHeight = fmax(bounds.height(), 1.0f);
+    const float pathWidth = std::max(bounds.width(), 1.0f);
+    const float pathHeight = std::max(bounds.height(), 1.0f);
 
     left = bounds.fLeft;
     top = bounds.fTop;
 
-    offset = (int) floorf(fmax(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
+    offset = (int) floorf(std::max(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
 
     width = uint32_t(pathWidth + offset * 2.0 + 0.5);
     height = uint32_t(pathHeight + offset * 2.0 + 0.5);
