@@ -1,0 +1,327 @@
+page.title=Backup automático para aplicativos
+page.tags=backup, previewresources, androidm
+page.keywords=backup, autobackup, preview
+page.image=images/cards/card-auto-backup_2x.png
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Neste documento</h2>
+      <ol>
+        <li><a href="#overview">Visão geral</a></li>
+        <li><a href="#configuring">Configurar backup de dados</a></li>
+        <li><a href="#testing">Testar configuração de backup</a></li>
+        <li><a href="#issues">Problemas conhecidos</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Frenquentemente, os usuários investem muito tempo e esforço para criar dados e configurar preferências
+ nos aplicativos. Preservar esses dados para os usuários caso substituam um dispositivo quebrado ou atualizem-se para um novo
+ é importante para garantir uma ótima experiência de usuário. Dispositivos que executam o sistema Android M Preview
+ ajudam a garantir uma boa experiência para os usuários nessas circunstâncias realizando o backup dos dados do aplicativo
+ automaticamente no Google Drive. Os dados do aplicativo são restaurados automaticamente se um usuário alterar ou atualizar um
+ dispositivo.
+</p>
+
+<p>
+  Os backups automáticos estão ativos para todos os aplicativos instalados nos dispositivos que executam o Android M Preview. Nenhum
+ código adicional de aplicativo é necessário. O sistema fornece aos usuários a habilidade de decisão
+ sobre os backups automáticos de dados. Também é possível limitar quais dados do aplicativo devem ter o backup.
+</p>
+
+<p>
+  Este documento descreve o novo comportamento do sistema e como especificar quais dados terão backup
+ para o aplicativo.
+</p>
+
+<h2 id="overview">Visão geral</h2>
+
+<p>
+  O recurso de backup automático preserva os dados que o aplicativo cria em um dispositivo de usuário enviando-os
+ à conta do Google Drive do usuário e criptografando-os. Não há cobranças para você ou para o usuário
+ em relação ao armazenamento de dados e os dados salvos não contam para a cota do Drive pessoal do usuário. Durante
+ o período do M Preview, os usuários podem armazenar até 25 MB por aplicativo do Android.
+</p>
+
+<p>
+  Os backups automáticos ocorrem a cada 24 horas, quando o dispositivo está ocioso, carregando e conectado
+ a uma rede Wi-Fi. Quando esses requisitos são atendidos, o serviço Backup Manager envia todos os dados de backup
+ disponíveis à nuvem. Quando um usuário transita para um novo dispositivo, ou desinstala e reinstala
+ o aplicativo com backup realizado, uma operação de restauração copia os dados de backup para o diretório de dados
+ do aplicativo recém-instalado.
+</p>
+
+<p class="note">
+  <strong>Observação:</strong> se o usuário usar o
+ <a href="{@docRoot}google/backup/index.html">serviço de Backup do Android</a> de legado, este novo comportamento
+ não se aplicará aos trabalhos de comportamento de backup existentes com o normal.
+</p>
+
+
+<h3 id="auto-exclude">Arquivos de dados excluídos automaticamente</h3>
+
+<p>
+  Nem todos os dados do aplicativo devem ter backup, como arquivos temporários e de armazenamento em cachê. Portanto, o serviço de backup automático
+ exclui determinados arquivos de dados por padrão:
+</p>
+
+<ul>
+  <li>Arquivos em diretórios identificados pelos métodos {@link android.content.Context#getCacheDir
+ getCacheDir()} e {@link android.content.ContextWrapper#getCodeCacheDir getCodeCacheDir()}
+.
+  </li>
+
+  <li>Arquivos localizados no armazenamento externo, a não ser que estejam no diretório identificado pelo método
+ {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+.
+  </li>
+
+  <li>Arquivos localizados no diretório identificado pelo método
+ {@link android.content.Context#getNoBackupFilesDir getNoBackupFilesDir()}.
+  </li>
+</ul>
+
+<h2 id="configuring">Configurar backup de dados</h2>
+
+<p>
+  Os dados criados por qualquer aplicativo instalado em um dispositivo M Preview têm backup, exceto
+ os arquivos excluídos automaticamente listados na seção anterior. É possível limitar e configurar
+ quais dados terão backup no seu aplicativo usando as configurações no manifesto do aplicativo.
+</p>
+
+<h3 id="include-exclude">Incluir ou excluir dados</h3>
+
+<p>
+  Dependendo de quais dados o aplicativo precisar e do modo que forem salvos, você precisará definir
+ regras específicas para incluir ou excluir determinados arquivos ou diretórios. O serviço de backup automático suporta
+ a configuração dessas regras de backup por meio do uso de um arquivo de configuração XML e do
+ manifesto do aplicativo. No manifesto do aplicativo, é possível especificar o arquivo de configuração de esquema de backup como exibido
+ no seguinte exemplo:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>
+  Neste código de exemplo, o atributo <code>android:fullBackupContent</code> especifica um arquivo XML,
+ localizado no diretório <code>res/xml/</code> do projeto de desenvolvimento do aplicativo, chamado
+ <code>mybackupscheme.xml</code>. Este arquivo de configuração inclui as regras de quais arquivos terão
+ backup. O seguinte código de exemplo mostra um arquivo de configuração que exclui um arquivo específico
+ dos backups:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;full-backup-content&gt;
+    &lt;exclude domain="database" path="device_info.db"/&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  Esta configuração de backup de exemplo exclui do backup somente um arquivo específico do banco de dados.
+  Todos os outros arquivos terão backup.
+</p>
+
+<h4>Sintaxe da configuração de backup</h4>
+
+<p>
+  A configuração do serviço de backup permite que você especifique quais arquivos incluir ou excluir do
+backup. A sintaxe para o arquivo XML de configuração de backup de dados é a seguinte:
+</p>
+
+<pre>
+&lt;full-backup-content&gt;
+    &lt;include domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+    &lt;exclude domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  Os seguintes elementos e atributos permitem que você especifique os arquivos que serão incluídos ou excluídos
+ do backup:
+</p>
+
+<ul>
+  <li>
+  <code>&lt;include&gt;</code>. Use este elemento se quiser especificar um conjunto de recursos
+para o backup, em vez de fazer o sistema realizar o backup de todos os dados no aplicativo por padrão. Ao especificar
+ uma tag <code>&lt;include&gt;</code>, o sistema realiza apenas o backup <em>dos recursos especificados</em>
+ com este elemento.
+  </li>
+
+  <li>
+  <code>&lt;exclude&gt;</code>. Use este elemento para especificar um conjunto de recursos que será excluído
+ do backup. O sistema realiza o backup de todos os dados no aplicativo, exceto os recursos especificados
+ com este elemento.
+  </li>
+
+  <li>
+  <code>domain.</code> O tipo de recurso que deseja excluir ou incluir no backup. Os valores válidos
+ que podem ser especificados para este atributo incluem:
+  </li>
+
+  <li style="list-style: none">
+  <ul>
+    <li>
+    <code>root</code>. Especifica que o recurso está no diretório raiz do aplicativo.
+    </li>
+
+    <li>
+    <code>file</code>. Corresponde ao recurso no diretório retornado
+ pelo método {@link android.content.Context#getFilesDir getFilesDir()}.
+    </li>
+
+    <li>
+    <code>database</code>. Corresponde ao banco de dados retornado
+ pelo método {@link android.content.Context#getDatabasePath getDatabasePath()} ou usando
+ a classe {@link android.database.sqlite.SQLiteOpenHelper}.
+    </li>
+
+    <li>
+    <code>sharedpref</code>. Corresponde a um objeto {@link android.content.SharedPreferences}
+ retornado pelo método {@link android.content.Context#getSharedPreferences getSharedPreferences()}
+.
+    </li>
+
+    <li>
+    <code>external</code>. Especifica que o recurso está no armazenamento externo e corresponde
+ a um arquivo no diretório retornado pelo método
+ {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}.
+    </li>
+
+    <li>
+    <code>path</code>. O caminho de arquivo para um recurso que deseja excluir ou incluir
+ no backup.
+    </li>
+  </ul>
+  </li>
+</ul>
+
+
+<h3 id="prohibit">Proibir backup de dados</h3>
+
+<p>
+  É possível optar por evitar backups automáticos de quaisquer dados do aplicativo configurando
+ o atributo <code>android:allowBackup</code> para <code>false</code> no elemento do aplicativo
+ do manifesto. Esta configuração é ilustrada no seguinte código de exemplo:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:allowBackup="false"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="testing">Testar configuração de backup</h2>
+
+<p>
+  Ao criar uma configuração de backup, deve-se testá-la para garantir que o aplicativo
+ salva os dados e que eles podem ser restaurados corretamente.
+</p>
+
+
+<h4>Ativar registro de backup</h4>
+
+<p>
+  Para ajudar a determinar como o recurso de backup analisa o arquivo XML, ative o registro
+ antes de realizar um backup de teste:
+</p>
+
+<pre class="noprettyprint">
+$ adb shell setprop log.tag.BackupXmlParserLogging VERBOSE
+</pre>
+
+<h4>Teste de backup</h4>
+
+<p>Para executar um backup manualmente, primeiro deve-se inicializar o Backup Manager chamando o seguinte
+ comando:
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr run
+</pre>
+
+<p>
+  Em seguida, realiza-se o backup manualmente do aplicativo usando o seguinte comando, especificando o nome
+ do pacote para o aplicativo como o parâmetro <code>&lt;PACKAGE&gt;</code>:
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr fullbackup &lt;PACKAGE&gt;</pre>
+
+
+<h4>Teste de restauração</h4>
+
+<p>
+  Para iniciar manualmente uma restauração após o backup dos dados do aplicativo, chame o seguinte comando,
+ especificando o nome do pacote para o aplicativo como o parâmetro <code>&lt;PACKAGE&gt;</code>:
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr restore &lt;PACKAGE&gt;
+</pre>
+
+<p class="warning">
+  <b>Aviso:</b> esta ação impede o aplicativo de apagar os dados antes de realizar
+ a operação de restauração.
+</p>
+
+<p>
+  Para iniciar o processo de restauração do aplicativo, deve-se desinstalar e reinstalá-lo. Os dados
+ do aplicativo são restaurados automaticamente a partir da nuvem quando a instalação do aplicativo for concluída.
+</p>
+
+
+<h4>Resolução de problemas de backups</h4>
+
+<p>
+  Caso ocorra problemas, é possível apagar os dados de backup e os metadados associados desativando o backup
+ e reativando-o em <strong>Settings (Configurações) &gt; Backup</strong>, redefinindo o dispositivo para as especificações de fábrica, ou
+ chamando este comando:
+</p>
+
+<pre>$ adb shell bmgr wipe &lt;TRANSPORT&gt; &lt;PACKAGE&gt;</pre>
+
+<p>
+  O valor <code>&lt;TRANSPORT&gt;</code> deve ser prefixado por <code>com.google.android.gms</code>.
+  Para obter uma lista de transportes, chame o seguinte comando:
+</p>
+
+<pre>$ adb shell bmgr list transports</pre>
+
+<h2 id="issues">Problemas conhecidos</h2>
+
+<p>A seguir estão os problemas conhecidos com o serviço de backup automático:</p>
+
+<ul>
+  <li><strong>Google Cloud Messaging</strong> -
+ Para aplicativos que usam o Google Cloud Messaging para notificações push, há um problema conhecido
+ onde o backup do ID de registro retornado pelo registro do Google Cloud Messaging pode
+ desencadear notificações push para o aplicativo restaurado. É importante consultar a API para obter um novo ID de registro
+ após a instalação em um novo dispositivo, o que não deve ser o caso se o ID de registro antigo
+ tiver backup. Para evitar isto, exclua o ID de registro do conjunto de arquivos
+ de backup.
+  </li>
+</ul>

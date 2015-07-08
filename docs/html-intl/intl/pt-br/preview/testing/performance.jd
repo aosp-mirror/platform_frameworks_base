@@ -1,0 +1,656 @@
+page.title=Teste de desempenho de exibição
+page.image=images/cards/card-test-performance_2x.png
+page.keywords=performance, fps, tools
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Neste documento</h2>
+      <ol>
+        <li><a href="#measure">Medir desempenho da IU</a>
+          <ul>
+            <li><a href="#aggregate">Agregar estatísticas de quadro</a></li>
+            <li><a href="#timing-info">Informações de precisão de quadro</a></li>
+            <li><a href="#timing-dump">Despejo de precisão de quadro simples</a></li>
+            <li><a href="#collection-window">Controlar janela de coleta de estatísticas</a></li>
+            <li><a href="#diagnose">Diagnosticar regressões de desempenho</a></li>
+            <li><a href="#resources">Recursos adicionais</a></li>
+          </ul>
+        </li>
+        <li><a href="#automate">Automatizar teste de desempenho da IU</a>
+          <ul>
+            <li><a href="#ui-tests">Configurar testes da IU</a></li>
+            <li><a href="#automated-tests">Configurar testes automatizados da IU</a></li>
+            <li><a href="#triage">Triagem e resolução de problemas observados</a></li>
+          </ul>
+        </li>
+      </ol>
+  </div>
+</div>
+
+
+<p>
+  O teste de desempenho da interface do usuário (IU) garante que o aplicativo
+ não só esteja de acordo com os requisitos funcionais, como também que as interações de usuários
+ sejam muito mais suaves, executando a 60 quadros por segundo de forma consistente (<a href="https://www.youtube.com/watch?v=CaMTIgxCSqU&amp;index=25&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">por que
+ 60 qps?</a>), sem nenhum quadro atrasado ou descartado ou, como gostamos de chamar, <em>"jank"</em>. Este documento explica as ferramentas disponíveis
+ para medir o desempenho da IU e dispõe uma abordagem para integrar
+ as medidas de desempenho de IU nas práticas de teste.
+</p>
+
+
+<h2 id="measure">Medir desempenho da IU</h2>
+
+<p>
+  Para aprimorar o desempenho, deve-se primeiro ter a habilidade de medir o desempenho
+ do sistema e, em seguida, diagnosticar e identificar problemas que podem ocorrer
+ em várias partes do processo.
+</p>
+
+<p>
+  <em><a href="https://source.android.com/devices/tech/debug/dumpsys.html">dumpsys</a></em> é uma ferramenta
+ do Android que é executada no dispositivo e despeja informações interessantes sobre o estado
+ dos serviços do sistema. Passar o comando <em>gfxinfo</em> para dumpsys fornece uma saída no logcat
+ com informações de desempenho relacionada aos quadros de animação que ocorrem
+ durante a fase de registro.
+</p>
+
+<pre>
+&gt; adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt;
+</pre>
+
+<p>
+  Este comando pode produzir diversas variáveis de dados de precisão de quadro.
+</p>
+
+<h3 id="aggregate">Agregar estatísticas de quadro</h3>
+
+<p>
+  Com o M Preview, o comando emite uma análise agregada dos dados de quadro para logcat,
+ coletados em todo o ciclo de vida do processo. Por exemplo:
+</p>
+
+<pre class="noprettyprint">
+Stats since: 752958278148ns
+Total frames rendered: 82189
+Janky frames: 35335 (42.99%)
+90th percentile: 34ms
+95th percentile: 42ms
+99th percentile: 69ms
+Number Missed Vsync: 4706
+Number High input latency: 142
+Number Slow UI thread: 17270
+Number Slow bitmap uploads: 1542
+Number Slow draw: 23342
+</pre>
+
+<p>
+  Estas estatísticas de alto nível carregam um alto nível de desempenho de renderização do aplicativo,
+ bem como a estabilidade em vários quadros.
+</p>
+
+
+<h3 id="timing-info">Informações de precisão de quadro</h3>
+
+<p>
+  Com o M Preview, há um novo comando para gfxinfo, o <em>framestats</em>, que fornece
+ informações de precisão de quadros extremamente detalhadas dos quadros recentes para que você possa rastrear
+ e depurar os problemas de forma mais precisa.
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; framestats
+</pre>
+
+<p>
+  Este comando emite informações de precisão de quadros, com marcações de data e hora, dos últimos 120
+ quadros produzidos pelo aplicativo. Abaixo, há um exemplo de saída bruta das estatísticas
+ de quadro de adb dumpsys gfxinfo &lt;PACKAGE_NAME&gt;:
+</p>
+
+<pre class="noprettyprint">
+0,49762224585003,49762241251670,9223372036854775807,0,49762257627204,49762257646058,49762257969704,49762258002100,49762265541631,49762273951162,49762300914808,49762303675954,
+0,49762445152142,49762445152142,9223372036854775807,0,49762446678818,49762446705589,49762447268818,49762447388037,49762453551527,49762457134131,49762474889027,49762476150120,
+0,49762462118845,49762462118845,9223372036854775807,0,49762462595381,49762462619287,49762462919964,49762462968454,49762476194547,49762476483454,49762480214964,49762480911527,
+0,49762479085548,49762479085548,9223372036854775807,0,49762480066370,49762480099339,49762481013089,49762481085850,49762482232152,49762482478350,49762485657620,49762486116683,
+</pre>
+
+<p>
+  Cada linha desta saída representa um quadro produzido pelo aplicativo. Cada linha tem um número fixo
+ de colunas que descrevem o tempo gasto em cada estágio do pipeline que produz quadros. A próxima seção descreve
+ este formato com detalhes, incluindo o que cada coluna representa.
+</p>
+
+
+<h4 id="fs-data-format">Formato de dados de estatísticas de quadro</h4>
+
+<p>
+  Como o bloco de dados é a saída no formato CSV, basta colá-lo na ferramenta
+ de planilha de sua escolha ou coletá-lo e analisá-lo com o script. A tabela a seguir explica o formato
+ das colunas de dados de saída. Todas as marcações de data e hora estão em nanossegundos.
+</p>
+
+<ul>
+  <li>SINALIZADORES
+    <ul>
+      <li>Linhas com ‘0’ para a coluna FLAGS podem ter o tempo total de quadros calculado
+ subtraindo a coluna INTENDED_VSYNC da coluna FRAME_COMPLETED.
+      </li>
+
+      <li>Se for um número diferente de zero, a linha deverá ser ignorada, pois o quadro será determinado
+ como exceção em comparação ao desempenho normal, onde espera-se que o layout e o desenho
+ demorem mais do que 16 ms. Eis alguns motivos para que isto ocorra:
+        <ul>
+          <li>Layout da janela alterado (como o primeiro quadro do aplicativo
+ ou após uma rotação)
+          </li>
+
+          <li>Também é possível que o quadro seja ignorado, quando alguns valores
+ ainda terão marcações de data e hora de lixo. Um quadro pode ser ignorado se, por exemplo,
+ estiver executando a 60 quadros por segundo ou se nada na tela estiver incorreto, o que não necessariamente
+ é um sinal de problema no aplicativo.
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>INTENDED_VSYNC
+    <ul>
+      <li>O ponto inicial planejado para o quadro. Se este valor for diferente de VSYNC,
+ significa que há um trabalho ocorrendo no encadeamento da IU que não permitiu que ele respondesse
+ ao sinal de vsync de forma precisa.
+      </li>
+    </ul>
+  </li>
+
+  <li>VSYNC
+    <ul>
+      <li>O valor de tempo foi usado em todos os escutadores vsync e no desenho para o quadro
+ (retorno de chamada do quadro Choreographer, animações, View.getDrawingTime(), etc.)
+      </li>
+
+      <li>Para entender mais sobre VSYNC e como ele influencia o aplicativo, assista ao vídeo
+ <a href="https://www.youtube.com/watch?v=1iaHxmfZGGc&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=23">
+Entendimento do VSYNC</a>.
+      </li>
+    </ul>
+  </li>
+
+  <li>OLDEST_INPUT_EVENT
+    <ul>
+      <li>A marcação de data e hora do evento de entrada mais antigo na fila de entrada, ou Long.MAX_VALUE
+ se não houver eventos de entrada para o quadro.
+      </li>
+
+      <li>Este valor é principalmente planejado para o trabalho da plataforma e tem utilidade limitada
+ para desenvolvedores de aplicativos.
+      </li>
+    </ul>
+  </li>
+
+  <li>NEWEST_INPUT_EVENT
+    <ul>
+      <li>A marcação de data e hora do evento de entrada mais recente na fila de entrada
+ ou 0 se não houver eventos de entrada para o quadro.
+      </li>
+
+      <li>Este valor é principalmente planejado para o trabalho da plataforma e tem utilidade limitada
+ para desenvolvedores de aplicativos.
+      </li>
+
+      <li>No entanto, é possível ter uma breve ideia da quantidade de latência que o aplicativo
+ está adicionado verificando (FRAME_COMPLETED - NEWEST_INPUT_EVENT).
+      </li>
+    </ul>
+  </li>
+
+  <li>HANDLE_INPUT_START
+    <ul>
+      <li>A marcação de data e hora em que os eventos de entrada foram despachados para o aplicativo.
+      </li>
+
+      <li>Ao olhar o horário entre isto e ANIMATION_START, é possível medir o tempo que o aplicativo
+ gastou para lidar com os eventos de entrada.
+      </li>
+
+      <li>Se este número for alto (&gt; 2 ms), indica que o aplicativo está gastando
+ tempo demais processando os eventos de entrada, como View.onTouchEvent(), o que pode indicar
+ que este trabalho precisa ser otimizado ou descarregado para um encadeamento diferente. Observe que há algumas situações,
+ como eventos de clique que iniciam novas atividades,
+ em que é esperado e aceitável que este número seja grande.
+      </li>
+    </ul>
+  </li>
+
+  <li>ANIMATION_START
+    <ul>
+      <li>A marcação de data e hora em que as animações registradas com Choreographer foram executadas.
+      </li>
+
+      <li>Ao olhar para o tempo entre isto e PERFORM_TRANVERSALS_START,
+ é possível determinar o tempo levado para avaliar todos os animadores
+ (ObjectAnimator, ViewPropertyAnimator e Transitions sendo as mais comuns) que estão sendo executados.
+      </li>
+
+      <li>Se este número for alto (&gt; 2 ms), verifique se o aplicativo gravou qualquer animador
+ personalizado ou quais campos de ObjectAnimators estão animando
+ e certifique-se de que eles sejam adequados para uma animação.
+      </li>
+
+      <li>Para saber mais sobre Choreographer, assista ao vídeo
+ <a href="https://developers.google.com/events/io/sessions/325418001">Para melhor ou pior</a>.
+      </li>
+    </ul>
+  </li>
+
+  <li>PERFORM_TRAVERSALS_START
+    <ul>
+      <li>Se você subtrair o DRAW_START deste valor, será possível extrair o tempo que as fases de medida e layout
+ levaram para serem concluídas (observação: durante uma rolagem ou animação,
+ espera-se que este valor seja próximo a zero).
+      </li>
+
+      <li>Para saber mais sobre as fases de medida e layout do pipeline de renderização,
+ assista ao vídeo <a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">
+Invalidações, layouts e desempenho</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>DRAW_START
+    <ul>
+      <li>O horário em que a fase de desenho de performTraversals foi iniciada. Este é o ponto inicial
+ do registro de listas de exibição de vistas que foram invalidadas.
+      </li>
+
+      <li>O tempo entre isto e SYNC_START é o tempo levado para chamar View.draw()
+ em todas as vistas invalidadas na árvore.
+      </li>
+
+      <li>Para obter mais informações sobre o modelo de desenho, assista aos vídeos <a href="{@docRoot}guide/topics/graphics/hardware-accel.html#hardware-model">Aceleração de hardware</a>
+ ou <a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">
+ Invalidações, layouts e desempenho</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>SYNC_START
+    <ul>
+      <li>O horário em que a fase de sincronização do desenho foi iniciada.
+      </li>
+
+      <li>Se o tempo entre isto e ISSUE_DRAW_COMMANDS_START for substancial (aproximadamente &gt; 0,4ms),
+ geralmente indicará que vários Bitmaps novos que foram desenhados deverão
+ ser enviados para o GPU.
+      </li>
+
+      <li>Para entender mais sobre a fase de sincronização, assista ao vídeo <a href="https://www.youtube.com/watch?v=VzYkVL1n4M8&amp;index=24&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu">
+Renderização de GPU de perfil</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>ISSUE_DRAW_COMMANDS_START
+    <ul>
+      <li>O horário em que o renderizador de hardware começou a emitir comandos de desenho para a GPU.
+      </li>
+
+      <li>O tempo entre isto e FRAME_COMPLETED fornece uma breve ideia da quantidade de trabalho de GPU
+ que o aplicativo está produzindo. Problemas com excesso ou efeitos de renderização
+ ineficientes são exibidos aqui.
+      </li>
+    </ul>
+  </li>
+
+  <li>SWAP_BUFFERS
+    <ul>
+      <li>O horário em que o eglSwapBuffers foi chamado, relativamente desinteressante
+ fora do trabalho da plataforma.
+      </li>
+    </ul>
+  </li>
+
+  <li>FRAME_COMPLETED
+    <ul>
+      <li>Tudo feito! O tempo total gasto trabalhando neste quadro pode ser calculando
+ realizando FRAME_COMPLETED - INTENDED_VSYNC.
+      </li>
+    </ul>
+  </li>
+
+</ul>
+
+<p>
+  É possível usar estes dados de várias formas. Uma visualização simples mas útil é o histograma
+ exibindo a distribuição dos tempos dos quadros (FRAME_COMPLETED - INTENDED_VSYNC)
+ em diferentes espaços de latência. Consulte a figura abaixo. Este gráfico mostra brevemente que a maioria
+ dos quadros estavam bons — bem abaixo do limite de 16 ms (representado em vermelho) —,
+ mas que alguns quadros estavam bem acima do limite. Podemos verificar as alterações neste histograma
+ com o tempo para encontrar as mudanças indiscriminadas ou novas exceções sendo criadas. Também é possível colocar em gráfico a latência de entrada,
+ o tempo gasto no layout ou outras medidas interessantes com base
+ nas várias marcações de data e hora nos dados.
+</p>
+
+<img src="{@docRoot}preview/images/perf-test-framestats.png">
+
+
+<h3 id="timing-dump">Despejo de precisão de quadro simples</h3>
+
+<p>
+  Se a <strong>renderização de GPU de perfil</strong> for definida para <strong>em adb shell dumpsys gfxinfo</strong>
+ nas opções de desenvolvedor, o comando <code>adb shell dumpsys gfxinfo</code> emitirá informações
+ de precisão para os 120 quadros mais recentes, divididas em algumas categorias
+ com valores separados por guias. Estes dados podem ser úteis para indicar quais partes do pipeline
+ de desenho podem estar lentas em um nível alto.
+</p>
+
+<p>
+  Semelhante às <a href="#fs-data-format">estatísticas de quadro</a> acima,
+ basta colá-los na ferramenta de planilha de sua escolha ou coletá-los e analisá-los
+ com um script. O gráfico a seguir exibe um detalhamento de onde os vários quadros produzidos
+ pelo aplicativo gastaram o tempo.
+</p>
+
+<img src="{@docRoot}preview/images/perf-test-frame-latency.png">
+
+<p>
+  O resultado de executar gfxinfo, copiar a saída, colá-lo no aplicativo de planilha
+ e gerar um gráfico dos dados como barras empilhadas.
+</p>
+
+<p>
+  Cada barra vertical representa um quadro da animação; sua altura representa a quantidade
+ de milissegundos para calcular este quadro de animação. Cada segmento colorido da barra
+ representa um estágio diferente do pipeline de renderização para que você possa ver que partes do aplicativo
+ podem estar criando um afunilamento. Para obter mais informações sobre o entendimento do pipeline
+ de renderização e como otimizá-lo, assista ao vídeo <a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;index=27&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">
+Invalidações, layouts e desempenho</a>.
+</p>
+
+
+<h3 id="collection-window">Controlar janela de coleta de estatísticas</h3>
+
+<p>
+  As precisões de quadro simples e estatísticas de quadro coletam dados
+ em um período muito curto — cerca de dois segundos de renderização. Para controlar este período de forma precisa — por exemplo,
+ restringir os dados para uma animação em particular —, é possível redefinir
+ todos os contadores e agregar as estatísticas coletadas.
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; reset
+</pre>
+
+<p>
+  Isto também pode ser usado em conjunto com os próprios comandos de despejo para coletar
+ e redefinir em uma cadência regular, capturando períodos de menos de dois segundos de quadros
+ continuamente.
+</p>
+
+
+<h3 id="diagnose">Diagnosticar regressões de desempenho</h3>
+
+<p>
+  A identificação de regressões é uma boa primeira etapa para rastrear os problemas
+ e manter o bem-estar do aplicativo. No entanto, o dumpsys identifica apenas a existência
+ e a gravidade relativa dos problemas. Ainda é necessário diagnosticar a causa particular dos problemas
+ de desempenho e encontrar maneiras adequadas de resolvê-los. Para isso, é altamente recomendado
+ o uso da ferramenta <a href="{@docRoot}tools/help/systrace.html">systrace</a>.
+</p>
+
+
+<h3 id="resources">Recursos adicionais</h3>
+
+<p>
+  Para obter mais informações sobre como o pipeline de renderização do Android funciona,
+ problemas comuns que podem ser encontrados e como resolvê-los,
+ alguns dos seguintes recursos podem ser úteis:
+</p>
+
+<ul>
+  <li>Desempenho de renderização 101
+  </li>
+  <li>Por que 60 qps?
+  </li>
+  <li>GPU e IU do Android
+  </li>
+  <li>Invalidações, layouts e desempenho
+  </li>
+  <li>Análise do desempenho de IU com Systrace
+  </li>
+</ul>
+
+
+<h2 id="automate">Automatizar teste de desempenho da IU</h2>
+
+<p>
+  Uma abordagem para o teste de desempenho da IU é fazer com que um testador humano
+ realize uma série de operações de usuário no aplicativo-alvo e procure visualmente problemas
+ ou gaste uma grande quantidade de tempo usando uma abordagem de ferramenta para encontrá-los. No entanto, esta abordagem manual
+ é repleta de riscos: a habilidade humana de notar alterações na taxa de quadros varia tremendamente,
+ além de consumir tempo, ser tedioso e propenso a erros.
+</p>
+
+<p>
+  Uma abordagem mais eficiente é registrar e analisar as métricas de desempenho essenciais
+ dos testes de IU automatizados. O Android M Developer Preview inclui novas capacidades de registro que facilitam
+ a determinação da quantidade e da gravidade de erros nas animações do aplicativo
+ e que podem ser usadas para compilar um processo rigoroso para determinar o desempenho atual
+ e rastrear os futuros objetivos de desempenho.
+</p>
+
+<p>
+  Este artigo mostra uma abordagem recomendada para usar estes dados para automatizar
+ o teste de desempenho.
+</p>
+
+<p>
+  Ele é geralmente dividido em duas ações principais. Primeiro: identificar o que está testando
+ e como será testado. Segundo: configuração e manutenção
+ de um ambiente de teste automatizado.
+</p>
+
+
+<h3 id="ui-tests">Configurar de testes da IU</h3>
+
+<p>
+  Antes de iniciar o teste automatizado, é importante determinar algumas decisões de alto nível
+ para entender corretamente o espaço de teste e as possíveis necessidades.
+</p>
+
+<h4>
+  Identificar principais animações/fluxos a testar
+</h4>
+
+<p>
+  Lembre-se que um desempenho ruim é mais visível aos usuários quando
+ interrompe uma animação suave. Portanto, ao identificar que tipos de ações de IU serão testadas, é útil se concentrar
+ nas animações principais que os usuários veem
+ ou nas mais importantes para a experiência. Por exemplo, eis alguns cenários comuns que pode ser útil identificar:
+</p>
+
+<ul>
+  <li>Rolagem de um ListView ou RecyclerView principal
+  </li>
+
+  <li>Animações durante ciclos de espera assíncrona
+  </li>
+
+  <li>Qualquer animação que possa ter manipulação ou carregamento de bitmap
+  </li>
+
+  <li>Animações com mistura alpha
+  </li>
+
+  <li>Desenho de vista personalizada com Canvas
+  </li>
+</ul>
+
+<p>
+  Trabalhe com engenheiros, designers, e gerentes de produto em sua equipe para priorizar
+ as animações de produto essenciais para a cobertura de teste.
+</p>
+
+<h4>
+  Defina os futuros objetivos e faça um rastreamento
+</h4>
+
+<p>
+  De um alto nível, talvez seja essencial identificar os objetivos específicos de desempenho
+ e concentrar-se em escrever testes e coletar dados. Por exemplo:
+</p>
+
+<ul>
+  <li>Quer apenas iniciar o rastreamento de desempenho de IU pela primeira vez para aprender mais?
+  </li>
+
+  <li>Quer evitar regressões que possam ser introduzidas no futuro?
+  </li>
+
+  <li>Está com 90% de quadros suaves hoje e deseja chegar a 98% neste trimestre?
+  </li>
+
+  <li>Está com 98% de quadros suaves e não quer regredir?
+  </li>
+
+  <li>O seu objetivo é aprimorar o desempenho em dispositivos de baixo nível?
+  </li>
+</ul>
+
+<p>
+  Em todos esses casos, você optará pelo rastreamento histórico, que exibe o desempenho
+ entre várias versões do aplicativo.
+</p>
+
+<h4>
+  Identificar dispositivos para realizar testes
+</h4>
+
+<p>
+  O desempenho do aplicativo varia dependendo do dispositivo em que está sendo executado. Alguns dispositivos podem
+ conter menos memória, GPUs menos eficientes ou chips de CPU mais lentos. Isto significa que as animações que podem
+ ter um bom desempenho em um conjunto de hardwares podem não ter o mesmo desempenho em outras,
+ podendo ser o resultado de um afunilamento em uma parte diferente do pipeline. Portanto, para contabilizar
+ esta variação em o que o usuário pode ver, escolha uma variação de dispositivos
+ para executar os testes: dispositivos e tablets de alto e baixo nível etc. Procure variações no desempenho de CPU,
+ RAM, densidade da tela, tamanho etc. Testes que passam em dispositivos de alto nível
+ podem falhar em dispositivos de baixo nível.
+</p>
+
+<h4>
+  Estruturas básicas para teste de IU
+</h4>
+
+<p>
+  Conjuntos de ferramenta, como <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a> e
+ <a href="{@docRoot}training/testing/ui-testing/espresso-testing.html">Espresso</a>,
+ são integrados para ajudar na automatização da ação de um usuário movendo-se pelo aplicativo. São estruturas simples
+ que imitam a interação de usuário no dispositivo. Para usar estas estruturas,
+ você cria efetivamente scripts únicos que executam um conjunto
+ de ações de usuário e reproduzem-nas no próprio dispositivo.
+</p>
+
+<p>
+  Ao combinar estes testes automatizados, juntamente com <code>dumpsys gfxinfo</code>, é possível criar
+ rapidamente um sistema reproduzível que permite a execução de um teste e a medição das informações
+ de desempenho desta condição em particular.
+</p>
+
+
+<h3 id="automated-tests">Configurar testes automatizados da IU</h3>
+
+<p>
+  Com a habilidade de executar um teste de IU e um pipeline para coletar
+ os dados de um único teste, a próxima etapa importante é adotar uma estrutura que pode executar
+ esse teste várias vezes, em vários dispositivos, e agregar os dados de desempenho resultados
+ para futuras análises da equipe de desenvolvimento.
+</p>
+
+<h4>
+  Uma estrutura para automatização de testes
+</h4>
+
+<p>
+  Vale observar que as estruturas de teste de IU (como o <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a>)
+ são executadas diretamente no emulador/dispositivo alvo. Enquanto as informações de coleta de desempenho feita
+ pelo <em>dumpsys gfxinfo</em> forem direcionadas por uma máquina hospedeira, envie comandos pelo ADB. Para ajudar a transmitir
+ a automatização dessas entidades separadas, a estrutura <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">MonkeyRunner</a>
+ foi desenvolvida: um sistema de script que é executado na máquina host que pode
+ emitir comandos para um conjunto de dispositivos conectados, bem como receber dados deles.
+</p>
+
+<p>
+  A compilação de um conjunto de scripts para uma automatização adequada de teste de desempenho de IU,
+ no mínimo, deve ser capaz de utilizar o MonkeyRunner para realizar as seguintes tarefas:
+</p>
+
+<ul>
+  <li>Carregar e iniciar um APK desejado para um emulador ou dispositivo alvo.
+  </li>
+
+  <li>Iniciar um teste de IU do UI Automator e permitir que ele seja executado.
+  </li>
+
+  <li>Coletar informações de desempenho por meio de <em>dumpsys gfxinfo</em><em>.</em>
+  </li>
+
+  <li>Agregar informações e exibi-las de forma útil para o desenvolvedor.
+  </li>
+</ul>
+
+
+<h3 id="triage">Triagem e resolução de problemas observados</h3>
+
+<p>
+  Quando os padrões ou regressões dos problemas forem identificados, a próxima etapa
+ é identificar e aplicar a resolução. Se a estrutura de teste automatizado preservar o detalhamento preciso para os quadros,
+ ela poderá ajudar na inspeção de alterações de layout/código suspeitos recentes (em caso
+ de regressão) ou reduzir a parte do sistema que você está analisando ao alternar
+ para a investigação manual. Para a investigação manual, <a href="{@docRoot}tools/help/systrace.html">systrace</a> é um ótimo lugar para começar,
+ exibindo as informações de precisão sobre cada estágio do pipeline de renderização,
+ cada encadeamento e núcleo no sistema, bem como quaisquer marcadores de evento personalizados definidos.
+</p>
+
+<h4>
+  Geração de perfis adequada de precisões temporais
+</h4>
+
+<p>
+  É importante observar as dificuldades em obter e medir as precisões
+ do desempenho de renderização. Esses números são, por natureza, não determinísticos e frequentemente
+ oscilam dependendo do estado do sistema, da quantidade de memória disponível,
+ da diminuição termal e da última vez em que a luz do sol atingiu a sua área da Terra. Ou seja, é possível executar
+ o mesmo teste duas vezes e receber números levemente diferentes
+ que podem ser muito próximos, mas não idênticos.
+</p>
+
+<p>
+  A coleta e a geração de perfil de dados nesta maneira significa executar o mesmo teste,
+ várias vezes, e acumular os resultados como uma média ou valor mediano (para a simplicidade,
+ chamemos de "lote"). Isto fornece uma aproximação do desempenho do teste,
+ já que precisões exatas não são necessárias.
+</p>
+
+<p>
+  Os lotes podem ser usados entre alterações de códigos para verificar o impacto relativo
+ dessas alterações no desempenho. Se a taxa de quadros média para o lote antes da alteração
+ for maior do que o lote após a alteração, então o resultado de desempenho wrt geral será um sucesso
+ para esta alteração em particular.
+</p>
+
+<p>
+  Isto significa que qualquer teste de IU automatizado feito deve levar este conceito
+ em consideração, bem como quaisquer anomalias que possam ocorrer durante um teste. Por exemplo,
+ se o desempenho do aplicativo repentinamente cair devido a algum problema do dispositivo
+ (que não tenha sido causado pelo aplicativo), então talvez seja necessário executar
+ o lote novamente para obter precisões menos caóticas.
+</p>
+
+<p>
+  Logo, quantas vezes deve-se realizar um teste antes de as medidas terem algum sentido? 10 vezes deve ser o mínimo,
+ com números altos como 50 ou 10 oferecendo resultados mais precisos
+ (é claro que se deve levar em consideração o tempo para ter mais precisão).
+</p>

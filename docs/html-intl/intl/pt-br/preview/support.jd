@@ -1,0 +1,67 @@
+page.title=Suporte
+page.image=images/cards/card-support_16-9_2x.png
+
+@jd:body
+
+<p>
+  Caso tenha encontrado erros ou tenha feedback sobre o M Developer Preview,
+ <a href="https://code.google.com/p/android-developer-preview/">crie um problema</a>
+ em nosso issue tracker.
+</p>
+
+<p>
+  Para obter mais auxílio, junte-se à comunidade
+ <a href="http://g.co/dev/AndroidMDevPreview">M Developer
+ Preview do Google+</a> para discutir suas experiências de desenvolvimento.
+</p>
+
+<h2 id="release-notes">Notas da versão</h2>
+
+<!--
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>M Developer Preview, Revision 2</a> <em>(Month 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+
+    <dt>Fix Category 1</dt>
+    <dd>
+      <ul>
+        <li>Fixed issue X.</li>
+        <li>Fixed issue Y.</li>
+        <li>Fixed issue Z.</li>
+      </ul>
+    </dd>
+
+    <dt>Fix Category 2</dt>
+    <dd>
+      <ul>
+        <li>Fixed issue X.</li>
+        <li>Fixed issue Y.</li>
+        <li>Fixed issue Z.</li>
+      </ul>
+    </dd>
+
+    </dl>
+  </div>
+</div>
+-->
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+<img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt="" />M Developer Preview, revisão 1</a> <em>(maio de 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Versão inicial.</dt>
+    </dl>
+  </div>
+</div>
+
+
