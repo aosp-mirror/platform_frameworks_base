@@ -1,0 +1,207 @@
+page.title=Configurar el SDK de la versión preliminar
+page.image=images/cards/card-set-up_16-9_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Contenido del documento</h2>
+      <ol>
+        <li><a href="#get-as13">Obtener Android Studio 1.3</a></li>
+        <li><a href="#get-sdk">Obtener el SDK de la versión preliminar</a></li>
+        <li><a href="#create-update">Crear o actualizar un proyecto</a></li>
+        <li><a href="#setup-test">Configurar para realizar pruebas</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>M Developer Preview SDK se encuentra disponible desde Android SDK Manager. En este documento, se asume que usted está familiarizado con el desarrollo de aplicaciones de Android, como el uso de Android SDK Manager y la creación de proyectos.
+
+ Si no está familiarizado con Android, consulte primero la sección de capacitación <a href="{@docRoot}training/basics/firstapp/index.html">Desarrollo de su primera aplicación</a>.</a>
+
+</p>
+
+<h2 id="get-as13">Obtener Android Studio 1.3</h2>
+
+<p>La versión preliminar para desarrolladores funciona mejor con Android Studio 1.3, que es una versión preliminar.
+ Se recomienda que instale la versión preliminar de Android Studio 1.3 para trabajar con el SDK de la versión preliminar.
+</p>
+
+<p class="caution"><strong>Advertencia:</strong> La versión preliminar Canary de Android Studio 1.3 aún se encuentra en desarrollo activo.
+ Si utiliza su equipo de desarrollo principal para probar la versión preliminar para desarrolladores, puede instalar una segunda instancia de Android para realizar las pruebas.
+
+</p>
+
+<p>Para instalar la versión preliminar de Android Studio 1.3:</p>
+
+<ol>
+  <li>Descargue y ejecute <a href="{@docRoot}tools/studio/index.html">Android Studio</a>
+
+  </li>
+
+  <li>Abra la ventana <strong>Settings</strong> (en Windows, puede hacerlo desde <strong>File &gt; Settings</strong>).
+ Seleccione el panel <strong>Appearance &amp; Behavior &gt; System  Settings &gt; Updates</strong>.
+
+
+
+    <p class="aside">En OSX, puede encontrar el panel <strong>Appearance &amp; Behavior</strong> en la ventana <strong>Preferences</strong> de Android Studio.
+
+</p>
+  </li>
+
+  <li> En el panel <strong>Updates</strong>, elija la opción <strong>Automatically check updates for:
+ Canary Channel</strong>.
+  </li>
+
+  <li>En el panel <strong>Updates</strong>, elija <strong>Check Now</strong> para verificar la última compilación de Canary.
+ Descargue e instale la compilación cuando se lo pida.
+
+  </li>
+</ol>
+
+<h2 id="get-sdk">Obtener el SDK de la versión preliminar</h2>
+
+<p>Para añadir los componentes del SDK de la versión preliminar a su entorno de desarrollo:</p>
+
+<ol>
+  <li>Ejecute la versión preliminar de Android Studio 1.3.
+  </li>
+
+  <li>Abra la ventana <strong>Settings</strong> (en Windows, puede hacerlo desde <strong>File &gt; Settings</strong>).
+ Seleccione el panel <strong>Appearance &amp; Behavior &gt; System  Settings &gt; Updates</strong>.
+
+
+
+    <p class="aside">En OSX, puede encontrar el panel <strong>Appearance &amp; Behavior</strong> en la ventana <strong>Preferences</strong> de Android Studio.
+
+</p>
+  </li>
+
+  <li>En el panel <strong>Updates</strong>, elija las opciones <strong>Automatically check updates for:
+ Canary Channel</strong> y <strong>Automatically check updates for Android SDK:
+ Preview Channel</strong>.
+  </li>
+
+  <li>Ejecute <strong>Android SDK Manager</strong>. (En Android Studio 1.3, SDK Manager está integrado a Android Studio, en lugar de ser una aplicación independiente).
+
+
+  </li>
+
+  <li>En la sección <strong>Platforms</strong>, elija <strong>Android MNC Preview</strong>.
+
+  </li>
+
+  <li>En la sección <strong>Tools</strong>, elija las últimas <strong>SDK Tools</strong>, <strong>Platform-tools</strong> y <strong>Build-tools</strong> de Android.
+
+
+  </li>
+
+  <li>Seleccione <strong>Install packages</strong> y acepte el contrato de licencia para todos los paquetes.
+
+  </li>
+
+  <li>Verifique que M Developer Preview esté instalado; para hacerlo, abra la ventana <strong>Settings</strong> y elija el panel <strong>Appearance &amp; Behavior &gt; System Settings &gt; Android SDK</strong>.
+
+</li>
+
+  <li>En el panel <strong>Android SDK</strong>, elija la pestaña <strong>SDK Platforms</strong>.
+ <strong>Android MNC Preview</strong> deberá figurar como <em>Installed</em>.
+ Luego, abra la pestaña <strong>SDK Tools</strong> para verificar que estén instaladas las últimas herramientas.
+
+
+  </li>
+</ol>
+<p>Después de completar estos pasos, los componentes de la versión preliminar ya estarán disponibles en su entorno de desarrollo.
+ </p>
+
+
+<h2 id="create-update">Crear o actualizar un proyecto</h2>
+
+<p>
+  Si desea utilizar las API de la versión preliminar, debe crear o actualizar un proyecto de desarrollo para utilizar los componentes de la versión preliminar.
+
+</p>
+
+
+<h3 id="create">Crear un proyecto nuevo</h3>
+
+<p>
+  Recomendamos que utilice Android Studio para crear un proyecto con la versión preliminar. Siga los pasos que se describen en <a href="{@docRoot}sdk/installing/create-project.html">Crear un proyecto</a> hasta que llegue a la pantalla <em>Form Factors</em> en el asistente.
+
+ Luego, realice los siguientes pasos para crear un proyecto configurado para la versión preliminar.
+
+</p>
+
+<ul>
+  <li>Seleccione <strong>Phone and Tablet</strong>.</li>
+  <li>Seleccione <strong>MNC: Android M (Preview)</strong> en <strong>Minimum SDK</strong>.
+</li>
+</ul>
+
+
+<h3 id="update">Actualizar un proyecto existente</h3>
+
+<p>
+  Para proyectos existentes, debe modificar la configuración del proyecto para habilitar las API de la versión preliminar. En su entorno de desarrollo, abra el archivo 
+<code>build.gradle</code> para su módulo y configure estos valores de la siguiente manera:
+
+</p>
+
+<ul>
+  <li><code>compileSdkVersion</code> se configura en <code>'android-MNC'</code></li>
+  <li><code>minSdkVersion</code> se configura en <code>'MNC'</code></li>
+  <li><code>targetSdkVersion</code> se configura en <code>'MNC'</code></li>
+</ul>
+
+
+<h2 id="setup-test">Configurar para realizar pruebas</h2>
+
+<p>
+  Probar una aplicación con la versión preliminar requiere un dispositivo o un dispositivo virtual configurado con la versión preliminar de la plataforma.
+ Si tiene un dispositivo compatible, puede instalar la plataforma de la versión preliminar para realizar la prueba.
+ De lo contrario, puede configurar un dispositivo virtual para realizar la prueba.
+</p>
+
+<h3 id="setup-device">Configurar un dispositivo físico</h3>
+
+<p>
+  Si tiene un Nexus 5, Nexus 6, Nexus 9 o Android TV, puede instalar una imagen de sistema de la versión preliminar en estos dispositivos para probar su aplicación. Con la herramienta Android Virtual Device Manager, puede configurar un dispositivo virtual con la versión preliminar de la plataforma desde Android Studio 
+
+
+
+</p>
+
+<p class="caution">
+  <strong>Importante:</strong> El proceso de instalación de una imagen preliminar en un dispositivo <em>elimina todos los datos del dispositivo</em>, por lo que debe hacer una copia de seguridad de los datos antes de instalar una imagen preliminar.
+
+</p>
+
+<h3 id="setupAVD">Configurar un dispositivo virtual</h3>
+
+<p>
+  Con la herramienta Android Virtual Device, puede configurar un dispositivo virtual para la versión preliminar de la plataforma desde Android Studio.
+
+</p>
+
+<p>Crear un AVD (dispositivo virtual de Android) con AVD Manager:</p>
+
+<ol>
+  <li>Instale el SDK de la versión preliminar en su entorno de desarrollo, como se detalla en <a href="{@docRoot}preview/setup-sdk.html">Configurar el SDK de la versión preliminar</a>.
+
+</li>
+  <li>Siga los pasos en <a href="{@docRoot}tools/devices/managing-avds.html">Administración de los ADV con ADV Manager</a>.
+
+ Utilice las siguientes configuraciones:
+    <ul>
+      <li><strong>Dispositivo:</strong> Nexus 5, Nexus 6, Nexus 9 o Android TV</li>
+      <li><strong>Destino:</strong>
+       Android M (versión preliminar) - Nivel de API M</li>
+      <li><strong>ABI:</strong> x86</li>
+    </ul>
+  </li>
+</ol>
+
+<p>
+  Para obtener más información sobre cómo crear dispositivos virtuales para realizar pruebas, consulte <a href="{@docRoot}tools/devices/index.html">Administración de dispositivos virtuales.</a>
+</p>
