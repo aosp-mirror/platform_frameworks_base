@@ -488,9 +488,13 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CaptureRequest#EDGE_MODE android.edge.mode}</li>
      * </ul>
      * </li>
+     * <li>{@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes} and
+     *   {@link CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES android.edge.availableEdgeModes} will both list ZERO_SHUTTER_LAG as a supported mode.</li>
      * </ul>
      *
+     * @see CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES
      * @see CaptureRequest#EDGE_MODE
+     * @see CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      * @see CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL
      * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
@@ -593,9 +597,13 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR android.reprocess.effectiveExposureFactor}</li>
      * </ul>
      * </li>
+     * <li>{@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes} and
+     *   {@link CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES android.edge.availableEdgeModes} will both list ZERO_SHUTTER_LAG as a supported mode.</li>
      * </ul>
      *
+     * @see CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES
      * @see CaptureRequest#EDGE_MODE
+     * @see CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      * @see CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR
      * @see CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL
@@ -1999,6 +2007,30 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int EDGE_MODE_HIGH_QUALITY = 2;
 
+    /**
+     * <p>Edge enhancement is applied at different levels for different output streams,
+     * based on resolution. Streams at maximum recording resolution (see {@link android.hardware.camera2.CameraDevice#createCaptureSession }) or below have
+     * edge enhancement applied, while higher-resolution streams have no edge enhancement
+     * applied. The level of edge enhancement for low-resolution streams is tuned so that
+     * frame rate is not impacted, and the quality is equal to or better than FAST (since it
+     * is only applied to lower-resolution outputs, quality may improve from FAST).</p>
+     * <p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
+     * with YUV or PRIVATE reprocessing, where the application continuously captures
+     * high-resolution intermediate buffers into a circular buffer, from which a final image is
+     * produced via reprocessing when a user takes a picture.  For such a use case, the
+     * high-resolution buffers must not have edge enhancement applied to maximize efficiency of
+     * preview and to avoid double-applying enhancement when reprocessed, while low-resolution
+     * buffers (used for recording or preview, generally) need edge enhancement applied for
+     * reasonable preview quality.</p>
+     * <p>This mode is guaranteed to be supported by devices that support either the
+     * YUV_REPROCESSING or PRIVATE_REPROCESSING capabilities
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} lists either of those capabilities).</p>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CaptureRequest#EDGE_MODE
+     */
+    public static final int EDGE_MODE_ZERO_SHUTTER_LAG = 3;
+
     //
     // Enumeration values for CaptureRequest#FLASH_MODE
     //
@@ -2103,6 +2135,31 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_MINIMAL = 3;
+
+    /**
+     * <p>Noise reduction is applied at different levels for different output streams,
+     * based on resolution. Streams at maximum recording resolution (see {@link android.hardware.camera2.CameraDevice#createCaptureSession }) or below have noise
+     * reduction applied, while higher-resolution streams have MINIMAL (if supported) or no
+     * noise reduction applied (if MINIMAL is not supported.) The degree of noise reduction
+     * for low-resolution streams is tuned so that frame rate is not impacted, and the quality
+     * is equal to or better than FAST (since it is only applied to lower-resolution outputs,
+     * quality may improve from FAST).</p>
+     * <p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
+     * with YUV or PRIVATE reprocessing, where the application continuously captures
+     * high-resolution intermediate buffers into a circular buffer, from which a final image is
+     * produced via reprocessing when a user takes a picture.  For such a use case, the
+     * high-resolution buffers must not have noise reduction applied to maximize efficiency of
+     * preview and to avoid over-applying noise filtering when reprocessing, while
+     * low-resolution buffers (used for recording or preview, generally) need noise reduction
+     * applied for reasonable preview quality.</p>
+     * <p>This mode is guaranteed to be supported by devices that support either the
+     * YUV_REPROCESSING or PRIVATE_REPROCESSING capabilities
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} lists either of those capabilities).</p>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     */
+    public static final int NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG = 4;
 
     //
     // Enumeration values for CaptureRequest#SENSOR_TEST_PATTERN_MODE

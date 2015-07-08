@@ -2081,7 +2081,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * will be applied. HIGH_QUALITY mode indicates that the
      * camera device will use the highest-quality enhancement algorithms,
      * even if it slows down capture rate. FAST means the camera device will
-     * not slow down capture rate when applying edge enhancement.</p>
+     * not slow down capture rate when applying edge enhancement. Every output stream will
+     * have a similar amount of enhancement applied.</p>
+     * <p>ZERO_SHUTTER_LAG is meant to be used by applications that maintain a continuous circular
+     * buffer of high-resolution images during preview and reprocess image(s) from that buffer
+     * into a final capture when triggered by the user. In this mode, the camera device applies
+     * edge enhancement to low-resolution streams (below maximum recording resolution) to
+     * maximize preview quality, but does not apply edge enhancement to high-resolution streams,
+     * since those will be reprocessed later if necessary.</p>
      * <p>For YUV_REPROCESSING, these FAST/HIGH_QUALITY modes both mean that the camera
      * device will apply FAST/HIGH_QUALITY YUV-domain edge enhancement, respectively.
      * The camera device may adjust its internal noise reduction parameters for best
@@ -2091,6 +2098,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #EDGE_MODE_OFF OFF}</li>
      *   <li>{@link #EDGE_MODE_FAST FAST}</li>
      *   <li>{@link #EDGE_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
+     *   <li>{@link #EDGE_MODE_ZERO_SHUTTER_LAG ZERO_SHUTTER_LAG}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES android.edge.availableEdgeModes}</p>
@@ -2105,6 +2113,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #EDGE_MODE_OFF
      * @see #EDGE_MODE_FAST
      * @see #EDGE_MODE_HIGH_QUALITY
+     * @see #EDGE_MODE_ZERO_SHUTTER_LAG
      */
     @PublicKey
     public static final Key<Integer> EDGE_MODE =
@@ -2763,7 +2772,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * will be applied. HIGH_QUALITY mode indicates that the camera device
      * will use the highest-quality noise filtering algorithms,
      * even if it slows down capture rate. FAST means the camera device will not
-     * slow down capture rate when applying noise filtering.</p>
+     * slow down capture rate when applying noise filtering. Every output stream will
+     * have a similar amount of enhancement applied.</p>
+     * <p>ZERO_SHUTTER_LAG is meant to be used by applications that maintain a continuous circular
+     * buffer of high-resolution images during preview and reprocess image(s) from that buffer
+     * into a final capture when triggered by the user. In this mode, the camera device applies
+     * noise reduction to low-resolution streams (below maximum recording resolution) to maximize
+     * preview quality, but does not apply noise reduction to high-resolution streams, since
+     * those will be reprocessed later if necessary.</p>
      * <p>For YUV_REPROCESSING, these FAST/HIGH_QUALITY modes both mean that the camera device
      * will apply FAST/HIGH_QUALITY YUV domain noise reduction, respectively. The camera device
      * may adjust the noise reduction parameters for best image quality based on the
@@ -2774,6 +2790,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #NOISE_REDUCTION_MODE_FAST FAST}</li>
      *   <li>{@link #NOISE_REDUCTION_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
      *   <li>{@link #NOISE_REDUCTION_MODE_MINIMAL MINIMAL}</li>
+     *   <li>{@link #NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG ZERO_SHUTTER_LAG}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes}</p>
@@ -2789,6 +2806,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #NOISE_REDUCTION_MODE_FAST
      * @see #NOISE_REDUCTION_MODE_HIGH_QUALITY
      * @see #NOISE_REDUCTION_MODE_MINIMAL
+     * @see #NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG
      */
     @PublicKey
     public static final Key<Integer> NOISE_REDUCTION_MODE =
