@@ -309,12 +309,10 @@ public final class NetworkStats implements AutoCloseable {
 
     /**
      * Collects device summary results into a Bucket.
-     * @param startTime
-     * @param endTime
      * @throws RemoteException
      */
-    Bucket getDeviceSummaryForNetwork(long startTime, long endTime) throws RemoteException {
-        mSummary = mSession.getDeviceSummaryForNetwork(mTemplate, startTime, endTime);
+    Bucket getDeviceSummaryForNetwork() throws RemoteException {
+        mSummary = mSession.getDeviceSummaryForNetwork(mTemplate, mStartTimeStamp, mEndTimeStamp);
 
         // Setting enumeration index beyond end to avoid accidental enumeration over data that does
         // not belong to the calling user.
@@ -325,12 +323,10 @@ public final class NetworkStats implements AutoCloseable {
 
     /**
      * Collects summary results and sets summary enumeration mode.
-     * @param startTime
-     * @param endTime
      * @throws RemoteException
      */
-    void startSummaryEnumeration(long startTime, long endTime) throws RemoteException {
-        mSummary = mSession.getSummaryForAllUid(mTemplate, startTime, endTime, false);
+    void startSummaryEnumeration() throws RemoteException {
+        mSummary = mSession.getSummaryForAllUid(mTemplate, mStartTimeStamp, mEndTimeStamp, false);
 
         mEnumerationIndex = 0;
     }
@@ -341,8 +337,9 @@ public final class NetworkStats implements AutoCloseable {
     void startHistoryEnumeration(int uid) {
         mHistory = null;
         try {
-            mHistory = mSession.getHistoryForUid(mTemplate, uid, android.net.NetworkStats.SET_ALL,
-                    android.net.NetworkStats.TAG_NONE, NetworkStatsHistory.FIELD_ALL);
+            mHistory = mSession.getHistoryIntervalForUid(mTemplate, uid,
+                    android.net.NetworkStats.SET_ALL, android.net.NetworkStats.TAG_NONE,
+                    NetworkStatsHistory.FIELD_ALL, mStartTimeStamp, mEndTimeStamp);
             setSingleUid(uid);
         } catch (RemoteException e) {
             Log.w(TAG, e);
@@ -368,9 +365,9 @@ public final class NetworkStats implements AutoCloseable {
             stepUid();
             mHistory = null;
             try {
-                mHistory = mSession.getHistoryForUid(mTemplate, getUid(),
+                mHistory = mSession.getHistoryIntervalForUid(mTemplate, getUid(),
                         android.net.NetworkStats.SET_ALL, android.net.NetworkStats.TAG_NONE,
-                        NetworkStatsHistory.FIELD_ALL);
+                        NetworkStatsHistory.FIELD_ALL, mStartTimeStamp, mEndTimeStamp);
             } catch (RemoteException e) {
                 Log.w(TAG, e);
                 // Leaving mHistory null
