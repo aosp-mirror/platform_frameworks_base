@@ -81,7 +81,6 @@ import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
@@ -106,7 +105,6 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.SwipeHelper;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -2145,11 +2143,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void runPostCollapseRunnables() {
-        int size = mPostCollapseRunnables.size();
-        for (int i = 0; i < size; i++) {
-            mPostCollapseRunnables.get(i).run();
-        }
+        ArrayList<Runnable> clonedList = new ArrayList<>(mPostCollapseRunnables);
         mPostCollapseRunnables.clear();
+        int size = clonedList.size();
+        for (int i = 0; i < size; i++) {
+            clonedList.get(i).run();
+        }
+
     }
 
     Animator mScrollViewAnim, mClearButtonAnim;
