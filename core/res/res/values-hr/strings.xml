@@ -355,6 +355,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Aplikaciji omogućuje upravljanje svjetiljkom."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"izravno pozivanje telefonskog broja"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Aplikaciji omogućuje pozivanje telefonskih brojeva bez vašeg sudjelovanja. To može dovesti do neočekivanih troškova ili poziva. Uzmite u obzir da se aplikaciji time ne omogućuje pozivanje brojeva u nuždi. Zlonamjerne aplikacije mogu vam uzrokovati dodatne troškove postavljanjem poziva bez vašeg odobrenja."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čitanje statusa i identiteta telefona"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Aplikaciji omogućuje pristup telefonskim značajkama uređaja. Ta dozvola aplikaciji omogućuje utvrđivanje telefonskog broja i ID-ova uređaja, je li poziv aktivan te udaljeni broj koji je povezan pozivom."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"spriječi mirovanje tabletnog uređaja"</string>
@@ -367,7 +371,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Aplikaciji omogućuje upotrebu infracrvenog odašiljača tableta."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Aplikaciji omogućuje upotrebu infracrvenih odašiljača televizora."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Aplikaciji omogućuje upotrebu infracrvenog odašiljača telefona."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"postavi pozadinsku sliku"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"postavi pozadinu"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Aplikaciji omogućuje postavljanje pozadinskih slika sustava."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"prilagođavanje veličine pozadinske slike"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Aplikaciji omogućuje postavljanje savjeta za veličinu sistemske pozadinske slike."</string>

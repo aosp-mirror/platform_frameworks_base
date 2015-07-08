@@ -356,6 +356,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Приложение сможет контролировать вспышку."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Осуществление телефонных вызовов"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Приложение сможет без вашего участия звонить на любой номер телефона. Это не относится к номерам экстренных служб. Вредоносные программы смогут совершать вызовы без вашего разрешения, что может привести к непредвиденным расходам."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"Получение данных о статусе телефона"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Приложение получит доступ к функциям телефона на устройстве. Кроме того, оно сможет определять номера телефонов и серийные номера моделей, состояние активности вызова, а также удаленные номера, с которыми установлено соединение."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"Отключение спящего режима"</string>
@@ -507,7 +511,7 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Изменять блокировку экрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокировка экрана"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Управлять способом и временем блокировки экрана."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Удалить все данные"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Удаление всех данных"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Удалять все данные на планшетном ПК без предупреждения путем сброса настроек."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сброс настроек и удаление всех данных на телевизоре без предупреждения."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Удалять все данные на телефоне без предупреждения путем сброса настроек."</string>
@@ -630,7 +634,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Мать"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Родитель"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Партнер"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Рекомендуют:"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Рекомендован"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Родственник"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Сестра"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Супруг(а)"</string>
@@ -1232,7 +1236,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Ещё"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Внутр. память"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Внутр. накопитель"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-карта"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"SD-карта <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB-накопитель"</string>
