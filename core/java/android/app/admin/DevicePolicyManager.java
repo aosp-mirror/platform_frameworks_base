@@ -4328,10 +4328,17 @@ public class DevicePolicyManager {
      * requests by applications. The policy can allow for normal operation which prompts the
      * user to grant a permission, or can allow automatic granting or denying of runtime
      * permission requests by an application. This also applies to new permissions declared by app
-     * updates.
+     * updates. When a permission is denied or granted this way, the effect is equivalent to setting
+     * the permission grant state via {@link #setPermissionGrantState}.
+     *
+     * <p/>As this policy only acts on runtime permission requests, it only applies to applications
+     * built with a {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#MNC} or later.
+     *
      * @param admin Which profile or device owner this request is associated with.
      * @param policy One of the policy constants {@link #PERMISSION_POLICY_PROMPT},
      * {@link #PERMISSION_POLICY_AUTO_GRANT} and {@link #PERMISSION_POLICY_AUTO_DENY}.
+     *
+     * @see #setPermissionGrantState
      */
     public void setPermissionPolicy(@NonNull ComponentName admin, int policy) {
         try {
