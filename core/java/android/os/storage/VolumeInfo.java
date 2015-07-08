@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.mtp.MtpStorage;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcel;
@@ -300,6 +299,8 @@ public class VolumeInfo implements Parcelable {
     }
 
     public StorageVolume buildStorageVolume(Context context, int userId) {
+        final StorageManager storage = context.getSystemService(StorageManager.class);
+
         final boolean removable;
         final boolean emulated;
         final boolean allowMassStorage = false;
@@ -310,14 +311,7 @@ public class VolumeInfo implements Parcelable {
             userPath = new File("/dev/null");
         }
 
-        String description = getDescription();
-        if (description == null) {
-            description = getFsUuid();
-        }
-        if (description == null) {
-            description = context.getString(android.R.string.unknownName);
-        }
-
+        String description = null;
         long mtpReserveSize = 0;
         long maxFileSize = 0;
         int mtpStorageId = StorageVolume.STORAGE_ID_INVALID;
@@ -325,11 +319,16 @@ public class VolumeInfo implements Parcelable {
         if (type == TYPE_EMULATED) {
             emulated = true;
 
+            final VolumeInfo privateVol = storage.findPrivateForEmulated(this);
+            if (privateVol != null) {
+                description = storage.getBestVolumeDescription(privateVol);
+            }
+
             if (isPrimary()) {
                 mtpStorageId = StorageVolume.STORAGE_ID_PRIMARY;
             }
 
-            mtpReserveSize = StorageManager.from(context).getStorageLowBytes(userPath);
+            mtpReserveSize = storage.getStorageLowBytes(userPath);
 
             if (ID_EMULATED_INTERNAL.equals(id)) {
                 removable = false;
@@ -340,6 +339,8 @@ public class VolumeInfo implements Parcelable {
         } else if (type == TYPE_PUBLIC) {
             emulated = false;
             removable = true;
+
+            description = storage.getBestVolumeDescription(this);
 
             if (isPrimary()) {
                 mtpStorageId = StorageVolume.STORAGE_ID_PRIMARY;
@@ -355,6 +356,10 @@ public class VolumeInfo implements Parcelable {
 
         } else {
             throw new IllegalStateException("Unexpected volume type " + type);
+        }
+
+        if (description == null) {
+            description = context.getString(android.R.string.unknownName);
         }
 
         return new StorageVolume(id, mtpStorageId, userPath, description, isPrimary(), removable,
