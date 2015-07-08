@@ -45,7 +45,6 @@ import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.android.support.DesignLibUtil;
-import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
 import com.android.layoutlib.bridge.bars.AppCompatActionBar;
 import com.android.layoutlib.bridge.bars.BridgeActionBar;
 import com.android.layoutlib.bridge.bars.Config;
@@ -116,6 +115,7 @@ import static com.android.ide.common.rendering.api.Result.Status.ERROR_NOT_INFLA
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_VIEWGROUP_NO_CHILDREN;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
+import static com.android.layoutlib.bridge.util.ReflectionUtils.isInstanceOf;
 
 /**
  * Class implementing the render session.
@@ -1341,8 +1341,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     }
                 }
             }
-        } else if (isInstanceOf(view, RecyclerViewUtil.CN_RECYCLER_VIEW)) {
-            RecyclerViewUtil.setAdapter(view, getContext(), getParams());
         } else if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();
@@ -1444,22 +1442,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             View child = group.getChildAt(i);
             handleScrolling(child);
         }
-    }
-
-    /**
-     * Check if the object is an instance of a class named {@code className}. This doesn't work
-     * for interfaces.
-     */
-    public static boolean isInstanceOf(Object object, String className) {
-        Class superClass = object.getClass();
-        while (superClass != null) {
-            String name = superClass.getName();
-            if (name.equals(className)) {
-                return true;
-            }
-            superClass = superClass.getSuperclass();
-        }
-        return false;
     }
 
     /**
