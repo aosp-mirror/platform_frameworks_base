@@ -497,8 +497,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>Each reprocessable capture session has an input {@link Surface} where the reprocess
      * capture requests get the input images from, rather than the camera device. The application
-     * can create a {@link android.media.ImageWriter} with this input {@link Surface} and use it to
-     * provide input images for reprocess capture requests.</p>
+     * can create a {@link android.media.ImageWriter ImageWriter} with this input {@link Surface}
+     * and use it to provide input images for reprocess capture requests. When the reprocessable
+     * capture session is closed, the input {@link Surface} is abandoned and becomes invalid.</p>
      *
      * @return The {@link Surface} where reprocessing capture requests get the input images from. If
      *         this is not a reprocess capture session, {@code null} will be returned.
