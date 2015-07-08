@@ -8,27 +8,55 @@
    pt-br-lang="Visão geral do programa"
    ru-lang="Обзор программы"
    zh-cn-lang="计划概览"
-   zh-tw-lang="程式總覽">Program Overview
-      </a></div>
+   zh-tw-lang="程式總覽">
+   Program Overview</a></div>
   </li>
 
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
+      es-lang="Descargas"
+      ja-lang="ダウンロード"
+      ko-lang="다운로드"
+      pt-br-lang="Downloads"
+      ru-lang="Загрузки"
+      zh-cn-lang="下载"
+      zh-tw-lang="下載">
       Downloads</a></div>
   </li>
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-sdk.html">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-sdk.html"
+      es-lang="Configurar el SDK de la versión preliminar"
+      ja-lang="Preview SDK のセットアップ"
+      ko-lang="미리 보기 SDK 설정하기"
+      pt-br-lang="Configuração do Preview SDK"
+      ru-lang="Настройка пакета SDK Preview"
+      zh-cn-lang="设置预览版 SDK"
+      zh-tw-lang="設定預覽版 SDK">
       Set up the SDK</a></div>
   </li>
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>preview/testing/guide.html">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>preview/testing/guide.html"
+      es-lang="Guía de prueba"
+      ja-lang="テストガイド"
+      ko-lang="테스트 가이드"
+      pt-br-lang="Guia de teste"
+      ru-lang="Руководство по тестированию"
+      zh-cn-lang="测试指南"
+      zh-tw-lang="測試指南">
       Testing Guide</a></div>
       <ul>
-        <li><a href="<?cs var:toroot ?>preview/testing/performance.html">
-          Performance Testing</a></li>
+        <li><a href="<?cs var:toroot ?>preview/testing/performance.html"
+      es-lang="Prueba de rendimiento de video"
+      ja-lang="表示パフォーマンスのテスト"
+      ko-lang="표시 성능 테스트"
+      pt-br-lang="Teste de desempenho de exibição"
+      ru-lang="Тестирование скорости отображения"
+      zh-cn-lang="测试显示性能"
+      zh-tw-lang="測試顯示效能">
+      Performance Testing</a></li>
       </ul>
   </li>
 
@@ -52,9 +80,23 @@
       zh-cn-lang="权限"
       zh-tw-lang="權限">Permissions
           </a></li>
-        <li><a href="<?cs var:toroot ?>preview/features/app-linking.html">
-          App Links</a></li>
-        <li><a href="<?cs var:toroot ?>preview/backup/index.html">
+        <li><a href="<?cs var:toroot ?>preview/features/app-linking.html"
+      es-lang="Vínculos de la aplicación"
+      ja-lang="App Links"
+      ko-lang="앱 링크"
+      pt-br-lang="Links de aplicativos"
+      ru-lang="Связи приложений"
+      zh-cn-lang="应用链接"
+      zh-tw-lang="應用程式連結">
+      App Links</a></li>
+        <li><a href="<?cs var:toroot ?>preview/backup/index.html"
+      es-lang="Copia de seguridad automática para aplicaciones"
+      ja-lang="アプリの自動バックアップ"
+      ko-lang="앱용 자동 백업"
+      pt-br-lang="Backup automático para aplicativos"
+      ru-lang="Автоматическое резервное копирование для приложений"
+      zh-cn-lang="自动备份应用"
+      zh-tw-lang="針對應用程式進行自動備份">
           Auto Backup for Apps</a></li>
       </ul>
   </li>
@@ -71,17 +113,38 @@
        </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/samples.html">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/samples.html"
+      es-lang="Ejemplos"
+      ja-lang="サンプル"
+      ko-lang="샘플"
+      pt-br-lang="Exemplos"
+      ru-lang="Примеры"
+      zh-cn-lang="示例"
+      zh-tw-lang="範例">
       Samples</a></div>
   </li>
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html"
+      es-lang="Soporte"
+      ja-lang="サポート"
+      ko-lang="지원"
+      pt-br-lang="Suporte"
+      ru-lang="Поддержка"
+      zh-cn-lang="支持"
+      zh-tw-lang="支援">
       Support</a></div>
   </li>
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/license.html">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/license.html"
+      es-lang="Contrato de licencia"
+      ja-lang="使用許諾契約"
+      ko-lang="라이선스 계약"
+      pt-br-lang="Contrato de licença"
+      ru-lang="Лицензионное соглашение"
+      zh-cn-lang="许可协议"
+      zh-tw-lang="授權協議">
       License Agreement</a></div>
   </li>
 
