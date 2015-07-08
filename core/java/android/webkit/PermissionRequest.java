@@ -26,6 +26,16 @@ import android.net.Uri;
  *
  * Either {@link #grant(String[]) grant()} or {@link #deny()} must be called in UI
  * thread to respond to the request.
+ *
+ * New protected resources whose names are not defined here may be requested in
+ * future versions of WebView, even when running on an older Android release. To
+ * avoid unintentionally granting requests for new permissions, you should pass the
+ * specific permissions you intend to grant to {@link #grant(String[]) grant()},
+ * and avoid writing code like this example:
+ * <pre>
+ * permissionRequest.grant(permissionRequest.getResources())  // This is wrong!!!
+ * </pre>
+ * See the WebView's release notes for information about new protected resources.
  */
 public abstract class PermissionRequest {
     /**
@@ -43,6 +53,15 @@ public abstract class PermissionRequest {
      */
     public final static String RESOURCE_PROTECTED_MEDIA_ID =
             "android.webkit.resource.PROTECTED_MEDIA_ID";
+    /**
+     * Resource will allow sysex messages to be sent to or received from MIDI devices. These
+     * messages are privileged operations, e.g. modifying sound libraries and sampling data, or
+     * even updating the MIDI device's firmware.
+     *
+     * Permission may be requested for this resource in API levels 21 and above, if the Android
+     * device has been updated to WebView 45 or above.
+     */
+    public final static String RESOURCE_MIDI_SYSEX = "android.webkit.resource.MIDI_SYSEX";
 
     /**
      * Call this method to get the origin of the web page which is trying to access
