@@ -47,7 +47,6 @@ public class SystemSensorManager extends SensorManager {
 
     private static boolean sSensorModuleInitialized = false;
     private static InjectEventQueue mInjectEventQueue = null;
-    private static boolean mDataInjectionMode = false;
 
     private final Object mLock = new Object();
 
@@ -235,7 +234,6 @@ public class SystemSensorManager extends SensorManager {
                     Log.e(TAG, "Data Injection mode not enabled");
                     return false;
                 }
-                mDataInjectionMode = true;
                 // Initialize a client for data_injection.
                 if (mInjectEventQueue == null) {
                     mInjectEventQueue = new InjectEventQueue(mMainLooper, this);
@@ -254,7 +252,7 @@ public class SystemSensorManager extends SensorManager {
     protected boolean injectSensorDataImpl(Sensor sensor, float[] values, int accuracy,
             long timestamp) {
         synchronized (mLock) {
-            if (!mDataInjectionMode) {
+            if (mInjectEventQueue == null) {
                 Log.e(TAG, "Data injection mode not activated before calling injectSensorData");
                 return false;
             }
@@ -264,7 +262,6 @@ public class SystemSensorManager extends SensorManager {
             if (ret != 0) {
                 mInjectEventQueue.dispose();
                 mInjectEventQueue = null;
-                mDataInjectionMode = false;
             }
             return ret == 0;
         }
