@@ -402,16 +402,6 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private static int sNextMtpIndex = 1;
-
-    private static int allocateMtpIndex(String volId) {
-        if (VolumeInfo.ID_EMULATED_INTERNAL.equals(volId)) {
-            return 0;
-        } else {
-            return sNextMtpIndex++;
-        }
-    }
-
     /** List of crypto types.
       * These must match CRYPT_TYPE_XXX in cryptfs.h AND their
       * corresponding commands in CommandListener.cpp */
@@ -742,7 +732,7 @@ class MountService extends IMountService.Stub
 
             // Create a stub volume that represents internal storage
             final VolumeInfo internal = new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL,
-                    VolumeInfo.TYPE_PRIVATE, null, null, 0);
+                    VolumeInfo.TYPE_PRIVATE, null, null);
             internal.state = VolumeInfo.STATE_MOUNTED;
             internal.path = Environment.getDataDirectory().getAbsolutePath();
             mVolumes.put(internal.id, internal);
@@ -967,8 +957,7 @@ class MountService extends IMountService.Stub
                 final String partGuid = TextUtils.nullIfEmpty(cooked[4]);
 
                 final DiskInfo disk = mDisks.get(diskId);
-                final int mtpIndex = allocateMtpIndex(id);
-                final VolumeInfo vol = new VolumeInfo(id, type, disk, partGuid, mtpIndex);
+                final VolumeInfo vol = new VolumeInfo(id, type, disk, partGuid);
                 mVolumes.put(id, vol);
                 onVolumeCreatedLocked(vol);
                 break;
@@ -2604,7 +2593,7 @@ class MountService extends IMountService.Stub
             final String uuid = null;
             final String state = Environment.MEDIA_REMOVED;
 
-            res.add(0, new StorageVolume(id, MtpStorage.getStorageIdForIndex(0), path,
+            res.add(0, new StorageVolume(id, StorageVolume.STORAGE_ID_INVALID, path,
                     description, primary, removable, emulated, mtpReserveSize,
                     allowMassStorage, maxFileSize, owner, uuid, state));
         }
