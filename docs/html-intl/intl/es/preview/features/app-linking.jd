@@ -1,0 +1,123 @@
+page.title=Vínculos de la aplicación
+page.image=images/cards/card-app-linking_2x.png
+page.keywords=vínculo de la aplicación, vínculos profundos, intentos
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Contenido del documento</h2>
+      <ol>
+        <li><a href="#web-assoc">Declarar la asociación de un sitio web</a></li>
+        <li><a href="#verfy-links">Solicitar verificación del vínculo de la aplicación</a></li>
+        <li><a href="#user-manage">Gestionar las configuraciones del vínculo de la aplicación</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  El sistema Android Intent es un mecanismo flexible para permitir a las aplicaciones controlar contenido y solicitudes.
+  Es posible que múltiples aplicaciones declaren modelos URI coincidentes en sus filtros de intento. Cuando un usuario hace clic en un vínculo web que no tiene un controlador de inicio predeterminado, la plataforma puede mostrar un diálogo para que el usuario seleccione una opción de una lista de aplicaciones que han declarado filtros de intento coincidentes.
+
+
+</p>
+
+<p>
+  Android M Developer Preview ofrece soporte para los vínculos de la aplicación, lo que mejora los controles de vínculos existentes al permitir a los desarrolladores de la aplicación asociar una aplicación con un dominio web propio.
+ Cuando los desarrolladores crean esta asociación, la plataforma puede determinar automáticamente la aplicación predeterminada utilizada para controlar un vínculo web particular y omitir el paso de solicitarles esta información a los usuarios.
+
+
+</p>
+
+
+<h2 id="web-assoc">Declarar una asociación de sitio web</h2>
+
+<p>
+  Los propietarios de un sitio web deben declarar las asociaciones con las aplicaciones a fin de establecer el vínculo de una aplicación. El propietario del sitio declara la relación con una aplicación al alojar un archivo JSON, denominado {@code statements.json}, en la ubicación conocida del domino:
+
+
+</p>
+
+<pre>http://&lt;domain&gt;:&lt;optional port&gt;/.well-known/statements.json</pre>
+
+<p class="note">
+  <strong>Nota:</strong>
+  Durante el período de M Developer Preview, el archivo JSON se verifica vía el protocolo http. Para la versión oficial de la plataforma, el archivo se verifica mediante el protocolo https cifrado.
+
+</p>
+
+<p>
+  Este archivo JSON indica la aplicación Android que se debe utilizar como el controlador predeterminado para las URL de este dominio.
+ Identifica la aplicación según estos campos:
+</p>
+
+<ul>
+  <li>{@code package_name}: El nombre de paquete declarado en el manifiesto de la aplicación.</li>
+
+  <li>{@code sha256_cert_fingerprints}: La huella dactilar SHA256 del certificado de firma de su aplicación.
+    Puede usar la herramienta Keytool de Java para generar la huella dactilar mediante el siguiente comando:
+    <pre>keytool -list -v -keystore my-release-key.keystore</pre>
+  </li>
+</ul>
+
+<p>
+  El siguiente listado de archivo muestra un ejemplo de los contenidos y del formato de un archivo
+{@code statements.json}:
+</p>
+
+<pre>
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "<strong>&lt;package name&gt;</strong>",
+    "sha256_cert_fingerprints": ["<strong>6C:EC:C5:0E:34:AE....EB:0C:9B</strong>"]
+  }
+}]
+</pre>
+
+
+<h2 id="verfy-links">Solicitar verificación del vínculo de la aplicación</h2>
+
+<p>
+  Una aplicación puede solicitar que la plataforma verifique automáticamente cualquier vínculo de aplicación definido por los nombres de host en los elementos de datos de sus filtros de intento, comparando con los archivos {@code statements.json} alojados en los respectivos dominios web.
+
+ Para solicitar la verificación del vínculo de la aplicación, agregue un atributo {@code android:autoVerify} a cada filtro de intento deseado en el manifiesto, como se muestra en el siguiente fragmento de código de manifiesto:
+
+
+</p>
+
+<pre>
+&lt;activity ...&gt;
+    &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;data android:scheme="http" android:host="www.android.com" /&gt;
+        &lt;data android:scheme="https" android:host="www.android.com" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>
+  Cuando el atributo {@code android:autoVerify} está presente en un manifiesto de aplicación, la plataforma intenta verificar los vínculos de la aplicación al instalar la aplicación.
+ Si la plataforma no puede verificar exitosamente los vínculos de la aplicación, la aplicación no se configura como la aplicación preferida para controlar los vínculos web.
+ La próxima vez que un usuario abra uno de estos vínculos, la plataforma recurrirá a mostrar al usuario un diálogo.
+
+
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Durante la prueba, existe la posibilidad de un falso positivo si la verificación falla, pero el usuario ha habilitado explícitamente la aplicación para que abra los vínculos compatibles sin preguntar, utilizando la aplicación de Configuraciones del sistema. En este caso, no se muestra el diálogo y el vínculo se dirige directamente a su aplicación, pero solo debido a la configuración del usuario y no porque la verificación se haya realizado correctamente.
+
+
+
+</p>
+
+
+<h2 id="user-manage">Gestionar las configuraciones del vínculo de la aplicación</h2>
+
+<p>
+  Los usuarios pueden cambiar las configuraciones del vínculo de la aplicación de manera que las URL se controlen como ellos lo prefieran. Puede revisar y gestionar los vínculos de la aplicación en la aplicación de Configuraciones del sistema, en <strong>Settings &gt; Apps &gt; App Info &gt; Open by default</strong>.
+
+
+</p>

@@ -1,0 +1,327 @@
+page.title=Copia de seguridad automática para aplicaciones
+page.tags=copia de seguridad, recursos de la versión preliminar, androidm
+page.keywords=copia de seguridad, copia de seguridad automática, versión preliminar
+page.image=images/cards/card-auto-backup_2x.png
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Contenido del documento</h2>
+      <ol>
+        <li><a href="#overview">Información general</a></li>
+        <li><a href="#configuring">Configuración de la copia de seguridad de datos</a></li>
+        <li><a href="#testing">Pruebas de la configuración de copia de seguridad</a></li>
+        <li><a href="#issues">Problemas conocidos</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  A menudo, los usuarios invierten tiempo y esfuerzo significativos para crear datos y configurar preferencias dentro de las aplicaciones.
+ Preservar los datos de los usuarios en caso de que reemplacen un dispositivo averiado o se actualicen a uno nuevo es una parte importante para garantizar una excelente experiencia del usuario.
+ Los dispositivos que ejecutan el sistema de la versión preliminar de Android M ayudan a garantizar una buena experiencia para los usuarios en estas circunstancias al realizar automáticamente copias de seguridad de los datos de la aplicación en Google Drive.
+
+ Los datos de la aplicación se restauran automáticamente si un usuario cambia o actualiza un dispositivo.
+
+</p>
+
+<p>
+  Las copias de seguridad automáticas se habilitan para todas las aplicaciones instaladas en dispositivos que ejecuten la versión preliminar de Android M. No se requiere ningún código de aplicación adicional.
+ El sistema les proporciona a los usuarios la capacidad de desactivar las copias de seguridad de datos automáticas.
+ También puede optar por limitar qué datos de su aplicación se incluyen en la copia de seguridad.
+</p>
+
+<p>
+  En este documento, se describe el nuevo comportamiento del sistema y el modo de especificar qué datos incluir en la copia de seguridad de la aplicación.
+
+</p>
+
+<h2 id="overview">Información general</h2>
+
+<p>
+  Para preservar los datos que su aplicación crea en un dispositivo de usuario, la característica de copia de seguridad automática los carga a la cuenta de Google Drive del usuario y los cifra.
+ No se aplican cargos para usted ni para el usuario por el almacenamiento de datos y los datos guardados no se consideran al calcular la capacidad máxima de la cuenta personal de Google Drive del usuario.
+ Durante el período de la versión preliminar de Android M, los usuarios pueden almacenar hasta 25 MB por aplicación de Android.
+
+</p>
+
+<p>
+  Las copias de seguridad automáticas se realizan cada 24 horas, cuando el dispositivo está inactivo, se está cargando y está conectado a una red Wi-Fi.
+ Cuando se cumplen estas condiciones, el servicio Backup Manager carga todos los datos de copia de seguridad disponibles a la nube.
+ Cuando el usuario pasa a un dispositivo nuevo, o desinstala y vuelve a instalar la aplicación de la copia de seguridad, una operación de restauración copia los datos incluidos en la copia de seguridad en el directorio de datos de la aplicación recientemente instalada.
+
+
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Si su aplicación utiliza el <a href="{@docRoot}google/backup/index.html">servicio Android Backup</a> heredado, este nuevo comportamiento no se aplica y el comportamiento de copia de seguridad existente funciona de manera habitual.
+
+
+</p>
+
+
+<h3 id="auto-exclude">Archivos de datos automáticamente excluidos</h3>
+
+<p>
+  No todos los datos de la aplicación se deben incluir en la copia de seguridad, como los archivos temporales y los cachés, por lo que el servicio de copias de seguridad automáticas excluye ciertos archivos de datos de manera predeterminada:
+
+</p>
+
+<ul>
+  <li>Archivos de los directorios a los que hacen referencia los métodos {@link android.content.Context#getCacheDir
+    getCacheDir()} y {@link android.content.ContextWrapper#getCodeCacheDir getCodeCacheDir()}
+.
+  </li>
+
+  <li>Archivos ubicados en almacenamiento externo, salvo que residan en el directorio al que hace referencia el método
+    {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+.
+  </li>
+
+  <li>Archivos ubicados en el directorio a los que hace referencia el método
+    {@link android.content.Context#getNoBackupFilesDir getNoBackupFilesDir()}.
+  </li>
+</ul>
+
+<h2 id="configuring">Configuración de la copia de seguridad de datos</h2>
+
+<p>
+  Las copias de seguridad se realizan para los datos creados por cualquier aplicación instalada en un dispositivo con la versión preliminar de Android M, excepto en el caso de los archivos excluidos automáticamente que se mencionaron en la sección anterior.
+ Usted puede limitar y configurar aún más los datos que se incluyen en la copia de seguridad de su aplicación y, para ello, debe utilizar configuraciones en el manifiesto de su aplicación.
+
+</p>
+
+<h3 id="include-exclude">Cómo incluir o excluir datos</h3>
+
+<p>
+  De acuerdo con los datos que su aplicación necesita y el modo en que usted guarda estos datos, es posible que tenga que definir reglas específicas para incluir o excluir ciertos archivos o directorios.
+ El servicio de copias de seguridad automáticas admite la configuración de estas reglas de copias de seguridad a través del uso de un archivo de configuración XML y el manifiesto de la aplicación.
+
+ En el manifiesto de la aplicación, puede especificar un archivo de configuración de esquema de la copia de seguridad, como se muestra en el siguiente ejemplo:
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>
+  En este código de ejemplo, el atributo <code>android:fullBackupContent</code> especifica un archivo XML, ubicado en el directorio <code>res/xml/</code> del proyecto de desarrollo de su aplicación, con el nombre <code>mybackupscheme.xml</code>.
+
+ Este archivo de configuración incluye reglas sobre los archivos para los que se realiza una copia de seguridad.
+ El siguiente código de ejemplo muestra un archivo de configuración que excluye un archivo específico de las copias de seguridad:
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;full-backup-content&gt;
+    &lt;exclude domain="database" path="device_info.db"/&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  Este ejemplo de configuración de copia de seguridad solo excluye un archivo específico de base de datos que no se incluirá en la copia de seguridad.
+  Todos los demás archivos se incluirán en la copia de seguridad.
+</p>
+
+<h4>Sintaxis de la configuración de copia de seguridad</h4>
+
+<p>
+  La configuración del servicio de copias de seguridad le permite especificar qué archivos incluir en la copia de seguridad o excluir de ella.
+ La sintaxis del archivo de configuración XML de copia de seguridad de datos es la siguiente:
+</p>
+
+<pre>
+&lt;full-backup-content&gt;
+    &lt;include domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+    &lt;exclude domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  Los siguientes elementos y atributos le permiten especificar qué archivos incluir de la copia de seguridad o excluir de ella:
+
+</p>
+
+<ul>
+  <li>
+  <code>&lt;include&gt;</code>. Use este elemento si desea especificar un conjunto de recursos para realizar una copia de seguridad, en lugar de hacer que el sistema realice una copia de seguridad de todos los datos de su aplicación de forma predeterminada.
+ Cuando especifica una etiqueta <code>&lt;include&gt;</code>, el sistema realiza una copia de seguridad <em>solo de los recursos que se especifican</em>
+ con este elemento.
+
+  </li>
+
+  <li>
+  <code>&lt;exclude&gt;</code>. Use este elemento para especificar un conjunto de recursos para excluir de la copia de seguridad.
+ El sistema realizará una copia de seguridad de todos los datos de su aplicación, excepto de los recursos que se especifican con este elemento.
+
+  </li>
+
+  <li>
+  <code>domain.</code> El tipo de recurso que desea incluir en la copia de seguridad o excluir de esta. Entre los valores válidos que usted puede especificar para este atributo se incluyen los siguientes:
+
+  </li>
+
+  <li style="list-style: none">
+  <ul>
+    <li>
+    <code>root</code>. Especifica que el recurso se encuentra en el directorio raíz de la aplicación.
+    </li>
+
+    <li>
+    <code>file</code>. Corresponde a un recurso del directorio devuelto por el método
+{@link android.content.Context#getFilesDir getFilesDir()}.
+    </li>
+
+    <li>
+    <code>database</code>. Corresponde a una base de datos devuelta por el método
+{@link android.content.Context#getDatabasePath getDatabasePath()} o mediante el uso de la clase
+{@link android.database.sqlite.SQLiteOpenHelper}.
+    </li>
+
+    <li>
+    <code>sharedpref</code>. Corresponde a un objeto {@link android.content.SharedPreferences} devuelto por el método {@link android.content.Context#getSharedPreferences getSharedPreferences()}
+.
+
+    </li>
+
+    <li>
+    <code>external</code>. Especifica que el recurso se encuentra en almacenamiento externo y corresponde a un archivo del directorio devuelto por el método
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}.
+
+    </li>
+
+    <li>
+    <code>path</code>. La ruta de archivo para un recurso que desea incluir en la copia de seguridad o excluir de esta.
+
+    </li>
+  </ul>
+  </li>
+</ul>
+
+
+<h3 id="prohibit">Cómo prohibir las copias de seguridad de datos</h3>
+
+<p>
+  Puede optar por impedir que se realicen copias de seguridad automáticas de los datos de su aplicación y, para ello, debe configurar el atributo
+<code>android:allowBackup</code> en <code>false</code> en el elemento de la aplicación de su manifiesto.
+ Esta configuración se ilustra en el siguiente código de ejemplo:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:allowBackup="false"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="testing">Pruebas de la configuración de copia de seguridad</h2>
+
+<p>
+  Cuando haya creado una configuración de copia de seguridad, debe probarla para garantizar que su aplicación guarde los datos y se pueda restaurar correctamente.
+
+</p>
+
+
+<h4>Cómo habilitar un registro de copias de seguridad</h4>
+
+<p>
+  Para ayudar a determinar la manera en que la característica de copia de seguridad está analizando su archivo XML, habilite el registro antes de realizar una copia de seguridad de prueba:
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell setprop log.tag.BackupXmlParserLogging VERBOSE
+</pre>
+
+<h4>Cómo probar la copia de seguridad</h4>
+
+<p>Para ejecutar manualmente una copia de seguridad, primero debe inicializar Backup Manager llamando al siguiente comando:
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr run
+</pre>
+
+<p>
+  Luego, realice una copia de seguridad de su aplicación manualmente utilizando el comando que se indica a continuación y especificando el nombre de paquete para su aplicación como el parámetro <code>&lt;PACKAGE&gt;</code>:
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr fullbackup &lt;PACKAGE&gt;</pre>
+
+
+<h4>Cómo probar la restauración</h4>
+
+<p>
+  Para iniciar una restauración manualmente después de realizar una copia de seguridad de los datos, llame al comando que se indica a continuación y especifique el nombre de paquete para su aplicación como el parámetro <code>&lt;PACKAGE&gt;</code>:
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr restore &lt;PACKAGE&gt;
+</pre>
+
+<p class="warning">
+  <b>Advertencia:</b> Esta acción detiene la aplicación y borra sus datos antes de realizar la operación de restauración.
+
+</p>
+
+<p>
+  Para iniciar el proceso de restauración de su aplicación, desinstale su aplicación y vuelva a instalarla. Los datos de la aplicación se restaurarán automáticamente desde la nube una vez que se complete la instalación.
+
+</p>
+
+
+<h4>Solución de problemas de las copias de seguridad</h4>
+
+<p>
+  Si tiene algún problema, borre los datos de la copia de seguridad y los metadatos asociados; para hacerlo, desactive y vuelva a activar la copia de seguridad en <strong>Settings &gt; Backup</strong>, restablezca el dispositivo a la configuración predeterminada de fábrica o llame al siguiente comando:
+
+
+</p>
+
+<pre>$ adb shell bmgr wipe &lt;TRANSPORT&gt; &lt;PACKAGE&gt;</pre>
+
+<p>
+  El valor <code>&lt;TRANSPORT&gt;</code> debe estar precedido por <code>com.google.android.gms</code>.
+  Para obtener una lista de transportes, llame al siguiente comando:
+</p>
+
+<pre>$ adb shell bmgr list transports</pre>
+
+<h2 id="issues">Problemas conocidos</h2>
+
+<p>Los siguientes son problemas conocidos del servicio de copias de seguridad automáticas:</p>
+
+<ul>
+  <li><strong>Google Cloud Messaging</strong>: En las aplicaciones que utilizan Google Cloud Messaging para notificaciones push, existe un problema conocido en el que al realizar una copia de seguridad de la Id. de registro devuelta por el registro de Google Cloud Messaging, se pueden romper las notificaciones push de la aplicación restaurada. Es importante realizar una consulta a la API para obtener una nueva Id. de registro después de realizar la instalación en un dispositivo nuevo, lo que no sucede si se realizó una copia de seguridad de la Id. de registro anterior.
+
+
+
+
+ Para evitar esta situación, excluya la Id. de registro del conjunto de archivos para incluir en la copia de seguridad.
+
+  </li>
+</ul>
