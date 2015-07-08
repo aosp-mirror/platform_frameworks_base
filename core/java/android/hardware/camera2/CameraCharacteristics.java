@@ -116,6 +116,20 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         }
 
         /**
+         * Return this {@link Key} as a string representation.
+         *
+         * <p>{@code "CameraCharacteristics.Key(%s)"}, where {@code %s} represents
+         * the name of this key as returned by {@link #getName}.</p>
+         *
+         * @return string representation of {@link Key}
+         */
+        @NonNull
+        @Override
+        public String toString() {
+            return String.format("CameraCharacteristics.Key(%s)", mKey.getName());
+        }
+
+        /**
          * Visible for CameraMetadataNative implementation only; do not use.
          *
          * TODO: Make this private or remove it altogether.

@@ -127,6 +127,20 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
         }
 
         /**
+         * Return this {@link Key} as a string representation.
+         *
+         * <p>{@code "CaptureResult.Key(%s)"}, where {@code %s} represents
+         * the name of this key as returned by {@link #getName}.</p>
+         *
+         * @return string representation of {@link Key}
+         */
+        @NonNull
+        @Override
+        public String toString() {
+            return String.format("CaptureResult.Key(%s)", mKey.getName());
+        }
+
+        /**
          * Visible for CameraMetadataNative implementation only; do not use.
          *
          * TODO: Make this private or remove it altogether.
