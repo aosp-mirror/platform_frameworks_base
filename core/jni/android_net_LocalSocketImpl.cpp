@@ -112,27 +112,6 @@ socket_bind_local (JNIEnv *env, jobject object, jobject fileDescriptor,
     }
 }
 
-/* private native void listen_native(int fd, int backlog) throws IOException; */
-static void
-socket_listen (JNIEnv *env, jobject object, jobject fileDescriptor, jint backlog)
-{
-    int ret;
-    int fd;
-
-    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-
-    if (env->ExceptionCheck()) {
-        return;
-    }
-
-    ret = listen(fd, backlog);
-
-    if (ret < 0) {
-        jniThrowIOException(env, errno);
-        return;
-    }
-}
-
 /*    private native FileDescriptor
 **    accept (FileDescriptor fd, LocalSocketImpl s)
 **                                   throws IOException;
@@ -587,7 +566,6 @@ static JNINativeMethod gMethods[] = {
     {"connectLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V",
                                                 (void*)socket_connect_local},
     {"bindLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V", (void*)socket_bind_local},
-    {"listen_native", "(Ljava/io/FileDescriptor;I)V", (void*)socket_listen},
     {"accept", "(Ljava/io/FileDescriptor;Landroid/net/LocalSocketImpl;)Ljava/io/FileDescriptor;", (void*)socket_accept},
     {"shutdown", "(Ljava/io/FileDescriptor;Z)V", (void*)socket_shutdown},
     {"read_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_read},
