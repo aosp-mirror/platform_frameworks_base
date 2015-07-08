@@ -338,9 +338,16 @@ static void ImageWriter_dequeueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
     int fenceFd = -1;
     status_t res = anw->dequeueBuffer(anw.get(), &anb, &fenceFd);
     if (res != OK) {
-        // TODO: handle different error cases here.
         ALOGE("%s: Dequeue buffer failed: %s (%d)", __FUNCTION__, strerror(-res), res);
-        jniThrowRuntimeException(env, "dequeue buffer failed");
+        switch (res) {
+            case NO_INIT:
+                jniThrowException(env, "java/lang/IllegalStateException",
+                    "Surface has been abandoned");
+                break;
+            default:
+                // TODO: handle other error cases here.
+                jniThrowRuntimeException(env, "dequeue buffer failed");
+        }
         return;
     }
     // New GraphicBuffer object doesn't own the handle, thus the native buffer
@@ -468,7 +475,16 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
     // Finally, queue input buffer
     res = anw->queueBuffer(anw.get(), buffer, fenceFd);
     if (res != OK) {
-        jniThrowRuntimeException(env, "Queue input buffer failed");
+        ALOGE("%s: Queue buffer failed: %s (%d)", __FUNCTION__, strerror(-res), res);
+        switch (res) {
+            case NO_INIT:
+                jniThrowException(env, "java/lang/IllegalStateException",
+                    "Surface has been abandoned");
+                break;
+            default:
+                // TODO: handle other error cases here.
+                jniThrowRuntimeException(env, "Queue input buffer failed");
+        }
         return;
     }
 
@@ -514,9 +530,16 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     // Step 1. Attach Image
     res = surface->attachBuffer(opaqueBuffer->mGraphicBuffer.get());
     if (res != OK) {
-        // TODO: handle different error case separately.
         ALOGE("Attach image failed: %s (%d)", strerror(-res), res);
-        jniThrowRuntimeException(env, "nativeAttachImage failed!!!");
+        switch (res) {
+            case NO_INIT:
+                jniThrowException(env, "java/lang/IllegalStateException",
+                    "Surface has been abandoned");
+                break;
+            default:
+                // TODO: handle other error cases here.
+                jniThrowRuntimeException(env, "nativeAttachImage failed!!!");
+        }
         return res;
     }
     sp < ANativeWindow > anw = surface;
@@ -545,7 +568,16 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     res = anw->queueBuffer(anw.get(), opaqueBuffer->mGraphicBuffer.get(), /*fenceFd*/
             -1);
     if (res != OK) {
-        jniThrowRuntimeException(env, "Queue input buffer failed");
+        ALOGE("%s: Queue buffer failed: %s (%d)", __FUNCTION__, strerror(-res), res);
+        switch (res) {
+            case NO_INIT:
+                jniThrowException(env, "java/lang/IllegalStateException",
+                    "Surface has been abandoned");
+                break;
+            default:
+                // TODO: handle other error cases here.
+                jniThrowRuntimeException(env, "Queue input buffer failed");
+        }
         return res;
     }
 
