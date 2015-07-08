@@ -35,6 +35,8 @@ interface INetworkStatsSession {
     NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
     /** Return historical network layer stats for specific UID traffic that matches template. */
     NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int set, int tag, int fields);
+    /** Return historical network layer stats for specific UID traffic that matches template. */
+    NetworkStatsHistory getHistoryIntervalForUid(in NetworkTemplate template, int uid, int set, int tag, int fields, long start, long end);
 
     /** Return array of uids that have stats and are accessible to the calling user */
     int[] getRelevantUids();
