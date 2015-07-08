@@ -247,7 +247,7 @@
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"勿扰"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"仅限优先打扰"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"仅限闹钟"</string>
-    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"完全静音"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"完全阻止"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"蓝牙"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"蓝牙（<xliff:g id="NUMBER">%d</xliff:g> 台设备）"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"蓝牙：关闭"</string>
@@ -326,7 +326,7 @@
     <string name="voice_hint" msgid="8939888732119726665">"滑动图标即可打开语音助理"</string>
     <string name="camera_hint" msgid="7939688436797157483">"滑动图标即可打开相机"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"完全静音。此模式也会将屏幕阅读器静音。"</string>
-    <string name="interruption_level_none" msgid="6000083681244492992">"完全静音"</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"完全阻止"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"仅限优先打扰"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"仅限闹钟"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"完全\n静音"</string>
