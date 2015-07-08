@@ -21,6 +21,8 @@ import android.graphics.PixelFormat;
 import android.media.Image.Plane;
 import android.util.Size;
 
+import libcore.io.Memory;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -109,12 +111,50 @@ class ImageUtils {
         ByteBuffer srcBuffer = null;
         ByteBuffer dstBuffer = null;
         for (int i = 0; i < srcPlanes.length; i++) {
+            int srcRowStride = srcPlanes[i].getRowStride();
+            int dstRowStride = dstPlanes[i].getRowStride();
             srcBuffer = srcPlanes[i].getBuffer();
+            dstBuffer = dstPlanes[i].getBuffer();
+            if (!(srcBuffer.isDirect() && dstBuffer.isDirect())) {
+                throw new IllegalArgumentException("Source and destination ByteBuffers must be"
+                        + " direct byteBuffer!");
+            }
+            if (srcPlanes[i].getPixelStride() != dstPlanes[i].getPixelStride()) {
+                throw new IllegalArgumentException("Source plane image pixel stride " +
+                        srcPlanes[i].getPixelStride() +
+                        " must be same as destination image pixel stride " +
+                        dstPlanes[i].getPixelStride());
+            }
+
             int srcPos = srcBuffer.position();
             srcBuffer.rewind();
-            dstBuffer = dstPlanes[i].getBuffer();
             dstBuffer.rewind();
-            dstBuffer.put(srcBuffer);
+            if (srcRowStride == dstRowStride) {
+                // Fast path, just copy the content if the byteBuffer all together.
+                dstBuffer.put(srcBuffer);
+            } else {
+                // Source and destination images may have different alignment requirements,
+                // therefore may have different strides. Copy row by row for such case.
+                int srcOffset = srcBuffer.position();
+                int dstOffset = dstBuffer.position();
+                Size effectivePlaneSize = getEffectivePlaneSizeForImage(src, i);
+                int srcByteCount = effectivePlaneSize.getWidth() * srcPlanes[i].getPixelStride();
+                for (int row = 0; row < effectivePlaneSize.getHeight(); row++) {
+                    if (row == effectivePlaneSize.getHeight() - 1) {
+                        // Special case for NV21 backed YUV420_888: need handle the last row
+                        // carefully to avoid memory corruption. Check if we have enough bytes to
+                        // copy.
+                        int remainingBytes = srcBuffer.remaining() - srcOffset;
+                        if (srcByteCount > remainingBytes) {
+                            srcByteCount = remainingBytes;
+                        }
+                    }
+                    directByteBufferCopy(srcBuffer, srcOffset, dstBuffer, dstOffset, srcByteCount);
+                    srcOffset += srcRowStride;
+                    dstOffset += dstRowStride;
+                }
+            }
+
             srcBuffer.position(srcPos);
             dstBuffer.rewind();
         }
@@ -174,5 +214,45 @@ class ImageUtils {
         }
 
         return (int)(width * height * estimatedBytePerPixel * numImages);
+    }
+
+    private static Size getEffectivePlaneSizeForImage(Image image, int planeIdx) {
+        switch (image.getFormat()) {
+            case ImageFormat.YV12:
+            case ImageFormat.YUV_420_888:
+            case ImageFormat.NV21:
+                if (planeIdx == 0) {
+                    return new Size(image.getWidth(), image.getHeight());
+                } else {
+                    return new Size(image.getWidth() / 2, image.getHeight() / 2);
+                }
+            case ImageFormat.NV16:
+                if (planeIdx == 0) {
+                    return new Size(image.getWidth(), image.getHeight());
+                } else {
+                    return new Size(image.getWidth(), image.getHeight() / 2);
+                }
+            case PixelFormat.RGB_565:
+            case PixelFormat.RGBA_8888:
+            case PixelFormat.RGBX_8888:
+            case PixelFormat.RGB_888:
+            case ImageFormat.JPEG:
+            case ImageFormat.YUY2:
+            case ImageFormat.Y8:
+            case ImageFormat.Y16:
+            case ImageFormat.RAW_SENSOR:
+            case ImageFormat.RAW10:
+                return new Size(image.getWidth(), image.getHeight());
+            case ImageFormat.PRIVATE:
+                return new Size(0, 0);
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Invalid image format %d", image.getFormat()));
+        }
+    }
+
+    private static void directByteBufferCopy(ByteBuffer srcBuffer, int srcOffset,
+            ByteBuffer dstBuffer, int dstOffset, int srcByteCount) {
+        Memory.memmove(dstBuffer, dstOffset, srcBuffer, srcOffset, srcByteCount);
     }
 }
