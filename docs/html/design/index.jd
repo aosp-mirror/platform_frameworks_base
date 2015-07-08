@@ -17,7 +17,7 @@ footer.hide=1
         <h1 class="dac-hero-title">Up and running with material design</h1>
         <p class="dac-hero-description">
         Android uses a new design metaphor inspired by paper and ink that provides a reassuring
-        sense of tactility. Visit the <a href="http://www.google.com/design/spec/material-design/introduction">material design</a> site for more resources. 
+        sense of tactility. Visit the <a href="https://www.google.com/design/spec/material-design/introduction.html">material design</a> site for more resources. 
         </p>
         <a class="dac-hero-cta" href="https://www.google.com/design/spec/material-design/introduction.html">
           <span class="dac-sprite dac-auto-chevron"></span>
