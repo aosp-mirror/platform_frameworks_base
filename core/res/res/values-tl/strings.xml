@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Pinapayagan ang app na kontrolin ang flashlight."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"direktang tawagan ang mga numero ng telepono"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Pinapayagan ang app na tumawag sa mga numero ng telepono nang wala ng iyong panghihimasok. Maaari itong magresulta sa mga hindi inaasahang pagsingil o tawag. Tandaan na hindi nito pinapayagan ang app na tumawag sa mga numerong pang-emergency. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagtawag nang wala ng iyong kumpirmasyon."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"basahin ang katayuan at pagkakakilanlan ng telepono"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Pinapayagan ang app na i-access ang mga tampok ng telepono ng device. Pinapayagan ng pahintulot na ito ang app na tukuyin ang numero ng telepono at  mga ID ng device, kung aktibo man ang isang tawag, at ang malayuang numerong ikinonekta ng isang tawag."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"pigilan ang tablet mula sa pag-sleep"</string>

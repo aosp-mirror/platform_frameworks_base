@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Апп нь гар чийдэнг удирдах боломжтой."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"утасны дугаарт шууд дуудлага хийх"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Апп нь таны оролцоогүйгээр дуудлага хийх боломжтой. Энэ нь төлөвлөгдөөгүй төлбөрт оруулах эсвэл дуудлага хийнэ. Энэ нь апп-г яаралтай дугаарт дуудлага хийхйг зөвшөөрөхгүй. Хортой апп нь таны зөвшөөрөлгүйгээр дуудлага хийж таныг төлбөрт оруулж болзошгүй"</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"утасны статус ба таниулбарыг унших"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Апп нь төхөөрөмжийн утасны функцд хандах боломжтой. Энэ зөвшөөрөл нь апп-д утасны дугаар болон төхөөрөмжийн ID-г, дуудлага идэвхтэй эсэх, холын дугаар дуудлагаар холбогдсон байгаа эсэхийг тогтоох боломжийг олгоно,"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"таблетыг унтуулахгүй байлгах"</string>

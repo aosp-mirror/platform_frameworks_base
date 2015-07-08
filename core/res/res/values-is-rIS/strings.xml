@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Leyfir forriti að stjórna vasaljósinu."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"hringja beint í símanúmer"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Leyfir forriti að hringja í símanúmer án íhlutunar notanda. Þetta getur haft í för með sér óumbeðin gjöld og símtöl. Athugaðu að þetta leyfir forritinu ekki að hringja í neyðarnúmer. Spilliforrit geta stofnað til kostnaðar fyrir þig með því að hringja símtöl án þinnar heimildar."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lesa stöðu símans og auðkenni"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leyfir forriti að fá aðgang að símaeiginleikum tækisins. Þessi heimild gerir forritinu kleift að komast að símanúmeri og auðkennum tækisins, hvort símtal er í gangi og símanúmeri viðmælanda í símtali."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"koma í veg fyrir að spjaldtölvan fari í biðstöðu"</string>

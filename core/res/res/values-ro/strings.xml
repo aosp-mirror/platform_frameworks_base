@@ -355,6 +355,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite aplicației să controleze lanterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"apelare directă numere de telefon"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite aplicației să apeleze numere de telefon fără intervenţia dvs. Acest lucru poate determina apariţia unor taxe sau a unor apeluri neaşteptate. Cu această permisiune aplicația nu poate apela numerele de urgenţă. Aplicaţiile rău intenţionate pot acumula costuri prin efectuarea unor apeluri fără confirmare."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"citeşte starea și identitatea telefonului"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicației să acceseze funcţiile de telefon ale dispozitivului. Cu această permisiune aplicația stabileşte numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanţă conectat printr-un apel."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"împiedicarea computerului tablet PC să intre în repaus"</string>
