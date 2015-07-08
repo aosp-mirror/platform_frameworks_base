@@ -1,0 +1,123 @@
+page.title=應用程式連結
+page.image=images/cards/card-app-linking_2x.png
+page.keywords=應用程式連結, 深層連結, 意圖
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文件內容</h2>
+      <ol>
+        <li><a href="#web-assoc">宣告網站關聯</a></li>
+        <li><a href="#verfy-links">要求應用程式連結驗證</a></li>
+        <li><a href="#user-manage">管理應用程式連結設定</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android 意圖系統是一個彈性機制，讓應用程式能夠用來處理內容和要求。
+  有許多應用程式可能會在它們的意圖篩選條件中宣告相符的 URI 模式。當使用者按一下不含預設啟動處理常式的 Web 連結時，平台可能會顯示一個對話方塊，讓使用者能夠從具備已宣告相符意圖篩選條件的應用程式清單中選取。
+
+
+</p>
+
+<p>
+  Android M 開發人員預覽版引進了應用程式連結的支援，這樣就能藉由允許應用程式開發人員將應用程式關聯至他們所擁有的 Web 網域，來改善現有的連結處理。
+當開發人員建立這個關聯時，平台可以自動判斷要用來處理特定 Web 連結的預設應用程式，並略過詢問使用者的程序。
+
+
+</p>
+
+
+<h2 id="web-assoc">宣告網站關聯</h2>
+
+<p>
+  網站擁有者必須宣告與應用程式的關聯，才能建立應用程式連結。站台擁有者可藉由在網域上的已知位置裝載名為 {@code statements.json} 的 JSON 檔案，來宣告與應用程式的關係：
+
+
+</p>
+
+<pre>http://&lt;domain&gt;:&lt;optional port&gt;/.well-known/statements.json</pre>
+
+<p class="note">
+  <strong>注意：</strong>
+  在 M 開發人員預覽版期間，會透過 http 通訊協定來驗證 JSON 檔案。如果是平台的正式版本，就會透過加密的 https 通訊協定來驗證該檔案。
+
+</p>
+
+<p>
+  這個 JSON 檔案會指出應該在這個網域中用來做為 URL 預設處理常式的 Android 應用程式。
+它會根據下列欄位來識別應用程式：
+</p>
+
+<ul>
+  <li>{@code package_name}：宣告於應用程式宣示說明中的套件名稱。</li>
+
+  <li>{@code sha256_cert_fingerprints}：您應用程式簽署憑證的 SHA256 指紋。
+    您可以使用 Java 金鑰工具，利用下列命令來產生指紋：
+    <pre>keytool -list -v -keystore my-release-key.keystore</pre>
+  </li>
+</ul>
+
+<p>
+  下列檔案清單會顯示
+{@code statements.json} 檔案的內容與格式範例：
+</p>
+
+<pre>
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "<strong>&lt;package name&gt;</strong>",
+    "sha256_cert_fingerprints": ["<strong>6C:EC:C5:0E:34:AE....EB:0C:9B</strong>"]
+  }
+}]
+</pre>
+
+
+<h2 id="verfy-links">要求應用程式連結驗證</h2>
+
+<p>
+  應用程式可以要求平台根據裝載於個別 Web 網域上的 {@code statements.json} 檔案，自動驗證在其意圖篩選條件的資料元素中由主機名稱所定義的任何應用程式連結。
+
+如要要求應用程式連結驗證，請將 {@code android:autoVerify}
+ 屬性新增到宣示說明中每個所需的意圖篩選條件中，如下列宣示說明程式碼片段所示：
+
+</p>
+
+<pre>
+&lt;activity ...&gt;
+    &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;data android:scheme="http" android:host="www.android.com" /&gt;
+        &lt;data android:scheme="https" android:host="www.android.com" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>
+  當 {@code android:autoVerify} 屬性出現在應用程式宣示說明時，平台即會在安裝該應用程式時嘗試驗證應用程式連結。
+如果平台無法成功驗證應用程式連結，就無法將該應用程式設定為偏好使用的應用程式來處理 Web 連結。
+當使用者下次開啟其中一個連結時，平台就切換回為該使用者展示一個對話方塊。
+
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>在測試期間，如果驗證失敗，可能會產生誤判，但是使用者已經使用系統「設定」應用程式，明確地啟用應用程式來自動開啟支援的連結。在此案例中，不會顯示任何對話方塊，而且連結會直接連至您的應用程式，但這只是基於使用者的設定，而不是因為驗證成功所致。
+
+
+
+</p>
+
+
+<h2 id="user-manage">管理應用程式連結設定</h2>
+
+<p>
+  使用者可以變更應用程式連結設定，讓他們能夠以偏好使用的方式來處理 URL。您可以在系統「設定」應用程式中，於 [設定] &gt; [應用程式] &gt; [應用程式資訊] &gt; [預設開啟]<strong></strong> 下方，檢閱和管理應用程式連結。
+
+
+</p>
