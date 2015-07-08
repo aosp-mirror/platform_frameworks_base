@@ -319,6 +319,7 @@ public class UsbDeviceManager {
         private String mCurrentFunctions;
         private UsbAccessory mCurrentAccessory;
         private int mUsbNotificationId;
+        private String mDefaultFunctions;
         private boolean mAdbNotificationShown;
         private int mCurrentUser = UserHandle.USER_NULL;
 
@@ -341,12 +342,18 @@ public class UsbDeviceManager {
         public UsbHandler(Looper looper) {
             super(looper);
             try {
-                // Special note about persist.sys.usb.config: We only ever look at the adb value
-                // from that property. Other values are ignored. persist.sys.usb.config is now
-                // only used to determine if adb is enabled or not.
                 // TODO: rename persist.sys.usb.config to something more descriptive.
                 // persist.sys.usb.config should never be unset.  But if it is, set it to "adb"
                 // so we have a chance of debugging what happened.
+                mDefaultFunctions = SystemProperties.get("persist.sys.usb.config", "adb");
+
+                // sanity check the sys.usb.config system property
+                // this may be necessary if we crashed while switching USB configurations
+                String config = SystemProperties.get("sys.usb.config", "none");
+                if (!config.equals(mDefaultFunctions)) {
+                    Slog.w(TAG, "resetting config to persistent property: " + mDefaultFunctions);
+                    SystemProperties.set("sys.usb.config", mDefaultFunctions);
+                }
 
                 mAdbEnabled = containsFunction(
                         SystemProperties.get(UsbManager.ADB_PERSISTENT_PROPERTY, "adb"),
@@ -414,11 +421,11 @@ public class UsbDeviceManager {
         }
 
         private void updatePersistentProperty() {
-            String newValue = mAdbEnabled ? "adb" : "none";
+            String newValue = getDefaultFunctions();
             String value = SystemProperties.get(UsbManager.ADB_PERSISTENT_PROPERTY);
             if (DEBUG) { Slog.d(TAG, "updatePersistentProperty newValue=" + newValue + " value=" + value); }
             if (!newValue.equals(value)) {
-                SystemProperties.set(UsbManager.ADB_PERSISTENT_PROPERTY, mAdbEnabled ? "adb" : "none");
+                SystemProperties.set(UsbManager.ADB_PERSISTENT_PROPERTY, getDefaultFunctions());
             }
             waitForState(newValue);
         }
@@ -797,7 +804,12 @@ public class UsbDeviceManager {
         }
 
         private String getDefaultFunctions() {
-            return mAdbEnabled ? UsbManager.USB_FUNCTION_ADB : UsbManager.USB_FUNCTION_MTP;
+            UserManager userManager = (UserManager)mContext.getSystemService(Context.USER_SERVICE);
+            if(userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER,
+                new UserHandle(mCurrentUser))) {
+               return "none";
+             }
+             return mDefaultFunctions;
         }
 
         public void dump(FileDescriptor fd, PrintWriter pw) {
