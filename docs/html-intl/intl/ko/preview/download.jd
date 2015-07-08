@@ -15,7 +15,7 @@ page.image=images/cards/card-download_16-9_2x.png
     <div class="sdk-terms" onfocus="this.blur()" style="width:678px">
 이것은 Android SDK 미리 보기 라이선스 계약서입니다(이하 "라이선스 계약").
 
-1. 개요 
+1. 개요
 
 1.1 Android SDK 미리 보기(본 라이선스 계약에서는 "미리 보기"라고 칭하며, 구체적으로 Android 시스템 파일, 패키지 API 및 미리 보기 라이브러리 파일이 이용 가능한 경우 및 이용 가능하게 전환된 경우 이를 포함한 것을 가리킴)는 본 라이선스 계약 조건에 따라 계약자에게 사용을 허여합니다. 본 라이선스 계약은 미리 보기 사용과 관련하여 계약자와 Google 간에 법적 구속력이 있는 계약을 체결합니다.
 
@@ -23,9 +23,9 @@ page.image=images/cards/card-download_16-9_2x.png
 
 1.3 "Google"은 미국 1600 Amphitheatre Parkway, Mountain View, CA 94043에 본사를 두고 있는 델라웨어주 법인인 Google Inc.를 의미합니다.
 
-2. 라이선스 계약에 동의 
+2. 라이선스 계약에 동의
 
-2.1 이 미리 보기를 사용하려면, 먼저 라이선스 계약에 동의해야 합니다. 이 라이선스 계약에 동의하지 않고 미리 보기를 사용해서는 안 됩니다. 
+2.1 이 미리 보기를 사용하려면, 먼저 라이선스 계약에 동의해야 합니다. 이 라이선스 계약에 동의하지 않고 미리 보기를 사용해서는 안 됩니다.
 
 2.2 수락을 클릭하고/거나 미리 보기를 사용하면 본 라이선스 계약 조건에 동의하는 것으로 간주됩니다.
 
@@ -33,9 +33,9 @@ page.image=images/cards/card-download_16-9_2x.png
 
 2.4 회사 또는 단체 내에서 내부적으로 미리 보기를 사용하며 고용주 또는 기타 단체를 대신하여 본 라이선스 계약 준수에 동의하는 경우, 계약자의 고용주나 그 단체에 본 라이선스 계약에 대한 구속력을 부여할 수 있는 모든 법적 권한을 계약자가 갖고 있음을 진술하고 보증합니다. 구속력을 부여할 수 있는 법적 권한이 없을 경우, 고용주 또는 기타 단체를 대신하여 본 라이선스 계약에 동의하거나 미리 보기를 사용할 수 없습니다.
 
-3. Google이 허하는 미리 보기 라이선스 
+3. Google이 허하는 미리 보기 라이선스
 
-3.1 본 라이선스 계약의 조건에 따라 Google은 계약자에게 로열티 없고 양도 불가능하며 비독점적이고 2차 인가를 불허하며, 한정되고 무효화할 수 있는 미리 보기 사용 권한을 허용하여 회사 또는 조직 내에서 개인적 또는 내부적으로 사용할 수 있도록 합니다. 이는 Android 플랫폼에서 실행되는 애플리케이션을 개발할 목적으로만 사용해야 합니다. 
+3.1 본 라이선스 계약의 조건에 따라 Google은 계약자에게 로열티 없고 양도 불가능하며 비독점적이고 2차 인가를 불허하며, 한정되고 무효화할 수 있는 미리 보기 사용 권한을 허용하여 회사 또는 조직 내에서 개인적 또는 내부적으로 사용할 수 있도록 합니다. 이는 Android 플랫폼에서 실행되는 애플리케이션을 개발할 목적으로만 사용해야 합니다.
 
 3.2 계약자는 SDK에 존재하는 지적 재산권을 포함한 SDK에 대한 모든 법적인 권리, 소유권 및 이익이 Google 또는 제3자에게 있음에 동의합니다 "지적 재산권"은 모든 특허법, 저작권법, 영업비밀법, 상표법상 존재하는 모든 권리 및 기타 모든 재산권을 의미합니다. Google은 계약자에게 명시적으로 부여하지 않은 모든 권리를 보유합니다.
 
@@ -43,7 +43,7 @@ page.image=images/cards/card-download_16-9_2x.png
 
 3.4 계약자는 미리 보기에서 파생된 소프트웨어 개발 키트의 배포, 이러한 키트 생성에 참여 또는 홍보를 포함하되 이에 국한되지 않고, Android의 단편화를 야기하는 어떠한 행동도 취하지 않을 것임에 동의합니다.
 
-3.5 오픈 소스 소프트웨어 라이선스에 의거한 미리 보기 구성요소의 사용, 재생산, 배포에는 본 라이선스 계약이 아닌, 해당 오픈 소스 소프트웨어 라이선스의 조건이 적용됩니다. 계약자는 허용된 모든 권한 하에서 그러한 오픈 소스 소프트웨어 라이선스에 관해 충실한 피허가자로서의 자세를 견지할 것이며 그러한 권한을 종료, 일시 중단 또는 침해하는 행위를 삼갈 것을 동의합니다. 
+3.5 오픈 소스 소프트웨어 라이선스에 의거한 미리 보기 구성요소의 사용, 재생산, 배포에는 본 라이선스 계약이 아닌, 해당 오픈 소스 소프트웨어 라이선스의 조건이 적용됩니다. 계약자는 허용된 모든 권한 하에서 그러한 오픈 소스 소프트웨어 라이선스에 관해 충실한 피허가자로서의 자세를 견지할 것이며 그러한 권한을 종료, 일시 중단 또는 침해하는 행위를 삼갈 것을 동의합니다.
 
 3.6 계약자는 Google이 제공하는 SDK의 형태 및 특성이 사전 통지 없이 변경될 수 있음에 동의하며, 이전 버전의 미리 보기에서 개발된 애플리케이션이 이후 버전의 SDK와 호환되지 않을 수 있음에 동의합니다. 계약자는 계약자 또는 사용자에게 사전 통지 없이 SDK(또는 SDK에 포함된 기능) 제공을(영구적 또는 일시적으로) 중단할 수 있는 권한이 Google에게 있음에 동의합니다.
 
@@ -51,7 +51,7 @@ page.image=images/cards/card-download_16-9_2x.png
 
 3.8 계약자는 SDK에 부착되어 있거나 포함되어 있는 모든 소유권 고지 사항(저작권 및 상표 고지 사항 포함)을 제거, 변경 또는 불분명하게 만들지 않을 것에 동의합니다.
 
-4. 계약자의 미리 보기 사용 
+4. 계약자의 미리 보기 사용
 
 4.1 Google은 본 라이선스 계약의 어떤 조항도 계약자(또는 계약자의 사용 허가자)가 미리 보기를 사용하여 개발한 소프트웨어 애플리케이션에 대한 권리, 소유권 또는 이익, 그리고 해당 애플리케이션에 존재하는 모든 지적 재산권을 부여하지 않는다는 점에 동의합니다.
 
@@ -65,7 +65,7 @@ page.image=images/cards/card-download_16-9_2x.png
 
 4.6 계약자는 본 라이선스 계약, 모든 해당 제3자 계약 또는 서비스 약관, 또는 모든 준거법 또는 규정에 의거한 계약자 의무 위반, 그리고 그로 인한 결과(Google 또는 제3자가 입을 수 있는 모든 피해나 손실 포함)에 전적으로 책임이 있다는 것(그리고 Google은 계약자 또는 모든 제3자에 대한 책임이 없다는 것)에 동의합니다.
 
-4.7 이 미리 보기는 현재 개발 단계에 있으며, 계약자의 테스트와 피드백은 그러한 개발 과정에 중요한 부분을 차지합니다. 미리 보기를 사용함으로써 계약자는 일부 기능의 구현은 아직 개발 중인 상태이며 미리 보기가 안정된 릴리스처럼 완벽하게 기능할 것이라 믿고 사용해서는 안 된다는 점을 인지하는 것으로 간주합니다. 계약자는 이 미리 보기를 사용한 애플리케이션을 공개적으로 배포 또는 배송하지 않기로 동의합니다. 이 미리 보기는 공식 Android SDK가 출시된 이후에는 더 이상 지원되지 않기 때문입니다. 
+4.7 이 미리 보기는 현재 개발 단계에 있으며, 계약자의 테스트와 피드백은 그러한 개발 과정에 중요한 부분을 차지합니다. 미리 보기를 사용함으로써 계약자는 일부 기능의 구현은 아직 개발 중인 상태이며 미리 보기가 안정된 릴리스처럼 완벽하게 기능할 것이라 믿고 사용해서는 안 된다는 점을 인지하는 것으로 간주합니다. 계약자는 이 미리 보기를 사용한 애플리케이션을 공개적으로 배포 또는 배송하지 않기로 동의합니다. 이 미리 보기는 공식 Android SDK가 출시된 이후에는 더 이상 지원되지 않기 때문입니다.
 
 5. 계약자의 개발자 자격 증명
 
@@ -139,7 +139,7 @@ page.image=images/cards/card-download_16-9_2x.png
 
 14.5 수출 규제. 미리 보기는 미국의 수출법과 규정의 적용을 받습니다. 계약자는 미리 보기에 적용되는 모든 국내 및 국제 수출법과 규정을 준수해야 합니다. 그러한 법에는 수출 대상국, 최종 사용자 및 최종 용도에 대한 제한이 포함됩니다.
 
-14.6 계약자 또는 Google은 상대 당사자의 사전 서면 승인 없이 본 라이선스 계약에서 부여된 권리를 제3자에게 양도하거나 이전할 수 없으며, 그러한 승인 없이 이루어진 양도 시도는 모두 무효입니다. 계약자는 Google의 사전 승인 없이 본 라이선스 계약 상의 책임 또는 의무를 위임할 수 없습니다. 
+14.6 계약자 또는 Google은 상대 당사자의 사전 서면 승인 없이 본 라이선스 계약에서 부여된 권리를 제3자에게 양도하거나 이전할 수 없으며, 그러한 승인 없이 이루어진 양도 시도는 모두 무효입니다. 계약자는 Google의 사전 승인 없이 본 라이선스 계약 상의 책임 또는 의무를 위임할 수 없습니다.
 
 14.7 본 라이선스 계약, 그리고 본 라이선스 계약 상의 계약자와 Google의 관계는 법률 조항 간의 충돌과는 무관하게 캘리포니아주법에 의한 규제를 받습니다. 계약자와 Google은 본 라이선스 계약으로부터 발생하는 모든 법적 문제 해결을 캘리포니아주 산타 클라라(Santa Clara) 카운티 내에 소재한 전속 관할 법원에 의뢰하는 것에 동의합니다. 위 규정에도 불구하고, 계약자는 Google이 여전히 모든 관할권에서 강제 구제책(또는 동등한 유형의 긴급 법적 구제)을 신청할 수 있음에 동의합니다.
   </div><!-- sdk terms -->
@@ -168,6 +168,11 @@ page.image=images/cards/card-download_16-9_2x.png
         <li><a href="#docs">개발자 관련 문서</a></li>
         <li><a href="#images">하드웨어 시스템 이미지</a></li>
       </ol>
+
+     <h2>Legacy downloads</h2>
+        <ol>
+           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview Archive</a></li>
+        </ol>
   </div>
 </div>
 
@@ -195,17 +200,18 @@ page.image=images/cards/card-download_16-9_2x.png
 
 <table>
   <tr>
-    <th scope="col">설명</th>
-    <th scope="col">다운로드/체크섬</th>
+    <th scope="col">Description</th>
+    <th scope="col">Download / Checksums</th>
   </tr>
   <tr id="docs-dl">
-    <td>Android M 미리 보기<br>개발자 문서</td>
-    <td><a href="#top" onclick="onDownload(this)">m-preview-1-developer-docs.zip</a><br>
-      MD5: b65201b0d35416f5a1b7a071b52854a7<br>
-      SHA-1: d47e856aa65e06897e6edd902ad8d2b1f05ac3ec
+    <td>Android M Preview 2<br>Developer Docs</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >m-preview-2-developer-docs.zip</a><br>
+      MD5: 1db6fff9c722b0339757e1cdf43663a8<br>
+      SHA-1: 5a4ae88d644e63824d21b0e18f8e3977a7665157
     </td>
   </tr>
-<table>
+</table>
 
 
 <h2 id="images">하드웨어 시스템 이미지</h2>
@@ -229,37 +235,41 @@ page.image=images/cards/card-download_16-9_2x.png
 
 <table>
   <tr>
-    <th scope="col">기기</th>
-    <th scope="col">다운로드/체크섬</th>
+    <th scope="col">Device</th>
+    <th scope="col">Download / Checksums</th>
   </tr>
   <tr id="hammerhead">
-    <td>Nexus 5(GSM/LTE) <br>"hammerhead"</td>
-    <td><a href="#top" onclick="onDownload(this)">hammerhead-MPZ44Q-preview-55d76d3a.tgz</a><br>
-      MD5: 9e2631b06c6525e401ceaae3677ff320<br>
-      SHA-1: 55d76d3a379b18f3363f28d8a462c236ab96fc36
+    <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >hammerhead-MPZ79M-preview-b1f4bde4.tgz</a><br>
+      MD5: 2ca9f18bf47a061b339bab52647ceb0d<br>
+      SHA-1: b1f4bde447eccbf8ce5d9b8b8ba954e3eac8e939
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
-    <td><a href="#top" onclick="onDownload(this)">shamu-MPZ44Q-preview-c1d6506a.tgz</a><br>
-      MD5: 307cbf9dab0a38df4ab2639d02be12aa<br>
-      SHA-1: c1d6506a74094bdb2f4b8677c7fe4967334f9ea8
+    <td><a href="#top" onclick="onDownload(this)"
+      >shamu-MPZ79M-preview-e1024040.tgz</a><br>
+      MD5: 24a2118da340b9afedfbdfc026f6ff81<br>
+      SHA-1: e10240408859d5188c4aae140e1c539130ba614b
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantis-MPZ44Q-preview-d15ad483.tgz</a><br>
-      MD5: fae40377fd999d2b09128665c915264d<br>
-      SHA-1: 7ab05f96093b2cb370b226f65931202714cbc2ca
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantis-MPZ79M-preview-9f305342.tgz</a><br>
+      MD5: 9edabf0a4c61b247f1cbb9dfdc0a899e<br>
+      SHA-1: 9f30534216f10899a6a75495fc7e92408ea333a7
     </td>
   </tr>
+
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td><a href="#top" onclick="onDownload(this)">fugu-MPZ44Q-preview-2406ba05.tgz</a><br>
-      MD5: 815902141a85cc65e7725f005cad31d5<br>
-      SHA-1: 2406ba0598dea1e69110497ac0bc8e16789bc8fb
+    <td>
+      <em>Coming soon</em>
     </td>
   </tr>
+
 </table>
 
 <h3 id="install-image">기기에 이미지 설치</h3>
