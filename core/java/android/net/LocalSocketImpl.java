@@ -206,16 +206,6 @@ class LocalSocketImpl
             FileDescriptor fd) throws IOException;
 
     /**
-     * Accepts a connection on a server socket.
-     *
-     * @param fd file descriptor of server socket
-     * @param s socket implementation that will become the new socket
-     * @return file descriptor of new socket
-     */
-    private native FileDescriptor accept
-            (FileDescriptor fd, LocalSocketImpl s) throws IOException;
-
-    /**
      * Create a new instance.
      */
     /*package*/ LocalSocketImpl()
@@ -338,14 +328,17 @@ class LocalSocketImpl
      * @param s a socket that will be used to represent the new connection.
      * @throws IOException
      */
-    protected void accept(LocalSocketImpl s) throws IOException
-    {
+    protected void accept(LocalSocketImpl s) throws IOException {
         if (fd == null) {
             throw new IOException("socket not created");
         }
 
-        s.fd = accept(fd, s);
-        s.mFdCreatedInternally = true;
+        try {
+            s.fd = Os.accept(fd, null /* address */);
+            s.mFdCreatedInternally = true;
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
     }
 
     /**
