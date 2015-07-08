@@ -2024,7 +2024,8 @@ public abstract class CameraMetadata<TKey> {
      * reasonable preview quality.</p>
      * <p>This mode is guaranteed to be supported by devices that support either the
      * YUV_REPROCESSING or PRIVATE_REPROCESSING capabilities
-     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} lists either of those capabilities).</p>
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} lists either of those capabilities) and it will
+     * be the default mode for CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CaptureRequest#EDGE_MODE
@@ -2154,7 +2155,8 @@ public abstract class CameraMetadata<TKey> {
      * applied for reasonable preview quality.</p>
      * <p>This mode is guaranteed to be supported by devices that support either the
      * YUV_REPROCESSING or PRIVATE_REPROCESSING capabilities
-     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} lists either of those capabilities).</p>
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} lists either of those capabilities) and it will
+     * be the default mode for CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CaptureRequest#NOISE_REDUCTION_MODE
