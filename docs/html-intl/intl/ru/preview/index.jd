@@ -1,0 +1,67 @@
+page.title=Android M Developer Preview
+page.tags="preview",
+meta.tags="preview, M preview", androidm
+fullpage=true
+section.landing=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<section class="dac-expand dac-hero dac-light" >
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-9of16 col-push-7of16 dac-hero-figure">
+        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png" srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
+             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
+      </div>
+      <div class="col-7of16 col-pull-9of16">
+        <h1 class="dac-hero-title">Android M Developer Preview</h1>
+        <p class="dac-hero-description">
+          Подготовьтесь к выходу следующей версии платформы Android. Протестируйте ваши приложения на устройствах Nexus 5, 6, 9 и
+Player. Узнайте о новых возможностях:&mdash; <strong>разрешениях на выполнение</strong>,
+новых функциях энергосбережения — <strong>режим «Doze»</strong> и <strong>ждущий режим для приложений</strong>, о новом
+<strong>помощнике</strong> и о многом другом.
+        </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Итак, приступим!
+</a><br>
+      </div>
+    </div>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:preview/landing/resources"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>
+    </div>
+  </div>
+</section>
+
+<section class="dac-section dac-gray"><div class="wrap">
+  <h1 class="dac-section-title">Ресурсы</h1>
+  <div class="dac-section-subtitle">
+    Важная информация, которая поможет вам подготовить ваши приложения для работы в Android M.
+  </div>
+ 
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:preview/landing/more"
+       data-cardSizes="6x6"
+       data-maxResults="16"></div>
+
+    <ul class="dac-section-links">
+      <li class="dac-section-link">
+        <a href="https://code.google.com/p/android-developer-preview/">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Сообщить о проблеме
+</a>
+      </li> 
+      <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
+        <span class="dac-sprite dac-auto-chevron"></span>
+        Присоединиться к сообществу в G+
+</a>
+      </li>
+    </ul>
+  </div>
+</section>
+

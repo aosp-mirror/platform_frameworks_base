@@ -1,0 +1,207 @@
+page.title=Настройка пакета SDK Preview
+page.image=images/cards/card-set-up_16-9_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Содержание документа</h2>
+      <ol>
+        <li><a href="#get-as13">Загрузка Android Studio 1.3</a></li>
+        <li><a href="#get-sdk">Загрузка пакета SDK Preview</a></li>
+        <li><a href="#create-update">Создание или обновление проекта</a></li>
+        <li><a href="#setup-test">Настройка для тестирования</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>Пакет SDK M Developer Preview можно загрузить с помощью менеджера SDK Android.
+В этой статье мы исходим из того, что вы уже знакомы с разработкой приложений Android и умеете работать с
+менеджером SDK Android и создавать проекты. Тем, кто только начинает работу с
+Android, рекомендуется сначала обратиться к разделу <a href="{@docRoot}training/basics/firstapp/index.html">Создание
+первого приложения</a>.</a></p>
+
+<h2 id="get-as13">Загрузка Android Studio 1.3</h2>
+
+<p>Для работы Developer Preview лучше всего подходит Android Studio 1.3, которая, кстати,
+также является предварительной версией. Для работы с пакетом SDK Preview настоятельно рекомендуется установить предварительную версию
+Android Studio 1.3.</p>
+
+<p class="caution"><strong>Внимание!</strong> Предварительная версия Android
+Studio 1.3 (сборка Canary) по-прежнему находится на стадии разработки. Если для тестирования
+ M Developer Preview вы используете свой основной компьютер для разработки, вы можете дополнительно установить
+Android Studio для целей тестирования.</p>
+
+<p>Порядок установки предварительной версии Android Studio 1.3</p>
+
+<ol>
+  <li>Загрузите и запустите <a href="{@docRoot}tools/studio/index.html">Android
+Studio</a>.
+  </li>
+
+  <li>Откройте окно <strong>Settings</strong> (в ОС Windows для этого выберите
+<strong>File &gt; Settings</strong>). Перейдите к панели
+<strong>Appearance &amp; Behavior &gt; System
+Settings &gt; Updates</strong>.
+
+    <p class="aside">В операционной системе OSX панель <strong>Appearance &amp;
+Behavior</strong>
+находится в Android Studio в окне <strong>Preferences</strong>.</p>
+  </li>
+
+  <li> На панели <strong>Updates</strong> выберите
+<strong>Automatically check updates for: Canary Channel</strong>.
+  </li>
+
+  <li>На панели <strong>Updates</strong> выберите <strong>Check Now</strong>,
+чтобы проверить наличие актуальных обновлений для сборки Canary. При появлении соответствующего запроса загрузите
+и установите сборку.
+  </li>
+</ol>
+
+<h2 id="get-sdk">Загрузка пакета SDK Preview</h2>
+
+<p>Порядок добавления компонентов SDK Preview в среду разработки</p>
+
+<ol>
+  <li>Запустите предварительную версию Android Studio 1.3.
+  </li>
+
+  <li>Откройте окно <strong>Settings</strong> (в ОС Windows для этого выберите
+<strong>File &gt; Settings</strong>). Перейдите к панели
+<strong>Appearance &amp; Behavior &gt; System
+Settings &gt; Updates</strong>.
+
+    <p class="aside">В операционной системе OSX панель <strong>Appearance &amp;
+Behavior</strong>
+находится в Android Studio в окне <strong>Preferences</strong>.</p>
+  </li>
+
+  <li>На панели <strong>Updates</strong> выберите параметры
+<strong>Automatically check updates for: Canary Channel</strong> и
+<strong>Automatically check updates for Android SDK: Preview Channel</strong>.
+  </li>
+
+  <li>Запустите <strong>менеджер SDK Android</strong>. (Менеджер SDK входит в состав Android Studio 1.3;
+теперь это не отдельное
+приложение.)
+  </li>
+
+  <li>В разделе <strong>Platforms</strong> выберите <strong>Android MNC
+Preview</strong>.
+  </li>
+
+  <li>В разделе <strong>Tools</strong> выберите последние инструменты
+<strong>SDK Tools</strong>, <strong>Platform-tools</strong> и
+<strong>Build-tools</strong> для Android.
+  </li>
+
+  <li>Нажмите на кнопку <strong>Install packages</strong> и примите условия лицензионного соглашения
+для всех пакетов.
+  </li>
+
+  <li>Убедитесь, что платформа M Developer Preview установлена. Для этого откройте окно
+<strong>Settings</strong> и перейдите к панели<strong>Appearance &amp; Behavior
+&gt; System Settings &gt; Android SDK</strong>.</li>
+
+  <li>На панели <strong>Android SDK</strong> выберите вкладку
+<strong>SDK Platforms</strong>. Для элемента <strong>Android MNC
+Preview</strong> должно быть указано <em>Installed</em>. Кроме того, перейдите на вкладку
+<strong>SDK Tools</strong> и убедитесь в том, что установлены актуальные
+версии инструментов.
+  </li>
+</ol>
+<p>После выполнения этих действий компоненты предварительной версии
+доступны для использования в вашей среде разработки. </p>
+
+
+<h2 id="create-update">Создание или обновление проекта</h2>
+
+<p>
+  Если вы хотите воспользоваться API-интерфейсами предварительной версии, создайте или обновите проект разработки так, чтобы в нем использовались
+компоненты предварительной версии.
+</p>
+
+
+<h3 id="create">Создание нового проекта</h3>
+
+<p>
+  Для создания проекта в предварительной версии рекомендуется использовать Android Studio. Выполните действия,
+приведенные в разделе <a href="{@docRoot}sdk/installing/create-project.html">Создание проекта</a>,
+пока в мастере проекта не появится экран <em>Form Factors</em>. Затем выполните
+действия по созданию проекта, настроенного для предварительной версии.
+</p>
+
+<ul>
+  <li>Установите флажок <strong>Phone and Tablet</strong>.</li>
+  <li>Выберите <strong>MNC: Android M (Preview)</strong> в разделе <strong>Minimum
+SDK</strong>.</li>
+</ul>
+
+
+<h3 id="update">Обновление существующего проекта</h3>
+
+<p>
+  В существующем проекте следует изменить его конфигурацию и настроить его на использование API-интерфейсов предварительной версии. В
+среде разработки откройте файл <code>build.gradle</code> для вашего модуля и задайте
+значения следующим образом:
+</p>
+
+<ul>
+  <li>для параметра <code>compileSdkVersion</code> задайте значение <code>'android-MNC'</code>;</li>
+  <li>для параметра <code>minSdkVersion</code> задайте значение <code>'MNC'</code>;</li>
+  <li>для параметра <code>targetSdkVersion</code> задайте значение <code>'MNC'</code>.</li>
+</ul>
+
+
+<h2 id="setup-test">Настройка для тестирования</h2>
+
+<p>
+  Для тестирования приложения в предварительной версии необходимо физическое или виртуальное устройство, настроенное с помощью
+предварительной версии платформы. Если имеется совместимое устройство, можно установить предварительную версию
+платформы для тестирования. Для тестирования также можно настроить виртуальное устройство.
+</p>
+
+<h3 id="setup-device">Настройка физического устройства</h3>
+
+<p>
+  Если у вас имеется устройство Nexus 5, Nexus 6, Nexus 9 или Android TV, для тестирования приложений вы можете установить на эти устройства
+системный образ предварительной версии.
+Также в Android Studio можно настроить виртуальное устройство с предварительной версией платформы,
+используя для этого диспетчер виртуальных устройств Android.
+</p>
+
+<p class="caution">
+  <strong>Внимание!</strong> Установка на устройство образа с предварительной версией платформы <em>приведет к удалению всех данных с
+устройства</em>, поэтому перед установкой обязательно создайте резервные копии необходимых данных.
+</p>
+
+<h3 id="setupAVD">Настройка виртуального устройства</h3>
+
+<p>
+  В Android Studio можно настроить виртуальное устройство с предварительной версией платформы,
+используя для этого диспетчер виртуальных устройств Android.
+</p>
+
+<p>Порядок настройки AVD в диспетчере AVD</p>
+
+<ol>
+  <li>Установите SDK Preview в свою среду разработки, как описано в разделе
+<a href="{@docRoot}preview/setup-sdk.html">Настройка пакета
+SDK Preview</a>.</li>
+  <li>Выполните действия, указанные в статье
+<a href="{@docRoot}tools/devices/managing-avds.html">Управление виртуальными устройствами с помощью диспетчера
+AVD</a>. Используйте следующие настройки:
+    <ul>
+      <li><strong>Device:</strong> Nexus 5, Nexus 6, Nexus 9 или Android TV</li>
+      <li><strong>Target:</strong>
+       Android M (Preview) – API Level M</li>
+      <li><strong>ABI:</strong> x86</li>
+    </ul>
+  </li>
+</ol>
+
+<p>
+  Дополнительные сведения о создании виртуальных устройств для тестирования представлены в статье <a href="{@docRoot}tools/devices/index.html">Управление виртуальными устройствами</a>.
+</p>
