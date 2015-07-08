@@ -31,6 +31,7 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
+import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,10 +40,10 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.ObbInfo;
-import android.mtp.MtpStorage;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.DropBoxManager;
@@ -52,7 +53,6 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
@@ -73,6 +73,7 @@ import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -176,7 +177,6 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private static final boolean LOCAL_LOGD = false;
     private static final boolean DEBUG_EVENTS = false;
     private static final boolean DEBUG_OBB = false;
 
@@ -723,10 +723,30 @@ class MountService extends IMountService.Stub
         MountServiceIdler.scheduleIdlePass(mContext);
     }
 
+    /**
+     * MediaProvider has a ton of code that makes assumptions about storage
+     * paths never changing, so we outright kill them to pick up new state.
+     */
+    @Deprecated
+    private void killMediaProvider() {
+        final ProviderInfo provider = mPms.resolveContentProvider(MediaStore.AUTHORITY, 0,
+                UserHandle.USER_OWNER);
+        if (provider != null) {
+            final IActivityManager am = ActivityManagerNative.getDefault();
+            try {
+                am.killApplicationWithAppId(provider.applicationInfo.packageName,
+                        UserHandle.getAppId(provider.applicationInfo.uid), "vold reset");
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
     private void resetIfReadyAndConnectedLocked() {
         Slog.d(TAG, "Thinking about reset, mSystemReady=" + mSystemReady
                 + ", mDaemonConnected=" + mDaemonConnected);
         if (mSystemReady && mDaemonConnected) {
+            killMediaProvider();
+
             mDisks.clear();
             mVolumes.clear();
 
@@ -1606,7 +1626,9 @@ class MountService extends IMountService.Stub
         waitForReady();
 
         try {
-            final NativeDaemonEvent res = mConnector.execute("volume", "benchmark", volId);
+            // TODO: make benchmark async so we don't block other commands
+            final NativeDaemonEvent res = mConnector.execute(3 * DateUtils.MINUTE_IN_MILLIS,
+                    "volume", "benchmark", volId);
             return Long.parseLong(res.getMessage());
         } catch (NativeDaemonTimeoutException e) {
             return Long.MAX_VALUE;
