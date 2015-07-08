@@ -5841,6 +5841,8 @@ package android.app.assist {
     method public java.lang.CharSequence getText();
     method public int getTextBackgroundColor();
     method public int getTextColor();
+    method public int[] getTextLineBaselines();
+    method public int[] getTextLineCharOffsets();
     method public int getTextSelectionEnd();
     method public int getTextSelectionStart();
     method public float getTextSize();
@@ -36978,6 +36980,7 @@ package android.view {
     method public abstract void setSelected(boolean);
     method public abstract void setText(java.lang.CharSequence);
     method public abstract void setText(java.lang.CharSequence, int, int);
+    method public abstract void setTextLines(int[], int[]);
     method public abstract void setTextStyle(float, int, int, int);
     method public abstract void setTransformation(android.graphics.Matrix);
     method public abstract void setVisibility(int);
