@@ -68,25 +68,11 @@ public class KeyguardAffordanceHelper {
     private View mTargetedView;
     private boolean mTouchSlopExeeded;
     private AnimatorListenerAdapter mFlingEndListener = new AnimatorListenerAdapter() {
-        public boolean mCancelled;
-
         @Override
         public void onAnimationEnd(Animator animation) {
             mSwipeAnimator = null;
             mSwipingInProgress = false;
-            if (!mCancelled) {
-                mTargetedView = null;
-            }
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-            mCancelled = true;
-        }
-
-        @Override
-        public void onAnimationStart(Animator animation) {
-            mCancelled = false;
+            mTargetedView = null;
         }
     };
     private Runnable mAnimationEndRunnable = new Runnable() {
@@ -290,7 +276,6 @@ public class KeyguardAffordanceHelper {
      * Phase 2: Move back.
      */
     private void startUnlockHintAnimationPhase2(boolean right, final Runnable onFinishedListener) {
-        final KeyguardAffordanceView targetView = right ? mRightIcon : mLeftIcon;
         ValueAnimator animator = getAnimatorToRadius(right, 0);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -513,9 +498,7 @@ public class KeyguardAffordanceHelper {
     }
 
     public void reset(boolean animate) {
-        if (mSwipeAnimator != null) {
-            mSwipeAnimator.cancel();
-        }
+        cancelAnimation();
         setTranslation(0.0f, true, animate);
         mMotionCancelled = true;
         if (mSwipingInProgress) {
