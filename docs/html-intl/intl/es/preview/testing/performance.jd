@@ -1,0 +1,656 @@
+page.title=Prueba de rendimiento de video
+page.image=images/cards/card-test-performance_2x.png
+page.keywords=rendimiento, fotogramas por segundo, herramientas
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Contenido del documento</h2>
+      <ol>
+        <li><a href="#measure">Medición del rendimiento de la UI</a>
+          <ul>
+            <li><a href="#aggregate">Incorporación de Frame Stats</a></li>
+            <li><a href="#timing-info">Información precisa del intervalo del fotograma</a></li>
+            <li><a href="#timing-dump">Volcado simple del intervalo del fotograma</a></li>
+            <li><a href="#collection-window">Control del período de recopilación de datos</a></li>
+            <li><a href="#diagnose">Diagnóstico de regresiones de rendimiento</a></li>
+            <li><a href="#resources">Recursos adicionales</a></li>
+          </ul>
+        </li>
+        <li><a href="#automate">Automatización de las pruebas de rendimiento de la UI</a>
+          <ul>
+            <li><a href="#ui-tests">Configuración de las pruebas de UI</a></li>
+            <li><a href="#automated-tests">Configuración de las pruebas automatizadas de UI</a></li>
+            <li><a href="#triage">Clasificación y solución de problemas detectados</a></li>
+          </ul>
+        </li>
+      </ol>
+  </div>
+</div>
+
+
+<p>
+  La prueba de rendimiento de la UI le garantiza que su aplicación no solo cumpla con los requisitos funcionales sino que la interacción del usuario con su aplicación sea fluida y funcione constantemente a 60 fotogramas por segundo (<a href="https://www.youtube.com/watch?v=CaMTIgxCSqU&amp;index=25&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Why 60fps?</a>) sin disminuir o retrasar fotogramas (lo que llamamos <em>“jank”</em>).
+
+
+ Este documento explica las herramientas disponibles para medir el rendimiento de la UI y establece un enfoque para integrar las medidas de rendimiento de la UI en sus prácticas de prueba.
+
+
+</p>
+
+
+<h2 id="measure">Medición del rendimiento de la UI</h2>
+
+<p>
+  Para mejorar el rendimiento, primero necesita poder medir el rendimiento de su sistema y, luego, diagnosticar e identificar los problemas que puedan surgir debido a las varias secciones de su canalización.
+
+
+</p>
+
+<p>
+  <em><a href="https://source.android.com/devices/tech/debug/dumpsys.html">dumpsys</a></em> es una herramienta de Android que se ejecuta en el dispositivo y vuelca información útil sobre el estado de los servicios del sistema.
+
+ Al pasar el comando <em>gxinfo</em> a dumsys, se obtiene una salida de logcat con información de rendimiento en relación con los fotogramas de animación que ocurren durante la fase de grabado.
+
+
+</p>
+
+<pre>
+&gt; adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt;
+</pre>
+
+<p>
+  Este comando puede crear múltiples variantes diferentes de datos del intervalo del fotograma.
+</p>
+
+<h3 id="aggregate">Incorporación de Frame Stats</h3>
+
+<p>
+  En la versión preliminar de Android M, el comando emite un análisis adicional a logcat sobre los datos del fotograma. Estos datos se recopilan en toda la duración del proceso.
+ Por ejemplo:
+</p>
+
+<pre class="noprettyprint">
+Stats since: 752958278148ns
+Total frames rendered: 82189
+Janky frames: 35335 (42.99%)
+90th percentile: 34ms
+95th percentile: 42ms
+99th percentile: 69ms
+Number Missed Vsync: 4706
+Number High input latency: 142
+Number Slow UI thread: 17270
+Number Slow bitmap uploads: 1542
+Number Slow draw: 23342
+</pre>
+
+<p>
+  Estas estadísticas de alto nivel representan, en un nivel avanzado, el rendimiento de representación de la aplicación y su estabilidad en muchos fotogramas.
+
+</p>
+
+
+<h3 id="timing-info">Información precisa del intervalo del fotograma</h3>
+
+<p>
+  La versión preliminar de Android M ofrece un nuevo comando para gfxinfo, es <em>framestats</em> que brinda información extremadamente detallada sobre el intervalo del fotograma reciente, de manera que usted puede localizar y depurar errores de manera más precisa.
+
+
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; framestats
+</pre>
+
+<p>
+  Este comando emite información sobre el intervalo del fotograma, medida en nanosegundos, de los últimos 120 fotogramas que produjo la aplicación. A continuación, se muestra un ejemplo sin formato de adb dumpsys gxinfo &lt;PACKAGE_NAME&gt; framestats:
+
+
+</p>
+
+<pre class="noprettyprint">
+0,49762224585003,49762241251670,9223372036854775807,0,49762257627204,49762257646058,49762257969704,49762258002100,49762265541631,49762273951162,49762300914808,49762303675954,
+0,49762445152142,49762445152142,9223372036854775807,0,49762446678818,49762446705589,49762447268818,49762447388037,49762453551527,49762457134131,49762474889027,49762476150120,
+0,49762462118845,49762462118845,9223372036854775807,0,49762462595381,49762462619287,49762462919964,49762462968454,49762476194547,49762476483454,49762480214964,49762480911527,
+0,49762479085548,49762479085548,9223372036854775807,0,49762480066370,49762480099339,49762481013089,49762481085850,49762482232152,49762482478350,49762485657620,49762486116683,
+</pre>
+
+<p>
+  Cada línea de esta salida representa un fotograma producido por la aplicación. Cada línea tiene un número fijo de columnas que describen el tiempo transcurrido en cada etapa de la canalización de producción de fotogramas.
+ En la siguiente sección, se describe este formato en detalle y se explica qué representa cada columna.
+
+</p>
+
+
+<h4 id="fs-data-format">Formato de datos de framestats</h4>
+
+<p>
+  Debido a que el bloque de datos se emite en formato CSV, es muy sencillo pegarlo en su herramienta de hoja de cálculo preferida, o recopilar y redistribuir con un script.
+ La siguiente tabla explica el formato de las columnas de los datos de salida.
+ Las marcas de tiempo están en nanosegundos.
+</p>
+
+<ul>
+  <li>FLAGS
+    <ul>
+      <li>El tiempo total del fotograma de las filas con “0” en la columna FLAGS se puede calcular restando la columna INTENDED_VSYNC a la columna FRAME_COMPLETED.
+
+      </li>
+
+      <li>Si el resultado no es cero, la fila se debe ignorar, ya que se ha determinado que el fotograma contiene un valor atípico de rendimiento, donde se espera que el diseño y la imagen tomen más de 16 ms.
+
+ Razones por las que esto puede suceder:
+        <ul>
+          <li>Se cambió el diseño de la ventana (ya sea el primer fotograma de la aplicación o luego de una rotación)
+
+          </li>
+
+          <li>También es posible que se haya omitido el fotograma. En ese caso, alguno de los valores tendrán marcas de tiempo no utilizables.
+ Se puede omitir un fotograma si, por ejemplo, supera los 60 fotogramas por segundo o si no había nada desfasado en pantalla. Esto no necesariamente indica que la aplicación tenga algún problema.
+
+
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>INTENDED_VSYNC
+    <ul>
+      <li>El punto de partida previsto del fotograma. Si este valor es diferente de VSYNC, el subproceso de la interfaz de usuario se encontraba ocupado, lo que evitó la respuesta a la señal vsync de manera oportuna.
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>VSYNC
+    <ul>
+      <li>El valor de tiempo que se utilizó en todas las escuchas vsync y las imágenes para el fotograma (devolución de llamada del fotograma Choreographer, animaciones, View.getDrawingTime(), etc.).
+
+      </li>
+
+      <li>Para obtener más información sobre VSYNC y cómo influye en su aplicación, consulte el video <a href="https://www.youtube.com/watch?v=1iaHxmfZGGc&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=23">
+Understanding VSYNC</a>.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>OLDEST_INPUT_EVENT
+    <ul>
+      <li>La marca de tiempo del evento de entrada más antiguo de la cola de entrada, o Long.MAX_VALUE en caso de que el fotograma no tengan ninguna entrada.
+
+      </li>
+
+      <li>Este valor está diseñado principalmente para trabajar en la plataforma y tiene utilidad limitada para los desarrolladores de aplicaciones.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>NEWEST_INPUT_EVENT
+    <ul>
+      <li>La marca de tiempo del evento de entrada más reciente de la cola de entrada, o 0 en caso de que el fotograma no contenga ninguna entrada.
+
+      </li>
+
+      <li>Este valor está diseñado principalmente para trabajar en la plataforma y tiene utilidad limitada para los desarrolladores de aplicaciones.
+
+      </li>
+
+      <li>Sin embargo, puede obtener una idea general sobre la cantidad de latencia que la aplicación está añadiendo consultando (FRAME_COMPLETED - NEWEST_INPUT_EVENT).
+
+      </li>
+    </ul>
+  </li>
+
+  <li>HANDLE_INPUT_START
+    <ul>
+      <li>La marca de tiempo en que el evento de entrada se distribuye a la aplicación.
+      </li>
+
+      <li>Al observar el tiempo entre esto y ANIMATION_START, se puede medir cuánto tiempo dedicó la aplicación a la administración de eventos de entrada.
+
+      </li>
+
+      <li>Si este valor es alto (mayor a 2 ms), esto significa que la aplicación dedica tiempo poco común al proceso de los eventos de entrada, como View.onTouchEvent(), lo que indica que este proceso se debe optimizar o descargar a otro subproceso.
+
+ Tenga en cuenta que, en algunas ocasiones, como cuando al hacer clic en un evento que lanza nuevas actividades o algo parecido, se espera y es aceptable que este valor sea alto.
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>ANIMATION_START
+    <ul>
+      <li>La marca de tiempo en la que se ejecutaron las animaciones registradas con Choreographer.
+      </li>
+
+      <li>Al observar el tiempo entre esto y PERFORM_TRANVERSALS_START, se puede determinar cuánto tiempo llevó evaluar todos los mecanismos de animación (los más comunes son ObjectAnimator, ViewPropertyAnimator y Transitions) que se estén ejecutando.
+
+
+      </li>
+
+      <li>Si este valor es alto (mayor a 2 ms), controle si su aplicación escribió alguna animación personalizada o qué campos está animando ObjectAnimators y asegúrese de que su animación sea adecuada.
+
+
+      </li>
+
+      <li>Para obtener más información sobre Choreographer, consulte el video <a href="https://developers.google.com/events/io/sessions/325418001">For Butter or Worse</a>.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>PERFORM_TRAVERSALS_START
+    <ul>
+      <li>Si a este valor le resta DRAW_START, puede saber cuánto tardaron en completarse las fases de medición y diseño. (Durante el desplazamiento o la animación, este número deberá ser cercano a cero).
+
+
+      </li>
+
+      <li>Para obtener más información sobre las fases de medición y diseño de la canalización de representación, consulte el video <a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">
+Invalidations, Layouts and Performance</a>.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>DRAW_START
+    <ul>
+      <li>El momento en que comenzó la fase de dibujo de performTraversals. Este es el punto inicial de grabación de la listas de visualización de cualquier vista invalidada.
+
+      </li>
+
+      <li>El tiempo entre esto y SYNC_START muestra cuánto se tardó en llamar a View.draw() en todas las vistas invalidadas en el árbol.
+
+      </li>
+
+      <li>Para obtener más información sobre el modelo de dibujo, consulte los videos <a href="{@docRoot}guide/topics/graphics/hardware-accel.html#hardware-model">Hardware Acceleration</a>
+ o <a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">
+Invalidations, Layouts and Performance.</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>SYNC_START
+    <ul>
+      <li>El momento en que comenzó la fase de sincronización del dibujo.
+      </li>
+
+      <li>Si el tiempo entre esto e ISSUE_DRAW_COMMANDS_START es muy alto (mayor a 0,4 ms o similar), generalmente esto significa que se dibujaron muchos mapas de bits que se deben subir a GPU.
+
+
+      </li>
+
+      <li>Para obtener más información sobre la fase de sincronización, consulte el video <a href="https://www.youtube.com/watch?v=VzYkVL1n4M8&amp;index=24&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu">
+Profile GPU Rendering.</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>ISSUE_DRAW_COMMANDS_START
+    <ul>
+      <li>El momento en que el representador de hardware comenzó a enviar comandos de dibujo a GPU.
+      </li>
+
+      <li>El tiempo entre esto y FRAME_COMPLETED permite obtener una idea general sobre cuánto trabajo le genera la aplicación a GPU.
+ Aquí aparecen los problemas como el exceso de dibujos o efectos de representación ineficientes.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>SWAP_BUFFERS
+    <ul>
+      <li>El momento en que se llamó a eglSwapBuffers, generalmente de poca importancia fuera del trabajo en plataforma.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>FRAME_COMPLETED
+    <ul>
+      <li>¡Todo listo! El tiempo total dedicado al trabajo en este fotograma se puede calcular al hacer FRAME_COMPLETED - INTENDED_VSYNC.
+
+      </li>
+    </ul>
+  </li>
+
+</ul>
+
+<p>
+  Puede utilizar esta información de distintas maneras. Un método de visualización simple pero eficaz es el histograma que muestra la distribución de los tiempos del fotograma (FRAME_COMPLETED - INTENDED_VSYNC) en distintos bloques de latencia; vea la siguiente figura.
+
+ Este gráfico indica brevemente que la mayoría de los fotogramas estuvieron muy bien, es decir, por debajo del límite de 16 ms (marcado en rojo). Sin embargo, algunos fotogramas estuvieron muy por arriba del límite.
+
+ En el histograma, podemos observar los cambios con el correr del tiempo para ver la creación de los cambios totales o los nuevos valores atípicos.
+ También puede graficar la latencia de entrada, el tiempo dedicado al diseño o cualquier otra medición interesante similar sobre las marcas de tiempo en los datos.
+
+
+</p>
+
+<img src="{@docRoot}preview/images/perf-test-framestats.png">
+
+
+<h3 id="timing-dump">Volcado simple del intervalo del fotograma</h3>
+
+<p>
+  Si, en las Opciones de Desarrollador, <strong>Profile GPU rendering</strong> se configura en <strong>In adb shell dumpsys gfinfo</strong>, el comando <code>adb shell dumpsys gfxinfo</code> emite sobre el tiempo de los 120 fotogramas más recientes y los agrupa en algunas categorías diferentes con valores separados por tabulación.
+
+
+ Esta información puede resultar útil para indicar qué partes de la canalización del dibujo podrían funcionar lento en un nivel alto.
+
+</p>
+
+<p>
+  Al igual que <a href="#fs-data-format">framestats</a>, es muy sencillo pegar esta información en su herramienta de hoja de cálculo preferida, o recolectar y redistribuir con un script.
+
+ El siguiente gráfico detalla dónde pasaron tiempo muchos de los fotogramas generados por la aplicación.
+
+</p>
+
+<img src="{@docRoot}preview/images/perf-test-frame-latency.png">
+
+<p>
+  El resultado de ejecutar gfxinfo, copiar la salida, pegar en una aplicación de hoja de cálculo y graficar la información en forma de barras apiladas.
+
+</p>
+
+<p>
+  Cada barra vertical representa un fotograma de animación, su altura representa la cantidad de milisegundos que le llevó calcular ese fotograma de animación.
+ Cada segmento de color de la barra representa una etapa diferente de la canalización de representación, de manera que usted pueda observar qué partes de su aplicación pueden estar creando un cuello de botella.
+
+ Para obtener más información sobre la canalización de representación y cómo optimizarla, consulte el video <a href="https://www.youtube.com/watch?v=we6poP0kw6E&amp;index=27&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">
+Invalidations Layouts and Performance</a>.
+
+</p>
+
+
+<h3 id="collection-window">Control del período de recopilación de datos</h3>
+
+<p>
+  Los intervalos de framestats y del fotograma simple recopilan datos durante un período muy breve: aproximadamente dos segundos que valen la pena representar.
+ Para poder controlar este período con precisión, por ejemplo para limitar los datos a una animación en particular, puede restablecer todos los contadores y agregar los datos recopilados.
+
+
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; reset
+</pre>
+
+<p>
+  Esto se puede usar junto con los comandos de volcado para recopilar y restablecer a una cadencia normal a fin de capturar continuamente períodos de fotogramas de menos de dos segundos.
+
+
+</p>
+
+
+<h3 id="diagnose">Diagnóstico de regresiones de rendimiento</h3>
+
+<p>
+  La identificación de regresiones es un buen primer paso para localizar los problemas y mantener la aplicación funcionando correctamente.
+ Sin embargo, dumpsys solo identifica la existencia y la gravedad relativa de los problemas.
+ Usted todavía debe diagnosticar la causa particular de los problemas de rendimiento y encontrar las soluciones adecuadas.
+ Para esto, es sumamente recomendable que utilice la herramienta <a href="{@docRoot}tools/help/systrace.html">systrace</a>.
+
+</p>
+
+
+<h3 id="resources">Recursos adicionales</h3>
+
+<p>
+  Para obtener más información sobre el funcionamiento de la canalización de representación de Android, los problemas comunes que puede encontrar y cómo solucionarlos, es posible que algunos de los siguientes recursos le resulten útiles:
+
+
+</p>
+
+<ul>
+  <li>Rendering Performance 101
+  </li>
+  <li>Why 60fps?
+  </li>
+  <li>Android UI and the GPU
+  </li>
+  <li>Invalidations Layouts and performance
+  </li>
+  <li>Analyzing UI Performance with Systrace
+  </li>
+</ul>
+
+
+<h2 id="automate">Pruebas automatizadas de rendimiento de la UI</h2>
+
+<p>
+  Un enfoque para realizar la prueba de rendimiento de la UI es solicitar a un evaluador que realice una serie de operaciones de usuario en la aplicación objetivo para identificar visualmente jank, o bien, pasar mucho tiempo utilizando un enfoque basado en alguna herramienta para encontrar jank.
+
+ Sin embargo, este enfoque manual tiene sus riesgos, la habilidad humana para percibir cambios en los índices de los fotogramas varía de manera alarmante. Además, este proceso lleva mucho tiempo, es tedioso y propenso a errores.
+
+
+</p>
+
+<p>
+  Un método más eficiente es registrarse y analizar las mediciones de rendimiento clave a partir de pruebas automatizadas de UI.
+ Android M Developer Preview incluye nuevas capacidades de registro que facilitan la determinación de la cantidad y gravedad de jank en las animaciones de su aplicación y pueden utilizarse para crear un proceso estricto a fin de determinar su rendimiento actual y realizar un seguimiento de futuros objetivos de rendimiento.
+
+
+
+</p>
+
+<p>
+  Este artículo lo guía a través de un enfoque recomendado para utilizar esa información a fin de automatizar su prueba de rendimiento.
+
+</p>
+
+<p>
+  Esto se divide básicamente en dos acciones clave. Primero, identificar qué está probando y cómo lo prueba. Segundo, configurar y mantener un entorno de prueba automatizado.
+
+
+</p>
+
+
+<h3 id="ui-tests">Configuración de pruebas de UI</h3>
+
+<p>
+  Antes de comenzar con las pruebas automatizadas, es importante establecer algunas decisiones de alto nivel para entender correctamente el espacio de prueba y las necesidades que puede tener.
+
+</p>
+
+<h4>
+  Identifique flujos/animaciones clave que desea probar
+</h4>
+
+<p>
+  Recuerde que el usuario visualiza el rendimiento negativo cuando una animación fluida se interrumpe.
+ Por lo tanto, al identificar qué tipo de acciones de UI desea probar, se recomienda centrarse en aquellas animaciones clave que el usuario ve más o que son más importantes para su experiencia.
+
+ Por ejemplo, a continuación, se mencionan situaciones comunes que es útil identificar:
+</p>
+
+<ul>
+  <li>Desplazamiento por ListView o RecyclerView principales
+  </li>
+
+  <li>Animaciones durante ciclos de espera no sincronizados
+  </li>
+
+  <li>Animaciones que puedan contener manipulación o carga de mapa de bits
+  </li>
+
+  <li>Animaciones que incluyan combinación alfa
+  </li>
+
+  <li>Dibujos personalizados con Canvas
+  </li>
+</ul>
+
+<p>
+  Trabaje con los ingenieros, diseñadores y gerentes de productos de su equipo a fin de priorizar estas animaciones clave para la cobertura de la prueba.
+
+</p>
+
+<h4>
+  Establezca sus objetivos futuros y realice un seguimiento en virtud de ellos
+</h4>
+
+<p>
+  Desde un nivel alto, puede ser crítico identificar sus metas de rendimiento específicas y concentrarse en escribir pruebas y recopilar datos sobre ellas.
+ Por ejemplo:
+</p>
+
+<ul>
+  <li>¿Simplemente desea comenzar a realizar un seguimiento del rendimiento de la UI por primera vez para obtener más información?
+  </li>
+
+  <li>¿Desea evitar regresiones que podrían aparecer en el futuro?
+  </li>
+
+  <li>¿Se encuentra hoy en un 90 % de fluidez de fotogramas y quiere alcanzar un 98 % en este trimestre?
+  </li>
+
+  <li>¿Se encuentra en un 98 % de fluidez de fotogramas y no quiere retroceder?
+  </li>
+
+  <li>¿Tiene como objetivo mejorar el rendimiento en dispositivos de gama baja?
+  </li>
+</ul>
+
+<p>
+  Para todas estas situaciones, es recomendable realizar un seguimiento que muestre el rendimiento en múltiples versiones de su aplicación.
+
+</p>
+
+<h4>
+  Identifique los dispositivos en los que desea realizar la prueba
+</h4>
+
+<p>
+  El rendimiento de la aplicación varía según el dispositivo en el que se ejecuta. Algunos dispositivos pueden tener menos memoria, GPU menos potentes o CPU más lentos.
+ Esto significa que las animaciones que funcionan bien en un conjunto de hardware pueden no hacerlo en otros, o peor, pueden provocar un cuello de botella en diferentes secciones de la canalización.
+
+ Por lo tanto, para justificar esta variación en lo que un usuario puede ver, seleccione una serie de dispositivos, tanto de alta gama como de baja, tablets, etc., en los que ejecutará las pruebas.
+
+ Busque variedad en rendimiento de CPU, memoria RAM, resolución de pantalla, tamaño, etc.
+ Las pruebas exitosas en un dispositivo de alta gama pueden fallar en uno de baja gama.
+
+</p>
+
+<h4>
+  Marcos básicos para pruebas de UI
+</h4>
+
+<p>
+  Algunos conjuntos de herramientas, como <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a> y <a href="{@docRoot}training/testing/ui-testing/espresso-testing.html">Espresso</a>, están diseñados para ayudar a automatizar el desplazamiento de un usuario por su aplicación.
+
+ Estos son marcos simples que imitan la interacción del usuario con el dispositivo.
+ Para utilizar estos marcos, debe crear con éxito scripts únicos que se ejecuten en un conjunto de acciones de usuarios y reproducirlos en el dispositivo en sí.
+
+
+</p>
+
+<p>
+  Al combinar estas pruebas automatizadas junto con <code>dumpsys gfxinfo</code>, puede crear rápidamente un sistema reproducible que le permite ejecutar una prueba y medir la información de rendimiento de esa condición particular.
+
+
+</p>
+
+
+<h3 id="automated-tests">Configurar pruebas automatizadas de UI</h3>
+
+<p>
+  Una vez que pueda ejecutar una prueba de UI y una canalización para recopilar datos de una sola prueba, el próximo paso importante es elegir un marco que pueda ejecutar esa prueba muchas veces en múltiples dispositivos y agregar los datos de rendimiento resultantes para que su equipo de desarrollo los analice mejor.
+
+
+
+</p>
+
+<h4>
+  Un marco para la automatización de pruebas
+</h4>
+
+<p>
+  Vale la pena mencionar que los marcos para pruebas de UI (como <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a>) se ejecutan directamente en el emulador/dispositivo objetivo.
+ A la recopilación de información de rendimiento realizada por 
+<em>dumpsys gfxinfo</em> la impulsa un equipo de host que envía comandos por ADB. Para ayudar a unir la automatización de estas entidades separadas, se diseñó el marco <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">MonkeyRunner.</a> Un sistema de scripts que se ejecuta en su equipo de host y que puede emitir comandos a un conjunto de dispositivos conectados y recibir datos de ellos.
+
+
+
+</p>
+
+<p>
+  Al crear un conjunto de scripts para la automatización adecuada de las pruebas de rendimiento de UI, usted podrá, como mínimo, utilizar MonkeyRunner para realizar con éxito las siguientes tareas:
+
+</p>
+
+<ul>
+  <li>Cargar e iniciar un APK deseado en un dispositivo objetivo, en múltiples dispositivos o en un emulador.
+  </li>
+
+  <li>Iniciar una prueba de UI automatizada y permitir que se ejecute.
+  </li>
+
+  <li>Recopilar información de rendimiento mediante <em>dumpsys gfxinfo</em><em>.</em>
+  </li>
+
+  <li>Añadir información y presentársela de manera útil al desarrollador.
+  </li>
+</ul>
+
+
+<h3 id="triage">Clasificar y solucionar problemas detectados</h3>
+
+<p>
+  Una vez que se identifican los patrones de problemas o las regresiones, el paso siguiente es identificar y aplicar la solución.
+ Si su marco de pruebas automatizadas preserva detalles precisos del intervalo para los fotogramas, puede ayudarlo a investigar cambios sospechosos de código o diseño (en el caso de una regresión), o delimitar la parte del sistema que está analizando al cambiar a una investigación manual.
+
+
+ Para realizar una investigación manual, <a href="{@docRoot}tools/help/systrace.html">systrace</a> es un buen lugar para comenzar, ya que muestra información precisa sobre cada etapa de la canalización de representación, cada subproceso y núcleo del sistema, además de cualquier marca de evento personalizada que usted defina.
+
+
+</p>
+
+<h4>
+  Descripción adecuada de intervalos temporales
+</h4>
+
+<p>
+  Es importante mencionar las dificultades para obtener y medir los intervalos que son producto del rendimiento de la representación.
+ Estos números son, por naturaleza, no deterministas y, a menudo, fluctúan según el estado del sistema, la cantidad de memoria disponible, el límite térmico y la última vez que un rayo solar tocó el área de la tierra donde se encuentra.
+
+ El punto es que puede ejecutar la misma prueba dos veces y obtener números apenas diferentes que pueden estar cerca pero no ser iguales.
+
+
+</p>
+
+<p>
+  Para recopilar y definir datos correctamente de esta manera, deberá ejecutar la misma prueba muchas veces y acumular los resultados como un promedio o un valor promedio (para que resulte más fácil, lo llamaremos un “lote”). Esto le ofrece una aproximación estimada del rendimiento de la prueba, sin requerir intervalos exactos.
+
+
+
+</p>
+
+<p>
+  Los lotes se pueden usar entre cambios de código para verificar el impacto relativo que esos cambios tienen en el rendimiento.
+ Si el índice de fotograma promedio para el lote previo al cambio es que el lote después del cambio, entonces, generalmente está en presencia de un incremento general en relación con el rendimiento para ese cambio particular.
+
+
+</p>
+
+<p>
+  Esto significa que cualquier prueba automatizada de UI que lleve a cabo debería tener en cuenta este concepto, además de justificar cualquier anomalía que pudiera surgir durante una prueba.
+ Por ejemplo, si el rendimiento de su aplicación disminuye repentinamente debido a algún problema con el dispositivo (que no sea provocado por la aplicación), deberá volver a ejecutar el lote para obtener intervalos menos caóticos.
+
+
+
+</p>
+
+<p>
+  Entonces, ¿cuántas veces debe ejecutar una prueba para que los resultados sean significativos? El mínimo debe ser 10 veces y con números más altos, como 50 o 100, para obtener resultados más precisos (por supuesto, ahora cambia el tiempo por la precisión).
+
+
+</p>
