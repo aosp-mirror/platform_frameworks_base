@@ -37,6 +37,7 @@ import android.os.UserManager;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.app.IMediaContainerService;
@@ -80,41 +81,45 @@ public class StorageMeasurement {
         public long availSize;
 
         /**
-         * Total apps disk usage.
+         * Total apps disk usage per profiles of the current user.
          * <p>
          * When measuring internal storage, this value includes the code size of
-         * all apps (regardless of install status for current user), and
-         * internal disk used by the current user's apps. When the device
+         * all apps (regardless of install status for the given profile), and
+         * internal disk used by the profile's apps. When the device
          * emulates external storage, this value also includes emulated storage
-         * used by the current user's apps.
+         * used by the profile's apps.
          * <p>
          * When measuring a physical {@link StorageVolume}, this value includes
-         * usage by all apps on that volume.
+         * usage by all apps on that volume and only for the primary profile.
+         * <p>
+         * Key is {@link UserHandle}.
          */
-        public long appsSize;
+        public SparseLongArray appsSize = new SparseLongArray();
 
         /**
-         * Total cache disk usage by apps.
+         * Total cache disk usage by apps (over all users and profiles).
          */
         public long cacheSize;
 
         /**
          * Total media disk usage, categorized by types such as
-         * {@link Environment#DIRECTORY_MUSIC}.
+         * {@link Environment#DIRECTORY_MUSIC} for every user profile of the current user.
          * <p>
          * When measuring internal storage, this reflects media on emulated
-         * storage for the current user.
+         * storage for the respective profile.
          * <p>
          * When measuring a physical {@link StorageVolume}, this reflects media
          * on that volume.
+         * <p>
+         * Key of the {@link SparseArray} is {@link UserHandle}.
          */
-        public HashMap<String, Long> mediaSize = new HashMap<>();
+        public SparseArray<HashMap<String, Long>> mediaSize = new SparseArray<>();
 
         /**
-         * Misc external disk usage for the current user, unaccounted in
-         * {@link #mediaSize}.
+         * Misc external disk usage for the current user's profiles, unaccounted in
+         * {@link #mediaSize}. Key is {@link UserHandle}.
          */
-        public long miscSize;
+        public SparseLongArray miscSize = new SparseLongArray();
 
         /**
          * Total disk usage for users, which is only meaningful for emulated
@@ -187,10 +192,16 @@ public class StorageMeasurement {
         private int mRemaining;
 
         public StatsObserver(boolean isPrivate, MeasurementDetails details, int currentUser,
-                Message finished, int remaining) {
+                List<UserInfo> profiles, Message finished, int remaining) {
             mIsPrivate = isPrivate;
             mDetails = details;
             mCurrentUser = currentUser;
+            if (isPrivate) {
+                // Add the profile ids as keys to detail's app sizes.
+                for (UserInfo userInfo : profiles) {
+                    mDetails.appsSize.put(userInfo.id, 0);
+                }
+            }
             mFinished = finished;
             mRemaining = remaining;
         }
@@ -220,11 +231,8 @@ public class StorageMeasurement {
                     cacheSize += stats.externalCacheSize;
                 }
 
-                // Count code and data for current user
-                if (stats.userHandle == mCurrentUser) {
-                    mDetails.appsSize += codeSize;
-                    mDetails.appsSize += dataSize;
-                }
+                // Count code and data for current user's profiles (keys prepared in constructor)
+                addValueIfKeyExists(mDetails.appsSize, stats.userHandle, codeSize + dataSize);
 
                 // User summary only includes data (code is only counted once
                 // for the current user)
@@ -235,8 +243,9 @@ public class StorageMeasurement {
 
             } else {
                 // Physical storage; only count external sizes
-                mDetails.appsSize += stats.externalCodeSize + stats.externalDataSize
-                        + stats.externalMediaSize + stats.externalObbSize;
+                addValue(mDetails.appsSize, mCurrentUser,
+                        stats.externalCodeSize + stats.externalDataSize
+                        + stats.externalMediaSize + stats.externalObbSize);
                 mDetails.cacheSize += stats.externalCacheSize;
             }
         }
@@ -342,7 +351,8 @@ public class StorageMeasurement {
         final PackageManager packageManager = mContext.getPackageManager();
 
         final List<UserInfo> users = userManager.getUsers();
-        final int currentUser = ActivityManager.getCurrentUser();
+        final List<UserInfo> currentProfiles = userManager.getEnabledProfiles(
+                ActivityManager.getCurrentUser());
 
         final MeasurementDetails details = new MeasurementDetails();
         final Message finished = mMeasurementHandler.obtainMessage(MeasurementHandler.MSG_COMPLETED,
@@ -354,18 +364,23 @@ public class StorageMeasurement {
         }
 
         if (mSharedVolume != null && mSharedVolume.isMountedReadable()) {
-            final File basePath = mSharedVolume.getPathForUser(currentUser);
+            for (UserInfo currentUserInfo : currentProfiles) {
+                final int userId = currentUserInfo.id;
+                final File basePath = mSharedVolume.getPathForUser(userId);
+                HashMap<String, Long> mediaMap = new HashMap<>(sMeasureMediaTypes.size());
+                details.mediaSize.put(userId, mediaMap);
 
-            // Measure media types for emulated storage, or for primary physical
-            // external volume
-            for (String type : sMeasureMediaTypes) {
-                final File path = new File(basePath, type);
-                final long size = getDirectorySize(imcs, path);
-                details.mediaSize.put(type, size);
+                // Measure media types for emulated storage, or for primary physical
+                // external volume
+                for (String type : sMeasureMediaTypes) {
+                    final File path = new File(basePath, type);
+                    final long size = getDirectorySize(imcs, path);
+                    mediaMap.put(type, size);
+                }
+
+                // Measure misc files not counted under media
+                addValue(details.miscSize, userId, measureMisc(imcs, basePath));
             }
-
-            // Measure misc files not counted under media
-            details.miscSize = measureMisc(imcs, basePath);
 
             if (mSharedVolume.getType() == VolumeInfo.TYPE_EMULATED) {
                 // Measure total emulated storage of all users; internal apps data
@@ -403,8 +418,8 @@ public class StorageMeasurement {
                 return;
             }
 
-            final StatsObserver observer = new StatsObserver(
-                    true, details, currentUser, finished, count);
+            final StatsObserver observer = new StatsObserver(true, details,
+                    ActivityManager.getCurrentUser(), currentProfiles, finished, count);
             for (UserInfo user : users) {
                 for (ApplicationInfo app : volumeApps) {
                     packageManager.getPackageSizeInfo(app.packageName, user.id, observer);
@@ -451,5 +466,12 @@ public class StorageMeasurement {
 
     private static void addValue(SparseLongArray array, int key, long value) {
         array.put(key, array.get(key) + value);
+    }
+
+    private static void addValueIfKeyExists(SparseLongArray array, int key, long value) {
+        final int index = array.indexOfKey(key);
+        if (index >= 0) {
+            array.put(key, array.valueAt(index) + value);
+        }
     }
 }
