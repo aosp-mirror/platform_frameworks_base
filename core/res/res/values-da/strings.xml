@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tilsluttet som et installationsprogram"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tilsluttet et USB-ekstraudstyr"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Tryk for at se flere muligheder."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater USB-lager?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vil du formatere SD-kortet?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle filer, der er gemt på dit USB-lager, slettes. Denne handling kan ikke fortrydes!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Du mister alle data på kortet."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formater"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning er tilsluttet"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tryk for at deaktivere USB-fejlretning."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Skift tastatur"</string>

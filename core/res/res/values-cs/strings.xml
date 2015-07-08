@@ -1054,11 +1054,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Připojeno jako instalátor"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Připojeno k perifernímu zařízení USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Klepnutím zobrazíte další možnosti."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formátovat úložiště USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formátovat kartu SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Všechny soubory uložené v úložišti USB budou vymazány. Tuto akci nelze vrátit zpět."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Všechna data na kartě budou ztracena."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotykem zakážete ladění USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Změna klávesnice"</string>

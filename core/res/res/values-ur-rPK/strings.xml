@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ایک انسٹالر کے بطور مربوط ہے"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏ایک USB لوازم سے مربوط ہے"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"مزید اختیارات کیلئے ٹچ کریں۔"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏USB اسٹوریج فارمیٹ کریں؟"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏SD کارڈ فارمیٹ کریں؟"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏آپ کی USB اسٹوریج میں اسٹور کردہ سبھی فائلوں کو ہٹا دیا جائے گا۔ اس کارروائی کو لوٹایا نہیں جا سکتا ہے!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"آپ کے کارڈ پر موجود سبھی ڈیٹا گم ہو جائے گا۔"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"فارمیٹ کریں"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏USB ڈیبگ کرنا مربوط ہو گیا"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏USB ڈیبگنگ کو غیر فعال کرنے کیلئے ٹچ کریں۔"</string>
     <string name="select_input_method" msgid="8547250819326693584">"کی بورڈ تبدیل کریں"</string>

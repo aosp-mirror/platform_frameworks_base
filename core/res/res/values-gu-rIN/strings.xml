@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ઇન્સ્ટોલર તરીકે કનેક્ટ કર્યું"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ઍક્સેસરીથી કનેક્ટ થયાં"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"વધુ વિકલ્પો માટે ટચ કરો."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB સંગ્રહને ફોર્મેટ કરીએ?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD કાર્ડ ફોર્મેટ કરીએ?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"તમારા USB સંગ્રહમાં સંગ્રહિત તમામ ફાઇલો કાઢી નાખવામાં આવશે. આ ક્રિયા પલટાવી શકાતી નથી!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"તમારા કાર્ડ પરનો બધો ડેટા ગુમ થઈ જશે."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ફોર્મેટ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ડીબગિંગ કનેક્ટ થયું."</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ડીબગિંગ અક્ષમ કરવા માટે ટચ કરો."</string>
     <string name="select_input_method" msgid="8547250819326693584">"કીબોર્ડ બદલો"</string>

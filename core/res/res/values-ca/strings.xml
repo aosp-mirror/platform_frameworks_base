@@ -502,7 +502,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el televisor o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el telèfon o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Canviar el bloqueig de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Canviar el bloqueig de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Canvia el bloqueig de pantalla"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquejar la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla com i quan es bloqueja la pantalla."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Esborrar totes les dades"</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connectat com a instal·lador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connectat a un accessori USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca per veure més opcions."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formata l\'emmagatzematge USB"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vols formatar la targeta SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"S\'esborraran tots els fitxers emmagatzemats al dispositiu d\'emmagatzematge USB. Aquesta acció no es pot desfer."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Es perdran totes les dades d\'aquesta targeta."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formata"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Canvia el teclat"</string>
@@ -1462,7 +1457,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"S\'ha fixat l\'aplicació. En aquest dispositiu no es permet anul·lar-ne la fixació."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demana el codi PIN per anul·lar"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Sol·licita el codi PIN per anul·lar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per anul·lar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya per anul·lar"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"L\'administrador ho ha instal·lat"</string>

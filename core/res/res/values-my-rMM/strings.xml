@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"installerအနေဖြင့် ချိတ်ဆက်သည်"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBတွဲဖက်ပစ္စည်းအား ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"ထပ်မံရွေးချယ်စရာများအတွက် ထိပါ"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB သိုလှောင်ခန်းကို ပုံစံပြန်ချမလား?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD ကဒ်ကို ပုံစံပြန်ချမလား?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"သင်၏ USB သိုလှောင်ခန်းထဲ သိုလှောင်ထားသည့် ဖိုင်အားလုံး ဖျက်ခံရမည်။ ဒီလုပ်ရပ်ကို ပြန်ပြီး ပြောင်းလဲ မရနိုင်ပါ။"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"သင့် ကဒ် ထဲက ဒေတာ အားလုံး ဆုံးသွားမည်။"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ပုံစံချရန်ပြင်ဆင်သည်"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားစစ်ခြင်းအား ချိတ်ဆက်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ဒီဘာဂင် ပိတ်ရန် ထိပါ။"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ကီးဘုတ် ပြောင်းလဲရန်"</string>

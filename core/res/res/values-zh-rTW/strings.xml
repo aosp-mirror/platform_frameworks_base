@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"已視為安裝程式連線"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已連接 USB 配件"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"輕觸即可顯示更多選項。"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"將 USB 儲存裝置格式化？"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"將 SD 卡格式化？"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB 儲存裝置上儲存的所有檔案即將遭到清除。這項動作無法復原！"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"儲存卡上的所有資料都會消失。"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已連接 USB 偵錯工具"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"輕觸即可停用 USB 偵錯。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"變更鍵盤"</string>

@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Gekoppel as \'n installeerder"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Gekoppel aan \'n USB-toebehoorsel"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Raak vir meer opsies."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formateer USB-geheue?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formateer SD-kaart?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle lêers wat op jou  USB-geheue gestoor is, sal uitgevee word. Hierdie handeling kan nie omgekeer word nie!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle data op jou kaart sal verlore gaan."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formaat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouter gekoppel"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Raak om USB-ontfouting te deaktiveer."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Verander sleutelbord"</string>

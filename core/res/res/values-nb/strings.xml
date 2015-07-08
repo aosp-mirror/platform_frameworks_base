@@ -501,7 +501,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser nettbrettet eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser TV-en eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser telefonen eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endre skjermlåsen"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endring av skjermlåsen"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Endre skjermlåsen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skjermen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollér hvordan og når skjermen låses."</string>
@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tilkoblet som installasjonsprogram"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Koblet til et USB-tilbehør"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Trykk for å se flere alternativer."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formatere USB-lagr.?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vil du formatere SD-kortet?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle filer som er lagret på USB-lagringen blir slettet. Denne handlingen kan ikke angres."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle data på kortet fjernes."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatér"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-feilsøking tilkoblet"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Trykk for å slå av USB-feilsøking."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Endre tastatur"</string>
@@ -1462,7 +1457,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appen er festet – du kan ikke løsne apper på denne enheten."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjermen er festet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skjermen er løsnet"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Krev PIN-kode for å løsne apper"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kode for å løsne apper"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev bruk av opplåsningsmønster for å løsne apper"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Krev passord for å løsne apper"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installert av administratoren"</string>

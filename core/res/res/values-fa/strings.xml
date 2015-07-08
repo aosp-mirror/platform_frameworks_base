@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به‌عنوان نصب کننده"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏به یک وسیله جانبی USB وصل شده است"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"برای گزینه‌های بیشتر لمس کنید."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏حافظهٔ USB فرمت شود؟"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏کارت SD فرمت شود؟"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏همه فایل‌های ذخیره شده در حافظهٔ USB پاک خواهد شد. این عمل را نمی‎توان برگرداند!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"‏تمام اطلاعات روی کارت شما از بین می‎رود."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"قالب"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏اشکال‌زدایی USB متصل شد"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏غیرفعال‌کردن اشکال‌زدایی‌USB: با لمس آن."</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغییر صفحه‌کلید"</string>
@@ -1527,7 +1522,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"گزینه‌های بیشتر"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"بستن منوی سرریز"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> مورد انتخاب شد</item>
-      <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> مورد انتخاب شد</item>
+      <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
+      <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
     </plurals>
 </resources>

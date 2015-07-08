@@ -1040,11 +1040,6 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"作为安装程序连接"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已连接到USB配件"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"触摸以查看更多选项。"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"格式化USB存储设备吗？"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"要格式化SD卡吗？"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"您的USB存储设备中存储的所有文件都将清除。该操作无法撤消！"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"您卡上的所有数据都会丢失。"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
