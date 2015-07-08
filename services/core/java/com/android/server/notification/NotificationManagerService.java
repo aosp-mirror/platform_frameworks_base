@@ -112,6 +112,9 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 
 import libcore.io.IoUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -1663,7 +1666,12 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
 
-            dumpImpl(pw, DumpFilter.parseFromArguments(args));
+            final DumpFilter filter = DumpFilter.parseFromArguments(args);
+            if (filter != null && filter.stats) {
+                dumpJson(pw, filter);
+            } else {
+                dumpImpl(pw, filter);
+            }
         }
 
         @Override
@@ -1799,6 +1807,32 @@ public class NotificationManagerService extends SystemService {
             return "callState";
         }
         return null;
+    };
+
+    private void dumpJson(PrintWriter pw, DumpFilter filter) {
+        JSONObject dump = new JSONObject();
+        try {
+            dump.put("service", "Notification Manager");
+            JSONArray bans = new JSONArray();
+            try {
+                ArrayMap<Integer, ArrayList<String>> packageBans = getPackageBans(filter);
+                for (Integer userId : packageBans.keySet()) {
+                    for (String packageName : packageBans.get(userId)) {
+                        JSONObject ban = new JSONObject();
+                        ban.put("userId", userId);
+                        ban.put("packageName", packageName);
+                        bans.put(ban);
+                    }
+                }
+            } catch (NameNotFoundException e) {
+                // pass
+            }
+            dump.put("bans", bans);
+            dump.put("stats", mUsageStats.dumpJson(filter));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        pw.println(dump);
     }
 
     void dumpImpl(PrintWriter pw, DumpFilter filter) {
@@ -1920,24 +1954,42 @@ public class NotificationManagerService extends SystemService {
 
             try {
                 pw.println("\n  Banned Packages:");
-                for(UserInfo user : UserManager.get(getContext()).getUsers()) {
-                    final int userId = user.getUserHandle().getIdentifier();
-                    pw.println("    UserId " + userId);
-                    final PackageManager packageManager = getContext().getPackageManager();
-                    List<PackageInfo> packages = packageManager.getInstalledPackages(0, userId);
-                    final int packageCount = packages.size();
-                    for (int p = 0; p < packageCount; p++) {
-                        final String packageName = packages.get(p).packageName;
-                        final int uid = packageManager.getPackageUid(packageName, userId);
-                        if (!checkNotificationOp(packageName, uid)) {
-                            pw.println("       " + packageName);
-                        }
+                ArrayMap<Integer, ArrayList<String>> packageBans = getPackageBans(filter);
+                for (Integer userId : packageBans.keySet()) {
+                    for (String packageName : packageBans.get(userId)) {
+                        pw.println("    " + userId + ": " + packageName);
                     }
                 }
             } catch (NameNotFoundException e) {
                 // pass
             }
         }
+    }
+
+    private ArrayMap<Integer, ArrayList<String>> getPackageBans(DumpFilter filter)
+            throws NameNotFoundException {
+        ArrayMap<Integer, ArrayList<String>> packageBans = new ArrayMap<>();
+        ArrayList<String> packageNames = new ArrayList<>();
+        for (UserInfo user : UserManager.get(getContext()).getUsers()) {
+            final int userId = user.getUserHandle().getIdentifier();
+            final PackageManager packageManager = getContext().getPackageManager();
+            List<PackageInfo> packages = packageManager.getInstalledPackages(0, userId);
+            final int packageCount = packages.size();
+            for (int p = 0; p < packageCount; p++) {
+                final String packageName = packages.get(p).packageName;
+                if (filter == null || filter.matches(packageName)) {
+                    final int uid = packageManager.getPackageUid(packageName, userId);
+                    if (!checkNotificationOp(packageName, uid)) {
+                        packageNames.add(packageName);
+                    }
+                }
+            }
+            if (!packageNames.isEmpty()) {
+                packageBans.put(userId, packageNames);
+                packageNames = new ArrayList<>();
+            }
+        }
+        return packageBans;
     }
 
     /**
@@ -3449,6 +3501,9 @@ public class NotificationManagerService extends SystemService {
     public static final class DumpFilter {
         public String pkgFilter;
         public boolean zen;
+        public long since;
+        public boolean stats;
+        private boolean all;
 
         public static DumpFilter parseFromArguments(String[] args) {
             if (args != null && args.length == 2 && "p".equals(args[0])
@@ -3460,27 +3515,35 @@ public class NotificationManagerService extends SystemService {
             if (args != null && args.length == 1 && "zen".equals(args[0])) {
                 final DumpFilter filter = new DumpFilter();
                 filter.zen = true;
+                filter.all = true;
+                return filter;
+            }
+            if (args != null && args.length >= 1 && "--stats".equals(args[0])) {
+                final DumpFilter filter = new DumpFilter();
+                filter.stats = true;
+                filter.since = args.length == 2 ? Long.valueOf(args[1]) : 0;
+                filter.all = true;
                 return filter;
             }
             return null;
         }
 
         public boolean matches(StatusBarNotification sbn) {
-            return zen ? true : sbn != null
+            return all ? true : sbn != null
                     && (matches(sbn.getPackageName()) || matches(sbn.getOpPkg()));
         }
 
         public boolean matches(ComponentName component) {
-            return zen ? true : component != null && matches(component.getPackageName());
+            return all ? true : component != null && matches(component.getPackageName());
         }
 
         public boolean matches(String pkg) {
-            return zen ? true : pkg != null && pkg.toLowerCase().contains(pkgFilter);
+            return all ? true : pkg != null && pkg.toLowerCase().contains(pkgFilter);
         }
 
         @Override
         public String toString() {
-            return zen ? "zen" : ('\'' + pkgFilter + '\'');
+            return stats ? "stats" : zen ? "zen" : ('\'' + pkgFilter + '\'');
         }
     }
 
