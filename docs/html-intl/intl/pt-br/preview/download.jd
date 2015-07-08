@@ -265,8 +265,10 @@ para fins de teste. Ao configurar um dispositivo com uma dessas imagens, é poss
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td>
-      <em>Coming soon</em>
+    <td><a href="#top" onclick="onDownload(this)"
+      >fugu-MPZ79N-preview-fb63af98.tgz</a><br>
+      MD5: e8d081137a20b66df595ee69523314b5<br>
+      SHA-1: fb63af98302dd97be8de9313734d389ccdcce250
     </td>
   </tr>
 
