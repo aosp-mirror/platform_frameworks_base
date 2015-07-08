@@ -232,7 +232,7 @@ public class VolumeInfo implements Parcelable {
     }
 
     public @Nullable String getDescription() {
-        if (ID_PRIVATE_INTERNAL.equals(id)) {
+        if (ID_PRIVATE_INTERNAL.equals(id) || ID_EMULATED_INTERNAL.equals(id)) {
             return Resources.getSystem().getString(com.android.internal.R.string.storage_internal);
         } else if (!TextUtils.isEmpty(fsLabel)) {
             return fsLabel;
@@ -317,6 +317,9 @@ public class VolumeInfo implements Parcelable {
         }
 
         String description = getDescription();
+        if (description == null) {
+            description = getFsUuid();
+        }
         if (description == null) {
             description = context.getString(android.R.string.unknownName);
         }
