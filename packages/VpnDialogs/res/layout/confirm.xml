@@ -22,8 +22,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:paddingTop="4mm"
-            android:paddingLeft="3mm"
-            android:paddingRight="3mm"
-            android:paddingBottom="4mm"/>
+            android:paddingTop="16dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:paddingBottom="8dp"/>
 </ScrollView>
