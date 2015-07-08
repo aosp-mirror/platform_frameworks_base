@@ -1270,7 +1270,7 @@
          of their choosing.
          This can be overridden for devices where a different default SMS
          application is desired. -->
-    <string name="default_sms_application" translatable="false">com.google.android.apps.messaging</string>
+    <string name="default_sms_application" translatable="false">com.android.mms</string>
 
     <!-- Default web browser.  This is the package name of the application that will
          be the default browser when the device first boots.  Afterwards the user
