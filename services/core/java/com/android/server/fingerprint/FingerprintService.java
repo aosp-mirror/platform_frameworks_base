@@ -301,6 +301,20 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         return 0;
     }
 
+    public int startPostEnroll(IBinder token) {
+        IFingerprintDaemon daemon = getFingerprintDaemon();
+        if (daemon == null) {
+            Slog.w(TAG, "startPostEnroll: no fingeprintd!");
+            return 0;
+        }
+        try {
+            return daemon.postEnroll();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "startPostEnroll failed", e);
+        }
+        return 0;
+    }
+
     private void stopPendingOperations() {
         if (mEnrollClient != null) {
             stopEnrollment(mEnrollClient.token, true);
@@ -632,6 +646,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         public long preEnroll(IBinder token) {
             checkPermission(MANAGE_FINGERPRINT);
             return startPreEnroll(token);
+        }
+
+        @Override // Binder call
+        public int postEnroll(IBinder token) {
+            checkPermission(MANAGE_FINGERPRINT);
+            return startPostEnroll(token);
         }
 
         @Override // Binder call
