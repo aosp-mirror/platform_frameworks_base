@@ -38,7 +38,9 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -146,6 +148,10 @@ public class ImageWallpaper extends WallpaperService {
         private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
         private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
         private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
+
+        private int mRotationAtLastSurfaceSizeUpdate = -1;
+        private int mDisplayWidthAtLastSurfaceSizeUpdate = -1;
+        private int mDisplayHeightAtLastSurfaceSizeUpdate = -1;
 
         public DrawableEngine() {
             super();
@@ -315,6 +321,9 @@ public class ImageWallpaper extends WallpaperService {
                 if (newRotation != mLastRotation) {
                     // Update surface size (if necessary)
                     updateSurfaceSize(getSurfaceHolder(), displayInfo);
+                    mRotationAtLastSurfaceSizeUpdate = newRotation;
+                    mDisplayWidthAtLastSurfaceSizeUpdate = displayInfo.logicalWidth;
+                    mDisplayHeightAtLastSurfaceSizeUpdate = displayInfo.logicalHeight;
                 }
                 SurfaceHolder sh = getSurfaceHolder();
                 final Rect frame = sh.getSurfaceFrame();
@@ -447,6 +456,37 @@ public class ImageWallpaper extends WallpaperService {
                     Log.w(TAG, "Unable reset to default wallpaper!", ex);
                 }
             }
+        }
+
+        @Override
+        protected void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
+            super.dump(prefix, fd, out, args);
+
+            out.print(prefix); out.println("ImageWallpaper.DrawableEngine:");
+            out.print(prefix); out.print(" mBackground="); out.print(mBackground);
+            out.print(" mBackgroundWidth="); out.print(mBackgroundWidth);
+            out.print(" mBackgroundHeight="); out.println(mBackgroundHeight);
+
+            out.print(prefix); out.print(" mLastRotation="); out.print(mLastRotation);
+            out.print(" mLastSurfaceWidth="); out.print(mLastSurfaceWidth);
+            out.print(" mLastSurfaceHeight="); out.println(mLastSurfaceHeight);
+
+            out.print(prefix); out.print(" mXOffset="); out.print(mXOffset);
+            out.print(" mYOffset="); out.println(mYOffset);
+
+            out.print(prefix); out.print(" mVisible="); out.print(mVisible);
+            out.print(" mRedrawNeeded="); out.print(mRedrawNeeded);
+            out.print(" mOffsetsChanged="); out.println(mOffsetsChanged);
+
+            out.print(prefix); out.print(" mLastXTranslation="); out.print(mLastXTranslation);
+            out.print(" mLastYTranslation="); out.print(mLastYTranslation);
+            out.print(" mScale="); out.println(mScale);
+
+            out.print(prefix); out.println(" DisplayInfo at last updateSurfaceSize:");
+            out.print(prefix);
+            out.print("  rotation="); out.print(mRotationAtLastSurfaceSizeUpdate);
+            out.print("  width="); out.print(mDisplayWidthAtLastSurfaceSizeUpdate);
+            out.print("  height="); out.println(mDisplayHeightAtLastSurfaceSizeUpdate);
         }
 
         private void drawWallpaperWithCanvas(SurfaceHolder sh, int w, int h, int left, int top) {
