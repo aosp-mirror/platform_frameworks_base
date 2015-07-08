@@ -86,9 +86,11 @@ web link and skip prompting users to select an app. To learn how to implement th
 <a href="{@docRoot}preview/features/app-linking.html">App Linking</a>.
 
 <h2 id="backup">Auto Backup for Apps</h2>
-<p>The system now performs automatic full data backup and restore for apps. This behavior is
-enabled by default for apps targeting M Preview; you do not need to add any additional code. If
-users delete their Google accounts, their backup data is deleted as well. To learn how this feature
+<p>The system now performs automatic full data backup and restore for apps. For the
+duration of the <a href="{@docRoot}preview/overview.html">M Developer Preview program</a>, all
+apps are backed up, independent of which SDK version they target. After the final M SDK release,
+your app must target M to enable this behavior; you do not need to add any additional code. If users
+delete their Google accounts, their backup data is deleted as well. To learn how this feature
 works and how to configure what to back up on the file system, see
 <a href="{@docRoot}preview/backup/index.html">Auto Backup for Apps</a>.</p>
 
@@ -152,10 +154,9 @@ conjunction with a public or secret key implementation for user authentication.<
 
 <p>To set the timeout duration for which the same key can be re-used after a user is successfully
 authenticated, call the new
-{@code android.security.keystore.KeyGenParameterSpec.setUserAuthenticationValidityDurationSeconds()}
+{@code android.security.keystore.KeyGenParameterSpec.Builder.setUserAuthenticationValidityDurationSeconds()}
 method when you set up a {@link javax.crypto.KeyGenerator} or
-{@link java.security.KeyPairGenerator}. This feature currently works for symmetric cryptographic
-operations.</p>
+{@link java.security.KeyPairGenerator}.</p>
 
 <p>Avoid showing the re-authentication dialog excessively -- your apps should try using the
 cryptographic object first and if the the timeout expires, use the
@@ -236,7 +237,7 @@ can summon the assistant within any app, by long-pressing on the <strong>Home</s
 <p>Your app can elect to not share the current context with the assistant by setting the
 {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} flag. In addition to the
 standard set of information that the platform passes to the assistant, your app can share
-additional information by using the new {@code android.app.Activity.AssistContent} class.</p>
+additional information by using the new {@code android.app.assist.AssistContent} class.</p>
 
 <p>To provide the assistant with additional context from your app, follow these steps:</p>
 
@@ -273,7 +274,7 @@ and connect a compatible Bluetooth stylus with their phone or tablet.  While con
 information from the touch screen is fused with pressure and button information from the stylus to
 provide a greater range of expression than with the touch screen alone. Your app can listen for
 stylus button presses and perform secondary actions, by registering the new
-{@code View.onStylusButtonPressListener} and {@code GestureDetector.OnStylusButtonPressListener}
+{@code View.onContextClickListener} and {@code GestureDetector.onContextClickListener}
 callbacks in your activity.</p>
 
 <p>Use the {@link android.view.MotionEvent} methods and constants to detect stylus button
@@ -284,11 +285,11 @@ interactions:</p>
 {@link android.view.MotionEvent#TOOL_TYPE_STYLUS}.</li>
 <li>For apps targeting M Preview, the
 {@link android.view.MotionEvent#getButtonState() getButtonState()}
-method returns {@code MotionEvent.STYLUS_BUTTON_PRIMARY} when the user
+method returns {@code MotionEvent.BUTTON_STYLUS_PRIMARY} when the user
 presses the primary stylus button. If the stylus has a second button, the same method returns
-{@code MotionEvent.STYLUS_BUTTON_SECONDARY} when the user presses it. If the user presses
+{@code MotionEvent.BUTTON_STYLUS_SECONDARY} when the user presses it. If the user presses
 both buttons simultaneously, the method returns both values OR'ed together
-({@code STYLUS_BUTTON_PRIMARY|STYLUS_BUTTON_SECONDARY}).</li>
+({@code BUTTON_STYLUS_PRIMARY|BUTTON_STYLUS_SECONDARY}).</li>
 <li>
 For apps targeting a lower platform version, the
 {@link android.view.MotionEvent#getButtonState() getButtonState()} method returns
@@ -314,7 +315,7 @@ provision Hotspot 2.0 credentials in your app, use the new methods of the
 {@link android.net.wifi.WifiEnterpriseConfig} class, such as {@code setPlmn()} and
 {@code setRealm()}. In the {@link android.net.wifi.WifiConfiguration} object, you can set the
 {@link android.net.wifi.WifiConfiguration#FQDN} and the {@code providerFriendlyName} fields.
-The new {@code ScanResult.PasspointNetwork} property indicates if a detected
+The new {@code ScanResult.isPasspointNetwork()} method indicates if a detected
 network represents a Hotspot 2.0 access point.
 </p>
 
@@ -356,10 +357,10 @@ allows users to start a voice search from a game controller or remote control co
 TV. The system invokes the new {@code android.app.Activity.onSearchRequested()} callback when the
 user starts a search. To determine if the user's input device has a built-in microphone, retrieve
 the {@link android.view.InputDevice} object from that callback, then call the new
-{@code InputDevice.hasMic()} method.</li>
-  <li>New {@code android.media.AudioDevicesManager} class which lets you retrieve a list of all
-attached source and sink audio devices. You can also specify an
-{@code android.media.OnAudioDeviceConnectionListener} object if you want your app to be notified
+{@code InputDevice.hasMicrophone()} method.</li>
+  <li>New {@code AudioManager.getDevices() method which lets you retrieve a list of all
+    audio devices currently connected to the system. You can also register an
+{@code android.media.AudioDeviceCallback} object if you want your app to be notified
 when an audio device is connected or disconnected.</li>
 </ul>
 
@@ -407,14 +408,15 @@ flash unit. If the torch mode is turned on or off successfully, the
 
 <h3 id="reprocessing">Reprocessing API</h3>
 <p>The {@link android.hardware.camera2 Camera2} API is extended to support YUV and private
-opaque format image reprocessing. Your app determine if the reprocessing capabilities are available
-via {@code CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES}. If a device supports reprocessing,
-you can create a reprocessable camera capture session by calling
+opaque format image reprocessing. To determine if these reprocessing capabilities are available,
+call {@link android.hardware.camera2.CameraManager#getCameraCharacteristics(java.lang.String)
+getCameraCharacteristics()} and check for the {@code REPROCESS_MAX_CAPTURE_STALL} key. If a
+device supports reprocessing, you can create a reprocessable camera capture session by calling
 {@code CameraDevice.createReprocessableCaptureSession()}, and create requests for input
 buffer reprocessing.</p>
 
-<p>Use the {@code ImageWriter} class to connect the input buffer flow to the camera reprocessing
-input. To get an empty buffer, follow this programming model:</p>
+<p>Use the {@code android.media.ImageWriter} class to connect the input buffer flow to the camera
+reprocessing input. To get an empty buffer, follow this programming model:</p>
 
 <ol>
 <li>Call the {@code ImageWriter.dequeueInputImage()} method.</li>
@@ -428,10 +430,10 @@ data directly. Instead, pass the {@code ImageFormat.PRIVATE} image directly to t
 {@code ImageWriter} by calling the {@code ImageWriter.queueInputImage()} method without any
 buffer copy.</p>
 
-<p>The {@code ImageReader} class now supports {@code android.graphics.ImageFormat.PRIVATE} format
-image streams. This support allows your app to maintain a circular image queue of
-{@code ImageReader} output images, select one or more images, and send them to the
-{@code ImageWriter} for camera reprocessing.</p>
+<p>The {@link android.media.ImageReader} class now supports
+{@code android.graphics.ImageFormat.PRIVATE} format image streams. This support allows your app to
+maintain a circular image queue of {@link android.media.ImageReader} output images, select one or
+more images, and send them to the {@code ImageWriter} for camera reprocessing.</p>
 
 <h2 id="afw">Android for Work Features</h2>
 <p>This preview includes the following new APIs for Android for Work:</p>
@@ -441,10 +443,10 @@ can now control the following settings to improve management of
 Corporate-Owned, Single-Use (COSU) devices:
   <ul>
     <li>Disable or re-enable the keyguard with the
-{@code DevicePolicyManager.setKeyguardEnabledState()} method.</li>
+{@code DevicePolicyManager.setKeyguardDisabled()} method.</li>
     <li>Disable or re-enable the status bar (including quick settings, notifications, and the
 navigation swipe-up gesture that launches Google Now) with the
-{@code DevicePolicyManager.setStatusBarEnabledState()} method.</li>
+{@code DevicePolicyManager.setStatusBarDisabled()} method.</li>
     <li>Disable or re-enable safe boot with the {@link android.os.UserManager} constant
 {@code DISALLOW_SAFE_BOOT}.</li>
     <li>Prevent the screen from turning off while plugged in with the
@@ -488,16 +490,6 @@ uninstallAllUserCaCerts()}</li>
   <li>{@link android.app.admin.DevicePolicyManager#installKeyPair(android.content.ComponentName,java.security.PrivateKey,java.security.cert.Certificate,java.lang.String)
 installKeyPair()}</li>
 </ul>
-</li>
-<li><strong>Enterprise factory reset protection:</strong> When provisioning a Device Owner, you can
-now configure parameters to unlock Factory Reset Protection (FRP) by setting the
-{@code DeviceManagerPolicy.EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS} bundle. An NFC Programmer
-app can provide these parameters after a device has been reset to unlock FRP and provision the device,
-without requiring the previously configured Google account. If you don't modify these parameters,
-FRP remains in-place and prevents the device from being activated without the previously activated
-Google credentials.
-<p>Additionally, by setting app restrictions on Google Play services, Device Owners can specify
-alternative Google accounts for unlocking FRP to replace the ones activated on the device.</p>
 </li>
 <img src="{@docRoot}preview/images/work-profile-screen.png"
 srcset="{@docRoot}preview/images/work-profile-screen.png 1x, {@docRoot}preview/images/work-profile-screen_2x.png 2x"

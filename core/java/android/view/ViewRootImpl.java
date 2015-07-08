@@ -5327,7 +5327,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void handleDispatchWindowAnimationStarted(int remainingFrameCount) {
-        if (!mDrawDuringWindowsAnimating) {
+        if (!mDrawDuringWindowsAnimating && remainingFrameCount != -1) {
             mRemainingFrameCount = remainingFrameCount;
             mWindowsAnimating = true;
         }

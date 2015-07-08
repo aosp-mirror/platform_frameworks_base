@@ -122,7 +122,13 @@ class WindowStateAnimator {
     // used.
     int mAnimDw;
     int mAnimDh;
+
+    /** Is the next animation to be started a window move animation? */
     boolean mAnimateMove = false;
+
+    /** Are we currently running a window move animation? */
+    boolean mAnimatingMove = false;
+
     float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
     float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
 
@@ -361,6 +367,7 @@ class WindowStateAnimator {
 
         mAnimating = false;
         mKeyguardGoingAwayAnimation = false;
+        mAnimatingMove = false;
         mLocalAnimating = false;
         if (mAnimation != null) {
             mAnimation.cancel();

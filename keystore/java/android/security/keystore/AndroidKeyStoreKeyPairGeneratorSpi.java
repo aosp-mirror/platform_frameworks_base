@@ -310,7 +310,14 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 } else {
                     mKeymasterDigests = EmptyArray.INT;
                 }
-            } catch (IllegalArgumentException e) {
+
+                // Check that user authentication related parameters are acceptable. This method
+                // will throw an IllegalStateException if there are issues (e.g., secure lock screen
+                // not set up).
+                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(),
+                        mSpec.isUserAuthenticationRequired(),
+                        mSpec.getUserAuthenticationValidityDurationSeconds());
+            } catch (IllegalArgumentException | IllegalStateException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
 

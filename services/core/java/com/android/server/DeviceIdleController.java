@@ -1236,6 +1236,8 @@ public class DeviceIdleController extends SystemService
         pw.println("    Re-enable device idle mode after it had previously been disabled.");
         pw.println("  enabled");
         pw.println("    Print 1 if device idle mode is currently enabled, else 0.");
+        pw.println("  whitelist");
+        pw.println("    Print currently whitelisted apps.");
         pw.println("  whitelist [package ...]");
         pw.println("    Add (prefix with +) or remove (prefix with -) packages.");
         pw.println("  tempwhitelist [package ..]");
@@ -1314,25 +1316,42 @@ public class DeviceIdleController extends SystemService
                     long token = Binder.clearCallingIdentity();
                     try {
                         i++;
-                        while (i < args.length) {
-                            arg = args[i];
-                            i++;
-                            if (arg.length() < 1 || (arg.charAt(0) != '-'
-                                    && arg.charAt(0) != '+')) {
-                                pw.println("Package must be prefixed with + or -: " + arg);
-                                return;
-                            }
-                            char op = arg.charAt(0);
-                            String pkg = arg.substring(1);
-                            if (op == '+') {
-                                if (addPowerSaveWhitelistAppInternal(pkg)) {
-                                    pw.println("Added: " + pkg);
-                                } else {
-                                    pw.println("Unknown package: " + pkg);
+                        if (i < args.length) {
+                            while (i < args.length) {
+                                arg = args[i];
+                                i++;
+                                if (arg.length() < 1 || (arg.charAt(0) != '-'
+                                        && arg.charAt(0) != '+')) {
+                                    pw.println("Package must be prefixed with + or -: " + arg);
+                                    return;
                                 }
-                            } else {
-                                if (removePowerSaveWhitelistAppInternal(pkg)) {
-                                    pw.println("Removed: " + pkg);
+                                char op = arg.charAt(0);
+                                String pkg = arg.substring(1);
+                                if (op == '+') {
+                                    if (addPowerSaveWhitelistAppInternal(pkg)) {
+                                        pw.println("Added: " + pkg);
+                                    } else {
+                                        pw.println("Unknown package: " + pkg);
+                                    }
+                                } else {
+                                    if (removePowerSaveWhitelistAppInternal(pkg)) {
+                                        pw.println("Removed: " + pkg);
+                                    }
+                                }
+                            }
+                        } else {
+                            synchronized (this) {
+                                for (int j=0; j<mPowerSaveWhitelistApps.size(); j++) {
+                                    pw.print("system,");
+                                    pw.print(mPowerSaveWhitelistApps.keyAt(j));
+                                    pw.print(",");
+                                    pw.println(mPowerSaveWhitelistApps.valueAt(j));
+                                }
+                                for (int j=0; j<mPowerSaveWhitelistUserApps.size(); j++) {
+                                    pw.print("user,");
+                                    pw.print(mPowerSaveWhitelistUserApps.keyAt(j));
+                                    pw.print(",");
+                                    pw.println(mPowerSaveWhitelistUserApps.valueAt(j));
                                 }
                             }
                         }

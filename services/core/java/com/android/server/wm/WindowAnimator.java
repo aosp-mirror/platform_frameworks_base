@@ -272,8 +272,9 @@ public class WindowAnimator {
 
                 try {
                     if (anyAnimating && !anyWasAnimating) {
-                        win.mClient.onAnimationStarted(
-                                winAnimator.mKeyguardGoingAwayAnimation ? 1 : 0);
+                        win.mClient.onAnimationStarted(winAnimator.mAnimatingMove ? -1
+                                : winAnimator.mKeyguardGoingAwayAnimation ? 1
+                                : 0);
                     } else if (!anyAnimating && anyWasAnimating) {
                         win.mClient.onAnimationStopped();
                     }

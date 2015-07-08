@@ -87,6 +87,10 @@ public abstract class KeymasterUtils {
      * @param userAuthenticationValidityDurationSeconds duration of time (seconds) for which user
      *        authentication is valid as authorization for using the key or {@code -1} if every
      *        use of the key needs authorization.
+     *
+     * @throws IllegalStateException if user authentication is required but the system is in a wrong
+     *         state (e.g., secure lock screen not set up) for generating or importing keys that
+     *         require user authentication.
      */
     public static void addUserAuthArgs(KeymasterArguments args,
             boolean userAuthenticationRequired,

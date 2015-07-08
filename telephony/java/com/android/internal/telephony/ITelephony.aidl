@@ -936,6 +936,7 @@ interface ITelephony {
      * @return {@code true} if the device supports hearing aid compatibility.
      */
     boolean isHearingAidCompatibilitySupported();
+
     /**
      * Get IMS Registration Status
      */
@@ -943,19 +944,16 @@ interface ITelephony {
 
     /**
      * Returns the Status of Wi-Fi Calling
-     *@hide
      */
     boolean isWifiCallingAvailable();
     
     /**
      * Returns the Status of Volte
-     *@hide
      */
     boolean isVolteAvailable();
 
      /**
      * Returns the Status of VT (video telephony)
-     *@hide
      */
     boolean isVideoTelephonyAvailable();
 
@@ -986,7 +984,6 @@ interface ITelephony {
 
     /**
      * Return the modem activity info.
-     *@hide
      */
     ModemActivityInfo getModemActivityInfo();
 }

@@ -83,7 +83,8 @@ oneway interface IWindow {
      * The window is beginning to animate. The application should stop drawing frames until the
      * window is not animating anymore, indicated by being called {@link #windowEndAnimating}.
      *
-     * @param remainingFrameCount how many frames the app might still draw before stopping drawing
+     * @param remainingFrameCount how many frames the app might still draw before stopping drawing;
+     *                            pass -1 to let it continue drawing
      */
     void onAnimationStarted(int remainingFrameCount);
 
