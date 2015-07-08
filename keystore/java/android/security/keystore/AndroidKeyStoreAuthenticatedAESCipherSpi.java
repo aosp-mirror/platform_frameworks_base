@@ -129,6 +129,12 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
                 return;
             }
 
+            if (!"GCM".equalsIgnoreCase(params.getAlgorithm())) {
+                throw new InvalidAlgorithmParameterException(
+                        "Unsupported AlgorithmParameters algorithm: " + params.getAlgorithm()
+                        + ". Supported: GCM");
+            }
+
             GCMParameterSpec spec;
             try {
                 spec = params.getParameterSpec(GCMParameterSpec.class);
