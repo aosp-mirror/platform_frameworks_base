@@ -243,6 +243,10 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.ime_switcher);
     }
 
+    public View getAppShelf() {
+        return mCurrentView.findViewById(R.id.app_shelf);
+    }
+
     private void getIcons(Resources res) {
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
@@ -341,6 +345,12 @@ public class NavigationBarView extends LinearLayout {
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
+
+        // The app shelf, if it exists, follows the visibility of the home button.
+        View appShelf = getAppShelf();
+        if (appShelf != null) {
+            appShelf.setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
+        }
     }
 
     private boolean inLockTask() {
