@@ -1,0 +1,327 @@
+page.title=自动备份应用
+page.tags=备份, 预览版资源, androidm
+page.keywords=备份, 自动备份, 预览版
+page.image=images/cards/card-auto-backup_2x.png
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文内容</h2>
+      <ol>
+        <li><a href="#overview">概览</a></li>
+        <li><a href="#configuring">配置数据备份</a></li>
+        <li><a href="#testing">测试备份配置</a></li>
+        <li><a href="#issues">已知问题</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  通常，用户需要投入大量的时间和精力在应用内创建数据和设置首选项。
+如果用户更换破损设备或升级至新设备，则保留用户数据对于确保提供卓越的用户体验至关重要。
+在这些情况下，运行 Android M 预览版系统的设备可以通过将应用数据自动备份到 Google Drive，帮助确保提供卓越的用户体验。
+
+这样，即使用户更换或升级设备，应用数据也可自动恢复。
+
+</p>
+
+<p>
+  对于运行 Android M 预览版的设备中所有已安装的应用，均可启用自动备份。无需额外提供应用代码。
+该系统允许用户选择禁止自动数据备份。
+此外，您还可以选择限制要备份应用中的哪些数据。
+</p>
+
+<p>
+  本文介绍了新系统行为，阐述了如何指定要为应用备份哪些数据。
+
+</p>
+
+<h2 id="overview">概览</h2>
+
+<p>
+  自动备份功能可以通过将应用在用户设备中创建的数据上传到用户的 Google Drive 帐户并进行加密，来保留这些数据。
+您或用户无需为数据存储付费，且保存的数据不计入用户个人的 Drive 配额。
+在 M 预览版运行期间，用户可针对每个 Android 应用存储多达 25MB 的数据。
+
+</p>
+
+<p>
+  当设备处于空闲、充电以及连接至 Wi-Fi 网络时，会每 24 小时自动备份一次数据。
+满足上述这些条件后，备份管理器服务会将所有可用的备份数据上传至云端。
+当用户改用新设备或卸载并重新安装备份的应用时，恢复操作会将备份的数据复制到新安装的应用的数据目录中。
+
+
+</p>
+
+<p class="note">
+  <strong>注：</strong>如果应用使用旧版 <a href="{@docRoot}google/backup/index.html">Android 备份服务</a>，则此新行为不适用，不过现有的备份行为会照常运行。
+
+
+</p>
+
+
+<h3 id="auto-exclude">自动排除的数据文件</h3>
+
+<p>
+  并非所有应用数据均应备份，例如临时文件和缓存文件就无需备份，因此自动备份服务会默认排除如下一些特定的数据文件：
+
+</p>
+
+<ul>
+  <li>通过 {@link android.content.Context#getCacheDir
+    getCacheDir()} 和 {@link android.content.ContextWrapper#getCodeCacheDir getCodeCacheDir()}
+ 方法所引用的目录中的文件
+  </li>
+
+  <li>位于外部存储中的文件，除非这些文件是驻留在通过 
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+ 方法所引用的目录中
+  </li>
+
+  <li>位于通过 
+{@link android.content.Context#getNoBackupFilesDir getNoBackupFilesDir()} 方法所引用的目录中的文件
+  </li>
+</ul>
+
+<h2 id="configuring">配置数据备份</h2>
+
+<p>
+  除了上一部分中列出的自动排除的文件外，凡 M 预览版设备中安装的任何应用所创建的数据均会备份。
+您可以使用应用清单文件中的设置，进一步限制和配置应用中的哪些数据需要备份。
+
+</p>
+
+<h3 id="include-exclude">包括或排除数据</h3>
+
+<p>
+  根据应用所需的数据及其保存方式，您可能需要针对包括或排除哪些特定的文件或目录设置具体的规则。
+自动备份服务支持使用 XML 配置文件和应用清单文件来设置这些备份规则。
+
+您可以在应用清单文件中指定备份架构配置文件，如下例所示：
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>
+  在此示例代码中，<code>android:fullBackupContent</code> 属性指定了一个 XML 文件。该文件名为 
+<code>mybackupscheme.xml</code>，位于应用开发项目的 <code>res/xml/</code> 目录中。
+此配置文件包括关于要备份哪些文件的规则。
+下列示例代码显示了将某一特定文件排除在备份之外的配置文件：
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;full-backup-content&gt;
+    &lt;exclude domain="database" path="device_info.db"/&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  此示例备份配置仅将一个特定数据库文件排除在备份之外。
+  所有其他文件均予以备份。
+</p>
+
+<h4>备份配置语法</h4>
+
+<p>
+  您可以通过备份服务配置指定备份中要包括或排除哪些文件。
+数据备份配置 xml 文件的语法如下：
+</p>
+
+<pre>
+&lt;full-backup-content&gt;
+    &lt;include domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+    &lt;exclude domain=["file" | "database" | "sharedpref" | "external" | "root"] path="string" /&gt;
+&lt;/full-backup-content&gt;
+</pre>
+
+<p>
+  您可以使用下列元素和属性指定备份中要包括或排除哪些文件：
+
+</p>
+
+<ul>
+  <li>
+  <code>&lt;include&gt;</code>。如果您想指定一组要备份的资源，而不是默认由系统备份应用中的所有数据，请使用此元素。
+如果您指定了 <code>&lt;include&gt;</code> 标记，系统将仅备份使用此元素指定的资源。<em></em>
+
+
+  </li>
+
+  <li>
+  <code>&lt;exclude&gt;</code>。使用此元素指定一组要排除在备份之外的资源。
+除了使用此元素指定的资源外，系统将备份应用中的所有数据。
+
+  </li>
+
+  <li>
+  <code>domain.</code> 您想要在备份中包括或排除的资源类型。您可为此属性指定的有效值包括：
+
+  </li>
+
+  <li style="list-style: none">
+  <ul>
+    <li>
+    <code>root</code>。指定资源处于应用的根目录中
+    </li>
+
+    <li>
+    <code>file</code>。与通过 
+{@link android.content.Context#getFilesDir getFilesDir()} 方法返回的目录中的某个资源相对应
+    </li>
+
+    <li>
+    <code>database</code>。与通过 
+{@link android.content.Context#getDatabasePath getDatabasePath()} 方法或使用 
+{@link android.database.sqlite.SQLiteOpenHelper} 类返回的某个数据库相对应
+    </li>
+
+    <li>
+    <code>sharedpref</code>。与通过 {@link android.content.Context#getSharedPreferences getSharedPreferences()}
+ 方法返回的某个 {@link android.content.SharedPreferences} 对象相对应
+
+    </li>
+
+    <li>
+    <code>external</code>。指定资源位于外部存储中，且与通过 
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()} 方法返回的目录中的某个文件相对应
+
+    </li>
+
+    <li>
+    <code>path</code>。您想要在备份中包括或排除的资源的文件路径
+
+    </li>
+  </ul>
+  </li>
+</ul>
+
+
+<h3 id="prohibit">禁止数据备份</h3>
+
+<p>
+  通过在清单文件的应用元素中将 
+<code>android:allowBackup</code> 属性设置为 <code>false</code>，您可选择阻止自动备份任何应用数据。
+此设置如下列示例代码所示：
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.my.appexample"&gt;
+    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;app ...
+<strong>        android:allowBackup="false"&gt;</strong>
+    &lt;/app&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="testing">测试备份配置</h2>
+
+<p>
+  创建备份配置后，您应立即进行测试，确保应用能够保存数据，且数据能够正确恢复。
+
+</p>
+
+
+<h4>启用备份日志记录</h4>
+
+<p>
+  要帮助确定备份功能如何解析 XML 文件，请在执行测试备份之前启用日志记录功能：
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell setprop log.tag.BackupXmlParserLogging VERBOSE
+</pre>
+
+<h4>测试备份</h4>
+
+<p>要手动运行备份，您首先必须通过调用下列命令初始化备份管理器：
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr run
+</pre>
+
+<p>
+  然后，使用下列命令并以 <code>&lt;PACKAGE&gt;</code> 参数指定应用的软件包名称来手动备份应用：
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr fullbackup &lt;PACKAGE&gt;</pre>
+
+
+<h4>测试恢复</h4>
+
+<p>
+  要在备份应用数据后手动启动数据恢复，请调用下列命令，并以 <code>&lt;PACKAGE&gt;</code> 参数指定应用的软件包名称：
+
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr restore &lt;PACKAGE&gt;
+</pre>
+
+<p class="warning">
+  <b>警告：</b>执行恢复操作之前，此操作将阻止您的应用运行并擦除其数据。
+
+</p>
+
+<p>
+  您可以通过卸载并重新安装应用来启动数据恢复进程。应用安装完成后，系统会立即自动从云中恢复应用数据。
+
+</p>
+
+
+<h4>诊断备份问题</h4>
+
+<p>
+  如果遇到问题，可通过在<strong>设置 &gt; 备份</strong>中先关闭然后重新打开备份、将设备恢复出厂设置或者调用以下命令，来清除备份数据及关联的元数据：
+
+
+</p>
+
+<pre>$ adb shell bmgr wipe &lt;TRANSPORT&gt; &lt;PACKAGE&gt;</pre>
+
+<p>
+  <code>&lt;TRANSPORT&gt;</code> 值必须以 <code>com.google.android.gms</code> 为前缀。
+  要获取传输列表，请调用下列命令：
+</p>
+
+<pre>$ adb shell bmgr list transports</pre>
+
+<h2 id="issues">已知问题</h2>
+
+<p>以下是自动备份服务的已知问题：</p>
+
+<ul>
+  <li><strong>Google 云消息传递</strong>：对于使用 Google 云消息传递推送通知的应用，存在一个已知问题，即：备份通过 Google 云消息传递注册所返回的注册 ID 时，可能会中断已恢复应用的推送通知。为此，应用安装到新设备后，务必查询 API，看是否具有新注册 ID，这一点至关重要。如果已备份旧注册 ID，则不会出现这种情况。
+
+
+
+
+为避免这种现象，请从已备份文件集中排除注册 ID。
+
+  </li>
+</ul>
