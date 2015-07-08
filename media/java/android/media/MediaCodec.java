@@ -2029,12 +2029,21 @@ final public class MediaCodec {
          */
         public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4;
 
+        /**
+         * This indicates that decryption was attempted on a session that is
+         * not opened, which could be due to a failure to open the session,
+         * closing the session prematurely, or the session being reclaimed
+         * by the resource manager.
+         */
+        public static final int ERROR_SESSION_NOT_OPENED = 5;
+
         /** @hide */
         @IntDef({
             ERROR_NO_KEY,
             ERROR_KEY_EXPIRED,
             ERROR_RESOURCE_BUSY,
             ERROR_INSUFFICIENT_OUTPUT_PROTECTION,
+            ERROR_SESSION_NOT_OPENED,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface CryptoErrorCode {}

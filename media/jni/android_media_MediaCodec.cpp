@@ -64,6 +64,7 @@ static struct CryptoErrorCodes {
     jint cryptoErrorKeyExpired;
     jint cryptoErrorResourceBusy;
     jint cryptoErrorInsufficientOutputProtection;
+    jint cryptoErrorSessionNotOpened;
 } gCryptoErrorCodes;
 
 static struct CodecActionCodes {
@@ -842,6 +843,9 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
             break;
         case ERROR_DRM_INSUFFICIENT_OUTPUT_PROTECTION:
             err = gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection;
+            break;
+        case ERROR_DRM_SESSION_NOT_OPENED:
+            err = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
             break;
         default:  /* Other negative DRM error codes go out as is. */
             break;
@@ -1687,6 +1691,11 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     field = env->GetStaticFieldID(clazz.get(), "ERROR_INSUFFICIENT_OUTPUT_PROTECTION", "I");
     CHECK(field != NULL);
     gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection =
+        env->GetStaticIntField(clazz.get(), field);
+
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_SESSION_NOT_OPENED", "I");
+    CHECK(field != NULL);
+    gCryptoErrorCodes.cryptoErrorSessionNotOpened =
         env->GetStaticIntField(clazz.get(), field);
 
     clazz.reset(env->FindClass("android/media/MediaCodec$CodecException"));
