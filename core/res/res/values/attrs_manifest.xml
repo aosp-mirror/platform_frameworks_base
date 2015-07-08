@@ -200,7 +200,7 @@
              together. -->
         <flag name="signatureOrSystem" value="3" />
         <!-- Additional flag from base permission type: this permission can also
-             be granted to any applications installed on the system image.
+             be granted to any applications installed as privileged apps on the system image.
              Please avoid using this option, as the
              signature protection level should be sufficient for most needs and
              works regardless of exactly where applications are installed.  This
@@ -208,6 +208,8 @@
              vendors have applications built in to a system image which need
              to share specific features explicitly because they are being built
              together. -->
+        <flag name="privileged" value="0x10" />
+        <!-- Old synonym for "privileged". -->
         <flag name="system" value="0x10" />
         <!-- Additional flag from base permission type: this permission can also
              (optionally) be granted to development applications. -->
@@ -226,6 +228,10 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to system apps that verify packages. -->
         <flag name="verifier" value="0x200" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted any application pre-installed on the system image (not just privileged
+            apps). -->
+        <flag name="preinstalled" value="0x400" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
