@@ -67,6 +67,10 @@ public class PooledStringWriter {
         }
     }
 
+    public int getStringCount() {
+        return mPool.size();
+    }
+
     public void finish() {
         final int pos = mOut.dataPosition();
         mOut.setDataPosition(mStart);

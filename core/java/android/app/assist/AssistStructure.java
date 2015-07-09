@@ -30,6 +30,9 @@ import java.util.ArrayList;
 public class AssistStructure implements Parcelable {
     static final String TAG = "AssistStructure";
 
+    static final boolean DEBUG_PARCEL = false;
+    static final boolean DEBUG_PARCEL_TREE = false;
+
     boolean mHaveData;
 
     ComponentName mActivityComponent;
@@ -46,16 +49,273 @@ public class AssistStructure implements Parcelable {
     static final int TRANSACTION_XFER = Binder.FIRST_CALL_TRANSACTION+1;
     static final String DESCRIPTOR = "android.app.AssistStructure";
 
-    final class SendChannel extends Binder {
+    final static class SendChannel extends Binder {
+        volatile AssistStructure mAssistStructure;
+
+        SendChannel(AssistStructure as) {
+            mAssistStructure = as;
+        }
+
         @Override protected boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
             if (code == TRANSACTION_XFER) {
+                AssistStructure as = mAssistStructure;
+                if (as == null) {
+                    return true;
+                }
+
                 data.enforceInterface(DESCRIPTOR);
-                writeContentToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                IBinder token = data.readStrongBinder();
+                if (DEBUG_PARCEL) Log.d(TAG, "Request for data on " + as
+                        + " using token " + token);
+                if (token != null) {
+                    if (DEBUG_PARCEL) Log.d(TAG, "Resuming partial write of " + token);
+                    if (token instanceof ParcelTransferWriter) {
+                        ParcelTransferWriter xfer = (ParcelTransferWriter)token;
+                        xfer.writeToParcel(as, reply);
+                        return true;
+                    }
+                    Log.w(TAG, "Caller supplied bad token type: " + token);
+                    // Don't write anything; this is the end of the data.
+                    return true;
+                }
+                //long start = SystemClock.uptimeMillis();
+                ParcelTransferWriter xfer = new ParcelTransferWriter(as, reply);
+                xfer.writeToParcel(as, reply);
+                //Log.i(TAG, "Time to parcel: " + (SystemClock.uptimeMillis()-start) + "ms");
                 return true;
             } else {
                 return super.onTransact(code, data, reply, flags);
             }
+        }
+    }
+
+    final static class ViewStackEntry {
+        ViewNode node;
+        int curChild;
+        int numChildren;
+    }
+
+    final static class ParcelTransferWriter extends Binder {
+        final boolean mWriteStructure;
+        int mCurWindow;
+        int mNumWindows;
+        final ArrayList<ViewStackEntry> mViewStack = new ArrayList<>();
+        ViewStackEntry mCurViewStackEntry;
+        int mCurViewStackPos;
+        int mNumWrittenWindows;
+        int mNumWrittenViews;
+        final float[] mTmpMatrix = new float[9];
+
+        ParcelTransferWriter(AssistStructure as, Parcel out) {
+            mWriteStructure = as.waitForReady();
+            ComponentName.writeToParcel(as.mActivityComponent, out);
+            mNumWindows = as.mWindowNodes.size();
+            if (mWriteStructure && mNumWindows > 0) {
+                out.writeInt(mNumWindows);
+            } else {
+                out.writeInt(0);
+            }
+        }
+
+        void writeToParcel(AssistStructure as, Parcel out) {
+            int start = out.dataPosition();
+            mNumWrittenWindows = 0;
+            mNumWrittenViews = 0;
+            boolean more = writeToParcelInner(as, out);
+            Log.i(TAG, "Flattened " + (more ? "partial" : "final") + " assist data: "
+                    + (out.dataPosition() - start)
+                    + " bytes, containing " + mNumWrittenWindows + " windows, "
+                    + mNumWrittenViews + " views");
+        }
+
+        boolean writeToParcelInner(AssistStructure as, Parcel out) {
+            if (mNumWindows == 0) {
+                return false;
+            }
+            if (DEBUG_PARCEL) Log.d(TAG, "Creating PooledStringWriter @ " + out.dataPosition());
+            PooledStringWriter pwriter = new PooledStringWriter(out);
+            while (writeNextEntryToParcel(as, out, pwriter)) {
+                // If the parcel contains more than 100K of data, then we are getting too
+                // large for a single IPC so stop here and let the caller come back when it
+                // is ready for more.
+                if (out.dataSize() > 1024*1024) {
+                    if (DEBUG_PARCEL) Log.d(TAG, "Assist data size is " + out.dataSize()
+                            + " @ pos " + out.dataPosition() + "; returning partial result");
+                    out.writeInt(0);
+                    out.writeStrongBinder(this);
+                    if (DEBUG_PARCEL) Log.d(TAG, "Finishing PooledStringWriter @ "
+                            + out.dataPosition() + ", size " + pwriter.getStringCount());
+                    pwriter.finish();
+                    return true;
+                }
+            }
+            if (DEBUG_PARCEL) Log.d(TAG, "Finishing PooledStringWriter @ "
+                    + out.dataPosition() + ", size " + pwriter.getStringCount());
+            pwriter.finish();
+            mViewStack.clear();
+            return false;
+        }
+
+        void pushViewStackEntry(ViewNode node, int pos) {
+            ViewStackEntry entry;
+            if (pos >= mViewStack.size()) {
+                entry = new ViewStackEntry();
+                mViewStack.add(entry);
+                if (DEBUG_PARCEL_TREE) Log.d(TAG, "New stack entry at " + pos + ": " + entry);
+            } else {
+                entry = mViewStack.get(pos);
+                if (DEBUG_PARCEL_TREE) Log.d(TAG, "Existing stack entry at " + pos + ": " + entry);
+            }
+            entry.node = node;
+            entry.numChildren = node.getChildCount();
+            entry.curChild = 0;
+            mCurViewStackEntry = entry;
+        }
+
+        boolean writeNextEntryToParcel(AssistStructure as, Parcel out, PooledStringWriter pwriter) {
+            // Write next view node if appropriate.
+            if (mCurViewStackEntry != null) {
+                if (mCurViewStackEntry.curChild < mCurViewStackEntry.numChildren) {
+                    // Write the next child in the current view.
+                    if (DEBUG_PARCEL_TREE) Log.d(TAG, "Writing child #"
+                            + mCurViewStackEntry.curChild + " in " + mCurViewStackEntry.node);
+                    ViewNode child = mCurViewStackEntry.node.mChildren[mCurViewStackEntry.curChild];
+                    mCurViewStackEntry.curChild++;
+                    if (DEBUG_PARCEL) Log.d(TAG, "write view: at " + out.dataPosition()
+                            + ", windows=" + mNumWrittenWindows
+                            + ", views=" + mNumWrittenViews);
+                    out.writeInt(1);
+                    int flags = child.writeSelfToParcel(out, pwriter, mTmpMatrix);
+                    mNumWrittenViews++;
+                    // If the child has children, push it on the stack to write them next.
+                    if ((flags&ViewNode.FLAGS_HAS_CHILDREN) != 0) {
+                        if (DEBUG_PARCEL_TREE) Log.d(TAG, "Preparing to write "
+                                + child.mChildren.length + " children under " + child);
+                        out.writeInt(child.mChildren.length);
+                        int pos = ++mCurViewStackPos;
+                        pushViewStackEntry(child, pos);
+                    }
+                    return true;
+                }
+
+                // We are done writing children of the current view; pop off the stack.
+                do {
+                    int pos = --mCurViewStackPos;
+                    if (DEBUG_PARCEL_TREE) Log.d(TAG, "Done with " + mCurViewStackEntry.node
+                            + "; popping up to " + pos);
+                    if (pos < 0) {
+                        // Reached the last view; step to next window.
+                        if (DEBUG_PARCEL_TREE) Log.d(TAG, "Done with view hierarchy!");
+                        mCurViewStackEntry = null;
+                        break;
+                    }
+                    mCurViewStackEntry = mViewStack.get(pos);
+                } while (mCurViewStackEntry.curChild >= mCurViewStackEntry.numChildren);
+                return true;
+            }
+
+            // Write the next window if appropriate.
+            int pos = mCurWindow;
+            if (pos < mNumWindows) {
+                WindowNode win = as.mWindowNodes.get(pos);
+                mCurWindow++;
+                if (DEBUG_PARCEL) Log.d(TAG, "write window #" + pos + ": at " + out.dataPosition()
+                        + ", windows=" + mNumWrittenWindows
+                        + ", views=" + mNumWrittenViews);
+                out.writeInt(1);
+                win.writeSelfToParcel(out, pwriter, mTmpMatrix);
+                mNumWrittenWindows++;
+                ViewNode root = win.mRoot;
+                mCurViewStackPos = 0;
+                if (DEBUG_PARCEL_TREE) Log.d(TAG, "Pushing initial root view " + root);
+                pushViewStackEntry(root, 0);
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    final class ParcelTransferReader {
+        final float[] mTmpMatrix = new float[9];
+        PooledStringReader mStringReader;
+
+        int mNumReadWindows;
+        int mNumReadViews;
+
+        private final IBinder mChannel;
+        private IBinder mTransferToken;
+        private Parcel mCurParcel;
+
+        ParcelTransferReader(IBinder channel) {
+            mChannel = channel;
+        }
+
+        void go() {
+            fetchData();
+            mActivityComponent = ComponentName.readFromParcel(mCurParcel);
+            final int N = mCurParcel.readInt();
+            if (N > 0) {
+                if (DEBUG_PARCEL) Log.d(TAG, "Creating PooledStringReader @ "
+                        + mCurParcel.dataPosition());
+                mStringReader = new PooledStringReader(mCurParcel);
+                if (DEBUG_PARCEL) Log.d(TAG, "PooledStringReader size = "
+                        + mStringReader.getStringCount());
+                for (int i=0; i<N; i++) {
+                    mWindowNodes.add(new WindowNode(this));
+                }
+            }
+            if (DEBUG_PARCEL) Log.d(TAG, "Finished reading: at " + mCurParcel.dataPosition()
+                    + ", avail=" + mCurParcel.dataAvail() + ", windows=" + mNumReadWindows
+                    + ", views=" + mNumReadViews);
+        }
+
+        Parcel readParcel() {
+            if (DEBUG_PARCEL) Log.d(TAG, "readParcel: at " + mCurParcel.dataPosition()
+                    + ", avail=" + mCurParcel.dataAvail() + ", windows=" + mNumReadWindows
+                    + ", views=" + mNumReadViews);
+            if (mCurParcel.readInt() != 0) {
+                return mCurParcel;
+            }
+            // We have run out of partial data, need to read another batch.
+            mTransferToken = mCurParcel.readStrongBinder();
+            if (mTransferToken == null) {
+                throw new IllegalStateException(
+                        "Reached end of partial data without transfer token");
+            }
+            if (DEBUG_PARCEL) Log.d(TAG, "Ran out of partial data at "
+                    + mCurParcel.dataPosition() + ", token " + mTransferToken);
+            fetchData();
+            if (DEBUG_PARCEL) Log.d(TAG, "Creating PooledStringReader @ "
+                    + mCurParcel.dataPosition());
+            mStringReader = new PooledStringReader(mCurParcel);
+            if (DEBUG_PARCEL) Log.d(TAG, "PooledStringReader size = "
+                    + mStringReader.getStringCount());
+            if (DEBUG_PARCEL) Log.d(TAG, "readParcel: at " + mCurParcel.dataPosition()
+                    + ", avail=" + mCurParcel.dataAvail() + ", windows=" + mNumReadWindows
+                    + ", views=" + mNumReadViews);
+            mCurParcel.readInt();
+            return mCurParcel;
+        }
+
+        private void fetchData() {
+            Parcel data = Parcel.obtain();
+            data.writeInterfaceToken(DESCRIPTOR);
+            data.writeStrongBinder(mTransferToken);
+            if (DEBUG_PARCEL) Log.d(TAG, "Requesting data with token " + mTransferToken);
+            if (mCurParcel != null) {
+                mCurParcel.recycle();
+            }
+            mCurParcel = Parcel.obtain();
+            try {
+                mChannel.transact(TRANSACTION_XFER, data, mCurParcel, 0);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failure reading AssistStructure data", e);
+                throw new IllegalStateException("Failure reading AssistStructure data: " + e);
+            }
+            data.recycle();
+            mNumReadWindows = mNumReadViews = 0;
         }
     }
 
@@ -145,24 +405,25 @@ public class AssistStructure implements Parcelable {
             view.dispatchProvideStructure(builder);
         }
 
-        WindowNode(Parcel in, PooledStringReader preader, float[] tmpMatrix) {
+        WindowNode(ParcelTransferReader reader) {
+            Parcel in = reader.readParcel();
+            reader.mNumReadWindows++;
             mX = in.readInt();
             mY = in.readInt();
             mWidth = in.readInt();
             mHeight = in.readInt();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mDisplayId = in.readInt();
-            mRoot = new ViewNode(in, preader, tmpMatrix);
+            mRoot = new ViewNode(reader);
         }
 
-        int writeToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {
+        void writeSelfToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {
             out.writeInt(mX);
             out.writeInt(mY);
             out.writeInt(mWidth);
             out.writeInt(mHeight);
             TextUtils.writeToParcel(mTitle, out, 0);
             out.writeInt(mDisplayId);
-            return mRoot.writeToParcel(out, pwriter, tmpMatrix);
         }
 
         /**
@@ -287,7 +548,10 @@ public class AssistStructure implements Parcelable {
         ViewNode() {
         }
 
-        ViewNode(Parcel in, PooledStringReader preader, float[] tmpMatrix) {
+        ViewNode(ParcelTransferReader reader) {
+            final Parcel in = reader.readParcel();
+            reader.mNumReadViews++;
+            final PooledStringReader preader = reader.mStringReader;
             mClassName = preader.readString();
             mFlags = in.readInt();
             final int flags = mFlags;
@@ -320,8 +584,8 @@ public class AssistStructure implements Parcelable {
             }
             if ((flags&FLAGS_HAS_MATRIX) != 0) {
                 mMatrix = new Matrix();
-                in.readFloatArray(tmpMatrix);
-                mMatrix.setValues(tmpMatrix);
+                in.readFloatArray(reader.mTmpMatrix);
+                mMatrix.setValues(reader.mTmpMatrix);
             }
             if ((flags&FLAGS_HAS_ELEVATION) != 0) {
                 mElevation = in.readFloat();
@@ -342,12 +606,12 @@ public class AssistStructure implements Parcelable {
                 final int NCHILDREN = in.readInt();
                 mChildren = new ViewNode[NCHILDREN];
                 for (int i=0; i<NCHILDREN; i++) {
-                    mChildren[i] = new ViewNode(in, preader, tmpMatrix);
+                    mChildren[i] = new ViewNode(reader);
                 }
             }
         }
 
-        int writeToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {
+        int writeSelfToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {
             int flags = mFlags & ~FLAGS_ALL_CONTROL;
             if (mId != View.NO_ID) {
                 flags |= FLAGS_HAS_ID;
@@ -428,15 +692,7 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
             }
-            int N = 1;
-            if ((flags&FLAGS_HAS_CHILDREN) != 0) {
-                final int NCHILDREN = mChildren.length;
-                out.writeInt(NCHILDREN);
-                for (int i=0; i<NCHILDREN; i++) {
-                    N += mChildren[i].writeToParcel(out, pwriter, tmpMatrix);
-                }
-            }
-            return N;
+            return flags;
         }
 
         /**
@@ -1177,22 +1433,11 @@ public class AssistStructure implements Parcelable {
             return;
         }
         mHaveData = true;
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(DESCRIPTOR);
-        try {
-            mReceiveChannel.transact(TRANSACTION_XFER, data, reply, 0);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failure reading AssistStructure data", e);
-            return;
-        }
-        readContentFromParcel(reply);
-        data.recycle();
-        reply.recycle();
+        ParcelTransferReader reader = new ParcelTransferReader(mReceiveChannel);
+        reader.go();
     }
 
-    void writeContentToParcel(Parcel out, int flags) {
-        // First make sure all content has been created.
+    boolean waitForReady() {
         boolean skipStructure = false;
         synchronized (this) {
             long endTime = SystemClock.uptimeMillis() + 5000;
@@ -1210,30 +1455,14 @@ public class AssistStructure implements Parcelable {
                 skipStructure = true;
             }
         }
-        int start = out.dataPosition();
-        PooledStringWriter pwriter = new PooledStringWriter(out);
-        float[] tmpMatrix = new float[9];
-        ComponentName.writeToParcel(mActivityComponent, out);
-        final int N = skipStructure ? 0 : mWindowNodes.size();
-        out.writeInt(N);
-        int NV = 0;
-        for (int i=0; i<N; i++) {
-            NV += mWindowNodes.get(i).writeToParcel(out, pwriter, tmpMatrix);
-        }
-        pwriter.finish();
-        Log.i(TAG, "Flattened assist data: " + (out.dataPosition() - start) + " bytes, containing "
-                + N + " windows, " + NV + " views");
+        return !skipStructure;
     }
 
-    void readContentFromParcel(Parcel in) {
-        PooledStringReader preader = new PooledStringReader(in);
-        float[] tmpMatrix = new float[9];
-        mActivityComponent = ComponentName.readFromParcel(in);
-        final int N = in.readInt();
-        for (int i=0; i<N; i++) {
-            mWindowNodes.add(new WindowNode(in, preader, tmpMatrix));
+    /** @hide */
+    public void clearSendChannel() {
+        if (mSendChannel != null) {
+            mSendChannel.mAssistStructure = null;
         }
-        //dump();
     }
 
     public int describeContents() {
@@ -1245,7 +1474,7 @@ public class AssistStructure implements Parcelable {
             // This object holds its data.  We want to write a send channel that the
             // other side can use to retrieve that data.
             if (mSendChannel == null) {
-                mSendChannel = new SendChannel();
+                mSendChannel = new SendChannel(this);
             }
             out.writeStrongBinder(mSendChannel);
         } else {
