@@ -824,14 +824,8 @@ final class Settings {
                 continue;
             }
 
-            // If no user has the permission, nothing to remove.
-            if (!sus.getPermissionsState().hasPermission(bp.name, userId)) {
-                 continue;
-            }
-
-            boolean used = false;
-
             // Check if another package in the shared user needs the permission.
+            boolean used = false;
             for (PackageSetting pkg : sus.packages) {
                 if (pkg.pkg != null
                         && !pkg.pkg.packageName.equals(deletedPs.pkg.packageName)
@@ -840,25 +834,42 @@ final class Settings {
                     break;
                 }
             }
+            if (used) {
+                continue;
+            }
 
-            if (!used) {
-                PermissionsState permissionsState = sus.getPermissionsState();
+            PermissionsState permissionsState = sus.getPermissionsState();
+            PackageSetting disabledPs = getDisabledSystemPkgLPr(deletedPs.pkg.packageName);
 
-                // Try to revoke as an install permission which is for all users.
-                // The package is gone - no need to keep flags for applying policy.
-                permissionsState.updatePermissionFlags(bp, userId,
-                        PackageManager.MASK_PERMISSION_FLAGS, 0);
-
-                if (permissionsState.revokeInstallPermission(bp) ==
-                        PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
-                    return UserHandle.USER_ALL;
+            // If the package is shadowing is a disabled system package,
+            // do not drop permissions that the shadowed package requests.
+            if (disabledPs != null) {
+                boolean reqByDisabledSysPkg = false;
+                for (String permission : disabledPs.pkg.requestedPermissions) {
+                    if (permission.equals(eachPerm)) {
+                        reqByDisabledSysPkg = true;
+                        break;
+                    }
                 }
-
-                // Try to revoke as an install permission which is per user.
-                if (permissionsState.revokeRuntimePermission(bp, userId) ==
-                        PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
-                    return userId;
+                if (reqByDisabledSysPkg) {
+                    continue;
                 }
+            }
+
+            // Try to revoke as an install permission which is for all users.
+            // The package is gone - no need to keep flags for applying policy.
+            permissionsState.updatePermissionFlags(bp, userId,
+                    PackageManager.MASK_PERMISSION_FLAGS, 0);
+
+            if (permissionsState.revokeInstallPermission(bp) ==
+                    PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
+                return UserHandle.USER_ALL;
+            }
+
+            // Try to revoke as an install permission which is per user.
+            if (permissionsState.revokeRuntimePermission(bp, userId) ==
+                    PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
+                return userId;
             }
         }
 
