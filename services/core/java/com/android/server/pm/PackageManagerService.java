@@ -709,7 +709,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                    "Updating IntentFilterVerificationInfo for verificationId:" + verificationId);
+                    "Updating IntentFilterVerificationInfo for package " + packageName
+                            +" verificationId:" + verificationId);
 
             synchronized (mPackages) {
                 if (verified) {
@@ -794,8 +795,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean hasHTTPorHTTPS = filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
                 filter.hasDataScheme(IntentFilter.SCHEME_HTTPS);
         if (!hasHTTPorHTTPS) {
-            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                    "IntentFilter does not contain any HTTP or HTTPS data scheme");
             return false;
         }
         return true;
@@ -2245,6 +2244,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!mRestoredSettings && !onlyCore) {
                 mSettings.applyDefaultPreferredAppsLPw(this, UserHandle.USER_OWNER);
                 applyFactoryDefaultBrowserLPw(UserHandle.USER_OWNER);
+                primeDomainVerificationsLPw(UserHandle.USER_OWNER);
             }
 
             // If this is first boot after an OTA, and a normal boot, then
@@ -2259,7 +2259,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.mFingerprint = Build.FINGERPRINT;
             }
 
-            primeDomainVerificationsLPw();
             checkDefaultBrowser();
 
             // All the changes are done during package scanning.
@@ -2412,54 +2411,56 @@ public class PackageManagerService extends IPackageManager.Stub {
         return verifierComponentName;
     }
 
-    private void primeDomainVerificationsLPw() {
-        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Start priming domain verifications");
-        boolean updated = false;
-        ArraySet<String> allHostsSet = new ArraySet<>();
-        for (PackageParser.Package pkg : mPackages.values()) {
-            final String packageName = pkg.packageName;
-            if (!hasDomainURLs(pkg)) {
-                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "No priming domain verifications for " +
-                            "package with no domain URLs: " + packageName);
-                continue;
-            }
-            if (!pkg.isSystemApp()) {
-                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                        "No priming domain verifications for a non system package : " +
-                                packageName);
-                continue;
-            }
-            for (PackageParser.Activity a : pkg.activities) {
-                for (ActivityIntentInfo filter : a.intents) {
-                    if (hasValidDomains(filter)) {
-                        allHostsSet.addAll(filter.getHostsList());
+    private void primeDomainVerificationsLPw(int userId) {
+        if (DEBUG_DOMAIN_VERIFICATION) {
+            Slog.d(TAG, "Priming domain verifications in user " + userId);
+        }
+
+        SystemConfig systemConfig = SystemConfig.getInstance();
+        ArraySet<String> packages = systemConfig.getLinkedApps();
+        ArraySet<String> domains = new ArraySet<String>();
+
+        for (String packageName : packages) {
+            PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg != null) {
+                if (!pkg.isSystemApp()) {
+                    Slog.w(TAG, "Non-system app '" + packageName + "' in sysconfig <app-link>");
+                    continue;
+                }
+
+                domains.clear();
+                for (PackageParser.Activity a : pkg.activities) {
+                    for (ActivityIntentInfo filter : a.intents) {
+                        if (hasValidDomains(filter)) {
+                            domains.addAll(filter.getHostsList());
+                        }
                     }
                 }
+
+                if (domains.size() > 0) {
+                    if (DEBUG_DOMAIN_VERIFICATION) {
+                        Slog.v(TAG, "      + " + packageName);
+                    }
+                    // 'Undefined' in the global IntentFilterVerificationInfo, i.e. the usual
+                    // state w.r.t. the formal app-linkage "no verification attempted" state;
+                    // and then 'always' in the per-user state actually used for intent resolution.
+                    final IntentFilterVerificationInfo ivi;
+                    ivi = mSettings.createIntentFilterVerificationIfNeededLPw(packageName,
+                            new ArrayList<String>(domains));
+                    ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
+                    mSettings.updateIntentFilterVerificationStatusLPw(packageName,
+                            INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS, userId);
+                } else {
+                    Slog.w(TAG, "Sysconfig <app-link> package '" + packageName
+                            + "' does not handle web links");
+                }
+            } else {
+                Slog.w(TAG, "Unknown package '" + packageName + "' in sysconfig <app-link>");
             }
-            if (allHostsSet.size() == 0) {
-                allHostsSet.add("*");
-            }
-            ArrayList<String> allHostsList = new ArrayList<>(allHostsSet);
-            IntentFilterVerificationInfo ivi =
-                    mSettings.createIntentFilterVerificationIfNeededLPw(packageName, allHostsList);
-            if (ivi != null) {
-                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                        "Priming domain verifications for package: " + packageName +
-                        " with hosts:" + ivi.getDomainsString());
-                ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS);
-                updated = true;
-            }
-            else {
-                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                        "No priming domain verifications for package: " + packageName);
-            }
-            allHostsSet.clear();
         }
-        if (updated) {
-            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                    "Will need to write primed domain verifications");
-        }
-        if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "End priming domain verifications");
+
+        scheduleWritePackageRestrictionsLocked(userId);
+        scheduleWriteSettingsLocked();
     }
 
     private void applyFactoryDefaultBrowserLPw(int userId) {
@@ -2467,7 +2468,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // with a product-specific overlay used for vendor customization.
         String browserPkg = mContext.getResources().getString(
                 com.android.internal.R.string.default_browser);
-        if (browserPkg != null) {
+        if (!TextUtils.isEmpty(browserPkg)) {
             // non-empty string => required to be a known package
             PackageSetting ps = mSettings.mPackages.get(browserPkg);
             if (ps == null) {
@@ -13691,6 +13692,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             clearPackagePreferredActivitiesLPw(null, userId);
             mSettings.applyDefaultPreferredAppsLPw(this, userId);
             applyFactoryDefaultBrowserLPw(userId);
+            primeDomainVerificationsLPw(userId);
 
             scheduleWritePackageRestrictionsLocked(userId);
         }
@@ -14805,7 +14807,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println();
                 int count = mSettings.mPackages.size();
                 if (count == 0) {
-                    pw.println("No domain preferred apps!");
+                    pw.println("No applications!");
                     pw.println();
                 } else {
                     final String prefix = "  ";
@@ -14814,45 +14816,41 @@ public class PackageManagerService extends IPackageManager.Stub {
                         pw.println("No domain preferred apps!");
                         pw.println();
                     } else {
-                        pw.println("Domain preferred apps status:");
+                        pw.println("App verification status:");
                         pw.println();
                         count = 0;
                         for (PackageSetting ps : allPackageSettings) {
                             IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
                             if (ivi == null || ivi.getPackageName() == null) continue;
-                            pw.println(prefix + "Package Name: " + ivi.getPackageName());
+                            pw.println(prefix + "Package: " + ivi.getPackageName());
                             pw.println(prefix + "Domains: " + ivi.getDomainsString());
-                            pw.println(prefix + "Status: " + ivi.getStatusString());
+                            pw.println(prefix + "Status:  " + ivi.getStatusString());
                             pw.println();
                             count++;
                         }
                         if (count == 0) {
-                            pw.println(prefix + "No domain preferred app status!");
+                            pw.println(prefix + "No app verification established.");
                             pw.println();
                         }
                         for (int userId : sUserManager.getUserIds()) {
-                            pw.println("Domain preferred apps for User " + userId + ":");
+                            pw.println("App linkages for user " + userId + ":");
                             pw.println();
                             count = 0;
                             for (PackageSetting ps : allPackageSettings) {
-                                IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-                                if (ivi == null || ivi.getPackageName() == null) {
-                                    continue;
-                                }
                                 final int status = ps.getDomainVerificationStatusForUser(userId);
                                 if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
                                     continue;
                                 }
-                                pw.println(prefix + "Package Name: " + ivi.getPackageName());
-                                pw.println(prefix + "Domains: " + ivi.getDomainsString());
+                                pw.println(prefix + "Package: " + ps.name);
+                                pw.println(prefix + "Domains: " + dumpDomainString(ps.name));
                                 String statusStr = IntentFilterVerificationInfo.
                                         getStatusStringFromValue(status);
-                                pw.println(prefix + "Status: " + statusStr);
+                                pw.println(prefix + "Status:  " + statusStr);
                                 pw.println();
                                 count++;
                             }
                             if (count == 0) {
-                                pw.println(prefix + "No domain preferred apps!");
+                                pw.println(prefix + "No configured app linkages.");
                                 pw.println();
                             }
                         }
@@ -14972,6 +14970,35 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
+    }
+
+    private String dumpDomainString(String packageName) {
+        List<IntentFilterVerificationInfo> iviList = getIntentFilterVerifications(packageName);
+        List<IntentFilter> filters = getAllIntentFilters(packageName);
+
+        ArraySet<String> result = new ArraySet<>();
+        if (iviList.size() > 0) {
+            for (IntentFilterVerificationInfo ivi : iviList) {
+                for (String host : ivi.getDomains()) {
+                    result.add(host);
+                }
+            }
+        }
+        if (filters != null && filters.size() > 0) {
+            for (IntentFilter filter : filters) {
+                if (filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
+                        filter.hasDataScheme(IntentFilter.SCHEME_HTTPS)) {
+                    result.addAll(filter.getHostsList());
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder(result.size() * 16);
+        for (String domain : result) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(domain);
+        }
+        return sb.toString();
     }
 
     // ------- apps on sdcard specific code -------
@@ -15893,6 +15920,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstaller.createUserConfig(userHandle);
             mSettings.createNewUserLILPw(this, mInstaller, userHandle);
             applyFactoryDefaultBrowserLPw(userHandle);
+            primeDomainVerificationsLPw(userHandle);
         }
     }
 
