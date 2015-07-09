@@ -6037,19 +6037,19 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            boolean readExcessivePowerFromParcelLocked(Parcel in) {
+            void readExcessivePowerFromParcelLocked(Parcel in) {
                 final int N = in.readInt();
                 if (N == 0) {
                     mExcessivePower = null;
-                    return true;
+                    return;
                 }
 
                 if (N > 10000) {
-                    Slog.w(TAG, "File corrupt: too many excessive power entries " + N);
-                    return false;
+                    throw new ParcelFormatException(
+                            "File corrupt: too many excessive power entries " + N);
                 }
 
-                mExcessivePower = new ArrayList<ExcessivePower>();
+                mExcessivePower = new ArrayList<>();
                 for (int i=0; i<N; i++) {
                     ExcessivePower ew = new ExcessivePower();
                     ew.type = in.readInt();
@@ -6057,7 +6057,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                     ew.usedTime = in.readLong();
                     mExcessivePower.add(ew);
                 }
-                return true;
             }
 
             void writeToParcelLocked(Parcel out) {
@@ -8893,6 +8892,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             readSummaryFromParcel(in);
         } catch(Exception e) {
             Slog.e("BatteryStats", "Error reading battery statistics", e);
+            resetAllStatsLocked();
         }
 
         mEndPlatformVersion = Build.ID;
@@ -8915,7 +8915,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         return 0;
     }
 
-    void readHistory(Parcel in, boolean andOldHistory) {
+    void readHistory(Parcel in, boolean andOldHistory) throws ParcelFormatException {
         final long historyBaseTime = in.readLong();
 
         mHistoryBuffer.setDataSize(0);
@@ -8928,6 +8928,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<numTags; i++) {
             int idx = in.readInt();
             String str = in.readString();
+            if (str == null) {
+                throw new ParcelFormatException("null history tag string");
+            }
             int uid = in.readInt();
             HistoryTag tag = new HistoryTag();
             tag.string = str;
@@ -8943,9 +8946,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         int bufSize = in.readInt();
         int curPos = in.dataPosition();
         if (bufSize >= (MAX_MAX_HISTORY_BUFFER*3)) {
-            Slog.w(TAG, "File corrupt: history data buffer too large " + bufSize);
+            throw new ParcelFormatException("File corrupt: history data buffer too large " +
+                    bufSize);
         } else if ((bufSize&~3) != bufSize) {
-            Slog.w(TAG, "File corrupt: history data buffer not aligned " + bufSize);
+            throw new ParcelFormatException("File corrupt: history data buffer not aligned " +
+                    bufSize);
         } else {
             if (DEBUG_HISTORY) Slog.i(TAG, "***************** READING NEW HISTORY: " + bufSize
                     + " bytes at " + curPos);
@@ -9041,7 +9046,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeLong(-1);
     }
 
-    public void readSummaryFromParcel(Parcel in) {
+    public void readSummaryFromParcel(Parcel in) throws ParcelFormatException {
         final int version = in.readInt();
         if (version != VERSION) {
             Slog.w("BatteryStats", "readFromParcel: version got " + version
@@ -9149,8 +9154,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         int NKW = in.readInt();
         if (NKW > 10000) {
-            Slog.w(TAG, "File corrupt: too many kernel wake locks " + NKW);
-            return;
+            throw new ParcelFormatException("File corrupt: too many kernel wake locks " + NKW);
         }
         for (int ikw = 0; ikw < NKW; ikw++) {
             if (in.readInt() != 0) {
@@ -9161,8 +9165,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         int NWR = in.readInt();
         if (NWR > 10000) {
-            Slog.w(TAG, "File corrupt: too many wakeup reasons " + NWR);
-            return;
+            throw new ParcelFormatException("File corrupt: too many wakeup reasons " + NWR);
         }
         for (int iwr = 0; iwr < NWR; iwr++) {
             if (in.readInt() != 0) {
@@ -9173,13 +9176,12 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         sNumSpeedSteps = in.readInt();
         if (sNumSpeedSteps < 0 || sNumSpeedSteps > 100) {
-            throw new BadParcelableException("Bad speed steps in data: " + sNumSpeedSteps);
+            throw new ParcelFormatException("Bad speed steps in data: " + sNumSpeedSteps);
         }
 
         final int NU = in.readInt();
         if (NU > 10000) {
-            Slog.w(TAG, "File corrupt: too many uids " + NU);
-            return;
+            throw new ParcelFormatException("File corrupt: too many uids " + NU);
         }
         for (int iu = 0; iu < NU; iu++) {
             int uid = in.readInt();
@@ -9262,8 +9264,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             int NSB = in.readInt();
             if (NSB > 100) {
-                Slog.w(TAG, "File corrupt: too many speed bins " + NSB);
-                return;
+                throw new ParcelFormatException("File corrupt: too many speed bins " + NSB);
             }
 
             u.mSpeedBins = new LongSamplingCounter[NSB];
@@ -9276,8 +9277,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             int NW = in.readInt();
             if (NW > 100) {
-                Slog.w(TAG, "File corrupt: too many wake locks " + NW);
-                return;
+                throw new ParcelFormatException("File corrupt: too many wake locks " + NW);
             }
             for (int iw = 0; iw < NW; iw++) {
                 String wlName = in.readString();
@@ -9286,8 +9286,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             int NS = in.readInt();
             if (NS > 100) {
-                Slog.w(TAG, "File corrupt: too many syncs " + NS);
-                return;
+                throw new ParcelFormatException("File corrupt: too many syncs " + NS);
             }
             for (int is = 0; is < NS; is++) {
                 String name = in.readString();
@@ -9296,8 +9295,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             int NJ = in.readInt();
             if (NJ > 100) {
-                Slog.w(TAG, "File corrupt: too many job timers " + NJ);
-                return;
+                throw new ParcelFormatException("File corrupt: too many job timers " + NJ);
             }
             for (int ij = 0; ij < NJ; ij++) {
                 String name = in.readString();
@@ -9306,8 +9304,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             int NP = in.readInt();
             if (NP > 1000) {
-                Slog.w(TAG, "File corrupt: too many sensors " + NP);
-                return;
+                throw new ParcelFormatException("File corrupt: too many sensors " + NP);
             }
             for (int is = 0; is < NP; is++) {
                 int seNumber = in.readInt();
@@ -9319,8 +9316,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             NP = in.readInt();
             if (NP > 1000) {
-                Slog.w(TAG, "File corrupt: too many processes " + NP);
-                return;
+                throw new ParcelFormatException("File corrupt: too many processes " + NP);
             }
             for (int ip = 0; ip < NP; ip++) {
                 String procName = in.readString();
@@ -9331,23 +9327,19 @@ public final class BatteryStatsImpl extends BatteryStats {
                 p.mStarts = p.mLoadedStarts = in.readInt();
                 p.mNumCrashes = p.mLoadedNumCrashes = in.readInt();
                 p.mNumAnrs = p.mLoadedNumAnrs = in.readInt();
-                if (!p.readExcessivePowerFromParcelLocked(in)) {
-                    return;
-                }
+                p.readExcessivePowerFromParcelLocked(in);
             }
 
             NP = in.readInt();
             if (NP > 10000) {
-                Slog.w(TAG, "File corrupt: too many packages " + NP);
-                return;
+                throw new ParcelFormatException("File corrupt: too many packages " + NP);
             }
             for (int ip = 0; ip < NP; ip++) {
                 String pkgName = in.readString();
                 Uid.Pkg p = u.getPackageStatsLocked(pkgName);
                 final int NWA = in.readInt();
                 if (NWA > 1000) {
-                    Slog.w(TAG, "File corrupt: too many wakeup alarms " + NWA);
-                    return;
+                    throw new ParcelFormatException("File corrupt: too many wakeup alarms " + NWA);
                 }
                 p.mWakeupAlarms.clear();
                 for (int iwa=0; iwa<NWA; iwa++) {
@@ -9358,8 +9350,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
                 NS = in.readInt();
                 if (NS > 1000) {
-                    Slog.w(TAG, "File corrupt: too many services " + NS);
-                    return;
+                    throw new ParcelFormatException("File corrupt: too many services " + NS);
                 }
                 for (int is = 0; is < NS; is++) {
                     String servName = in.readString();
