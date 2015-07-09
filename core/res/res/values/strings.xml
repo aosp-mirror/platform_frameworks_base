@@ -3170,33 +3170,11 @@
     <!-- Label for the "Done" button on the far left of action mode toolbars. -->
     <string name="action_mode_done">Done</string>
 
-    <!-- Strings for ExternalStorageFormatter service. -->
-    <!-- Text for progress dialog while unmounting USB storage volume [CHAR LIMIT=NONE] -->
-    <string name="progress_unmounting" product="nosdcard">Unmounting USB storage\u2026</string>
-    <!-- Text for progress dialog while unmounting SD card [CHAR LIMIT=NONE] -->
-    <string name="progress_unmounting" product="default">Unmounting SD card\u2026</string>
+    <!-- Strings for MasterClearReceiver. -->
     <!-- Text for progress dialog while erasing USB storage volume [CHAR LIMIT=NONE] -->
     <string name="progress_erasing" product="nosdcard">Erasing USB storage\u2026</string>
     <!-- Text for progress dialog while erasing SD card [CHAR LIMIT=NONE] -->
     <string name="progress_erasing" product="default">Erasing SD card\u2026</string>
-    <!-- Text for message to user that an error happened when formatting USB storage [CHAR LIMIT=NONE] -->
-    <string name="format_error" product="nosdcard">Couldn\'t erase USB storage.</string>
-    <!-- Text for message to user that an error happened when formatting SD card [CHAR LIMIT=NONE] -->
-    <string name="format_error" product="default">Couldn\'t erase SD card.</string>
-    <!-- Text for message to user that SD card has been removed while in use [CHAR LIMIT=NONE] -->
-    <string name="media_bad_removal">SD card was removed before being unmounted.</string>
-    <!-- Text for message to user USB storage is currently being checked [CHAR LIMIT=NONE] -->
-    <string name="media_checking" product="nosdcard">USB storage is currently being checked.</string>
-    <!-- Text for message to user SD card is currently being checked [CHAR LIMIT=NONE] -->
-    <string name="media_checking" product="default">SD card is currently being checked.</string>
-    <!-- Text for message to user SD card has been removed [CHAR LIMIT=NONE] -->
-    <string name="media_removed">SD card has been removed.</string>
-    <!-- Text for message to user USB storage is currently mounted on a computer [CHAR LIMIT=NONE] -->
-    <string name="media_shared" product="nosdcard">USB storage is currently in use by a computer.</string>
-    <!-- Text for message to user SD card is currently mounted on a computer [CHAR LIMIT=NONE] -->
-    <string name="media_shared" product="default">SD card is currently in use by a computer.</string>
-    <!-- Text for message for an unknown external media state [CHAR LIMIT=NONE] -->
-    <string name="media_unknown_state">External media in unknown state.</string>
 
     <!-- Text for WebView's text selection Action Mode -->
     <!-- ActionBar action to share the current selection [CHAR LIMIT=10] -->
