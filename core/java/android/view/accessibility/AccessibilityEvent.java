@@ -1418,15 +1418,14 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     }
                     builder.append("TYPE_VIEW_CONTEXT_CLICKED");
                     eventTypeCount++;
-                }
+                } break;
                 case TYPE_ASSIST_READING_CONTEXT: {
                     if (eventTypeCount > 0) {
                         builder.append(", ");
                     }
                     builder.append("TYPE_ASSIST_READING_CONTEXT");
                     eventTypeCount++;
-                }
-                    break;
+                } break;
             }
         }
         if (eventTypeCount > 1) {
