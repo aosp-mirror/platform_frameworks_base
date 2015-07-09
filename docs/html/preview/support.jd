@@ -52,11 +52,11 @@ page.image=images/cards/card-support_16-9_2x.png
 
 <div class="wrap">
   <div class="cols">
-    <div class="col-5of12">
+    <div class="col-9of16">
       <p>
         <em>Date: July 2015<br>
-        Build: MPZ79M<br>
-        Hardware support: Nexus 5,6,9, Player<br>
+        Builds: MPZ79M (Nexus 5, 6, 9), MPZ79N (Nexus Player)<br>
+        Hardware support: Nexus 5, 6, 9, Player<br>
         Emulator support: x86 &amp; ARM 32/64-bit<br>
         Google Play services: 7.6</em>
       </p>
@@ -293,10 +293,12 @@ page.image=images/cards/card-support_16-9_2x.png
 </p>
 
 <p>
-  If you are just getting started with Android M Developer Preview you want to
-  receive Developer Preview 2 by OTA, first download Developer Preview 1 and
-  flash it to your device. Leave the device powered on for several hours until
-  the device is registered and receives the update.
+  If you are just getting started with Android M Developer Preview, and want
+  to receive Developer Preview 2 via OTA, download the appropriate
+  Developer Preview 1 <a href="{@docRoot}preview/download_mp1.html#images">
+  system image</a>, and flash it to your device. Then,
+  leave the device powered on for several hours. It registers with the
+  OTA service, and receives Developer Preview 2 by OTA.
 </p>
 
 <p>
@@ -307,7 +309,7 @@ page.image=images/cards/card-support_16-9_2x.png
 
 <p>
   For instructions on how to start developing and testing with Android M, read
-  <a href="/preview/setup-sdk.html">Setting up the SDK</a>
+  <a href="/preview/setup-sdk.html">Setting up the SDK</a>.
 </p>
 
 <h2 id="preview1-notes">
@@ -316,11 +318,11 @@ page.image=images/cards/card-support_16-9_2x.png
 
 <div class="wrap">
   <div class="cols">
-    <div class="col-5of12">
+    <div class="col-6of12">
       <p>
         <em>Date: May 2015<br>
         Build: MPZ44Q<br>
-        Hardware support: Nexus 5,6,9, Player<br>
+        Hardware support: Nexus 5, 6, 9, Player<br>
         Emulator support: x86 &amp; ARM (32/64-bit)<br>
         Google Play services: 7.5</em>
       </p>
