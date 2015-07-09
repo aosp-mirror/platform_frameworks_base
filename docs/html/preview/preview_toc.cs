@@ -125,14 +125,7 @@
   </li>
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html"
-      es-lang="Soporte"
-      ja-lang="サポート"
-      ko-lang="지원"
-      pt-br-lang="Suporte"
-      ru-lang="Поддержка"
-      zh-cn-lang="支持"
-      zh-tw-lang="支援">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html">
       Support</a></div>
   </li>
 
