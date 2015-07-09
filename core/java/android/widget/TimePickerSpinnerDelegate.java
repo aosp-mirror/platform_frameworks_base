@@ -592,8 +592,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     public static String[] getAmPmStrings(Context context) {
         String[] result = new String[2];
         LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        result[0] = d.amPm[0].length() > 2 ? d.narrowAm : d.amPm[0];
-        result[1] = d.amPm[1].length() > 2 ? d.narrowPm : d.amPm[1];
+        result[0] = d.amPm[0].length() > 4 ? d.narrowAm : d.amPm[0];
+        result[1] = d.amPm[1].length() > 4 ? d.narrowPm : d.amPm[1];
         return result;
     }
 }
