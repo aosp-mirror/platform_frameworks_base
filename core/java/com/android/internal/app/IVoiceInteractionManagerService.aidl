@@ -93,9 +93,11 @@ interface IVoiceInteractionManagerService {
      * Shows the session for the currently active service. Used to start a new session from system
      * affordances.
      *
+     * @param args the bundle to pass as arguments to the voice interaction session
      * @param showCallback callback to be notified when the session was shown
      */
-    void showSessionForActiveService(IVoiceInteractionSessionShowCallback showCallback);
+    void showSessionForActiveService(in Bundle args,
+            IVoiceInteractionSessionShowCallback showCallback);
 
     /**
      * Hides the session from the active service, if it is showing.
