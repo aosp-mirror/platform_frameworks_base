@@ -202,6 +202,7 @@ public class StackScrollAlgorithm {
 
     private void updateClipping(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
+        boolean dismissAllInProgress = ambientState.isDismissAllInProgress();
         float previousNotificationEnd = 0;
         float previousNotificationStart = 0;
         boolean previousNotificationIsSwiped = false;
@@ -237,14 +238,27 @@ public class StackScrollAlgorithm {
             updateChildClippingAndBackground(state, newHeight, clipHeight,
                     newHeight - (previousNotificationStart - newYTranslation));
 
+            if (dismissAllInProgress) {
+                state.clipTopAmount = Math.max(child.getMinClipTopAmount(), state.clipTopAmount);
+            }
+
             if (!child.isTransparent()) {
                 // Only update the previous values if we are not transparent,
                 // otherwise we would clip to a transparent view.
-                previousNotificationStart = newYTranslation + state.clipTopAmount * state.scale;
-                previousNotificationEnd = newNotificationEnd;
-                previousNotificationIsSwiped = ambientState.getDraggedViews().contains(child);
+                if ((dismissAllInProgress && canChildBeDismissed(child))) {
+                    previousNotificationIsSwiped = true;
+                } else {
+                    previousNotificationIsSwiped = ambientState.getDraggedViews().contains(child);
+                    previousNotificationEnd = newNotificationEnd;
+                    previousNotificationStart = newYTranslation + state.clipTopAmount * state.scale;
+                }
             }
         }
+    }
+
+    public static boolean canChildBeDismissed(View v) {
+        final View veto = v.findViewById(R.id.veto);
+        return (veto != null && veto.getVisibility() != View.GONE);
     }
 
     /**
