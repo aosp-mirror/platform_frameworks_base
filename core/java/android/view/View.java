@@ -6672,11 +6672,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void getOutsets(Rect outOutsetRect) {
-        if (mAttachInfo != null) {
-            outOutsetRect.set(mAttachInfo.mOutsets);
-        } else {
-            outOutsetRect.setEmpty();
-        }
+        outOutsetRect.set(mAttachInfo.mOutsets);
     }
 
     /**
@@ -13570,7 +13566,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        onDetachedFromWindows();
+        onDetachedFromWindow();
         onDetachedFromWindowInternal();
 
         ListenerInfo li = mListenerInfo;
