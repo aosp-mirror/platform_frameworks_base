@@ -1211,6 +1211,12 @@ public abstract class WebSettings {
     /**
      * Sets the WebView's user-agent string. If the string is null or empty,
      * the system default value will be used.
+     *
+     * Note that starting from {@link android.os.Build.VERSION_CODES#KITKAT} Android
+     * version, changing the user-agent while loading a web page causes WebView
+     * to initiate loading once again.
+     *
+     * @param ua new user-agent string
      */
     public abstract void setUserAgentString(String ua);
 
