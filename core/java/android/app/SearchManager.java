@@ -946,27 +946,9 @@ public class SearchManager
      *
      * @hide
      */
-    public Intent getAssistIntent(Context context, boolean inclContext) {
-        return getAssistIntent(context, inclContext, UserHandle.myUserId());
-    }
-
-    /**
-     * Gets an intent for launching installed assistant activity, or null if not available.
-     * @return The assist intent.
-     *
-     * @hide
-     */
-    public Intent getAssistIntent(Context context, boolean inclContext, int userHandle) {
+    public Intent getAssistIntent(boolean inclContext) {
         try {
-            if (mService == null) {
-                return null;
-            }
-            ComponentName comp = mService.getAssistIntent(userHandle);
-            if (comp == null) {
-                return null;
-            }
             Intent intent = new Intent(Intent.ACTION_ASSIST);
-            intent.setComponent(comp);
             if (inclContext) {
                 IActivityManager am = ActivityManagerNative.getDefault();
                 Bundle extras = am.getAssistContextExtras(ActivityManager.ASSIST_CONTEXT_BASIC);
@@ -982,17 +964,38 @@ public class SearchManager
     }
 
     /**
-     * Launch an assist action for the current top activity.
+     * Starts the assistant.
+     *
+     * @param args the args to pass to the assistant
+     *
      * @hide
      */
-    public boolean launchAssistAction(String hint, int userHandle, Bundle args) {
+    public void launchAssist(Bundle args) {
+        try {
+            if (mService == null) {
+                return;
+            }
+            mService.launchAssist(args);
+        } catch (RemoteException re) {
+            Log.e(TAG, "launchAssist() failed: " + re);
+        }
+    }
+
+    /**
+     * Starts the legacy assistant (i.e. the {@link Intent#ACTION_ASSIST}).
+     *
+     * @param args the args to pass to the assistant
+     *
+     * @hide
+     */
+    public boolean launchLegacyAssist(String hint, int userHandle, Bundle args) {
         try {
             if (mService == null) {
                 return false;
             }
-            return mService.launchAssistAction(hint, userHandle, args);
+            return mService.launchLegacyAssist(hint, userHandle, args);
         } catch (RemoteException re) {
-            Log.e(TAG, "launchAssistAction() failed: " + re);
+            Log.e(TAG, "launchAssist() failed: " + re);
             return false;
         }
     }
