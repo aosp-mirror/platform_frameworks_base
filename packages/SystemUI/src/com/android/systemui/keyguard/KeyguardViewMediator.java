@@ -1013,33 +1013,38 @@ public class KeyguardViewMediator extends SystemUI {
             return;
         }
 
-        // if the setup wizard hasn't run yet, don't show
-        final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim", false);
-        final boolean absent = SubscriptionManager.isValidSubscriptionId(
-                mUpdateMonitor.getNextSubIdForState(IccCardConstants.State.ABSENT));
-        final boolean disabled = SubscriptionManager.isValidSubscriptionId(
-                mUpdateMonitor.getNextSubIdForState(IccCardConstants.State.PERM_DISABLED));
-        final boolean lockedOrMissing = mUpdateMonitor.isSimPinSecure()
-                || ((absent || disabled) && requireSim);
+        // In split system user mode, we never unlock system user.
+        if (!UserManager.isSplitSystemUser()
+                || KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM) {
 
-        if (!lockedOrMissing && shouldWaitForProvisioning()) {
-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
-                    + " and the sim is not locked or missing");
-            return;
-        }
+            // if the setup wizard hasn't run yet, don't show
+            final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim", false);
+            final boolean absent = SubscriptionManager.isValidSubscriptionId(
+                    mUpdateMonitor.getNextSubIdForState(IccCardConstants.State.ABSENT));
+            final boolean disabled = SubscriptionManager.isValidSubscriptionId(
+                    mUpdateMonitor.getNextSubIdForState(IccCardConstants.State.PERM_DISABLED));
+            final boolean lockedOrMissing = mUpdateMonitor.isSimPinSecure()
+                    || ((absent || disabled) && requireSim);
 
-        if (mLockPatternUtils.isLockScreenDisabled(KeyguardUpdateMonitor.getCurrentUser())
-                && !lockedOrMissing) {
-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
-            return;
-        }
+            if (!lockedOrMissing && shouldWaitForProvisioning()) {
+                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
+                        + " and the sim is not locked or missing");
+                return;
+            }
 
-        if (mLockPatternUtils.checkVoldPassword(KeyguardUpdateMonitor.getCurrentUser())) {
-            if (DEBUG) Log.d(TAG, "Not showing lock screen since just decrypted");
-            // Without this, settings is not enabled until the lock screen first appears
-            setShowingLocked(false);
-            hideLocked();
-            return;
+            if (mLockPatternUtils.isLockScreenDisabled(KeyguardUpdateMonitor.getCurrentUser())
+                    && !lockedOrMissing) {
+                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
+                return;
+            }
+
+            if (mLockPatternUtils.checkVoldPassword(KeyguardUpdateMonitor.getCurrentUser())) {
+                if (DEBUG) Log.d(TAG, "Not showing lock screen since just decrypted");
+                // Without this, settings is not enabled until the lock screen first appears
+                setShowingLocked(false);
+                hideLocked();
+                return;
+            }
         }
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
@@ -1391,6 +1396,15 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
 
+            if (UserManager.isSplitSystemUser()
+                    && KeyguardUpdateMonitor.getCurrentUser() == UserHandle.USER_SYSTEM) {
+                // In split system user mode, we never unlock system user. The end user has to
+                // switch to another user.
+                // TODO: We should stop it early by disabling the swipe up flow. Right now swipe up
+                // still completes and makes the screen blank.
+                if (DEBUG) Log.d(TAG, "Split system user, quit unlocking.");
+                return;
+            }
             mHiding = true;
             if (mShowing && !mOccluded) {
                 if (!mHideAnimationRun) {
