@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
@@ -45,11 +46,6 @@ public class AssistManager {
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
 
-    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-            .build();
-
     private static final long TIMEOUT_SERVICE = 2500;
     private static final long TIMEOUT_ACTIVITY = 1000;
 
@@ -58,7 +54,7 @@ public class AssistManager {
     private final AssistDisclosure mAssistDisclosure;
 
     private AssistOrbContainer mView;
-    private final PhoneStatusBar mBar;
+    private final BaseStatusBar mBar;
     private final AssistUtils mAssistUtils;
 
     private ComponentName mAssistComponent;
@@ -92,7 +88,7 @@ public class AssistManager {
         }
     };
 
-    public AssistManager(PhoneStatusBar bar, Context context) {
+    public AssistManager(BaseStatusBar bar, Context context) {
         mContext = context;
         mBar = bar;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
@@ -125,7 +121,8 @@ public class AssistManager {
         }
     }
 
-    public void onGestureInvoked() {
+    public void startAssist(Bundle args) {
+        updateAssistInfo();
         if (mAssistComponent == null) {
             return;
         }
@@ -137,7 +134,7 @@ public class AssistManager {
                     ? TIMEOUT_SERVICE
                     : TIMEOUT_ACTIVITY);
         }
-        startAssist();
+        startAssistInternal(args);
     }
 
     public void hideAssist() {
@@ -168,17 +165,17 @@ public class AssistManager {
         mView.show(true /* show */, true /* animate */);
     }
 
-    private void startAssist() {
+    private void startAssistInternal(Bundle args) {
         if (mAssistComponent != null) {
             if (isAssistantService()) {
-                startVoiceInteractor();
+                startVoiceInteractor(args);
             } else {
-                startAssistActivity();
+                startAssistActivity(args);
             }
         }
     }
 
-    private void startAssistActivity() {
+    private void startAssistActivity(Bundle args) {
         if (!mBar.isDeviceProvisioned()) {
             return;
         }
@@ -191,13 +188,14 @@ public class AssistManager {
                 Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
 
         final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, structureEnabled, UserHandle.USER_CURRENT);
+                .getAssistIntent(structureEnabled);
         if (intent == null) {
             return;
         }
         if (mAssistComponent != null) {
             intent.setComponent(mAssistComponent);
         }
+        intent.putExtras(args);
 
         if (structureEnabled) {
             showDisclosure();
@@ -219,8 +217,8 @@ public class AssistManager {
         }
     }
 
-    private void startVoiceInteractor() {
-        mAssistUtils.showSessionForActiveService(mShowCallback);
+    private void startVoiceInteractor(Bundle args) {
+        mAssistUtils.showSessionForActiveService(args, mShowCallback);
     }
 
     public void launchVoiceAssistFromKeyguard() {
@@ -302,10 +300,6 @@ public class AssistManager {
     }
 
     public void onUserSwitched(int newUserId) {
-        updateAssistInfo();
-    }
-
-    public void prepareBeforeInvocation() {
         updateAssistInfo();
     }
 }

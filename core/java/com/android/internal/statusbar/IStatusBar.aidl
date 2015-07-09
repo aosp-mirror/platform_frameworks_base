@@ -16,8 +16,10 @@
 
 package com.android.internal.statusbar;
 
-import com.android.internal.statusbar.StatusBarIcon;
+import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+
+import com.android.internal.statusbar.StatusBarIcon;
 
 /** @hide */
 oneway interface IStatusBar
@@ -66,5 +68,6 @@ oneway interface IStatusBar
     void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
 
     void showAssistDisclosure();
+    void startAssist(in Bundle args);
 }
 
