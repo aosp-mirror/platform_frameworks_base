@@ -44,6 +44,7 @@ public abstract class ExpandableView extends FrameLayout {
     private int mClipTopOptimization;
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
+    private int mMinClipTopAmount = 0;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -398,6 +399,14 @@ public abstract class ExpandableView extends FrameLayout {
 
     public void setWillBeGone(boolean willBeGone) {
         mWillBeGone = willBeGone;
+    }
+
+    public int getMinClipTopAmount() {
+        return mMinClipTopAmount;
+    }
+
+    public void setMinClipTopAmount(int minClipTopAmount) {
+        mMinClipTopAmount = minClipTopAmount;
     }
 
     /**

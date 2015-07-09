@@ -946,6 +946,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         addPostCollapseAction(new Runnable() {
             @Override
             public void run() {
+                mStackScroller.setDismissAllInProgress(false);
                 try {
                     mBarService.onClearAllNotifications(mCurrentUserId);
                 } catch (Exception ex) { }
@@ -960,12 +961,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         Runnable animationFinishAction = new Runnable() {
             @Override
             public void run() {
-                mStackScroller.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mStackScroller.setDismissAllInProgress(false);
-                    }
-                });
                 animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             }
         };
