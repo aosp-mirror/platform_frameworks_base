@@ -3,14 +3,22 @@ page.title=Android Lollipop
 @jd:body
 
 
-  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
-    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
-  </div>
+<div style="float:right;">
+  <img src="{@docRoot}images/home/l-hero_2x.png" srcset="/images/home/l-hero.png 1x, /images/home/l-hero_2x.png 2x">
+</div>
 
-  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
-  <div class="col-4 normal-links highlights" style="font-size:12px;">
-    <h3 id="thisd" >핵심 개발자 기능</h3>
-    <ul style="list-style-type:none;">
+<p>지금까지의 Android 출시 버전 중 가장 크고 야심 차게 준비한 Android 5.0 Lollipop을 소개합니다.</p>
+
+<p>이번 출시 버전에는 사용자를 위한 새로운 기능과 개발자를 위한 수천 가지의 새로운 API가 포함되어 있습니다. 이제 Android를 휴대전화, 태블릿, 웨어러블 기기뿐만 아니라 TV와 자동차에서도 사용할 수 있습니다.</p>
+
+<p>새로운 개발자 API에 대해 자세히 살펴보려면 <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API 개요</a>를 참조하세요. 또는 <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>에서 소비자를 위한 Android 5.0에 대해 자세히 읽어 볼 수 있습니다.</p>
+
+
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>핵심 개발자 기능</h2>
+  <ol>
+      <ul style="list-style-type:none;">
   <li><a href="#Material">머티리얼 디자인</a></li>
   <li><a href="#Perf">성능 중심</a></li>
   <li><a href="#Notifications">알림</a></li>
@@ -26,21 +34,11 @@ page.title=Android Lollipop
   <li><a href="#WebView">Chromium WebView</a></li>
   <li><a href="#Accessibility">접근성 및 입력</a></li>
   <li><a href="#Battery">배터리를 효율적으로 사용하는 앱을 위한 도구</a></li>
-    </ul>
+  </ol>
   </div>
 </div>
 
 
-
-
-
-
-
-<p>지금까지의 Android 출시 버전 중 가장 크고 야심 차게 준비한 Android 5.0 Lollipop을 소개합니다.</p>
-
-<p>이번 출시 버전에는 사용자를 위한 새로운 기능과 개발자를 위한 수천 가지의 새로운 API가 포함되어 있습니다. 이제 Android를 휴대전화, 태블릿, 웨어러블 기기뿐만 아니라 TV와 자동차에서도 사용할 수 있습니다.</p>
-
-<p>새로운 개발자 API에 대해 자세히 살펴보려면 <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API 개요</a>를 참조하세요. 또는 <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>에서 소비자를 위한 Android 5.0에 대해 자세히 읽어 볼 수 있습니다.</p>
 
 <h2 id="Material">머티리얼 디자인</h2>
 
@@ -69,7 +67,7 @@ page.title=Android Lollipop
 </div>
 
 
-<p>물결 애니메이션을 앱의 버튼, 체크박스, 기타 터치 컨트롤에 사용할 수 있습니다. 
+<p>물결 애니메이션을 앱의 버튼, 체크박스, 기타 터치 컨트롤에 사용할 수 있습니다.
 
 <p>또한 XML에서 벡터 드로어블을 정의하고 다양한 방법으로 애니메이션을 적용할 수도 있습니다. 벡터 드로어블은 정의 값을 잃지 않고 크기가 조절되므로 단일 색상 인앱 아이콘에 적합합니다.</p>
 
