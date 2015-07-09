@@ -45,6 +45,8 @@ import android.util.SparseArray;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -240,16 +242,24 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     @Override
-    public ComponentName getAssistIntent(int userHandle) {
+    public void launchAssist(Bundle args) {
+        StatusBarManagerInternal statusBarManager =
+                LocalServices.getService(StatusBarManagerInternal.class);
+        if (statusBarManager != null) {
+            statusBarManager.startAssist(args);
+        }
+    }
+
+    private ComponentName getLegacyAssistComponent(int userHandle) {
         try {
             userHandle = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userHandle, true, false, "getAssistIntent", null);
+                    Binder.getCallingUid(), userHandle, true, false, "getLegacyAssistComponent", null);
             IPackageManager pm = AppGlobals.getPackageManager();
             Intent assistIntent = new Intent(Intent.ACTION_ASSIST);
             ResolveInfo info =
                     pm.resolveIntent(assistIntent,
-                    assistIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    PackageManager.MATCH_DEFAULT_ONLY, userHandle);
+                            assistIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            PackageManager.MATCH_DEFAULT_ONLY, userHandle);
             if (info != null) {
                 return new ComponentName(
                         info.activityInfo.applicationInfo.packageName,
@@ -257,16 +267,16 @@ public class SearchManagerService extends ISearchManager.Stub {
             }
         } catch (RemoteException re) {
             // Local call
-            Log.e(TAG, "RemoteException in getAssistIntent: " + re);
+            Log.e(TAG, "RemoteException in getLegacyAssistComponent: " + re);
         } catch (Exception e) {
-            Log.e(TAG, "Exception in getAssistIntent: " + e);
+            Log.e(TAG, "Exception in getLegacyAssistComponent: " + e);
         }
         return null;
     }
 
     @Override
-    public boolean launchAssistAction(String hint, int userHandle, Bundle args) {
-        ComponentName comp = getAssistIntent(userHandle);
+    public boolean launchLegacyAssist(String hint, int userHandle, Bundle args) {
+        ComponentName comp = getLegacyAssistComponent(userHandle);
         if (comp == null) {
             return false;
         }

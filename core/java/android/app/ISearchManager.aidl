@@ -30,6 +30,6 @@ interface ISearchManager {
    List<ResolveInfo> getGlobalSearchActivities();
    ComponentName getGlobalSearchActivity();
    ComponentName getWebSearchActivity();
-   ComponentName getAssistIntent(int userHandle);
-   boolean launchAssistAction(String hint, int userHandle, in Bundle args);
+   void launchAssist(in Bundle args);
+   boolean launchLegacyAssist(String hint, int userHandle, in Bundle args);
 }

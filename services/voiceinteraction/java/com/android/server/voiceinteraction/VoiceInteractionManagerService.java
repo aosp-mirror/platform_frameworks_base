@@ -761,7 +761,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void showSessionForActiveService(IVoiceInteractionSessionShowCallback showCallback) {
+        public void showSessionForActiveService(Bundle args,
+                IVoiceInteractionSessionShowCallback showCallback) {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
                 if (mImpl == null) {
@@ -771,7 +772,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(new Bundle() /* sessionArgs */,
+                    mImpl.showSessionLocked(args,
                             VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE
                                     | VoiceInteractionSession.SHOW_WITH_ASSIST
                                     | VoiceInteractionSession.SHOW_WITH_SCREENSHOT,

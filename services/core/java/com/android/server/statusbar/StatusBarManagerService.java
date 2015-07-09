@@ -18,6 +18,7 @@ package com.android.server.statusbar;
 
 import android.app.StatusBarManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -161,6 +162,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             if (mBar != null) {
                 try {
                     mBar.showAssistDisclosure();
+                } catch (RemoteException e) {
+                }
+            }
+        }
+
+        @Override
+        public void startAssist(Bundle args) {
+            if (mBar != null) {
+                try {
+                    mBar.startAssist(args);
                 } catch (RemoteException e) {
                 }
             }
@@ -522,6 +533,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             try {
                 mBar.appTransitionStarting(
                         statusBarAnimationsStartTime, statusBarAnimationsDuration);
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void startAssist(Bundle args) {
+        if (mBar != null) {
+            try {
+                mBar.startAssist(args);
             } catch (RemoteException ex) {}
         }
     }

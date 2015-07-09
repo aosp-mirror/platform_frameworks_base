@@ -3048,14 +3048,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void launchAssistAction() {
-        launchAssistAction(null, Integer.MIN_VALUE);
-    }
-
-    private void launchAssistAction(String hint) {
-        launchAssistAction(hint, Integer.MIN_VALUE);
-    }
-
     private void launchAssistAction(String hint, int deviceId) {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
         Bundle args = null;
@@ -3063,8 +3055,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             args = new Bundle();
             args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, deviceId);
         }
-        ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .launchAssistAction(hint, UserHandle.myUserId(), args);
+        if ((mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
+            // On TV, use legacy handling until assistants are implemented in the proper way.
+            ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                    .launchLegacyAssist(hint, UserHandle.myUserId(), args);
+        } else {
+            try {
+                if (hint != null) {
+                    if (args == null) {
+                        args = new Bundle();
+                    }
+                    args.putBoolean(hint, true);
+                }
+                IStatusBarService statusbar = getStatusBarService();
+                if (statusbar != null) {
+                    statusbar.startAssist(args);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException when starting assist", e);
+                // re-acquire status bar service next time it is needed.
+                mStatusBarService = null;
+            }
+        }
     }
 
     private void startActivityAsUser(Intent intent, UserHandle handle) {
