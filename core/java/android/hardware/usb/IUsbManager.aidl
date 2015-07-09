@@ -82,6 +82,9 @@ interface IUsbManager
     /* Clears default preferences and permissions for the package */
     void clearDefaults(String packageName, int userId);
 
+    /* Returns true if the specified USB function is enabled. */
+    boolean isFunctionEnabled(String function);
+
     /* Sets the current USB function. */
     void setCurrentFunction(String function);
 
