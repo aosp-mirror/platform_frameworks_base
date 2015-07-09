@@ -31,6 +31,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelFormatException;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
@@ -1113,7 +1114,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 mStats.mCheckinFile.delete();
                                 return;
                             }
-                        } catch (IOException e) {
+                        } catch (IOException | ParcelFormatException e) {
                             Slog.w(TAG, "Failure reading checkin file "
                                     + mStats.mCheckinFile.getBaseFile(), e);
                         }
