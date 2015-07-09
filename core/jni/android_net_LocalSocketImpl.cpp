@@ -112,49 +112,6 @@ socket_bind_local (JNIEnv *env, jobject object, jobject fileDescriptor,
     }
 }
 
-/*    private native FileDescriptor
-**    accept (FileDescriptor fd, LocalSocketImpl s)
-**                                   throws IOException;
-*/
-static jobject
-socket_accept (JNIEnv *env, jobject object, jobject fileDescriptor, jobject s)
-{
-    union {
-        struct sockaddr address;
-        struct sockaddr_un un_address;
-    } sa;
-
-    int ret;
-    int retFD;
-    int fd;
-    socklen_t addrlen;
-
-    if (s == NULL) {
-        jniThrowNullPointerException(env, NULL);
-        return NULL;
-    }
-
-    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-
-    if (env->ExceptionCheck()) {
-        return NULL;
-    }
-
-    do {
-        addrlen = sizeof(sa);
-        ret = accept(fd, &(sa.address), &addrlen);
-    } while (ret < 0 && errno == EINTR);
-
-    if (ret < 0) {
-        jniThrowIOException(env, errno);
-        return NULL;
-    }
-
-    retFD = ret;
-
-    return jniCreateFileDescriptor(env, retFD);
-}
-
 /* private native void shutdown(FileDescriptor fd, boolean shutdownInput) */
 
 static void
@@ -566,7 +523,6 @@ static JNINativeMethod gMethods[] = {
     {"connectLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V",
                                                 (void*)socket_connect_local},
     {"bindLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V", (void*)socket_bind_local},
-    {"accept", "(Ljava/io/FileDescriptor;Landroid/net/LocalSocketImpl;)Ljava/io/FileDescriptor;", (void*)socket_accept},
     {"shutdown", "(Ljava/io/FileDescriptor;Z)V", (void*)socket_shutdown},
     {"read_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_read},
     {"readba_native", "([BIILjava/io/FileDescriptor;)I", (void*) socket_readba},
