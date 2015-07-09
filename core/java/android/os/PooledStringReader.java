@@ -36,6 +36,10 @@ public class PooledStringReader {
         mPool = new String[size];
     }
 
+    public int getStringCount() {
+        return mPool.length;
+    }
+
     public String readString() {
         int idx = mIn.readInt();
         if (idx >= 0) {

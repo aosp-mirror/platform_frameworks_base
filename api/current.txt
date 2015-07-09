@@ -28792,6 +28792,7 @@ package android.service.voice {
     method public android.view.LayoutInflater getLayoutInflater();
     method public android.app.Dialog getWindow();
     method public void hide();
+    method public void onAssistStructureFailure(java.lang.Throwable);
     method public void onBackPressed();
     method public void onCancelRequest(android.service.voice.VoiceInteractionSession.Request);
     method public void onCloseSystemDialogs();
