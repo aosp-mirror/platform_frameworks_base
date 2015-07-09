@@ -245,6 +245,18 @@ class TelephonyIcons {
             TelephonyIcons.QS_DATA_3G
             );
 
+    static final MobileIconGroup WFC = new MobileIconGroup(
+            "WFC",
+            TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH,
+            TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
+            0, 0,
+            TelephonyIcons.TELEPHONY_NO_NETWORK,
+            TelephonyIcons.QS_TELEPHONY_NO_NETWORK,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
+            0, 0, false, 0
+            );
+
     static final MobileIconGroup UNKNOWN = new MobileIconGroup(
             "Unknown",
             TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH,
