@@ -355,7 +355,9 @@ public final class BluetoothEventManager {
                 return;
             }
             int errorMsg = R.string.bluetooth_pairing_error_message;
-            Utils.showError(context, cachedDevice.getName(), errorMsg);
+            if (context != null && cachedDevice != null) {
+                Utils.showError(context, cachedDevice.getName(), errorMsg);
+            }
         }
     }
 
