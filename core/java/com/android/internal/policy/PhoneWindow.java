@@ -4419,7 +4419,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             Bundle args = new Bundle();
             args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, event.getDeviceId());
             return ((SearchManager)getContext().getSystemService(Context.SEARCH_SERVICE))
-                    .launchAssistAction(null, UserHandle.myUserId(), args);
+                    .launchLegacyAssist(null, UserHandle.myUserId(), args);
         }
         return result;
     }
