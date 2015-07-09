@@ -520,6 +520,21 @@ public class FingerprintManager {
     }
 
     /**
+     * Finishes enrollment and cancels the current auth token.
+     * @hide
+     */
+    @RequiresPermission(MANAGE_FINGERPRINT)
+    public int postEnroll() {
+        int result = 0;
+        if (mService != null) try {
+            result = mService.postEnroll(mToken);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Remote exception in post enroll: ", e);
+        }
+        return result;
+    }
+
+    /**
      * Remove given fingerprint template from fingerprint hardware and/or protected storage.
      * @param fp the fingerprint item to remove
      * @param callback an optional callback to verify that fingerprint templates have been
