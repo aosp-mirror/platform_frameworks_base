@@ -1,21 +1,23 @@
-page.title=Android Lollipop 
+page.title=Android Lollipop
 @jd:body
 
+<div style="float:right;">
+  <img src="{@docRoot}images/home/l-hero_2x.png" srcset="/images/home/l-hero.png 1x, /images/home/l-hero_2x.png 2x">
+</div>
 
 
+<p>欢迎使用 Android 5.0 Lollipop，这是迄今为止规模最大最为雄心勃勃的 Android 版本！</p>
+
+<p>此版本为用户推出了各种崭新的新功能，为开发者则提供了数千个新的 API。不仅如此，它将 Android 的疆土扩展得更远，小到手机、平板电脑和穿戴式设备，大到电视和汽车，都可以是它活跃的领地。</p>
+
+<p>要深入了解面向开发者的新 API，请参阅 <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API 概述</a>。有关适合消费者阅读的更多 Android 5.0 内容，请访问 <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>。</p>
 
 
-
-
-
-  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
-    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
-  </div>
-
-  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
-  <div class="col-4 normal-links highlights" style="font-size:12px;">
-    <h3 id="thisd" >面向开发者的主要功能</h3>
-    <ul style="list-style-type:none;">
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>面向开发者的主要功能</h2>
+  <ol>
+      <ul style="list-style-type:none;">
   <li><a href="#Material">Material Design 设计</a></li>
   <li><a href="#Perf">注重性能</a></li>
   <li><a href="#Notifications">通知</a></li>
@@ -31,21 +33,9 @@ page.title=Android Lollipop
   <li><a href="#WebView">Chromium WebView</a></li>
   <li><a href="#Accessibility">辅助功能和输入</a></li>
   <li><a href="#Battery">构建低电耗应用</a></li>
-    </ul>
+    </ol>
   </div>
 </div>
-
-
-
-
-
-
-
-<p>欢迎使用 Android 5.0 Lollipop，这是迄今为止规模最大最为雄心勃勃的 Android 版本！</p>
-
-<p>此版本为用户推出了各种崭新的新功能，为开发者则提供了数千个新的 API。不仅如此，它将 Android 的疆土扩展得更远，小到手机、平板电脑和穿戴式设备，大到电视和汽车，都可以是它活跃的领地。</p>
-
-<p>要深入了解面向开发者的新 API，请参阅 <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API 概述</a>。有关适合消费者阅读的更多 Android 5.0 内容，请访问 <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>。</p>
 
 
 
@@ -76,7 +66,7 @@ page.title=Android Lollipop
 </div>
 
 
-<p>您可以对按钮、复选框以及应用中的其他触摸控件加上涟漪动画。 
+<p>您可以对按钮、复选框以及应用中的其他触摸控件加上涟漪动画。
 
 <p>您还可以在 XML 文件中定义可动的矢量图，让它们展现出各种不同的动画效果。矢量图在自由缩放的同时不会失真，非常适合用作应用中的纯色图标。</p>
 
