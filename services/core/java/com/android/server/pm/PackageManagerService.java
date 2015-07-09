@@ -4397,8 +4397,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             // cross-profile app linking works only towards the parent.
             final UserInfo parent = getProfileParent(sourceUserId);
             synchronized(mPackages) {
-                return getCrossProfileDomainPreferredLpr(intent, resolvedType, 0, sourceUserId,
-                        parent.id) != null;
+                CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
+                        intent, resolvedType, 0, sourceUserId, parent.id);
+                return xpDomainInfo != null
+                        && xpDomainInfo.bestDomainVerificationStatus !=
+                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
             }
         }
         return false;
