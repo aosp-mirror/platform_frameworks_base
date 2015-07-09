@@ -3383,7 +3383,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             enforceDeclaredAsUsedAndRuntimePermission(pkg, bp);
 
-            uid = pkg.applicationInfo.uid;
+            uid = UserHandle.getUid(userId, pkg.applicationInfo.uid);
             sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
