@@ -624,9 +624,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mNetworkInfo != null && mNetworkInfo.getState() != State.DISCONNECTED;
     }
 
+    public boolean isPasspoint() {
+        return mConfig != null && mConfig.isPasspoint();
+    }
+
     /** Return whether the given {@link WifiInfo} is for this access point. */
     private boolean isInfoForThisAccessPoint(WifiInfo info) {
-        if (networkId != WifiConfiguration.INVALID_NETWORK_ID) {
+        if (isPasspoint() == false && networkId != WifiConfiguration.INVALID_NETWORK_ID) {
             return networkId == info.getNetworkId();
         } else {
             // Might be an ephemeral connection with no WifiConfiguration. Try matching on SSID.
