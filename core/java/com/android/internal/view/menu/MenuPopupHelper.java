@@ -31,7 +31,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListAdapter;
-import android.widget.ListPopupWindow;
+import android.widget.MenuPopupWindow;
 import android.widget.PopupWindow;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private final int mPopupStyleRes;
 
     private View mAnchorView;
-    private ListPopupWindow mPopup;
+    private MenuPopupWindow mPopup;
     private ViewTreeObserver mTreeObserver;
     private Callback mPresenterCallback;
 
@@ -126,7 +126,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         }
     }
 
-    public ListPopupWindow getPopup() {
+    public MenuPopupWindow getPopup() {
         return mPopup;
     }
 
@@ -142,7 +142,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             return true;
         }
 
-        mPopup = new ListPopupWindow(mContext, null, mPopupStyleAttr, mPopupStyleRes);
+        mPopup = new MenuPopupWindow(mContext, null, mPopupStyleAttr, mPopupStyleRes);
         mPopup.setOnDismissListener(this);
         mPopup.setOnItemClickListener(this);
         mPopup.setAdapter(mAdapter);
