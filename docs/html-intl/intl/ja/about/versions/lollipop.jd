@@ -3,46 +3,9 @@ page.title=Android Lollipop
 @jd:body
 
 
-
-
-
-
-
-
-
-
-  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
-    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
-  </div>
-
-  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
-  <div class="col-4 normal-links highlights" style="font-size:12px;">
-    <h3 id="thisd" >主なデベロッパー機能</h3>
-    <ul style="list-style-type:none;">
-  <li><a href="#Material">Material Design</a></li>
-  <li><a href="#Perf">パフォーマンス重視</a></li>
-  <li><a href="#Notifications">通知</a></li>
-  <li><a href="#TV">アプリを大画面で</a></li>
-  <li><a href="#Documents">アプリのドキュメント化</a></li>
-  <li><a href="#Connectivity">進化した接続性</a></li>
-  <li><a href="#Graphics">高性能グラフィックス</a></li>
-  <li><a href="#Audio">さらに強化された音声</a></li>
-  <li><a href="#Camera">カメラと動画の拡張</a></li>
-  <li><a href="#Work">職場での Android</a></li>
-  <li><a href="#ScreenCapture">画面のキャプチャと共有</a></li>
-  <li><a href="#Sensors">新しいタイプのセンサー</a></li>
-  <li><a href="#WebView">Chromium WebView</a></li>
-  <li><a href="#Accessibility">ユーザー補助機能と入力</a></li>
-  <li><a href="#Battery">省電力アプリ用のツール</a></li>
-    </ul>
-  </div>
+<div style="float:right;">
+  <img src="{@docRoot}images/home/l-hero_2x.png" srcset="/images/home/l-hero.png 1x, /images/home/l-hero_2x.png 2x">
 </div>
-
-
-
-
-
-
 
 <p>Android 5.0 Lollipop は、これまでの Android の中で最も大きく刷新された意欲的なリリースです。</p>
 
@@ -50,6 +13,29 @@ page.title=Android Lollipop
 
 <p>新しいデベロッパー向け API の概要については、<a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API</a> をご覧ください。Android 5.0 のユーザー向けの新機能については <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a> をご覧ください。</p>
 
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>主なデベロッパー機能</h2>
+  <ol>
+      <ul style="list-style-type:none;">
+        <li><a href="#Material">Material design</a></li>
+        <li><a href="#Perf">パフォーマンス重視</a></li>
+        <li><a href="#Notifications">通知</a></li>
+        <li><a href="#TV">アプリを大画面で</a></li>
+        <li><a href="#Documents">アプリのドキュメント化</a></li>
+        <li><a href="#Connectivity">進化した接続性</a></li>
+        <li><a href="#Graphics">高性能グラフィックス</a></li>
+        <li><a href="#Audio">さらに強化された音声</a></li>
+        <li><a href="#Camera">カメラと動画の拡張</a></li>
+        <li><a href="#Work">職場での Android</a></li>
+        <li><a href="#ScreenCapture">画面のキャプチャと共有</a></li>
+        <li><a href="#Sensors">新しいタイプのセンサー</a></li>
+        <li><a href="#WebView">Chromium WebView</a></li>
+        <li><a href="#Accessibility">>ユーザー補助機能と入力</a></li>
+        <li><a href="#Battery">省電力アプリ用のツール</a></li>
+      </ol>
+</div>
+</div>
 
 
 <h2 id="Material">Material Design</h2>
