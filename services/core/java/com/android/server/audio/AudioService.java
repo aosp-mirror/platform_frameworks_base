@@ -1166,6 +1166,11 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
+        // If we are being called by the system (e.g. hardware keys) check for current user
+        // so we handle user restrictions correctly.
+        if (uid == android.os.Process.SYSTEM_UID) {
+            uid = UserHandle.getUid(getCurrentUserId(), UserHandle.getAppId(uid));
+        }
         if (mAppOps.noteOp(STREAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
@@ -1412,7 +1417,11 @@ public class AudioService extends IAudioService.Stub {
             (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) != 0) {
             return;
         }
-
+        // If we are being called by the system (e.g. hardware keys) check for current user
+        // so we handle user restrictions correctly.
+        if (uid == android.os.Process.SYSTEM_UID) {
+            uid = UserHandle.getUid(getCurrentUserId(), UserHandle.getAppId(uid));
+        }
         if (mAppOps.noteOp(STREAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
@@ -1538,6 +1547,19 @@ public class AudioService extends IAudioService.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private int getCurrentUserId() {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            UserInfo currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+            return currentUser.id;
+        } catch (RemoteException e) {
+            // Activity manager not running, nothing we can do assume user 0.
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return UserHandle.USER_OWNER;
     }
 
     // UI update and Broadcast Intent
@@ -1733,22 +1755,41 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    private void setMasterMuteInternal(boolean mute, int flags, String callingPackage, int uid) {
+    private void setMasterMuteInternal(boolean mute, int flags, String callingPackage, int uid,
+            int userId) {
+        // If we are being called by the system check for user we are going to change
+        // so we handle user restrictions correctly.
+        if (uid == android.os.Process.SYSTEM_UID) {
+            uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
+        }
         if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
         }
-        if (mute != AudioSystem.getMasterMute()) {
-            setSystemAudioMute(mute);
-            AudioSystem.setMasterMute(mute);
-            // Post a persist master volume msg
-            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, mute ? 1
-                    : 0, UserHandle.getCallingUserId(), null, PERSIST_DELAY);
-            sendMasterMuteUpdate(mute, flags);
+        if (userId != UserHandle.getCallingUserId() &&
+                mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        if (getCurrentUserId() == userId) {
+            if (mute != AudioSystem.getMasterMute()) {
+                setSystemAudioMute(mute);
+                AudioSystem.setMasterMute(mute);
+                // Post a persist master volume msg
+                sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, mute ? 1
+                        : 0, userId, null, PERSIST_DELAY);
+                sendMasterMuteUpdate(mute, flags);
 
-            Intent intent = new Intent(AudioManager.MASTER_MUTE_CHANGED_ACTION);
-            intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, mute);
-            sendBroadcastToAll(intent);
+                Intent intent = new Intent(AudioManager.MASTER_MUTE_CHANGED_ACTION);
+                intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, mute);
+                sendBroadcastToAll(intent);
+            }
+        } else {
+            // If not the current user just persist the setting which will be loaded
+            // on user switch.
+            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, mute ? 1
+                    : 0, userId, null, PERSIST_DELAY);
         }
     }
 
@@ -1757,8 +1798,9 @@ public class AudioService extends IAudioService.Stub {
         return AudioSystem.getMasterMute();
     }
 
-    public void setMasterMute(boolean mute, int flags, String callingPackage) {
-        setMasterMuteInternal(mute, flags, callingPackage, Binder.getCallingUid());
+    public void setMasterMute(boolean mute, int flags, String callingPackage, int userId) {
+        setMasterMuteInternal(mute, flags, callingPackage, Binder.getCallingUid(),
+                userId);
     }
 
     /** @see AudioManager#getStreamVolume(int) */
@@ -1804,20 +1846,36 @@ public class AudioService extends IAudioService.Stub {
         return mStreamVolumeAlias[AudioSystem.STREAM_SYSTEM];
     }
 
-    /** @see AudioManager#setMicrophoneMute(boolean) */
-    public void setMicrophoneMute(boolean on, String callingPackage) {
-        if (mAppOps.noteOp(AppOpsManager.OP_MUTE_MICROPHONE, Binder.getCallingUid(),
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+    /** @see AudioManager#setMicrophoneMute(boolean, int) */
+    public void setMicrophoneMute(boolean on, String callingPackage, int userId) {
+        // If we are being called by the system check for user we are going to change
+        // so we handle user restrictions correctly.
+        int uid = Binder.getCallingUid();
+        if (uid == android.os.Process.SYSTEM_UID) {
+            uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
+        }
+        if (mAppOps.noteOp(AppOpsManager.OP_MUTE_MICROPHONE, uid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
             return;
         }
         if (!checkAudioSettingsPermission("setMicrophoneMute()")) {
             return;
         }
+        if (userId != UserHandle.getCallingUserId() &&
+                mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
 
-        AudioSystem.muteMicrophone(on);
+        // If mute is for current user actually mute, else just persist the setting
+        // which will be loaded on user switch.
+        if (getCurrentUserId() == userId) {
+            AudioSystem.muteMicrophone(on);
+        }
         // Post a persist microphone msg.
         sendMsg(mAudioHandler, MSG_PERSIST_MICROPHONE_MUTE, SENDMSG_REPLACE, on ? 1
-                : 0, UserHandle.getCallingUserId(), null, PERSIST_DELAY);
+                : 0, userId, null, PERSIST_DELAY);
     }
 
     @Override
