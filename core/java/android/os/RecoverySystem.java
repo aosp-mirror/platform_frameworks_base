@@ -44,11 +44,8 @@ import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.harmony.security.asn1.BerInputStream;
-import org.apache.harmony.security.pkcs7.ContentInfo;
-import org.apache.harmony.security.pkcs7.SignedData;
-import org.apache.harmony.security.pkcs7.SignerInfo;
-import org.apache.harmony.security.x509.Certificate;
+import sun.security.pkcs.PKCS7;
+import sun.security.pkcs.SignerInfo;
 
 /**
  * RecoverySystem contains methods for interacting with the Android
@@ -150,14 +147,13 @@ public class RecoverySystem {
                                      ProgressListener listener,
                                      File deviceCertsZipFile)
         throws IOException, GeneralSecurityException {
-        long fileLen = packageFile.length();
+        final long fileLen = packageFile.length();
 
-        RandomAccessFile raf = new RandomAccessFile(packageFile, "r");
+        final RandomAccessFile raf = new RandomAccessFile(packageFile, "r");
         try {
-            int lastPercent = 0;
-            long lastPublishTime = System.currentTimeMillis();
+            final long startTimeMillis = System.currentTimeMillis();
             if (listener != null) {
-                listener.onProgress(lastPercent);
+                listener.onProgress(0);
             }
 
             raf.seek(fileLen - 6);
@@ -168,8 +164,8 @@ public class RecoverySystem {
                 throw new SignatureException("no signature in file (no footer)");
             }
 
-            int commentSize = (footer[4] & 0xff) | ((footer[5] & 0xff) << 8);
-            int signatureStart = (footer[0] & 0xff) | ((footer[1] & 0xff) << 8);
+            final int commentSize = (footer[4] & 0xff) | ((footer[5] & 0xff) << 8);
+            final int signatureStart = (footer[0] & 0xff) | ((footer[1] & 0xff) << 8);
 
             byte[] eocd = new byte[commentSize + 22];
             raf.seek(fileLen - (commentSize + 22));
@@ -189,51 +185,30 @@ public class RecoverySystem {
                 }
             }
 
-            // The following code is largely copied from
-            // JarUtils.verifySignature().  We could just *call* that
-            // method here if that function didn't read the entire
-            // input (ie, the whole OTA package) into memory just to
-            // compute its message digest.
+            // Parse the signature
+            PKCS7 block =
+                new PKCS7(new ByteArrayInputStream(eocd, commentSize+22-signatureStart, signatureStart));
 
-            BerInputStream bis = new BerInputStream(
-                new ByteArrayInputStream(eocd, commentSize+22-signatureStart, signatureStart));
-            ContentInfo info = (ContentInfo)ContentInfo.ASN1.decode(bis);
-            SignedData signedData = info.getSignedData();
-            if (signedData == null) {
-                throw new IOException("signedData is null");
-            }
-            List<Certificate> encCerts = signedData.getCertificates();
-            if (encCerts.isEmpty()) {
-                throw new IOException("encCerts is empty");
-            }
             // Take the first certificate from the signature (packages
             // should contain only one).
-            Iterator<Certificate> it = encCerts.iterator();
-            X509Certificate cert = null;
-            if (it.hasNext()) {
-                CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                InputStream is = new ByteArrayInputStream(it.next().getEncoded());
-                cert = (X509Certificate) cf.generateCertificate(is);
-            } else {
+            X509Certificate[] certificates = block.getCertificates();
+            if (certificates == null || certificates.length == 0) {
                 throw new SignatureException("signature contains no certificates");
             }
+            X509Certificate cert = certificates[0];
+            PublicKey signatureKey = cert.getPublicKey();
 
-            List<SignerInfo> sigInfos = signedData.getSignerInfos();
-            SignerInfo sigInfo;
-            if (!sigInfos.isEmpty()) {
-                sigInfo = (SignerInfo)sigInfos.get(0);
-            } else {
-                throw new IOException("no signer infos!");
+            SignerInfo[] signerInfos = block.getSignerInfos();
+            if (signerInfos == null || signerInfos.length == 0) {
+                throw new SignatureException("signature contains no signedData");
             }
+            SignerInfo signerInfo = signerInfos[0];
 
             // Check that the public key of the certificate contained
             // in the package equals one of our trusted public keys.
-
+            boolean verified = false;
             HashSet<X509Certificate> trusted = getTrustedCerts(
                 deviceCertsZipFile == null ? DEFAULT_KEYSTORE : deviceCertsZipFile);
-
-            PublicKey signatureKey = cert.getPublicKey();
-            boolean verified = false;
             for (X509Certificate c : trusted) {
                 if (c.getPublicKey().equals(signatureKey)) {
                     verified = true;
@@ -246,61 +221,54 @@ public class RecoverySystem {
 
             // The signature cert matches a trusted key.  Now verify that
             // the digest in the cert matches the actual file data.
-
-            // The verifier in recovery only handles SHA1withRSA and
-            // SHA256withRSA signatures.  SignApk chooses which to use
-            // based on the signature algorithm of the cert:
-            //
-            //    "SHA256withRSA" cert -> "SHA256withRSA" signature
-            //    "SHA1withRSA" cert   -> "SHA1withRSA" signature
-            //    "MD5withRSA" cert    -> "SHA1withRSA" signature (for backwards compatibility)
-            //    any other cert       -> SignApk fails
-            //
-            // Here we ignore whatever the cert says, and instead use
-            // whatever algorithm is used by the signature.
-
-            String da = sigInfo.getDigestAlgorithm();
-            String dea = sigInfo.getDigestEncryptionAlgorithm();
-            String alg = null;
-            if (da == null || dea == null) {
-                // fall back to the cert algorithm if the sig one
-                // doesn't look right.
-                alg = cert.getSigAlgName();
-            } else {
-                alg = da + "with" + dea;
-            }
-            Signature sig = Signature.getInstance(alg);
-            sig.initVerify(cert);
-
-            // The signature covers all of the OTA package except the
-            // archive comment and its 2-byte length.
-            long toRead = fileLen - commentSize - 2;
-            long soFar = 0;
             raf.seek(0);
-            byte[] buffer = new byte[4096];
-            boolean interrupted = false;
-            while (soFar < toRead) {
-                interrupted = Thread.interrupted();
-                if (interrupted) break;
-                int size = buffer.length;
-                if (soFar + size > toRead) {
-                    size = (int)(toRead - soFar);
-                }
-                int read = raf.read(buffer, 0, size);
-                sig.update(buffer, 0, read);
-                soFar += read;
+            final ProgressListener listenerForInner = listener;
+            SignerInfo verifyResult = block.verify(signerInfo, new InputStream() {
+                // The signature covers all of the OTA package except the
+                // archive comment and its 2-byte length.
+                long toRead = fileLen - commentSize - 2;
+                long soFar = 0;
 
-                if (listener != null) {
-                    long now = System.currentTimeMillis();
-                    int p = (int)(soFar * 100 / toRead);
-                    if (p > lastPercent &&
-                        now - lastPublishTime > PUBLISH_PROGRESS_INTERVAL_MS) {
-                        lastPercent = p;
-                        lastPublishTime = now;
-                        listener.onProgress(lastPercent);
-                    }
+                int lastPercent = 0;
+                long lastPublishTime = startTimeMillis;
+
+                @Override
+                public int read() throws IOException {
+                    throw new UnsupportedOperationException();
                 }
-            }
+
+                @Override
+                public int read(byte[] b, int off, int len) throws IOException {
+                    if (soFar >= toRead) {
+                        return -1;
+                    }
+                    if (Thread.currentThread().isInterrupted()) {
+                        return -1;
+                    }
+
+                    int size = len;
+                    if (soFar + size > toRead) {
+                        size = (int)(toRead - soFar);
+                    }
+                    int read = raf.read(b, off, size);
+                    soFar += read;
+
+                    if (listenerForInner != null) {
+                        long now = System.currentTimeMillis();
+                        int p = (int)(soFar * 100 / toRead);
+                        if (p > lastPercent &&
+                            now - lastPublishTime > PUBLISH_PROGRESS_INTERVAL_MS) {
+                            lastPercent = p;
+                            lastPublishTime = now;
+                            listenerForInner.onProgress(lastPercent);
+                        }
+                    }
+
+                    return read;
+                }
+            });
+
+            final boolean interrupted = Thread.interrupted();
             if (listener != null) {
                 listener.onProgress(100);
             }
@@ -309,7 +277,7 @@ public class RecoverySystem {
                 throw new SignatureException("verification was interrupted");
             }
 
-            if (!sig.verify(sigInfo.getEncryptedDigest())) {
+            if (verifyResult == null) {
                 throw new SignatureException("signature digest verification failed");
             }
         } finally {
