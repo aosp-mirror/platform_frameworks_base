@@ -25,6 +25,12 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.INSTALL_EXTERNAL;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
@@ -72,6 +78,9 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
+import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILURE;
+import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
+import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -12663,7 +12672,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                                 KILL_APP_REASON_GIDS_CHANGED);
                                     }
                                 });
-                            break;
+                                break;
                             }
                         }
                     }
@@ -12779,8 +12788,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         // writer
         synchronized (mPackages) {
             PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
+
+            // Propagate the permissions state as we do want to drop on the floor
+            // runtime permissions. The update permissions method below will take
+            // care of removing obsolete permissions and grant install permissions.
+            ps.getPermissionsState().copyFrom(disabledPs.getPermissionsState());
             updatePermissionsLPw(newPkg.packageName, newPkg,
                     UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
+
             if (applyUserRestrictions) {
                 if (DEBUG_REMOVE) {
                     Slog.d(TAG, "Propagating install state across reinstall");
@@ -12941,8 +12956,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (clearPackagePreferredActivitiesLPw(packageName, removeUser)) {
                     scheduleWritePackageRestrictionsLocked(removeUser);
                 }
-                revokeRuntimePermissionsAndClearAllFlagsLocked(ps.getPermissionsState(),
-                        removeUser);
+                resetUserChangesToRuntimePermissionsAndFlagsLocked(ps, removeUser);
             }
             return true;
         }
@@ -13103,8 +13117,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             PackageSetting ps = (PackageSetting) pkg.mExtras;
-            PermissionsState permissionsState = ps.getPermissionsState();
-            revokeRuntimePermissionsAndClearUserSetFlagsLocked(permissionsState, userId);
+            resetUserChangesToRuntimePermissionsAndFlagsLocked(ps, userId);
         }
 
         // Always delete data directories for package, even if we found no other
@@ -13135,65 +13148,117 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-
     /**
-     * Revokes granted runtime permissions and clears resettable flags
-     * which are flags that can be set by a user interaction.
+     * Reverts user permission state changes (permissions and flags).
      *
-     * @param permissionsState The permission state to reset.
+     * @param ps The package for which to reset.
      * @param userId The device user for which to do a reset.
      */
-    private void revokeRuntimePermissionsAndClearUserSetFlagsLocked(
-            PermissionsState permissionsState, int userId) {
-        final int userSetFlags = PackageManager.FLAG_PERMISSION_USER_SET
-                | PackageManager.FLAG_PERMISSION_USER_FIXED
-                | PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+    private void resetUserChangesToRuntimePermissionsAndFlagsLocked(
+            final PackageSetting ps, final int userId) {
+        if (ps.pkg == null) {
+            return;
+        }
 
-        revokeRuntimePermissionsAndClearFlagsLocked(permissionsState, userId, userSetFlags);
-    }
+        final int userSettableFlags = FLAG_PERMISSION_USER_SET
+                | FLAG_PERMISSION_USER_FIXED
+                | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
 
-    /**
-     * Revokes granted runtime permissions and clears all flags.
-     *
-     * @param permissionsState The permission state to reset.
-     * @param userId The device user for which to do a reset.
-     */
-    private void revokeRuntimePermissionsAndClearAllFlagsLocked(
-            PermissionsState permissionsState, int userId) {
-        revokeRuntimePermissionsAndClearFlagsLocked(permissionsState, userId,
-                PackageManager.MASK_PERMISSION_FLAGS);
-    }
+        final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
+                | FLAG_PERMISSION_POLICY_FIXED;
 
-    /**
-     * Revokes granted runtime permissions and clears certain flags.
-     *
-     * @param permissionsState The permission state to reset.
-     * @param userId The device user for which to do a reset.
-     * @param flags The flags that is going to be reset.
-     */
-    private void revokeRuntimePermissionsAndClearFlagsLocked(
-            PermissionsState permissionsState, final int userId, int flags) {
-        boolean needsWrite = false;
+        boolean writeInstallPermissions = false;
+        boolean writeRuntimePermissions = false;
 
-        for (PermissionState state : permissionsState.getRuntimePermissionStates(userId)) {
-            BasePermission bp = mSettings.mPermissions.get(state.getName());
-            if (bp != null) {
-                permissionsState.revokeRuntimePermission(bp, userId);
-                permissionsState.updatePermissionFlags(bp, userId, flags, 0);
-                needsWrite = true;
+        final int permissionCount = ps.pkg.requestedPermissions.size();
+        for (int i = 0; i < permissionCount; i++) {
+            String permission = ps.pkg.requestedPermissions.get(i);
+
+            BasePermission bp = mSettings.mPermissions.get(permission);
+            if (bp == null) {
+                continue;
+            }
+
+            // If shared user we just reset the state to which only this app contributed.
+            if (ps.sharedUser != null) {
+                boolean used = false;
+                final int packageCount = ps.sharedUser.packages.size();
+                for (int j = 0; j < packageCount; j++) {
+                    PackageSetting pkg = ps.sharedUser.packages.valueAt(j);
+                    if (pkg.pkg != null && !pkg.pkg.packageName.equals(ps.pkg.packageName)
+                            && pkg.pkg.requestedPermissions.contains(permission)) {
+                        used = true;
+                        break;
+                    }
+                }
+                if (used) {
+                    continue;
+                }
+            }
+
+            PermissionsState permissionsState = ps.getPermissionsState();
+
+            final int oldFlags = permissionsState.getPermissionFlags(bp.name, userId);
+
+            // Always clear the user settable flags.
+            final boolean hasInstallState = permissionsState.getInstallPermissionState(
+                    bp.name) != null;
+            if (permissionsState.updatePermissionFlags(bp, userId, userSettableFlags, 0)) {
+                if (hasInstallState) {
+                    writeInstallPermissions = true;
+                } else {
+                    writeRuntimePermissions = true;
+                }
+            }
+
+            // Below is only runtime permission handling.
+            if (!bp.isRuntime()) {
+                continue;
+            }
+
+            // Never clobber system or policy.
+            if ((oldFlags & policyOrSystemFlags) != 0) {
+                continue;
+            }
+
+            // If this permission was granted by default, make sure it is.
+            if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0) {
+                if (permissionsState.grantRuntimePermission(bp, userId)
+                        != PERMISSION_OPERATION_FAILURE) {
+                    writeRuntimePermissions = true;
+                }
+            } else {
+                // Otherwise, reset the permission.
+                final int revokeResult = permissionsState.revokeRuntimePermission(bp, userId);
+                switch (revokeResult) {
+                    case PERMISSION_OPERATION_SUCCESS: {
+                        writeRuntimePermissions = true;
+                    } break;
+
+                    case PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
+                        writeRuntimePermissions = true;
+                        // If gids changed for this user, kill all affected packages.
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                // This has to happen with no lock held.
+                                killSettingPackagesForUser(ps, userId,
+                                        KILL_APP_REASON_GIDS_CHANGED);
+                            }
+                        });
+                    } break;
+                }
             }
         }
 
-        // Ensure default permissions are never cleared.
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mDefaultPermissionPolicy.grantDefaultPermissions(userId);
-            }
-        });
-
-        if (needsWrite) {
+        // Synchronously write as we are taking permissions away.
+        if (writeRuntimePermissions) {
             mSettings.writeRuntimePermissionsForUserLPr(userId, true);
+        }
+
+        // Synchronously write as we are taking permissions away.
+        if (writeInstallPermissions) {
+            mSettings.writeLPr();
         }
     }
 
