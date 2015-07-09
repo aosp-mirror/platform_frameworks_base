@@ -30,6 +30,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Slog;
 import android.util.SparseArray;
 
