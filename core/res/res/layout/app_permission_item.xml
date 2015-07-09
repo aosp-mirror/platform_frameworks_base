@@ -31,7 +31,8 @@
         android:layout_height="24dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"
+        android:tint="@android:color/black"/>
 
     <ImageView
         android:layout_width="wrap_content"
