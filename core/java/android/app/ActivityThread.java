@@ -180,15 +180,14 @@ public final class ActivityThread {
     final ApplicationThread mAppThread = new ApplicationThread();
     final Looper mLooper = Looper.myLooper();
     final H mH = new H();
-    final ArrayMap<IBinder, ActivityClientRecord> mActivities
-            = new ArrayMap<IBinder, ActivityClientRecord>();
+    final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
     // List of new activities (via ActivityRecord.nextIdle) that should
     // be reported when next we idle.
     ActivityClientRecord mNewActivities = null;
     // Number of activities that are currently visible on-screen.
     int mNumVisibleActivities = 0;
-    final ArrayMap<IBinder, Service> mServices
-            = new ArrayMap<IBinder, Service>();
+    WeakReference<AssistStructure> mLastAssistStructure;
+    final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
     AppBindData mBoundApplication;
     Profiler mProfiler;
     int mCurDefaultDisplayDpi;
@@ -2568,6 +2567,12 @@ public final class ActivityThread {
     }
 
     public void handleRequestAssistContextExtras(RequestAssistContextExtras cmd) {
+        if (mLastAssistStructure != null) {
+            AssistStructure structure = mLastAssistStructure.get();
+            if (structure != null) {
+                structure.clearSendChannel();
+            }
+        }
         Bundle data = new Bundle();
         AssistStructure structure = null;
         AssistContent content = new AssistContent();
@@ -2597,6 +2602,7 @@ public final class ActivityThread {
         if (structure == null) {
             structure = new AssistStructure();
         }
+        mLastAssistStructure = new WeakReference<>(structure);
         IActivityManager mgr = ActivityManagerNative.getDefault();
         try {
             mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content, referrer);
