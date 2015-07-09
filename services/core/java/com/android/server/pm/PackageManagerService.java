@@ -468,6 +468,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     final ArrayMap<String, ArrayMap<String, PackageParser.Package>> mOverlays =
         new ArrayMap<String, ArrayMap<String, PackageParser.Package>>();
 
+    /**
+     * Tracks new system packages [receiving in an OTA] that we expect to
+     * find updated user-installed versions. Keys are package name, values
+     * are package location.
+     */
+    final private ArrayMap<String, File> mExpectingBetter = new ArrayMap<>();
+
     final Settings mSettings;
     boolean mRestoredSettings;
 
@@ -2045,7 +2052,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<String>();
-            final ArrayMap<String, File> expectingBetter = new ArrayMap<>();
             if (!mOnlyCore) {
                 Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
                 while (psit.hasNext()) {
@@ -2078,7 +2084,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     + ", versionCode=" + ps.versionCode + "; scanned versionCode="
                                     + scannedPkg.mVersionCode);
                             removePackageLI(ps, true);
-                            expectingBetter.put(ps.name, ps.codePath);
+                            mExpectingBetter.put(ps.name, ps.codePath);
                         }
 
                         continue;
@@ -2152,10 +2158,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * the userdata partition actually showed up. If they never
                  * appeared, crawl back and revive the system version.
                  */
-                for (int i = 0; i < expectingBetter.size(); i++) {
-                    final String packageName = expectingBetter.keyAt(i);
+                for (int i = 0; i < mExpectingBetter.size(); i++) {
+                    final String packageName = mExpectingBetter.keyAt(i);
                     if (!mPackages.containsKey(packageName)) {
-                        final File scanFile = expectingBetter.valueAt(i);
+                        final File scanFile = mExpectingBetter.valueAt(i);
 
                         logCriticalInfo(Log.WARN, "Expected better " + packageName
                                 + " but never showed up; reverting to system");
@@ -2190,6 +2196,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
+            mExpectingBetter.clear();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -5623,7 +5630,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkg.mVersionCode <= ps.versionCode) {
                     // The system package has been updated and the code path does not match
                     // Ignore entry. Skip it.
-                    Slog.i(TAG, "Package " + ps.name + " at " + scanFile
+                    if (DEBUG_INSTALL) Slog.i(TAG, "Package " + ps.name + " at " + scanFile
                             + " ignored: updated version " + ps.versionCode
                             + " better than this " + pkg.mVersionCode);
                     if (!updatedPkg.codePath.equals(scanFile)) {
@@ -5636,7 +5643,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         updatedPkg.resourcePathString = scanFile.toString();
                     }
                     updatedPkg.pkg = pkg;
-                    throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE, null);
+                    throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
+                            "Package " + ps.name + " at " + scanFile
+                                    + " ignored: updated version " + ps.versionCode
+                                    + " better than this " + pkg.mVersionCode);
                 } else {
                     // The current app on the system partition is better than
                     // what we have updated to on the data partition; switch
@@ -6419,20 +6429,29 @@ public class PackageManagerService extends IPackageManager.Stub {
         // scanned APK is both already known and at the path previously established
         // for it.  Previously unknown packages we pick up normally, but if we have an
         // a priori expectation about this package's install presence, enforce it.
+        // With a singular exception for new system packages. When an OTA contains
+        // a new system package, we allow the codepath to change from a system location
+        // to the user-installed location. If we don't allow this change, any newer,
+        // user-installed version of the application will be ignored.
         if ((scanFlags & SCAN_REQUIRE_KNOWN) != 0) {
-            PackageSetting known = mSettings.peekPackageLPr(pkg.packageName);
-            if (known != null) {
-                if (DEBUG_PACKAGE_SCANNING) {
-                    Log.d(TAG, "Examining " + pkg.codePath
-                            + " and requiring known paths " + known.codePathString
-                            + " & " + known.resourcePathString);
-                }
-                if (!pkg.applicationInfo.getCodePath().equals(known.codePathString)
-                        || !pkg.applicationInfo.getResourcePath().equals(known.resourcePathString)) {
-                    throw new PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,
-                            "Application package " + pkg.packageName
-                            + " found at " + pkg.applicationInfo.getCodePath()
-                            + " but expected at " + known.codePathString + "; ignoring.");
+            if (mExpectingBetter.containsKey(pkg.packageName)) {
+                logCriticalInfo(Log.WARN,
+                        "Relax SCAN_REQUIRE_KNOWN requirement for package " + pkg.packageName);
+            } else {
+                PackageSetting known = mSettings.peekPackageLPr(pkg.packageName);
+                if (known != null) {
+                    if (DEBUG_PACKAGE_SCANNING) {
+                        Log.d(TAG, "Examining " + pkg.codePath
+                                + " and requiring known paths " + known.codePathString
+                                + " & " + known.resourcePathString);
+                    }
+                    if (!pkg.applicationInfo.getCodePath().equals(known.codePathString)
+                            || !pkg.applicationInfo.getResourcePath().equals(known.resourcePathString)) {
+                        throw new PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,
+                                "Application package " + pkg.packageName
+                                + " found at " + pkg.applicationInfo.getCodePath()
+                                + " but expected at " + known.codePathString + "; ignoring.");
+                    }
                 }
             }
         }
