@@ -3,22 +3,22 @@ page.title=Android Lollipop
 @jd:body
 
 
+<div style="float:right;">
+  <img src="{@docRoot}images/home/l-hero_2x.png" srcset="/images/home/l-hero.png 1x, /images/home/l-hero_2x.png 2x">
+</div>
 
 
+<p>歡迎使用 Android 5.0 Lollipop，這是目前為止規模最大、功能最強的 Android 版本！</p>
 
+<p>這個版本不僅為使用者提供了許多新功能，也為開發人員提供了數以千計的全新 API。Android 的應用領域也因此從手機、平板電腦、穿戴式裝置，進一步擴展到電視和汽車。</p>
 
+<p>如要深入瞭解全新的開發人員 API，請參閱 <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API 總覽</a>。如需適合一般消費者閱讀的 Android 5.0 相關資訊，請前往 <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>。</p>
 
-
-
-
-  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
-    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
-  </div>
-
-  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
-  <div class="col-4 normal-links highlights" style="font-size:12px;">
-    <h3 id="thisd" >主要開發人員功能</h3>
-    <ul style="list-style-type:none;">
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>主要開發人員功能</h2>
+  <ol>
+      <ul style="list-style-type:none;">
   <li><a href="#Material">實感設計</a></li>
   <li><a href="#Perf">聚焦優異效能</a></li>
   <li><a href="#Notifications">通知</a></li>
@@ -34,21 +34,10 @@ page.title=Android Lollipop
   <li><a href="#WebView">Chromium WebView</a></li>
   <li><a href="#Accessibility">協助工具和輸入功能</a></li>
   <li><a href="#Battery">用於打造低耗電應用程式的工具</a></li>
-    </ul>
+    </ol>
   </div>
 </div>
 
-
-
-
-
-
-
-<p>歡迎使用 Android 5.0 Lollipop，這是目前為止規模最大、功能最強的 Android 版本！</p>
-
-<p>這個版本不僅為使用者提供了許多新功能，也為開發人員提供了數以千計的全新 API。Android 的應用領域也因此從手機、平板電腦、穿戴式裝置，進一步擴展到電視和汽車。</p>
-
-<p>如要深入瞭解全新的開發人員 API，請參閱 <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API 總覽</a>。如需適合一般消費者閱讀的 Android 5.0 相關資訊，請前往 <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>。</p>
 
 <h2 id="Material">實感設計</h2>
 
@@ -77,7 +66,7 @@ page.title=Android Lollipop
 </div>
 
 
-<p>您可以為按鈕、核取方塊和應用程式中的其他觸控控制項套用波紋動畫。 
+<p>您可以為按鈕、核取方塊和應用程式中的其他觸控控制項套用波紋動畫。
 
 <p>您也能以 XML 定義向量圖形可繪項目，並透過多種方式套用動畫效果。向量圖形可繪項目縮放時不會失真，因此最適合用於應用程式內的單色圖示。</p>
 

@@ -2,20 +2,25 @@ page.title=Android Lollipop
 
 @jd:body
 
+<div style="float:right;">
+  <img src="{@docRoot}images/home/l-hero_2x.png" srcset="/images/home/l-hero.png 1x, /images/home/l-hero_2x.png 2x">
+</div>
 
 
+<p>Bem-vindo ao Android 5.0 Lollipop, a maior e mais ambiciosa versão para Android já lançada!</p>
+
+<p>Esta versão está repleta de novos recursos para usuários e milhares de novas APIs para desenvolvedores. Ele expande o Android ainda mais, de telefones, tablets e acessórios a TVs e carros.</p>
+
+<p>Para uma análise mais detalhada das novas APIs para desenvolvedores, consulte a <a href="{@docRoot}about/versions/android-5.0.html">Visão geral da API do Android 5.0</a>. Ou leia mais sobre o Android 5.0 para consumidores em <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>.</p>
+
+<p style="    padding: 10px;    background: #eee;    width: 250px;    border: 1px solid #ccc;    margin-top: 20px;">Para testar seus apps em um dispositivo real, inclua um Nexus 5 ou 7 com a <br><a href="/preview/index.html#Start"><b>IMAGEM DE VISUALIZAÇÃO DO SISTEMA DO ANDROID</b></a>.</p>
 
 
-
-
-  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
-    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
-  </div>
-
-  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
-  <div class="col-4 normal-links highlights" style="font-size:12px;">
-    <h3 id="thisd" >Principais recursos para desenvolvedores</h3>
-    <ul style="list-style-type:none;">
+   <div id="qv-wrapper">
+   <div id="qv">
+    <h2>Principais recursos para desenvolvedores</h2>
+  <ol>
+      <ul style="list-style-type:none;">
   <li><a href="#Material">Material design</a></li>
   <li><a href="#Perf">Foco no desempenho</a></li>
   <li><a href="#Notifications">Notificações</a></li>
@@ -31,25 +36,9 @@ page.title=Android Lollipop
   <li><a href="#WebView">Chromium WebView</a></li>
   <li><a href="#Accessibility">Acessibilidade e entrada </a></li>
   <li><a href="#Battery">Ferramentas para apps com consumo eficaz de bateria</a></li>
-    </ul>
+  </ol>
   </div>
 </div>
-
-
-
-
-
-
-
-<p>Bem-vindo ao Android 5.0 Lollipop, a maior e mais ambiciosa versão para Android já lançada!</p>
-
-<p>Esta versão está repleta de novos recursos para usuários e milhares de novas APIs para desenvolvedores. Ele expande o Android ainda mais, de telefones, tablets e acessórios a TVs e carros.</p>
-
-<p>Para uma análise mais detalhada das novas APIs para desenvolvedores, consulte a <a href="{@docRoot}about/versions/android-5.0.html">Visão geral da API do Android 5.0</a>. Ou leia mais sobre o Android 5.0 para consumidores em <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>.</p>
-
-
-
-<p style="    padding: 10px;    background: #eee;    width: 250px;    border: 1px solid #ccc;    margin-top: 20px;">Para testar seus apps em um dispositivo real, inclua um Nexus 5 ou 7 com a <br><a href="/preview/index.html#Start"><b>IMAGEM DE VISUALIZAÇÃO DO SISTEMA DO ANDROID</b></a>.</p>
 
 
 <h2 id="Material">Material design</h2>
@@ -79,7 +68,7 @@ page.title=Android Lollipop
 </div>
 
 
-<p>Animações com ondulação estão disponíveis para botões, caixas de seleção e outros controles de toque em seu app. 
+<p>Animações com ondulação estão disponíveis para botões, caixas de seleção e outros controles de toque em seu app.
 
 <p>Você também pode definir drawables de vetor em XML e animá-los de várias formas. Drawables de vetor são dimensionados sem perder definição, então eles são perfeitos para ícones de uma cor em apps.</p>
 
