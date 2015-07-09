@@ -59,6 +59,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -128,6 +129,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -692,6 +694,15 @@ class MountService extends IMountService.Stub
     }
 
     private void waitForLatch(CountDownLatch latch, String condition) {
+        try {
+            waitForLatch(latch, condition, -1);
+        } catch (TimeoutException ignored) {
+        }
+    }
+
+    private void waitForLatch(CountDownLatch latch, String condition, long timeoutMillis)
+            throws TimeoutException {
+        final long startMillis = SystemClock.elapsedRealtime();
         while (true) {
             try {
                 if (latch.await(5000, TimeUnit.MILLISECONDS)) {
@@ -702,6 +713,10 @@ class MountService extends IMountService.Stub
                 }
             } catch (InterruptedException e) {
                 Slog.w(TAG, "Interrupt while waiting for " + condition);
+            }
+            if (timeoutMillis > 0 && SystemClock.elapsedRealtime() > startMillis + timeoutMillis) {
+                throw new TimeoutException("Thread " + Thread.currentThread().getName()
+                        + " gave up waiting for " + condition + " after " + timeoutMillis + "ms");
             }
         }
     }
@@ -1645,10 +1660,12 @@ class MountService extends IMountService.Stub
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
             mConnector.execute("volume", "partition", diskId, "public");
+            waitForLatch(latch, "partitionPublic", 3 * DateUtils.MINUTE_IN_MILLIS);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        } catch (TimeoutException e) {
+            throw new IllegalStateException(e);
         }
-        waitForLatch(latch, "partitionPublic");
     }
 
     @Override
@@ -1660,10 +1677,12 @@ class MountService extends IMountService.Stub
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
             mConnector.execute("volume", "partition", diskId, "private");
+            waitForLatch(latch, "partitionPrivate", 3 * DateUtils.MINUTE_IN_MILLIS);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        } catch (TimeoutException e) {
+            throw new IllegalStateException(e);
         }
-        waitForLatch(latch, "partitionPrivate");
     }
 
     @Override
@@ -1675,10 +1694,12 @@ class MountService extends IMountService.Stub
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
             mConnector.execute("volume", "partition", diskId, "mixed", ratio);
+            waitForLatch(latch, "partitionMixed", 3 * DateUtils.MINUTE_IN_MILLIS);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        } catch (TimeoutException e) {
+            throw new IllegalStateException(e);
         }
-        waitForLatch(latch, "partitionMixed");
     }
 
     @Override
