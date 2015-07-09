@@ -1356,6 +1356,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int FOREGROUND_PROFILE_CHANGED_MSG = 53;
     static final int DISPATCH_UIDS_CHANGED_MSG = 54;
     static final int REPORT_TIME_TRACKER_MSG = 55;
+    static final int REPORT_USER_SWITCH_COMPLETE_MSG = 56;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2017,6 +2018,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             case REPORT_TIME_TRACKER_MSG: {
                 AppTimeTracker tracker = (AppTimeTracker)msg.obj;
                 tracker.deliverResult(mContext);
+            } break;
+            case REPORT_USER_SWITCH_COMPLETE_MSG: {
+                dispatchUserSwitchComplete(msg.arg1);
             } break;
             }
         }
@@ -19956,7 +19960,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        completeSwitchAndInitalize(uss, newUserId, true, false);
+        completeSwitchAndInitialize(uss, newUserId, true, false);
     }
 
     void moveUserToForegroundLocked(UserState uss, int oldUserId, int newUserId) {
@@ -19979,10 +19983,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
-        completeSwitchAndInitalize(uss, newUserId, false, true);
+        completeSwitchAndInitialize(uss, newUserId, false, true);
     }
 
-    void completeSwitchAndInitalize(UserState uss, int newUserId,
+    void completeSwitchAndInitialize(UserState uss, int newUserId,
             boolean clearInitializing, boolean clearSwitching) {
         boolean unfrozen = false;
         synchronized (this) {
@@ -19999,16 +20003,23 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (unfrozen) {
-            final int N = mUserSwitchObservers.beginBroadcast();
-            for (int i=0; i<N; i++) {
-                try {
-                    mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(newUserId);
-                } catch (RemoteException e) {
-                }
-            }
-            mUserSwitchObservers.finishBroadcast();
+            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
+            mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG,
+                    newUserId, 0));
         }
         stopGuestUserIfBackground();
+    }
+
+    /** Called on handler thread */
+    void dispatchUserSwitchComplete(int userId) {
+        final int observerCount = mUserSwitchObservers.beginBroadcast();
+        for (int i = 0; i < observerCount; i++) {
+            try {
+                mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(userId);
+            } catch (RemoteException e) {
+            }
+        }
+        mUserSwitchObservers.finishBroadcast();
     }
 
     /**
