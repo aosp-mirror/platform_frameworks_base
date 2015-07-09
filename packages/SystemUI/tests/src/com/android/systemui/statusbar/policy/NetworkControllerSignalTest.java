@@ -127,6 +127,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
             setupDefaultSignal();
+            setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
             setGsmRoaming(true);
             setLevel(testStrength);
 
