@@ -71,6 +71,14 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_H);
     }
 
+    public void testWfcNoDataIcon() {
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_IWLAN);
+
+        verifyDataIndicators(0, 0);
+    }
+
     public void test4gDataIcon() {
         // Switch to showing 4g icon and re-initialize the NetworkController.
         mConfig.show4gForLte = true;
