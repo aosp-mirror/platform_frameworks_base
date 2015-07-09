@@ -254,7 +254,7 @@ public class FingerprintManager {
      * Container for callback data from {@link FingerprintManager#authenticate(CryptoObject,
      *     CancellationSignal, int, AuthenticationCallback, Handler)}.
      */
-    public static final class AuthenticationResult {
+    public static class AuthenticationResult {
         private Fingerprint mFingerprint;
         private CryptoObject mCryptoObject;
 
