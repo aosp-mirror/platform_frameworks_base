@@ -90,6 +90,10 @@ public class SystemConfig {
     // These are the app package names that should not allow IME switching.
     final ArraySet<String> mFixedImeApps = new ArraySet<>();
 
+    // These are the package names of apps which should be in the 'always'
+    // URL-handling state upon factory reset.
+    final ArraySet<String> mLinkedApps = new ArraySet<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -125,6 +129,10 @@ public class SystemConfig {
 
     public ArraySet<String> getFixedImeApps() {
         return mFixedImeApps;
+    }
+
+    public ArraySet<String> getLinkedApps() {
+        return mLinkedApps;
     }
 
     SystemConfig() {
@@ -342,6 +350,16 @@ public class SystemConfig {
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
+
+                } else if ("app-link".equals(name)) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<app-link> without package in " + permFile + " at "
+                                + parser.getPositionDescription());
+                    } else {
+                        mLinkedApps.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
 
                 } else {
                     XmlUtils.skipCurrentTag(parser);
