@@ -432,7 +432,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (enrolledHandle != null) {
             mStorage.writePatternHash(enrolledHandle, userId);
         } else {
-            Slog.e(TAG, "Failed to enroll pattern");
+            throw new RemoteException("Failed to enroll pattern");
         }
     }
 
@@ -460,7 +460,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (enrolledHandle != null) {
             mStorage.writePasswordHash(enrolledHandle, userId);
         } else {
-            Slog.e(TAG, "Failed to enroll password");
+            throw new RemoteException("Failed to enroll password");
         }
     }
 
