@@ -498,13 +498,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void run() {
             Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from " + activity);
-            synchronized (ActivityManagerService.this) {
-                synchronized (this) {
-                    haveResult = true;
-                    notifyAll();
-                }
-                pendingAssistExtrasTimedOutLocked(this);
+            synchronized (this) {
+                haveResult = true;
+                notifyAll();
             }
+            pendingAssistExtrasTimedOut(this);
         }
     }
 
@@ -10776,9 +10774,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void pendingAssistExtrasTimedOutLocked(PendingAssistExtras pae) {
-        mPendingAssistExtras.remove(pae);
-        if (pae.receiver != null) {
+    void pendingAssistExtrasTimedOut(PendingAssistExtras pae) {
+        IResultReceiver receiver;
+        synchronized (this) {
+            mPendingAssistExtras.remove(pae);
+            receiver = pae.receiver;
+        }
+        if (receiver != null) {
             // Caller wants result sent back to them.
             try {
                 pae.receiver.send(0, null);
