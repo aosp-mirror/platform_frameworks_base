@@ -60,7 +60,6 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
@@ -5446,10 +5445,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0,
                                 userHandle);
-                    } else if (UserManager.DISALLOW_USB_FILE_TRANSFER.equals(key)) {
-                        UsbManager manager =
-                                (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
-                        manager.setCurrentFunction("none");
                     } else if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF,
