@@ -25,9 +25,9 @@ import android.os.IBinder;
 import android.os.Process;
 import android.util.Log;
 
+import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.systemui.SystemUIApplication;
 
@@ -120,9 +120,15 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onStartedWakingUp(IKeyguardShowCallback callback) {
+        public void onStartedWakingUp() {
             checkPermission();
-            mKeyguardViewMediator.onStartedWakingUp(callback);
+            mKeyguardViewMediator.onStartedWakingUp();
+        }
+
+        @Override // Binder interface
+        public void onScreenTurningOn(IKeyguardDrawnCallback callback) {
+            checkPermission();
+            mKeyguardViewMediator.onScreenTurningOn(callback);
         }
 
         @Override // Binder interface
