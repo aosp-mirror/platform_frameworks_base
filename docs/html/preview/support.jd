@@ -57,7 +57,7 @@ page.image=images/cards/card-support_16-9_2x.png
         <em>Date: July 2015<br>
         Build: MPZ79M<br>
         Hardware support: Nexus 5,6,9, Player<br>
-        Emulator support: ARM 32/64-bit<br>
+        Emulator support: x86 &amp; ARM 32/64-bit<br>
         Google Play services: 7.6</em>
       </p>
     </div>
@@ -321,7 +321,7 @@ page.image=images/cards/card-support_16-9_2x.png
         <em>Date: May 2015<br>
         Build: MPZ44Q<br>
         Hardware support: Nexus 5,6,9, Player<br>
-        Emulator support: x86 & ARM (32/64-bit)<br>
+        Emulator support: x86 &amp; ARM (32/64-bit)<br>
         Google Play services: 7.5</em>
       </p>
     </div>
