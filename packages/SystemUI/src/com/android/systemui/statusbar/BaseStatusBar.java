@@ -41,9 +41,9 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -65,7 +65,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -2123,6 +2122,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     public void showAssistDisclosure() {
         if (mAssistManager != null) {
             mAssistManager.showDisclosure();
+        }
+    }
+
+    @Override
+    public void startAssist(Bundle args) {
+        if (mAssistManager != null) {
+            mAssistManager.startAssist(args);
         }
     }
 }

@@ -1038,8 +1038,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (shouldDisableNavbarGestures()) {
                 return false;
             }
-            mAssistManager.prepareBeforeInvocation();
-            mAssistManager.onGestureInvoked();
+            mAssistManager.startAssist(new Bundle() /* args */);
             awakenDreams();
             if (mNavigationBarView != null) {
                 mNavigationBarView.abortCurrentGesture();

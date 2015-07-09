@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -62,6 +63,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_APP_TRANSITION_CANCELLED   = 20 << MSG_SHIFT;
     private static final int MSG_APP_TRANSITION_STARTING    = 21 << MSG_SHIFT;
     private static final int MSG_ASSIST_DISCLOSURE          = 22 << MSG_SHIFT;
+    private static final int MSG_START_ASSIST               = 23 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -106,6 +108,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void appTransitionCancelled();
         public void appTransitionStarting(long startTime, long duration);
         public void showAssistDisclosure();
+        public void startAssist(Bundle args);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -283,6 +286,13 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void startAssist(Bundle args) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_START_ASSIST);
+            mHandler.obtainMessage(MSG_START_ASSIST, args).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -377,6 +387,9 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_ASSIST_DISCLOSURE:
                     mCallbacks.showAssistDisclosure();
+                    break;
+                case MSG_START_ASSIST:
+                    mCallbacks.startAssist((Bundle) msg.obj);
                     break;
             }
         }
