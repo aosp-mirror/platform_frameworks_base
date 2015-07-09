@@ -641,7 +641,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
 
         @Override
-        public void onFingerprintAuthenticated(int userId) {
+        public void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) {
         }
 
         @Override

@@ -74,7 +74,6 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private static final int MSG_USER_SWITCHING = 10;
     private static final int ENROLLMENT_TIMEOUT_MS = 60 * 1000; // 1 minute
 
-    private boolean mIsKeyguard; // true if the authentication client is keyguard
     private ClientMonitor mAuthClient = null;
     private ClientMonitor mEnrollClient = null;
     private ClientMonitor mRemoveClient = null;
@@ -577,12 +576,6 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 result |= true; // we have a valid fingerprint
                 mLockoutReset.run();
             }
-            // For fingerprint devices that support touch-to-wake, this will ensure the device
-            // wakes up and turns the screen on when fingerprint is authenticated.
-            if (mIsKeyguard && authenticated) {
-                mPowerManager.wakeUp(SystemClock.uptimeMillis(),
-                        "android.server.fingerprint:AUTH");
-            }
             return result;
         }
 
@@ -727,7 +720,6 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mIsKeyguard = KEYGUARD_PACKAGE.equals(opPackageName);
                     startAuthentication(token, opId, groupId, receiver, flags, restricted);
                 }
             });

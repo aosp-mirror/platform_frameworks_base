@@ -119,7 +119,7 @@ import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
-import com.android.server.policy.keyguard.KeyguardServiceDelegate.ShowListener;
+import com.android.server.policy.keyguard.KeyguardServiceDelegate.DrawnListener;
 
 import java.io.File;
 import java.io.FileReader;
@@ -323,10 +323,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHandler.sendEmptyMessage(MSG_WINDOW_MANAGER_DRAWN_COMPLETE);
         }
     };
-    final ShowListener mKeyguardDelegateCallback = new ShowListener() {
+    final DrawnListener mKeyguardDrawnCallback = new DrawnListener() {
         @Override
-        public void onShown(IBinder windowToken) {
-            if (DEBUG_WAKEUP) Slog.d(TAG, "mKeyguardDelegate.ShowListener.onShown.");
+        public void onDrawn() {
+            if (DEBUG_WAKEUP) Slog.d(TAG, "mKeyguardDelegate.ShowListener.onDrawn.");
             mHandler.sendEmptyMessage(MSG_KEYGUARD_DRAWN_COMPLETE);
         }
     };
@@ -5496,11 +5496,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onStartedWakingUp(mKeyguardDelegateCallback);
-            // ... eventually calls finishKeyguardDrawn
-        } else {
-            if (DEBUG_WAKEUP) Slog.d(TAG, "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
-            finishKeyguardDrawn();
+            mKeyguardDelegate.onStartedWakingUp();
         }
     }
 
@@ -5539,9 +5535,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mKeyguardDelegate != null) {
                 mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
             }
+            mWindowManagerDrawComplete = false;
         }
 
-        finishScreenTurningOn();
+        // ... eventually calls finishWindowsDrawn which will finalize our screen turn on
+        // as well as enabling the orientation change logic/sensor.
+        mWindowManagerInternal.waitForAllWindowsDrawn(mWindowManagerDrawCallback,
+                WAITING_FOR_DRAWN_TIMEOUT);
     }
 
     // Called on the DisplayManager's DisplayPowerController thread.
@@ -5570,12 +5570,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenOnFully = false;
             mWindowManagerDrawComplete = false;
             mScreenOnListener = screenOnListener;
-        }
 
-        mWindowManagerInternal.waitForAllWindowsDrawn(mWindowManagerDrawCallback,
-                WAITING_FOR_DRAWN_TIMEOUT);
-        // ... eventually calls finishWindowsDrawn which will finalize our screen turn on
-        // as well as enabling the orientation change logic/sensor.
+            if (mKeyguardDelegate != null) {
+                mKeyguardDelegate.onScreenTurningOn(mKeyguardDrawnCallback);
+            } else {
+                if (DEBUG_WAKEUP) Slog.d(TAG,
+                        "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
+                finishKeyguardDrawn();
+            }
+        }
     }
 
     private void finishWindowsDrawn() {

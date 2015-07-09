@@ -15,6 +15,6 @@
  */
 package com.android.internal.policy;
 
-oneway interface IKeyguardShowCallback {
-    void onShown(IBinder windowToken);
+oneway interface IKeyguardDrawnCallback {
+    void onDrawn();
 }
