@@ -223,7 +223,8 @@ public class MobileSignalController extends SignalController<
         boolean activityOut = mCurrentState.dataConnected
                         && !mCurrentState.carrierNetworkChangeMode
                         && mCurrentState.activityOut;
-        showDataIcon &= mCurrentState.isDefault;
+        showDataIcon &= mCurrentState.isDefault
+                || mCurrentState.iconGroup == TelephonyIcons.ROAMING;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
         mCallbackHandler.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
