@@ -1025,6 +1025,8 @@ public final class Pm {
                 params.installFlags |= PackageManager.INSTALL_INTERNAL;
             } else if (opt.equals("-d")) {
                 params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else if (opt.equals("-g")) {
+                params.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
             } else if (opt.equals("--originating-uri")) {
                 params.originatingUri = Uri.parse(nextOptionData());
             } else if (opt.equals("--referrer")) {
