@@ -715,6 +715,10 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void flushPackageRestrictionsAsUser(int userId) {
+    }
+
+    @Override
     public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             UserHandle userHandle) {
         return false;

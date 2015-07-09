@@ -2025,6 +2025,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public void flushPackageRestrictionsAsUser(int userId) {
+        try {
+            mPM.flushPackageRestrictionsAsUser(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             UserHandle user) {
         try {

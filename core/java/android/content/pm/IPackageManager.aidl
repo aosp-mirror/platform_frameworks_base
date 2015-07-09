@@ -314,6 +314,11 @@ interface IPackageManager {
     int getApplicationEnabledSetting(in String packageName, int userId);
 
     /**
+     * As per {@link android.content.pm.PackageManager#flushPackageRestrictionsAsUser}.
+     */
+    void flushPackageRestrictionsAsUser(in int userId);
+
+    /**
      * Set whether the given package should be considered stopped, making
      * it not visible to implicit intents that filter out stopped packages.
      */
