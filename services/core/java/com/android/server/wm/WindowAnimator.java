@@ -349,6 +349,7 @@ public class WindowAnimator {
                                 "Now policy hidden: " + win);
                     } else {
                         boolean applyExistingExitAnimation = mPostKeyguardExitAnimation != null
+                                && !mPostKeyguardExitAnimation.hasEnded()
                                 && !winAnimator.mKeyguardGoingAwayAnimation
                                 && win.hasDrawnLw()
                                 && win.mAttachedWindow == null
@@ -499,8 +500,7 @@ public class WindowAnimator {
                         mPostKeyguardExitAnimation.getStartOffset(),
                         mPostKeyguardExitAnimation.getDuration());
                 mKeyguardGoingAway = false;
-            } else if (mCurrentTime - mPostKeyguardExitAnimation.getStartTime()
-                    > mPostKeyguardExitAnimation.getDuration()) {
+            } else if (mPostKeyguardExitAnimation.hasEnded()) {
                 // Done with the animation, reset.
                 if (DEBUG_KEYGUARD) Slog.v(TAG, "Done with Keyguard exit animations.");
                 mPostKeyguardExitAnimation = null;
