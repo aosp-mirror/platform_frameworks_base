@@ -297,7 +297,6 @@
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="bool" name="config_windowShowCircularMask" />
   <java-symbol type="bool" name="config_windowEnableCircularEmulatorDisplayOverlay" />
-  <java-symbol type="bool" name="config_wifi_framework_enable_associated_autojoin_scan" />
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
   <java-symbol type="bool" name="config_wifi_enable_disconnection_debounce" />
