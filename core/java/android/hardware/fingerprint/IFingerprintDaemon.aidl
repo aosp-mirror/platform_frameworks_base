@@ -21,7 +21,7 @@ import android.hardware.fingerprint.IFingerprintDaemonCallback;
  * Communication channel from FingerprintService to FingerprintDaemon (fingerprintd)
  * @hide
  */
- 
+
 interface IFingerprintDaemon {
     int authenticate(long sessionId, int groupId);
     int cancelAuthentication();
@@ -34,4 +34,5 @@ interface IFingerprintDaemon {
     long openHal();
     int closeHal();
     void init(IFingerprintDaemonCallback callback);
+    int postEnroll();
 }
