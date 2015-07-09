@@ -2217,23 +2217,6 @@ public class ConnectivityManager {
      * changes.  Should be extended by applications wanting notifications.
      */
     public static class NetworkCallback {
-        /** @hide */
-        public static final int PRECHECK     = 1;
-        /** @hide */
-        public static final int AVAILABLE    = 2;
-        /** @hide */
-        public static final int LOSING       = 3;
-        /** @hide */
-        public static final int LOST         = 4;
-        /** @hide */
-        public static final int UNAVAIL      = 5;
-        /** @hide */
-        public static final int CAP_CHANGED  = 6;
-        /** @hide */
-        public static final int PROP_CHANGED = 7;
-        /** @hide */
-        public static final int CANCELED     = 8;
-
         /**
          * Called when the framework connects to a new network to evaluate whether it satisfies this
          * request. If evaluation succeeds, this callback may be followed by an {@link #onAvailable}
@@ -2310,30 +2293,54 @@ public class ConnectivityManager {
          */
         public void onLinkPropertiesChanged(Network network, LinkProperties linkProperties) {}
 
+        /**
+         * Called when the network the framework connected to for this request
+         * goes into {@link NetworkInfo.DetailedState.SUSPENDED}.
+         * This generally means that while the TCP connections are still live,
+         * temporarily network data fails to transfer.  Specifically this is used
+         * on cellular networks to mask temporary outages when driving through
+         * a tunnel, etc.
+         * @hide
+         */
+        public void onNetworkSuspended(Network network) {}
+
+        /**
+         * Called when the network the framework connected to for this request
+         * returns from a {@link NetworkInfo.DetailedState.SUSPENDED} state.
+         * This should always be preceeded by a matching {@code onNetworkSuspended}
+         * call.
+         * @hide
+         */
+        public void onNetworkResumed(Network network) {}
+
         private NetworkRequest networkRequest;
     }
 
     private static final int BASE = Protocol.BASE_CONNECTIVITY_MANAGER;
-    /** @hide obj = pair(NetworkRequest, Network) */
-    public static final int CALLBACK_PRECHECK           = BASE + 1;
-    /** @hide obj = pair(NetworkRequest, Network) */
-    public static final int CALLBACK_AVAILABLE          = BASE + 2;
-    /** @hide obj = pair(NetworkRequest, Network), arg1 = ttl */
-    public static final int CALLBACK_LOSING             = BASE + 3;
-    /** @hide obj = pair(NetworkRequest, Network) */
-    public static final int CALLBACK_LOST               = BASE + 4;
-    /** @hide obj = NetworkRequest */
-    public static final int CALLBACK_UNAVAIL            = BASE + 5;
-    /** @hide obj = pair(NetworkRequest, Network) */
-    public static final int CALLBACK_CAP_CHANGED        = BASE + 6;
-    /** @hide obj = pair(NetworkRequest, Network) */
-    public static final int CALLBACK_IP_CHANGED         = BASE + 7;
-    /** @hide obj = NetworkRequest */
-    public static final int CALLBACK_RELEASED           = BASE + 8;
     /** @hide */
-    public static final int CALLBACK_EXIT               = BASE + 9;
+    public static final int CALLBACK_PRECHECK            = BASE + 1;
+    /** @hide */
+    public static final int CALLBACK_AVAILABLE           = BASE + 2;
+    /** @hide arg1 = TTL */
+    public static final int CALLBACK_LOSING              = BASE + 3;
+    /** @hide */
+    public static final int CALLBACK_LOST                = BASE + 4;
+    /** @hide */
+    public static final int CALLBACK_UNAVAIL             = BASE + 5;
+    /** @hide */
+    public static final int CALLBACK_CAP_CHANGED         = BASE + 6;
+    /** @hide */
+    public static final int CALLBACK_IP_CHANGED          = BASE + 7;
+    /** @hide */
+    public static final int CALLBACK_RELEASED            = BASE + 8;
+    /** @hide */
+    public static final int CALLBACK_EXIT                = BASE + 9;
     /** @hide obj = NetworkCapabilities, arg1 = seq number */
-    private static final int EXPIRE_LEGACY_REQUEST      = BASE + 10;
+    private static final int EXPIRE_LEGACY_REQUEST       = BASE + 10;
+    /** @hide */
+    public static final int CALLBACK_SUSPENDED           = BASE + 11;
+    /** @hide */
+    public static final int CALLBACK_RESUMED             = BASE + 12;
 
     private class CallbackHandler extends Handler {
         private final HashMap<NetworkRequest, NetworkCallback>mCallbackMap;
@@ -2407,6 +2414,20 @@ public class ConnectivityManager {
                                 LinkProperties.class);
 
                         callback.onLinkPropertiesChanged(network, lp);
+                    }
+                    break;
+                }
+                case CALLBACK_SUSPENDED: {
+                    NetworkCallback callback = getCallback(request, "SUSPENDED");
+                    if (callback != null) {
+                        callback.onNetworkSuspended(network);
+                    }
+                    break;
+                }
+                case CALLBACK_RESUMED: {
+                    NetworkCallback callback = getCallback(request, "RESUMED");
+                    if (callback != null) {
+                        callback.onNetworkResumed(network);
                     }
                     break;
                 }

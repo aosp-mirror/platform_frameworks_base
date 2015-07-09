@@ -499,10 +499,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        private void maybeLogBroadcast(NetworkAgentInfo nai, boolean connected, int type,
+        private void maybeLogBroadcast(NetworkAgentInfo nai, DetailedState state, int type,
                 boolean isDefaultNetwork) {
             if (DBG) {
-                log("Sending " + (connected ? "connected" : "disconnected") +
+                log("Sending " + state +
                         " broadcast for type " + type + " " + nai.name() +
                         " isDefaultNetwork=" + isDefaultNetwork);
             }
@@ -526,8 +526,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Send a broadcast if this is the first network of its type or if it's the default.
             final boolean isDefaultNetwork = isDefaultNetwork(nai);
             if (list.size() == 1 || isDefaultNetwork) {
-                maybeLogBroadcast(nai, true, type, isDefaultNetwork);
-                sendLegacyNetworkBroadcast(nai, true, type);
+                maybeLogBroadcast(nai, DetailedState.CONNECTED, type, isDefaultNetwork);
+                sendLegacyNetworkBroadcast(nai, DetailedState.CONNECTED, type);
             }
         }
 
@@ -544,17 +544,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return;
             }
 
+            final DetailedState state = DetailedState.DISCONNECTED;
+
             if (wasFirstNetwork || wasDefault) {
-                maybeLogBroadcast(nai, false, type, wasDefault);
-                sendLegacyNetworkBroadcast(nai, false, type);
+                maybeLogBroadcast(nai, state, type, wasDefault);
+                sendLegacyNetworkBroadcast(nai, state, type);
             }
 
             if (!list.isEmpty() && wasFirstNetwork) {
                 if (DBG) log("Other network available for type " + type +
                               ", sending connected broadcast");
                 final NetworkAgentInfo replacement = list.get(0);
-                maybeLogBroadcast(replacement, false, type, isDefaultNetwork(replacement));
-                sendLegacyNetworkBroadcast(replacement, false, type);
+                maybeLogBroadcast(replacement, state, type, isDefaultNetwork(replacement));
+                sendLegacyNetworkBroadcast(replacement, state, type);
             }
         }
 
@@ -563,6 +565,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (VDBG) log("Removing agent " + nai + " wasDefault=" + wasDefault);
             for (int type = 0; type < mTypeLists.length; type++) {
                 remove(type, nai, wasDefault);
+            }
+        }
+
+        // send out another legacy broadcast - currently only used for suspend/unsuspend
+        // toggle
+        public void update(NetworkAgentInfo nai) {
+            final boolean isDefault = isDefaultNetwork(nai);
+            final DetailedState state = nai.networkInfo.getDetailedState();
+            for (int type = 0; type < mTypeLists.length; type++) {
+                final ArrayList<NetworkAgentInfo> list = mTypeLists[type];
+                final boolean isFirst = (list != null && list.size() > 0 && nai == list.get(0));
+                if (isFirst || isDefault) {
+                    maybeLogBroadcast(nai, state, type, isDefault);
+                    sendLegacyNetworkBroadcast(nai, state, type);
+                }
             }
         }
 
@@ -4581,6 +4598,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void updateNetworkInfo(NetworkAgentInfo networkAgent, NetworkInfo newInfo) {
         NetworkInfo.State state = newInfo.getState();
         NetworkInfo oldInfo = null;
+        final int oldScore = networkAgent.getCurrentScore();
         synchronized (networkAgent) {
             oldInfo = networkAgent.networkInfo;
             networkAgent.networkInfo = newInfo;
@@ -4648,8 +4666,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // This has to happen after matching the requests, because callbacks are just requests.
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
-        } else if (state == NetworkInfo.State.DISCONNECTED ||
-                state == NetworkInfo.State.SUSPENDED) {
+        } else if (state == NetworkInfo.State.DISCONNECTED) {
             networkAgent.asyncChannel.disconnect();
             if (networkAgent.isVPN()) {
                 synchronized (mProxyLock) {
@@ -4661,6 +4678,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                 }
             }
+        } else if ((oldInfo != null && oldInfo.getState() == NetworkInfo.State.SUSPENDED) ||
+                state == NetworkInfo.State.SUSPENDED) {
+            // going into or coming out of SUSPEND: rescore and notify
+            if (networkAgent.getCurrentScore() != oldScore) {
+                rematchAllNetworksAndRequests(networkAgent, oldScore,
+                        NascentState.NOT_JUST_VALIDATED);
+            }
+            notifyNetworkCallbacks(networkAgent, (state == NetworkInfo.State.SUSPENDED ?
+                    ConnectivityManager.CALLBACK_SUSPENDED :
+                    ConnectivityManager.CALLBACK_RESUMED));
+            mLegacyTypeTracker.update(networkAgent);
         }
     }
 
@@ -4696,7 +4724,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, boolean connected, int type) {
+    private void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, DetailedState state, int type) {
         // The NetworkInfo we actually send out has no bearing on the real
         // state of affairs. For example, if the default connection is mobile,
         // and a request for HIPRI has just gone away, we need to pretend that
@@ -4705,11 +4733,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // and is still connected.
         NetworkInfo info = new NetworkInfo(nai.networkInfo);
         info.setType(type);
-        if (connected) {
-            info.setDetailedState(DetailedState.CONNECTED, null, info.getExtraInfo());
+        if (state != DetailedState.DISCONNECTED) {
+            info.setDetailedState(state, null, info.getExtraInfo());
             sendConnectedBroadcast(info);
         } else {
-            info.setDetailedState(DetailedState.DISCONNECTED, info.getReason(), info.getExtraInfo());
+            info.setDetailedState(state, info.getReason(), info.getExtraInfo());
             Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
             intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
             intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
