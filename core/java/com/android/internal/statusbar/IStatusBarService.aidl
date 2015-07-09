@@ -16,11 +16,13 @@
 
 package com.android.internal.statusbar;
 
+import android.os.Bundle;
+import android.service.notification.StatusBarNotification;
+
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.NotificationVisibility;
-import android.service.notification.StatusBarNotification;
 
 /** @hide */
 interface IStatusBarService
@@ -86,4 +88,6 @@ interface IStatusBarService
      *        bar caused by this app transition in millis
      */
     void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
+
+    void startAssist(in Bundle args);
 }
