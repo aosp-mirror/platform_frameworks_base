@@ -52,6 +52,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.MutableBoolean;
@@ -62,6 +63,8 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+
+import com.android.internal.app.AssistUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
@@ -89,7 +92,7 @@ public class SystemServicesProxy {
     AppWidgetManager mAwm;
     PackageManager mPm;
     IPackageManager mIpm;
-    SearchManager mSm;
+    AssistUtils mAssistUtils;
     WindowManager mWm;
     Display mDisplay;
     String mRecentsPackage;
@@ -114,7 +117,7 @@ public class SystemServicesProxy {
         mAwm = AppWidgetManager.getInstance(context);
         mPm = context.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
-        mSm = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        mAssistUtils = new AssistUtils(context);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
@@ -133,10 +136,7 @@ public class SystemServicesProxy {
         mBgProtectionCanvas = new Canvas();
 
         // Resolve the assist intent
-        Intent assist = mSm.getAssistIntent(context, false);
-        if (assist != null) {
-            mAssistComponent = assist.getComponent();
-        }
+        mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.myUserId());
 
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             // Create a dummy icon
@@ -580,6 +580,7 @@ public class SystemServicesProxy {
      * Returns the first Recents widget from the same package as the global assist activity.
      */
     private AppWidgetProviderInfo resolveSearchAppWidget() {
+        if (mAssistComponent == null) return null;
         List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
                 AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
         for (AppWidgetProviderInfo info : widgets) {
