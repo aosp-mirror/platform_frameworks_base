@@ -21,6 +21,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructTimeval;
 import android.system.StructUcred;
+import android.system.UnixSocketAddress;
 import android.util.Slog;
 
 import static android.system.OsConstants.*;
@@ -30,7 +31,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.InterruptedIOException;
 import java.net.InetSocketAddress;
-import java.net.InetUnixAddress;
 
 /**
  * Set up a Unix domain socket that debuggerd will connect() to in
@@ -117,8 +117,9 @@ final class NativeCrashListener extends Thread {
 
         try {
             FileDescriptor serverFd = Os.socket(AF_UNIX, SOCK_STREAM, 0);
-            final InetUnixAddress sockAddr = new InetUnixAddress(DEBUGGERD_SOCKET_PATH);
-            Os.bind(serverFd, sockAddr, 0);
+            final UnixSocketAddress sockAddr = UnixSocketAddress.createFileSystem(
+                    DEBUGGERD_SOCKET_PATH);
+            Os.bind(serverFd, sockAddr);
             Os.listen(serverFd, 1);
 
             while (true) {
