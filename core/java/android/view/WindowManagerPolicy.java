@@ -342,6 +342,14 @@ public interface WindowManagerPolicy {
         boolean isGoneForLayoutLw();
 
         /**
+         * Returns true if the window has a surface that it has drawn a
+         * complete UI in to. Note that this is different from {@link #hasDrawnLw()}
+         * in that it also returns true if the window is READY_TO_SHOW, but was not yet
+         * promoted to HAS_DRAWN.
+         */
+        boolean isDrawnLw();
+
+        /**
          * Returns true if this window has been shown on screen at some time in 
          * the past.  Must be called with the window manager lock held.
          */
