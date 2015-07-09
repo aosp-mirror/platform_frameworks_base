@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
@@ -27,9 +28,9 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -38,12 +39,10 @@ import android.widget.LinearLayout;
 import com.android.systemui.R;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Recent task icons appearing in the navigation bar. Touching an icon brings the activity to the
- * front. There is a fixed set of icons and icons are hidden if there are fewer recent tasks than
- * icons.
+ * front. The tag for each icon's View contains the RecentTaskInfo.
  */
 class NavigationBarRecents extends LinearLayout {
     private final static boolean DEBUG = false;
@@ -56,15 +55,16 @@ class NavigationBarRecents extends LinearLayout {
     private final ActivityManager mActivityManager;
     private final PackageManager mPackageManager;
     private final LayoutInflater mLayoutInflater;
+    // All icons share the same long-click listener.
+    private final AppLongClickListener mAppLongClickListener;
     private final TaskStackListenerImpl mTaskStackListener;
-    // Recent tasks being displayed in the shelf.
-    private final Set<ComponentName> mCurrentTasks = new ArraySet<ComponentName>(MAX_RECENTS);
 
     public NavigationBarRecents(Context context, AttributeSet attrs) {
         super(context, attrs);
         mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mPackageManager = getContext().getPackageManager();
         mLayoutInflater = LayoutInflater.from(context);
+        mAppLongClickListener = new AppLongClickListener(context);
 
         // Listen for task stack changes and refresh when they happen. Update notifications happen
         // on an IPC thread, so use Handler to handle the message on the main thread.
@@ -84,7 +84,7 @@ class NavigationBarRecents extends LinearLayout {
     private void updateRecentApps() {
         // TODO: Should this be getRunningTasks?
         // TODO: Query other UserHandles?
-        List<ActivityManager.RecentTaskInfo> recentTasks = mActivityManager.getRecentTasksForUser(
+        List<RecentTaskInfo> recentTasks = mActivityManager.getRecentTasksForUser(
                 MAX_RECENTS,
                 ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
@@ -96,87 +96,90 @@ class NavigationBarRecents extends LinearLayout {
         addNewRecents(recentTasks);
     }
 
-    // Remove any icons that disappeared from recents.
-    private void removeMissingRecents(List<ActivityManager.RecentTaskInfo> recentTasks) {
-        // Extract the component names.
-        Set<ComponentName> recentComponents = new ArraySet<ComponentName>(recentTasks.size());
-        for (ActivityManager.RecentTaskInfo task : recentTasks) {
-            ComponentName component = task.baseIntent.getComponent();
-            if (component == null) {  // It's unclear if this can happen in practice.
-                continue;
-            }
-            recentComponents.add(component);
+    // Removes any icons that disappeared from recents.
+    private void removeMissingRecents(List<RecentTaskInfo> recentTasks) {
+        // Build a set of the new task ids.
+        SparseBooleanArray newTaskIds = new SparseBooleanArray();
+        for (RecentTaskInfo task : recentTasks) {
+            newTaskIds.put(task.persistentId, true);
         }
 
-        // Start with a copy of the currently displayed tasks.
-        Set<ComponentName> removed = new ArraySet<ComponentName>(mCurrentTasks);
-        // Remove all the entries that still exist in recents.
-        removed.removeAll(recentComponents);
-        // The remaining entries no longer exist in recents, so remove their icons.
-        for (ComponentName task : removed) {
-            removeIcon(task);
-        }
-    }
-
-    // Removes the icon for a task.
-    private void removeIcon(ComponentName task) {
-        for (int i = 0; i < getChildCount(); i++) {
-            ComponentName childTask = (ComponentName) getChildAt(i).getTag();
-            if (childTask.equals(task)) {
-                if (DEBUG) Slog.d(TAG, "removing missing " + task);
+        // Iterate through the currently displayed tasks. If they no longer exist in recents,
+        // remove them.
+        int i = 0;
+        while (i < getChildCount()) {
+            RecentTaskInfo currentTask = (RecentTaskInfo) getChildAt(i).getTag();
+            if (!newTaskIds.get(currentTask.persistentId)) {
+                if (DEBUG) Slog.d(TAG, "Removing " + currentTask.baseIntent);
                 removeViewAt(i);
-                mCurrentTasks.remove(task);
-                return;
+            } else {
+                i++;
             }
         }
     }
 
     // Adds new tasks at the end of the icon list.
-    private void addNewRecents(List<ActivityManager.RecentTaskInfo> recentTasks) {
-        for (ActivityManager.RecentTaskInfo task : recentTasks) {
+    private void addNewRecents(List<RecentTaskInfo> recentTasks) {
+        // Build a set of the current task ids.
+        SparseBooleanArray currentTaskIds = new SparseBooleanArray();
+        for (int i = 0; i < getChildCount(); i++) {
+            RecentTaskInfo task = (RecentTaskInfo) getChildAt(i).getTag();
+            currentTaskIds.put(task.persistentId, true);
+        }
+
+        // Add tasks that don't currently exist to the end of the view.
+        for (RecentTaskInfo task : recentTasks) {
             // Don't overflow the list.
             if (getChildCount() >= MAX_RECENTS) {
                 return;
             }
-            ComponentName component = task.baseIntent.getComponent();
-            if (component == null) {  // It's unclear if this can happen in practice.
-                continue;
-            }
             // Don't add tasks that are already being shown.
-            if (mCurrentTasks.contains(component)) {
+            if (currentTaskIds.get(task.persistentId)) {
                 continue;
             }
             addRecentAppButton(task);
         }
     }
 
-    // Adds an icon at the end of the list to represent an activity for a given component.
-    private void addRecentAppButton(ActivityManager.RecentTaskInfo task) {
-        // Add this task to the currently-shown set.
-        ComponentName component = task.baseIntent.getComponent();
-        mCurrentTasks.add(component);
-        if (DEBUG) Slog.d(TAG, "adding " + component);
+    // Adds an icon at the end of the shelf.
+    private void addRecentAppButton(RecentTaskInfo task) {
+        if (DEBUG) Slog.d(TAG, "Adding " + task.baseIntent);
 
+        // Add an icon for the task.
         ImageView button = (ImageView) mLayoutInflater.inflate(
                 R.layout.navigation_bar_app_item, this, false /* attachToRoot */);
-        button.setOnLongClickListener(AppLongClickListener.getInstance());
+        button.setOnLongClickListener(mAppLongClickListener);
         addView(button);
 
         // Use the View's tag to store metadata for drag and drop.
-        button.setTag(component);
+        button.setTag(task);
 
         button.setVisibility(View.VISIBLE);
         // Load the activity icon on a background thread.
-        new GetActivityIconTask(mPackageManager, button).execute(component);
+        new GetActivityIconTask(mPackageManager, button).execute(getRealActivityForTask(task));
 
-        final Intent baseIntent = task.baseIntent;
+        final int taskPersistentId = task.persistentId;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Consider using ActivityManager.moveTaskToFront(). This will need a task id.
-                v.getContext().startActivity(baseIntent);
+                // Launch or bring the activity to front.
+                IActivityManager manager = ActivityManagerNative.getDefault();
+                try {
+                    manager.startActivityFromRecents(taskPersistentId, null /* options */);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
+    }
+
+    private static ComponentName getRealActivityForTask(RecentTaskInfo task) {
+        // Prefer the activity that started the task.
+        if (task.realActivity != null) {
+            return task.realActivity;
+        }
+        // This should not happen, but fall back to the base intent's activity component name.
+        return task.baseIntent.getComponent();
     }
 
     /**
@@ -205,17 +208,27 @@ class NavigationBarRecents extends LinearLayout {
 
     /** Starts a drag on long-click on an app icon. */
     private static class AppLongClickListener implements View.OnLongClickListener {
-        private static AppLongClickListener INSTANCE = new AppLongClickListener();
+        private final Context mContext;
 
-        public static AppLongClickListener getInstance() {
-            return INSTANCE;
+        public AppLongClickListener(Context context) {
+            mContext = context;
         }
 
         @Override
         public boolean onLongClick(View v) {
             ImageView icon = (ImageView) v;
-            ComponentName activityName = (ComponentName) v.getTag();
-            NavigationBarApps.startAppDrag(icon, activityName);
+
+            // The drag will go to the pinned section, which wants to launch the main activity
+            // for the task's package.
+            RecentTaskInfo task = (RecentTaskInfo) v.getTag();
+            String packageName = getRealActivityForTask(task).getPackageName();
+            Intent intent = mContext.getPackageManager().getLaunchIntentForPackage(packageName);
+            if (intent == null) {
+                return false;
+            }
+
+            if (DEBUG) Slog.d(TAG, "Start drag with " + intent);
+            NavigationBarApps.startAppDrag(icon, intent.getComponent());
             return true;
         }
     }
