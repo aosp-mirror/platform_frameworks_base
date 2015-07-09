@@ -4407,15 +4407,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
 
     private void clearUserRestrictions(UserHandle userHandle) {
-        AudioManager audioManager =
-                (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         Bundle userRestrictions = mUserManager.getUserRestrictions();
         mUserManager.setUserRestrictions(new Bundle(), userHandle);
+        IAudioService iAudioService = IAudioService.Stub.asInterface(
+                ServiceManager.getService(Context.AUDIO_SERVICE));
         if (userRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME)) {
-            audioManager.setMasterMute(false, 0);
+            try {
+                iAudioService.setMasterMute(true, 0, mContext.getPackageName(),
+                        userHandle.getIdentifier());
+            } catch (RemoteException e) {
+                // Not much we can do here.
+            }
         }
         if (userRestrictions.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE)) {
-            audioManager.setMicrophoneMute(false);
+            try {
+                iAudioService.setMicrophoneMute(true, mContext.getPackageName(),
+                        userHandle.getIdentifier());
+            } catch (RemoteException e) {
+                // Not much we can do here.
+            }
         }
     }
 
@@ -5426,9 +5436,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 if (enabled && !alreadyRestricted) {
                     if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
-                        iAudioService.setMicrophoneMute(true, mContext.getPackageName());
+                        iAudioService.setMicrophoneMute(true, mContext.getPackageName(),
+                                userHandle);
                     } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                        iAudioService.setMasterMute(true, 0, mContext.getPackageName());
+                        iAudioService.setMasterMute(true, 0, mContext.getPackageName(),
+                                userHandle);
                     }
                     if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -5480,9 +5492,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 if (!enabled && alreadyRestricted) {
                     if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
-                        iAudioService.setMicrophoneMute(false, mContext.getPackageName());
+                        iAudioService.setMicrophoneMute(false, mContext.getPackageName(),
+                                userHandle);
                     } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                        iAudioService.setMasterMute(false, 0, mContext.getPackageName());
+                        iAudioService.setMasterMute(false, 0, mContext.getPackageName(),
+                                userHandle);
                     }
                 }
             } catch (RemoteException re) {
@@ -6031,13 +6045,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-
-            IAudioService iAudioService = IAudioService.Stub.asInterface(
-                    ServiceManager.getService(Context.AUDIO_SERVICE));
+            int userId = UserHandle.getCallingUserId();
+            long identity = Binder.clearCallingIdentity();
             try {
-                iAudioService.setMasterMute(on, 0, who.getPackageName());
+                IAudioService iAudioService = IAudioService.Stub.asInterface(
+                        ServiceManager.getService(Context.AUDIO_SERVICE));
+                iAudioService.setMasterMute(on, 0, mContext.getPackageName(), userId);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Failed to setMasterMute", re);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }

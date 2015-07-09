@@ -55,7 +55,7 @@ interface IAudioService {
 
     boolean isMasterMute();
 
-    void setMasterMute(boolean mute, int flags, String callingPackage);
+    void setMasterMute(boolean mute, int flags, String callingPackage, int userId);
 
     int getStreamVolume(int streamType);
 
@@ -65,7 +65,7 @@ interface IAudioService {
 
     int getLastAudibleStreamVolume(int streamType);
 
-    void setMicrophoneMute(boolean on, String callingPackage);
+    void setMicrophoneMute(boolean on, String callingPackage, int userId);
 
     void setRingerModeExternal(int ringerMode, String caller);
 
