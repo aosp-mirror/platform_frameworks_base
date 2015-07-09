@@ -22,7 +22,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -54,8 +53,6 @@ public class UsbManager {
      * <li> {@link #USB_CONNECTED} boolean indicating whether USB is connected or disconnected.
      * <li> {@link #USB_CONFIGURED} boolean indicating whether USB is configured.
      * currently zero if not configured, one for configured.
-     * <li> {@link #USB_FUNCTION_MASS_STORAGE} boolean extra indicating whether the
-     * mass storage function is enabled
      * <li> {@link #USB_FUNCTION_ADB} boolean extra indicating whether the
      * adb function is enabled
      * <li> {@link #USB_FUNCTION_RNDIS} boolean extra indicating whether the
@@ -152,12 +149,13 @@ public class UsbManager {
     public static final String USB_DATA_UNLOCKED = "unlocked";
 
     /**
-     * Name of the USB mass storage USB function.
-     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     * A placeholder indicating that no USB function is being specified.
+     * Used to distinguish between selecting no function vs. the default function in
+     * {@link #setCurrentFunction(String)}.
      *
      * {@hide}
      */
-    public static final String USB_FUNCTION_MASS_STORAGE = "mass_storage";
+    public static final String USB_FUNCTION_NONE = "none";
 
     /**
      * Name of the adb USB function.
@@ -218,15 +216,14 @@ public class UsbManager {
     /**
      * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} and
      * {@link #ACTION_USB_DEVICE_DETACHED} broadcasts
-     * containing the UsbDevice object for the device.
+     * containing the {@link UsbDevice} object for the device.
      */
-
     public static final String EXTRA_DEVICE = "device";
 
     /**
      * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} and
      * {@link #ACTION_USB_ACCESSORY_DETACHED} broadcasts
-     * containing the UsbAccessory object for the accessory.
+     * containing the {@link UsbAccessory} object for the accessory.
      */
     public static final String EXTRA_ACCESSORY = "accessory";
 
@@ -237,23 +234,6 @@ public class UsbManager {
      * containing a boolean value indicating whether the user granted permission or not.
      */
     public static final String EXTRA_PERMISSION_GRANTED = "permission";
-
-    /**
-     * The persistent property which stores whether adb is enabled or not. Other values are ignored.
-     * Previously this value stored non-adb settings, but not anymore.
-     * TODO: rename this to something adb specific, rather than using usb.
-     *
-     * {@hide}
-     */
-    public static final String ADB_PERSISTENT_PROPERTY = "persist.sys.usb.config";
-
-    /**
-     * The non-persistent property which stores the current USB settings.
-     *
-     * {@hide}
-     */
-    public static final String USB_SETTINGS_PROPERTY = "sys.usb.config";
-
 
     private final Context mContext;
     private final IUsbManager mService;
@@ -437,31 +417,44 @@ public class UsbManager {
         }
     }
 
-    private static boolean propertyContainsFunction(String property, String function) {
-        String functions = SystemProperties.get(property, "");
-        int index = functions.indexOf(function);
-        if (index < 0) return false;
-        if (index > 0 && functions.charAt(index - 1) != ',') return false;
-        int charAfter = index + function.length();
-        if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
-        return true;
-    }
-
     /**
-     * Returns true if the specified USB function is currently enabled.
+     * Returns true if the specified USB function is currently enabled when in device mode.
+     * <p>
+     * USB functions represent interfaces which are published to the host to access
+     * services offered by the device.
+     * </p>
      *
      * @param function name of the USB function
-     * @return true if the USB function is enabled.
+     * @return true if the USB function is enabled
      *
      * {@hide}
      */
     public boolean isFunctionEnabled(String function) {
-        return propertyContainsFunction(USB_SETTINGS_PROPERTY, function);
+        try {
+            return mService.isFunctionEnabled(function);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setCurrentFunction", e);
+            return false;
+        }
     }
 
     /**
-     * Sets the current USB function.
-     * If function is null, then the current function is set to the default function.
+     * Sets the current USB function when in device mode.
+     * <p>
+     * USB functions represent interfaces which are published to the host to access
+     * services offered by the device.
+     * </p><p>
+     * This method is intended to select among primary USB functions.  The system may
+     * automatically activate additional functions such as {@link #USB_FUNCTION_ADB}
+     * or {@link #USB_FUNCTION_ACCESSORY} based on other settings and states.
+     * </p><p>
+     * The allowed values are: {@link #USB_FUNCTION_NONE}, {@link #USB_FUNCTION_AUDIO_SOURCE},
+     * {@link #USB_FUNCTION_MIDI}, {@link #USB_FUNCTION_MTP}, {@link #USB_FUNCTION_PTP},
+     * or {@link #USB_FUNCTION_RNDIS}.
+     * </p><p>
+     * Note: This function is asynchronous and may fail silently without applying
+     * the requested changes.
+     * </p>
      *
      * @param function name of the USB function, or null to restore the default function
      *
@@ -477,8 +470,9 @@ public class UsbManager {
 
     /**
      * Sets whether USB data (for example, MTP exposed pictures) should be made available
-     * on the USB connection. Unlocking usb data should only be done with user involvement,
-     * since exposing pictures or other data could leak sensitive user information.
+     * on the USB connection when in device mode. Unlocking usb data should only be done with
+     * user involvement, since exposing pictures or other data could leak sensitive
+     * user information.
      *
      * {@hide}
      */
@@ -491,7 +485,8 @@ public class UsbManager {
     }
 
     /**
-     * Returns {@code true} iff access to sensitive USB data is currently allowed.
+     * Returns {@code true} iff access to sensitive USB data is currently allowed when
+     * in device mode.
      *
      * {@hide}
      */
@@ -504,4 +499,51 @@ public class UsbManager {
         return false;
     }
 
+    /** @hide */
+    public static String addFunction(String functions, String function) {
+        if ("none".equals(functions)) {
+            return function;
+        }
+        if (!containsFunction(functions, function)) {
+            if (functions.length() > 0) {
+                functions += ",";
+            }
+            functions += function;
+        }
+        return functions;
+    }
+
+    /** @hide */
+    public static String removeFunction(String functions, String function) {
+        String[] split = functions.split(",");
+        for (int i = 0; i < split.length; i++) {
+            if (function.equals(split[i])) {
+                split[i] = null;
+            }
+        }
+        if (split.length == 1 && split[0] == null) {
+            return "none";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < split.length; i++) {
+            String s = split[i];
+            if (s != null) {
+                if (builder.length() > 0) {
+                    builder.append(",");
+                }
+                builder.append(s);
+            }
+        }
+        return builder.toString();
+    }
+
+    /** @hide */
+    public static boolean containsFunction(String functions, String function) {
+        int index = functions.indexOf(function);
+        if (index < 0) return false;
+        if (index > 0 && functions.charAt(index - 1) != ',') return false;
+        int charAfter = index + function.length();
+        if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
+        return true;
+    }
 }

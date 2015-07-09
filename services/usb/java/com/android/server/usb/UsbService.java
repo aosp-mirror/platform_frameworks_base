@@ -17,6 +17,7 @@
 package com.android.server.usb;
 
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,10 +26,11 @@ import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
-import android.os.UserManager;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -63,6 +65,8 @@ public class UsbService extends IUsbManager.Stub {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mUsbService.systemReady();
+            } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+                mUsbService.bootCompleted();
             }
         }
     }
@@ -108,13 +112,15 @@ public class UsbService extends IUsbManager.Stub {
 
         setCurrentUser(UserHandle.USER_OWNER);
 
-        final IntentFilter userFilter = new IntentFilter();
-        userFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        userFilter.addAction(Intent.ACTION_USER_STOPPED);
-        mContext.registerReceiver(mUserReceiver, userFilter, null, null);
+        final IntentFilter filter = new IntentFilter();
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_STOPPED);
+        filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        mContext.registerReceiver(mReceiver, filter, null, null);
     }
 
-    private BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
@@ -124,6 +130,11 @@ public class UsbService extends IUsbManager.Stub {
             } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
                 synchronized (mLock) {
                     mSettingsByUser.remove(userId);
+                }
+            } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
+                    .equals(action)) {
+                if (mDeviceManager != null) {
+                    mDeviceManager.updateUserRestrictions();
                 }
             }
         }
@@ -135,7 +146,7 @@ public class UsbService extends IUsbManager.Stub {
             mHostManager.setCurrentSettings(userSettings);
         }
         if (mDeviceManager != null) {
-            mDeviceManager.setCurrentSettings(userSettings);
+            mDeviceManager.setCurrentUser(userId, userSettings);
         }
     }
 
@@ -147,6 +158,12 @@ public class UsbService extends IUsbManager.Stub {
         }
         if (mHostManager != null) {
             mHostManager.systemReady();
+        }
+    }
+
+    public void bootCompleted() {
+        if (mDeviceManager != null) {
+            mDeviceManager.bootCompleted();
         }
     }
 
@@ -252,15 +269,19 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public boolean isFunctionEnabled(String function) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        return mDeviceManager != null && mDeviceManager.isFunctionEnabled(function);
+    }
+
+    @Override
     public void setCurrentFunction(String function) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
-        // If attempt to change USB function while file transfer is restricted, ensure that
-        // the current function is set to "none", and return.
-        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
-            if (mDeviceManager != null) mDeviceManager.setCurrentFunctions("none");
-            return;
+        if (!isSupportedCurrentFunction(function)) {
+            Slog.w(TAG, "Caller of setCurrentFunction() requested unsupported USB function: "
+                    + function);
+            function = UsbManager.USB_FUNCTION_NONE;
         }
 
         if (mDeviceManager != null) {
@@ -268,6 +289,22 @@ public class UsbService extends IUsbManager.Stub {
         } else {
             throw new IllegalStateException("USB device mode not supported");
         }
+    }
+
+    private static boolean isSupportedCurrentFunction(String function) {
+        if (function == null) return true;
+
+        switch (function) {
+            case UsbManager.USB_FUNCTION_NONE:
+            case UsbManager.USB_FUNCTION_AUDIO_SOURCE:
+            case UsbManager.USB_FUNCTION_MIDI:
+            case UsbManager.USB_FUNCTION_MTP:
+            case UsbManager.USB_FUNCTION_PTP:
+            case UsbManager.USB_FUNCTION_RNDIS:
+                return true;
+        }
+
+        return false;
     }
 
     @Override
