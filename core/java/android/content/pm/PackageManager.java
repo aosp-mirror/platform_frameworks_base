@@ -4627,12 +4627,12 @@ public abstract class PackageManager {
     /** {@hide} */
     public static String permissionFlagToString(int flag) {
         switch (flag) {
-            case FLAG_PERMISSION_GRANTED_BY_DEFAULT: return "FLAG_PERMISSION_GRANTED_BY_DEFAULT";
-            case FLAG_PERMISSION_POLICY_FIXED: return "FLAG_PERMISSION_POLICY_FIXED";
-            case FLAG_PERMISSION_SYSTEM_FIXED: return "FLAG_PERMISSION_SYSTEM_FIXED";
-            case FLAG_PERMISSION_USER_SET: return "FLAG_PERMISSION_USER_SET";
-            case FLAG_PERMISSION_REVOKE_ON_UPGRADE: return "FLAG_PERMISSION_REVOKE_ON_UPGRADE";
-            case FLAG_PERMISSION_USER_FIXED: return "FLAG_PERMISSION_USER_FIXED";
+            case FLAG_PERMISSION_GRANTED_BY_DEFAULT: return "GRANTED_BY_DEFAULT";
+            case FLAG_PERMISSION_POLICY_FIXED: return "POLICY_FIXED";
+            case FLAG_PERMISSION_SYSTEM_FIXED: return "SYSTEM_FIXED";
+            case FLAG_PERMISSION_USER_SET: return "USER_SET";
+            case FLAG_PERMISSION_REVOKE_ON_UPGRADE: return "REVOKE_ON_UPGRADE";
+            case FLAG_PERMISSION_USER_FIXED: return "USER_FIXED";
             default: return Integer.toString(flag);
         }
     }
