@@ -27,6 +27,10 @@ footer.hide=1
           <span class="dac-sprite dac-auto-chevron"></span>
           スタートガイド
         </a><br>
+
+         <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Developer Preview 2</a>
       </div>
     </div>
     <div class="dac-section dac-small">
@@ -43,7 +47,7 @@ footer.hide=1
   <div class="dac-section-subtitle">
     Android M 向けにアプリを用意する際に役立つ必須情報をご提供します。
   </div>
- 
+
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:preview/landing/more"
        data-cardSizes="6x6"
@@ -55,7 +59,7 @@ footer.hide=1
           <span class="dac-sprite dac-auto-chevron"></span>
           問題の報告
         </a>
-      </li> 
+      </li>
       <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
         <span class="dac-sprite dac-auto-chevron"></span>
         Join G+ コミュニティ
