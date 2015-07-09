@@ -40,6 +40,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -872,7 +873,8 @@ public class AudioManager {
     public void setMasterMute(boolean mute, int flags) {
         IAudioService service = getService();
         try {
-            service.setMasterMute(mute, flags, getContext().getOpPackageName());
+            service.setMasterMute(mute, flags, getContext().getOpPackageName(),
+                    UserHandle.getCallingUserId());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setMasterMute", e);
         }
@@ -1551,10 +1553,11 @@ public class AudioManager {
      * @param on set <var>true</var> to mute the microphone;
      *           <var>false</var> to turn mute off
      */
-    public void setMicrophoneMute(boolean on){
+    public void setMicrophoneMute(boolean on) {
         IAudioService service = getService();
         try {
-            service.setMicrophoneMute(on, getContext().getOpPackageName());
+            service.setMicrophoneMute(on, getContext().getOpPackageName(),
+                    UserHandle.getCallingUserId());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setMicrophoneMute", e);
         }
