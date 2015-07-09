@@ -877,6 +877,9 @@ public abstract class BatteryStats implements Parcelable {
 
         public void readFromParcel(Parcel in) {
             final int N = in.readInt();
+            if (N > mStepDurations.length) {
+                throw new ParcelFormatException("more step durations than available: " + N);
+            }
             mNumStepDurations = N;
             for (int i=0; i<N; i++) {
                 mStepDurations[i] = in.readLong();
