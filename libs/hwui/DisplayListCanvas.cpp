@@ -31,7 +31,7 @@
 namespace android {
 namespace uirenderer {
 
-DisplayListCanvas::DisplayListCanvas()
+DisplayListCanvas::DisplayListCanvas(int width, int height)
     : mState(*this)
     , mResourceCache(ResourceCache::getInstance())
     , mDisplayListData(nullptr)
@@ -41,6 +41,7 @@ DisplayListCanvas::DisplayListCanvas()
     , mDeferredBarrierType(kBarrier_None)
     , mHighContrastText(false)
     , mRestoreSaveCount(-1) {
+    reset(width, height);
 }
 
 DisplayListCanvas::~DisplayListCanvas() {
@@ -48,27 +49,12 @@ DisplayListCanvas::~DisplayListCanvas() {
             "Destroyed a DisplayListCanvas during a record!");
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Operations
-///////////////////////////////////////////////////////////////////////////////
-
-DisplayListData* DisplayListCanvas::finishRecording() {
-    mPaintMap.clear();
-    mRegionMap.clear();
-    mPathMap.clear();
-    DisplayListData* data = mDisplayListData;
-    mDisplayListData = nullptr;
-    mSkiaCanvasProxy.reset(nullptr);
-    return data;
-}
-
-void DisplayListCanvas::prepareDirty(float left, float top,
-        float right, float bottom) {
-
+void DisplayListCanvas::reset(int width, int height) {
     LOG_ALWAYS_FATAL_IF(mDisplayListData,
             "prepareDirty called a second time during a recording!");
     mDisplayListData = new DisplayListData();
 
+    mState.setViewport(width, height);
     mState.initializeSaveStack(0, 0, mState.getWidth(), mState.getHeight(), Vector3());
 
     mDeferredBarrierType = kBarrier_InOrder;
@@ -76,16 +62,22 @@ void DisplayListCanvas::prepareDirty(float left, float top,
     mRestoreSaveCount = -1;
 }
 
-bool DisplayListCanvas::finish() {
+
+///////////////////////////////////////////////////////////////////////////////
+// Operations
+///////////////////////////////////////////////////////////////////////////////
+
+DisplayListData* DisplayListCanvas::finishRecording() {
     flushRestoreToCount();
     flushTranslate();
-    return false;
-}
 
-void DisplayListCanvas::interrupt() {
-}
-
-void DisplayListCanvas::resume() {
+    mPaintMap.clear();
+    mRegionMap.clear();
+    mPathMap.clear();
+    DisplayListData* data = mDisplayListData;
+    mDisplayListData = nullptr;
+    mSkiaCanvasProxy.reset(nullptr);
+    return data;
 }
 
 void DisplayListCanvas::callDrawGLFunction(Functor *functor) {

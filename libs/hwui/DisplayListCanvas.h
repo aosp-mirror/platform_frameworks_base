@@ -62,28 +62,18 @@ class StateOp;
  */
 class ANDROID_API DisplayListCanvas: public Canvas, public CanvasStateClient {
 public:
-    DisplayListCanvas();
+    DisplayListCanvas(int width, int height);
     virtual ~DisplayListCanvas();
 
-    void insertReorderBarrier(bool enableReorder);
+    void reset(int width, int height);
 
     DisplayListData* finishRecording();
-
-// ----------------------------------------------------------------------------
-// HWUI Frame state operations
-// ----------------------------------------------------------------------------
-
-    void prepareDirty(float left, float top, float right, float bottom);
-    void prepare() { prepareDirty(0.0f, 0.0f, width(), height()); }
-    bool finish();
-    void interrupt();
-    void resume();
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas state operations
 // ----------------------------------------------------------------------------
 
-    void setViewport(int width, int height) { mState.setViewport(width, height); }
+    void insertReorderBarrier(bool enableReorder);
 
     const Rect& getRenderTargetClipBounds() const { return mState.getRenderTargetClipBounds(); }
 

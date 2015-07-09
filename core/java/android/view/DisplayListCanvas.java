@@ -48,13 +48,17 @@ public class DisplayListCanvas extends Canvas {
     private int mWidth;
     private int mHeight;
 
-    static DisplayListCanvas obtain(@NonNull RenderNode node) {
+    static DisplayListCanvas obtain(@NonNull RenderNode node, int width, int height) {
         if (node == null) throw new IllegalArgumentException("node cannot be null");
         DisplayListCanvas canvas = sPool.acquire();
         if (canvas == null) {
-            canvas = new DisplayListCanvas();
+            canvas = new DisplayListCanvas(width, height);
+        } else {
+            nResetDisplayListCanvas(canvas.mNativeCanvasWrapper, width, height);
         }
         canvas.mNode = node;
+        canvas.mWidth = width;
+        canvas.mHeight = height;
         return canvas;
     }
 
@@ -87,12 +91,13 @@ public class DisplayListCanvas extends Canvas {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-    private DisplayListCanvas() {
-        super(nCreateDisplayListCanvas());
+    private DisplayListCanvas(int width, int height) {
+        super(nCreateDisplayListCanvas(width, height));
         mDensity = 0; // disable bitmap density scaling
     }
 
-    private static native long nCreateDisplayListCanvas();
+    private static native long nCreateDisplayListCanvas(int width, int height);
+    private static native void nResetDisplayListCanvas(long canvas, int width, int height);
 
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
@@ -154,17 +159,6 @@ public class DisplayListCanvas extends Canvas {
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void setViewport(int width, int height) {
-        mWidth = width;
-        mHeight = height;
-
-        nSetViewport(mNativeCanvasWrapper, width, height);
-    }
-
-    private static native void nSetViewport(long renderer,
-            int width, int height);
-
-    @Override
     public void setHighContrastText(boolean highContrastText) {
         nSetHighContrastText(mNativeCanvasWrapper, highContrastText);
     }
@@ -182,31 +176,6 @@ public class DisplayListCanvas extends Canvas {
     }
 
     private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
-
-    /**
-     * Invoked before any drawing operation is performed in this canvas.
-     *
-     * @param dirty The dirty rectangle to update, can be null.
-     */
-    public void onPreDraw(Rect dirty) {
-        if (dirty != null) {
-            nPrepareDirty(mNativeCanvasWrapper, dirty.left, dirty.top, dirty.right, dirty.bottom);
-        } else {
-            nPrepare(mNativeCanvasWrapper);
-        }
-    }
-
-    private static native void nPrepare(long renderer);
-    private static native void nPrepareDirty(long renderer, int left, int top, int right, int bottom);
-
-    /**
-     * Invoked after all drawing operation have been performed.
-     */
-    public void onPostDraw() {
-        nFinish(mNativeCanvasWrapper);
-    }
-
-    private static native void nFinish(long renderer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Functor

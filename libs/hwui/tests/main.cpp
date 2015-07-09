@@ -42,15 +42,12 @@ public:
 };
 
 static DisplayListCanvas* startRecording(RenderNode* node) {
-    DisplayListCanvas* renderer = new DisplayListCanvas();
-    renderer->setViewport(node->stagingProperties().getWidth(),
-            node->stagingProperties().getHeight());
-    renderer->prepare();
+    DisplayListCanvas* renderer = new DisplayListCanvas(
+            node->stagingProperties().getWidth(), node->stagingProperties().getHeight());
     return renderer;
 }
 
 static void endRecording(DisplayListCanvas* renderer, RenderNode* node) {
-    renderer->finish();
     node->setStagingDisplayList(renderer->finishRecording());
     delete renderer;
 }

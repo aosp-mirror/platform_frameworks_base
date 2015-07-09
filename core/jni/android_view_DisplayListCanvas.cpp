@@ -50,12 +50,6 @@ static struct {
 // Setup
 // ----------------------------------------------------------------------------
 
-static void android_view_DisplayListCanvas_setViewport(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint width, jint height) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->setViewport(width, height);
-}
-
 static void android_view_DisplayListCanvas_setHighContrastText(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jboolean highContrastText) {
     DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
@@ -66,24 +60,6 @@ static void android_view_DisplayListCanvas_insertReorderBarrier(JNIEnv* env, job
         jlong rendererPtr, jboolean reorderEnable) {
     DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     renderer->insertReorderBarrier(reorderEnable);
-}
-
-static void android_view_DisplayListCanvas_prepare(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->prepare();
-}
-
-static void android_view_DisplayListCanvas_prepareDirty(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint left, jint top, jint right, jint bottom) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->prepareDirty(left, top, right, bottom);
-}
-
-static void android_view_DisplayListCanvas_finish(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->finish();
 }
 
 // ----------------------------------------------------------------------------
@@ -188,9 +164,17 @@ static jlong android_view_DisplayListCanvas_finishRecording(JNIEnv* env,
     return reinterpret_cast<jlong>(renderer->finishRecording());
 }
 
-static jlong android_view_DisplayListCanvas_createDisplayListCanvas(JNIEnv* env, jobject clazz) {
-    return reinterpret_cast<jlong>(new DisplayListCanvas);
+static jlong android_view_DisplayListCanvas_createDisplayListCanvas(JNIEnv* env, jobject clazz,
+        jint width, jint height) {
+    return reinterpret_cast<jlong>(new DisplayListCanvas(width, height));
 }
+
+static void android_view_DisplayListCanvas_resetDisplayListCanvas(JNIEnv* env, jobject clazz,
+        jlong rendererPtr, jint width, jint height) {
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
+    renderer->reset(width, height);
+}
+
 
 static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
         jobject clazz, jlong rendererPtr, jlong renderNodePtr) {
@@ -244,12 +228,8 @@ const char* const kClassPathName = "android/view/DisplayListCanvas";
 
 static JNINativeMethod gMethods[] = {
     { "nIsAvailable",       "()Z",             (void*) android_view_DisplayListCanvas_isAvailable },
-    { "nSetViewport",       "(JII)V",          (void*) android_view_DisplayListCanvas_setViewport },
     { "nSetHighContrastText","(JZ)V",          (void*) android_view_DisplayListCanvas_setHighContrastText },
     { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
-    { "nPrepare",           "(J)V",            (void*) android_view_DisplayListCanvas_prepare },
-    { "nPrepareDirty",      "(JIIII)V",        (void*) android_view_DisplayListCanvas_prepareDirty },
-    { "nFinish",            "(J)V",            (void*) android_view_DisplayListCanvas_finish },
 
     { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_DisplayListCanvas_callDrawGLFunction },
 
@@ -262,7 +242,8 @@ static JNINativeMethod gMethods[] = {
     { "nFinishRecording",   "(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
     { "nDrawRenderNode",    "(JJ)V",           (void*) android_view_DisplayListCanvas_drawRenderNode },
 
-    { "nCreateDisplayListCanvas", "()J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
+    { "nCreateDisplayListCanvas", "(II)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
+    { "nResetDisplayListCanvas", "(JII)V",     (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
 
     { "nDrawLayer",               "(JJFF)V",   (void*) android_view_DisplayListCanvas_drawLayer },
 

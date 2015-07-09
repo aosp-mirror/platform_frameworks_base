@@ -214,17 +214,6 @@ public class Canvas {
         mBitmap = bitmap;
     }
 
-    /**
-     * Set the viewport dimensions if this canvas is GL based. If it is not,
-     * this method is ignored and no exception is thrown.
-     *
-     * @param width The width of the viewport
-     * @param height The height of the viewport
-     *
-     * @hide
-     */
-    public void setViewport(int width, int height) {}
-
     /** @hide */
     public void setHighContrastText(boolean highContrastText) {}
 
