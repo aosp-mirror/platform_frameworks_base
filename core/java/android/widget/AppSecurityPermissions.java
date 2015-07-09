@@ -98,18 +98,12 @@ public class AppSecurityPermissions {
             super(info);
         }
 
-        public Drawable loadGroupIcon(PackageManager pm) {
+        public Drawable loadGroupIcon(Context context, PackageManager pm) {
             if (icon != 0) {
                 return loadUnbadgedIcon(pm);
             } else {
-                ApplicationInfo appInfo;
-                try {
-                    appInfo = pm.getApplicationInfo(packageName, 0);
-                    return appInfo.loadUnbadgedIcon(pm);
-                } catch (NameNotFoundException e) {
-                }
+                return context.getDrawable(R.drawable.ic_perm_device_info);
             }
-            return null;
         }
     }
 
@@ -163,7 +157,7 @@ public class AppSecurityPermissions {
             PackageManager pm = getContext().getPackageManager();
             Drawable icon = null;
             if (first) {
-                icon = grp.loadGroupIcon(pm);
+                icon = grp.loadGroupIcon(getContext(), pm);
             }
             CharSequence label = perm.mLabel;
             if (perm.mNew && newPermPrefix != null) {
@@ -213,7 +207,7 @@ public class AppSecurityPermissions {
                     builder.setMessage(sbuilder.toString());
                 }
                 builder.setCancelable(true);
-                builder.setIcon(mGroup.loadGroupIcon(pm));
+                builder.setIcon(mGroup.loadGroupIcon(getContext(), pm));
                 addRevokeUIIfNecessary(builder);
                 mDialog = builder.show();
                 mDialog.setCanceledOnTouchOutside(true);
