@@ -14256,7 +14256,7 @@ package android.hardware.fingerprint {
     method public void onAuthenticationSucceeded(android.hardware.fingerprint.FingerprintManager.AuthenticationResult);
   }
 
-  public static final class FingerprintManager.AuthenticationResult {
+  public static class FingerprintManager.AuthenticationResult {
     method public android.hardware.fingerprint.FingerprintManager.CryptoObject getCryptoObject();
   }
 
