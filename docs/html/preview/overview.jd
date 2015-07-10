@@ -5,6 +5,33 @@ page.tags="preview", "developer", "android"
 
 @jd:body
 
+<div class="cols" style=
+"background-color:#ffebc3; padding: 5px 0;margin-bottom:1em; text-align:center;">
+<h3>
+    Developer Preview 2 is now available
+  </h3>
+
+ <ul class="dac-section-links">
+    <li class="dac-section-link">
+      <a href="#preview2-notes">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Read the Notes</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="#preview2-get">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get the Update</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Report Issues</a>
+    </li>
+  </ul>
+</div>
+
 <p>
   Welcome to the <strong>Android M Developer Preview</strong>, a program that gives you
   everything you need to test and optimize your apps for the next version of
@@ -128,15 +155,15 @@ page.tags="preview", "developer", "android"
 
 <ul>
   <li>
-    <strong>Preview&nbsp;1</strong> (initial Preview release, late May),
+    <strong><a href="{@docRoot}preview/download_mp1.html">Preview&nbsp;1</a></strong> (available).
   </li>
 
   <li>
-    <strong>Preview&nbsp;2</strong> (late June/early July), and
+    <strong><a href="{@docRoot}preview/download.html">Preview&nbsp;2</a></strong> (available).
   </li>
 
   <li>
-    <strong>Preview&nbsp;3</strong> (near final, late July)
+    <strong>Preview&nbsp;3</strong> (near final, late July).
   </li>
 </ul>
 
