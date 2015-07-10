@@ -206,7 +206,6 @@ public abstract class Layout {
 
         mText = text;
         mPaint = paint;
-        mWorkPaint = new TextPaint();
         mWidth = width;
         mAlignment = align;
         mSpacingMult = spacingMult;
@@ -1993,7 +1992,6 @@ public abstract class Layout {
 
     private CharSequence mText;
     private TextPaint mPaint;
-    /* package */ TextPaint mWorkPaint;
     private int mWidth;
     private Alignment mAlignment = Alignment.ALIGN_NORMAL;
     private float mSpacingMult;
