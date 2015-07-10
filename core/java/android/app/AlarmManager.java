@@ -570,12 +570,15 @@ public class AlarmManager {
      * even when the system is in low-power idle modes.  This type of alarm must <b>only</b>
      * be used for situations where it is actually required that the alarm go off while in
      * idle -- a reasonable example would be for a calendar notification that should make a
-     * sound so the user is aware of it.  These alarms can significantly impact the power use
-     * of the device when idle (and thus cause significant battery blame to the app scheduling
-     * them), so they should be used with care.
+     * sound so the user is aware of it.  When the alarm is dispatched, the app will also be
+     * added to the system's temporary whitelist for approximately 10 seconds to allow that
+     * application to acquire further wake locks in which to complete its work.</p>
      *
-     * <p>To reduce abuse, there are restrictions on how frequently these alarms will go off
-     * for a particular application.  Under normal system operation, it will not dispatch these
+     * <p>These alarms can significantly impact the power use
+     * of the device when idle (and thus cause significant battery blame to the app scheduling
+     * them), so they should be used with care.  To reduce abuse, there are restrictions on how
+     * frequently these alarms will go off for a particular application.
+     * Under normal system operation, it will not dispatch these
      * alarms more than about every minute (at which point every such pending alarm is
      * dispatched); when in low-power idle modes this duration may be significantly longer,
      * such as 15 minutes.</p>
@@ -619,12 +622,15 @@ public class AlarmManager {
      * {@link #setAndAllowWhileIdle}.  This type of alarm must <b>only</b>
      * be used for situations where it is actually required that the alarm go off while in
      * idle -- a reasonable example would be for a calendar notification that should make a
-     * sound so the user is aware of it.  These alarms can significantly impact the power use
-     * of the device when idle (and thus cause significant battery blame to the app scheduling
-     * them), so they should be used with care.
+     * sound so the user is aware of it.  When the alarm is dispatched, the app will also be
+     * added to the system's temporary whitelist for approximately 10 seconds to allow that
+     * application to acquire further wake locks in which to complete its work.</p>
      *
-     * <p>To reduce abuse, there are restrictions on how frequently these alarms will go off
-     * for a particular application.  Under normal system operation, it will not dispatch these
+     * <p>These alarms can significantly impact the power use
+     * of the device when idle (and thus cause significant battery blame to the app scheduling
+     * them), so they should be used with care.  To reduce abuse, there are restrictions on how
+     * frequently these alarms will go off for a particular application.
+     * Under normal system operation, it will not dispatch these
      * alarms more than about every minute (at which point every such pending alarm is
      * dispatched); when in low-power idle modes this duration may be significantly longer,
      * such as 15 minutes.</p>
