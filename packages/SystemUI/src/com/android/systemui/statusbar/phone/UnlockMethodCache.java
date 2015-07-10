@@ -127,7 +127,7 @@ public class UnlockMethodCache {
         }
 
         @Override
-        public void onScreenTurnedOn() {
+        public void onStartedWakingUp() {
             update(false /* updateAlways */);
         }
 

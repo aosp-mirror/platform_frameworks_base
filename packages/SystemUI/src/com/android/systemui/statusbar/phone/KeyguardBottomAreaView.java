@@ -634,13 +634,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
 
         @Override
-        public void onScreenTurnedOn() {
-            mLockIcon.setScreenOn(true);
+        public void onStartedWakingUp() {
+            mLockIcon.setDeviceInteractive(true);
         }
 
         @Override
-        public void onScreenTurnedOff(int why) {
-            mLockIcon.setScreenOn(false);
+        public void onFinishedGoingToSleep(int why) {
+            mLockIcon.setDeviceInteractive(false);
         }
 
         @Override
