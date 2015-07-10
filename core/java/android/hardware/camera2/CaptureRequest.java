@@ -184,7 +184,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     private final CameraMetadataNative mSettings;
     private boolean mIsReprocess;
     // If this request is part of constrained high speed request list that was created by
-    // {@link CameraDevice#createConstrainedHighSpeedRequestList}.
+    // {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}
     private boolean mIsPartOfCHSRequestList = false;
     // Each reprocess request must be tied to a reprocessable session ID.
     // Valid only for reprocess requests (mIsReprocess == true).
@@ -340,14 +340,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * <p>Determine if this request is part of a constrained high speed request list that was
-     * created by {@link CameraDevice#createConstrainedHighSpeedRequestList}. A constrained high
-     * speed request list contains some constrained high speed capture requests with certain
-     * interleaved pattern that is suitable for high speed preview/video streaming. An active
-     * constrained high speed capture session only accepts constrained high speed request lists.
-     * This method can be used to do the sanity check when a constrained high speed capture session
-     * receives a request list via {@link CameraCaptureSession#setRepeatingBurst} or
-     * {@link CameraCaptureSession#captureBurst}.
-     * </p>
+     * created by
+     * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}.
+     * A constrained high speed request list contains some constrained high speed capture requests
+     * with certain interleaved pattern that is suitable for high speed preview/video streaming. An
+     * active constrained high speed capture session only accepts constrained high speed request
+     * lists.  This method can be used to do the sanity check when a constrained high speed capture
+     * session receives a request list via {@link CameraCaptureSession#setRepeatingBurst} or
+     * {@link CameraCaptureSession#captureBurst}.  </p>
      *
      *
      * @return {@code true} if this request is part of a constrained high speed request list,
@@ -595,9 +595,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
         /**
          * <p>Mark this request as part of a constrained high speed request list created by
-         * {@link CameraDevice#createConstrainedHighSpeedRequestList}. A constrained high speed
-         * request list contains some constrained high speed capture requests with certain
-         * interleaved pattern that is suitable for high speed preview/video streaming.</p>
+         * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}.
+         * A constrained high speed request list contains some constrained high speed capture
+         * requests with certain interleaved pattern that is suitable for high speed preview/video
+         * streaming.</p>
          *
          * @hide
          */
