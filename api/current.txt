@@ -9275,6 +9275,7 @@ package android.content.pm {
     method public abstract java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public abstract android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public abstract boolean hasSystemFeature(java.lang.String);
+    method public abstract boolean isPermissionRevokedByPolicy(java.lang.String, java.lang.String);
     method public abstract boolean isSafeMode();
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
     method public abstract java.util.List<android.content.pm.ProviderInfo> queryContentProviders(java.lang.String, int, int);
@@ -31827,6 +31828,7 @@ package android.test.mock {
     method public java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public boolean hasSystemFeature(java.lang.String);
+    method public boolean isPermissionRevokedByPolicy(java.lang.String, java.lang.String);
     method public boolean isSafeMode();
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
     method public java.util.List<android.content.pm.ProviderInfo> queryContentProviders(java.lang.String, int, int);
