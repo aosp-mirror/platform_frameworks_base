@@ -31,14 +31,15 @@ import com.android.internal.util.AsyncChannel;
 import com.android.server.connectivity.NetworkMonitor;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * A bag class used by ConnectivityService for holding a collection of most recent
  * information published by a particular NetworkAgent as well as the
  * AsyncChannel/messenger for reaching that NetworkAgent and lists of NetworkRequests
- * interested in using it.
+ * interested in using it.  Default sort order is descending by score.
  */
-public class NetworkAgentInfo {
+public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public NetworkInfo networkInfo;
     // This Network object should always be used if possible, so as to encourage reuse of the
     // enclosed socket factory and connection pool.  Avoid creating other Network objects.
@@ -71,6 +72,13 @@ public class NetworkAgentInfo {
 
     // Whether a captive portal was found during the last network validation attempt.
     public boolean lastCaptivePortalDetected;
+
+    // Indicates whether the network is lingering.  Networks are lingered when they become unneeded
+    // as a result of their NetworkRequests being satisfied by a different network, so as to allow
+    // communication to wrap up before the network is taken down.  This usually only happens to the
+    // default network.  Lingering ends with either the linger timeout expiring and the network
+    // being taken down, or the network satisfying a request again.
+    public boolean lingering;
 
     // This represents the last score received from the NetworkAgent.
     private int currentScore;
@@ -181,7 +189,7 @@ public class NetworkAgentInfo {
                 linkProperties + "}  nc{" +
                 networkCapabilities + "}  Score{" + getCurrentScore() + "}  " +
                 "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  " +
-                "created{" + created + "}  " +
+                "created{" + created + "} lingering{" + lingering + "} " +
                 "explicitlySelected{" + networkMisc.explicitlySelected + "} " +
                 "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} " +
                 "everCaptivePortalDetected{" + everCaptivePortalDetected + "} " +
@@ -193,5 +201,11 @@ public class NetworkAgentInfo {
         return "NetworkAgentInfo [" + networkInfo.getTypeName() + " (" +
                 networkInfo.getSubtypeName() + ") - " +
                 (network == null ? "null" : network.toString()) + "]";
+    }
+
+    // Enables sorting in descending order of score.
+    @Override
+    public int compareTo(NetworkAgentInfo other) {
+        return other.getCurrentScore() - getCurrentScore();
     }
 }
