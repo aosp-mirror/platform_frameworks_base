@@ -62,6 +62,7 @@ import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
@@ -166,6 +167,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IMountService;
+import android.os.storage.MountServiceInternal;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
@@ -2727,23 +2729,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    @Override
-    public int getMountExternalMode(int uid) {
-        if (Process.isIsolated(uid)) {
-            return Zygote.MOUNT_EXTERNAL_NONE;
-        } else {
-            if (checkUidPermission(WRITE_MEDIA_STORAGE, uid) == PERMISSION_GRANTED) {
-                return Zygote.MOUNT_EXTERNAL_DEFAULT;
-            } else if (checkUidPermission(WRITE_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
-                return Zygote.MOUNT_EXTERNAL_WRITE;
-            } else if (checkUidPermission(READ_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
-                return Zygote.MOUNT_EXTERNAL_READ;
-            } else {
-                return Zygote.MOUNT_EXTERNAL_DEFAULT;
-            }
-        }
-    }
-
     static PermissionInfo generatePermissionInfo(
             BasePermission bp, int flags) {
         if (bp.perm != null) {
@@ -3466,8 +3451,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             final long token = Binder.clearCallingIdentity();
             try {
                 if (sUserManager.isInitialized(userId)) {
-                    final StorageManager storage = mContext.getSystemService(StorageManager.class);
-                    storage.remountUid(uid);
+                    MountServiceInternal mountServiceInternal = LocalServices.getService(
+                            MountServiceInternal.class);
+                    mountServiceInternal.onExternalStoragePolicyChanged(uid, packageName);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -14439,6 +14425,33 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         mInstallerService.systemReady();
         mPackageDexOptimizer.systemReady();
+
+        MountServiceInternal mountServiceInternal = LocalServices.getService(
+                MountServiceInternal.class);
+        mountServiceInternal.addExternalStoragePolicy(
+                new MountServiceInternal.ExternalStorageMountPolicy() {
+            @Override
+            public int getMountMode(int uid, String packageName) {
+                if (Process.isIsolated(uid)) {
+                    return Zygote.MOUNT_EXTERNAL_NONE;
+                }
+                if (checkUidPermission(WRITE_MEDIA_STORAGE, uid) == PERMISSION_GRANTED) {
+                    return Zygote.MOUNT_EXTERNAL_DEFAULT;
+                }
+                if (checkUidPermission(READ_EXTERNAL_STORAGE, uid) == PERMISSION_DENIED) {
+                    return Zygote.MOUNT_EXTERNAL_DEFAULT;
+                }
+                if (checkUidPermission(WRITE_EXTERNAL_STORAGE, uid) == PERMISSION_DENIED) {
+                    return Zygote.MOUNT_EXTERNAL_READ;
+                }
+                return Zygote.MOUNT_EXTERNAL_WRITE;
+            }
+
+            @Override
+            public boolean hasExternalStorage(int uid, String packageName) {
+                return true;
+            }
+        });
     }
 
     @Override
