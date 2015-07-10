@@ -48,6 +48,12 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     void addAdapter(IConnectionServiceAdapter adapter) {
+        for (IConnectionServiceAdapter it : mAdapters) {
+            if (it.asBinder() == adapter.asBinder()) {
+                Log.w(this, "Ignoring duplicate adapter addition.");
+                return;
+            }
+        }
         if (mAdapters.add(adapter)) {
             try {
                 adapter.asBinder().linkToDeath(this, 0);
@@ -58,8 +64,13 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     void removeAdapter(IConnectionServiceAdapter adapter) {
-        if (adapter != null && mAdapters.remove(adapter)) {
-            adapter.asBinder().unlinkToDeath(this, 0);
+        if (adapter != null) {
+            for (IConnectionServiceAdapter it : mAdapters) {
+                if (it.asBinder() == adapter.asBinder() && mAdapters.remove(it)) {
+                    adapter.asBinder().unlinkToDeath(this, 0);
+                    break;
+                }
+            }
         }
     }
 
