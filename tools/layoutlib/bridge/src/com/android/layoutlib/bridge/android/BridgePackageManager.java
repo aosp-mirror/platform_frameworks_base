@@ -52,7 +52,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
-
 import java.util.List;
 
 /**
@@ -165,6 +164,11 @@ public class BridgePackageManager extends PackageManager {
     @Override
     public int checkPermission(String permName, String pkgName) {
         return 0;
+    }
+
+    @Overide
+    public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
+        return false;
     }
 
     @Override
