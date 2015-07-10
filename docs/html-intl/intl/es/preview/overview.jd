@@ -5,6 +5,33 @@ page.tags="preview", "developer", "android"
 
 @jd:body
 
+<div class="cols" style=
+"background-color:#ffebc3; padding: 5px 0;margin-bottom:1em; text-align:center;">
+<h3>
+    Developer Preview 2 is now available
+  </h3>
+
+ <ul class="dac-section-links">
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview2-notes">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Read the Notes</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview2-get">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get the Update</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Report Issues</a>
+    </li>
+  </ul>
+</div>
+
 <p>
   Bienvenido a <strong>Android M Developer Preview</strong>, el programa que le brinda todo lo que necesita para probar y optimizar sus aplicaciones para la próxima versión de Android.
 

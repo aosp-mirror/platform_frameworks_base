@@ -246,9 +246,11 @@ page.image=images/cards/card-support_16-9_2x.png
       <strong>Clear data</strong>.</li>
       <li>In YouTube app, it's not possible to share a video. The share window is
       blank.</li>
-      <li>Android For Work Profile setup is not working properly, so you won't be
-      able to create a new Work Profile after you update. As a workaround, make
-      sure to create the Work Profiles you need in Developer Preview 1 before
+      <li>The bundled Google Apps Device Policy app included in Developer Preview 2 is unable to
+      properly set up an Android for Work Profile, so you cannot create a new Work Profile with this
+      app after you update. This issue is specific to the Google Apps Device Policy app, and not the
+      Android for Work platform (or our partner EMM providers). As a workaround for users of the
+      Google Apps Device Policy app, be sure to create a Work Profile in Developer Preview 1 before
       updating to Developer Preview 2.
       </li>
     </ul>
