@@ -120,14 +120,16 @@ manifest.</p>
 &lt;uses-permission
         android:name="android.permission.USE_FINGERPRINT" /&gt;
 </pre>
-
 <img src="{@docRoot}preview/images/fingerprint-screen.png"
 srcset="{@docRoot}preview/images/fingerprint-screen.png 1x, {@docRoot}preview/images/fingerprint-screen_2x.png 2x"
 style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 
 <p>To see an app implementation of fingerprint authentication, refer to the
 <a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">
-  Fingerprint Dialog sample</a>.</p>
+  Fingerprint Dialog sample</a>. For a demonstration of how you can use these authentication
+  APIs in conjunction with other Android APIs, see the video
+  <a class="video-shadowbox-button" href="https://www.youtube.com/watch?v=VOn7VrTRlA4">
+  Fingerprint and Payment APIs</a>.</p>
 
 <p>If you are testing this feature, follow these steps:</p>
 <ol>
