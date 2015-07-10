@@ -421,6 +421,15 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
+        try {
+            return mPM.isPermissionRevokedByPolicy(permName, pkgName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
     public boolean addPermission(PermissionInfo info) {
         try {
             return mPM.addPermission(info);
