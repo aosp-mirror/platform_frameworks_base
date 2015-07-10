@@ -431,7 +431,8 @@ public class ConnectivityManager {
     public static final int TYPE_MOBILE_IA = 14;
 
     /**
-     * Emergency PDN connection for emergency calls
+     * Emergency PDN connection for emergency services.  This
+     * may include IMS and MMS in emergency situations.
      * {@hide}
      */
     public static final int TYPE_MOBILE_EMERGENCY = 15;
