@@ -219,7 +219,8 @@ public class BitmapDrawable extends Drawable {
         }
     }
 
-    private void setBitmap(Bitmap bitmap) {
+    /** @hide */
+    protected void setBitmap(Bitmap bitmap) {
         if (mBitmapState.mBitmap != bitmap) {
             mBitmapState.mBitmap = bitmap;
             computeBitmapSize();
