@@ -4494,7 +4494,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         return result;
                     }
                     result = filterCandidatesWithDomainPreferredActivitiesLPr(flags, result,
-                            xpDomainInfo);
+                            xpDomainInfo, userId);
                     Collections.sort(result, mResolvePrioritySorter);
                 }
                 return result;
@@ -4611,13 +4611,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private List<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPr(
-            int flags, List<ResolveInfo> candidates, CrossProfileDomainInfo xpDomainInfo) {
+            int flags, List<ResolveInfo> candidates, CrossProfileDomainInfo xpDomainInfo,
+            int userId) {
         if (DEBUG_PREFERRED || DEBUG_DOMAIN_VERIFICATION) {
-            Slog.v("TAG", "Filtering results with preferred activities. Candidates count: " +
+            Slog.v(TAG, "Filtering results with preferred activities. Candidates count: " +
                     candidates.size());
         }
 
-        final int userId = UserHandle.getCallingUserId();
         ArrayList<ResolveInfo> result = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> alwaysList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> undefinedList = new ArrayList<ResolveInfo>();
