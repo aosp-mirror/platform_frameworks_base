@@ -88,10 +88,9 @@ public class ChooseTypeAndAccountActivity extends Activity
     public static final String EXTRA_SELECTED_ACCOUNT = "selectedAccount";
 
     /**
-     * Deprecated. Providing this extra to {@link ChooseTypeAndAccountActivity}
-     * will have no effect.
+     * If true then display the account selection list even if there is just
+     * one account to choose from. boolean.
      */
-    @Deprecated
     public static final String EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT =
             "alwaysPromptForAccount";
 
@@ -118,6 +117,7 @@ public class ChooseTypeAndAccountActivity extends Activity
     private Set<String> mSetOfRelevantAccountTypes;
     private String mSelectedAccountName = null;
     private boolean mSelectedAddNewAccount = false;
+    private boolean mAlwaysPromptForAccount = false;
     private String mDescriptionOverride;
 
     private ArrayList<Account> mAccounts;
@@ -188,6 +188,7 @@ public class ChooseTypeAndAccountActivity extends Activity
 
         mSetOfAllowableAccounts = getAllowableAccountSet(intent);
         mSetOfRelevantAccountTypes = getReleventAccountTypes(intent);
+        mAlwaysPromptForAccount = intent.getBooleanExtra(EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT, false);
         mDescriptionOverride = intent.getStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE);
 
         mAccounts = getAcceptableAccountChoices(AccountManager.get(this));
@@ -217,6 +218,15 @@ public class ChooseTypeAndAccountActivity extends Activity
                 } else {
                     startChooseAccountTypeActivity();
                 }
+                return;
+            }
+
+            // if there is only one allowable account return it
+            if (!mAlwaysPromptForAccount && mAccounts.size() == 1) {
+                Account account = mAccounts.get(0);
+                super.onCreate(savedInstanceState);
+                setResultAndFinish(account.name, account.type);
+                return;
             }
         }
 
