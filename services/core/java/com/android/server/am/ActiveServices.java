@@ -1587,7 +1587,7 @@ public final class ActiveServices {
 
         while (r.pendingStarts.size() > 0) {
             Exception caughtException = null;
-            ServiceRecord.StartItem si;
+            ServiceRecord.StartItem si = null;
             try {
                 si = r.pendingStarts.remove(0);
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Sending arguments to: "
