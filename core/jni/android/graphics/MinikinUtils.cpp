@@ -33,7 +33,7 @@ FontStyle MinikinUtils::prepareMinikinPaint(MinikinPaint* minikinPaint, FontColl
     FontStyle resolved = resolvedFace->fStyle;
 
     /* Prepare minikin FontStyle */
-    std::string lang = paint->getTextLocale();
+    const std::string& lang = paint->getTextLocale();
     FontLanguage minikinLang(lang.c_str(), lang.size());
     FontVariant minikinVariant = (paint->getFontVariant() == VARIANT_ELEGANT) ? VARIANT_ELEGANT
             : VARIANT_COMPACT;
