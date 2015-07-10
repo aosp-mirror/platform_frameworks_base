@@ -166,7 +166,7 @@ public class BridgePackageManager extends PackageManager {
         return 0;
     }
 
-    @Overide
+    @Override
     public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
         return false;
     }
