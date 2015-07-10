@@ -102,26 +102,26 @@ public class ConnectivityManager {
      * portal, which is blocking Internet connectivity. The user was presented
      * with a notification that network sign in is required,
      * and the user invoked the notification's action indicating they
-     * desire to sign in to the network. Apps handling this action should
+     * desire to sign in to the network. Apps handling this activity should
      * facilitate signing in to the network. This action includes a
      * {@link Network} typed extra called {@link #EXTRA_NETWORK} that represents
      * the network presenting the captive portal; all communication with the
      * captive portal must be done using this {@code Network} object.
      * <p/>
-     * When the app handling this action believes the user has signed in to
-     * the network and the captive portal has been dismissed, the app should call
-     * {@link #reportCaptivePortalDismissed} so the system can reevaluate the network.
-     * If reevaluation finds the network no longer subject to a captive portal,
-     * the network may become the default active data network.
-     * <p/>
-     * When the app handling this action believes the user explicitly wants
+     * This activity includes a {@link CaptivePortal} extra named
+     * {@link #EXTRA_CAPTIVE_PORTAL} that can be used to indicate different
+     * outcomes of the captive portal sign in to the system:
+     * <ul>
+     * <li> When the app handling this action believes the user has signed in to
+     * the network and the captive portal has been dismissed, the app should
+     * call {@link CaptivePortal#reportCaptivePortalDismissed} so the system can
+     * reevaluate the network. If reevaluation finds the network no longer
+     * subject to a captive portal, the network may become the default active
+     * data network. </li>
+     * <li> When the app handling this action believes the user explicitly wants
      * to ignore the captive portal and the network, the app should call
-     * {@link #ignoreNetworkWithCaptivePortal}.
-     * <p/>
-     * Note that this action includes a {@code String} extra named
-     * {@link #EXTRA_CAPTIVE_PORTAL_TOKEN} that must
-     * be passed in to {@link #reportCaptivePortalDismissed} and
-     * {@link #ignoreNetworkWithCaptivePortal}.
+     * {@link CaptivePortal#ignoreNetwork}. </li>
+     * </ul>
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL";
@@ -187,16 +187,15 @@ public class ConnectivityManager {
      * {@hide}
      */
     public static final String EXTRA_INET_CONDITION = "inetCondition";
-
     /**
-     * The lookup key for a string that is sent out with
-     * {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN}. This string must be
-     * passed in to {@link #reportCaptivePortalDismissed} and
-     * {@link #ignoreNetworkWithCaptivePortal}. Retrieve it with
-     * {@link android.content.Intent#getStringExtra(String)}.
+     * The lookup key for a {@link CaptivePortal} object included with the
+     * {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN} intent.  The {@code CaptivePortal}
+     * object can be used to either indicate to the system that the captive
+     * portal has been dismissed or that the user does not want to pursue
+     * signing in to captive portal.  Retrieve it with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
      */
-    public static final String EXTRA_CAPTIVE_PORTAL_TOKEN = "captivePortalToken";
-
+    public static final String EXTRA_CAPTIVE_PORTAL = "android.net.extra.CAPTIVE_PORTAL";
     /**
      * Broadcast action to indicate the change of data activity status
      * (idle or active) on a network in a recent period.
@@ -1911,82 +1910,6 @@ public class ConnectivityManager {
     public void reportNetworkConnectivity(Network network, boolean hasConnectivity) {
         try {
             mService.reportNetworkConnectivity(network, hasConnectivity);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /** {@hide} */
-    public static final int CAPTIVE_PORTAL_APP_RETURN_DISMISSED    = 0;
-    /** {@hide} */
-    public static final int CAPTIVE_PORTAL_APP_RETURN_UNWANTED     = 1;
-    /** {@hide} */
-    public static final int CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS = 2;
-
-    /**
-     * Called by an app handling the {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN}
-     * action to indicate to the system that the captive portal has been
-     * dismissed.  In response the framework will re-evaluate the network's
-     * connectivity and might take further action thereafter.
-     *
-     * @param network The {@link Network} object passed via
-     *                {@link #EXTRA_NETWORK} with the
-     *                {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
-     * @param actionToken The {@code String} passed via
-     *                    {@link #EXTRA_CAPTIVE_PORTAL_TOKEN} with the
-     *                    {@code ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
-     */
-    public void reportCaptivePortalDismissed(Network network, String actionToken) {
-        try {
-            mService.captivePortalAppResponse(network, CAPTIVE_PORTAL_APP_RETURN_DISMISSED,
-                    actionToken);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Called by an app handling the {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN}
-     * action to indicate that the user does not want to pursue signing in to
-     * captive portal and the system should continue to prefer other networks
-     * without captive portals for use as the default active data network.  The
-     * system will not retest the network for a captive portal so as to avoid
-     * disturbing the user with further sign in to network notifications.
-     *
-     * @param network The {@link Network} object passed via
-     *                {@link #EXTRA_NETWORK} with the
-     *                {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
-     * @param actionToken The {@code String} passed via
-     *                    {@link #EXTRA_CAPTIVE_PORTAL_TOKEN} with the
-     *                    {@code ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
-     */
-    public void ignoreNetworkWithCaptivePortal(Network network, String actionToken) {
-        try {
-            mService.captivePortalAppResponse(network, CAPTIVE_PORTAL_APP_RETURN_UNWANTED,
-                    actionToken);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Called by an app handling the {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN}
-     * action to indicate the user wants to use this network as is, even though
-     * the captive portal is still in place.  The system will treat the network
-     * as if it did not have a captive portal when selecting the network to use
-     * as the default active data network. This may result in this network
-     * becoming the default active data network, which could disrupt network
-     * connectivity for apps because the captive portal is still in place.
-     *
-     * @param network The {@link Network} object passed via
-     *                {@link #EXTRA_NETWORK} with the
-     *                {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
-     * @param actionToken The {@code String} passed via
-     *                    {@link #EXTRA_CAPTIVE_PORTAL_TOKEN} with the
-     *                    {@code ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
-     * @hide
-     */
-    public void useNetworkWithCaptivePortal(Network network, String actionToken) {
-        try {
-            mService.captivePortalAppResponse(network, CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS,
-                    actionToken);
         } catch (RemoteException e) {
         }
     }

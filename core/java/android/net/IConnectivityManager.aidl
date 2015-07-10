@@ -96,8 +96,6 @@ interface IConnectivityManager
 
     void reportNetworkConnectivity(in Network network, boolean hasConnectivity);
 
-    void captivePortalAppResponse(in Network network, int response, String actionToken);
-
     ProxyInfo getGlobalProxy();
 
     void setGlobalProxy(in ProxyInfo p);

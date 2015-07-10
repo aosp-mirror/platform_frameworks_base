@@ -2800,16 +2800,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    public void captivePortalAppResponse(Network network, int response, String actionToken) {
-        if (response == ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS) {
-            enforceConnectivityInternalPermission();
-        }
-        final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
-        if (nai == null) return;
-        nai.networkMonitor.sendMessage(NetworkMonitor.CMD_CAPTIVE_PORTAL_APP_FINISHED, response, 0,
-                actionToken);
-    }
-
     private ProxyInfo getDefaultProxy() {
         // this information is already available as a world read/writable jvm property
         // so this API change wouldn't have a benifit.  It also breaks the passing
