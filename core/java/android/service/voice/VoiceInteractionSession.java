@@ -209,16 +209,30 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
 
         @Override
-        public void handleAssist(Bundle data, AssistStructure structure,
-                AssistContent content) {
+        public void handleAssist(final Bundle data, final AssistStructure structure,
+                final AssistContent content) {
             // We want to pre-warm the AssistStructure before handing it off to the main
-            // thread.  There is a strong argument to be made that it should be handed
-            // through as a separate param rather than part of the assistBundle.
-            if (structure != null) {
-                structure.ensureData();
-            }
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOO(MSG_HANDLE_ASSIST,
-                    data, structure, content));
+            // thread.  We also want to do this on a separate thread, so that if the app
+            // is for some reason slow (due to slow filling in of async children in the
+            // structure), we don't block other incoming IPCs (such as the screenshot) to
+            // us (since we are a oneway interface, they get serialized).  (Okay?)
+            Thread retriever = new Thread("AssistStructure retriever") {
+                @Override
+                public void run() {
+                    Throwable failure = null;
+                    if (structure != null) {
+                        try {
+                            structure.ensureData();
+                        } catch (Throwable e) {
+                            Log.w(TAG, "Failure retrieving AssistStructure", e);
+                            failure = e;
+                        }
+                    }
+                    mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_HANDLE_ASSIST,
+                            data, failure == null ? structure : null, failure, content));
+                }
+            };
+            retriever.start();
         }
 
         @Override
@@ -689,8 +703,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                     args = (SomeArgs)msg.obj;
                     if (DEBUG) Log.d(TAG, "onHandleAssist: data=" + args.arg1
                             + " structure=" + args.arg2 + " content=" + args.arg3);
-                    onHandleAssist((Bundle) args.arg1, (AssistStructure) args.arg2,
-                            (AssistContent) args.arg3);
+                    doOnHandleAssist((Bundle) args.arg1, (AssistStructure) args.arg2,
+                            (Throwable) args.arg3, (AssistContent) args.arg4);
                     break;
                 case MSG_HANDLE_SCREENSHOT:
                     if (DEBUG) Log.d(TAG, "onHandleScreenshot: " + msg.obj);
@@ -1111,9 +1125,45 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mContentFrame.requestApplyInsets();
     }
 
+    void doOnHandleAssist(Bundle data, AssistStructure structure, Throwable failure,
+            AssistContent content) {
+        if (failure != null) {
+            onAssistStructureFailure(failure);
+        }
+        onHandleAssist(data, structure, content);
+    }
+
+    /**
+     * Called when there has been a failure transferring the {@link AssistStructure} to
+     * the assistant.  This may happen, for example, if the data is too large and results
+     * in an out of memory exception, or the client has provided corrupt data.  This will
+     * be called immediately before {@link #onHandleAssist} and the AssistStructure supplied
+     * there afterwards will be null.
+     *
+     * @param failure The failure exception that was thrown when building the
+     * {@link AssistStructure}.
+     */
+    public void onAssistStructureFailure(Throwable failure) {
+    }
+
+    /**
+     * Called to receive data from the application that the user was currently viewing when
+     * an assist session is started.
+     *
+     * @param data Arbitrary data supplied by the app through
+     * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
+     * @param structure If available, the structure definition of all windows currently
+     * displayed by the app; if structure has been turned off by the user, will be null.
+     * @param content Additional content data supplied by the app through
+     * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
+     */
     public void onHandleAssist(Bundle data, AssistStructure structure, AssistContent content) {
     }
 
+    /**
+     * Called to receive a screenshot of what the user was currently viewing when an assist
+     * session is started.  Will be null if screenshots are disabled by the user.
+     */
     public void onHandleScreenshot(Bitmap screenshot) {
     }
 
