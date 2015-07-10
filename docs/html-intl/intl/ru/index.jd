@@ -27,10 +27,13 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         платформы Android. Протестируйте ваши приложения на устройствах Nexus
         5, 6, 9 и Player. </p>
 
-        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
+        <a class="dac-hero-cta" href="{@docRoot}preview/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Итак, приступим!
-        </a>
+        </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Developer Preview 2</a>
       </div>
     </div>
   </div>
