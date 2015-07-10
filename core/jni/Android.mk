@@ -114,7 +114,6 @@ LOCAL_SRC_FILES:= \
     android/graphics/MinikinUtils.cpp \
     android/graphics/Movie.cpp \
     android/graphics/NinePatch.cpp \
-    android/graphics/NinePatchImpl.cpp \
     android/graphics/NinePatchPeeker.cpp \
     android/graphics/Paint.cpp \
     android/graphics/PaintImpl.cpp \

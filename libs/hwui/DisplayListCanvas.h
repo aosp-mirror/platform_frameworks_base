@@ -79,10 +79,6 @@ public:
 // HWUI Canvas draw operations
 // ----------------------------------------------------------------------------
 
-    // TODO: move drawPatch() to Canvas.h
-    void drawPatch(const SkBitmap& bitmap, const Res_png_9patch* patch,
-            float left, float top, float right, float bottom, const SkPaint* paint);
-
     // Shapes
     void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
                 CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
@@ -209,6 +205,9 @@ public:
             float dstRight, float dstBottom, const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) override;
+    virtual void drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
+            float dstLeft, float dstTop, float dstRight, float dstBottom,
+            const SkPaint* paint) override;
 
     // Text
     virtual void drawText(const uint16_t* glyphs, const float* positions, int count,

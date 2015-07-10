@@ -29,11 +29,10 @@
 #include "SkRegion.h"
 #include "GraphicsJNI.h"
 
+#include "utils/NinePatch.h"
+
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
-
-extern void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds, const SkBitmap& bitmap,
-        const android::Res_png_9patch& chunk, const SkPaint* paint, SkRegion** outRegion);
 
 using namespace android;
 
@@ -88,72 +87,6 @@ public:
         }
     }
 
-    static void draw(JNIEnv* env, SkCanvas* canvas, SkRect& bounds, const SkBitmap& bitmap,
-            Res_png_9patch* chunk, const SkPaint* paint, jint destDensity, jint srcDensity) {
-        if (destDensity == srcDensity || destDensity == 0 || srcDensity == 0) {
-            ALOGV("Drawing unscaled 9-patch: (%g,%g)-(%g,%g)",
-                    SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
-                    SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom));
-            NinePatch_Draw(canvas, bounds, bitmap, *chunk, paint, NULL);
-        } else {
-            canvas->save();
-
-            SkScalar scale = destDensity / (float)srcDensity;
-            canvas->translate(bounds.fLeft, bounds.fTop);
-            canvas->scale(scale, scale);
-
-            bounds.fRight = (bounds.fRight-bounds.fLeft) / scale;
-            bounds.fBottom = (bounds.fBottom-bounds.fTop) / scale;
-            bounds.fLeft = bounds.fTop = 0;
-
-            ALOGV("Drawing scaled 9-patch: (%g,%g)-(%g,%g) srcDensity=%d destDensity=%d",
-                    SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
-                    SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom),
-                    srcDensity, destDensity);
-
-            NinePatch_Draw(canvas, bounds, bitmap, *chunk, paint, NULL);
-
-            canvas->restore();
-        }
-    }
-
-    static void drawF(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRectF,
-            jobject jbitmap, jlong chunkHandle, jlong paintHandle,
-            jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->asSkCanvas();
-        Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
-        const Paint* paint     = reinterpret_cast<Paint*>(paintHandle);
-        SkASSERT(canvas);
-        SkASSERT(boundsRectF);
-        SkASSERT(chunk);
-        // paint is optional
-
-        SkBitmap bitmap;
-        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
-        SkRect bounds;
-        GraphicsJNI::jrectf_to_rect(env, boundsRectF, &bounds);
-
-        draw(env, canvas, bounds, bitmap, chunk, paint, destDensity, srcDensity);
-    }
-
-    static void drawI(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRect,
-            jobject jbitmap, jlong chunkHandle, jlong paintHandle,
-            jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->asSkCanvas();
-        Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
-        const Paint* paint     = reinterpret_cast<Paint*>(paintHandle);
-        SkASSERT(canvas);
-        SkASSERT(boundsRect);
-        SkASSERT(chunk);
-        // paint is optional
-
-        SkBitmap bitmap;
-        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
-        SkRect bounds;
-        GraphicsJNI::jrect_to_rect(env, boundsRect, &bounds);
-        draw(env, canvas, bounds, bitmap, chunk, paint, destDensity, srcDensity);
-    }
-
     static jlong getTransparentRegion(JNIEnv* env, jobject, jobject jbitmap,
             jlong chunkHandle, jobject boundsRect) {
         Res_png_9patch* chunk = reinterpret_cast<Res_png_9patch*>(chunkHandle);
@@ -166,7 +99,7 @@ public:
         GraphicsJNI::jrect_to_rect(env, boundsRect, &bounds);
 
         SkRegion* region = NULL;
-        NinePatch_Draw(NULL, bounds, bitmap, *chunk, NULL, &region);
+        NinePatch::Draw(NULL, bounds, bitmap, *chunk, NULL, &region);
 
         return reinterpret_cast<jlong>(region);
     }
@@ -180,10 +113,6 @@ static JNINativeMethod gNinePatchMethods[] = {
     { "validateNinePatchChunk", "([B)J",
             (void*) SkNinePatchGlue::validateNinePatchChunk },
     { "nativeFinalize", "(J)V", (void*) SkNinePatchGlue::finalize },
-    { "nativeDraw", "(JLandroid/graphics/RectF;Landroid/graphics/Bitmap;JJII)V",
-            (void*) SkNinePatchGlue::drawF },
-    { "nativeDraw", "(JLandroid/graphics/Rect;Landroid/graphics/Bitmap;JJII)V",
-            (void*) SkNinePatchGlue::drawI },
     { "nativeGetTransparentRegion", "(Landroid/graphics/Bitmap;JLandroid/graphics/Rect;)J",
             (void*) SkNinePatchGlue::getTransparentRegion }
 };
