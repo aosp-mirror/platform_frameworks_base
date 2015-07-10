@@ -33,6 +33,7 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Represent a logical device of type Playback residing in Android system.
@@ -317,6 +318,13 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
         try {
             String iso3Language = new String(message.getParams(), 0, 3, "US-ASCII");
+            Locale currentLocale = mService.getContext().getResources().getConfiguration().locale;
+            if (currentLocale.getISO3Language().equals(iso3Language)) {
+                // Do not switch language if the new language is the same as the current one.
+                // This helps avoid accidental country variant switching from en_US to en_AU
+                // due to the limitation of CEC. See the warning below.
+                return true;
+            }
 
             // Don't use Locale.getAvailableLocales() since it returns a locale
             // which is not available on Settings.
