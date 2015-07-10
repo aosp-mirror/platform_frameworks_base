@@ -23,13 +23,16 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <div class="dac-hero-tag"></div>
 
         <h1 class="dac-hero-title">Android M Developer Preview</h1>
-        <p class="dac-hero-description">準備使用新版 Android。在 Nexus 5、6、9 和 
+        <p class="dac-hero-description">準備使用新版 Android。在 Nexus 5、6、9 和
         Player 上測試您的應用程式。 </p>
 
-        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
+        <a class="dac-hero-cta" href="{@docRoot}preview/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           開始使用！
-        </a>
+        </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Developer Preview 2</a>
       </div>
     </div>
   </div>
