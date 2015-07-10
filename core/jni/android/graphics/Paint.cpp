@@ -74,6 +74,13 @@ static void defaultSettingsForAndroid(Paint* paint) {
     paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
 }
 
+struct LocaleCacheEntry {
+    std::string javaLocale;
+    std::string languageTag;
+};
+
+static thread_local LocaleCacheEntry sSingleEntryLocaleCache;
+
 class PaintGlue {
 public:
     enum MoveOpt {
@@ -399,10 +406,14 @@ public:
     static void setTextLocale(JNIEnv* env, jobject clazz, jlong objHandle, jstring locale) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         ScopedUtfChars localeChars(env, locale);
-        char langTag[ULOC_FULLNAME_CAPACITY];
-        toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, localeChars.c_str());
+        if (sSingleEntryLocaleCache.javaLocale != localeChars.c_str()) {
+            sSingleEntryLocaleCache.javaLocale = localeChars.c_str();
+            char langTag[ULOC_FULLNAME_CAPACITY];
+            toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, localeChars.c_str());
+            sSingleEntryLocaleCache.languageTag = langTag;
+        }
 
-        obj->setTextLocale(langTag);
+        obj->setTextLocale(sSingleEntryLocaleCache.languageTag);
     }
 
     static jboolean isElegantTextHeight(JNIEnv* env, jobject paint) {
