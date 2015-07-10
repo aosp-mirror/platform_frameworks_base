@@ -135,6 +135,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
     protected static final int MSG_SHOW_NEXT_AFFILIATED_TASK = 1024;
     protected static final int MSG_SHOW_PREV_AFFILIATED_TASK = 1025;
+    protected static final int MSG_SHOW_KEYBOARD_SHORTCUTS_MENU = 1026;
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
@@ -1066,6 +1067,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         mHandler.sendEmptyMessage(msg);
     }
 
+    @Override
+    public void showKeyboardShortcutsMenu() {
+        int msg = MSG_SHOW_KEYBOARD_SHORTCUTS_MENU;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
     /** Jumps to the next affiliated task in the group. */
     public void showNextAffiliatedTask() {
         int msg = MSG_SHOW_NEXT_AFFILIATED_TASK;
@@ -1141,6 +1149,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (mRecents != null) {
             mRecents.preloadRecents();
         }
+    }
+
+    protected void showKeyboardShortcuts() {
+        Toast.makeText(mContext, "Show keyboard shortcuts screen", Toast.LENGTH_LONG).show();
     }
 
     protected void cancelPreloadingRecents() {
@@ -1252,6 +1264,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                   break;
              case MSG_SHOW_PREV_AFFILIATED_TASK:
                   showRecentsPreviousAffiliatedTask();
+                  break;
+             case MSG_SHOW_KEYBOARD_SHORTCUTS_MENU:
+                  showKeyboardShortcuts();
                   break;
             }
         }
