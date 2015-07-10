@@ -27,6 +27,9 @@ footer.hide=1
           <span class="dac-sprite dac-auto-chevron"></span>
           지금 시작하세요!
 </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Developer Preview 2</a>
       </div>
     </div>
     <div class="dac-section dac-small">
@@ -43,7 +46,7 @@ footer.hide=1
   <div class="dac-section-subtitle">
     앱을 Android M에 대비시키는 데 유용한 중요 정보입니다.
   </div>
- 
+
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:preview/landing/more"
        data-cardSizes="6x6"
@@ -55,7 +58,7 @@ footer.hide=1
           <span class="dac-sprite dac-auto-chevron"></span>
           문제 보고
 </a>
-      </li> 
+      </li>
       <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
         <span class="dac-sprite dac-auto-chevron"></span>
         G+ 커뮤니티 가입
