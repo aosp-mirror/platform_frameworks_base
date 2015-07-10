@@ -4580,8 +4580,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 state == NetworkInfo.State.SUSPENDED) {
             // going into or coming out of SUSPEND: rescore and notify
             if (networkAgent.getCurrentScore() != oldScore) {
-                rematchAllNetworksAndRequests(networkAgent, oldScore,
-                        NascentState.NOT_JUST_VALIDATED);
+                rematchAllNetworksAndRequests(networkAgent, oldScore);
             }
             notifyNetworkCallbacks(networkAgent, (state == NetworkInfo.State.SUSPENDED ?
                     ConnectivityManager.CALLBACK_SUSPENDED :
