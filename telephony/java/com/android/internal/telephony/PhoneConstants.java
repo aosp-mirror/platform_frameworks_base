@@ -133,7 +133,8 @@ public class PhoneConstants {
     public static final String APN_TYPE_CBS = "cbs";
     /** APN type for IA Initial Attach APN */
     public static final String APN_TYPE_IA = "ia";
-    /** APN type for IA Emergency PDN */
+    /** APN type for Emergency PDN. This is not an IA apn, but is used
+     * for access to carrier services in an emergency call situation. */
     public static final String APN_TYPE_EMERGENCY = "emergency";
 
     public static final int RIL_CARD_MAX_APPS    = 8;
