@@ -165,7 +165,7 @@ page.image=images/cards/card-support_16-9_2x.png
 
       <li>Remote Bluetooth/Wi-Fi MAC's now require either the
       <code>android.permission.LOCATION_FINE</code> or
-      <code>android.permission.LOCATION_COURSE</code> permission.
+      <code>android.permission.LOCATION_COARSE</code> permission.
       </li>
 
       <li>Some accounts and identity permissions are moved to
@@ -256,10 +256,9 @@ page.image=images/cards/card-support_16-9_2x.png
   <li>Issues specific to MPZ79N on Nexus Player:
     <ul>
       <li>Bluetooth share crashes after clearing data. Please <strong>do not
-      clear Bluetooth share data</strong>, otherwise you will need to Factory
+      clear app data for system services</strong>, otherwise you will need to Factory
       Reset your device</li>
-      <li>There are issues with remote control connectivity. Remote can drop
-      from Bluetooth pairing when left idle. </li>
+      <li>Remote control can experience intermittent connectivity issues. </li>
       <li>Movies show black screen with some ANRs on exiting the video.</li>
       <li>In YouTube app, lower-resolution videos have a green bar at the top
       and some color-ghosting</li>
