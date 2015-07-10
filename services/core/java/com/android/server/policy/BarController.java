@@ -155,7 +155,7 @@ public class BarController {
     }
 
     private int computeStateLw(boolean wasVis, boolean wasAnim, WindowState win, boolean change) {
-        if (win.hasDrawnLw()) {
+        if (win.isDrawnLw()) {
             final boolean vis = win.isVisibleLw();
             final boolean anim = win.isAnimatingLw();
             if (mState == StatusBarManager.WINDOW_STATE_HIDING && !change && !vis) {
@@ -198,7 +198,7 @@ public class BarController {
     }
 
     public boolean checkHiddenLw() {
-        if (mWin != null && mWin.hasDrawnLw()) {
+        if (mWin != null && mWin.isDrawnLw()) {
             if (!mWin.isVisibleLw() && !mWin.isAnimatingLw()) {
                 updateStateLw(StatusBarManager.WINDOW_STATE_HIDDEN);
             }
