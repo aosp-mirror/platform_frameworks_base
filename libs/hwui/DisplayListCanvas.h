@@ -75,24 +75,15 @@ public:
 
     void insertReorderBarrier(bool enableReorder);
 
-    const Rect& getRenderTargetClipBounds() const { return mState.getRenderTargetClipBounds(); }
-
-    bool isCurrentTransformSimple() {
-        return mState.currentTransform()->isSimple();
-    }
-
 // ----------------------------------------------------------------------------
 // HWUI Canvas draw operations
 // ----------------------------------------------------------------------------
 
-    // Bitmap-based
-    void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     // TODO: move drawPatch() to Canvas.h
     void drawPatch(const SkBitmap& bitmap, const Res_png_9patch* patch,
             float left, float top, float right, float bottom, const SkPaint* paint);
 
     // Shapes
-    void drawRects(const float* rects, int count, const SkPaint* paint);
     void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
                 CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
                 CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
@@ -195,6 +186,7 @@ public:
     }
     virtual void drawLines(const float* points, int count, const SkPaint& paint) override;
     virtual void drawRect(float left, float top, float right, float bottom, const SkPaint& paint) override;
+    virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) override;
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
@@ -238,6 +230,9 @@ private:
         kBarrier_InOrder,
         kBarrier_OutOfOrder,
     };
+
+    void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
+    void drawRects(const float* rects, int count, const SkPaint* paint);
 
     void flushRestoreToCount();
     void flushTranslate();

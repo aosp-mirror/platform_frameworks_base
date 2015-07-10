@@ -255,6 +255,13 @@ static void drawRect(JNIEnv* env, jobject, jlong canvasHandle, jfloat left, jflo
     get_canvas(canvasHandle)->drawRect(left, top, right, bottom, *paint);
 }
 
+static void drawRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong regionHandle,
+                       jlong paintHandle) {
+    const SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
+    const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    get_canvas(canvasHandle)->drawRegion(*region, *paint);
+}
+
 static void drawRoundRect(JNIEnv* env, jobject, jlong canvasHandle, jfloat left, jfloat top,
                           jfloat right, jfloat bottom, jfloat rx, jfloat ry, jlong paintHandle) {
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
@@ -698,6 +705,7 @@ static JNINativeMethod gMethods[] = {
     {"native_drawLine", "(JFFFFJ)V", (void*) CanvasJNI::drawLine},
     {"native_drawLines", "(J[FIIJ)V", (void*) CanvasJNI::drawLines},
     {"native_drawRect","(JFFFFJ)V", (void*) CanvasJNI::drawRect},
+    {"native_drawRegion", "(JJJ)V", (void*) CanvasJNI::drawRegion },
     {"native_drawRoundRect","(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
     {"native_drawCircle","(JFFFJ)V", (void*) CanvasJNI::drawCircle},
     {"native_drawOval","(JFFFFJ)V", (void*) CanvasJNI::drawOval},

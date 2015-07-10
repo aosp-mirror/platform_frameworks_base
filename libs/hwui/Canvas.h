@@ -118,6 +118,7 @@ public:
     virtual void drawLines(const float* points, int count, const SkPaint& paint) = 0;
     virtual void drawRect(float left, float top, float right, float bottom,
             const SkPaint& paint) = 0;
+    virtual void drawRegion(const SkRegion& region, const SkPaint& paint) = 0;
     virtual void drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) = 0;
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) = 0;
