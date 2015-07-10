@@ -28,7 +28,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.KeyguardManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -488,8 +487,6 @@ public class AudioService extends IAudioService.Stub {
     private static int sSoundEffectVolumeDb;
     // previous volume adjustment direction received by checkForRingerModeChange()
     private int mPrevVolDirection = AudioManager.ADJUST_SAME;
-    // Keyguard manager proxy
-    private KeyguardManager mKeyguardManager;
     // mVolumeControlStream is set by VolumePanel to temporarily force the stream type which volume
     // is controlled by Vol keys.
     private int  mVolumeControlStream = -1;
@@ -696,8 +693,6 @@ public class AudioService extends IAudioService.Stub {
         sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SENDMSG_QUEUE,
                 0, 0, null, 0);
 
-        mKeyguardManager =
-                (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mScoConnectionState = AudioManager.SCO_AUDIO_STATE_ERROR;
         resetBluetoothSco();
         getBluetoothHeadset();
