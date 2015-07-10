@@ -91,6 +91,7 @@ public class ImageView extends View {
     private boolean mColorMod = false;
 
     private Drawable mDrawable = null;
+    private ImageViewBitmapDrawable mRecycleableBitmapDrawable = null;
     private ColorStateList mDrawableTintList = null;
     private PorterDuff.Mode mDrawableTintMode = null;
     private boolean mHasDrawableTint = false;
@@ -588,18 +589,16 @@ public class ImageView extends View {
      */
     @android.view.RemotableViewMethod
     public void setImageBitmap(Bitmap bm) {
-        // if this is used frequently, may handle bitmaps explicitly
-        // to reduce the intermediate drawable object
-        if (mDrawable instanceof ImageViewBitmapDrawable) {
-            ImageViewBitmapDrawable recycledDrawable = (ImageViewBitmapDrawable) mDrawable;
-            // Hacky fix to force setImageDrawable to do a full setImageDrawable
-            // instead of doing an object reference comparison
-            mDrawable = null;
-            recycledDrawable.setBitmap(bm);
-            setImageDrawable(recycledDrawable);
+        // Hacky fix to force setImageDrawable to do a full setImageDrawable
+        // instead of doing an object reference comparison
+        mDrawable = null;
+        if (mRecycleableBitmapDrawable == null) {
+            mRecycleableBitmapDrawable = new ImageViewBitmapDrawable(
+                    mContext.getResources(), bm);
         } else {
-            setImageDrawable(new ImageViewBitmapDrawable(mContext.getResources(), bm));
+            mRecycleableBitmapDrawable.setBitmap(bm);
         }
+        setImageDrawable(mRecycleableBitmapDrawable);
     }
 
     public void setImageState(int[] state, boolean merge) {
@@ -868,6 +867,10 @@ public class ImageView extends View {
     }
 
     private void updateDrawable(Drawable d) {
+        if (d != mRecycleableBitmapDrawable && mRecycleableBitmapDrawable != null) {
+            mRecycleableBitmapDrawable.setBitmap(null);
+        }
+
         if (mDrawable != null) {
             mDrawable.setCallback(null);
             unscheduleDrawable(mDrawable);
