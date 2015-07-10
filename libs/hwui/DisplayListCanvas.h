@@ -165,6 +165,7 @@ public:
     // Matrix
     virtual void getMatrix(SkMatrix* outMatrix) const override { mState.getMatrix(outMatrix); }
     virtual void setMatrix(const SkMatrix& matrix) override;
+    virtual void setLocalMatrix(const SkMatrix& matrix) override;
 
     virtual void concat(const SkMatrix& matrix) override;
     virtual void rotate(float degrees) override;
