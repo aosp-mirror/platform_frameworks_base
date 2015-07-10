@@ -2148,6 +2148,7 @@ void OpenGLRenderer::restoreToCount(int saveCount) {
     mState.restoreToCount(saveCount);
 }
 
+
 void OpenGLRenderer::translate(float dx, float dy, float dz) {
     mState.translate(dx, dy, dz);
 }
@@ -2166,6 +2167,11 @@ void OpenGLRenderer::skew(float sx, float sy) {
 
 void OpenGLRenderer::setMatrix(const Matrix4& matrix) {
     mState.setMatrix(matrix);
+}
+
+void OpenGLRenderer::setLocalMatrix(const SkMatrix& matrix) {
+    mState.setMatrix(mBaseTransform);
+    mState.concatMatrix(matrix);
 }
 
 void OpenGLRenderer::concatMatrix(const Matrix4& matrix) {

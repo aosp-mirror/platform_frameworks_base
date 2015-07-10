@@ -887,6 +887,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
     if (!quickRejected) {
         Matrix4 initialTransform(*(renderer.currentTransform()));
+        renderer.setBaseTransform(initialTransform);
 
         if (drawLayer) {
             handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
