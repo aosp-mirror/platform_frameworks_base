@@ -2064,12 +2064,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // if it's awaiting captive portal login, or if validation failed), this
     // may trigger a re-evaluation of the network.
     private void unlinger(NetworkAgentInfo nai) {
+        nai.networkLingered.clear();
+        if (!nai.lingering) return;
         nai.lingering = false;
         if (VDBG) log("Canceling linger of " + nai.name());
-        // If network has never been validated, it cannot have been lingered, so don't bother
-        // needlessly triggering a re-evaluation.
-        if (!nai.everValidated) return;
-        nai.networkLingered.clear();
         nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
     }
 
@@ -2224,43 +2222,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     // Is nai unneeded by all NetworkRequests (and should be disconnected)?
-    // For validated Networks this is simply whether it is satsifying any NetworkRequests.
-    // For unvalidated Networks this is whether it is satsifying any NetworkRequests or
-    // were it to become validated, would it have a chance of satisfying any NetworkRequests.
+    // This is whether it is satisfying any NetworkRequests or were it to become validated,
+    // would it have a chance of satisfying any NetworkRequests.
     private boolean unneeded(NetworkAgentInfo nai) {
         if (!nai.created || nai.isVPN() || nai.lingering) return false;
-        boolean unneeded = true;
-        if (nai.everValidated) {
-            for (int i = 0; i < nai.networkRequests.size() && unneeded; i++) {
-                final NetworkRequest nr = nai.networkRequests.valueAt(i);
-                try {
-                    if (isRequest(nr)) unneeded = false;
-                } catch (Exception e) {
-                    loge("Request " + nr + " not found in mNetworkRequests.");
-                    loge("  it came from request list  of " + nai.name());
-                }
-            }
-        } else {
-            for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-                // If this Network is already the highest scoring Network for a request, or if
-                // there is hope for it to become one if it validated, then it is needed.
-                if (nri.isRequest && nai.satisfies(nri.request) &&
-                        (nai.networkRequests.get(nri.request.requestId) != null ||
-                        // Note that this catches two important cases:
-                        // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
-                        //    is currently satisfying the request.  This is desirable when
-                        //    cellular ends up validating but WiFi does not.
-                        // 2. Unvalidated WiFi will not be reaped when validated cellular
-                        //    is currently satsifying the request.  This is desirable when
-                        //    WiFi ends up validating and out scoring cellular.
-                        mNetworkForRequestId.get(nri.request.requestId).getCurrentScore() <
-                                nai.getCurrentScoreAsValidated())) {
-                    unneeded = false;
-                    break;
-                }
+        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            // If this Network is already the highest scoring Network for a request, or if
+            // there is hope for it to become one if it validated, then it is needed.
+            if (nri.isRequest && nai.satisfies(nri.request) &&
+                    (nai.networkRequests.get(nri.request.requestId) != null ||
+                    // Note that this catches two important cases:
+                    // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
+                    //    is currently satisfying the request.  This is desirable when
+                    //    cellular ends up validating but WiFi does not.
+                    // 2. Unvalidated WiFi will not be reaped when validated cellular
+                    //    is currently satsifying the request.  This is desirable when
+                    //    WiFi ends up validating and out scoring cellular.
+                    mNetworkForRequestId.get(nri.request.requestId).getCurrentScore() <
+                            nai.getCurrentScoreAsValidated())) {
+                return false;
             }
         }
-        return unneeded;
+        return true;
     }
 
     private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
@@ -4004,29 +3987,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * augmented with any stateful capabilities implied from {@code networkAgent}
      * (e.g., validated status and captive portal status).
      *
-     * @param networkAgent the network having its capabilities updated.
+     * @param nai the network having its capabilities updated.
      * @param networkCapabilities the new network capabilities.
      */
-    private void updateCapabilities(NetworkAgentInfo networkAgent,
-            NetworkCapabilities networkCapabilities) {
+    private void updateCapabilities(NetworkAgentInfo nai, NetworkCapabilities networkCapabilities) {
         // Don't modify caller's NetworkCapabilities.
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
-        if (networkAgent.lastValidated) {
+        if (nai.lastValidated) {
             networkCapabilities.addCapability(NET_CAPABILITY_VALIDATED);
         } else {
             networkCapabilities.removeCapability(NET_CAPABILITY_VALIDATED);
         }
-        if (networkAgent.lastCaptivePortalDetected) {
+        if (nai.lastCaptivePortalDetected) {
             networkCapabilities.addCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
         } else {
             networkCapabilities.removeCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
         }
-        if (!Objects.equals(networkAgent.networkCapabilities, networkCapabilities)) {
-            synchronized (networkAgent) {
-                networkAgent.networkCapabilities = networkCapabilities;
+        if (!Objects.equals(nai.networkCapabilities, networkCapabilities)) {
+            final int oldScore = nai.getCurrentScore();
+            synchronized (nai) {
+                nai.networkCapabilities = networkCapabilities;
             }
-            rematchAllNetworksAndRequests(networkAgent, networkAgent.getCurrentScore());
-            notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_CAP_CHANGED);
+            rematchAllNetworksAndRequests(nai, oldScore);
+            notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
     }
 
@@ -4256,9 +4239,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         // Linger any networks that are no longer needed.
         for (NetworkAgentInfo nai : affectedNetworks) {
-            if (nai.everValidated && unneeded(nai)) {
+            if (nai.lingering) {
+                // Already lingered.  Nothing to do.  This can only happen if "nai" is in
+                // "affectedNetworks" twice.  The reasoning being that to get added to
+                // "affectedNetworks", "nai" must have been satisfying a NetworkRequest
+                // (i.e. not lingered) so it could have only been lingered by this loop.
+                // unneeded(nai) will be false and we'll call unlinger() below which would
+                // be bad, so handle it here.
+            } else if (unneeded(nai)) {
                 linger(nai);
             } else {
+                // Clear nai.networkLingered we might have added above.
                 unlinger(nai);
             }
         }
@@ -4292,7 +4283,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
                                               oldDefaultNetwork, true);
                 }
-                mDefaultInetConditionPublished = newNetwork.everValidated ? 100 : 0;
+                mDefaultInetConditionPublished = newNetwork.lastValidated ? 100 : 0;
                 mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
                 notifyLockdownVpn(newNetwork);
             }
