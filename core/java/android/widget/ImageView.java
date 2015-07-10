@@ -570,6 +570,17 @@ public class ImageView extends View {
         }
     }
 
+    private static class ImageViewBitmapDrawable extends BitmapDrawable {
+        public ImageViewBitmapDrawable(Resources res, Bitmap bitmap) {
+            super(res, bitmap);
+        }
+
+        @Override
+        public void setBitmap(Bitmap bitmap) {
+            super.setBitmap(bitmap);
+        }
+    };
+
     /**
      * Sets a Bitmap as the content of this ImageView.
      * 
@@ -579,7 +590,16 @@ public class ImageView extends View {
     public void setImageBitmap(Bitmap bm) {
         // if this is used frequently, may handle bitmaps explicitly
         // to reduce the intermediate drawable object
-        setImageDrawable(new BitmapDrawable(mContext.getResources(), bm));
+        if (mDrawable instanceof ImageViewBitmapDrawable) {
+            ImageViewBitmapDrawable recycledDrawable = (ImageViewBitmapDrawable) mDrawable;
+            // Hacky fix to force setImageDrawable to do a full setImageDrawable
+            // instead of doing an object reference comparison
+            mDrawable = null;
+            recycledDrawable.setBitmap(bm);
+            setImageDrawable(recycledDrawable);
+        } else {
+            setImageDrawable(new ImageViewBitmapDrawable(mContext.getResources(), bm));
+        }
     }
 
     public void setImageState(int[] state, boolean merge) {
