@@ -744,7 +744,8 @@ public class StaticLayout extends Layout {
                     && (ellipsize == TextUtils.TruncateAt.END
                         || (mMaximumVisibleLineCount == 1
                                 && ellipsize != TextUtils.TruncateAt.MARQUEE));
-            if (remainingLineCount < breakCount && ellipsisMayBeApplied) {
+            if (remainingLineCount > 0 && remainingLineCount < breakCount &&
+                    ellipsisMayBeApplied) {
                 // Treat the last line and overflowed lines as a single line.
                 breaks[remainingLineCount - 1] = breaks[breakCount - 1];
                 // Calculate width and flag.
