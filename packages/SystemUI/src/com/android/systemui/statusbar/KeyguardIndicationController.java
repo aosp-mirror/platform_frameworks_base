@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -45,12 +46,16 @@ import android.view.View;
 public class KeyguardIndicationController {
 
     private static final String TAG = "KeyguardIndicationController";
+    private static final boolean DEBUG_CHARGING_CURRENT = false;
 
     private static final int MSG_HIDE_TRANSIENT = 1;
 
     private final Context mContext;
     private final KeyguardIndicationTextView mTextView;
     private final IBatteryStats mBatteryInfo;
+
+    private final int mSlowThreshold;
+    private final int mFastThreshold;
 
     private String mRestingIndication;
     private String mTransientIndication;
@@ -59,10 +64,17 @@ public class KeyguardIndicationController {
 
     private boolean mPowerPluggedIn;
     private boolean mPowerCharged;
+    private int mChargingSpeed;
+    private int mChargingCurrent;
 
     public KeyguardIndicationController(Context context, KeyguardIndicationTextView textView) {
         mContext = context;
         mTextView = textView;
+
+        Resources res = context.getResources();
+        mSlowThreshold = res.getInteger(R.integer.config_chargingSlowlyThreshold);
+        mFastThreshold = res.getInteger(R.integer.config_chargingFastThreshold);
+
 
         mBatteryInfo = IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
@@ -150,7 +162,11 @@ public class KeyguardIndicationController {
             return mTransientIndication;
         }
         if (mPowerPluggedIn) {
-            return computePowerIndication();
+            String indication = computePowerIndication();
+            if (DEBUG_CHARGING_CURRENT) {
+                indication = indication + mChargingCurrent;
+            }
+            return indication;
         }
         return mRestingIndication;
     }
@@ -174,7 +190,19 @@ public class KeyguardIndicationController {
         }
 
         // Fall back to simple charging label.
-        return mContext.getResources().getString(R.string.keyguard_plugged_in);
+        int chargingId;
+        switch (mChargingSpeed) {
+            case KeyguardUpdateMonitor.BatteryStatus.CHARGING_FAST:
+                chargingId = R.string.keyguard_plugged_in_charging_fast;
+                break;
+            case KeyguardUpdateMonitor.BatteryStatus.CHARGING_SLOWLY:
+                chargingId = R.string.keyguard_plugged_in_charging_slowly;
+                break;
+            default:
+                chargingId = R.string.keyguard_plugged_in;
+                break;
+        }
+        return mContext.getResources().getString(chargingId);
     }
 
     KeyguardUpdateMonitorCallback mUpdateMonitor = new KeyguardUpdateMonitorCallback() {
@@ -184,6 +212,8 @@ public class KeyguardIndicationController {
                     || status.status == BatteryManager.BATTERY_STATUS_FULL;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
+            mChargingCurrent = status.maxChargingCurrent;
+            mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             updateIndication();
         }
     };

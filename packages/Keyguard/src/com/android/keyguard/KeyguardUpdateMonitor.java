@@ -37,6 +37,7 @@ import static android.os.BatteryManager.EXTRA_STATUS;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_HEALTH;
+import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
 
 import android.media.AudioManager;
 import android.os.BatteryManager;
@@ -487,8 +488,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
                 final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
                 final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
+                final int maxChargingCurrent = intent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
                 final Message msg = mHandler.obtainMessage(
-                        MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health));
+                        MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health,
+                        maxChargingCurrent));
                 mHandler.sendMessage(msg);
             } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
                 SimData args = SimData.fromIntent(intent);
@@ -639,15 +642,22 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public static class BatteryStatus {
+        public static final int CHARGING_UNKNOWN = -1;
+        public static final int CHARGING_SLOWLY = 0;
+        public static final int CHARGING_REGULAR = 1;
+        public static final int CHARGING_FAST = 2;
+
         public final int status;
         public final int level;
         public final int plugged;
         public final int health;
-        public BatteryStatus(int status, int level, int plugged, int health) {
+        public final int maxChargingCurrent;
+        public BatteryStatus(int status, int level, int plugged, int health, int maxChargingCurrent) {
             this.status = status;
             this.level = level;
             this.plugged = plugged;
             this.health = health;
+            this.maxChargingCurrent = maxChargingCurrent;
         }
 
         /**
@@ -678,6 +688,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             return level < LOW_BATTERY_THRESHOLD;
         }
 
+        public final int getChargingSpeed(int slowThreshold, int fastThreshold) {
+            return maxChargingCurrent <= 0 ? CHARGING_UNKNOWN :
+                    maxChargingCurrent < slowThreshold ? CHARGING_SLOWLY :
+                    maxChargingCurrent > fastThreshold ? CHARGING_FAST :
+                    CHARGING_REGULAR;
+        }
     }
 
     public static KeyguardUpdateMonitor getInstance(Context context) {
@@ -744,7 +760,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         // Take a guess at initial SIM state, battery status and PLMN until we get an update
-        mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0);
+        mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0, 0);
 
         // Watch for interesting updates
         final IntentFilter filter = new IntentFilter();
