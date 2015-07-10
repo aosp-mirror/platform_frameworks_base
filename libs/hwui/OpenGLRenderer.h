@@ -368,6 +368,7 @@ public:
 
     void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
     void setMatrix(const SkMatrix& matrix) { mState.setMatrix(matrix); }
+    void setLocalMatrix(const SkMatrix& matrix);
     void concatMatrix(const SkMatrix& matrix) { mState.concatMatrix(matrix); }
 
     void translate(float dx, float dy, float dz = 0.0f);
@@ -417,6 +418,8 @@ public:
         mTempPaths.push_back(std::move(path));
         return returnPath;
     }
+
+    void setBaseTransform(const Matrix4& matrix) { mBaseTransform = matrix; }
 
 protected:
     /**
@@ -876,6 +879,16 @@ private:
 
     // Paths kept alive for the duration of the frame
     std::vector<std::unique_ptr<SkPath>> mTempPaths;
+
+    /**
+     * Initial transform for a rendering pass; transform from global device
+     * coordinates to the current RenderNode's drawing content coordinates,
+     * with the RenderNode's RenderProperty transforms already applied.
+     * Calling setMatrix(mBaseTransform) will result in drawing at the origin
+     * of the DisplayList's recorded surface prior to any Canvas
+     * transformation.
+     */
+    Matrix4 mBaseTransform;
 
     friend class Layer;
     friend class TextDrawFunctor;
