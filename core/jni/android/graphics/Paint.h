@@ -57,7 +57,7 @@ public:
         mTextLocale = textLocale;
     }
 
-    std::string getTextLocale() const {
+    const std::string& getTextLocale() const {
         return mTextLocale;
     }
 
