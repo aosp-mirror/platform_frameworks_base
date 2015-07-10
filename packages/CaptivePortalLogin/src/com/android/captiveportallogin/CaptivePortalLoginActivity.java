@@ -21,6 +21,7 @@ import android.app.LoadedApk;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
@@ -62,7 +63,7 @@ public class CaptivePortalLoginActivity extends Activity {
 
     private URL mURL;
     private Network mNetwork;
-    private String mResponseToken;
+    private CaptivePortal mCaptivePortal;
     private NetworkCallback mNetworkCallback;
     private ConnectivityManager mCm;
     private boolean mLaunchBrowser = false;
@@ -83,7 +84,7 @@ public class CaptivePortalLoginActivity extends Activity {
             done(Result.WANTED_AS_IS);
         }
         mNetwork = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_NETWORK);
-        mResponseToken = getIntent().getStringExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_TOKEN);
+        mCaptivePortal = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL);
 
         // Also initializes proxy system properties.
         mCm.bindProcessToNetwork(mNetwork);
@@ -155,13 +156,13 @@ public class CaptivePortalLoginActivity extends Activity {
         }
         switch (result) {
             case DISMISSED:
-                mCm.reportCaptivePortalDismissed(mNetwork, mResponseToken);
+                mCaptivePortal.reportCaptivePortalDismissed();
                 break;
             case UNWANTED:
-                mCm.ignoreNetworkWithCaptivePortal(mNetwork, mResponseToken);
+                mCaptivePortal.ignoreNetwork();
                 break;
             case WANTED_AS_IS:
-                mCm.useNetworkWithCaptivePortal(mNetwork, mResponseToken);
+                mCaptivePortal.useNetwork();
                 break;
         }
         finish();
