@@ -133,7 +133,8 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Indicates this is a network that has the ability to reach a carrier's
-     * Emergency IMS servers, used for network signaling during emergency calls.
+     * Emergency IMS servers or other services, used for network signaling
+     * during emergency calls.
      */
     public static final int NET_CAPABILITY_EIMS           = 10;
 
