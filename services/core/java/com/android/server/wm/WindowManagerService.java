@@ -10979,6 +10979,13 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mLastDispatchedSystemUiVisibility == visibility) {
             return;
         }
+        final int globalDiff = (visibility ^ mLastDispatchedSystemUiVisibility)
+                // We are only interested in differences of one of the
+                // clearable flags...
+                & View.SYSTEM_UI_CLEARABLE_FLAGS
+                // ...if it has actually been cleared.
+                & ~visibility;
+
         mLastDispatchedSystemUiVisibility = visibility;
         mInputManager.setSystemUiVisibility(visibility);
         final WindowList windows = getDefaultWindowListLocked();
@@ -10987,12 +10994,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState ws = windows.get(i);
             try {
                 int curValue = ws.mSystemUiVisibility;
-                int diff = curValue ^ visibility;
-                // We are only interested in differences of one of the
-                // clearable flags...
-                diff &= View.SYSTEM_UI_CLEARABLE_FLAGS;
-                // ...if it has actually been cleared.
-                diff &= ~visibility;
+                int diff = (curValue ^ visibility) & globalDiff;
                 int newValue = (curValue&~diff) | (visibility&diff);
                 if (newValue != curValue) {
                     ws.mSeq++;
