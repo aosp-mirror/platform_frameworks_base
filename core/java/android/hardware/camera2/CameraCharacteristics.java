@@ -664,7 +664,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the max possible number of frames the camera device will group together for this high
      * speed stream configuration. This max batch size will be used to generate a high speed
      * recording request list by
-     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList }.
+     * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList }.
      * The max batch size for each configuration will satisfy below conditions:</p>
      * <ul>
      * <li>Each max batch size will be a divisor of its corresponding fps_max / 30. For example,
