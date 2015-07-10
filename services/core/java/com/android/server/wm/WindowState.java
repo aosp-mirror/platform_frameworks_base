@@ -1104,6 +1104,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * Returns true if the window has a surface that it has drawn a
      * complete UI in to.
      */
+    @Override
     public boolean isDrawnLw() {
         return mHasSurface && !mDestroying &&
                 (mWinAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW
