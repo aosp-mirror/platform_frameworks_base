@@ -13,13 +13,13 @@ page.tags="preview", "developer", "android"
 
  <ul class="dac-section-links">
     <li class="dac-section-link">
-      <a href="#preview2-notes">
+      <a href="{@docRoot}preview/support.html#preview2-notes">
       <span class="dac-sprite dac-auto-chevron"></span>
       Read the Notes</a>
     </li>
 
     <li class="dac-section-link">
-      <a href="#preview2-get">
+      <a href="{@docRoot}preview/support.html#preview2-get">
       <span class="dac-sprite dac-auto-chevron"></span>
       Get the Update</a>
     </li>
