@@ -518,7 +518,7 @@ public class NotificationPanelView extends PanelView implements
         if (mQsExpansionEnabled) {
             mQsExpandImmediate = true;
         }
-        expand();
+        expand(true /* animate */);
     }
 
     @Override
@@ -1784,8 +1784,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void instantExpand() {
-        super.instantExpand();
+    public void expand(boolean animate) {
+        super.expand(animate);
         setListening(true);
     }
 

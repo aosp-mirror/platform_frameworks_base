@@ -2174,7 +2174,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             return ;
         }
 
-        mNotificationPanel.expand();
+        mNotificationPanel.expand(true /* animate */);
 
         if (false) postStartTracing();
     }
@@ -3608,7 +3608,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Make our window larger and the panel expanded.
         makeExpandedVisible(true);
-        mNotificationPanel.instantExpand();
+        mNotificationPanel.expand(false /* animate */);
     }
 
     private void instantCollapseNotificationPanel() {

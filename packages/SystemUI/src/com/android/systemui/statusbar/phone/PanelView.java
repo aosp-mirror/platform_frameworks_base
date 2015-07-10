@@ -836,17 +836,6 @@ public abstract class PanelView extends FrameLayout {
         }
     };
 
-    public void expand() {
-        if (DEBUG) logf("expand: " + this);
-        if (isFullyCollapsed()) {
-            mBar.startOpeningPanel(this);
-            notifyExpandingStarted();
-            fling(0, true /* expand */);
-        } else if (DEBUG) {
-            if (DEBUG) logf("skipping expansion: is expanded");
-        }
-    }
-
     public void cancelPeek() {
         if (mPeekAnimator != null) {
             mPeekAnimator.cancel();
@@ -859,7 +848,11 @@ public abstract class PanelView extends FrameLayout {
         notifyBarPanelExpansionChanged();
     }
 
-    public void instantExpand() {
+    public void expand(final boolean animate) {
+        if (!isFullyCollapsed() && !isCollapsing()) {
+            return;
+        }
+
         mInstantExpanding = true;
         mUpdateFlingOnLayout = false;
         abortAnimations();
@@ -881,7 +874,13 @@ public abstract class PanelView extends FrameLayout {
                         if (mStatusBar.getStatusBarWindow().getHeight()
                                 != mStatusBar.getStatusBarHeight()) {
                             getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            setExpandedFraction(1f);
+                            if (animate) {
+                                mBar.startOpeningPanel(PanelView.this);
+                                notifyExpandingStarted();
+                                fling(0, true /* expand */);
+                            } else {
+                                setExpandedFraction(1f);
+                            }
                             mInstantExpanding = false;
                         }
                     }
