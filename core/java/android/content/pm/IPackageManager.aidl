@@ -506,4 +506,6 @@ interface IPackageManager {
     int getMountExternalMode(int uid);
 
     void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
+
+    boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 }

@@ -2398,7 +2398,7 @@ public abstract class PackageManager {
      * Check whether a particular package has been granted a particular
      * permission.
      *
-     * @param permName The name of the permission you are checking for,
+     * @param permName The name of the permission you are checking for.
      * @param pkgName The name of the package you are checking against.
      *
      * @return If the package has the permission, PERMISSION_GRANTED is
@@ -2410,6 +2410,21 @@ public abstract class PackageManager {
      */
     @CheckResult
     public abstract int checkPermission(String permName, String pkgName);
+
+    /**
+     * Checks whether a particular permissions has been revoked for a
+     * package by policy. Typically the device owner or the profile owner
+     * may apply such a policy. The user cannot grant policy revoked
+     * permissions, hence the only way for an app to get such a permission
+     * is by a policy change.
+     *
+     * @param permName The name of the permission you are checking for.
+     * @param pkgName The name of the package you are checking against.
+     *
+     * @return Whether the permission is restricted by policy.
+     */
+    @CheckResult
+    public abstract boolean isPermissionRevokedByPolicy(String permName, String pkgName);
 
     /**
      * Add a new dynamic permission to the system.  For this to work, your
