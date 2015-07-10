@@ -124,6 +124,9 @@ public:
             float dstRight, float dstBottom, const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) override;
+    virtual void drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
+            float dstLeft, float dstTop, float dstRight, float dstBottom,
+            const SkPaint* paint) override;
 
     virtual void drawText(const uint16_t* text, const float* positions, int count,
             const SkPaint& paint, float x, float y,
@@ -678,6 +681,12 @@ void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshH
     mCanvas->drawVertices(SkCanvas::kTriangles_VertexMode, ptCount, (SkPoint*)vertices,
                          texs, (const SkColor*)colors, NULL, indices,
                          indexCount, tmpPaint);
+}
+
+void SkiaCanvas::drawNinePatch(const SkBitmap& bitmap, const Res_png_9patch& chunk,
+        float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
+    SkRect bounds = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
+    NinePatch::Draw(mCanvas, bounds, bitmap, chunk, paint, nullptr);
 }
 
 // ----------------------------------------------------------------------------

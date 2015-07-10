@@ -1281,7 +1281,10 @@ public class Canvas {
      * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull Rect dst, @Nullable Paint paint) {
-        patch.drawSoftware(this, dst, paint);
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
+        native_drawNinePatch(mNativeCanvasWrapper, patch.getBitmap(), patch.mNativeChunk,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint,
+                mDensity, patch.getDensity());
     }
 
     /**
@@ -1294,7 +1297,10 @@ public class Canvas {
      * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull RectF dst, @Nullable Paint paint) {
-        patch.drawSoftware(this, dst, paint);
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
+        native_drawNinePatch(mNativeCanvasWrapper, patch.getBitmap(), patch.mNativeChunk,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint,
+                mDensity, patch.getDensity());
     }
 
     /**
@@ -2062,6 +2068,9 @@ public class Canvas {
                                                long nativePaint);
     private static native void native_drawRegion(long nativeCanvas,
             long nativeRegion, long nativePaint);
+    private native void native_drawNinePatch(long nativeCanvas, Bitmap bitmap,
+            long ninePatch, float dstLeft, float dstTop, float dstRight, float dstBottom,
+            long nativePaintOrZero, int screenDensity, int bitmapDensity);
     private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
                                                  float left, float top,
                                                  long nativePaintOrZero,
