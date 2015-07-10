@@ -655,8 +655,8 @@ public abstract class CameraMetadata<TKey> {
      * <p>The device supports constrained high speed video recording (frame rate &gt;=120fps)
      * use case. The camera device will support high speed capture session created by
      * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }, which
-     * only accepts high speed request list created by
-     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList }.</p>
+     * only accepts high speed request lists created by
+     * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList }.</p>
      * <p>A camera device can still support high speed video streaming by advertising the high speed
      * FPS ranges in {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges}. For this case, all normal
      * capture request per frame control and synchronization requirements will apply to
@@ -717,9 +717,9 @@ public abstract class CameraMetadata<TKey> {
      * <li>The FPS ranges are selected from
      * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.</li>
      * </ul>
-     * <p>When above conditions are NOT satistied, the
+     * <p>When above conditions are NOT satistied,
      * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }
-     * and {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList } will fail.</p>
+     * will fail.</p>
      * <p>Switching to a FPS range that has different maximum FPS may trigger some camera device
      * reconfigurations, which may introduce extra latency. It is recommended that
      * the application avoids unnecessary maximum target FPS changes as much as possible
@@ -1813,9 +1813,8 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_SCENE_MODE_BARCODE = 16;
 
     /**
-     * <p>This is deprecated, please use
-     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }
-     * and {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList }
+     * <p>This is deprecated, please use {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }
+     * and {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList }
      * for high speed video recording.</p>
      * <p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.</p>
      * <p>The supported high speed video sizes and fps ranges are specified in
