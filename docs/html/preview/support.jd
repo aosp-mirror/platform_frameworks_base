@@ -1,4 +1,4 @@
-page.title=Support
+page.title=Support and Release Notes
 page.tags="preview", "developer preview"
 page.image=images/cards/card-support_16-9_2x.png
 
@@ -14,7 +14,7 @@ page.image=images/cards/card-support_16-9_2x.png
     <li class="dac-section-link">
       <a href="#preview2-notes">
       <span class="dac-sprite dac-auto-chevron"></span>
-      Release notes</a>
+      Read the Notes</a>
     </li>
 
     <li class="dac-section-link">

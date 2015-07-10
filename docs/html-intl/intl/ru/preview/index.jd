@@ -27,6 +27,9 @@ Player. Узнайте о новых возможностях:&mdash; <strong>р
           <span class="dac-sprite dac-auto-chevron"></span>
           Итак, приступим!
 </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Developer Preview 2</a>
       </div>
     </div>
     <div class="dac-section dac-small">
@@ -43,7 +46,7 @@ Player. Узнайте о новых возможностях:&mdash; <strong>р
   <div class="dac-section-subtitle">
     Важная информация, которая поможет вам подготовить ваши приложения для работы в Android M.
   </div>
- 
+
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:preview/landing/more"
        data-cardSizes="6x6"
@@ -55,7 +58,7 @@ Player. Узнайте о новых возможностях:&mdash; <strong>р
           <span class="dac-sprite dac-auto-chevron"></span>
           Сообщить о проблеме
 </a>
-      </li> 
+      </li>
       <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
         <span class="dac-sprite dac-auto-chevron"></span>
         Присоединиться к сообществу в G+
