@@ -18101,6 +18101,14 @@ package android.mtp {
 
 package android.net {
 
+  public class CaptivePortal implements android.os.Parcelable {
+    method public int describeContents();
+    method public void ignoreNetwork();
+    method public void reportCaptivePortalDismissed();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.CaptivePortal> CREATOR;
+  }
+
   public class ConnectivityManager {
     method public void addDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public boolean bindProcessToNetwork(android.net.Network);
@@ -18117,7 +18125,6 @@ package android.net {
     method public android.net.NetworkInfo getNetworkInfo(android.net.Network);
     method public deprecated int getNetworkPreference();
     method public static deprecated android.net.Network getProcessDefaultNetwork();
-    method public void ignoreNetworkWithCaptivePortal(android.net.Network, java.lang.String);
     method public boolean isActiveNetworkMetered();
     method public boolean isDefaultNetworkActive();
     method public static deprecated boolean isNetworkTypeValid(int);
@@ -18126,7 +18133,6 @@ package android.net {
     method public void releaseNetworkRequest(android.app.PendingIntent);
     method public void removeDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public deprecated void reportBadNetwork(android.net.Network);
-    method public void reportCaptivePortalDismissed(android.net.Network, java.lang.String);
     method public void reportNetworkConnectivity(android.net.Network, boolean);
     method public boolean requestBandwidthUpdate(android.net.Network);
     method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
@@ -18139,7 +18145,7 @@ package android.net {
     field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL";
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
-    field public static final java.lang.String EXTRA_CAPTIVE_PORTAL_TOKEN = "captivePortalToken";
+    field public static final java.lang.String EXTRA_CAPTIVE_PORTAL = "android.net.extra.CAPTIVE_PORTAL";
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
     field public static final java.lang.String EXTRA_NETWORK = "android.net.extra.NETWORK";
