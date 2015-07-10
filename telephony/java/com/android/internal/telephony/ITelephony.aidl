@@ -455,9 +455,9 @@ interface ITelephony {
 
     /**
      * Returns the network type for data transmission
-     * @param callingPackage package making the call.
+     * Legacy call, permission-free
      */
-    int getNetworkType(String callingPackage);
+    int getNetworkType();
 
     /**
      * Returns the network type of a subId.
@@ -480,16 +480,12 @@ interface ITelephony {
     int getDataNetworkTypeForSubscriber(int subId, String callingPackage);
 
     /**
-      * Returns the network type for voice
-      */
-    int getVoiceNetworkType();
-
-    /**
       * Returns the voice network type of a subId
       * @param subId user preferred subId.
+      * @param callingPackage package making the call.
       * Returns the network type
       */
-    int getVoiceNetworkTypeForSubscriber(int subId);
+    int getVoiceNetworkTypeForSubscriber(int subId, String callingPackage);
 
     /**
      * Return true if an ICC card is present
