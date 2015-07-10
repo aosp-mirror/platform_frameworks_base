@@ -26,10 +26,12 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <p class="dac-hero-description">Prepare-se para a próxima versão do
         Android. Teste os aplicativos no Nexus 5, 6, 9 e Player.  </p>
 
-        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
+        <a class="dac-hero-cta" href="{@docRoot}preview/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Comece!
-        </a>
+          Comece!</a><br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Developer Preview 2</a>
       </div>
     </div>
   </div>
