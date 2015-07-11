@@ -108,10 +108,10 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ಯಾವುದೇ ಸೇವೆಯಿಲ್ಲ."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ಇನ್‌ಪುಟ್ ವಿಧಾನ ಬದಲಿಸು ಬಟನ್."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ನೀವು ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದಾಗ ನಮೂನೆ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ನೀವು ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದಾಗ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"ನೀವು ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದಾಗ ಪಿನ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"ನೀವು ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದಾಗ ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ನೀವು ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಿದಾಗ ನಮೂನೆ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ನೀವು ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಿದಾಗ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"ನೀವು ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಿದಾಗ ಪಿನ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"ನೀವು ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಿದಾಗ ಪಾಸ್‌ವರ್ಡ್‌ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
