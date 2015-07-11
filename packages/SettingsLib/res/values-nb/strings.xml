@@ -29,20 +29,16 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentiseringsproblem"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Utenfor område"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"Ingen Internett-tilgang ble funnet. Kan ikke koble til på nytt automatisk."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"Lagret av <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Koblet til via en Wi-Fi-assistent"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Tilkoblet via %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Tilgjengelig via %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Tilkoblet – ingen Internett-forbindelse"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Frakoblet"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Kobler fra…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Kobler til…"</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Tilkoblet"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"Parer…"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Sammenkobles …"</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Tilkobling (ingen telefon)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Tilkoblet (ingen medier)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Tilkoblet (ingen meldingstilgang)"</string>
@@ -56,27 +52,24 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Bruk til kontaktdeling"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Deling av Internett-tilkobling"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Meldingstilgang"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Tilgang til SIM-kortet"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Koblet til medielyd"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Koblet til telefonlyd"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Koblet til tjener for filoverføring"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Koblet til kart"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Koblet til SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Ikke koblet til tjener for filoverføring"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Koblet til inndataenhet"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Koblet til enhet for Internett-tilgang"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Deler lokal Internett-tilkobling med enhet"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Bruk for Internett-tilgang"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Bruk for kart"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Bruk for tilgang til SIM-kortet"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Bruk for medielyd"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Bruk for telefonlyd"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Bruk til filoverføring"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Bruk for inndata"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Paring"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Sammenkoble"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"KOBLE"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Avbryt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Med sammenkobling får den andre enheten tilgang til kontaktene og anropsloggen din når den er tilkoblet."</string>

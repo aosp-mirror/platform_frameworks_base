@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Masalah autentikasi"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Tidak dalam jangkauan"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"Akses Internet Tidak Terdeteksi, tidak akan menyambung ulang secara otomatis."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"Disimpan oleh <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Terhubung melalui Asisten Wi-Fi"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Terhubung melalui %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Tersedia melalui %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Tersambung, tidak ada internet"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Sambungan terputus"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Memutus sambungan..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Menyambung…"</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Gunakan untuk berbagi kontak"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Berbagi sambungan internet"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Akses Pesan"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Akses SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Tersambung ke media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Tersambung ke audio ponsel"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Sambungkan ke server transfer file"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Tersambung ke peta"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Terhubung ke SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Tidak tersambung kepada server transfer file"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Terhubung ke perangkat masukan"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Tersambung ke perangkat untuk akses Internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Berbagi sambungan Internet lokal dengan perangkat"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Digunakan untuk akses internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Gunakan untuk peta"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Gunakan untuk akses SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Gunakan untuk audio media"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Gunakan untuk audio ponsel"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Gunakan untuk transfer file"</string>
