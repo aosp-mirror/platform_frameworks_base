@@ -247,9 +247,9 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"приступ подацима сензора о виталним функцијама"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преузима садржај прозора"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Проверава садржај прозора са којим остварујете интеракцију."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Укључивање Истраживања додиром"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Укључи Истраживања додиром"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Ставке које додирнете ће бити изговорене, а можете да се крећете по екрану покретима."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Укључивање побољшане приступачности веба"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Укључи побољшану приступачност веба"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могу да се инсталирају скрипте да би садржај апликација био приступачнији."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Прати текст који уносите"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Обухвата личне податке као што су бројеви кредитних картица и лозинке."</string>
@@ -355,6 +355,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Дозвољава апликацији да контролише блиц."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно позивање бројева телефона"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Дозвољава апликацији да позива бројеве телефона без ваше дозволе. Ово може да доведе до неочекиваних трошкова или позива. Имајте на уму да ово не дозвољава апликацији да позива бројеве за хитне случајеве. Злонамерне апликације могу да позивају без ваше потврде, што може да доведе до трошкова."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"читање статуса и идентитета телефона"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозвољава апликацији да приступа функцијама телефона на уређају. Ова дозвола омогућава апликацији да утврди број телефона и ИД-ове уређаја, затим да ли је позив активан, као и број даљинског уређаја са којим је успостављен позив."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"спречавање преласка таблета у стање спавања"</string>
@@ -502,8 +506,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава таблет или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава ТВ или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава телефон или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Промени закључавање екрана"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Мења закључавање екрана."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Промена закључавања екрана"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Промените закључавање екрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Закључавање екрана"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролишите начин и време закључавања екрана."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Брисање свих података"</string>
@@ -877,7 +881,7 @@
     <string name="yes" msgid="5362982303337969312">"Потврди"</string>
     <string name="no" msgid="5141531044935541497">"Откажи"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Пажња"</string>
-    <string name="loading" msgid="7933681260296021180">"Учитавање…"</string>
+    <string name="loading" msgid="7933681260296021180">"Учитава се…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ДА"</string>
     <string name="capital_off" msgid="6815870386972805832">"НЕ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Довршавање радње помоћу"</string>
@@ -1044,14 +1048,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB за пренос датотека"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB за пренос слика"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB за MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Повезан као инсталациони програм"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Повезано са USB додатком"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Додирните за још опција."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Желите да формат. USB меморију?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Желите ли да форматирате SD картицу?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Све датотеке ускладиштене на USB меморији биће избрисане. Ова радња не може да се опозове!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Сви подаци са картице биће изгубљени."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отклањање грешака са USB-а је успостављено"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Додирните да бисте онемогућили отклањање грешака са USB-а."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Промените тастатуру"</string>

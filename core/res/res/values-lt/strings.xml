@@ -356,6 +356,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Leidžiama programai valdyti šviesos signalą."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skambinti tiesiogiai telefono numeriais"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Leidžiama programai skambinti telefonų numeriais be jūsų įsikišimo. Dėl to gali atsirasti nenumatytų apmokestinimų ar skambučių. Atminkite, kad programai neleidžiama skambinti pagalbos telefonų numeriais. Kenkėjiškos programos gali skambinti be jūsų patvirtinimo, o dėl to jums gali būti taikomi mokesčiai."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"skaityti telefono būseną ir tapatybę"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leidžiama programai pasiekti telefono funkcijas įrenginyje. Šis leidimas suteikia teisę programai nustatyti telefono numerį ir įrenginio ID, tai, ar skambutis aktyvus, ir skambučiu prijungtą nuotolinį numerį."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"neleisti planšetiniam kompiuteriui užmigti"</string>
@@ -503,7 +507,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite planšetinį kompiuterį arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite TV arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite telefoną arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekrano užrakto pakeitimas"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Pakeisti ekrano užraktą"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Pakeisti ekrano užraktą."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Užrakinti ekraną"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Valdyti, kaip ir kada užrakinamas ekranas."</string>
@@ -910,7 +914,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ neatsako. Ar norite ją uždaryti?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Procesas „<xliff:g id="PROCESS">%1$s</xliff:g>“ neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="force_close" msgid="8346072094521265605">"Gerai"</string>
-    <string name="report" msgid="4060218260984795706">"Ataskaita"</string>
+    <string name="report" msgid="4060218260984795706">"Pranešti"</string>
     <string name="wait" msgid="7147118217226317732">"Palaukti"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Puslapis neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Programa peradresuota"</string>
@@ -1051,14 +1055,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB (failų perkėlimas)"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB (nuotraukų perkėlimas)"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB (MIDI)"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Prij. kaip diegimo programa"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Prijungta prie USB priedo"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Palieskite, kad būtų rodoma daugiau parinkčių."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formatuoti USB atmintį?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formatuoti SD kortelę?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Bus ištrinti visi USB atmintyje saugomi failai. Šio veiksmo negalima atšaukti!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Bus prarasti visi kortelėje esantys duomenys."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatuoti"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB derinimas prijungtas"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Neleisti USB derinimo."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviatūros keitimas"</string>
@@ -1560,9 +1558,9 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Daugiau parinkčių"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Uždaryti perpildymo sritį"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one">Pasirinktas <xliff:g id="COUNT_1">%1$d</xliff:g> elementas</item>
-      <item quantity="few">Pasirinkti <xliff:g id="COUNT_1">%1$d</xliff:g> elementai</item>
-      <item quantity="many">Pasirinkta <xliff:g id="COUNT_1">%1$d</xliff:g> elemento</item>
-      <item quantity="other">Pasirinkta <xliff:g id="COUNT_1">%1$d</xliff:g> elementų</item>
+      <item quantity="one">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
+      <item quantity="few">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
+      <item quantity="many">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
+      <item quantity="other">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
     </plurals>
 </resources>

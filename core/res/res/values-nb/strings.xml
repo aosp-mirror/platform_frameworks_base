@@ -191,7 +191,7 @@
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Forbereder oppdateringen …"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Behandler oppdateringspakken …"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Starter på nytt …"</string>
-    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Fabrikkinnstillinger"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Tilbakestill til fabrikkstandard"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Starter på nytt …"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutter…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Nettbrettet slås av."</string>
@@ -227,31 +227,31 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Personlig"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Jobb"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"få tilgang til kontaktene dine"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"se kontaktene dine"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posisjon"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"tilgang til enhetens plassering"</string>
-    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenderen"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"få tilgang til kalenderen din"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"åpne kalenderen din"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sende og lese SMS-meldinger"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"få tilgang til bilder, media og filer på enheten din"</string>
-    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonen"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, media og filer på enheten din"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spill inn lyd"</string>
-    <string name="permgrouplab_camera" msgid="4820372495894586615">"Kameraet"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ta bilder og ta opp video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ring og administrer anrop"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få tilgang til sensordata om de vitale tegnene dine"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente innhold i vinduer"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Den kontrollerer innholdet i vinduer du samhandler med."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Den analyserer innholdet i vinduer du samhandler med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"slå på berøringsutforsking"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Berørte elementer leses høyt, og skjermen kan utforskes ved hjelp av bevegelser."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"slå på forbedret nettilgjengelighet"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skript kan installeres for å gjøre appinnhold mer tilgjengelig."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere teksten du skriver inn"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette kan inkludere personlige data, blant annet kredittkortnumre og passord."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data, som kredittkortnumre og passord."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lar appen deaktivere statusfeltet eller legge til og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusrad"</string>
@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Lar appen kontrollere lommelykten."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe telefonnummer direkte"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Lar appen ringe telefonnumre uten at du gjør noe. Dette kan resultere i uventede oppringninger og kostnader. Appen kan imidlertid ikke ringe nødnumre. Merk at skadelige apper kan påføre deg kostnader ved å ringe uten bekreftelse fra deg."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lese telefonstatus og -identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"hindre nettbrettet fra å gå over til sovemodus"</string>
@@ -501,7 +505,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser nettbrettet eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser TV-en eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser telefonen eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endre skjermlåsen"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endring av skjermlåsen"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Endre skjermlåsen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skjermen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollér hvordan og når skjermen låses."</string>
@@ -534,19 +538,19 @@
     <item msgid="9192514806975898961">"Egendefinert…"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Hjemme"</item>
+    <item msgid="8073994352956129127">"Hjem"</item>
     <item msgid="7084237356602625604">"Arbeid"</item>
     <item msgid="1112044410659011023">"Annen"</item>
     <item msgid="2374913952870110618">"Egendefinert…"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Hjemme"</item>
+    <item msgid="6880257626740047286">"Hjem"</item>
     <item msgid="5629153956045109251">"Arbeid"</item>
     <item msgid="4966604264500343469">"Annen"</item>
     <item msgid="4932682847595299369">"Egendefinert…"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Hjemme"</item>
+    <item msgid="1738585194601476694">"Hjem"</item>
     <item msgid="1359644565647383708">"Arbeid"</item>
     <item msgid="7868549401053615677">"Annen"</item>
     <item msgid="3145118944639869809">"Egendefinert…"</item>
@@ -567,7 +571,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Egendefinert"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Hjemme"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Hjem"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobil"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Arbeid"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Faks arbeid"</string>
@@ -592,16 +596,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Jubileum"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Andre"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Egendefinert"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Hjemme"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Hjem"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Arbeid"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Annen"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Egendefinert"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Hjemme"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Hjem"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Arbeid"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Annen"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Egendefinert"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Hjemme"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Hjem"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Arbeid"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Annen"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Egendefinert"</string>
@@ -609,7 +613,7 @@
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
-    <string name="imProtocolQq" msgid="8887484379494111884">"OQ"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
     <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB for filoverføring"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB for bildeoverføring"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB for MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tilkoblet som installasjonsprogram"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Koblet til et USB-tilbehør"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Trykk for å få flere alternativer."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formatere USB-lagr.?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vil du formatere SD-kortet?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle filer som er lagret på USB-lagringen blir slettet. Denne handlingen kan ikke angres."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle data på kortet fjernes."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatér"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Trykk for å se flere alternativer."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-feilsøking tilkoblet"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Trykk for å slå av USB-feilsøking."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Endre tastatur"</string>
@@ -1461,7 +1459,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appen er festet – du kan ikke løsne apper på denne enheten."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjermen er festet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skjermen er løsnet"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Krev PIN-kode for å løsne apper"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kode for å løsne apper"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev bruk av opplåsningsmønster for å løsne apper"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Krev passord for å løsne apper"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installert av administratoren"</string>

@@ -358,6 +358,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"للسماح للتطبيق بالتحكم في الضوء الوامض."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"اتصال مباشر بأرقام الهواتف"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"للسماح للتطبيق بطلب أرقام هاتفية بدون تدخل منك. وقد يؤدي ذلك إلى تحمل رسوم غير متوقعة أو إجراء مكالمات غير متوقعة. ومن الجدير بالذكر أن ذلك لا يتيح للتطبيق الاتصال بأرقام الطوارئ. وقد تؤدي التطبيقات الضارة إلى تحملك تكاليف مالية من خلال إجراء مكالمات بدون موافقة منك."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"قراءة حالة الهاتف والهوية"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"منع الجهاز اللوحي من الدخول في وضع السكون"</string>
@@ -533,7 +537,7 @@
     <item msgid="7897544654242874543">"عمل"</item>
     <item msgid="1103601433382158155">"فاكس العمل"</item>
     <item msgid="1735177144948329370">"فاكس المنزل"</item>
-    <item msgid="603878674477207394">"جهاز النداء"</item>
+    <item msgid="603878674477207394">"جهاز نداء"</item>
     <item msgid="1650824275177931637">"آخر"</item>
     <item msgid="9192514806975898961">"مخصص"</item>
   </string-array>
@@ -576,7 +580,7 @@
     <string name="phoneTypeWork" msgid="8863939667059911633">"عمل"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"فاكس العمل"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"فاكس المنزل"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"جهاز النداء"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"جهاز نداء"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"آخر"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"هاتف معاودة الاتصال"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"هاتف سيارة"</string>
@@ -1065,14 +1069,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB لنقل الملفات"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB لنقل الصور"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB لـ MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"التوصيل كأداة تثبيت"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏الاتصال بجهاز USB ملحق"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"المس للحصول على مزيد من الخيارات."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏تهيئة وحدة تخزين USB؟"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏هل تريد تنسيق بطاقة SD؟"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏سيتم مسح جميع الملفات المخزنة على وحدة تخزين USB. لا يمكن عكس هذا الإجراء!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ستفقد جميع البيانات على بطاقتك."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"تنسيق"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏تم توصيل تصحيح أخطاء USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏المس لتعطيل تصحيح أخطاء USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغيير لوحة المفاتيح"</string>

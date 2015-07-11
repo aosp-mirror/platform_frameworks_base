@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Tətbiqə siqnal işığı na nəzarət etməyə imkan verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon nömrələrinə birbaşa zəng edir"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tətbiqə Sizin müdaxiləniz olmadan telefon zəngləri etməyə imkan verir. Zərərli tətbiqlər Sizdən xəbərsiz şəkildə müxtəlif zənglər edərək, Sizə maddi ziyan vura bilər. Qeyd: Bu, tətbiqlərə təcili nömrələrə zəng etməyə icazə vermir."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefon statusunu və identifikasiyanı oxuyur"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tətbiqə cihazın telefon funksiyalarına giriş icazəsi verir. Belə icazəli tətbiq bu telefonun nömrəsini və cihaz İD\'ni, zəngin aktiv olub-olmadığını və zəng edilən nömrəni müəyyən edə bilər."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"planşetin yuxu rejiminin qarşısını almaq"</string>
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Fayl transferi üçün USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Foto transfer üçün USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI üçün USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Quraşdırıcı kimi qoşulub"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB aksesuara qoşuldu"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Əlavə seçimlər üçün toxunun."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB yaddaşına format atılsın?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD kart format edilsin?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB yaddaşınızda yerləşdirilmiş bütün fayllar silinəcək. Bu addım geri dönülməzdir."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Kartınızdakı bütün məlumatlar itəcək."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB sazlama qoşuludur"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB debaqı deaktivasiya etmək üçün toxunun."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviaturanı dəyişin"</string>

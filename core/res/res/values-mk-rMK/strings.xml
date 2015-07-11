@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Дозволува апликацијата да ја контролира батериската ламба."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно избирај телефонски броеви"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Овозможува апликацијата да повикува телефонски броеви без ваша интервенција. Ова може да предизвика неочекувани трошоци или повици. Имајте на ум дека ова не дозволува апликацијата да повикува броеви на служби за итна помош. Злонамерните апликации може да ве чинат пари поради повици без ваша потврда."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"прочитај ги статусот и идентитетот  на телефонот"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Овозможува апликацијата да пристапи кон карактеристиките на телефонот на уредот. Оваа дозвола овозможува апликацијата да ги утврди телефонскиот број и ИД на уредот, дали повикот е активен и далечинскиот број поврзан со повикот."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"спречи режим на штедење кај таблет"</string>
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"УСБ за пренос на датотеки"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"УСБ за пренос на фотографии"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"УСБ за МИДИ"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Поврзан како инсталатор"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Поврзан со УСБ додаток"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Допри за повеќе опции."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Форматирај УСБ-склад?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Да се форматира СД-картичката?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Сите датотеки складирани на УСБ-склад ќе се избришат. Дејството не може да се отповика."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Сите податоци од картичката ќе се загубат."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Форматирај"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку УСБ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Допрете за да се оневозможи отстранувањето грешки преку USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
