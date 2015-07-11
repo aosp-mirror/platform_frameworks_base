@@ -60,7 +60,7 @@
     <string name="label_view" msgid="6304565553218192990">"مشاهده"</string>
     <string name="always_use_device" msgid="1450287437017315906">"‏استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"‏استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"‏اجازه به اشکال‌زدایی USB؟"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"‏اشکال‌زدایی USB مجاز است؟"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏اثر انگشت کلید RSA رایانه: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"همیشه از این رایانه انجام شود"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏اشکال‌زدایی USB مجاز نیست"</string>
@@ -399,8 +399,8 @@
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"دفعه بعد که آن را روشن کنید، در تنظیمات نشان داده می‌شود."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"پنهان کردن"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> می‌خواهد کنترل‌کننده صدا باشد."</string>
-    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"مجاز"</string>
-    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"رد کردن"</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"مجاز است"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"اجازه ندارد"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> کنترل‌کننده صدا است"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"برای بازیابی کنترل‌کننده اصلی، لمس کنید."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"درحال استفاده از نمایه کاری‌تان هستید"</string>

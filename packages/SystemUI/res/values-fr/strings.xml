@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"Interface du système"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Effacer"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Supprimer de la liste"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informations sur l\'application"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Infos application"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Vos écrans récents s\'affichent ici"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Masquer les applications récentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -298,7 +298,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> au maximum"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Avertissement : <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Vos écrans récents s\'affichent ici"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informations sur l\'application"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Infos application"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"épinglage d\'écran"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Impossible de lancer <xliff:g id="APP">%s</xliff:g>."</string>
