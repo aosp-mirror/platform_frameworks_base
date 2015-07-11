@@ -52,7 +52,7 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"قسمت پین"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"قسمت پین سیم‌کارت"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"‏قسمت PUK سیم‌کارت"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"زنگ هشدار بعدی برای <xliff:g id="ALARM">%1$s</xliff:g> تنظیم شد"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"هشدار بعدی برای <xliff:g id="ALARM">%1$s</xliff:g> تنظیم شد"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"الگو را فراموش کرده‌اید"</string>
