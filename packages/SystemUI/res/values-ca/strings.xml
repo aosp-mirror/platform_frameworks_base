@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Elimina de la llista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informació de l\'aplicació"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Aquí es mostren les teves pantalles recents."</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Omet les aplicacions recents"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignora les aplicacions recents"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="other">%d pantalles en la visió general</item>
       <item quantity="one">1 pantalla en la visió general</item>
@@ -169,7 +169,7 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Mode silenci."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Descarta <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Ignora <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"S\'ha omès <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"S\'han descartat totes les aplicacions recents."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"S\'està iniciant <xliff:g id="APP">%s</xliff:g>."</string>
@@ -302,7 +302,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixació de pantalla"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"cerca"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"No s\'ha pogut iniciar <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Descarta totes les aplicacions"</string>
+    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Ignora totes les aplicacions"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisió horitzontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisió vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisió personalitzada"</string>

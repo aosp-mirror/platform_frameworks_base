@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"UI συστήματ."</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Εκκαθάριση"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Διαγραφή"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Κατάργηση από τη λίστα"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Πληροφορίες εφαρμογής"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Οι πρόσφατες οθόνες σας εμφανίζονται εδώ"</string>
@@ -79,7 +79,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Προσάρτηση ως κάμερας (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Εγκατάστ. της εφαρμ. μεταφ.αρχείων Android για Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Πίσω"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Αρχική σελίδα"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Αρχική οθόνη"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Μενού"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Επισκόπηση"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Αναζήτηση"</string>
