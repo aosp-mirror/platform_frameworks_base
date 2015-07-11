@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"允許應用程式控制閃光燈。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"允許應用程式自行撥打電話，但可能產生非預期的費用或撥打非預期的電話。注意：這項權限不允許應用程式撥打緊急電話。惡意應用程式可能利用此功能擅自撥打電話，增加您不必要的額外支出。"</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"讀取手機狀態和識別碼"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允許應用程式使用裝置的電話功能。這項權限可讓應用程式判讀手機號碼和裝置 ID、是否正在通話中，以及所撥打的對方號碼。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"防止平板電腦進入休眠狀態"</string>
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB 檔案傳輸"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB 相片傳輸"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"已視為安裝程式連線"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已連接 USB 配件"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"輕觸即可顯示更多選項。"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"將 USB 儲存裝置格式化？"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"將 SD 卡格式化？"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB 儲存裝置上儲存的所有檔案即將遭到清除。這項動作無法復原！"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"儲存卡上的所有資料都會消失。"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已連接 USB 偵錯工具"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"輕觸即可停用 USB 偵錯。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"變更鍵盤"</string>

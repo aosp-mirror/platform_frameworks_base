@@ -246,9 +246,9 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"اپنی علامات حیات کے متعلق سنسر ڈیٹا تک رسائی حاصل کریں"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ونڈو مواد بازیافت کرنے کی"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"کسی ایسی ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کریں"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کرنے کی"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"ٹچ کیے ہوئے آئٹمز کو زور سے بولا جائے گا اور اشاروں کا استعمال کرکے اسکرین کو دریافت کیا جا سکتا ہے۔"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"‏بہتر ویب accessibility کو آن کریں"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"‏بہتر ویب accessibility کو آن کرنے کی"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ایپ کا مواد مزید قابل رسائی بنانے کیلئے اسکرپٹس کو انسٹال کیا جا سکتا ہے۔"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"آپکے ٹائپ کردہ متن کا مشاہدہ کرنے کی"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اس میں ذاتی ڈیٹا جیسے کریڈٹ کارڈ نمبرز اور پاس ورڈز شامل ہیں۔"</string>
@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ایپ کو فلیش لائٹ کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"براہ راست فون نمبرز پر کال کریں"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ایپ کو آپ کی مداخلت کے بغیر فون نمبروں پر کال کرنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز یا کالیں ہوسکتی ہیں۔ نوٹ کرلیں کہ یہ ایپ کو ہنگامی نمبروں پر کال کرنے کی اجازت نہیں دیتا ہے۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر کالیں کرکے آپ کی رقم صرف کروا سکتے ہیں۔"</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"فون کے اسٹیٹس اور شناخت کو پڑھیں"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"‏ایپ کو آلے کی فون والی خصوصیات تک رسائی حاصل کرنے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو فون نمبر اور آلے کے IDs کا تعین کرنے، آیا کوئی کال فعال ہے، اور کال کے ذریعہ مربوط ریموٹ نمبر کا تعین کرنے دیتی ہے۔"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ٹیبلیٹ کو سلیپ وضع میں جانے سے روکیں"</string>
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏فائل کی منتقلی کیلئے USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏تصویر کی منتقلی کیلئے USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏MIDI کیلئے USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ایک انسٹالر کے بطور مربوط ہے"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏ایک USB لوازم سے مربوط ہے"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"مزید اختیارات کیلئے ٹچ کریں۔"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏USB اسٹوریج فارمیٹ کریں؟"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏SD کارڈ فارمیٹ کریں؟"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏آپ کی USB اسٹوریج میں اسٹور کردہ سبھی فائلوں کو ہٹا دیا جائے گا۔ اس کارروائی کو لوٹایا نہیں جا سکتا ہے!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"آپ کے کارڈ پر موجود سبھی ڈیٹا گم ہو جائے گا۔"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"فارمیٹ کریں"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏USB ڈیبگ کرنا مربوط ہو گیا"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏USB ڈیبگنگ کو غیر فعال کرنے کیلئے ٹچ کریں۔"</string>
     <string name="select_input_method" msgid="8547250819326693584">"کی بورڈ تبدیل کریں"</string>

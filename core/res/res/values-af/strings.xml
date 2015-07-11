@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Laat die program toe om die flitslig te beheer."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skakel foonnommers direk"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Laat die program toe om telefoonnommers sonder jou tussentrede te bel. Dit kan tot onverwagte heffings of oproepe lei. Let daarop dat dit nie die program toelaat om noodnommers te bel nie. Kwaadwillige programme kan jou geld kos deur oproepe sonder jou bevestiging te maak."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lees foonstatus en identiteit"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Laat die program toe om toegang tot die foonfunksies van die toestel te verkry. Hierdie toestemming laat die program toe om te bepaal wat die foonnommer en toestel-IDs is, of die oproep aan die gang is, en die afgeleë nommer wat deur \'n oproep verbind word."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"verhoed dat tablet slaap"</string>
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB vir lêeroordrag"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB vir foto-oordrag"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB vir MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Gekoppel as \'n installeerder"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Gekoppel aan \'n USB-toebehoorsel"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Raak vir meer opsies."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formateer USB-geheue?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formateer SD-kaart?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle lêers wat op jou  USB-geheue gestoor is, sal uitgevee word. Hierdie handeling kan nie omgekeer word nie!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle data op jou kaart sal verlore gaan."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formaat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouter gekoppel"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Raak om USB-ontfouting te deaktiveer."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Verander sleutelbord"</string>

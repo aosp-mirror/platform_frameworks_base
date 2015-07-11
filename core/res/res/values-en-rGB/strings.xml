@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Allows the app to control the flashlight."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"directly call phone numbers"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Allows the app to call phone numbers without your intervention. This may result in unexpected charges or calls. Note that this doesn\'t allow the app to call emergency numbers. Malicious apps may cost you money by making calls without your confirmation."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"read phone status and identity"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Allows the app to access the phone features of the device. This permission allows the app to determine the phone number and device IDs, whether a call is active and the remote number connected by a call."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"prevent tablet from sleeping"</string>
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB for file transfer"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB for photo transfer"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB for MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connected as an installer"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connected to a USB accessory"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Touch for more options."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Format USB storage?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Format SD card?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"All files stored in your USB storage will be erased. This action can\'t be reversed!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"All data on your card will be lost."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB debugging connected"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Touch to disable USB debugging."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Change keyboard"</string>

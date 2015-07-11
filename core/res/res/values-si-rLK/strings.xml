@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"සැණෙළිය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ඔබගේ මැදිහත් වීමක් නොමැතිව දුරකථන අංක ඇමතීමට යෙදුමට අවසර දෙන්න. මෙහි ප්‍රතිඑලය වන්නේ අනපේක්ෂිත අයකිරීම් හෝ ඇමතුම් ඇතිවීමයි. මෙයන් හදිසි අංක වලට ඇමතුම් ගැනීමට යෙදුමට අවසර නොදෙන බවට සටහන් කරගන්න. ඔබගේ අනුදැනුමක් නොමැතිව ඇමතුම් ගැනීමෙන් අනිෂ්ට යෙදුම් ඔබගේ මුදල් නිකරුණේ වැය කරයි."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත පිවිසීමට යෙදුමට අවසර දෙන්න. ඇමතුම සක්‍රිය වුවත් සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
@@ -1039,14 +1043,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ගොනු හුවමාරුව සඳහා USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ඡායාරූප හුවමාරුව සඳහා USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI සඳහා USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ස්ථාපිතයක් ලෙස සම්බන්ධයි"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB මෙවලමකට සම්බන්ධිතයි"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"වඩා වැඩි විකල්ප සඳහා ස්පර්ශ කරන්න."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB ආචයනය ෆෝමැට් කරන්නද?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD පත ෆෝමැට් කරන්නද?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ඔබගේ USB ආචයනයේ ඇති සියලුම ගොනු මැකී යනු ඇත. මෙම ක්‍රියාව ආපසු හැරවිය නොහැක!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ඔබගේ පතේ සියලු දත්ත නැති වනු ඇත."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ෆෝමැට්"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB නිදොස්කරණය අබල කිරීමට ස්පර්ශ කරන්න."</string>
     <string name="select_input_method" msgid="8547250819326693584">"යතුරු පුවරු වෙනස් කිරීම"</string>
