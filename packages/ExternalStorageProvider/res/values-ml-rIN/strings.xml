@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7123375275748530234">"ബാഹ്യ സംഭരണം"</string>
-    <string name="root_internal_storage" msgid="827844243068584127">"ആന്തരിക സംഭരണം"</string>
+    <string name="app_label" msgid="7123375275748530234">"ബാഹ്യ സ്റ്റോറേജ്"</string>
+    <string name="root_internal_storage" msgid="827844243068584127">"ആന്തരിക സ്റ്റോറേജ്"</string>
     <string name="root_documents" msgid="4051252304075469250">"പ്രമാണങ്ങൾ"</string>
 </resources>
