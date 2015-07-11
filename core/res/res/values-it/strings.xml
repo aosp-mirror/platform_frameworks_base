@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Consente all\'applicazione di controllare il flash."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"chiamata diretta n. telefono"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Consente all\'applicazione di chiamare numeri di telefono senza il tuo intervento. Ciò può comportare chiamate o addebiti imprevisti. Tieni presente che ciò non consente all\'applicazione di chiamare numeri di emergenza. Applicazioni dannose potrebbero generare dei costi effettuando chiamate senza la tua conferma."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lettura stato e identità telefono"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Consente all\'applicazione di accedere alle funzioni telefoniche del dispositivo. Questa autorizzazione consente all\'applicazione di determinare il numero di telefono e gli ID dei dispositivi, se una chiamata è attiva e il numero remoto connesso da una chiamata."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"disattivazione stand-by del tablet"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB per il trasferimento di file"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB per il trasferimento di foto"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB per la modalità MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Collegato come installer"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Collegato a un accessorio USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Tocca per visualizzare più opzioni."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>

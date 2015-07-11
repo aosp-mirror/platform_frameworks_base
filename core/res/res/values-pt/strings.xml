@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite que o app controle a lanterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ligar diretamente para números de telefone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que o app ligue para números de telefone sem sua intervenção. Isso pode resultar em cobranças ou chamadas inesperadas. Esta opção não permite que o app ligue para números de emergência. Apps maliciosos podem gerar custos com chamadas feitas sem sua confirmação."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ler status e identidade do telefone"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que o app acesse os recursos de telefonia do dispositivo. Esta permissão autoriza o app a determinar o número de telefone e IDs de dispositivo, quando uma chamada está ativa, e o número remoto conectado a uma chamada."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir modo de inatividade do tablet"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB para transferência de arquivos"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB para transferência de fotos"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB para MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectados como um instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a um acessório USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Toque para ver mais opções."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB conectada"</string>
