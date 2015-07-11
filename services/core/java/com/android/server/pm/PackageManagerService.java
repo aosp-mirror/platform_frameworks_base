@@ -284,7 +284,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final boolean DEBUG_PREFERRED = false;
     static final boolean DEBUG_UPGRADE = false;
     static final boolean DEBUG_DOMAIN_VERIFICATION = false;
-    private static final boolean DEBUG_BACKUP = true;
+    private static final boolean DEBUG_BACKUP = false;
     private static final boolean DEBUG_INSTALL = false;
     private static final boolean DEBUG_REMOVE = false;
     private static final boolean DEBUG_BROADCASTS = false;
@@ -4581,7 +4581,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (ps == null) {
                 continue;
             }
-            int status = getDomainVerificationStatusLPr(ps, parentUserId);
+            long verificationState = getDomainVerificationStatusLPr(ps, parentUserId);
+            int status = (int)(verificationState >> 32);
             if (result == null) {
                 result = new CrossProfileDomainInfo();
                 result.resolveInfo =
@@ -4678,11 +4679,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                         continue;
                     }
                     // Try to get the status from User settings first
-                    int status = getDomainVerificationStatusLPr(ps, userId);
+                    long packedStatus = getDomainVerificationStatusLPr(ps, userId);
+                    int status = (int)(packedStatus >> 32);
+                    int linkGeneration = (int)(packedStatus & 0xFFFFFFFF);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
                         if (DEBUG_DOMAIN_VERIFICATION) {
-                            Slog.i(TAG, "  + always: " + info.activityInfo.packageName);
+                            Slog.i(TAG, "  + always: " + info.activityInfo.packageName
+                                    + " : linkgen=" + linkGeneration);
                         }
+                        // Use link-enabled generation as preferredOrder, i.e.
+                        // prefer newly-enabled over earlier-enabled.
+                        info.preferredOrder = linkGeneration;
                         alwaysList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
                         if (DEBUG_DOMAIN_VERIFICATION) {
@@ -4698,7 +4705,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-            // First try to add the "always" resolution for the current user if there is any
+            // First try to add the "always" resolution(s) for the current user, if any
             if (alwaysList.size() > 0) {
                 result.addAll(alwaysList);
             // if there is an "always" for the parent user, add it.
@@ -4759,15 +4766,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         return result;
     }
 
-    private int getDomainVerificationStatusLPr(PackageSetting ps, int userId) {
-        int status = ps.getDomainVerificationStatusForUser(userId);
+    // Returns a packed value as a long:
+    //
+    // high 'int'-sized word: link status: undefined/ask/never/always.
+    // low 'int'-sized word: relative priority among 'always' results.
+    private long getDomainVerificationStatusLPr(PackageSetting ps, int userId) {
+        long result = ps.getDomainVerificationStatusForUser(userId);
         // if none available, get the master status
-        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+        if (result >> 32 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
             if (ps.getIntentFilterVerificationInfo() != null) {
-                status = ps.getIntentFilterVerificationInfo().getStatus();
+                result = ((long)ps.getIntentFilterVerificationInfo().getStatus()) << 32;
             }
         }
-        return status;
+        return result;
     }
 
     private ResolveInfo querySkipCurrentProfileIntents(
@@ -12963,7 +12974,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         false, //hidden
                         null, null, null,
                         false, // blockUninstall
-                        INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
+                        INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
                 if (!isSystemApp(ps)) {
                     if (ps.isAnyInstalled(sUserManager.getUserIds())) {
                         // Other user still have this package installed, so all
@@ -14886,8 +14897,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             pw.println();
                             count = 0;
                             for (PackageSetting ps : allPackageSettings) {
-                                final int status = ps.getDomainVerificationStatusForUser(userId);
-                                if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                                final long status = ps.getDomainVerificationStatusForUser(userId);
+                                if (status >> 32 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
                                     continue;
                                 }
                                 pw.println(prefix + "Package: " + ps.name);
