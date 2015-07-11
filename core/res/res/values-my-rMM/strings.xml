@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"appအား ကား ဖလက်ရှမီးကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ဖုန်းနံပါတ်များကိုတိုက်ရိုက်ခေါ်ဆိုခြင်း"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"အပလီကေးရှင်းအား အလိုအလျောက် ဖုန်းခေါ်ခွင့် ပြုပါ။ မလိုအပ်သော ဖုန်းခ များ ဖြစ်ပေါ်နိုင်ပါသည်။ ဒီခွင့်ပြုခြင်းမှာ အရေးပေါ်ဖုန်းခေါ်ခြင်း မပါဝင်ပါ။ သံသယဖြစ်စရာ အပလီကေးရှင်းများက သင့်မသိပဲ ဖုန်းခေါ်ခြင်းဖြင့် ဖုန်းခ ပိုမိုကျနိုင်ပါသည်။"</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ဖုန်းရဲ့ အခြေအနေ နှင့် အမှတ်သညာအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"အပလီကေးရှင်းအား ဖုန်းရဲ့ စွမ်းဆောင်ချက်များအား သုံးခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ဖုန်းနံပါတ်၊ စက်နံပါတ်၊ ဖုန်းခေါ်နေမှု ရှိမရှိနှင့် တဖက်မှ ဖုန်းနံပါတ် များအား သိရှိနိုင်ပါသည်"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"တက်ပလက်အား ပိတ်ခြင်းမှ ကာကွယ်ခြင်း"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ဖိုင်လွှဲပြောင်းရန်အတွက် USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ဓာတ်ပုံလွှဲပြောင်းရန်အတွက် USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI အတွက် USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"installerအနေဖြင့် ချိတ်ဆက်သည်"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBတွဲဖက်ပစ္စည်းအား ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"ထပ်မံရွေးချယ်စရာများအတွက် ထိပါ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားစစ်ခြင်းအား ချိတ်ဆက်ထားသည်"</string>

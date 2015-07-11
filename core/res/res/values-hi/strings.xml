@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ऐप्स को फ़्लैशलाइट नियंत्रित करने देता है."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"फ़ोन नंबर पर सीधे कॉल करें"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ऐप्स  को आपके हस्‍तक्षेप के बिना फ़ोन नंबर पर कॉल करने देता है. इसके परिणाम अप्रत्‍याशित शुल्‍क या कॉल हो सकते हैं. ध्यान दें कि यह ऐप्स  को आपातकालीन नंबर पर कॉल नहीं करने देता. दुर्भावनापूर्ण ऐप्स  आपकी पुष्टि के बिना कॉल करके आपका धन व्‍यय कर सकते हैं."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फ़ोन की स्‍थिति और पहचान पढ़ें"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ऐप्स  को डिवाइस की फ़ोन सुविधाओं तक पहुंचने देता है. यह अनुमति ऐप्स  को फ़ोन नंबर और डिवाइस आईडी, कॉल सक्रिय है या नहीं, और कॉल द्वारा कनेक्ट किया गया दूरस्‍थ नंबर निर्धारित करने देती है."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टेबलेट को निष्‍क्रिय होने से रोकें"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"फ़ाइल स्‍थानांतरण के लिए USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"फ़ोटो स्‍थानांतरण के लिए USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI के लिए USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"किसी इंस्‍टॉलर के रूप में कनेक्‍ट किया गया"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB सहायक सामग्री से कनेक्‍ट कि‍या गया"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"और विकल्पों के लिए स्पर्श करें."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग कनेक्ट किया गया"</string>

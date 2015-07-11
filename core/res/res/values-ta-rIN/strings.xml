@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ஃப்ளாஷ் லைட்டைக் கட்டுப்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"உங்கள் தலையீட்டின்றி மொபைல் எண்களை அழைக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதன் விளைவாக எதிர்பாராத கட்டணங்களோ அழைப்புகளோ ஏற்படலாம். அவசரகால எண்களை அழைக்க இது பயன்பாட்டை அனுமதிக்காது என்பதை நினைவில்கொள்ளவும். தீங்கிழைக்கும் பயன்பாடுகள், உங்கள் உறுதிப்படுத்தல் இன்றி அழைப்புகளைச் செய்வதால் உங்களுக்குச் செலவு ஏற்படக்கூடும்."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"மொபைல் நிலை மற்றும் அடையாளத்தைப் படித்தல்"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"டேப்லெட் உறக்க நிலைக்குச் செல்வதைத் தடுத்தல்"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB, கோப்புப் பரிமாற்றத்துக்கு மட்டும்"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB, படப் பரிமாற்றத்துக்கு மட்டும்"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB, MIDIக்கு மட்டும்"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"நிறுவியாக இணைக்கப்பட்டது"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB துணைக்கருவியுடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"கூடுதல் விருப்பங்களுக்காகத் தொடவும்."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>

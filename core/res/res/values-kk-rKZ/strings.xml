@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Қолданбаға қалта шамын басқаруға рұқсат береді."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"нөмірлерге тікелей телефон шалу"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Қолданбаға сіздің қатысуыңызсыз қоңырау шалу мүмкіндігін береді. Нәтижесінде қосымша төлем немесе күтпеген қоңырау алуыңыз мүмкін. Есіңізде болсын, қолданба төтенше байланыстарға қоңырау шала алмайды. Залалды қолданбалар сіздің рұқсатыңызсыз қоңыраулар шалып, күтпеген төлемдерге себеп болуы мүмкін."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"телефон күйін оқу немесе анықтау"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Қолданбаға құрылғыдағы телефон функцияларына кіру мүмкіндігін береді. Бұл рұқсат қолданбаға телефон нөмірі, құрылғы жеке анықтағышы, қоңырау белсенділігі және сол қоңырауға байланысты қашықтағы нөмірді анықтау мүмкіндігін береді."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетті ұйқыдан бөгеу"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Файлды тасымалдауға арналған USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Фотосуретті тасымалдауға арналған USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI режиміне арналған USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Орнату құрылғысына жалғанған"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB жабдығына қосылған"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Қосымша параметрлер үшін түртіңіз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB жөндеу қосылған"</string>

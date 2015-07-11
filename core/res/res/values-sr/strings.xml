@@ -355,6 +355,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Дозвољава апликацији да контролише блиц."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно позивање бројева телефона"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Дозвољава апликацији да позива бројеве телефона без ваше дозволе. Ово може да доведе до неочекиваних трошкова или позива. Имајте на уму да ово не дозвољава апликацији да позива бројеве за хитне случајеве. Злонамерне апликације могу да позивају без ваше потврде, што може да доведе до трошкова."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"читање статуса и идентитета телефона"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозвољава апликацији да приступа функцијама телефона на уређају. Ова дозвола омогућава апликацији да утврди број телефона и ИД-ове уређаја, затим да ли је позив активан, као и број даљинског уређаја са којим је успостављен позив."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"спречавање преласка таблета у стање спавања"</string>
@@ -1044,7 +1048,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB за пренос датотека"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB за пренос слика"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB за MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Повезан као инсталациони програм"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Повезано са USB додатком"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Додирните за још опција."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отклањање грешака са USB-а је успостављено"</string>

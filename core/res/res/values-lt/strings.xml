@@ -356,6 +356,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Leidžiama programai valdyti šviesos signalą."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skambinti tiesiogiai telefono numeriais"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Leidžiama programai skambinti telefonų numeriais be jūsų įsikišimo. Dėl to gali atsirasti nenumatytų apmokestinimų ar skambučių. Atminkite, kad programai neleidžiama skambinti pagalbos telefonų numeriais. Kenkėjiškos programos gali skambinti be jūsų patvirtinimo, o dėl to jums gali būti taikomi mokesčiai."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"skaityti telefono būseną ir tapatybę"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leidžiama programai pasiekti telefono funkcijas įrenginyje. Šis leidimas suteikia teisę programai nustatyti telefono numerį ir įrenginio ID, tai, ar skambutis aktyvus, ir skambučiu prijungtą nuotolinį numerį."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"neleisti planšetiniam kompiuteriui užmigti"</string>
@@ -1051,7 +1055,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB (failų perkėlimas)"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB (nuotraukų perkėlimas)"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB (MIDI)"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Prij. kaip diegimo programa"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Prijungta prie USB priedo"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Palieskite, kad būtų rodoma daugiau parinkčių."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB derinimas prijungtas"</string>

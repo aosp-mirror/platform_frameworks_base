@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ਐਪ ਨੂੰ ਫਲੈਸ਼ਲਾਈਟ ਤੇ ਨਿਯੰਤਰਣ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ਫੋਨ ਨੰਬਰਾਂ ਤੇ ਸਿੱਧੇ ਕਾਲ ਕਰੋ"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਫੋਨ ਨੰਬਰਾਂ ਤੇ ਕਾਲ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦੇ ਸਿੱਟੇ ਵਜੋਂ ਅਕਲਪਿਤ ਖ਼ਰਚੇ ਜਾਂ ਕਾਲਾਂ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਧਿਆਨ ਦਿਓ ਕਿ ਇਹ ਐਪ ਨੂੰ ਐਮਰਜੈਂਸੀ ਨੰਬਰਾਂ ਤੇ ਕਾਲ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦਾ। ਖ਼ਰਾਬ ਐਪਸ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਕਾਲਾਂ ਕਰਕੇ ਤੁਹਾਨੂੰ ਖ਼ਰਚੇ ਪਾ ਸਕਦੇ ਹਨ।"</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ਫੋਨ ਸਥਿਤੀ ਅਤੇ ਪਛਾਣ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ਐਪ ਨੂੰ ਡਿਵਾਈਸ ਦੀਆਂ ਫੋਨ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਅਨੁਮਤੀ ਐਪ ਨੂੰ ਫੋਨ ਨੰਬਰ ਅਤੇ ਡਿਵਾਈਸ ID ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ, ਇੱਕ ਕਾਲ ਸਕਿਰਿਆ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਰਿਮੋਟ ਨੰਬਰ ਇੱਕ ਕਾਲ ਨਾਲ ਕਨੈਕਟ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ਟੈਬਲੇਟ ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ਫ਼ਾਈਲ ਟ੍ਰਾਂਸਫ਼ਰ ਲਈ USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ਫੋਟੋ ਟ੍ਰਾਂਸਫ਼ਰ ਲਈ USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI ਲਈ USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ਇੱਕ ਇੰਸਟੌਲਰ ਦੇ ਤੌਰ ਤੇ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ਇੱਕ USB ਐਕਸੈਸਰੀ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>

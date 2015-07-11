@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"앱이 카메라 플래시를 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"앱이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 앱이 비상 전화를 걸도록 하는 권한은 주어지지 않습니다. 악성 앱이 사용자의 확인 없이 전화를 걸어 요금이 부과될 수 있습니다."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"휴대전화 상태 및 ID 읽기"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"앱이 기기의 휴대전화 기능에 액세스할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 전화번호 및 기기의 ID, 활성 통화인지 여부, 통화가 연결된 원격 번호 등을 확인할 수 있습니다."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"파일 전송용 USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"사진 전송용 USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI용 USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"설치 프로그램으로 연결됨"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB 액세서리에 연결됨"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>

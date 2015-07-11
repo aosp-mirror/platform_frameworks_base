@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"‏به برنامه اجازه می‎دهد تا چراغ قوه را کنترل کند."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"تماس مستقیم با شماره تلفن‌ها"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"به برنامه اجازه می‌دهد بدون دخالت شما با شماره‌های تلفن تماس بگیرد. این ممکن است باعث ایجاد هزینه یا تماس‌های پیش‌بینی نشده شود. توجه داشته باشید که این به برنامه اجازه نمی‌دهد به برقراری تماس‌های اضطراری بپردازد. برنامه‌های مخرب ممکن است با برقراری تماس بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"خواندن وضعیت تلفن و شناسه"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"به برنامه اجازه می‌دهد به ویژگی‌های تلفن دستگاه شما دسترسی پیدا کند. این مجوز به برنامه اجازه می‌دهد شماره تلفن و شناسه‌های دستگاه، فعال بودن یک تماس و شماره راه دوری که با یک تماس متصل شده است را مشخص کند."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ممانعت از به خواب رفتن رایانهٔ لوحی"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB برای انتقال فایل"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB برای انتقال عکس"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB برای MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به‌عنوان نصب کننده"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏به یک وسیله جانبی USB وصل شده است"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"برای گزینه‌های بیشتر لمس کنید."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏اشکال‌زدایی USB متصل شد"</string>

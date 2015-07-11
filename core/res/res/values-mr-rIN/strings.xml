@@ -210,7 +210,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"बंद"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"दोष अहवाल"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"दोष अहवाल घ्या"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे आपल्या वर्तमान डिव्हाइस स्थितीविषयी माहिती संकलित करेल. यास दोष अहवाल प्रारंभ करण्यापासून तो पाठविला जाण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे आपल्या वर्तमान डिव्हाइस स्थितीविषयी माहिती संकलित करेल. दोष अहवाल प्रारंभ करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"मूक मोड"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ध्वनी बंद आहे"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ध्वनी चालू आहे"</string>
@@ -354,6 +354,10 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"फ्लॅशलाइट नियंत्रित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"फोन नंबरवर प्रत्यक्ष कॉल करा"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"आपल्या हस्तक्षेपाशिवाय फोन नंबरवर कॉल करण्यासाठी अॅप ला अनुमती देते. यामुळे अनपेक्षित शुल्क किंवा कॉल लागू शकतात. लक्षात ठेवा की हे आणीबाणीच्या नंबरवर कॉल करण्यासाठी अॅप ला अनुमती देत नाही. दुर्भावनापूर्ण अॅप्स नी आपल्या पुष्टिकरणाशिवाय कॉल केल्यामुळे आपले पैसे खर्च होऊ शकतात."</string>
+    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
+    <skip />
+    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
+    <skip />
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिती आणि ओळख वाचा"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइसच्या फोन वैशिष्ट्यांवर प्रवेश करण्यास अॅप ला अनुमती देते. ही परवानगी कॉल सक्रिय असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस ID आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टॅब्लेट निष्क्रिय होण्यापासून प्रतिबंधित करा"</string>
@@ -1037,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"स्थानांतरणासाठी USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"फोटो स्थानांतरणासाठी USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI साठी USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"स्थापनकर्ता म्हणून कनेक्ट केले"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB उपसाधनावर कनेक्ट केले"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"अधिक पर्यायांसाठी स्पर्श करा."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
