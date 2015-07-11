@@ -210,7 +210,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"बंद"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"दोष अहवाल"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"दोष अहवाल घ्या"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे आपल्या वर्तमान डिव्हाइस स्थितीविषयी माहिती संकलित करेल. यास दोष अहवाल प्रारंभ करण्यापासून तो पाठविला जाण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे आपल्या वर्तमान डिव्हाइस स्थितीविषयी माहिती संकलित करेल. दोष अहवाल प्रारंभ करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"मूक मोड"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ध्वनी बंद आहे"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ध्वनी चालू आहे"</string>
@@ -1041,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"स्थानांतरणासाठी USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"फोटो स्थानांतरणासाठी USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI साठी USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"स्थापनकर्ता म्हणून कनेक्ट केले"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB उपसाधनावर कनेक्ट केले"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"अधिक पर्यायांसाठी स्पर्श करा."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>

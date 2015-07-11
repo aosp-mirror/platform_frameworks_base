@@ -1041,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Fayl transferi üçün USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Foto transfer üçün USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI üçün USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Quraşdırıcı kimi qoşulub"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB aksesuara qoşuldu"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Əlavə seçimlər üçün toxunun."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB sazlama qoşuludur"</string>

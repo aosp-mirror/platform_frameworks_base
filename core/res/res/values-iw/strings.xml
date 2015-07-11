@@ -1055,7 +1055,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB להעברת קבצים"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB להעברת תמונות"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB ל-MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"מחובר כמתקין"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏מחובר לאביזר USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"גע להצגת עוד אפשרויות."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏ניקוי באגים של USB מחובר"</string>

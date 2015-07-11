@@ -227,7 +227,7 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Privat"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Geschäftlich"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"Auf Kontakte zuzugreifen"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"auf Kontakte zuzugreifen"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"Auf den Standort Ihres Geräts zugreifen"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
@@ -1041,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB für die Dateiübertragung"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB für die Fotoübertragung"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB für MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Als Installationsprogramm angeschlossen"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Mit USB-Zubehör verbunden"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Für weitere Optionen tippen"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging"</string>

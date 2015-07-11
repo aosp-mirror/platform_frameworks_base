@@ -1041,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"파일 전송용 USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"사진 전송용 USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI용 USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"설치 프로그램으로 연결됨"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB 액세서리에 연결됨"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
