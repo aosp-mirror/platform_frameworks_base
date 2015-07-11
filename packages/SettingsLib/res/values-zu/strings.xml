@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Inkinga yokufakazela ubuqiniso"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ayikho ebubanzini"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"Ukufinyeela okungekhona kwe-inthanethi kutholakele, ngeke kuxhumeke ngokuzenzakalelayo."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"Kulondolozwe ngu-<xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Ixhunywe ngomsizi we-Wi-FI"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Kuxhumeke nge-%1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Iyatholakala nge-%1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Kuxhumekile, ayikho i-inthanethi"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Ayixhunyiwe"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Inqamula uxhumano kwi-inthanethi..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Iyaxhuma..."</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Sebenzisela ukwabelana kokuxhumana"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Ukwabelana ngoxhumano lwe-Inthanethi"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Ukufinyelela umlayezo"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Ukufinyelela kwe-SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Ixhume emsindweni wemidiya"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Ixhunywe kumsindo wefoni"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Ixhunywe kwiseva yokudlulisa ifayela"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Ixhumeke kumephu"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Kuxhumeke ku-SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Ayixhunyiwe kwiseva sokudlulisa ifayela"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Ixhunywe kwidivaysi yokufakwayo"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Ixhunyiwe kwidivaysi yokufinyelela kwi-Inthanethi"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Yabelana noxhumano lwe-Inthanethi kanye nedivaysi"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Sebenzisa ukufinyelela i-Inthanethi"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Sebenzisela imephu"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Ukusebenzisa kokufinyelela kwe-SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Sebenzisela umsindo wemidiya"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Sebenziselwa umsindo wefoni"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Sebenziselwa ukudlulisa ifayela"</string>

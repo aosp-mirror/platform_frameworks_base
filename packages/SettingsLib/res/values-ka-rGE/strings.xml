@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ავთენტიკაციის პრობლემა"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"არ არის დიაპაზონში"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"ინტერნეტთან წვდომის ამოცნობა ვერ მოხერხდა. ავტომატურად ხელახლა დაკავშირება არ განხორციელდება."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"შენახული <xliff:g id="NAME">%1$s</xliff:g>-ის მიერ"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"დაკავშირებულია Wi-Fi თანაშემწით"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s-ით დაკავშირებული"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"ხელმისაწვდომია %1$s-ით"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"დაკავშირებულია, ინტერნეტის გარეშე"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"კავშირი გაწყვეტილია"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"მიმდინარეობს გათიშვა…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"მიმდინარეობს დაკავშირება…"</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"კონტაქტის გაზიარებისთვის გამოყენება"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ინტერნეტ კავშირის გაზიარება"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"შეტყობინებებზე წვდომა"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM წვდომა"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"დაკავშირებულია აუდიო მულტიმედიურ სისტემასთან"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"დაკავშირებულია ტელეფონის აუდიო მოწყობილობასთან"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"დაკავშირებულია ფაილების გადაცემის სერვერთან"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"რუკასთან დაკავშირებული"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP-თან დაკავშირებული"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"არ არის დაკავშირებული ფაილების ტრანსფერის სერვერთან"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"დაკავშირებულია შეყვანის მოწყობილობასთან"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"დაკავშირებულია მოწყობილობასთან ინტერნეტთან წვდომისთვის"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"ლოკალური კავშირის გაზიარება მოწყობილობასთან"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"გამოიყენე ინტერნეტთან წვდომისთვის"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"რუკაზე გამოყენება"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"გამოყენება SIM წვდომისთვის"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"მედია აუდიოსთვის გამოყენება"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"გამოიყენეთ ტელეფონის აუდიომოწყობილობაში"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ფაილების ტრანსფერისათვის გამოყენება"</string>

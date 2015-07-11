@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Πρόβλημα ελέγχου ταυτότητας"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Εκτός εμβέλειας"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"Δεν εντοπίστηκε καμία πρόσβαση στο διαδίκτυο, δεν θα γίνει αυτόματη επανασύνδεση."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"Αποθηκεύτηκε από <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Σύνδεση μέσω βοηθού Wi‑Fi"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Συνδέθηκε μέσω %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Διαθέσιμο μέσω %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Συνδέθηκε, χωρίς διαδίκτυο"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Αποσυνδέθηκε"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Αποσύνδεση..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Σύνδεση..."</string>
@@ -56,27 +52,24 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Για κοινή χρήση επαφών"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Κοινή χρήση σύνδεσης στο Διαδίκτυο"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Πρόσβαση στο μήνυμα"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Πρόσβαση SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Συνδέθηκε σε ήχο πολυμέσων"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Συνδεδεμένο στον ήχο τηλεφώνου"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Συνδεδεμένο σε διακομιστή μεταφοράς αρχείων"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Συνδεδεμένο στο χάρτη"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Συνδέθηκε σε SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Δεν έχει συνδεθεί σε διακομιστή μεταφοράς αρχείων"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Συνδέθηκε σε συσκευή εισόδου"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Συνδέθηκε με συσκευή με πρόσβ. στο Διαδ."</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Κοιν. χρ. σύνδ. στο Διαδ. με συσκευή"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Χρήση για την πρόσβαση στο Διαδίκτυο"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Χρήση για χάρτη"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Χρήση για πρόσβαση στη SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Χρήση για ήχο πολυμέσων"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Χρήση για ήχο τηλεφώνου"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Χρήση για τη μεταφορά αρχείων"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Χρήση για είσοδο"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Ζεύγος"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Σύζευξη"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ΣΥΖΕΥΞΗ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Ακύρωση"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Η σύζευξη παρέχει πρόσβαση στις επαφές σας και το ιστορικό κλήσεων όταν συνδεθείτε."</string>

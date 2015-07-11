@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem z uwierzytelnianiem"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Poza zasięgiem"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"Nie wykryto dostępu do internetu. Nie można automatycznie przywrócić połączenia."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"Zapisane przez: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Połączono przez Asystenta Wi‑Fi"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Połączono przez %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Dostępne przez %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Połączono, brak internetu"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Rozłączona"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Rozłączanie..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Łączenie..."</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Używaj do udostępniania kontaktów"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Udostępnianie połączenia internetowego"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Dostęp do wiadomości"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Dostęp do karty SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Połączono z funkcją audio multimediów"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Połączono z funkcją audio telefonu"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Połączono z serwerem transferu plików"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Połączono z mapą"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Połączono z PDU"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Brak połączenia z serwerem transferu plików"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Podłączono do urządzenia wejściowego"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Połączone w celu dostępu do internetu"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Udostępnianie połączenia internetowego"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Użyj na potrzeby dostępu do internetu"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Używaj dla mapy"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Używaj, by uzyskać dostęp do karty SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Użyj dla funkcji audio multimediów"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Użyj dla funkcji audio telefonu"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Użyj do transferu plików"</string>

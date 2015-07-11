@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentificēšanas problēma"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Nav diapazona ietvaros"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"Nevar noteikt interneta savienojumu. Savienojums netiks izveidots vēlreiz automātiski."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"Saglabāja: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Izveidots savienojums ar Wi‑Fi palīgu"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Savienots, izmantojot %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Pieejams, izmantojot %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Savienots, nav piekļuves internetam"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Atvienots"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Notiek atvienošana..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Notiek savienojuma izveide…"</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Izmantot kontaktpersonas informācijas kopīgošanai"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Interneta savienojuma koplietošana"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Piekļuve ziņojumam"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Piekļuve SIM kartei"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Savienots ar multivides audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Savienots ar tālruņa audio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Savienots ar failu pārsūtīšanas serveri"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Izveidots savienojums ar karti"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Savienots ar SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Nav savienots ar failu pārsūtīšanas serveri"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Izveidots savienojums ar ievades ierīci"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Savien. ar ier., lai nodr. int. piekļ."</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Tiek kopliet. lok. intern. savien. ar ierīci"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Izmantot, lai piekļūtu internetam"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Lietot kartei"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Izmantot, lai piekļūtu SIM kartei"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Izmantot multivides skaņai"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Izmantot tālruņa skaņai"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Izmantot faila pārsūtīšanai"</string>

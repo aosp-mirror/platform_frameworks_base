@@ -29,15 +29,11 @@
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"인증 문제"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"범위 내에 없음"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"감지된 인터넷 액세스가 없으며 자동으로 다시 연결되지 않습니다."</string>
-    <!-- no translation found for saved_network (4352716707126620811) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 저장됨"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi 도우미를 통해 연결됨"</string>
-    <!-- no translation found for connected_via_passpoint (2826205693803088747) -->
-    <skip />
-    <!-- no translation found for available_via_passpoint (1617440946846329613) -->
-    <skip />
-    <!-- no translation found for wifi_connected_no_internet (3149853966840874992) -->
-    <skip />
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s을(를) 통해 연결됨"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s을(를) 통해 사용 가능"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"인터넷을 사용하지 않고 연결됨"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"연결 끊김"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"연결을 끊는 중…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"연결 중…"</string>
@@ -56,22 +52,19 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"연락처 공유용"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"인터넷 연결 공유"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"메시지 액세스"</string>
-    <!-- no translation found for bluetooth_profile_sap (5764222021851283125) -->
-    <skip />
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM 액세스"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"미디어 오디오에 연결됨"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"휴대전화 오디오에 연결됨"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"파일 전송 서버에 연결됨"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"지도에 연결됨"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_connected (8561765057453083838) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP에 연결됨"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"파일 전송 서버에 연결되지 않았습니다."</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"입력 장치에 연결됨"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"인터넷 액세스를 위해 기기에 연결됨"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"로컬 인터넷 연결을 기기와 공유 중"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"인터넷 액세스에 사용"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"지도에 사용"</string>
-    <!-- no translation found for bluetooth_sap_profile_summary_use_for (7085362712786907993) -->
-    <skip />
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM 액세스에 사용"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"미디어 오디오에 사용"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"휴대전화 오디오에 사용"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"파일 전송에 사용"</string>
