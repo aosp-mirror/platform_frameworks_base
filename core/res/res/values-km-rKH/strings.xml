@@ -1043,7 +1043,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB សម្រាប់ការផ្ទេរឯកសារ"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB សម្រាប់ការផ្ទេររូបថត"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB សម្រាប់ MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"បាន​ភ្ជាប់​ជា​កម្មវិធី​ដំឡើង"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"ប៉ះដើម្បីបានជម្រើសថែមទៀត។"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​យូអេសប៊ី"</string>

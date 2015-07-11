@@ -1043,7 +1043,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ගොනු හුවමාරුව සඳහා USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ඡායාරූප හුවමාරුව සඳහා USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI සඳහා USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ස්ථාපිතයක් ලෙස සම්බන්ධයි"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB මෙවලමකට සම්බන්ධිතයි"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"වඩා වැඩි විකල්ප සඳහා ස්පර්ශ කරන්න."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>

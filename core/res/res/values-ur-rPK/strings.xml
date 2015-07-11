@@ -1041,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏فائل کی منتقلی کیلئے USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏تصویر کی منتقلی کیلئے USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏MIDI کیلئے USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ایک انسٹالر کے بطور مربوط ہے"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏ایک USB لوازم سے مربوط ہے"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"مزید اختیارات کیلئے ٹچ کریں۔"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏USB ڈیبگ کرنا مربوط ہو گیا"</string>

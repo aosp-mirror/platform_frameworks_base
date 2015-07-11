@@ -1041,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB برای انتقال فایل"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB برای انتقال عکس"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB برای MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به‌عنوان نصب کننده"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏به یک وسیله جانبی USB وصل شده است"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"برای گزینه‌های بیشتر لمس کنید."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏اشکال‌زدایی USB متصل شد"</string>

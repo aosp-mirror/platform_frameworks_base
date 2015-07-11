@@ -1041,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ફાઇલ ટ્રાન્સફર માટે USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ફોટા ટ્રાન્સફર માટે USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI માટે USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ઇન્સ્ટોલર તરીકે કનેક્ટ કર્યું"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ઍક્સેસરીથી કનેક્ટ થયાં"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"વધુ વિકલ્પો માટે ટચ કરો."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ડીબગિંગ કનેક્ટ થયું."</string>

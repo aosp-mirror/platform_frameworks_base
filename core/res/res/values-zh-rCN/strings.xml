@@ -1041,7 +1041,6 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"正在通过 USB 传输文件"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"正在通过 USB 传输照片"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"正在通过 USB 连接到 MIDI 接口"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"作为安装程序连接"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已连接到USB配件"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"触摸以查看更多选项。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
