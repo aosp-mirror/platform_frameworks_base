@@ -34,8 +34,8 @@
     <string name="install_for_print_preview" msgid="6366303997385509332">"PDF ko‘rsatuvchi dasturni o‘rnatish"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Chop etish dasturi buzildi"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Chop etish buyrug‘i yaratilyapti"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"PDF formatda saqlash"</string>
-    <string name="all_printers" msgid="5018829726861876202">"Barcha printerlar…"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF formatida saqlash"</string>
+    <string name="all_printers" msgid="5018829726861876202">"Barcha printerlar"</string>
     <string name="print_dialog" msgid="32628687461331979">"Chop etish oynasi"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"Sahifa: <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
