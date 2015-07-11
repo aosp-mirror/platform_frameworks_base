@@ -31,9 +31,9 @@
     <string name="menu_delete" msgid="8138799623850614177">"ഇല്ലാതാക്കുക"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"എല്ലാം തിരഞ്ഞെടുക്കുക"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ഇതിൽ പകർത്തുക…"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"ആന്തരിക സംഭരണം കാണിക്കുക"</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"ആന്തരിക സ്റ്റോറേജ്  കാണിക്കുക"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD കാർഡ് കാണിക്കുക"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"ആന്തരിക സംഭരണം മറയ്‌ക്കുക"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"ആന്തരിക സ്റ്റോറേജ്  മറയ്‌ക്കുക"</string>
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD കാർഡ് മറയ്‌ക്കുക"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ഫയൽ വലുപ്പം കാണിക്കുക"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ഫയൽ വലുപ്പം മറയ്‌ക്കുക"</string>
