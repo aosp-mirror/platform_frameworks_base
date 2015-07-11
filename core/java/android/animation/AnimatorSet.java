@@ -17,6 +17,7 @@
 package android.animation;
 
 import android.util.ArrayMap;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,6 +51,7 @@ import java.util.List;
  */
 public final class AnimatorSet extends Animator {
 
+    private static final String TAG = "AnimatorSet";
     /**
      * Internal variables
      * NOTE: This object implements the clone() method, making a deep copy of any referenced
@@ -79,20 +81,10 @@ public final class AnimatorSet extends Animator {
     private ArrayList<Node> mNodes = new ArrayList<Node>();
 
     /**
-     * The sorted list of nodes. This is the order in which the animations will
-     * be played. The details about when exactly they will be played depend
-     * on the dependency relationships of the nodes.
+     * Animator Listener that tracks the lifecycle of each Animator in the set. It will be added
+     * to each Animator before they start and removed after they end.
      */
-    private ArrayList<Node> mSortedNodes = new ArrayList<Node>();
-
-    /**
-     * Flag indicating whether the nodes should be sorted prior to playing. This
-     * flag allows us to cache the previous sorted nodes so that if the sequence
-     * is replayed with no changes, it does not have to re-sort the nodes again.
-     */
-    private boolean mNeedsSort = true;
-
-    private AnimatorSetListener mSetListener = null;
+    private AnimatorSetListener mSetListener = new AnimatorSetListener(this);
 
     /**
      * Flag indicating that the AnimatorSet has been manually
@@ -101,7 +93,13 @@ public final class AnimatorSet extends Animator {
      * child animations of this AnimatorSet end. It also determines whether cancel/end
      * notifications are sent out via the normal AnimatorSetListener mechanism.
      */
-    boolean mTerminated = false;
+    private boolean mTerminated = false;
+
+    /**
+     * Tracks whether any change has been made to the AnimatorSet, which is then used to
+     * determine whether the dependency graph should be re-constructed.
+     */
+    private boolean mDependencyDirty = false;
 
     /**
      * Indicates whether an AnimatorSet has been start()'d, whether or
@@ -113,8 +111,13 @@ public final class AnimatorSet extends Animator {
     private long mStartDelay = 0;
 
     // Animator used for a nonzero startDelay
-    private ValueAnimator mDelayAnim = null;
+    private ValueAnimator mDelayAnim = ValueAnimator.ofFloat(0f, 1f).setDuration(0);
 
+    // Root of the dependency tree of all the animators in the set. In this tree, parent-child
+    // relationship captures the order of animation (i.e. parent and child will play sequentially),
+    // and sibling relationship indicates "with" relationship, as sibling animators start at the
+    // same time.
+    private Node mRootNode = new Node(mDelayAnim);
 
     // How long the child animations should last in ms. The default value is negative, which
     // simply means that there is no duration set on the AnimatorSet. When a real duration is
@@ -125,7 +128,17 @@ public final class AnimatorSet extends Animator {
     // was set on this AnimatorSet, so it should not be passed down to the children.
     private TimeInterpolator mInterpolator = null;
 
+    // Whether the AnimatorSet can be reversed.
     private boolean mReversible = true;
+    // The total duration of finishing all the Animators in the set.
+    private long mTotalDuration = 0;
+
+    public AnimatorSet() {
+        super();
+        mNodeMap.put(mDelayAnim, mRootNode);
+        mNodes.add(mRootNode);
+    }
+
     /**
      * Sets up this AnimatorSet to play all of the supplied animations at the same time.
      * This is equivalent to calling {@link #play(Animator)} with the first animator in the
@@ -139,7 +152,6 @@ public final class AnimatorSet extends Animator {
      */
     public void playTogether(Animator... items) {
         if (items != null) {
-            mNeedsSort = true;
             Builder builder = play(items[0]);
             for (int i = 1; i < items.length; ++i) {
                 builder.with(items[i]);
@@ -154,7 +166,6 @@ public final class AnimatorSet extends Animator {
      */
     public void playTogether(Collection<Animator> items) {
         if (items != null && items.size() > 0) {
-            mNeedsSort = true;
             Builder builder = null;
             for (Animator anim : items) {
                 if (builder == null) {
@@ -174,13 +185,12 @@ public final class AnimatorSet extends Animator {
      */
     public void playSequentially(Animator... items) {
         if (items != null) {
-            mNeedsSort = true;
             if (items.length == 1) {
                 play(items[0]);
             } else {
                 mReversible = false;
                 for (int i = 0; i < items.length - 1; ++i) {
-                    play(items[i]).before(items[i+1]);
+                    play(items[i]).before(items[i + 1]);
                 }
             }
         }
@@ -194,13 +204,12 @@ public final class AnimatorSet extends Animator {
      */
     public void playSequentially(List<Animator> items) {
         if (items != null && items.size() > 0) {
-            mNeedsSort = true;
             if (items.size() == 1) {
                 play(items.get(0));
             } else {
                 mReversible = false;
                 for (int i = 0; i < items.size() - 1; ++i) {
-                    play(items.get(i)).before(items.get(i+1));
+                    play(items.get(i)).before(items.get(i + 1));
                 }
             }
         }
@@ -216,8 +225,10 @@ public final class AnimatorSet extends Animator {
      */
     public ArrayList<Animator> getChildAnimations() {
         ArrayList<Animator> childList = new ArrayList<Animator>();
-        for (Node node : mNodes) {
-            childList.add(node.animation);
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            childList.add(node.mAnimation);
         }
         return childList;
     }
@@ -231,8 +242,10 @@ public final class AnimatorSet extends Animator {
      */
     @Override
     public void setTarget(Object target) {
-        for (Node node : mNodes) {
-            Animator animation = node.animation;
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            Animator animation = node.mAnimation;
             if (animation instanceof AnimatorSet) {
                 ((AnimatorSet)animation).setTarget(target);
             } else if (animation instanceof ObjectAnimator) {
@@ -249,7 +262,7 @@ public final class AnimatorSet extends Animator {
         int conf = super.getChangingConfigurations();
         final int nodeCount = mNodes.size();
         for (int i = 0; i < nodeCount; i ++) {
-            conf |= mNodes.get(i).animation.getChangingConfigurations();
+            conf |= mNodes.get(i).mAnimation.getChangingConfigurations();
         }
         return conf;
     }
@@ -303,7 +316,6 @@ public final class AnimatorSet extends Animator {
      */
     public Builder play(Animator anim) {
         if (anim != null) {
-            mNeedsSort = true;
             return new Builder(anim);
         }
         return null;
@@ -323,22 +335,20 @@ public final class AnimatorSet extends Animator {
             ArrayList<AnimatorListener> tmpListeners = null;
             if (mListeners != null) {
                 tmpListeners = (ArrayList<AnimatorListener>) mListeners.clone();
-                for (AnimatorListener listener : tmpListeners) {
-                    listener.onAnimationCancel(this);
+                int size = tmpListeners.size();
+                for (int i = 0; i < size; i++) {
+                    tmpListeners.get(i).onAnimationCancel(this);
                 }
             }
-            if (mDelayAnim != null && mDelayAnim.isRunning()) {
-                // If we're currently in the startDelay period, just cancel that animator and
-                // send out the end event to all listeners
-                mDelayAnim.cancel();
-            } else  if (mSortedNodes.size() > 0) {
-                for (Node node : mSortedNodes) {
-                    node.animation.cancel();
-                }
+            ArrayList<Animator> playingSet = new ArrayList<>(mPlayingSet);
+            int setSize = playingSet.size();
+            for (int i = 0; i < setSize; i++) {
+                playingSet.get(i).cancel();
             }
             if (tmpListeners != null) {
-                for (AnimatorListener listener : tmpListeners) {
-                    listener.onAnimationEnd(this);
+                int size = tmpListeners.size();
+                for (int i = 0; i < size; i++) {
+                    tmpListeners.get(i).onAnimationEnd(this);
                 }
             }
             mStarted = false;
@@ -355,34 +365,44 @@ public final class AnimatorSet extends Animator {
     public void end() {
         mTerminated = true;
         if (isStarted()) {
-            if (mSortedNodes.size() != mNodes.size()) {
-                // hasn't been started yet - sort the nodes now, then end them
-                sortNodes();
-                for (Node node : mSortedNodes) {
-                    if (mSetListener == null) {
-                        mSetListener = new AnimatorSetListener(this);
+            endRemainingAnimations();
+        }
+        if (mListeners != null) {
+            ArrayList<AnimatorListener> tmpListeners =
+                    (ArrayList<AnimatorListener>) mListeners.clone();
+            for (int i = 0; i < tmpListeners.size(); i++) {
+                tmpListeners.get(i).onAnimationEnd(this);
+            }
+        }
+        mStarted = false;
+    }
+
+    /**
+     * Iterate the animations that haven't finished or haven't started, and end them.
+     */
+    private void endRemainingAnimations() {
+        ArrayList<Animator> remainingList = new ArrayList<Animator>(mNodes.size());
+        remainingList.addAll(mPlayingSet);
+
+        int index = 0;
+        while (index < remainingList.size()) {
+            Animator anim = remainingList.get(index);
+            anim.end();
+            index++;
+            Node node = mNodeMap.get(anim);
+            if (node.mChildNodes != null) {
+                int childSize = node.mChildNodes.size();
+                for (int i = 0; i < childSize; i++) {
+                    Node child = node.mChildNodes.get(i);
+                    if (child.mLatestParent != node) {
+                        continue;
                     }
-                    node.animation.addListener(mSetListener);
+                    remainingList.add(child.mAnimation);
                 }
             }
-            if (mDelayAnim != null) {
-                mDelayAnim.cancel();
-            }
-            if (mSortedNodes.size() > 0) {
-                for (Node node : mSortedNodes) {
-                    node.animation.end();
-                }
-            }
-            if (mListeners != null) {
-                ArrayList<AnimatorListener> tmpListeners =
-                        (ArrayList<AnimatorListener>) mListeners.clone();
-                for (AnimatorListener listener : tmpListeners) {
-                    listener.onAnimationEnd(this);
-                }
-            }
-            mStarted = false;
         }
     }
+
 
     /**
      * Returns true if any of the child animations of this AnimatorSet have been started and have
@@ -391,8 +411,9 @@ public final class AnimatorSet extends Animator {
      */
     @Override
     public boolean isRunning() {
-        for (Node node : mNodes) {
-            if (node.animation.isRunning()) {
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            if (mNodes.get(i).mAnimation.isRunning()) {
                 return true;
             }
         }
@@ -426,7 +447,24 @@ public final class AnimatorSet extends Animator {
         if (mStartDelay > 0) {
             mReversible = false;
         }
+        long delta = startDelay - mStartDelay;
         mStartDelay = startDelay;
+        if (!mDependencyDirty) {
+            // Dependency graph already constructed, update all the nodes' start/end time
+            int size = mNodes.size();
+            for (int i = 0; i < size; i++) {
+                Node node = mNodes.get(i);
+                if (node == mRootNode) {
+                    node.mEndTime = mStartDelay;
+                } else {
+                    node.mStartTime = node.mStartTime == DURATION_INFINITE ?
+                            DURATION_INFINITE : node.mStartTime + delta;
+                    node.mEndTime = node.mEndTime == DURATION_INFINITE ?
+                            DURATION_INFINITE : node.mEndTime + delta;
+
+                }
+            }
+        }
     }
 
     /**
@@ -455,6 +493,7 @@ public final class AnimatorSet extends Animator {
         if (duration < 0) {
             throw new IllegalArgumentException("duration must be a value of zero or greater");
         }
+        mDependencyDirty = true;
         // Just record the value for now - it will be used later when the AnimatorSet starts
         mDuration = duration;
         return this;
@@ -462,15 +501,19 @@ public final class AnimatorSet extends Animator {
 
     @Override
     public void setupStartValues() {
-        for (Node node : mNodes) {
-            node.animation.setupStartValues();
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            node.mAnimation.setupStartValues();
         }
     }
 
     @Override
     public void setupEndValues() {
-        for (Node node : mNodes) {
-            node.animation.setupEndValues();
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            node.mAnimation.setupEndValues();
         }
     }
 
@@ -482,8 +525,10 @@ public final class AnimatorSet extends Animator {
             if (mDelayAnim != null) {
                 mDelayAnim.pause();
             } else {
-                for (Node node : mNodes) {
-                    node.animation.pause();
+                int size = mNodes.size();
+                for (int i = 0; i < size; i++) {
+                    Node node = mNodes.get(i);
+                    node.mAnimation.pause();
                 }
             }
         }
@@ -497,8 +542,10 @@ public final class AnimatorSet extends Animator {
             if (mDelayAnim != null) {
                 mDelayAnim.resume();
             } else {
-                for (Node node : mNodes) {
-                    node.animation.resume();
+                int size = mNodes.size();
+                for (int i = 0; i < size; i++) {
+                    Node node = mNodes.get(i);
+                    node.mAnimation.resume();
                 }
             }
         }
@@ -518,96 +565,25 @@ public final class AnimatorSet extends Animator {
         mStarted = true;
         mPaused = false;
 
-        for (Node node : mNodes) {
-            node.animation.setAllowRunningAsynchronously(false);
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            node.mEnded = false;
+            node.mAnimation.setAllowRunningAsynchronously(false);
         }
 
-        if (mDuration >= 0) {
-            // If the duration was set on this AnimatorSet, pass it along to all child animations
-            for (Node node : mNodes) {
-                // TODO: don't set the duration of the timing-only nodes created by AnimatorSet to
-                // insert "play-after" delays
-                node.animation.setDuration(mDuration);
-            }
-        }
         if (mInterpolator != null) {
-            for (Node node : mNodes) {
-                node.animation.setInterpolator(mInterpolator);
-            }
-        }
-        // First, sort the nodes (if necessary). This will ensure that sortedNodes
-        // contains the animation nodes in the correct order.
-        sortNodes();
-
-        int numSortedNodes = mSortedNodes.size();
-        for (int i = 0; i < numSortedNodes; ++i) {
-            Node node = mSortedNodes.get(i);
-            // First, clear out the old listeners
-            ArrayList<AnimatorListener> oldListeners = node.animation.getListeners();
-            if (oldListeners != null && oldListeners.size() > 0) {
-                final ArrayList<AnimatorListener> clonedListeners = new
-                        ArrayList<AnimatorListener>(oldListeners);
-
-                for (AnimatorListener listener : clonedListeners) {
-                    if (listener instanceof DependencyListener ||
-                            listener instanceof AnimatorSetListener) {
-                        node.animation.removeListener(listener);
-                    }
-                }
+            for (int i = 0; i < size; i++) {
+                Node node = mNodes.get(i);
+                node.mAnimation.setInterpolator(mInterpolator);
             }
         }
 
-        // nodesToStart holds the list of nodes to be started immediately. We don't want to
-        // start the animations in the loop directly because we first need to set up
-        // dependencies on all of the nodes. For example, we don't want to start an animation
-        // when some other animation also wants to start when the first animation begins.
-        final ArrayList<Node> nodesToStart = new ArrayList<Node>();
-        for (int i = 0; i < numSortedNodes; ++i) {
-            Node node = mSortedNodes.get(i);
-            if (mSetListener == null) {
-                mSetListener = new AnimatorSetListener(this);
-            }
-            if (node.dependencies == null || node.dependencies.size() == 0) {
-                nodesToStart.add(node);
-            } else {
-                int numDependencies = node.dependencies.size();
-                for (int j = 0; j < numDependencies; ++j) {
-                    Dependency dependency = node.dependencies.get(j);
-                    dependency.node.animation.addListener(
-                            new DependencyListener(this, node, dependency.rule));
-                }
-                node.tmpDependencies = (ArrayList<Dependency>) node.dependencies.clone();
-            }
-            node.animation.addListener(mSetListener);
-        }
+        updateAnimatorsDuration();
+        createDependencyGraph();
+
         // Now that all dependencies are set up, start the animations that should be started.
-        if (mStartDelay <= 0) {
-            for (Node node : nodesToStart) {
-                node.animation.start();
-                mPlayingSet.add(node.animation);
-            }
-        } else {
-            mDelayAnim = ValueAnimator.ofFloat(0f, 1f);
-            mDelayAnim.setDuration(mStartDelay);
-            mDelayAnim.addListener(new AnimatorListenerAdapter() {
-                boolean canceled = false;
-                public void onAnimationCancel(Animator anim) {
-                    canceled = true;
-                }
-                public void onAnimationEnd(Animator anim) {
-                    if (!canceled) {
-                        int numNodes = nodesToStart.size();
-                        for (int i = 0; i < numNodes; ++i) {
-                            Node node = nodesToStart.get(i);
-                            node.animation.start();
-                            mPlayingSet.add(node.animation);
-                        }
-                    }
-                    mDelayAnim = null;
-                }
-            });
-            mDelayAnim.start();
-        }
+        start(mRootNode);
         if (mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
@@ -631,6 +607,27 @@ public final class AnimatorSet extends Animator {
         }
     }
 
+    private void updateAnimatorsDuration() {
+        if (mDuration >= 0) {
+            // If the duration was set on this AnimatorSet, pass it along to all child animations
+            int size = mNodes.size();
+            for (int i = 0; i < size; i++) {
+                Node node = mNodes.get(i);
+                // TODO: don't set the duration of the timing-only nodes created by AnimatorSet to
+                // insert "play-after" delays
+                node.mAnimation.setDuration(mDuration);
+            }
+        }
+        mDelayAnim.setDuration(mStartDelay);
+    }
+
+    void start(final Node node) {
+        final Animator anim = node.mAnimation;
+        mPlayingSet.add(anim);
+        anim.addListener(mSetListener);
+        anim.start();
+    }
+
     @Override
     public AnimatorSet clone() {
         final AnimatorSet anim = (AnimatorSet) super.clone();
@@ -643,15 +640,13 @@ public final class AnimatorSet extends Animator {
          * and will populate any appropriate lists, when it is started.
          */
         final int nodeCount = mNodes.size();
-        anim.mNeedsSort = true;
         anim.mTerminated = false;
         anim.mStarted = false;
         anim.mPlayingSet = new ArrayList<Animator>();
         anim.mNodeMap = new ArrayMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>(nodeCount);
-        anim.mSortedNodes = new ArrayList<Node>(nodeCount);
         anim.mReversible = mReversible;
-        anim.mSetListener = null;
+        anim.mSetListener = new AnimatorSetListener(anim);
 
         // Walk through the old nodes list, cloning each node and adding it to the new nodemap.
         // One problem is that the old node dependencies point to nodes in the old AnimatorSet.
@@ -662,16 +657,10 @@ public final class AnimatorSet extends Animator {
             Node nodeClone = node.clone();
             node.mTmpClone = nodeClone;
             anim.mNodes.add(nodeClone);
-            anim.mNodeMap.put(nodeClone.animation, nodeClone);
-            // Clear out the dependencies in the clone; we'll set these up manually later
-            nodeClone.dependencies = null;
-            nodeClone.tmpDependencies = null;
-            nodeClone.nodeDependents = null;
-            nodeClone.nodeDependencies = null;
+            anim.mNodeMap.put(nodeClone.mAnimation, nodeClone);
 
-            // clear out any listeners that were set up by the AnimatorSet; these will
-            // be set up when the clone's nodes are sorted
-            final ArrayList<AnimatorListener> cloneListeners = nodeClone.animation.getListeners();
+            // clear out any listeners that were set up by the AnimatorSet
+            final ArrayList<AnimatorListener> cloneListeners = nodeClone.mAnimation.getListeners();
             if (cloneListeners != null) {
                 for (int i = cloneListeners.size() - 1; i >= 0; i--) {
                     final AnimatorListener listener = cloneListeners.get(i);
@@ -681,127 +670,37 @@ public final class AnimatorSet extends Animator {
                 }
             }
         }
+
+        anim.mRootNode = mRootNode.mTmpClone;
+        anim.mDelayAnim = (ValueAnimator) anim.mRootNode.mAnimation;
+
         // Now that we've cloned all of the nodes, we're ready to walk through their
         // dependencies, mapping the old dependencies to the new nodes
-        for (int n = 0; n < nodeCount; n++) {
-            final Node node = mNodes.get(n);
-            final Node clone = node.mTmpClone;
-            if (node.dependencies != null) {
-                clone.dependencies = new ArrayList<Dependency>(node.dependencies.size());
-                final int depSize = node.dependencies.size();
-                for (int i = 0; i < depSize; i ++) {
-                    final Dependency dependency = node.dependencies.get(i);
-                    Dependency cloneDependency = new Dependency(dependency.node.mTmpClone,
-                            dependency.rule);
-                    clone.dependencies.add(cloneDependency);
-                }
+        for (int i = 0; i < nodeCount; i++) {
+            Node node = mNodes.get(i);
+            // Update dependencies for node's clone
+            node.mTmpClone.mLatestParent = node.mLatestParent == null ?
+                    null : node.mLatestParent.mTmpClone;
+            int size = node.mChildNodes == null ? 0 : node.mChildNodes.size();
+            for (int j = 0; j < size; j++) {
+                node.mTmpClone.mChildNodes.set(j, node.mChildNodes.get(j).mTmpClone);
             }
-            if (node.nodeDependents != null) {
-                clone.nodeDependents = new ArrayList<Node>(node.nodeDependents.size());
-                for (Node dep : node.nodeDependents) {
-                    clone.nodeDependents.add(dep.mTmpClone);
-                }
+            size = node.mSiblings == null ? 0 : node.mSiblings.size();
+            for (int j = 0; j < size; j++) {
+                node.mTmpClone.mSiblings.set(j, node.mSiblings.get(j).mTmpClone);
             }
-            if (node.nodeDependencies != null) {
-                clone.nodeDependencies = new ArrayList<Node>(node.nodeDependencies.size());
-                for (Node dep : node.nodeDependencies) {
-                    clone.nodeDependencies.add(dep.mTmpClone);
-                }
+            size = node.mParents == null ? 0 : node.mParents.size();
+            for (int j = 0; j < size; j++) {
+                node.mTmpClone.mParents.set(j, node.mParents.get(j).mTmpClone);
             }
         }
+
         for (int n = 0; n < nodeCount; n++) {
             mNodes.get(n).mTmpClone = null;
         }
         return anim;
     }
 
-    /**
-     * This class is the mechanism by which animations are started based on events in other
-     * animations. If an animation has multiple dependencies on other animations, then
-     * all dependencies must be satisfied before the animation is started.
-     */
-    private static class DependencyListener implements AnimatorListener {
-
-        private AnimatorSet mAnimatorSet;
-
-        // The node upon which the dependency is based.
-        private Node mNode;
-
-        // The Dependency rule (WITH or AFTER) that the listener should wait for on
-        // the node
-        private int mRule;
-
-        public DependencyListener(AnimatorSet animatorSet, Node node, int rule) {
-            this.mAnimatorSet = animatorSet;
-            this.mNode = node;
-            this.mRule = rule;
-        }
-
-        /**
-         * Ignore cancel events for now. We may want to handle this eventually,
-         * to prevent follow-on animations from running when some dependency
-         * animation is canceled.
-         */
-        public void onAnimationCancel(Animator animation) {
-        }
-
-        /**
-         * An end event is received - see if this is an event we are listening for
-         */
-        public void onAnimationEnd(Animator animation) {
-            if (mRule == Dependency.AFTER) {
-                startIfReady(animation);
-            }
-        }
-
-        /**
-         * Ignore repeat events for now
-         */
-        public void onAnimationRepeat(Animator animation) {
-        }
-
-        /**
-         * A start event is received - see if this is an event we are listening for
-         */
-        public void onAnimationStart(Animator animation) {
-            if (mRule == Dependency.WITH) {
-                startIfReady(animation);
-            }
-        }
-
-        /**
-         * Check whether the event received is one that the node was waiting for.
-         * If so, mark it as complete and see whether it's time to start
-         * the animation.
-         * @param dependencyAnimation the animation that sent the event.
-         */
-        private void startIfReady(Animator dependencyAnimation) {
-            if (mAnimatorSet.mTerminated) {
-                // if the parent AnimatorSet was canceled, then don't start any dependent anims
-                return;
-            }
-            Dependency dependencyToRemove = null;
-            int numDependencies = mNode.tmpDependencies.size();
-            for (int i = 0; i < numDependencies; ++i) {
-                Dependency dependency = mNode.tmpDependencies.get(i);
-                if (dependency.rule == mRule &&
-                        dependency.node.animation == dependencyAnimation) {
-                    // rule fired - remove the dependency and listener and check to
-                    // see whether it's time to start the animation
-                    dependencyToRemove = dependency;
-                    dependencyAnimation.removeListener(this);
-                    break;
-                }
-            }
-            mNode.tmpDependencies.remove(dependencyToRemove);
-            if (mNode.tmpDependencies.size() == 0) {
-                // all dependencies satisfied: start the animation
-                mNode.animation.start();
-                mAnimatorSet.mPlayingSet.add(mNode.animation);
-            }
-        }
-
-    }
 
     private class AnimatorSetListener implements AnimatorListener {
 
@@ -812,14 +711,16 @@ public final class AnimatorSet extends Animator {
         }
 
         public void onAnimationCancel(Animator animation) {
+
             if (!mTerminated) {
                 // Listeners are already notified of the AnimatorSet canceling in cancel().
                 // The logic below only kicks in when animations end normally
-                if (mPlayingSet.size() == 0) {
-                    if (mListeners != null) {
-                        int numListeners = mListeners.size();
+                if (mAnimatorSet.mPlayingSet.size() == 0) {
+                    ArrayList<AnimatorListener> listeners = mAnimatorSet.mListeners;
+                    if (listeners != null) {
+                        int numListeners = listeners.size();
                         for (int i = 0; i < numListeners; ++i) {
-                            mListeners.get(i).onAnimationCancel(mAnimatorSet);
+                            listeners.get(i).onAnimationCancel(mAnimatorSet);
                         }
                     }
                 }
@@ -829,17 +730,26 @@ public final class AnimatorSet extends Animator {
         @SuppressWarnings("unchecked")
         public void onAnimationEnd(Animator animation) {
             animation.removeListener(this);
-            mPlayingSet.remove(animation);
+            mAnimatorSet.mPlayingSet.remove(animation);
             Node animNode = mAnimatorSet.mNodeMap.get(animation);
-            animNode.done = true;
+            animNode.mEnded = true;
+
             if (!mTerminated) {
+                List<Node> children = animNode.mChildNodes;
+                // Start children animations, if any.
+                int childrenSize = children == null ? 0 : children.size();
+                for (int i = 0; i < childrenSize; i++) {
+                    if (children.get(i).mLatestParent == animNode) {
+                        mAnimatorSet.start(children.get(i));
+                    }
+                }
                 // Listeners are already notified of the AnimatorSet ending in cancel() or
                 // end(); the logic below only kicks in when animations end normally
-                ArrayList<Node> sortedNodes = mAnimatorSet.mSortedNodes;
                 boolean allDone = true;
-                int numSortedNodes = sortedNodes.size();
-                for (int i = 0; i < numSortedNodes; ++i) {
-                    if (!sortedNodes.get(i).done) {
+                // Traverse the tree and find if there's any unfinished node
+                int size = mNodes.size();
+                for (int i = 0; i < size; i++) {
+                    if (!mNodes.get(i).mEnded) {
                         allDone = false;
                         break;
                     }
@@ -872,79 +782,6 @@ public final class AnimatorSet extends Animator {
     }
 
     /**
-     * This method sorts the current set of nodes, if needed. The sort is a simple
-     * DependencyGraph sort, which goes like this:
-     * - All nodes without dependencies become 'roots'
-     * - while roots list is not null
-     * -   for each root r
-     * -     add r to sorted list
-     * -     remove r as a dependency from any other node
-     * -   any nodes with no dependencies are added to the roots list
-     */
-    private void sortNodes() {
-        if (mNeedsSort) {
-            mSortedNodes.clear();
-            ArrayList<Node> roots = new ArrayList<Node>();
-            int numNodes = mNodes.size();
-            for (int i = 0; i < numNodes; ++i) {
-                Node node = mNodes.get(i);
-                if (node.dependencies == null || node.dependencies.size() == 0) {
-                    roots.add(node);
-                }
-            }
-            ArrayList<Node> tmpRoots = new ArrayList<Node>();
-            while (roots.size() > 0) {
-                int numRoots = roots.size();
-                for (int i = 0; i < numRoots; ++i) {
-                    Node root = roots.get(i);
-                    mSortedNodes.add(root);
-                    if (root.nodeDependents != null) {
-                        int numDependents = root.nodeDependents.size();
-                        for (int j = 0; j < numDependents; ++j) {
-                            Node node = root.nodeDependents.get(j);
-                            node.nodeDependencies.remove(root);
-                            if (node.nodeDependencies.size() == 0) {
-                                tmpRoots.add(node);
-                            }
-                        }
-                    }
-                }
-                roots.clear();
-                roots.addAll(tmpRoots);
-                tmpRoots.clear();
-            }
-            mNeedsSort = false;
-            if (mSortedNodes.size() != mNodes.size()) {
-                throw new IllegalStateException("Circular dependencies cannot exist"
-                        + " in AnimatorSet");
-            }
-        } else {
-            // Doesn't need sorting, but still need to add in the nodeDependencies list
-            // because these get removed as the event listeners fire and the dependencies
-            // are satisfied
-            int numNodes = mNodes.size();
-            for (int i = 0; i < numNodes; ++i) {
-                Node node = mNodes.get(i);
-                if (node.dependencies != null && node.dependencies.size() > 0) {
-                    int numDependencies = node.dependencies.size();
-                    for (int j = 0; j < numDependencies; ++j) {
-                        Dependency dependency = node.dependencies.get(j);
-                        if (node.nodeDependencies == null) {
-                            node.nodeDependencies = new ArrayList<Node>();
-                        }
-                        if (!node.nodeDependencies.contains(dependency.node)) {
-                            node.nodeDependencies.add(dependency.node);
-                        }
-                    }
-                }
-                // nodes are 'done' by default; they become un-done when started, and done
-                // again when ended
-                node.done = false;
-            }
-        }
-    }
-
-    /**
      * @hide
      */
     @Override
@@ -953,8 +790,10 @@ public final class AnimatorSet extends Animator {
             return false;
         }
         // Loop to make sure all the Nodes can reverse.
-        for (Node node : mNodes) {
-            if (!node.animation.canReverse() || node.animation.getStartDelay() > 0) {
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            if (!node.mAnimation.canReverse() || node.mAnimation.getStartDelay() > 0) {
                 return false;
             }
         }
@@ -967,8 +806,10 @@ public final class AnimatorSet extends Animator {
     @Override
     public void reverse() {
         if (canReverse()) {
-            for (Node node : mNodes) {
-                node.animation.reverse();
+            int size = mNodes.size();
+            for (int i = 0; i < size; i++) {
+                Node node = mNodes.get(i);
+                node.mAnimation.reverse();
             }
         }
     }
@@ -976,34 +817,194 @@ public final class AnimatorSet extends Animator {
     @Override
     public String toString() {
         String returnVal = "AnimatorSet@" + Integer.toHexString(hashCode()) + "{";
-        boolean prevNeedsSort = mNeedsSort;
-        sortNodes();
-        mNeedsSort = prevNeedsSort;
-        for (Node node : mSortedNodes) {
-            returnVal += "\n    " + node.animation.toString();
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            returnVal += "\n    " + node.mAnimation.toString();
         }
         return returnVal + "\n}";
     }
 
-    /**
-     * Dependency holds information about the node that some other node is
-     * dependent upon and the nature of that dependency.
-     *
-     */
-    private static class Dependency {
-        static final int WITH = 0; // dependent node must start with this dependency node
-        static final int AFTER = 1; // dependent node must start when this dependency node finishes
-
-        // The node that the other node with this Dependency is dependent upon
-        public Node node;
-
-        // The nature of the dependency (WITH or AFTER)
-        public int rule;
-
-        public Dependency(Node node, int rule) {
-            this.node = node;
-            this.rule = rule;
+    private void printChildCount() {
+        // Print out the child count through a level traverse.
+        ArrayList<Node> list = new ArrayList<>(mNodes.size());
+        list.add(mRootNode);
+        Log.d(TAG, "Current tree: ");
+        int index = 0;
+        while (index < list.size()) {
+            int listSize = list.size();
+            StringBuilder builder = new StringBuilder();
+            for (; index < listSize; index++) {
+                Node node = list.get(index);
+                int num = 0;
+                if (node.mChildNodes != null) {
+                    for (int i = 0; i < node.mChildNodes.size(); i++) {
+                        Node child = node.mChildNodes.get(i);
+                        if (child.mLatestParent == node) {
+                            num++;
+                            list.add(child);
+                        }
+                    }
+                }
+                builder.append(" ");
+                builder.append(num);
+            }
+            Log.d(TAG, builder.toString());
         }
+    }
+
+    private void createDependencyGraph() {
+        if (!mDependencyDirty) {
+            return;
+        }
+
+        // TODO: In addition to checking the dirty flag, we should also cache the duration for
+        // each animator, so that when the animator's duration is changed, we can detect that and
+        // update the dependency graph.
+
+        mDependencyDirty = false;
+        // Traverse all the siblings and make sure they have all the parents
+        int size = mNodes.size();
+        for (int i = 0; i < size; i++) {
+            mNodes.get(i).mParentsAdded = false;
+        }
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            if (node.mParentsAdded) {
+                continue;
+            }
+
+            node.mParentsAdded = true;
+            if (node.mSiblings == null) {
+                continue;
+            }
+
+            // Find all the siblings
+            findSiblings(node, node.mSiblings);
+            node.mSiblings.remove(node);
+
+            // Get parents from all siblings
+            int siblingSize = node.mSiblings.size();
+            for (int j = 0; j < siblingSize; j++) {
+                node.addParents(node.mSiblings.get(j).mParents);
+            }
+
+            // Now make sure all siblings share the same set of parents
+            for (int j = 0; j < siblingSize; j++) {
+                Node sibling = node.mSiblings.get(j);
+                sibling.addParents(node.mParents);
+                sibling.mParentsAdded = true;
+            }
+        }
+
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            if (node != mRootNode && node.mParents == null) {
+                node.addParent(mRootNode);
+            }
+        }
+
+        // Do a DFS on the tree
+        ArrayList<Node> visited = new ArrayList<Node>(mNodes.size());
+        // Assign start/end time
+        mRootNode.mStartTime = 0;
+        mRootNode.mEndTime = mDelayAnim.getDuration();
+        updatePlayTime(mRootNode, visited);
+
+        long maxEndTime = 0;
+        for (int i = 0; i < size; i++) {
+            Node node = mNodes.get(i);
+            if (node.mEndTime == DURATION_INFINITE) {
+                maxEndTime = DURATION_INFINITE;
+                break;
+            } else {
+                maxEndTime = node.mEndTime > maxEndTime ? node.mEndTime : maxEndTime;
+            }
+        }
+        mTotalDuration = maxEndTime;
+    }
+
+    /**
+     * Based on parent's start/end time, calculate children's start/end time. If cycle exists in
+     * the graph, all the nodes on the cycle will be marked to start at {@link #DURATION_INFINITE},
+     * meaning they will ever play.
+     */
+    private void updatePlayTime(Node parent,  ArrayList<Node> visited) {
+        if (parent.mChildNodes == null) {
+            return;
+        }
+
+        visited.add(parent);
+        int childrenSize = parent.mChildNodes.size();
+        for (int i = 0; i < childrenSize; i++) {
+            Node child = parent.mChildNodes.get(i);
+            int index = visited.indexOf(child);
+            if (index >= 0) {
+                // Child has been visited, cycle found. Mark all the nodes in the cycle.
+                for (int j = index; j < visited.size(); i++) {
+                    visited.get(j).mLatestParent = null;
+                    visited.get(j).mStartTime = DURATION_INFINITE;
+                    visited.get(j).mEndTime = DURATION_INFINITE;
+                }
+                child.mStartTime = DURATION_INFINITE;
+                child.mEndTime = DURATION_INFINITE;
+                child.mLatestParent = null;
+                Log.w(TAG, "Cycle found in AnimatorSet: " + this);
+                continue;
+            }
+
+            if (child.mStartTime != DURATION_INFINITE) {
+                if (parent.mEndTime == DURATION_INFINITE) {
+                    child.mLatestParent = parent;
+                    child.mStartTime = DURATION_INFINITE;
+                    child.mEndTime = DURATION_INFINITE;
+                } else {
+                    if (parent.mEndTime >= child.mStartTime) {
+                        child.mLatestParent = parent;
+                        child.mStartTime = parent.mEndTime;
+                    }
+
+                    long duration = child.mAnimation.getTotalDuration();
+                    child.mEndTime = duration == DURATION_INFINITE ?
+                            DURATION_INFINITE : child.mStartTime + duration;
+                }
+            }
+            updatePlayTime(child, visited);
+        }
+        visited.remove(parent);
+    }
+
+    // Recursively find all the siblings
+    private void findSiblings(Node node, ArrayList<Node> siblings) {
+        if (!siblings.contains(node)) {
+            siblings.add(node);
+            if (node.mSiblings == null) {
+                return;
+            }
+            for (int i = 0; i < node.mSiblings.size(); i++) {
+                findSiblings(node.mSiblings.get(i), siblings);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public long getTotalDuration() {
+        updateAnimatorsDuration();
+        createDependencyGraph();
+        return mTotalDuration;
+    }
+
+    private Node getNodeForAnimation(Animator anim) {
+        Node node = mNodeMap.get(anim);
+        if (node == null) {
+            node = new Node(anim);
+            mNodeMap.put(anim, node);
+            mNodes.add(node);
+        }
+        return node;
     }
 
     /**
@@ -1013,51 +1014,47 @@ public final class AnimatorSet extends Animator {
      * well as dependencies of other nodes upon this (in the nodeDependents list).
      */
     private static class Node implements Cloneable {
-        public Animator animation;
+        Animator mAnimation;
 
         /**
-         *  These are the dependencies that this node's animation has on other
-         *  nodes. For example, if this node's animation should begin with some
-         *  other animation ends, then there will be an item in this node's
-         *  dependencies list for that other animation's node.
+         * Child nodes are the nodes associated with animations that will be played immediately
+         * after current node.
          */
-        public ArrayList<Dependency> dependencies = null;
-
-        /**
-         * tmpDependencies is a runtime detail. We use the dependencies list for sorting.
-         * But we also use the list to keep track of when multiple dependencies are satisfied,
-         * but removing each dependency as it is satisfied. We do not want to remove
-         * the dependency itself from the list, because we need to retain that information
-         * if the AnimatorSet is launched in the future. So we create a copy of the dependency
-         * list when the AnimatorSet starts and use this tmpDependencies list to track the
-         * list of satisfied dependencies.
-         */
-        public ArrayList<Dependency> tmpDependencies = null;
-
-        /**
-         * nodeDependencies is just a list of the nodes that this Node is dependent upon.
-         * This information is used in sortNodes(), to determine when a node is a root.
-         */
-        public ArrayList<Node> nodeDependencies = null;
-
-        /**
-         * nodeDepdendents is the list of nodes that have this node as a dependency. This
-         * is a utility field used in sortNodes to facilitate removing this node as a
-         * dependency when it is a root node.
-         */
-        public ArrayList<Node> nodeDependents = null;
-
-        /**
-         * Flag indicating whether the animation in this node is finished. This flag
-         * is used by AnimatorSet to check, as each animation ends, whether all child animations
-         * are done and it's time to send out an end event for the entire AnimatorSet.
-         */
-        public boolean done = false;
+        ArrayList<Node> mChildNodes = null;
 
         /**
          * Temporary field to hold the clone in AnimatorSet#clone. Cleaned after clone is complete
          */
         private Node mTmpClone = null;
+
+        /**
+         * Flag indicating whether the animation in this node is finished. This flag
+         * is used by AnimatorSet to check, as each animation ends, whether all child animations
+         * are mEnded and it's time to send out an end event for the entire AnimatorSet.
+         */
+        boolean mEnded = false;
+
+        /**
+         * Nodes with animations that are defined to play simultaneously with the animation
+         * associated with this current node.
+         */
+        ArrayList<Node> mSiblings;
+
+        /**
+         * Parent nodes are the nodes with animations preceding current node's animation. Parent
+         * nodes here are derived from user defined animation sequence.
+         */
+        ArrayList<Node> mParents;
+
+        /**
+         * Latest parent is the parent node associated with a animation that finishes after all
+         * the other parents' animations.
+         */
+        Node mLatestParent = null;
+
+        boolean mParentsAdded = false;
+        long mStartTime = 0;
+        long mEndTime = 0;
 
         /**
          * Constructs the Node with the animation that it encapsulates. A Node has no
@@ -1067,39 +1064,61 @@ public final class AnimatorSet extends Animator {
          * @param animation The animation that the Node encapsulates.
          */
         public Node(Animator animation) {
-            this.animation = animation;
-        }
-
-        /**
-         * Add a dependency to this Node. The dependency includes information about the
-         * node that this node is dependency upon and the nature of the dependency.
-         * @param dependency
-         */
-        public void addDependency(Dependency dependency) {
-            if (dependencies == null) {
-                dependencies = new ArrayList<Dependency>();
-                nodeDependencies = new ArrayList<Node>();
-            }
-            dependencies.add(dependency);
-            if (!nodeDependencies.contains(dependency.node)) {
-                nodeDependencies.add(dependency.node);
-            }
-            Node dependencyNode = dependency.node;
-            if (dependencyNode.nodeDependents == null) {
-                dependencyNode.nodeDependents = new ArrayList<Node>();
-            }
-            dependencyNode.nodeDependents.add(this);
+            this.mAnimation = animation;
         }
 
         @Override
         public Node clone() {
             try {
                 Node node = (Node) super.clone();
-                node.animation = animation.clone();
-                node.done = false;
+                node.mAnimation = mAnimation.clone();
+                if (mChildNodes != null) {
+                    node.mChildNodes = new ArrayList<>(mChildNodes);
+                }
+                node.mEnded = false;
                 return node;
             } catch (CloneNotSupportedException e) {
                throw new AssertionError();
+            }
+        }
+
+        void addChild(Node node) {
+            if (mChildNodes == null) {
+                mChildNodes = new ArrayList<>();
+            }
+            if (!mChildNodes.contains(node)) {
+                mChildNodes.add(node);
+                node.addParent(this);
+            }
+        }
+
+        public void addSibling(Node node) {
+            if (mSiblings == null) {
+                mSiblings = new ArrayList<Node>();
+            }
+            if (!mSiblings.contains(node)) {
+                mSiblings.add(node);
+                node.addSibling(this);
+            }
+        }
+
+        public void addParent(Node node) {
+            if (mParents == null) {
+                mParents =  new ArrayList<Node>();
+            }
+            if (!mParents.contains(node)) {
+                mParents.add(node);
+                node.addChild(this);
+            }
+        }
+
+        public void addParents(ArrayList<Node> parents) {
+            if (parents == null) {
+                return;
+            }
+            int size = parents.size();
+            for (int i = 0; i < size; i++) {
+                addParent(parents.get(i));
             }
         }
     }
@@ -1172,12 +1191,8 @@ public final class AnimatorSet extends Animator {
          * the other methods of this Builder object.
          */
         Builder(Animator anim) {
-            mCurrentNode = mNodeMap.get(anim);
-            if (mCurrentNode == null) {
-                mCurrentNode = new Node(anim);
-                mNodeMap.put(anim, mCurrentNode);
-                mNodes.add(mCurrentNode);
-            }
+            mDependencyDirty = true;
+            mCurrentNode = getNodeForAnimation(anim);
         }
 
         /**
@@ -1188,14 +1203,8 @@ public final class AnimatorSet extends Animator {
          * {@link AnimatorSet#play(Animator)} method starts.
          */
         public Builder with(Animator anim) {
-            Node node = mNodeMap.get(anim);
-            if (node == null) {
-                node = new Node(anim);
-                mNodeMap.put(anim, node);
-                mNodes.add(node);
-            }
-            Dependency dependency = new Dependency(mCurrentNode, Dependency.WITH);
-            node.addDependency(dependency);
+            Node node = getNodeForAnimation(anim);
+            mCurrentNode.addSibling(node);
             return this;
         }
 
@@ -1209,14 +1218,8 @@ public final class AnimatorSet extends Animator {
          */
         public Builder before(Animator anim) {
             mReversible = false;
-            Node node = mNodeMap.get(anim);
-            if (node == null) {
-                node = new Node(anim);
-                mNodeMap.put(anim, node);
-                mNodes.add(node);
-            }
-            Dependency dependency = new Dependency(mCurrentNode, Dependency.AFTER);
-            node.addDependency(dependency);
+            Node node = getNodeForAnimation(anim);
+            mCurrentNode.addChild(node);
             return this;
         }
 
@@ -1230,14 +1233,8 @@ public final class AnimatorSet extends Animator {
          */
         public Builder after(Animator anim) {
             mReversible = false;
-            Node node = mNodeMap.get(anim);
-            if (node == null) {
-                node = new Node(anim);
-                mNodeMap.put(anim, node);
-                mNodes.add(node);
-            }
-            Dependency dependency = new Dependency(node, Dependency.AFTER);
-            mCurrentNode.addDependency(dependency);
+            Node node = getNodeForAnimation(anim);
+            mCurrentNode.addParent(node);
             return this;
         }
 
