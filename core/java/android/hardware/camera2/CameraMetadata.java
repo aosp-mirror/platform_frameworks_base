@@ -1935,21 +1935,21 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Same as FACE_PRIORITY scene mode, except that the camera
-     * device will choose higher sensivity values ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity})
+     * device will choose higher sensitivity values ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity})
      * under low light conditions.</p>
      * <p>The camera device may be tuned to expose the images in a reduced
      * sensitivity range to produce the best quality images. For example,
      * if the {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange} gives range of [100, 1600],
      * the camera device auto-exposure routine tuning process may limit the actual
-     * exposure sensivity range to [100, 1200] to ensure that the noise level isn't
-     * exessive to compromise the image quality. Under this situation, the image under
+     * exposure sensitivity range to [100, 1200] to ensure that the noise level isn't
+     * exessive in order to preserve the image quality. Under this situation, the image under
      * low light may be under-exposed when the sensor max exposure time (bounded by the
      * {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange} when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is one of the
-     * ON_* modes) and effecitve max sensitivity are reached. This scene mode allows the
+     * ON_* modes) and effective max sensitivity are reached. This scene mode allows the
      * camera device auto-exposure routine to increase the sensitivity up to the max
      * sensitivity specified by {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange} when the scene is too
      * dark and the max exposure time is reached. The captured images may be noisier
-     * compared with the images captured in normal FACE_PRIORITY mode, therefore, it is
+     * compared with the images captured in normal FACE_PRIORITY mode; therefore, it is
      * recommended that the application only use this scene mode when it is capable of
      * reducing the noise level of the captured images.</p>
      * <p>Unlike the other scene modes, {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
