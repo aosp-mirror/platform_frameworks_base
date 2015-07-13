@@ -25,7 +25,9 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.NetworkRequest;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -34,6 +36,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.systemui.R;
@@ -210,9 +213,17 @@ public class SecurityControllerImpl implements SecurityController {
         try {
             for (UserInfo user : mUserManager.getUsers()) {
                 VpnConfig cfg = mConnectivityManagerService.getVpnConfig(user.id);
-                if (cfg != null) {
-                    vpns.put(user.id, cfg);
+                if (cfg == null) {
+                    continue;
+                } else if (cfg.legacy) {
+                    // Legacy VPNs should do nothing if the network is disconnected. Third-party
+                    // VPN warnings need to continue as traffic can still go to the app.
+                    LegacyVpnInfo legacyVpn = mConnectivityManagerService.getLegacyVpnInfo(user.id);
+                    if (legacyVpn == null || legacyVpn.state != LegacyVpnInfo.STATE_CONNECTED) {
+                        continue;
+                    }
                 }
+                vpns.put(user.id, cfg);
             }
         } catch (RemoteException rme) {
             // Roll back to previous state
