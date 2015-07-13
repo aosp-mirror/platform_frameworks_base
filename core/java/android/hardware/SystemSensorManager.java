@@ -123,7 +123,10 @@ public class SystemSensorManager extends SensorManager {
             SensorEventQueue queue = mSensorListeners.get(listener);
             if (queue == null) {
                 Looper looper = (handler != null) ? handler.getLooper() : mMainLooper;
-                queue = new SensorEventQueue(listener, looper, this);
+                final String fullClassName = listener.getClass().getEnclosingClass() != null ?
+                    listener.getClass().getEnclosingClass().getName() :
+                    listener.getClass().getName();
+                queue = new SensorEventQueue(listener, looper, this, fullClassName);
                 if (!queue.addSensor(sensor, delayUs, maxBatchReportLatencyUs)) {
                     queue.dispose();
                     return false;
@@ -166,12 +169,17 @@ public class SystemSensorManager extends SensorManager {
     protected boolean requestTriggerSensorImpl(TriggerEventListener listener, Sensor sensor) {
         if (sensor == null) throw new IllegalArgumentException("sensor cannot be null");
 
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+
         if (sensor.getReportingMode() != Sensor.REPORTING_MODE_ONE_SHOT) return false;
 
         synchronized (mTriggerListeners) {
             TriggerEventQueue queue = mTriggerListeners.get(listener);
             if (queue == null) {
-                queue = new TriggerEventQueue(listener, mMainLooper, this);
+                final String fullClassName = listener.getClass().getEnclosingClass() != null ?
+                    listener.getClass().getEnclosingClass().getName() :
+                    listener.getClass().getName();
+                queue = new TriggerEventQueue(listener, mMainLooper, this, fullClassName);
                 if (!queue.addSensor(sensor, 0, 0)) {
                     queue.dispose();
                     return false;
@@ -234,7 +242,8 @@ public class SystemSensorManager extends SensorManager {
                 }
                 // Initialize a client for data_injection.
                 if (mInjectEventQueue == null) {
-                    mInjectEventQueue = new InjectEventQueue(mMainLooper, this);
+                    mInjectEventQueue = new InjectEventQueue(mMainLooper, this,
+                            mContext.getPackageName());
                 }
             } else {
                 // If data injection is being disabled clean up the native resources.
@@ -296,10 +305,11 @@ public class SystemSensorManager extends SensorManager {
         protected static final int OPERATING_MODE_NORMAL = 0;
         protected static final int OPERATING_MODE_DATA_INJECTION = 1;
 
-        BaseEventQueue(Looper looper, SystemSensorManager manager, int mode) {
+        BaseEventQueue(Looper looper, SystemSensorManager manager, int mode, String packageName) {
+            if (packageName == null) packageName = "";
             nSensorEventQueue = nativeInitBaseEventQueue(manager.mNativeInstance,
                     new WeakReference<>(this), looper.getQueue(), mScratch,
-                    manager.mContext.getPackageName(), mode, manager.mContext.getOpPackageName());
+                    packageName, mode, manager.mContext.getOpPackageName());
             mCloseGuard.open("dispose");
             mManager = manager;
         }
@@ -419,8 +429,8 @@ public class SystemSensorManager extends SensorManager {
         private final SparseArray<SensorEvent> mSensorsEvents = new SparseArray<SensorEvent>();
 
         public SensorEventQueue(SensorEventListener listener, Looper looper,
-                SystemSensorManager manager) {
-            super(looper, manager, OPERATING_MODE_NORMAL);
+                SystemSensorManager manager, String packageName) {
+            super(looper, manager, OPERATING_MODE_NORMAL, packageName);
             mListener = listener;
         }
 
@@ -486,8 +496,8 @@ public class SystemSensorManager extends SensorManager {
         private final SparseArray<TriggerEvent> mTriggerEvents = new SparseArray<TriggerEvent>();
 
         public TriggerEventQueue(TriggerEventListener listener, Looper looper,
-                SystemSensorManager manager) {
-            super(looper, manager, OPERATING_MODE_NORMAL);
+                SystemSensorManager manager, String packageName) {
+            super(looper, manager, OPERATING_MODE_NORMAL, packageName);
             mListener = listener;
         }
 
@@ -540,8 +550,8 @@ public class SystemSensorManager extends SensorManager {
     }
 
     final class InjectEventQueue extends BaseEventQueue {
-        public InjectEventQueue(Looper looper, SystemSensorManager manager) {
-            super(looper, manager, OPERATING_MODE_DATA_INJECTION);
+        public InjectEventQueue(Looper looper, SystemSensorManager manager, String packageName) {
+            super(looper, manager, OPERATING_MODE_DATA_INJECTION, packageName);
         }
 
         int injectSensorData(int handle, float[] values,int accuracy, long timestamp) {
