@@ -134,7 +134,8 @@ final class DockObserver extends SystemService {
                 if (mAllowTheaterModeWakeFromDock
                         || Settings.Global.getInt(getContext().getContentResolver(),
                             Settings.Global.THEATER_MODE_ON, 0) == 0) {
-                    mPowerManager.wakeUp(SystemClock.uptimeMillis());
+                    mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                            "android.server:DOCK");
                 }
                 updateLocked();
             }

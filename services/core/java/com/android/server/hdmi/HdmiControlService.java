@@ -1969,7 +1969,7 @@ public final class HdmiControlService extends SystemService {
     void wakeUp() {
         assertRunOnServiceThread();
         mWakeUpMessageReceived = true;
-        mPowerManager.wakeUp(SystemClock.uptimeMillis());
+        mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.server.hdmi:WAKE");
         // PowerManger will send the broadcast Intent.ACTION_SCREEN_ON and after this gets
         // the intent, the sequence will continue at onWakeUp().
     }

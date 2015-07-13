@@ -472,6 +472,26 @@ final class Notifier {
     }
 
     /**
+     * Called when the screen has turned on.
+     */
+    public void onWakeUp(String reason, int reasonUid, String opPackageName, int opUid) {
+        if (DEBUG) {
+            Slog.d(TAG, "onWakeUp: event=" + reason + ", reasonUid=" + reasonUid
+                    + " opPackageName=" + opPackageName + " opUid=" + opUid);
+        }
+
+        try {
+            mBatteryStats.noteWakeUp(reason, reasonUid);
+            if (opPackageName != null) {
+                mAppOps.noteOperation(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName);
+            }
+        } catch (RemoteException ex) {
+            // Ignore
+        }
+
+    }
+
+    /**
      * Called when wireless charging has started so as to provide user feedback.
      */
     public void onWirelessChargingStarted() {
