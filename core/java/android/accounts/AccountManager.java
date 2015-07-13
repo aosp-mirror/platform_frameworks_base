@@ -43,6 +43,7 @@ import com.google.android.collect.Maps;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -2259,6 +2260,9 @@ public class AccountManager {
     }
 
     /**
+     * Deprecated in favor of {@link #newChooseAccountIntent(Account, List, String[], String,
+     * String, String[], Bundle)}.
+     *
      * Returns an intent to an {@link Activity} that prompts the user to choose from a list of
      * accounts.
      * The caller will then typically start the activity by calling
@@ -2273,14 +2277,13 @@ public class AccountManager {
      * null, null, null);</pre>
      * @param selectedAccount if specified, indicates that the {@link Account} is the currently
      * selected one, according to the caller's definition of selected.
-     * @param allowableAccounts an optional {@link ArrayList} of accounts that are allowed to be
+     * @param allowableAccounts an optional {@link List} of accounts that are allowed to be
      * shown. If not specified then this field will not limit the displayed accounts.
      * @param allowableAccountTypes an optional string array of account types. These are used
      * both to filter the shown accounts and to filter the list of account types that are shown
      * when adding an account. If not specified then this field will not limit the displayed
      * account types when adding an account.
-     * @param alwaysPromptForAccount if set the account chooser screen is always shown, otherwise
-     * it is only shown when there is more than one account from which to choose
+     * @param alwaysPromptForAccount boolean that is ignored.
      * @param descriptionOverrideText if non-null this string is used as the description in the
      * accounts chooser screen rather than the default
      * @param addAccountAuthTokenType this string is passed as the {@link #addAccount}
@@ -2291,10 +2294,61 @@ public class AccountManager {
      * parameter
      * @return an {@link Intent} that can be used to launch the ChooseAccount activity flow.
      */
-    static public Intent newChooseAccountIntent(Account selectedAccount,
+    @Deprecated
+    static public Intent newChooseAccountIntent(
+            Account selectedAccount,
             ArrayList<Account> allowableAccounts,
             String[] allowableAccountTypes,
             boolean alwaysPromptForAccount,
+            String descriptionOverrideText,
+            String addAccountAuthTokenType,
+            String[] addAccountRequiredFeatures,
+            Bundle addAccountOptions) {
+        return newChooseAccountIntent(
+                selectedAccount,
+                allowableAccounts,
+                allowableAccountTypes,
+                descriptionOverrideText,
+                addAccountAuthTokenType,
+                addAccountRequiredFeatures,
+                addAccountOptions);
+    }
+
+    /**
+     * Returns an intent to an {@link Activity} that prompts the user to choose from a list of
+     * accounts.
+     * The caller will then typically start the activity by calling
+     * <code>startActivityForResult(intent, ...);</code>.
+     * <p>
+     * On success the activity returns a Bundle with the account name and type specified using
+     * keys {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE}.
+     * <p>
+     * The most common case is to call this with one account type, e.g.:
+     * <p>
+     * <pre>  newChooseAccountIntent(null, null, new String[]{"com.google"}, null, null, null,
+     * null);</pre>
+     * @param selectedAccount if specified, indicates that the {@link Account} is the currently
+     * selected one, according to the caller's definition of selected.
+     * @param allowableAccounts an optional {@link List} of accounts that are allowed to be
+     * shown. If not specified then this field will not limit the displayed accounts.
+     * @param allowableAccountTypes an optional string array of account types. These are used
+     * both to filter the shown accounts and to filter the list of account types that are shown
+     * when adding an account. If not specified then this field will not limit the displayed
+     * account types when adding an account.
+     * @param descriptionOverrideText if non-null this string is used as the description in the
+     * accounts chooser screen rather than the default
+     * @param addAccountAuthTokenType this string is passed as the {@link #addAccount}
+     * authTokenType parameter
+     * @param addAccountRequiredFeatures this string array is passed as the {@link #addAccount}
+     * requiredFeatures parameter
+     * @param addAccountOptions This {@link Bundle} is passed as the {@link #addAccount} options
+     * parameter
+     * @return an {@link Intent} that can be used to launch the ChooseAccount activity flow.
+     */
+    static public Intent newChooseAccountIntent(
+            Account selectedAccount,
+            List<Account> allowableAccounts,
+            String[] allowableAccountTypes,
             String descriptionOverrideText,
             String addAccountAuthTokenType,
             String[] addAccountRequiredFeatures,
@@ -2305,14 +2359,12 @@ public class AccountManager {
         intent.setClassName(componentName.getPackageName(),
                 componentName.getClassName());
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST,
-                allowableAccounts);
+                new ArrayList<Account>(allowableAccounts));
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
                 allowableAccountTypes);
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE,
                 addAccountOptions);
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_SELECTED_ACCOUNT, selectedAccount);
-        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT,
-                alwaysPromptForAccount);
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_DESCRIPTION_TEXT_OVERRIDE,
                 descriptionOverrideText);
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING,
