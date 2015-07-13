@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"සැණෙළිය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ඔබගේ මැදිහත් වීමක් නොමැතිව දුරකථන අංක ඇමතීමට යෙදුමට අවසර දෙන්න. මෙහි ප්‍රතිඑලය වන්නේ අනපේක්ෂිත අයකිරීම් හෝ ඇමතුම් ඇතිවීමයි. මෙයන් හදිසි අංක වලට ඇමතුම් ගැනීමට යෙදුමට අවසර නොදෙන බවට සටහන් කරගන්න. ඔබගේ අනුදැනුමක් නොමැතිව ඇමතුම් ගැනීමෙන් අනිෂ්ට යෙදුම් ඔබගේ මුදල් නිකරුණේ වැය කරයි."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS ඇමතුම් සේවාවට පිවිසෙන්න"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ඔබේ මැදිහත්වීමකින් තොරව ඇමතුම් සිදු කිරීමට  IMS සේවාව භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත පිවිසීමට යෙදුමට අවසර දෙන්න. ඇමතුම සක්‍රිය වුවත් සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
