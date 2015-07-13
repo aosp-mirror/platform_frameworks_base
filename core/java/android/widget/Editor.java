@@ -16,6 +16,12 @@
 
 package android.widget;
 
+import java.text.BreakIterator;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+
 import android.R;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -106,12 +112,6 @@ import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.EditableInputConnection;
 
-import java.text.BreakIterator;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-
 
 /**
  * Helper class used by TextView to handle editable text views.
@@ -127,6 +127,7 @@ public class Editor {
     private static int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
     private static final float LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS = 0.5f;
     private static final int UNSET_X_VALUE = -1;
+    private static final int UNSET_LINE = -1;
     // Tag used when the Editor maintains its own separate UndoManager.
     private static final String UNDO_OWNER_TAG = "Editor";
 
@@ -3510,7 +3511,11 @@ public class Editor {
         // Minimum touch target size for handles
         private int mMinSize;
         // Indicates the line of text that the handle is on.
-        protected int mPrevLine = -1;
+        protected int mPrevLine = UNSET_LINE;
+        // Indicates the line of text that the user was touching. This can differ from mPrevLine
+        // when selecting text when the handles jump to the end / start of words which may be on
+        // a different line.
+        protected int mPreviousLineTouched = UNSET_LINE;
 
         public HandleView(Drawable drawableLtr, Drawable drawableRtl) {
             super(mTextView.getContext());
@@ -3801,6 +3806,7 @@ public class Editor {
                     mLastParentX = positionListener.getPositionX();
                     mLastParentY = positionListener.getPositionY();
                     mIsDragging = true;
+                    mPreviousLineTouched = UNSET_LINE;
                     break;
                 }
 
@@ -4015,8 +4021,12 @@ public class Editor {
             Layout layout = mTextView.getLayout();
             int offset;
             if (layout != null) {
-                int currLine = getCurrentLineAdjustedForSlop(layout, mPrevLine, y);
+                if (mPreviousLineTouched == UNSET_LINE) {
+                    mPreviousLineTouched = mTextView.getLineAtCoordinate(y);
+                }
+                int currLine = getCurrentLineAdjustedForSlop(layout, mPreviousLineTouched, y);
                 offset = mTextView.getOffsetAtCoordinate(currLine, x);
+                mPreviousLineTouched = currLine;
             } else {
                 offset = mTextView.getOffsetForPosition(x, y);
             }
@@ -4092,9 +4102,13 @@ public class Editor {
                 return;
             }
 
+            if (mPreviousLineTouched == UNSET_LINE) {
+                mPreviousLineTouched = mTextView.getLineAtCoordinate(y);
+            }
+
             boolean positionCursor = false;
             final int selectionEnd = mTextView.getSelectionEnd();
-            int currLine = getCurrentLineAdjustedForSlop(layout, mPrevLine, y);
+            int currLine = getCurrentLineAdjustedForSlop(layout, mPreviousLineTouched, y);
             int initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
 
             if (initialOffset >= selectionEnd) {
@@ -4138,9 +4152,9 @@ public class Editor {
             } else {
                 final float xDiff = x - mPrevX;
                 if (atRtl) {
-                    isExpanding = xDiff > 0 || currLine > mPrevLine;
+                    isExpanding = xDiff > 0 || currLine > mPreviousLineTouched;
                 } else {
-                    isExpanding = xDiff < 0 || currLine < mPrevLine;
+                    isExpanding = xDiff < 0 || currLine < mPreviousLineTouched;
                 }
             }
 
@@ -4204,6 +4218,7 @@ public class Editor {
                     offset = getNextCursorOffset(selectionEnd, false);
                     mTouchWordDelta = 0.0f;
                 }
+                mPreviousLineTouched = currLine;
                 positionAtCursorOffset(offset, false);
             }
             mPrevX = x;
@@ -4218,8 +4233,9 @@ public class Editor {
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             boolean superResult = super.onTouchEvent(event);
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                // Reset the touch word offset when the user has lifted their finger.
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                // Reset the touch word offset and x value when the user
+                // re-engages the handle.
                 mTouchWordDelta = 0.0f;
                 mPrevX = UNSET_X_VALUE;
             }
@@ -4280,9 +4296,13 @@ public class Editor {
                 return;
             }
 
+            if (mPreviousLineTouched == UNSET_LINE) {
+                mPreviousLineTouched = mTextView.getLineAtCoordinate(y);
+            }
+
             boolean positionCursor = false;
             final int selectionStart = mTextView.getSelectionStart();
-            int currLine = getCurrentLineAdjustedForSlop(layout, mPrevLine, y);
+            int currLine = getCurrentLineAdjustedForSlop(layout, mPreviousLineTouched, y);
             int initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
 
             if (initialOffset <= selectionStart) {
@@ -4326,9 +4346,9 @@ public class Editor {
             } else {
                 final float xDiff = x - mPrevX;
                 if (atRtl) {
-                    isExpanding = xDiff < 0 || currLine < mPrevLine;
+                    isExpanding = xDiff < 0 || currLine < mPreviousLineTouched;
                 } else {
-                    isExpanding = xDiff > 0 || currLine > mPrevLine;
+                    isExpanding = xDiff > 0 || currLine > mPreviousLineTouched;
                 }
             }
 
@@ -4392,6 +4412,7 @@ public class Editor {
                     offset = getNextCursorOffset(selectionStart, true);
                     mTouchWordDelta = 0.0f;
                 }
+                mPreviousLineTouched = currLine;
                 positionAtCursorOffset(offset, false);
             }
             mPrevX = x;
@@ -4406,8 +4427,9 @@ public class Editor {
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             boolean superResult = super.onTouchEvent(event);
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                // Reset the touch word offset when the user has lifted their finger.
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                // Reset the touch word offset and x value when the user
+                // re-engages the handle.
                 mTouchWordDelta = 0.0f;
                 mPrevX = UNSET_X_VALUE;
             }
