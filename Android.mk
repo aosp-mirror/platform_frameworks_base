@@ -667,7 +667,8 @@ dirs_to_check_apis := \
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 dirs_to_document := \
 	$(dirs_to_check_apis) \
-  $(addprefix ../../, $(FRAMEWORKS_SUPPORT_JAVA_SRC_DIRS))
+  $(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS)) \
+  $(addprefix ../../, $(FRAMEWORKS_SUPPORT_JAVA_SRC_DIRS)) \
 
 # These are relative to frameworks/base
 html_dirs := \
