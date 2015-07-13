@@ -4438,10 +4438,16 @@ public class Editor {
     }
 
     private int getCurrentLineAdjustedForSlop(Layout layout, int prevLine, float y) {
+        final int trueLine = mTextView.getLineAtCoordinate(y);
         if (layout == null || prevLine > layout.getLineCount()
                 || layout.getLineCount() <= 0 || prevLine < 0) {
             // Invalid parameters, just return whatever line is at y.
-            return mTextView.getLineAtCoordinate(y);
+            return trueLine;
+        }
+
+        if (Math.abs(trueLine - prevLine) >= 2) {
+            // Only stick to lines if we're within a line of the previous selection.
+            return trueLine;
         }
 
         final float verticalOffset = mTextView.viewportToContentVerticalOffset();
