@@ -126,45 +126,6 @@ import android.graphics.Rect;
  * @hide
  */
 public class RenderNode {
-    /**
-     * Flag used when calling
-     * {@link DisplayListCanvas#drawRenderNode
-     * When this flag is set, draw operations lying outside of the bounds of the
-     * display list will be culled early. It is recommeneded to always set this
-     * flag.
-     */
-    public static final int FLAG_CLIP_CHILDREN = 0x1;
-
-    // NOTE: The STATUS_* values *must* match the enum in DrawGlInfo.h
-
-    /**
-     * Indicates that the display list is done drawing.
-     *
-     * @see DisplayListCanvas#drawRenderNode(RenderNode, int)
-     */
-    public static final int STATUS_DONE = 0x0;
-
-    /**
-     * Indicates that the display list needs another drawing pass.
-     *
-     * @see DisplayListCanvas#drawRenderNode(RenderNode, int)
-     */
-    public static final int STATUS_DRAW = 0x1;
-
-    /**
-     * Indicates that the display list needs to re-execute its GL functors.
-     *
-     * @see DisplayListCanvas#drawRenderNode(RenderNode, int)
-     * @see DisplayListCanvas#callDrawGLFunction2(long)
-     */
-    public static final int STATUS_INVOKE = 0x2;
-
-    /**
-     * Indicates that the display list performed GL drawing operations.
-     *
-     * @see DisplayListCanvas#drawRenderNode(RenderNode, int)
-     */
-    public static final int STATUS_DREW = 0x4;
 
     private boolean mValid;
     // Do not access directly unless you are ThreadedRenderer
@@ -225,11 +186,7 @@ public class RenderNode {
      * @see #isValid()
      */
     public DisplayListCanvas start(int width, int height) {
-        DisplayListCanvas canvas = DisplayListCanvas.obtain(this);
-        canvas.setViewport(width, height);
-        // The dirty rect should always be null for a display list
-        canvas.onPreDraw(null);
-        return canvas;
+        return DisplayListCanvas.obtain(this, width, height);
     }
 
     /**
@@ -241,7 +198,6 @@ public class RenderNode {
      * @see #isValid()
      */
     public void end(DisplayListCanvas canvas) {
-        canvas.onPostDraw();
         long renderNodeData = canvas.finishRecording();
         nSetDisplayListData(mNativeRenderNode, renderNodeData);
         canvas.recycle();
