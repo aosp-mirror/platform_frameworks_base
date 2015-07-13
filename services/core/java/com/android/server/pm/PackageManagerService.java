@@ -3458,8 +3458,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             mSettings.writeRuntimePermissionsForUserLPr(userId, false);
         }
 
-        if (READ_EXTERNAL_STORAGE.equals(name)
-                || WRITE_EXTERNAL_STORAGE.equals(name)) {
+        // Only need to do this if user is initialized. Otherwise it's a new user
+        // and there are no processes running as the user yet and there's no need
+        // to make an expensive call to remount processes for the changed permissions.
+        if ((READ_EXTERNAL_STORAGE.equals(name)
+                || WRITE_EXTERNAL_STORAGE.equals(name))
+                && sUserManager.isInitialized(userId)) {
             final long token = Binder.clearCallingIdentity();
             try {
                 final StorageManager storage = mContext.getSystemService(StorageManager.class);
@@ -15965,16 +15969,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    void newUserCreatedLILPw(final int userHandle) {
-        // We cannot grant the default permissions with a lock held as
-        // we query providers from other components for default handlers
-        // such as enabled IMEs, etc.
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mDefaultPermissionPolicy.grantDefaultPermissions(userHandle);
-            }
-        });
+    void newUserCreated(final int userHandle) {
+        mDefaultPermissionPolicy.grantDefaultPermissions(userHandle);
     }
 
     @Override

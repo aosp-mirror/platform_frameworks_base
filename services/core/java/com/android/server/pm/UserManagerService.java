@@ -1220,6 +1220,7 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo = null;
+        final int userId;
         try {
             synchronized (mInstallLock) {
                 synchronized (mPackagesLock) {
@@ -1240,7 +1241,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (isGuest && findCurrentGuestUserLocked() != null) {
                         return null;
                     }
-                    int userId = getNextAvailableIdLocked();
+                    userId = getNextAvailableIdLocked();
                     userInfo = new UserInfo(userId, name, null, flags);
                     userInfo.serialNumber = mNextSerialNumber++;
                     long now = System.currentTimeMillis();
@@ -1274,9 +1275,9 @@ public class UserManagerService extends IUserManager.Stub {
                     updateUserIdsLocked();
                     Bundle restrictions = new Bundle();
                     mUserRestrictions.append(userId, restrictions);
-                    mPm.newUserCreatedLILPw(userId);
                 }
             }
+            mPm.newUserCreated(userId);
             if (userInfo != null) {
                 Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
                 addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
@@ -2010,5 +2011,13 @@ public class UserManagerService extends IUserManager.Stub {
                     }
             }
         }
+    }
+
+    /**
+     * @param userId
+     * @return whether the user has been initialized yet
+     */
+    boolean isInitialized(int userId) {
+        return (getUserInfo(userId).flags & UserInfo.FLAG_INITIALIZED) != 0;
     }
 }
