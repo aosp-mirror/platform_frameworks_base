@@ -627,7 +627,6 @@
   <java-symbol type="string" name="eventTypeOther" />
   <java-symbol type="string" name="fileSizeSuffix" />
   <java-symbol type="string" name="force_close" />
-  <java-symbol type="string" name="format_error" />
   <java-symbol type="string" name="gadget_host_error_inflating" />
   <java-symbol type="string" name="gigabyteShort" />
   <java-symbol type="string" name="gpsNotifMessage" />
@@ -711,11 +710,6 @@
   <java-symbol type="string" name="lockscreen_emergency_call" />
   <java-symbol type="string" name="lockscreen_return_to_call" />
   <java-symbol type="string" name="low_memory" />
-  <java-symbol type="string" name="media_bad_removal" />
-  <java-symbol type="string" name="media_checking" />
-  <java-symbol type="string" name="media_removed" />
-  <java-symbol type="string" name="media_shared" />
-  <java-symbol type="string" name="media_unknown_state" />
   <java-symbol type="string" name="megabyteShort" />
   <java-symbol type="string" name="midnight" />
   <java-symbol type="string" name="mismatchPin" />
@@ -814,7 +808,6 @@
   <java-symbol type="string" name="print_service_installed_title" />
   <java-symbol type="string" name="print_service_installed_message" />
   <java-symbol type="string" name="progress_erasing" />
-  <java-symbol type="string" name="progress_unmounting" />
   <java-symbol type="string" name="mobile_provisioning_apn" />
   <java-symbol type="string" name="mobile_provisioning_url" />
   <java-symbol type="string" name="quick_contacts_not_available" />
