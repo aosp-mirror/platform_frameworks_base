@@ -1470,6 +1470,8 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void removeUserStateLocked(final int userHandle) {
+        mContext.getSystemService(StorageManager.class)
+            .deleteUserKey(userHandle);
         // Cleanup package manager settings
         mPm.cleanUpUserLILPw(this, userHandle);
 
