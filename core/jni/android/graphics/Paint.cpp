@@ -1065,12 +1065,11 @@ public:
             jint contextEnd, jboolean isRtl, jint offset) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-        // TODO performance: optimize JNI array access
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        jchar* textArray = (jchar*) env->GetPrimitiveArrayCritical(text, NULL);
         jfloat result = doRunAdvance(paint, typeface, textArray + contextStart,
                 start - contextStart, end - start, contextEnd - contextStart, isRtl,
                 offset - contextStart);
-        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+        env->ReleasePrimitiveArrayCritical(text, textArray, JNI_ABORT);
         return result;
     }
 
@@ -1086,12 +1085,11 @@ public:
             jint contextEnd, jboolean isRtl, jfloat advance) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-        // TODO performance: optimize JNI array access
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        jchar* textArray = (jchar*) env->GetPrimitiveArrayCritical(text, NULL);
         jint result = doOffsetForAdvance(paint, typeface, textArray + contextStart,
                 start - contextStart, end - start, contextEnd - contextStart, isRtl, advance);
         result += contextStart;
-        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+        env->ReleasePrimitiveArrayCritical(text, textArray, JNI_ABORT);
         return result;
     }
 
@@ -1158,9 +1156,9 @@ static JNINativeMethod methods[] = {
     {"ascent","!()F", (void*) PaintGlue::ascent},
     {"descent","!()F", (void*) PaintGlue::descent},
 
-    {"getFontMetrics", "(Landroid/graphics/Paint$FontMetrics;)F",
+    {"getFontMetrics", "!(Landroid/graphics/Paint$FontMetrics;)F",
             (void*)PaintGlue::getFontMetrics},
-    {"getFontMetricsInt", "(Landroid/graphics/Paint$FontMetricsInt;)I",
+    {"getFontMetricsInt", "!(Landroid/graphics/Paint$FontMetricsInt;)I",
             (void*)PaintGlue::getFontMetricsInt},
     {"native_measureText","([CIII)F", (void*) PaintGlue::measureText_CIII},
     {"native_measureText","(Ljava/lang/String;I)F", (void*) PaintGlue::measureText_StringI},
