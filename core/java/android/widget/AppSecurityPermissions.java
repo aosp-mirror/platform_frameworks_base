@@ -61,8 +61,6 @@ import java.util.Set;
  */
 public class AppSecurityPermissions {
 
-    public static final int WHICH_PERSONAL = 1<<0;
-    public static final int WHICH_DEVICE = 1<<1;
     public static final int WHICH_NEW = 1<<2;
     public static final int WHICH_ALL = 0xffff;
 
@@ -75,7 +73,8 @@ public class AppSecurityPermissions {
             = new HashMap<String, MyPermissionGroupInfo>();
     private final List<MyPermissionGroupInfo> mPermGroupsList
             = new ArrayList<MyPermissionGroupInfo>();
-    private final PermissionGroupInfoComparator mPermGroupComparator = new PermissionGroupInfoComparator();
+    private final PermissionGroupInfoComparator mPermGroupComparator =
+            new PermissionGroupInfoComparator();
     private final PermissionInfoComparator mPermComparator = new PermissionInfoComparator();
     private final List<MyPermissionInfo> mPermsList = new ArrayList<MyPermissionInfo>();
     private final CharSequence mNewPermPrefix;
@@ -85,8 +84,6 @@ public class AppSecurityPermissions {
         CharSequence mLabel;
 
         final ArrayList<MyPermissionInfo> mNewPermissions = new ArrayList<MyPermissionInfo>();
-        final ArrayList<MyPermissionInfo> mPersonalPermissions = new ArrayList<MyPermissionInfo>();
-        final ArrayList<MyPermissionInfo> mDevicePermissions = new ArrayList<MyPermissionInfo>();
         final ArrayList<MyPermissionInfo> mAllPermissions = new ArrayList<MyPermissionInfo>();
 
         MyPermissionGroupInfo(PermissionInfo perm) {
@@ -352,13 +349,6 @@ public class AppSecurityPermissions {
         }
         for (int i=0; i<strList.length; i++) {
             String permName = strList[i];
-            // If we are only looking at an existing app, then we only
-            // care about permissions that have actually been granted to it.
-            if (installedPkgInfo != null && info != installedPkgInfo) {
-                if ((flagsList[i]&PackageInfo.REQUESTED_PERMISSION_GRANTED) == 0) {
-                    continue;
-                }
-            }
             try {
                 PermissionInfo tmpPermInfo = mPm.getPermissionInfo(permName, 0);
                 if (tmpPermInfo == null) {
@@ -431,10 +421,6 @@ public class AppSecurityPermissions {
     private List<MyPermissionInfo> getPermissionList(MyPermissionGroupInfo grp, int which) {
         if (which == WHICH_NEW) {
             return grp.mNewPermissions;
-        } else if (which == WHICH_PERSONAL) {
-            return grp.mPersonalPermissions;
-        } else if (which == WHICH_DEVICE) {
-            return grp.mDevicePermissions;
         } else {
             return grp.mAllPermissions;
         }
@@ -577,15 +563,8 @@ public class AppSecurityPermissions {
     
     private static class PermissionGroupInfoComparator implements Comparator<MyPermissionGroupInfo> {
         private final Collator sCollator = Collator.getInstance();
-        PermissionGroupInfoComparator() {
-        }
+        @Override
         public final int compare(MyPermissionGroupInfo a, MyPermissionGroupInfo b) {
-            if (((a.flags^b.flags)&PermissionGroupInfo.FLAG_PERSONAL_INFO) != 0) {
-                return ((a.flags&PermissionGroupInfo.FLAG_PERSONAL_INFO) != 0) ? -1 : 1;
-            }
-            if (a.priority != b.priority) {
-                return a.priority > b.priority ? -1 : 1;
-            }
             return sCollator.compare(a.mLabel, b.mLabel);
         }
     }
@@ -628,11 +607,6 @@ public class AppSecurityPermissions {
                     if (pInfo.mNew) {
                         addPermToList(group.mNewPermissions, pInfo);
                     }
-                    if ((group.flags&PermissionGroupInfo.FLAG_PERSONAL_INFO) != 0) {
-                        addPermToList(group.mPersonalPermissions, pInfo);
-                    } else {
-                        addPermToList(group.mDevicePermissions, pInfo);
-                    }
                 }
             }
         }
@@ -652,12 +626,5 @@ public class AppSecurityPermissions {
             mPermGroupsList.add(pgrp);
         }
         Collections.sort(mPermGroupsList, mPermGroupComparator);
-        if (localLOGV) {
-            for (MyPermissionGroupInfo grp : mPermGroupsList) {
-                Log.i(TAG, "Group " + grp.name + " personal="
-                        + ((grp.flags&PermissionGroupInfo.FLAG_PERSONAL_INFO) != 0)
-                        + " priority=" + grp.priority);
-            }
-        }
     }
 }
