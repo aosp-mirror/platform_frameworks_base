@@ -177,15 +177,19 @@ public class PhoneNumberUtils
             phoneColumn = ContactsContract.CommonDataKinds.Phone.NUMBER;
         }
 
-        final Cursor c = context.getContentResolver().query(uri, new String[] {
-            phoneColumn
-        }, null, null, null);
-        if (c != null) {
-            try {
+        Cursor c = null;
+        try {
+            c = context.getContentResolver().query(uri, new String[] { phoneColumn },
+                    null, null, null);
+            if (c != null) {
                 if (c.moveToFirst()) {
                     number = c.getString(c.getColumnIndex(phoneColumn));
                 }
-            } finally {
+            }
+        } catch (RuntimeException e) {
+            Rlog.e(LOG_TAG, "Error getting phone number.", e);
+        } finally {
+            if (c != null) {
                 c.close();
             }
         }
