@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 
 /**
  * Per-user information.
@@ -133,6 +134,15 @@ public class UserInfo implements Parcelable {
     public boolean supportsSwitchTo() {
         // TODO remove fw.show_hidden_users when we have finished developing managed profiles.
         return !isManagedProfile() || SystemProperties.getBoolean("fw.show_hidden_users", false);
+    }
+
+    /**
+     * @return true if this user can be switched to by end user through UI.
+     */
+    public boolean supportsSwitchToByUser() {
+        // Hide the system user when it does not represent a human user.
+        boolean hideSystemUser = UserManager.isSplitSystemUser();
+        return (!hideSystemUser || id != UserHandle.USER_SYSTEM) && supportsSwitchTo();
     }
 
     public UserInfo() {

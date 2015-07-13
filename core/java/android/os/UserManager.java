@@ -15,6 +15,7 @@
  */
 package android.os;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -522,6 +523,16 @@ public class UserManager {
     }
 
     /**
+     * @hide
+     * @return Whether the device is running with split system user. It means the system user and
+     * primary user are two separate users. Previously system user and primary user are combined as
+     * a single owner user.  see @link {android.os.UserHandle#USER_OWNER}
+     */
+    public static boolean isSplitSystemUser() {
+        return SystemProperties.getBoolean("ro.fw.system_user_split", false);
+    }
+
+    /**
      * Returns the user handle for the user that this process is running under.
      *
      * @return the user handle of this process.
@@ -986,7 +997,7 @@ public class UserManager {
      * @return the Primary user, null if not found.
      * @hide
      */
-    public UserInfo getPrimaryUser() {
+    public @Nullable UserInfo getPrimaryUser() {
         try {
             return mService.getPrimaryUser();
         } catch (RemoteException re) {
@@ -1293,7 +1304,7 @@ public class UserManager {
         }
         int switchableUserCount = 0;
         for (UserInfo user : users) {
-            if (user.supportsSwitchTo()) {
+            if (user.supportsSwitchToByUser()) {
                 ++switchableUserCount;
             }
         }

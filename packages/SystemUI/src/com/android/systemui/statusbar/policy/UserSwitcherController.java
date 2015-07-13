@@ -79,7 +79,7 @@ public class UserSwitcherController {
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     private Dialog mExitGuestDialog;
     private Dialog mAddUserDialog;
-    private int mLastNonGuestUser = UserHandle.USER_OWNER;
+    private int mLastNonGuestUser = UserHandle.USER_SYSTEM;
     private boolean mSimpleUserSwitcher;
     private boolean mAddUsersWhenLocked;
 
@@ -95,7 +95,7 @@ public class UserSwitcherController {
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_STOPPING);
         filter.addAction(ACTION_REMOVE_GUEST);
-        mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter,
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
                 null /* permission */, null /* scheduler */);
 
 
@@ -146,17 +146,21 @@ public class UserSwitcherController {
                 }
                 ArrayList<UserRecord> records = new ArrayList<>(infos.size());
                 int currentId = ActivityManager.getCurrentUser();
+                UserInfo currentUserInfo = null;
                 UserRecord guestRecord = null;
                 int avatarSize = mContext.getResources()
                         .getDimensionPixelSize(R.dimen.max_avatar_size);
 
                 for (UserInfo info : infos) {
                     boolean isCurrent = currentId == info.id;
+                    if (isCurrent) {
+                        currentUserInfo = info;
+                    }
                     if (info.isGuest()) {
                         guestRecord = new UserRecord(info, null /* picture */,
                                 true /* isGuest */, isCurrent, false /* isAddUser */,
                                 false /* isRestricted */);
-                    } else if (info.supportsSwitchTo()) {
+                    } else if (info.supportsSwitchToByUser()) {
                         Bitmap picture = bitmaps.get(info.id);
                         if (picture == null) {
                             picture = mUserManager.getUserIcon(info.id);
@@ -172,11 +176,13 @@ public class UserSwitcherController {
                     }
                 }
 
-                boolean ownerCanCreateUsers = !mUserManager.hasUserRestriction(
-                        UserManager.DISALLOW_ADD_USER, UserHandle.OWNER);
-                boolean currentUserCanCreateUsers =
-                        (currentId == UserHandle.USER_OWNER) && ownerCanCreateUsers;
-                boolean anyoneCanCreateUsers = ownerCanCreateUsers && addUsersWhenLocked;
+                boolean systemCanCreateUsers = !mUserManager.hasUserRestriction(
+                                UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM);
+                boolean currentUserCanCreateUsers = currentUserInfo != null
+                        && (currentUserInfo.isAdmin()
+                                || currentUserInfo.id == UserHandle.USER_SYSTEM)
+                        && systemCanCreateUsers;
+                boolean anyoneCanCreateUsers = systemCanCreateUsers && addUsersWhenLocked;
                 boolean canCreateGuest = (currentUserCanCreateUsers || anyoneCanCreateUsers)
                         && guestRecord == null;
                 boolean canCreateUser = (currentUserCanCreateUsers || anyoneCanCreateUsers)
@@ -284,10 +290,10 @@ public class UserSwitcherController {
     }
 
     private void exitGuest(int id) {
-        int newId = UserHandle.USER_OWNER;
-        if (mLastNonGuestUser != UserHandle.USER_OWNER) {
+        int newId = UserHandle.USER_SYSTEM;
+        if (mLastNonGuestUser != UserHandle.USER_SYSTEM) {
             UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
-            if (info != null && info.isEnabled() && info.supportsSwitchTo()) {
+            if (info != null && info.isEnabled() && info.supportsSwitchToByUser()) {
                 newId = info.id;
             }
         }
@@ -325,6 +331,7 @@ public class UserSwitcherController {
                 }
 
                 final int currentId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                final UserInfo userInfo = mUserManager.getUserInfo(currentId);
                 final int N = mUsers.size();
                 for (int i = 0; i < N; i++) {
                     UserRecord record = mUsers.get(i);
@@ -336,7 +343,7 @@ public class UserSwitcherController {
                     if (shouldBeCurrent && !record.isGuest) {
                         mLastNonGuestUser = record.info.id;
                     }
-                    if (currentId != UserHandle.USER_OWNER && record.isRestricted) {
+                    if ((userInfo == null || !userInfo.isAdmin()) && record.isRestricted) {
                         // Immediately remove restricted records in case the AsyncTask is too slow.
                         mUsers.remove(i);
                         i--;
@@ -354,7 +361,7 @@ public class UserSwitcherController {
 
         private void showGuestNotification(int guestUserId) {
             PendingIntent removeGuestPI = PendingIntent.getBroadcastAsUser(mContext,
-                    0, new Intent(ACTION_REMOVE_GUEST), 0, UserHandle.OWNER);
+                    0, new Intent(ACTION_REMOVE_GUEST), 0, UserHandle.SYSTEM);
             Notification notification = new Notification.Builder(mContext)
                     .setVisibility(Notification.VISIBILITY_SECRET)
                     .setPriority(Notification.PRIORITY_MIN)
