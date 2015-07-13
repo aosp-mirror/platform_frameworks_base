@@ -103,6 +103,11 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference == mEnabledSwitch) {
+            if (newValue != Boolean.TRUE) {
+                // Make sure we aren't in demo mode when disabling it.
+                mOnSwitch.setChecked(false);
+                stopDemoMode();
+            }
             setGlobal(DEMO_MODE_ALLOWED, newValue == Boolean.TRUE ? 1 : 0);
         } else if (preference == mOnSwitch) {
             if (newValue == Boolean.TRUE) {
@@ -123,7 +128,7 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         getContext().sendBroadcast(intent);
 
         intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_CLOCK);
-        intent.putExtra("hhmm", "0520");
+        intent.putExtra("hhmm", "0600");
         getContext().sendBroadcast(intent);
 
         intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_NETWORK);
