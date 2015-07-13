@@ -101,10 +101,6 @@ public:
     // TODO: rename for consistency
     void callDrawGLFunction(Functor* functor);
 
-    void setHighContrastText(bool highContrastText) {
-        mHighContrastText = highContrastText;
-    }
-
 // ----------------------------------------------------------------------------
 // CanvasStateClient interface
 // ----------------------------------------------------------------------------
@@ -124,6 +120,11 @@ public:
     virtual bool isOpaque() override { return false; }
     virtual int width() override { return mState.getWidth(); }
     virtual int height() override { return mState.getHeight(); }
+
+    virtual void setHighContrastText(bool highContrastText) override {
+        mHighContrastText = highContrastText;
+    }
+    virtual bool isHighContrastText() override { return mHighContrastText; }
 
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas state operations
@@ -302,16 +303,6 @@ private:
         }
 
         return cachedPaint;
-    }
-
-    inline SkPaint* copyPaint(const SkPaint* paint) {
-        if (!paint) return nullptr;
-
-        SkPaint* returnPaint = new SkPaint(*paint);
-        std::unique_ptr<const SkPaint> copy(returnPaint);
-        mDisplayListData->paints.push_back(std::move(copy));
-
-        return returnPaint;
     }
 
     inline const SkRegion* refRegion(const SkRegion* region) {

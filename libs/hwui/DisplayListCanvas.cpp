@@ -437,16 +437,6 @@ void DisplayListCanvas::drawPosText(const uint16_t* text, const float* positions
     addDrawOp(op);
 }
 
-static void simplifyPaint(int color, SkPaint* paint) {
-    paint->setColor(color);
-    paint->setShader(nullptr);
-    paint->setColorFilter(nullptr);
-    paint->setLooper(nullptr);
-    paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
-    paint->setStrokeJoin(SkPaint::kRound_Join);
-    paint->setLooper(nullptr);
-}
-
 void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
         int count, const SkPaint& paint, float x, float y,
         float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
@@ -459,31 +449,9 @@ void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
     positions = refBuffer<float>(positions, count * 2);
     Rect bounds(boundsLeft, boundsTop, boundsRight, boundsBottom);
 
-    if (CC_UNLIKELY(mHighContrastText)) {
-        // high contrast draw path
-        int color = paint.getColor();
-        int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
-        bool darken = channelSum < (128 * 3);
-
-        // outline
-        SkPaint* outlinePaint = copyPaint(&paint);
-        simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, outlinePaint);
-        outlinePaint->setStyle(SkPaint::kStrokeAndFill_Style);
-        addDrawOp(new (alloc()) DrawTextOp(text, bytesCount, count,
-                x, y, positions, outlinePaint, totalAdvance, bounds)); // bounds?
-
-        // inner
-        SkPaint* innerPaint = copyPaint(&paint);
-        simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, innerPaint);
-        innerPaint->setStyle(SkPaint::kFill_Style);
-        addDrawOp(new (alloc()) DrawTextOp(text, bytesCount, count,
-                x, y, positions, innerPaint, totalAdvance, bounds));
-    } else {
-        // standard draw path
-        DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
-                x, y, positions, refPaint(&paint), totalAdvance, bounds);
-        addDrawOp(op);
-    }
+    DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
+            x, y, positions, refPaint(&paint), totalAdvance, bounds);
+    addDrawOp(op);
 }
 
 void DisplayListCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {

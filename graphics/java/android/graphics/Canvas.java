@@ -215,7 +215,9 @@ public class Canvas {
     }
 
     /** @hide */
-    public void setHighContrastText(boolean highContrastText) {}
+    public void setHighContrastText(boolean highContrastText) {
+        native_setHighContrastText(mNativeCanvasWrapper, highContrastText);
+    }
 
     /** @hide */
     public void insertReorderBarrier() {}
@@ -1974,6 +1976,7 @@ public class Canvas {
     private static native void native_setBitmap(long canvasHandle,
                                                 Bitmap bitmap);
     private static native boolean native_isOpaque(long canvasHandle);
+    private static native void native_setHighContrastText(long renderer, boolean highContrastText);
     private static native int native_getWidth(long canvasHandle);
     private static native int native_getHeight(long canvasHandle);
 

@@ -50,12 +50,6 @@ static struct {
 // Setup
 // ----------------------------------------------------------------------------
 
-static void android_view_DisplayListCanvas_setHighContrastText(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jboolean highContrastText) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->setHighContrastText(highContrastText);
-}
-
 static void android_view_DisplayListCanvas_insertReorderBarrier(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jboolean reorderEnable) {
     DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
@@ -198,7 +192,6 @@ const char* const kClassPathName = "android/view/DisplayListCanvas";
 
 static JNINativeMethod gMethods[] = {
     { "nIsAvailable",       "()Z",             (void*) android_view_DisplayListCanvas_isAvailable },
-    { "nSetHighContrastText","(JZ)V",          (void*) android_view_DisplayListCanvas_setHighContrastText },
     { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
 
     { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_DisplayListCanvas_callDrawGLFunction },
