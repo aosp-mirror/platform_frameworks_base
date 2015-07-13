@@ -83,6 +83,7 @@ public interface MetricsConstants {
     public static final int INPUTMETHOD_LANGUAGE = 57;
     public static final int INPUTMETHOD_KEYBOARD = 58;
     public static final int INPUTMETHOD_SPELL_CHECKERS = 59;
+    public static final int INPUTMETHOD_SUBTYPE_ENABLER = 60;
     public static final int INPUTMETHOD_USER_DICTIONARY = 61;
     public static final int INPUTMETHOD_USER_DICTIONARY_ADD_WORD = 62;
     public static final int LOCATION = 63;
