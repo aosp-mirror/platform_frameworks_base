@@ -2559,6 +2559,34 @@ class MountService extends IMountService.Stub
     }
 
     @Override
+    public void createNewUserDir(int userHandle, String path) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only SYSTEM_UID can create user directories");
+        }
+
+        waitForReady();
+
+        if (DEBUG_EVENTS) {
+            Slog.i(TAG, "Creating new user dir");
+        }
+
+        try {
+            NativeDaemonEvent event = mCryptConnector.execute(
+                "cryptfs", "createnewuserdir", userHandle, path);
+            if (!"0".equals(event.getMessage())) {
+                String error = "createnewuserdir sent unexpected message: "
+                    + event.getMessage();
+                Slog.e(TAG,  error);
+                // ext4enc:TODO is this the right exception?
+                throw new RuntimeException(error);
+            }
+        } catch (NativeDaemonConnectorException e) {
+            Slog.e(TAG, "createnewuserdir threw exception", e);
+            throw new RuntimeException("createnewuserdir threw exception", e);
+        }
+    }
+
+    @Override
     public int mkdirs(String callingPkg, String appPath) {
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
         final UserEnvironment userEnv = new UserEnvironment(userId);
