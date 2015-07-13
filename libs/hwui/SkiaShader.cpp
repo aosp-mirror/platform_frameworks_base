@@ -370,7 +370,11 @@ void SkiaShader::store(Caches& caches, const SkShader& shader, const Matrix4& mo
     if (tryStoreLayer(caches, shader, modelViewMatrix,
             textureUnit, description, &outData->layerData)) {
         outData->skiaShaderType = kLayer_SkiaShaderType;
+        return;
     }
+
+    // Unknown/unsupported type, so explicitly ignore shader
+    outData->skiaShaderType = kNone_SkiaShaderType;
 }
 
 void SkiaShader::apply(Caches& caches, const SkiaShaderData& data) {
