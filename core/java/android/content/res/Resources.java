@@ -1918,6 +1918,7 @@ public class Resources {
             other.mResId = mResId;
             other.mForce = mForce;
             other.mCount = mCount;
+            other.mHashCode = mHashCode;
             return other;
         }
     }
