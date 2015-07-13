@@ -253,6 +253,7 @@ public class KeyguardViewMediator extends SystemUI {
     private KeyguardUpdateMonitor mUpdateMonitor;
 
     private boolean mDeviceInteractive;
+    private boolean mGoingToSleep;
 
     // last known state of the cellular connection
     private String mPhoneState = TelephonyManager.EXTRA_STATE_IDLE;
@@ -639,6 +640,7 @@ public class KeyguardViewMediator extends SystemUI {
         if (DEBUG) Log.d(TAG, "onStartedGoingToSleep(" + why + ")");
         synchronized (this) {
             mDeviceInteractive = false;
+            mGoingToSleep = true;
 
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
@@ -678,6 +680,7 @@ public class KeyguardViewMediator extends SystemUI {
         if (DEBUG) Log.d(TAG, "onFinishedGoingToSleep(" + why + ")");
         synchronized (this) {
             mDeviceInteractive = false;
+            mGoingToSleep = false;
 
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
@@ -1239,6 +1242,10 @@ public class KeyguardViewMediator extends SystemUI {
         }
         mUpdateMonitor.clearFingerprintRecognized();
 
+        if (mGoingToSleep) {
+            Log.i(TAG, "Device is going to sleep, aborting keyguardDone");
+            return;
+        }
         if (mExitSecureCallback != null) {
             try {
                 mExitSecureCallback.onKeyguardExitResult(authenticated);
