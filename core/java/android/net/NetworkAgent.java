@@ -17,6 +17,7 @@
 package android.net;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -296,7 +297,15 @@ public abstract class NetworkAgent extends Handler {
             }
 
             case CMD_SET_SIGNAL_STRENGTH_THRESHOLDS: {
-                setSignalStrengthThresholds((int[]) msg.obj);
+                ArrayList<Integer> thresholds =
+                        ((Bundle) msg.obj).getIntegerArrayList("thresholds");
+                // TODO: Change signal strength thresholds API to use an ArrayList<Integer>
+                // rather than convert to int[].
+                int[] intThresholds = new int[(thresholds != null) ? thresholds.size() : 0];
+                for (int i = 0; i < intThresholds.length; i++) {
+                    intThresholds[i] = thresholds.get(i);
+                }
+                setSignalStrengthThresholds(intThresholds);
                 break;
             }
         }
