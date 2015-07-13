@@ -67,6 +67,8 @@ import android.util.SparseIntArray;
 
 import com.google.android.collect.Lists;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1396,5 +1398,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (subId == info.getSubscriptionId()) return info;
         }
         return null; // not found
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("KeyguardUpdateMonitor state:");
+        pw.println("  SIM States:");
+        for (SimData data : mSimDatas.values()) {
+            pw.println("    " + data.toString());
+        }
+        pw.println("  Subs:");
+        if (mSubscriptionInfo != null) {
+            for (int i = 0; i < mSubscriptionInfo.size(); i++) {
+                pw.println("    " + mSubscriptionInfo.get(i));
+            }
+        }
+        pw.println("  Service states:");
+        for (int subId : mServiceStates.keySet()) {
+            pw.println("    " + subId + "=" + mServiceStates.get(subId));
+        }
     }
 }
