@@ -210,6 +210,7 @@
 
     <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
     <bool name="recents_has_transposed_nav_bar">true</bool>
+
     <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
     <integer name="recents_svelte_level">0</integer>
 
@@ -295,6 +296,9 @@
 
     <!-- Duration of the expansion animation in the volume dialog -->
     <item name="volume_expand_animation_duration" type="integer">300</item>
+
+    <!-- Whether to show a "shelf" of apps at the bottom of the screen. -->
+    <bool name="config_enableAppShelf">false</bool>
 
 </resources>
 
