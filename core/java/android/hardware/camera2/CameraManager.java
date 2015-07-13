@@ -723,6 +723,8 @@ public final class CameraManager {
         private static final String TAG = "CameraManagerGlobal";
         private final boolean DEBUG = false;
 
+        private final int CAMERA_SERVICE_RECONNECT_DELAY_MS = 1000;
+
         // Singleton instance
         private static final CameraManagerGlobal gCameraManager =
             new CameraManagerGlobal();
@@ -1158,6 +1160,45 @@ public final class CameraManager {
         }
 
         /**
+         * Try to connect to camera service after some delay if any client registered camera
+         * availability callback or torch status callback.
+         */
+        private void scheduleCameraServiceReconnectionLocked() {
+            final Handler handler;
+
+            if (mCallbackMap.size() > 0) {
+                handler = mCallbackMap.valueAt(0);
+            } else if (mTorchCallbackMap.size() > 0) {
+                handler = mTorchCallbackMap.valueAt(0);
+            } else {
+                // Not necessary to reconnect camera service if no client registers a callback.
+                return;
+            }
+
+            if (DEBUG) {
+                Log.v(TAG, "Reconnecting Camera Service in " + CAMERA_SERVICE_RECONNECT_DELAY_MS +
+                        " ms");
+            }
+
+            handler.postDelayed(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            ICameraService cameraService = getCameraService();
+                            if (cameraService == null) {
+                                synchronized(mLock) {
+                                    if (DEBUG) {
+                                        Log.v(TAG, "Reconnecting Camera Service failed.");
+                                    }
+                                    scheduleCameraServiceReconnectionLocked();
+                                }
+                            }
+                        }
+                    },
+                    CAMERA_SERVICE_RECONNECT_DELAY_MS);
+        }
+
+        /**
          * Listener for camera service death.
          *
          * <p>The camera service isn't supposed to die under any normal circumstances, but can be
@@ -1171,21 +1212,19 @@ public final class CameraManager {
 
                 mCameraService = null;
 
-                // Tell listeners that the cameras and torch modes are _available_, because any
-                // existing clients will have gotten disconnected. This is optimistic under the
-                // assumption that the service will be back shortly.
-                //
-                // Without this, a camera service crash while a camera is open will never signal
-                // to listeners that previously in-use cameras are now available.
+                // Tell listeners that the cameras and torch modes are unavailable and schedule a
+                // reconnection to camera service. When camera service is reconnected, the camera
+                // and torch statuses will be updated.
                 for (int i = 0; i < mDeviceStatus.size(); i++) {
                     String cameraId = mDeviceStatus.keyAt(i);
-                    onStatusChangedLocked(STATUS_PRESENT, cameraId);
+                    onStatusChangedLocked(STATUS_NOT_PRESENT, cameraId);
                 }
                 for (int i = 0; i < mTorchStatus.size(); i++) {
                     String cameraId = mTorchStatus.keyAt(i);
-                    onTorchStatusChangedLocked(TORCH_STATUS_AVAILABLE_OFF, cameraId);
+                    onTorchStatusChangedLocked(TORCH_STATUS_NOT_AVAILABLE, cameraId);
                 }
 
+                scheduleCameraServiceReconnectionLocked();
             }
         }
 
