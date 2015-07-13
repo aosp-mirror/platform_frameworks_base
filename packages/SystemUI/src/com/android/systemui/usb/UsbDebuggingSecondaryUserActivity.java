@@ -47,8 +47,7 @@ public class UsbDebuggingSecondaryUserActivity extends AlertActivity
 
         final AlertController.AlertParams ap = mAlertParams;
         ap.mTitle = getString(R.string.usb_debugging_secondary_user_title);
-        UserInfo user = UserManager.get(this).getUserInfo(UserHandle.USER_OWNER);
-        ap.mMessage = getString(R.string.usb_debugging_secondary_user_message, user.name);
+        ap.mMessage = getString(R.string.usb_debugging_secondary_user_message);
         ap.mPositiveButtonText = getString(android.R.string.ok);
         ap.mPositiveButtonListener = this;
 
