@@ -828,11 +828,16 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void fallbackToSingleUserLocked() {
+        int flags = UserInfo.FLAG_INITIALIZED;
+        // In split system user mode, the admin and primary flags are assigned to the first human
+        // user.
+        if (!UserManager.isSplitSystemUser()) {
+            flags |= UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY;
+        }
         // Create the system user
-        // TODO: UserInfo.FLAG_PRIMARY flag should be set on the first human user.
         UserInfo system = new UserInfo(UserHandle.USER_SYSTEM,
                 mContext.getResources().getString(com.android.internal.R.string.owner_name), null,
-                UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED);
+                flags);
         mUsers.put(system.id, system);
         mNextSerialNumber = MIN_USER_ID;
         mUserVersion = USER_VERSION;
@@ -1255,6 +1260,16 @@ public class UserManagerService extends IUserManager.Stub {
                     // If we're adding a guest and there already exists one, bail.
                     if (isGuest && findCurrentGuestUserLocked() != null) {
                         return null;
+                    }
+                    // In split system user mode, we assign the first human user the primary flag.
+                    // And if the only system user is not admin, we also assign the admin flag to
+                    // primary user.
+                    if (UserManager.isSplitSystemUser()
+                            && !isGuest && !isManagedProfile && mUsers.size() == 1) {
+                        flags |= UserInfo.FLAG_PRIMARY;
+                        if (!mUsers.get(UserHandle.USER_SYSTEM).isAdmin()) {
+                            flags |= UserInfo.FLAG_ADMIN;
+                        }
                     }
                     userId = getNextAvailableIdLocked();
                     userInfo = new UserInfo(userId, name, null, flags);
