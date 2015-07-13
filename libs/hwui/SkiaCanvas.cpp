@@ -95,6 +95,7 @@ public:
     virtual void drawLines(const float* points, int count, const SkPaint& paint) override;
     virtual void drawRect(float left, float top, float right, float bottom,
             const SkPaint& paint) override;
+    virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) override;
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
@@ -505,6 +506,14 @@ void SkiaCanvas::drawRect(float left, float top, float right, float bottom,
         const SkPaint& paint) {
     mCanvas->drawRectCoords(left, top, right, bottom, paint);
 
+}
+
+void SkiaCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
+    SkRegion::Iterator it(region);
+    while (!it.done()) {
+        mCanvas->drawRect(SkRect::Make(it.rect()), paint);
+        it.next();
+    }
 }
 
 void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom,

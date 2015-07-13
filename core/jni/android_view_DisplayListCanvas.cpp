@@ -124,36 +124,6 @@ static void android_view_DisplayListCanvas_drawCircleProps(JNIEnv* env, jobject 
     renderer->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
-static void android_view_DisplayListCanvas_drawRegionAsRects(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong regionPtr, jlong paintPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    SkRegion* region = reinterpret_cast<SkRegion*>(regionPtr);
-    Paint* paint = reinterpret_cast<Paint*>(paintPtr);
-    if (paint->getStyle() != Paint::kFill_Style ||
-            (paint->isAntiAlias() && !renderer->isCurrentTransformSimple())) {
-        SkRegion::Iterator it(*region);
-        while (!it.done()) {
-            const SkIRect& r = it.rect();
-            renderer->drawRect(r.fLeft, r.fTop, r.fRight, r.fBottom, *paint);
-            it.next();
-        }
-    } else {
-        int count = 0;
-        Vector<float> rects;
-        SkRegion::Iterator it(*region);
-        while (!it.done()) {
-            const SkIRect& r = it.rect();
-            rects.push(r.fLeft);
-            rects.push(r.fTop);
-            rects.push(r.fRight);
-            rects.push(r.fBottom);
-            count += 4;
-            it.next();
-        }
-        renderer->drawRects(rects.array(), count, paint);
-    }
-}
-
 // ----------------------------------------------------------------------------
 // Display lists
 // ----------------------------------------------------------------------------
@@ -235,7 +205,6 @@ static JNINativeMethod gMethods[] = {
 
     { "nDrawPatch",         "(JLandroid/graphics/Bitmap;JFFFFJ)V",     (void*) android_view_DisplayListCanvas_drawPatch },
 
-    { "nDrawRects",         "(JJJ)V",          (void*) android_view_DisplayListCanvas_drawRegionAsRects },
     { "nDrawRoundRect",     "(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
     { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },
 

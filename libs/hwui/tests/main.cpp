@@ -230,21 +230,19 @@ private:
         DisplayListCanvas* renderer = startRecording(node.get());
         renderer->drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
 
+        SkRegion region;
         float rects[width * height];
         int index = 0;
         for (int xOffset = 0; xOffset < width; xOffset+=2) {
             for (int yOffset = 0; yOffset < height; yOffset+=2) {
-                rects[index++] = xOffset;
-                rects[index++] = yOffset;
-                rects[index++] = xOffset + 1;
-                rects[index++] = yOffset + 1;
+                region.op(xOffset, yOffset, xOffset + 1, yOffset + 1, SkRegion::kUnion_Op);
             }
         }
         int count = width * height;
 
         SkPaint paint;
         paint.setColor(0xff00ffff);
-        renderer->drawRects(rects, count, &paint);
+        renderer->drawRegion(region, paint);
 
         endRecording(renderer, node.get());
         return node;

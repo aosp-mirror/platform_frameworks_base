@@ -278,18 +278,4 @@ public class DisplayListCanvas extends Canvas {
 
     private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
             long propRight, long propBottom, long propRx, long propRy, long propPaint);
-
-    // TODO: move this optimization to Canvas.java
-    @Override
-    public void drawPath(Path path, Paint paint) {
-        if (path.isSimplePath) {
-            if (path.rects != null) {
-                nDrawRects(mNativeCanvasWrapper, path.rects.mNativeRegion, paint.getNativeInstance());
-            }
-        } else {
-            super.drawPath(path, paint);
-        }
-    }
-
-    private static native void nDrawRects(long renderer, long region, long paint);
 }

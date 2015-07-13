@@ -1248,7 +1248,11 @@ public class Canvas {
      * @param paint The paint used to draw the path
      */
     public void drawPath(@NonNull Path path, @NonNull Paint paint) {
-        native_drawPath(mNativeCanvasWrapper, path.ni(), paint.getNativeInstance());
+        if (path.isSimplePath && path.rects != null) {
+            native_drawRegion(mNativeCanvasWrapper, path.rects.mNativeRegion, paint.getNativeInstance());
+        } else {
+            native_drawPath(mNativeCanvasWrapper, path.ni(), paint.getNativeInstance());
+        }
     }
 
     /**
@@ -2053,6 +2057,8 @@ public class Canvas {
     private static native void native_drawPath(long nativeCanvas,
                                                long nativePath,
                                                long nativePaint);
+    private static native void native_drawRegion(long nativeCanvas,
+            long nativeRegion, long nativePaint);
     private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
                                                  float left, float top,
                                                  long nativePaintOrZero,

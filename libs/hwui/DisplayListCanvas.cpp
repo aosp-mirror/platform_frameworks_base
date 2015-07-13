@@ -486,6 +486,32 @@ void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
     }
 }
 
+void DisplayListCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
+    if (paint.getStyle() != SkPaint::kFill_Style ||
+            (paint.isAntiAlias() && !mState.currentTransform()->isSimple())) {
+        SkRegion::Iterator it(region);
+        while (!it.done()) {
+            const SkIRect& r = it.rect();
+            drawRect(r.fLeft, r.fTop, r.fRight, r.fBottom, paint);
+            it.next();
+        }
+    } else {
+        int count = 0;
+        Vector<float> rects;
+        SkRegion::Iterator it(region);
+        while (!it.done()) {
+            const SkIRect& r = it.rect();
+            rects.push(r.fLeft);
+            rects.push(r.fTop);
+            rects.push(r.fRight);
+            rects.push(r.fBottom);
+            count += 4;
+            it.next();
+        }
+        drawRects(rects.array(), count, &paint);
+    }
+}
+
 void DisplayListCanvas::drawRects(const float* rects, int count, const SkPaint* paint) {
     if (count <= 0) return;
 
