@@ -137,7 +137,12 @@ public class Html {
     }
 
     /**
-     * Returns an HTML representation of the provided Spanned text.
+     * Returns an HTML representation of the provided Spanned text. A best effort is
+     * made to add HTML tags corresponding to spans. Also note that HTML metacharacters
+     * (such as "&lt;" and "&amp;") within the input text are escaped.
+     *
+     * @param text input text to convert
+     * @return string containing input converted to HTML
      */
     public static String toHtml(Spanned text) {
         StringBuilder out = new StringBuilder();
