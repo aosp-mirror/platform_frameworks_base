@@ -4528,7 +4528,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } else if (result.size() <= 1) {
                         return result;
                     }
-                    result = filterCandidatesWithDomainPreferredActivitiesLPr(flags, result,
+                    result = filterCandidatesWithDomainPreferredActivitiesLPr(intent, flags, result,
                             xpDomainInfo, userId);
                     Collections.sort(result, mResolvePrioritySorter);
                 }
@@ -4646,9 +4646,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return scheme.equals(IntentFilter.SCHEME_HTTP) || scheme.equals(IntentFilter.SCHEME_HTTPS);
     }
 
-    private List<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPr(
-            int flags, List<ResolveInfo> candidates, CrossProfileDomainInfo xpDomainInfo,
+    private List<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPr(Intent intent,
+            int matchFlags, List<ResolveInfo> candidates, CrossProfileDomainInfo xpDomainInfo,
             int userId) {
+        final boolean debug = (intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0;
+
         if (DEBUG_PREFERRED || DEBUG_DOMAIN_VERIFICATION) {
             Slog.v(TAG, "Filtering results with preferred activities. Candidates count: " +
                     candidates.size());
@@ -4720,26 +4722,41 @@ public class PackageManagerService extends IPackageManager.Stub {
                     result.add(xpDomainInfo.resolveInfo);
                 }
                 // Also add Browsers (all of them or only the default one)
-                if ((flags & MATCH_ALL) != 0) {
+                if ((matchFlags & MATCH_ALL) != 0) {
                     result.addAll(matchAllList);
                 } else {
-                    // Try to add the Default Browser if we can
+                    // Browser/generic handling case.  If there's a default browser, go straight
+                    // to that (but only if there is no other higher-priority match).
                     final String defaultBrowserPackageName = getDefaultBrowserPackageName(
                             UserHandle.myUserId());
-                    if (!TextUtils.isEmpty(defaultBrowserPackageName)) {
-                        boolean defaultBrowserFound = false;
-                        final int browserCount = matchAllList.size();
-                        for (int n=0; n<browserCount; n++) {
-                            ResolveInfo browser = matchAllList.get(n);
-                            if (browser.activityInfo.packageName.equals(defaultBrowserPackageName)) {
-                                result.add(browser);
-                                defaultBrowserFound = true;
-                                break;
+                    int maxMatchPrio = 0;
+                    ResolveInfo defaultBrowserMatch = null;
+                    final int numCandidates = matchAllList.size();
+                    for (int n = 0; n < numCandidates; n++) {
+                        ResolveInfo info = matchAllList.get(n);
+                        // track the highest overall match priority...
+                        if (info.priority > maxMatchPrio) {
+                            maxMatchPrio = info.priority;
+                        }
+                        // ...and the highest-priority default browser match
+                        if (info.activityInfo.packageName.equals(defaultBrowserPackageName)) {
+                            if (defaultBrowserMatch == null
+                                    || (defaultBrowserMatch.priority < info.priority)) {
+                                if (debug) {
+                                    Slog.v(TAG, "Considering default browser match " + info);
+                                }
+                                defaultBrowserMatch = info;
                             }
                         }
-                        if (!defaultBrowserFound) {
-                            result.addAll(matchAllList);
+                    }
+                    if (defaultBrowserMatch != null
+                            && defaultBrowserMatch.priority >= maxMatchPrio
+                            && !TextUtils.isEmpty(defaultBrowserPackageName))
+                    {
+                        if (debug) {
+                            Slog.v(TAG, "Default browser match " + defaultBrowserMatch);
                         }
+                        result.add(defaultBrowserMatch);
                     } else {
                         result.addAll(matchAllList);
                     }
