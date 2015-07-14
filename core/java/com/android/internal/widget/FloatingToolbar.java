@@ -285,6 +285,7 @@ public final class FloatingToolbar {
 
         private final Context mContext;
         private final View mParent;
+        private final int[] mParentPositionOnScreen = new int[2];
         private final PopupWindow mPopupWindow;
         private final ViewGroup mContentContainer;
         private final int mMarginHorizontal;
@@ -337,8 +338,8 @@ public final class FloatingToolbar {
             }
         };
 
-        private final Rect mViewPort = new Rect();
-        private final Point mCoords = new Point();
+        private final Rect mViewPortOnScreen = new Rect();
+        private final Point mCoordsOnScreen = new Point();
         private final Rect mTmpRect = new Rect();
 
         private final Region mTouchableRegion = new Region();
@@ -428,8 +429,8 @@ public final class FloatingToolbar {
          * Shows this popup at the specified coordinates.
          * The specified coordinates may be adjusted to make sure the popup is entirely on-screen.
          */
-        public void show(Rect contentRect) {
-            Preconditions.checkNotNull(contentRect);
+        public void show(Rect contentRectOnScreen) {
+            Preconditions.checkNotNull(contentRectOnScreen);
 
             if (isShowing()) {
                 return;
@@ -447,9 +448,15 @@ public final class FloatingToolbar {
                 // The "show" animation will make this visible.
                 mContentContainer.setAlpha(0);
             }
-            refreshCoordinatesAndOverflowDirection(contentRect);
+            refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
             preparePopupContent();
-            mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, mCoords.x, mCoords.y);
+            // We need to specify the offset relative to mParent.
+            // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can
+            // specify the popup poision in screen coordinates.
+            mParent.getLocationOnScreen(mParentPositionOnScreen);
+            final int relativeX = mCoordsOnScreen.x - mParentPositionOnScreen[0];
+            final int relativeY = mCoordsOnScreen.y - mParentPositionOnScreen[1];
+            mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, relativeX, relativeY);
             setTouchableSurfaceInsetsComputer();
             runShowAnimation();
         }
@@ -502,17 +509,23 @@ public final class FloatingToolbar {
          * The specified coordinates may be adjusted to make sure the popup is entirely on-screen.
          * This is a no-op if this popup is not showing.
          */
-        public void updateCoordinates(Rect contentRect) {
-            Preconditions.checkNotNull(contentRect);
+        public void updateCoordinates(Rect contentRectOnScreen) {
+            Preconditions.checkNotNull(contentRectOnScreen);
 
             if (!isShowing() || !mPopupWindow.isShowing()) {
                 return;
             }
 
             cancelOverflowAnimations();
-            refreshCoordinatesAndOverflowDirection(contentRect);
+            refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
             preparePopupContent();
-            mPopupWindow.update(mCoords.x, mCoords.y, getWidth(), getHeight());
+            // We need to specify the offset relative to mParent.
+            // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can
+            // specify the popup poision in screen coordinates.
+            mParent.getLocationOnScreen(mParentPositionOnScreen);
+            final int relativeX = mCoordsOnScreen.x - mParentPositionOnScreen[0];
+            final int relativeY = mCoordsOnScreen.y - mParentPositionOnScreen[1];
+            mPopupWindow.update(relativeX, relativeY, getWidth(), getHeight());
         }
 
         /**
@@ -536,47 +549,47 @@ public final class FloatingToolbar {
             return mContext;
         }
 
-        private void refreshCoordinatesAndOverflowDirection(Rect contentRect) {
+        private void refreshCoordinatesAndOverflowDirection(Rect contentRectOnScreen) {
             refreshViewPort();
 
-            int x = contentRect.centerX() - getWidth() / 2;
+            int x = contentRectOnScreen.centerX() - getWidth() / 2;
             // Update x so that the toolbar isn't rendered behind the nav bar in landscape.
-            x = Math.max(0, Math.min(x, mViewPort.right - getWidth()));
+            x = Math.max(0, Math.min(x, mViewPortOnScreen.right - getWidth()));
 
             int y;
 
-            int availableHeightAboveContent = contentRect.top - mViewPort.top;
-            int availableHeightBelowContent = mViewPort.bottom - contentRect.bottom;
+            int availableHeightAboveContent = contentRectOnScreen.top - mViewPortOnScreen.top;
+            int availableHeightBelowContent = mViewPortOnScreen.bottom - contentRectOnScreen.bottom;
 
             if (mOverflowPanel == null) {  // There is no overflow.
                 if (availableHeightAboveContent >= getToolbarHeightWithVerticalMargin()) {
                     // There is enough space at the top of the content.
-                    y = contentRect.top - getToolbarHeightWithVerticalMargin();
+                    y = contentRectOnScreen.top - getToolbarHeightWithVerticalMargin();
                 } else if (availableHeightBelowContent >= getToolbarHeightWithVerticalMargin()) {
                     // There is enough space at the bottom of the content.
-                    y = contentRect.bottom;
+                    y = contentRectOnScreen.bottom;
                 } else if (availableHeightBelowContent >= getEstimatedToolbarHeight(mContext)) {
                     // Just enough space to fit the toolbar with no vertical margins.
-                    y = contentRect.bottom - mMarginVertical;
+                    y = contentRectOnScreen.bottom - mMarginVertical;
                 } else {
                     // Not enough space. Prefer to position as high as possible.
                     y = Math.max(
-                            mViewPort.top,
-                            contentRect.top - getToolbarHeightWithVerticalMargin());
+                            mViewPortOnScreen.top,
+                            contentRectOnScreen.top - getToolbarHeightWithVerticalMargin());
                 }
             } else {  // There is an overflow.
                 int margin = 2 * mMarginVertical;
                 int minimumOverflowHeightWithMargin = mOverflowPanel.getMinimumHeight() + margin;
-                int availableHeightThroughContentDown =
-                        mViewPort.bottom - contentRect.top + getToolbarHeightWithVerticalMargin();
-                int availableHeightThroughContentUp =
-                        contentRect.bottom - mViewPort.top + getToolbarHeightWithVerticalMargin();
+                int availableHeightThroughContentDown = mViewPortOnScreen.bottom -
+                        contentRectOnScreen.top + getToolbarHeightWithVerticalMargin();
+                int availableHeightThroughContentUp = contentRectOnScreen.bottom -
+                        mViewPortOnScreen.top + getToolbarHeightWithVerticalMargin();
 
                 if (availableHeightAboveContent >= minimumOverflowHeightWithMargin) {
                     // There is enough space at the top of the content rect for the overflow.
                     // Position above and open upwards.
                     updateOverflowHeight(availableHeightAboveContent - margin);
-                    y = contentRect.top - getHeight();
+                    y = contentRectOnScreen.top - getHeight();
                     mOverflowDirection = OVERFLOW_DIRECTION_UP;
                 } else if (availableHeightAboveContent >= getToolbarHeightWithVerticalMargin()
                         && availableHeightThroughContentDown >= minimumOverflowHeightWithMargin) {
@@ -584,33 +597,34 @@ public final class FloatingToolbar {
                     // but not the overflow.
                     // Position above but open downwards.
                     updateOverflowHeight(availableHeightThroughContentDown - margin);
-                    y = contentRect.top - getToolbarHeightWithVerticalMargin();
+                    y = contentRectOnScreen.top - getToolbarHeightWithVerticalMargin();
                     mOverflowDirection = OVERFLOW_DIRECTION_DOWN;
                 } else if (availableHeightBelowContent >= minimumOverflowHeightWithMargin) {
                     // There is enough space at the bottom of the content rect for the overflow.
                     // Position below and open downwards.
                     updateOverflowHeight(availableHeightBelowContent - margin);
-                    y = contentRect.bottom;
+                    y = contentRectOnScreen.bottom;
                     mOverflowDirection = OVERFLOW_DIRECTION_DOWN;
                 } else if (availableHeightBelowContent >= getToolbarHeightWithVerticalMargin()
-                        && mViewPort.height() >= minimumOverflowHeightWithMargin) {
+                        && mViewPortOnScreen.height() >= minimumOverflowHeightWithMargin) {
                     // There is enough space at the bottom of the content rect for the main panel
                     // but not the overflow.
                     // Position below but open upwards.
                     updateOverflowHeight(availableHeightThroughContentUp - margin);
-                    y = contentRect.bottom + getToolbarHeightWithVerticalMargin() - getHeight();
+                    y = contentRectOnScreen.bottom + getToolbarHeightWithVerticalMargin() -
+                            getHeight();
                     mOverflowDirection = OVERFLOW_DIRECTION_UP;
                 } else {
                     // Not enough space.
                     // Position at the top of the view port and open downwards.
-                    updateOverflowHeight(mViewPort.height() - margin);
-                    y = mViewPort.top;
+                    updateOverflowHeight(mViewPortOnScreen.height() - margin);
+                    y = mViewPortOnScreen.top;
                     mOverflowDirection = OVERFLOW_DIRECTION_DOWN;
                 }
                 mOverflowPanel.setOverflowDirection(mOverflowDirection);
             }
 
-            mCoords.set(x, y);
+            mCoordsOnScreen.set(x, y);
         }
 
         private int getToolbarHeightWithVerticalMargin() {
@@ -913,18 +927,18 @@ public final class FloatingToolbar {
 
 
         private void refreshViewPort() {
-            mParent.getWindowVisibleDisplayFrame(mViewPort);
+            mParent.getWindowVisibleDisplayFrame(mViewPortOnScreen);
         }
 
         private boolean viewPortHasChanged() {
             mParent.getWindowVisibleDisplayFrame(mTmpRect);
-            return !mTmpRect.equals(mViewPort);
+            return !mTmpRect.equals(mViewPortOnScreen);
         }
 
         private int getToolbarWidth(int suggestedWidth) {
             int width = suggestedWidth;
             refreshViewPort();
-            int maximumWidth = mViewPort.width() - 2 * mParent.getResources()
+            int maximumWidth = mViewPortOnScreen.width() - 2 * mParent.getResources()
                     .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
             if (width <= 0) {
                 width = mParent.getResources()
@@ -1443,6 +1457,9 @@ public final class FloatingToolbar {
     private static PopupWindow createPopupWindow(View content) {
         ViewGroup popupContentHolder = new LinearLayout(content.getContext());
         PopupWindow popupWindow = new PopupWindow(popupContentHolder);
+        // TODO: Use .setLayoutInScreenEnabled(true) instead of .setClippingEnabled(false)
+        // unless FLAG_LAYOUT_IN_SCREEN has any unintentional side-effects.
+        popupWindow.setClippingEnabled(false);
         popupWindow.setWindowLayoutType(
                 WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL);
         popupWindow.setAnimationStyle(0);
