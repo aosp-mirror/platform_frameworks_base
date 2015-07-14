@@ -15,7 +15,7 @@
  */
 package com.android.internal.policy;
 
-import com.android.internal.policy.IKeyguardShowCallback;
+import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 
@@ -57,7 +57,13 @@ oneway interface IKeyguardService {
     /**
      * Called when the device has started waking up.
      */
-    void onStartedWakingUp(IKeyguardShowCallback callback);
+    void onStartedWakingUp();
+
+    /**
+     * Called when the device screen is turning on.
+     */
+    void onScreenTurningOn(IKeyguardDrawnCallback callback);
+
     void setKeyguardEnabled(boolean enabled);
     void onSystemReady();
     void doKeyguardTimeout(in Bundle options);
