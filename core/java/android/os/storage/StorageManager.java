@@ -968,7 +968,7 @@ public class StorageManager {
                         || vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isMountedReadable()) {
                     final File internalPath = FileUtils.rewriteAfterRename(vol.getPath(),
                             vol.getInternalPath(), path);
-                    if (internalPath != null) {
+                    if (internalPath != null && internalPath.exists()) {
                         return internalPath;
                     }
                 }
