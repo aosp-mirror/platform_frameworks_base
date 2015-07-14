@@ -4230,7 +4230,7 @@ public class TelephonyManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#canChangeDtmfToneLength", e);
         } catch (SecurityException e) {
-            Log.w(TAG, "Permission error calling ITelephony#canChangeDtmfToneLength", e);
+            Log.e(TAG, "Permission error calling ITelephony#canChangeDtmfToneLength", e);
         }
         return false;
     }
@@ -4248,6 +4248,8 @@ public class TelephonyManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isWorldPhone", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Permission error calling ITelephony#isWorldPhone", e);
         }
         return false;
     }
@@ -4265,6 +4267,8 @@ public class TelephonyManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isTtyModeSupported", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Permission error calling ITelephony#isTtyModeSupported", e);
         }
         return false;
     }
@@ -4283,6 +4287,8 @@ public class TelephonyManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isHearingAidCompatibilitySupported", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Permission error calling ITelephony#isHearingAidCompatibilitySupported", e);
         }
         return false;
     }
