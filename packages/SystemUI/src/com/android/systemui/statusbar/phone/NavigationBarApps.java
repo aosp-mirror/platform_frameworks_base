@@ -29,7 +29,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.Slog;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -111,19 +111,27 @@ class NavigationBarApps extends LinearLayout {
         return button;
     }
 
+    // Not shared with NavigationBarRecents because the data model is specific to pinned apps.
     private class AppLongClickListener implements View.OnLongClickListener {
         @Override
         public boolean onLongClick(View v) {
             mDragView = v;
+            ImageView icon = (ImageView) v;
             ComponentName activityName = mAppsModel.getApp(indexOfChild(v));
-            // The drag data is an Intent to launch the activity.
-            Intent mainIntent = Intent.makeMainActivity(activityName);
-            ClipData dragData = ClipData.newIntent("", mainIntent);
-            // Use the ImageView to create the shadow.
-            View.DragShadowBuilder shadow = new AppIconDragShadowBuilder((ImageView) v);
-            v.startDrag(dragData, shadow, null /* myLocalState */, 0 /* flags */);
+            startAppDrag(icon, activityName);
             return true;
         }
+    }
+
+    /** Helper function to start dragging an app icon (either pinned or recent). */
+    static void startAppDrag(ImageView icon, ComponentName activityName) {
+        // The drag data is an Intent to launch the activity.
+        Intent mainIntent = Intent.makeMainActivity(activityName);
+        ClipData dragData = ClipData.newIntent("", mainIntent);
+        // Use the ImageView to create the shadow.
+        View.DragShadowBuilder shadow = new AppIconDragShadowBuilder(icon);
+        // Use a global drag because the icon might be dragged into the launcher.
+        icon.startDrag(dragData, shadow, null /* myLocalState */, View.DRAG_FLAG_GLOBAL);
     }
 
     @Override
@@ -161,7 +169,7 @@ class NavigationBarApps extends LinearLayout {
      * an app shortcut and will be accepted for a drop.
      */
     private boolean onDragStarted(DragEvent event) {
-        if (DEBUG) Log.d(TAG, "onDragStarted");
+        if (DEBUG) Slog.d(TAG, "onDragStarted");
 
         // Ensure that an app shortcut is being dragged.
         if (!canAcceptDrag(event)) {
@@ -194,7 +202,7 @@ class NavigationBarApps extends LinearLayout {
      * needs to use LinearLayout/ViewGroup methods.
      */
     private void onDragEnteredIcon(View target) {
-        if (DEBUG) Log.d(TAG, "onDragEntered " + indexOfChild(target));
+        if (DEBUG) Slog.d(TAG, "onDragEntered " + indexOfChild(target));
 
         // If the drag didn't start from an existing icon, add an invisible placeholder to create
         // empty space for the user to drag into.
@@ -227,7 +235,7 @@ class NavigationBarApps extends LinearLayout {
     }
 
     private boolean onDrop(DragEvent event) {
-        if (DEBUG) Log.d(TAG, "onDrop");
+        if (DEBUG) Slog.d(TAG, "onDrop");
 
         int dragViewIndex = indexOfChild(mDragView);
         if (mAppsModel.getApp(dragViewIndex) == null) {
@@ -285,7 +293,7 @@ class NavigationBarApps extends LinearLayout {
 
     /** Cleans up at the end of the drag. */
     private boolean onDragEnded() {
-        if (DEBUG) Log.d(TAG, "onDragEnded");
+        if (DEBUG) Slog.d(TAG, "onDragEnded");
 
         if (mDragView != null) {
             // The icon wasn't dropped into the app list. Remove the placeholder.

@@ -391,7 +391,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int LAST_PREBOOT_DELIVERED_FILE_VERSION = 10000;
 
     // Delay in notifying task stack change listeners (in millis)
-    static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 1000;
+    static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
 
     // Necessary ApplicationInfo flags to mark an app as persistent
     private static final int PERSISTENT_MASK =
