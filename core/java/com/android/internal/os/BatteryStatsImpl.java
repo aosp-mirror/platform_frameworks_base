@@ -8073,7 +8073,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     timer.mUid.mSystemCpuTime.addCountLocked(systemTimeUs);
 
                     final Uid.Proc proc = timer.mUid.getProcessStatsLocked("*wakelock*");
-                    proc.addCpuTimeLocked(userTimeUs, systemTimeUs);
+                    proc.addCpuTimeLocked(userTimeUs / 1000, systemTimeUs / 1000);
 
                     mTempTotalCpuUserTimeUs -= userTimeUs;
                     mTempTotalCpuSystemTimeUs -= systemTimeUs;
@@ -8097,8 +8097,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 u.mSystemCpuTime.addCountLocked(mTempTotalCpuSystemTimeUs);
 
                 final Uid.Proc proc = u.getProcessStatsLocked("*lost*");
-                proc.addCpuTimeLocked((int) mTempTotalCpuUserTimeUs,
-                        (int) mTempTotalCpuSystemTimeUs);
+                proc.addCpuTimeLocked((int) mTempTotalCpuUserTimeUs / 1000,
+                        (int) mTempTotalCpuSystemTimeUs / 1000);
             }
         }
 
