@@ -2659,8 +2659,15 @@ class MountService extends IMountService.Stub
         boolean foundPrimary = false;
 
         final int userId = UserHandle.getUserId(uid);
-        final boolean reportUnmounted = !mMountServiceInternal.hasExternalStorage(
-                uid, packageName);
+        final boolean reportUnmounted;
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            reportUnmounted = !mMountServiceInternal.hasExternalStorage(
+                    uid, packageName);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
 
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
