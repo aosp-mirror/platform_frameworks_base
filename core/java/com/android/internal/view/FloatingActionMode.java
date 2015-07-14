@@ -41,13 +41,13 @@ public class FloatingActionMode extends ActionMode {
     private final ActionMode.Callback2 mCallback;
     private final MenuBuilder mMenu;
     private final Rect mContentRect;
-    private final Rect mContentRectOnWindow;
-    private final Rect mPreviousContentRectOnWindow;
-    private final int[] mViewPosition;
-    private final int[] mPreviousViewPosition;
-    private final int[] mRootViewPosition;
-    private final Rect mViewRect;
-    private final Rect mPreviousViewRect;
+    private final Rect mContentRectOnScreen;
+    private final Rect mPreviousContentRectOnScreen;
+    private final int[] mViewPositionOnScreen;
+    private final int[] mPreviousViewPositionOnScreen;
+    private final int[] mRootViewPositionOnScreen;
+    private final Rect mViewRectOnScreen;
+    private final Rect mPreviousViewRectOnScreen;
     private final Rect mScreenRect;
     private final View mOriginatingView;
     private final int mBottomAllowance;
@@ -77,16 +77,16 @@ public class FloatingActionMode extends ActionMode {
                 MenuItem.SHOW_AS_ACTION_IF_ROOM);
         setType(ActionMode.TYPE_FLOATING);
         mContentRect = new Rect();
-        mContentRectOnWindow = new Rect();
-        mPreviousContentRectOnWindow = new Rect();
-        mViewPosition = new int[2];
-        mPreviousViewPosition = new int[2];
-        mRootViewPosition = new int[2];
-        mViewRect = new Rect();
-        mPreviousViewRect = new Rect();
+        mContentRectOnScreen = new Rect();
+        mPreviousContentRectOnScreen = new Rect();
+        mViewPositionOnScreen = new int[2];
+        mPreviousViewPositionOnScreen = new int[2];
+        mRootViewPositionOnScreen = new int[2];
+        mViewRectOnScreen = new Rect();
+        mPreviousViewRectOnScreen = new Rect();
         mScreenRect = new Rect();
         mOriginatingView = Preconditions.checkNotNull(originatingView);
-        mOriginatingView.getLocationInWindow(mViewPosition);
+        mOriginatingView.getLocationOnScreen(mViewPositionOnScreen);
         // Allow the content rect to overshoot a little bit beyond the
         // bottom view bound if necessary.
         mBottomAllowance = context.getResources()
@@ -138,52 +138,53 @@ public class FloatingActionMode extends ActionMode {
     public void updateViewLocationInWindow() {
         checkToolbarInitialized();
 
-        mOriginatingView.getLocationInWindow(mViewPosition);
-        mOriginatingView.getRootView().getLocationInWindow(mRootViewPosition);
-        mOriginatingView.getGlobalVisibleRect(mViewRect);
-        mViewRect.offset(mRootViewPosition[0], mRootViewPosition[1]);
+        mOriginatingView.getLocationOnScreen(mViewPositionOnScreen);
+        mOriginatingView.getRootView().getLocationOnScreen(mRootViewPositionOnScreen);
+        mOriginatingView.getGlobalVisibleRect(mViewRectOnScreen);
+        mViewRectOnScreen.offset(mRootViewPositionOnScreen[0], mRootViewPositionOnScreen[1]);
 
-        if (!Arrays.equals(mViewPosition, mPreviousViewPosition)
-                || !mViewRect.equals(mPreviousViewRect)) {
+        if (!Arrays.equals(mViewPositionOnScreen, mPreviousViewPositionOnScreen)
+                || !mViewRectOnScreen.equals(mPreviousViewRectOnScreen)) {
             repositionToolbar();
-            mPreviousViewPosition[0] = mViewPosition[0];
-            mPreviousViewPosition[1] = mViewPosition[1];
-            mPreviousViewRect.set(mViewRect);
+            mPreviousViewPositionOnScreen[0] = mViewPositionOnScreen[0];
+            mPreviousViewPositionOnScreen[1] = mViewPositionOnScreen[1];
+            mPreviousViewRectOnScreen.set(mViewRectOnScreen);
         }
     }
 
     private void repositionToolbar() {
         checkToolbarInitialized();
 
-        mContentRectOnWindow.set(mContentRect);
-        mContentRectOnWindow.offset(mViewPosition[0], mViewPosition[1]);
+        mContentRectOnScreen.set(mContentRect);
+        mContentRectOnScreen.offset(mViewPositionOnScreen[0], mViewPositionOnScreen[1]);
 
         if (isContentRectWithinBounds()) {
             mFloatingToolbarVisibilityHelper.setOutOfBounds(false);
             // Make sure that content rect is not out of the view's visible bounds.
-            mContentRectOnWindow.set(
-                    Math.max(mContentRectOnWindow.left, mViewRect.left),
-                    Math.max(mContentRectOnWindow.top, mViewRect.top),
-                    Math.min(mContentRectOnWindow.right, mViewRect.right),
-                    Math.min(mContentRectOnWindow.bottom, mViewRect.bottom + mBottomAllowance));
+            mContentRectOnScreen.set(
+                    Math.max(mContentRectOnScreen.left, mViewRectOnScreen.left),
+                    Math.max(mContentRectOnScreen.top, mViewRectOnScreen.top),
+                    Math.min(mContentRectOnScreen.right, mViewRectOnScreen.right),
+                    Math.min(mContentRectOnScreen.bottom,
+                            mViewRectOnScreen.bottom + mBottomAllowance));
 
-            if (!mContentRectOnWindow.equals(mPreviousContentRectOnWindow)) {
+            if (!mContentRectOnScreen.equals(mPreviousContentRectOnScreen)) {
                 // Content rect is moving.
                 mOriginatingView.removeCallbacks(mMovingOff);
                 mFloatingToolbarVisibilityHelper.setMoving(true);
                 mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
                 mOriginatingView.postDelayed(mMovingOff, MOVING_HIDE_DELAY);
 
-                mFloatingToolbar.setContentRect(mContentRectOnWindow);
+                mFloatingToolbar.setContentRect(mContentRectOnScreen);
                 mFloatingToolbar.updateLayout();
             }
         } else {
             mFloatingToolbarVisibilityHelper.setOutOfBounds(true);
             mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
-            mContentRectOnWindow.setEmpty();
+            mContentRectOnScreen.setEmpty();
         }
 
-        mPreviousContentRectOnWindow.set(mContentRectOnWindow);
+        mPreviousContentRectOnScreen.set(mContentRectOnScreen);
     }
 
     private boolean isContentRectWithinBounds() {
@@ -193,8 +194,8 @@ public class FloatingActionMode extends ActionMode {
             mContext.getResources().getDisplayMetrics().widthPixels,
             mContext.getResources().getDisplayMetrics().heightPixels);
 
-        return Rect.intersects(mContentRectOnWindow, mScreenRect)
-            && Rect.intersects(mContentRectOnWindow, mViewRect);
+        return Rect.intersects(mContentRectOnScreen, mScreenRect)
+            && Rect.intersects(mContentRectOnScreen, mViewRectOnScreen);
     }
 
     @Override
@@ -268,7 +269,6 @@ public class FloatingActionMode extends ActionMode {
         mOriginatingView.removeCallbacks(mMovingOff);
         mOriginatingView.removeCallbacks(mHideOff);
     }
-
 
     /**
      * A helper for showing/hiding the floating toolbar depending on certain states.
