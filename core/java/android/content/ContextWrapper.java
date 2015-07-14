@@ -402,12 +402,6 @@ public class ContextWrapper extends Context {
     }
 
     /** @hide */
-    @Override
-    public void sendBroadcast(Intent intent, String[] receiverPermissions) {
-        mBase.sendBroadcast(intent, receiverPermissions);
-    }
-
-    /** @hide */
     @SystemApi
     @Override
     public void sendBroadcast(Intent intent, String receiverPermission, Bundle options) {
