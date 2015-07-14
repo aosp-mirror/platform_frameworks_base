@@ -20,6 +20,7 @@ import static android.net.TrafficStats.MB_IN_BYTES;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.IPackageMoveObserver;
@@ -857,7 +858,9 @@ public class StorageManager {
         final IMountService mountService = IMountService.Stub.asInterface(
                 ServiceManager.getService("mount"));
         try {
-            return mountService.getVolumeList(userId);
+            final String packageName = ActivityThread.currentOpPackageName();
+            final int uid = ActivityThread.getPackageManager().getPackageUid(packageName, userId);
+            return mountService.getVolumeList(uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -891,15 +894,6 @@ public class StorageManager {
             }
         }
         throw new IllegalStateException("Missing primary storage");
-    }
-
-    /** {@hide} */
-    public void remountUid(int uid) {
-        try {
-            mMountService.remountUid(uid);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
     }
 
     /** {@hide} */
