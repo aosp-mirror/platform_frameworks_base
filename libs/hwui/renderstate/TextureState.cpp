@@ -22,7 +22,8 @@ namespace uirenderer {
 const GLenum kTextureUnits[] = {
     GL_TEXTURE0,
     GL_TEXTURE1,
-    GL_TEXTURE2
+    GL_TEXTURE2,
+    GL_TEXTURE3
 };
 
 TextureState::TextureState()
@@ -33,10 +34,13 @@ TextureState::TextureState()
     GLint maxTextureUnits;
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
     LOG_ALWAYS_FATAL_IF(maxTextureUnits < kTextureUnitsCount,
-        "At least %d texture units are required!", kTextureUnitsCount);
+            "At least %d texture units are required!", kTextureUnitsCount);
 }
 
 void TextureState::activateTexture(GLuint textureUnit) {
+    LOG_ALWAYS_FATAL_IF(textureUnit >= kTextureUnitsCount,
+            "Tried to use texture unit index %d, only %d exist",
+            textureUnit, kTextureUnitsCount);
     if (mTextureUnit != textureUnit) {
         glActiveTexture(kTextureUnits[textureUnit]);
         mTextureUnit = textureUnit;
