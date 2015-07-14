@@ -1574,7 +1574,8 @@ public final class StrictMode {
      */
     public static void conditionallyCheckInstanceCounts() {
         VmPolicy policy = getVmPolicy();
-        if (policy.classInstanceLimit.size() == 0) {
+        int policySize = policy.classInstanceLimit.size();
+        if (policySize == 0) {
             return;
         }
 
@@ -1583,15 +1584,17 @@ public final class StrictMode {
         System.gc();
 
         // Note: classInstanceLimit is immutable, so this is lock-free
-        for (Map.Entry<Class, Integer> entry : policy.classInstanceLimit.entrySet()) {
-            Class klass = entry.getKey();
-            int limit = entry.getValue();
-            long instances = VMDebug.countInstancesOfClass(klass, false);
-            if (instances <= limit) {
-                continue;
+        // Create the classes array.
+        Class[] classes = policy.classInstanceLimit.keySet().toArray(new Class[policySize]);
+        long[] instanceCounts = VMDebug.countInstancesOfClasses(classes, false);
+        for (int i = 0; i < classes.length; ++i) {
+            Class klass = classes[i];
+            int limit = policy.classInstanceLimit.get(klass);
+            long instances = instanceCounts[i];
+            if (instances > limit) {
+                Throwable tr = new InstanceCountViolation(klass, instances, limit);
+                onVmPolicyViolation(tr.getMessage(), tr);
             }
-            Throwable tr = new InstanceCountViolation(klass, instances, limit);
-            onVmPolicyViolation(tr.getMessage(), tr);
         }
     }
 
