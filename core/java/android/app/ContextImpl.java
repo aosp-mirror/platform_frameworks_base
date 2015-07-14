@@ -180,7 +180,7 @@ class ContextImpl extends Context {
     @GuardedBy("mSync")
     private File[] mExternalMediaDirs;
 
-    private static final String[] EMPTY_FILE_LIST = {};
+    private static final String[] EMPTY_STRING_ARRAY = {};
 
     // The system service cache for the system services that are cached per-ContextImpl.
     final Object[] mServiceCache = SystemServiceRegistry.createServiceCache();
@@ -552,7 +552,7 @@ class ContextImpl extends Context {
     @Override
     public String[] fileList() {
         final String[] list = getFilesDir().list();
-        return (list != null) ? list : EMPTY_FILE_LIST;
+        return (list != null) ? list : EMPTY_STRING_ARRAY;
     }
 
     @Override
@@ -591,7 +591,7 @@ class ContextImpl extends Context {
     @Override
     public String[] databaseList() {
         final String[] list = getDatabasesDir().list();
-        return (list != null) ? list : EMPTY_FILE_LIST;
+        return (list != null) ? list : EMPTY_STRING_ARRAY;
     }
 
 
@@ -777,11 +777,28 @@ class ContextImpl extends Context {
     public void sendBroadcast(Intent intent, String receiverPermission) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        String[] receiverPermissions = receiverPermission == null ? null
+                : new String[] {receiverPermission};
         try {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
-                    Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE,
+                    Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
+                    null, false, false, getUserId());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
+        }
+    }
+
+    @Override
+    public void sendBroadcast(Intent intent, String[] receiverPermissions) {
+        warnIfCallingFromSystemProcess();
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.prepareToLeaveProcess();
+            ActivityManagerNative.getDefault().broadcastIntent(
+                    mMainThread.getApplicationThread(), intent, resolvedType, null,
+                    Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
                     null, false, false, getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -792,11 +809,13 @@ class ContextImpl extends Context {
     public void sendBroadcast(Intent intent, String receiverPermission, Bundle options) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        String[] receiverPermissions = receiverPermission == null ? null
+                : new String[] {receiverPermission};
         try {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
-                    Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE,
+                    Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
                     options, false, false, getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -807,11 +826,13 @@ class ContextImpl extends Context {
     public void sendBroadcast(Intent intent, String receiverPermission, int appOp) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        String[] receiverPermissions = receiverPermission == null ? null
+                : new String[] {receiverPermission};
         try {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
-                    Activity.RESULT_OK, null, null, receiverPermission, appOp, null, false, false,
+                    Activity.RESULT_OK, null, null, receiverPermissions, appOp, null, false, false,
                     getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -822,11 +843,13 @@ class ContextImpl extends Context {
     public void sendOrderedBroadcast(Intent intent, String receiverPermission) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        String[] receiverPermissions = receiverPermission == null ? null
+                : new String[] {receiverPermission};
         try {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
-                    Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE,
+                    Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
                     null, true, false, getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -883,11 +906,13 @@ class ContextImpl extends Context {
             }
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        String[] receiverPermissions = receiverPermission == null ? null
+                : new String[] {receiverPermission};
         try {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
-                initialCode, initialData, initialExtras, receiverPermission, appOp,
+                initialCode, initialData, initialExtras, receiverPermissions, appOp,
                     options, true, false, getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -917,11 +942,13 @@ class ContextImpl extends Context {
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, int appOp) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        String[] receiverPermissions = receiverPermission == null ? null
+                : new String[] {receiverPermission};
         try {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
-                    Activity.RESULT_OK, null, null, receiverPermission, appOp, null, false, false,
+                    Activity.RESULT_OK, null, null, receiverPermissions, appOp, null, false, false,
                     user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -959,11 +986,13 @@ class ContextImpl extends Context {
             }
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        String[] receiverPermissions = receiverPermission == null ? null
+                : new String[] {receiverPermission};
         try {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
-                initialCode, initialData, initialExtras, receiverPermission,
+                initialCode, initialData, initialExtras, receiverPermissions,
                     appOp, null, true, false, user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
