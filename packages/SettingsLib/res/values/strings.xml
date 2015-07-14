@@ -182,4 +182,17 @@
     <!-- Message for the error dialog when BT pairing fails because the other device rejected the pairing. -->
     <string name="bluetooth_pairing_rejected_error_message">Pairing rejected by <xliff:g id="device_name">%1$s</xliff:g>.</string>
 
+    <!-- Content description of the WIFI signal when WIFI is disabled for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_off">Wifi off.</string>
+    <!-- Content description of the WIFI signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_wifi">Wifi disconnected.</string>
+    <!-- Content description of the WIFI signal when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_one_bar">Wifi one bar.</string>
+    <!-- Content description of the WIFI signal when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_two_bars">Wifi two bars.</string>
+    <!-- Content description of the WIFI signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_three_bars">Wifi three bars.</string>
+    <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
+
 </resources>
