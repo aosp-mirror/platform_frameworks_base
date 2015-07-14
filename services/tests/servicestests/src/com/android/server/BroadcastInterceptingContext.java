@@ -139,11 +139,6 @@ public class BroadcastInterceptingContext extends ContextWrapper {
     }
 
     @Override
-    public void sendBroadcast(Intent intent, String[] receiverPermissions) {
-        sendBroadcast(intent);
-    }
-
-    @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user) {
         sendBroadcast(intent);
     }
