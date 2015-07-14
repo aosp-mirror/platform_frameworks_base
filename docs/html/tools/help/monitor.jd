@@ -15,8 +15,8 @@ page.title=Device Monitor
 
 <p>Android Device Monitor is a stand-alone tool that provides a graphical user interface for
 several Android application debugging and analysis tools. The Monitor tool does not
-require installation of an integrated development environment, such as Eclipse, and encapsulates the
-following tools:</p>
+require installation of an integrated development environment, such as Android Studio, and
+encapsulates the following tools:</p>
 
 <ul>
   <li><a href="{@docRoot}tools/debugging/ddms.html">DDMS</a></li>
@@ -30,9 +30,19 @@ following tools:</p>
 
 <h2 id="usage">Usage</h2>
 
-<p>To start Device Monitor, enter the following command from the SDK <code>tools/</code>
-directory:</p>
+<p>To start Device Monitor:</p>
+
+<ul>
+  <li>From Android Studio, choose <strong>Tools &gt; Android Device Monitor</strong> or click
+    the Android Device Monitor icon
+    <img src="{@docRoot}images/tools/hierarchicalviewer-icon.png" alt=""/>.
+  </li>
+  <li>From the command line, in the SDK <code>tools/</code> directory, enter the following command:
   <pre>monitor</pre>
+  </li>
+</ul>
+
+
 
 <p>Start an Android emulator or connect an Android device via USB cable, and connect Device
 Monitor to the device by selecting it in the <strong>Devices</strong> window.</p>
