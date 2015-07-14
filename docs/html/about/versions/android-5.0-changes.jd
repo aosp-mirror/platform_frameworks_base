@@ -598,3 +598,8 @@ android.provider.MediaStore#EXTRA_OUTPUT EXTRA_OUTPUT} should contain a content
 URI specifying where the photo should be stored. The camera app can write the
 image to the location specified by that URI, and the app that fired the intent
 would be able to read that file, even if the app is on the other profile. </p>
+
+<h3>Lockscreen widget support removed</h3>
+
+<p>Android 5.0 removes support for lockscreen widgets; it continues to support
+widgets on the home screen.</p>
