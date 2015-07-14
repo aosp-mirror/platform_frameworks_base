@@ -68,6 +68,8 @@ import android.os.storage.IMountService;
 import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
 import android.os.storage.IObbActionListener;
+import android.os.storage.MountServiceInternal;
+import android.os.storage.MountServiceInternal.ExternalStorageMountPolicy;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
@@ -127,6 +129,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -307,16 +310,6 @@ class MountService extends IMountService.Stub
     @GuardedBy("mLock")
     private String mMoveTargetUuid;
 
-    private DiskInfo findDiskById(String id) {
-        synchronized (mLock) {
-            final DiskInfo disk = mDisks.get(id);
-            if (disk != null) {
-                return disk;
-            }
-        }
-        throw new IllegalArgumentException("No disk found for ID " + id);
-    }
-
     private VolumeInfo findVolumeByIdOrThrow(String id) {
         synchronized (mLock) {
             final VolumeInfo vol = mVolumes.get(id);
@@ -455,6 +448,9 @@ class MountService extends IMountService.Stub
 
     /** Map from raw paths to {@link ObbState}. */
     final private Map<String, ObbState> mObbPathToStateMap = new HashMap<String, ObbState>();
+
+    // Not guarded by a lock.
+    private final MountServiceInternalImpl mMountServiceInternal = new MountServiceInternalImpl();
 
     class ObbState implements IBinder.DeathRecipient {
         public ObbState(String rawPath, String canonicalPath, int callingUid,
@@ -807,7 +803,7 @@ class MountService extends IMountService.Stub
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 if (vol.isVisibleToUser(userId) && vol.isMountedReadable()) {
-                    final StorageVolume userVol = vol.buildStorageVolume(mContext, userId);
+                    final StorageVolume userVol = vol.buildStorageVolume(mContext, userId, false);
                     mHandler.obtainMessage(H_VOLUME_BROADCAST, userVol).sendToTarget();
 
                     final String envState = VolumeInfo.getEnvironmentForState(vol.getState());
@@ -1250,7 +1246,7 @@ class MountService extends IMountService.Stub
             // user-specific broadcasts.
             for (int userId : mStartedUsers) {
                 if (vol.isVisibleToUser(userId)) {
-                    final StorageVolume userVol = vol.buildStorageVolume(mContext, userId);
+                    final StorageVolume userVol = vol.buildStorageVolume(mContext, userId, false);
                     mHandler.obtainMessage(H_VOLUME_BROADCAST, userVol).sendToTarget();
 
                     mCallbacks.notifyStorageStateChanged(userVol.getPath(), oldStateEnv,
@@ -1369,6 +1365,8 @@ class MountService extends IMountService.Stub
         synchronized (mLock) {
             readSettingsLocked();
         }
+
+        LocalServices.addService(MountServiceInternal.class, mMountServiceInternal);
 
         /*
          * Create the connection to vold with a maximum queue of twice the
@@ -1787,27 +1785,28 @@ class MountService extends IMountService.Stub
         }
     }
 
-    @Override
-    public void remountUid(int uid) {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+    private void remountUidExternalStorage(int uid, int mode) {
         waitForReady();
 
-        final int mountExternal = mPms.getMountExternalMode(uid);
-        final String mode;
-        if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
-            mode = "default";
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
-            mode = "read";
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
-            mode = "write";
-        } else {
-            mode = "none";
+        String modeName = "none";
+        switch (mode) {
+            case Zygote.MOUNT_EXTERNAL_DEFAULT: {
+                modeName = "default";
+            } break;
+
+            case Zygote.MOUNT_EXTERNAL_READ: {
+                modeName = "read";
+            } break;
+
+            case Zygote.MOUNT_EXTERNAL_WRITE: {
+                modeName = "write";
+            } break;
         }
 
         try {
-            mConnector.execute("volume", "remount_uid", uid, mode);
+            mConnector.execute("volume", "remount_uid", uid, modeName);
         } catch (NativeDaemonConnectorException e) {
-            Slog.w(TAG, "Failed to remount UID " + uid + " as " + mode + ": " + e);
+            Slog.w(TAG, "Failed to remount UID " + uid + " as " + modeName + ": " + e);
         }
     }
 
@@ -2655,15 +2654,20 @@ class MountService extends IMountService.Stub
     }
 
     @Override
-    public StorageVolume[] getVolumeList(int userId) {
+    public StorageVolume[] getVolumeList(int uid, String packageName) {
         final ArrayList<StorageVolume> res = new ArrayList<>();
         boolean foundPrimary = false;
+
+        final int userId = UserHandle.getUserId(uid);
+        final boolean reportUnmounted = !mMountServiceInternal.hasExternalStorage(
+                uid, packageName);
 
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 if (vol.isVisibleToUser(userId)) {
-                    final StorageVolume userVol = vol.buildStorageVolume(mContext, userId);
+                    final StorageVolume userVol = vol.buildStorageVolume(mContext, userId,
+                            reportUnmounted);
                     if (vol.isPrimary()) {
                         res.add(0, userVol);
                         foundPrimary = true;
@@ -3434,6 +3438,52 @@ class MountService extends IMountService.Stub
         }
         if (mCryptConnector != null) {
             mCryptConnector.monitor();
+        }
+    }
+
+    private final class MountServiceInternalImpl extends MountServiceInternal {
+        // Not guarded by a lock.
+        private final CopyOnWriteArrayList<ExternalStorageMountPolicy> mPolicies =
+                new CopyOnWriteArrayList<>();
+
+        @Override
+        public void addExternalStoragePolicy(ExternalStorageMountPolicy policy) {
+            // No locking - CopyOnWriteArrayList
+            mPolicies.add(policy);
+        }
+
+        @Override
+        public void onExternalStoragePolicyChanged(int uid, String packageName) {
+            final int mountMode = getExternalStorageMountMode(uid, packageName);
+            remountUidExternalStorage(uid, mountMode);
+        }
+
+        @Override
+        public int getExternalStorageMountMode(int uid, String packageName) {
+            // No locking - CopyOnWriteArrayList
+            int mountMode = Integer.MAX_VALUE;
+            for (ExternalStorageMountPolicy policy : mPolicies) {
+                final int policyMode = policy.getMountMode(uid, packageName);
+                if (policyMode == Zygote.MOUNT_EXTERNAL_NONE) {
+                    return Zygote.MOUNT_EXTERNAL_NONE;
+                }
+                mountMode = Math.min(mountMode, policyMode);
+            }
+            if (mountMode == Integer.MAX_VALUE) {
+                return Zygote.MOUNT_EXTERNAL_NONE;
+            }
+            return mountMode;
+        }
+
+        public boolean hasExternalStorage(int uid, String packageName) {
+            // No locking - CopyOnWriteArrayList
+            for (ExternalStorageMountPolicy policy : mPolicies) {
+                final boolean policyHasStorage = policy.hasExternalStorage(uid, packageName);
+                if (!policyHasStorage) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

@@ -48,6 +48,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.storage.MountServiceInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -60,6 +61,7 @@ import android.util.Xml;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.os.Zygote;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -245,6 +247,34 @@ public class AppOpsService extends IAppOpsService.Stub {
                 scheduleFastWriteLocked();
             }
         }
+
+        MountServiceInternal mountServiceInternal = LocalServices.getService(
+                MountServiceInternal.class);
+        mountServiceInternal.addExternalStoragePolicy(
+                new MountServiceInternal.ExternalStorageMountPolicy() {
+                    @Override
+                    public int getMountMode(int uid, String packageName) {
+                        if (Process.isIsolated(uid)) {
+                            return Zygote.MOUNT_EXTERNAL_NONE;
+                        }
+                        if (noteOperation(AppOpsManager.OP_READ_EXTERNAL_STORAGE, uid,
+                                packageName) != AppOpsManager.MODE_ALLOWED) {
+                            return Zygote.MOUNT_EXTERNAL_NONE;
+                        }
+                        if (noteOperation(AppOpsManager.OP_WRITE_EXTERNAL_STORAGE, uid,
+                                packageName) != AppOpsManager.MODE_ALLOWED) {
+                            return Zygote.MOUNT_EXTERNAL_READ;
+                        }
+                        return Zygote.MOUNT_EXTERNAL_WRITE;
+                    }
+
+                    @Override
+                    public boolean hasExternalStorage(int uid, String packageName) {
+                        final int mountMode = getMountMode(uid, packageName);
+                        return mountMode == Zygote.MOUNT_EXTERNAL_READ
+                                || mountMode == Zygote.MOUNT_EXTERNAL_WRITE;
+                    }
+                });
     }
 
     public void packageRemoved(int uid, String packageName) {
