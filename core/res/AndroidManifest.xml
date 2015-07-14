@@ -2436,7 +2436,7 @@
 
     <!-- Allows managing (adding, removing) fingerprint templates. Reserved for the system. @hide -->
     <permission android:name="android.permission.MANAGE_FINGERPRINT"
-        android:protectionLevel="signature" />
+        android:protectionLevel="system|signature" />
 
     <!-- Allows an application to control keyguard.  Only allowed for system processes.
         @hide -->
