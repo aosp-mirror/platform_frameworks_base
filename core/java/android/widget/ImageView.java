@@ -91,7 +91,7 @@ public class ImageView extends View {
     private boolean mColorMod = false;
 
     private Drawable mDrawable = null;
-    private ImageViewBitmapDrawable mRecycleableBitmapDrawable = null;
+    private BitmapDrawable mRecycleableBitmapDrawable = null;
     private ColorStateList mDrawableTintList = null;
     private PorterDuff.Mode mDrawableTintMode = null;
     private boolean mHasDrawableTint = false;
@@ -571,17 +571,6 @@ public class ImageView extends View {
         }
     }
 
-    private static class ImageViewBitmapDrawable extends BitmapDrawable {
-        public ImageViewBitmapDrawable(Resources res, Bitmap bitmap) {
-            super(res, bitmap);
-        }
-
-        @Override
-        public void setBitmap(Bitmap bitmap) {
-            super.setBitmap(bitmap);
-        }
-    };
-
     /**
      * Sets a Bitmap as the content of this ImageView.
      * 
@@ -593,8 +582,7 @@ public class ImageView extends View {
         // instead of doing an object reference comparison
         mDrawable = null;
         if (mRecycleableBitmapDrawable == null) {
-            mRecycleableBitmapDrawable = new ImageViewBitmapDrawable(
-                    mContext.getResources(), bm);
+            mRecycleableBitmapDrawable = new BitmapDrawable(mContext.getResources(), bm);
         } else {
             mRecycleableBitmapDrawable.setBitmap(bm);
         }
