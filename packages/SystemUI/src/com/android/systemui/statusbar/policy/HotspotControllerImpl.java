@@ -111,7 +111,9 @@ public class HotspotControllerImpl implements HotspotController {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Log.d(TAG, "onReceive " + intent.getAction());
-            fireCallback(isHotspotEnabled());
+            int state = intent.getIntExtra(
+                    WifiManager.EXTRA_WIFI_AP_STATE, WifiManager.WIFI_AP_STATE_FAILED);
+            fireCallback(WifiManager.WIFI_AP_STATE_ENABLED == state);
         }
     }
 }
