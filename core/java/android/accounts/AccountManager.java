@@ -2359,7 +2359,7 @@ public class AccountManager {
         intent.setClassName(componentName.getPackageName(),
                 componentName.getClassName());
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST,
-                new ArrayList<Account>(allowableAccounts));
+                allowableAccounts == null ? null : new ArrayList<Account>(allowableAccounts));
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
                 allowableAccountTypes);
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE,
