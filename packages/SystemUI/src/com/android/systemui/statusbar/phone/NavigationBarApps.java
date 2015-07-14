@@ -33,6 +33,7 @@ import android.util.Slog;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -53,8 +54,13 @@ class NavigationBarApps extends LinearLayout {
     private final PackageManager mPackageManager;
     private final LayoutInflater mLayoutInflater;
 
-    // The view being dragged, or null if the user is not dragging. This may be a newly created
-    // placeholder view if the drag is coming from outside the apps list.
+    // This view has two roles:
+    // 1) If the drag started outside the pinned apps list, it is a placeholder icon with a null
+    // data model entry.
+    // 2) If the drag started inside the pinned apps list, it is the icon for the app being dragged
+    // with the associated data model entry.
+    // The icon is set invisible for the duration of the drag, creating a visual space for a drop.
+    // When the user is not dragging this member is null.
     private View mDragView;
 
     public NavigationBarApps(Context context, AttributeSet attrs) {
@@ -69,9 +75,12 @@ class NavigationBarApps extends LinearLayout {
         LayoutTransition transition = new LayoutTransition();
         // Don't trigger on disappear. Adding the view will trigger the layout animation.
         transition.disableTransitionType(LayoutTransition.DISAPPEARING);
-        transition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
         // Don't animate the dragged icon itself.
         transition.disableTransitionType(LayoutTransition.APPEARING);
+        // When an icon is dragged off the shelf, start sliding the other icons over immediately
+        // to match the parent view's animation.
+        transition.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
+        transition.setStagger(LayoutTransition.CHANGE_DISAPPEARING, 0);
         setLayoutTransition(transition);
     }
 
@@ -79,6 +88,22 @@ class NavigationBarApps extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         createAppButtons();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+      super.onAttachedToWindow();
+      // When an icon is dragged out of the pinned area this view's width changes, which causes
+      // the parent container's layout to change and the divider and recents icons to shift left.
+      // Animate the parent's CHANGING transition.
+      ViewGroup parent = (ViewGroup) getParent();
+      LayoutTransition transition = new LayoutTransition();
+      transition.disableTransitionType(LayoutTransition.APPEARING);
+      transition.disableTransitionType(LayoutTransition.DISAPPEARING);
+      transition.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
+      transition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+      transition.enableTransitionType(LayoutTransition.CHANGING);
+      parent.setLayoutTransition(transition);
     }
 
     /** Creates an ImageView for each pinned app. */
@@ -153,6 +178,9 @@ class NavigationBarApps extends LinearLayout {
             case DragEvent.ACTION_DROP:
                 handled = onDrop(event);
                 break;
+            case DragEvent.ACTION_DRAG_EXITED:
+                handled = onDragExited();
+                break;
         }
 
         return handled || childHandled;
@@ -176,6 +204,12 @@ class NavigationBarApps extends LinearLayout {
             return false;
         }
 
+        // If there are no pinned apps this view will be collapsed, but the user still needs some
+        // empty space to use as a drag target.
+        if (getChildCount() == 0) {
+            mDragView = createPlaceholderDragView(0);
+        }
+
         // If this is an existing icon being reordered, hide the app icon. The drag shadow will
         // continue to draw.
         if (mDragView != null) {
@@ -190,7 +224,7 @@ class NavigationBarApps extends LinearLayout {
      * Creates a blank icon-sized View to create an empty space during a drag. Also creates a data
      * model entry so the rest of the code can assume it is reordering existing entries.
      */
-    private ImageView createPlaceholderAppButton(int index) {
+    private ImageView createPlaceholderDragView(int index) {
         ImageView button = createAppButton();
         addView(button, index);
         mAppsModel.addApp(index, null /* name */);
@@ -208,7 +242,7 @@ class NavigationBarApps extends LinearLayout {
         // empty space for the user to drag into.
         if (mDragView == null) {
             int placeholderIndex = indexOfChild(target);
-            mDragView = createPlaceholderAppButton(placeholderIndex);
+            mDragView = createPlaceholderDragView(placeholderIndex);
             return;
         }
 
@@ -237,29 +271,37 @@ class NavigationBarApps extends LinearLayout {
     private boolean onDrop(DragEvent event) {
         if (DEBUG) Slog.d(TAG, "onDrop");
 
+        // An earlier drag event might have canceled the drag. If so, there is nothing to do.
+        if (mDragView == null) {
+            return true;
+        }
+
+        // If this was an existing app being dragged then end the drag.
         int dragViewIndex = indexOfChild(mDragView);
-        if (mAppsModel.getApp(dragViewIndex) == null) {
-            // The drag view was a placeholder. Unpack the drop.
-            ComponentName activityName = getActivityNameFromDragEvent(event);
-            if (activityName != null) {
-                // The drop had valid data. Update the placeholder with a real activity and icon.
-                updateAppAt(dragViewIndex, activityName);
-            } else {
-                // This wasn't a valid drop. Clean up the placeholder and model.
-                removeAppAt(dragViewIndex);
-                mDragView = null;
-            }
+        if (mAppsModel.getApp(dragViewIndex) != null) {
+            endDrag();
+            return true;
         }
 
-        // The drag is complete. If the drag view still exists ensure it is visible.
-        if (mDragView != null) {
-            mDragView.setVisibility(View.VISIBLE);
-            mDragView = null;
+        // The drag view was a placeholder. Unpack the drop.
+        ComponentName activityName = getActivityNameFromDragEvent(event);
+        if (activityName == null) {
+            // This wasn't a valid drop. Clean up the placeholder and model.
+            removePlaceholderDragViewIfNeeded();
+            return true;
         }
 
-        // Persist the state of the reordered icons.
-        mAppsModel.savePrefs();
+        // The drop had valid data. Update the placeholder with a real activity and icon.
+        updateAppAt(dragViewIndex, activityName);
+        endDrag();
         return true;
+    }
+
+    /** Cleans up at the end of a drag. */
+    private void endDrag() {
+        mDragView.setVisibility(View.VISIBLE);
+        mDragView = null;
+        mAppsModel.savePrefs();
     }
 
     /** Returns an app launch Intent from a DragEvent, or null if the data wasn't valid. */
@@ -285,23 +327,32 @@ class NavigationBarApps extends LinearLayout {
         new GetActivityIconTask(mPackageManager, button).execute(activityName);
     }
 
-    /** Removes the app at a given view index from both the UI and data model. */
-    private void removeAppAt(int index) {
+    /** Removes the empty placeholder view and cleans up the data model. */
+    private void removePlaceholderDragViewIfNeeded() {
+        // If the drag has ended already there is nothing to do.
+        if (mDragView == null) {
+            return;
+        }
+        int index = indexOfChild(mDragView);
         removeViewAt(index);
         mAppsModel.removeApp(index);
+        endDrag();
     }
 
     /** Cleans up at the end of the drag. */
     private boolean onDragEnded() {
         if (DEBUG) Slog.d(TAG, "onDragEnded");
+        // If the icon wasn't already dropped into the app list then remove the placeholder.
+        removePlaceholderDragViewIfNeeded();
+        return true;
+    }
 
-        if (mDragView != null) {
-            // The icon wasn't dropped into the app list. Remove the placeholder.
-            removeAppAt(indexOfChild(mDragView));
-            mAppsModel.savePrefs();
-            mDragView = null;
-        }
-
+    /** Handles the dragged icon exiting the bounds of this view during the drag. */
+    private boolean onDragExited() {
+        if (DEBUG) Slog.d(TAG, "onDragExited");
+        // Remove the placeholder. It will be added again if the user drags the icon back over
+        // the shelf.
+        removePlaceholderDragViewIfNeeded();
         return true;
     }
 
