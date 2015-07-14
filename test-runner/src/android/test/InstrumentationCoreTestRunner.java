@@ -21,12 +21,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import com.android.internal.util.Predicate;
-import com.android.internal.util.Predicates;
-
-import dalvik.annotation.BrokenTest;
-import dalvik.annotation.SideEffect;
-
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -191,20 +185,5 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
         });
 
         return runner;
-    }
-
-    @Override
-    List<Predicate<TestMethod>> getBuilderRequirements() {
-        List<Predicate<TestMethod>> builderRequirements =
-                super.getBuilderRequirements();
-        Predicate<TestMethod> brokenTestPredicate =
-                Predicates.not(new HasAnnotation(BrokenTest.class));
-        builderRequirements.add(brokenTestPredicate);
-        if (!singleTest) {
-            Predicate<TestMethod> sideEffectPredicate =
-                    Predicates.not(new HasAnnotation(SideEffect.class));
-            builderRequirements.add(sideEffectPredicate);
-        }
-        return builderRequirements;
     }
 }
