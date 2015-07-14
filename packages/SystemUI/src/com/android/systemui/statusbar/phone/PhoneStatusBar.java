@@ -98,6 +98,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
@@ -2723,6 +2724,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mHeadsUpManager.dump(fd, pw, args);
         } else {
             pw.println("  mHeadsUpManager: null");
+        }
+        if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
+            KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
         }
 
         pw.println("SharedPreferences:");
