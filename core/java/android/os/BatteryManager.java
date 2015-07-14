@@ -101,6 +101,13 @@ public class BatteryManager {
      */
     public static final String EXTRA_INVALID_CHARGER = "invalid_charger";
 
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Int value set to the maximum charging current supported by the charger in micro amperes.
+     * {@hide}
+     */
+    public static final String EXTRA_MAX_CHARGING_CURRENT = "max_charging_current";
+
     // values for "status" field in the ACTION_BATTERY_CHANGED Intent
     public static final int BATTERY_STATUS_UNKNOWN = 1;
     public static final int BATTERY_STATUS_CHARGING = 2;
