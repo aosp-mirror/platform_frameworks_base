@@ -105,8 +105,8 @@ public class ExtractEditText extends EditText {
     @Override public boolean onTextContextMenuItem(int id) {
         if (mIME != null && mIME.onExtractTextContextMenuItem(id)) {
             // Mode was started on Extracted, needs to be stopped here.
-            // Cut and paste will change the text, which stops selection mode.
-            if (id == android.R.id.copy) stopTextActionMode();
+            // Cut will change the text, which stops selection mode.
+            if (id == android.R.id.copy || id == android.R.id.paste) stopTextActionMode();
             return true;
         }
         return super.onTextContextMenuItem(id);
