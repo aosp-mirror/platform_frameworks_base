@@ -32,7 +32,6 @@ import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +51,7 @@ final class BroadcastRecord extends Binder {
     final boolean initialSticky; // initial broadcast from register to sticky?
     final int userId;       // user id this broadcast was for
     final String resolvedType; // the resolved data type
-    final String[] requiredPermissions; // permissions the caller has required
+    final String requiredPermission; // a permission the caller has required
     final int appOp;        // an app op that is associated with this broadcast
     final BroadcastOptions options; // BroadcastOptions supplied by caller
     final List receivers;   // contains BroadcastFilter and ResolveInfo
@@ -104,11 +103,9 @@ final class BroadcastRecord extends Binder {
                 pw.print(callerApp != null ? callerApp.toShortString() : "null");
                 pw.print(" pid="); pw.print(callingPid);
                 pw.print(" uid="); pw.println(callingUid);
-        if ((requiredPermissions != null && requiredPermissions.length > 0)
-                || appOp != AppOpsManager.OP_NONE) {
-            pw.print(prefix); pw.print("requiredPermissions=");
-            pw.print(Arrays.toString(requiredPermissions));
-            pw.print("  appOp="); pw.println(appOp);
+        if (requiredPermission != null || appOp != AppOpsManager.OP_NONE) {
+            pw.print(prefix); pw.print("requiredPermission="); pw.print(requiredPermission);
+                    pw.print("  appOp="); pw.println(appOp);
         }
         if (options != null) {
             pw.print(prefix); pw.print("options="); pw.println(options.toBundle());
@@ -187,7 +184,7 @@ final class BroadcastRecord extends Binder {
 
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
-            int _callingPid, int _callingUid, String _resolvedType, String[] _requiredPermissions,
+            int _callingPid, int _callingUid, String _resolvedType, String _requiredPermission,
             int _appOp, BroadcastOptions _options, List _receivers, IIntentReceiver _resultTo,
             int _resultCode, String _resultData, Bundle _resultExtras, boolean _serialized,
             boolean _sticky, boolean _initialSticky,
@@ -200,7 +197,7 @@ final class BroadcastRecord extends Binder {
         callingPid = _callingPid;
         callingUid = _callingUid;
         resolvedType = _resolvedType;
-        requiredPermissions = _requiredPermissions;
+        requiredPermission = _requiredPermission;
         appOp = _appOp;
         options = _options;
         receivers = _receivers;

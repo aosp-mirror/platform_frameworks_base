@@ -6361,7 +6361,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     }
                                 },
                                 0, null, null,
-                                new String[] {android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
+                                android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
                                 AppOpsManager.OP_NONE, null, true, false,
                                 MY_PID, Process.SYSTEM_UID, userId);
                     }
@@ -11792,7 +11792,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     throws RemoteException {
                             }
                         }, 0, null, null,
-                        new String[] {INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
+                        INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
                         null, true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             } catch (Throwable t) {
                 Slog.wtf(TAG, "Failed sending first user broadcasts", t);
@@ -16355,7 +16355,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
-            Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle options,
+            Bundle resultExtras, String requiredPermission, int appOp, Bundle options,
             boolean ordered, boolean sticky, int callingPid, int callingUid, int userId) {
         intent = new Intent(intent);
 
@@ -16608,9 +16608,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }
-            if (requiredPermissions != null && requiredPermissions.length > 0) {
+            if (requiredPermission != null) {
                 Slog.w(TAG, "Can't broadcast sticky intent " + intent
-                        + " and enforce permissions " + Arrays.toString(requiredPermissions));
+                        + " and enforce permission " + requiredPermission);
                 return ActivityManager.BROADCAST_STICKY_CANT_HAVE_PERMISSION;
             }
             if (intent.getComponent() != null) {
@@ -16718,7 +16718,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // components to be launched.
             final BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
-                    callerPackage, callingPid, callingUid, resolvedType, requiredPermissions,
+                    callerPackage, callingPid, callingUid, resolvedType, requiredPermission,
                     appOp, brOptions, registeredReceivers, resultTo, resultCode, resultData,
                     resultExtras, ordered, sticky, false, userId);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
@@ -16808,7 +16808,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, resolvedType,
-                    requiredPermissions, appOp, brOptions, receivers, resultTo, resultCode,
+                    requiredPermission, appOp, brOptions, receivers, resultTo, resultCode,
                     resultData, resultExtras, ordered, sticky, false, userId);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r
@@ -16857,7 +16857,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public final int broadcastIntent(IApplicationThread caller,
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle resultExtras,
-            String[] requiredPermissions, int appOp, Bundle options,
+            String requiredPermission, int appOp, Bundle options,
             boolean serialized, boolean sticky, int userId) {
         enforceNotIsolatedCaller("broadcastIntent");
         synchronized(this) {
@@ -16870,13 +16870,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             int res = broadcastIntentLocked(callerApp,
                     callerApp != null ? callerApp.info.packageName : null,
                     intent, resolvedType, resultTo, resultCode, resultData, resultExtras,
-                    requiredPermissions, appOp, null, serialized, sticky,
+                    requiredPermission, appOp, null, serialized, sticky,
                     callingPid, callingUid, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
     }
-
 
     int broadcastIntentInPackage(String packageName, int uid,
             Intent intent, String resolvedType, IIntentReceiver resultTo,
@@ -16887,12 +16886,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             intent = verifyBroadcastLocked(intent);
 
             final long origId = Binder.clearCallingIdentity();
-            String[] requiredPermissions = requiredPermission == null ? null
-                    : new String[] {requiredPermission};
             int res = broadcastIntentLocked(null, packageName, intent, resolvedType,
-                    resultTo, resultCode, resultData, resultExtras,
-                    requiredPermissions, AppOpsManager.OP_NONE, options, serialized,
-                    sticky, -1, uid, userId);
+                    resultTo, resultCode, resultData, resultExtras, requiredPermission,
+                    AppOpsManager.OP_NONE, options, serialized, sticky, -1, uid, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -19827,7 +19823,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         int sendingUser) throws RemoteException {
                                 }
                             }, 0, null, null,
-                            new String[] {INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
+                            INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
                             null, true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 }
             }
@@ -19889,9 +19885,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null,
-                        new String[] {android.Manifest.permission.MANAGE_USERS},
-                        AppOpsManager.OP_NONE, null, false, false, MY_PID, Process.SYSTEM_UID,
-                        UserHandle.USER_ALL);
+                        android.Manifest.permission.MANAGE_USERS, AppOpsManager.OP_NONE,
+                        null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -20074,9 +20069,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null,
-                        new String[] {android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                        AppOpsManager.OP_NONE, null, true, false, MY_PID, Process.SYSTEM_UID,
-                        userId);
+                        android.Manifest.permission.RECEIVE_BOOT_COMPLETED, AppOpsManager.OP_NONE,
+                        null, true, false, MY_PID, Process.SYSTEM_UID, userId);
             }
         }
     }
@@ -20214,7 +20208,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Kick things off.
                 broadcastIntentLocked(null, null, stoppingIntent,
                         null, stoppingReceiver, 0, null, null,
-                        new String[] {INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
+                        INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
                         null, true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             } finally {
                 Binder.restoreCallingIdentity(ident);
