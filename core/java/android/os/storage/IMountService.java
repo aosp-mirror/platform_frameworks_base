@@ -1341,7 +1341,6 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_remountUid = IBinder.FIRST_CALL_TRANSACTION + 61;
 
         static final int TRANSACTION_createNewUserDir = IBinder.FIRST_CALL_TRANSACTION + 62;
-        static final int TRANSACTION_deleteUserKey = IBinder.FIRST_CALL_TRANSACTION + 63;
 
         static final int TRANSACTION_deleteUserKey = IBinder.FIRST_CALL_TRANSACTION + 63;
 
