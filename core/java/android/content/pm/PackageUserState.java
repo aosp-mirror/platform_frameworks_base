@@ -38,6 +38,7 @@ public class PackageUserState {
     public ArraySet<String> enabledComponents;
 
     public int domainVerificationStatus;
+    public int appLinkGeneration;
 
     public PackageUserState() {
         installed = true;
@@ -60,5 +61,6 @@ public class PackageUserState {
                 ? new ArraySet<>(o.enabledComponents) : null;
         blockUninstall = o.blockUninstall;
         domainVerificationStatus = o.domainVerificationStatus;
+        appLinkGeneration = o.appLinkGeneration;
     }
 }
