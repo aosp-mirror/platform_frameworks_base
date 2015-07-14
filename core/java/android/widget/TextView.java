@@ -6347,17 +6347,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (text.text != null) {
             if (content == null) {
                 setText(text.text, TextView.BufferType.EDITABLE);
-            } else if (text.partialStartOffset < 0) {
-                removeParcelableSpans(content, 0, content.length());
-                content.replace(0, content.length(), text.text);
             } else {
-                final int N = content.length();
-                int start = text.partialStartOffset;
-                if (start > N) start = N;
-                int end = text.partialEndOffset;
-                if (end > N) end = N;
+                int start = 0;
+                int end = content.length();
+
+                if (text.partialStartOffset >= 0) {
+                    final int N = content.length();
+                    start = text.partialStartOffset;
+                    if (start > N) start = N;
+                    end = text.partialEndOffset;
+                    if (end > N) end = N;
+                }
+
                 removeParcelableSpans(content, start, end);
-                content.replace(start, end, text.text);
+                if (TextUtils.equals(content.subSequence(start, end), text.text)) {
+                    if (text.text instanceof Spanned) {
+                        // OK to copy spans only.
+                        TextUtils.copySpansFrom((Spanned) text.text, start, end,
+                                Object.class, content, start);
+                    }
+                } else {
+                    content.replace(start, end, text.text);
+                }
             }
         }
 
