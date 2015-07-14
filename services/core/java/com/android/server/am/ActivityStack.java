@@ -2669,8 +2669,13 @@ final class ActivityStack {
             if (!r.finishing) {
                 if (!mService.isSleeping()) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + r);
-                    requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                            "stop-no-history", false);
+                    if (requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
+                            "stop-no-history", false)) {
+                        // Activity was finished, no need to continue trying to schedule stop.
+                        adjustFocusedActivityLocked(r, "stopActivityFinished");
+                        r.resumeKeyDispatchingLocked();
+                        return;
+                    }
                 } else {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "Not finishing noHistory " + r
                             + " on stop because we're just sleeping");
@@ -2963,6 +2968,7 @@ final class ActivityStack {
         r.state = ActivityState.FINISHING;
 
         if (mode == FINISH_IMMEDIATELY
+                || (mode == FINISH_AFTER_PAUSE && prevState == ActivityState.PAUSED)
                 || prevState == ActivityState.STOPPED
                 || prevState == ActivityState.INITIALIZING) {
             // If this activity is already stopped, we can just finish
