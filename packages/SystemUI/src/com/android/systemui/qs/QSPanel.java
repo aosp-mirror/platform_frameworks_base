@@ -158,6 +158,9 @@ public class QSPanel extends ViewGroup {
             mColumns = columns;
             postInvalidate();
         }
+        for (TileRecord r : mRecords) {
+            r.tile.clearState();
+        }
         if (mListening) {
             refreshAllTiles();
         }
