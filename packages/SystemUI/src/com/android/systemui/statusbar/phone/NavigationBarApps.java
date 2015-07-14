@@ -191,6 +191,10 @@ class NavigationBarApps extends LinearLayout {
 
     /** Returns true if a drag should be handled. */
     private static boolean canAcceptDrag(DragEvent event) {
+        // Poorly behaved apps might not provide a clip description.
+        if (event.getClipDescription() == null) {
+            return false;
+        }
         // The event must contain an intent.
         return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_INTENT);
     }
