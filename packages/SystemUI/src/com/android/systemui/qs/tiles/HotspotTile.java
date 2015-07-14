@@ -94,7 +94,11 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         state.visible = mController.isHotspotSupported() && mUsageTracker.isRecentlyUsed();
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
-        state.value = mController.isHotspotEnabled();
+        if (arg instanceof Boolean) {
+            state.value = (boolean) arg;
+        } else {
+            mController.isHotspotEnabled();
+        }
         state.icon = state.visible && state.value ? mEnable : mDisable;
     }
 
@@ -120,7 +124,7 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     private final class Callback implements HotspotController.Callback {
         @Override
         public void onHotspotChanged(boolean enabled) {
-            refreshState();
+            refreshState(enabled);
         }
     };
 
