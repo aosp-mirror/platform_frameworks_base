@@ -73,7 +73,7 @@ public:
     void unbindTexture(GLuint texture);
 private:
     // total number of texture units available for use
-    static const int kTextureUnitsCount = 3;
+    static const int kTextureUnitsCount = 4;
 
     TextureState();
     GLuint mTextureUnit;
