@@ -1516,6 +1516,32 @@ public abstract class Context {
     public abstract void sendBroadcast(Intent intent,
             @Nullable String receiverPermission);
 
+
+    /**
+     * Broadcast the given intent to all interested BroadcastReceivers, allowing
+     * an array of required permissions to be enforced.  This call is asynchronous; it returns
+     * immediately, and you will continue executing while the receivers are run.  No results are
+     * propagated from receivers and receivers can not abort the broadcast. If you want to allow
+     * receivers to propagate results or abort the broadcast, you must send an ordered broadcast
+     * using {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermissions Array of names of permissions that a receiver must hold
+     *                            in order to receive your broadcast.
+     *                            If null or empty, no permissions are required.
+     *
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     * @hide
+     */
+    public abstract void sendBroadcast(Intent intent, String[] receiverPermissions);
+
     /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
      * an optional required permission to be enforced.  This
