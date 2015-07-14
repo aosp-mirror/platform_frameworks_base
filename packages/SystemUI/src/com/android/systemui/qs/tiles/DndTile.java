@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.SysUIToast;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.ZenModePanel;
@@ -102,7 +103,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         if (mController.isVolumeRestricted()) {
             // Collapse the panels, so the user can see the toast.
             mHost.collapsePanels();
-            Toast.makeText(mContext, mContext.getString(
+            SysUIToast.makeText(mContext, mContext.getString(
                     com.android.internal.R.string.error_message_change_not_allowed),
                     Toast.LENGTH_LONG).show();
             return;
