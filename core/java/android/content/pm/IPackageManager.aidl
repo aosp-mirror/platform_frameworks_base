@@ -502,9 +502,6 @@ interface IPackageManager {
 
     void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
-
-    int getMountExternalMode(int uid);
-
     void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
