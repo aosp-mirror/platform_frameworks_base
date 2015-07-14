@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
@@ -360,12 +361,20 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 + " callback.asBinder=" + callback.asBinder());
         }
 
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.READ_PHONE_STATE, null);
+        try {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                    "addOnSubscriptionsChangedListener");
+            // SKIP checking for run-time permission since obtained PRIVILEGED
+        } catch (SecurityException e) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PHONE_STATE,
+                    "addOnSubscriptionsChangedListener");
 
-        if (mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
-            return;
+            if (mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
+                    callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                return;
+            }
         }
 
         Record r;
@@ -471,9 +480,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             checkListenerPermission(events);
 
             if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
-                if (mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
-                        callingPackage) != AppOpsManager.MODE_ALLOWED) {
-                    return;
+                try {
+                    mContext.enforceCallingPermission(
+                            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
+                    // SKIP checking for run-time permission since obtained PRIVILEGED
+                } catch (SecurityException e) {
+                    if (mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
+                            callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                        return;
+                    }
                 }
             }
 
@@ -646,6 +661,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private boolean canReadPhoneState(String callingPackage) {
+        if (mContext.checkCallingPermission(
+                android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) ==
+                PackageManager.PERMISSION_GRANTED) {
+            // SKIP checking for run-time permission since obtained PRIVILEGED
+            return true;
+        }
         boolean canReadPhoneState = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
         if (canReadPhoneState &&
@@ -1432,6 +1453,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         }
 
+        // Send broadcast twice, once for apps that have PRIVILEGED permission and once for those
+        // that have the runtime one
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 android.Manifest.permission.READ_PHONE_STATE,
                 AppOpsManager.OP_READ_PHONE_STATE);
@@ -1563,8 +1588,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PHONE_STATE, null);
+            try {
+                mContext.enforceCallingPermission(
+                        android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
+                // SKIP checking for run-time permission since obtained PRIVILEGED
+            } catch (SecurityException e) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.READ_PHONE_STATE, null);
+            }
         }
 
         if ((events & PRECISE_PHONE_STATE_PERMISSION_MASK) != 0) {
