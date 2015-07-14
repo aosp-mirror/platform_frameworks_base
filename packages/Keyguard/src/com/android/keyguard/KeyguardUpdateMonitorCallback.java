@@ -178,8 +178,10 @@ public class KeyguardUpdateMonitorCallback {
     /**
      * Called when a fingerprint is recognized.
      * @param userId the user id for which the fingerprint was authenticated
+     * @param wakeAndUnlocking whether the authentication woke the device up and thus we'd like to
+     *                         dismiss the lockscreen before turning on the screen
      */
-    public void onFingerprintAuthenticated(int userId) { }
+    public void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) { }
 
     /**
      * Called when fingerprint provides help string (e.g. "Try again")
