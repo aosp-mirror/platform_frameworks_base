@@ -144,6 +144,7 @@ import android.content.pm.VerifierInfo;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
+import android.os.Debug;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
