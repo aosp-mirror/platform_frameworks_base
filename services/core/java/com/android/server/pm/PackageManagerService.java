@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
@@ -1342,8 +1341,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // permissions if requested before broadcasting the install.
                             if ((args.installFlags
                                     & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0) {
-                                grantRequestedRuntimePermissions(res.pkg,
-                                        args.user.getIdentifier());
+                                grantRequestedRuntimePermissions(res.pkg, args.user.getIdentifier(),
+                                        args.installGrantPermissions);
                             }
 
                             // Determine the set of users who are adding this
@@ -1672,12 +1671,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     };
 
-    private void grantRequestedRuntimePermissions(PackageParser.Package pkg, int userId) {
+    private void grantRequestedRuntimePermissions(PackageParser.Package pkg, int userId,
+            String[] grantedPermissions) {
         if (userId >= UserHandle.USER_OWNER) {
-            grantRequestedRuntimePermissionsForUser(pkg, userId);
+            grantRequestedRuntimePermissionsForUser(pkg, userId, grantedPermissions);
         } else if (userId == UserHandle.USER_ALL) {
-            for (int someUserId : UserManagerService.getInstance().getUserIds()) {
-                grantRequestedRuntimePermissionsForUser(pkg, someUserId);
+            final int[] userIds;
+            synchronized (mPackages) {
+                userIds = UserManagerService.getInstance().getUserIds();
+            }
+            for (int someUserId : userIds) {
+                grantRequestedRuntimePermissionsForUser(pkg, someUserId, grantedPermissions);
             }
         }
 
@@ -1687,7 +1691,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void grantRequestedRuntimePermissionsForUser(PackageParser.Package pkg, int userId) {
+    private void grantRequestedRuntimePermissionsForUser(PackageParser.Package pkg, int userId,
+            String[] grantedPermissions) {
         SettingBase sb = (SettingBase) pkg.mExtras;
         if (sb == null) {
             return;
@@ -1697,7 +1702,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         for (String permission : pkg.requestedPermissions) {
             BasePermission bp = mSettings.mPermissions.get(permission);
-            if (bp != null && bp.isRuntime()) {
+            if (bp != null && bp.isRuntime() && (grantedPermissions == null
+                    || ArrayUtils.contains(grantedPermissions, permission))) {
                 permissionsState.grantRuntimePermission(bp, userId);
             }
         }
@@ -3385,7 +3391,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS,
+                android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
                 "grantRuntimePermission");
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
@@ -3469,7 +3475,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS,
+                android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
                 "revokeRuntimePermission");
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
@@ -3520,7 +3526,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void resetRuntimePermissions() {
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS,
+                android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
                 "revokeRuntimePermission");
 
         int callingUid = Binder.getCallingUid();
@@ -3530,16 +3536,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                     "resetRuntimePermissions");
         }
 
-        final int[] userIds;
-
         synchronized (mPackages) {
             updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
-            final int userCount = UserManagerService.getInstance().getUserIds().length;
-            userIds = Arrays.copyOf(UserManagerService.getInstance().getUserIds(), userCount);
-        }
-
-        for (int userId : userIds) {
-            mDefaultPermissionPolicy.grantDefaultPermissions(userId);
+            for (int userId : UserManagerService.getInstance().getUserIds()) {
+                final int packageCount = mPackages.size();
+                for (int i = 0; i < packageCount; i++) {
+                    PackageParser.Package pkg = mPackages.valueAt(i);
+                    if (!(pkg.mExtras instanceof PackageSetting)) {
+                        continue;
+                    }
+                    PackageSetting ps = (PackageSetting) pkg.mExtras;
+                    resetUserChangesToRuntimePermissionsAndFlagsLocked(ps, userId);
+                }
+            }
         }
     }
 
@@ -3549,9 +3558,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return 0;
         }
 
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS,
-                "getPermissionFlags");
+        enforceGrantRevokeRuntimePermissionPermissions("getPermissionFlags");
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "getPermissionFlags");
@@ -3584,9 +3591,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS,
-                "updatePermissionFlags");
+        enforceGrantRevokeRuntimePermissionPermissions("updatePermissionFlags");
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "updatePermissionFlags");
@@ -3646,9 +3651,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS,
-                "updatePermissionFlagsForAllApps");
+        enforceGrantRevokeRuntimePermissionPermissions("updatePermissionFlagsForAllApps");
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "updatePermissionFlagsForAllApps");
@@ -3675,6 +3678,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (changed) {
                 mSettings.writeRuntimePermissionsForUserLPr(userId, false);
             }
+        }
+    }
+
+    private void enforceGrantRevokeRuntimePermissionPermissions(String message) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
+                != PackageManager.PERMISSION_GRANTED
+            && mContext.checkCallingOrSelfPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(message + " requires "
+                    + Manifest.permission.GRANT_RUNTIME_PERMISSIONS + " or "
+                    + Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
         }
     }
 
@@ -9445,7 +9459,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(origin, null, observer, installFlags, installerPackageName,
-                null, verificationParams, user, packageAbiOverride);
+                null, verificationParams, user, packageAbiOverride, null);
         mHandler.sendMessage(msg);
     }
 
@@ -9465,7 +9479,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(origin, null, observer, params.installFlags,
-                installerPackageName, params.volumeUuid, verifParams, user, params.abiOverride);
+                installerPackageName, params.volumeUuid, verifParams, user, params.abiOverride,
+                params.grantedRuntimePermissions);
         mHandler.sendMessage(msg);
     }
 
@@ -10345,10 +10360,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         private InstallArgs mArgs;
         private int mRet;
         final String packageAbiOverride;
+        final String[] grantedRuntimePermissions;
+
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
-                VerificationParams verificationParams, UserHandle user, String packageAbiOverride) {
+                VerificationParams verificationParams, UserHandle user, String packageAbiOverride,
+                String[] grantedPermissions) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -10358,6 +10376,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.volumeUuid = volumeUuid;
             this.verificationParams = verificationParams;
             this.packageAbiOverride = packageAbiOverride;
+            this.grantedRuntimePermissions = grantedPermissions;
         }
 
         @Override
@@ -10782,6 +10801,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final ManifestDigest manifestDigest;
         final UserHandle user;
         final String abiOverride;
+        final String[] installGrantPermissions;
 
         // The list of instruction sets supported by this app. This is currently
         // only used during the rmdex() phase to clean up resources. We can get rid of this
@@ -10791,7 +10811,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         InstallArgs(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
                 ManifestDigest manifestDigest, UserHandle user, String[] instructionSets,
-                String abiOverride) {
+                String abiOverride, String[] installGrantPermissions) {
             this.origin = origin;
             this.move = move;
             this.installFlags = installFlags;
@@ -10802,6 +10822,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.user = user;
             this.instructionSets = instructionSets;
             this.abiOverride = abiOverride;
+            this.installGrantPermissions = installGrantPermissions;
         }
 
         abstract int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException;
@@ -10894,7 +10915,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         FileInstallArgs(InstallParams params) {
             super(params.origin, params.move, params.observer, params.installFlags,
                     params.installerPackageName, params.volumeUuid, params.getManifestDigest(),
-                    params.getUser(), null /* instruction sets */, params.packageAbiOverride);
+                    params.getUser(), null /* instruction sets */, params.packageAbiOverride,
+                    params.grantedRuntimePermissions);
             if (isFwdLocked()) {
                 throw new IllegalArgumentException("Forward locking only supported in ASEC");
             }
@@ -10903,7 +10925,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
             super(OriginInfo.fromNothing(), null, null, 0, null, null, null, null, instructionSets,
-                    null);
+                    null, null);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
         }
@@ -11119,7 +11141,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         AsecInstallArgs(InstallParams params) {
             super(params.origin, params.move, params.observer, params.installFlags,
                     params.installerPackageName, params.volumeUuid, params.getManifestDigest(),
-                    params.getUser(), null /* instruction sets */, params.packageAbiOverride);
+                    params.getUser(), null /* instruction sets */, params.packageAbiOverride,
+                    params.grantedRuntimePermissions);
         }
 
         /** Existing install */
@@ -11127,7 +11150,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         boolean isExternal, boolean isForwardLocked) {
             super(OriginInfo.fromNothing(), null, null, (isExternal ? INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null, null,
-                    instructionSets, null);
+                    instructionSets, null, null);
             // Hackily pretend we're still looking at a full code path
             if (!fullCodePath.endsWith(RES_FILE_NAME)) {
                 fullCodePath = new File(fullCodePath, RES_FILE_NAME).getAbsolutePath();
@@ -11144,7 +11167,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         AsecInstallArgs(String cid, String[] instructionSets, boolean isForwardLocked) {
             super(OriginInfo.fromNothing(), null, null, (isAsecExternal(cid) ? INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null, null,
-                    instructionSets, null);
+                    instructionSets, null, null);
             this.cid = cid;
             setMountPath(PackageHelper.getSdDir(cid));
         }
@@ -11411,7 +11434,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         MoveInstallArgs(InstallParams params) {
             super(params.origin, params.move, params.observer, params.installFlags,
                     params.installerPackageName, params.volumeUuid, params.getManifestDigest(),
-                    params.getUser(), null /* instruction sets */, params.packageAbiOverride);
+                    params.getUser(), null /* instruction sets */, params.packageAbiOverride,
+                    params.grantedRuntimePermissions);
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) {
@@ -15864,7 +15888,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         msg.obj = new InstallParams(origin, move, installObserver, installFlags,
-                installerPackageName, volumeUuid, null, user, packageAbiOverride);
+                installerPackageName, volumeUuid, null, user, packageAbiOverride, null);
         mHandler.sendMessage(msg);
     }
 
@@ -16031,7 +16055,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void setPermissionEnforced(String permission, boolean enforced) {
-        mContext.enforceCallingOrSelfPermission(GRANT_REVOKE_PERMISSIONS, null);
+        // TODO: Now that we no longer change GID for storage, this should to away.
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                "setPermissionEnforced");
         if (READ_EXTERNAL_STORAGE.equals(permission)) {
             synchronized (mPackages) {
                 if (mSettings.mReadExternalStorageEnforced == null

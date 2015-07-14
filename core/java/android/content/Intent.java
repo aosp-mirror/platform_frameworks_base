@@ -1023,7 +1023,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#MNC MNC}
      * and above and declares as using the {@link android.Manifest.permission#CALL_PHONE}
-     * permission which is not granted, then atempting to use this action will
+     * permission which is not granted, then attempting to use this action will
      * result in a {@link java.lang.SecurityException}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
