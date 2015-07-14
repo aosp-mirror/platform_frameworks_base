@@ -27,12 +27,9 @@ import android.provider.MediaStore.Video;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import dalvik.annotation.TestTargetClass;
-
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 
-@TestTargetClass(MediaInserter.class)
 public class MediaInserterTest extends InstrumentationTestCase {
 
     private MediaInserter mMediaInserter;
