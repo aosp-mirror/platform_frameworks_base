@@ -456,14 +456,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int resultCode = data.readInt();
             String resultData = data.readString();
             Bundle resultExtras = data.readBundle();
-            String[] perms = data.readStringArray();
+            String perm = data.readString();
             int appOp = data.readInt();
             Bundle options = data.readBundle();
             boolean serialized = data.readInt() != 0;
             boolean sticky = data.readInt() != 0;
             int userId = data.readInt();
             int res = broadcastIntent(app, intent, resolvedType, resultTo,
-                    resultCode, resultData, resultExtras, perms, appOp,
+                    resultCode, resultData, resultExtras, perm, appOp,
                     options, serialized, sticky, userId);
             reply.writeNoException();
             reply.writeInt(res);
@@ -3007,7 +3007,7 @@ class ActivityManagerProxy implements IActivityManager
     public int broadcastIntent(IApplicationThread caller,
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle map,
-            String[] requiredPermissions, int appOp, Bundle options, boolean serialized,
+            String requiredPermission, int appOp, Bundle options, boolean serialized,
             boolean sticky, int userId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -3020,7 +3020,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(resultCode);
         data.writeString(resultData);
         data.writeBundle(map);
-        data.writeStringArray(requiredPermissions);
+        data.writeString(requiredPermission);
         data.writeInt(appOp);
         data.writeBundle(options);
         data.writeInt(serialized ? 1 : 0);
