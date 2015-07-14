@@ -114,7 +114,7 @@ public final class NotificationRecord {
     /** @deprecated Use {@link #getUser()} instead. */
     public int getUserId() { return sbn.getUserId(); }
 
-    void dump(PrintWriter pw, String prefix, Context baseContext) {
+    void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
         final Notification notification = sbn.getNotification();
         final Icon icon = notification.getSmallIcon();
         String iconStr = String.valueOf(icon);
@@ -164,7 +164,7 @@ public final class NotificationRecord {
                     pw.println("null");
                 } else {
                     pw.print(val.getClass().getSimpleName());
-                    if (val instanceof CharSequence || val instanceof String) {
+                    if (redact && (val instanceof CharSequence || val instanceof String)) {
                         // redact contents from bugreports
                     } else if (val instanceof Bitmap) {
                         pw.print(String.format(" (%dx%d)",
@@ -172,7 +172,14 @@ public final class NotificationRecord {
                                 ((Bitmap) val).getHeight()));
                     } else if (val.getClass().isArray()) {
                         final int N = Array.getLength(val);
-                        pw.println(" (" + N + ")");
+                        pw.print(" (" + N + ")");
+                        if (!redact) {
+                            for (int j=0; j<N; j++) {
+                                pw.println();
+                                pw.print(String.format("%s      [%d] %s",
+                                        prefix, j, String.valueOf(Array.get(val, j))));
+                            }
+                        }
                     } else {
                         pw.print(" (" + String.valueOf(val) + ")");
                     }
