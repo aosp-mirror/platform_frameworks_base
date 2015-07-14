@@ -29,6 +29,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Debug;
 import android.os.UserHandle;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
@@ -344,7 +345,6 @@ final class DefaultPermissionGrantPolicy {
             Intent cbrIntent = new Intent(Intents.SMS_CB_RECEIVED_ACTION);
             PackageParser.Package cbrPackage =
                     getDefaultSystemHandlerActivityPackageLPr(cbrIntent, userId);
-
             if (cbrPackage != null && doesPackageSupportRuntimePermissions(cbrPackage)) {
                 grantRuntimePermissionsLPw(cbrPackage, SMS_PERMISSIONS, false, userId);
             }
@@ -625,8 +625,9 @@ final class DefaultPermissionGrantPolicy {
 
     private PackageParser.Package getDefaultSystemHandlerActivityPackageLPr(
             Intent intent, int userId) {
-        List<ResolveInfo> handlers = mService.queryIntentActivities(intent,
-                intent.resolveType(mService.mContext.getContentResolver()), 0, userId);
+        List<ResolveInfo> handlers = mService.mActivities.queryIntent(intent,
+                intent.resolveType(mService.mContext.getContentResolver()),
+                PackageManager.GET_DISABLED_COMPONENTS, userId);
         final int handlerCount = handlers.size();
         for (int i = 0; i < handlerCount; i++) {
             ResolveInfo handler = handlers.get(i);
@@ -650,8 +651,9 @@ final class DefaultPermissionGrantPolicy {
         for (String syncAdapterPackageName : syncAdapterPackageNames) {
             homeIntent.setPackage(syncAdapterPackageName);
 
-            List<ResolveInfo> homeActivities = mService.queryIntentActivities(homeIntent,
-                    homeIntent.resolveType(mService.mContext.getContentResolver()), 0, userId);
+            List<ResolveInfo> homeActivities = mService.mActivities.queryIntent(homeIntent,
+                    homeIntent.resolveType(mService.mContext.getContentResolver()),
+                    PackageManager.GET_DISABLED_COMPONENTS, userId);
             if (!homeActivities.isEmpty()) {
                 continue;
             }
