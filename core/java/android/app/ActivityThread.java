@@ -991,7 +991,7 @@ public final class ActivityThread {
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
 
             Runtime runtime = Runtime.getRuntime();
-
+            runtime.gc();  // Do GC since countInstancesOfClass counts unreachable objects.
             long dalvikMax = runtime.totalMemory() / 1024;
             long dalvikFree = runtime.freeMemory() / 1024;
             long dalvikAllocated = dalvikMax - dalvikFree;
