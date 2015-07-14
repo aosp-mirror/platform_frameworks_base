@@ -124,22 +124,27 @@ public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
 
     @Override
     protected PrivateKey engineGeneratePrivate(KeySpec spec) throws InvalidKeySpecException {
-        throw new UnsupportedOperationException(
-                "To generate a key pair in Android KeyStore, use KeyPairGenerator initialized with"
+        throw new InvalidKeySpecException(
+                "To generate a key pair in Android Keystore, use KeyPairGenerator initialized with"
                 + " " + KeyGenParameterSpec.class.getName());
     }
 
     @Override
     protected PublicKey engineGeneratePublic(KeySpec spec) throws InvalidKeySpecException {
-        throw new UnsupportedOperationException(
-                "To generate a key pair in Android KeyStore, use KeyPairGenerator initialized with"
+        throw new InvalidKeySpecException(
+                "To generate a key pair in Android Keystore, use KeyPairGenerator initialized with"
                 + " " + KeyGenParameterSpec.class.getName());
     }
 
     @Override
-    protected Key engineTranslateKey(Key arg0) throws InvalidKeyException {
-        throw new UnsupportedOperationException(
-                "To import a key into Android KeyStore, use KeyStore.setEntry with "
-                + KeyProtection.class.getName());
+    protected Key engineTranslateKey(Key key) throws InvalidKeyException {
+        if (key == null) {
+            throw new InvalidKeyException("key == null");
+        } else if ((!(key instanceof AndroidKeyStorePrivateKey))
+                && (!(key instanceof AndroidKeyStorePublicKey))) {
+            throw new InvalidKeyException(
+                    "To import a key into Android Keystore, use KeyStore.setEntry");
+        }
+        return key;
     }
 }
