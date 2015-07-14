@@ -185,15 +185,20 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
 
     @Override
     protected SecretKey engineGenerateSecret(KeySpec keySpec) throws InvalidKeySpecException {
-        throw new UnsupportedOperationException(
-                "To generate secret key in Android KeyStore, use KeyGenerator initialized with "
+        throw new InvalidKeySpecException(
+                "To generate secret key in Android Keystore, use KeyGenerator initialized with "
                         + KeyGenParameterSpec.class.getName());
     }
 
     @Override
     protected SecretKey engineTranslateKey(SecretKey key) throws InvalidKeyException {
-        throw new UnsupportedOperationException(
-                "To import a secret key into Android KeyStore, use KeyStore.setEntry with "
-                + KeyProtection.class.getName());
+        if (key == null) {
+            throw new InvalidKeyException("key == null");
+        } else if (!(key instanceof AndroidKeyStoreSecretKey)) {
+            throw new InvalidKeyException(
+                    "To import a secret key into Android Keystore, use KeyStore.setEntry");
+        }
+
+        return key;
     }
 }
