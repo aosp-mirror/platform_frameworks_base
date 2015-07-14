@@ -758,13 +758,15 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
-            public StorageVolume[] getVolumeList(int userId) throws RemoteException {
+            public StorageVolume[] getVolumeList(int uid, String packageName)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 StorageVolume[] _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeInt(userId);
+                    _data.writeInt(uid);
+                    _data.writeString(packageName);
                     mRemote.transact(Stub.TRANSACTION_getVolumeList, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.createTypedArray(StorageVolume.CREATOR);
@@ -1179,21 +1181,6 @@ public interface IMountService extends IInterface {
             }
 
             @Override
-            public void remountUid(int uid) throws RemoteException {
-                Parcel _data = Parcel.obtain();
-                Parcel _reply = Parcel.obtain();
-                try {
-                    _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeInt(uid);
-                    mRemote.transact(Stub.TRANSACTION_remountUid, _data, _reply, 0);
-                    _reply.readException();
-                } finally {
-                    _reply.recycle();
-                    _data.recycle();
-                }
-            }
-
-            @Override
             public void createNewUserDir(int userHandle, String path) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -1337,8 +1324,6 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_benchmark = IBinder.FIRST_CALL_TRANSACTION + 59;
         static final int TRANSACTION_setDebugFlags = IBinder.FIRST_CALL_TRANSACTION + 60;
-
-        static final int TRANSACTION_remountUid = IBinder.FIRST_CALL_TRANSACTION + 61;
 
         static final int TRANSACTION_createNewUserDir = IBinder.FIRST_CALL_TRANSACTION + 62;
 
@@ -1657,8 +1642,9 @@ public interface IMountService extends IInterface {
                 }
                 case TRANSACTION_getVolumeList: {
                     data.enforceInterface(DESCRIPTOR);
-                    int userId = data.readInt();
-                    StorageVolume[] result = getVolumeList(userId);
+                    int uid = data.readInt();
+                    String packageName = data.readString();
+                    StorageVolume[] result = getVolumeList(uid, packageName);
                     reply.writeNoException();
                     reply.writeTypedArray(result, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
                     return true;
@@ -1897,13 +1883,6 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
-		case TRANSACTION_remountUid: {
-                    data.enforceInterface(DESCRIPTOR);
-                    int uid = data.readInt();
-                    remountUid(uid);
-                    reply.writeNoException();
-                    return true;
-                }
                 case TRANSACTION_createNewUserDir: {
                     data.enforceInterface(DESCRIPTOR);
                     int userHandle = data.readInt();
@@ -2130,11 +2109,11 @@ public interface IMountService extends IInterface {
     /**
      * Returns list of all mountable volumes.
      */
-    public StorageVolume[] getVolumeList(int userId) throws RemoteException;
+    public StorageVolume[] getVolumeList(int uid, String packageName) throws RemoteException;
 
     /**
      * Gets the path on the filesystem for the ASEC container itself.
-     * 
+     *
      * @param cid ASEC container ID
      * @return path to filesystem or {@code null} if it's not found
      * @throws RemoteException
@@ -2228,8 +2207,6 @@ public interface IMountService extends IInterface {
     public String getPrimaryStorageUuid() throws RemoteException;
     public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback)
             throws RemoteException;
-
-    public void remountUid(int uid) throws RemoteException;
 
     /**
      * Creates the user data directory, possibly encrypted
