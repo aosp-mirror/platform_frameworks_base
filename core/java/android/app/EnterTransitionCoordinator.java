@@ -333,6 +333,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         boolean startSharedElementTransition = true;
         setGhostVisibility(View.INVISIBLE);
         scheduleGhostVisibilityChange(View.INVISIBLE);
+        pauseInput();
         Transition transition = beginTransition(decorView, startEnterTransition,
                 startSharedElementTransition);
         scheduleGhostVisibilityChange(View.VISIBLE);
