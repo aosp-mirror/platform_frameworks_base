@@ -3459,13 +3459,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Only need to do this if user is initialized. Otherwise it's a new user
         // and there are no processes running as the user yet and there's no need
         // to make an expensive call to remount processes for the changed permissions.
-        if ((READ_EXTERNAL_STORAGE.equals(name)
-                || WRITE_EXTERNAL_STORAGE.equals(name))
-                && sUserManager.isInitialized(userId)) {
+        if (READ_EXTERNAL_STORAGE.equals(name)
+                || WRITE_EXTERNAL_STORAGE.equals(name)) {
             final long token = Binder.clearCallingIdentity();
             try {
-                final StorageManager storage = mContext.getSystemService(StorageManager.class);
-                storage.remountUid(uid);
+                if (sUserManager.isInitialized(userId)) {
+                    final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                    storage.remountUid(uid);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
