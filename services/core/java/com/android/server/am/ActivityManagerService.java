@@ -8265,6 +8265,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         rti.persistentId = tr.taskId;
         rti.baseIntent = new Intent(tr.getBaseIntent());
         rti.origActivity = tr.origActivity;
+        rti.realActivity = tr.realActivity;
         rti.description = tr.lastDescription;
         rti.stackId = tr.stack != null ? tr.stack.mStackId : -1;
         rti.userId = tr.userId;

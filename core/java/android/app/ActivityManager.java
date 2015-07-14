@@ -836,6 +836,13 @@ public class ActivityManager {
         public ComponentName origActivity;
 
         /**
+         * The actual activity component that started the task.
+         * @hide
+         */
+        @Nullable
+        public ComponentName realActivity;
+
+        /**
          * Description of the task's last state.
          */
         public CharSequence description;
@@ -918,6 +925,7 @@ public class ActivityManager {
                 dest.writeInt(0);
             }
             ComponentName.writeToParcel(origActivity, dest);
+            ComponentName.writeToParcel(realActivity, dest);
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             if (taskDescription != null) {
@@ -942,6 +950,7 @@ public class ActivityManager {
             persistentId = source.readInt();
             baseIntent = source.readInt() > 0 ? Intent.CREATOR.createFromParcel(source) : null;
             origActivity = ComponentName.readFromParcel(source);
+            realActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             taskDescription = source.readInt() > 0 ?
                     TaskDescription.CREATOR.createFromParcel(source) : null;
