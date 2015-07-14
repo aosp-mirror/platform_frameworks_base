@@ -318,12 +318,6 @@ public class MockContext extends Context {
     }
 
     /** @hide */
-    @Override
-    public void sendBroadcast(Intent intent, String[] receiverPermissions) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** @hide */
     @SystemApi
     @Override
     public void sendBroadcast(Intent intent, String receiverPermission, Bundle options) {
