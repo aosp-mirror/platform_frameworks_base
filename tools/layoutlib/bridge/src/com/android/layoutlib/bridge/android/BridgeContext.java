@@ -1509,6 +1509,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public void sendBroadcast(Intent intent, String[] receiverPermissions) {
+        // pass
+
+    }
+
+    @Override
     public void sendBroadcast(Intent arg0, String arg1, Bundle arg2) {
         // pass
 
