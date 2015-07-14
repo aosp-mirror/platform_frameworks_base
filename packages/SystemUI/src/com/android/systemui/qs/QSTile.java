@@ -61,8 +61,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
 
     private Callback mCallback;
-    protected final TState mState = newTileState();
-    private final TState mTmpState = newTileState();
+    protected TState mState = newTileState();
+    private TState mTmpState = newTileState();
     private boolean mAnnounceNextStateChange;
 
     abstract protected TState newTileState();
@@ -139,6 +139,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHandler.obtainMessage(H.REFRESH_STATE, arg).sendToTarget();
     }
 
+    public final void clearState() {
+        mHandler.sendEmptyMessage(H.CLEAR_STATE);
+    }
+
     public void userSwitch(int newUserId) {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId, 0).sendToTarget();
     }
@@ -176,6 +180,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     protected void handleLongClick() {
         // optional
+    }
+
+    protected void handleClearState() {
+        mTmpState = newTileState();
+        mState = newTileState();
     }
 
     protected void handleRefreshState(Object arg) {
@@ -246,6 +255,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         private static final int TOGGLE_STATE_CHANGED = 8;
         private static final int SCAN_STATE_CHANGED = 9;
         private static final int DESTROY = 10;
+        private static final int CLEAR_STATE = 11;
 
         private H(Looper looper) {
             super(looper);
@@ -286,6 +296,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
                 } else if (msg.what == DESTROY) {
                     name = "handleDestroy";
                     handleDestroy();
+                } else if (msg.what == CLEAR_STATE) {
+                    name = "handleClearState";
+                    handleClearState();
                 } else {
                     throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }
