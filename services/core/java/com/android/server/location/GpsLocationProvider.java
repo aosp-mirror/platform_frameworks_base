@@ -445,22 +445,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
             } else if (action.equals(Intents.WAP_PUSH_RECEIVED_ACTION)) {
                 checkWapSuplInit(intent);
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                // retrieve NetworkInfo result for this UID
-                NetworkInfo info =
-                        intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-                ConnectivityManager connManager = (ConnectivityManager)
-                        mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                info = connManager.getNetworkInfo(info.getType());
-
-                int networkState;
-                if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false) ||
-                        !info.isConnected()) {
-                    networkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
-                } else {
-                    networkState = LocationProvider.AVAILABLE;
+                // retrieve NetworkType result for this UID
+                int networkType = intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1);
+                if (DEBUG) Log.d(TAG, "Connectivity action, type=" + networkType);
+                if (networkType == ConnectivityManager.TYPE_MOBILE
+                        || networkType == ConnectivityManager.TYPE_WIFI
+                        || networkType == ConnectivityManager.TYPE_MOBILE_SUPL) {
+                    updateNetworkState(networkType);
                 }
-
-                updateNetworkState(networkState, info);
             } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)
                     || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)
@@ -732,13 +724,19 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return PROPERTIES;
     }
 
-    public void updateNetworkState(int state, NetworkInfo info) {
-        sendMessage(UPDATE_NETWORK_STATE, state, info);
+    public void updateNetworkState(int networkType) {
+        sendMessage(UPDATE_NETWORK_STATE, networkType, null /*obj*/);
     }
 
-    private void handleUpdateNetworkState(int state, NetworkInfo info) {
-        mNetworkAvailable = (state == LocationProvider.AVAILABLE);
-
+    private void handleUpdateNetworkState(int networkType) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mobileInfo =
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        NetworkInfo wifiInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        mNetworkAvailable = (mobileInfo != null && mobileInfo.isConnected())
+                || (wifiInfo != null && wifiInfo.isConnected());
+        NetworkInfo info = connectivityManager.getNetworkInfo(networkType);
         if (DEBUG) {
             Log.d(TAG, "updateNetworkState " + (mNetworkAvailable ? "available" : "unavailable")
                 + " info: " + info);
@@ -764,7 +762,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE_SUPL
                 && mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
-            if (mNetworkAvailable) {
+            if (info.isConnected()) {
                 String apnName = info.getExtraInfo();
                 if (apnName == null) {
                     /* Assign a dummy value in the case of C2K as otherwise we will have a runtime
@@ -1967,7 +1965,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     handleSetRequest(gpsRequest.request, gpsRequest.source);
                     break;
                 case UPDATE_NETWORK_STATE:
-                    handleUpdateNetworkState(msg.arg1, (NetworkInfo)msg.obj);
+                    handleUpdateNetworkState(msg.arg1);
                     break;
                 case INJECT_NTP_TIME:
                     handleInjectNtpTime();
