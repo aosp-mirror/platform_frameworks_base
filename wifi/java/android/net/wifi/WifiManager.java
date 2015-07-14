@@ -206,6 +206,16 @@ public class WifiManager {
      * @hide
      */
     public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
+
+    /**
+     * The look up key for an int that indicates why softAP started failed
+     * currently support general and no_channel
+     * @see #SAP_START_FAILURE_GENERAL
+     * @see #SAP_START_FAILURE_NO_CHANNEL
+     *
+     * @hide
+     */
+    public static final String EXTRA_WIFI_AP_FAILURE_REASON = "wifi_ap_error_code";
     /**
      * The previous Wi-Fi state.
      *
@@ -263,6 +273,20 @@ public class WifiManager {
      */
     public static final int WIFI_AP_STATE_FAILED = 14;
 
+    /**
+     *  If WIFI AP start failed, this reason code means there is no legal channel exists on
+     *  user selected band by regulatory
+     *
+     *  @hide
+     */
+    public static final int SAP_START_FAILURE_GENERAL= 0;
+
+    /**
+     *  All other reason for AP start failed besides SAP_START_FAILURE_GENERAL
+     *
+     *  @hide
+     */
+    public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
     /**
      * Broadcast intent action indicating that a connection to the supplicant has
      * been established (and it is now possible
