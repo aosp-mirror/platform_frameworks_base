@@ -21,6 +21,7 @@ import android.annotation.DrawableRes;
 import android.content.res.ColorStateList;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -294,7 +295,13 @@ public final class Icon implements Parcelable {
                     } else {
                         final PackageManager pm = context.getPackageManager();
                         try {
-                            mObj1 = pm.getResourcesForApplication(resPackage);
+                            ApplicationInfo ai = pm.getApplicationInfo(
+                                    resPackage, PackageManager.GET_UNINSTALLED_PACKAGES);
+                            if (ai != null) {
+                                mObj1 = pm.getResourcesForApplication(ai);
+                            } else {
+                                break;
+                            }
                         } catch (PackageManager.NameNotFoundException e) {
                             Log.e(TAG, String.format("Unable to find pkg=%s for icon %s",
                                     resPackage, this), e);
