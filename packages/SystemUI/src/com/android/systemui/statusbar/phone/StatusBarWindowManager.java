@@ -21,7 +21,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.SystemProperties;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +31,8 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.StatusBarState;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 
 /**
@@ -48,7 +49,6 @@ public class StatusBarWindowManager {
     private final boolean mKeyguardScreenRotation;
 
     private final State mCurrentState = new State();
-    private boolean mLogState;
 
     public StatusBarWindowManager(Context context) {
         mContext = context;
@@ -183,9 +183,6 @@ public class StatusBarWindowManager {
         applyFitsSystemWindows(state);
         applyModalFlag(state);
         if (mLp.copyFrom(mLpChanged) != 0) {
-            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD && mLogState) {
-                logCurrentState();
-            }
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }
     }
@@ -282,19 +279,9 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
-    public void setLogState(boolean logState) {
-        mLogState = logState;
-        if (logState) {
-            Log.w(PhoneStatusBar.TAG, "===== Started logging WM state changes =====");
-            logCurrentState();
-        } else {
-            Log.w(PhoneStatusBar.TAG, "===== Finished logging WM state changes =====");
-        }
-    }
-
-    private void logCurrentState() {
-        Log.i(PhoneStatusBar.TAG, mCurrentState.toString()
-                + "\n  Expanded: " + isExpanded(mCurrentState));
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("StatusBarWindowManager state:");
+        pw.println(mCurrentState);
     }
 
     private static class State {
