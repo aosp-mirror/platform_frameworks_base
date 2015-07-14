@@ -45,7 +45,9 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 
@@ -91,12 +93,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
+    private static final boolean DEBUG_FP_WAKELOCK = KeyguardConstants.DEBUG_FP_WAKELOCK;
     private static final int LOW_BATTERY_THRESHOLD = 20;
+    private static final long FINGERPRINT_WAKELOCK_TIMEOUT_MS = 15 * 1000;
 
     private static final String ACTION_FACE_UNLOCK_STARTED
             = "com.android.facelock.FACE_UNLOCK_STARTED";
     private static final String ACTION_FACE_UNLOCK_STOPPED
             = "com.android.facelock.FACE_UNLOCK_STOPPED";
+    private static final String FINGERPRINT_WAKE_LOCK_NAME = "wake-and-unlock wakelock";
 
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
@@ -115,10 +120,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_SCREEN_TURNED_ON = 319;
     private static final int MSG_SCREEN_TURNED_OFF = 320;
     private static final int MSG_KEYGUARD_BOUNCER_CHANGED = 322;
-    private static final int MSG_FINGERPRINT_AUTHENTICATED = 323;
-    private static final int MSG_FINGERPRINT_ERROR = 324;
-    private static final int MSG_FINGERPRINT_HELP = 325;
-    private static final int MSG_FINGERPRINT_AUTH_FAILED = 326;
     private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 327;
     private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 328;
     private static final int MSG_AIRPLANE_MODE_CHANGED = 329;
@@ -158,6 +159,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private List<SubscriptionInfo> mSubscriptionInfo;
     private boolean mFingerprintDetectionRunning;
     private TrustManager mTrustManager;
+    private PowerManager mPowerManager;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -211,18 +213,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 case MSG_SCREEN_TURNED_ON:
                     handleScreenTurnedOn();
                     break;
-                case MSG_FINGERPRINT_AUTHENTICATED:
-                    handleFingerprintAuthenticated();
-                    break;
-                case MSG_FINGERPRINT_HELP:
-                    handleFingerprintHelp(msg.arg1 /* msgId */, (String) msg.obj /* errString */);
-                    break;
-                case MSG_FINGERPRINT_ERROR:
-                    handleFingerprintError(msg.arg1 /* msgId */, (String) msg.obj /* errString */);
-                    break;
-                case MSG_FINGERPRINT_AUTH_FAILED:
-                    handleFingerprintAuthFailed();
-                    break;
                 case MSG_FACE_UNLOCK_STATE_CHANGED:
                     handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
                     break;
@@ -253,6 +243,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
 
     private static int sCurrentUser;
+
+    private boolean mWakeAndUnlocking;
 
     public synchronized static void setCurrentUser(int currentUser) {
         sCurrentUser = currentUser;
@@ -354,23 +346,72 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void onFingerprintAuthenticated(int userId) {
+    private void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) {
         mUserFingerprintAuthenticated.put(userId, true);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onFingerprintAuthenticated(userId);
+                cb.onFingerprintAuthenticated(userId, wakeAndUnlocking);
             }
         }
     }
 
     private void handleFingerprintAuthFailed() {
+        releaseFingerprintWakeLock();
         stopListeningForFingerprint();
         handleFingerprintHelp(-1, mContext.getString(R.string.fingerprint_not_recognized));
         updateFingerprintListeningState();
     }
 
+    private void handleFingerprintAcquired(int acquireInfo) {
+        if (acquireInfo != FingerprintManager.FINGERPRINT_ACQUIRED_GOOD) {
+            return;
+        }
+        if (!mScreenOn) {
+            releaseFingerprintWakeLock();
+            mWakeLock = mPowerManager.newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK, FINGERPRINT_WAKE_LOCK_NAME);
+            mWakeLock.acquire();
+            mWakeAndUnlocking = true;
+            if (DEBUG_FP_WAKELOCK) {
+                Log.i(TAG, "fingerprint acquired, grabbing fp wakelock");
+            }
+            mHandler.postDelayed(mReleaseFingerprintWakeLockRunnable,
+                    FINGERPRINT_WAKELOCK_TIMEOUT_MS);
+        } else {
+            mWakeAndUnlocking = false;
+        }
+    }
+
+    private final Runnable mReleaseFingerprintWakeLockRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG_FP_WAKELOCK) {
+                Log.i(TAG, "fp wakelock: TIMEOUT!!");
+            }
+            releaseFingerprintWakeLock();
+        }
+    };
+
+    private void releaseFingerprintWakeLock() {
+        if (mWakeLock != null) {
+            mHandler.removeCallbacks(mReleaseFingerprintWakeLockRunnable);
+            if (DEBUG_FP_WAKELOCK) {
+                Log.i(TAG, "releasing fp wakelock");
+            }
+            mWakeLock.release();
+            mWakeLock = null;
+        }
+    }
+
     private void handleFingerprintAuthenticated() {
+        if (mWakeAndUnlocking) {
+            if (DEBUG_FP_WAKELOCK) {
+                Log.i(TAG, "fp wakelock: Authenticated, waking up...");
+            }
+            mPowerManager.wakeUp(SystemClock.uptimeMillis());
+        }
+        releaseFingerprintWakeLock();
         try {
             final int userId;
             try {
@@ -383,7 +424,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
                 return;
             }
-            onFingerprintAuthenticated(userId);
+            onFingerprintAuthenticated(userId, mWakeAndUnlocking);
         } finally {
             setFingerprintRunningDetectionRunning(false);
         }
@@ -555,26 +596,32 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         @Override
         public void onAuthenticationFailed() {
-            mHandler.obtainMessage(MSG_FINGERPRINT_AUTH_FAILED).sendToTarget();
+            handleFingerprintAuthFailed();
         };
 
         @Override
         public void onAuthenticationSucceeded(AuthenticationResult result) {
-            mHandler.obtainMessage(MSG_FINGERPRINT_AUTHENTICATED).sendToTarget();
+            handleFingerprintAuthenticated();
         }
 
         @Override
         public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
-            mHandler.obtainMessage(MSG_FINGERPRINT_HELP, helpMsgId, 0, helpString).sendToTarget();
+            handleFingerprintHelp(helpMsgId, helpString.toString());
         }
 
         @Override
         public void onAuthenticationError(int errMsgId, CharSequence errString) {
-            mHandler.obtainMessage(MSG_FINGERPRINT_ERROR, errMsgId, 0, errString).sendToTarget();
+            handleFingerprintError(errMsgId, errString.toString());
+        }
+
+        @Override
+        public void onAuthenticationAcquired(int acquireInfo) {
+            handleFingerprintAcquired(acquireInfo);
         }
     };
     private CancellationSignal mFingerprintCancelSignal;
     private FingerprintManager mFpm;
+    private PowerManager.WakeLock mWakeLock;
 
     /**
      * When we receive a
@@ -754,6 +801,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private KeyguardUpdateMonitor(Context context) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
+        mPowerManager = context.getSystemService(PowerManager.class);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -832,7 +880,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return mScreenOn && mKeyguardIsVisible && !mSwitchingUser
+        return mKeyguardIsVisible && !mSwitchingUser
                 && mTrustManager.hasUserAuthenticatedSinceBoot(ActivityManager.getCurrentUser());
     }
 

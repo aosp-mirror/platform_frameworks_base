@@ -1750,7 +1750,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private int adjustDisableFlags(int state) {
-        if (!mLaunchTransitionFadingAway
+        if (!mLaunchTransitionFadingAway && !mKeyguardFadingAway
                 && (mExpandedVisible || mBouncerShowing || mWaitingForKeyguardExit)) {
             state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
             state |= StatusBarManager.DISABLE_SYSTEM_INFO;
@@ -3479,7 +3479,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 startTime + fadeoutDuration
                         - StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION,
                 StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION);
-        disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
+        disable(mDisabledUnmodified1, mDisabledUnmodified2, fadeoutDuration > 0 /* animate */);
     }
 
     public boolean isKeyguardFadingAway() {
