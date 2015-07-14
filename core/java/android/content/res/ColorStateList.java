@@ -603,7 +603,7 @@ public class ColorStateList implements Parcelable {
      * @hide only for resource preloading
      */
     public ConstantState<ColorStateList> getConstantState() {
-        if (mFactory != null) {
+        if (mFactory == null) {
             mFactory = new ColorStateListFactory(this);
         }
         return mFactory;
