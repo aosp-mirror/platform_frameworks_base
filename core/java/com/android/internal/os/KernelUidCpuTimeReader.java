@@ -95,8 +95,7 @@ public class KernelUidCpuTimeReader {
                         powerDeltaMaUs -= mLastPowerMaUs.valueAt(index);
 
                         final long timeDiffUs = nowUs - mLastTimeReadUs;
-                        if (userTimeDeltaUs < 0 || systemTimeDeltaUs < 0 || powerDeltaMaUs < 0 ||
-                                userTimeDeltaUs > timeDiffUs || systemTimeDeltaUs > timeDiffUs) {
+                        if (userTimeDeltaUs < 0 || systemTimeDeltaUs < 0 || powerDeltaMaUs < 0) {
                             StringBuilder sb = new StringBuilder("Malformed cpu data for UID=");
                             sb.append(uid).append("!\n");
                             sb.append("Time between reads: ");
