@@ -26,12 +26,6 @@ from
         </ol>
       </li>
       <li><a href="#preview">Setting a Preview Image</a></li>
-      <li><a href="#lockscreen">Enabling App Widgets on the Lockscreen</a>
-        <ol>
-          <li><a href="#lockscreen-sizing">Sizing guidelines</a></li>
-        </ol>
-      </li>
-
       <li><a href="#collections">Using App Widgets with Collections</a>
         <ol>
           <li><a href="#collection_sample">Sample application</a></li>
@@ -175,8 +169,7 @@ folder.</p>
     android:initialLayout="@layout/example_appwidget"
     android:configure="com.example.android.ExampleAppWidgetConfigure" 
     android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen|keyguard"
-    android:initialKeyguardLayout="@layout/example_keyguard">
+    android:widgetCategory="home_screen">
 &lt;/appwidget-provider>
 </pre>
 
@@ -281,17 +274,11 @@ vertical resizing isn't enabled (see <code>resizeMode</code>). Introduced in And
 the widget can be resized. This field has no effect if it is greater than {@code minWidth} or if
 horizontal resizing isn't enabled (see <code>resizeMode</code>). Introduced in Android 4.0.</li>
 
-<li>The <code>widgetCategory</code> attribute declares whether your App Widget can be displayed on the home screen, 
-the lock screen (keyguard), or both. Values for this attribute include "home_screen" and "keyguard".  A widget that 
-is displayed on both needs to ensure that it follows the design guidelines for both widget classes. For more
-information, see <a href="#lockscreen">Enabling App Widgets on the Lockscreen</a>. The default value is "home_screen". Introduced in Android 4.2.
-</li>
-
-<li>The <code>initialKeyguardLayout</code> attribute points to the layout resource
-that defines the lock screen App Widget layout. This works the same way as the 
-{@link android.appwidget.AppWidgetProviderInfo#initialLayout android:initialLayout}, 
-in that it provides a layout that can appear immediately until your app widget is initialized and able to update 
-the layout. Introduced in Android 4.2.</li>
+<li>The <code>widgetCategory</code> attribute declares whether your App Widget
+can be displayed on the home screen ({@code home_screen}), the lock screen
+({@code keyguard}), or both. Only Android versions lower than 5.0 support
+lock-screen widgets. For Android 5.0 and higher, only {@code home_screen} is
+valid.</li>
 
 </ul>
 
@@ -736,66 +723,6 @@ emulator includes an application called &quot;Widget Preview.&quot; To create a
 preview image, launch this application, select the app widget for your
 application and set it up how you'd like your preview image to appear, then save
 it and place it in your application's drawable resources.</p>
-
-<h2 id="lockscreen">Enabling App Widgets on the Lockscreen</h2>
-
-<p>Android 4.2 introduces the ability for users to add widgets to the lock screen. To indicate that your app widget is available for use on the lock screen, declare the {@link android.appwidget.AppWidgetProviderInfo#widgetCategory android:widgetCategory} attribute in the XML file that specifies your {@link android.appwidget.AppWidgetProviderInfo}. This attribute supports two values: "home_screen" and "keyguard". An app widget can declare support for one or both.</p>
-
-<p>By default, every app widget supports placement on the Home screen, so "home_screen" is the default value for the 
-{@link android.appwidget.AppWidgetProviderInfo#widgetCategory android:widgetCategory} attribute. If you want your app widget to be available for the lock screen, add the "keyguard" value:</p>
-<pre>
-&lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-   ...
-   android:widgetCategory="keyguard|home_screen">
-&lt;/appwidget-provider>
-</pre>
-
-<p>If you declare a widget to be displayable on both keyguard (lockscreen) and home, it's likely that you'll want to customize the widget depending on where it is displayed. For example, you might create a separate layout file for keyguard vs. home. The next step is to detect the widget category at runtime and respond accordingly. 
-
-You can detect whether your widget is on the lockscreen or home screen by calling 
-{@link android.appwidget.AppWidgetManager#getAppWidgetOptions getAppWidgetOptions()} 
-to get the widget's options as a {@link android.os.Bundle}. The returned bundle will include the key 
-{@link android.appwidget.AppWidgetManager#OPTION_APPWIDGET_HOST_CATEGORY}, whose value will be one of {@link android.appwidget.AppWidgetProviderInfo#WIDGET_CATEGORY_HOME_SCREEN} or 
-{@link android.appwidget.AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD}. This value is determined by the host into which the widget is bound. In the {@link android.appwidget.AppWidgetProvider}, you can then check the widget's category, for example:</p>
-
-<pre>
-AppWidgetManager appWidgetManager;
-int widgetId;
-Bundle myOptions = appWidgetManager.getAppWidgetOptions (widgetId);
-
-// Get the value of OPTION_APPWIDGET_HOST_CATEGORY
-int category = myOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1);
-
-// If the value is WIDGET_CATEGORY_KEYGUARD, it's a lockscreen widget
-boolean isKeyguard = category == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD;
-</pre>
-
-<p>Once you know the widget's category, you can optionally load a different base layout, set different properties, and so on. For example:</p>
-
-<pre>
-int baseLayout = isKeyguard ? R.layout.keyguard_widget_layout : R.layout.widget_layout;
-</pre>
-
-
-<p>You should also specify an initial layout for your app widget when on the lock screen with the 
-{@link android.appwidget.AppWidgetProviderInfo#initialKeyguardLayout android:initialKeyguardLayout} attribute. This works the same way as the 
-{@link android.appwidget.AppWidgetProviderInfo#initialLayout android:initialLayout}, in that it provides a layout that can appear immediately until your app widget is initialized and able to update the layout.</p>
-
-<h3 id="lockscreen-sizing">Sizing guidelines</h3>
-
-<p>When a widget is hosted on the lockscreen, the framework ignores the {@code minWidth}, {@code minHeight}, {@code minResizeWidth}, and {@code minResizeHeight} fields. If a widget is also a home screen widget, these parameters are still needed as they're still used on home, but they will be ignored for purposes of the lockscreen.</p>
-
-<p>The width of a lockscreen widget always fills the provided space. For the height of a lockscreen widget, you have the following options:</p>
-
-<ul>
-    <li>If the widget does not mark itself as vertically resizable ({@code android:resizeMode="vertical"}), then the widget height will always be "small":
-      <ul>
-        <li>On a phone in portrait mode, "small" is defined as the space remaining when an unlock UI is being displayed.</li>
-        <li>On tablets and landscape phones, "small" is set on a per-device basis.</li>    
-      </ul>
-    </li>
-    <li>If the widget marks itself as vertically resizable, then the widget height shows up as "small" on portrait phones displaying an unlock UI. In all other cases, the widget sizes to fill the available height.</li>
-</ul>
 
 <h2 id="collections">Using App Widgets with Collections</h2>
 
