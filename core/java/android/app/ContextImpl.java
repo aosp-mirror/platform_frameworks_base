@@ -1925,13 +1925,14 @@ class ContextImpl extends Context {
                         // enough permissions; ask vold to create on our behalf.
                         final IMountService mount = IMountService.Stub.asInterface(
                                 ServiceManager.getService("mount"));
-                        int res = -1;
                         try {
-                            res = mount.mkdirs(getPackageName(), dir.getAbsolutePath());
-                        } catch (Exception ignored) {
-                        }
-                        if (res != 0) {
-                            Log.w(TAG, "Failed to ensure directory: " + dir);
+                            final int res = mount.mkdirs(getPackageName(), dir.getAbsolutePath());
+                            if (res != 0) {
+                                Log.w(TAG, "Failed to ensure " + dir + ": " + res);
+                                dir = null;
+                            }
+                        } catch (Exception e) {
+                            Log.w(TAG, "Failed to ensure " + dir + ": " + e);
                             dir = null;
                         }
                     }
