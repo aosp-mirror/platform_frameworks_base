@@ -298,14 +298,14 @@ public class VolumeInfo implements Parcelable {
         }
     }
 
-    public StorageVolume buildStorageVolume(Context context, int userId) {
+    public StorageVolume buildStorageVolume(Context context, int userId, boolean reportUnmounted) {
         final StorageManager storage = context.getSystemService(StorageManager.class);
 
         final boolean removable;
         final boolean emulated;
         final boolean allowMassStorage = false;
-        final String envState = getEnvironmentForState(state);
-
+        final String envState = reportUnmounted
+                ? Environment.MEDIA_UNMOUNTED : getEnvironmentForState(state);
         File userPath = getPathForUser(userId);
         if (userPath == null) {
             userPath = new File("/dev/null");
