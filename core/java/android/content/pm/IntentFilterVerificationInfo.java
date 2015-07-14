@@ -26,7 +26,9 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+
 import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -181,14 +183,28 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         return getStatusStringFromValue(mMainStatus);
     }
 
-    public static String getStatusStringFromValue(int val) {
-        switch (val) {
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK       : return "ask";
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS    : return "always";
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER     : return "never";
+    public static String getStatusStringFromValue(long val) {
+        StringBuilder sb = new StringBuilder();
+        switch ((int)(val >> 32)) {
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
+                sb.append("always : ");
+                sb.append(Long.toHexString(val & 0x00000000FFFFFFFF));
+                break;
+
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
+                sb.append("ask");
+                break;
+
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER:
+                sb.append("never");
+                break;
+
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
             default:
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED : return "undefined";
+                sb.append("undefined");
+                break;
         }
+        return sb.toString();
     }
 
     @Override

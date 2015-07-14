@@ -341,7 +341,8 @@ abstract class PackageSettingBase extends SettingBase {
     void setUserState(int userId, int enabled, boolean installed, boolean stopped,
             boolean notLaunched, boolean hidden,
             String lastDisableAppCaller, ArraySet<String> enabledComponents,
-            ArraySet<String> disabledComponents, boolean blockUninstall, int domainVerifState) {
+            ArraySet<String> disabledComponents, boolean blockUninstall, int domainVerifState,
+            int linkGeneration) {
         PackageUserState state = modifyUserState(userId);
         state.enabled = enabled;
         state.installed = installed;
@@ -353,6 +354,7 @@ abstract class PackageSettingBase extends SettingBase {
         state.disabledComponents = disabledComponents;
         state.blockUninstall = blockUninstall;
         state.domainVerificationStatus = domainVerifState;
+        state.appLinkGeneration = linkGeneration;
     }
 
     ArraySet<String> getEnabledComponents(int userId) {
@@ -449,12 +451,23 @@ abstract class PackageSettingBase extends SettingBase {
         verificationInfo = info;
     }
 
-    int getDomainVerificationStatusForUser(int userId) {
-        return readUserState(userId).domainVerificationStatus;
+    // Returns a packed value as a long:
+    //
+    // high 'int'-sized word: link status: undefined/ask/never/always.
+    // low 'int'-sized word: relative priority among 'always' results.
+    long getDomainVerificationStatusForUser(int userId) {
+        PackageUserState state = readUserState(userId);
+        long result = (long) state.appLinkGeneration;
+        result |= ((long) state.domainVerificationStatus) << 32;
+        return result;
     }
 
-    void setDomainVerificationStatusForUser(int status, int userId) {
-        modifyUserState(userId).domainVerificationStatus = status;
+    void setDomainVerificationStatusForUser(final int status, int generation, int userId) {
+        PackageUserState state = modifyUserState(userId);
+        state.domainVerificationStatus = status;
+        if (status == PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
+            state.appLinkGeneration = generation;
+        }
     }
 
     void clearDomainVerificationStatusForUser(int userId) {
