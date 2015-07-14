@@ -91,6 +91,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.Xml;
 
 import java.io.BufferedOutputStream;
@@ -200,6 +201,7 @@ final class Settings {
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
     private static final String ATTR_PACKAGE_NAME= "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
+    private static final String ATTR_APP_LINK_GENERATION = "app-link-generation";
 
     private final Object mLock;
 
@@ -297,6 +299,9 @@ final class Settings {
 
     // For every user, it is used to find the package name of the default Browser App.
     final SparseArray<String> mDefaultBrowserApp = new SparseArray<String>();
+
+    // App-link priority tracking, per-user
+    final SparseIntArray mNextAppLinkGeneration = new SparseIntArray();
 
     final StringBuilder mReadMessages = new StringBuilder();
 
@@ -628,7 +633,7 @@ final class Settings {
                                     false, // hidden
                                     null, null, null,
                                     false, // blockUninstall
-                                    INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
+                                    INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
                             writePackageRestrictionsLPr(user.id);
                         }
                     }
@@ -1055,7 +1060,7 @@ final class Settings {
             }
             return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
         }
-        int status = ps.getDomainVerificationStatusForUser(userId);
+        int status = (int)(ps.getDomainVerificationStatusForUser(userId) >> 32);
         if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
             if (ps.getIntentFilterVerificationInfo() != null) {
                 status = ps.getIntentFilterVerificationInfo().getStatus();
@@ -1064,7 +1069,7 @@ final class Settings {
         return status;
     }
 
-    boolean updateIntentFilterVerificationStatusLPw(String packageName, int status, int userId) {
+    boolean updateIntentFilterVerificationStatusLPw(String packageName, final int status, int userId) {
         // Update the status for the current package
         PackageSetting current = mPackages.get(packageName);
         if (current == null) {
@@ -1074,7 +1079,15 @@ final class Settings {
             return false;
         }
 
-        current.setDomainVerificationStatusForUser(status, userId);
+        final int alwaysGeneration;
+        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
+            alwaysGeneration = mNextAppLinkGeneration.get(userId) + 1;
+            mNextAppLinkGeneration.put(userId, alwaysGeneration);
+        } else {
+            alwaysGeneration = 0;
+        }
+
+        current.setDomainVerificationStatusForUser(status, alwaysGeneration, userId);
         return true;
     }
 
@@ -1386,7 +1399,7 @@ final class Settings {
                                 false,  // hidden
                                 null, null, null,
                                 false, // blockUninstall
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
+                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
                     }
                     return;
                 }
@@ -1407,6 +1420,8 @@ final class Settings {
                         "No start tag found in package manager stopped packages");
                 return;
             }
+
+            int maxAppLinkGeneration = 0;
 
             int outerDepth = parser.getDepth();
             PackageSetting ps = null;
@@ -1461,6 +1476,12 @@ final class Settings {
                             PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED :
                             Integer.parseInt(verifStateStr);
 
+                    final String linkGenStr = parser.getAttributeValue(null, ATTR_APP_LINK_GENERATION);
+                    final int linkGeneration = linkGenStr == null ? 0 : Integer.parseInt(linkGenStr);
+                    if (linkGeneration > maxAppLinkGeneration) {
+                        maxAppLinkGeneration = linkGeneration;
+                    }
+
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
 
@@ -1482,7 +1503,7 @@ final class Settings {
 
                     ps.setUserState(userId, enabled, installed, stopped, notLaunched, hidden,
                             enabledCaller, enabledComponents, disabledComponents, blockUninstall,
-                            verifState);
+                            verifState, linkGeneration);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -1499,6 +1520,8 @@ final class Settings {
             }
 
             str.close();
+
+            mNextAppLinkGeneration.put(userId, maxAppLinkGeneration + 1);
 
         } catch (XmlPullParserException e) {
             mReadMessages.append("Error reading: " + e.toString());
@@ -1752,6 +1775,10 @@ final class Settings {
                             PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
                         serializer.attribute(null, ATTR_DOMAIN_VERIFICATON_STATE,
                                 Integer.toString(ustate.domainVerificationStatus));
+                    }
+                    if (ustate.appLinkGeneration != 0) {
+                        serializer.attribute(null, ATTR_APP_LINK_GENERATION,
+                                Integer.toString(ustate.appLinkGeneration));
                     }
                     if (ustate.enabledComponents != null
                             && ustate.enabledComponents.size() > 0) {
