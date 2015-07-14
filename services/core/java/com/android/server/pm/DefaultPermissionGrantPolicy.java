@@ -175,7 +175,7 @@ final class DefaultPermissionGrantPolicy {
 
         synchronized (mService.mPackages) {
             for (PackageParser.Package pkg : mService.mPackages.values()) {
-                if (!isSysComponentOrPersistentPrivApp(pkg)
+                if (!isSysComponentOrPersistentPlatformSignedPrivApp(pkg)
                         || !doesPackageSupportRuntimePermissions(pkg)) {
                     continue;
                 }
@@ -683,7 +683,7 @@ final class DefaultPermissionGrantPolicy {
     private PackageParser.Package getSystemPackageLPr(String packageName) {
         PackageParser.Package pkg = getPackageLPr(packageName);
         if (pkg != null && pkg.isSystemApp()) {
-            return !isSysComponentOrPersistentPrivApp(pkg) ? pkg : null;
+            return !isSysComponentOrPersistentPlatformSignedPrivApp(pkg) ? pkg : null;
         }
         return null;
     }
@@ -732,11 +732,16 @@ final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private static boolean isSysComponentOrPersistentPrivApp(PackageParser.Package pkg) {
-        return UserHandle.getAppId(pkg.applicationInfo.uid) < FIRST_APPLICATION_UID
-                || ((pkg.applicationInfo.privateFlags
-                & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0
-                && (pkg.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0);
+    private boolean isSysComponentOrPersistentPlatformSignedPrivApp(PackageParser.Package pkg) {
+        if (UserHandle.getAppId(pkg.applicationInfo.uid) < FIRST_APPLICATION_UID) {
+            return true;
+        }
+        if ((pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) == 0
+                || (pkg.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) == 0) {
+            return false;
+        }
+        return PackageManagerService.compareSignatures(mService.mPlatformPackage.mSignatures,
+                pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
     }
 
     private static boolean doesPackageSupportRuntimePermissions(PackageParser.Package pkg) {
