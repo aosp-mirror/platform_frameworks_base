@@ -817,17 +817,19 @@ public class StorageManager {
 
     /** {@hide} */
     private static @Nullable StorageVolume getStorageVolume(StorageVolume[] volumes, File file) {
-        File canonicalFile = null;
         try {
-            canonicalFile = file.getCanonicalFile();
+            file = file.getCanonicalFile();
         } catch (IOException ignored) {
-            canonicalFile = null;
+            return null;
         }
         for (StorageVolume volume : volumes) {
-            if (volume.getPathFile().equals(file)) {
-                return volume;
+            File volumeFile = volume.getPathFile();
+            try {
+                volumeFile = volumeFile.getCanonicalFile();
+            } catch (IOException ignored) {
+                continue;
             }
-            if (FileUtils.contains(volume.getPathFile(), canonicalFile)) {
+            if (FileUtils.contains(volumeFile, file)) {
                 return volume;
             }
         }
