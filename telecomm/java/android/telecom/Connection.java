@@ -1231,17 +1231,17 @@ public abstract class Connection extends Conferenceable {
     public static String stateToString(int state) {
         switch (state) {
             case STATE_INITIALIZING:
-                return "STATE_INITIALIZING";
+                return "INITIALIZING";
             case STATE_NEW:
-                return "STATE_NEW";
+                return "NEW";
             case STATE_RINGING:
-                return "STATE_RINGING";
+                return "RINGING";
             case STATE_DIALING:
-                return "STATE_DIALING";
+                return "DIALING";
             case STATE_ACTIVE:
-                return "STATE_ACTIVE";
+                return "ACTIVE";
             case STATE_HOLDING:
-                return "STATE_HOLDING";
+                return "HOLDING";
             case STATE_DISCONNECTED:
                 return "DISCONNECTED";
             default:
