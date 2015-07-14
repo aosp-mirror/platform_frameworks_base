@@ -16,10 +16,6 @@
 #ifndef RENDERNODE_H
 #define RENDERNODE_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
 #include <SkCamera.h>
 #include <SkMatrix.h>
 

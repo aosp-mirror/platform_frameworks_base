@@ -17,10 +17,6 @@
 #ifndef ANDROID_HWUI_DISPLAY_LIST_H
 #define ANDROID_HWUI_DISPLAY_LIST_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
 #include <SkCamera.h>
 #include <SkMatrix.h>
 

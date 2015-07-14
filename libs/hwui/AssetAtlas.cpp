@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "AssetAtlas.h"
 #include "Caches.h"
 #include "Image.h"

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 /**
  * Extra vertices for the corner for smoother corner.
  * Only for outer vertices.

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 // The highest z value can't be higher than (CASTER_Z_CAP_RATIO * light.z)
 #define CASTER_Z_CAP_RATIO 0.95f
 

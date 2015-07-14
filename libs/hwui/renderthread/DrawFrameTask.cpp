@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define ATRACE_TAG ATRACE_TAG_VIEW
-
 #include "DrawFrameTask.h"
 
 #include <utils/Log.h>

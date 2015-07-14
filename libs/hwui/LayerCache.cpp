@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <GLES2/gl2.h>
 
 #include <utils/Log.h>
