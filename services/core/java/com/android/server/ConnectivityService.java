@@ -559,8 +559,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final DetailedState state = nai.networkInfo.getDetailedState();
             for (int type = 0; type < mTypeLists.length; type++) {
                 final ArrayList<NetworkAgentInfo> list = mTypeLists[type];
+                final boolean contains = (list != null && list.contains(nai));
                 final boolean isFirst = (list != null && list.size() > 0 && nai == list.get(0));
-                if (isFirst || isDefault) {
+                if (isFirst || (contains && isDefault)) {
                     maybeLogBroadcast(nai, state, type, isDefault);
                     sendLegacyNetworkBroadcast(nai, state, type);
                 }
