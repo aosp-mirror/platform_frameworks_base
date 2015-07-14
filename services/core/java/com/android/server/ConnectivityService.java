@@ -407,6 +407,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // sequence number of NetworkRequests
     private int mNextNetworkRequestId = 1;
 
+    // NetworkRequest activity String log entries.
+    private static final int MAX_NETWORK_REQUEST_LOGS = 20;
+    private final LocalLog mNetworkRequestInfoLogs = new LocalLog(MAX_NETWORK_REQUEST_LOGS);
+
     // Array of <Network,ReadOnlyLocalLogs> tracking network validation and results
     private static final int MAX_VALIDATION_LOGS = 10;
     private final ArrayDeque<Pair<Network,ReadOnlyLocalLog>> mValidationLogs =
@@ -610,8 +614,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (DBG) log("ConnectivityService starting up");
 
         mDefaultRequest = createInternetRequestForTransport(-1);
-        mNetworkRequests.put(mDefaultRequest, new NetworkRequestInfo(
-                null, mDefaultRequest, new Binder(), NetworkRequestInfo.REQUEST));
+        NetworkRequestInfo defaultNRI = new NetworkRequestInfo(null, mDefaultRequest,
+                new Binder(), NetworkRequestInfo.REQUEST);
+        mNetworkRequests.put(mDefaultRequest, defaultNRI);
+        mNetworkRequestInfoLogs.log("REGISTER " + defaultNRI);
 
         mDefaultMobileDataRequest = createInternetRequestForTransport(
                 NetworkCapabilities.TRANSPORT_CELLULAR);
@@ -1859,6 +1865,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     pw.decreaseIndent();
                 }
             }
+
+            pw.println();
+            pw.println("mNetworkRequestInfoLogs (most recent first):");
+            pw.increaseIndent();
+            mNetworkRequestInfoLogs.reverseDump(fd, pw, args);
+            pw.decreaseIndent();
         }
     }
 
@@ -2208,6 +2220,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleRegisterNetworkRequest(NetworkRequestInfo nri) {
         mNetworkRequests.put(nri.request, nri);
+        mNetworkRequestInfoLogs.log("REGISTER " + nri);
         rematchAllNetworksAndRequests(null, 0);
         if (nri.isRequest && mNetworkForRequestId.get(nri.request.requestId) == null) {
             sendUpdatedScoreToFactories(nri.request, 0);
@@ -2257,6 +2270,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (DBG) log("releasing NetworkRequest " + request);
             nri.unlinkDeathRecipient();
             mNetworkRequests.remove(request);
+            mNetworkRequestInfoLogs.log("RELEASE " + nri);
             if (nri.isRequest) {
                 // Find all networks that are satisfying this request and remove the request
                 // from their request lists.
@@ -3529,8 +3543,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         public String toString() {
-            return (isRequest ? "Request" : "Listen") + " from uid/pid:" + mUid + "/" +
-                    mPid + " for " + request +
+            return (isRequest ? "Request" : "Listen") +
+                    " from uid/pid:" + mUid + "/" + mPid +
+                    " for " + request +
                     (mPendingIntent == null ? "" : " to trigger " + mPendingIntent);
         }
     }
@@ -3560,9 +3575,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, legacyType,
                 nextNetworkRequestId());
-        if (DBG) log("requestNetwork for " + networkRequest);
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
                 NetworkRequestInfo.REQUEST);
+        if (DBG) log("requestNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST, nri));
         if (timeoutMs > 0) {
@@ -3625,9 +3640,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId());
-        if (DBG) log("pendingRequest for " + networkRequest + " to trigger " + operation);
         NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation,
                 NetworkRequestInfo.REQUEST);
+        if (DBG) log("pendingRequest for " + nri);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT,
                 nri));
         return networkRequest;
@@ -3675,11 +3690,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             enforceAccessPermission();
         }
 
-        NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
-                networkCapabilities), TYPE_NONE, nextNetworkRequestId());
-        if (DBG) log("listenForNetwork for " + networkRequest);
+        NetworkRequest networkRequest = new NetworkRequest(
+                new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
                 NetworkRequestInfo.LISTEN);
+        if (DBG) log("listenForNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_LISTENER, nri));
         return networkRequest;
@@ -3693,11 +3708,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             enforceAccessPermission();
         }
 
-        NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
-                networkCapabilities), TYPE_NONE, nextNetworkRequestId());
-        if (DBG) log("pendingListenForNetwork for " + networkRequest + " to trigger " + operation);
+        NetworkRequest networkRequest = new NetworkRequest(
+                new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation,
                 NetworkRequestInfo.LISTEN);
+        if (DBG) log("pendingListenForNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_LISTENER, nri));
     }
