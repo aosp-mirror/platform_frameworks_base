@@ -262,7 +262,6 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(setupPackage)) {
                 grantRuntimePermissionsLPw(setupPackage, PHONE_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(setupPackage, CONTACTS_PERMISSIONS, userId);
-                grantRuntimePermissionsLPw(setupPackage, SETTINGS_PERMISSIONS, userId);
             }
 
             // Camera
