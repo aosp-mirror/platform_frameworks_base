@@ -275,7 +275,7 @@ public class PhoneStatusBarPolicy {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         int iconId = R.drawable.stat_sys_data_bluetooth;
         String contentDescription =
-                mContext.getString(R.string.accessibility_bluetooth_disconnected);
+                mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
         if (adapter != null) {
             mBluetoothEnabled = (adapter.getState() == BluetoothAdapter.STATE_ON);
             if (adapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED) {
