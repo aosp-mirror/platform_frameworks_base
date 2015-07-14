@@ -661,8 +661,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     for (int i = start /* get out of normal index range */; i < start + num; i++) {
                         subs.add(addSignalController(i, i));
                     }
+                    mCallbackHandler.setSubs(subs);
                 }
-                mCallbackHandler.setSubs(subs);
             }
             String nosim = args.getString("nosim");
             if (nosim != null) {
