@@ -262,14 +262,16 @@ trainingnavtop=true
 
 <h2 id="advertising">Provide Effective Advertising</h2>
 
-<p>Advertising on Android TV must always be full-screen. Ads must not appear alongside or over
-content. The user must be able to dismiss an advertisement with the D-pad controller. Video ads must
-be dismissible within 30 seconds of their start time.</p>
+<p>For the living room environment, we recommend you use video ads solutions
+that are full-screen and dismissable within 30 seconds. Functionality for
+advertising on Android TV, such as dismiss buttons and clickthroughs, must be
+accessible using the D-pad rather than touch.</p>
 
-<p>Android TV does not provide a web browser. Your ads must not attempt to launch a web browser or
-redirect to the Google Play Store.</p>
+<p>Android TV does not provide a web browser. Your ads must not attempt to
+launch a web browser or redirect to Google Play Store content that is not
+approved for Android TV devices.</p>
 
 <p class="note">
-  <strong>Note:</strong> You can use the {@link android.webkit.WebView} class for logins to
-  services like Google+ and Facebook.
+  <strong>Note:</strong> You can use the {@link android.webkit.WebView} class
+  for logins to services like Google+ and Facebook.
 </p>
