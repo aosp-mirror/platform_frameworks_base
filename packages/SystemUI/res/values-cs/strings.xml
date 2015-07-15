@@ -116,12 +116,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dvě čárky signálu datové sítě."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tři čárky signálu datové sítě."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Plný signál datové sítě."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Síť Wi-Fi je vypnuta."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Síť Wi-Fi odpojena."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Jedna čárka signálu sítě Wi-Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Dvě čárky signálu sítě Wi-Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Tři čárky signálu sítě Wi-Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Plný signál sítě Wi-Fi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Připojeno k zařízení <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Připojeno k zařízení <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Žádný signál sítě WiMAX."</string>

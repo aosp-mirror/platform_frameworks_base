@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Data na dalawang bar."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Data na tatlong bar."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Puno ang signal ng data."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Naka-off ang Wifi."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Nakadiskonekta ang Wifi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"May isang bar ang WiFi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"May dalawang bar ang Wifi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"May tatlong bar ang Wifi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Puno ang signal ng WiFi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Nakakonekta sa <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Nakakonekta sa <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Walang WiMAX."</string>

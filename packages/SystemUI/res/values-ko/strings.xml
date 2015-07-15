@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"데이터 신호 막대가 두 개입니다."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"데이터 신호 막대가 세 개입니다."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"데이터 신호가 강합니다."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi가 꺼져 있습니다."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi 연결이 끊어졌습니다."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi 신호 막대가 하나입니다."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi 신호 막대가 두 개입니다."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi 신호 막대가 세 개입니다."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi 신호가 강합니다."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>에 연결되었습니다."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>에 연결되었습니다."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX가 없습니다."</string>
