@@ -101,8 +101,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         mUpdateFlags = 0;
                     }
                     updateExternalStats((String)msg.obj, updateFlags);
-                    synchronized (this) {
-                        synchronized (mStats) {
+
+                    // other parts of the system could be calling into us
+                    // from mStats in order to report of changes. We must grab the mStats
+                    // lock before grabbing our own or we'll end up in a deadlock.
+                    synchronized (mStats) {
+                        synchronized (this) {
                             final int numUidsToRemove = mUidsToRemove.size();
                             for (int i = 0; i < numUidsToRemove; i++) {
                                 mStats.removeIsolatedUidLocked(mUidsToRemove.get(i));
