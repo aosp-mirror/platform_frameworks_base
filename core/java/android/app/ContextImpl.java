@@ -960,14 +960,21 @@ class ContextImpl extends Context {
             String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
         sendOrderedBroadcastAsUser(intent, user, receiverPermission, AppOpsManager.OP_NONE,
-                resultReceiver, scheduler, initialCode, initialData, initialExtras);
+                null, resultReceiver, scheduler, initialCode, initialData, initialExtras);
     }
 
     @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
-            Handler scheduler,
-            int initialCode, String initialData, Bundle initialExtras) {
+            Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
+        sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp,
+                null, resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, int appOp, Bundle options, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
         IIntentReceiver rd = null;
         if (resultReceiver != null) {
             if (mPackageInfo != null) {
@@ -981,8 +988,8 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new LoadedApk.ReceiverDispatcher(
-                        resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
+                rd = new LoadedApk.ReceiverDispatcher(resultReceiver, getOuterContext(),
+                        scheduler, null, false).getIIntentReceiver();
             }
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
@@ -993,7 +1000,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermissions,
-                    appOp, null, true, false, user.getIdentifier());
+                    appOp, options, true, false, user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
         }
