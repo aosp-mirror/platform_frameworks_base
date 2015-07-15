@@ -913,12 +913,38 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     /**
+     * Equivalent to {@link VoiceInteractionService#setDisabledShowContext
+     * VoiceInteractionService.setDisabledShowContext(int)}.
+     */
+    public void setDisabledShowContext(int flags) {
+        try {
+            mSystemService.setDisabledShowContext(flags);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Equivalent to {@link VoiceInteractionService#getDisabledShowContext
+     * VoiceInteractionService.getDisabledShowContext}.
+     */
+    public int getDisabledShowContext() {
+        try {
+            return mSystemService.getDisabledShowContext();
+        } catch (RemoteException e) {
+            return 0;
+        }
+    }
+
+    /**
      * Show the UI for this session.  This asks the system to go through the process of showing
      * your UI, which will eventually culminate in {@link #onShow}.  This is similar to calling
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      * @param args Arbitrary arguments that will be propagated {@link #onShow}.
      * @param flags Indicates additional optional behavior that should be performed.  May
-     * be {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST}
+     * be any combination of
+     * {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST} and
+     * {@link VoiceInteractionSession#SHOW_WITH_SCREENSHOT
+     * VoiceInteractionSession.SHOW_WITH_SCREENSHOT}
      * to request that the system generate and deliver assist data on the current foreground
      * app as part of showing the session UI.
      */

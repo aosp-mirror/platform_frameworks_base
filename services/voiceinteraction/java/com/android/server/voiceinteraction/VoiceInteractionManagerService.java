@@ -578,6 +578,44 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @Override
+        public void setDisabledShowContext(int flags) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "setDisabledShowContext without running voice interaction service");
+                    return;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.setDisabledShowContextLocked(callingPid, callingUid, flags);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+
+        }
+
+        @Override
+        public int getDisabledShowContext() {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "getDisabledShowContext without running voice interaction service");
+                    return 0;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mImpl.getDisabledShowContextLocked(callingPid, callingUid);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+
+        }
+
         //----------------- Model management APIs --------------------------------//
 
         @Override
