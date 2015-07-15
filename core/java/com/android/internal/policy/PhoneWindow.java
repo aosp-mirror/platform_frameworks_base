@@ -27,6 +27,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
+import android.os.Build;
 import android.os.UserHandle;
 
 import android.view.ActionMode;
@@ -3531,7 +3532,28 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             public void onDestroyActionMode(ActionMode mode) {
                 mWrapped.onDestroyActionMode(mode);
-                if (mode == mPrimaryActionMode) {
+                final boolean isMncApp = mContext.getApplicationInfo().targetSdkVersion
+                        >= Build.VERSION_CODES.MNC;
+                final boolean isPrimary;
+                final boolean isFloating;
+                if (isMncApp) {
+                    isPrimary = mode == mPrimaryActionMode;
+                    isFloating = mode == mFloatingActionMode;
+                    if (!isPrimary && mode.getType() == ActionMode.TYPE_PRIMARY) {
+                        Log.e(TAG, "Destroying unexpected ActionMode instance of TYPE_PRIMARY; "
+                                + mode + " was not the current primary action mode! Expected "
+                                + mPrimaryActionMode);
+                    }
+                    if (!isFloating && mode.getType() == ActionMode.TYPE_FLOATING) {
+                        Log.e(TAG, "Destroying unexpected ActionMode instance of TYPE_FLOATING; "
+                                + mode + " was not the current floating action mode! Expected "
+                                + mFloatingActionMode);
+                    }
+                } else {
+                    isPrimary = mode.getType() == ActionMode.TYPE_PRIMARY;
+                    isFloating = mode.getType() == ActionMode.TYPE_FLOATING;
+                }
+                if (isPrimary) {
                     if (mPrimaryActionModePopup != null) {
                         removeCallbacks(mShowPrimaryActionModePopup);
                     }
@@ -3569,7 +3591,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
 
                     mPrimaryActionMode = null;
-                } else if (mode == mFloatingActionMode) {
+                } else if (isFloating) {
                     cleanupFloatingActionModeViews();
                     mFloatingActionMode = null;
                 }
