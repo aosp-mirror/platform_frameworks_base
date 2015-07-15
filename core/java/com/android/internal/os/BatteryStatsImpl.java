@@ -3122,6 +3122,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public void noteWakeUpLocked(String reason, int reasonUid) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_SCREEN_WAKE_UP,
+                reason, reasonUid);
+    }
+
     public void noteInteractiveLocked(boolean interactive) {
         if (mInteractive != interactive) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();

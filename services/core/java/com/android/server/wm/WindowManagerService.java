@@ -10308,7 +10308,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_VISIBILITY || DEBUG_POWER) {
                     Slog.v(TAG, "Turning screen on after layout!");
                 }
-                mPowerManager.wakeUp(SystemClock.uptimeMillis());
+                mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.server.wm:TURN_ON");
             }
             mTurnOnScreen = false;
         }
