@@ -199,12 +199,30 @@ public final class Bitmap implements Parcelable {
      * the new bitmap will be considered non-opaque, and will respect the value
      * set by setPremultiplied().</p>
      *
-     * <p>WARNING: This method should NOT be called on a bitmap currently used
-     * by the view system. It does not make guarantees about how the underlying
-     * pixel buffer is remapped to the new config, just that the allocation is
-     * reused. Additionally, the view system does not account for bitmap
-     * properties being modifying during use, e.g. while attached to
-     * drawables.</p>
+     * <p>WARNING: This method should NOT be called on a bitmap currently in use
+     * by the view system, Canvas, or the AndroidBitmap NDK API. It does not
+     * make guarantees about how the underlying pixel buffer is remapped to the
+     * new config, just that the allocation is reused. Additionally, the view
+     * system does not account for bitmap properties being modifying during use,
+     * e.g. while attached to drawables.</p>
+     *
+     * <p>In order to safely ensure that a Bitmap is no longer in use by the
+     * View system it is necessary to wait for a draw pass to occur after
+     * invalidate()'ing any view that had previously drawn the Bitmap in the last
+     * draw pass due to hardware acceleration's caching of draw commands. As
+     * an example, here is how this can be done for an ImageView:
+     * <pre class="prettyprint">
+     *      ImageView myImageView = ...;
+     *      final Bitmap myBitmap = ...;
+     *      myImageView.setImageDrawable(null);
+     *      myImageView.post(new Runnable() {
+     *          public void run() {
+     *              // myBitmap is now no longer in use by the ImageView
+     *              // and can be safely reconfigured.
+     *              myBitmap.reconfigure(...);
+     *          }
+     *      });
+     * </pre></p>
      *
      * @see #setWidth(int)
      * @see #setHeight(int)
