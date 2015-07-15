@@ -1195,9 +1195,11 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_PACKAGE_ACTIVE = 0x0010;
         // Event for a package being on the temporary whitelist.
         public static final int EVENT_TEMP_WHITELIST = 0x0011;
+        // Event for the screen waking up.
+        public static final int EVENT_SCREEN_WAKE_UP = 0x0012;
 
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0012;
+        public static final int EVENT_COUNT = 0x0013;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1858,12 +1860,14 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
-            "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active", "tmpwhitelist"
+            "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active", "tmpwhitelist",
+            "screenwake",
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
-            "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw"
+            "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw",
+            "Esw",
     };
 
     /**
