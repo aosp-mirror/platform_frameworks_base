@@ -1006,8 +1006,10 @@ public class Am extends BaseCommand {
     private void sendBroadcast() throws Exception {
         Intent intent = makeIntent(UserHandle.USER_CURRENT);
         IntentReceiver receiver = new IntentReceiver();
+        String[] requiredPermissions = mReceiverPermission == null ? null
+                : new String[] {mReceiverPermission};
         System.out.println("Broadcasting: " + intent);
-        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, mReceiverPermission,
+        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, requiredPermissions,
                 android.app.AppOpsManager.OP_NONE, null, true, false, mUserId);
         receiver.waitForFinish();
     }
