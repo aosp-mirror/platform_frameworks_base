@@ -73,6 +73,16 @@ public final class SomeArgs {
         }
     }
 
+    public void complete() {
+        synchronized (this) {
+            if (mWaitState != WAIT_WAITING) {
+                throw new IllegalStateException("Not waiting");
+            }
+            mWaitState = WAIT_FINISHED;
+            notifyAll();
+        }
+    }
+
     public void recycle() {
         if (mInPool) {
             throw new IllegalStateException("Already recycled.");

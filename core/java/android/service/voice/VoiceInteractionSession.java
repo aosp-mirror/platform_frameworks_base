@@ -650,7 +650,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
         @Override
         public void executeMessage(Message msg) {
-            SomeArgs args;
+            SomeArgs args = null;
             switch (msg.what) {
                 case MSG_START_CONFIRMATION:
                     if (DEBUG) Log.d(TAG, "onConfirm: req=" + msg.obj);
@@ -676,6 +676,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                     args = (SomeArgs)msg.obj;
                     if (DEBUG) Log.d(TAG, "onGetSupportedCommands: cmds=" + args.arg1);
                     args.arg1 = onGetSupportedCommands((String[]) args.arg1);
+                    args.complete();
+                    args = null;
                     break;
                 case MSG_CANCEL:
                     if (DEBUG) Log.d(TAG, "onCancel: req=" + ((Request)msg.obj));
@@ -722,6 +724,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                     if (DEBUG) Log.d(TAG, "doHide");
                     doHide();
                     break;
+            }
+            if (args != null) {
+                args.recycle();
             }
         }
 
