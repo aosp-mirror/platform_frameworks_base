@@ -16405,7 +16405,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         @Override
         public void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider) {
             synchronized (mPackages) {
-                mDefaultPermissionPolicy.setSyncAdapterPackagesProviderrLPw(provider);
+                mDefaultPermissionPolicy.setSyncAdapterPackagesProviderLPw(provider);
             }
         }
 
