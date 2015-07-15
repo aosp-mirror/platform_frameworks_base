@@ -3272,7 +3272,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
 
 
     /**
-     * 8-bit GEMM-like operation for neural networks: C = B.transposed() * A
+     * 8-bit GEMM-like operation for neural networks: C = A * Transpose(B)
      * Calculations are done in 1.10.21 fixed-point format for the final output,
      * just before there's a shift down to drop the fractional parts. The output
      * values are gated to 0 to 255 to fit in a byte, but the 10-bit format
