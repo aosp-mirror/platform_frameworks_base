@@ -137,7 +137,7 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void wakeUp(long time) throws RemoteException {
+    public void wakeUp(long time, String reason, String opPackageName) throws RemoteException {
         // pass for now.
     }
 
