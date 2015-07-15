@@ -233,8 +233,10 @@ public class AppOpsManager {
     public static final int OP_READ_EXTERNAL_STORAGE = 59;
     /** @hide Write external storage. */
     public static final int OP_WRITE_EXTERNAL_STORAGE = 60;
+    /** @hide Turned on the screen. */
+    public static final int OP_TURN_SCREEN_ON = 61;
     /** @hide */
-    public static final int _NUM_OP = 61;
+    public static final int _NUM_OP = 62;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -393,7 +395,8 @@ public class AppOpsManager {
             OP_READ_CELL_BROADCASTS,
             OP_MOCK_LOCATION,
             OP_READ_EXTERNAL_STORAGE,
-            OP_WRITE_EXTERNAL_STORAGE
+            OP_WRITE_EXTERNAL_STORAGE,
+            OP_TURN_SCREEN_ON,
     };
 
     /**
@@ -461,7 +464,8 @@ public class AppOpsManager {
             OPSTR_READ_CELL_BROADCASTS,
             OPSTR_MOCK_LOCATION,
             OPSTR_READ_EXTERNAL_STORAGE,
-            OPSTR_WRITE_EXTERNAL_STORAGE
+            OPSTR_WRITE_EXTERNAL_STORAGE,
+            null,
     };
 
     /**
@@ -528,8 +532,9 @@ public class AppOpsManager {
             "BODY_SENSORS",
             "READ_CELL_BROADCASTS",
             "MOCK_LOCATION",
-            "OPSTR_READ_EXTERNAL_STORAGE",
-            "OPSTR_WRITE_EXTERNAL_STORAGE",
+            "READ_EXTERNAL_STORAGE",
+            "WRITE_EXTERNAL_STORAGE",
+            "TURN_ON_SCREEN",
     };
 
     /**
@@ -598,6 +603,7 @@ public class AppOpsManager {
             null,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            null, // no permission for turning the screen on
     };
 
     /**
@@ -666,7 +672,8 @@ public class AppOpsManager {
             null, // READ_CELL_BROADCASTS
             null, // MOCK_LOCATION
             null, // READ_EXTERNAL_STORAGE
-            null  // WRITE_EXTERNAL_STORAGE
+            null, // WRITE_EXTERNAL_STORAGE
+            null, // TURN_ON_SCREEN
     };
 
     /**
@@ -734,7 +741,8 @@ public class AppOpsManager {
             false, // READ_CELL_BROADCASTS
             false, // MOCK_LOCATION
             false, // READ_EXTERNAL_STORAGE
-            false  // WRITE_EXTERNAL_STORAGE
+            false, // WRITE_EXTERNAL_STORAGE
+            false, // TURN_ON_SCREEN
     };
 
     /**
@@ -801,7 +809,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ERRORED,  // OP_MOCK_LOCATION
             AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,  // OP_TURN_ON_SCREEN
     };
 
     /**
@@ -872,7 +881,8 @@ public class AppOpsManager {
             false,
             false,
             false,
-            false
+            false,
+            false,
     };
 
     /**
