@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -282,10 +283,17 @@ public class CallerInfo {
      * number. The returned CallerInfo is null if no number is supplied.
      */
     public static CallerInfo getCallerInfo(Context context, Uri contactRef) {
-
-        return getCallerInfo(context, contactRef,
-                CallerInfoAsyncQuery.getCurrentProfileContentResolver(context)
-                        .query(contactRef, null, null, null, null));
+        CallerInfo info = null;
+        ContentResolver cr = CallerInfoAsyncQuery.getCurrentProfileContentResolver(context);
+        if (cr != null) {
+            try {
+                info = getCallerInfo(context, contactRef,
+                        cr.query(contactRef, null, null, null, null));
+            } catch (RuntimeException re) {
+                Rlog.e(TAG, "Error getting caller info.", re);
+            }
+        }
+        return info;
     }
 
     /**
