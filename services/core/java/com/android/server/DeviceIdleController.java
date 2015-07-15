@@ -409,7 +409,7 @@ public class DeviceIdleController extends SystemService
                 MAX_TEMP_APP_WHITELIST_DURATION = mParser.getLong(
                         KEY_MAX_TEMP_APP_WHITELIST_DURATION, 5 * 60 * 1000L);
                 MMS_TEMP_APP_WHITELIST_DURATION = mParser.getLong(
-                        KEY_MMS_TEMP_APP_WHITELIST_DURATION, 30 * 1000L);
+                        KEY_MMS_TEMP_APP_WHITELIST_DURATION, 60 * 1000L);
             }
         }
 
