@@ -860,8 +860,23 @@ public class StorageManager {
         final IMountService mountService = IMountService.Stub.asInterface(
                 ServiceManager.getService("mount"));
         try {
-            final String packageName = ActivityThread.currentOpPackageName();
+            String packageName = ActivityThread.currentOpPackageName();
+            if (packageName == null) {
+                // Package name can be null if the activity thread is running but the app
+                // hasn't bound yet. In this case we fall back to the first package in the
+                // current UID. This works for runtime permissions as permission state is
+                // per UID and permission realted app ops are updated for all UID packages.
+                String[] packageNames = ActivityThread.getPackageManager().getPackagesForUid(
+                        android.os.Process.myUid());
+                if (packageNames == null || packageNames.length <= 0) {
+                    return new StorageVolume[0];
+                }
+                packageName = packageNames[0];
+            }
             final int uid = ActivityThread.getPackageManager().getPackageUid(packageName, userId);
+            if (uid <= 0) {
+                return new StorageVolume[0];
+            }
             return mountService.getVolumeList(uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
