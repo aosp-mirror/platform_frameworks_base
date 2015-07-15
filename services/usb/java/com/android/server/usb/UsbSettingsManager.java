@@ -44,6 +44,7 @@ import android.util.Xml;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1193,35 +1194,35 @@ class UsbSettingsManager {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw) {
+    public void dump(IndentingPrintWriter pw) {
         synchronized (mLock) {
-            pw.println("  Device permissions:");
+            pw.println("Device permissions:");
             for (String deviceName : mDevicePermissionMap.keySet()) {
-                pw.print("    " + deviceName + ": ");
+                pw.print("  " + deviceName + ": ");
                 SparseBooleanArray uidList = mDevicePermissionMap.get(deviceName);
                 int count = uidList.size();
                 for (int i = 0; i < count; i++) {
                     pw.print(Integer.toString(uidList.keyAt(i)) + " ");
                 }
-                pw.println("");
+                pw.println();
             }
-            pw.println("  Accessory permissions:");
+            pw.println("Accessory permissions:");
             for (UsbAccessory accessory : mAccessoryPermissionMap.keySet()) {
-                pw.print("    " + accessory + ": ");
+                pw.print("  " + accessory + ": ");
                 SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
                 int count = uidList.size();
                 for (int i = 0; i < count; i++) {
                     pw.print(Integer.toString(uidList.keyAt(i)) + " ");
                 }
-                pw.println("");
+                pw.println();
             }
-            pw.println("  Device preferences:");
+            pw.println("Device preferences:");
             for (DeviceFilter filter : mDevicePreferenceMap.keySet()) {
-                pw.println("    " + filter + ": " + mDevicePreferenceMap.get(filter));
+                pw.println("  " + filter + ": " + mDevicePreferenceMap.get(filter));
             }
-            pw.println("  Accessory preferences:");
+            pw.println("Accessory preferences:");
             for (AccessoryFilter filter : mAccessoryPreferenceMap.keySet()) {
-                pw.println("    " + filter + ": " + mAccessoryPreferenceMap.get(filter));
+                pw.println("  " + filter + ": " + mAccessoryPreferenceMap.get(filter));
             }
         }
     }

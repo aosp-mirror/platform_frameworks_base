@@ -38,6 +38,7 @@ import android.util.Base64;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 
 import java.io.File;
@@ -451,17 +452,17 @@ public class UsbDebuggingManager {
         mHandler.sendEmptyMessage(UsbDebuggingHandler.MESSAGE_ADB_CLEAR);
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw) {
-        pw.println("  USB Debugging State:");
-        pw.println("    Connected to adbd: " + (mThread != null));
-        pw.println("    Last key received: " + mFingerprints);
-        pw.println("    User keys:");
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("USB Debugging State:");
+        pw.println("  Connected to adbd: " + (mThread != null));
+        pw.println("  Last key received: " + mFingerprints);
+        pw.println("  User keys:");
         try {
             pw.println(FileUtils.readTextFile(new File("/data/misc/adb/adb_keys"), 0, null));
         } catch (IOException e) {
             pw.println("IOException: " + e);
         }
-        pw.println("    System keys:");
+        pw.println("  System keys:");
         try {
             pw.println(FileUtils.readTextFile(new File("/adb_keys"), 0, null));
         } catch (IOException e) {
