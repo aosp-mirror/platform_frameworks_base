@@ -203,6 +203,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     public void startExit() {
         if (!mIsExitStarted) {
             mIsExitStarted = true;
+            pauseInput();
             ViewGroup decorView = getDecor();
             if (decorView != null) {
                 decorView.suppressLayout(true);
@@ -220,6 +221,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     public void startExit(int resultCode, Intent data) {
         if (!mIsExitStarted) {
             mIsExitStarted = true;
+            pauseInput();
             ViewGroup decorView = getDecor();
             if (decorView != null) {
                 decorView.suppressLayout(true);
