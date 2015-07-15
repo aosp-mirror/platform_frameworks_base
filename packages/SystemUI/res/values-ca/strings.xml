@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Senyal de dades: dues barres."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Senyal de dades: tres barres."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Senyal de dades: complet."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi desactivada."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi desconnectada."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Senyal Wi-Fi: una barra."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Senyal Wi-Fi: dues barres."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Senyal Wi-Fi: tres barres."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Senyal Wi-Fi: complet."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"S\'ha connectat a <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"S\'ha connectat a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Sense WiMAX."</string>

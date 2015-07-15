@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"डेटा दुई बाधाहरू।"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"डेटा तिन बाधाहरू।"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"डेटा संकेत पूर्ण।"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"वाइफाइ बन्द।"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"वाइफाइ विच्छेद भयो।"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"वाइफाइ एक पट्टि।"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"वाइफाइ दुई पट्टि।"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"वाइफाइ तिन बारहरू।"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"वाइफाइ सङ्केत भरिएको।"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> मा जडित।"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> मा जडित।"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"वाइम्यास छैन।"</string>

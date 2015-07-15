@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Signal moyen"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Signal bon"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Signal excellent"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi désactivé"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi déconnecté"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Signal Wi-Fi faible"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Signal Wi-Fi moyen"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Signal Wi-Fi bon"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Signal Wi-Fi excellent"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Connecté à : <xliff:g id="WIFI">%s</xliff:g>"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Connecté à : <xliff:g id="BLUETOOTH">%s</xliff:g>"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Aucun signal WiMAX"</string>
