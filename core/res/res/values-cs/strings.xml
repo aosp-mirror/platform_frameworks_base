@@ -356,10 +356,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Umožňuje aplikaci ovládat baterku."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"přímé volání na telefonní čísla"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikaci volat na telefonní čísla bez vašeho přičinění. Může mít za následek neočekávané poplatky nebo hovory. Toto oprávnění neumožňuje aplikaci volat na tísňová čísla. Škodlivé aplikace vás mohou připravit o peníze uskutečňováním hovorů bez vašeho svolení."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"přístup ke službě zasílání rychlých zpráv pro účely hovorů"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Umožňuje aplikaci používat službu zasílání rychlých zpráv k uskutečňování hovorů bez vašeho zásahu."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čtení stavu a identity telefonu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Toto oprávnění umožňuje aplikaci zjistit telefonní číslo telefonu, identifikační čísla zařízení, zda zrovna probíhá hovor, a vzdálené číslo, ke kterému je hovor připojen."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"bránění přechodu tabletu do režimu spánku"</string>
@@ -1166,19 +1164,8 @@
       <item quantity="one">1 shoda</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Hotovo"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Odpojování úložiště USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Odpojování karty SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Mazání úložiště USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Mazání karty SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Úložiště USB nelze smazat."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Kartu SD nelze smazat."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Karta SD nebyla před odebráním odpojena."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Probíhá kontrola úložiště USB."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Probíhá kontrola karty SD."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Karta SD byla odebrána."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Úložiště USB je momentálně používáno počítačem."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Karta SD je momentálně používána počítačem."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Neznámý stav externího média."</string>
     <string name="share" msgid="1778686618230011964">"Sdílet"</string>
     <string name="find" msgid="4808270900322985960">"Najít"</string>
     <string name="websearch" msgid="4337157977400211589">"Vyhledat na webu"</string>

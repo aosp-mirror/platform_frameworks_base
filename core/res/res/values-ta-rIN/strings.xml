@@ -55,7 +55,7 @@
     <string name="mmiComplete" msgid="8232527495411698359">"MMI நிறைவடைந்தது."</string>
     <string name="badPin" msgid="9015277645546710014">"உள்ளிட்ட பழைய பின் தவறானது."</string>
     <string name="badPuk" msgid="5487257647081132201">"உள்ளிட்ட PUK2 தவறானது."</string>
-    <string name="mismatchPin" msgid="609379054496863419">"உள்ளிட்ட PINகள் பொருந்தவில்லை."</string>
+    <string name="mismatchPin" msgid="609379054496863419">"உள்ளிட்ட பின்கள் பொருந்தவில்லை."</string>
     <string name="invalidPin" msgid="3850018445187475377">"4 இலிருந்து 8 எண்கள் வரையுள்ள பின் ஐத் தட்டச்சு செய்யவும்."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 அல்லது அதற்கு மேல் எண்கள் உள்ள PUK ஐத் தட்டச்சு செய்யவும்."</string>
     <string name="needPuk" msgid="919668385956251611">"உங்கள் சிம் கார்டு PUK பூட்டுதல் செய்யப்பட்டுள்ளது. அதைத் திறக்க PUK குறியீட்டைத் உள்ளிடவும்."</string>
@@ -244,13 +244,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"மொபைல் அழைப்புகளைச் செய்யும், பெறும்"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் உணர்விகள்"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடலியக்கக் குறிகள் பற்றிய உணர்வித் தரவை அணுகும்"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறுதல்"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் ஊடாடிக்கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கவும்"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றி கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"தொட்ட உருப்படிகள் சத்தமாகப் பேசும் மற்றும் சைகைகளைப் பயன்படுத்தி திரையை ஆராயலாம்."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"மேம்பட்ட இணைய அணுகல்தன்மையை இயக்கவும்"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"பயன்பாட்டு உள்ளடக்கத்தை மேலும் எளிதாக அணுகக்கூடியதாக்க ஸ்கிரிப்ட்கள் நிறுவப்பட்டிருக்கலாம்."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கவும்"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"மேம்பட்ட இணைய அணுகல்தன்மையை இயக்கும்"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"பயன்பாட்டு உள்ளடக்கத்தை மேலும் எளிதாக அணுகக்கூடியதாக்க ஸ்கிரிப்ட்கள் நிறுவப்படலாம்."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கும்"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"கிரெடிட் கார்டு எண்கள் மற்றும் கடவுச்சொற்கள் போன்ற தனிப்பட்ட தகவலும் உள்ளடங்கும்."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற பயன்பாட்டை அனுமதிக்கிறது."</string>
@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ஃப்ளாஷ் லைட்டைக் கட்டுப்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"உங்கள் தலையீட்டின்றி மொபைல் எண்களை அழைக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதன் விளைவாக எதிர்பாராத கட்டணங்களோ அழைப்புகளோ ஏற்படலாம். அவசரகால எண்களை அழைக்க இது பயன்பாட்டை அனுமதிக்காது என்பதை நினைவில்கொள்ளவும். தீங்கிழைக்கும் பயன்பாடுகள், உங்கள் உறுதிப்படுத்தல் இன்றி அழைப்புகளைச் செய்வதால் உங்களுக்குச் செலவு ஏற்படக்கூடும்."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS அழைப்புச் சேவையை அணுகுதல்"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"உங்கள் குறுக்கீடின்றி IMS சேவையைப் பயன்படுத்தி அழைப்பதற்கு, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"மொபைல் நிலை மற்றும் அடையாளத்தைப் படித்தல்"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"டேப்லெட் உறக்க நிலைக்குச் செல்வதைத் தடுத்தல்"</string>
@@ -635,7 +633,7 @@
     <string name="relationTypeReferredBy" msgid="101573059844135524">"பரிந்துரைத்தவர்"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"உறவினர்"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"சகோதரி"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"வாழ்க்கைத்துணை"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"துணைவர்"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"தனிப்பயன்"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"வீடு"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"அலுவலகம்"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 பொருத்தம்</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"முடிந்தது"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB சேமிப்பிடத்தை இணைப்பு நீக்குகிறது…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD கார்டை இணைப்பு நீக்குகிறது…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB சேமிப்பிடத்தை அழிக்கிறது…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD கார்டை அழிக்கிறது…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB சேமிப்பை அழிக்க முடியவில்லை."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD கார்டை அழிக்க முடியவில்லை."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"இணைப்பு நீக்கப்படுவதற்கு முன் SD கார்டு அகற்றப்பட்டது."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB சேமிப்பிடம் தற்போது சரிபார்க்கப்படுகிறது"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD கார்டு தற்போது சரிபார்க்கப்படுகிறது."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD கார்டு அகற்றப்பட்டது."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB சேமிப்பிடம் தற்போது கணினி மூலம் பயன்படுத்தப்படுகிறது."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD கார்டு தற்போது கணினி மூலம் பயன்படுத்தப்படுகிறது."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"வெளிப்புற மீடியா அறியப்படாத நிலையில் உள்ளது."</string>
     <string name="share" msgid="1778686618230011964">"பகிர்"</string>
     <string name="find" msgid="4808270900322985960">"கண்டறி"</string>
     <string name="websearch" msgid="4337157977400211589">"இணையத் தேடல்"</string>
@@ -1248,7 +1235,7 @@
     <string name="issued_by" msgid="2647584988057481566">"வழங்கியது:"</string>
     <string name="validity_period" msgid="8818886137545983110">"செல்லுபடியாகும் காலம்:"</string>
     <string name="issued_on" msgid="5895017404361397232">"வழங்கிய நாள்:"</string>
-    <string name="expires_on" msgid="3676242949915959821">"இதில் காலாவதியாகிறது:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"காலாவதியாவது:"</string>
     <string name="serial_number" msgid="758814067660862493">"வரிசை எண்:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"கைரேகைகள்:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 கைரேகை:"</string>
@@ -1435,7 +1422,7 @@
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"புதிய பின்"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"புதிய பின்னை உறுதிப்படுத்தவும்"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"வரம்புகளைத் திருத்துவதற்கு பின்னை உருவாக்கவும்"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINகள் பொருந்தவில்லை. மீண்டும் முயற்சிக்கவும்."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"பின்கள் பொருந்தவில்லை. மீண்டும் முயற்சிக்கவும்."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"பின் மிகவும் சிறியதாக உள்ளது. குறைந்தது 4 இலக்கங்கள் இருக்க வேண்டும்."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்</item>

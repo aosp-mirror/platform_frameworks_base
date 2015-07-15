@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Cho phép ứng dụng kiểm soát đèn nháy."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"gọi trực tiếp số điện thoại"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Cho phép ứng dụng gọi các số điện thoại mà không cần sự can thiệp của bạn. Việc này có thể dẫn đến các khoản phí hoặc cuộc gọi không mong muốn. Lưu ý rằng quyền này không cho phép ứng dụng gọi các số khẩn cấp. Các ứng dụng độc hại có thể khiến bạn tốn tiền do thực hiện cuộc gọi mà không cần sự xác nhận của bạn."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"truy cập dịch vụ gọi điện qua IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Cho phép ứng dụng sử dụng dịch vụ IMS để thực hiện cuộc gọi mà không có sự can thiệp của bạn."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"đọc trạng thái và nhận dạng của điện thoại"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Cho phép ứng dụng truy cập vào các tính năng điện thoại của thiết bị. Quyền này cho phép ứng dụng xác định số điện thoại và ID thiết bị, cho dù cuộc gọi có hiện hoạt hay không và số từ xa có được kết nối bằng một cuộc gọi hay không."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ngăn máy tính bảng chuyển sang chế độ ngủ"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 trận đấu</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Xong"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Đang ngắt kết nối bộ lưu trữ USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Đang ngắt kết nối thẻ SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Đang xóa bộ lưu trữ USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Đang xóa thẻ SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Không thể xóa bộ nhớ USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Không thể xóa thẻ SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Thẻ SD bị tháo trước khi được ngắt kết nối."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Bộ nhớ USB hiện đang được kiểm tra."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Thẻ SD hiện đang được kiểm tra."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Thẻ SD đã được tháo."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Bộ nhớ USB hiện đang được máy tính sử dụng."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Thẻ SD hiện đang được máy tính sử dụng."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Phương tiện bên ngoài ở trạng thái không xác định."</string>
     <string name="share" msgid="1778686618230011964">"Chia sẻ"</string>
     <string name="find" msgid="4808270900322985960">"Tìm"</string>
     <string name="websearch" msgid="4337157977400211589">"Tìm kiếm trên web"</string>
