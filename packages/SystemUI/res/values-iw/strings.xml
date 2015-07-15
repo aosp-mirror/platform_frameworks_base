@@ -66,7 +66,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏טביעת האצבע של מפתח ה-RSA של המחשב היא:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"אפשר תמיד ממחשב זה"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏לא ניתן לבצע ניקוי באגים ב-USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"‏המכשיר המחובר כעת אל המכשיר הזה אינו יכול להפעיל ניקוי באגים ב-USB. כדי להשתמש בתכונה הזו יש לעבור אל המשתמש הראשי, “<xliff:g id="NAME">%s</xliff:g>”."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"הגדל תצוגה כדי למלא את המסך"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"מתח כדי למלא את המסך"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"שומר צילום מסך..."</string>
@@ -116,12 +117,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"שני פסים של נתונים."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"שלושה פסים של נתונים."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"אות הנתונים מלא."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"‏Wi-Fi כבוי."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"‏Wi-Fi מנותק."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"‏פס אחד של Wi-Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"‏שני פסים של Wi-Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"‏שלושה פסים של Wi-Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"‏אות ה-Wi-Fi מלא."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"מחובר אל <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"מחובר אל <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"‏ללא WiMAX."</string>
