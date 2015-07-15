@@ -30,7 +30,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"പരിധിയിലില്ല"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"ഇന്റർനെറ്റ് ആക്സസ്സൊന്നും കണ്ടെത്താത്തതിനാൽ സ്വയം വീണ്ടും കണക്‌റ്റുചെയ്യില്ല."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> സംരക്ഷിച്ചത്"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi അസിസ്റ്റന്റ് മുഖേന കണക്‌റ്റുചെയ്തു"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"വൈഫൈ അസിസ്റ്റന്റ് മുഖേന കണക്‌റ്റുചെയ്തു"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s വഴി ബന്ധിപ്പിച്ചു"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s വഴി ലഭ്യം"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"കണക്റ്റുചെയ്തിരിക്കുന്നു, ഇന്റർനെറ്റില്ല"</string>
@@ -77,4 +77,16 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ഒരു തെറ്റായ പിൻ അല്ലെങ്കിൽ പാസ്‌കീ കാരണം <xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ജോടിയാക്കാനായില്ല."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതുമായി ആശയവിനിമയം നടത്താനായില്ല."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>, ജോടിയാക്കൽ നിരസിച്ചു."</string>
+    <!-- no translation found for accessibility_wifi_off (1166761729660614716) -->
+    <skip />
+    <!-- no translation found for accessibility_no_wifi (8834610636137374508) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_one_bar (4869376278894301820) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_two_bars (3569851234710034416) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_three_bars (8134185644861380311) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_signal_full (7061045677694702) -->
+    <skip />
 </resources>
