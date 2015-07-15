@@ -37,6 +37,8 @@ interface IVoiceInteractionManagerService {
     void setKeepAwake(IBinder token, boolean keepAwake);
     void closeSystemDialogs(IBinder token);
     void finish(IBinder token);
+    void setDisabledShowContext(int flags);
+    int getDisabledShowContext();
 
     /**
      * Gets the registered Sound model for keyphrase detection for the current user.
