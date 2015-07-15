@@ -116,12 +116,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Podatki z dvema črticama."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Podatki s tremi črticami."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Podatkovni signal poln."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi je izklopljen."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Povezava Wi-Fi je prekinjena."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi z eno črtico."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi z dvema črticama."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi s tremi črticami."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Poln signal Wi-Fi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Povezava vzpostavljena z: <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Povezava vzpostavljena z: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ni signala WiMAX."</string>

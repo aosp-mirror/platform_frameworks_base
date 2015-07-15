@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"डेटा दो बार."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"डेटा तीन बार."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"पूर्ण डेटा सि‍ग्‍नल."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi बंद."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi डिस्कनेक्ट है."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"WiFi एक बार."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"WiFi दो बार."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WiFi तीन बार."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"पूर्ण WiFi सि‍ग्‍नल."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> से कनेक्ट किया गया."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> से कनेक्ट किया गया."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX नहीं."</string>

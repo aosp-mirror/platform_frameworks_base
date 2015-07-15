@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"தரவின் சிக்னல் இரண்டு கோடு வரை உள்ளது."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"தரவு சிக்னல் மூன்று கோட்டில் உள்ளது."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"தரவு சிக்னல் முழுமையாக உள்ளது."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi முடக்கப்பட்டது."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi துண்டிக்கப்பட்டது."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi ஒரு கோடு."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi இரண்டு கோடுகள்."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi மூன்று கோடுகள்."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi சிக்னல் முழுமையாக உள்ளது."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>க்கு இணைக்கப்பட்டது."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>க்கு இணைக்கப்பட்டது."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX இல்லை."</string>
@@ -343,7 +337,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"இந்த அமர்வின் எல்லா பயன்பாடுகளும், தரவும் நீக்கப்படும்."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"அகற்று"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"வரவேற்கிறோம்!"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"மீண்டும் தொடங்கு"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"தொடரவும்"</string>
