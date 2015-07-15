@@ -348,27 +348,27 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
-        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
+        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println("USB Manager State:");
+        pw.increaseIndent();
         if (mDeviceManager != null) {
-            mDeviceManager.dump(fd, pw);
+            mDeviceManager.dump(pw);
         }
         if (mHostManager != null) {
-            mHostManager.dump(fd, pw);
+            mHostManager.dump(pw);
         }
-        mAlsaManager.dump(fd, pw);
+        mAlsaManager.dump(pw);
 
         synchronized (mLock) {
             for (int i = 0; i < mSettingsByUser.size(); i++) {
                 final int userId = mSettingsByUser.keyAt(i);
                 final UsbSettingsManager settings = mSettingsByUser.valueAt(i);
-                pw.increaseIndent();
                 pw.println("Settings for user " + userId + ":");
-                settings.dump(fd, pw);
+                pw.increaseIndent();
+                settings.dump(pw);
                 pw.decreaseIndent();
             }
         }
-        pw.decreaseIndent();
     }
 }

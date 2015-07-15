@@ -45,6 +45,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 
 import java.io.File;
@@ -807,17 +808,17 @@ public class UsbDeviceManager {
                     UsbManager.USB_FUNCTION_ADB);
         }
 
-        public void dump(FileDescriptor fd, PrintWriter pw) {
-            pw.println("  USB Device State:");
-            pw.println("    mCurrentFunctions: " + mCurrentFunctions);
-            pw.println("    mCurrentFunctionsApplied: " + mCurrentFunctionsApplied);
-            pw.println("    mConnected: " + mConnected);
-            pw.println("    mConfigured: " + mConfigured);
-            pw.println("    mCurrentAccessory: " + mCurrentAccessory);
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("USB Device State:");
+            pw.println("  mCurrentFunctions: " + mCurrentFunctions);
+            pw.println("  mCurrentFunctionsApplied: " + mCurrentFunctionsApplied);
+            pw.println("  mConnected: " + mConnected);
+            pw.println("  mConfigured: " + mConfigured);
+            pw.println("  mCurrentAccessory: " + mCurrentAccessory);
             try {
-                pw.println("    Kernel state: "
+                pw.println("  Kernel state: "
                         + FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());
-                pw.println("    Kernel function list: "
+                pw.println("  Kernel function list: "
                         + FileUtils.readTextFile(new File(FUNCTIONS_PATH), 0, null).trim());
             } catch (IOException e) {
                 pw.println("IOException: " + e);
@@ -908,12 +909,12 @@ public class UsbDeviceManager {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw) {
+    public void dump(IndentingPrintWriter pw) {
         if (mHandler != null) {
-            mHandler.dump(fd, pw);
+            mHandler.dump(pw);
         }
         if (mDebuggingManager != null) {
-            mDebuggingManager.dump(fd, pw);
+            mDebuggingManager.dump(pw);
         }
     }
 
