@@ -658,7 +658,17 @@ public final class PowerManager {
      */
     public void wakeUp(long time) {
         try {
-            mService.wakeUp(time);
+            mService.wakeUp(time, "wakeUp", mContext.getOpPackageName());
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void wakeUp(long time, String reason) {
+        try {
+            mService.wakeUp(time, reason, mContext.getOpPackageName());
         } catch (RemoteException e) {
         }
     }

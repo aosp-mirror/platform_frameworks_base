@@ -648,7 +648,8 @@ public final class DreamManagerService extends SystemService {
                 if (mCurrentDreamName != null && mCurrentDreamCanDoze
                         && !mCurrentDreamName.equals(getDozeComponent())) {
                     // May have updated the doze component, wake up
-                    mPowerManager.wakeUp(SystemClock.uptimeMillis());
+                    mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                            "android.server.dreams:SYSPROP");
                 }
             }
         }
