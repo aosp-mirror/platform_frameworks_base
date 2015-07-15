@@ -106,7 +106,7 @@ public interface IActivityManager extends IInterface {
     public void unregisterReceiver(IIntentReceiver receiver) throws RemoteException;
     public int broadcastIntent(IApplicationThread caller, Intent intent,
             String resolvedType, IIntentReceiver resultTo, int resultCode,
-            String resultData, Bundle map, String[] requiredPermissions,
+            String resultData, Bundle map, String requiredPermission,
             int appOp, Bundle options, boolean serialized, boolean sticky, int userId) throws RemoteException;
     public void unbroadcastIntent(IApplicationThread caller, Intent intent, int userId) throws RemoteException;
     public void finishReceiver(IBinder who, int resultCode, String resultData, Bundle map,
