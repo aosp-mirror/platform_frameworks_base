@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"फ्लॅशलाइट नियंत्रित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"फोन नंबरवर प्रत्यक्ष कॉल करा"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"आपल्या हस्तक्षेपाशिवाय फोन नंबरवर कॉल करण्यासाठी अॅप ला अनुमती देते. यामुळे अनपेक्षित शुल्क किंवा कॉल लागू शकतात. लक्षात ठेवा की हे आणीबाणीच्या नंबरवर कॉल करण्यासाठी अॅप ला अनुमती देत नाही. दुर्भावनापूर्ण अॅप्स नी आपल्या पुष्टिकरणाशिवाय कॉल केल्यामुळे आपले पैसे खर्च होऊ शकतात."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवेमध्‍ये प्रवेश करा"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिती आणि ओळख वाचा"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइसच्या फोन वैशिष्ट्यांवर प्रवेश करण्यास अॅप ला अनुमती देते. ही परवानगी कॉल सक्रिय असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस ID आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टॅब्लेट निष्क्रिय होण्यापासून प्रतिबंधित करा"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> पैकी <xliff:g id="INDEX">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"पूर्ण केले"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB संचयन अनमाउंट करत आहे…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD कार्ड अनमाउंट करत आहे…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB संचयन मिटवत आहे…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD कार्ड मिटवत आहे…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB संचयन मिटवू शकलो नाही."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD कार्ड मिटवू शकलो नाही."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD कार्ड अनमाउंट करण्यापूर्वी काढले गेले."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB संचयन सध्या तपासले जात आहे."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD कार्ड सध्या तपासले जात आहे."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD कार्ड काढले गेले आहे."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB संचयन सध्या संगणकाद्वारे वापरात आहे."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD कार्ड सध्या संगणकाद्वारे वापरात आहे."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"बाह्य मीडिया अज्ञात स्थितीमध्ये आहे."</string>
     <string name="share" msgid="1778686618230011964">"सामायिक करा"</string>
     <string name="find" msgid="4808270900322985960">"शोधा"</string>
     <string name="websearch" msgid="4337157977400211589">"वेब शोध"</string>

@@ -224,8 +224,8 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Androidシステム"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"プライベート"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"職場"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"個人用"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"仕事用"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"連絡先へのアクセス"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置情報"</string>
@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ライトの制御をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"電話番号発信"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS通話サービスへのアクセス"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"IMSサービスがユーザー操作なしで電話をかけることをアプリに許可します。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"端末のステータスとIDの読み取り"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"端末の電話機能へのアクセスをアプリに許可します。これにより、電話番号、端末ID、通話中かどうか、通話相手の電話番号をアプリから特定できるようになります。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"タブレットのスリープを無効化"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1件一致</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"完了"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USBストレージのマウント解除中..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SDカードのマウント解除中..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USBストレージ内のデータを消去中..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SDカード内のデータを消去中..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USBストレージ内のデータを消去できませんでした。"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SDカード内のデータを消去できませんでした。"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SDカードがマウント解除される前に取り外されました。"</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USBストレージは現在確認中です。"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SDカードは現在確認中です。"</string>
-    <string name="media_removed" msgid="7001526905057952097">"SDカードが取り外されました。"</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USBストレージは現在パソコンで使用中です。"</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SDカードは現在パソコンで使用中です。"</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"外部メディアの状態は不明です。"</string>
     <string name="share" msgid="1778686618230011964">"共有"</string>
     <string name="find" msgid="4808270900322985960">"検索"</string>
     <string name="websearch" msgid="4337157977400211589">"ウェブ検索"</string>

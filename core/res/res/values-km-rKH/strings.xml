@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ពិល។"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​ផ្ទាល់"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ឲ្យ​កម្មវិធី​ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​គ្មាន​សកម្មភាព​របស់​អ្នក។​ វា​អាច​កាត់​លុយ​ ឬ​ហៅ​ដោយ​មិន​រំពឹង​ទុក។ ចំណាំ​ថា​ វា​មិន​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ហៅ​លេខ​ពេល​អាសន្ន​ទេ។ កម្មវិធី​ព្យាបាទ​អាច​កាត់​លុយ​របស់​អ្នក​ ដោយ​ធ្វើការ​ហៅ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"ចូលដំណើរការសេវាកម្មការហៅតាម IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"អនុញ្ញាតឲ្យកម្មវិធីនេះប្រើសេវាកម្ម IMS ដើម្បីធ្វើការហៅដោយគ្មានការអន្តរាគមន៍ពីអ្នក។"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"អាន​ស្ថានភាព និង​អត្តសញ្ញាណ​ទូរស័ព្ទ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​លក្ខណៈ​ទូរស័ព្ទ​នៃ​ឧបករណ៍។ សិទ្ធិ​នេះ​​ឲ្យ​កម្មវិធី​កំណត់​លេខ​ទូរស័ព្ទ និង​លេខ​សម្គាល់​ឧបករណ៍ ថា​តើ​ការ​ហៅ​សកម្ម និង​លេខ​ពី​ចម្ងាយ​បាន​ភ្ជាប់​ដោយ​ការ​ហៅ។"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ការពារ​​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក"</string>
@@ -1152,19 +1150,8 @@
       <item quantity="one">ការប្រកួត 1</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"រួចរាល់"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"កំពុង​ផ្ដាច់​ឧបករណ៍​យូអេសប៊ី..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"កំពុង​ផ្ដាច់​កាត​អេសឌី..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"កំពុង​លុប​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"កំពុង​លុប​កាត​អេសឌី..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"មិន​​អាច​លុប​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី។"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"មិន​អាច​លុប​កាត​អេសឌី។"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"បាន​ដក​កាត​អេសឌី​មុន​នឹង​ផ្ដាច់។"</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"បច្ចុប្បន្ន​កំពុង​ពិនិត្យ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី។"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"បច្ចុប្បន្ន​កំពុង​ពិនិត្យ​មើល​កាត​អេសឌី។"</string>
-    <string name="media_removed" msgid="7001526905057952097">"បាន​ដក​កាត​អេសឌី។"</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​បច្ចុប្បន្ន​កំពុង​ប្រើ​ដោយ​កុំព្យូទ័រ។"</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"បច្ចុប្បន្ន​កាត​អេសឌី​កំពុង​ប្រើ​ដោយ​កុំព្យូទ័រ"</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"មិន​ស្គាល់​ស្ថានភាព​មេឌៀ​ខាង​ក្រៅ។"</string>
     <string name="share" msgid="1778686618230011964">"ចែក​រំលែក​"</string>
     <string name="find" msgid="4808270900322985960">"រក"</string>
     <string name="websearch" msgid="4337157977400211589">"ស្វែងរក​តាម​បណ្ដាញ"</string>

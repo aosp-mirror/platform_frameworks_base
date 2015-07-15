@@ -355,10 +355,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Ļauj lietotnei kontrolēt zibspuldzi."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"tieši zvanīt uz tālruņa numuriem"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Ļauj lietotnei zvanīt uz tālruņa numuriem bez jūsu iejaukšanās. Tas var radīt neparedzētas izmaksas vai zvanus. Ņemiet vērā, ka lietotnei nav atļauts zvanīt uz tālruņa numuriem ārkārtas situācijām. Ļaunprātīgas lietotnes var radīt jums izmaksas, veicot zvanus bez jūsu apstiprinājuma."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"piekļūt tūlītējās ziņojumapmaiņas pakalpojumam, lai veiktu zvanus"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Ļauj lietotnei izmantot tūlītējās ziņojumapmaiņas pakalpojumu, lai veiktu zvanus bez jūsu ziņas."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lasīt tālruņa statusu un identitāti"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ļauj lietotnei piekļūt ierīces tālruņa funkcijām. Ar šo atļauju lietotne var noteikt tālruņa numuru un ierīču ID, zvana statusu un attālo numuru, ar ko ir izveidots savienojums, veicot zvanu."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"novērst planšetdatora pāriešanu miega režīmā"</string>
@@ -1158,19 +1156,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g>. no <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Gatavs"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Notiek USB atmiņas atvienošana..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Notiek SD kartes atvienošana..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Notiek USB atmiņas dzēšana..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Notiek SD kartes dzēšana..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Nevarēja dzēst USB atmiņu."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Nevarēja dzēst SD karti."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD karte pirms atvienošanas tika noņemta."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB atmiņa pašlaik tiek pārbaudīta."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD karte pašlaik tiek pārbaudīta."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD karte ir noņemta."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB krātuve pašlaik tiek izmantota datorā."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD karte pašlaik tiek izmantota datorā."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Ārējais datu nesējs ir nezināmā stāvoklī."</string>
     <string name="share" msgid="1778686618230011964">"Kopīgot"</string>
     <string name="find" msgid="4808270900322985960">"Atrast"</string>
     <string name="websearch" msgid="4337157977400211589">"Meklēt tīmeklī"</string>

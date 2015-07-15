@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Апп нь гар чийдэнг удирдах боломжтой."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"утасны дугаарт шууд дуудлага хийх"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Апп нь таны оролцоогүйгээр дуудлага хийх боломжтой. Энэ нь төлөвлөгдөөгүй төлбөрт оруулах эсвэл дуудлага хийнэ. Энэ нь апп-г яаралтай дугаарт дуудлага хийхйг зөвшөөрөхгүй. Хортой апп нь таны зөвшөөрөлгүйгээр дуудлага хийж таныг төлбөрт оруулж болзошгүй"</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS дуудлагын үйлчилгээнд хандах"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Апп нь дуудлага хийхдээ таны оролцоогүйгээр IMS үйлчилгээг ашиглах боломжтой."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"утасны статус ба таниулбарыг унших"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Апп нь төхөөрөмжийн утасны функцд хандах боломжтой. Энэ зөвшөөрөл нь апп-д утасны дугаар болон төхөөрөмжийн ID-г, дуудлага идэвхтэй эсэх, холын дугаар дуудлагаар холбогдсон байгаа эсэхийг тогтоох боломжийг олгоно,"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"таблетыг унтуулахгүй байлгах"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 үр дүн гарч ирсэн байна</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Дуусгах"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB санг салгаж байна…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD картыг салгаж байна…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB санг арилгаж байна…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD картыг цэвэрлэж байна…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB санг арилгаж чадсангүй."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD картыг арилгаж чадсангүй."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD картыг салгалгүйгээр хассан байна."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB санг одоо шалгаж байна."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD картыг одоо шалгаж байна."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD картыг сугалсан байна."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB санг одоо компьютерээс ашиглаж байна."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"USB санг одоо компьютерээс ашиглаж байна."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Гадаад медиа үл мэдэгдэх статустай байна."</string>
     <string name="share" msgid="1778686618230011964">"Хуваалцах"</string>
     <string name="find" msgid="4808270900322985960">"Олох"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб хайлт"</string>
