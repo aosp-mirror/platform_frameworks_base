@@ -49,7 +49,10 @@ class NavigationBarApps extends LinearLayout {
     private final static boolean DEBUG = false;
     private final static String TAG = "NavigationBarApps";
 
-    private final NavigationBarAppsModel mAppsModel;
+    // There are separate NavigationBarApps view instances for landscape vs. portrait, but they
+    // share the data model.
+    private static NavigationBarAppsModel sAppsModel;
+
     private final LauncherApps mLauncherApps;
     private final PackageManager mPackageManager;
     private final LayoutInflater mLayoutInflater;
@@ -65,7 +68,10 @@ class NavigationBarApps extends LinearLayout {
 
     public NavigationBarApps(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mAppsModel = new NavigationBarAppsModel(context);
+        if (sAppsModel == null) {
+            sAppsModel = new NavigationBarAppsModel(context);
+            sAppsModel.initialize();  // Load the saved icons, if any.
+        }
         mLauncherApps = (LauncherApps) context.getSystemService("launcherapps");
         mPackageManager = context.getPackageManager();
         mLayoutInflater = LayoutInflater.from(context);
@@ -85,12 +91,6 @@ class NavigationBarApps extends LinearLayout {
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        createAppButtons();
-    }
-
-    @Override
     protected void onAttachedToWindow() {
       super.onAttachedToWindow();
       // When an icon is dragged out of the pinned area this view's width changes, which causes
@@ -106,18 +106,21 @@ class NavigationBarApps extends LinearLayout {
       parent.setLayoutTransition(transition);
     }
 
-    /** Creates an ImageView for each pinned app. */
-    private void createAppButtons() {
-        // Load the saved icons, if any.
-        mAppsModel.initialize();
+    /**
+     * Creates an ImageView icon for each pinned app. Removes any existing icons. May be called
+     * to synchronize the current view with the shared data mode.
+     */
+    public void recreateAppButtons() {
+        // Remove any existing icon buttons.
+        removeAllViews();
 
-        int appCount = mAppsModel.getAppCount();
+        int appCount = sAppsModel.getAppCount();
         for (int i = 0; i < appCount; i++) {
             ImageView button = createAppButton();
             addView(button);
 
             // Load the icon asynchronously.
-            ComponentName activityName = mAppsModel.getApp(i);
+            ComponentName activityName = sAppsModel.getApp(i);
             new GetActivityIconTask(mPackageManager, button).execute(activityName);
         }
     }
@@ -142,7 +145,7 @@ class NavigationBarApps extends LinearLayout {
         public boolean onLongClick(View v) {
             mDragView = v;
             ImageView icon = (ImageView) v;
-            ComponentName activityName = mAppsModel.getApp(indexOfChild(v));
+            ComponentName activityName = sAppsModel.getApp(indexOfChild(v));
             startAppDrag(icon, activityName);
             return true;
         }
@@ -227,7 +230,7 @@ class NavigationBarApps extends LinearLayout {
     private ImageView createPlaceholderDragView(int index) {
         ImageView button = createAppButton();
         addView(button, index);
-        mAppsModel.addApp(index, null /* name */);
+        sAppsModel.addApp(index, null /* name */);
         return button;
     }
 
@@ -264,8 +267,8 @@ class NavigationBarApps extends LinearLayout {
         addView(mDragView, targetIndex);
 
         // Update the data model.
-        ComponentName app = mAppsModel.removeApp(dragViewIndex);
-        mAppsModel.addApp(targetIndex, app);
+        ComponentName app = sAppsModel.removeApp(dragViewIndex);
+        sAppsModel.addApp(targetIndex, app);
     }
 
     private boolean onDrop(DragEvent event) {
@@ -278,7 +281,7 @@ class NavigationBarApps extends LinearLayout {
 
         // If this was an existing app being dragged then end the drag.
         int dragViewIndex = indexOfChild(mDragView);
-        if (mAppsModel.getApp(dragViewIndex) != null) {
+        if (sAppsModel.getApp(dragViewIndex) != null) {
             endDrag();
             return true;
         }
@@ -301,7 +304,7 @@ class NavigationBarApps extends LinearLayout {
     private void endDrag() {
         mDragView.setVisibility(View.VISIBLE);
         mDragView = null;
-        mAppsModel.savePrefs();
+        sAppsModel.savePrefs();
     }
 
     /** Returns an app launch Intent from a DragEvent, or null if the data wasn't valid. */
@@ -322,7 +325,7 @@ class NavigationBarApps extends LinearLayout {
 
     /** Updates the app at a given view index. */
     private void updateAppAt(int index, ComponentName activityName) {
-        mAppsModel.setApp(index, activityName);
+        sAppsModel.setApp(index, activityName);
         ImageView button = (ImageView) getChildAt(index);
         new GetActivityIconTask(mPackageManager, button).execute(activityName);
     }
@@ -335,7 +338,7 @@ class NavigationBarApps extends LinearLayout {
         }
         int index = indexOfChild(mDragView);
         removeViewAt(index);
-        mAppsModel.removeApp(index);
+        sAppsModel.removeApp(index);
         endDrag();
     }
 
@@ -381,7 +384,7 @@ class NavigationBarApps extends LinearLayout {
     private class AppClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            ComponentName activityName = mAppsModel.getApp(indexOfChild(v));
+            ComponentName activityName = sAppsModel.getApp(indexOfChild(v));
 
             // TODO: Support apps from multiple user profiles. The profile will need to be stored in
             // the data model for each app shortcut.

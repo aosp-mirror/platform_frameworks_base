@@ -78,6 +78,7 @@
                 android:layout_weight="1"
                 >
                 <com.android.systemui.statusbar.phone.NavigationBarApps
+                    android:id="@+id/navigation_bar_apps"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     />
@@ -242,6 +243,7 @@
                 android:layout_weight="1"
                 >
                 <com.android.systemui.statusbar.phone.NavigationBarApps
+                    android:id="@+id/navigation_bar_apps"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     />
