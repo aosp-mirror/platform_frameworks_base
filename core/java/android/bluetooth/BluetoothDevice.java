@@ -92,7 +92,8 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
      * #EXTRA_CLASS}. Can contain the extra fields {@link #EXTRA_NAME} and/or
      * {@link #EXTRA_RSSI} if they are available.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} and
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} to receive.
      */
      // TODO: Change API to not broadcast RSSI if not available (incoming connection)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
