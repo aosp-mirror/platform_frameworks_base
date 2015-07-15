@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Ordenagailuaren RSA gakoaren hatz-marka hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Onartu beti ordenagailu honetatik"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ez da onartzen USB arazketa"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Gailu honetan saioa hasita duen erabiltzaileak ezin du USB arazketa aktibatu. Eginbide hori erabiltzeko, aldatu “<xliff:g id="NAME">%s</xliff:g>” erabiltzaile nagusira."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Handiagotu pantaila betetzeko"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Luzatu pantaila betetzeko"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Pantaila-argazkia gordetzen…"</string>
@@ -114,12 +115,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Datu-seinaleak bi barra ditu."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Datu-seinaleak hiru barra ditu."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Datu-seinale osoa."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi konexioa desaktibatuta dago."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi konexioa desaktibatu da."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi sarearen barra bat."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi sarearen bi barra."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi sarearen hiru barra."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi sarearen seinalea osoa."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> sarera konektatuta."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> gailura konektatuta."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX gabe."</string>

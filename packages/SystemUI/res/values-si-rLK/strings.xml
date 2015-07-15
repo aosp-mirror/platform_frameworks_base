@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"මෙම පරිගණකයේ RSA යතුරු ඇඟිලි සටහන වන්නේ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"සැම විටම මෙම පරිගණකයෙන් ඉඩ ලබා දෙන්න"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB නිදොස්කරණය වෙත අවසර නැහැ"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"දැනට මෙම උපාංගයට පුරනය වී ඇති පරිශීලකයා හට USB නිදොස්කරණය සක්‍රිය කළ නොහැක. මෙම අංගය භාවිතා කිරීම සඳහා, \"<xliff:g id="NAME">%s</xliff:g>\" මූලික පරිශීලකයා වෙත මාරු වෙන්න."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"තිරය පිරවීමට විශාලනය කරන්න"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"තිරය පිරවීමට අදින්න"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"තිර රුව සුරකිමින්…"</string>
@@ -114,12 +115,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"දත්ත තීරු 2."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"දත්ත තීරු 3."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"දත්ත සංඥාව පිරී ඇත."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi අක්‍රියයි."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi සම්බන්ධ කර නොමැත."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi තීරු එකයි."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi තීරු දෙකයි."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WiFi තීරු තුනයි."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi සංඥාව පිරී ඇත."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> වෙත සම්බන්ධ කරන ලදි."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> වෙත සම්බන්ධ කරන ලදි."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX නැත."</string>

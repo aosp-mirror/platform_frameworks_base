@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允许使用这台计算机进行调试"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"不允许使用 USB 调试功能"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户“<xliff:g id="NAME">%s</xliff:g>”的帐户。"</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"拉伸以填满屏幕"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在保存屏幕截图..."</string>
@@ -114,12 +115,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"数据信号强度为两格。"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"数据信号强度为三格。"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"数据信号满格。"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"已关闭WLAN。"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"WLAN连接已断开。"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"WLAN信号强度为一格。"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"WLAN信号强度为两格。"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WLAN信号强度为三格。"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"WLAN信号满格。"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"已连接到<xliff:g id="WIFI">%s</xliff:g>。"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"已连接到<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"无 WiMAX 信号。"</string>

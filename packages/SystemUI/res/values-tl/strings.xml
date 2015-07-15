@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Ang RSA key fingerprint ng computer ay:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Palaging payagan mula sa computer na ito"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Hindi pinapayagan ang pagde-debug sa pamamagitan ng USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Hindi ma-on ng user na kasalukuyang naka-sign in sa device na ito ang pagde-debug sa pamamagitan ng USB. Upang magamit ang feature na ito, lumipat sa pangunahing user na “<xliff:g id="NAME">%s</xliff:g>.”"</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"I-zoom upang punan screen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"I-stretch upang mapuno screen"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Sine-save ang screenshot…"</string>
@@ -114,12 +115,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Data na dalawang bar."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Data na tatlong bar."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Puno ang signal ng data."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Naka-off ang Wifi."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Nakadiskonekta ang Wifi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"May isang bar ang WiFi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"May dalawang bar ang Wifi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"May tatlong bar ang Wifi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Puno ang signal ng WiFi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Nakakonekta sa <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Nakakonekta sa <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Walang WiMAX."</string>

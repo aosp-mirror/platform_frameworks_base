@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"कम्प्युटरको RSA कुञ्जी औंलाछाप:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"यो कम्प्युटरबाट सधैँ अनुमति दिनुहोस्"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डिबग गर्न अनुमति छैन"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"हाल यस यन्त्रमा साइन इन भएका प्रयोगकर्ताले USB डिबग सक्रिय गर्न सक्दैन। यो विशेषता प्रयोग गर्न, \"<xliff:g id="NAME">%s</xliff:g>\" प्राथमिक प्रयोगकर्तामा स्विच गर्नुहोस्।"</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"स्क्रिन भर्न जुम गर्नुहोस्"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्क्रिन भर्न तन्काउनुहोस्"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रिनसट बचत गर्दै…"</string>
@@ -114,12 +115,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"डेटा दुई बाधाहरू।"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"डेटा तिन बाधाहरू।"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"डेटा संकेत पूर्ण।"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"वाइफाइ बन्द।"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"वाइफाइ विच्छेद भयो।"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"वाइफाइ एक पट्टि।"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"वाइफाइ दुई पट्टि।"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"वाइफाइ तिन बारहरू।"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"वाइफाइ सङ्केत भरिएको।"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> मा जडित।"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> मा जडित।"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"वाइम्यास छैन।"</string>
