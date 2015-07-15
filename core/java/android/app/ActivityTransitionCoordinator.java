@@ -217,11 +217,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     protected void viewsReady(ArrayMap<String, View> sharedElements) {
-        final View decor = getDecor();
-        final ViewRootImpl viewRoot = decor == null ? null : decor.getViewRootImpl();
-        if (viewRoot != null) {
-            viewRoot.setPausedForTransition(true);
-        }
         sharedElements.retainAll(mAllSharedElementNames);
         if (mListener != null) {
             mListener.onMapSharedElements(mAllSharedElementNames, sharedElements);
@@ -902,6 +897,14 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 viewRoot.setPausedForTransition(false);
             }
             onTransitionsComplete();
+        }
+    }
+
+    protected void pauseInput() {
+        final View decor = getDecor();
+        final ViewRootImpl viewRoot = decor == null ? null : decor.getViewRootImpl();
+        if (viewRoot != null) {
+            viewRoot.setPausedForTransition(true);
         }
     }
 
