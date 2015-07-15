@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ਐਪ ਨੂੰ ਫਲੈਸ਼ਲਾਈਟ ਤੇ ਨਿਯੰਤਰਣ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ਫੋਨ ਨੰਬਰਾਂ ਤੇ ਸਿੱਧੇ ਕਾਲ ਕਰੋ"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਫੋਨ ਨੰਬਰਾਂ ਤੇ ਕਾਲ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦੇ ਸਿੱਟੇ ਵਜੋਂ ਅਕਲਪਿਤ ਖ਼ਰਚੇ ਜਾਂ ਕਾਲਾਂ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਧਿਆਨ ਦਿਓ ਕਿ ਇਹ ਐਪ ਨੂੰ ਐਮਰਜੈਂਸੀ ਨੰਬਰਾਂ ਤੇ ਕਾਲ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦਾ। ਖ਼ਰਾਬ ਐਪਸ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਕਾਲਾਂ ਕਰਕੇ ਤੁਹਾਨੂੰ ਖ਼ਰਚੇ ਪਾ ਸਕਦੇ ਹਨ।"</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS ਕਾਲ ਸੇਵਾ ਤੱਕ ਪਹੁੰਚ"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਕਾਲਾਂ ਕਰਨ ਲਈ IMS ਸੇਵਾ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ਫੋਨ ਸਥਿਤੀ ਅਤੇ ਪਛਾਣ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ਐਪ ਨੂੰ ਡਿਵਾਈਸ ਦੀਆਂ ਫੋਨ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਅਨੁਮਤੀ ਐਪ ਨੂੰ ਫੋਨ ਨੰਬਰ ਅਤੇ ਡਿਵਾਈਸ ID ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ, ਇੱਕ ਕਾਲ ਸਕਿਰਿਆ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਰਿਮੋਟ ਨੰਬਰ ਇੱਕ ਕਾਲ ਨਾਲ ਕਨੈਕਟ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ਟੈਬਲੇਟ ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> </item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ਹੋ ਗਿਆ"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB ਸਟੋਰੇਜ ਨੂੰ ਅਨਮਾਊਂਟ ਕਰ ਰਿਹਾ ਹੈ…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD ਕਾਰਡ ਨੂੰ ਅਨਮਾਊਂਟ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB ਸਟੋਰੇਜ ਮਿਟਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ਕਾਰਡ ਮਿਟਾ ਰਿਹਾ ਹੈ…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB ਸਟੋਰੇਜ ਨਹੀਂ ਮਿਟਾ ਸਕਿਆ।"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD ਕਾਰਡ ਨਹੀਂ ਮਿਟਾ ਸਕਿਆ।"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD ਕਾਰਡ ਨੂੰ ਅਨਮਾਊਂਟ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਹਟਾ ਦਿੱਤਾ ਗਿਆ ਸੀ।"</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"ਇਸ ਵੇਲੇ USB ਸਟੋਰੇਜ ਦੀ ਜਾਂਚ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ।"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"ਇਸ ਵੇਲੇ SD ਕਾਰਡ ਦੀ ਜਾਂਚ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ।"</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD ਕਾਰਡ ਹਟਾਇਆ ਗਿਆ ਹੈ।"</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB ਸਟੋਰੇਜ ਇਸ ਵੇਲੇ ਇੱਕ ਕੰਪਿਊਟਰ ਵੱਲੋਂ ਵਰਤੋਂ ਵਿੱਚ ਨਹੀਂ ਹੈ।"</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD ਕਾਰਡ ਇਸ ਵੇਲੇ ਇੱਕ ਕੰਪਿਊਟਰ ਵੱਲੋਂ ਵਰਤੋਂ ਵਿੱਚ ਹੈ।"</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"ਅਗਿਆਤ ਸਥਿਤੀ ਵਿੱਚ ਬਾਹਰੀ ਮੀਡੀਆ।"</string>
     <string name="share" msgid="1778686618230011964">"ਸ਼ੇਅਰ ਕਰੋ"</string>
     <string name="find" msgid="4808270900322985960">"ਲੱਭੋ"</string>
     <string name="websearch" msgid="4337157977400211589">"ਵੈਬ ਖੋਜ"</string>

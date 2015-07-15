@@ -30,7 +30,7 @@
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dias"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dia <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> horas"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> h"</string>
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite que o app controle a lanterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ligar diretamente para números de telefone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que o app ligue para números de telefone sem sua intervenção. Isso pode resultar em cobranças ou chamadas inesperadas. Esta opção não permite que o app ligue para números de emergência. Apps maliciosos podem gerar custos com chamadas feitas sem sua confirmação."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"acessar serviço de mensagens instantâneas para chamadas"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite que o app use o serviço de mensagens instantâneas para fazer chamadas sem sua intervenção."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ler status e identidade do telefone"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que o app acesse os recursos de telefonia do dispositivo. Esta permissão autoriza o app a determinar o número de telefone e IDs de dispositivo, quando uma chamada está ativa, e o número remoto conectado a uma chamada."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir modo de inatividade do tablet"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Concluído"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Desconectando armazenamento USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Desconectando cartão SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Apagando o armazenamento USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Apagando cartão SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Não foi possível apagar o armazenamento USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Não foi possível apagar o cartão SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"O cartão SD foi removido antes de ser desconectado."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"O armazenamento USB está sendo verificado no momento."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"O cartão SD está sendo verificado no momento."</string>
-    <string name="media_removed" msgid="7001526905057952097">"O cartão SD foi removido."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"O armazenamento USB está em uso por um computador no momento."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"O cartão SD está em uso por um computador no momento."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Mídia externa em estado desconhecido."</string>
     <string name="share" msgid="1778686618230011964">"Compartilhar"</string>
     <string name="find" msgid="4808270900322985960">"Localizar"</string>
     <string name="websearch" msgid="4337157977400211589">"Pesquisa na web do Google"</string>

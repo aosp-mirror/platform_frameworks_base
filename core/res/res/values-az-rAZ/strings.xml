@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Tətbiqə siqnal işığı na nəzarət etməyə imkan verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon nömrələrinə birbaşa zəng edir"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tətbiqə Sizin müdaxiləniz olmadan telefon zəngləri etməyə imkan verir. Zərərli tətbiqlər Sizdən xəbərsiz şəkildə müxtəlif zənglər edərək, Sizə maddi ziyan vura bilər. Qeyd: Bu, tətbiqlərə təcili nömrələrə zəng etməyə icazə vermir."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS zəng xidmətinə giriş"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Tətbiqə müdaxilə olmadan zəng etmək üçün IMS xidmətindən istifadə etməyə imkan verir."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefon statusunu və identifikasiyanı oxuyur"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tətbiqə cihazın telefon funksiyalarına giriş icazəsi verir. Belə icazəli tətbiq bu telefonun nömrəsini və cihaz İD\'ni, zəngin aktiv olub-olmadığını və zəng edilən nömrəni müəyyən edə bilər."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"planşetin yuxu rejiminin qarşısını almaq"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 eynilik</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Hazırdır"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB yaddaşı qaldırılır..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD kart demontaj edilir..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB yaddaş silinir..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD kart silinir..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB yaddaşı silinə bilmədi."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD kartı silmək mümkün olmadı."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD kart demontaj edilmədən öncə çıxarıldı."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB yaddaş hazırda yoxlanılır."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD kart hazırda yoxlanılır."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD kart çıxarılıb."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"SD kart hazırda kompüter tərəfindən istifadə edilir."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD kart hal-hazırda kompüter tərəfindən istifadə edilir."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Naməlum vəziyyətdə xarici media."</string>
     <string name="share" msgid="1778686618230011964">"Paylaşın"</string>
     <string name="find" msgid="4808270900322985960">"Tapın"</string>
     <string name="websearch" msgid="4337157977400211589">"Veb Axtarış"</string>

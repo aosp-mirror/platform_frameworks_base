@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"允許應用程式控制閃光燈。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"允許應用程式自行撥打電話，但可能產生非預期的費用或撥打非預期的電話。注意：這項權限不允許應用程式撥打緊急電話。惡意應用程式可能利用此功能擅自撥打電話，增加您不必要的額外支出。"</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"存取 IMS 撥號服務"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"允許應用程式自動使用 IMS 服務撥打電話。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"讀取手機狀態和識別碼"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允許應用程式使用裝置的電話功能。這項權限可讓應用程式判讀手機號碼和裝置 ID、是否正在通話中，以及所撥打的對方號碼。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"防止平板電腦進入休眠狀態"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 個相符項目</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"完成"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"正在卸載 USB 儲存裝置…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"正在卸載 SD 卡…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"正在清除 USB 儲存裝置的資料…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"正在清除 SD 卡的資料…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"無法清除 USB 儲存裝置。"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"無法清除 SD 卡。"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD 卡尚未卸載就已移除。"</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB 儲存裝置目前正在接受檢查。"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD 卡目前正在接受檢查。"</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD 卡已移除。"</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"電腦目前正在使用 USB 儲存裝置。"</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"電腦目前正在使用 SD 卡。"</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"外部媒體狀態不明。"</string>
     <string name="share" msgid="1778686618230011964">"分享"</string>
     <string name="find" msgid="4808270900322985960">"尋找"</string>
     <string name="websearch" msgid="4337157977400211589">"網頁搜尋"</string>

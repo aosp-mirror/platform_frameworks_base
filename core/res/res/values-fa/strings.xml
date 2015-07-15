@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"‏به برنامه اجازه می‎دهد تا چراغ قوه را کنترل کند."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"تماس مستقیم با شماره تلفن‌ها"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"به برنامه اجازه می‌دهد بدون دخالت شما با شماره‌های تلفن تماس بگیرد. این ممکن است باعث ایجاد هزینه یا تماس‌های پیش‌بینی نشده شود. توجه داشته باشید که این به برنامه اجازه نمی‌دهد به برقراری تماس‌های اضطراری بپردازد. برنامه‌های مخرب ممکن است با برقراری تماس بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"‏دسترسی به سرویس تماس IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"‏به برنامه اجازه می‌دهد از سرویس IMS برای برقراری تماس‌ها بدون دخالت شما استفاده کند."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"خواندن وضعیت تلفن و شناسه"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"به برنامه اجازه می‌دهد به ویژگی‌های تلفن دستگاه شما دسترسی پیدا کند. این مجوز به برنامه اجازه می‌دهد شماره تلفن و شناسه‌های دستگاه، فعال بودن یک تماس و شماره راه دوری که با یک تماس متصل شده است را مشخص کند."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ممانعت از به خواب رفتن رایانهٔ لوحی"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"انجام شد"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"‏در حال لغو نصب حافظهٔ USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"‏در حال لغو نصب کارت SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"‏در حال پاک کردن حافظهٔ USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"‏در حال پاک کردن کارت SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"‏پاک کردن محل ذخیره  USB ممکن نیست."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"‏پاک کردن کارت SD ممکن نیست."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"‏کارت SD قبل از قطع اتصال از دستگاه خارج شد."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"‏حافظهٔ USB اکنون در حال بررسی شدن است."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"‏کارت SD در حال حاضر در حال بررسی است."</string>
-    <string name="media_removed" msgid="7001526905057952097">"‏کارت SD حذف شده است."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"حافظه در حال حاضر توسط رایانه دیگری استفاده می‌شود."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"‏کارت SD در حال حاضر توسط یک رایانه در حال استفاده است."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"رسانه خارجی در حالت ناشناس است."</string>
     <string name="share" msgid="1778686618230011964">"اشتراک‌گذاری"</string>
     <string name="find" msgid="4808270900322985960">"یافتن"</string>
     <string name="websearch" msgid="4337157977400211589">"جستجوی وب"</string>

@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Hiermee kan de app de zaklamp bedienen."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefoonnummers rechtstreeks bellen"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Hiermee kan de app zonder uw tussenkomst telefoonnummers bellen. Dit kan tot onverwachte kosten of oproepen leiden. De app kan hiermee geen noodnummers bellen. Schadelijke apps kunnen u geld kosten door nummers te bellen zonder om uw bevestiging te vragen."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"toegang tot IMS-service voor bellen"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Hiermee kan de app de IMS-service gebruiken om te bellen zonder uw tussenkomst."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefoonstatus en -identiteit lezen"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Hiermee kan de app toegang krijgen tot de telefoonfuncties van het apparaat, Met deze toestemming kan de app het telefoonnummer en de apparaat-ID\'s bepalen, of een oproep actief is, en het andere telefoonnummer waarmee wordt gebeld."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"voorkomen dat tablet overschakelt naar slaapmodus"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 overeenkomst</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Gereed"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB-opslag ontkoppelen..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD-kaart ontkoppelen..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB-opslag wissen..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD-kaart wissen..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Kan USB-opslag niet wissen."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Kan SD-kaart niet wissen."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD-kaart is verwijderd voordat deze is ontkoppeld."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-opslag wordt momenteel gecontroleerd."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD-kaart wordt momenteel gecontroleerd."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD-kaart is verwijderd."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB-opslag wordt momenteel gebruikt door een computer."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD-kaart wordt momenteel gebruikt door een computer."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Extern medium heeft onbekende status."</string>
     <string name="share" msgid="1778686618230011964">"Delen"</string>
     <string name="find" msgid="4808270900322985960">"Vinden"</string>
     <string name="websearch" msgid="4337157977400211589">"Online zoeken"</string>

@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"appအား ကား ဖလက်ရှမီးကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ဖုန်းနံပါတ်များကိုတိုက်ရိုက်ခေါ်ဆိုခြင်း"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"အပလီကေးရှင်းအား အလိုအလျောက် ဖုန်းခေါ်ခွင့် ပြုပါ။ မလိုအပ်သော ဖုန်းခ များ ဖြစ်ပေါ်နိုင်ပါသည်။ ဒီခွင့်ပြုခြင်းမှာ အရေးပေါ်ဖုန်းခေါ်ခြင်း မပါဝင်ပါ။ သံသယဖြစ်စရာ အပလီကေးရှင်းများက သင့်မသိပဲ ဖုန်းခေါ်ခြင်းဖြင့် ဖုန်းခ ပိုမိုကျနိုင်ပါသည်။"</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS ဖုန်းခေါ်ဆိုမှု ဝန်ဆောင်ဌာန ဝင်ကြည့်ပါ"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"သင့်ရဲ့ဝင်ရောက်စွက်ဖက်မှုမပါဘဲ IMS ဝန်ဆောင်မှုကိုအသုံးပြုပြီး ဖုန်းခေါ်ဆိုနိုင်ရန် အပ်ဖ်ကို ခွင့်ပြုထားပါ။"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ဖုန်းရဲ့ အခြေအနေ နှင့် အမှတ်သညာအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"အပလီကေးရှင်းအား ဖုန်းရဲ့ စွမ်းဆောင်ချက်များအား သုံးခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ဖုန်းနံပါတ်၊ စက်နံပါတ်၊ ဖုန်းခေါ်နေမှု ရှိမရှိနှင့် တဖက်မှ ဖုန်းနံပါတ် များအား သိရှိနိုင်ပါသည်"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"တက်ပလက်အား ပိတ်ခြင်းမှ ကာကွယ်ခြင်း"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">ကိုက်ညီမှု 1 ခု</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ပြီးပါပြီ"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB သိုလှောင်မှု ကိရိယာအား ဆက်သွယ်မှု ရပ်ရန် ပြုလုပ်နေစဉ်…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD ကဒ်အား ဆက်သွယ်မှု ရပ်ရန် ပြုလုပ်နေစဉ်…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB သိုလှောင်မှု အချက်အလက်များ ဖျက်နေစဉ်…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ကဒ် အား ဖျက်နေစဉ်…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USBသိုလှောင်ကိရိယာအားမဖျက်နိုင်ပါ"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SDကတ်အားမဖျက်နိုင်ပါ"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"အထိုင်မှမဖြုတ်ခင် SDကဒ်အားဖယ်လိုက်သည်"</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USBသိုလေှာင်နေရာအားယခုစစ်ဆေးနေသည်"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SDကဒ်အားယခုစစ်ဆေးနေသည်"</string>
-    <string name="media_removed" msgid="7001526905057952097">"SDကဒ်အားဖယ်ရှားလိုက်သည်"</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB သိုလှောင်နေရာအားယခုကွန်ပြုတာမှအသုံးပြုနေပါသည်"</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SDကဒ်အားယခုကွန်ပြုတာမှအသုံးပြုနေပါသည်"</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"အပြင်မီဒီယာအားမသိသောအခြေအနေ"</string>
     <string name="share" msgid="1778686618230011964">"မျှဝေခြင်း"</string>
     <string name="find" msgid="4808270900322985960">"ရှာဖွေရန်"</string>
     <string name="websearch" msgid="4337157977400211589">"ဝက်ဘ်ပေါ်မှာ ရှာဖွေရန်"</string>

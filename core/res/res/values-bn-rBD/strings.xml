@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"অ্যাপ্লিকেশানকে টর্চলাইট নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"সরাসরি ফোন নম্বরগুলিতে কল করে"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"অ্যাপ্লিকেশানটিকে আপনার হস্তক্ষেপ ছাড়াই ফোন নম্বরগুলিতে কল করতে মঞ্জুর করে৷ এটি অপ্রত্যাশিত পরিমাণ খরচা বা কলের কারণ হতে পারে৷ মনে রাখবেন, এটি অ্যাপ্লিকেশানটির দ্বারা জরুরি নম্বরগুলিতে কল করাকে অনুমতি দেয় না৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার সম্মতি ছাড়াই কল করার ফলে আপনাকে অহেতুক অর্থ প্রদান করতে হতে পারে৷"</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS পরিষেবাতে অ্যাক্সেস"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"আপনার হস্তক্ষেপ ছাড়াই কল করতে অ্যাপ্লিকেশানটিকে IMS পরিষেবা ব্যবহারের অনুমতি দিন৷"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ফোনের স্থিতি এবং পরিচয় পড়ুন"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"অ্যাপ্লিকেশানটিকে ডিভাইসের ফোন বৈশিষ্ট্যগুলিকে অ্যাক্সেস করার অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে একটি কল সক্রিয় থাকা অবস্থায় এবং দূরবর্তী নম্বর একটি কল দ্বারা সংযুক্ত থাকাকালীনও ফোন নম্বর এবং ডিভাইসের IDগুলি নির্ধারণ করার অনুমতি দেয়৷"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ঘুমানো থেকে ট্যাবলেটকে প্রতিরোধ করে"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g>টির <xliff:g id="INDEX">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"সম্পন্ন হয়েছে"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB সংগ্রহস্থল আনমাউন্ট করা হচ্ছে…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD কার্ড আনমাউন্ট করা হচ্ছে…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB সংগ্রহস্থল মোছা হচ্ছে…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD কার্ড মোছা হচ্ছে…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB সঞ্চয়স্থান মুছে ফেলা যায়নি৷"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD কার্ড মুছে ফেলা যায়নি৷"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"আনমাউন্ট হওয়ার আগেই SD কার্ডটি সরানো হয়েছে৷"</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB সঞ্চয়স্থান বর্তমানে পরীক্ষা করা হচ্ছে৷"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD কার্ড বর্তমানে পরীক্ষা করা হচ্ছে৷"</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD কার্ড সরানো হয়েছে৷"</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"একটি কম্পিউটারে USB সঞ্চয়স্থান বর্তমানে ব্যবহারে রয়েছে৷"</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"একটি কম্পিউটারে SD কার্ড বর্তমানে ব্যবহারে রয়েছে৷"</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"অজানা স্থিতিতে থাকা বাহ্যিক মিডিয়া"</string>
     <string name="share" msgid="1778686618230011964">"ভাগ করুন"</string>
     <string name="find" msgid="4808270900322985960">"খুঁজুন"</string>
     <string name="websearch" msgid="4337157977400211589">"ওয়েব অনুসন্ধান"</string>

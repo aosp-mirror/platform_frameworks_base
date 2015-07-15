@@ -355,10 +355,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite aplicației să controleze lanterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"apelare directă numere de telefon"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite aplicației să apeleze numere de telefon fără intervenţia dvs. Acest lucru poate determina apariţia unor taxe sau a unor apeluri neaşteptate. Cu această permisiune aplicația nu poate apela numerele de urgenţă. Aplicaţiile rău intenţionate pot acumula costuri prin efectuarea unor apeluri fără confirmare."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"accesează serviciul de apelare IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite aplicației să folosească serviciul IMS pentru apeluri, fără intervenția dvs."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"citeşte starea și identitatea telefonului"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicației să acceseze funcţiile de telefon ale dispozitivului. Cu această permisiune aplicația stabileşte numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanţă conectat printr-un apel."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"împiedicarea computerului tablet PC să intre în repaus"</string>
@@ -1158,19 +1156,8 @@
       <item quantity="one">Un rezultat</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Terminat"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Se demontează stocarea USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Se demontează cardul SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Se şterge stocarea USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Se şterge cardul SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Nu s-a putut şterge stocarea USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Nu s-a putut şterge cardul SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Cardul SD a fost eliminat înainte de a fi demontat."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Stocarea USB este în curs de verificare."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Cardul SD este în curs de verificare."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Cardul SD a fost eliminat."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Stocarea USB este utilizată în prezent de un computer."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Cardul SD este utilizat în prezent de un computer."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Media externă în stare necunoscută."</string>
     <string name="share" msgid="1778686618230011964">"Distribuiţi"</string>
     <string name="find" msgid="4808270900322985960">"Găsiţi"</string>
     <string name="websearch" msgid="4337157977400211589">"Căutare pe web"</string>

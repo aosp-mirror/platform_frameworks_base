@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ອະນຸຍາດໃຫ້ແອັບຯ ຄວບຄຸມໄຟແຟລດ."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ໂທຫາເບີໂທລະສັບໂດຍກົງ"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ອະນຸຍາດໃຫ້ແອັບຯໂທຫາເບີໂທລະສັບໄດ້ ໂດຍບໍ່ຕ້ອງຖ້າການດຳເນີນການໃດໆຈາກທ່ານ. ຄຸນສົມບັດນີ້ອາດກໍ່ໃຫ້ເກີດຄ່າໃຊ້ຈ່າຍໃນການໂທທີ່ບໍ່ຄາດຄິດໄດ້. ໝາຍເຫດ: ຄຸນສົມບັດນີ້ບໍ່ໄດ້ເປັນການອະນຸຍາດໃຫ້ແອັບຯ ສາມາດໂທຫາເບີສຸກເສີນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດເຮັດໃຫ້ທ່ານ ຕ້ອງເສຍຄ່າໂທໂດຍທີ່ບໍ່ໄດ້ຄາດຄິດ."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"ເຂົ້າ​ຫາ​ການ​ບໍ​ລິ​ການ​ໂທ IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ໃຊ້​ການ​ບໍ​ລິ​ການ IMS ເພື່ອ​ໂທ​ໂດຍ​ບໍ່​ມີ​ການ​ຊ່ວຍ​ເຫຼືອ​ຂອງ​ທ່ານ."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ອ່ານສະຖານະ ແລະຂໍ້ມູນລະບຸໂຕຕົນຂອງໂທລະສັບ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ອະນຸຍາດໃຫ້ແອັບຯ ເຂົ້າເຖິງຄວາມສາມາດການໂທລະສັບຂອງອຸປະກອນ. ການກຳນົດສິດນີ້ເຮັດໃຫ້ແອັບຯສາມາດກວດສອບເບີໂທລະສັບ ແລະ ID ຂອງອຸປະກອນ, ບໍ່ວ່າການໂທຈະຍັງດຳເນີນຢູ່ ແລະເບີປາຍທາງເຊື່ອມຕໍ່ຢູ່ຫຼືບໍ່ກໍຕາມ."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ຂັດຂວາງບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 ກົງກັນ</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ແລ້ວໆ"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"ກຳລັງຖອນການເຊື່ອມຕໍ່ບ່ອນຈັດເກັບຂໍ້ມູນ USB …"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"ຖອນການເຊື່ອມຕໍ່ SD card..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"ກຳລັງລຶບ ບ່ອນຈັດເກັບຂໍ້ມູນ USB …"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"ກຳລັງລຶບ​ SD card..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"ບໍ່ສາມາດລຶບບ່ອນຈັດເກັບຂໍ້ມູນ USB ໄດ້."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"ບໍ່ສາມາດລຶບ SD card ໄດ້."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD card ຖືກຖອດອອກກ່ອນການຖອນການເຊື່ອມຕໍ່."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"ບ່ອນຈັດເກັບຂໍ້ມູນກຳລັງຢູ່ໃນລະຫວ່າງການກວດສອບ."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"ກຳລັງກວດສອບ SD card ຢູ່ໃນຂະນະນີ້."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD card ຖືກຖອດອອກແລ້ວ."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"ບ່ອນຈັດເກັບຂໍ້ມູນ USB ກຳລັງຖືກນຳໃຊ້ໂດຍຄອມພິວເຕີ."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD card ກຳລັງຖືກນຳໃຊ້ໂດຍຄອມພິວເຕີຢູ່."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"ຂໍ້ມູນພາຍນອກຢູ່ໃນສະຖານະທີ່ບໍ່ຮູ້ຈັກ."</string>
     <string name="share" msgid="1778686618230011964">"ແບ່ງປັນ"</string>
     <string name="find" msgid="4808270900322985960">"ຊອກຫາ"</string>
     <string name="websearch" msgid="4337157977400211589">"ຊອກຫາເວັບ"</string>
