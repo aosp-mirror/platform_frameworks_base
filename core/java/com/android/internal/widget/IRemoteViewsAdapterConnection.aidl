@@ -19,7 +19,7 @@ package com.android.internal.widget;
 import android.os.IBinder;
 
 /** {@hide} */
-interface IRemoteViewsAdapterConnection {
+oneway interface IRemoteViewsAdapterConnection {
     void onServiceConnected(IBinder service);
     void onServiceDisconnected();
 }
