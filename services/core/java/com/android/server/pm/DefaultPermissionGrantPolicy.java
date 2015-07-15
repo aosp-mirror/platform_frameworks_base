@@ -29,7 +29,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Debug;
 import android.os.UserHandle;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
@@ -120,12 +119,7 @@ final class DefaultPermissionGrantPolicy {
 
     private static final Set<String> ACCOUNTS_PERMISSIONS = new ArraySet<>();
     static {
-        //ACCOUNTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
-    }
-
-    private static final Set<String> SETTINGS_PERMISSIONS = new ArraySet<>();
-    static {
-        SETTINGS_PERMISSIONS.add(Manifest.permission.WRITE_SETTINGS);
+        ACCOUNTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
     private final PackageManagerService mService;
@@ -161,7 +155,7 @@ final class DefaultPermissionGrantPolicy {
         mDialerAppPackagesProvider = provider;
     }
 
-    public void setSyncAdapterPackagesProviderrLPw(SyncAdapterPackagesProvider provider) {
+    public void setSyncAdapterPackagesProviderLPw(SyncAdapterPackagesProvider provider) {
         mSyncAdapterPackagesProvider = provider;
     }
 
@@ -256,7 +250,7 @@ final class DefaultPermissionGrantPolicy {
 
             // SetupWizard
             Intent setupIntent = new Intent(Intent.ACTION_MAIN);
-            setupIntent.addCategory(Intent.CATEGORY_HOME);
+            setupIntent.addCategory(Intent.CATEGORY_SETUP_WIZARD);
             PackageParser.Package setupPackage = getDefaultSystemHandlerActivityPackageLPr(
                     setupIntent, userId);
             if (setupPackage != null
@@ -374,8 +368,7 @@ final class DefaultPermissionGrantPolicy {
 
             // Calendar provider sync adapters
             List<PackageParser.Package> calendarSyncAdapters = getHeadlessSyncAdapterPackagesLPr(
-                    calendarSyncAdapterPackages,
-                            userId);
+                    calendarSyncAdapterPackages, userId);
             final int calendarSyncAdapterCount = calendarSyncAdapters.size();
             for (int i = 0; i < calendarSyncAdapterCount; i++) {
                 PackageParser.Package calendarSyncAdapter = calendarSyncAdapters.get(i);
@@ -398,8 +391,7 @@ final class DefaultPermissionGrantPolicy {
 
             // Contacts provider sync adapters
             List<PackageParser.Package> contactsSyncAdapters = getHeadlessSyncAdapterPackagesLPr(
-                    contactsSyncAdapterPackages,
-                            userId);
+                    contactsSyncAdapterPackages, userId);
             final int contactsSyncAdapterCount = contactsSyncAdapters.size();
             for (int i = 0; i < contactsSyncAdapterCount; i++) {
                 PackageParser.Package contactsSyncAdapter = contactsSyncAdapters.get(i);
@@ -628,10 +620,12 @@ final class DefaultPermissionGrantPolicy {
         List<ResolveInfo> handlers = mService.mActivities.queryIntent(intent,
                 intent.resolveType(mService.mContext.getContentResolver()),
                 PackageManager.GET_DISABLED_COMPONENTS, userId);
+        if (handlers == null) {
+            return null;
+        }
         final int handlerCount = handlers.size();
         for (int i = 0; i < handlerCount; i++) {
             ResolveInfo handler = handlers.get(i);
-            // TODO: This is a temporary hack to figure out the setup app.
             PackageParser.Package handlerPackage = getSystemPackageLPr(
                     handler.activityInfo.packageName);
             if (handlerPackage != null) {
