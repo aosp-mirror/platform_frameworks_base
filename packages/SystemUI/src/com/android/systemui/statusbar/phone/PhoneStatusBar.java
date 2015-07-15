@@ -2001,7 +2001,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public boolean isKeyguardCurrentlySecure() {
-        return !mUnlockMethodCache.isCurrentlyInsecure();
+        return !mUnlockMethodCache.canSkipBouncer();
     }
 
     public void setPanelExpanded(boolean isExpanded) {
@@ -3051,20 +3051,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         boolean isOccluded = mStatusBarKeyguardViewManager.isOccluded();
         boolean isBouncerShowing = mStatusBarKeyguardViewManager.isBouncerShowing();
         boolean isSecure = mUnlockMethodCache.isMethodSecure();
-        boolean isCurrentlyInsecure = mUnlockMethodCache.isCurrentlyInsecure();
+        boolean canSkipBouncer = mUnlockMethodCache.canSkipBouncer();
         int stateFingerprint = getLoggingFingerprint(mState,
                 isShowing,
                 isOccluded,
                 isBouncerShowing,
                 isSecure,
-                isCurrentlyInsecure);
+                canSkipBouncer);
         if (stateFingerprint != mLastLoggedStateFingerprint) {
             EventLogTags.writeSysuiStatusBarState(mState,
                     isShowing ? 1 : 0,
                     isOccluded ? 1 : 0,
                     isBouncerShowing ? 1 : 0,
                     isSecure ? 1 : 0,
-                    isCurrentlyInsecure ? 1 : 0);
+                    canSkipBouncer ? 1 : 0);
             mLastLoggedStateFingerprint = stateFingerprint;
         }
     }
@@ -3668,7 +3668,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            if (!expand && !mUnlockMethodCache.isCurrentlyInsecure()) {
+            if (!expand && !mUnlockMethodCache.canSkipBouncer()) {
                 showBouncer();
             }
         }

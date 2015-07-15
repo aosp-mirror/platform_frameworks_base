@@ -92,7 +92,8 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing() && !mKeyguard.isTrusted());
+        state.visible = !mKeyguard.isSecure() || !mKeyguard.isShowing()
+                || mKeyguard.canSkipBouncer();
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.value = false;
         state.autoMirrorDrawable = false;
