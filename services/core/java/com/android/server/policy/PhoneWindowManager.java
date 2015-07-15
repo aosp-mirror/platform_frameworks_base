@@ -123,6 +123,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -1827,21 +1828,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (permission != null) {
             if (permission == android.Manifest.permission.SYSTEM_ALERT_WINDOW) {
                 final int callingUid = Binder.getCallingUid();
-                // check if this is a system uid first before bothering with
-                // obtaining package name
+                // system processes will be automatically allowed privilege to draw
                 if (callingUid == Process.SYSTEM_UID) {
                     return WindowManagerGlobal.ADD_OKAY;
                 }
 
+                // check if user has enabled this operation. SecurityException will be thrown if
+                // this app has not been allowed by the user
                 final int mode = mAppOpsManager.checkOp(outAppOp[0], callingUid,
                         attrs.packageName);
-                if (mode == AppOpsManager.MODE_DEFAULT) {
-                    if (mContext.checkCallingPermission(permission) !=
-                            PackageManager.PERMISSION_GRANTED) {
+                switch (mode) {
+                    case AppOpsManager.MODE_ALLOWED:
+                    case AppOpsManager.MODE_IGNORED:
+                        // although we return ADD_OKAY for MODE_IGNORED, the added window will
+                        // actually be hidden in WindowManagerService
+                        return WindowManagerGlobal.ADD_OKAY;
+                    case AppOpsManager.MODE_ERRORED:
                         return WindowManagerGlobal.ADD_PERMISSION_DENIED;
-                    }
+                    default:
+                        // in the default mode, we will make a decision here based on
+                        // checkCallingPermission()
+                        if (mContext.checkCallingPermission(permission) !=
+                                PackageManager.PERMISSION_GRANTED) {
+                            return WindowManagerGlobal.ADD_PERMISSION_DENIED;
+                        } else {
+                            return WindowManagerGlobal.ADD_OKAY;
+                        }
                 }
-                return WindowManagerGlobal.ADD_OKAY;
             }
 
             if (mContext.checkCallingOrSelfPermission(permission)
