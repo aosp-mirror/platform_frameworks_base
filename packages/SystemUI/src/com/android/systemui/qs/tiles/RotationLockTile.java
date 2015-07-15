@@ -78,8 +78,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             return;
         }
         state.value = rotationLocked;
-        final boolean portrait = mContext.getResources().getConfiguration().orientation
-                != Configuration.ORIENTATION_LANDSCAPE;
+        final boolean portrait = isCurrentOrientationLockPortrait();
         final AnimationIcon icon;
         if (rotationLocked) {
             final int label = portrait ? R.string.quick_settings_rotation_locked_portrait_label
@@ -96,6 +95,17 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
                 R.string.accessibility_rotation_lock_on_portrait,
                 R.string.accessibility_rotation_lock_on_landscape,
                 R.string.accessibility_rotation_lock_off);
+    }
+
+    private boolean isCurrentOrientationLockPortrait() {
+        int lockOrientation = mController.getRotationLockOrientation();
+        if (lockOrientation == Configuration.ORIENTATION_UNDEFINED) {
+            // Freely rotating device; use current rotation
+            return mContext.getResources().getConfiguration().orientation
+                    != Configuration.ORIENTATION_LANDSCAPE;
+        } else {
+            return lockOrientation != Configuration.ORIENTATION_LANDSCAPE;
+        }
     }
 
     @Override
@@ -116,9 +126,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             int idWhenOff) {
         int stringID;
         if (locked) {
-            final boolean portrait = mContext.getResources().getConfiguration().orientation
-                    != Configuration.ORIENTATION_LANDSCAPE;
-            stringID = portrait ? idWhenPortrait: idWhenLandscape;
+            stringID = isCurrentOrientationLockPortrait() ? idWhenPortrait: idWhenLandscape;
         } else {
             stringID = idWhenOff;
         }
