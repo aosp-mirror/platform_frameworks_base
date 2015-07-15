@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Laat die program toe om die flitslig te beheer."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skakel foonnommers direk"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Laat die program toe om telefoonnommers sonder jou tussentrede te bel. Dit kan tot onverwagte heffings of oproepe lei. Let daarop dat dit nie die program toelaat om noodnommers te bel nie. Kwaadwillige programme kan jou geld kos deur oproepe sonder jou bevestiging te maak."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"toegang tot kitsboodskapoproepdiens"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Laat die program toe om die kitsboodskapdiens te gebruik om oproepe sonder jou ingryping te maak."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lees foonstatus en identiteit"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Laat die program toe om toegang tot die foonfunksies van die toestel te verkry. Hierdie toestemming laat die program toe om te bepaal wat die foonnommer en toestel-IDs is, of die oproep aan die gang is, en die afgeleë nommer wat deur \'n oproep verbind word."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"verhoed dat tablet slaap"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 passing</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Klaar"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Ontheg tans USB-geheue..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Ontheg tans SD-kaart..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Vee tans USB-geheue uit..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Vee tans SD-kaart uit..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Kon nie USB-berging uitvee nie."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Kon nie SD-kaart uitvee nie."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD-kaart is verwyder voordat dit ontheg is."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-berging word tans gekontroleer."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD-kaart word tans gekontroleer."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD-kaart is verwyder."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB-berging word tans deur \'n rekenaar gebruik."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD-kaart word tans deur \'n rekenaar gebruik."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Eksterne media in onbekende toestand."</string>
     <string name="share" msgid="1778686618230011964">"Deel"</string>
     <string name="find" msgid="4808270900322985960">"Vind"</string>
     <string name="websearch" msgid="4337157977400211589">"Websoektog"</string>

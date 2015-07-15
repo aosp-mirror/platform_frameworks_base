@@ -229,13 +229,13 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"auf Kontakte zuzugreifen"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"Auf den Standort Ihres Geräts zugreifen"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort Ihres Geräts zuzugreifen"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"Auf Kalender zuzugreifen"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"auf Kalender zuzugreifen"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS senden und abrufen"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS zu senden und abzurufen"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Speicher"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"Auf Fotos, Medien und Dateien auf Ihrem Gerät zugreifen"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"auf Fotos, Medien und Dateien auf Ihrem Gerät zuzugreifen"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"Audio aufzunehmen"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Ermöglicht der App, die Lichtanzeige zu steuern"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Telefonnummern direkt anrufen"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Ermöglicht der App, ohne Ihr Eingreifen Telefonnummern zu wählen. Dies kann zu unerwarteten Kosten und Anrufen führen. Beachten Sie, dass die App keine Notrufnummern wählen kann. Schädliche Apps verursachen möglicherweise Kosten, indem sie Anrufe ohne Ihre Bestätigung tätigen."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"Zugriff auf IMS-Anrufdienst"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Ermöglicht der App die Verwendung des IMS-Dienstes zum Tätigen von Anrufen ohne Nutzereingriffe"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"Telefonstatus und Identität abrufen"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ermöglicht der App, auf die Telefonfunktionen des Geräts zuzugreifen. Die Berechtigung erlaubt der App, die Telefonnummer und Geräte-IDs zu erfassen, festzustellen, ob gerade ein Gespräch geführt wird, und die Rufnummer verbundener Anrufer zu lesen."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"Ruhezustand des Tablets deaktivieren"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 Treffer</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Fertig"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB-Speicher wird getrennt..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD-Karte wird getrennt..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB-Speicher wird gelöscht..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD-Karteninhalt wird gelöscht..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Löschen des USB-Speichers nicht möglich"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Löschen der SD-Karte nicht möglich"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD-Karte wurde vor dem Trennvorgang entfernt."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Der USB-Speicher wird zurzeit überprüft."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Die SD-Karte wird zurzeit überprüft."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Die SD-Karte wurde entfernt."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Der USB-Speicher wird zurzeit von einem Computer verwendet."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Die SD-Karte wird zurzeit von einem Computer verwendet."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Unbekannter Status des externen Speichermediums"</string>
     <string name="share" msgid="1778686618230011964">"Teilen"</string>
     <string name="find" msgid="4808270900322985960">"Suchen"</string>
     <string name="websearch" msgid="4337157977400211589">"Websuche"</string>

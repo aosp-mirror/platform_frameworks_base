@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Ilova chaqnoqni boshqarishi mumkin."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon raqamlariga tog‘ridan to‘g‘ri qo‘ng‘iroq qilish"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Ilovaga sizning yordamingizsiz telefonga qo‘ng‘iroq qilish imkonini beradi. Bu kutilmagan qo‘ng‘iroqlarni amalga oshirishi yoki ortiqcha to‘lovlarni yuzaga keltirishi mumkin. Shunga e’tibor qilinki, u favqulodda telefon raqamlariga qo‘ng‘iroqlar qilishga ruxsat bermaydi. Zararli ilovalar sizdan so‘ramasdan qo‘ng‘iroqlarni amalga oshirib, pulingizni sarflashi mumkin."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS qo‘ng‘iroq xizmatiga kirish"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Ilovaga sizning ishtirokingizsiz qo‘ng‘iroqlarni amalga oshirish uchun IMS xizmatidan foydalanishga ruxsat beradi."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefon holati va nomini o‘qish"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ilovaga qurilmangizdagi telefon xususiyatlariga kirishga ruxsat beradi. Bu ruxsat ilovaga telefon raqami va qurilma nomlari, qo‘ng‘iroq faol yoki faolsizligi va masofadagi raqam qo‘ng‘rioq orqali bog‘langanligini aniqlashga imkon beradi."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"planshetni uyquga ketishiga yo‘l qo‘ymaslik"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 ta natija</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Tayyor"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB xotirasi uzilmoqda…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD xotira kartasi uzilmoqda…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB xotirasi tozalanmoqda…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD xotira kartasi tozalanmoqda…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB xotirani o‘chirib bo‘lmadi."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD kartani o‘chirib bo‘lmadi."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD karta uzishdan oldin olib tashlandi."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB xotira hozirda tekshirilmoqda."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD karta hozirda tekshirilmoqda."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD karta olib tashlandi."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB xotiradan kompyuterda foydalanilmoqda."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"CD kartadan kompyuterda foydalanilmoqda."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Tashqi xotira noma’lum holatda."</string>
     <string name="share" msgid="1778686618230011964">"Bo‘lishish"</string>
     <string name="find" msgid="4808270900322985960">"Topish"</string>
     <string name="websearch" msgid="4337157977400211589">"Veb qidiruv"</string>

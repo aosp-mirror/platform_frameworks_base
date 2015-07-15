@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Қолданбаға қалта шамын басқаруға рұқсат береді."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"нөмірлерге тікелей телефон шалу"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Қолданбаға сіздің қатысуыңызсыз қоңырау шалу мүмкіндігін береді. Нәтижесінде қосымша төлем немесе күтпеген қоңырау алуыңыз мүмкін. Есіңізде болсын, қолданба төтенше байланыстарға қоңырау шала алмайды. Залалды қолданбалар сіздің рұқсатыңызсыз қоңыраулар шалып, күтпеген төлемдерге себеп болуы мүмкін."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS қоңырау қызметін пайдалану"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Сіздің қатысуыңызсыз қоңыраулар соғу үшін қолданбаға IMS қызметін пайдалануға рұқсат етеді."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"телефон күйін оқу немесе анықтау"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Қолданбаға құрылғыдағы телефон функцияларына кіру мүмкіндігін береді. Бұл рұқсат қолданбаға телефон нөмірі, құрылғы жеке анықтағышы, қоңырау белсенділігі және сол қоңырауға байланысты қашықтағы нөмірді анықтау мүмкіндігін береді."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетті ұйқыдан бөгеу"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 сәйкестік</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Дайын"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB жадын шығаруда…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD картасын шығаруда…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB жадын өшіруде…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD картаны өшіруде…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB жадын өшіре алмады."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD картасын өшіре алмады."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD картасы қолданыс кезінде алынды."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB жады қазір тексерілуде."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD картасы қазір тексерілуде."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD картасы алынды."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB жадын қазір компьютер қолдануда."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD картасын қазір компьютер қолдануда."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Сыртқы медиа белгісіз күйде."</string>
     <string name="share" msgid="1778686618230011964">"Бөлісу"</string>
     <string name="find" msgid="4808270900322985960">"Табу"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб іздеу"</string>

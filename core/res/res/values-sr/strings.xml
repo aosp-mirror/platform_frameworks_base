@@ -355,10 +355,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Дозвољава апликацији да контролише блиц."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно позивање бројева телефона"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Дозвољава апликацији да позива бројеве телефона без ваше дозволе. Ово може да доведе до неочекиваних трошкова или позива. Имајте на уму да ово не дозвољава апликацији да позива бројеве за хитне случајеве. Злонамерне апликације могу да позивају без ваше потврде, што може да доведе до трошкова."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"приступ услузи позива помоћу размене тренутних порука"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Дозвољава апликацији да користи услугу размене тренутних порука да би упућивала позиве без ваше интервенције."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"читање статуса и идентитета телефона"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозвољава апликацији да приступа функцијама телефона на уређају. Ова дозвола омогућава апликацији да утврди број телефона и ИД-ове уређаја, затим да ли је позив активан, као и број даљинског уређаја са којим је успостављен позив."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"спречавање преласка таблета у стање спавања"</string>
@@ -1158,19 +1156,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> од <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Готово"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Искључивање USB меморије..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Искључивање SD картице..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Брисање USB меморије..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Брисање SD картице..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Није могуће избрисати USB меморију."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Није могуће избрисати SD картицу."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD картица није искључена пре него што је уклоњена."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Тренутно је у току провера USB меморије."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Тренутно је у току провера SD картице."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD картица је уклоњена."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Рачунар тренутно користи USB меморију."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD картица се тренутно користи на рачунару."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Екстерни медиј непознатог статуса."</string>
     <string name="share" msgid="1778686618230011964">"Дели"</string>
     <string name="find" msgid="4808270900322985960">"Пронађи"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб-претрага"</string>

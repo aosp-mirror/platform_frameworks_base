@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Linterna kontrolatzea baimentzen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"deitu zuzenean telefono-zenbakietara"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Telefono-zenbakietara zuk esku hartu gabe deitzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak edo deiak eragin daitezke. Aplikazio gaiztoek erabil dezakete zuk berretsi gabeko deiak eginda gastuak eragiteko."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"Atzitu IMS dei-zerbitzua"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Zuk ezer egin beharrik gabe deiak egiteko IMS zerbitzua erabiltzea baimentzen dio aplikazioari."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonoaren egoera eta identitatea irakurtzea"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Gailuaren telefono-eginbideak atzitzeko baimena ematen die aplikazioei. Baimen horrek aplikazioari telefono-zenbakia eta gailu IDak zein diren, deirik aktibo dagoen eta deia zer zenbakirekin konektatuta dagoen zehazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"eragotzi tableta inaktibo ezartzea"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">Emaitza bat</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Eginda"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB memoria desmuntatzen…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD txartela desmuntatzen…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB memoria ezabatzen…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD txartela ezabatzen…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Ezin izan da USB memoriako edukia ezabatu."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Ezin izan da SD txarteleko edukia ezabatu."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD txartela desmuntatu aurretik kendu da."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB memoria egiaztatzen ari da."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD txartela egiaztatzen ari da."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD txartela kendu egin da."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Une honetan, ordenagailu bat ari da USB memoria erabiltzen."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Une honetan, ordenagailu bat ari da SD txartela erabiltzen."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Kanpoko euskarria egoera ezezagunean."</string>
     <string name="share" msgid="1778686618230011964">"Partekatu"</string>
     <string name="find" msgid="4808270900322985960">"Aurkitu"</string>
     <string name="websearch" msgid="4337157977400211589">"Web-bilaketa"</string>

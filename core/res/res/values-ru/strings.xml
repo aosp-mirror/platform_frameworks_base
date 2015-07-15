@@ -356,10 +356,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Приложение сможет контролировать вспышку."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Осуществление телефонных вызовов"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Приложение сможет без вашего участия звонить на любой номер телефона. Это не относится к номерам экстренных служб. Вредоносные программы смогут совершать вызовы без вашего разрешения, что может привести к непредвиденным расходам."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"совершение звонков с помощью службы IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Позволяет приложению совершать звонки с помощью службы IMS без вашего вмешательства."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"Получение данных о статусе телефона"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Приложение получит доступ к функциям телефона на устройстве. Кроме того, оно сможет определять номера телефонов и серийные номера моделей, состояние активности вызова, а также удаленные номера, с которыми установлено соединение."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"Отключение спящего режима"</string>
@@ -1166,19 +1164,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> совпадений из <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Готово"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Отключение USB-накопителя..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Отключение SD-карты..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Очистка USB-накопителя..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Очистка SD-карты..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Не удалось очистить USB-накопитель."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Не удалось очистить SD-карту."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD-карта была извлечена до отключения."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-накопитель проверяется."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Выполняется проверка SD-карты."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD-карта была отключена."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Сейчас USB-накопитель используется компьютером."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Сейчас SD-карта используется компьютером."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Неизвестно состояние внешнего носителя."</string>
     <string name="share" msgid="1778686618230011964">"Отправить"</string>
     <string name="find" msgid="4808270900322985960">"Найти"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб-поиск"</string>

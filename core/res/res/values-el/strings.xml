@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Επιτρέπει στην εφαρμογή τον έλεγχο του φακού."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"απευθείας κλήση τηλεφωνικών αριθμών"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Επιτρέπει στην εφαρμογή την κλήση αριθμών τηλεφώνου χωρίς δική σας παρέμβαση. Αυτό μπορεί να προκαλέσει μη αναμενόμενες χρεώσεις ή κλήσεις. Έχετε υπόψη ότι δεν επιτρέπεται στην εφαρμογή η κλήση αριθμών έκτακτης ανάγκης. Οι κακόβουλες εφαρμογές ενδέχεται να σας κοστίσουν χρήματα, πραγματοποιώντας κλήσεις χωρίς την έγκρισή σας."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"πρόσβαση στην υπηρεσία κλήσεων της IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Επιτρέπει στην εφαρμογή τη χρήση της υπηρεσίας IMS για την πραγματοποίηση κλήσεων χωρίς τη δική σας παρέμβαση."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ανάγνωση κατάστασης και ταυτότητας τηλεφώνου"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Επιτρέπει στην εφαρμογή την πρόσβαση στις λειτουργίες τηλεφώνου της συσκευής. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να καθορίζει τον αριθμό τηλεφώνου και τα αναγνωριστικά συσκευών, εάν μια κλήση είναι ενεργή, καθώς και τον απομακρυσμένο αριθμό που συνδέεται από μια κλήση."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"παρεμπόδιση μετάβασης του tablet σε κατάσταση αδράνειας"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 αντιστοιχία</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Τέλος"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Αποσύνδεση του χώρου αποθήκευσης USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Αφαίρεση κάρτας SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Διαγραφή χώρου αποθήκευσης USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Διαγραφή κάρτας SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Δεν ήταν δυνατή η διαγραφή του χώρου αποθήκευσης USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Δεν ήταν δυνατή η διαγραφή της κάρτας SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Η κάρτα SD καταργήθηκε πριν την αποπροσάρτησή της."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Αυτή τη στιγμή γίνεται έλεγχος του αποθηκευτικού χώρου USB."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Γίνεται έλεγχος της κάρτας SD."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Η κάρτα SD έχει αφαιρεθεί."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Αυτή τη στιγμή ο αποθηκευτικός χώρος USB χρησιμοποιείται από κάποιον υπολογιστή."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Αυτή τη στιγμή η κάρτα SD χρησιμοποιείται από κάποιον υπολογιστή."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Το εξωτερικό μέσο είναι σε άγνωστη κατάσταση."</string>
     <string name="share" msgid="1778686618230011964">"Κοινή χρ."</string>
     <string name="find" msgid="4808270900322985960">"Εύρεση"</string>
     <string name="websearch" msgid="4337157977400211589">"Αναζήτηση ιστού"</string>

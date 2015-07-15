@@ -356,10 +356,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Дозволяє програмі контролювати світловий сигнал."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"прямо набирати номери тел."</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Дозволяє програмі набирати номери телефону без вашого відома. Це може спричинити неочікуване стягнення плати чи здійснення дзвінків. Зауважте, що це не дозволяє програмі набирати екстрені номери. Шкідливі програми можуть здійснювати дзвінки без вашого підтвердження, за що з вас стягуватимуться кошти."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"отримувати доступ до телефонної служби IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Додаток зможе телефонувати за допомогою служби IMS без вашого відома."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"читати статус та ідентифікаційну інформацію телефону"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Такий дозвіл дає програмі змогу визначати номер телефону й ідентифікатори пристрою, активність виклику, а також віддалений номер, на який здійснюється виклик."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не доп.перехід пристр.в реж.сну"</string>
@@ -1166,19 +1164,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> із <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Готово"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Відключення носія USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Відключення карти SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Стирання носія USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Стирання карти SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Не вдалось очистити носій USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Не вдалось очистити карту SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Карту SD вилучено раніше ніж її було відключено."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Носій USB наразі перевіряється."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Карта SD наразі перевіряється."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Карту SD вилучено."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Наразі комп\'ютер використовує носій USB."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Наразі комп\'ютер використовує карту SD."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Зовнішні носії в невідомому стані."</string>
     <string name="share" msgid="1778686618230011964">"Надіслати"</string>
     <string name="find" msgid="4808270900322985960">"Знайти"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб-пошук"</string>

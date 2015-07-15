@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"앱이 카메라 플래시를 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"앱이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 앱이 비상 전화를 걸도록 하는 권한은 주어지지 않습니다. 악성 앱이 사용자의 확인 없이 전화를 걸어 요금이 부과될 수 있습니다."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS 통화 서비스에 액세스"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"앱이 IMS 서비스를 사용하여 자동으로 전화를 걸 수 있도록 허용합니다."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"휴대전화 상태 및 ID 읽기"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"앱이 기기의 휴대전화 기능에 액세스할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 전화번호 및 기기의 ID, 활성 통화인지 여부, 통화가 연결된 원격 번호 등을 확인할 수 있습니다."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">검색결과 1개</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"완료"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB 저장소 마운트 해제 중..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD 카드 마운트 해제 중..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB 저장소 지우는 중..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD 카드 지우는 중..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB 저장소를 지우지 못했습니다."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD 카드를 지우지 못했습니다."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD 카드가 마운트 해제되기 전에 제거되었습니다."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"현재 USB 저장소를 확인하는 중입니다."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"현재 SD 카드를 확인하는 중입니다."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD 카드가 제거되었습니다."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"현재 USB 저장소를 컴퓨터에서 사용하고 있습니다."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"현재 SD 카드를 컴퓨터에서 사용하고 있습니다."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"외부 미디어가 알 수 없는 상태입니다."</string>
     <string name="share" msgid="1778686618230011964">"공유"</string>
     <string name="find" msgid="4808270900322985960">"찾기"</string>
     <string name="websearch" msgid="4337157977400211589">"웹 검색"</string>
