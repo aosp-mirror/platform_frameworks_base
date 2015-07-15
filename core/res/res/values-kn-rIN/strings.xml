@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ಫ್ಲ್ಯಾಶ್‌ಲೈಟ್ ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ನೇರವಾಗಿ ಕರೆ ಮಾಡಿ"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ನಿಮ್ಮ ಹಸ್ತಕ್ಷೇಪ ಇಲ್ಲದೆಯೇ ಫೋನ್‍ ಸಂಖ್ಯೆಗಳಿಗೆ ಕರೆ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಅನಿರೀಕ್ಷಿತ ಶುಲ್ಕಗಳು ಅಥವಾ ಕರೆಗಳಿಗೆ ಕಾರಣವಾಗಬಹುದು. ತುರ್ತು ಸಂಖ್ಯೆಗಳಿಗೆ ಕರೆಮಾಡಲು ಈ ಅಪ್ಲಿಕೇಶನ್‍ ಅನುಮತಿಸುವುದಿಲ್ಲ ಎಂಬುದು ಗಮನದಲ್ಲಿರಲಿ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ನಿಮ್ಮ ಖಾತರಿ ಇಲ್ಲದೆಯೇ ಕರೆಗಳನ್ನು ಮಾಡುವುದರ ಮೂಲಕ ನಿಮ್ಮ ಹಣ ಖರ್ಚಾಗಬಹುದು."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS ಕರೆ ಸೇವೆಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ನಿಮ್ಮ ಮಧ್ಯಸ್ಥಿಕೆ ಇಲ್ಲದೆಯೇ ಕರೆಗಳನ್ನು ಮಾಡಲು IMS ಸೇವೆಯನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ಫೋನ್ ಸ್ಥಿತಿ ಮತ್ತು ಗುರುತಿಸುವಿಕೆಯನ್ನು ಓದಿ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ಸಾಧನದ ಫೋನ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು ಫೋನ್ ಸಂಖ್ಯೆ ಮತ್ತು ಸಾಧನದ ID ಗಳನ್ನು ನಿರ್ಧರಿಸಲು, ಕರೆಯು ಸಕ್ರಿಯವಾಗಿದೆಯೇ ಮತ್ತು ಕರೆಯ ಮೂಲಕ ರಿಮೋಟ್ ಸಂಖ್ಯೆಯು ಸಂಪರ್ಕಗೊಂಡಿವೆಯೇ ಎಂಬುದನ್ನೂ ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಕಲ್ಪಿಸುತ್ತದೆ."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ಟ್ಯಾಬ್ಲೆಟ್ ನಿದ್ರಾವಸ್ಥೆಯನ್ನು ತಡೆಯಿರಿ"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> ರಲ್ಲಿ <xliff:g id="INDEX">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ಮುಗಿದಿದೆ"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB ಸಂಗ್ರಹಣೆಯ ಅಳವಡಿಕೆ ತೆಗೆಯಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD ಕಾರ್ಡ್ ಅಳವಡಿಕೆ ತೆಗೆಯಲಾಗುತ್ತಿದೆ…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB ಸಂಗ್ರಹಣೆ ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ಕಾರ್ಡ್ ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD ಕಾರ್ಡ್ ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"ಅಳವಡಿಕೆಯನ್ನು ತೆಗೆಯುವ ಮೊದಲೇ SD ಕಾರ್ಡ್‌ ಅನ್ನು ತೆಗೆದು ಹಾಕಲಾಗಿದೆ."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಪ್ರಸ್ತುತ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD ಕಾರ್ಡ್ ಆನ್ನು ಪ್ರಸ್ತುತ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD ಕಾರ್ಡ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB ಸಂಗ್ರಹಣೆ ಪ್ರಸ್ತುತ ಒಂದು ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಬಳಕೆಯಲ್ಲಿದೆ."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD ಕಾರ್ಡ್ ಪ್ರಸ್ತುತ ಒಂದು ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಬಳಕೆಯಲ್ಲಿದೆ."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"ಬಾಹ್ಯ ಮಾಧ್ಯಮ ಅಜ್ಞಾತ ಸ್ಥಿತಿಯಲ್ಲಿದೆ."</string>
     <string name="share" msgid="1778686618230011964">"ಹಂಚು"</string>
     <string name="find" msgid="4808270900322985960">"ಹುಡುಕಿ"</string>
     <string name="websearch" msgid="4337157977400211589">"ವೆಬ್ ಹುಡುಕಾಟ"</string>

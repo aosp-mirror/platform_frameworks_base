@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ఫ్లాష్‌లైట్‌ను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ఫోన్ నంబర్‌లకు నేరుగా కాల్ చేయడం"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"మీ ప్రమేయం లేకుండా ఫోన్ నంబర్‌లకు కాల్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన అనుకోని ఛార్జీలు విధించబడవచ్చు లేదా కాల్‌లు రావచ్చు. ఇది అత్యవసర నంబర్‌లకు కాల్ చేయడానికి అనువర్తనాన్ని అనుమతించదని గుర్తుంచుకోండి. హానికరమైన అనువర్తనాలు మీ నిర్ధారణ లేకుండానే కాల్‌లు చేయడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS కాల్ సేవ ప్రాప్యత అనుమతి"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"మీ ప్రమేయం లేకుండా కాల్‌లు చేయడం కోసం IMS సేవను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ఫోన్ స్థితి మరియు గుర్తింపుని చదవడం"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"పరికరం యొక్క ఫోన్ లక్షణాలను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 సరిపోలిక</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"పూర్తయింది"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB నిల్వను అన్‌మౌంట్ చేస్తోంది…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD కార్డు‌ను అన్‌మౌంట్ చేస్తోంది…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB నిల్వను ఎరేజ్ చేస్తోంది…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD కార్డు‌ను ఎరేజ్ చేస్తోంది…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB నిల్వను ఎరేజ్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD కార్డు‌ను ఎరేజ్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD కార్డు అన్‌మౌంట్ చేయబడటానికి ముందే తీసివేయబడింది."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB నిల్వ ప్రస్తుతం తనిఖీ చేయబడుతోంది."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD కార్డు ప్రస్తుతం తనిఖీ చేయబడుతోంది."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD కార్డు తీసివేయబడింది."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB నిల్వ ప్రస్తుతం కంప్యూటర్‌లో ఉపయోగంలో ఉంది."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD కార్డు ప్రస్తుతం కంప్యూటర్‌లో ఉపయోగంలో ఉంది."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"బాహ్య మీడియా స్థితి తెలియదు."</string>
     <string name="share" msgid="1778686618230011964">"భాగస్వామ్యం చేయండి"</string>
     <string name="find" msgid="4808270900322985960">"కనుగొనండి"</string>
     <string name="websearch" msgid="4337157977400211589">"వెబ్ శోధన"</string>

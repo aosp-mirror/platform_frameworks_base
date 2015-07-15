@@ -1150,19 +1150,8 @@
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> න් <xliff:g id="INDEX">%d</xliff:g> යි</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"හරි"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB ආචයනය ගැලවීම..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD පත ගලවමින්..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB ආචයනය මකමින්..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD පත මකමින්..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB ආචයනය මැකිය නොහැක."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD පත මැකීමට නොහැකි විය."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"ගැලවීමට පෙර SD පත ඉවත්කර ඇත."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB ආචයනය මේ වනවිට පරීක්ෂා කරමින් පවතී."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD පත දැන් පරීක්ෂා කරමින් පවතී."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD පත ඉවත් කර ඇත."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"පරිගණකයක් විසින් දැන් USB ආචයනය භාවිතා කරයි."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD පත දැනට පරිගණකයකින් පාවිච්චි කරයි."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"බාහිර මාධ්‍යය නොදන්නා අවස්ථාවේ පවතියි."</string>
     <string name="share" msgid="1778686618230011964">"බෙදාගන්න"</string>
     <string name="find" msgid="4808270900322985960">"සොයන්න"</string>
     <string name="websearch" msgid="4337157977400211589">"වෙබ් සෙවුම"</string>

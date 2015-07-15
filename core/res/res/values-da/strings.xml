@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Tillader, at appen kan kontrollere lommelygten."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe direkte op til telefonnumre"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tillader, at appen kan ringe til telefonnumre uden din indgriben. Dette kan resultere i uventede opkrævninger eller opkald. Bemærk, at appen med denne tilladelse ikke kan ringe til nødopkaldsnumre. Skadelige apps kan koste dig penge ved at foretage opkald uden din bekræftelse."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"få adgang til IMS-opkaldstjeneste"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Tillader, at appen kan bruge IMS-tjenesten til at foretage opkald, uden at du foretager dig noget."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"læse telefonens status og identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tillader, at appen kan få adgang til telefonfunktionerne på enheden. Med denne tilladelse kan appen fastslå telefonnummeret og enheds-id\'erne, hvorvidt et opkald er aktivt samt det eksterne nummer, der oprettes forbindelse til via et opkald."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"afholde tabletcomputeren fra at gå i dvale"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> af <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Udfør"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Demonterer USB-lageret..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Demonterer SD-kortet..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Sletter USB-lageret..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Sletter SD-kortet..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Kunne ikke slette USB-lager."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD-kortet kunne ikke formateres."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD-kortet blev fjernet, før det blev demonteret."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-lager bliver kontrolleret."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD-kortet bliver kontrolleret."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD-kortet er fjernet."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB-lager er i øjeblikket i brug af en computer."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD-kortet er i øjeblikket i brug af en computer."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Eksternt medie i ukendt tilstand."</string>
     <string name="share" msgid="1778686618230011964">"Del"</string>
     <string name="find" msgid="4808270900322985960">"Find"</string>
     <string name="websearch" msgid="4337157977400211589">"Websøgning"</string>

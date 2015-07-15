@@ -356,10 +356,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Inaruhusu programu kudhibiti tochi."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"piga simu moja kwa moja kwa nambari za simu"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Inaruhusu programu kupiga nambari za simu bila ya wewe kuingilia kati. Hii inaweza kusababisha gharama zisizotarajiwa au simu. Kumbuka kuwa hii hairuhusu programu kupiga nambari za dharura. Programu hasidi zinaweza kukugharimu pesa kwa kupiga simu bila uthibitisho wako."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"fikia huduma ya simu ya IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Huruhusu programu kutumia huduma ya IMS kupiga simu bila udhibiti wako."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"kusoma hali na kitambulisho cha simu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Huruhusu programu kufikia vipengele vya simu vilivyo kwenye kifaa. Idhini hii inaruhusu programu kutambua nambari ya simu na kifaa, kama kuna simu inayopigwa, na nambari ya mbali iliyounganishwa kwenye simu."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zuia kompyuta ndogo dhidi ya kulala"</string>
@@ -1152,19 +1150,8 @@
       <item quantity="one">1 inayolingana</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Nimemaliza"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Inaondoa hifadhi ya USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Inaondoa kadi ya SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Inafuta hifadhi ya USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Inafuta kadi ya SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Haikuweza kufuta hifadhi ya USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Haikuweza kufuta kadi ya SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Kadi ya SD iliondolewa kabla ya kuondolewa."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Hifadhi ya USB inakaguliwa kwa sasa."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Kadi ya SD inakaguliwa kwa sasa."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Kadi ya SD imeondolewa."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Hifadhi ya USB inatumika kwa sasa na kompyuta."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Kadi ya SD inatumika kwa sasa na kompyuta."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Media ya nje katika hali isiyojulikana."</string>
     <string name="share" msgid="1778686618230011964">"Shiriki"</string>
     <string name="find" msgid="4808270900322985960">"Tafuta"</string>
     <string name="websearch" msgid="4337157977400211589">"Utafutaji Wavuti"</string>

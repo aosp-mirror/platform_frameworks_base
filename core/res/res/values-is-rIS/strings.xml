@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Leyfir forriti að stjórna vasaljósinu."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"hringja beint í símanúmer"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Leyfir forriti að hringja í símanúmer án íhlutunar notanda. Þetta getur haft í för með sér óumbeðin gjöld og símtöl. Athugaðu að þetta leyfir forritinu ekki að hringja í neyðarnúmer. Spilliforrit geta stofnað til kostnaðar fyrir þig með því að hringja símtöl án þinnar heimildar."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"fá aðgang að IMS-símtalsþjónustu"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Leyfir forriti að nota IMS-þjónustu til að hringja án inngrips frá þér."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lesa stöðu símans og auðkenni"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leyfir forriti að fá aðgang að símaeiginleikum tækisins. Þessi heimild gerir forritinu kleift að komast að símanúmeri og auðkennum tækisins, hvort símtal er í gangi og símanúmeri viðmælanda í símtali."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"koma í veg fyrir að spjaldtölvan fari í biðstöðu"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> af <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Lokið"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Aftengir USB-geymslu…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Aftengir SD-kort…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Hreinsar út af USB-geymslu…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Hreinsar út af SD-korti…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Ekki tókst að eyða út af USB-geymslu."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Ekki tókst að eyða út af SD-korti."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD-kortið var fjarlægt áður en það var aftengt."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Verið er að kanna USB-geymsluna."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Verið er að kanna SD-kortið."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD-kortið hefur verið fjarlægt."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Tölva er að nota USB-geymsluna."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Tölva er að nota SD-kortið."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Óþekkt ástand ytri geymslumiðils."</string>
     <string name="share" msgid="1778686618230011964">"Deila"</string>
     <string name="find" msgid="4808270900322985960">"Finna"</string>
     <string name="websearch" msgid="4337157977400211589">"Vefleit"</string>

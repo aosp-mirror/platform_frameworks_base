@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permet que l\'aplicació controli la llanterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"trucar directament a números de telèfon"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet que l\'aplicació truqui a números de telèfon sense la teva intervenció. Aquesta acció pot produir càrrecs o trucades inesperades. Tingues en compte que això no permet que l\'aplicació truqui a números d\'emergència. Les aplicacions malicioses poden fer trucades sense la teva confirmació, cosa que et pot fer gastar diners."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"accés al servei de trucades IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permet que l\'aplicació utilitzi el servei IMS per fer trucades sense la teva intervenció."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"veure l\'estat i la identitat del telèfon"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evita que la tauleta entri en mode de repòs"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 partida</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Fet"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"S\'està desactivant l\'emmagatzematge USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"S\'està desactivant la targeta SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"S\'està esborrant l\'emmagatzematge USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"S\'està esborrant la targeta SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"No s\'ha pogut esborrar l\'emmagatzematge USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"No s\'ha pogut esborrar la targeta SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"La targeta SD s\'ha retirat abans de desinstal·lar-la."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Actualment s\'està comprovant l\'emmagatzematge USB."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"S\'està comprovant la targeta SD."</string>
-    <string name="media_removed" msgid="7001526905057952097">"S\'ha retirat la targeta SD."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Actualment, un equip està utilitzant l\'emmagatzematge USB."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Actualment, un equip està utilitzant la targeta SD."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Mitjà extern en un estat desconegut."</string>
     <string name="share" msgid="1778686618230011964">"Comparteix"</string>
     <string name="find" msgid="4808270900322985960">"Cerca"</string>
     <string name="websearch" msgid="4337157977400211589">"Cerca al web"</string>

@@ -1148,19 +1148,8 @@
       <item quantity="one">ഒരു പൊരുത്തം</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"പൂർത്തിയായി"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB കാർഡ് അൺമൗണ്ടുചെയ്യുന്നു…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD കാർഡ് അൺമൗണ്ടുചെയ്യുന്നു…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB കാർഡ് മായ്‌ക്കുന്നു…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD കാർഡ് മായ്‌ക്കുന്നു…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB സ്റ്റോറേജ്  മായ്‌ക്കാനായില്ല."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD കാർഡ് മായ്‌ക്കാനായില്ല."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"അൺമൗണ്ട് ചെയ്യുന്നതിനുമുമ്പ് SD കാർഡ് നീക്കംചെയ്‌തു."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"നിലവിൽ USB സ്റ്റോറേജ്  പരിശോധിക്കുന്നു."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"നിലവിൽ SD കാർഡ് പരിശോധിക്കുന്നു."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD കാർഡ് നീക്കംചെയ്‌തു."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"ഒരു കമ്പ്യൂട്ടറിൽ USB സ്റ്റോറേജ്  നിലവിൽ ഉപയോഗത്തിലാണ്."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"ഒരു കമ്പ്യൂട്ടറിൽ SD കാർഡ് നിലവിൽ ഉപയോഗത്തിലാണ്."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"അജ്ഞാത നിലയിലുള്ള ബാഹ്യ മീഡിയ."</string>
     <string name="share" msgid="1778686618230011964">"പങ്കിടുക"</string>
     <string name="find" msgid="4808270900322985960">"കണ്ടെത്തുക"</string>
     <string name="websearch" msgid="4337157977400211589">"വെബ്‌ തിരയൽ"</string>
