@@ -1193,9 +1193,11 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_PACKAGE_INACTIVE = 0x000f;
         // Event for a package becoming active due to an interaction.
         public static final int EVENT_PACKAGE_ACTIVE = 0x0010;
+        // Event for a package being on the temporary whitelist.
+        public static final int EVENT_TEMP_WHITELIST = 0x0011;
 
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0011;
+        public static final int EVENT_COUNT = 0x0012;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1219,6 +1221,10 @@ public abstract class BatteryStats implements Parcelable {
                 EVENT_USER_FOREGROUND | EVENT_FLAG_FINISH;
         public static final int EVENT_ALARM_START = EVENT_ALARM | EVENT_FLAG_START;
         public static final int EVENT_ALARM_FINISH = EVENT_ALARM | EVENT_FLAG_FINISH;
+        public static final int EVENT_TEMP_WHITELIST_START =
+                EVENT_TEMP_WHITELIST | EVENT_FLAG_START;
+        public static final int EVENT_TEMP_WHITELIST_FINISH =
+                EVENT_TEMP_WHITELIST | EVENT_FLAG_FINISH;
 
         // For CMD_EVENT.
         public int eventCode;
@@ -1852,12 +1858,12 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
-            "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active"
+            "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active", "tmpwhitelist"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
-            "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa"
+            "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw"
     };
 
     /**
