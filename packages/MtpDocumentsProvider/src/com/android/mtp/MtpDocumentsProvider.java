@@ -16,14 +16,24 @@
 
 package com.android.mtp;
 
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
-import java.io.FileNotFoundException;
+import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+/**
+ * DocumentsProvider for MTP devices.
+ */
 public class MtpDocumentsProvider extends DocumentsProvider {
     private static final String TAG = "MtpDocumentsProvider";
     public static final String AUTHORITY = "com.android.mtp.documents";
@@ -40,32 +50,89 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
     };
 
+    private MtpManager mDeviceModel;
+    private ContentResolver mResolver;
+
     @Override
     public boolean onCreate() {
+        mDeviceModel = new MtpManager(getContext());
+        mResolver = getContext().getContentResolver();
         return true;
+    }
+
+    @VisibleForTesting
+    void onCreateForTesting(MtpManager deviceModel, ContentResolver resolver) {
+        this.mDeviceModel = deviceModel;
+        this.mResolver = resolver;
     }
 
     @Override
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
-        return null;
+        throw new FileNotFoundException();
     }
 
     @Override
     public Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException {
-        return null;
+        throw new FileNotFoundException();
     }
 
     @Override
     public Cursor queryChildDocuments(String parentDocumentId,
             String[] projection, String sortOrder)
             throws FileNotFoundException {
-        return null;
+        throw new FileNotFoundException();
     }
 
     @Override
     public ParcelFileDescriptor openDocument(String documentId, String mode,
             CancellationSignal signal) throws FileNotFoundException {
-        return null;
+        throw new FileNotFoundException();
+    }
+
+    // TODO: Remove annotation when the method starts to be used.
+    @VisibleForTesting
+    void openDevice(int deviceId) {
+        try {
+            mDeviceModel.openDevice(deviceId);
+            notifyRootsUpdate();
+        } catch (IOException error) {
+            Log.d(TAG, "Failed to open the MTP device: " + deviceId);
+        }
+    }
+
+    // TODO: Remove annotation when the method starts to be used.
+    @VisibleForTesting
+    void closeDevice(int deviceId) {
+        try {
+            mDeviceModel.closeDevice(deviceId);
+            notifyRootsUpdate();
+        } catch (IOException error) {
+            Log.d(TAG, "Failed to close the MTP device: " + deviceId);
+        }
+    }
+
+    // TODO: Remove annotation when the method starts to be used.
+    @VisibleForTesting
+    void closeAllDevices() {
+        boolean closed = false;
+        for (int deviceId : mDeviceModel.getOpenedDeviceIds()) {
+            try {
+                mDeviceModel.closeDevice(deviceId);
+                closed = true;
+            } catch (IOException d) {
+                Log.d(TAG, "Failed to close the MTP device: " + deviceId);
+            }
+        }
+        if (closed) {
+            notifyRootsUpdate();
+        }
+    }
+
+    private void notifyRootsUpdate() {
+        mResolver.notifyChange(
+                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY),
+                null,
+                false);
     }
 }
