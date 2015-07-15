@@ -169,6 +169,11 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     }
 
     @Override
+    public void tearDown(Surface surface) throws CameraAccessException {
+        mSessionImpl.tearDown(surface);
+    }
+
+    @Override
     public int capture(CaptureRequest request, CaptureCallback listener, Handler handler)
             throws CameraAccessException {
         throw new UnsupportedOperationException("Constrained high speed session doesn't support"
