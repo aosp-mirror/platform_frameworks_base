@@ -151,6 +151,7 @@ public class KernelUidCpuTimeReader {
         if (index >= 0) {
             mLastUserTimeUs.removeAt(index);
             mLastSystemTimeUs.removeAt(index);
+            mLastPowerMaUs.removeAt(index);
         }
 
         try (FileWriter writer = new FileWriter(sRemoveUidProcFile)) {
