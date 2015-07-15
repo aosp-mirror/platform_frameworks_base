@@ -561,6 +561,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 result |= true; // we have a valid fingerprint
                 mLockoutReset.run();
             }
+            // For fingerprint devices that support touch-to-wake, this will ensure the device
+            // wakes up and turns the screen on when fingerprint is authenticated.
+            if (mIsKeyguard && authenticated) {
+                mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                        "android.server.fingerprint:AUTH");
+            }
             return result;
         }
 

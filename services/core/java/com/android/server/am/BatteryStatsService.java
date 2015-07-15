@@ -493,6 +493,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
     
+    public void noteWakeUp(String reason, int reasonUid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWakeUpLocked(reason, reasonUid);
+        }
+    }
+
     public void noteInteractive(boolean interactive) {
         enforceCallingPermission();
         synchronized (mStats) {
