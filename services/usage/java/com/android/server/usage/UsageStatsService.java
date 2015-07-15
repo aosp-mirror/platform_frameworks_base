@@ -1177,7 +1177,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void whitelistAppTemporarily(String packageName, long duration, int userId)
                 throws RemoteException {
-            mDeviceIdleController.addPowerSaveTempWhitelistApp(packageName, duration, userId);
+            StringBuilder reason = new StringBuilder(32);
+            reason.append("from:");
+            UserHandle.formatUid(reason, Binder.getCallingUid());
+            mDeviceIdleController.addPowerSaveTempWhitelistApp(packageName, duration, userId,
+                    reason.toString());
         }
 
         @Override
