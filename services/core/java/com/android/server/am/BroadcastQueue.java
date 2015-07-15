@@ -175,7 +175,7 @@ public final class BroadcastQueue {
                     DeviceIdleController.LocalService dic = mService.mLocalDeviceIdleController;
                     if (dic != null) {
                         dic.addPowerSaveTempWhitelistAppDirect(UserHandle.getAppId(msg.arg1),
-                                msg.arg2);
+                                msg.arg2, true, (String)msg.obj);
                     }
                 } break;
             }
@@ -612,7 +612,7 @@ public final class BroadcastQueue {
         }
     }
 
-    final void scheduleTempWhitelistLocked(int uid, long duration) {
+    final void scheduleTempWhitelistLocked(int uid, long duration, BroadcastRecord r) {
         if (duration > Integer.MAX_VALUE) {
             duration = Integer.MAX_VALUE;
         }
@@ -622,7 +622,19 @@ public final class BroadcastQueue {
         // not that big a deal, however, because the main purpose here is to allow apps
         // to hold wake locks, and they will be able to acquire their wake lock immediately
         // it just won't be enabled until we get through this work.
-        mHandler.obtainMessage(SCHEDULE_TEMP_WHITELIST_MSG, uid, (int)duration).sendToTarget();
+        StringBuilder b = new StringBuilder();
+        b.append("broadcast:");
+        UserHandle.formatUid(b, r.callingUid);
+        b.append(":");
+        if (r.intent.getAction() != null) {
+            b.append(r.intent.getAction());
+        } else if (r.intent.getComponent() != null) {
+            b.append(r.intent.getComponent().flattenToShortString());
+        } else if (r.intent.getData() != null) {
+            b.append(r.intent.getData());
+        }
+        mHandler.obtainMessage(SCHEDULE_TEMP_WHITELIST_MSG, uid, (int)duration, b.toString())
+                .sendToTarget();
     }
 
     final void processNextBroadcast(boolean fromMsg) {
@@ -822,7 +834,7 @@ public final class BroadcastQueue {
                 } else {
                     if (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0) {
                         scheduleTempWhitelistLocked(filter.owningUid,
-                                brOptions.getTemporaryAppWhitelistDuration());
+                                brOptions.getTemporaryAppWhitelistDuration(), r);
                     }
                 }
                 return;
@@ -1005,7 +1017,7 @@ public final class BroadcastQueue {
 
             if (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0) {
                 scheduleTempWhitelistLocked(receiverUid,
-                        brOptions.getTemporaryAppWhitelistDuration());
+                        brOptions.getTemporaryAppWhitelistDuration(), r);
             }
 
             // Broadcast is being executed, its package can't be stopped.
