@@ -1004,7 +1004,8 @@ public class Editor {
         }
 
         if (!handled && mTextActionMode != null) {
-            if (touchPositionIsInSelection()) {
+            // TODO: Fix dragging in extracted mode.
+            if (touchPositionIsInSelection() && !mTextView.isInExtractedMode()) {
                 // Start a drag
                 final int start = mTextView.getSelectionStart();
                 final int end = mTextView.getSelectionEnd();
