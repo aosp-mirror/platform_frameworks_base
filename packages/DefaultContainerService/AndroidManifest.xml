@@ -9,6 +9,7 @@
          view storage for all users -->
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
 
     <application android:label="@string/service_name"
                  android:allowBackup="false">
