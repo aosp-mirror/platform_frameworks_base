@@ -989,6 +989,9 @@ include the action bar on devices running Android 2.1 or higher."
             <a href="<?cs var:toroot ?>training/wearables/watch-faces/information.html">Showing Information in Watch Faces</a>
           </li>
           <li>
+            <a href="<?cs var:toroot ?>training/wearables/watch-faces/interacting.html">Creating Interactive Watch Faces</a>
+          </li>
+          <li>
             <a href="<?cs var:toroot ?>training/wearables/watch-faces/configuration.html">Providing Configuration Activities</a>
           </li>
           <li>

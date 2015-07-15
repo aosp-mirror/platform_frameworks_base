@@ -128,7 +128,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -501,6 +501,7 @@ type="text/css">
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html">GridPagerAdapter</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridViewPager.html">GridViewPager</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridViewPager.LayoutParams.html">GridViewPager.LayoutParams</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ProgressSpinner.html">ProgressSpinner</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/SimpleAnimatorListener.html">SimpleAnimatorListener</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/WatchViewStub.html">WatchViewStub</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/WearableFrameLayout.html">WearableFrameLayout</a></li>
@@ -724,7 +725,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-"><p style="border:2px solid #99ccff;padding:12px;margin-top:20px"><strong>Note:</strong> The Wearable Support Library classes under the <code>android.support.wearable</code> package are subject to change. For the full Android API reference, see <a href="/reference/">Reference</a>.</p>
+<div id="jd-content" class="api apilevel-">
 <table class="jd-inheritance-table">
 
 
@@ -3236,7 +3237,7 @@ android.view.View
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/WearableListView.html#onInterceptTouchEvent(android.view.MotionEvent)">onInterceptTouchEvent</a></span>(MotionEvent event)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/WearableListView.html#isAtTop()">isAtTop</a></span>()</nobr>
         
   </td></tr>
 
@@ -3252,13 +3253,29 @@ android.view.View
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/WearableListView.html#onTouchEvent(android.view.MotionEvent)">onTouchEvent</a></span>(MotionEvent event)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/WearableListView.html#onInterceptTouchEvent(android.view.MotionEvent)">onInterceptTouchEvent</a></span>(MotionEvent event)</nobr>
         
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/WearableListView.html#onTouchEvent(android.view.MotionEvent)">onTouchEvent</a></span>(MotionEvent event)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3281,7 +3298,7 @@ android.view.View
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3304,7 +3321,7 @@ android.view.View
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3327,7 +3344,7 @@ android.view.View
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3343,7 +3360,7 @@ android.view.View
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3366,7 +3383,7 @@ android.view.View
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3390,7 +3407,7 @@ android.view.View
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3413,7 +3430,7 @@ android.view.View
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3433,6 +3450,22 @@ android.view.View
 
         </div>
   
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/WearableListView.html#smoothScrollToPosition(int, android.support.v7.widget.RecyclerView.SmoothScroller)">smoothScrollToPosition</a></span>(int position, RecyclerView.SmoothScroller smoothScroller)</nobr>
+        
   </td></tr>
 
 
@@ -16613,6 +16646,43 @@ From interface
 </div>
 
 
+<A NAME="isAtTop()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isAtTop</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if the list is scrolled all the way to the top.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="onInterceptTouchEvent(android.view.MotionEvent)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -16963,6 +17033,38 @@ From interface
 </div>
 
 
+<A NAME="smoothScrollToPosition(int, android.support.v7.widget.RecyclerView.SmoothScroller)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">smoothScrollToPosition</span>
+      <span class="normal">(int position, RecyclerView.SmoothScroller smoothScroller)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 
 
 
@@ -17026,6 +17128,7 @@ From interface
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>
