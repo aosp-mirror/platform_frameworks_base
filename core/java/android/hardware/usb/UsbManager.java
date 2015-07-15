@@ -17,6 +17,8 @@
 
 package android.hardware.usb;
 
+import com.android.internal.util.Preconditions;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Bundle;
@@ -73,6 +75,22 @@ public class UsbManager {
      */
     public static final String ACTION_USB_STATE =
             "android.hardware.usb.action.USB_STATE";
+
+    /**
+     * Broadcast Action: A broadcast for USB port changes.
+     *
+     * This intent is sent when a USB port is added, removed, or changes state.
+     * <ul>
+     * <li> {@link #EXTRA_PORT} containing the {@link android.hardware.usb.UsbPort}
+     * for the port.
+     * <li> {@link #EXTRA_PORT_STATUS} containing the {@link android.hardware.usb.UsbPortStatus}
+     * for the port, or null if the port has been removed
+     * </ul>
+     *
+     * @hide
+     */
+    public static final String ACTION_USB_PORT_CHANGED =
+            "android.hardware.usb.action.USB_PORT_CHANGED";
 
    /**
      * Broadcast Action:  A broadcast for USB device attached event.
@@ -212,6 +230,23 @@ public class UsbManager {
      * {@hide}
      */
     public static final String USB_FUNCTION_ACCESSORY = "accessory";
+
+    /**
+     * Name of extra for {@link #ACTION_USB_PORT_CHANGED}
+     * containing the {@link UsbPort} object for the port.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PORT = "port";
+
+    /**
+     * Name of extra for {@link #ACTION_USB_PORT_CHANGED}
+     * containing the {@link UsbPortStatus} object for the port, or null if the port
+     * was removed.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PORT_STATUS = "portStatus";
 
     /**
      * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} and
@@ -497,6 +532,77 @@ public class UsbManager {
             Log.e(TAG, "RemoteException in isUsbDataUnlocked", e);
         }
         return false;
+    }
+
+    /**
+     * Returns a list of physical USB ports on the device.
+     * <p>
+     * This list is guaranteed to contain all dual-role USB Type C ports but it might
+     * be missing other ports depending on whether the kernel USB drivers have been
+     * updated to publish all of the device's ports through the new "dual_role_usb"
+     * device class (which supports all types of ports despite its name).
+     * </p>
+     *
+     * @return The list of USB ports, or null if none.
+     *
+     * @hide
+     */
+    public UsbPort[] getPorts() {
+        try {
+            return mService.getPorts();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in getPorts", e);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the status of the specified USB port.
+     *
+     * @param port The port to query.
+     * @return The status of the specified USB port, or null if unknown.
+     *
+     * @hide
+     */
+    public UsbPortStatus getPortStatus(UsbPort port) {
+        Preconditions.checkNotNull(port, "port must not be null");
+
+        try {
+            return mService.getPortStatus(port.getId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in getPortStatus", e);
+        }
+        return null;
+    }
+
+    /**
+     * Sets the desired role combination of the port.
+     * <p>
+     * The supported role combinations depend on what is connected to the port and may be
+     * determined by consulting
+     * {@link UsbPortStatus#isRoleCombinationSupported UsbPortStatus.isRoleCombinationSupported}.
+     * </p><p>
+     * Note: This function is asynchronous and may fail silently without applying
+     * the requested changes.  If this function does cause a status change to occur then
+     * a {@link #ACTION_USB_PORT_CHANGED} broadcast will be sent.
+     * </p>
+     *
+     * @param powerRole The desired power role: {@link UsbPort#POWER_ROLE_SOURCE}
+     * or {@link UsbPort#POWER_ROLE_SINK}, or 0 if no power role.
+     * @param dataRole The desired data role: {@link UsbPort#DATA_ROLE_HOST}
+     * or {@link UsbPort#DATA_ROLE_DEVICE}, or 0 if no data role.
+     *
+     * @hide
+     */
+    public void setPortRoles(UsbPort port, int powerRole, int dataRole) {
+        Preconditions.checkNotNull(port, "port must not be null");
+        UsbPort.checkRoles(powerRole, dataRole);
+
+        try {
+            mService.setPortRoles(port.getId(), powerRole, dataRole);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setPortRole", e);
+        }
     }
 
     /** @hide */
