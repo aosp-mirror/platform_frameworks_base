@@ -36,6 +36,24 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
     </style>
 
+    <style name="DocumentsNonDialogTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
+        <item name="android:actionBarWidgetTheme">@null</item>
+        <item name="android:actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
+        <item name="android:actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
+
+        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
+        <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
+        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
+
+        <item name="android:listDivider">@*android:drawable/list_divider_material</item>
+
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowNoTitle">true</item>
+
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+    </style>
+
     <style name="StandaloneTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
         <item name="android:actionBarWidgetTheme">@null</item>
 
