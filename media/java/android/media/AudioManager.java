@@ -3859,8 +3859,8 @@ public class AudioManager {
      */
     public void registerAudioDeviceCallback(AudioDeviceCallback callback,
             android.os.Handler handler) {
-        if (callback != null && !mDeviceCallbacks.containsKey(callback)) {
-            synchronized (mDeviceCallbacks) {
+        synchronized (mDeviceCallbacks) {
+            if (callback != null && !mDeviceCallbacks.containsKey(callback)) {
                 if (mDeviceCallbacks.size() == 0) {
                     if (mPortListener == null) {
                         mPortListener = new OnAmPortUpdateListener();
@@ -3924,21 +3924,20 @@ public class AudioManager {
                     calcListDeltas(current_ports, mPreviousPorts, GET_DEVICES_ALL);
 
             if (added_devices.length != 0 || removed_devices.length != 0) {
-                Collection<NativeEventHandlerDelegate> values;
                 synchronized (mDeviceCallbacks) {
-                    values = mDeviceCallbacks.values();
-                }
-                for (NativeEventHandlerDelegate delegate : values) {
-                    handler = delegate.getHandler();
-                    if (handler != null) {
-                        if (added_devices.length != 0) {
-                            handler.sendMessage(
-                                Message.obtain(handler,MSG_DEVICES_DEVICES_ADDED, added_devices));
-                        }
-                        if (removed_devices.length != 0) {
-                            handler.sendMessage(
-                                Message.obtain(handler,MSG_DEVICES_DEVICES_REMOVED,
-                                               removed_devices));
+                    for (int i = 0; i < mDeviceCallbacks.size(); i++) {
+                        handler = mDeviceCallbacks.valueAt(i).getHandler();
+                        if (handler != null) {
+                            if (added_devices.length != 0) {
+                                handler.sendMessage(Message.obtain(handler,
+                                                                   MSG_DEVICES_DEVICES_ADDED,
+                                                                   added_devices));
+                            }
+                            if (removed_devices.length != 0) {
+                                handler.sendMessage(Message.obtain(handler,
+                                                                   MSG_DEVICES_DEVICES_REMOVED,
+                                                                   removed_devices));
+                            }
                         }
                     }
                 }
