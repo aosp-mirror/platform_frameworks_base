@@ -19,6 +19,8 @@ package android.hardware.usb;
 import android.app.PendingIntent;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
@@ -108,4 +110,13 @@ interface IUsbManager
 
     /* Clear public keys installed for secure USB debugging */
     void clearUsbDebuggingKeys();
+
+    /* Gets the list of USB ports. */
+    UsbPort[] getPorts();
+
+    /* Gets the status of the specified USB port. */
+    UsbPortStatus getPortStatus(in String portId);
+
+    /* Sets the port's current role. */
+    void setPortRoles(in String portId, int powerRole, int dataRole);
 }
