@@ -475,10 +475,8 @@
     <!-- no translation found for permlab_callPhone (3925836347681847954) -->
     <skip />
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Колдонмого сиздин катышууңузсуз телефон номурларга чалуу уруксатын берет. Бул сиз күтпөгөн чыгымдарга же чалууларга алып келиши мүмкүн. Бул куткаруучулардын номурларына чалууга уруксат бербей тургандыгын эске алыңыз. Зыяндуу колдонмолор, сиздин ырастооңузсуз чалууларды аткарып, көп чыгымдарга себепкер болушу мүмкүн."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS чалуу кызматына мүмкүнчүлүк алуу"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Колдонмого сизди катыштырбай туруп, IMS кызматынын жардамы менен чалууларды жасоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"телефондун абалын жана аныктыгын окуу"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Колдонмого түзмөктүн чалуу мүмкүнчүлүктөрүнө жетки алуу уруксатын берет. Бул уруксат колдонмого, телефондун номурун, түзмөктүн ID-син, чалуунун абалын жана байланышта чыккан номурду аныктоого жол берет."</string>
     <!-- no translation found for permlab_wakeLock (1531731435011495015) -->
@@ -1527,26 +1525,8 @@
     </plurals>
     <!-- no translation found for action_mode_done (7217581640461922289) -->
     <skip />
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB сактагыч чыгарылууда…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD-карта чыгарылууда…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB сактагыч тазаланууда…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD-карта тазаланууда…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB сактагыч тазаланган жок."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD-карта тазаланган жок."</string>
-    <!-- no translation found for media_bad_removal (7960864061016603281) -->
-    <skip />
-    <!-- no translation found for media_checking (418188720009569693) -->
-    <skip />
-    <!-- no translation found for media_checking (7334762503904827481) -->
-    <skip />
-    <!-- no translation found for media_removed (7001526905057952097) -->
-    <skip />
-    <!-- no translation found for media_shared (5830814349250834225) -->
-    <skip />
-    <!-- no translation found for media_shared (5706130568133540435) -->
-    <skip />
-    <!-- no translation found for media_unknown_state (729192782197290385) -->
-    <skip />
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->

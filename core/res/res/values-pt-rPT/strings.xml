@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite à aplicação controlar a lanterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"marcar números de telefone diretamente"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que a aplicação ligue para números de telefone sem a intervenção do utilizador. Esta ação pode resultar em cobranças ou chamadas inesperadas. Tenha em atenção que isto não permite que a aplicação ligue para números de emergência. As aplicações maliciosas podem fazer com que incorra em custos, fazendo chamadas sem a sua confirmação."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"aceder ao serviço de chamadas IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite que a aplicação utilize o serviço IMS para fazer chamadas sem a sua intervenção."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ler o estado e a identidade do telemóvel"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que a aplicação aceda às funcionalidades de telefone do dispositivo. Esta autorização permite que a aplicação determine o número de telefone e IDs do dispositivo, se alguma chamada está ativa e qual o número remoto ligado por uma chamada."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir que o tablet entre em inactividade"</string>
@@ -528,7 +526,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desat. funcionalid. bloq. ecrã"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impeça a utilização de algumas funcionalidades de bloqueio de ecrã."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Residência"</item>
+    <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvel"</item>
     <item msgid="7897544654242874543">"Emprego"</item>
     <item msgid="1103601433382158155">"Fax do emprego"</item>
@@ -571,7 +569,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Personalizado"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Residência"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Casa"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Telemóvel"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Emprego"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax do emprego"</string>
@@ -592,7 +590,7 @@
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistente"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Personalizado"</string>
-    <string name="eventTypeBirthday" msgid="2813379844211390740">"Data de nascimento"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Data de nasc."</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Aniversário"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Outro"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizado"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 correspondência</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Concluído"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"A desmontar memória de armazenamento USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"A desmontar cartão SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"A apagar memória de armazenamento USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"A apagar cartão SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Não foi possível apagar a memória de armazenamento USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Não foi possível apagar o cartão SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"O cartão SD foi removido antes de ser desmontado."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"O armazenamento USB está actualmente a ser verificado."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"O cartão SD está actualmente a ser verificado."</string>
-    <string name="media_removed" msgid="7001526905057952097">"O cartão SD foi removido."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"O armazenamento USB está actualmente a ser utilizado por um computador."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"O cartão SD está actualmente a ser utilizado por um computador."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Suporte de dados externo em estado desconhecido."</string>
     <string name="share" msgid="1778686618230011964">"Partilhar"</string>
     <string name="find" msgid="4808270900322985960">"Localizar"</string>
     <string name="websearch" msgid="4337157977400211589">"Pesquisar na Web"</string>

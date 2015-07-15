@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Membenarkan apl mengawal lampu suluh."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"panggil terus nombor telefon"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Membenarkan apl memanggil nombor telefon tanpa campur tangan anda. Ini mungkin menyebabkan caj atau panggilan yang di luar jangkaan. Apl hasad boleh menyebabkan anda kerugian wang dengan membuat panggilan tanpa pengesahan anda."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"akses perkhidmatan panggilan IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Membenarkan apl menggunakan perkhidmatan IMS untuk membuat panggilan tanpa campur tangan anda."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"baca status dan identiti telefon"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Membenarkan apl mengakses ciri telefon pada peranti. Kebenaran ini membolehkan apl menentukan nombor telefon dan ID peranti, sama ada panggilan aktif dan nombor jauh yang dihubungkan dengan panggilan."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"menghalang tablet daripada tidur"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 padanan</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Selesai"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Menyahlekap storan USB…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Menyahlekap kad SD…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Memadamkan storan USB…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Memadamkan kad SD…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Tidak dapat memadamkan storan USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Tidak dapat memadamkan kad SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Kad SD telah dikeluarkan sebelum dinyahlekap."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Storan USB sedang disemak buat masa ini."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Kad SD sedang disemak buat masa ini."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Kad SD telah dikeluarkan."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Storan USB sedang digunakan oleh komputer buat masa ini."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Kad SD sedang digunakan oleh komputer buat masa ini."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Media luaran dalam keadaan yang tidak diketahui."</string>
     <string name="share" msgid="1778686618230011964">"Kongsi"</string>
     <string name="find" msgid="4808270900322985960">"Dapatkan"</string>
     <string name="websearch" msgid="4337157977400211589">"Carian Web"</string>

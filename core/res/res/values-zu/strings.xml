@@ -1148,19 +1148,8 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> kokungu-<xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Kwenziwe"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Iyehlisa isitoreji se-USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Yehlisa ikhadi le-SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Isula isitoreji se-USB."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Isula ikhadi le-SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Yehlulekile ukusula indawo yokugcina i-USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Yehlulekile ukwesula ikhadi le-SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Ikhadi le-SD likhishwe ngaphambi kokuba lehliswe."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Isitoreji se-USB sisahlolwa."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Ikhadi le-SD okwamanje liyahlolwa."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Ikhadi le-SD likhishiwe."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Isitoreji se-USB sisasetshenziswa yikhompyutha."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Ikhadi le-SD okwamanje lisetshenziswa ikhompyutha."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Imidiya yangaphakathi kwisimo esingaziwa."</string>
     <string name="share" msgid="1778686618230011964">"Yabelana"</string>
     <string name="find" msgid="4808270900322985960">"Thola"</string>
     <string name="websearch" msgid="4337157977400211589">"USesho lweWebhu"</string>

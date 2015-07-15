@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Mengizinkan apl mengontrol lampu kilat."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"panggil nomor telepon secara langsung"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Memungkinkan aplikasi menghubungi nomor telepon tanpa campur tangan Anda. Izin ini dapat mengakibatkan biaya atau panggilan tak terduga. Perhatikan bahwa izin ini tidak memungkinkan aplikasi menghubungi nomor darurat. Aplikasi berbahaya dapat menyebabkan Anda dikenakan biaya dengan melakukan panggilan tanpa konfirmasi Anda."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"akses layanan panggilan IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Memungkinkan aplikasi menggunakan layanan IMS untuk melakukan panggilan tanpa campur tangan Anda."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"baca identitas dan status ponsel"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang tersambung oleh sebuah panggilan."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"cegah tablet dari tidur"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 kecocokan</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Selesai"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Melepas penyimpanan USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Melepas kartu SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Menghapus penyimpanan USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Menghapus kartu SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Tidak dapat menghapus penyimpanan USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Tidak dapat menghapus kartu SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Kartu SD dihapus sebelum dilepas."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Saat ini penyimpanan USB sedang diperiksa."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Kartu SD sedang diperiksa."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Kartu SD telah dikeluarkan."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Saat ini penyimpanan USB sedang digunakan oleh komputer."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Kartu SD sedang digunakan oleh komputer."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Media eksternal dalam status tidak diketahui."</string>
     <string name="share" msgid="1778686618230011964">"Bagikan"</string>
     <string name="find" msgid="4808270900322985960">"Temukan"</string>
     <string name="websearch" msgid="4337157977400211589">"Penelusuran Web"</string>

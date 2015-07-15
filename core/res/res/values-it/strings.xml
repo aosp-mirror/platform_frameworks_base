@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Consente all\'applicazione di controllare il flash."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"chiamata diretta n. telefono"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Consente all\'applicazione di chiamare numeri di telefono senza il tuo intervento. Ciò può comportare chiamate o addebiti imprevisti. Tieni presente che ciò non consente all\'applicazione di chiamare numeri di emergenza. Applicazioni dannose potrebbero generare dei costi effettuando chiamate senza la tua conferma."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"Accesso al servizio di chiamata IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Consente all\'app di utilizzare il servizio IMS per fare chiamate senza il tuo intervento."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lettura stato e identità telefono"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Consente all\'applicazione di accedere alle funzioni telefoniche del dispositivo. Questa autorizzazione consente all\'applicazione di determinare il numero di telefono e gli ID dei dispositivi, se una chiamata è attiva e il numero remoto connesso da una chiamata."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"disattivazione stand-by del tablet"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 partita</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Fine"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Smontaggio dell\'archivio USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Smontaggio scheda SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Cancellazione dell\'archivio USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Cancellazione scheda SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Cancellazione archivio USB non riuscita."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Cancellazione scheda SD non riuscita."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"La scheda SD è stata rimossa prima che fosse smontata."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Controllo dell\'archivio USB..."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Controllo della scheda SD..."</string>
-    <string name="media_removed" msgid="7001526905057952097">"La scheda SD è stata rimossa."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"L\'archivio USB è attualmente utilizzato da un computer."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"La scheda SD è attualmente utilizzata da un computer."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Stato dei supporti esterni sconosciuto."</string>
     <string name="share" msgid="1778686618230011964">"Condividi"</string>
     <string name="find" msgid="4808270900322985960">"Trova"</string>
     <string name="websearch" msgid="4337157977400211589">"Ricerca Web"</string>

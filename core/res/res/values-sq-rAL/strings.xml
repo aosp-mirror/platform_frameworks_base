@@ -45,7 +45,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Posta zanore"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem në lidhje ose kod i pavlefshëm MMI-je."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"Operacioni kufizohet vetëm në numrat e telefonisë fikse."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Veprimi është i kufizuar vetëm kundrejt numrave me telefonim të përzgjedhur"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Shërbimi u aktivizua."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Shërbimi u aktivizua për:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Shërbimi është çaktivizuar."</string>
@@ -354,10 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Lejon aplikacionin të kontrollojë elektrikun."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefono drejtpërdrejt numrat e telefonit"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Lejon aplikacionin të telefonojë numra pa ndërhyrjen tënde. Kjo mund të rezultojë në tarifa ose telefonata të papritura. Ki parasysh se kjo nuk e lejon aplikacionin të telefonojë numra urgjence. Aplikacione keqdashëse mund të të kushtojnë para duke kryer telefonata pa konfirmimin tënd."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"qasje në shërbimin e telefonatave IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Lejon aplikacionin të përdorë shërbimin IMS për të kryer telefonata pa ndërhyrjen tënde."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lexo statusin e telefonit dhe identitetin"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lejon aplikacionin të hyjë në funksionet telefonike të pajisjes. Kjo leje i mundëson aplikacionit të përcaktojë numrin e telefonit dhe ID-të e pajisjes, nëse një telefonatë është aktive apo nëse numri në distancë është i lidhur me një telefonatë."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"parandalo kalimin e tabletit në fjetje"</string>
@@ -1150,19 +1148,8 @@
       <item quantity="one">1 përputhje</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"U krye!"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Po çmonton USB-në…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Po çmonton kartën SD…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Po fshin USB-në..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Po fshin kartën SD…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Nuk mundi ta spastronte USB-në."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Nuk mundi të fshinte kartën SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Karta SD u hoq para shkëputjes."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-ja po kontrollohet aktualisht."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Aktualisht karta SD po kontrollohet."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Karta SD është hequr."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB-ja është aktualisht në përdorim në kompjuter."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Karta SD është aktualisht në përdorim në kompjuter."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Pajisja ruajtëse e jashtme është në gjendje të panjohshme."</string>
     <string name="share" msgid="1778686618230011964">"Shpërnda"</string>
     <string name="find" msgid="4808270900322985960">"Gjej"</string>
     <string name="websearch" msgid="4337157977400211589">"Kërkim në internet"</string>

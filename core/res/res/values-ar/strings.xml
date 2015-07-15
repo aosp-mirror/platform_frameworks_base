@@ -358,10 +358,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"للسماح للتطبيق بالتحكم في الضوء الوامض."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"اتصال مباشر بأرقام الهواتف"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"للسماح للتطبيق بطلب أرقام هاتفية بدون تدخل منك. وقد يؤدي ذلك إلى تحمل رسوم غير متوقعة أو إجراء مكالمات غير متوقعة. ومن الجدير بالذكر أن ذلك لا يتيح للتطبيق الاتصال بأرقام الطوارئ. وقد تؤدي التطبيقات الضارة إلى تحملك تكاليف مالية من خلال إجراء مكالمات بدون موافقة منك."</string>
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"الوصول إلى خدمة الاتصال عبر الرسائل الفورية"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"للسماح للتطبيق باستخدام خدمة الرسائل الفورية لإجراء المكالمات دون تدخل منك."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"قراءة حالة الهاتف والهوية"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"منع الجهاز اللوحي من الدخول في وضع السكون"</string>
@@ -1182,19 +1180,8 @@
       <item quantity="one">مباراة واحدة</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"تم"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"‏جارٍ إلغاء تحميل وحدة تخزين USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"‏جارٍ إلغاء تحميل بطاقة SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"‏جارٍ محو وحدة تخزين USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"‏جارٍ محو بطاقة SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"‏تعذر مسح وحدة تخزين USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"‏تعذر مسح بطاقة SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"‏تمت إزالة بطاقة SD قبل أن يتم إلغاء تركيبها."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"‏يتم حاليًا التحقق من وحدة تخزين USB."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"‏يتم الآن التحقق من بطاقة SD."</string>
-    <string name="media_removed" msgid="7001526905057952097">"‏تمت إزالة بطاقة SD."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"‏وحدة تخزين USB قيد الاستخدام بواسطة كمبيوتر حاليًا."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"‏بطاقة SD قيد الاستخدام حاليًا بواسطة كمبيوتر."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"وسائط خارجية في حالة غير معروفة."</string>
     <string name="share" msgid="1778686618230011964">"مشاركة"</string>
     <string name="find" msgid="4808270900322985960">"بحث"</string>
     <string name="websearch" msgid="4337157977400211589">"بحث الويب"</string>
