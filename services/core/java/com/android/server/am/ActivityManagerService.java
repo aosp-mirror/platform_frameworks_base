@@ -18,10 +18,7 @@ package com.android.server.am;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -3517,8 +3514,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
                     mStackSupervisor.startActivityLocked(null, intent, null, ri.activityInfo,
-                            null, null, null, null, 0, 0, 0, null, 0, 0, 0, null, false, null, null,
-                            null);
+                            null, null, null, null, 0, 0, 0, null, 0, 0, 0, null, false, false,
+                            null, null, null);
                 }
             }
         }
@@ -3804,13 +3801,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                profilerInfo, null, null, options, userId, null, null);
+                profilerInfo, null, null, options, false, userId, null, null);
     }
 
     @Override
     public final int startActivityAsCaller(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle options, int userId) {
+            int startFlags, ProfilerInfo profilerInfo, Bundle options, boolean ignoreTargetSecurity,
+            int userId) {
 
         // This is very dangerous -- it allows you to perform a start activity (including
         // permission grants) as any app that may launch one of your own activities.  So
@@ -3844,6 +3842,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     + sourceRecord.launchedFromUid);
                 }
             }
+            if (ignoreTargetSecurity) {
+                if (intent.getComponent() == null) {
+                    throw new SecurityException(
+                            "Component must be specified with ignoreTargetSecurity");
+                }
+                if (intent.getSelector() != null) {
+                    throw new SecurityException(
+                            "Selector not allowed with ignoreTargetSecurity");
+                }
+            }
             targetUid = sourceRecord.launchedFromUid;
             targetPackage = sourceRecord.launchedFromPackage;
         }
@@ -3856,7 +3864,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             int ret = mStackSupervisor.startActivityMayWait(null, targetUid, targetPackage, intent,
                     resolvedType, null, null, resultTo, resultWho, requestCode, startFlags, null,
-                    null, null, options, userId, null, null);
+                    null, null, options, ignoreTargetSecurity, userId, null, null);
             return ret;
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
@@ -3885,7 +3893,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 null, null, resultTo, resultWho, requestCode, startFlags, profilerInfo, res, null,
-                options, userId, null, null);
+                options, false, userId, null, null);
         return res;
     }
 
@@ -3899,7 +3907,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, config, options, userId, null, null);
+                null, null, config, options, false, userId, null, null);
         return ret;
     }
 
@@ -3957,7 +3965,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(null, callingUid, callingPackage, intent,
                 resolvedType, session, interactor, null, null, 0, startFlags, profilerInfo, null,
-                null, options, userId, null, null);
+                null, options, false, userId, null, null);
     }
 
     @Override
@@ -4068,7 +4076,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int res = mStackSupervisor.startActivityLocked(r.app.thread, intent,
                     r.resolvedType, aInfo, null, null, resultTo != null ? resultTo.appToken : null,
                     resultWho, requestCode, -1, r.launchedFromUid, r.launchedFromPackage,
-                    -1, r.launchedFromUid, 0, options, false, null, null, null);
+                    -1, r.launchedFromUid, 0, options, false, false, null, null, null);
             Binder.restoreCallingIdentity(origId);
 
             r.finishing = wasFinishing;
@@ -4126,7 +4134,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, null, options, userId, container, inTask);
+                null, null, null, options, false, userId, container, inTask);
         return ret;
     }
 
@@ -20557,7 +20565,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             return mStackSupervisor.startActivityMayWait(appThread, -1, callingPackage, intent,
                     resolvedType, null, null, null, null, 0, 0, null, null,
-                    null, options, callingUser, null, tr);
+                    null, options, false, callingUser, null, tr);
         }
 
         @Override
