@@ -70,6 +70,8 @@ public class UsbManager {
      * <li> {@link #USB_FUNCTION_MIDI} boolean extra indicating whether the
      * MIDI function is enabled
      * </ul>
+     * If the sticky intent has not been found, that indicates USB is disconnected,
+     * USB is not configued, MTP function is enabled, and all the other functions are disabled.
      *
      * {@hide}
      */
@@ -592,7 +594,7 @@ public class UsbManager {
 
     /** @hide */
     public static String addFunction(String functions, String function) {
-        if ("none".equals(functions)) {
+        if (USB_FUNCTION_NONE.equals(functions)) {
             return function;
         }
         if (!containsFunction(functions, function)) {
@@ -613,7 +615,7 @@ public class UsbManager {
             }
         }
         if (split.length == 1 && split[0] == null) {
-            return "none";
+            return USB_FUNCTION_NONE;
         }
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < split.length; i++) {
