@@ -10825,6 +10825,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // We are now ready to launch the assist activity.
+        IResultReceiver sendReceiver = null;
+        Bundle sendBundle = null;
         synchronized (this) {
             buildAssistBundleLocked(pae, extras);
             boolean exists = mPendingAssistExtras.remove(pae);
@@ -10833,18 +10835,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Timed out.
                 return;
             }
-            if (pae.receiver != null) {
+            if ((sendReceiver=pae.receiver) != null) {
                 // Caller wants result sent back to them.
-                Bundle topBundle = new Bundle();
-                topBundle.putBundle("data", pae.extras);
-                topBundle.putParcelable("structure", pae.structure);
-                topBundle.putParcelable("content", pae.content);
-                try {
-                    pae.receiver.send(0, topBundle);
-                } catch (RemoteException e) {
-                }
-                return;
+                sendBundle = new Bundle();
+                sendBundle.putBundle("data", pae.extras);
+                sendBundle.putParcelable("structure", pae.structure);
+                sendBundle.putParcelable("content", pae.content);
             }
+        }
+        if (sendReceiver != null) {
+            try {
+                sendReceiver.send(0, sendBundle);
+            } catch (RemoteException e) {
+            }
+            return;
         }
 
         long ident = Binder.clearCallingIdentity();
