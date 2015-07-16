@@ -72,6 +72,7 @@ final class DefaultPermissionGrantPolicy {
     static {
         CONTACTS_PERMISSIONS.add(Manifest.permission.READ_CONTACTS);
         CONTACTS_PERMISSIONS.add(Manifest.permission.WRITE_CONTACTS);
+        CONTACTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
     private static final Set<String> LOCATION_PERMISSIONS = new ArraySet<>();
@@ -115,11 +116,6 @@ final class DefaultPermissionGrantPolicy {
     static {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-    }
-
-    private static final Set<String> ACCOUNTS_PERMISSIONS = new ArraySet<>();
-    static {
-        ACCOUNTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
     private final PackageManagerService mService;
@@ -352,7 +348,6 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(calendarPackage)) {
                 grantRuntimePermissionsLPw(calendarPackage, CALENDAR_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(calendarPackage, CONTACTS_PERMISSIONS, userId);
-                grantRuntimePermissionsLPw(calendarPackage, ACCOUNTS_PERMISSIONS, userId);
             }
 
             // Calendar provider
@@ -362,7 +357,6 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(calendarProviderPackage, CONTACTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(calendarProviderPackage, CALENDAR_PERMISSIONS,
                         true, userId);
-                grantRuntimePermissionsLPw(calendarProviderPackage, ACCOUNTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(calendarProviderPackage, STORAGE_PERMISSIONS, userId);
             }
 
@@ -386,7 +380,6 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(contactsPackage)) {
                 grantRuntimePermissionsLPw(contactsPackage, CONTACTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(contactsPackage, PHONE_PERMISSIONS, userId);
-                grantRuntimePermissionsLPw(contactsPackage, ACCOUNTS_PERMISSIONS, userId);
             }
 
             // Contacts provider sync adapters
@@ -408,7 +401,6 @@ final class DefaultPermissionGrantPolicy {
                         true, userId);
                 grantRuntimePermissionsLPw(contactsProviderPackage, PHONE_PERMISSIONS,
                         true, userId);
-                grantRuntimePermissionsLPw(contactsProviderPackage, ACCOUNTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(contactsProviderPackage, STORAGE_PERMISSIONS, userId);
             }
 
@@ -419,7 +411,7 @@ final class DefaultPermissionGrantPolicy {
                     getDefaultSystemHandlerActivityPackageLPr(deviceProvisionIntent, userId);
             if (deviceProvisionPackage != null
                     && doesPackageSupportRuntimePermissions(deviceProvisionPackage)) {
-                grantRuntimePermissionsLPw(deviceProvisionPackage, ACCOUNTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(deviceProvisionPackage, CONTACTS_PERMISSIONS, userId);
             }
 
             // Maps
