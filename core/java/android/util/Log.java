@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.DeadSystemException;
@@ -27,6 +28,8 @@ import com.android.internal.util.LineBreakBufferedWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.UnknownHostException;
 
 /**
@@ -59,6 +62,10 @@ import java.net.UnknownHostException;
  * significant work and incurring significant overhead.
  */
 public final class Log {
+    /** @hide */
+    @IntDef({ASSERT, ERROR, WARN, INFO, DEBUG, VERBOSE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Level {}
 
     /**
      * Priority constant for the println method; use Log.v.
@@ -207,9 +214,8 @@ public final class Log {
      *  INFO will be logged. Before you make any calls to a logging method you should check to see
      *  if your tag should be logged. You can change the default level by setting a system property:
      *      'setprop log.tag.&lt;YOUR_LOG_TAG> &lt;LEVEL>'
-     *  Where level is either VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT, or SUPPRESS. SUPPRESS will
-     *  turn off all logging for your tag. You can also create a local.prop file that with the
-     *  following in it:
+     *  Where level is either VERBOSE, DEBUG, INFO, WARN, ERROR, or ASSERT.
+     *  You can also create a local.prop file that with the following in it:
      *      'log.tag.&lt;YOUR_LOG_TAG>=&lt;LEVEL>'
      *  and place that in /data/local.prop.
      *
@@ -220,7 +226,7 @@ public final class Log {
      *         for Nougat (7.0) releases (API <= 23) and prior, there is no
      *         tag limit of concern after this API level.
      */
-    public static native boolean isLoggable(@Nullable String tag, int level);
+    public static native boolean isLoggable(@Nullable String tag, @Level int level);
 
     /**
      * Send a {@link #WARN} log message and log the exception.
@@ -364,7 +370,7 @@ public final class Log {
      * @param msg The message you would like logged.
      * @return The number of bytes written.
      */
-    public static int println(int priority, @Nullable String tag, @NonNull String msg) {
+    public static int println(@Level int priority, @Nullable String tag, @NonNull String msg) {
         return println_native(LOG_ID_MAIN, priority, tag, msg);
     }
 
