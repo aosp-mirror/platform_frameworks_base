@@ -4714,8 +4714,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     // Browser/generic handling case.  If there's a default browser, go straight
                     // to that (but only if there is no other higher-priority match).
-                    final String defaultBrowserPackageName = getDefaultBrowserPackageName(
-                            UserHandle.myUserId());
+                    final String defaultBrowserPackageName = getDefaultBrowserPackageName(userId);
                     int maxMatchPrio = 0;
                     ResolveInfo defaultBrowserMatch = null;
                     final int numCandidates = matchAllList.size();
@@ -9927,7 +9926,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (packageName != null) {
                 result |= updateIntentVerificationStatus(packageName,
                         PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
-                        UserHandle.myUserId());
+                        userId);
                 mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowserLPr(
                         packageName, userId);
             }
