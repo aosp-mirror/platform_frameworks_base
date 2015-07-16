@@ -973,7 +973,7 @@ public class ResolverActivity extends Activity {
 
         @Override
         public boolean startAsCaller(Activity activity, Bundle options, int userId) {
-            activity.startActivityAsCaller(mResolvedIntent, options, userId);
+            activity.startActivityAsCaller(mResolvedIntent, options, false, userId);
             return true;
         }
 
