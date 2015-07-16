@@ -423,6 +423,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             // post-inflate process. For now this supports TabHost/TabWidget
             postInflateProcess(view, params.getLayoutlibCallback(), isPreference ? view : null);
+            mInflater.onDoneInflation();
 
             setActiveToolbar(view, context, params);
 
@@ -1342,6 +1343,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 }
             }
         } else if (view instanceof ViewGroup) {
+            mInflater.postInflateProcess(view);
             ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();
             for (int c = 0; c < count; c++) {
