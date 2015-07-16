@@ -85,6 +85,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private static final int FINGERPRINT_ACQUIRED_GOOD = 0;
 
     Handler mHandler = new Handler() {
+        @Override
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case MSG_USER_SWITCHING:
@@ -273,7 +274,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             Slog.w(TAG, "enroll: no fingeprintd!");
             return;
         }
-        stopPendingOperations();
+        stopPendingOperations(true);
         mEnrollClient = new ClientMonitor(token, receiver, groupId, restricted);
         final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
         try {
@@ -314,17 +315,23 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         return 0;
     }
 
-    private void stopPendingOperations() {
+    private void stopPendingOperations(boolean initiatedByClient) {
         if (mEnrollClient != null) {
-            stopEnrollment(mEnrollClient.token, true);
+            stopEnrollment(mEnrollClient.token, initiatedByClient);
         }
         if (mAuthClient != null) {
-            stopAuthentication(mAuthClient.token, true);
+            stopAuthentication(mAuthClient.token, initiatedByClient);
         }
         // mRemoveClient is allowed to continue
     }
 
-    void stopEnrollment(IBinder token, boolean notify) {
+    /**
+     * Stop enrollment in progress and inform client if they initiated it.
+     *
+     * @param token token for client
+     * @param initiatedByClient if this call is the result of client action (e.g. calling cancel)
+     */
+    void stopEnrollment(IBinder token, boolean initiatedByClient) {
         IFingerprintDaemon daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "stopEnrollment: no fingeprintd!");
@@ -332,15 +339,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
         final ClientMonitor client = mEnrollClient;
         if (client == null || client.token != token) return;
-        try {
-            int result = daemon.cancelEnrollment();
-            if (result != 0) {
-                Slog.w(TAG, "startEnrollCancel failed, result = " + result);
+        if (initiatedByClient) {
+            try {
+                int result = daemon.cancelEnrollment();
+                if (result != 0) {
+                    Slog.w(TAG, "startEnrollCancel failed, result = " + result);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "stopEnrollment failed", e);
             }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "stopEnrollment failed", e);
-        }
-        if (notify) {
             client.sendError(FingerprintManager.FINGERPRINT_ERROR_CANCELED);
         }
         removeClient(mEnrollClient);
@@ -353,7 +360,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             Slog.w(TAG, "startAuthentication: no fingeprintd!");
             return;
         }
-        stopPendingOperations();
+        stopPendingOperations(true);
         mAuthClient = new ClientMonitor(token, receiver, groupId, restricted);
         if (inLockoutMode()) {
             Slog.v(TAG, "In lockout mode; disallowing authentication");
@@ -373,7 +380,13 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    void stopAuthentication(IBinder token, boolean notify) {
+    /**
+     * Stop authentication in progress and inform client if they initiated it.
+     *
+     * @param token token for client
+     * @param initiatedByClient if this call is the result of client action (e.g. calling cancel)
+     */
+    void stopAuthentication(IBinder token, boolean initiatedByClient) {
         IFingerprintDaemon daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "stopAuthentication: no fingeprintd!");
@@ -381,15 +394,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
         final ClientMonitor client = mAuthClient;
         if (client == null || client.token != token) return;
-        try {
-            int result = daemon.cancelAuthentication();
-            if (result != 0) {
-                Slog.w(TAG, "stopAuthentication failed, result=" + result);
+        if (initiatedByClient) {
+            try {
+                int result = daemon.cancelAuthentication();
+                if (result != 0) {
+                    Slog.w(TAG, "stopAuthentication failed, result=" + result);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "stopAuthentication failed", e);
             }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "stopAuthentication failed", e);
-        }
-        if (notify) {
             client.sendError(FingerprintManager.FINGERPRINT_ERROR_CANCELED);
         }
         removeClient(mAuthClient);
@@ -485,12 +498,14 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             receiver = null;
         }
 
+        @Override
         public void binderDied() {
             token = null;
             removeClient(this);
             receiver = null;
         }
 
+        @Override
         protected void finalize() throws Throwable {
             try {
                 if (token != null) {
