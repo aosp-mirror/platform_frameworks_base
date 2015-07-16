@@ -85,6 +85,9 @@ public class QsTuner extends Fragment implements Callback {
             case MENU_RESET:
                 mTileHost.reset();
                 break;
+            case android.R.id.home:
+                getFragmentManager().popBackStack();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

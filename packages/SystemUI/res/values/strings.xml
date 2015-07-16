@@ -1032,7 +1032,7 @@
     <string name="volume_stream_vibrate_dnd" translatable="false">%s vibrate — Priority only</string>
 
     <!-- Name of special SystemUI debug settings -->
-    <string name="system_ui_tuner">System UI tuner</string>
+    <string name="system_ui_tuner">System UI Tuner</string>
 
     <!-- Preference to show/hide embedded battery percentage [CHAR LIMIT=50] -->
     <string name="show_battery_percentage">Show embedded battery percentage</string>
@@ -1098,5 +1098,26 @@
 
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>
+
+    <!-- Title of warning when entering System UI tuner for first time [CHAR LIMIT=NONE] -->
+    <string name="tuner_warning_title">Fun for some but not for all</string>
+
+    <!-- Warning for users entering the System UI tuner for the first time [CHAR LIMIT=NONE]-->
+    <string name="tuner_warning">System UI Tuner gives you extra ways to tweak and customize the Android user interface. These experimental features may change, break, or disappear in future releases. Proceed with caution.</string>
+
+    <!-- Warning for users entering the System UI tuner [CHAR LIMIT=NONE]-->
+    <string name="tuner_persistent_warning">These experimental features may change, break, or disappear in future releases. Proceed with caution.</string>
+
+    <!-- Generic "got it" acceptance of dialog or cling [CHAR LIMIT=NONE] -->
+    <string name="got_it">Got it</string>
+
+    <!-- Toast describing tuner has been enabled [CHAR LIMIT=NONE] -->
+    <string name="tuner_toast">Congrats! System UI Tuner has been added to Settings</string>
+
+    <!-- Option to remove the tuner from settings [CHAR LIMIT=NONE] -->
+    <string name="remove_from_settings">Remove from Settings</string>
+
+    <!-- Dialog asking if the tuner should really be removed from settings [CHAR LIMIT=NONE]-->
+    <string name="remove_from_settings_prompt">Remove System UI Tuner from Settings and stop using all of its features?"</string>
 
 </resources>
