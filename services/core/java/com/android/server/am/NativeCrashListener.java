@@ -123,11 +123,10 @@ final class NativeCrashListener extends Thread {
             Os.listen(serverFd, 1);
 
             while (true) {
-                InetSocketAddress peer = new InetSocketAddress();
                 FileDescriptor peerFd = null;
                 try {
                     if (MORE_DEBUG) Slog.v(TAG, "Waiting for debuggerd connection");
-                    peerFd = Os.accept(serverFd, peer);
+                    peerFd = Os.accept(serverFd, null /* peerAddress */);
                     if (MORE_DEBUG) Slog.v(TAG, "Got debuggerd socket " + peerFd);
                     if (peerFd != null) {
                         // Only the superuser is allowed to talk to us over this socket
