@@ -27,6 +27,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="end"
+            android:focusable="true"
             android:background="@drawable/ripple_drawable"
             android:contentDescription="@string/accessibility_clear_all"/>
 </com.android.systemui.statusbar.DismissView>
