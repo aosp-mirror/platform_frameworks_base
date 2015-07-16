@@ -153,6 +153,8 @@ private:
     }
 
     void regionFromPath(const SkPath& path, SkRegion& pathAsRegion) {
+        // TODO: this should not mask every path to the viewport - this makes it impossible to use
+        // paths to clip to larger areas (which is valid e.g. with SkRegion::kReplace_Op)
         pathAsRegion.setPath(path, createViewportRegion());
     }
 
