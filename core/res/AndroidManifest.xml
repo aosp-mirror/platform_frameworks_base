@@ -2062,9 +2062,23 @@
     <permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @hide Allows an application to grant or revoke specific permissions. -->
-    <permission android:name="android.permission.GRANT_REVOKE_PERMISSIONS"
+    <!-- Allows an application to grant specific permissions.
+         @hide -->
+    <permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS"
         android:protectionLevel="signature|installer" />
+
+    <!-- Allows an app that has this permission and the permissions to install packages
+         to request certain runtime permissions to be granted at installation.
+         @hide
+         @SystemApi -->
+    <permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS"
+        android:protectionLevel="signature|installer|verifier" />
+
+    <!-- Allows an application to revoke specific permissions.
+        @hide
+        @SystemApi -->
+    <permission android:name="android.permission.REVOKE_RUNTIME_PERMISSIONS"
+         android:protectionLevel="signature|installer|verifier" />
 
     <!-- @hide Allows an application to observe permission changes. -->
     <permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"
@@ -2547,12 +2561,6 @@
          {@link android.service.voice.VoiceInteractionService}.
          @hide -->
     <permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE"
-        android:protectionLevel="signature" />
-
-    <!-- Allows an app that has this permission and a permissions to install packages
-         to request all runtime permissions to be granted at installation.
-     @hide -->
-    <permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS"
         android:protectionLevel="signature" />
 
     <!-- The system process that is allowed to bind to services in carrier apps will

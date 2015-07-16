@@ -104,6 +104,7 @@ package android {
     field public static final java.lang.String HARDWARE_TEST = "android.permission.HARDWARE_TEST";
     field public static final java.lang.String HDMI_CEC = "android.permission.HDMI_CEC";
     field public static final java.lang.String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
+    field public static final java.lang.String INSTALL_GRANT_RUNTIME_PERMISSIONS = "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS";
     field public static final java.lang.String INSTALL_LOCATION_PROVIDER = "android.permission.INSTALL_LOCATION_PROVIDER";
     field public static final java.lang.String INSTALL_PACKAGES = "android.permission.INSTALL_PACKAGES";
     field public static final java.lang.String INSTALL_SHORTCUT = "com.android.launcher.permission.INSTALL_SHORTCUT";
@@ -182,6 +183,7 @@ package android {
     field public static final java.lang.String REQUEST_INSTALL_PACKAGES = "android.permission.REQUEST_INSTALL_PACKAGES";
     field public static final deprecated java.lang.String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
     field public static final java.lang.String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
+    field public static final java.lang.String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final java.lang.String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final java.lang.String SEND_SMS = "android.permission.SEND_SMS";
@@ -9455,6 +9457,7 @@ package android.content.pm {
     method public void setAppIcon(android.graphics.Bitmap);
     method public void setAppLabel(java.lang.CharSequence);
     method public void setAppPackageName(java.lang.String);
+    method public void setGrantedRuntimePermissions(java.lang.String[]);
     method public void setInstallLocation(int);
     method public void setOriginatingUri(android.net.Uri);
     method public void setReferrerUri(android.net.Uri);
