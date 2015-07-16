@@ -450,7 +450,10 @@ public final class FloatingToolbar {
             }
             refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
             preparePopupContent();
-            // We need to specify the offset relative to mParent.
+            // PopupWindow#showAtLocation() receives the location relative to the attached window
+            // hence the following code is correct when and only when mParent is aligned to the
+            // top-left of the attached window.
+            // TODO: Fix the following logic so that mParent can be placed at anywhere.
             // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can
             // specify the popup poision in screen coordinates.
             mParent.getLocationOnScreen(mParentPositionOnScreen);
@@ -519,6 +522,10 @@ public final class FloatingToolbar {
             cancelOverflowAnimations();
             refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
             preparePopupContent();
+            // PopupWindow#update() receives the location relative to the attached window hence
+            // the following code is correct when and only when mParent is aligned to the top-left
+            // of the attached window.
+            // TODO: Fix the following logic so that mParent can be placed at anywhere.
             // We need to specify the offset relative to mParent.
             // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can
             // specify the popup poision in screen coordinates.
