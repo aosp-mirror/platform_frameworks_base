@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
+import com.android.layoutlib.bridge.util.ReflectionUtils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,6 +31,7 @@ import android.view.View;
 import java.lang.reflect.Method;
 
 import static com.android.layoutlib.bridge.util.ReflectionUtils.ReflectionException;
+import static com.android.layoutlib.bridge.util.ReflectionUtils.getCause;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.getMethod;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.invoke;
 
@@ -68,11 +70,6 @@ public class RecyclerViewUtil {
             Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                     "Error occurred while trying to setup RecyclerView.", cause, null);
         }
-    }
-
-    private static Throwable getCause(Throwable throwable) {
-        Throwable cause = throwable.getCause();
-        return cause == null ? throwable : cause;
     }
 
     private static void setLayoutManager(@NonNull View recyclerView, @NonNull BridgeContext context,
