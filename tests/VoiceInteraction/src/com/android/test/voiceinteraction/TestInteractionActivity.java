@@ -103,6 +103,14 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                 }
             };
             mInteractor.submitRequest(mCurrentRequest, REQUEST_CONFIRM);
+            String[] cmds = new String[] {
+                    "com.android.test.voiceinteraction.COMMAND",
+                    "com.example.foo.bar"
+            };
+            boolean sup[] = mInteractor.supportsCommands(cmds);
+            for (int i=0; i<cmds.length; i++) {
+                mLog.append(cmds[i] + ": " + (sup[i] ? "SUPPORTED" : "NOT SUPPORTED") + "\n");
+            }
         } else {
             Log.i(TAG, "Restarting with active confirmation: " + mCurrentRequest);
         }
