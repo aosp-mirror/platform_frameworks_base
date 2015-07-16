@@ -50,6 +50,8 @@ public class BridgeConstants {
     public final static String FILL_PARENT = "fill_parent";
     public final static String WRAP_CONTENT = "wrap_content";
 
+    // Should be kept in sync with LayoutMetadata.KEY_LV_ITEM in tools/adt/idea
     /** Attribute in the tools namespace used to specify layout manager for RecyclerView. */
-    public static final String ATTR_LIST_ITEM = "list_item";
+    @SuppressWarnings("SpellCheckingInspection")
+    public static final String ATTR_LIST_ITEM = "listitem";
 }
