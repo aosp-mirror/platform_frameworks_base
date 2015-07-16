@@ -1819,6 +1819,9 @@ public class Notification implements Parcelable
         } else {
             sb.append("null");
         }
+        if (this.tickerText != null) {
+            sb.append(" tick");
+        }
         sb.append(" defaults=0x");
         sb.append(Integer.toHexString(this.defaults));
         sb.append(" flags=0x");
