@@ -799,12 +799,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private static boolean hasValidDomains(ActivityIntentInfo filter) {
-        boolean hasHTTPorHTTPS = filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
-                filter.hasDataScheme(IntentFilter.SCHEME_HTTPS);
-        if (!hasHTTPorHTTPS) {
-            return false;
-        }
-        return true;
+        return filter.hasCategory(Intent.CATEGORY_BROWSABLE)
+                && (filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
+                        filter.hasDataScheme(IntentFilter.SCHEME_HTTPS));
     }
 
     private IntentFilterVerifier mIntentFilterVerifier;
@@ -15073,8 +15070,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (filters != null && filters.size() > 0) {
             for (IntentFilter filter : filters) {
-                if (filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
-                        filter.hasDataScheme(IntentFilter.SCHEME_HTTPS)) {
+                if (filter.hasCategory(Intent.CATEGORY_BROWSABLE)
+                        && (filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
+                                filter.hasDataScheme(IntentFilter.SCHEME_HTTPS))) {
                     result.addAll(filter.getHostsList());
                 }
             }
