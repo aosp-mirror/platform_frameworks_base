@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
  */
 public class ReflectionUtils {
 
-    @Nullable
+    @NonNull
     public static Method getMethod(@NonNull Class<?> clazz, @NonNull String name,
             @Nullable Class<?>... params) throws ReflectionException {
         try {
@@ -65,6 +65,12 @@ public class ReflectionUtils {
             superClass = superClass.getSuperclass();
         }
         return false;
+    }
+
+    @NonNull
+    public static Throwable getCause(@NonNull Throwable throwable) {
+        Throwable cause = throwable.getCause();
+        return cause == null ? throwable : cause;
     }
 
     /**
