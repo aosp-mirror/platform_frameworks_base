@@ -2393,7 +2393,7 @@ public final class CalendarContract {
             intent.setData(ContentUris.withAppendedId(CalendarContract.CONTENT_URI, alarmTime));
             intent.putExtra(ALARM_TIME, alarmTime);
             PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
-            manager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pi);
+            manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, pi);
         }
 
         /**
