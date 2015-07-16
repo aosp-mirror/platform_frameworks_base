@@ -4415,9 +4415,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized(mPackages) {
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, 0, sourceUserId, parent.id);
-                return xpDomainInfo != null
-                        && xpDomainInfo.bestDomainVerificationStatus !=
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+                return xpDomainInfo != null;
             }
         }
         return false;
@@ -4573,6 +4571,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 result.bestDomainVerificationStatus = bestDomainVerificationStatus(status,
                         result.bestDomainVerificationStatus);
             }
+        }
+        // Don't consider matches with status NEVER across profiles.
+        if (result != null && result.bestDomainVerificationStatus
+                == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+            return null;
         }
         return result;
     }
