@@ -44,7 +44,7 @@ public:
 
     bool isCurrent(EGLSurface surface) { return mCurrentSurface == surface; }
     // Returns true if the current surface changed, false if it was already current
-    bool makeCurrent(EGLSurface surface);
+    bool makeCurrent(EGLSurface surface, EGLint* errOut = nullptr);
     void beginFrame(EGLSurface surface, EGLint* width, EGLint* height);
     bool swapBuffers(EGLSurface surface, const SkRect& dirty, EGLint width, EGLint height);
 
