@@ -79,17 +79,20 @@ public class DisplaySettings {
         }
     }
 
-    public void setOverscanLocked(String name, int left, int top, int right, int bottom) {
+    public void setOverscanLocked(String uniqueId, String name, int left, int top, int right,
+            int bottom) {
         if (left == 0 && top == 0 && right == 0 && bottom == 0) {
             // Right now all we are storing is overscan; if there is no overscan,
             // we have no need for the entry.
+            mEntries.remove(uniqueId);
+            // Legacy name might have been in used, so we need to clear it.
             mEntries.remove(name);
             return;
         }
-        Entry entry = mEntries.get(name);
+        Entry entry = mEntries.get(uniqueId);
         if (entry == null) {
-            entry = new Entry(name);
-            mEntries.put(name, entry);
+            entry = new Entry(uniqueId);
+            mEntries.put(uniqueId, entry);
         }
         entry.overscanLeft = left;
         entry.overscanTop = top;
