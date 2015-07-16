@@ -285,7 +285,6 @@ public final class FloatingToolbar {
 
         private final Context mContext;
         private final View mParent;
-        private final int[] mParentPositionOnScreen = new int[2];
         private final PopupWindow mPopupWindow;
         private final ViewGroup mContentContainer;
         private final int mMarginHorizontal;
@@ -339,7 +338,8 @@ public final class FloatingToolbar {
         };
 
         private final Rect mViewPortOnScreen = new Rect();
-        private final Point mCoordsOnScreen = new Point();
+        private final Point mCoordsOnWindow = new Point();
+        private final int[] mTmpCoords = new int[2];
         private final Rect mTmpRect = new Rect();
 
         private final Region mTouchableRegion = new Region();
@@ -450,16 +450,11 @@ public final class FloatingToolbar {
             }
             refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
             preparePopupContent();
-            // PopupWindow#showAtLocation() receives the location relative to the attached window
-            // hence the following code is correct when and only when mParent is aligned to the
-            // top-left of the attached window.
-            // TODO: Fix the following logic so that mParent can be placed at anywhere.
+            // We need to specify the position in window coordinates.
             // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can
             // specify the popup poision in screen coordinates.
-            mParent.getLocationOnScreen(mParentPositionOnScreen);
-            final int relativeX = mCoordsOnScreen.x - mParentPositionOnScreen[0];
-            final int relativeY = mCoordsOnScreen.y - mParentPositionOnScreen[1];
-            mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, relativeX, relativeY);
+            mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, mCoordsOnWindow.x,
+                    mCoordsOnWindow.y);
             setTouchableSurfaceInsetsComputer();
             runShowAnimation();
         }
@@ -522,17 +517,10 @@ public final class FloatingToolbar {
             cancelOverflowAnimations();
             refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
             preparePopupContent();
-            // PopupWindow#update() receives the location relative to the attached window hence
-            // the following code is correct when and only when mParent is aligned to the top-left
-            // of the attached window.
-            // TODO: Fix the following logic so that mParent can be placed at anywhere.
-            // We need to specify the offset relative to mParent.
+            // We need to specify the position in window coordinates.
             // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can
             // specify the popup poision in screen coordinates.
-            mParent.getLocationOnScreen(mParentPositionOnScreen);
-            final int relativeX = mCoordsOnScreen.x - mParentPositionOnScreen[0];
-            final int relativeY = mCoordsOnScreen.y - mParentPositionOnScreen[1];
-            mPopupWindow.update(relativeX, relativeY, getWidth(), getHeight());
+            mPopupWindow.update(mCoordsOnWindow.x, mCoordsOnWindow.y, getWidth(), getHeight());
         }
 
         /**
@@ -631,7 +619,22 @@ public final class FloatingToolbar {
                 mOverflowPanel.setOverflowDirection(mOverflowDirection);
             }
 
-            mCoordsOnScreen.set(x, y);
+            // We later specify the location of PopupWindow relative to the attached window.
+            // The idea here is that 1) we can get the location of a View in both window coordinates
+            // and screen coordiantes, where the offset between them should be equal to the window
+            // origin, and 2) we can use an arbitrary for this calculation while calculating the
+            // location of the rootview is supposed to be least expensive.
+            // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can avoid
+            // the following calculation.
+            mParent.getRootView().getLocationOnScreen(mTmpCoords);
+            int rootViewLeftOnScreen = mTmpCoords[0];
+            int rootViewTopOnScreen = mTmpCoords[1];
+            mParent.getRootView().getLocationInWindow(mTmpCoords);
+            int rootViewLeftOnWindow = mTmpCoords[0];
+            int rootViewTopOnWindow = mTmpCoords[1];
+            int windowLeftOnScreen = rootViewLeftOnScreen - rootViewLeftOnWindow;
+            int windowTopOnScreen = rootViewTopOnScreen - rootViewTopOnWindow;
+            mCoordsOnWindow.set(x - windowLeftOnScreen, y - windowTopOnScreen);
         }
 
         private int getToolbarHeightWithVerticalMargin() {
