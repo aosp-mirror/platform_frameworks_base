@@ -1249,7 +1249,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
         if (mHost != null) {
-            mHost.getContext().getPackageManager().shouldShowRequestPermissionRationale(permission);
+            return mHost.getContext().getPackageManager()
+                    .shouldShowRequestPermissionRationale(permission);
         }
         return false;
     }
