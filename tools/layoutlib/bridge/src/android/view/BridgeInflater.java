@@ -25,6 +25,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.android.support.DrawerLayoutUtil;
 import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.util.ReflectionUtils;
@@ -33,10 +34,13 @@ import com.android.util.Pair;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.util.AttributeSet;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.android.layoutlib.bridge.android.BridgeContext.getBaseContext;
 
@@ -48,6 +52,7 @@ public final class BridgeInflater extends LayoutInflater {
     private final LayoutlibCallback mLayoutlibCallback;
     private boolean mIsInMerge = false;
     private ResourceReference mResourceReference;
+    private Map<View, String> mOpenDrawerLayouts;
 
     /**
      * List of class prefixes which are tried first by default.
@@ -256,7 +261,14 @@ public final class BridgeInflater extends LayoutInflater {
                     resourceId = 0;
                 }
                 RecyclerViewUtil.setAdapter(view, bc, mLayoutlibCallback, resourceId);
+            } else if (ReflectionUtils.isInstanceOf(view, DrawerLayoutUtil.CN_DRAWER_LAYOUT)) {
+                String attrVal = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI,
+                        BridgeConstants.ATTR_OPEN_DRAWER);
+                if (attrVal != null) {
+                    getDrawerLayoutMap().put(view, attrVal);
+                }
             }
+
         }
     }
 
@@ -311,5 +323,29 @@ public final class BridgeInflater extends LayoutInflater {
         }
 
         return viewKey;
+    }
+
+    public void postInflateProcess(View view) {
+        if (mOpenDrawerLayouts != null) {
+            String gravity = mOpenDrawerLayouts.get(view);
+            if (gravity != null) {
+                DrawerLayoutUtil.openDrawer(view, gravity);
+            }
+            mOpenDrawerLayouts.remove(view);
+        }
+    }
+
+    @NonNull
+    private Map<View, String> getDrawerLayoutMap() {
+        if (mOpenDrawerLayouts == null) {
+            mOpenDrawerLayouts = new HashMap<View, String>(4);
+        }
+        return mOpenDrawerLayouts;
+    }
+
+    public void onDoneInflation() {
+        if (mOpenDrawerLayouts != null) {
+            mOpenDrawerLayouts.clear();
+        }
     }
 }
