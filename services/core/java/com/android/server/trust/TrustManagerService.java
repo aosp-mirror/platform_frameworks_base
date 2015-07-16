@@ -227,7 +227,7 @@ public class TrustManagerService extends SystemService {
         for (UserInfo userInfo : userInfos) {
             if (userInfo == null || userInfo.partial || !userInfo.isEnabled()
                     || userInfo.guestToRemove) continue;
-            if (!userInfo.supportsSwitchTo()) continue;
+            if (!userInfo.supportsSwitchToByUser()) continue;
             if (!mActivityManager.isUserRunning(userInfo.id)) continue;
             if (!lockPatternUtils.isSecure(userInfo.id)) continue;
             if (!getUserHasAuthenticated(userInfo.id)) continue;
@@ -316,7 +316,7 @@ public class TrustManagerService extends SystemService {
             UserInfo info = userInfos.get(i);
 
             if (info == null || info.partial || !info.isEnabled() || info.guestToRemove
-                    || !info.supportsSwitchTo()) {
+                    || !info.supportsSwitchToByUser()) {
                 continue;
             }
 
@@ -783,7 +783,7 @@ public class TrustManagerService extends SystemService {
         private void dumpUser(PrintWriter fout, UserInfo user, boolean isCurrent) {
             fout.printf(" User \"%s\" (id=%d, flags=%#x)",
                     user.name, user.id, user.flags);
-            if (!user.supportsSwitchTo()) {
+            if (!user.supportsSwitchToByUser()) {
                 fout.println("(managed profile)");
                 fout.println("   disabled because switching to this user is not possible.");
                 return;
