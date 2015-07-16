@@ -20,6 +20,7 @@
     android:minHeight="@dimen/qs_detail_item_height"
     android:background="@drawable/btn_borderless_rect"
     android:clickable="true"
+    android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal" >
 
@@ -57,6 +58,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:clickable="true"
+        android:focusable="true"
         android:scaleType="center"
         android:src="@drawable/ic_qs_cancel" />
 
