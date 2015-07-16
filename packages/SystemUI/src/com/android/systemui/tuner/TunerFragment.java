@@ -37,6 +37,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -108,6 +109,7 @@ public class TunerFragment extends PreferenceFragment {
                 System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
 
         registerPrefs(getPreferenceScreen());
+        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER, true);
     }
 
     @Override
@@ -116,6 +118,7 @@ public class TunerFragment extends PreferenceFragment {
         getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
 
         unregisterPrefs(getPreferenceScreen());
+        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER, false);
     }
 
     private void registerPrefs(PreferenceGroup group) {
@@ -190,6 +193,7 @@ public class TunerFragment extends PreferenceFragment {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             final boolean v = (Boolean) newValue;
+            MetricsLogger.action(getContext(), MetricsLogger.TUNER_BATTERY_PERCENTAGE, v);
             System.putInt(getContext().getContentResolver(), SHOW_PERCENT_SETTING, v ? 1 : 0);
             return true;
         }

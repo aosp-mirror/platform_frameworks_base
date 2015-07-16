@@ -30,6 +30,7 @@ import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.view.MenuItem;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 
@@ -93,6 +94,18 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_DEMO_MODE, true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_DEMO_MODE, false);
+    }
+
+    @Override
     public void onDestroy() {
         getContext().getContentResolver().unregisterContentObserver(mDemoModeObserver);
         super.onDestroy();
@@ -113,15 +126,18 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        boolean enabled = newValue == Boolean.TRUE;
         if (preference == mEnabledSwitch) {
-            if (newValue != Boolean.TRUE) {
+            if (!enabled) {
                 // Make sure we aren't in demo mode when disabling it.
                 mOnSwitch.setChecked(false);
                 stopDemoMode();
             }
-            setGlobal(DemoMode.DEMO_MODE_ALLOWED, newValue == Boolean.TRUE ? 1 : 0);
+            MetricsLogger.action(getContext(), MetricsLogger.TUNER_DEMO_MODE_ENABLED, enabled);
+            setGlobal(DemoMode.DEMO_MODE_ALLOWED, enabled ? 1 : 0);
         } else if (preference == mOnSwitch) {
-            if (newValue == Boolean.TRUE) {
+            MetricsLogger.action(getContext(), MetricsLogger.TUNER_DEMO_MODE_ON, enabled);
+            if (enabled) {
                 startDemoMode();
             } else {
                 stopDemoMode();
