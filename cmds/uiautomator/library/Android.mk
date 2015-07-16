@@ -41,8 +41,9 @@ LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/core-src \
 	$(LOCAL_PATH)/testrunner-src
 LOCAL_DROIDDOC_HTML_DIR :=
 
+LOCAL_DROIDDOC_STUB_OUT_DIR := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_uiautomator_intermediates/src
+
 LOCAL_DROIDDOC_OPTIONS:= \
-    -stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_uiautomator_intermediates/src \
     -stubpackages com.android.uiautomator.core:com.android.uiautomator.testrunner \
     -api $(uiautomator_internal_api_file) \
     -removedApi $(uiautomator_internal_removed_api_file)
