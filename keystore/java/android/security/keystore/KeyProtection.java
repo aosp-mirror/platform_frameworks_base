@@ -423,7 +423,8 @@ public final class KeyProtection implements ProtectionParameter {
          * <p>This must be specified for signing/verification keys and RSA encryption/decryption
          * keys used with RSA OAEP padding scheme because these operations involve a digest. For
          * HMAC keys, the default is the digest specified in {@link Key#getAlgorithm()} (e.g.,
-         * {@code SHA-256} for key algorithm {@code HmacSHA256}).
+         * {@code SHA-256} for key algorithm {@code HmacSHA256}). HMAC keys cannot be authorized
+         * for more than one digest.
          *
          * <p>For private keys used for TLS/SSL client or server authentication it is usually
          * necessary to authorize the use of no digest ({@link KeyProperties#DIGEST_NONE}). This is
