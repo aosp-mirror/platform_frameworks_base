@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Xml;
@@ -44,6 +45,8 @@ import java.util.Set;
 
 /** {@hide} */
 public class XmlUtils {
+
+    private static final String STRING_ARRAY_SEPARATOR = ":";
 
     public static void skipCurrentTag(XmlPullParser parser)
             throws XmlPullParserException, IOException {
