@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IStopUserCallback;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -1262,12 +1263,15 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                     // In split system user mode, we assign the first human user the primary flag.
-                    // And if the only system user is not admin, we also assign the admin flag to
-                    // primary user.
+                    // And if there is no device owner, we also assign the admin flag to primary
+                    // user.
                     if (UserManager.isSplitSystemUser()
-                            && !isGuest && !isManagedProfile && mUsers.size() == 1) {
+                            && !isGuest && !isManagedProfile && getPrimaryUser() == null) {
                         flags |= UserInfo.FLAG_PRIMARY;
-                        if (!mUsers.get(UserHandle.USER_SYSTEM).isAdmin()) {
+                        DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
+                                mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                        if (devicePolicyManager == null
+                                || devicePolicyManager.getDeviceOwner() == null) {
                             flags |= UserInfo.FLAG_ADMIN;
                         }
                     }
