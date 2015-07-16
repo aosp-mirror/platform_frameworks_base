@@ -8681,7 +8681,8 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.overscanBottom = bottom;
         }
 
-        mDisplaySettings.setOverscanLocked(displayInfo.uniqueId, left, top, right, bottom);
+        mDisplaySettings.setOverscanLocked(displayInfo.uniqueId, displayInfo.name, left, top,
+                right, bottom);
         mDisplaySettings.writeSettingsLocked();
 
         reconfigureDisplayLocked(displayContent);
