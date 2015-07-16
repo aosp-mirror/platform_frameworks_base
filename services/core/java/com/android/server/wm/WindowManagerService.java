@@ -2730,10 +2730,10 @@ public class WindowManagerService extends IWindowManager.Stub
             wasVisible = win.isWinVisibleLw();
             if (wasVisible) {
 
-                int transit = WindowManagerPolicy.TRANSIT_EXIT;
-                if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
-                    transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
-                }
+                final int transit = (!startingWindow)
+                        ? WindowManagerPolicy.TRANSIT_EXIT
+                        : WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
+
                 // Try starting an animation.
                 if (win.mWinAnimator.applyAnimationLocked(transit, false)) {
                     win.mExiting = true;
@@ -2745,12 +2745,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             final AppWindowToken appToken = win.mAppToken;
+            final boolean isAnimating = win.mWinAnimator.isAnimating();
             // The starting window is the last window in this app token and it isn't animating.
             // Allow it to be removed now as there is no additional window or animation that will
             // trigger its removal.
             final boolean lastWinStartingNotAnimating = startingWindow && appToken!= null
-                    && appToken.allAppWindows.size() == 1 && !win.mWinAnimator.isAnimating();
-            if (!lastWinStartingNotAnimating && (win.mExiting || win.mWinAnimator.isAnimating())) {
+                    && appToken.allAppWindows.size() == 1 && !isAnimating;
+            if (!lastWinStartingNotAnimating && (win.mExiting || isAnimating)) {
                 // The exit animation is running... wait for it!
                 win.mExiting = true;
                 win.mRemoveOnExit = true;
@@ -4527,7 +4528,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         wtoken.willBeHidden = false;
-        if (wtoken.hidden == visible) {
+        // Allow for state changes and animation to be applied if token is transitioning
+        // visibility state or the token was marked as hidden and is exiting before we had a chance
+        // to play the transition animation.
+        if (wtoken.hidden == visible || (wtoken.hidden && wtoken.mIsExiting)) {
             boolean changed = false;
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                 TAG, "Changing app " + wtoken + " hidden=" + wtoken.hidden
