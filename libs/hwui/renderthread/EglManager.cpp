@@ -217,7 +217,7 @@ void EglManager::destroy() {
     mCurrentSurface = EGL_NO_SURFACE;
 }
 
-bool EglManager::makeCurrent(EGLSurface surface) {
+bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
     if (isCurrent(surface)) return false;
 
     if (surface == EGL_NO_SURFACE) {
@@ -225,8 +225,14 @@ bool EglManager::makeCurrent(EGLSurface surface) {
         surface = mPBufferSurface;
     }
     if (!eglMakeCurrent(mEglDisplay, surface, surface, mEglContext)) {
-        LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
-                (void*)surface, egl_error_str());
+        if (errOut) {
+            *errOut = eglGetError();
+            ALOGW("Failed to make current on surface %p, error=%s",
+                    (void*)surface, egl_error_str(*errOut));
+        } else {
+            LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
+                    (void*)surface, egl_error_str());
+        }
     }
     mCurrentSurface = surface;
     return true;
