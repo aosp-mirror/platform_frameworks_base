@@ -112,5 +112,16 @@ TEST(ClipArea, paths) {
     regionBounds.set(skRect);
     EXPECT_EQ(expected, regionBounds);
 }
+
+TEST(ClipArea, replaceNegative) {
+    ClipArea area(createClipArea());
+    area.setClip(0, 0, 100, 100);
+
+    Matrix4 transform;
+    transform.loadIdentity();
+    Rect expected(-50, -50, 50, 50);
+    area.clipRectWithTransform(expected, &transform, SkRegion::kReplace_Op);
+    EXPECT_EQ(expected, area.getClipRect());
+}
 }
 }

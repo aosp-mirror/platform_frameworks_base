@@ -263,10 +263,11 @@ void ClipArea::enterRectangleMode() {
 bool ClipArea::rectangleModeClipRectWithTransform(const Rect& r,
         const mat4* transform, SkRegion::Op op) {
 
-    // TODO: we should be able to handle kReplace_Op efficiently without
-    // going through RegionMode and later falling back into RectangleMode.
-
-    if (op != SkRegion::kIntersect_Op) {
+    if (op == SkRegion::kReplace_Op && transform->rectToRect()) {
+        mClipRect = r;
+        transform->mapRect(mClipRect);
+        return true;
+    } else if (op != SkRegion::kIntersect_Op) {
         enterRegionMode();
         return regionModeClipRectWithTransform(r, transform, op);
     }
