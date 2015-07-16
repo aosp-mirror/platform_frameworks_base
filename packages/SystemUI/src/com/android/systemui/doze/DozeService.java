@@ -136,7 +136,7 @@ public class DozeService extends DreamService {
                 mDozeParameters.getPulseOnPickup(), mDozeParameters.getVibrateOnPickup(),
                 DozeLog.PULSE_REASON_SENSOR_PICKUP);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.setReferenceCounted(true);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mDisplayStateSupported = mDozeParameters.getDisplayStateSupported();
