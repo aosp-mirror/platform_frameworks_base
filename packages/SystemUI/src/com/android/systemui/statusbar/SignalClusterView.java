@@ -478,7 +478,6 @@ public class SignalClusterView
     }
 
     private void setTint(ImageView v, int tint) {
-        v.setImageTintMode(PorterDuff.Mode.SRC_ATOP);
         v.setImageTintList(ColorStateList.valueOf(tint));
     }
 
