@@ -163,7 +163,7 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.nfc"
         android:required="false"/&gt;
-&lt;uses-feature android:name="android.hardware.gps"
+&lt;uses-feature android:name="android.hardware.location.gps"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.microphone"
         android:required="false"/&gt;
