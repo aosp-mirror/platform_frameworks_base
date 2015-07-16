@@ -145,7 +145,11 @@ void CanvasContext::setOpaque(bool opaque) {
 void CanvasContext::makeCurrent() {
     // TODO: Figure out why this workaround is needed, see b/13913604
     // In the meantime this matches the behavior of GLRenderer, so it is not a regression
-    mHaveNewSurface |= mEglManager.makeCurrent(mEglSurface);
+    EGLint error = 0;
+    mHaveNewSurface |= mEglManager.makeCurrent(mEglSurface, &error);
+    if (error) {
+        setSurface(nullptr);
+    }
 }
 
 void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater) {
