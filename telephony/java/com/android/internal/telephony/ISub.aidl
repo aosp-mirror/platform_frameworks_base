@@ -172,6 +172,10 @@ interface ISub {
 
     int[] getActiveSubIdList();
 
+    void setSubscriptionProperty(int subId, String propKey, String propValue);
+
+    String getSubscriptionProperty(int subId, String propKey, String callingPackage);
+
     /**
      * Get the SIM state for the slot idx
      * @return SIM state as the ordinal of IccCardConstants.State
