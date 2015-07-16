@@ -107,6 +107,7 @@ import android.view.AppTransitionAnimationSpec;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.DropPermissionHolder;
 import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IInputFilter;
@@ -626,6 +627,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowContentFrameStats mTempWindowRenderStats;
 
+    private static final int DRAG_FLAGS_URI_ACCESS = View.DRAG_FLAG_GLOBAL_URI_READ |
+            View.DRAG_FLAG_GLOBAL_URI_WRITE;
+
+    private static final int DRAG_FLAGS_URI_PERMISSIONS = DRAG_FLAGS_URI_ACCESS |
+            View.DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION |
+            View.DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION;
+
     final class DragInputEventReceiver extends InputEventReceiver {
         // Set, if stylus button was down at the start of the drag.
         private boolean mStylusButtonDownAtStart;
@@ -671,7 +679,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (DEBUG_DRAG) Slog.d(TAG, "Button no longer pressed; dropping at "
                                     + newX + "," + newY);
                             synchronized (mWindowMap) {
-                                endDrag = mDragState.notifyDropLw(newX, newY);
+                                endDrag = completeDrop(newX, newY);
                             }
                         } else {
                             synchronized (mWindowMap) {
@@ -685,7 +693,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_DRAG) Slog.d(TAG, "Got UP on move channel; dropping at "
                                 + newX + "," + newY);
                         synchronized (mWindowMap) {
-                            endDrag = mDragState.notifyDropLw(newX, newY);
+                            endDrag = completeDrop(newX, newY);
                         }
                     } break;
 
@@ -713,6 +721,25 @@ public class WindowManagerService extends IWindowManager.Stub
                 finishInputEvent(event, handled);
             }
         }
+    }
+
+    private boolean completeDrop(float x, float y) {
+        WindowState dropTargetWin = mDragState.getDropTargetWinLw(x, y);
+
+        DropPermissionHolder dropPermissionHolder = null;
+        if ((mDragState.mFlags & View.DRAG_FLAG_GLOBAL) != 0 &&
+                (mDragState.mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
+            dropPermissionHolder = new DropPermissionHolder(
+                    mDragState.mData,
+                    mActivityManager,
+                    mDragState.mUid,
+                    dropTargetWin.getOwningPackage(),
+                    mDragState.mFlags & DRAG_FLAGS_URI_PERMISSIONS,
+                    UserHandle.getUserId(mDragState.mUid),
+                    UserHandle.getUserId(dropTargetWin.getOwningUid()));
+        }
+
+        return mDragState.notifyDropLw(dropTargetWin, dropPermissionHolder, x, y);
     }
 
     /**

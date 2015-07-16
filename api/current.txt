@@ -34802,6 +34802,7 @@ package android.view {
     method public int getAction();
     method public android.content.ClipData getClipData();
     method public android.content.ClipDescription getClipDescription();
+    method public android.view.DropPermissionHolder getDropPermissionHolder();
     method public java.lang.Object getLocalState();
     method public boolean getResult();
     method public float getX();
@@ -34814,6 +34815,14 @@ package android.view {
     field public static final int ACTION_DRAG_STARTED = 1; // 0x1
     field public static final int ACTION_DROP = 3; // 0x3
     field public static final android.os.Parcelable.Creator<android.view.DragEvent> CREATOR;
+  }
+
+  public class DropPermissionHolder implements android.os.Parcelable {
+    method public int describeContents();
+    method public void grant();
+    method public void revoke();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.view.DropPermissionHolder> CREATOR;
   }
 
   public class FocusFinder {
@@ -36519,6 +36528,11 @@ package android.view {
     field public static final int ACCESSIBILITY_LIVE_REGION_NONE = 0; // 0x0
     field public static final int ACCESSIBILITY_LIVE_REGION_POLITE = 1; // 0x1
     field public static final android.util.Property<android.view.View, java.lang.Float> ALPHA;
+    field public static final int DRAG_FLAG_GLOBAL = 256; // 0x100
+    field public static final int DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION = 64; // 0x40
+    field public static final int DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION = 128; // 0x80
+    field public static final int DRAG_FLAG_GLOBAL_URI_READ = 1; // 0x1
+    field public static final int DRAG_FLAG_GLOBAL_URI_WRITE = 2; // 0x2
     field public static final int DRAG_FLAG_OPAQUE = 512; // 0x200
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000

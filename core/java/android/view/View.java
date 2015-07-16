@@ -3641,9 +3641,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * with this flag set, all visible applications will be able to participate
      * in the drag operation and receive the dragged content.
      *
-     * @hide
+     * If this is the only flag set, then the drag recipient will only have access to text data
+     * and intents contained in the {@link ClipData} object. Access to URIs contained in the
+     * {@link ClipData} is determined by other DRAG_FLAG_GLOBAL_* flags.
      */
-    public static final int DRAG_FLAG_GLOBAL = 1;
+    public static final int DRAG_FLAG_GLOBAL = 1 << 8;  // 256
+
+    /**
+     * When this flag is used with {@link #DRAG_FLAG_GLOBAL}, the drag recipient will be able to
+     * request read access to the content URI(s) contained in the {@link ClipData} object.
+     * @see android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+     */
+    public static final int DRAG_FLAG_GLOBAL_URI_READ = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+
+    /**
+     * When this flag is used with {@link #DRAG_FLAG_GLOBAL}, the drag recipient will be able to
+     * request write access to the content URI(s) contained in the {@link ClipData} object.
+     * @see android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+     */
+    public static final int DRAG_FLAG_GLOBAL_URI_WRITE = Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+
+    /**
+     * When this flag is used with {@link #DRAG_FLAG_GLOBAL_URI_READ} and/or {@link
+     * #DRAG_FLAG_GLOBAL_URI_WRITE}, the URI permission grant can be persisted across device
+     * reboots until explicitly revoked with
+     * {@link android.content.Context#revokeUriPermission(Uri,int) Context.revokeUriPermission}.
+     * @see android.content.Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+     */
+    public static final int DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION =
+            Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION;
+
+    /**
+     * When this flag is used with {@link #DRAG_FLAG_GLOBAL_URI_READ} and/or {@link
+     * #DRAG_FLAG_GLOBAL_URI_WRITE}, the URI permission grant applies to any URI that is a prefix
+     * match against the original granted URI.
+     * @see android.content.Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+     */
+    public static final int DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION =
+            Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
 
     /**
      * Flag indicating that the drag shadow will be opaque.  When

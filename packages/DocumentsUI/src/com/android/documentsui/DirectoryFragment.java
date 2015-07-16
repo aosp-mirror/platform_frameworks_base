@@ -1519,7 +1519,8 @@ public class DirectoryFragment extends Fragment {
                     getClipDataFromDocuments(docs),
                     new DrawableShadowBuilder(getDragShadowIcon(docs)),
                     null,
-                    View.DRAG_FLAG_GLOBAL
+                    View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ |
+                            View.DRAG_FLAG_GLOBAL_URI_WRITE
             );
             return true;
         }
