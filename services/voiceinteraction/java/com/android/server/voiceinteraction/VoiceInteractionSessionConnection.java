@@ -183,7 +183,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         }
     }
 
-    public boolean showLocked(Bundle args, int flags,
+    public boolean showLocked(Bundle args, int flags, int disabledContext,
             IVoiceInteractionSessionShowCallback showCallback) {
         if (mBound) {
             if (!mFullyBound) {
@@ -200,15 +200,17 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             }
             boolean structureEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, mUser) != 0
-                    && isScreenCaptureAllowed;
+                    && isScreenCaptureAllowed
+                    && (disabledContext&VoiceInteractionSession.SHOW_WITH_ASSIST) == 0;
             boolean screenshotEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ASSIST_SCREENSHOT_ENABLED, 1, mUser) != 0
-                    && isScreenCaptureAllowed;
+                    && isScreenCaptureAllowed
+                    && (disabledContext&VoiceInteractionSession.SHOW_WITH_SCREENSHOT) == 0;
             mShowArgs = args;
             mShowFlags = flags;
             mHaveAssistData = false;
             boolean needDisclosure = false;
-            if ((flags& VoiceInteractionSession.SHOW_WITH_ASSIST) != 0) {
+            if ((flags&VoiceInteractionSession.SHOW_WITH_ASSIST) != 0) {
                 if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_STRUCTURE, mCallingUid,
                         mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED
                         && structureEnabled) {
@@ -226,7 +228,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                 mAssistData = null;
             }
             mHaveScreenshot = false;
-            if ((flags& VoiceInteractionSession.SHOW_WITH_SCREENSHOT) != 0) {
+            if ((flags&VoiceInteractionSession.SHOW_WITH_SCREENSHOT) != 0) {
                 if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_SCREENSHOT, mCallingUid,
                         mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED
                         && screenshotEnabled) {

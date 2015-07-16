@@ -65,6 +65,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     IVoiceInteractionService mService;
 
     VoiceInteractionSessionConnection mActiveSession;
+    int mDisabledShowContext;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -146,7 +147,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             mActiveSession = new VoiceInteractionSessionConnection(mLock, mSessionComponentName,
                     mUser, mContext, this, mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
-        return mActiveSession.showLocked(args, flags, showCallback);
+        return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback);
     }
 
     public boolean hideSessionLocked() {
@@ -222,6 +223,24 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mActiveSession = null;
     }
 
+    public void setDisabledShowContextLocked(int callingPid, int callingUid, int flags) {
+        int activeUid = mInfo.getServiceInfo().applicationInfo.uid;
+        if (callingUid != activeUid) {
+            throw new SecurityException("Calling uid " + callingUid
+                    + " does not match active uid " + activeUid);
+        }
+        mDisabledShowContext = flags;
+    }
+
+    public int getDisabledShowContextLocked(int callingPid, int callingUid) {
+        int activeUid = mInfo.getServiceInfo().applicationInfo.uid;
+        if (callingUid != activeUid) {
+            throw new SecurityException("Calling uid " + callingUid
+                    + " does not match active uid " + activeUid);
+        }
+        return mDisabledShowContext;
+    }
+
     public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!mValid) {
             pw.print("  NOT VALID: ");
@@ -235,6 +254,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         pw.print("  mComponent="); pw.println(mComponent.flattenToShortString());
         pw.print("  Session service="); pw.println(mInfo.getSessionService());
         pw.print("  Settings activity="); pw.println(mInfo.getSettingsActivity());
+        if (mDisabledShowContext != 0) {
+            pw.print("  mDisabledShowContext=");
+            pw.println(Integer.toHexString(mDisabledShowContext));
+        }
         pw.print("  mBound="); pw.print(mBound);  pw.print(" mService="); pw.println(mService);
         if (mActiveSession != null) {
             pw.println("  Active session:");
