@@ -10618,6 +10618,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
                             receivers, verificationState);
 
+                    // Apps installed for "all" users use the device owner to verify the app
+                    UserHandle verifierUser = getUser();
+                    if (verifierUser == UserHandle.ALL) {
+                        verifierUser = UserHandle.OWNER;
+                    }
+
                     /*
                      * If any sufficient verifiers were listed in the package
                      * manifest, attempt to ask them.
@@ -10633,8 +10639,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                                 final Intent sufficientIntent = new Intent(verification);
                                 sufficientIntent.setComponent(verifierComponent);
-
-                                mContext.sendBroadcastAsUser(sufficientIntent, getUser());
+                                mContext.sendBroadcastAsUser(sufficientIntent, verifierUser);
                             }
                         }
                     }
@@ -10649,7 +10654,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                          * target BroadcastReceivers have run.
                          */
                         verification.setComponent(requiredVerifierComponent);
-                        mContext.sendOrderedBroadcastAsUser(verification, getUser(),
+                        mContext.sendOrderedBroadcastAsUser(verification, verifierUser,
                                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
                                 new BroadcastReceiver() {
                                     @Override
