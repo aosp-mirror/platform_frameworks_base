@@ -761,7 +761,8 @@ framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= \
 	$(foreach lib,$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES),$(call intermediates-dir-for,JAVA_LIBRARIES,$(lib)-res,,COMMON))
 
 framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
-    frameworks/base/docs/knowntags.txt
+    frameworks/base/docs/knowntags.txt \
+    libcore/Docs.mk
 
 samples_dir := development/samples/browseable
 
