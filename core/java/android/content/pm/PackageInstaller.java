@@ -18,8 +18,10 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -889,6 +891,8 @@ public class PackageInstaller {
         public String abiOverride;
         /** {@hide} */
         public String volumeUuid;
+        /** {@hide} */
+        public String[] grantedRuntimePermissions;
 
         /**
          * Construct parameters for a new package install session.
@@ -914,6 +918,7 @@ public class PackageInstaller {
             referrerUri = source.readParcelable(null);
             abiOverride = source.readString();
             volumeUuid = source.readString();
+            grantedRuntimePermissions = source.readStringArray();
         }
 
         /**
@@ -987,6 +992,23 @@ public class PackageInstaller {
             this.referrerUri = referrerUri;
         }
 
+        /**
+         * Sets which runtime permissions to be granted to the package at installation.
+         * Using this API requires holding {@link android.Manifest.permission
+         * #INSTALL_GRANT_RUNTIME_PERMISSIONS}
+         *
+         * @param permissions The permissions to grant or null to grant all runtime
+         *     permissions.
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS)
+        public void setGrantedRuntimePermissions(String[] permissions) {
+            installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
+            this.grantedRuntimePermissions = permissions;
+        }
+
         /** {@hide} */
         public void setInstallFlagsInternal() {
             installFlags |= PackageManager.INSTALL_INTERNAL;
@@ -1012,6 +1034,7 @@ public class PackageInstaller {
             pw.printPair("referrerUri", referrerUri);
             pw.printPair("abiOverride", abiOverride);
             pw.printPair("volumeUuid", volumeUuid);
+            pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
             pw.println();
         }
 
@@ -1033,6 +1056,7 @@ public class PackageInstaller {
             dest.writeParcelable(referrerUri, flags);
             dest.writeString(abiOverride);
             dest.writeString(volumeUuid);
+            dest.writeStringArray(grantedRuntimePermissions);
         }
 
         public static final Parcelable.Creator<SessionParams>

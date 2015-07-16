@@ -43,7 +43,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -71,7 +70,6 @@ import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
-import android.os.storage.VolumeInfo;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -123,6 +121,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     /** XML constants used in {@link #mSessionsFile} */
     private static final String TAG_SESSIONS = "sessions";
     private static final String TAG_SESSION = "session";
+    private static final String TAG_GRANTED_RUNTIME_PERMISSION = "granted-runtime-permission";
     private static final String ATTR_SESSION_ID = "sessionId";
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
@@ -144,6 +143,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String ATTR_REFERRER_URI = "referrerUri";
     private static final String ATTR_ABI_OVERRIDE = "abiOverride";
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
+    private static final String ATTR_NAME = "name";
 
     /** Automatically destroy sessions older than this */
     private static final long MAX_AGE_MILLIS = 3 * DateUtils.DAY_IN_MILLIS;
@@ -374,16 +374,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             }
         } catch (FileNotFoundException e) {
             // Missing sessions are okay, probably first boot
-        } catch (IOException e) {
-            Slog.wtf(TAG, "Failed reading install sessions", e);
-        } catch (XmlPullParserException e) {
+        } catch (IOException | XmlPullParserException e) {
             Slog.wtf(TAG, "Failed reading install sessions", e);
         } finally {
             IoUtils.closeQuietly(fis);
         }
     }
 
-    private PackageInstallerSession readSessionLocked(XmlPullParser in) throws IOException {
+    private PackageInstallerSession readSessionLocked(XmlPullParser in) throws IOException,
+            XmlPullParserException {
         final int sessionId = readIntAttribute(in, ATTR_SESSION_ID);
         final int userId = readIntAttribute(in, ATTR_USER_ID);
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
@@ -409,6 +408,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         params.referrerUri = readUriAttribute(in, ATTR_REFERRER_URI);
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
+        params.grantedRuntimePermissions = readGrantedRuntimePermissions(in);
 
         final File appIconFile = buildAppIconFile(sessionId);
         if (appIconFile.exists()) {
@@ -501,7 +501,49 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.appIconLastModified = appIconFile.lastModified();
         }
 
+        writeGrantedRuntimePermissions(out, params.grantedRuntimePermissions);
+
         out.endTag(null, TAG_SESSION);
+    }
+
+    private static void writeGrantedRuntimePermissions(XmlSerializer out,
+            String[] grantedRuntimePermissions) throws IOException {
+        if (grantedRuntimePermissions != null) {
+            for (String permission : grantedRuntimePermissions) {
+                out.startTag(null, TAG_GRANTED_RUNTIME_PERMISSION);
+                writeStringAttribute(out, ATTR_NAME, permission);
+                out.endTag(null, TAG_GRANTED_RUNTIME_PERMISSION);
+            }
+        }
+    }
+
+    private static String[] readGrantedRuntimePermissions(XmlPullParser in)
+            throws IOException, XmlPullParserException {
+        List<String> permissions = null;
+
+        final int outerDepth = in.getDepth();
+        int type;
+        while ((type = in.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || in.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            if (TAG_GRANTED_RUNTIME_PERMISSION.equals(in.getName())) {
+                String permission = readStringAttribute(in, ATTR_NAME);
+                if (permissions == null) {
+                    permissions = new ArrayList<>();
+                }
+                permissions.add(permission);
+            }
+        }
+
+        if (permissions == null) {
+            return null;
+        }
+
+        String[] permissionsArray = new String[permissions.size()];
+        permissions.toArray(permissionsArray);
+        return permissionsArray;
     }
 
     private File buildAppIconFile(int sessionId) {
