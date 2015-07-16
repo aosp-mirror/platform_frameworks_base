@@ -54,4 +54,5 @@ public class BridgeConstants {
     /** Attribute in the tools namespace used to specify layout manager for RecyclerView. */
     @SuppressWarnings("SpellCheckingInspection")
     public static final String ATTR_LIST_ITEM = "listitem";
+    public static final String ATTR_OPEN_DRAWER = "openDrawer";
 }
