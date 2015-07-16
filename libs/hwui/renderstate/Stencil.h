@@ -17,10 +17,6 @@
 #ifndef ANDROID_HWUI_STENCIL_H
 #define ANDROID_HWUI_STENCIL_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
 #include <GLES2/gl2.h>
 
 #include <cutils/compiler.h>

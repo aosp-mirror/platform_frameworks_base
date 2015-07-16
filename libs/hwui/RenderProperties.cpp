@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "RenderProperties.h"
 
 #include <utils/Trace.h>

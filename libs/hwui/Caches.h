@@ -17,11 +17,6 @@
 #ifndef ANDROID_HWUI_CACHES_H
 #define ANDROID_HWUI_CACHES_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
-
 #include "AssetAtlas.h"
 #include "Dither.h"
 #include "Extensions.h"

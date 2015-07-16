@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#define LOG_TAG "OpenGLRenderer"
 #define LOG_NDEBUG 1
-#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #define VERTEX_DEBUG 0
 

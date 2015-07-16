@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#define ATRACE_TAG ATRACE_TAG_VIEW
-#define LOG_TAG "OpenGLRenderer"
-
 #include "RenderNode.h"
 
 #include <algorithm>
