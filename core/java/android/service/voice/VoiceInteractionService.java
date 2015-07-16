@@ -37,7 +37,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Locale;
 
-
 /**
  * Top-level service of the current global voice interactor, which is providing
  * support for hotwording, the back-end of a {@link android.app.VoiceInteractor}, etc.
@@ -154,11 +153,39 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
+     * Set contextual options you would always like to have disabled when a session
+     * is shown.  The flags may be any combination of
+     * {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST} and
+     * {@link VoiceInteractionSession#SHOW_WITH_SCREENSHOT
+     * VoiceInteractionSession.SHOW_WITH_SCREENSHOT}.
+     */
+    public void setDisabledShowContext(int flags) {
+        try {
+            mSystemService.setDisabledShowContext(flags);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Return the value set by {@link #setDisabledShowContext}.
+     */
+    public int getDisabledShowContext() {
+        try {
+            return mSystemService.getDisabledShowContext();
+        } catch (RemoteException e) {
+            return 0;
+        }
+    }
+
+    /**
      * Request that the associated {@link android.service.voice.VoiceInteractionSession} be
      * shown to the user, starting it if necessary.
      * @param args Arbitrary arguments that will be propagated to the session.
      * @param flags Indicates additional optional behavior that should be performed.  May
-     * be {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST}
+     * be any combination of
+     * {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST} and
+     * {@link VoiceInteractionSession#SHOW_WITH_SCREENSHOT
+      * VoiceInteractionSession.SHOW_WITH_SCREENSHOT}
      * to request that the system generate and deliver assist data on the current foreground
      * app as part of showing the session UI.
      */
