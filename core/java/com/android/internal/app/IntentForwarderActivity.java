@@ -103,7 +103,7 @@ public class IntentForwarderActivity extends Activity  {
                     || ChooserActivity.class.getName().equals(ri.activityInfo.name));
 
             try {
-                startActivityAsCaller(newIntent, null, targetUserId);
+                startActivityAsCaller(newIntent, null, false, targetUserId);
             } catch (RuntimeException e) {
                 int launchedFromUid = -1;
                 String launchedFromPackage = "?";
