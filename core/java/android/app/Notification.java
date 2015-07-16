@@ -3122,7 +3122,7 @@ public class Notification implements Parcelable
 
         private RemoteViews generateActionButton(Action action) {
             final boolean tombstone = (action.actionIntent == null);
-            RemoteViews button = new RemoteViews(mContext.getPackageName(),
+            RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
                     tombstone ? getActionTombstoneLayoutResource()
                               : getActionLayoutResource());
             button.setTextViewCompoundDrawablesRelative(R.id.action0, action.icon, 0, 0, 0);
@@ -4391,7 +4391,7 @@ public class Notification implements Parcelable
 
         private RemoteViews generateMediaActionButton(Action action) {
             final boolean tombstone = (action.actionIntent == null);
-            RemoteViews button = new RemoteViews(mBuilder.mContext.getPackageName(),
+            RemoteViews button = new BuilderRemoteViews(mBuilder.mContext.getApplicationInfo(),
                     R.layout.notification_material_media_action);
             button.setImageViewResource(R.id.action0, action.icon);
             button.setDrawableParameters(R.id.action0, false, -1,
