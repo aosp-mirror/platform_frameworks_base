@@ -3977,16 +3977,24 @@ public class Activity extends ContextThemeWrapper
      * as intermediaries that dispatch their intent to the target the user selects -- to
      * do this, they must perform all security checks including permission grants as if
      * their launch had come from the original activity.
+     * @param intent The Intent to start.
+     * @param options ActivityOptions or null.
+     * @param ignoreTargetSecurity If true, the activity manager will not check whether the
+     * caller it is doing the start is, is actually allowed to start the target activity.
+     * If you set this to true, you must set an explicit component in the Intent and do any
+     * appropriate security checks yourself.
+     * @param userId The user the new activity should run as.
      * @hide
      */
-    public void startActivityAsCaller(Intent intent, @Nullable Bundle options, int userId) {
+    public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
+            boolean ignoreTargetSecurity, int userId) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivityAsCaller(
                         this, mMainThread.getApplicationThread(), mToken, this,
-                        intent, -1, options, userId);
+                        intent, -1, options, ignoreTargetSecurity, userId);
         if (ar != null) {
             mMainThread.sendActivityResult(
                 mToken, mEmbeddedID, -1, ar.getResultCode(),
