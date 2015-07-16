@@ -418,9 +418,9 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      If the app continues to play sound after the user has left, the app provides a <em>Now
-      Playing</em> card on the home screen recommendation row so users can return to the app to
-      control playback.
+      If the app continues to play sound or video after the user has left, the
+      app provides a <em>Now Playing</em> card on the home screen recommendation
+      row so users can return to the app to control playback.
       (<a href="{@docRoot}training/tv/playback/now-playing.html">Learn how</a>)
     </p>
   </td>
