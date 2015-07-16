@@ -2543,8 +2543,10 @@ public class WindowManagerService extends IWindowManager.Stub
             win.attach();
             mWindowMap.put(client.asBinder(), win);
             if (win.mAppOp != AppOpsManager.OP_NONE) {
-                if (mAppOps.startOpNoThrow(win.mAppOp, win.getOwningUid(), win.getOwningPackage())
-                        != AppOpsManager.MODE_ALLOWED) {
+                int startOpResult = mAppOps.startOpNoThrow(win.mAppOp, win.getOwningUid(),
+                        win.getOwningPackage());
+                if ((startOpResult != AppOpsManager.MODE_ALLOWED) &&
+                        (startOpResult != AppOpsManager.MODE_DEFAULT)) {
                     win.setAppOpVisibilityLw(false);
                 }
             }
@@ -2899,7 +2901,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (win.mAppOp != AppOpsManager.OP_NONE) {
                         final int mode = mAppOps.checkOpNoThrow(win.mAppOp, win.getOwningUid(),
                                 win.getOwningPackage());
-                        win.setAppOpVisibilityLw(mode == AppOpsManager.MODE_ALLOWED);
+                        win.setAppOpVisibilityLw(mode == AppOpsManager.MODE_ALLOWED ||
+                                mode == AppOpsManager.MODE_DEFAULT);
                     }
                 }
             }
