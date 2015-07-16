@@ -6159,12 +6159,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return false;
             }
         }
-
-        synchronized (mInstallLock) {
-            final String[] instructionSets = new String[] { targetInstructionSet };
-            int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
-                    false /* forceDex */, false /* defer */, true /* inclDependencies */);
-            return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mInstallLock) {
+                final String[] instructionSets = new String[] { targetInstructionSet };
+                int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
+                        false /* forceDex */, false /* defer */, true /* inclDependencies */);
+                return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
         }
     }
 
