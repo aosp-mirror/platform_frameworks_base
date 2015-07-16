@@ -1050,6 +1050,7 @@ public abstract class Connection extends Conferenceable {
     private int mConnectionCapabilities;
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
+    private long mConnectTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
     private StatusHints mStatusHints;
     private int mVideoState;
     private DisconnectCause mDisconnectCause;
@@ -1159,6 +1160,19 @@ public abstract class Connection extends Conferenceable {
      */
     public final boolean getAudioModeIsVoip() {
         return mAudioModeIsVoip;
+    }
+
+    /**
+     * Retrieves the connection start time of the {@code Connnection}, if specified.  A value of
+     * {@link Conference#CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the
+     * start time of the conference.
+     *
+     * @return The time at which the {@code Connnection} was connected.
+     *
+     * @hide
+     */
+    public final long getConnectTimeMillis() {
+        return mConnectTimeMillis;
     }
 
     /**
@@ -1473,6 +1487,18 @@ public abstract class Connection extends Conferenceable {
         for (Listener l : mListeners) {
             l.onAudioModeIsVoipChanged(this, isVoip);
         }
+    }
+
+    /**
+     * Sets the time at which a call became active on this Connection. This is set only
+     * when a conference call becomes active on this connection.
+     *
+     * @param connectionTimeMillis The connection time, in milliseconds.
+     *
+     * @hide
+     */
+    public final void setConnectTimeMillis(long connectTimeMillis) {
+        mConnectTimeMillis = connectTimeMillis;
     }
 
     /**
