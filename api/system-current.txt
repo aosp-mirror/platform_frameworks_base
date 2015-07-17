@@ -4909,9 +4909,9 @@ package android.app {
     field public int flags;
     field public android.app.PendingIntent fullScreenIntent;
     field public android.widget.RemoteViews headsUpContentView;
-    field public int icon;
+    field public deprecated int icon;
     field public int iconLevel;
-    field public android.graphics.Bitmap largeIcon;
+    field public deprecated android.graphics.Bitmap largeIcon;
     field public int ledARGB;
     field public int ledOffMS;
     field public int ledOnMS;
@@ -4927,20 +4927,22 @@ package android.app {
   }
 
   public static class Notification.Action implements android.os.Parcelable {
-    ctor public Notification.Action(int, java.lang.CharSequence, android.app.PendingIntent);
+    ctor public deprecated Notification.Action(int, java.lang.CharSequence, android.app.PendingIntent);
     method public android.app.Notification.Action clone();
     method public int describeContents();
     method public android.os.Bundle getExtras();
+    method public android.graphics.drawable.Icon getIcon();
     method public android.app.RemoteInput[] getRemoteInputs();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.Notification.Action> CREATOR;
     field public android.app.PendingIntent actionIntent;
-    field public int icon;
+    field public deprecated int icon;
     field public java.lang.CharSequence title;
   }
 
   public static final class Notification.Action.Builder {
-    ctor public Notification.Action.Builder(int, java.lang.CharSequence, android.app.PendingIntent);
+    ctor public deprecated Notification.Action.Builder(int, java.lang.CharSequence, android.app.PendingIntent);
+    ctor public Notification.Action.Builder(android.graphics.drawable.Icon, java.lang.CharSequence, android.app.PendingIntent);
     ctor public Notification.Action.Builder(android.app.Notification.Action);
     method public android.app.Notification.Action.Builder addExtras(android.os.Bundle);
     method public android.app.Notification.Action.Builder addRemoteInput(android.app.RemoteInput);
@@ -4988,7 +4990,7 @@ package android.app {
 
   public static class Notification.Builder {
     ctor public Notification.Builder(android.content.Context);
-    method public android.app.Notification.Builder addAction(int, java.lang.CharSequence, android.app.PendingIntent);
+    method public deprecated android.app.Notification.Builder addAction(int, java.lang.CharSequence, android.app.PendingIntent);
     method public android.app.Notification.Builder addAction(android.app.Notification.Action);
     method public android.app.Notification.Builder addExtras(android.os.Bundle);
     method public android.app.Notification.Builder addPerson(java.lang.String);
