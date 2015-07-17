@@ -740,15 +740,20 @@ class MountService extends IMountService.Stub
      */
     @Deprecated
     private void killMediaProvider() {
-        final ProviderInfo provider = mPms.resolveContentProvider(MediaStore.AUTHORITY, 0,
-                UserHandle.USER_OWNER);
-        if (provider != null) {
-            final IActivityManager am = ActivityManagerNative.getDefault();
-            try {
-                am.killApplicationWithAppId(provider.applicationInfo.packageName,
-                        UserHandle.getAppId(provider.applicationInfo.uid), "vold reset");
-            } catch (RemoteException e) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final ProviderInfo provider = mPms.resolveContentProvider(MediaStore.AUTHORITY, 0,
+                    UserHandle.USER_OWNER);
+            if (provider != null) {
+                final IActivityManager am = ActivityManagerNative.getDefault();
+                try {
+                    am.killApplicationWithAppId(provider.applicationInfo.packageName,
+                            UserHandle.getAppId(provider.applicationInfo.uid), "vold reset");
+                } catch (RemoteException e) {
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
