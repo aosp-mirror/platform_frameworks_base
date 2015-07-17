@@ -373,7 +373,7 @@ consideration that the interaction must be explicitly enabled.
 <h2 id="behavior-afw">Android for Work Changes</h2>
 <p>This preview includes the following behavior changes for Android for Work:</p>
 <ul>
-<li><strong>Work contacts in personal contexts.</strong> The Google Dialer
+  <li><strong>Work contacts in personal contexts.</strong> The Google Dialer
 Call Log now displays work contacts when the user views past calls.
 Setting
 {@link android.app.admin.DevicePolicyManager#setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean) setCrossProfileCallerIdDisabled()}
@@ -381,21 +381,19 @@ to {@code true} hides the work profile contacts in the Google Dialer Call Log. W
 displayed along with personal contacts to devices over Bluetooth only if
 you set {@code DevicePolicyManager.setBluetoothContactSharingDisabled()} to {@code false}. By
 default, it is set to {@code true}.
-</li>
-<li><strong>WiFi configuration removal:</strong> WiFi configurations added by a Profile Owner
+  </li>
+  <li><strong>WiFi configuration removal:</strong> WiFi configurations added by a Profile Owner
 (for example, through calls to the
 {@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
-addNetwork()} method) are now removed if that work profile is deleted.</li>
-
-<li><strong>WiFi configuration lockdown:</strong> Any WiFi configuration created by
+addNetwork()} method) are now removed if that work profile is deleted.
+  </li>
+  <li><strong>WiFi configuration lockdown:</strong> Any WiFi configuration created by
   an active Device Owner can no longer be modified or deleted by the user if
   <code>Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN</code> is non-zero.
   The user can still create and modify their own WiFi configurations. Active Device
   Owners have the privilege of editing/removing any WiFi configurations, including
   those not created by them.
-</li>
-
-</li>
+  </li>
 <li><strong>Download Work Policy Controller via Google account addition:</strong> When a Google
 account that requires management via a Work Policy Controller (WPC) app is added to a device
 outside of a managed context, the add account flow now prompts the user to install the
@@ -408,7 +406,7 @@ method affects the camera for the calling user only; calling it from the managed
 affect camera apps running on the primary user. </li>
   <li>In addition, the
 {@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()}
-    method is now available for Profile Owners, in addition to Device Owners. </li>
+    method is now available for Profile Owners, as well as to Device Owners. </li>
   <li>A Profile Owner can set these keyguard restrictions:
     <ul>
     <li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} and
@@ -422,9 +420,19 @@ affect camera apps running on the primary user. </li>
   <li>The {@link android.app.admin.DevicePolicyManager#setScreenCaptureDisabled(android.content.ComponentName, boolean) setScreenCaptureDisabled()} method now also blocks the assist structure when an app of the given user is in the foreground. </li>
   <li><code>EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM</code> now defaults to SHA-256. SHA-1 is still supported for backwards compatibility but will be removed in future. <code>EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM</code> now only accepts SHA-256.</li>
   <li>Device initializer APIs which existed in the MNC preview are now removed. They will not appear in the final M release.</li>
-    <li>Android for Work APIs are optimized for M runtime permissions, including Work profiles, assist layer, and others. New DevicePolicyManager permission APIs don't affect pre-M apps.</li>
-    </ul>
-    <li><strong>Changes to global settings</strong> &mdash; the settings below can no longer be set via {@link android.app.admin.DevicePolicyManager#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String) setGlobalSettings()}</code>:
+    <li><code>EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS</code> is removed so NFC bump provisioning cannot programmatically unlock a factory reset protected device.</li>
+    <li>Android for Work APIs are optimized for M runtime permissions, including Work profiles, assist layer, and others. New <code>DevicePolicyManager</code> permission APIs don't affect pre-M apps.</li>
+    </ul></li>
+
+<li><strong>Changes to other APIs</strong>:
+<ul>
+    <li>Data Usage: The {@code android.app.usage.NetworkUsageStats} class has been renamed {@code android.app.usage.NetworkStats}.</li>
+</ul>
+    </li>
+
+    <li><strong>Changes to global settings</strong>:
+    <ul>
+    <li>These settings can no longer be set via {@link android.app.admin.DevicePolicyManager#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String) setGlobalSettings()}</code>:
 <ul>
     <li><code>BLUETOOTH_ON</code></li>
     <li><code>DEVELOPMENT_SETTINGS_ENABLED</code></li>
@@ -433,4 +441,10 @@ affect camera apps running on the primary user. </li>
     <li><code>WIFI_ON</code></li> 
 </ul>
     </li>
+    <li>These global settings can now be set via <code><a href="/reference/android/app/admin/DevicePolicyManager.html#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String)">setGlobalSettings()</a></code>:
+    <ul>
+    <li><code>WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN</code></li>
+    </ul>
+    </li>
+    </ul>
 </ul>
