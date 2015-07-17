@@ -100,4 +100,6 @@ interface ICameraDeviceUser
     int flush(out LongParcelable lastFrameNumber);
 
     int prepare(int streamId);
+
+    int tearDown(int streamId);
 }
