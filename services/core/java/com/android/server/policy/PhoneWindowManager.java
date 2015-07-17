@@ -358,6 +358,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     boolean mSystemReady;
     boolean mSystemBooted;
+    private boolean mDeferBindKeyguard;
     boolean mHdmiPlugged;
     HdmiControl mHdmiControl;
     IUiModeManager mUiModeManager;
@@ -6014,6 +6015,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         readCameraLensCoverState();
         updateUiMode();
+        boolean bindKeyguardNow;
         synchronized (mLock) {
             updateOrientationListenerLp();
             mSystemReady = true;
@@ -6023,13 +6025,36 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     updateSettings();
                 }
             });
+
+            bindKeyguardNow = mDeferBindKeyguard;
+            if (bindKeyguardNow) {
+                // systemBooted ran but wasn't able to bind to the Keyguard, we'll do it now.
+                mDeferBindKeyguard = false;
+            }
+        }
+
+        if (bindKeyguardNow) {
+            mKeyguardDelegate.bindService(mContext);
+            mKeyguardDelegate.onBootCompleted();
         }
     }
 
     /** {@inheritDoc} */
     @Override
     public void systemBooted() {
-        if (mKeyguardDelegate != null) {
+        boolean bindKeyguardNow = false;
+        synchronized (mLock) {
+            // Time to bind Keyguard; take care to only bind it once, either here if ready or
+            // in systemReady if not.
+            if (mKeyguardDelegate != null) {
+                bindKeyguardNow = true;
+            } else {
+                // Because mKeyguardDelegate is null, we know that the synchronized block in
+                // systemReady didn't run yet and setting this will actually have an effect.
+                mDeferBindKeyguard = true;
+            }
+        }
+        if (bindKeyguardNow) {
             mKeyguardDelegate.bindService(mContext);
             mKeyguardDelegate.onBootCompleted();
         }
