@@ -37,7 +37,7 @@ public class KeyguardServiceDelegate {
     private final KeyguardState mKeyguardState = new KeyguardState();
     private DrawnListener mDrawnListenerWhenConnect;
 
-    /* package */ static final class KeyguardState {
+    private static final class KeyguardState {
         KeyguardState() {
             // Assume keyguard is showing and secure until we know for sure. This is here in
             // the event something checks before the service is actually started.
@@ -119,8 +119,13 @@ public class KeyguardServiceDelegate {
             mKeyguardState.showing = false;
             mKeyguardState.showingAndNotOccluded = false;
             mKeyguardState.secure = false;
-            mKeyguardState.deviceHasKeyguard = false;
-            hideScrim();
+            synchronized (mKeyguardState) {
+                // TODO: Fix synchronisation model in this class. The other state in this class
+                // is at least self-healing but a race condition here can lead to the scrim being
+                // stuck on keyguard-less devices.
+                mKeyguardState.deviceHasKeyguard = false;
+                hideScrim();
+            }
         } else {
             if (DEBUG) Log.v(TAG, "*** Keyguard started");
         }
@@ -315,13 +320,15 @@ public class KeyguardServiceDelegate {
     }
 
     public void showScrim() {
-        if (!mKeyguardState.deviceHasKeyguard) return;
-        mScrim.post(new Runnable() {
-            @Override
-            public void run() {
-                mScrim.setVisibility(View.VISIBLE);
-            }
-        });
+        synchronized (mKeyguardState) {
+            if (!mKeyguardState.deviceHasKeyguard) return;
+            mScrim.post(new Runnable() {
+                @Override
+                public void run() {
+                    mScrim.setVisibility(View.VISIBLE);
+                }
+            });
+        }
     }
 
     public void hideScrim() {
