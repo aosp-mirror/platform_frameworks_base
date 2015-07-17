@@ -214,7 +214,7 @@ public class LockIcon extends KeyguardAffordanceView {
         } else if (oldState == STATE_FINGERPRINT_ERROR && newState == STATE_FINGERPRINT) {
             return R.drawable.lockscreen_fingerprint_error_state_to_fp_animation;
         } else if (oldState == STATE_FINGERPRINT && newState == STATE_LOCK_OPEN
-                && !mUnlockMethodCache.isCurrentlyInsecure()) {
+                && !mUnlockMethodCache.isTrusted()) {
             return R.drawable.lockscreen_fingerprint_draw_off_animation;
         } else if (newState == STATE_FINGERPRINT && !oldScreenOn && screenOn) {
             return R.drawable.lockscreen_fingerprint_draw_on_animation;
@@ -226,7 +226,7 @@ public class LockIcon extends KeyguardAffordanceView {
     private int getState() {
         boolean fingerprintRunning =
                 KeyguardUpdateMonitor.getInstance(mContext).isFingerprintDetectionRunning();
-        if (mUnlockMethodCache.isCurrentlyInsecure()) {
+        if (mUnlockMethodCache.canSkipBouncer()) {
             return STATE_LOCK_OPEN;
         } else if (mTransientFpError) {
             return STATE_FINGERPRINT_ERROR;

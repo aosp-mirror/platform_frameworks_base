@@ -497,9 +497,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0;
     }
 
+    public boolean getUserCanSkipBouncer(int userId) {
+        return getUserHasTrust(userId) || mUserFingerprintAuthenticated.get(userId);
+    }
+
     public boolean getUserHasTrust(int userId) {
-        return !isTrustDisabled(userId) && mUserHasTrust.get(userId)
-                || mUserFingerprintAuthenticated.get(userId);
+        return !isTrustDisabled(userId) && mUserHasTrust.get(userId);
     }
 
     public boolean getUserTrustIsManaged(int userId) {
