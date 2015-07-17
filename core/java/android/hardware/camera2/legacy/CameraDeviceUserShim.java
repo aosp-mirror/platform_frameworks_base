@@ -636,6 +636,20 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         return CameraBinderDecorator.NO_ERROR;
     }
 
+    public int tearDown(int streamId) {
+        if (DEBUG) {
+            Log.d(TAG, "tearDown called.");
+        }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot tear down stream, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
+        // LEGACY doesn't support actual teardown, so just a no-op
+
+        return CameraBinderDecorator.NO_ERROR;
+    }
+
     @Override
     public IBinder asBinder() {
         // This is solely intended to be used for in-process binding.
