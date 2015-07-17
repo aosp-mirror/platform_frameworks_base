@@ -24,6 +24,7 @@ import android.media.PlaybackParams;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.Surface;
 
 import java.lang.annotation.Retention;
@@ -82,7 +83,7 @@ import java.util.List;
  *         codec.releaseOutputBuffer(bufferId, 1000 * info.presentationTime);
  *     } else {
  *         ByteBuffer audioByteBuffer = codec.getOutputBuffer(bufferId);
- *         sync.queueByteBuffer(audioByteBuffer, bufferId, info.size, info.presentationTime);
+ *         sync.queueAudio(audioByteBuffer, bufferId, info.presentationTime);
  *     }
  *     // ...
  * }
@@ -427,6 +428,11 @@ public final class MediaSync {
     /**
      * Flushes all buffers from the sync object.
      * <p>
+     * All pending unprocessed audio and video buffers are discarded. If an audio track was
+     * configured, it is flushed and stopped. If a video output surface was configured, the
+     * last frame queued to it is left on the frame. Queue a blank video frame to clear the
+     * surface,
+     * <p>
      * No callbacks are received for the flushed buffers.
      *
      * @throws IllegalStateException if the internal player engine has not been
@@ -437,10 +443,19 @@ public final class MediaSync {
             mAudioBuffers.clear();
             mCallbackHandler.removeCallbacksAndMessages(null);
         }
-        // TODO implement this for surface buffers.
+        if (mAudioTrack != null) {
+            mAudioTrack.pause();
+            mAudioTrack.flush();
+            // Call stop() to signal to the AudioSink to completely fill the
+            // internal buffer before resuming playback.
+            mAudioTrack.stop();
+        }
+        native_flush();
     }
 
-   /**
+    private native final void native_flush();
+
+    /**
      * Get current playback position.
      * <p>
      * The MediaTimestamp represents how the media time correlates to the system time in
@@ -478,6 +493,7 @@ public final class MediaSync {
 
     /**
      * Queues the audio data asynchronously for playback (AudioTrack must be in streaming mode).
+     * If the audio track was flushed as a result of {@link #flush}, it will be restarted.
      * @param audioData the buffer that holds the data to play. This buffer will be returned
      *     to the client via registered callback.
      * @param bufferId an integer used to identify audioData. It will be returned to
@@ -519,6 +535,14 @@ public final class MediaSync {
 
                     AudioBuffer audioBuffer = mAudioBuffers.get(0);
                     int size = audioBuffer.mByteBuffer.remaining();
+                    // restart audio track after flush
+                    if (size > 0 && mAudioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING) {
+                        try {
+                            mAudioTrack.play();
+                        } catch (IllegalStateException e) {
+                            Log.w(TAG, "could not start audio track");
+                        }
+                    }
                     int sizeWritten = mAudioTrack.write(
                             audioBuffer.mByteBuffer,
                             size,
@@ -558,17 +582,19 @@ public final class MediaSync {
                 final MediaSync sync = this;
                 mCallbackHandler.post(new Runnable() {
                     public void run() {
+                        Callback callback;
                         synchronized(mCallbackLock) {
+                            callback = mCallback;
                             if (mCallbackHandler == null
                                     || mCallbackHandler.getLooper().getThread()
                                             != Thread.currentThread()) {
                                 // callback handler has been changed.
                                 return;
                             }
-                            if (mCallback != null) {
-                                mCallback.onAudioBufferConsumed(sync, audioBuffer.mByteBuffer,
-                                        audioBuffer.mBufferIndex);
-                            }
+                        }
+                        if (callback != null) {
+                            callback.onAudioBufferConsumed(sync, audioBuffer.mByteBuffer,
+                                    audioBuffer.mBufferIndex);
                         }
                     }
                 });
