@@ -3771,6 +3771,11 @@ public class Activity extends ContextThemeWrapper
     /**
      * Callback for the result from requesting permissions. This method
      * is invoked for every call on {@link #requestPermissions(String[], int)}.
+     * <p>
+     * <strong>Note:</strong> It is possible that the permissions request interaction
+     * with the user is interrupted. In this case you will receive empty permissions
+     * and results arrays which should be treated as a cancellation.
+     * </p>
      *
      * @param requestCode The request code passed in {@link #requestPermissions(String[], int)}.
      * @param permissions The requested permissions. Never null.
