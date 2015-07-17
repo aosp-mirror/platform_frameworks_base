@@ -36,7 +36,7 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
     private int mCurrentUser;
     private boolean mShowing;
     private boolean mSecure;
-    private boolean mTrusted;
+    private boolean mCanSkipBouncer;
 
     private boolean mListening;
 
@@ -47,7 +47,7 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
             @Override
             public void onUserSwitched(int newUserId) {
                 mCurrentUser = newUserId;
-                updateTrustedState();
+                updateCanSkipBouncerState();
             }
         };
     }
@@ -57,7 +57,7 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
         if (mCallbacks.size() != 0 && !mListening) {
             mListening = true;
             mCurrentUser = ActivityManager.getCurrentUser();
-            updateTrustedState();
+            updateCanSkipBouncerState();
             mKeyguardUpdateMonitor.registerCallback(this);
             mUserTracker.startTracking();
         }
@@ -79,8 +79,8 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
         return mSecure;
     }
 
-    public boolean isTrusted() {
-        return mTrusted;
+    public boolean canSkipBouncer() {
+        return mCanSkipBouncer;
     }
 
     public void notifyKeyguardState(boolean showing, boolean secure) {
@@ -92,12 +92,12 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
 
     @Override
     public void onTrustChanged(int userId) {
-        updateTrustedState();
+        updateCanSkipBouncerState();
         notifyKeyguardChanged();
     }
 
-    private void updateTrustedState() {
-        mTrusted = mKeyguardUpdateMonitor.getUserHasTrust(mCurrentUser);
+    private void updateCanSkipBouncerState() {
+        mCanSkipBouncer = mKeyguardUpdateMonitor.getUserCanSkipBouncer(mCurrentUser);
     }
 
     private void notifyKeyguardChanged() {
