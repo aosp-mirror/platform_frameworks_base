@@ -72,7 +72,7 @@ final class DefaultPermissionGrantPolicy {
     static {
         CONTACTS_PERMISSIONS.add(Manifest.permission.READ_CONTACTS);
         CONTACTS_PERMISSIONS.add(Manifest.permission.WRITE_CONTACTS);
-//        CONTACTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
+        CONTACTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
     private static final Set<String> LOCATION_PERMISSIONS = new ArraySet<>();
