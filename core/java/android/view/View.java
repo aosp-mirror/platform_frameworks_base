@@ -21150,11 +21150,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /** @hide */
-    public void hackTurnOffWindowResizeAnim(boolean off) {
-        mAttachInfo.mTurnOffWindowResizeAnim = off;
-    }
-
     /**
      * This method returns a ViewPropertyAnimator object, which can be used to animate
      * specific properties on this View.
@@ -21567,11 +21562,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Indicates whether the application is in compatibility mode
          */
         boolean mScalingRequired;
-
-        /**
-         * If set, ViewRootImpl doesn't use its lame animation for when the window resizes.
-         */
-        boolean mTurnOffWindowResizeAnim;
 
         /**
          * Left position of this view's window

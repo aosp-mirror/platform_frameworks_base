@@ -286,13 +286,6 @@ public final class ViewRootImpl implements ViewParent,
     int mScrollY;
     int mCurScrollY;
     Scroller mScroller;
-    HardwareLayer mResizeBuffer;
-    long mResizeBufferStartTime;
-    int mResizeBufferDuration;
-    // Used to block the creation of the ResizeBuffer due to invalidations in
-    // the previous DisplayList tree that must prevent re-execution.
-    // Currently this means a functor was detached.
-    boolean mBlockResizeBuffer;
     static final Interpolator mResizeInterpolator = new AccelerateDecelerateInterpolator();
     private ArrayList<LayoutTransition> mPendingTransitions;
 
@@ -680,8 +673,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void detachFunctor(long functor) {
-        // TODO: Make the resize buffer some other way to not need this block
-        mBlockResizeBuffer = true;
         if (mAttachInfo.mHardwareRenderer != null) {
             // Fence so that any pending invokeFunctor() messages will be processed
             // before we return from detachFunctor.
@@ -1036,13 +1027,6 @@ public final class ViewRootImpl implements ViewParent,
 
     int getHostVisibility() {
         return mAppVisible ? mView.getVisibility() : View.GONE;
-    }
-
-    void disposeResizeBuffer() {
-        if (mResizeBuffer != null) {
-            mResizeBuffer.destroy();
-            mResizeBuffer = null;
-        }
     }
 
     /**
@@ -1611,68 +1595,6 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mStableInsets);
                 final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);
                 if (contentInsetsChanged) {
-                    if (mWidth > 0 && mHeight > 0 && lp != null &&
-                            ((lp.systemUiVisibility|lp.subtreeSystemUiVisibility)
-                                    & View.SYSTEM_UI_LAYOUT_FLAGS) == 0 &&
-                            mSurface != null && mSurface.isValid() &&
-                            !mAttachInfo.mTurnOffWindowResizeAnim &&
-                            mAttachInfo.mHardwareRenderer != null &&
-                            mAttachInfo.mHardwareRenderer.isEnabled() &&
-                            lp != null && !PixelFormat.formatHasAlpha(lp.format)
-                            && !mBlockResizeBuffer) {
-
-                        disposeResizeBuffer();
-
-// TODO: Again....
-//                        if (mResizeBuffer == null) {
-//                            mResizeBuffer = mAttachInfo.mHardwareRenderer.createDisplayListLayer(
-//                                    mWidth, mHeight);
-//                        }
-//                        mResizeBuffer.prepare(mWidth, mHeight, false);
-//                        RenderNode layerRenderNode = mResizeBuffer.startRecording();
-//                        HardwareCanvas layerCanvas = layerRenderNode.start(mWidth, mHeight);
-//                        try {
-//                            final int restoreCount = layerCanvas.save();
-//
-//                            int yoff;
-//                            final boolean scrolling = mScroller != null
-//                                    && mScroller.computeScrollOffset();
-//                            if (scrolling) {
-//                                yoff = mScroller.getCurrY();
-//                                mScroller.abortAnimation();
-//                            } else {
-//                                yoff = mScrollY;
-//                            }
-//
-//                            layerCanvas.translate(0, -yoff);
-//                            if (mTranslator != null) {
-//                                mTranslator.translateCanvas(layerCanvas);
-//                            }
-//
-//                            RenderNode renderNode = mView.mRenderNode;
-//                            if (renderNode != null && renderNode.isValid()) {
-//                                layerCanvas.drawDisplayList(renderNode, null,
-//                                        RenderNode.FLAG_CLIP_CHILDREN);
-//                            } else {
-//                                mView.draw(layerCanvas);
-//                            }
-//
-//                            drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
-//
-//                            mResizeBufferStartTime = SystemClock.uptimeMillis();
-//                            mResizeBufferDuration = mView.getResources().getInteger(
-//                                    com.android.internal.R.integer.config_mediumAnimTime);
-//
-//                            layerCanvas.restoreToCount(restoreCount);
-//                            layerRenderNode.end(layerCanvas);
-//                            layerRenderNode.setCaching(true);
-//                            layerRenderNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
-//                            mTempRect.set(0, 0, mWidth, mHeight);
-//                        } finally {
-//                            mResizeBuffer.endRecording(mTempRect);
-//                        }
-//                        mAttachInfo.mHardwareRenderer.flushLayerUpdates();
-                    }
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
                     if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
                             + mAttachInfo.mContentInsets);
@@ -1752,7 +1674,6 @@ public final class ViewRootImpl implements ViewParent,
                     if (mScroller != null) {
                         mScroller.abortAnimation();
                     }
-                    disposeResizeBuffer();
                     // Our surface is gone
                     if (mAttachInfo.mHardwareRenderer != null &&
                             mAttachInfo.mHardwareRenderer.isEnabled()) {
@@ -2345,8 +2266,6 @@ public final class ViewRootImpl implements ViewParent,
 
     int mHardwareXOffset;
     int mHardwareYOffset;
-    int mResizeAlpha;
-    final Paint mResizePaint = new Paint();
 
     @Override
     public void onHardwarePreDraw(DisplayListCanvas canvas) {
@@ -2355,11 +2274,6 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void onHardwarePostDraw(DisplayListCanvas canvas) {
-        if (mResizeBuffer != null) {
-            mResizePaint.setAlpha(mResizeAlpha);
-            canvas.drawHardwareLayer(mResizeBuffer, mHardwareXOffset, mHardwareYOffset,
-                    mResizePaint);
-        }
         drawAccessibilityFocusedDrawableIfNeeded(canvas);
     }
 
@@ -2527,27 +2441,13 @@ public final class ViewRootImpl implements ViewParent,
         final boolean scalingRequired = mAttachInfo.mScalingRequired;
 
         int resizeAlpha = 0;
-        if (mResizeBuffer != null) {
-            long deltaTime = SystemClock.uptimeMillis() - mResizeBufferStartTime;
-            if (deltaTime < mResizeBufferDuration) {
-                float amt = deltaTime/(float) mResizeBufferDuration;
-                amt = mResizeInterpolator.getInterpolation(amt);
-                animating = true;
-                resizeAlpha = 255 - (int)(amt*255);
-            } else {
-                disposeResizeBuffer();
-            }
-        }
 
         final Rect dirty = mDirty;
         if (mSurfaceHolder != null) {
             // The app owns the surface, we won't draw.
             dirty.setEmpty();
-            if (animating) {
-                if (mScroller != null) {
-                    mScroller.abortAnimation();
-                }
-                disposeResizeBuffer();
+            if (animating && mScroller != null) {
+                mScroller.abortAnimation();
             }
             return;
         }
@@ -2609,7 +2509,6 @@ public final class ViewRootImpl implements ViewParent,
                     mHardwareXOffset = xOffset;
                     invalidateRoot = true;
                 }
-                mResizeAlpha = resizeAlpha;
 
                 if (invalidateRoot) {
                     mAttachInfo.mHardwareRenderer.invalidateRoot();
@@ -2617,7 +2516,6 @@ public final class ViewRootImpl implements ViewParent,
 
                 dirty.setEmpty();
 
-                mBlockResizeBuffer = false;
                 mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
@@ -2937,7 +2835,7 @@ public final class ViewRootImpl implements ViewParent,
         if (scrollY != mScrollY) {
             if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Pan scroll changed: old="
                     + mScrollY + " , new=" + scrollY);
-            if (!immediate && mResizeBuffer == null) {
+            if (!immediate) {
                 if (mScroller == null) {
                     mScroller = new Scroller(mView.getContext());
                 }

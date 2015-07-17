@@ -2832,14 +2832,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        @Override
-        public void setBackgroundDrawable(Drawable d) {
-            super.setBackgroundDrawable(d);
-            if (getWindowToken() != null) {
-                updateWindowResizeState();
-            }
-        }
-
         public void setWindowFrame(Drawable drawable) {
             if (getForeground() != drawable) {
                 setForeground(drawable);
@@ -3235,17 +3227,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        void updateWindowResizeState() {
-            Drawable bg = getBackground();
-            hackTurnOffWindowResizeAnim(bg == null || bg.getOpacity()
-                    != PixelFormat.OPAQUE);
-        }
-
         @Override
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
-
-            updateWindowResizeState();
 
             final Callback cb = getCallback();
             if (cb != null && !isDestroyed() && mFeatureId < 0) {
