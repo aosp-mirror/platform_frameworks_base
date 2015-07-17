@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.Application;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -30,8 +29,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -255,10 +252,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private Intent getCameraIntent() {
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-        boolean currentUserHasTrust = updateMonitor.getUserHasTrust(
+        boolean canSkipBouncer = updateMonitor.getUserCanSkipBouncer(
                 KeyguardUpdateMonitor.getCurrentUser());
         boolean secure = mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser());
-        return (secure && !currentUserHasTrust) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
+        return (secure && !canSkipBouncer) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
     }
 
     private void updateCameraVisibility() {
