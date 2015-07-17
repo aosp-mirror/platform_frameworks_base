@@ -621,7 +621,7 @@ public class UserSwitcherController {
                 if (ActivityManager.isUserAMonkey()) {
                     return;
                 }
-                UserInfo user = mUserManager.createSecondaryUser(
+                UserInfo user = mUserManager.createUser(
                         mContext.getString(R.string.user_new_user_name), 0 /* flags */);
                 if (user == null) {
                     // Couldn't create user, most likely because there are too many, but we haven't
