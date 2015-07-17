@@ -200,6 +200,11 @@ public class VectorDrawable extends Drawable {
     private static final int LINEJOIN_ROUND = 1;
     private static final int LINEJOIN_BEVEL = 2;
 
+    // Cap the bitmap size, such that it won't hurt the performance too much
+    // and it won't crash due to a very large scale.
+    // The drawable will look blurry above this size.
+    private static final int MAX_CACHED_BITMAP_SIZE = 2048;
+
     private static final boolean DBG_VECTOR_DRAWABLE = false;
 
     private VectorDrawableState mVectorState;
@@ -218,6 +223,11 @@ public class VectorDrawable extends Drawable {
     private int mDpiScaledWidth = 0;
     private int mDpiScaledHeight = 0;
     private Insets mDpiScaleInsets = Insets.NONE;
+
+    // Temp variable, only for saving "new" operation at the draw() time.
+    private final float[] mTmpFloats = new float[9];
+    private final Matrix mTmpMatrix = new Matrix();
+    private final Rect mTmpBounds = new Rect();
 
     public VectorDrawable() {
         this(null, null);
@@ -262,44 +272,59 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        final Rect bounds = getBounds();
-        if (bounds.width() <= 0 || bounds.height() <= 0) {
+        // We will offset the bounds for drawBitmap, so copyBounds() here instead
+        // of getBounds().
+        copyBounds(mTmpBounds);
+        if (mTmpBounds.width() <= 0 || mTmpBounds.height() <= 0) {
             // Nothing to draw
             return;
         }
 
-        final int saveCount = canvas.save();
-        final boolean needMirroring = needMirroring();
+        // Color filters always override tint filters.
+        final ColorFilter colorFilter = (mColorFilter == null ? mTintFilter : mColorFilter);
 
-        canvas.translate(bounds.left, bounds.top);
+        // The imageView can scale the canvas in different ways, in order to
+        // avoid blurry scaling, we have to draw into a bitmap with exact pixel
+        // size first. This bitmap size is determined by the bounds and the
+        // canvas scale.
+        canvas.getMatrix(mTmpMatrix);
+        mTmpMatrix.getValues(mTmpFloats);
+        float canvasScaleX = Math.abs(mTmpFloats[Matrix.MSCALE_X]);
+        float canvasScaleY = Math.abs(mTmpFloats[Matrix.MSCALE_Y]);
+        int scaledWidth = (int) (mTmpBounds.width() * canvasScaleX);
+        int scaledHeight = (int) (mTmpBounds.height() * canvasScaleY);
+        scaledWidth = Math.min(MAX_CACHED_BITMAP_SIZE, scaledWidth);
+        scaledHeight = Math.min(MAX_CACHED_BITMAP_SIZE, scaledHeight);
+
+        if (scaledWidth <= 0 || scaledHeight <= 0) {
+            return;
+        }
+
+        final int saveCount = canvas.save();
+        canvas.translate(mTmpBounds.left, mTmpBounds.top);
+
+        // Handle RTL mirroring.
+        final boolean needMirroring = needMirroring();
         if (needMirroring) {
-            canvas.translate(bounds.width(), 0);
+            canvas.translate(mTmpBounds.width(), 0);
             canvas.scale(-1.0f, 1.0f);
         }
 
-        // Color filters always override tint filters.
-        final ColorFilter colorFilter = mColorFilter == null ? mTintFilter : mColorFilter;
+        // At this point, canvas has been translated to the right position.
+        // And we use this bound for the destination rect for the drawBitmap, so
+        // we offset to (0, 0);
+        mTmpBounds.offsetTo(0, 0);
 
+        mVectorState.createCachedBitmapIfNeeded(scaledWidth, scaledHeight);
         if (!mAllowCaching) {
-            // AnimatedVectorDrawable
-            if (!mVectorState.hasTranslucentRoot()) {
-                mVectorState.mVPathRenderer.draw(
-                        canvas, bounds.width(), bounds.height(), colorFilter);
-            } else {
-                mVectorState.createCachedBitmapIfNeeded(bounds);
-                mVectorState.updateCachedBitmap(bounds);
-                mVectorState.drawCachedBitmapWithRootAlpha(canvas, colorFilter);
-            }
+            mVectorState.updateCachedBitmap(scaledWidth, scaledHeight);
         } else {
-            // Static Vector Drawable case.
-            mVectorState.createCachedBitmapIfNeeded(bounds);
             if (!mVectorState.canReuseCache()) {
-                mVectorState.updateCachedBitmap(bounds);
+                mVectorState.updateCachedBitmap(scaledWidth, scaledHeight);
                 mVectorState.updateCacheStates();
             }
-            mVectorState.drawCachedBitmapWithRootAlpha(canvas, colorFilter);
         }
-
+        mVectorState.drawCachedBitmapWithRootAlpha(canvas, colorFilter, mTmpBounds);
         canvas.restoreToCount(saveCount);
     }
 
@@ -770,10 +795,11 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        public void drawCachedBitmapWithRootAlpha(Canvas canvas, ColorFilter filter) {
+        public void drawCachedBitmapWithRootAlpha(Canvas canvas, ColorFilter filter,
+                Rect originalBounds) {
             // The bitmap's size is the same as the bounds.
             final Paint p = getPaint(filter);
-            canvas.drawBitmap(mCachedBitmap, 0, 0, p);
+            canvas.drawBitmap(mCachedBitmap, null, originalBounds, p);
         }
 
         public boolean hasTranslucentRoot() {
@@ -797,16 +823,15 @@ public class VectorDrawable extends Drawable {
             return mTempPaint;
         }
 
-        public void updateCachedBitmap(Rect bounds) {
+        public void updateCachedBitmap(int width, int height) {
             mCachedBitmap.eraseColor(Color.TRANSPARENT);
             Canvas tmpCanvas = new Canvas(mCachedBitmap);
-            mVPathRenderer.draw(tmpCanvas, bounds.width(), bounds.height(), null);
+            mVPathRenderer.draw(tmpCanvas, width, height, null);
         }
 
-        public void createCachedBitmapIfNeeded(Rect bounds) {
-            if (mCachedBitmap == null || !canReuseBitmap(bounds.width(),
-                    bounds.height())) {
-                mCachedBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(),
+        public void createCachedBitmapIfNeeded(int width, int height) {
+            if (mCachedBitmap == null || !canReuseBitmap(width, height)) {
+                mCachedBitmap = Bitmap.createBitmap(width, height,
                         Bitmap.Config.ARGB_8888);
                 mCacheDirty = true;
             }
