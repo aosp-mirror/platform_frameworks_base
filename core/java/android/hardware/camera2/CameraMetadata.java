@@ -1994,8 +1994,9 @@ public abstract class CameraMetadata<TKey> {
     public static final int EDGE_MODE_OFF = 0;
 
     /**
-     * <p>Apply edge enhancement at a quality level that does not slow down frame rate relative to sensor
-     * output</p>
+     * <p>Apply edge enhancement at a quality level that does not slow down frame rate
+     * relative to sensor output. It may be the same as OFF if edge enhancement will
+     * slow down frame rate relative to sensor.</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_FAST = 1;
@@ -2117,7 +2118,8 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Noise reduction is applied without reducing frame rate relative to sensor
-     * output.</p>
+     * output. It may be the same as OFF if noise reduction will reduce frame rate
+     * relative to sensor.</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_FAST = 1;
