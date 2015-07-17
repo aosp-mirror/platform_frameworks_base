@@ -44,6 +44,7 @@ public final class ParcelableConnection implements Parcelable {
     private final int mVideoState;
     private final boolean mRingbackRequested;
     private final boolean mIsVoipAudioMode;
+    private final long mConnectTimeMillis;
     private final StatusHints mStatusHints;
     private final DisconnectCause mDisconnectCause;
     private final List<String> mConferenceableConnectionIds;
@@ -62,6 +63,7 @@ public final class ParcelableConnection implements Parcelable {
             int videoState,
             boolean ringbackRequested,
             boolean isVoipAudioMode,
+            long connectTimeMillis,
             StatusHints statusHints,
             DisconnectCause disconnectCause,
             List<String> conferenceableConnectionIds,
@@ -77,6 +79,7 @@ public final class ParcelableConnection implements Parcelable {
         mVideoState = videoState;
         mRingbackRequested = ringbackRequested;
         mIsVoipAudioMode = isVoipAudioMode;
+        mConnectTimeMillis = connectTimeMillis;
         mStatusHints = statusHints;
         mDisconnectCause = disconnectCause;
         mConferenceableConnectionIds = conferenceableConnectionIds;
@@ -128,6 +131,10 @@ public final class ParcelableConnection implements Parcelable {
         return mIsVoipAudioMode;
     }
 
+    public long getConnectTimeMillis() {
+        return mConnectTimeMillis;
+    }
+
     public final StatusHints getStatusHints() {
         return mStatusHints;
     }
@@ -176,6 +183,7 @@ public final class ParcelableConnection implements Parcelable {
             int videoState = source.readInt();
             boolean ringbackRequested = source.readByte() == 1;
             boolean audioModeIsVoip = source.readByte() == 1;
+            long connectTimeMillis = source.readLong();
             StatusHints statusHints = source.readParcelable(classLoader);
             DisconnectCause disconnectCause = source.readParcelable(classLoader);
             List<String> conferenceableConnectionIds = new ArrayList<>();
@@ -194,6 +202,7 @@ public final class ParcelableConnection implements Parcelable {
                     videoState,
                     ringbackRequested,
                     audioModeIsVoip,
+                    connectTimeMillis,
                     statusHints,
                     disconnectCause,
                     conferenceableConnectionIds,
@@ -227,6 +236,7 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeInt(mVideoState);
         destination.writeByte((byte) (mRingbackRequested ? 1 : 0));
         destination.writeByte((byte) (mIsVoipAudioMode ? 1 : 0));
+        destination.writeLong(mConnectTimeMillis);
         destination.writeParcelable(mStatusHints, 0);
         destination.writeParcelable(mDisconnectCause, 0);
         destination.writeStringList(mConferenceableConnectionIds);
