@@ -2807,30 +2807,6 @@ public class WifiManager {
     }
 
     /**
-     * Set setting for allowing Scans when infrastructure is associated
-     * @hide
-     */
-    public void setAllowScansWhileAssociated(int enabled) {
-        try {
-            mService.setAllowScansWhileAssociated(enabled);
-        } catch (RemoteException e) {
-
-        }
-    }
-
-    /**
-     * Get setting for allowing Scans when infrastructure is associated
-     * @hide
-     */
-    public int getAllowScansWhileAssociated() {
-        try {
-            return mService.getAllowScansWhileAssociated();
-        } catch (RemoteException e) {
-        }
-        return 0;
-    }
-
-    /**
      * Resets all wifi manager settings back to factory defaults.
      *
      * @hide
@@ -2856,6 +2832,31 @@ public class WifiManager {
     }
 
     /**
+     * Framework layer autojoin enable/disable when device is associated
+     * this will enable/disable autojoin scan and switch network when connected
+     * @return true -- if set successful false -- if set failed
+     * @hide
+     */
+    public boolean enableAutoJoinWhenAssociated(boolean enabled) {
+        try {
+            return mService.enableAutoJoinWhenAssociated(enabled);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get setting for Framework layer autojoin enable status
+     * @hide
+     */
+    public boolean getEnableAutoJoinWhenAssociated() {
+        try {
+            return mService.getEnableAutoJoinWhenAssociated();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+    /**
      * Set setting for enabling autojoin Offload thru Wifi HAL layer
      * @hide
      */
@@ -2874,30 +2875,6 @@ public class WifiManager {
     public int getHalBasedAutojoinOffload() {
         try {
             return mService.getHalBasedAutojoinOffload();
-        } catch (RemoteException e) {
-        }
-        return 0;
-    }
-
-    /**
-     * Set setting for enabling network switching while wifi is associated
-     * @hide
-     */
-    public void setAllowNetworkSwitchingWhileAssociated(int enabled) {
-        try {
-            mService.setAllowNetworkSwitchingWhileAssociated(enabled);
-        } catch (RemoteException e) {
-
-        }
-    }
-
-    /**
-     * Get setting for enabling network switching while wifi is associated
-     * @hide
-     */
-    public int getAllowNetworkSwitchingWhileAssociated() {
-        try {
-            return mService.getAllowNetworkSwitchingWhileAssociated();
         } catch (RemoteException e) {
         }
         return 0;
