@@ -480,9 +480,6 @@
     <!-- Integer indicating how to handle beacons with uninitialized RSSI value of 0 -->
     <integer translatable="false" name="config_wifi_framework_scan_result_rssi_level_patchup_value">-85</integer>
 
-    <!-- Boolean indicating associated scan are allowed -->
-    <bool translatable="false" name="config_wifi_framework_enable_associated_autojoin_scan">true</bool>
-
     <!-- Boolean indicating associated network selection is allowed -->
     <bool translatable="false" name="config_wifi_framework_enable_associated_network_selection">true</bool>
 
