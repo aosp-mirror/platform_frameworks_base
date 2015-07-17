@@ -2965,6 +2965,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     public boolean activitySupportsIntent(ComponentName component, Intent intent,
             String resolvedType) {
         synchronized (mPackages) {
+            if (component.equals(mResolveComponentName)) {
+                // The resolver supports EVERYTHING!
+                return true;
+            }
             PackageParser.Activity a = mActivities.mActivities.get(component);
             if (a == null) {
                 return false;
