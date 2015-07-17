@@ -21,7 +21,7 @@ import android.service.chooser.ChooserTarget;
 /**
  * @hide
  */
-interface IChooserTargetResult
+oneway interface IChooserTargetResult
 {
     void sendResult(in List<ChooserTarget> targets);
 }
