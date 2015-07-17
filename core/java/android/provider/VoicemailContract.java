@@ -314,11 +314,16 @@ public class VoicemailContract {
             contentValues.put(Voicemails.IS_READ, voicemail.isRead() ? 1 : 0);
 
             PhoneAccountHandle phoneAccount = voicemail.getPhoneAccount();
-            if (voicemail.getPhoneAccount() != null) {
+            if (phoneAccount != null) {
                 contentValues.put(Voicemails.PHONE_ACCOUNT_COMPONENT_NAME,
                         phoneAccount.getComponentName().flattenToString());
                 contentValues.put(Voicemails.PHONE_ACCOUNT_ID, phoneAccount.getId());
             }
+
+            if (voicemail.getTranscription() != null) {
+                contentValues.put(Voicemails.TRANSCRIPTION, voicemail.getTranscription());
+            }
+
             return contentValues;
         }
     }
