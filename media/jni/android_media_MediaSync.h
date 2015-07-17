@@ -49,6 +49,8 @@ struct JMediaSync : public RefBase {
     status_t setVideoFrameRateHint(float rate);
     float getVideoFrameRate();
 
+    void flush();
+
     sp<const MediaClock> getMediaClock();
 
 protected:
