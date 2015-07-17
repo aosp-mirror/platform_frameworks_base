@@ -28555,14 +28555,13 @@ package android.service.carrier {
 package android.service.chooser {
 
   public final class ChooserTarget implements android.os.Parcelable {
-    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.drawable.Icon, float, android.app.PendingIntent);
-    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.drawable.Icon, float, android.content.IntentSender);
+    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.drawable.Icon, float, android.content.ComponentName, android.os.Bundle);
     method public int describeContents();
+    method public android.content.ComponentName getComponentName();
     method public android.graphics.drawable.Icon getIcon();
-    method public android.content.IntentSender getIntentSender();
+    method public android.os.Bundle getIntentExtras();
     method public float getScore();
     method public java.lang.CharSequence getTitle();
-    method public boolean sendIntent(android.content.Context, android.content.Intent);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.chooser.ChooserTarget> CREATOR;
   }
