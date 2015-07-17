@@ -166,8 +166,10 @@ public class Notification implements Parcelable
 
     /**
      * The resource id of a drawable to use as the icon in the status bar.
-     * This is required; notifications with an invalid icon resource will not be shown.
+     *
+     * @deprecated Use {@link Builder#setSmallIcon(Icon)} instead.
      */
+    @Deprecated
     @DrawableRes
     public int icon;
 
@@ -269,8 +271,11 @@ public class Notification implements Parcelable
     public RemoteViews headsUpContentView;
 
     /**
-     * The bitmap that may escape the bounds of the panel and bar.
+     * A large bitmap to be shown in the notification content area.
+     *
+     * @deprecated Use {@link Builder#setLargeIcon(Icon)} instead.
      */
+    @Deprecated
     public Bitmap largeIcon;
 
     /**
@@ -900,11 +905,15 @@ public class Notification implements Parcelable
      */
     public static class Action implements Parcelable {
         private final Bundle mExtras;
+        private Icon mIcon;
         private final RemoteInput[] mRemoteInputs;
 
         /**
          * Small icon representing the action.
+         *
+         * @deprecated Use {@link Action#getIcon()} instead.
          */
+        @Deprecated
         public int icon;
 
         /**
@@ -919,7 +928,12 @@ public class Notification implements Parcelable
         public PendingIntent actionIntent;
 
         private Action(Parcel in) {
-            icon = in.readInt();
+            if (in.readInt() != 0) {
+                mIcon = Icon.CREATOR.createFromParcel(in);
+            }
+            if (mIcon.getType() == Icon.TYPE_RESOURCE) {
+                icon = mIcon.getResId();
+            }
             title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             if (in.readInt() == 1) {
                 actionIntent = PendingIntent.CREATOR.createFromParcel(in);
@@ -929,19 +943,31 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Use {@link Notification.Builder#addAction(int, CharSequence, PendingIntent)}.
+         * @deprecated Use {@link android.app.Notification.Action.Builder}.
          */
+        @Deprecated
         public Action(int icon, CharSequence title, PendingIntent intent) {
-            this(icon, title, intent, new Bundle(), null);
+            this(Icon.createWithResource("", icon), title, intent, new Bundle(), null);
         }
 
-        private Action(int icon, CharSequence title, PendingIntent intent, Bundle extras,
+        private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                 RemoteInput[] remoteInputs) {
-            this.icon = icon;
+            this.mIcon = icon;
             this.title = title;
             this.actionIntent = intent;
             this.mExtras = extras != null ? extras : new Bundle();
             this.mRemoteInputs = remoteInputs;
+        }
+
+        /**
+         * Return an icon representing the action.
+         */
+        public Icon getIcon() {
+            if (mIcon == null && icon != 0) {
+                // you snuck an icon in here without using the builder; let's try to keep it
+                mIcon = Icon.createWithResource("", icon);
+            }
+            return mIcon;
         }
 
         /**
@@ -963,7 +989,7 @@ public class Notification implements Parcelable
          * Builder class for {@link Action} objects.
          */
         public static final class Builder {
-            private final int mIcon;
+            private final Icon mIcon;
             private final CharSequence mTitle;
             private final PendingIntent mIntent;
             private final Bundle mExtras;
@@ -975,7 +1001,18 @@ public class Notification implements Parcelable
              * @param title the title of the action
              * @param intent the {@link PendingIntent} to fire when users trigger this action
              */
+            @Deprecated
             public Builder(int icon, CharSequence title, PendingIntent intent) {
+                this(Icon.createWithResource("", icon), title, intent, new Bundle(), null);
+            }
+
+            /**
+             * Construct a new builder for {@link Action} object.
+             * @param icon icon to show for this action
+             * @param title the title of the action
+             * @param intent the {@link PendingIntent} to fire when users trigger this action
+             */
+            public Builder(Icon icon, CharSequence title, PendingIntent intent) {
                 this(icon, title, intent, new Bundle(), null);
             }
 
@@ -985,11 +1022,11 @@ public class Notification implements Parcelable
              * @param action the action to read fields from.
              */
             public Builder(Action action) {
-                this(action.icon, action.title, action.actionIntent, new Bundle(action.mExtras),
+                this(action.getIcon(), action.title, action.actionIntent, new Bundle(action.mExtras),
                         action.getRemoteInputs());
             }
 
-            private Builder(int icon, CharSequence title, PendingIntent intent, Bundle extras,
+            private Builder(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                     RemoteInput[] remoteInputs) {
                 mIcon = icon;
                 mTitle = title;
@@ -1063,7 +1100,7 @@ public class Notification implements Parcelable
         @Override
         public Action clone() {
             return new Action(
-                    icon,
+                    getIcon(),
                     title,
                     actionIntent, // safe to alias
                     new Bundle(mExtras),
@@ -1075,7 +1112,13 @@ public class Notification implements Parcelable
         }
         @Override
         public void writeToParcel(Parcel out, int flags) {
-            out.writeInt(icon);
+            final Icon ic = getIcon();
+            if (ic != null) {
+                out.writeInt(1);
+                ic.writeToParcel(out, 0);
+            } else {
+                out.writeInt(0);
+            }
             TextUtils.writeToParcel(title, out, flags);
             if (actionIntent != null) {
                 out.writeInt(1);
@@ -2725,7 +2768,10 @@ public class Notification implements Parcelable
          * @param icon Resource ID of a drawable that represents the action.
          * @param title Text describing the action.
          * @param intent PendingIntent to be fired when the action is invoked.
+         *
+         * @deprecated Use {@link #addAction(Action)} instead.
          */
+        @Deprecated
         public Builder addAction(int icon, CharSequence title, PendingIntent intent) {
             mActions.add(new Action(icon, safeCharSequence(title), intent));
             return this;
@@ -4265,7 +4311,7 @@ public class Notification implements Parcelable
      *
      * In the expanded form, {@link Notification#bigContentView}, up to 5
      * {@link Notification.Action}s specified with
-     * {@link Notification.Builder#addAction(int, CharSequence, PendingIntent) addAction} will be
+     * {@link Notification.Builder#addAction(Action) addAction} will be
      * shown as icon-only pushbuttons, suitable for transport controls. The Bitmap given to
      * {@link Notification.Builder#setLargeIcon(android.graphics.Bitmap) setLargeIcon()} will be
      * treated as album artwork.
