@@ -60,6 +60,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -129,7 +130,7 @@ final class Settings {
      * Note that care should be taken to make sure all database upgrades are
      * idempotent.
      */
-    private static final int CURRENT_DATABASE_VERSION = DatabaseVersion.SIGNATURE_MALFORMED_RECOVER;
+    public static final int CURRENT_DATABASE_VERSION = DatabaseVersion.SIGNATURE_MALFORMED_RECOVER;
 
     /**
      * This class contains constants that can be referred to from upgrade code.
@@ -177,11 +178,12 @@ final class Settings {
             "persistent-preferred-activities";
     static final String TAG_CROSS_PROFILE_INTENT_FILTERS =
             "crossProfile-intent-filters";
-    public static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
-    public static final String TAG_DEFAULT_APPS= "default-apps";
-    public static final String TAG_ALL_INTENT_FILTER_VERIFICATION =
+    private static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
+    private static final String TAG_DEFAULT_APPS = "default-apps";
+    private static final String TAG_ALL_INTENT_FILTER_VERIFICATION =
             "all-intent-filter-verifications";
-    public static final String TAG_DEFAULT_BROWSER= "default-browser";
+    private static final String TAG_DEFAULT_BROWSER = "default-browser";
+    private static final String TAG_VERSION = "version";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
@@ -199,9 +201,12 @@ final class Settings {
     private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
-    private static final String ATTR_PACKAGE_NAME= "packageName";
+    private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
     private static final String ATTR_APP_LINK_GENERATION = "app-link-generation";
+    private static final String ATTR_VOLUME_UUID = "volumeUuid";
+    private static final String ATTR_SDK_VERSION = "sdkVersion";
+    private static final String ATTR_DATABASE_VERSION = "databaseVersion";
 
     private final Object mLock;
 
@@ -226,27 +231,43 @@ final class Settings {
 
     private static int mFirstAvailableUid = 0;
 
-    // TODO: store SDK versions and fingerprint for each volume UUID
-
-    // These are the last platform API version we were using for
-    // the apps installed on internal and external storage.  It is
-    // used to grant newer permissions one time during a system upgrade.
-    int mInternalSdkPlatform;
-    int mExternalSdkPlatform;
+    /** Map from volume UUID to {@link VersionInfo} */
+    private ArrayMap<String, VersionInfo> mVersion = new ArrayMap<>();
 
     /**
-     * The current database version for apps on internal storage. This is
-     * used to upgrade the format of the packages.xml database not necessarily
-     * tied to an SDK version.
+     * Version details for a storage volume that may hold apps.
      */
-    int mInternalDatabaseVersion;
-    int mExternalDatabaseVersion;
+    public static class VersionInfo {
+        /**
+         * These are the last platform API version we were using for the apps
+         * installed on internal and external storage. It is used to grant newer
+         * permissions one time during a system upgrade.
+         */
+        int sdkVersion;
 
-    /**
-     * Last known value of {@link Build#FINGERPRINT}. Used to determine when an
-     * system update has occurred, meaning we need to clear code caches.
-     */
-    String mFingerprint;
+        /**
+         * The current database version for apps on internal storage. This is
+         * used to upgrade the format of the packages.xml database not
+         * necessarily tied to an SDK version.
+         */
+        int databaseVersion;
+
+        /**
+         * Last known value of {@link Build#FINGERPRINT}. Used to determine when
+         * an system update has occurred, meaning we need to clear code caches.
+         */
+        String fingerprint;
+
+        /**
+         * Force all version information to match current system values,
+         * typically after resolving any required upgrade steps.
+         */
+        public void forceCurrent() {
+            sdkVersion = Build.VERSION.SDK_INT;
+            databaseVersion = CURRENT_DATABASE_VERSION;
+            fingerprint = Build.FINGERPRINT;
+        }
+    }
 
     Boolean mReadExternalStorageEnforced;
 
@@ -1188,38 +1209,26 @@ final class Settings {
                 .onDefaultRuntimePermissionsGrantedLPr(userId);
     }
 
-    /**
-     * Returns whether the current database has is older than {@code version}
-     * for apps on internal storage.
-     */
-    public boolean isInternalDatabaseVersionOlderThan(int version) {
-        return mInternalDatabaseVersion < version;
+    public VersionInfo findOrCreateVersion(String volumeUuid) {
+        VersionInfo ver = mVersion.get(volumeUuid);
+        if (ver == null) {
+            ver = new VersionInfo();
+            ver.forceCurrent();
+            mVersion.put(volumeUuid, ver);
+        }
+        return ver;
     }
 
-    /**
-     * Returns whether the current database has is older than {@code version}
-     * for apps on external storage.
-     */
-    public boolean isExternalDatabaseVersionOlderThan(int version) {
-        return mExternalDatabaseVersion < version;
+    public VersionInfo getInternalVersion() {
+        return mVersion.get(StorageManager.UUID_PRIVATE_INTERNAL);
     }
 
-    /**
-     * Updates the database version for apps on internal storage. Called after
-     * call the updates to the database format are done for apps on internal
-     * storage after the initial start-up scan.
-     */
-    public void updateInternalDatabaseVersion() {
-        mInternalDatabaseVersion = CURRENT_DATABASE_VERSION;
+    public VersionInfo getExternalVersion() {
+        return mVersion.get(StorageManager.UUID_PRIMARY_PHYSICAL);
     }
 
-    /**
-     * Updates the database version for apps on internal storage. Called after
-     * call the updates to the database format are done for apps on internal
-     * storage after the initial start-up scan.
-     */
-    public void updateExternalDatabaseVersion() {
-        mExternalDatabaseVersion = CURRENT_DATABASE_VERSION;
+    public void onVolumeForgotten(String fsUuid) {
+        mVersion.remove(fsUuid);
     }
 
     /**
@@ -2060,16 +2069,17 @@ final class Settings {
 
             serializer.startTag(null, "packages");
 
-            serializer.startTag(null, "last-platform-version");
-            serializer.attribute(null, "internal", Integer.toString(mInternalSdkPlatform));
-            serializer.attribute(null, "external", Integer.toString(mExternalSdkPlatform));
-            serializer.attribute(null, "fingerprint", mFingerprint);
-            serializer.endTag(null, "last-platform-version");
+            for (int i = 0; i < mVersion.size(); i++) {
+                final String volumeUuid = mVersion.keyAt(i);
+                final VersionInfo ver = mVersion.valueAt(i);
 
-            serializer.startTag(null, "database-version");
-            serializer.attribute(null, "internal", Integer.toString(mInternalDatabaseVersion));
-            serializer.attribute(null, "external", Integer.toString(mExternalDatabaseVersion));
-            serializer.endTag(null, "database-version");
+                serializer.startTag(null, TAG_VERSION);
+                XmlUtils.writeStringAttribute(serializer, ATTR_VOLUME_UUID, volumeUuid);
+                XmlUtils.writeIntAttribute(serializer, ATTR_SDK_VERSION, ver.sdkVersion);
+                XmlUtils.writeIntAttribute(serializer, ATTR_DATABASE_VERSION, ver.databaseVersion);
+                XmlUtils.writeStringAttribute(serializer, ATTR_FINGERPRINT, ver.fingerprint);
+                serializer.endTag(null, TAG_VERSION);
+            }
 
             if (mVerifierDeviceIdentity != null) {
                 serializer.startTag(null, "verifier");
@@ -2499,8 +2509,10 @@ final class Settings {
                     mReadMessages.append("No settings file found\n");
                     PackageManagerService.reportSettingsProblem(Log.INFO,
                             "No settings file; creating initial state");
-                    mInternalSdkPlatform = mExternalSdkPlatform = sdkVersion;
-                    mFingerprint = Build.FINGERPRINT;
+                    // It's enough to just touch version details to create them
+                    // with default values
+                    findOrCreateVersion(StorageManager.UUID_PRIVATE_INTERNAL);
+                    findOrCreateVersion(StorageManager.UUID_PRIMARY_PHYSICAL);
                     return false;
                 }
                 str = new FileInputStream(mSettingsFilename);
@@ -2584,48 +2596,27 @@ final class Settings {
                 } else if (tagName.equals("restored-ivi")) {
                     readRestoredIntentFilterVerifications(parser);
                 } else if (tagName.equals("last-platform-version")) {
-                    mInternalSdkPlatform = mExternalSdkPlatform = 0;
-                    try {
-                        String internal = parser.getAttributeValue(null, "internal");
-                        if (internal != null) {
-                            mInternalSdkPlatform = Integer.parseInt(internal);
-                        }
-                        String external = parser.getAttributeValue(null, "external");
-                        if (external != null) {
-                            mExternalSdkPlatform = Integer.parseInt(external);
-                        }
-                    } catch (NumberFormatException e) {
-                    }
-                    mFingerprint = parser.getAttributeValue(null, "fingerprint");
+                    // Upgrade from older XML schema
+                    final VersionInfo internal = findOrCreateVersion(
+                            StorageManager.UUID_PRIVATE_INTERNAL);
+                    final VersionInfo external = findOrCreateVersion(
+                            StorageManager.UUID_PRIMARY_PHYSICAL);
 
-                    // If the build is setup to drop runtime permissions
-                    // on update drop the files before loading them.
-                    if (PackageManagerService.CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE) {
-                        if (!Build.FINGERPRINT.equals(mFingerprint)) {
-                            if (users == null) {
-                                mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(
-                                        UserHandle.USER_OWNER);
-                            } else {
-                                for (UserInfo user : users) {
-                                    mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(
-                                            user.id);
-                                }
-                            }
-                        }
-                    }
+                    internal.sdkVersion = XmlUtils.readIntAttribute(parser, "internal", 0);
+                    external.sdkVersion = XmlUtils.readIntAttribute(parser, "external", 0);
+                    internal.fingerprint = external.fingerprint =
+                            XmlUtils.readStringAttribute(parser, "fingerprint");
+
                 } else if (tagName.equals("database-version")) {
-                    mInternalDatabaseVersion = mExternalDatabaseVersion = 0;
-                    try {
-                        String internalDbVersionString = parser.getAttributeValue(null, "internal");
-                        if (internalDbVersionString != null) {
-                            mInternalDatabaseVersion = Integer.parseInt(internalDbVersionString);
-                        }
-                        String externalDbVersionString = parser.getAttributeValue(null, "external");
-                        if (externalDbVersionString != null) {
-                            mExternalDatabaseVersion = Integer.parseInt(externalDbVersionString);
-                        }
-                    } catch (NumberFormatException ignored) {
-                    }
+                    // Upgrade from older XML schema
+                    final VersionInfo internal = findOrCreateVersion(
+                            StorageManager.UUID_PRIVATE_INTERNAL);
+                    final VersionInfo external = findOrCreateVersion(
+                            StorageManager.UUID_PRIMARY_PHYSICAL);
+
+                    internal.databaseVersion = XmlUtils.readIntAttribute(parser, "internal", 0);
+                    external.databaseVersion = XmlUtils.readIntAttribute(parser, "external", 0);
+
                 } else if (tagName.equals("verifier")) {
                     final String deviceIdentity = parser.getAttributeValue(null, "device");
                     try {
@@ -2639,6 +2630,14 @@ final class Settings {
                     mReadExternalStorageEnforced = "1".equals(enforcement);
                 } else if (tagName.equals("keyset-settings")) {
                     mKeySetManagerService.readKeySetsLPw(parser, mKeySetRefs);
+                } else if (TAG_VERSION.equals(tagName)) {
+                    final String volumeUuid = XmlUtils.readStringAttribute(parser,
+                            ATTR_VOLUME_UUID);
+                    final VersionInfo ver = findOrCreateVersion(volumeUuid);
+                    ver.sdkVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
+                    ver.databaseVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
+                    ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
+
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
@@ -2657,6 +2656,23 @@ final class Settings {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+        }
+
+        // If the build is setup to drop runtime permissions
+        // on update drop the files before loading them.
+        if (PackageManagerService.CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE) {
+            final VersionInfo internal = getInternalVersion();
+            if (!Build.FINGERPRINT.equals(internal.fingerprint)) {
+                if (users == null) {
+                    mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(
+                            UserHandle.USER_OWNER);
+                } else {
+                    for (UserInfo user : users) {
+                        mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(
+                                user.id);
+                    }
+                }
+            }
         }
 
         final int N = mPendingPackages.size();
@@ -3901,6 +3917,29 @@ final class Settings {
         ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK, "FORWARD_LOCK",
         ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
     };
+
+    void dumpVersionLPr(IndentingPrintWriter pw) {
+        pw.increaseIndent();
+        for (int i= 0; i < mVersion.size(); i++) {
+            final String volumeUuid = mVersion.keyAt(i);
+            final VersionInfo ver = mVersion.valueAt(i);
+            if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
+                pw.println("Internal:");
+            } else if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
+                pw.println("External:");
+            } else {
+                pw.println("UUID " + volumeUuid + ":");
+            }
+            pw.increaseIndent();
+            pw.printPair("sdkVersion", ver.sdkVersion);
+            pw.printPair("databaseVersion", ver.databaseVersion);
+            pw.println();
+            pw.printPair("fingerprint", ver.fingerprint);
+            pw.println();
+            pw.decreaseIndent();
+        }
+        pw.decreaseIndent();
+    }
 
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
             ArraySet<String> permissionNames, PackageSetting ps, SimpleDateFormat sdf,
