@@ -30,6 +30,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.Watchdog;
 
 import android.Manifest;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -3319,8 +3320,14 @@ public final class PowerManagerService extends SystemService
          */
         @Override // Binder call
         public void setStayOnSetting(int val) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SETTINGS, null);
+            int uid = Binder.getCallingUid();
+            // if uid is of root's, we permit this operation straight away
+            if (uid != Process.ROOT_UID) {
+                if (!Settings.checkAndNoteWriteSettingsOperation(mContext, uid,
+                        Settings.getPackageNameForUid(mContext, uid), true)) {
+                    return;
+                }
+            }
 
             final long ident = Binder.clearCallingIdentity();
             try {
