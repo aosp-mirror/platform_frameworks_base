@@ -25,7 +25,7 @@
     android:id="@+id/status_bar"
     android:background="@drawable/system_bar_background"
     android:orientation="vertical"
-    android:focusable="true"
+    android:focusable="false"
     android:descendantFocusability="afterDescendants"
     >
 
