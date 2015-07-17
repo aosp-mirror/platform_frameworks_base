@@ -2312,4 +2312,6 @@
 
   <java-symbol type="bool" name="allow_stacked_button_bar" />
   <java-symbol type="bool" name="config_eap_sim_based_auth_supported" />
+
+  <java-symbol type="array" name="config_cell_retries_per_error_code" />
 </resources>

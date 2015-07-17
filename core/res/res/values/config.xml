@@ -2264,4 +2264,12 @@
  
     <!-- How long history of previous vibrations should be kept for the dumpsys. -->
     <integer name="config_previousVibrationsDumpLimit">20</integer>
+
+    <!-- Number of retries Cell Data should attempt for a given error code before
+         restarting the modem.
+         Error codes not listed will not lead to modem restarts.
+         Array of "code#,retry#"  -->
+    <string-array name="config_cell_retries_per_error_code">
+    </string-array>
+
 </resources>
