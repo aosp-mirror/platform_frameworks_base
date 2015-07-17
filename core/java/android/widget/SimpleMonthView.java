@@ -42,6 +42,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import com.android.internal.R;
 import com.android.internal.widget.ExploreByTouchHelper;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -73,6 +74,7 @@ class SimpleMonthView extends View {
 
     private final SimpleDateFormat mTitleFormatter;
     private final SimpleDateFormat mDayOfWeekFormatter;
+    private final NumberFormat mDayFormatter;
 
     // Desired dimensions.
     private final int mDesiredMonthHeight;
@@ -162,6 +164,7 @@ class SimpleMonthView extends View {
         final String titleFormat = DateFormat.getBestDateTimePattern(locale, DEFAULT_TITLE_FORMAT);
         mTitleFormatter = new SimpleDateFormat(titleFormat, locale);
         mDayOfWeekFormatter = new SimpleDateFormat(DAY_OF_WEEK_FORMAT, locale);
+        mDayFormatter = NumberFormat.getIntegerInstance(locale);
 
         initPaints(res);
     }
@@ -454,7 +457,7 @@ class SimpleMonthView extends View {
             }
             p.setColor(dayTextColor);
 
-            canvas.drawText(Integer.toString(day), colCenterRtl, rowCenter - halfLineHeight, p);
+            canvas.drawText(mDayFormatter.format(day), colCenterRtl, rowCenter - halfLineHeight, p);
 
             col++;
 
@@ -866,7 +869,7 @@ class SimpleMonthView extends View {
          */
         private CharSequence getDayText(int id) {
             if (isValidDayOfMonth(id)) {
-                return Integer.toString(id);
+                return mDayFormatter.format(id);
             }
 
             return null;
