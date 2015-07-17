@@ -17,20 +17,14 @@
 
 package android.service.chooser;
 
-import android.app.Activity;
-import android.app.PendingIntent;
+import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
-import android.util.Log;
 
 /**
  * A ChooserTarget represents a deep-link into an application as returned by a
@@ -62,11 +56,16 @@ public final class ChooserTarget implements Parcelable {
     private Icon mIcon;
 
     /**
-     * The IntentSender that will be used to deliver the intent to the target.
-     * It will be {@link android.content.Intent#fillIn(android.content.Intent, int)} filled in}
-     * by the real intent sent by the application.
+     * The ComponentName of the Activity to be invoked. Must be part of the target creator's
+     * own package or an Activity exported by its package.
      */
-    private IntentSender mIntentSender;
+    private ComponentName mComponentName;
+
+    /**
+     * A Bundle to merge with the extras of the intent sent to this target.
+     * Any extras here will override the extras from the original intent.
+     */
+    private Bundle mIntentExtras;
 
     /**
      * The score given to this item. It can be normalized.
@@ -86,61 +85,23 @@ public final class ChooserTarget implements Parcelable {
      * Scores should be in the range from 0.0f (unlikely match) to 1.0f (very relevant match).
      * Scores for a set of targets do not need to sum to 1.</p>
      *
-     * <p>Before being sent, the PendingIntent supplied will be
-     * {@link Intent#fillIn(Intent, int) filled in} by the Intent originally supplied
-     * to the chooser. When constructing a PendingIntent for use in a ChooserTarget, make sure
-     * that you permit the relevant fields to be filled in using the appropriate flags such as
-     * {@link Intent#FILL_IN_ACTION}, {@link Intent#FILL_IN_CATEGORIES},
-     * {@link Intent#FILL_IN_DATA} and {@link Intent#FILL_IN_CLIP_DATA}. Note that
-     * {@link Intent#FILL_IN_CLIP_DATA} is required to appropriately receive URI permission grants
-     * for {@link Intent#ACTION_SEND} intents.</p>
+     * <p>The ComponentName must be the name of an Activity component in the creator's own
+     * package, or an exported component from any other package. You may provide an optional
+     * Bundle of extras that will be merged into the final intent before it is sent to the
+     * target Activity; use this to add any additional data about the deep link that the target
+     * activity will read. e.g. conversation IDs, email addresses, etc.</p>
      *
      * <p>Take care not to place custom {@link android.os.Parcelable} types into
-     * the PendingIntent as extras, as the system will not be able to unparcel it to merge
-     * additional extras.</p>
+     * the extras bundle, as the system will not be able to unparcel them to merge them.</p>
      *
      * @param title title of this target that will be shown to a user
      * @param icon icon to represent this target
      * @param score ranking score for this target between 0.0f and 1.0f, inclusive
-     * @param pendingIntent PendingIntent to fill in and send if the user chooses this target
+     * @param componentName Name of the component to be launched if this target is chosen
+     * @param intentExtras Bundle of extras to merge with the extras of the launched intent
      */
     public ChooserTarget(CharSequence title, Icon icon, float score,
-            PendingIntent pendingIntent) {
-        this(title, icon, score, pendingIntent.getIntentSender());
-    }
-
-    /**
-     * Construct a deep link target for presentation by a chooser UI.
-     *
-     * <p>A target is composed of a title and an icon for presentation to the user.
-     * The UI presenting this target may truncate the title if it is too long to be presented
-     * in the available space, as well as crop, resize or overlay the supplied icon.</p>
-     *
-     * <p>The creator of a target may supply a ranking score. This score is assumed to be relative
-     * to the other targets supplied by the same
-     * {@link ChooserTargetService#onGetChooserTargets(ComponentName, IntentFilter) query}.
-     * Scores should be in the range from 0.0f (unlikely match) to 1.0f (very relevant match).
-     * Scores for a set of targets do not need to sum to 1.</p>
-     *
-     * <p>Before being sent, the IntentSender supplied will be
-     * {@link Intent#fillIn(Intent, int) filled in} by the Intent originally supplied
-     * to the chooser. When constructing an IntentSender for use in a ChooserTarget, make sure
-     * that you permit the relevant fields to be filled in using the appropriate flags such as
-     * {@link Intent#FILL_IN_ACTION}, {@link Intent#FILL_IN_CATEGORIES},
-     * {@link Intent#FILL_IN_DATA} and {@link Intent#FILL_IN_CLIP_DATA}. Note that
-     * {@link Intent#FILL_IN_CLIP_DATA} is required to appropriately receive URI permission grants
-     * for {@link Intent#ACTION_SEND} intents.</p>
-     *
-     * <p>Take care not to place custom {@link android.os.Parcelable} types into
-     * the IntentSender as extras, as the system will not be able to unparcel it to merge
-     * additional extras.</p>
-     *
-     * @param title title of this target that will be shown to a user
-     * @param icon icon to represent this target
-     * @param score ranking score for this target between 0.0f and 1.0f, inclusive
-     * @param intentSender IntentSender to fill in and send if the user chooses this target
-     */
-    public ChooserTarget(CharSequence title, Icon icon, float score, IntentSender intentSender) {
+            ComponentName componentName, @Nullable Bundle intentExtras) {
         mTitle = title;
         mIcon = icon;
         if (score > 1.f || score < 0.f) {
@@ -148,7 +109,8 @@ public final class ChooserTarget implements Parcelable {
                     + "must be between 0.0f and 1.0f");
         }
         mScore = score;
-        mIntentSender = intentSender;
+        mComponentName = componentName;
+        mIntentExtras = intentExtras;
     }
 
     ChooserTarget(Parcel in) {
@@ -159,7 +121,8 @@ public final class ChooserTarget implements Parcelable {
             mIcon = null;
         }
         mScore = in.readFloat();
-        mIntentSender = IntentSender.readIntentSenderOrNullFromParcel(in);
+        mComponentName = ComponentName.readFromParcel(in);
+        mIntentExtras = in.readBundle();
     }
 
     /**
@@ -194,49 +157,29 @@ public final class ChooserTarget implements Parcelable {
     }
 
     /**
-     * Returns the raw IntentSender supplied by the ChooserTarget's creator.
-     * This may be null if the creator specified a regular Intent instead.
+     * Returns the ComponentName of the Activity that should be launched for this ChooserTarget.
      *
-     * <p>To fill in and send the intent, see {@link #sendIntent(Context, Intent)}.</p>
-     *
-     * @return the IntentSender supplied by the ChooserTarget's creator
+     * @return the name of the target Activity to launch
      */
-    public IntentSender getIntentSender() {
-        return mIntentSender;
+    public ComponentName getComponentName() {
+        return mComponentName;
     }
 
     /**
-     * Fill in the IntentSender supplied by the ChooserTarget's creator and send it.
+     * Returns the Bundle of extras to be added to an intent launched to this target.
      *
-     * @param context the sending Context; generally the Activity presenting the chooser UI
-     * @param fillInIntent the Intent provided to the Chooser to be sent to a selected target
-     * @return true if sending the Intent was successful
+     * @return the extras to merge with the extras of the intent being launched
      */
-    public boolean sendIntent(Context context, Intent fillInIntent) {
-        if (fillInIntent != null) {
-            fillInIntent.migrateExtraStreamToClipData();
-            fillInIntent.prepareToLeaveProcess();
-        }
-        if (mIntentSender != null) {
-            try {
-                mIntentSender.sendIntent(context, 0, fillInIntent, null, null);
-                return true;
-            } catch (IntentSender.SendIntentException e) {
-                Log.e(TAG, "sendIntent " + this + " failed", e);
-                return false;
-            }
-        } else {
-            Log.e(TAG, "sendIntent " + this + " failed - no IntentSender to send");
-            return false;
-        }
+    public Bundle getIntentExtras() {
+        return mIntentExtras;
     }
 
     @Override
     public String toString() {
         return "ChooserTarget{"
-                + (mIntentSender != null ? mIntentSender.getCreatorPackage() : null)
-                + ", "
-                + "'" + mTitle
+                + mComponentName
+                + ", " + mIntentExtras
+                + ", '" + mTitle
                 + "', " + mScore + "}";
     }
 
@@ -255,7 +198,8 @@ public final class ChooserTarget implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeFloat(mScore);
-        IntentSender.writeIntentSenderOrNullToParcel(mIntentSender, dest);
+        ComponentName.writeToParcel(mComponentName, dest);
+        dest.writeBundle(mIntentExtras);
     }
 
     public static final Creator<ChooserTarget> CREATOR
