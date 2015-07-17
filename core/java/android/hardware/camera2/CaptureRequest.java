@@ -1584,8 +1584,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * will be applied. HIGH_QUALITY mode indicates that the
      * camera device will use the highest-quality enhancement algorithms,
      * even if it slows down capture rate. FAST means the camera device will
-     * not slow down capture rate when applying edge enhancement. Every output stream will
-     * have a similar amount of enhancement applied.</p>
+     * not slow down capture rate when applying edge enhancement. FAST may be the same as OFF if
+     * edge enhancement will slow down capture rate. Every output stream will have a similar
+     * amount of enhancement applied.</p>
      * <p>ZERO_SHUTTER_LAG is meant to be used by applications that maintain a continuous circular
      * buffer of high-resolution images during preview and reprocess image(s) from that buffer
      * into a final capture when triggered by the user. In this mode, the camera device applies
@@ -1594,7 +1595,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * since those will be reprocessed later if necessary.</p>
      * <p>For YUV_REPROCESSING, these FAST/HIGH_QUALITY modes both mean that the camera
      * device will apply FAST/HIGH_QUALITY YUV-domain edge enhancement, respectively.
-     * The camera device may adjust its internal noise reduction parameters for best
+     * The camera device may adjust its internal edge enhancement parameters for best
      * image quality based on the {@link CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR android.reprocess.effectiveExposureFactor}, if it is set.</p>
      * <p><b>Possible values:</b>
      * <ul>
@@ -2003,8 +2004,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * will be applied. HIGH_QUALITY mode indicates that the camera device
      * will use the highest-quality noise filtering algorithms,
      * even if it slows down capture rate. FAST means the camera device will not
-     * slow down capture rate when applying noise filtering. Every output stream will
-     * have a similar amount of enhancement applied.</p>
+     * slow down capture rate when applying noise filtering. FAST may be the same as MINIMAL if
+     * MINIMAL is listed, or the same as OFF if any noise filtering will slow down capture rate.
+     * Every output stream will have a similar amount of enhancement applied.</p>
      * <p>ZERO_SHUTTER_LAG is meant to be used by applications that maintain a continuous circular
      * buffer of high-resolution images during preview and reprocess image(s) from that buffer
      * into a final capture when triggered by the user. In this mode, the camera device applies
