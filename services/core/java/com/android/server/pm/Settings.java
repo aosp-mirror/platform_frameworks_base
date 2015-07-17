@@ -1056,13 +1056,7 @@ final class Settings {
             }
             return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
         }
-        int status = (int)(ps.getDomainVerificationStatusForUser(userId) >> 32);
-        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
-            if (ps.getIntentFilterVerificationInfo() != null) {
-                status = ps.getIntentFilterVerificationInfo().getStatus();
-            }
-        }
-        return status;
+        return (int)(ps.getDomainVerificationStatusForUser(userId) >> 32);
     }
 
     boolean updateIntentFilterVerificationStatusLPw(String packageName, final int status, int userId) {
