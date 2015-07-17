@@ -203,7 +203,13 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
         return false;
     }
 
-    outData->bitmapTexture = caches.textureCache.get(&bitmap);
+    /*
+     * Bypass the AssetAtlas, since those textures:
+     * 1) require UV mapping, which isn't implemented in matrix computation below
+     * 2) can't handle REPEAT simply
+     * 3) are safe to upload here (outside of sync stage), since they're static
+     */
+    outData->bitmapTexture = caches.textureCache.getAndBypassAtlas(&bitmap);
     if (!outData->bitmapTexture) return false;
 
     outData->bitmapSampler = (*textureUnit)++;

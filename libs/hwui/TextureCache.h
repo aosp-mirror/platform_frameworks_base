@@ -76,10 +76,20 @@ public:
     bool prefetchAndMarkInUse(const SkBitmap* bitmap);
 
     /**
-     * Returns the texture associated with the specified bitmap. If the texture
-     * cannot be found in the cache, a new texture is generated.
+     * Returns the texture associated with the specified bitmap from either within the cache, or
+     * the AssetAtlas. If the texture cannot be found in the cache, a new texture is generated.
      */
-    Texture* get(const SkBitmap* bitmap);
+    Texture* get(const SkBitmap* bitmap) {
+        return get(bitmap, AtlasUsageType::Use);
+    }
+
+    /**
+     * Returns the texture associated with the specified bitmap. If the texture cannot be found in
+     * the cache, a new texture is generated, even if it resides in the AssetAtlas.
+     */
+    Texture* getAndBypassAtlas(const SkBitmap* bitmap) {
+        return get(bitmap, AtlasUsageType::Bypass);
+    }
 
     /**
      * Removes the texture associated with the specified pixelRef. This is meant
@@ -123,10 +133,15 @@ public:
     void setAssetAtlas(AssetAtlas* assetAtlas);
 
 private:
+    enum class AtlasUsageType {
+        Use,
+        Bypass,
+    };
 
     bool canMakeTextureFromBitmap(const SkBitmap* bitmap);
 
-    Texture* getCachedTexture(const SkBitmap* bitmap);
+    Texture* get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType);
+    Texture* getCachedTexture(const SkBitmap* bitmap, AtlasUsageType atlasUsageType);
 
     /**
      * Generates the texture from a bitmap into the specified texture structure.
