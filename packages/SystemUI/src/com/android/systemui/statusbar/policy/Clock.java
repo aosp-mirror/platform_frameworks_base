@@ -232,7 +232,13 @@ public class Clock extends TextView implements DemoMode {
             } else if (hhmm != null && hhmm.length() == 4) {
                 int hh = Integer.parseInt(hhmm.substring(0, 2));
                 int mm = Integer.parseInt(hhmm.substring(2));
-                mCalendar.set(Calendar.HOUR, hh);
+                boolean is24 = DateFormat.is24HourFormat(
+                        getContext(), ActivityManager.getCurrentUser());
+                if (is24) {
+                    mCalendar.set(Calendar.HOUR_OF_DAY, hh);
+                } else {
+                    mCalendar.set(Calendar.HOUR, hh);
+                }
                 mCalendar.set(Calendar.MINUTE, mm);
             }
             setText(getSmallTime());
