@@ -559,9 +559,9 @@ final class DefaultPermissionGrantPolicy {
         }
         PackageParser.Package smsPackage = getPackageLPr(packageName);
         if (smsPackage != null && doesPackageSupportRuntimePermissions(smsPackage)) {
-            grantRuntimePermissionsLPw(smsPackage, PHONE_PERMISSIONS, userId);
-            grantRuntimePermissionsLPw(smsPackage, CONTACTS_PERMISSIONS, userId);
-            grantRuntimePermissionsLPw(smsPackage, SMS_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(smsPackage, PHONE_PERMISSIONS, false, true, userId);
+            grantRuntimePermissionsLPw(smsPackage, CONTACTS_PERMISSIONS, false, true, userId);
+            grantRuntimePermissionsLPw(smsPackage, SMS_PERMISSIONS, false, true, userId);
         }
     }
 
@@ -573,10 +573,10 @@ final class DefaultPermissionGrantPolicy {
         PackageParser.Package dialerPackage = getPackageLPr(packageName);
         if (dialerPackage != null
                 && doesPackageSupportRuntimePermissions(dialerPackage)) {
-            grantRuntimePermissionsLPw(dialerPackage, PHONE_PERMISSIONS, userId);
-            grantRuntimePermissionsLPw(dialerPackage, CONTACTS_PERMISSIONS, userId);
-            grantRuntimePermissionsLPw(dialerPackage, SMS_PERMISSIONS, userId);
-            grantRuntimePermissionsLPw(dialerPackage, MICROPHONE_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(dialerPackage, PHONE_PERMISSIONS, false, true, userId);
+            grantRuntimePermissionsLPw(dialerPackage, CONTACTS_PERMISSIONS, false, true, userId);
+            grantRuntimePermissionsLPw(dialerPackage, SMS_PERMISSIONS, false, true, userId);
+            grantRuntimePermissionsLPw(dialerPackage, MICROPHONE_PERMISSIONS, false, true, userId);
         }
     }
 
@@ -603,7 +603,7 @@ final class DefaultPermissionGrantPolicy {
         PackageParser.Package browserPackage = getSystemPackageLPr(packageName);
         if (browserPackage != null
                 && doesPackageSupportRuntimePermissions(browserPackage)) {
-            grantRuntimePermissionsLPw(browserPackage, LOCATION_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(browserPackage, LOCATION_PERMISSIONS, false, false, userId);
         }
     }
 
@@ -676,11 +676,16 @@ final class DefaultPermissionGrantPolicy {
 
     private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
             int userId) {
-        grantRuntimePermissionsLPw(pkg, permissions, false, userId);
+        grantRuntimePermissionsLPw(pkg, permissions, false, false, userId);
     }
 
     private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
             boolean systemFixed, int userId) {
+        grantRuntimePermissionsLPw(pkg, permissions, systemFixed, false, userId);
+    }
+
+    private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
+            boolean systemFixed, boolean overrideUserChoice,  int userId) {
         List<String> requestedPermissions = pkg.requestedPermissions;
 
         if (pkg.isUpdatedSystemApp()) {
@@ -699,7 +704,17 @@ final class DefaultPermissionGrantPolicy {
                 // If any flags are set to the permission, then it is either set in
                 // its current state by the system or device/profile owner or the user.
                 // In all these cases we do not want to clobber the current state.
-                if (flags == 0) {
+                // Unless the caller wants to override user choices. The override is
+                // to make sure we can grant the needed permission to the default
+                // sms and phone apps after the user chooses this in the UI.
+                if (flags == 0 || overrideUserChoice) {
+                    // Never clobber policy or system.
+                    final int fixedFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
+                            | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+                    if ((flags & fixedFlags) != 0) {
+                        continue;
+                    }
+
                     mService.grantRuntimePermission(pkg.packageName, permission, userId);
                     if (DEBUG) {
                         Log.i(TAG, "Granted " + permission + " to default handler "
