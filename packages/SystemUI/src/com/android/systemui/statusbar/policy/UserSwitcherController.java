@@ -412,7 +412,7 @@ public class UserSwitcherController {
         public int getCount() {
             boolean secureKeyguardShowing = mController.mKeyguardMonitor.isShowing()
                     && mController.mKeyguardMonitor.isSecure()
-                    && !mController.mKeyguardMonitor.isTrusted();
+                    && !mController.mKeyguardMonitor.canSkipBouncer();
             if (!secureKeyguardShowing) {
                 return mController.mUsers.size();
             }

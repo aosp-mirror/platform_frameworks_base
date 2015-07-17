@@ -308,7 +308,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     boolean showNextSecurityScreenOrFinish(boolean authenticated) {
         if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
         boolean finish = false;
-        if (mUpdateMonitor.getUserHasTrust(KeyguardUpdateMonitor.getCurrentUser())) {
+        if (mUpdateMonitor.getUserCanSkipBouncer(
+                KeyguardUpdateMonitor.getCurrentUser())) {
             finish = true;
         } else if (SecurityMode.None == mCurrentSecuritySelection) {
             SecurityMode securityMode = mSecurityModel.getSecurityMode();
