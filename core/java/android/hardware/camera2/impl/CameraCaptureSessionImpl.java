@@ -146,6 +146,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
+    public void tearDown(Surface surface) throws CameraAccessException {
+        mDeviceImpl.tearDown(surface);
+    }
+
+    @Override
     public synchronized int capture(CaptureRequest request, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (request == null) {
