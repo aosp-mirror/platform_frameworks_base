@@ -138,6 +138,45 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      */
     public abstract void prepare(@NonNull Surface surface) throws CameraAccessException;
 
+
+    /**
+     * <p>Free all buffers allocated for an output Surface.</p>
+     *
+     * <p>Normally, once allocated, the image buffers for a given output Surface remain allocated
+     * for the lifetime of the capture session, to minimize latency of captures and to reduce
+     * memory allocation overhead.</p>
+     *
+     * <p>However, in some cases, it may be desirable for allocated buffers to be freed to reduce
+     * the application's memory consumption, if the particular output Surface will not be used by
+     * the application for some time.</p>
+     *
+     * <p>The tearDown() method can be used to perform this operation. After the call finishes, all
+     * unfilled image buffers will have been freed. Any future use of the target Surface may require
+     * allocation of additional buffers, as if the session had just been created.  Buffers being
+     * held by the application (either explicitly as Image objects from ImageReader, or implicitly
+     * as the current texture in a SurfaceTexture or the current contents of a RS Allocation, will
+     * remain valid and allocated even when tearDown is invoked.</p>
+     *
+     * <p>A Surface that has had tearDown() called on it is eligible to have prepare() invoked on it
+     * again even if it was used as a request target before the tearDown() call, as long as it
+     * doesn't get used as a target of a request between the tearDown() and prepare() calls.</p>
+     *
+     * @param surface the output Surface for which buffers should be freed. Must be one of the
+     * the output Surfaces used to create this session.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     * @throws IllegalArgumentException if the Surface is invalid, not part of this Session, or has
+     *                                  already been used as a target of a CaptureRequest in this
+     *                                  session or immediately prior sessions.
+     *
+     * @hide
+     */
+    public abstract void tearDown(@NonNull Surface surface) throws CameraAccessException;
+
     /**
      * <p>Submit a request for an image to be captured by the camera device.</p>
      *
