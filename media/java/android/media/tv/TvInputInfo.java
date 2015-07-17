@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -611,7 +612,7 @@ public final class TvInputInfo implements Parcelable {
         String format = DELIMITER_INFO_IN_ID + PREFIX_HDMI_DEVICE
                 + "%0" + LENGTH_HDMI_PHYSICAL_ADDRESS + "X"
                 + "%0" + LENGTH_HDMI_DEVICE_ID + "X";
-        return name.flattenToShortString() + String.format(format,
+        return name.flattenToShortString() + String.format(Locale.ENGLISH, format,
                 deviceInfo.getPhysicalAddress(), deviceInfo.getId());
     }
 
