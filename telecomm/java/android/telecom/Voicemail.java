@@ -36,10 +36,11 @@ public class Voicemail implements Parcelable {
     private final Uri mUri;
     private final Boolean mIsRead;
     private final Boolean mHasContent;
+    private final String mTranscription;
 
     private Voicemail(Long timestamp, String number, PhoneAccountHandle phoneAccountHandle, Long id,
             Long duration, String source, String providerData, Uri uri, Boolean isRead,
-            Boolean hasContent) {
+            Boolean hasContent, String transcription) {
         mTimestamp = timestamp;
         mNumber = number;
         mPhoneAccount = phoneAccountHandle;
@@ -50,6 +51,7 @@ public class Voicemail implements Parcelable {
         mUri = uri;
         mIsRead = isRead;
         mHasContent = hasContent;
+        mTranscription = transcription;
     }
 
     /**
@@ -88,6 +90,7 @@ public class Voicemail implements Parcelable {
         private Uri mBuilderUri;
         private Boolean mBuilderIsRead;
         private boolean mBuilderHasContent;
+        private String mBuilderTranscription;
 
         /** You should use the correct factory method to construct a builder. */
         private Builder() {
@@ -143,6 +146,11 @@ public class Voicemail implements Parcelable {
             return this;
         }
 
+        public Builder setTranscription(String transcription) {
+            mBuilderTranscription = transcription;
+            return this;
+        }
+
         public Voicemail build() {
             mBuilderId = mBuilderId == null ? -1 : mBuilderId;
             mBuilderTimestamp = mBuilderTimestamp == null ? 0 : mBuilderTimestamp;
@@ -150,7 +158,7 @@ public class Voicemail implements Parcelable {
             mBuilderIsRead = mBuilderIsRead == null ? false : mBuilderIsRead;
             return new Voicemail(mBuilderTimestamp, mBuilderNumber, mBuilderPhoneAccount,
                     mBuilderId, mBuilderDuration, mBuilderSourcePackage, mBuilderSourceData,
-                    mBuilderUri, mBuilderIsRead, mBuilderHasContent);
+                    mBuilderUri, mBuilderIsRead, mBuilderHasContent, mBuilderTranscription);
         }
     }
 
@@ -230,6 +238,13 @@ public class Voicemail implements Parcelable {
         return mHasContent;
     }
 
+    /**
+     * Returns the text transcription of this voicemail, or null if this field is not set.
+     */
+    public String getTranscription() {
+        return mTranscription;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -265,6 +280,7 @@ public class Voicemail implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeCharSequence(mTranscription);
     }
 
     public static final Creator<Voicemail> CREATOR
@@ -299,5 +315,6 @@ public class Voicemail implements Parcelable {
         }
         mIsRead = in.readInt() > 0 ? true : false;
         mHasContent = in.readInt() > 0 ? true : false;
+        mTranscription = (String) in.readCharSequence();
     }
 }
