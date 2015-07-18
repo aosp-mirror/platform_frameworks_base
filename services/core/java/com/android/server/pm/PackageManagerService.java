@@ -224,6 +224,7 @@ import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
+import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1652,6 +1653,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         @Override
         public void onVolumeForgotten(String fsUuid) {
+            if (TextUtils.isEmpty(fsUuid)) {
+                Slog.w(TAG, "Forgetting internal storage is probably a mistake; ignoring");
+                return;
+            }
+
             // Remove any apps installed on the forgotten volume
             synchronized (mPackages) {
                 final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(fsUuid);
@@ -1661,6 +1667,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             UserHandle.USER_OWNER, PackageManager.DELETE_ALL_USERS);
                 }
 
+                mSettings.onVolumeForgotten(fsUuid);
                 mSettings.writeLPr();
             }
         }
@@ -2237,17 +2244,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             // cases get permissions that the user didn't initially explicitly
             // allow...  it would be nice to have some better way to handle
             // this situation.
-            final boolean regrantPermissions = mSettings.mInternalSdkPlatform
-                    != mSdkVersion;
-            if (regrantPermissions) Slog.i(TAG, "Platform changed from "
-                    + mSettings.mInternalSdkPlatform + " to " + mSdkVersion
-                    + "; regranting permissions for internal storage");
-            mSettings.mInternalSdkPlatform = mSdkVersion;
+            final VersionInfo ver = mSettings.getInternalVersion();
 
-            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
-                    | (regrantPermissions
-                            ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
-                            : 0));
+            int updateFlags = UPDATE_PERMISSIONS_ALL;
+            if (ver.sdkVersion != mSdkVersion) {
+                Slog.i(TAG, "Platform changed from " + ver.sdkVersion + " to "
+                        + mSdkVersion + "; regranting permissions for internal storage");
+                updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
+            }
+            updatePermissionsLPw(null, null, updateFlags);
+            ver.sdkVersion = mSdkVersion;
 
             // If this is the first boot, and it is a normal boot, then
             // we need to initialize the default preferred apps.
@@ -2259,20 +2265,22 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
-            mIsUpgrade = !Build.FINGERPRINT.equals(mSettings.mFingerprint);
+            mIsUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
             if (mIsUpgrade && !onlyCore) {
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
                 for (int i = 0; i < mSettings.mPackages.size(); i++) {
                     final PackageSetting ps = mSettings.mPackages.valueAt(i);
-                    deleteCodeCacheDirsLI(ps.volumeUuid, ps.name);
+                    if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, ps.volumeUuid)) {
+                        deleteCodeCacheDirsLI(ps.volumeUuid, ps.name);
+                    }
                 }
-                mSettings.mFingerprint = Build.FINGERPRINT;
+                ver.fingerprint = Build.FINGERPRINT;
             }
 
             checkDefaultBrowser();
 
             // All the changes are done during package scanning.
-            mSettings.updateInternalDatabaseVersion();
+            ver.databaseVersion = Settings.CURRENT_DATABASE_VERSION;
 
             // can downgrade to reader
             mSettings.writeLPr();
@@ -3917,10 +3925,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * were updated, return true.
      */
     private boolean isCompatSignatureUpdateNeeded(PackageParser.Package scannedPkg) {
-        return (isExternal(scannedPkg) && mSettings.isExternalDatabaseVersionOlderThan(
-                DatabaseVersion.SIGNATURE_END_ENTITY))
-                || (!isExternal(scannedPkg) && mSettings.isInternalDatabaseVersionOlderThan(
-                        DatabaseVersion.SIGNATURE_END_ENTITY));
+        final VersionInfo ver = getSettingsVersionForPackage(scannedPkg);
+        return ver.databaseVersion < DatabaseVersion.SIGNATURE_END_ENTITY;
     }
 
     /**
@@ -3967,13 +3973,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private boolean isRecoverSignatureUpdateNeeded(PackageParser.Package scannedPkg) {
-        if (isExternal(scannedPkg)) {
-            return mSettings.isExternalDatabaseVersionOlderThan(
-                    DatabaseVersion.SIGNATURE_MALFORMED_RECOVER);
-        } else {
-            return mSettings.isInternalDatabaseVersionOlderThan(
-                    DatabaseVersion.SIGNATURE_MALFORMED_RECOVER);
-        }
+        final VersionInfo ver = getSettingsVersionForPackage(scannedPkg);
+        return ver.databaseVersion < DatabaseVersion.SIGNATURE_MALFORMED_RECOVER;
     }
 
     private int compareSignaturesRecover(PackageSignatures existingSigs,
@@ -12489,6 +12490,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         return installFlags;
     }
 
+    private VersionInfo getSettingsVersionForPackage(PackageParser.Package pkg) {
+        if (isExternal(pkg)) {
+            if (TextUtils.isEmpty(pkg.volumeUuid)) {
+                return mSettings.getExternalVersion();
+            } else {
+                return mSettings.findOrCreateVersion(pkg.volumeUuid);
+            }
+        } else {
+            return mSettings.getInternalVersion();
+        }
+    }
+
     private void deleteTempPackageFiles() {
         final FilenameFilter filter = new FilenameFilter() {
             public boolean accept(File dir, String name) {
@@ -14754,16 +14767,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (dumpState.onTitlePrinted())
                         pw.println();
                     pw.println("Database versions:");
-                    pw.print("  SDK Version:");
-                    pw.print(" internal=");
-                    pw.print(mSettings.mInternalSdkPlatform);
-                    pw.print(" external=");
-                    pw.println(mSettings.mExternalSdkPlatform);
-                    pw.print("  DB Version:");
-                    pw.print(" internal=");
-                    pw.print(mSettings.mInternalDatabaseVersion);
-                    pw.print(" external=");
-                    pw.println(mSettings.mExternalDatabaseVersion);
+                    mSettings.dumpVersionLPr(new IndentingPrintWriter(pw, "  "));
                 }
             }
 
@@ -15410,20 +15414,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             // cases get permissions that the user didn't initially explicitly
             // allow... it would be nice to have some better way to handle
             // this situation.
-            final boolean regrantPermissions = mSettings.mExternalSdkPlatform != mSdkVersion;
-            if (regrantPermissions)
-                Slog.i(TAG, "Platform changed from " + mSettings.mExternalSdkPlatform + " to "
-                        + mSdkVersion + "; regranting permissions for external storage");
-            mSettings.mExternalSdkPlatform = mSdkVersion;
+            final VersionInfo ver = mSettings.getExternalVersion();
 
-            // Make sure group IDs have been assigned, and any permission
-            // changes in other apps are accounted for
-            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
-                    | (regrantPermissions
-                            ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
-                            : 0));
+            int updateFlags = UPDATE_PERMISSIONS_ALL;
+            if (ver.sdkVersion != mSdkVersion) {
+                logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
+                        + mSdkVersion + "; regranting permissions for external");
+                updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
+            }
+            updatePermissionsLPw(null, null, updateFlags);
 
-            mSettings.updateExternalDatabaseVersion();
+            // Yay, everything is now upgraded
+            ver.forceCurrent();
 
             // can downgrade to reader
             // Persist settings
@@ -15515,6 +15517,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int parseFlags = mDefParseFlags | PackageParser.PARSE_EXTERNAL_STORAGE;
         synchronized (mInstallLock) {
         synchronized (mPackages) {
+            final VersionInfo ver = mSettings.findOrCreateVersion(vol.fsUuid);
             final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(vol.fsUuid);
             for (PackageSetting ps : packages) {
                 final PackageParser.Package pkg;
@@ -15524,9 +15527,22 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } catch (PackageManagerException e) {
                     Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
                 }
+
+                if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
+                    deleteCodeCacheDirsLI(ps.volumeUuid, ps.name);
+                }
             }
 
-            // TODO: regrant any permissions that changed based since original install
+            int updateFlags = UPDATE_PERMISSIONS_ALL;
+            if (ver.sdkVersion != mSdkVersion) {
+                logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
+                        + mSdkVersion + "; regranting permissions for " + vol.fsUuid);
+                updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
+            }
+            updatePermissionsLPw(null, null, updateFlags);
+
+            // Yay, everything is now upgraded
+            ver.forceCurrent();
 
             mSettings.writeLPr();
         }
