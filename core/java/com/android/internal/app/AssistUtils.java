@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -45,13 +46,15 @@ public class AssistUtils {
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
     }
 
-    public void showSessionForActiveService(Bundle args,
-            IVoiceInteractionSessionShowCallback showCallback) {
+    public boolean showSessionForActiveService(Bundle args, int sourceFlags,
+            IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
         try {
-            mVoiceInteractionManagerService.showSessionForActiveService(args, showCallback);
+            return mVoiceInteractionManagerService.showSessionForActiveService(args, sourceFlags,
+                    showCallback, activityToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call showSessionForActiveService", e);
         }
+        return false;
     }
 
     public void launchVoiceAssistFromKeyguard() {

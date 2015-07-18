@@ -91,6 +91,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      */
     public static final int SHOW_SOURCE_ASSIST_GESTURE = 1<<2;
 
+    /**
+     * Flag for use with {@link #onShow}: indicates that the application itself has invoked
+     * the assistant.
+     */
+    public static final int SHOW_SOURCE_APPLICATION = 1<<3;
+
     final Context mContext;
     final HandlerCaller mHandlerCaller;
 
@@ -936,6 +942,23 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     /**
+     * Return which show context flags have been disabled by the user through the system
+     * settings UI, so the session will never get this data.  Returned flags are any combination of
+     * {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST} and
+     * {@link VoiceInteractionSession#SHOW_WITH_SCREENSHOT
+     * VoiceInteractionSession.SHOW_WITH_SCREENSHOT}.  Note that this only tells you about
+     * global user settings, not about restrictions that may be applied contextual based on
+     * the current application the user is in or other transient states.
+     */
+    public int getUserDisabledShowContext() {
+        try {
+            return mSystemService.getUserDisabledShowContext();
+        } catch (RemoteException e) {
+            return 0;
+        }
+    }
+
+    /**
      * Show the UI for this session.  This asks the system to go through the process of showing
      * your UI, which will eventually culminate in {@link #onShow}.  This is similar to calling
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
@@ -1179,23 +1202,33 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
     /**
      * Called to receive data from the application that the user was currently viewing when
-     * an assist session is started.
+     * an assist session is started.  If the original show request did not specify
+     * {@link #SHOW_WITH_ASSIST}, this method will not be called.
      *
      * @param data Arbitrary data supplied by the app through
      * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
+     * May be null if assist data has been disabled by the user or device policy.
      * @param structure If available, the structure definition of all windows currently
-     * displayed by the app; if structure has been turned off by the user, will be null.
+     * displayed by the app.  May be null if assist data has been disabled by the user
+     * or device policy; will be an empty stub if the application has disabled assist
+     * by marking its window as secure.
      * @param content Additional content data supplied by the app through
      * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
+     * May be null if assist data has been disabled by the user or device policy; will
+     * not be automatically filled in with data from the app if the app has marked its
+     * window as secure.
      */
-    public void onHandleAssist(Bundle data, AssistStructure structure, AssistContent content) {
+    public void onHandleAssist(@Nullable Bundle data, @Nullable AssistStructure structure,
+            @Nullable AssistContent content) {
     }
 
     /**
      * Called to receive a screenshot of what the user was currently viewing when an assist
-     * session is started.  Will be null if screenshots are disabled by the user.
+     * session is started.  May be null if screenshots are disabled by the user, policy,
+     * or application.  If the original show request did not specify
+     * {@link #SHOW_WITH_SCREENSHOT}, this method will not be called.
      */
-    public void onHandleScreenshot(Bitmap screenshot) {
+    public void onHandleScreenshot(@Nullable Bitmap screenshot) {
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {

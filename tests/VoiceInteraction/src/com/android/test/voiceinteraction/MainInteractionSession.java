@@ -50,6 +50,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     View mOptionsContainer;
     CheckBox mDisallowAssist;
     CheckBox mDisallowScreenshot;
+    TextView mOptionsText;
     ImageView mScreenshot;
     ImageView mFullScreenshot;
     Button mConfirmButton;
@@ -86,8 +87,9 @@ public class MainInteractionSession extends VoiceInteractionSession
     @Override
     public void onShow(Bundle args, int showFlags) {
         super.onShow(args, showFlags);
+        Log.i(TAG, "onShow: flags=0x" + Integer.toHexString(showFlags) + " args=" + args);
         mState = STATE_IDLE;
-        mStartIntent = args.getParcelable("intent");
+        mStartIntent = args != null ? (Intent)args.getParcelable("intent") : null;
         if (mStartIntent == null) {
             mStartIntent = new Intent(getContext(), TestInteractionActivity.class);
         }
@@ -96,6 +98,7 @@ public class MainInteractionSession extends VoiceInteractionSession
         }
         onHandleScreenshot(null);
         updateState();
+        refreshOptions();
     }
 
     @Override
@@ -134,6 +137,7 @@ public class MainInteractionSession extends VoiceInteractionSession
         mDisallowAssist.setOnClickListener(this);
         mDisallowScreenshot = (CheckBox)mContentView.findViewById(R.id.disallow_screenshot);
         mDisallowScreenshot.setOnClickListener(this);
+        mOptionsText = (TextView)mContentView.findViewById(R.id.options_text);
         mConfirmButton = (Button)mContentView.findViewById(R.id.confirm);
         mConfirmButton.setOnClickListener(this);
         mCompleteButton = (Button)mContentView.findViewById(R.id.complete);
@@ -145,13 +149,17 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     void refreshOptions() {
-        if (mOptionsCheck.isChecked()) {
-            mOptionsContainer.setVisibility(View.VISIBLE);
-            int flags = getDisabledShowContext();
-            mDisallowAssist.setChecked((flags & SHOW_WITH_ASSIST) != 0);
-            mDisallowScreenshot.setChecked((flags & SHOW_WITH_SCREENSHOT) != 0);
-        } else {
-            mOptionsContainer.setVisibility(View.GONE);
+        if (mOptionsContainer != null) {
+            if (mOptionsCheck.isChecked()) {
+                mOptionsContainer.setVisibility(View.VISIBLE);
+                int flags = getDisabledShowContext();
+                mDisallowAssist.setChecked((flags & SHOW_WITH_ASSIST) != 0);
+                mDisallowScreenshot.setChecked((flags & SHOW_WITH_SCREENSHOT) != 0);
+                int disabled = getUserDisabledShowContext();
+                mOptionsText.setText("Disabled: 0x" + Integer.toHexString(disabled));
+            } else {
+                mOptionsContainer.setVisibility(View.GONE);
+            }
         }
     }
 

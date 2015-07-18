@@ -1545,6 +1545,24 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Ask to have the current assistant shown to the user.  This only works if the calling
+     * activity is the current foreground activity.  It is the same as calling
+     * {@link android.service.voice.VoiceInteractionService#showSession
+     * VoiceInteractionService.showSession} and requesting all of the possible context.
+     * The receiver will always see
+     * {@link android.service.voice.VoiceInteractionSession#SHOW_SOURCE_APPLICATION} set.
+     * @return Returns true if the assistant was successfully invoked, else false.  For example
+     * false will be returned if the caller is not the current top activity.
+     */
+    public boolean showAssist(Bundle args) {
+        try {
+            return ActivityManagerNative.getDefault().showAssistFromActivity(mToken, args);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
      * Called when you are no longer visible to the user.  You will next
      * receive either {@link #onRestart}, {@link #onDestroy}, or nothing,
      * depending on later user activity.
