@@ -47,6 +47,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
@@ -117,6 +118,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
+import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
@@ -398,6 +400,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private DataConnectionStats mDataConnectionStats;
 
     TelephonyManager mTelephonyManager;
+
+    private KeepaliveTracker mKeepaliveTracker;
 
     // sequence number for Networks; keep in sync with system/netd/NetworkController.cpp
     private final static int MIN_NET_ID = 100; // some reserved marks
@@ -764,6 +768,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mPacManager = new PacManager(mContext, mHandler, EVENT_PROXY_HAS_CHANGED);
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+
+        mKeepaliveTracker = new KeepaliveTracker(mHandler);
     }
 
     private NetworkRequest createInternetRequestForTransport(int transportType) {
@@ -1449,6 +1455,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
+    private void enforceKeepalivePermission() {
+        mContext.enforceCallingPermission(KeepaliveTracker.PERMISSION, "ConnectivityService");
+    }
+
     public void sendConnectedBroadcast(NetworkInfo info) {
         enforceConnectivityInternalPermission();
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
@@ -1840,9 +1850,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 pw.println(", last requested never");
             }
         }
-        pw.println();
 
+        pw.println();
         mTethering.dump(fd, pw, args);
+
+        pw.println();
+        mKeepaliveTracker.dump(pw);
 
         if (mInetLog != null && mInetLog.size() > 0) {
             pw.println();
@@ -2010,6 +2023,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     nai.networkMisc.acceptUnvalidated = (boolean) msg.obj;
                     break;
                 }
+                case NetworkAgent.EVENT_PACKET_KEEPALIVE: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_PACKET_KEEPALIVE from unknown NetworkAgent");
+                        break;
+                    }
+                    mKeepaliveTracker.handleEventPacketKeepalive(nai, msg);
+                    break;
+                }
                 case NetworkMonitor.EVENT_NETWORK_TESTED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     if (isLiveNetworkAgent(nai, "EVENT_NETWORK_TESTED")) {
@@ -2148,6 +2170,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             notifyIfacesChanged();
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOST);
+            mKeepaliveTracker.handleStopAllKeepalives(nai,
+                    ConnectivityManager.PacketKeepalive.ERROR_INVALID_NETWORK);
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
             updateClat(null, nai.linkProperties, nai);
@@ -2507,6 +2531,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON: {
                     handleMobileDataAlwaysOn();
+                    break;
+                }
+                // Sent by KeepaliveTracker to process an app request on the state machine thread.
+                case NetworkAgent.CMD_START_PACKET_KEEPALIVE: {
+                    mKeepaliveTracker.handleStartKeepalive(msg);
+                    break;
+                }
+                // Sent by KeepaliveTracker to process an app request on the state machine thread.
+                case NetworkAgent.CMD_STOP_PACKET_KEEPALIVE: {
+                    NetworkAgentInfo nai = getNetworkAgentInfoForNetwork((Network) msg.obj);
+                    int slot = msg.arg1;
+                    int reason = msg.arg2;
+                    mKeepaliveTracker.handleStopKeepalive(nai, slot, reason);
                     break;
                 }
                 case EVENT_SYSTEM_READY: {
@@ -3863,6 +3900,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             notifyIfacesChanged();
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
         }
+
+        mKeepaliveTracker.handleCheckKeepalivesStillValid(networkAgent);
     }
 
     private void updateClat(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo nai) {
@@ -4660,6 +4699,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
             notifyIfacesChanged();
         }
         return success;
+    }
+
+    @Override
+    public void startNattKeepalive(Network network, int intervalSeconds, Messenger messenger,
+            IBinder binder, String srcAddr, int srcPort, String dstAddr) {
+        enforceKeepalivePermission();
+        mKeepaliveTracker.startNattKeepalive(
+                getNetworkAgentInfoForNetwork(network),
+                intervalSeconds, messenger, binder,
+                srcAddr, srcPort, dstAddr, ConnectivityManager.PacketKeepalive.NATT_PORT);
+    }
+
+    @Override
+    public void stopKeepalive(Network network, int slot) {
+        mHandler.sendMessage(mHandler.obtainMessage(
+                NetworkAgent.CMD_STOP_PACKET_KEEPALIVE, slot, PacketKeepalive.SUCCESS, network));
     }
 
     @Override
