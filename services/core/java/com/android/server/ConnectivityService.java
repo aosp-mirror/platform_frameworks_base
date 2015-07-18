@@ -3611,7 +3611,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private int[] getSignalStrengthThresholds(NetworkAgentInfo nai) {
+    private ArrayList<Integer> getSignalStrengthThresholds(NetworkAgentInfo nai) {
         final SortedSet<Integer> thresholds = new TreeSet();
         synchronized (nai) {
             for (NetworkRequestInfo nri : mNetworkRequests.values()) {
@@ -3621,22 +3621,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        // We can't just do something like:
-        //     return thresholds.toArray(new int[thresholds.size()]);
-        // because autoboxing does not work for primitive arrays.
-        final int[] out = new int[thresholds.size()];
-        int pos = 0;
-        for (Integer threshold : thresholds) {
-            out[pos] = threshold;
-            pos++;
-        }
-        return out;
+        return new ArrayList<Integer>(thresholds);
     }
 
     private void updateSignalStrengthThresholds(NetworkAgentInfo nai) {
+        Bundle thresholds = new Bundle();
+        thresholds.putIntegerArrayList("thresholds", getSignalStrengthThresholds(nai));
         nai.asyncChannel.sendMessage(
                 android.net.NetworkAgent.CMD_SET_SIGNAL_STRENGTH_THRESHOLDS,
-                0, 0, getSignalStrengthThresholds(nai));
+                0, 0, thresholds);
     }
 
     @Override
