@@ -184,6 +184,14 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int EVENT_PACKET_KEEPALIVE = BASE + 13;
 
+    /**
+     * Sent by ConnectivityService to inform this network transport of signal strength thresholds
+     * that when crossed should trigger a system wakeup and a NetworkCapabilities update.
+     *
+     *   obj = int[] describing signal strength thresholds.
+     */
+    public static final int CMD_SET_SIGNAL_STRENGTH_THRESHOLDS = BASE + 14;
+
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null);
@@ -284,6 +292,11 @@ public abstract class NetworkAgent extends Handler {
             }
             case CMD_STOP_PACKET_KEEPALIVE: {
                 stopPacketKeepalive(msg);
+                break;
+            }
+
+            case CMD_SET_SIGNAL_STRENGTH_THRESHOLDS: {
+                setSignalStrengthThresholds((int[]) msg.obj);
                 break;
             }
         }
@@ -443,6 +456,13 @@ public abstract class NetworkAgent extends Handler {
      */
     public void onPacketKeepaliveEvent(int slot, int reason) {
         queueOrSendMessage(EVENT_PACKET_KEEPALIVE, slot, reason);
+    }
+
+    /**
+     * Called by ConnectivityService to inform this network transport of signal strength thresholds
+     * that when crossed should trigger a system wakeup and a NetworkCapabilities update.
+     */
+    protected void setSignalStrengthThresholds(int[] thresholds) {
     }
 
     protected void log(String s) {
