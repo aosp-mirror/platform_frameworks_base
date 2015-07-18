@@ -1923,6 +1923,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
                             Slog.wtf(TAG, "BUG: " + nai + " has stateful capability.");
                         }
+                        if (nai.created && !nai.networkCapabilities.equalImmutableCapabilities(
+                                networkCapabilities)) {
+                            Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
+                                    + nai.networkCapabilities + " -> " + networkCapabilities);
+                        }
                         updateCapabilities(nai, networkCapabilities);
                     }
                     break;
@@ -3550,14 +3555,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void ensureImmutableCapabilities(NetworkCapabilities networkCapabilities) {
-        if (networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
-            throw new IllegalArgumentException(
-                    "Cannot request network with NET_CAPABILITY_VALIDATED");
-        }
-        if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) {
-            throw new IllegalArgumentException(
-                    "Cannot request network with NET_CAPABILITY_CAPTIVE_PORTAL");
+    private void ensureRequestableCapabilities(NetworkCapabilities networkCapabilities) {
+        final String badCapability = networkCapabilities.describeFirstNonRequestableCapability();
+        if (badCapability != null) {
+            throw new IllegalArgumentException("Cannot request network with " + badCapability);
         }
     }
 
@@ -3567,7 +3568,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         enforceNetworkRequestPermissions(networkCapabilities);
         enforceMeteredApnPolicy(networkCapabilities);
-        ensureImmutableCapabilities(networkCapabilities);
+        ensureRequestableCapabilities(networkCapabilities);
 
         if (timeoutMs < 0 || timeoutMs > ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS) {
             throw new IllegalArgumentException("Bad timeout specified");
@@ -3636,7 +3637,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         enforceNetworkRequestPermissions(networkCapabilities);
         enforceMeteredApnPolicy(networkCapabilities);
-        ensureImmutableCapabilities(networkCapabilities);
+        ensureRequestableCapabilities(networkCapabilities);
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId());
