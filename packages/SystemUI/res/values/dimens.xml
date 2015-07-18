@@ -562,7 +562,7 @@
 
     <!-- Padding to be used on the bottom of the fingerprint icon on Keyguard so it better aligns
          with the other icons. -->
-    <dimen name="fingerprint_icon_additional_padding">12dp</dimen>
+    <dimen name="fingerprint_icon_additional_padding">4dp</dimen>
 
     <!-- Minimum margin of the notification panel on the side, when being positioned dynamically -->
     <dimen name="notification_panel_min_side_margin">48dp</dimen>
