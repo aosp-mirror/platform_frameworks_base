@@ -160,4 +160,9 @@ interface IConnectivityManager
     boolean setUnderlyingNetworksForVpn(in Network[] networks);
 
     void factoryReset();
+
+    void startNattKeepalive(in Network network, int intervalSeconds, in Messenger messenger,
+            in IBinder binder, String srcAddr, int srcPort, String dstAddr);
+
+    void stopKeepalive(in Network network, int slot);
 }
