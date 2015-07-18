@@ -140,8 +140,8 @@ bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
 
 // Returns a prepared Texture* that either is already in the cache or can fit
 // in the cache (and is thus added to the cache)
-Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
-    if (CC_LIKELY(mAssetAtlas)) {
+Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap, AtlasUsageType atlasUsageType) {
+    if (CC_LIKELY(mAssetAtlas != nullptr) && atlasUsageType == AtlasUsageType::Use) {
         AssetAtlas::Entry* entry = mAssetAtlas->getEntry(bitmap);
         if (CC_UNLIKELY(entry)) {
             return entry->texture;
@@ -190,15 +190,15 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
 }
 
 bool TextureCache::prefetchAndMarkInUse(const SkBitmap* bitmap) {
-    Texture* texture = getCachedTexture(bitmap);
+    Texture* texture = getCachedTexture(bitmap, AtlasUsageType::Use);
     if (texture) {
         texture->isInUse = true;
     }
     return texture;
 }
 
-Texture* TextureCache::get(const SkBitmap* bitmap) {
-    Texture* texture = getCachedTexture(bitmap);
+Texture* TextureCache::get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType) {
+    Texture* texture = getCachedTexture(bitmap, atlasUsageType);
 
     if (!texture) {
         if (!canMakeTextureFromBitmap(bitmap)) {
