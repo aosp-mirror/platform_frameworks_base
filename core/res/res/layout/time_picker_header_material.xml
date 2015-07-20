@@ -22,7 +22,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
-                android:padding="@dimen/timepicker_separator_padding">
+                android:padding="@dimen/timepicker_separator_padding"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
 
     <!-- The hour should always be to the left of the separator,
          regardless of the current locale's layout direction. -->
@@ -68,14 +70,14 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/minutes"
         android:layout_alignBaseline="@+id/minutes"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:orientation="vertical"
         android:baselineAlignedChildIndex="1">
         <CheckedTextView
             android:id="@+id/am_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="@dimen/timepicker_ampm_horizontal_padding"
-            android:paddingEnd="@dimen/timepicker_ampm_horizontal_padding"
             android:paddingTop="@dimen/timepicker_am_top_padding"
             android:textAppearance="@style/TextAppearance.Material.TimePicker.AmPmLabel"
             android:lines="1"
@@ -84,8 +86,6 @@
             android:id="@+id/pm_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="@dimen/timepicker_ampm_horizontal_padding"
-            android:paddingEnd="@dimen/timepicker_ampm_horizontal_padding"
             android:paddingTop="@dimen/timepicker_pm_top_padding"
             android:textAppearance="@style/TextAppearance.Material.TimePicker.AmPmLabel"
             android:lines="1"
