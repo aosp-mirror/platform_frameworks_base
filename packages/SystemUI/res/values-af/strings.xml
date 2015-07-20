@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Die rekenaar se RSA-sleutel-vingerafdruk is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Laat altyd toe van hierdie rekenaar af"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-ontfouting word nie toegelaat nie"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Die gebruiker wat tans by hierdie toestel aangemeld is, kan nie USB-ontfouting aanskakel nie. Skakel asseblief na \'n administrasiegebruiker oor om hierdie kenmerk te gebruik."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoem om skerm te vul"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Strek om skerm te vul"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Stoor tans skermkiekie..."</string>

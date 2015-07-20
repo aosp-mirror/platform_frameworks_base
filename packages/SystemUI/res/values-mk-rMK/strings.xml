@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Клучниот отпечаток на RSA на компјутерот е:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Секогаш дозволувај од овој компјутер"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Отстранувањето грешки на УСБ не е дозволено"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Корисникот што моментално е најавен на уредов не може да вклучи отстранување грешки на УСБ. За да ја користите функцијата, префрлете се на корисникот Администратор."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Зумирај да се исполни екранот"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Растегни да се исполни екранот"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сликата на екранот се зачувува..."</string>

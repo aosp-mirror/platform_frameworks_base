@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"பின்வருவது கணினியின் RSA விசை கைரேகையாகும்:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"இந்தக் கணினியிலிருந்து எப்போதும் அனுமதி"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB பிழைத்திருத்தம் அனுமதிக்கப்படவில்லை"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"தற்போது இந்தச் சாதனத்தில் உள்நுழைந்துள்ள பயனரால் USB பிழைத்திருத்தத்தை இயக்க முடியாது. இந்த அம்சத்தைப் பயன்படுத்த, நிர்வாகிப் பயனருக்கு மாறவும்."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"திரையை நிரப்ப இழு"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
