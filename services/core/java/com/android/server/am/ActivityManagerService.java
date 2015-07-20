@@ -65,6 +65,7 @@ import android.os.storage.IMountService;
 import android.os.storage.MountServiceInternal;
 import android.os.storage.StorageManager;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.VoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -73,6 +74,7 @@ import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.AssistUtils;
 import com.android.internal.app.DumpHeapActivity;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IVoiceInteractor;
@@ -10686,7 +10688,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public Bundle getAssistContextExtras(int requestType) {
         PendingAssistExtras pae = enqueueAssistContext(requestType, null, null, null,
-                UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT);
+                null, UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT);
         if (pae == null) {
             return null;
         }
@@ -10707,7 +10709,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean isScreenCaptureAllowedOnCurrentActivity() {
+    public boolean isAssistDataAllowedOnCurrentActivity() {
         int userId = mCurrentUserId;
         synchronized (this) {
             ActivityRecord activity = getFocusedStack().topActivity();
@@ -10722,13 +10724,41 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void requestAssistContextExtras(int requestType, IResultReceiver receiver) {
-        enqueueAssistContext(requestType, null, null, receiver, UserHandle.getCallingUserId(),
-                null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT);
+    public boolean showAssistFromActivity(IBinder token, Bundle args) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                ActivityRecord caller = ActivityRecord.forTokenLocked(token);
+                ActivityRecord top = getFocusedStack().topActivity();
+                if (top != caller) {
+                    Slog.w(TAG, "showAssistFromActivity failed: caller " + caller
+                            + " is not current top " + top);
+                    return false;
+                }
+                if (!top.nowVisible) {
+                    Slog.w(TAG, "showAssistFromActivity failed: caller " + caller
+                            + " is not visible");
+                    return false;
+                }
+            }
+            AssistUtils utils = new AssistUtils(mContext);
+            return utils.showSessionForActiveService(args,
+                    VoiceInteractionSession.SHOW_SOURCE_APPLICATION, null, token);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public boolean requestAssistContextExtras(int requestType, IResultReceiver receiver,
+            IBinder activityToken) {
+        return enqueueAssistContext(requestType, null, null, receiver, activityToken,
+                UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT) != null;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
-            IResultReceiver receiver, int userHandle, Bundle args, long timeout) {
+            IResultReceiver receiver, IBinder activityToken, int userHandle, Bundle args,
+            long timeout) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "enqueueAssistContext()");
         synchronized (this) {
@@ -10741,9 +10771,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "getAssistContextExtras failed: no process for " + activity);
                 return null;
             }
-            if (activity.app.pid == Binder.getCallingPid()) {
-                Slog.w(TAG, "getAssistContextExtras failed: request process same as " + activity);
-                return null;
+            if (activityToken != null) {
+                ActivityRecord caller = ActivityRecord.forTokenLocked(activityToken);
+                if (activity != caller) {
+                    Slog.w(TAG, "enqueueAssistContext failed: caller " + caller
+                            + " is not current top " + activity);
+                    return null;
+                }
             }
             PendingAssistExtras pae;
             Bundle extras = new Bundle();
@@ -10854,7 +10888,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
             Bundle args) {
-        return enqueueAssistContext(requestType, intent, hint, null, userHandle, args,
+        return enqueueAssistContext(requestType, intent, hint, null, null, userHandle, args,
                 PENDING_ASSIST_EXTRAS_TIMEOUT) != null;
     }
 
