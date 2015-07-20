@@ -17,12 +17,14 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.LayoutTransition;
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
@@ -119,8 +121,11 @@ class NavigationBarApps extends LinearLayout {
             ImageView button = createAppButton();
             addView(button);
 
-            // Load the icon asynchronously.
             ComponentName activityName = sAppsModel.getApp(i);
+            CharSequence appLabel = getAppLabel(mPackageManager, activityName);
+            button.setContentDescription(getAppLabel(mPackageManager, activityName));
+
+            // Load the icon asynchronously.
             new GetActivityIconTask(mPackageManager, button).execute(activityName);
         }
     }
@@ -149,6 +154,24 @@ class NavigationBarApps extends LinearLayout {
             startAppDrag(icon, activityName);
             return true;
         }
+    }
+
+    /**
+     * Returns the human-readable name for an activity's package or null.
+     * TODO: Cache the labels, perhaps in an LruCache.
+     */
+    @Nullable
+    static CharSequence getAppLabel(PackageManager packageManager,
+            ComponentName activityName) {
+        String packageName = activityName.getPackageName();
+        ApplicationInfo info;
+        try {
+            info = packageManager.getApplicationInfo(packageName, 0x0 /* flags */);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Package not found " + packageName);
+            return null;
+        }
+        return packageManager.getApplicationLabel(info);
     }
 
     /** Helper function to start dragging an app icon (either pinned or recent). */

@@ -151,6 +151,10 @@ class NavigationBarRecents extends LinearLayout {
         button.setOnLongClickListener(mAppLongClickListener);
         addView(button);
 
+        ComponentName activityName = getRealActivityForTask(task);
+        CharSequence appLabel = NavigationBarApps.getAppLabel(mPackageManager, activityName);
+        button.setContentDescription(appLabel);
+
         // Use the View's tag to store metadata for drag and drop.
         button.setTag(task);
 

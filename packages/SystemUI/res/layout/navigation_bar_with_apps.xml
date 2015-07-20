@@ -82,8 +82,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     />
-    
+
                 <ImageView android:id="@+id/app_divider"
+                    android:focusable="false"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -91,7 +92,7 @@
                     android:layout_marginRight="10dp"
                     android:src="@drawable/nav_app_divider"
                     />
-    
+
                 <com.android.systemui.statusbar.phone.NavigationBarRecents
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -247,8 +248,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     />
-    
+
                 <ImageView android:id="@+id/app_divider"
+                    android:focusable="false"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -256,7 +258,7 @@
                     android:layout_marginRight="10dp"
                     android:src="@drawable/nav_app_divider"
                     />
-    
+
             <com.android.systemui.statusbar.phone.NavigationBarRecents
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
