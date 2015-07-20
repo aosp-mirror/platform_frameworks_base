@@ -133,7 +133,7 @@ public final class TvInputManagerService extends SystemService {
         mTvInputHardwareManager = new TvInputHardwareManager(context, new HardwareListener());
 
         synchronized (mLock) {
-            mUserStates.put(mCurrentUserId, new UserState(mContext, mCurrentUserId));
+            getOrCreateUserStateLocked(mCurrentUserId);
         }
     }
 
@@ -222,7 +222,7 @@ public final class TvInputManagerService extends SystemService {
             @Override
             public void onPackageRemoved(String packageName, int uid) {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(getChangingUserId());
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId());
                     if (!userState.packageSet.contains(packageName)) {
                         // Not a TV input package.
                         return;
@@ -281,7 +281,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void buildTvInputListLocked(int userId, String[] updatedPackages) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         userState.packageSet.clear();
 
         if (DEBUG) Slog.d(TAG, "buildTvInputList");
@@ -368,7 +368,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void buildTvContentRatingSystemListLocked(int userId) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         userState.contentRatingSystemList.clear();
 
         final PackageManager pm = mContext.getPackageManager();
@@ -402,11 +402,7 @@ public final class TvInputManagerService extends SystemService {
             clearSessionAndServiceStatesLocked(mUserStates.get(mCurrentUserId));
 
             mCurrentUserId = userId;
-            UserState userState = mUserStates.get(userId);
-            if (userState == null) {
-                userState = new UserState(mContext, userId);
-                mUserStates.put(userId, userState);
-            }
+            getOrCreateUserStateLocked(userId);
             buildTvInputListLocked(userId, null);
             buildTvContentRatingSystemListLocked(userId);
             mWatchLogHandler.obtainMessage(WatchLogHandler.MSG_SWITCH_CONTENT_RESOLVER,
@@ -473,16 +469,17 @@ public final class TvInputManagerService extends SystemService {
         return context.getContentResolver();
     }
 
-    private UserState getUserStateLocked(int userId) {
+    private UserState getOrCreateUserStateLocked(int userId) {
         UserState userState = mUserStates.get(userId);
         if (userState == null) {
-            throw new IllegalStateException("User state not found for user ID " + userId);
+            userState = new UserState(mContext, userId);
+            mUserStates.put(userId, userState);
         }
         return userState;
     }
 
     private ServiceState getServiceStateLocked(ComponentName component, int userId) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         ServiceState serviceState = userState.serviceStateMap.get(component);
         if (serviceState == null) {
             throw new IllegalStateException("Service state not found for " + component + " (userId="
@@ -492,7 +489,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private SessionState getSessionStateLocked(IBinder sessionToken, int callingUid, int userId) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (sessionState == null) {
             throw new SessionNotFoundException("Session state not found for token " + sessionToken);
@@ -530,7 +527,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void updateServiceConnectionLocked(ComponentName component, int userId) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         ServiceState serviceState = userState.serviceStateMap.get(component);
         if (serviceState == null) {
             return;
@@ -574,7 +571,7 @@ public final class TvInputManagerService extends SystemService {
     private void abortPendingCreateSessionRequestsLocked(ServiceState serviceState,
             String inputId, int userId) {
         // Let clients know the create session requests are failed.
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         List<SessionState> sessionsToAbort = new ArrayList<>();
         for (IBinder sessionToken : serviceState.sessionTokens) {
             SessionState sessionState = userState.sessionStateMap.get(sessionToken);
@@ -593,7 +590,7 @@ public final class TvInputManagerService extends SystemService {
 
     private void createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
             int userId) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (DEBUG) {
             Slog.d(TAG, "createSessionInternalLocked(inputId=" + sessionState.info.getId() + ")");
@@ -629,7 +626,7 @@ public final class TvInputManagerService extends SystemService {
         try {
             sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
             if (sessionState.session != null) {
-                UserState userState = getUserStateLocked(userId);
+                UserState userState = getOrCreateUserStateLocked(userId);
                 if (sessionToken == userState.mainSessionToken) {
                     setMainLocked(sessionToken, false, callingUid, userId);
                 }
@@ -646,7 +643,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void removeSessionStateLocked(IBinder sessionToken, int userId) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         if (sessionToken == userState.mainSessionToken) {
             if (DEBUG) {
                 Slog.d(TAG, "mainSessionToken=null");
@@ -768,7 +765,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void setStateLocked(String inputId, int state, int userId) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = getOrCreateUserStateLocked(userId);
         TvInputState inputState = userState.inputMap.get(inputId);
         ServiceState serviceState = userState.serviceStateMap.get(inputState.info.getComponent());
         int oldState = inputState.state;
@@ -791,7 +788,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     List<TvInputInfo> inputList = new ArrayList<>();
                     for (TvInputState state : userState.inputMap.values()) {
                         inputList.add(state.info);
@@ -810,7 +807,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     TvInputState state = userState.inputMap.get(inputId);
                     return state == null ? null : state.info;
                 }
@@ -826,7 +823,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     TvInputState state = userState.inputMap.get(inputId);
                     return state == null ? INPUT_STATE_CONNECTED : state.state;
                 }
@@ -842,7 +839,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     return userState.contentRatingSystemList;
                 }
             } finally {
@@ -857,7 +854,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    final UserState userState = getUserStateLocked(resolvedUserId);
+                    final UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.callbackSet.add(callback);
                     try {
                         callback.asBinder().linkToDeath(new IBinder.DeathRecipient() {
@@ -886,7 +883,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.callbackSet.remove(callback);
                 }
             } finally {
@@ -901,7 +898,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     return userState.persistentDataStore.isParentalControlsEnabled();
                 }
             } finally {
@@ -917,7 +914,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.persistentDataStore.setParentalControlsEnabled(enabled);
                 }
             } finally {
@@ -932,7 +929,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     return userState.persistentDataStore.isRatingBlocked(
                             TvContentRating.unflattenFromString(rating));
                 }
@@ -948,7 +945,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     List<String> ratings = new ArrayList<>();
                     for (TvContentRating rating
                             : userState.persistentDataStore.getBlockedRatings()) {
@@ -969,7 +966,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.persistentDataStore.addBlockedRating(
                             TvContentRating.unflattenFromString(rating));
                 }
@@ -986,7 +983,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.persistentDataStore.removeBlockedRating(
                             TvContentRating.unflattenFromString(rating));
                 }
@@ -1013,7 +1010,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     TvInputState inputState = userState.inputMap.get(inputId);
                     if (inputState == null) {
                         Slog.w(TAG, "Failed to find input state for inputId=" + inputId);
@@ -1084,7 +1081,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     if (userState.mainSessionToken == sessionToken) {
                         return;
                     }
@@ -1211,7 +1208,7 @@ public final class TvInputManagerService extends SystemService {
                             return;
                         }
 
-                        UserState userState = getUserStateLocked(resolvedUserId);
+                        UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
 
                         // Log the start of watch.
@@ -1639,7 +1636,7 @@ public final class TvInputManagerService extends SystemService {
             try {
                 String hardwareInputId = null;
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     if (userState.inputMap.get(inputId) == null) {
                         Slog.e(TAG, "input not found for " + inputId);
                         return false;
@@ -1669,7 +1666,7 @@ public final class TvInputManagerService extends SystemService {
                     userId, "isSingleSessionActive");
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     if (userState.sessionStateMap.size() == 1) {
                         return true;
                     } else if (userState.sessionStateMap.size() == 2) {
@@ -1710,7 +1707,7 @@ public final class TvInputManagerService extends SystemService {
 
                 for (int i = 0; i < mUserStates.size(); i++) {
                     int userId = mUserStates.keyAt(i);
-                    UserState userState = getUserStateLocked(userId);
+                    UserState userState = getOrCreateUserStateLocked(userId);
                     pw.println("UserState (" + userId + "):");
                     pw.increaseIndent();
 
@@ -1864,7 +1861,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void binderDied() {
             synchronized (mLock) {
-                UserState userState = getUserStateLocked(userId);
+                UserState userState = getOrCreateUserStateLocked(userId);
                 // DO NOT remove the client state of clientStateMap in this method. It will be
                 // removed in releaseSessionLocked().
                 ClientState clientState = userState.clientStateMap.get(clientToken);
@@ -1945,7 +1942,7 @@ public final class TvInputManagerService extends SystemService {
                     }
                 }
                 // If there are any other sessions based on this session, they should be released.
-                UserState userState = getUserStateLocked(userId);
+                UserState userState = getOrCreateUserStateLocked(userId);
                 for (SessionState sessionState : userState.sessionStateMap.values()) {
                     if (sessionToken == sessionState.hardwareSessionToken) {
                         releaseSessionLocked(sessionState.sessionToken, Process.SYSTEM_UID,
@@ -1977,7 +1974,7 @@ public final class TvInputManagerService extends SystemService {
                 Slog.d(TAG, "onServiceConnected(component=" + component + ")");
             }
             synchronized (mLock) {
-                UserState userState = getUserStateLocked(mUserId);
+                UserState userState = getOrCreateUserStateLocked(mUserId);
                 ServiceState serviceState = userState.serviceStateMap.get(mComponent);
                 serviceState.service = ITvInputService.Stub.asInterface(service);
 
@@ -2038,7 +2035,7 @@ public final class TvInputManagerService extends SystemService {
                         + mComponent + " (expected), " + component + " (actual).");
             }
             synchronized (mLock) {
-                UserState userState = getUserStateLocked(mUserId);
+                UserState userState = getOrCreateUserStateLocked(mUserId);
                 ServiceState serviceState = userState.serviceStateMap.get(mComponent);
                 if (serviceState != null) {
                     serviceState.reconnecting = true;
@@ -2163,7 +2160,7 @@ public final class TvInputManagerService extends SystemService {
             }
 
             IBinder clientToken = mSessionState.client.asBinder();
-            UserState userState = getUserStateLocked(mSessionState.userId);
+            UserState userState = getOrCreateUserStateLocked(mSessionState.userId);
             ClientState clientState = userState.clientStateMap.get(clientToken);
             if (clientState == null) {
                 clientState = new ClientState(clientToken, mSessionState.userId);
@@ -2509,7 +2506,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void onHardwareDeviceAdded(TvInputHardwareInfo info) {
             synchronized (mLock) {
-                UserState userState = getUserStateLocked(mCurrentUserId);
+                UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
                 for (ServiceState serviceState : userState.serviceStateMap.values()) {
                     if (!serviceState.isHardware || serviceState.service == null) continue;
@@ -2525,7 +2522,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void onHardwareDeviceRemoved(TvInputHardwareInfo info) {
             synchronized (mLock) {
-                UserState userState = getUserStateLocked(mCurrentUserId);
+                UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
                 for (ServiceState serviceState : userState.serviceStateMap.values()) {
                     if (!serviceState.isHardware || serviceState.service == null) continue;
@@ -2541,7 +2538,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void onHdmiDeviceAdded(HdmiDeviceInfo deviceInfo) {
             synchronized (mLock) {
-                UserState userState = getUserStateLocked(mCurrentUserId);
+                UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
                 for (ServiceState serviceState : userState.serviceStateMap.values()) {
                     if (!serviceState.isHardware || serviceState.service == null) continue;
@@ -2557,7 +2554,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void onHdmiDeviceRemoved(HdmiDeviceInfo deviceInfo) {
             synchronized (mLock) {
-                UserState userState = getUserStateLocked(mCurrentUserId);
+                UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
                 for (ServiceState serviceState : userState.serviceStateMap.values()) {
                     if (!serviceState.isHardware || serviceState.service == null) continue;
