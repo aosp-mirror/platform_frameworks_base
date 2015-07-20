@@ -173,7 +173,7 @@ public final class BidiFormatter {
 
         /**
          * Specifies whether the BidiFormatter to be built should also "reset" directionality before
-         * a string being bidi-wrapped, not just after it. The default is false.
+         * a string being bidi-wrapped, not just after it. The default is true.
          */
         public Builder stereoReset(boolean stereoReset) {
             if (stereoReset) {
@@ -363,12 +363,13 @@ public final class BidiFormatter {
      * If {@code isolate}, directionally isolates the string so that it does not garble its
      * surroundings. Currently, this is done by "resetting" the directionality after the string by
      * appending a trailing Unicode bidi mark matching the context directionality (LRM or RLM) when
-     * either the overall directionality or the exit directionality of the string is opposite to that
-     * of the context. If the formatter was built using {@link Builder#stereoReset(boolean)} and
-     * passing "true" as an argument, also prepends a Unicode bidi mark matching the context
-     * directionality when either the overall directionality or the entry directionality of the
-     * string is opposite to that of the context. Note that as opposed to the overall
-     * directionality, the entry and exit directionalities are determined from the string itself.
+     * either the overall directionality or the exit directionality of the string is opposite to
+     * that of the context. Unless the formatter was built using
+     * {@link Builder#stereoReset(boolean)} with a {@code false} argument, also prepends a Unicode
+     * bidi mark matching the context directionality when either the overall directionality or the
+     * entry directionality of the string is opposite to that of the context. Note that as opposed
+     * to the overall directionality, the entry and exit directionalities are determined from the
+     * string itself.
      * <p>
      * Does *not* do HTML-escaping.
      *
