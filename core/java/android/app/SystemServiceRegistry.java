@@ -691,6 +691,9 @@ final class SystemServiceRegistry {
             @Override
             public MidiManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.MIDI_SERVICE);
+                if (b == null) {
+                    return null;
+                }
                 return new MidiManager(IMidiManager.Stub.asInterface(b));
             }});
 
