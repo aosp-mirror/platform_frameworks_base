@@ -355,7 +355,7 @@
     <string name="permlab_callPhone" msgid="3925836347681847954">"deitu zuzenean telefono-zenbakietara"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Telefono-zenbakietara zuk esku hartu gabe deitzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak edo deiak eragin daitezke. Aplikazio gaiztoek erabil dezakete zuk berretsi gabeko deiak eginda gastuak eragiteko."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"Atzitu IMS dei-zerbitzua"</string>
-    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Zuk ezer egin beharrik gabe deiak egiteko IMS zerbitzua erabiltzea baimentzen dio aplikazioari."</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Zuk ezer egin beharrik gabe deiak egiteko IMS zerbitzua erabiltzea baimentzen die aplikazioei."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonoaren egoera eta identitatea irakurtzea"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Gailuaren telefono-eginbideak atzitzeko baimena ematen die aplikazioei. Baimen horrek aplikazioari telefono-zenbakia eta gailu IDak zein diren, deirik aktibo dagoen eta deia zer zenbakirekin konektatuta dagoen zehazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"eragotzi tableta inaktibo ezartzea"</string>
@@ -883,7 +883,7 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Irekin %1$s aplikazioarekin"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Editatu honekin:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editatu %1$s aplikazioarekin"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Partekatu honekin:"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Partekatu hauen bidez:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partekatu %1$s aplikazioarekin"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Hautatu hasierako aplikazioa"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Erabili %1$s hasierako aplikazio gisa"</string>
