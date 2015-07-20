@@ -1943,6 +1943,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
                                     + nai.networkCapabilities + " -> " + networkCapabilities);
                         }
+                        if (nai.created && !nai.networkCapabilities.equalImmutableCapabilities(
+                                networkCapabilities)) {
+                            Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
+                                    + nai.networkCapabilities + " -> " + networkCapabilities);
+                        }
                         updateCapabilities(nai, networkCapabilities);
                     }
                     break;
