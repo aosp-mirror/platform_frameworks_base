@@ -656,12 +656,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void setContentAlpha(float contentAlpha) {
-        int layerType = contentAlpha == 0.0f || contentAlpha == 1.0f ? LAYER_TYPE_NONE
-                : LAYER_TYPE_HARDWARE;
         View contentView = getContentView();
-        int currentLayerType = contentView.getLayerType();
-        if (currentLayerType != layerType) {
-            contentView.setLayerType(layerType, null);
+        if (contentView.hasOverlappingRendering()) {
+            int layerType = contentAlpha == 0.0f || contentAlpha == 1.0f ? LAYER_TYPE_NONE
+                    : LAYER_TYPE_HARDWARE;
+            int currentLayerType = contentView.getLayerType();
+            if (currentLayerType != layerType) {
+                contentView.setLayerType(layerType, null);
+            }
         }
         contentView.setAlpha(contentAlpha);
     }
