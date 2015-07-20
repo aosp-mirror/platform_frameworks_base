@@ -127,7 +127,7 @@
     <!-- Text size for the time picker header HH:MM label. This value is large
          enough that we don't need to use scaled pixels, dp is fine. -->
     <dimen name="timepicker_time_label_size">60dp</dimen>
-    <dimen name="timepicker_ampm_label_size">16sp</dimen>
+    <dimen name="timepicker_ampm_label_size">16dp</dimen>
     <dimen name="timepicker_ampm_horizontal_padding">16dp</dimen>
     <dimen name="timepicker_am_top_padding">4dp</dimen>
     <dimen name="timepicker_pm_top_padding">4dp</dimen>
