@@ -228,15 +228,15 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Лично"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Посао"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"приступ контактима"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"приступи контактима"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Локација"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"приступ локацији овог уређаја"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"приступ календару"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"приступи календару"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"слање и преглед SMS порука"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"шаље и прегледа SMS поруке"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Складиште"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"приступ сликама, медијима и датотекама на уређају"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"приступи сликама, медијима и датотекама на уређају"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снимање аудио снимака"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>

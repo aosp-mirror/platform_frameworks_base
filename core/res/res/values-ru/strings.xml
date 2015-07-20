@@ -1060,7 +1060,7 @@
     <string name="select_input_method" msgid="8547250819326693584">"Выбор раскладки"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Выбрать раскладку"</string>
     <string name="show_ime" msgid="9157568568695230830">"Показать способ ввода"</string>
-    <string name="hardware" msgid="7517821086888990278">"Аппаратура"</string>
+    <string name="hardware" msgid="7517821086888990278">"Аппаратная"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Выберите раскладку клавиатуры"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Нажмите, чтобы выбрать раскладку клавиатуры."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1342,87 +1342,87 @@
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Это действие запрещено администратором"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Невозможно обработать это действие"</string>
     <string name="revoke" msgid="5404479185228271586">"Отменить"</string>
-    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0 (841х1189 мм)"</string>
-    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1 (594х841 мм)"</string>
-    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2 (420х594 мм)"</string>
-    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3 (297х420 мм)"</string>
-    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4 (210х297 мм)"</string>
-    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5 (148х210 мм)"</string>
-    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6 (105х148 мм)"</string>
-    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7 (74х105 мм)"</string>
-    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8 (52х74 мм)"</string>
-    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9 (37х52 мм)"</string>
-    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10 (26х37 мм)"</string>
-    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0 (1000х1414 мм)"</string>
-    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1 (707х1000 мм)"</string>
-    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2 (500х707 мм)"</string>
-    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3 (353х500 мм)"</string>
-    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4 (250х353 мм)"</string>
-    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5 (176х250 мм)"</string>
-    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6 (125х176 мм)"</string>
-    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7 (88х125 мм)"</string>
-    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8 (62х88 мм)"</string>
-    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9 (44х62 мм)"</string>
-    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10 (31х44 мм)"</string>
-    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0 (917х1297 мм)"</string>
-    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1 (648х917 мм)"</string>
-    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2 (458х648 мм)"</string>
-    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3 (324х458 мм)"</string>
-    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4 (229х324 мм)"</string>
-    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5 (162х229 мм)"</string>
-    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6 (114х162 мм)"</string>
-    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7 (81х114 мм)"</string>
-    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8 (57х81 мм)"</string>
-    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9 (40х57 мм)"</string>
-    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10 (28х40 мм)"</string>
-    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter (216х279 мм)"</string>
-    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter (203х267 мм)"</string>
-    <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal (216х356 мм)"</string>
-    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal (203 х 127 мм)"</string>
-    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger (432х279 мм)"</string>
-    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid (279х432 мм)"</string>
-    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Index Card 3x5 (76x127 мм)"</string>
-    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Index Card 4x6 (102x152 мм)"</string>
-    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Index Card 5x8 (127x203 мм)"</string>
-    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch (184x267 мм)"</string>
-    <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto (203x254 мм)"</string>
-    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap (203x330 мм)"</string>
-    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K (270x390 мм)"</string>
-    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K (195x270 мм)"</string>
-    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1 (102x165 мм)"</string>
-    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2 (102x176 мм)"</string>
-    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3 (125x176 мм)"</string>
-    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4 (110x208 мм)"</string>
-    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5 (110x220 мм)"</string>
-    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6 (120x320 мм)"</string>
-    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7 (160x230 мм)"</string>
-    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8 (120x309 мм)"</string>
-    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9 (229x324 мм)"</string>
-    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10 (324x458 мм)"</string>
-    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K (146x215 мм)"</string>
-    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai (146x215 мм)"</string>
-    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai (275х395 мм)"</string>
-    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai (275x395 мм)"</string>
-    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10 (32x45 мм)"</string>
-    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9 (45x64 мм)"</string>
-    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8 (64x91 мм)"</string>
-    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7 (91x128 мм)"</string>
-    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6 (128x182 мм)"</string>
-    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5 (182x257 мм)"</string>
-    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4 (257x364 мм)"</string>
-    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3 (364x515 мм)"</string>
-    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2 (515x728 мм)"</string>
-    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1 (728x1030 мм)"</string>
-    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0 (1030x1456 мм)"</string>
-    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec (216x330 мм)"</string>
-    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"Chou4 (90x205 мм)"</string>
-    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"Chou3 (120x235 мм)"</string>
-    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"Chou2 (111,1x146 мм)"</string>
-    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"Hagaki (100x148 мм)"</string>
-    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"Oufuku (148x200 мм)"</string>
-    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kaku (240x322,1 мм)"</string>
-    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2 (240x332 мм)"</string>
-    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4 (105x235 мм)"</string>
+    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
+    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
+    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2"</string>
+    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3"</string>
+    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4"</string>
+    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5"</string>
+    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6"</string>
+    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7"</string>
+    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8"</string>
+    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9"</string>
+    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10"</string>
+    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0"</string>
+    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1"</string>
+    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2"</string>
+    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3"</string>
+    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4"</string>
+    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5"</string>
+    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6"</string>
+    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7"</string>
+    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8"</string>
+    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9"</string>
+    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10"</string>
+    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0"</string>
+    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1"</string>
+    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2"</string>
+    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3"</string>
+    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4"</string>
+    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5"</string>
+    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6"</string>
+    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7"</string>
+    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
+    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
+    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter"</string>
+    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal"</string>
+    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger"</string>
+    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Index Card 3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Index Card 4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Index Card 5x8"</string>
+    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch"</string>
+    <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto"</string>
+    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap"</string>
+    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K"</string>
+    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K"</string>
+    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1"</string>
+    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2"</string>
+    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3"</string>
+    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4"</string>
+    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5"</string>
+    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6"</string>
+    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7"</string>
+    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8"</string>
+    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9"</string>
+    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10"</string>
+    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K"</string>
+    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai"</string>
+    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai"</string>
+    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai"</string>
+    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10"</string>
+    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9"</string>
+    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8"</string>
+    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7"</string>
+    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6"</string>
+    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5"</string>
+    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4"</string>
+    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3"</string>
+    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2"</string>
+    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1"</string>
+    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0"</string>
+    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec"</string>
+    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"Chou4"</string>
+    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"Chou3"</string>
+    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"Chou2"</string>
+    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"Hagaki"</string>
+    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"Oufuku"</string>
+    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kaku"</string>
+    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
+    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
     <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Неизвестный вертикальный формат"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Неизвестный горизонтальный формат"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Печать отменена"</string>
