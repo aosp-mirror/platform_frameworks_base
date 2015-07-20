@@ -1017,15 +1017,13 @@ public class MediaPlayer implements SubtitleController.Listener
                 setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getDeclaredLength());
             }
             return;
-        } catch (SecurityException ex) {
-        } catch (IOException ex) {
+        } catch (SecurityException | IOException ex) {
+            Log.w(TAG, "Couldn't open file on client side; trying server side: " + ex);
         } finally {
             if (fd != null) {
                 fd.close();
             }
         }
-
-        Log.d(TAG, "Couldn't open file on client side, trying server side");
 
         setDataSource(uri.toString(), headers);
     }
