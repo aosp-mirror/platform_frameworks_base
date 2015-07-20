@@ -1667,6 +1667,8 @@ class WindowStateAnimator {
     // This must be called while inside a transaction.
     boolean performShowLocked() {
         if (mWin.isHiddenFromUserLocked()) {
+            if (DEBUG_VISIBILITY) Slog.w(TAG, "hiding " + mWin + ", belonging to " + mWin.mOwnerUid);
+            mWin.hideLw(false);
             return false;
         }
         if (DEBUG_VISIBILITY || (DEBUG_STARTING_WINDOW &&
