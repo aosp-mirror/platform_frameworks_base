@@ -894,6 +894,28 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public void onLockscreenShown() {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                if (mImpl == null) {
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    if (mImpl.mActiveSession != null && mImpl.mActiveSession.mSession != null) {
+                        try {
+                            mImpl.mActiveSession.mSession.onLockscreenShown();
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "Failed to call onLockscreenShown", e);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {

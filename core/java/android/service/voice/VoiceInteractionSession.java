@@ -265,6 +265,11 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
 
         @Override
+        public void onLockscreenShown() {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_ON_LOCKSCREEN_SHOWN));
+        }
+
+        @Override
         public void destroy() {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_DESTROY));
         }
@@ -674,6 +679,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     static final int MSG_HANDLE_SCREENSHOT = 105;
     static final int MSG_SHOW = 106;
     static final int MSG_HIDE = 107;
+    static final int MSG_ON_LOCKSCREEN_SHOWN = 108;
 
     class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
         @Override
@@ -751,6 +757,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 case MSG_HIDE:
                     if (DEBUG) Log.d(TAG, "doHide");
                     doHide();
+                    break;
+                case MSG_ON_LOCKSCREEN_SHOWN:
+                    if (DEBUG) Log.d(TAG, "onLockscreenShown");
+                    onLockscreenShown();
                     break;
             }
             if (args != null) {
@@ -1293,6 +1303,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * calls {@link #hide}.
      */
     public void onCloseSystemDialogs() {
+        hide();
+    }
+
+    /**
+     * Called when the lockscreen was shown.
+     */
+    public void onLockscreenShown() {
         hide();
     }
 
