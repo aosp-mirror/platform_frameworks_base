@@ -2193,8 +2193,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             int requestType = data.readInt();
             IResultReceiver receiver = IResultReceiver.Stub.asInterface(data.readStrongBinder());
-            requestAssistContextExtras(requestType, receiver);
+            IBinder activityToken = data.readStrongBinder();
+            boolean res = requestAssistContextExtras(requestType, receiver, activityToken);
             reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
             return true;
         }
 
@@ -2225,7 +2227,17 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case IS_SCREEN_CAPTURE_ALLOWED_ON_CURRENT_ACTIVITY_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            boolean res = isScreenCaptureAllowedOnCurrentActivity();
+            boolean res = isAssistDataAllowedOnCurrentActivity();
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
+        case SHOW_ASSIST_FROM_ACTIVITY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            Bundle args = data.readBundle();
+            boolean res = showAssistFromActivity(token, args);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -5377,17 +5389,20 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public void requestAssistContextExtras(int requestType, IResultReceiver receiver)
-            throws RemoteException {
+    public boolean requestAssistContextExtras(int requestType, IResultReceiver receiver,
+            IBinder activityToken) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(requestType);
         data.writeStrongBinder(receiver.asBinder());
+        data.writeStrongBinder(activityToken);
         mRemote.transact(REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION, data, reply, 0);
         reply.readException();
+        boolean res = reply.readInt() != 0;
         data.recycle();
         reply.recycle();
+        return res;
     }
 
     public void reportAssistContextExtras(IBinder token, Bundle extras, AssistStructure structure,
@@ -5429,11 +5444,25 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public boolean isScreenCaptureAllowedOnCurrentActivity() throws RemoteException {
+    public boolean isAssistDataAllowedOnCurrentActivity() throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         mRemote.transact(IS_SCREEN_CAPTURE_ALLOWED_ON_CURRENT_ACTIVITY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
+    public boolean showAssistFromActivity(IBinder token, Bundle args) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        data.writeBundle(args);
+        mRemote.transact(SHOW_ASSIST_FROM_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
         data.recycle();
