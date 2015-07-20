@@ -322,6 +322,22 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             return mExtras;
         }
 
+        /**
+         * Check whether this request is currently active.  A request becomes inactive after
+         * calling {@link #cancel} or a final result method that completes the request.  After
+         * this point, further interactions with the request will result in
+         * {@link java.lang.IllegalStateException} errors; you should not catch these errors,
+         * but can use this method if you need to determine the state of the request.  Returns
+         * true if the request is still active.
+         */
+        public boolean isActive() {
+            VoiceInteractionSession session = mSession.get();
+            if (session == null) {
+                return false;
+            }
+            return session.isRequestActive(mInterface.asBinder());
+        }
+
         void finishRequest() {
             VoiceInteractionSession session = mSession.get();
             if (session == null) {
@@ -338,6 +354,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
         /**
          * Ask the app to cancel this current request.
+         * This also finishes the request (it is no longer active).
          */
         public void cancel() {
             try {
@@ -389,6 +406,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * in a call to
          * {@link android.app.VoiceInteractor.ConfirmationRequest#onConfirmationResult
          * VoiceInteractor.ConfirmationRequest.onConfirmationResult}.
+         * This finishes the request (it is no longer active).
          */
         public void sendConfirmationResult(boolean confirmed, Bundle result) {
             try {
@@ -475,6 +493,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * and resulting in a call to
          * {@link android.app.VoiceInteractor.PickOptionRequest#onPickOptionResult
          * VoiceInteractor.PickOptionRequest.onPickOptionResult} with false for finished.
+         * This finishes the request (it is no longer active).
          */
         public void sendPickOptionResult(
                 VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
@@ -522,6 +541,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * in a call to
          * {@link android.app.VoiceInteractor.CompleteVoiceRequest#onCompleteResult
          * VoiceInteractor.CompleteVoiceRequest.onCompleteResult}.
+         * This finishes the request (it is no longer active).
          */
         public void sendCompleteResult(Bundle result) {
             try {
@@ -570,7 +590,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * Report that the voice interactor has finished aborting the voice operation, resulting
          * in a call to
          * {@link android.app.VoiceInteractor.AbortVoiceRequest#onAbortResult
-         * VoiceInteractor.AbortVoiceRequest.onAbortResult}.
+         * VoiceInteractor.AbortVoiceRequest.onAbortResult}.  This finishes the request (it
+         * is no longer active).
          */
         public void sendAbortResult(Bundle result) {
             try {
@@ -630,6 +651,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * Report the final result of the request, completing the request and resulting in a call to
          * {@link android.app.VoiceInteractor.CommandRequest#onCommandResult
          * VoiceInteractor.CommandRequest.onCommandResult} with true for isCompleted.
+         * This finishes the request (it is no longer active).
          */
         public void sendResult(Bundle result) {
             sendCommandResult(true, result);
@@ -820,7 +842,15 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     void addRequest(Request req) {
-        mActiveRequests.put(req.mInterface.asBinder(), req);
+        synchronized (this) {
+            mActiveRequests.put(req.mInterface.asBinder(), req);
+        }
+    }
+
+    boolean isRequestActive(IBinder reqInterface) {
+        synchronized (this) {
+            return mActiveRequests.containsKey(reqInterface);
+        }
     }
 
     Request removeRequest(IBinder reqInterface) {
