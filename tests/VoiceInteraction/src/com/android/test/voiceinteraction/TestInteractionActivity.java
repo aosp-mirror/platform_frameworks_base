@@ -16,7 +16,6 @@
 
 package com.android.test.voiceinteraction;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.VoiceInteractor;
 import android.content.ComponentName;

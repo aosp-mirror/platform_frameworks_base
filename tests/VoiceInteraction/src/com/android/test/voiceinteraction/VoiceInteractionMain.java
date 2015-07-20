@@ -49,7 +49,7 @@ public class VoiceInteractionMain extends Activity {
 
     View.OnClickListener mStartListener = new View.OnClickListener() {
         public void onClick(View v) {
-            startService(new Intent(VoiceInteractionMain.this, MainInteractionService.class));
+            showAssist(null);
         }
     };
 }
