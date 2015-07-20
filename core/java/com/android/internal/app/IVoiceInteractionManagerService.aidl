@@ -39,6 +39,7 @@ interface IVoiceInteractionManagerService {
     void finish(IBinder token);
     void setDisabledShowContext(int flags);
     int getDisabledShowContext();
+    int getUserDisabledShowContext();
 
     /**
      * Gets the registered Sound model for keyphrase detection for the current user.
@@ -96,10 +97,12 @@ interface IVoiceInteractionManagerService {
      * affordances.
      *
      * @param args the bundle to pass as arguments to the voice interaction session
-     * @param showCallback callback to be notified when the session was shown
+     * @param sourceFlags flags indicating the source of this show
+     * @param showCallback optional callback to be notified when the session was shown
+     * @param activityToken optional token of activity that needs to be on top
      */
-    void showSessionForActiveService(in Bundle args,
-            IVoiceInteractionSessionShowCallback showCallback);
+    boolean showSessionForActiveService(in Bundle args, int sourceFlags,
+            IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken);
 
     /**
      * Hides the session from the active service, if it is showing.

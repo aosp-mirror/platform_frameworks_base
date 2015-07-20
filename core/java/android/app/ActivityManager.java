@@ -2823,7 +2823,7 @@ public class ActivityManager {
 
     /**
      * Request that the system start watching for the calling process to exceed a pss
-     * size as given here.  Once called, the system will look for any occassions where it
+     * size as given here.  Once called, the system will look for any occasions where it
      * sees the associated process with a larger pss size and, when this happens, automatically
      * pull a heap dump from it and allow the user to share the data.  Note that this request
      * continues running even if the process is killed and restarted.  To remove the watch,

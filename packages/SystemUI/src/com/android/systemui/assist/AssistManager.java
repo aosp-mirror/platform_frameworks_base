@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -218,7 +219,8 @@ public class AssistManager {
     }
 
     private void startVoiceInteractor(Bundle args) {
-        mAssistUtils.showSessionForActiveService(args, mShowCallback);
+        mAssistUtils.showSessionForActiveService(args,
+                VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE, mShowCallback, null);
     }
 
     public void launchVoiceAssistFromKeyguard() {

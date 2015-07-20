@@ -434,8 +434,8 @@ public interface IActivityManager extends IInterface {
 
     public Bundle getAssistContextExtras(int requestType) throws RemoteException;
 
-    public void requestAssistContextExtras(int requestType, IResultReceiver receiver)
-            throws RemoteException;
+    public boolean requestAssistContextExtras(int requestType, IResultReceiver receiver,
+            IBinder activityToken) throws RemoteException;
 
     public void reportAssistContextExtras(IBinder token, Bundle extras,
             AssistStructure structure, AssistContent content, Uri referrer) throws RemoteException;
@@ -443,7 +443,9 @@ public interface IActivityManager extends IInterface {
     public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
             Bundle args) throws RemoteException;
 
-    public boolean isScreenCaptureAllowedOnCurrentActivity() throws RemoteException;
+    public boolean isAssistDataAllowedOnCurrentActivity() throws RemoteException;
+
+    public boolean showAssistFromActivity(IBinder token, Bundle args) throws RemoteException;
 
     public void killUid(int uid, String reason) throws RemoteException;
 
@@ -865,6 +867,7 @@ public interface IActivityManager extends IInterface {
     int UNREGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+298;
     int IS_SCREEN_CAPTURE_ALLOWED_ON_CURRENT_ACTIVITY_TRANSACTION
             = IBinder.FIRST_CALL_TRANSACTION+299;
+    int SHOW_ASSIST_FROM_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+300;
 
     // Start of N transactions
     int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 340;
