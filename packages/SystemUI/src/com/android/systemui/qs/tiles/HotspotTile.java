@@ -23,10 +23,9 @@ import android.content.Intent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.qs.UsageTracker;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.UsageTracker;
 import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTile<QSTile.BooleanState> {
@@ -37,14 +36,12 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     private final HotspotController mController;
     private final Callback mCallback = new Callback();
     private final UsageTracker mUsageTracker;
-    private final KeyguardMonitor mKeyguard;
 
     public HotspotTile(Host host) {
         super(host);
         mController = host.getHotspotController();
         mUsageTracker = newUsageTracker(host.getContext());
         mUsageTracker.setListening(true);
-        mKeyguard = host.getKeyguardMonitor();
     }
 
     @Override
@@ -97,7 +94,7 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         if (arg instanceof Boolean) {
             state.value = (boolean) arg;
         } else {
-            mController.isHotspotEnabled();
+            state.value = mController.isHotspotEnabled();
         }
         state.icon = state.visible && state.value ? mEnable : mDisable;
     }
