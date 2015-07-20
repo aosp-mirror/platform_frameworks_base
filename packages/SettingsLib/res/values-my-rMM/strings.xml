@@ -77,16 +77,10 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီးမမှန်ကန်သောကြောင့်<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ။"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်ဆက်သွယ်မရပါ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်တွဲချိတ်ရန် ပယ်ချခံရသည်"</string>
-    <!-- no translation found for accessibility_wifi_off (1166761729660614716) -->
-    <skip />
-    <!-- no translation found for accessibility_no_wifi (8834610636137374508) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_one_bar (4869376278894301820) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_two_bars (3569851234710034416) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_three_bars (8134185644861380311) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_signal_full (7061045677694702) -->
-    <skip />
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"ဝိုင်ဖိုင် မရှိ"</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"ဝိုင်ဖိုင် ချိတ်ဆက်ထားမှု မရှိပါ"</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"ဝိုင်ဖိုင် ၁ ဘားရှိ"</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"ဝိုင်ဖိုင် ၂ ဘား"</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"ဝိုင်ဖိုင် ၃ ဘား"</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"ဝိုင်ဖိုင် အပြည့်ရှိ"</string>
 </resources>

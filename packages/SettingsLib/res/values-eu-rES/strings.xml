@@ -77,16 +77,10 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Ezin izan da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin parekatu PIN edo pasakode okerra idatzi delako."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Ezin da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin komunikatu."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuak bikotetzea ukatu du."</string>
-    <!-- no translation found for accessibility_wifi_off (1166761729660614716) -->
-    <skip />
-    <!-- no translation found for accessibility_no_wifi (8834610636137374508) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_one_bar (4869376278894301820) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_two_bars (3569851234710034416) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_three_bars (8134185644861380311) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_signal_full (7061045677694702) -->
-    <skip />
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Desaktibatuta dago Wi-Fi konexioa."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Deskonektatu egin da Wi-Fi konexioa."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi sarearen barra bat."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi sarearen bi barra."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi sarearen hiru barra."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi sarearen seinalea osoa."</string>
 </resources>
