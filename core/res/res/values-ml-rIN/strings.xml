@@ -569,7 +569,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"ഇഷ്‌ടാനുസൃതം"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"വീട്ടുനമ്പർ"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"വീട്"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"മൊബൈൽ"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"ഔദ്യോഗിക നമ്പർ"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ഔദ്യോഗിക ഫാക്‌സ്"</string>
@@ -999,7 +999,7 @@
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"റദ്ദാക്കുക"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"എന്റെ ഇഷ്ടം ഓർമ്മിച്ചുവയ്ക്കുക"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"നിങ്ങൾക്ക് ഇത് പിന്നീട് ക്രമീകരണങ്ങൾ &gt; അപ്ലിക്കേഷനുകൾ എന്നതിൽ മാറ്റാനാകും"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"എല്ലായ്‌പ്പോഴും അനുവദിക്കുക"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"എപ്പോഴും അനുവദിക്കൂ"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ഒരിക്കലുമനുവദിക്കരുത്"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"സിം കാർഡ് നീക്കംചെയ്‌തു"</string>
     <string name="sim_removed_message" msgid="5450336489923274918">"സാധുതയുള്ള ഒരു സിം കാർഡ് ചേർത്ത് പുനരാരംഭിക്കുന്നതുവരെ സെല്ലുലാർ നെറ്റ്‌വർക്ക് ലഭ്യമാകില്ല."</string>
