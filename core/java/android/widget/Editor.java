@@ -3225,7 +3225,8 @@ public class Editor {
         }
 
         private void updateReplaceItem(Menu menu) {
-            boolean canReplace = mTextView.isSuggestionsEnabled() && shouldOfferToShowSuggestions();
+            boolean canReplace = mTextView.isSuggestionsEnabled() && shouldOfferToShowSuggestions()
+                    && !(mTextView.isInExtractedMode() && mTextView.hasSelection());
             boolean replaceItemExists = menu.findItem(TextView.ID_REPLACE) != null;
             if (canReplace && !replaceItemExists) {
                 menu.add(Menu.NONE, TextView.ID_REPLACE, MENU_ITEM_ORDER_REPLACE,
