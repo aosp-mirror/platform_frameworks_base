@@ -74,21 +74,6 @@ public class MainInteractionService extends VoiceInteractionService {
                 "Hello There", Locale.forLanguageTag("en-US"), mHotwordCallback);
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (isActiveService(this, new ComponentName(this, getClass()))) {
-            Bundle args = new Bundle();
-            args.putParcelable("intent", new Intent(this, TestInteractionActivity.class));
-            args.putBundle("assist", intent.getExtras());
-            showSession(args, VoiceInteractionSession.SHOW_WITH_ASSIST
-                    | VoiceInteractionSession.SHOW_WITH_SCREENSHOT);
-        } else {
-            Log.w(TAG, "Not starting -- not current voice interaction service");
-        }
-        stopSelf(startId);
-        return START_NOT_STICKY;
-    }
-
     private void hotwordAvailabilityChangeHelper(int availability) {
         Log.i(TAG, "Hotword availability = " + availability);
         switch (availability) {
