@@ -27,22 +27,22 @@ import android.widget.ImageView;
 class AppIconDragShadowBuilder extends View.DragShadowBuilder {
     private final static int ICON_SCALE = 2;
     final Drawable mDrawable;
-    final int mWidth;
-    final int mHeight;
+    final int mIconSize;  // Height and width in device-pixels.
 
     public AppIconDragShadowBuilder(ImageView icon) {
         mDrawable = icon.getDrawable();
         // The Drawable may not be the same size as the ImageView, so use the ImageView size.
-        mWidth = icon.getWidth() * ICON_SCALE;
-        mHeight = icon.getHeight() * ICON_SCALE;
+        // The ImageView is not square because it has additional left and right padding to create
+        // a wider drop target, so use the height to create a square drag shadow.
+        mIconSize = icon.getHeight() * ICON_SCALE;
     }
 
     @Override
     public void onProvideShadowMetrics(Point size, Point touch) {
-        size.set(mWidth, mHeight);
+        size.set(mIconSize, mIconSize);
         // Shift the drag shadow up slightly because the apps are at the bottom edge of the
         // screen.
-        touch.set(mWidth / 2, mHeight * 2 / 3);
+        touch.set(mIconSize / 2, mIconSize * 2 / 3);
     }
 
     @Override
@@ -50,7 +50,7 @@ class AppIconDragShadowBuilder extends View.DragShadowBuilder {
         // The Drawable's native bounds may be different than the source ImageView. Force it
         // to the correct size.
         Rect oldBounds = mDrawable.copyBounds();
-        mDrawable.setBounds(0, 0, mWidth, mHeight);
+        mDrawable.setBounds(0, 0, mIconSize, mIconSize);
         mDrawable.draw(canvas);
         mDrawable.setBounds(oldBounds);
     }
