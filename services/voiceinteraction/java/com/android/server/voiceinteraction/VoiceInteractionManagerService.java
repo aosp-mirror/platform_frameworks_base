@@ -448,7 +448,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(args, flags, null /* showCallback */);
+                    mImpl.showSessionLocked(args, flags, null, null);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -463,12 +463,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     throw new SecurityException(
                             "deliverNewSession without running voice interaction service");
                 }
-                final int callingPid = Binder.getCallingPid();
-                final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.deliverNewSessionLocked(callingPid, callingUid, token, session,
-                            interactor);
+                    return mImpl.deliverNewSessionLocked(token, session, interactor);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -484,7 +481,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.showSessionLocked(sessionArgs, flags, null /* showCallback */);
+                    return mImpl.showSessionLocked(sessionArgs, flags, null, null);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -533,11 +530,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "setKeepAwake without running voice interaction service");
                     return;
                 }
-                final int callingPid = Binder.getCallingPid();
-                final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.setKeepAwakeLocked(callingPid, callingUid, token, keepAwake);
+                    mImpl.setKeepAwakeLocked(token, keepAwake);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -551,11 +546,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "closeSystemDialogs without running voice interaction service");
                     return;
                 }
-                final int callingPid = Binder.getCallingPid();
-                final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.closeSystemDialogsLocked(callingPid, callingUid, token);
+                    mImpl.closeSystemDialogsLocked(token);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -585,16 +578,14 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "setDisabledShowContext without running voice interaction service");
                     return;
                 }
-                final int callingPid = Binder.getCallingPid();
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.setDisabledShowContextLocked(callingPid, callingUid, flags);
+                    mImpl.setDisabledShowContextLocked(callingUid, flags);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
             }
-
         }
 
         @Override
@@ -604,16 +595,32 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "getDisabledShowContext without running voice interaction service");
                     return 0;
                 }
-                final int callingPid = Binder.getCallingPid();
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.getDisabledShowContextLocked(callingPid, callingUid);
+                    return mImpl.getDisabledShowContextLocked(callingUid);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
             }
+        }
 
+        @Override
+        public int getUserDisabledShowContext() {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG,
+                            "getUserDisabledShowContext without running voice interaction service");
+                    return 0;
+                }
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mImpl.getUserDisabledShowContextLocked(callingUid);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
         }
 
         //----------------- Model management APIs --------------------------------//
@@ -799,22 +806,22 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void showSessionForActiveService(Bundle args,
-                IVoiceInteractionSessionShowCallback showCallback) {
+        public boolean showSessionForActiveService(Bundle args, int sourceFlags,
+                IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "showSessionForActiveService without running voice interaction"
                             + "service");
-                    return;
+                    return false;
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(args,
-                            VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE
+                    return mImpl.showSessionLocked(args,
+                            sourceFlags
                                     | VoiceInteractionSession.SHOW_WITH_ASSIST
                                     | VoiceInteractionSession.SHOW_WITH_SCREENSHOT,
-                            showCallback);
+                            showCallback, activityToken);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -908,7 +915,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         private void enforceCallingPermission(String permission) {
-            if (mContext.checkCallingPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+            if (mContext.checkCallingOrSelfPermission(permission)
+                    != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Caller does not hold the permission " + permission);
             }
         }
