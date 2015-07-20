@@ -18,16 +18,11 @@ package android.security.keystore;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.IBinder;
 import android.security.KeyStore;
-import android.security.KeyStoreException;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 
-import libcore.util.EmptyArray;
-
-import java.io.ByteArrayOutputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -102,91 +97,6 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         @Override
         protected final int getAdditionalEntropyAmountForFinish() {
             return 0;
-        }
-
-        @Override
-        @NonNull
-        protected KeyStoreCryptoOperationStreamer createMainDataStreamer(
-                KeyStore keyStore, IBinder operationToken) {
-            if (isEncrypting()) {
-                // KeyStore's RSA encryption without padding expects the input to be of the same
-                // length as the modulus. We thus have to buffer all input to pad it with leading
-                // zeros.
-                return new ZeroPaddingEncryptionStreamer(
-                        super.createMainDataStreamer(keyStore, operationToken),
-                        getModulusSizeBytes());
-            } else {
-                return super.createMainDataStreamer(keyStore, operationToken);
-            }
-        }
-
-        /**
-         * Streamer which buffers all plaintext input, then pads it with leading zeros to match
-         * modulus size, and then sends it into KeyStore to obtain ciphertext.
-         */
-        private static class ZeroPaddingEncryptionStreamer
-                implements KeyStoreCryptoOperationStreamer {
-
-            private final KeyStoreCryptoOperationStreamer mDelegate;
-            private final int mModulusSizeBytes;
-            private final ByteArrayOutputStream mInputBuffer = new ByteArrayOutputStream();
-            private long mConsumedInputSizeBytes;
-
-            private ZeroPaddingEncryptionStreamer(
-                    KeyStoreCryptoOperationStreamer delegate,
-                    int modulusSizeBytes) {
-                mDelegate = delegate;
-                mModulusSizeBytes = modulusSizeBytes;
-            }
-
-            @Override
-            public byte[] update(byte[] input, int inputOffset, int inputLength)
-                    throws KeyStoreException {
-                if (inputLength > 0) {
-                    mInputBuffer.write(input, inputOffset, inputLength);
-                    mConsumedInputSizeBytes += inputLength;
-                }
-                return EmptyArray.BYTE;
-            }
-
-            @Override
-            public byte[] doFinal(byte[] input, int inputOffset, int inputLength,
-                    byte[] signature, byte[] additionalEntropy) throws KeyStoreException {
-                if (inputLength > 0) {
-                    mConsumedInputSizeBytes += inputLength;
-                    mInputBuffer.write(input, inputOffset, inputLength);
-                }
-                byte[] bufferedInput = mInputBuffer.toByteArray();
-                mInputBuffer.reset();
-                byte[] paddedInput;
-                if (bufferedInput.length < mModulusSizeBytes) {
-                    // Pad input with leading zeros
-                    paddedInput = new byte[mModulusSizeBytes];
-                    System.arraycopy(
-                            bufferedInput, 0,
-                            paddedInput,
-                            paddedInput.length - bufferedInput.length,
-                            bufferedInput.length);
-                } else {
-                    // RI throws BadPaddingException in this scenario. INVALID_ARGUMENT below will
-                    // be translated into BadPaddingException.
-                    throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_ARGUMENT,
-                            "Message size (" + bufferedInput.length + " bytes) must be smaller than"
-                            + " modulus (" + mModulusSizeBytes + " bytes)");
-                }
-                return mDelegate.doFinal(paddedInput, 0, paddedInput.length, signature,
-                        additionalEntropy);
-            }
-
-            @Override
-            public long getConsumedInputSizeBytes() {
-                return mConsumedInputSizeBytes;
-            }
-
-            @Override
-            public long getProducedOutputSizeBytes() {
-                return mDelegate.getProducedOutputSizeBytes();
-            }
         }
     }
 
