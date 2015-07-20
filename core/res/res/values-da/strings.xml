@@ -354,8 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Tillader, at appen kan kontrollere lommelygten."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe direkte op til telefonnumre"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tillader, at appen kan ringe til telefonnumre uden din indgriben. Dette kan resultere i uventede opkrævninger eller opkald. Bemærk, at appen med denne tilladelse ikke kan ringe til nødopkaldsnumre. Skadelige apps kan koste dig penge ved at foretage opkald uden din bekræftelse."</string>
-    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"få adgang til IMS-opkaldstjeneste"</string>
-    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Tillader, at appen kan bruge IMS-tjenesten til at foretage opkald, uden at du foretager dig noget."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"få adgang til chat-opkaldstjeneste"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Tillader, at appen kan bruge chat-tjenesten til at foretage opkald, uden du gør noget."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"læse telefonens status og identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tillader, at appen kan få adgang til telefonfunktionerne på enheden. Med denne tilladelse kan appen fastslå telefonnummeret og enheds-id\'erne, hvorvidt et opkald er aktivt samt det eksterne nummer, der oprettes forbindelse til via et opkald."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"afholde tabletcomputeren fra at gå i dvale"</string>
