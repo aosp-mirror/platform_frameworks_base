@@ -122,6 +122,16 @@ public class AssistUtils {
         }
     }
 
+    public void onLockscreenShown() {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.onLockscreenShown();
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to call onLockscreenShown", e);
+        }
+    }
+
     public ComponentName getAssistComponentForUser(int userId) {
         final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ASSISTANT, userId);

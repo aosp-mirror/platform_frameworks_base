@@ -35,5 +35,6 @@ oneway interface IVoiceInteractionSession {
     void taskStarted(in Intent intent, int taskId);
     void taskFinished(in Intent intent, int taskId);
     void closeSystemDialogs();
+    void onLockscreenShown();
     void destroy();
 }
