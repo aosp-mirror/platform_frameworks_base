@@ -10017,7 +10017,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     w.mContentChanged = false;
 
                     // Moved from updateWindowsAndWallpaperLocked().
-                    if (w.mHasSurface && !w.isHiddenFromUserLocked()) {
+                    if (w.mHasSurface) {
                         // Take care of the window being ready to display.
                         final boolean committed =
                                 winAnimator.commitFinishDrawingLocked();
@@ -10050,10 +10050,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
 
                         winAnimator.setSurfaceBoundariesLocked(recoveringMemory);
-                    }
 
-                    // Check the draw state of the window, but only if it is visible to the user.
-                    if (!w.isHiddenFromUserLocked()) {
                         final AppWindowToken atoken = w.mAppToken;
                         if (DEBUG_STARTING_WINDOW && atoken != null
                                 && w == atoken.startingWindow) {
