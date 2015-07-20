@@ -1067,23 +1067,22 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public ParcelableVolumeInfo getVolumeAttributes() {
+            int volumeType;
+            AudioAttributes attributes;
             synchronized (mLock) {
-                int type;
-                int max;
-                int current;
                 if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
-                    type = mVolumeControlType;
-                    max = mMaxVolume;
-                    current = mOptimisticVolume != -1 ? mOptimisticVolume
-                            : mCurrentVolume;
-                } else {
-                    int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
-                    type = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
-                    max = mAudioManager.getStreamMaxVolume(stream);
-                    current = mAudioManager.getStreamVolume(stream);
+                    int current = mOptimisticVolume != -1 ? mOptimisticVolume : mCurrentVolume;
+                    return new ParcelableVolumeInfo(
+                            mVolumeType, mAudioAttrs, mVolumeControlType, mMaxVolume, current);
                 }
-                return new ParcelableVolumeInfo(mVolumeType, mAudioAttrs, type, max, current);
+                volumeType = mVolumeType;
+                attributes = mAudioAttrs;
             }
+            int stream = AudioAttributes.toLegacyStreamType(attributes);
+            int max = mAudioManager.getStreamMaxVolume(stream);
+            int current = mAudioManager.getStreamVolume(stream);
+            return new ParcelableVolumeInfo(
+                    volumeType, attributes, VolumeProvider.VOLUME_CONTROL_ABSOLUTE, max, current);
         }
 
         @Override
