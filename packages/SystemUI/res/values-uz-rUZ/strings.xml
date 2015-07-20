@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Kompyuterning RSA tugmasi barmoq izlari:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Doimo ushbu kompyuterdan ruxsat berilsin"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB orqali nosozliklarni tuzatishga ruxsat berilmagan"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Bu qurilmaga ayni paytda o‘z hisobi bilan kirgan foydalanuvchi USB orqali tuzatish funksiyasini faollashtira olmaydi. Undan foydalanish uchun administrator profiliga o‘ting."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ekranga moslashtirish"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ekran hajmida cho‘zish"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Ekran surati saqlanmoqda…"</string>

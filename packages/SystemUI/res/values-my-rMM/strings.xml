@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ဒီကွန်ပျူတာရဲ့ RSA key fingerprint ကတော့:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g> ဖြစ်ပါသည်"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ဒီကွန်ပျူတာမှ အမြဲခွင့်ပြုရန်"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB အမှားပြင်ဆင်ခြင်း ခွင့်မပြုပါ"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ဤစက်ပစ္စည်းသို့ လက်ရှိဝင်ရောက်ထားသည့် အသုံးပြုသူသည် USB အမှားပြင်ဆင်ခြင်း ဖွင့်၍မရပါ။ ဤအင်္ဂါရပ်ကို အသုံးပြုရန်၊ ကျေးဇူးပြု၍ ကြီးကြပ်သူသို့ပြောင်းပါ။"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ဖန်သားပြင်ပြည့် ချဲ့ခြင်း"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ဖန်သားပြင်အပြည့်ဆန့်ခြင်း"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ဖန်သားပြင်ဓါတ်ပုံသိမ်းစဉ်.."</string>

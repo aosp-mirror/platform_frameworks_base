@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"इस कंप्यूटर से हमेशा अनुमति दें"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डीबगिंग की अनुमति नहीं है"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"वर्तमान में इस डिवाइस में प्रवेश किया हुआ उपयोगकर्ता USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का उपयोग करने के लिए, कृपया किसी नियंत्रक उपयोगकर्ता में स्‍विच करें."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने के लिए ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन को भरने के लिए खींचें"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रीनशॉट सहेजा जा रहा है..."</string>

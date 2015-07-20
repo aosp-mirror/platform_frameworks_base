@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ស្នាម​ម្រាម​ដៃ​ RSA របស់​កុំព្យូទ័រ​គឺ៖ \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"អនុញ្ញាត​ជា​និច្ច​សម្រាប់​កុំព្យូទ័រ​នេះ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"មិនអនុញ្ញាតការកែកំហុសតាមរយៈយូអេសប៊ីទេ"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"អ្នកប្រើដែលបានចូលទៅឧបករណ៍នេះនាពេលបច្ចុប្បន្នមិនអាចបើកការកែកំហុសតាមរយៈយូអេសប៊ីបានទេ។ ដើម្បីប្រើលក្ខណៈពិសេសនេះ សូមប្តូរទៅរបៀបអ្នកប្រើជា អ្នកគ្រប់គ្រង។"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ពង្រីក​​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ទាញ​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>

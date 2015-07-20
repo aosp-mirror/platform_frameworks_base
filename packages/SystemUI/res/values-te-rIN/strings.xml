@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ఇది కంప్యూటర్ యొక్క RSA కీ వేలిముద్ర:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ఈ కంప్యూటర్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ప్రస్తుతం ఈ పరికరంలో సైన్ ఇన్ చేసిన వినియోగదారు USB డీబగ్గింగ్‌ను ఆన్ చేయలేరు. ఈ లక్షణాన్ని ఉపయోగించడానికి, దయచేసి నిర్వాహక వినియోగదారుగా మారండి."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"స్క్రీన్‌కు నింపేలా జూమ్ చేయండి"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"స్క్రీన్‌కు నింపేలా విస్తరించండి"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>

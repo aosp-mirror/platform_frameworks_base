@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"কম্পিউটারের RSA কী আঙ্গুলের ছাপ হল:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"এই কম্পিউটার থেকে সর্বদা অনুমতি দিন"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ডিবাগিং অনুমোদিত নয়"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (8572228137833020196) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ব্যবহারকারী বর্তমানে এই ডিভাইসটিতে সাইন ইন করেছেন তাই USB ডিবাগিং চালু করা যাবে না। এই বৈশিষ্ট্যটি ব্যবহার করতে, অনুগ্রহ করে প্রশাসক ব্যবহারকারীতে পাল্টান।"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"পূর্ণ স্ক্রীণে প্রসারিত করুন"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"স্ক্রীনশট সংরক্ষণ করা হচ্ছে..."</string>
