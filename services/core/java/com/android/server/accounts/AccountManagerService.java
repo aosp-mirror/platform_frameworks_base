@@ -534,9 +534,10 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             return readPasswordInternal(accounts, account);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -572,9 +573,10 @@ public class AccountManagerService
                     + ", pid " + Binder.getCallingPid());
         }
         if (account == null) throw new IllegalArgumentException("account is null");
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             return readPreviousNameInternal(accounts, account);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -632,9 +634,10 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             return readUserDataInternal(accounts, account, key);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -709,11 +712,12 @@ public class AccountManagerService
          *     a limited user.
          */
 
-        UserAccounts accounts = getUserAccountsForCaller();
         // fails if the account already exists
         int uid = getCallingUid();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             return addAccountInternal(accounts, account, password, extras, false, uid);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -800,6 +804,13 @@ public class AccountManagerService
         int userId = Binder.getCallingUserHandle().getIdentifier();
         if (!canUserModifyAccounts(userId) || !canUserModifyAccountsForType(userId, account.type)) {
             return false;
+        }
+        int user = UserHandle.getCallingUserId();
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(user);
+        } finally {
+            restoreCallingIdentity(identityToken);
         }
         return updateLastAuthenticatedTime(account);
     }
@@ -975,9 +986,10 @@ public class AccountManagerService
         if (account == null) throw new IllegalArgumentException("account is null");
         if (features == null) throw new IllegalArgumentException("features is null");
         checkReadAccountsPermitted(callingUid, account.type);
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             new TestFeaturesSession(accounts, response, account, features).bind();
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1057,9 +1069,10 @@ public class AccountManagerService
                     accountToRename.type);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName);
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
@@ -1206,7 +1219,6 @@ public class AccountManagerService
             throw new SecurityException(msg);
         }
 
-        UserAccounts accounts = getUserAccounts(userId);
         if (!canUserModifyAccounts(userId)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
@@ -1227,6 +1239,7 @@ public class AccountManagerService
         UserHandle user = new UserHandle(userId);
         long identityToken = clearCallingIdentity();
 
+        UserAccounts accounts = getUserAccounts(userId);
         cancelNotification(getSigninRequiredNotificationId(accounts, account), user);
         synchronized(accounts.credentialsPermissionNotificationIds) {
             for (Pair<Pair<Account, String>, Integer> pair:
@@ -1381,9 +1394,10 @@ public class AccountManagerService
         }
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         if (authToken == null) throw new IllegalArgumentException("authToken is null");
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             synchronized (accounts.cacheLock) {
                 final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
                 db.beginTransaction();
@@ -1517,9 +1531,10 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             return readAuthTokenInternal(accounts, account, authTokenType);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1544,9 +1559,10 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             saveAuthTokenToDatabase(accounts, account, authTokenType, authToken);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1569,9 +1585,10 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             setPasswordInternal(accounts, account, password, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1632,9 +1649,10 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             setPasswordInternal(accounts, account, null, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1659,9 +1677,10 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             setUserdataInternal(accounts, account, key, value);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1734,9 +1753,10 @@ public class AccountManagerService
         if (callingUid != Process.SYSTEM_UID) {
             throw new SecurityException("can only call from system");
         }
-        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callingUid));
+        int userId = UserHandle.getUserId(callingUid);
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             new Session(accounts, response, accountType, false /* expectActivityLaunch */,
                     false /* stripAuthTokenFromResult */,  null /* accountName */,
                     false /* authDetailsRequired */) {
@@ -1803,11 +1823,17 @@ public class AccountManagerService
             Slog.w(TAG, "Failed to report error back to the client." + e);
             return;
         }
-
-        final UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
+        long ident = Binder.clearCallingIdentity();
+        final UserAccounts accounts;
         final RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo;
-        authenticatorInfo = mAuthenticatorCache.getServiceInfo(
-                AuthenticatorDescription.newKey(account.type), accounts.userId);
+        try {
+            accounts = getUserAccounts(userId);
+            authenticatorInfo = mAuthenticatorCache.getServiceInfo(
+                    AuthenticatorDescription.newKey(account.type), accounts.userId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         final boolean customTokens =
                 authenticatorInfo != null && authenticatorInfo.type.customTokens;
@@ -1820,7 +1846,7 @@ public class AccountManagerService
         // Get the calling package. We will use it for the purpose of caching.
         final String callerPkg = loginOptions.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
         List<String> callerOwnedPackageNames;
-        long ident = Binder.clearCallingIdentity();
+        ident = Binder.clearCallingIdentity();
         try {
             callerOwnedPackageNames = Arrays.asList(mPackageManager.getPackagesForUid(callerUid));
         } finally {
@@ -2108,17 +2134,18 @@ public class AccountManagerService
             return;
         }
 
-        UserAccounts accounts = getUserAccountsForCaller();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
         options.putInt(AccountManager.KEY_CALLER_UID, uid);
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
 
-        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_ADD, TABLE_ACCOUNTS);
-
+        int usrId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(usrId);
+            logRecordWithUid(
+                    accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_ADD, TABLE_ACCOUNTS, uid);
             new Session(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, null /* accountName */,
                     false /* authDetailsRequired */, true /* updateLastAuthenticationTime */) {
@@ -2190,17 +2217,17 @@ public class AccountManagerService
             return;
         }
 
-        UserAccounts accounts = getUserAccounts(userId);
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
         options.putInt(AccountManager.KEY_CALLER_UID, uid);
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
 
-        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_ADD, TABLE_ACCOUNTS);
-
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
+            logRecordWithUid(
+                    accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_ADD, TABLE_ACCOUNTS, userId);
             new Session(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, null /* accountName */,
                     false /* authDetailsRequired */, true /* updateLastAuthenticationTime */) {
@@ -2262,9 +2289,9 @@ public class AccountManagerService
         }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
-        UserAccounts accounts = getUserAccounts(userId);
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             new Session(accounts, response, account.type, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, account.name,
                     true /* authDetailsRequired */, true /* updateLastAuthenticatedTime */) {
@@ -2298,9 +2325,10 @@ public class AccountManagerService
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             new Session(accounts, response, account.type, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, account.name,
                     false /* authDetailsRequired */, true /* updateLastCredentialTime */) {
@@ -2342,9 +2370,10 @@ public class AccountManagerService
                     accountType);
             throw new SecurityException(msg);
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             new Session(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, null /* accountName */,
                     false /* authDetailsRequired */) {
@@ -2468,13 +2497,13 @@ public class AccountManagerService
      * @hide
      */
     public Account[] getAccounts(int userId) {
-        UserAccounts accounts = getUserAccounts(userId);
         int callingUid = Binder.getCallingUid();
         if (!isReadAccountsPermitted(callingUid, null)) {
             return new Account[0];
         }
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             synchronized (accounts.cacheLock) {
                 return getAccountsFromCacheLocked(accounts, null, callingUid, null);
             }
@@ -2720,9 +2749,10 @@ public class AccountManagerService
             }
             return;
         }
-        UserAccounts userAccounts = getUserAccountsForCaller();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts userAccounts = getUserAccounts(userId);
             if (features == null || features.length == 0) {
                 Account[] accounts;
                 synchronized (userAccounts.cacheLock) {
@@ -3225,6 +3255,11 @@ public class AccountManagerService
     private void logRecord(UserAccounts accounts, String action, String tableName) {
         SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
         logRecord(db, action, tableName, -1, accounts);
+    }
+
+    private void logRecordWithUid(UserAccounts accounts, String action, String tableName, int uid) {
+        SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+        logRecord(db, action, tableName, -1, accounts, uid);
     }
 
     /*
