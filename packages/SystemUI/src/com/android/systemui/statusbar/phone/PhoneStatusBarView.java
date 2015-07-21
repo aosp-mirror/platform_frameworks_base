@@ -24,6 +24,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 
@@ -117,12 +118,12 @@ public class PhoneStatusBarView extends PanelBar {
     public void onAllPanelsCollapsed() {
         super.onAllPanelsCollapsed();
         // Close the status bar in the next frame so we can show the end of the animation.
-        postOnAnimation(mHideExpandedRunnable);
+        DejankUtils.postAfterTraversal(mHideExpandedRunnable);
         mLastFullyOpenedPanel = null;
     }
 
     public void removePendingHideExpandedRunnables() {
-        removeCallbacks(mHideExpandedRunnable);
+        DejankUtils.removeCallbacks(mHideExpandedRunnable);
     }
 
     @Override
