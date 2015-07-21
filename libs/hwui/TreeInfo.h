@@ -95,7 +95,7 @@ public:
     // layer updates or similar. May be NULL.
     OpenGLRenderer* renderer;
     ErrorHandler* errorHandler;
-    // TODO: Remove this? May be NULL
+    // May be NULL (TODO: can it really?)
     renderthread::CanvasContext* canvasContext;
 
     struct Out {
