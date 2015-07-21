@@ -5126,6 +5126,11 @@ public class AudioService extends IAudioService.Stub {
             if (UserHandle.getAppId(pkg.applicationInfo.uid) < FIRST_APPLICATION_UID) {
                 continue;
             }
+            // Skip packages that have permission to interact across users
+            if (pm.checkPermission(Manifest.permission.INTERACT_ACROSS_USERS, pkg.packageName)
+                    == PackageManager.PERMISSION_GRANTED) {
+                continue;
+            }
             if (homeActivityName != null
                     && pkg.packageName.equals(homeActivityName.getPackageName())
                     && pkg.applicationInfo.isSystemApp()) {
