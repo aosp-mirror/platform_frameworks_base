@@ -68,12 +68,12 @@ public class KernelWakelockReader {
         try {
             FileInputStream is;
             try {
-                is = new FileInputStream(sWakeupSourceFile);
-                wakeup_sources = true;
+                is = new FileInputStream(sWakelockFile);
+                wakeup_sources = false;
             } catch (java.io.FileNotFoundException e) {
                 try {
-                    is = new FileInputStream(sWakelockFile);
-                    wakeup_sources = false;
+                    is = new FileInputStream(sWakeupSourceFile);
+                    wakeup_sources = true;
                 } catch (java.io.FileNotFoundException e2) {
                     return null;
                 }
