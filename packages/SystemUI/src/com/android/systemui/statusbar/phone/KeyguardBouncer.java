@@ -29,6 +29,7 @@ import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.DejankUtils;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -46,7 +47,6 @@ public class KeyguardBouncer {
     private KeyguardHostView mKeyguardView;
     private ViewGroup mRoot;
     private boolean mShowingSoon;
-    private Choreographer mChoreographer = Choreographer.getInstance();
     private int mBouncerPromptReason;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
@@ -70,16 +70,13 @@ public class KeyguardBouncer {
             return;
         }
 
-        mBouncerPromptReason = mCallback.getBouncerPromptReason();
-
         // Try to dismiss the Keyguard. If no security pattern is set, this will dismiss the whole
         // Keyguard. If we need to authenticate, show the bouncer.
         if (!mKeyguardView.dismiss()) {
             mShowingSoon = true;
 
             // Split up the work over multiple frames.
-            mChoreographer.postCallbackDelayed(Choreographer.CALLBACK_ANIMATION, mShowRunnable,
-                    null, 16);
+            DejankUtils.postAfterTraversal(mShowRunnable);
         }
     }
 
@@ -107,7 +104,7 @@ public class KeyguardBouncer {
     }
 
     private void cancelShowRunnable() {
-        mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION, mShowRunnable, null);
+        DejankUtils.removeCallbacks(mShowRunnable);
         mShowingSoon = false;
     }
 
@@ -165,6 +162,7 @@ public class KeyguardBouncer {
         if (wasInitialized) {
             mKeyguardView.showPrimarySecurityScreen();
         }
+        mBouncerPromptReason = mCallback.getBouncerPromptReason();
     }
 
     private void ensureView() {
