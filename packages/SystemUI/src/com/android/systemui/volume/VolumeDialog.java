@@ -127,6 +127,7 @@ public class VolumeDialog {
     private boolean mPendingStateChanged;
     private boolean mPendingRecheckAll;
     private long mCollapseTime;
+    private boolean mHovering = false;
 
     public VolumeDialog(Context context, int windowType, VolumeDialogController controller,
             ZenModeController zenModeController, Callback callback) {
@@ -165,6 +166,16 @@ public class VolumeDialog {
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
         mDialog.setContentView(R.layout.volume_dialog);
         mDialogView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog);
+        mDialogView.setOnHoverListener(new View.OnHoverListener() {
+            @Override
+            public boolean onHover(View v, MotionEvent event) {
+                int action = event.getActionMasked();
+                mHovering = (action == MotionEvent.ACTION_HOVER_ENTER)
+                        || (action == MotionEvent.ACTION_HOVER_MOVE);
+                rescheduleTimeoutH();
+                return true;
+            }
+        });
         mDialogContentView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog_content);
         mExpandButton = (ImageButton) mDialogView.findViewById(R.id.volume_expand_button);
         mExpandButton.setOnClickListener(mClickExpand);
@@ -456,6 +467,7 @@ public class VolumeDialog {
 
     private int computeTimeoutH() {
         if (mAccessibility.mFeedbackEnabled) return 20000;
+        if (mHovering) return 16000;
         if (mSafetyWarning != null) return 5000;
         if (mExpanded || mExpandButtonAnimationRunning) return 5000;
         if (mActiveStream == AudioManager.STREAM_MUSIC) return 1500;
