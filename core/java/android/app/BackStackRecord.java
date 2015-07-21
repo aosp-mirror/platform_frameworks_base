@@ -1094,8 +1094,10 @@ final class BackStackRecord extends FragmentTransaction implements
                         container.getViewTreeObserver().removeOnPreDrawListener(this);
 
                         // Don't include any newly-hidden fragments in the transition.
-                        excludeHiddenFragments(hiddenFragmentViews, inFragment.mContainerId,
-                                overallTransition);
+                        if (inFragment != null) {
+                            excludeHiddenFragments(hiddenFragmentViews, inFragment.mContainerId,
+                                    overallTransition);
+                        }
 
                         ArrayMap<String, View> namedViews = null;
                         if (sharedElementTransition != null) {
@@ -1692,7 +1694,7 @@ final class BackStackRecord extends FragmentTransaction implements
 
     private static void setNameOverrides(TransitionState state, ArrayList<String> sourceNames,
             ArrayList<String> targetNames) {
-        if (sourceNames != null) {
+        if (sourceNames != null && targetNames != null) {
             for (int i = 0; i < sourceNames.size(); i++) {
                 String source = sourceNames.get(i);
                 String target = targetNames.get(i);
@@ -1703,7 +1705,9 @@ final class BackStackRecord extends FragmentTransaction implements
 
     private void setBackNameOverrides(TransitionState state, ArrayMap<String, View> namedViews,
             boolean isEnd) {
-        int count = mSharedElementTargetNames == null ? 0 : mSharedElementTargetNames.size();
+        int targetCount = mSharedElementTargetNames == null ? 0 : mSharedElementTargetNames.size();
+        int sourceCount = mSharedElementSourceNames == null ? 0 : mSharedElementSourceNames.size();
+        final int count = Math.min(targetCount, sourceCount);
         for (int i = 0; i < count; i++) {
             String source = mSharedElementSourceNames.get(i);
             String originalTarget = mSharedElementTargetNames.get(i);
