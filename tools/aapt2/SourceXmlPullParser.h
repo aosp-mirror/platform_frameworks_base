@@ -20,7 +20,7 @@
 #include "XmlPullParser.h"
 
 #include <istream>
-#include <libexpat/expat.h>
+#include <expat.h>
 #include <queue>
 #include <stack>
 #include <string>

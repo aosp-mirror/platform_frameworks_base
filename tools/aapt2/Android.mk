@@ -82,10 +82,6 @@ testSources := \
 	XmlDom_test.cpp \
 	XmlFlattener_test.cpp
 
-cIncludes := \
-	external/libpng \
-	external/libz
-
 hostLdLibs :=
 
 hostStaticLibs := \
@@ -114,7 +110,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libaapt2
 
 LOCAL_SRC_FILES := $(sources)
-LOCAL_C_INCLUDES += $(cIncludes)
+LOCAL_STATIC_LIBRARIES += $(hostStaticLibs)
 LOCAL_CFLAGS += $(cFlags)
 LOCAL_CPPFLAGS += $(cppFlags)
 
@@ -130,7 +126,6 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(testSources)
 
-LOCAL_C_INCLUDES += $(cIncludes)
 LOCAL_STATIC_LIBRARIES += libaapt2 $(hostStaticLibs)
 LOCAL_LDLIBS += $(hostLdLibs)
 LOCAL_CFLAGS += $(cFlags)
@@ -146,7 +141,6 @@ LOCAL_MODULE := aapt2
 
 LOCAL_SRC_FILES := $(main)
 
-LOCAL_C_INCLUDES += $(cIncludes)
 LOCAL_STATIC_LIBRARIES += libaapt2 $(hostStaticLibs)
 LOCAL_LDLIBS += $(hostLdLibs)
 LOCAL_CFLAGS += $(cFlags)

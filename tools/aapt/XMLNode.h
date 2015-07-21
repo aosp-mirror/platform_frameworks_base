@@ -10,6 +10,8 @@
 #include "StringPool.h"
 #include "ResourceTable.h"
 
+#include <expat.h>
+
 class XMLNode;
 
 extern const char* const RESOURCES_ROOT_NAMESPACE;
