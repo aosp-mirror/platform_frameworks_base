@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 
 import java.io.IOException;
@@ -50,6 +51,8 @@ public class Ringtone {
         MediaStore.Audio.Media.DATA,
         MediaStore.Audio.Media.TITLE
     };
+    /** Selection that limits query results to just audio files */
+    private static final String MEDIA_SELECTION = MediaColumns.MIME_TYPE + " LIKE 'audio/%'";
 
     // keep references on active Ringtones until stopped or completion listener called.
     private static final ArrayList<Ringtone> sActiveRingtones = new ArrayList<Ringtone>();
@@ -193,11 +196,14 @@ public class Ringtone {
      */
     public String getTitle(Context context) {
         if (mTitle != null) return mTitle;
-        return mTitle = getTitle(context, mUri, true);
+        return mTitle = getTitle(context, mUri, true /*followSettingsUri*/, mAllowRemote);
     }
 
-    private static String getTitle(Context context, Uri uri, boolean followSettingsUri) {
-        Cursor cursor = null;
+    /**
+     * @hide
+     */
+    public static String getTitle(
+            Context context, Uri uri, boolean followSettingsUri, boolean allowRemote) {
         ContentResolver res = context.getContentResolver();
         
         String title = null;
@@ -209,31 +215,45 @@ public class Ringtone {
                 if (followSettingsUri) {
                     Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(context,
                             RingtoneManager.getDefaultType(uri));
-                    String actualTitle = getTitle(context, actualUri, false);
+                    String actualTitle = getTitle(
+                            context, actualUri, false /*followSettingsUri*/, allowRemote);
                     title = context
                             .getString(com.android.internal.R.string.ringtone_default_with_actual,
                                     actualTitle);
                 }
             } else {
+                Cursor cursor = null;
                 try {
                     if (MediaStore.AUTHORITY.equals(authority)) {
-                        cursor = res.query(uri, MEDIA_COLUMNS, null, null, null);
+                        final String mediaSelection = allowRemote ? null : MEDIA_SELECTION;
+                        cursor = res.query(uri, MEDIA_COLUMNS, mediaSelection, null, null);
+                        if (cursor != null && cursor.getCount() == 1) {
+                            cursor.moveToFirst();
+                            return cursor.getString(2);
+                        }
+                        // missing cursor is handled below
                     }
                 } catch (SecurityException e) {
-                    // missing cursor is handled below
-                }
-
-                try {
-                    if (cursor != null && cursor.getCount() == 1) {
-                        cursor.moveToFirst();
-                        return cursor.getString(2);
-                    } else {
-                        title = uri.getLastPathSegment();
+                    IRingtonePlayer mRemotePlayer = null;
+                    if (allowRemote) {
+                        AudioManager audioManager =
+                                (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                        mRemotePlayer = audioManager.getRingtonePlayer();
+                    }
+                    if (mRemotePlayer != null) {
+                        try {
+                            title = mRemotePlayer.getTitle(uri);
+                        } catch (RemoteException re) {
+                        }
                     }
                 } finally {
                     if (cursor != null) {
                         cursor.close();
                     }
+                    cursor = null;
+                }
+                if (title == null) {
+                    title = uri.getLastPathSegment();
                 }
             }
         }
