@@ -12273,6 +12273,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             // We did an in-place move, so dex is ready to roll
             scanFlags |= SCAN_NO_DEX;
             scanFlags |= SCAN_MOVE;
+
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(pkgName);
+                if (ps == null) {
+                    res.setError(INSTALL_FAILED_INTERNAL_ERROR,
+                            "Missing settings for moved package " + pkgName);
+                }
+
+                // We moved the entire application as-is, so bring over the
+                // previously derived ABI information.
+                pkg.applicationInfo.primaryCpuAbi = ps.primaryCpuAbiString;
+                pkg.applicationInfo.secondaryCpuAbi = ps.secondaryCpuAbiString;
+            }
+
         } else if (!forwardLocked && !pkg.applicationInfo.isExternalAsec()) {
             // Enable SCAN_NO_DEX flag to skip dexopt at a later stage
             scanFlags |= SCAN_NO_DEX;
