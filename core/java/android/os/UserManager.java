@@ -46,7 +46,9 @@ public class UserManager {
     private final Context mContext;
 
     /**
-     * Specifies if a user is disallowed from adding and removing accounts.
+     * Specifies if a user is disallowed from adding and removing accounts, unless they are
+     * {@link android.accounts.AccountManager#addAccountExplicitly programmatically} added by
+     * Authenticator.
      * The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
