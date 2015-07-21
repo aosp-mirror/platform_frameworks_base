@@ -49,8 +49,10 @@ public class AssistUtils {
     public boolean showSessionForActiveService(Bundle args, int sourceFlags,
             IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
         try {
-            return mVoiceInteractionManagerService.showSessionForActiveService(args, sourceFlags,
-                    showCallback, activityToken);
+            if (mVoiceInteractionManagerService != null) {
+                return mVoiceInteractionManagerService.showSessionForActiveService(args,
+                        sourceFlags, showCallback, activityToken);
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call showSessionForActiveService", e);
         }
@@ -59,7 +61,9 @@ public class AssistUtils {
 
     public void launchVoiceAssistFromKeyguard() {
         try {
-            mVoiceInteractionManagerService.launchVoiceAssistFromKeyguard();
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.launchVoiceAssistFromKeyguard();
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call launchVoiceAssistFromKeyguard", e);
         }
@@ -87,7 +91,11 @@ public class AssistUtils {
 
     public ComponentName getActiveServiceComponentName() {
         try {
-            return mVoiceInteractionManagerService.getActiveServiceComponentName();
+            if (mVoiceInteractionManagerService != null) {
+                return mVoiceInteractionManagerService.getActiveServiceComponentName();
+            } else {
+                return null;
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call getActiveServiceComponentName", e);
             return null;
@@ -106,7 +114,9 @@ public class AssistUtils {
 
     public void hideCurrentSession() {
         try {
-            mVoiceInteractionManagerService.hideCurrentSession();
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.hideCurrentSession();
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call hideCurrentSession", e);
         }
