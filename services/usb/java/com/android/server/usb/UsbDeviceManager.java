@@ -122,6 +122,8 @@ public class UsbDeviceManager {
     // Request is cancelled if host does not configure device within 10 seconds.
     private static final int ACCESSORY_REQUEST_TIMEOUT = 10 * 1000;
 
+    private static final String BOOT_MODE_PROPERTY = "ro.bootmode";
+
     private UsbHandler mHandler;
     private boolean mBootCompleted;
 
@@ -468,6 +470,7 @@ public class UsbDeviceManager {
                 functions = getDefaultFunctions();
             }
             functions = applyAdbFunction(functions);
+            functions = applyOemOverrideFunction(functions);
             functions = applyUserRestrictions(functions);
 
             if (!mCurrentFunctions.equals(functions) || !mCurrentFunctionsApplied
@@ -886,6 +889,24 @@ public class UsbDeviceManager {
                 }
             }
         }
+    }
+
+    private String applyOemOverrideFunction(String usbFunctions) {
+        if ((usbFunctions == null) || (mOemModeMap == null)) return usbFunctions;
+
+        String bootMode = SystemProperties.get(BOOT_MODE_PROPERTY, "unknown");
+
+        List<Pair<String, String>> overrides = mOemModeMap.get(bootMode);
+        if (overrides != null) {
+            for (Pair<String, String> pair: overrides) {
+                if (pair.first.equals(usbFunctions)) {
+                    Slog.d(TAG, "OEM USB override: " + pair.first + " ==> " + pair.second);
+                    return pair.second;
+                }
+            }
+        }
+        // return passed in functions as is.
+        return usbFunctions;
     }
 
     public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
