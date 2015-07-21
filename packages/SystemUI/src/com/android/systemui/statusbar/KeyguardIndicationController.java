@@ -164,7 +164,7 @@ public class KeyguardIndicationController {
         if (mPowerPluggedIn) {
             String indication = computePowerIndication();
             if (DEBUG_CHARGING_CURRENT) {
-                indication = indication + mChargingCurrent;
+                indication += ",  " + (mChargingCurrent / 1000) + " mA";
             }
             return indication;
         }
