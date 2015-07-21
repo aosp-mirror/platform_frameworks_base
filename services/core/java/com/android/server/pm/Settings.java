@@ -4120,6 +4120,28 @@ final class Settings {
         pw.print(prefix); pw.print("  pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
                 pw.println();
 
+        if (ps.pkg != null && ps.pkg.permissions != null && ps.pkg.permissions.size() > 0) {
+            final ArrayList<PackageParser.Permission> perms = ps.pkg.permissions;
+            pw.print(prefix); pw.println("  declared permissions:");
+            for (int i=0; i<perms.size(); i++) {
+                PackageParser.Permission perm = perms.get(i);
+                if (permissionNames != null
+                        && !permissionNames.contains(perm.info.name)) {
+                    continue;
+                }
+                pw.print(prefix); pw.print("    "); pw.print(perm.info.name);
+                pw.print(": prot=");
+                pw.print(PermissionInfo.protectionToString(perm.info.protectionLevel));
+                if ((perm.info.flags&PermissionInfo.FLAG_COSTS_MONEY) != 0) {
+                    pw.print(", COSTS_MONEY");
+                }
+                if ((perm.info.flags&PermissionInfo.FLAG_INSTALLED) != 0) {
+                    pw.print(", INSTALLED");
+                }
+                pw.println();
+            }
+        }
+
         if (ps.sharedUser == null || permissionNames != null) {
             PermissionsState permissionsState = ps.getPermissionsState();
             dumpInstallPermissionsLPr(pw, prefix + "  ", permissionNames, permissionsState);
@@ -4155,14 +4177,14 @@ final class Settings {
                 if (cmp != null && cmp.size() > 0) {
                     pw.print(prefix); pw.println("    disabledComponents:");
                     for (String s : cmp) {
-                        pw.print(prefix); pw.print("    "); pw.println(s);
+                        pw.print(prefix); pw.print("      "); pw.println(s);
                     }
                 }
                 cmp = ps.getEnabledComponents(user.id);
                 if (cmp != null && cmp.size() > 0) {
                     pw.print(prefix); pw.println("    enabledComponents:");
                     for (String s : cmp) {
-                        pw.print(prefix); pw.print("    "); pw.println(s);
+                        pw.print(prefix); pw.print("      "); pw.println(s);
                     }
                 }
             }
@@ -4267,11 +4289,14 @@ final class Settings {
                     pw.print(" type="); pw.print(p.type);
                     pw.print(" prot=");
                     pw.println(PermissionInfo.protectionToString(p.protectionLevel));
-            if (p.packageSetting != null) {
-                pw.print("    packageSetting="); pw.println(p.packageSetting);
-            }
             if (p.perm != null) {
                 pw.print("    perm="); pw.println(p.perm);
+                if (p.perm.info.flags != PermissionInfo.FLAG_INSTALLED) {
+                    pw.print("    flags=0x"); pw.println(Integer.toHexString(p.perm.info.flags));
+                }
+            }
+            if (p.packageSetting != null) {
+                pw.print("    packageSetting="); pw.println(p.packageSetting);
             }
             if (READ_EXTERNAL_STORAGE.equals(p.name)) {
                 pw.print("    enforced=");
@@ -4372,24 +4397,32 @@ final class Settings {
                     continue;
                 }
                 pw.print(prefix); pw.print("  "); pw.print(permissionState.getName());
-                pw.print(", granted="); pw.print(permissionState.isGranted());
-                    pw.print(", flags="); pw.println(permissionFlagsToString(
-                        permissionState.getFlags()));
+                pw.print(": granted="); pw.print(permissionState.isGranted());
+                    pw.println(permissionFlagsToString(", flags=",
+                            permissionState.getFlags()));
             }
         }
     }
 
-    private static String permissionFlagsToString(int flags) {
-        StringBuilder flagsString = new StringBuilder();
-        flagsString.append("[ ");
+    private static String permissionFlagsToString(String prefix, int flags) {
+        StringBuilder flagsString = null;
         while (flags != 0) {
+            if (flagsString == null) {
+                flagsString = new StringBuilder();
+                flagsString.append(prefix);
+                flagsString.append("[ ");
+            }
             final int flag = 1 << Integer.numberOfTrailingZeros(flags);
             flags &= ~flag;
             flagsString.append(PackageManager.permissionFlagToString(flag));
             flagsString.append(' ');
         }
-        flagsString.append(']');
-        return flagsString.toString();
+        if (flagsString != null) {
+            flagsString.append(']');
+            return flagsString.toString();
+        } else {
+            return "";
+        }
     }
 
     void dumpInstallPermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
@@ -4403,8 +4436,8 @@ final class Settings {
                     continue;
                 }
                 pw.print(prefix); pw.print("  "); pw.print(permissionState.getName());
-                    pw.print(", granted="); pw.print(permissionState.isGranted());
-                    pw.print(", flags="); pw.println(permissionFlagsToString(
+                    pw.print(": granted="); pw.print(permissionState.isGranted());
+                    pw.println(permissionFlagsToString(", flags=",
                         permissionState.getFlags()));
             }
         }
