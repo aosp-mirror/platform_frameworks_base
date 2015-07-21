@@ -91,7 +91,6 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
-import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -106,6 +105,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -221,7 +221,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
             reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL);
 
-            final ArraySet<File> unclaimedIcons = Sets.newArraySet(
+            final ArraySet<File> unclaimedIcons = newArraySet(
                     mSessionsDir.listFiles());
 
             // Ignore stages and icons claimed by active sessions
@@ -245,7 +245,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     private void reconcileStagesLocked(String volumeUuid) {
         final File stagingDir = buildStagingDir(volumeUuid);
-        final ArraySet<File> unclaimedStages = Sets.newArraySet(
+        final ArraySet<File> unclaimedStages = newArraySet(
                 stagingDir.listFiles(sStageFilter));
 
         // Ignore stages claimed by active sessions
@@ -1089,6 +1089,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 .setStyle(new Notification.BigTextStyle().bigText(contentText))
                 .setLargeIcon(packageIcon)
                 .build();
+    }
+
+    public static <E> ArraySet<E> newArraySet(E... elements) {
+        final ArraySet<E> set = new ArraySet<E>();
+        if (elements != null) {
+            set.ensureCapacity(elements.length);
+            Collections.addAll(set, elements);
+        }
+        return set;
     }
 
     private static class Callbacks extends Handler {
