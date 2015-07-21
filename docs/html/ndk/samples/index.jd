@@ -20,7 +20,6 @@ package; if you have already downloaded the NDK, you have them. They reside in
 {@code $NDK/samples/}, where {@code $NDK} is the NDK installation root.</p>
 
  <div id="sdk-terms-form">
-      <p><a href="{@docRoot}shareables/ndk/ndk-samples.zip" class="button">
-      Download ndk-samples.zip</a></p>
+      <p><a href="https://github.com/googlesamples/android-ndk/tree/android-mk" class="button">
+      Browse NDK samples</a></p>
  </div>
-
