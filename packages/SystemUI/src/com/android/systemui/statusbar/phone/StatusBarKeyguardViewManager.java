@@ -19,15 +19,12 @@ package com.android.systemui.statusbar.phone;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
@@ -163,26 +160,10 @@ public class StatusBarKeyguardViewManager {
         mBouncer.onScreenTurnedOff();
     }
 
-    public void onScreenTurnedOn(final IKeyguardShowCallback callback) {
+    public void onScreenTurnedOn() {
         mScreenOn = true;
         mScreenWillWakeUp = false;
         mPhoneStatusBar.onScreenTurnedOn();
-        if (callback != null) {
-            callbackAfterDraw(callback);
-        }
-    }
-
-    private void callbackAfterDraw(final IKeyguardShowCallback callback) {
-        mContainer.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    callback.onShown(mContainer.getWindowToken());
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Exception calling onShown():", e);
-                }
-            }
-        });
     }
 
     public void notifyScreenWakeUpRequested() {
@@ -270,16 +251,22 @@ public class StatusBarKeyguardViewManager {
             mPhoneStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
             boolean staying = mPhoneStatusBar.hideKeyguard();
             if (!staying) {
-                mStatusBarWindowManager.setKeyguardFadingAway(true);
-                mScrimController.animateKeyguardFadingOut(delay, fadeoutDuration, new Runnable() {
-                    @Override
-                    public void run() {
-                        mStatusBarWindowManager.setKeyguardFadingAway(false);
-                        mPhoneStatusBar.finishKeyguardFadingAway();
-                        WindowManagerGlobal.getInstance().trimMemory(
-                                ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                    }
-                });
+                if (fadeoutDuration == 0) {
+                    mPhoneStatusBar.finishKeyguardFadingAway();
+                    WindowManagerGlobal.getInstance().trimMemory(
+                            ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                } else {
+                    mStatusBarWindowManager.setKeyguardFadingAway(true);
+                    mScrimController.animateKeyguardFadingOut(delay, fadeoutDuration, new Runnable() {
+                        @Override
+                        public void run() {
+                            mStatusBarWindowManager.setKeyguardFadingAway(false);
+                            mPhoneStatusBar.finishKeyguardFadingAway();
+                            WindowManagerGlobal.getInstance().trimMemory(
+                                    ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                        }
+                    });
+                }
             } else {
                 mScrimController.animateGoingToFullShade(delay, fadeoutDuration);
                 mPhoneStatusBar.finishKeyguardFadingAway();
