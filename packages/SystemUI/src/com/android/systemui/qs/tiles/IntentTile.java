@@ -45,6 +45,8 @@ public class IntentTile extends QSTile<QSTile.State> {
     private int mCurrentUserId;
     private String mIntentPackage;
 
+    private Intent mLastIntent;
+
     private IntentTile(Host host, String action) {
         super(host);
         mContext.registerReceiver(mReceiver, new IntentFilter(action));
@@ -112,8 +114,16 @@ public class IntentTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleUpdateState(State state, Object arg) {
-        if (!(arg instanceof Intent)) return;
-        final Intent intent = (Intent) arg;
+        Intent intent = (Intent) arg;
+        if (intent == null) {
+            if (mLastIntent == null) {
+                return;
+            }
+            // No intent but need to refresh state, just use the last one.
+            intent = mLastIntent;
+        }
+        // Save the last one in case we need it later.
+        mLastIntent = intent;
         state.visible = intent.getBooleanExtra("visible", true);
         state.contentDescription = intent.getStringExtra("contentDescription");
         state.label = intent.getStringExtra("label");
