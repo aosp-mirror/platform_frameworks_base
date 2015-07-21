@@ -446,13 +446,23 @@ class RecentTasks extends ArrayList<TaskRecord> {
                 if (i > MAX_RECENT_BITMAPS) {
                     tr.freeLastThumbnail();
                 }
-                if (task.realActivity == null || tr.realActivity == null ||
-                        !task.realActivity.equals(tr.realActivity)) {
+                final boolean sameAffinity =
+                        task.affinity != null && task.affinity.equals(tr.affinity);
+                final boolean trIsDocument = tr.intent != null && tr.intent.isDocument();
+                final boolean bothDocuments = document && trIsDocument;
+                if (!sameAffinity && !bothDocuments) {
+                    // Not the same affinity and not documents. Move along...
                     continue;
                 }
-                final boolean trIsDocument = tr.intent != null && tr.intent.isDocument();
-                if (document && trIsDocument) {
-                    // These are the same document activity (not necessarily the same doc).
+
+                if (bothDocuments) {
+                    // Do these documents belong to the same activity?
+                    final boolean sameActivity = task.realActivity != null
+                            && tr.realActivity != null
+                            && task.realActivity.equals(tr.realActivity);
+                    if (!sameActivity) {
+                        continue;
+                    }
                     if (maxRecents > 0) {
                         --maxRecents;
                         continue;
