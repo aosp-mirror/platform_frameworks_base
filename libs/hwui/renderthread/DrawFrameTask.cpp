@@ -114,7 +114,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     int64_t vsync = mFrameInfo[static_cast<int>(FrameInfoIndex::Vsync)];
     mRenderThread->timeLord().vsyncReceived(vsync);
     mContext->makeCurrent();
-    Caches::getInstance().textureCache.resetMarkInUse();
+    Caches::getInstance().textureCache.resetMarkInUse(mContext);
 
     for (size_t i = 0; i < mLayers.size(); i++) {
         mContext->processLayerUpdate(mLayers[i].get());

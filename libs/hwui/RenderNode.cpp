@@ -214,10 +214,10 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         info.renderer->pushLayerUpdate(mLayer);
     }
 
-    if (CC_UNLIKELY(info.canvasContext)) {
-        // If canvasContext is not null that means there are prefetched layers
-        // that need to be accounted for. That might be us, so tell CanvasContext
-        // that this layer is in the tree and should not be destroyed.
+    if (info.canvasContext) {
+        // There might be prefetched layers that need to be accounted for.
+        // That might be us, so tell CanvasContext that this layer is in the
+        // tree and should not be destroyed.
         info.canvasContext->markLayerInUse(this);
     }
 }
@@ -339,7 +339,8 @@ void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayL
         TextureCache& cache = Caches::getInstance().textureCache;
         info.out.hasFunctors |= subtree->functors.size();
         for (size_t i = 0; info.prepareTextures && i < subtree->bitmapResources.size(); i++) {
-            info.prepareTextures = cache.prefetchAndMarkInUse(subtree->bitmapResources[i]);
+            info.prepareTextures = cache.prefetchAndMarkInUse(
+                    info.canvasContext, subtree->bitmapResources[i]);
         }
         for (size_t i = 0; i < subtree->children().size(); i++) {
             DrawRenderNodeOp* op = subtree->children()[i];
