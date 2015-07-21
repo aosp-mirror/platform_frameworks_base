@@ -53,11 +53,6 @@ aaptTests := \
     tests/Pseudolocales_test.cpp \
     tests/ResourceFilter_test.cpp
 
-aaptCIncludes := \
-    system/core/base/include \
-    external/libpng \
-    external/zlib
-
 aaptHostLdLibs :=
 aaptHostStaticLibs := \
     libandroidfw \
@@ -96,8 +91,8 @@ LOCAL_CPPFLAGS += $(aaptCppFlags)
 ifeq (darwin,$(HOST_OS))
 LOCAL_CFLAGS += -D_DARWIN_UNLIMITED_STREAMS
 endif
-LOCAL_C_INCLUDES += $(aaptCIncludes)
 LOCAL_SRC_FILES := $(aaptSources)
+LOCAL_STATIC_LIBRARIES += $(aaptHostStaticLibs)
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 

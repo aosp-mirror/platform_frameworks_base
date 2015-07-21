@@ -21,7 +21,7 @@
 #include "StringPiece.h"
 
 #include <istream>
-#include <libexpat/expat.h>
+#include <expat.h>
 #include <memory>
 #include <string>
 #include <vector>
