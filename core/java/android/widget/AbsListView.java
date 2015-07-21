@@ -1559,13 +1559,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (accessibilityId == getAccessibilityViewId()) {
             return this;
         }
-        // If the data changed the children are invalid since the data model changed.
-        // Hence, we pretend they do not exist. After a layout the children will sync
-        // with the model at which point we notify that the accessibility state changed,
-        // so a service will be able to re-fetch the views.
-        if (mDataChanged) {
-            return null;
-        }
         return super.findViewByAccessibilityIdTraversal(accessibilityId);
     }
 
@@ -2411,18 +2404,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     class ListItemAccessibilityDelegate extends AccessibilityDelegate {
-        @Override
-        public AccessibilityNodeInfo createAccessibilityNodeInfo(View host) {
-            // If the data changed the children are invalid since the data model changed.
-            // Hence, we pretend they do not exist. After a layout the children will sync
-            // with the model at which point we notify that the accessibility state changed,
-            // so a service will be able to re-fetch the views.
-            if (mDataChanged) {
-                return null;
-            }
-            return super.createAccessibilityNodeInfo(host);
-        }
-
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
