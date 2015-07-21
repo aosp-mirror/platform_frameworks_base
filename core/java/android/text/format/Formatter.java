@@ -16,11 +16,17 @@
 
 package android.text.format;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.BidiFormatter;
+import android.text.TextUtils;
+import android.view.View;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
+
+import java.util.Locale;
 
 /**
  * Utility class to aid in formatting common values that are not covered
@@ -46,8 +52,23 @@ public final class Formatter {
         }
     }
 
+    /* Wraps the source string in bidi formatting characters in RTL locales */
+    private static String bidiWrap(@NonNull Context context, String source) {
+        final Locale locale = context.getResources().getConfiguration().locale;
+        if (TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL) {
+            return BidiFormatter.getInstance(true /* RTL*/).unicodeWrap(source);
+        } else {
+            return source;
+        }
+    }
+
     /**
-     * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc
+     * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc.
+     *
+     * If the context has a right-to-left locale, the returned string is wrapped in bidi formatting
+     * characters to make sure it's displayed correctly if inserted inside a right-to-left string.
+     * (This is useful in cases where the unit strings, like "MB", are left-to-right, but the
+     * locale is right-to-left.)
      *
      * @param context Context to use to load the localized units
      * @param sizeBytes size value to be formatted, in bytes
@@ -58,8 +79,8 @@ public final class Formatter {
             return "";
         }
         final BytesResult res = formatBytes(context.getResources(), sizeBytes, 0);
-        return context.getString(com.android.internal.R.string.fileSizeSuffix,
-                res.value, res.units);
+        return bidiWrap(context, context.getString(com.android.internal.R.string.fileSizeSuffix,
+                res.value, res.units));
     }
 
     /**
@@ -71,8 +92,8 @@ public final class Formatter {
             return "";
         }
         final BytesResult res = formatBytes(context.getResources(), sizeBytes, FLAG_SHORTER);
-        return context.getString(com.android.internal.R.string.fileSizeSuffix,
-                res.value, res.units);
+        return bidiWrap(context, context.getString(com.android.internal.R.string.fileSizeSuffix,
+                res.value, res.units));
     }
 
     /** {@hide} */
