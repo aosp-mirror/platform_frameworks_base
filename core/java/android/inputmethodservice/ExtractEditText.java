@@ -103,8 +103,12 @@ public class ExtractEditText extends EditText {
     }
 
     @Override public boolean onTextContextMenuItem(int id) {
-        // Select all shouldn't be handled by the original edit text, but by the extracted one.
-        if (id != android.R.id.selectAll && mIME != null && mIME.onExtractTextContextMenuItem(id)) {
+        // Select all and Replace text shouldn't be handled by the original edit text, but by the
+        // extracted one.
+        if (id == android.R.id.selectAll || id == android.R.id.replaceText) {
+            return super.onTextContextMenuItem(id);
+        }
+        if (mIME != null && mIME.onExtractTextContextMenuItem(id)) {
             // Mode was started on Extracted, needs to be stopped here.
             // Cut will change the text, which stops selection mode.
             if (id == android.R.id.copy || id == android.R.id.paste) stopTextActionMode();
