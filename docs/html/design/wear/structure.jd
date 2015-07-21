@@ -166,7 +166,10 @@ href="#2DPicker">2D picker</a> is always available.</p>
   <li>A map that asks the user to drop a pin should exit when the pin is dropped.</li>
   <li>A short game can exit when the game finishes.</li>
   <li>A drawing app can finish after 5 seconds of inactivity.</li>
+
+  <p class="note">An app generally should not exit in {@link android.app.Activity#onPause onPause()}.  This is because events such as <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Heads-up">Heads-up Notifications</a> can trigger the {@link android.app.Activity#onPause() onPause()} callback.</p>
 </ul>
+
 
 <h3>Manually exiting</h3>
 
