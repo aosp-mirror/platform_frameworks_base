@@ -1943,11 +1943,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
                                     + nai.networkCapabilities + " -> " + networkCapabilities);
                         }
-                        if (nai.created && !nai.networkCapabilities.equalImmutableCapabilities(
-                                networkCapabilities)) {
-                            Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
-                                    + nai.networkCapabilities + " -> " + networkCapabilities);
-                        }
                         updateCapabilities(nai, networkCapabilities);
                     }
                     break;
@@ -2257,6 +2252,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void handleRegisterNetworkRequest(NetworkRequestInfo nri) {
         mNetworkRequests.put(nri.request, nri);
         mNetworkRequestInfoLogs.log("REGISTER " + nri);
+        if (!nri.isRequest) {
+            for (NetworkAgentInfo network : mNetworkAgentInfos.values()) {
+                if (network.satisfiesImmutableCapabilitiesOf(nri.request)) {
+                    updateSignalStrengthThresholds(network);
+                }
+            }
+        }
         rematchAllNetworksAndRequests(null, 0);
         if (!nri.isRequest && nri.request.networkCapabilities.hasSignalStrength()) {
             for (NetworkAgentInfo network : mNetworkAgentInfos.values()) {
