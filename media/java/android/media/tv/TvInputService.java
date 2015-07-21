@@ -385,13 +385,14 @@ public abstract class TvInputService extends Service {
             trackIdSet.clear();
 
             // TODO: Validate the track list.
+            final List<TvTrackInfo> tracksCopy = new ArrayList<>(tracks);
             executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyTracksChanged");
                         if (mSessionCallback != null) {
-                            mSessionCallback.onTracksChanged(tracks);
+                            mSessionCallback.onTracksChanged(tracksCopy);
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyTracksChanged", e);
