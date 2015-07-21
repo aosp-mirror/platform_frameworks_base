@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:background="#FF0000"
+        android:textSize="200sp"
+        android:layout_width="200dp"
+        android:layout_height="200dp" />
+    <TextView
+        android:background="#00FF00"
+        android:textSize="200sp"
+        android:layout_width="200dp"
+        android:layout_height="200dp" />
+    <TextView
+        android:background="#0000FF"
+        android:textSize="200sp"
+        android:layout_width="200dp"
+        android:layout_height="200dp" />
+    <TextView
+        android:background="#FF00FF"
+        android:textSize="200sp"
+        android:layout_width="200dp"
+        android:layout_height="200dp" />
+    <TextView
+        android:background="#00FFFF"
+        android:textSize="200sp"
+        android:layout_width="200dp"
+        android:layout_height="200dp" />
+</merge>
