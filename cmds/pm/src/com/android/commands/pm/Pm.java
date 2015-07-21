@@ -16,6 +16,11 @@
 
 package com.android.commands.pm;
 
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -210,6 +215,14 @@ public final class Pm {
 
         if ("set-permission-enforced".equals(op)) {
             return runSetPermissionEnforced();
+        }
+
+        if ("set-app-link".equals(op)) {
+            return runSetAppLink();
+        }
+
+        if ("get-app-link".equals(op)) {
+            return runGetAppLink();
         }
 
         if ("set-install-location".equals(op)) {
@@ -825,6 +838,148 @@ public final class Pm {
 
         // couldn't find a matching constant? return the value
         return Integer.toString(result);
+    }
+
+    // pm set-app-link [--user USER_ID] PACKAGE {always|ask|never|undefined}
+    private int runSetAppLink() {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextOptionData());
+                if (userId < 0) {
+                    System.err.println("Error: user must be >= 0");
+                    return 1;
+                }
+            } else {
+                System.err.println("Error: unknown option: " + opt);
+                showUsage();
+                return 1;
+            }
+        }
+
+        // Package name to act on; required
+        final String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified.");
+            showUsage();
+            return 1;
+        }
+
+        // State to apply; {always|ask|never|undefined}, required
+        final String modeString = nextArg();
+        if (modeString == null) {
+            System.err.println("Error: no app link state specified.");
+            showUsage();
+            return 1;
+        }
+
+        final int newMode;
+        switch (modeString.toLowerCase()) {
+            case "undefined":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+                break;
+
+            case "always":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+                break;
+
+            case "ask":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+                break;
+
+            case "never":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+                break;
+
+            default:
+                System.err.println("Error: unknown app link state '" + modeString + "'");
+                return 1;
+        }
+
+        try {
+            final PackageInfo info = mPm.getPackageInfo(pkg, 0, userId);
+            if (info == null) {
+                System.err.println("Error: package " + pkg + " not found.");
+                return 1;
+            }
+
+            if ((info.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) == 0) {
+                System.err.println("Error: package " + pkg + " does not handle web links.");
+                return 1;
+            }
+
+            if (!mPm.updateIntentVerificationStatus(pkg, newMode, userId)) {
+                System.err.println("Error: unable to update app link status for " + pkg);
+                return 1;
+            }
+        } catch (Exception e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    // pm get-app-link [--user USER_ID] PACKAGE
+    private int runGetAppLink() {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextOptionData());
+                if (userId < 0) {
+                    System.err.println("Error: user must be >= 0");
+                    return 1;
+                }
+            } else {
+                System.err.println("Error: unknown option: " + opt);
+                showUsage();
+                return 1;
+            }
+        }
+
+        // Package name to act on; required
+        final String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified.");
+            showUsage();
+            return 1;
+        }
+
+        try {
+            final PackageInfo info = mPm.getPackageInfo(pkg, 0, userId);
+            if (info == null) {
+                System.err.println("Error: package " + pkg + " not found.");
+                return 1;
+            }
+
+            if ((info.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) == 0) {
+                System.err.println("Error: package " + pkg + " does not handle web links.");
+                return 1;
+            }
+
+            System.out.println(linkStateToString(mPm.getIntentVerificationStatus(pkg, userId)));
+        } catch (Exception e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private String linkStateToString(int state) {
+        switch (state) {
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED: return "undefined";
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK: return "ask";
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS: return "always";
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER: return "never";
+        }
+        return "Unknown link state: " + state;
     }
 
     private int runSetInstallLocation() {
@@ -1936,6 +2091,8 @@ public final class Pm {
         System.err.println("       pm grant [--user USER_ID] PACKAGE PERMISSION");
         System.err.println("       pm revoke [--user USER_ID] PACKAGE PERMISSION");
         System.err.println("       pm reset-permissions");
+        System.err.println("       pm set-app-link [--user USER_ID] PACKAGE {always|ask|never|undefined}");
+        System.err.println("       pm get-app-link [--user USER_ID] PACKAGE");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
