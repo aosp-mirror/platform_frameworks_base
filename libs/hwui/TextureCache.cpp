@@ -122,10 +122,12 @@ void TextureCache::setAssetAtlas(AssetAtlas* assetAtlas) {
     mAssetAtlas = assetAtlas;
 }
 
-void TextureCache::resetMarkInUse() {
+void TextureCache::resetMarkInUse(void* ownerToken) {
     LruCache<uint32_t, Texture*>::Iterator iter(mCache);
     while (iter.next()) {
-        iter.value()->isInUse = false;
+        if (iter.value()->isInUse == ownerToken) {
+            iter.value()->isInUse = nullptr;
+        }
     }
 }
 
@@ -189,10 +191,10 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap, AtlasUsageType a
     return texture;
 }
 
-bool TextureCache::prefetchAndMarkInUse(const SkBitmap* bitmap) {
+bool TextureCache::prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap) {
     Texture* texture = getCachedTexture(bitmap, AtlasUsageType::Use);
     if (texture) {
-        texture->isInUse = true;
+        texture->isInUse = ownerToken;
     }
     return texture;
 }
