@@ -40,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -182,6 +183,15 @@ public class NavigationBarView extends LinearLayout {
         getIcons(res);
 
         mBarTransitions = new NavigationBarTransitions(this);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        ViewRootImpl root = getViewRootImpl();
+        if (root != null) {
+            root.setDrawDuringWindowsAnimating(true);
+        }
     }
 
     public BarTransitions getBarTransitions() {
