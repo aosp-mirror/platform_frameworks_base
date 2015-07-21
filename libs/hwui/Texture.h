@@ -97,7 +97,7 @@ public:
      * Whether or not the Texture is marked in use and thus not evictable for
      * the current frame. This is reset at the start of a new frame.
      */
-    bool isInUse = false;
+    void* isInUse = nullptr;
 
 private:
     /**
