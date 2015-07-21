@@ -123,20 +123,29 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     public void binderDied() {
         Slog.v(TAG, "fingerprintd died");
         mDaemon = null;
+        dispatchError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
     }
 
     public IFingerprintDaemon getFingerprintDaemon() {
         if (mDaemon == null) {
             mDaemon = IFingerprintDaemon.Stub.asInterface(ServiceManager.getService(FINGERPRINTD));
-            if (mDaemon == null) {
-                Slog.w(TAG, "fingerprind service not available");
-            } else {
+            if (mDaemon != null) {
                 try {
                     mDaemon.asBinder().linkToDeath(this, 0);
-                }   catch (RemoteException e) {
-                    Slog.w(TAG, "caught remote exception in linkToDeath: ", e);
-                    mDaemon = null; // try again!
+                    mDaemon.init(mDaemonCallback);
+                    mHalDeviceId = mDaemon.openHal();
+                    if (mHalDeviceId != 0) {
+                        updateActiveGroup(ActivityManager.getCurrentUser());
+                    } else {
+                        Slog.w(TAG, "Failed to open Fingerprint HAL!");
+                        mDaemon = null;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to open fingeprintd HAL", e);
+                    mDaemon = null; // try again later!
                 }
+            } else {
+                Slog.w(TAG, "fingerprint service not available");
             }
         }
         return mDaemon;
@@ -155,7 +164,6 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     protected void dispatchRemoved(long deviceId, int fingerId, int groupId) {
         final ClientMonitor client = mRemoveClient;
         if (fingerId != 0) {
-            ContentResolver res = mContext.getContentResolver();
             removeTemplateForUser(mRemoveClient, fingerId);
         }
         if (client != null && client.sendRemoved(fingerId, groupId)) {
@@ -813,15 +821,6 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     public void onStart() {
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
         IFingerprintDaemon daemon = getFingerprintDaemon();
-        if (daemon != null) {
-            try {
-                daemon.init(mDaemonCallback);
-                mHalDeviceId = daemon.openHal();
-            	updateActiveGroup(ActivityManager.getCurrentUser());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to open fingeprintd HAL", e);
-            }
-        }
         if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
         listenForUserSwitches();
     }
