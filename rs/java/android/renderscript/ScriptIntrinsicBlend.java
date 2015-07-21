@@ -360,6 +360,8 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
     /**
      * dst = dst.rgb * src.a + (1.0 - dst.a) * src.rgb
      * dst.a = src.a
+     * Note: Before API 23, the alpha channel was not correctly set.
+     *       Please use with caution when targeting older APIs.
      *
      * @param ain The source buffer
      * @param aout The destination buffer
@@ -371,6 +373,8 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
     /**
      * dst = dst.rgb * src.a + (1.0 - dst.a) * src.rgb
      * dst.a = src.a
+     * Note: Before API 23, the alpha channel was not correctly set.
+     *       Please use with caution when targeting older APIs.
      *
      * @param ain The source buffer
      * @param aout The destination buffer
