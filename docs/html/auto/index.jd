@@ -334,131 +334,266 @@ page.image=/images/cards/android-auto_2x.png
                 Android Auto is coming soon to new cars from these manufacturers
               </div>
           </div>
+
           <div class="cols cols-leftp">
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/abarth.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.abarth.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/abarth.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/alpharomeo.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.acura.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/acura.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/acura.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.alfaromeo.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/alpharomeo.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/audi.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.audi.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/audi.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
           </div>
+
           <div class="cols cols-leftp">
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/bentley.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.bentleymotors.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/bentley.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/chevrolet.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.buick.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/buick.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/chrysler.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.cadillac.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/cadillac.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/dodge.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.chevrolet.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/chevrolet.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
           </div>
+
           <div class="cols cols-leftp">
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/fiat.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.chrysler.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/chrysler.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/ford.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.citroen.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/citroen.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/honda.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.dodge.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/dodge.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/hyundai.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.driveds.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/citroen_ds.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
           </div>
+
           <div class="cols cols-leftp">
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/infinity.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.fiat.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/fiat.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/jeep.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.ford.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/ford.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/kia.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.gmc.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/gmc.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/maserati.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.holden.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/holden.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
           </div>
+
           <div class="cols cols-leftp">
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/mazda.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.honda.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/honda.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/mitsubishi.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.hyundai.com">
+                  <img src="{@docRoot}auto/images/logos/auto/hyundai.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/nissan.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.infiniti.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/infinity.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/opel.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.jeep.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/jeep.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
           </div>
+
           <div class="cols cols-leftp">
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/ram.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.kia.com/worldwide/">
+                  <img src="{@docRoot}auto/images/logos/auto/kia.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/renault.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.mahindra.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/mahindra.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/seat.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.maserati.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/maserati.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/skoda.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.mazda.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/mazda.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
           </div>
+
           <div class="cols cols-leftp">
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/subaru.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.mitsubishi-motors.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/mitsubishi.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/suzuki.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.nissan-global.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/nissan.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/volkswagen.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.opel.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/opel.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/volvo.png"
-                   width="120" height="120" class="img-logo" />
+              <a href="http://www.peugeot.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/peugeot.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
             </div>
+          </div>
+
+          <div class="cols cols-leftp">
+            <div class="col-5">
+              <a href="http://www.ramtrucks.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/ram.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            <div class="col-5">
+              <a href="http://www.renault.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/renault.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            <div class="col-5">
+              <a href="http://www.seat.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/seat.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            <div class="col-5">
+              <a href="http://www.skoda-auto.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/skoda.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+          </div>
+
+          <div class="cols cols-leftp">
+            <div class="col-5">
+              <a href="http://www.smotor.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/ssangyong.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            <div class="col-5">
+              <a href="http://www.subaru-global.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/subaru.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            <div class="col-5">
+              <a href="http://www.globalsuzuki.com/automobile/">
+                  <img src="{@docRoot}auto/images/logos/auto/suzuki.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            <div class="col-5">
+              <a href="http://www.vauxhall.co.uk/">
+                  <img src="{@docRoot}auto/images/logos/auto/vauxhall.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+          </div>
+
+          <div class="cols cols-leftp">
+            <div class="col-5"></div>
+            <div class="col-5">
+              <a href="http://www.volkswagen.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/volkswagen.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            <div class="col-5">
+              <a href="http://www.volvocars.com/intl">
+                  <img src="{@docRoot}auto/images/logos/auto/volvo.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            <div class="col-5"></div>
+
           </div>
         </div>
       </div>
