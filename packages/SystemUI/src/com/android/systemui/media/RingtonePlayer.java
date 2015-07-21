@@ -171,6 +171,13 @@ public class RingtonePlayer extends SystemUI {
             }
             mAsyncPlayer.stop();
         }
+
+        @Override
+        public String getTitle(Uri uri) {
+            final UserHandle user = Binder.getCallingUserHandle();
+            return Ringtone.getTitle(getContextForUser(user), uri,
+                    false /*followSettingsUri*/, false /*allowRemote*/);
+        }
     };
 
     private Context getContextForUser(UserHandle user) {

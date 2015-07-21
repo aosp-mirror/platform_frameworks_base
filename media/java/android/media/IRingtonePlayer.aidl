@@ -33,4 +33,7 @@ interface IRingtonePlayer {
     /** Used for Notification sound playback. */
     void playAsync(in Uri uri, in UserHandle user, boolean looping, in AudioAttributes aa);
     void stopAsync();
+
+    /** Return the title of the media. */
+    String getTitle(in Uri uri);
 }
