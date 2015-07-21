@@ -31,7 +31,7 @@
         android:layout_height="match_parent"
         />
 
-    <LinearLayout
+    <com.android.keyguard.AlphaOptimizedLinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -63,6 +63,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
-    </LinearLayout>
+    </com.android.keyguard.AlphaOptimizedLinearLayout>
 
 </com.android.systemui.statusbar.NotificationOverflowContainer>
