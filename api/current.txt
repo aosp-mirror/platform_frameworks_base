@@ -28919,6 +28919,7 @@ package android.service.voice {
     method public java.lang.String getCallingPackage();
     method public int getCallingUid();
     method public android.os.Bundle getExtras();
+    method public boolean isActive();
   }
 
   public abstract class VoiceInteractionSessionService extends android.app.Service {
