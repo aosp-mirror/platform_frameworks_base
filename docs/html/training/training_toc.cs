@@ -37,35 +37,6 @@
 
       <li class="nav-section">
         <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/basics/actionbar/index.html"
-             description=
-             "The action bar is one of the most important design elements you can implement for your
-app's activities. Although first introduced with API level 11, you can use the Support Library to
-include the action bar on devices running Android 2.1 or higher."
-            >Adding the Action Bar</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/actionbar/setting-up.html">
-            Setting Up the Action Bar
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/basics/actionbar/adding-buttons.html">
-            Adding Action Buttons
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/basics/actionbar/styling.html">
-            Styling the Action Bar
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/basics/actionbar/overlaying.html">
-            Overlaying the Action Bar
-          </a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/supporting-devices/index.html"
              description=
              "How to build your app with alternative resources that provide an

@@ -199,7 +199,7 @@ key name in the first parameter and the value in the second parameter.</p>
 follows:
 <p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
 <pre>
-public class MyActivity extends ActionBarActivity {
+public class MyActivity extends AppCompatActivity {
     public final static String EXTRA_MESSAGE = "com.mycompany.myfirstapp.MESSAGE";
     ...
 }
@@ -281,7 +281,7 @@ the activity performs the initial setup of the activity components.</p>
 <p>The class already includes an implementation of the required
 {@link android.app.Activity#onCreate onCreate()} method. You will update the implementation of this
 method later. It also includes an implementation of
-{@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()}, which handles the action
+{@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()}, which handles the app
 bar's <em>Up</em> behavior. Keep these two methods as they are for now.</p>
 
 <!-- Android Studio does not create a Fragment placeholder
@@ -322,7 +322,7 @@ directory, next to the original {@code MyActivity.java} file.</li>
 <li>Add the following code to the file:
 
 <pre>
-public class DisplayMessageActivity extends ActionBarActivity {
+public class DisplayMessageActivity extends AppCompatActivity {
 
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -337,8 +337,8 @@ public class DisplayMessageActivity extends ActionBarActivity {
 
     &#64;Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
+        // Handle app bar item clicks here. The app bar
+        // automatically handles clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
