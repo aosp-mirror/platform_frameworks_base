@@ -178,16 +178,13 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     info.damageAccumulator = &mDamageAccumulator;
     info.renderer = mCanvas;
-    if (mPrefetechedLayers.size() && info.mode == TreeInfo::MODE_FULL) {
-        info.canvasContext = this;
-    }
+    info.canvasContext = this;
+
     mAnimationContext->startFrame(info.mode);
     mRootRenderNode->prepareTree(info);
     mAnimationContext->runRemainingAnimations(info);
 
-    if (info.canvasContext) {
-        freePrefetechedLayers();
-    }
+    freePrefetechedLayers();
 
     if (CC_UNLIKELY(!mNativeWindow.get())) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
@@ -369,7 +366,11 @@ void CanvasContext::destroyHardwareResources() {
     if (mEglManager.hasEglContext()) {
         freePrefetechedLayers();
         mRootRenderNode->destroyHardwareResources();
-        Caches::getInstance().flush(Caches::kFlushMode_Layers);
+        Caches& caches = Caches::getInstance();
+        // Make sure to release all the textures we were owning as there won't
+        // be another draw
+        caches.textureCache.resetMarkInUse(this);
+        caches.flush(Caches::kFlushMode_Layers);
     }
 }
 

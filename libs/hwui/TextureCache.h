@@ -66,14 +66,14 @@ public:
     /**
      * Resets all Textures to not be marked as in use
      */
-    void resetMarkInUse();
+    void resetMarkInUse(void* ownerToken);
 
     /**
      * Attempts to precache the SkBitmap. Returns true if a Texture was successfully
      * acquired for the bitmap, false otherwise. If a Texture was acquired it is
      * marked as in use.
      */
-    bool prefetchAndMarkInUse(const SkBitmap* bitmap);
+    bool prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap);
 
     /**
      * Returns the texture associated with the specified bitmap from either within the cache, or
