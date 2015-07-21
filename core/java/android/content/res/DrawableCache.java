@@ -52,6 +52,6 @@ class DrawableCache extends ThemedResourceCache<Drawable.ConstantState> {
 
     @Override
     public boolean shouldInvalidateEntry(Drawable.ConstantState entry, int configChanges) {
-        return false;
+        return Configuration.needNewResources(configChanges, entry.getChangingConfigurations());
     }
 }
