@@ -20,8 +20,6 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include <libexpat/expat.h>
-
 using namespace android;
 
 #define PRINT_STRING_METRICS 0
