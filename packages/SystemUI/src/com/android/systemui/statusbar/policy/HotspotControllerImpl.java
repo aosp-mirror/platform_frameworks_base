@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,6 +26,8 @@ import android.util.Log;
 
 import com.android.settingslib.TetherUtil;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class HotspotControllerImpl implements HotspotController {
@@ -43,11 +44,32 @@ public class HotspotControllerImpl implements HotspotController {
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final Receiver mReceiver = new Receiver();
     private final Context mContext;
-    private final WifiManager mWifiManager;
+
+    private int mHotspotState;
 
     public HotspotControllerImpl(Context context) {
         mContext = context;
-        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("HotspotController state:");
+        pw.print("  mHotspotEnabled="); pw.println(stateToString(mHotspotState));
+    }
+
+    private static String stateToString(int hotspotState) {
+        switch (hotspotState) {
+            case WifiManager.WIFI_AP_STATE_DISABLED:
+                return "DISABLED";
+            case WifiManager.WIFI_AP_STATE_DISABLING:
+                return "DISABLING";
+            case WifiManager.WIFI_AP_STATE_ENABLED:
+                return "ENABLED";
+            case WifiManager.WIFI_AP_STATE_ENABLING:
+                return "ENABLING";
+            case WifiManager.WIFI_AP_STATE_FAILED:
+                return "FAILED";
+        }
+        return null;
     }
 
     public void addCallback(Callback callback) {
@@ -66,7 +88,7 @@ public class HotspotControllerImpl implements HotspotController {
 
     @Override
     public boolean isHotspotEnabled() {
-        return mWifiManager.getWifiApState() == WifiManager.WIFI_AP_STATE_ENABLED;
+        return mHotspotState == WifiManager.WIFI_AP_STATE_ENABLED;
     }
 
     @Override
@@ -76,7 +98,6 @@ public class HotspotControllerImpl implements HotspotController {
 
     @Override
     public void setHotspotEnabled(boolean enabled) {
-        final ContentResolver cr = mContext.getContentResolver();
         // Call provisioning app which is called when enabling Tethering from Settings
         if (enabled && TetherUtil.isProvisioningNeeded(mContext)) {
             mContext.startServiceAsUser(TETHER_SERVICE_INTENT, UserHandle.CURRENT);
@@ -113,7 +134,8 @@ public class HotspotControllerImpl implements HotspotController {
             if (DEBUG) Log.d(TAG, "onReceive " + intent.getAction());
             int state = intent.getIntExtra(
                     WifiManager.EXTRA_WIFI_AP_STATE, WifiManager.WIFI_AP_STATE_FAILED);
-            fireCallback(WifiManager.WIFI_AP_STATE_ENABLED == state);
+            mHotspotState = state;
+            fireCallback(mHotspotState == WifiManager.WIFI_AP_STATE_ENABLED);
         }
     }
 }
