@@ -32,6 +32,8 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.intensive.setup.ConfigGenerator;
 import com.android.layoutlib.bridge.intensive.setup.LayoutLibTestCallback;
 import com.android.layoutlib.bridge.intensive.setup.LayoutPullParser;
+import com.android.resources.Density;
+import com.android.resources.Navigation;
 import com.android.utils.ILogger;
 
 import org.junit.Before;
@@ -288,20 +290,50 @@ public class Main {
         renderAndVerify("allwidgets.xml", "allwidgets.png");
     }
 
+    /** Test expand_layout.xml */
+    @Test
+    public void testExpand() throws ClassNotFoundException {
+        // Create the layout pull parser.
+        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
+                "expand_vert_layout.xml");
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
+        layoutLibCallback.initResources();
+
+        ConfigGenerator customConfigGenerator = new ConfigGenerator()
+                .setScreenWidth(300)
+                .setScreenHeight(20)
+                .setDensity(Density.XHIGH)
+                .setNavigation(Navigation.NONAV);
+
+        SessionParams params = getSessionParams(parser, customConfigGenerator,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", RenderingMode.V_SCROLL,
+                22);
+
+        renderAndVerify(params, "expand_vert_layout.png");
+
+        customConfigGenerator = new ConfigGenerator()
+                .setScreenWidth(20)
+                .setScreenHeight(300)
+                .setDensity(Density.XHIGH)
+                .setNavigation(Navigation.NONAV);
+        parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
+                "expand_horz_layout.xml");
+        params = getSessionParams(parser, customConfigGenerator,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", RenderingMode
+                        .H_SCROLL, 22);
+
+        renderAndVerify(params, "expand_horz_layout.png");
+    }
+
     /**
      * Create a new rendering session and test that rendering given layout on nexus 5
      * doesn't throw any exceptions and matches the provided image.
      */
-    private void renderAndVerify(String layoutFileName, String goldenFileName)
+    private void renderAndVerify(SessionParams params, String goldenFileName)
             throws ClassNotFoundException {
-        // Create the layout pull parser.
-        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutFileName);
-        // Create LayoutLibCallback.
-        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
-        layoutLibCallback.initResources();
         // TODO: Set up action bar handler properly to test menu rendering.
         // Create session params.
-        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5, layoutLibCallback);
         RenderSession session = mBridge.createSession(params);
         if (!session.getResult().isSuccess()) {
             getLogger().error(session.getResult().getException(),
@@ -322,25 +354,44 @@ public class Main {
     }
 
     /**
+     * Create a new rendering session and test that rendering given layout on nexus 5
+     * doesn't throw any exceptions and matches the provided image.
+     */
+    private void renderAndVerify(String layoutFileName, String goldenFileName)
+            throws ClassNotFoundException {
+        // Create the layout pull parser.
+        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutFileName);
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
+        layoutLibCallback.initResources();
+        // TODO: Set up action bar handler properly to test menu rendering.
+        // Create session params.
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.Light.DarkActionBar", RenderingMode.NORMAL, 22);
+        renderAndVerify(params, goldenFileName);
+    }
+
+    /**
      * Uses Theme.Material and Target sdk version as 22.
      */
     private SessionParams getSessionParams(LayoutPullParser layoutParser,
-            ConfigGenerator configGenerator, LayoutLibTestCallback layoutLibCallback) {
+            ConfigGenerator configGenerator, LayoutLibTestCallback layoutLibCallback,
+            String themeName, RenderingMode renderingMode, int targetSdk) {
         FolderConfiguration config = configGenerator.getFolderConfig();
         ResourceResolver resourceResolver =
                 ResourceResolver.create(mProjectResources.getConfiguredResources(config),
                         mFrameworkRepo.getConfiguredResources(config),
-                        "Theme.Material.Light.DarkActionBar", false);
+                        themeName, false);
 
         return new SessionParams(
                 layoutParser,
-                RenderingMode.NORMAL,
+                renderingMode,
                 null /*used for caching*/,
                 configGenerator.getHardwareConfig(),
                 resourceResolver,
                 layoutLibCallback,
                 0,
-                22, // TODO: Make it more configurable to run tests for various versions.
+                targetSdk,
                 getLayoutLog());
     }
 
