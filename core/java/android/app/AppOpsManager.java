@@ -325,6 +325,12 @@ public class AppOpsManager {
     /** Write external storage. */
     public static final String OPSTR_WRITE_EXTERNAL_STORAGE
             = "android:write_external_storage";
+    /** Required to draw on top of other apps. */
+    public static final String OPSTR_SYSTEM_ALERT_WINDOW
+            = "android:system_alert_window";
+    /** Required to write/modify/update system settingss. */
+    public static final String OPSTR_WRITE_SETTINGS
+            = "android:write_settings";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -427,8 +433,8 @@ public class AppOpsManager {
             OPSTR_SEND_SMS,
             null,
             null,
-            null,
-            null,
+            OPSTR_WRITE_SETTINGS,
+            OPSTR_SYSTEM_ALERT_WINDOW,
             null,
             OPSTR_CAMERA,
             OPSTR_RECORD_AUDIO,
