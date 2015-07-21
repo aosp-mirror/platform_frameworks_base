@@ -19,12 +19,14 @@ package android.security.keystore;
 import android.os.IBinder;
 import android.security.KeyStore;
 import android.security.KeyStoreException;
+import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 
 import libcore.util.EmptyArray;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.ProviderException;
 
 /**
  * Helper for streaming a crypto operation's input and output via {@link KeyStore} service's
@@ -135,14 +137,15 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
                 mBuffered = EmptyArray.BYTE;
                 mBufferedOffset = 0;
                 mBufferedLength = 0;
-            } else if (opResult.inputConsumed == 0) {
+            } else if (opResult.inputConsumed <= 0) {
                 // Nothing was consumed. More input needed.
                 if (inputLength > 0) {
                     // More input is available, but it wasn't included into the previous chunk
                     // because the chunk reached its maximum permitted size.
                     // Shouldn't have happened.
-                    throw new IllegalStateException("Nothing consumed from max-sized chunk: "
-                            + chunk.length + " bytes");
+                    throw new KeyStoreException(KeymasterDefs.KM_ERROR_UNKNOWN_ERROR,
+                            "Keystore consumed nothing from max-sized chunk: " + chunk.length
+                                    + " bytes");
                 }
                 mBuffered = chunk;
                 mBufferedOffset = 0;
@@ -153,8 +156,9 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
                 mBufferedOffset = opResult.inputConsumed;
                 mBufferedLength = chunk.length - opResult.inputConsumed;
             } else {
-                throw new IllegalStateException("Consumed more than provided: "
-                        + opResult.inputConsumed + ", provided: " + chunk.length);
+                throw new KeyStoreException(KeymasterDefs.KM_ERROR_UNKNOWN_ERROR,
+                        "Keystore consumed more input than provided. Provided: " + chunk.length
+                                + ", consumed: " + opResult.inputConsumed);
             }
 
             if ((opResult.output != null) && (opResult.output.length > 0)) {
@@ -165,7 +169,7 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
                         try {
                             bufferedOutput.write(opResult.output);
                         } catch (IOException e) {
-                            throw new IllegalStateException("Failed to buffer output", e);
+                            throw new ProviderException("Failed to buffer output", e);
                         }
                     }
                 } else {
@@ -179,7 +183,7 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
                         try {
                             bufferedOutput.write(opResult.output);
                         } catch (IOException e) {
-                            throw new IllegalStateException("Failed to buffer output", e);
+                            throw new ProviderException("Failed to buffer output", e);
                         }
                         result = bufferedOutput.toByteArray();
                     }
@@ -229,27 +233,71 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
             return EmptyArray.BYTE;
         }
 
-        byte[] chunk = ArrayUtils.subarray(mBuffered, mBufferedOffset, mBufferedLength);
-        mBuffered = EmptyArray.BYTE;
-        mBufferedLength = 0;
-        mBufferedOffset = 0;
+        // Keep invoking the update operation with remaining buffered data until either all of the
+        // buffered data is consumed or until update fails to consume anything.
+        ByteArrayOutputStream bufferedOutput = null;
+        while (mBufferedLength > 0) {
+            byte[] chunk = ArrayUtils.subarray(mBuffered, mBufferedOffset, mBufferedLength);
+            OperationResult opResult = mKeyStoreStream.update(chunk);
+            if (opResult == null) {
+                throw new KeyStoreConnectException();
+            } else if (opResult.resultCode != KeyStore.NO_ERROR) {
+                throw KeyStore.getKeyStoreException(opResult.resultCode);
+            }
 
-        OperationResult opResult = mKeyStoreStream.update(chunk);
-        if (opResult == null) {
-            throw new KeyStoreConnectException();
-        } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeyStore.getKeyStoreException(opResult.resultCode);
+            if (opResult.inputConsumed <= 0) {
+                // Nothing was consumed. Break out of the loop to avoid an infinite loop.
+                break;
+            }
+
+            if (opResult.inputConsumed >= chunk.length) {
+                // All of the input was consumed
+                mBuffered = EmptyArray.BYTE;
+                mBufferedOffset = 0;
+                mBufferedLength = 0;
+            } else {
+                // Some of the input was not consumed
+                mBuffered = chunk;
+                mBufferedOffset = opResult.inputConsumed;
+                mBufferedLength = chunk.length - opResult.inputConsumed;
+            }
+
+            if (opResult.inputConsumed > chunk.length) {
+                throw new KeyStoreException(KeymasterDefs.KM_ERROR_UNKNOWN_ERROR,
+                        "Keystore consumed more input than provided. Provided: "
+                                + chunk.length + ", consumed: " + opResult.inputConsumed);
+            }
+
+            if ((opResult.output != null) && (opResult.output.length > 0)) {
+                // Some output was produced by this update operation
+                if (bufferedOutput == null) {
+                    // No output buffered yet.
+                    if (mBufferedLength == 0) {
+                        // No more output will be produced by this flush operation
+                        mProducedOutputSizeBytes += opResult.output.length;
+                        return opResult.output;
+                    } else {
+                        // More output might be produced by this flush operation -- buffer output.
+                        bufferedOutput = new ByteArrayOutputStream();
+                    }
+                }
+                // Buffer the output from this update operation
+                try {
+                    bufferedOutput.write(opResult.output);
+                } catch (IOException e) {
+                    throw new ProviderException("Failed to buffer output", e);
+                }
+            }
         }
 
-        if (opResult.inputConsumed < chunk.length) {
-            throw new IllegalStateException("Keystore failed to consume all input. Provided: "
-                    + chunk.length + ", consumed: " + opResult.inputConsumed);
-        } else if (opResult.inputConsumed > chunk.length) {
-            throw new IllegalStateException("Keystore consumed more input than provided"
-                    + " . Provided: " + chunk.length + ", consumed: " + opResult.inputConsumed);
+        if (mBufferedLength > 0) {
+            throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH,
+                    "Keystore failed to consume last "
+                            + ((mBufferedLength != 1) ? (mBufferedLength + " bytes") : "byte")
+                            + " of input");
         }
 
-        byte[] result = (opResult.output != null) ? opResult.output : EmptyArray.BYTE;
+        byte[] result = (bufferedOutput != null) ? bufferedOutput.toByteArray() : EmptyArray.BYTE;
         mProducedOutputSizeBytes += result.length;
         return result;
     }
