@@ -477,6 +477,8 @@ public class AudioService extends IAudioService.Stub {
 
     // true if boot sequence has been completed
     private boolean mSystemReady;
+    // true if Intent.ACTION_USER_SWITCHED has ever been received
+    private boolean mUserSwitchedReceived;
     // listener for SoundPool sample load completion indication
     private SoundPoolCallback mSoundPoolCallBack;
     // thread for SoundPool listener
@@ -5059,14 +5061,18 @@ public class AudioService extends IAudioService.Stub {
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 handleConfigurationChanged(context);
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                // attempt to stop music playback for background user
-                sendMsg(mAudioHandler,
-                        MSG_BROADCAST_AUDIO_BECOMING_NOISY,
-                        SENDMSG_REPLACE,
-                        0,
-                        0,
-                        null,
-                        0);
+                if (mUserSwitchedReceived) {
+                    // attempt to stop music playback for background user except on first user
+                    // switch (i.e. first boot)
+                    sendMsg(mAudioHandler,
+                            MSG_BROADCAST_AUDIO_BECOMING_NOISY,
+                            SENDMSG_REPLACE,
+                            0,
+                            0,
+                            null,
+                            0);
+                }
+                mUserSwitchedReceived = true;
                 // the current audio focus owner is no longer valid
                 mMediaFocusControl.discardAudioFocusOwner();
 
