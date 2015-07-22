@@ -37,4 +37,8 @@ public class StatusBarState {
      */
     public static final int SHADE_LOCKED = 2;
 
+    /**
+     * Status bar is locked and shows the full screen user switcher.
+     */
+    public static final int FULLSCREEN_USER_SWITCHER = 3;
 }

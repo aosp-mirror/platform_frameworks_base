@@ -294,5 +294,8 @@
     <!-- Whether to show a "shelf" of apps at the bottom of the screen. -->
     <bool name="config_enableAppShelf">false</bool>
 
+    <!-- Whether to show the full screen user switcher. -->
+    <bool name="enable_fullscreen_user_switcher">false</bool>
+
 </resources>
 

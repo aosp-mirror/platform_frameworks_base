@@ -867,6 +867,14 @@
     <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
     <string name="user_add_user_message_short" msgid="1511354412249044381">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
 
+    <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
+    <string name="user_remove_user_title">Remove user?</string>
+
+    <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
+    <string name="user_remove_user_message">All apps and data of this user will be deleted.</string>
+
+    <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
+    <string name="user_remove_user_remove">Remove</string>
 
     <!-- Battery saver notification title. [CHAR LIMIT=60]-->
     <string name="battery_saver_notification_title">Battery saver is on</string>

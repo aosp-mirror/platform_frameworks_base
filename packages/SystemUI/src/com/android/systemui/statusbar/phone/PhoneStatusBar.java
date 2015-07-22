@@ -137,6 +137,7 @@ import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.FullscreenUserSwitcher;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
 import com.android.systemui.statusbar.policy.KeyButtonView;
@@ -270,6 +271,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     KeyguardMonitor mKeyguardMonitor;
     BrightnessMirrorController mBrightnessMirrorController;
     AccessibilityController mAccessibilityController;
+    FullscreenUserSwitcher mFullscreenUserSwitcher;
 
     int mNaturalBarHeight = -1;
 
@@ -860,11 +862,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (UserSwitcherController.isUserSwitcherAvailable(UserManager.get(mContext))) {
             mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
                     mHandler);
+            if (mUserSwitcherController.useFullscreenUserSwitcher()) {
+                mFullscreenUserSwitcher = new FullscreenUserSwitcher(this, mUserSwitcherController,
+                        (ViewStub) mStatusBarWindow.findViewById(
+                                R.id.fullscreen_user_switcher_stub));
+            } else {
+                // Fullscreen user switcher does not show keyguard. Hence no KeyguardUserSwitcher.
+                mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
+                        (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
+                        mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
+            }
         }
-        mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
-                (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
-                mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
-
 
         // Set up the quick settings tile panel
         mQSPanel = (QSPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
@@ -1703,8 +1711,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         final boolean hasArtwork = artworkBitmap != null;
 
-        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK)
-                && (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
+        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK) && mState != StatusBarState.SHADE) {
             // time to show some art!
             if (mBackdrop.getVisibility() != View.VISIBLE) {
                 mBackdrop.setVisibility(View.VISIBLE);
@@ -2167,8 +2174,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void animateCollapsePanels(int flags, boolean force, boolean delayed,
             float speedUpFactor) {
-        if (!force &&
-                (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
+        if (!force && mState != StatusBarState.SHADE) {
             runPostCollapseRunnables();
             return;
         }
@@ -2991,6 +2997,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         resetUserSetupObserver();
         setControllerUsers();
         mAssistManager.onUserSwitched(newUserId);
+        if (mFullscreenUserSwitcher != null) {
+            mFullscreenUserSwitcher.onUserSwitched(newUserId);
+        }
     }
 
     private void setControllerUsers() {
@@ -3359,7 +3368,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             onLaunchTransitionFadingEnded();
         }
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
-        setBarState(StatusBarState.KEYGUARD);
+        if (mUserSwitcherController != null && mUserSwitcherController.useFullscreenUserSwitcher()) {
+            setBarState(StatusBarState.FULLSCREEN_USER_SWITCHER);
+        } else {
+            setBarState(StatusBarState.KEYGUARD);
+        }
         updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
         if (!mDeviceInteractive) {
 
@@ -3368,7 +3381,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // Keyguard.
             mNotificationPanel.setTouchDisabled(true);
         }
-        instantExpandNotificationsPanel();
+        if (mState == StatusBarState.KEYGUARD) {
+            instantExpandNotificationsPanel();
+        } else if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
+            instantCollapseNotificationPanel();
+        }
         mLeaveOpenOnKeyguardHide = false;
         if (mDraggedDownRow != null) {
             mDraggedDownRow.setUserLocked(false);
@@ -3553,12 +3570,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationController.setVisible(true);
             mNotificationPanel.resetViews();
-            mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
+            if (mKeyguardUserSwitcher != null) {
+                mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
+            }
             mStatusBarView.removePendingHideExpandedRunnables();
         } else {
             mKeyguardIndicationController.setVisible(false);
-            mKeyguardUserSwitcher.setKeyguard(false,
-                    goingToFullShade || mState == StatusBarState.SHADE_LOCKED || fromShadeLocked);
+            if (mKeyguardUserSwitcher != null) {
+                mKeyguardUserSwitcher.setKeyguard(false,
+                        goingToFullShade ||
+                        mState == StatusBarState.SHADE_LOCKED ||
+                        fromShadeLocked);
+            }
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mScrimController.setKeyguardShowing(true);
@@ -3566,6 +3589,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         } else {
             mScrimController.setKeyguardShowing(false);
             mIconPolicy.setKeyguardShowing(false);
+        }
+        if (mFullscreenUserSwitcher != null) {
+            if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
+                mFullscreenUserSwitcher.show();
+            } else {
+                mFullscreenUserSwitcher.hide();
+            }
         }
         mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
         updateDozingState();
@@ -3634,8 +3664,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public boolean onSpacePressed() {
-        if (mDeviceInteractive
-                && (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
+        if (mDeviceInteractive && mState != StatusBarState.SHADE) {
             animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
             return true;

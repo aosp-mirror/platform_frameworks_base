@@ -79,6 +79,11 @@
         </FrameLayout>
     </FrameLayout>
 
+    <ViewStub android:id="@+id/fullscreen_user_switcher_stub"
+              android:layout="@layout/fullscreen_user_switcher"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"/>
+
     <com.android.systemui.statusbar.phone.PanelHolder
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"

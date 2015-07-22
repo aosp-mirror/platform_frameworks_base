@@ -32,6 +32,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -189,7 +190,7 @@ public class UserSwitcherController {
                         guestRecord = new UserRecord(info, null /* picture */,
                                 true /* isGuest */, isCurrent, false /* isAddUser */,
                                 false /* isRestricted */);
-                    } else if (info.supportsSwitchToByUser()) {
+                    } else if (info.isEnabled() && info.supportsSwitchToByUser()) {
                         Bitmap picture = bitmaps.get(info.id);
                         if (picture == null) {
                             picture = mUserManager.getUserIcon(info.id);
@@ -270,6 +271,35 @@ public class UserSwitcherController {
 
     public boolean isSimpleUserSwitcher() {
         return mSimpleUserSwitcher;
+    }
+
+    public boolean useFullscreenUserSwitcher() {
+        // Use adb to override:
+        // adb shell settings put system enable_fullscreen_user_switcher 0  # Turn it off.
+        // adb shell settings put system enable_fullscreen_user_switcher 1  # Turn it on.
+        // Restart SystemUI or adb reboot.
+        final int DEFAULT = -1;
+        final int overrideUseFullscreenUserSwitcher =
+                Settings.System.getInt(mContext.getContentResolver(),
+                        "enable_fullscreen_user_switcher", DEFAULT);
+        if (overrideUseFullscreenUserSwitcher != DEFAULT) {
+            return overrideUseFullscreenUserSwitcher != 0;
+        }
+        // Otherwise default to the build setting.
+        return mContext.getResources().getBoolean(R.bool.enable_fullscreen_user_switcher);
+    }
+
+    public void removeUserId(int userId) {
+        if (userId == UserHandle.USER_SYSTEM) {
+            Log.w(TAG, "User " + userId + " could not removed.");
+            return;
+        }
+        if (ActivityManager.getCurrentUser() == userId) {
+            switchToUserId(UserHandle.USER_SYSTEM);
+        }
+        if (mUserManager.removeUser(userId)) {
+            refreshUsers(UserHandle.USER_NULL);
+        }
     }
 
     public void switchTo(UserRecord record) {
