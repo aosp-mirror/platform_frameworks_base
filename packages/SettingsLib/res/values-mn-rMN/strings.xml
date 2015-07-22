@@ -79,8 +79,8 @@
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Хослуулахаас <xliff:g id="DEVICE_NAME">%1$s</xliff:g> татгалзсан."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi унтраалттай байна."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wifi холбогдоогүй байна."</string>
-    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi нэг баганатай байна."</string>
-    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi хоёр баганатай байна."</string>
-    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi гурван баганатай байна."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi сүлжээний дохио нэг баганатай байна."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi сүлжээний дохио хоёр баганатай байна."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi сүлжээний дохио гурван баганатай байна."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wifi-н дохио дүүрэн байна."</string>
 </resources>

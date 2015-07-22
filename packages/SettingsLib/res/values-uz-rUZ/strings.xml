@@ -78,7 +78,7 @@
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Quyidagi qurilma javob bermayapti: <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> biriktirish so‘rovini rad qildi."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi o‘chiq."</string>
-    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi aloqasi uzilgan."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi o‘chirilgan."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi: bitta ustun"</string>
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi: ikkita ustun"</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi: uchta ustun"</string>
