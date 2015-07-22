@@ -79,7 +79,7 @@ public abstract class FrameworkActionBarWrapper {
         }
     }
 
-    FrameworkActionBarWrapper(@NonNull BridgeContext context, ActionBarCallback callback,
+    FrameworkActionBarWrapper(@NonNull BridgeContext context, @NonNull ActionBarCallback callback,
             @NonNull ActionBar actionBar) {
         mActionBar = actionBar;
         mCallback = callback;

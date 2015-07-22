@@ -593,9 +593,13 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
 
     /**
      * Returns the integer id of a framework resource, from a given resource type and resource name.
+     * <p/>
+     * If no resource is found, it creates a dynamic id for the resource.
+     *
      * @param type the type of the resource
      * @param name the name of the resource.
-     * @return an {@link Integer} containing the resource id, or null if no resource were found.
+     *
+     * @return an {@link Integer} containing the resource id.
      */
     @NonNull
     public static Integer getResourceId(ResourceType type, String name) {

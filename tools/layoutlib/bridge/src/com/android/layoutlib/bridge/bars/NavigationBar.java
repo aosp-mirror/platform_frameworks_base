@@ -19,8 +19,6 @@ package com.android.layoutlib.bridge.bars;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.Density;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.util.AttributeSet;
@@ -37,8 +35,8 @@ public class NavigationBar extends CustomBar {
      * Constructor to be used when creating the {@link NavigationBar} as a regular control.
      * This is currently used by the theme editor.
      */
-    public NavigationBar(Context context, AttributeSet attrs)
-            throws XmlPullParserException {
+    @SuppressWarnings("unused")
+    public NavigationBar(Context context, AttributeSet attrs) {
         this((BridgeContext) context,
                 Density.getEnum(((BridgeContext) context).getMetrics().densityDpi),
                 LinearLayout.HORIZONTAL, // In this mode, it doesn't need to be render vertically
@@ -49,7 +47,7 @@ public class NavigationBar extends CustomBar {
     }
 
     public NavigationBar(BridgeContext context, Density density, int orientation, boolean isRtl,
-            boolean rtlEnabled, int simulatedPlatformVersion) throws XmlPullParserException {
+            boolean rtlEnabled, int simulatedPlatformVersion) {
         super(context, orientation, "/bars/navigation_bar.xml", "navigation_bar.xml",
                 simulatedPlatformVersion);
 
