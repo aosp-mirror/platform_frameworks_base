@@ -35,7 +35,6 @@ import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.SignalCallbackAdapter;
 
 import java.util.List;
@@ -48,6 +47,8 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     private final AccessPointController mWifiController;
     private final WifiDetailAdapter mDetailAdapter;
     private final QSTile.SignalState mStateBeforeClick = newTileState();
+
+    private final WifiSignalCallback mSignalCallback = new WifiSignalCallback();
 
     public WifiTile(Host host) {
         super(host);
@@ -118,8 +119,10 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     protected void handleUpdateState(SignalState state, Object arg) {
         state.visible = true;
         if (DEBUG) Log.d(TAG, "handleUpdateState arg=" + arg);
-        if (arg == null) return;
         CallbackInfo cb = (CallbackInfo) arg;
+        if (cb == null) {
+            cb = mSignalCallback.mInfo;
+        }
 
         boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.enabledDesc != null);
         boolean wifiNotConnected = (cb.wifiSignalIconId > 0) && (cb.enabledDesc == null);
@@ -213,20 +216,21 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         }
     }
 
-    private final SignalCallback mSignalCallback = new SignalCallbackAdapter() {
+    private final class WifiSignalCallback extends SignalCallbackAdapter {
+        final CallbackInfo mInfo = new CallbackInfo();
+
         @Override
         public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
                 boolean activityIn, boolean activityOut, String description) {
             if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + enabled);
-            final CallbackInfo info = new CallbackInfo();
-            info.enabled = enabled;
-            info.connected = qsIcon.visible;
-            info.wifiSignalIconId = qsIcon.icon;
-            info.enabledDesc = description;
-            info.activityIn = activityIn;
-            info.activityOut = activityOut;
-            info.wifiSignalContentDescription = qsIcon.contentDescription;
-            refreshState(info);
+            mInfo.enabled = enabled;
+            mInfo.connected = qsIcon.visible;
+            mInfo.wifiSignalIconId = qsIcon.icon;
+            mInfo.enabledDesc = description;
+            mInfo.activityIn = activityIn;
+            mInfo.activityOut = activityOut;
+            mInfo.wifiSignalContentDescription = qsIcon.contentDescription;
+            refreshState(mInfo);
         }
     };
 
