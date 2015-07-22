@@ -191,7 +191,11 @@ class UsageStatsDatabase {
 
                 for (File f : files) {
                     final AtomicFile af = new AtomicFile(f);
-                    mSortedStatFiles[i].put(UsageStatsXml.parseBeginTime(af), af);
+                    try {
+                        mSortedStatFiles[i].put(UsageStatsXml.parseBeginTime(af), af);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "failed to index file: " + f, e);
+                    }
                 }
             }
         }
@@ -506,7 +510,14 @@ class UsageStatsDatabase {
                 if (path.endsWith(BAK_SUFFIX)) {
                     f = new File(path.substring(0, path.length() - BAK_SUFFIX.length()));
                 }
-                long beginTime = UsageStatsXml.parseBeginTime(f);
+
+                long beginTime;
+                try {
+                    beginTime = UsageStatsXml.parseBeginTime(f);
+                } catch (IOException e) {
+                    beginTime = 0;
+                }
+
                 if (beginTime < expiryTime) {
                     new AtomicFile(f).delete();
                 }
