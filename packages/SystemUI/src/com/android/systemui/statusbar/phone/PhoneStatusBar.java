@@ -3211,7 +3211,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void dispatchDemoCommand(String command, Bundle args) {
         if (!mDemoModeAllowed) {
             mDemoModeAllowed = Settings.Global.getInt(mContext.getContentResolver(),
-                    "sysui_demo_allowed", 0) != 0;
+                    DEMO_MODE_ALLOWED, 0) != 0;
         }
         if (!mDemoModeAllowed) return;
         if (command.equals(COMMAND_ENTER)) {
