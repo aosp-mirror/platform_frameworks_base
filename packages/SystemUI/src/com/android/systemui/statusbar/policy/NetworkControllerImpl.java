@@ -197,7 +197,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         mContext.registerReceiver(this, filter, null, mReceiverHandler);
         mListening = true;
@@ -339,8 +338,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
                 action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
             updateConnectivity();
-        } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
-            handleConfigurationChanged();
         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
             refreshLocale();
             updateAirplaneMode(false);
@@ -373,8 +370,18 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
     }
 
-    public void handleConfigurationChanged() {
+    public void onConfigurationChanged() {
         mConfig = Config.readConfig(mContext);
+        mReceiverHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                handleConfigurationChanged();
+            }
+        });
+    }
+
+    @VisibleForTesting
+    void handleConfigurationChanged() {
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.setConfiguration(mConfig);
         }
