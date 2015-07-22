@@ -591,7 +591,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         addNavigationBar();
 
         // Lastly, call to the icon policy to install/update all the icons.
-        mIconPolicy = new PhoneStatusBarPolicy(mContext, mCastController, mHotspotController);
+        mIconPolicy = new PhoneStatusBarPolicy(mContext, mCastController, mHotspotController,
+                mUserInfoController);
         mIconPolicy.setCurrentUserSetup(mUserSetup);
         mSettingsObserver.onChange(false); // set up
 
@@ -839,7 +840,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNextAlarmController = new NextAlarmController(mContext);
         mKeyguardMonitor = new KeyguardMonitor(mContext);
         if (UserSwitcherController.isUserSwitcherAvailable(UserManager.get(mContext))) {
-            mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor);
+            mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
+                    mHandler);
         }
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
                 (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
