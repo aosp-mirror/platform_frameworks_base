@@ -51,7 +51,7 @@ import javax.crypto.spec.GCMParameterSpec;
 abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreCipherSpiBase {
 
     abstract static class GCM extends AndroidKeyStoreAuthenticatedAESCipherSpi {
-        private static final int MIN_SUPPORTED_TAG_LENGTH_BITS = 96;
+        static final int MIN_SUPPORTED_TAG_LENGTH_BITS = 96;
         private static final int MAX_SUPPORTED_TAG_LENGTH_BITS = 128;
         private static final int DEFAULT_TAG_LENGTH_BITS = 128;
         private static final int IV_LENGTH_BYTES = 12;
