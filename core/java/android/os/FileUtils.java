@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.provider.DocumentsContract.Document;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -68,6 +69,8 @@ public class FileUtils {
 
     /** Regular expression for safe filenames: no spaces or metacharacters */
     private static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("[\\w%+,./=_-]+");
+
+    private static final File[] EMPTY = new File[0];
 
     /**
      * Set owner and mode of of given {@link File}.
@@ -632,6 +635,15 @@ public class FileUtils {
             return new File(parent, name);
         } else {
             return new File(parent, name + "." + ext);
+        }
+    }
+
+    public static @NonNull File[] listFilesOrEmpty(File dir) {
+        File[] res = dir.listFiles();
+        if (res != null) {
+            return res;
+        } else {
+            return EMPTY;
         }
     }
 }
