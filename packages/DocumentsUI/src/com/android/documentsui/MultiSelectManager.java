@@ -439,21 +439,21 @@ public final class MultiSelectManager {
         }
 
         @Override
+        public int hashCode() {
+            return mSelection.hashCode();
+        }
+
+        @Override
         public boolean equals(Object that) {
           if (this == that) {
               return true;
           }
 
-          if (that instanceof Selection) {
-              Selection other = (Selection) that;
-              for (int i = 0; i < mSelection.size(); i++) {
-                  if (mSelection.keyAt(i) != other.mSelection.keyAt(i)) {
-                      return false;
-                  }
-              }
-              return true;
+          if (!(that instanceof Selection)) {
+              return false;
           }
-          return false;
+
+          return mSelection.equals(((Selection) that).mSelection);
         }
     }
 

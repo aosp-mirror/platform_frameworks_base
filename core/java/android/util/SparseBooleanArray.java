@@ -237,6 +237,41 @@ public class SparseBooleanArray implements Cloneable {
         mSize++;
     }
 
+    @Override
+    public int hashCode() {
+        int hashCode = mSize;
+        for (int i = 0; i < mSize; i++) {
+            hashCode = 31 * hashCode + mKeys[i] | (mValues[i] ? 1 : 0);
+        }
+        return hashCode;
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (this == that) {
+          return true;
+      }
+
+      if (!(that instanceof SparseBooleanArray)) {
+          return false;
+      }
+
+      SparseBooleanArray other = (SparseBooleanArray) that;
+      if (mSize != other.mSize) {
+          return false;
+      }
+
+      for (int i = 0; i < mSize; i++) {
+          if (mKeys[i] != other.mKeys[i]) {
+              return false;
+          }
+          if (mValues[i] != other.mValues[i]) {
+              return false;
+          }
+      }
+      return true;
+    }
+
     /**
      * {@inheritDoc}
      *

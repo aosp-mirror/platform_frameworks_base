@@ -16,8 +16,7 @@
 
 package com.android.documentsui;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import com.android.documentsui.MultiSelectManager.Selection;
 
@@ -80,6 +79,22 @@ public class MultiSelectManager_SelectionTest {
         other.add(5);
         other.add(9);
         assertEquals(selection, other);
+        assertEquals(selection.hashCode(), other.hashCode());
+    }
+
+    @Test
+    public void equalsCopy() {
+        Selection other = new Selection();
+        other.copyFrom(selection);
+        assertEquals(selection, other);
+        assertEquals(selection.hashCode(), other.hashCode());
+    }
+
+    @Test
+    public void notEquals() {
+        Selection other = new Selection();
+        other.add(789);
+        assertFalse(selection.equals(other));
     }
 
     @Test
