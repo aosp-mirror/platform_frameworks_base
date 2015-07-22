@@ -120,6 +120,7 @@ public final class BatteryService extends SystemService {
     private int mLastBatteryVoltage;
     private int mLastBatteryTemperature;
     private boolean mLastBatteryLevelCritical;
+    private int mLastMaxChargingCurrent;
 
     private int mInvalidCharger;
     private int mLastInvalidCharger;
@@ -354,6 +355,7 @@ public final class BatteryService extends SystemService {
                 mPlugType != mLastPlugType ||
                 mBatteryProps.batteryVoltage != mLastBatteryVoltage ||
                 mBatteryProps.batteryTemperature != mLastBatteryTemperature ||
+                mBatteryProps.maxChargingCurrent != mLastMaxChargingCurrent ||
                 mInvalidCharger != mLastInvalidCharger)) {
 
             if (mPlugType != mLastPlugType) {
@@ -480,6 +482,7 @@ public final class BatteryService extends SystemService {
             mLastPlugType = mPlugType;
             mLastBatteryVoltage = mBatteryProps.batteryVoltage;
             mLastBatteryTemperature = mBatteryProps.batteryTemperature;
+            mLastMaxChargingCurrent = mBatteryProps.maxChargingCurrent;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
             mLastInvalidCharger = mInvalidCharger;
         }
