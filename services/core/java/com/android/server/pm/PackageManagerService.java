@@ -15600,12 +15600,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * recycled.
      */
     private void reconcileUsers(String volumeUuid) {
-        final File[] files = Environment.getDataUserDirectory(volumeUuid).listFiles();
-        if (ArrayUtils.isEmpty(files)) {
-            Slog.d(TAG, "No users found on " + volumeUuid);
-            return;
-        }
-
+        final File[] files = FileUtils
+                .listFilesOrEmpty(Environment.getDataUserDirectory(volumeUuid));
         for (File file : files) {
             if (!file.isDirectory()) continue;
 
@@ -15661,12 +15657,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * another volume.
      */
     private void reconcileApps(String volumeUuid) {
-        final File[] files = Environment.getDataAppDirectory(volumeUuid).listFiles();
-        if (ArrayUtils.isEmpty(files)) {
-            Slog.d(TAG, "No apps found on " + volumeUuid);
-            return;
-        }
-
+        final File[] files = FileUtils
+                .listFilesOrEmpty(Environment.getDataAppDirectory(volumeUuid));
         for (File file : files) {
             final boolean isPackage = (isApkFile(file) || file.isDirectory())
                     && !PackageInstallerService.isStageName(file.getName());
@@ -15797,7 +15789,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Now that we're guarded by frozen state, kill app during move
-        killApplication(packageName, appId, "move pkg");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            killApplication(packageName, appId, "move pkg");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
 
         final Bundle extras = new Bundle();
         extras.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
