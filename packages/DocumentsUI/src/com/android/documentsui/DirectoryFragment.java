@@ -510,18 +510,18 @@ public class DirectoryFragment extends Fragment {
         final LayoutManager layout;
         switch (mode) {
             case MODE_GRID:
-                if (mGridLayout == null) {
-                    // TODO: Determine appropriate column count.
-                    mGridLayout = new GridLayoutManager(getContext(), 4);
-                }
                 thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
+                if (mGridLayout == null) {
+                    int columnCount = Math.max(1, mRecView.getWidth() / thumbSize);
+                    mGridLayout = new GridLayoutManager(getContext(), columnCount);
+                }
                 layout = mGridLayout;
                 break;
             case MODE_LIST:
+                thumbSize = getResources().getDimensionPixelSize(R.dimen.icon_size);
                 if (mListLayout == null) {
                     mListLayout = new LinearLayoutManager(getContext());
                 }
-                thumbSize = getResources().getDimensionPixelSize(R.dimen.icon_size);
                 layout = mListLayout;
                 break;
             case MODE_UNKNOWN:

@@ -45,6 +45,7 @@
         android:paddingBottom="@dimen/grid_padding_vert"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
-        android:drawSelectorOnTop="true" />
+        android:drawSelectorOnTop="true"
+        android:background="@color/item_doc_grid_background" />
 
 </com.android.documentsui.DirectoryView>
