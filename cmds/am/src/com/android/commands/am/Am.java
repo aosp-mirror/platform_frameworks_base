@@ -26,6 +26,7 @@ import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
+import android.app.IStopUserCallback;
 import android.app.ProfilerInfo;
 import android.app.UiAutomationConnection;
 import android.app.usage.ConfigurationStats;
@@ -133,7 +134,7 @@ public class Am extends BaseCommand {
                 "       am to-app-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am start-user <USER_ID>\n" +
-                "       am stop-user <USER_ID>\n" +
+                "       am stop-user [-w] <USER_ID>\n" +
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
@@ -257,6 +258,7 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit start or switch to it.\n" +
+                "  -w: wait for stop-user to complete.\n" +
                 "\n" +
                 "am stack start: start a new activity on <DISPLAY_ID> using <INTENT>.\n" +
                 "\n" +
@@ -1303,9 +1305,45 @@ public class Am extends BaseCommand {
         }
     }
 
+    private static class StopUserCallback extends IStopUserCallback.Stub {
+        private boolean mFinished = false;
+
+        public synchronized void waitForFinish() {
+            try {
+                while (!mFinished) wait();
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @Override
+        public synchronized void userStopped(int userId) {
+            mFinished = true;
+            notifyAll();
+        }
+
+        @Override
+        public synchronized void userStopAborted(int userId) {
+            mFinished = true;
+            notifyAll();
+        }
+    }
+
     private void runStopUser() throws Exception {
-        String user = nextArgRequired();
-        int res = mAm.stopUser(Integer.parseInt(user), null);
+        boolean wait = false;
+        String opt = null;
+        while ((opt = nextOption()) != null) {
+            if ("-w".equals(opt)) {
+                wait = true;
+            } else {
+                System.err.println("Error: unknown option: " + opt);
+                return;
+            }
+        }
+        int user = Integer.parseInt(nextArgRequired());
+        StopUserCallback callback = wait ? new StopUserCallback() : null;
+
+        int res = mAm.stopUser(user, callback);
         if (res != ActivityManager.USER_OP_SUCCESS) {
             String txt = "";
             switch (res) {
@@ -1317,6 +1355,8 @@ public class Am extends BaseCommand {
                     break;
             }
             System.err.println("Switch failed: " + res + txt);
+        } else if (callback != null) {
+            callback.waitForFinish();
         }
     }
 
