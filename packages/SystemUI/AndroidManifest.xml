@@ -174,11 +174,6 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".usb.UsbStorageActivity"
-                  android:label="@*android:string/usb_storage_activity_title"
-                  android:excludeFromRecents="true">
-        </activity>
-
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
                   android:icon="@drawable/tuner"

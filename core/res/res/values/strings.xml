@@ -2827,53 +2827,7 @@
     <string name="no_permissions">No permissions required</string>
     <!-- [CHAR LIMIT=NONE] Additional text in permission description for perms that can cost money. -->
     <string name="perm_costs_money">this may cost you money</string>
-
-    <!-- USB storage dialog strings -->
-    <!-- This is the title for the activity's window. -->
-    <string name="usb_storage_activity_title">USB mass storage</string>
-
-    <!-- See USB_STORAGE.  USB_STORAGE_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to mount.  This is the title. -->
-    <string name="usb_storage_title">USB connected</string>
-    <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_message" product="nosdcard">You\'ve connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\'s USB storage.</string>
-    <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_message" product="default">You\'ve connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\'s SD card.</string>
-    <!-- See USB_STORAGE.    This is the button text to mount the phone on the computer. -->
-    <string name="usb_storage_button_mount">Turn on USB storage</string>
-    <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_error_message" product="nosdcard">There\'s a problem using your USB storage for USB mass storage.</string>
-    <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. -->
-    <string name="usb_storage_error_message" product="default">There\'s a problem using your SD card for USB mass storage.</string>
-    <!-- USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
-    <string name="usb_storage_notification_title">USB connected</string>
-    <!-- See USB_STORAGE. This is the message. -->
-    <string name="usb_storage_notification_message">Touch to copy files to/from your computer.</string>
-
-    <!-- USB_STORAGE_STOP: While USB storage is enabled, we show a notification dialog asking if he wants to stop. This is the title -->
-    <string name="usb_storage_stop_notification_title">Turn off USB storage</string>
-    <!-- See USB_STORAGE. This is the message. -->
-    <string name="usb_storage_stop_notification_message">Touch to turn off USB storage.</string>
-
-    <!-- USB storage stop dialog strings -->
-    <!-- This is the label for the activity, and should never be visible to the user. -->
-    <!-- See USB_STORAGE_STOP.  USB_STORAGE_STOP_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to stop usb storage.  This is the title. -->
-    <string name="usb_storage_stop_title">USB storage in use</string>
-    <!-- See USB_STORAGE_STOP.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_stop_message" product="nosdcard">Before turning off USB storage, unmount (\"eject\") your Android\'s USB storage from your computer.</string>
-    <!-- See USB_STORAGE_STOP.    This is the message. -->
-    <string name="usb_storage_stop_message" product="default">Before turning off USB storage, unmount (\"eject\") your Android\'s SD card from your computer.</string>
-    <!-- See USB_STORAGE_STOP.    This is the button text to stop usb storage. -->
-    <string name="usb_storage_stop_button_mount">Turn off USB storage</string>
-    <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. -->
-    <string name="usb_storage_stop_error_message">There was a problem turning off USB storage. Check that you\'ve unmounted the USB host, then try again.</string>
-
-    <!-- USB_STORAGE_KILL_STORAGE_USERS dialog  -->
-    <string name="dlg_confirm_kill_storage_users_title">Turn on USB storage</string>
-    <!-- USB_STORAGE_KILL_STORAGE_USERS dialog message text -->
-    <string name="dlg_confirm_kill_storage_users_text">If you turn on USB storage, some apps you\'re using will stop and may be unavailable until you turn off USB storage.</string>
-    <!-- USB_STORAGE_ERROR dialog  dialog-->
-    <string name="dlg_error_title">USB operation unsuccessful</string>
-    <!-- USB_STORAGE_ERROR dialog  ok button-->
+    <!-- Dialog ok button-->
     <string name="dlg_ok">OK</string>
 
     <!-- USB_PREFERENCES: Notification for when the user connected to the charger only.  This is the title -->

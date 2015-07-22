@@ -1882,16 +1882,7 @@
   <java-symbol type="drawable" name="scrubber_control_disabled_holo" />
   <java-symbol type="drawable" name="scrubber_control_selector_holo" />
   <java-symbol type="drawable" name="scrubber_progress_horizontal_holo_dark" />
-  <java-symbol type="drawable" name="usb_android" />
-  <java-symbol type="drawable" name="usb_android_connected" />
-  <java-symbol type="id" name="banner" />
-  <java-symbol type="id" name="mount_button" />
-  <java-symbol type="id" name="unmount_button" />
-  <java-symbol type="layout" name="usb_storage_activity" />
   <java-symbol type="string" name="chooseUsbActivity" />
-  <java-symbol type="string" name="dlg_confirm_kill_storage_users_text" />
-  <java-symbol type="string" name="dlg_confirm_kill_storage_users_title" />
-  <java-symbol type="string" name="dlg_error_title" />
   <java-symbol type="string" name="ext_media_badremoval_notification_message" />
   <java-symbol type="string" name="ext_media_badremoval_notification_title" />
   <java-symbol type="string" name="ext_media_checking_notification_message" />
@@ -1915,15 +1906,6 @@
   <java-symbol type="string" name="ext_media_move_success_message" />
   <java-symbol type="string" name="ext_media_move_failure_title" />
   <java-symbol type="string" name="ext_media_move_failure_message" />
-  <java-symbol type="string" name="usb_storage_error_message" />
-  <java-symbol type="string" name="usb_storage_message" />
-  <java-symbol type="string" name="usb_storage_notification_message" />
-  <java-symbol type="string" name="usb_storage_notification_title" />
-  <java-symbol type="string" name="usb_storage_stop_message" />
-  <java-symbol type="string" name="usb_storage_stop_notification_message" />
-  <java-symbol type="string" name="usb_storage_stop_notification_title" />
-  <java-symbol type="string" name="usb_storage_stop_title" />
-  <java-symbol type="string" name="usb_storage_title" />
   <java-symbol type="style" name="Animation.RecentApplications" />
   <java-symbol type="integer" name="dock_enter_exit_duration" />
 
