@@ -60,8 +60,11 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         // Assume several apps are stored.
         when(mMockPrefs.getInt("app_count", -1)).thenReturn(3);
         when(mMockPrefs.getString("app_0", null)).thenReturn("package0/class0");
+        when(mMockPrefs.getLong("app_user_0", -1)).thenReturn(-1L);
         when(mMockPrefs.getString("app_1", null)).thenReturn("package1/class1");
+        when(mMockPrefs.getLong("app_user_1", -1)).thenReturn(45L);
         when(mMockPrefs.getString("app_2", null)).thenReturn("package2/class2");
+        when(mMockPrefs.getLong("app_user_2", -1)).thenReturn(239L);
 
         mModel.initialize();
     }
@@ -70,9 +73,12 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
     public void testInitializeFromPrefs() {
         initializeModelFromPrefs();
         assertEquals(3, mModel.getAppCount());
-        assertEquals("package0/class0", mModel.getApp(0).flattenToString());
-        assertEquals("package1/class1", mModel.getApp(1).flattenToString());
-        assertEquals("package2/class2", mModel.getApp(2).flattenToString());
+        assertEquals("package0/class0", mModel.getApp(0).getComponentName().flattenToString());
+        assertEquals(-1L, mModel.getApp(0).getUserSerialNumber());
+        assertEquals("package1/class1", mModel.getApp(1).getComponentName().flattenToString());
+        assertEquals(45L, mModel.getApp(1).getUserSerialNumber());
+        assertEquals("package2/class2", mModel.getApp(2).getComponentName().flattenToString());
+        assertEquals(239L, mModel.getApp(2).getUserSerialNumber());
     }
 
     /** Tests initializing the model when the SharedPreferences aren't available. */
@@ -94,8 +100,10 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         // Initializing the model should load the installed activities.
         mModel.initialize();
         assertEquals(2, mModel.getAppCount());
-        assertEquals("package1/class1", mModel.getApp(0).flattenToString());
-        assertEquals("package2/class2", mModel.getApp(1).flattenToString());
+        assertEquals("package1/class1", mModel.getApp(0).getComponentName().flattenToString());
+        assertEquals(-1L, mModel.getApp(0).getUserSerialNumber());
+        assertEquals("package2/class2", mModel.getApp(1).getComponentName().flattenToString());
+        assertEquals(-1L, mModel.getApp(1).getUserSerialNumber());
     }
 
     /** Tests initializing the model if one of the prefs is missing. */
@@ -106,6 +114,7 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         // Assume two apps are nominally stored.
         when(mMockPrefs.getInt("app_count", -1)).thenReturn(2);
         when(mMockPrefs.getString("app_0", null)).thenReturn("package0/class0");
+        when(mMockPrefs.getLong("app_user_0", -1)).thenReturn(239L);
 
         // But assume one pref is missing.
         when(mMockPrefs.getString("app_1", null)).thenReturn(null);
@@ -113,7 +122,8 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         // Initializing the model should load from prefs and skip the missing one.
         mModel.initialize();
         assertEquals(1, mModel.getAppCount());
-        assertEquals("package0/class0", mModel.getApp(0).flattenToString());
+        assertEquals("package0/class0", mModel.getApp(0).getComponentName().flattenToString());
+        assertEquals(239L, mModel.getApp(0).getUserSerialNumber());
     }
 
     /** Tests saving the model to SharedPreferences. */

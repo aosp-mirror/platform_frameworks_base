@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -55,11 +56,14 @@ class NavigationBarAppsModel {
     // Preference name prefix for each app's info. The actual pref has an integer appended to it.
     private final static String APP_PREF_PREFIX = "app_";
 
+    // User serial number prefix for each app's info. The actual pref has an integer appended to it.
+    private final static String APP_USER_PREFIX = "app_user_";
+
     private final LauncherApps mLauncherApps;
     private final SharedPreferences mPrefs;
 
-    // Apps are represented as an ordered list of component names.
-    private final List<ComponentName> mApps = new ArrayList<ComponentName>();
+    // Apps are represented as an ordered list of app infos.
+    private final List<AppInfo> mApps = new ArrayList<AppInfo>();
 
     public NavigationBarAppsModel(Context context) {
         mLauncherApps = (LauncherApps) context.getSystemService("launcherapps");
@@ -97,22 +101,22 @@ class NavigationBarAppsModel {
     }
 
     /** Returns the app at the given index. */
-    public ComponentName getApp(int index) {
+    public AppInfo getApp(int index) {
         return mApps.get(index);
     }
 
     /** Adds the app before the given index. */
-    public void addApp(int index, ComponentName name) {
-        mApps.add(index, name);
+    public void addApp(int index, AppInfo appInfo) {
+        mApps.add(index, appInfo);
     }
 
     /** Sets the app at the given index. */
-    public void setApp(int index, ComponentName name) {
-        mApps.set(index, name);
+    public void setApp(int index, AppInfo appInfo) {
+        mApps.set(index, appInfo);
     }
 
     /** Remove the app at the given index. */
-    public ComponentName removeApp(int index) {
+    public AppInfo removeApp(int index) {
         return mApps.remove(index);
     }
 
@@ -125,8 +129,10 @@ class NavigationBarAppsModel {
         int appCount = mApps.size();
         edit.putInt(APP_COUNT_PREF, appCount);
         for (int i = 0; i < appCount; i++) {
-            String componentNameString = mApps.get(i).flattenToString();
+            final AppInfo appInfo = mApps.get(i);
+            String componentNameString = appInfo.getComponentName().flattenToString();
             edit.putString(prefNameForApp(i), componentNameString);
+            edit.putLong(prefUserForApp(i), appInfo.getUserSerialNumber());
         }
         // Start an asynchronous disk write.
         edit.apply();
@@ -143,7 +149,8 @@ class NavigationBarAppsModel {
                 continue;
             }
             ComponentName componentName = ComponentName.unflattenFromString(prefValue);
-            mApps.add(componentName);
+            long userSerialNumber = mPrefs.getLong(prefUserForApp(i), AppInfo.USER_UNSPECIFIED);
+            mApps.add(new AppInfo(componentName, userSerialNumber));
         }
     }
 
@@ -151,11 +158,12 @@ class NavigationBarAppsModel {
     private void addDefaultApps() {
         // Get a list of all app activities.
         List<LauncherActivityInfo> apps =
-                mLauncherApps.getActivityList(null /* packageName */, UserHandle.OWNER);
+                mLauncherApps.getActivityList(
+                        null /* packageName */, new UserHandle(ActivityManager.getCurrentUser()));
         int appCount = apps.size();
         for (int i = 0; i < NUM_INITIAL_APPS && i < appCount; i++) {
             LauncherActivityInfo activityInfo = apps.get(i);
-            mApps.add(activityInfo.getComponentName());
+            mApps.add(new AppInfo(activityInfo.getComponentName(), AppInfo.USER_UNSPECIFIED));
         }
     }
 
@@ -163,4 +171,10 @@ class NavigationBarAppsModel {
     private static String prefNameForApp(int index) {
         return APP_PREF_PREFIX + Integer.toString(index);
     }
+
+    /** Returns the pref name for the app's user at a given index. */
+    private static String prefUserForApp(int index) {
+        return APP_USER_PREFIX + Integer.toString(index);
+    }
+
 }
