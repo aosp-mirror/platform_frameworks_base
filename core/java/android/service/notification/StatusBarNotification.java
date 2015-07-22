@@ -17,6 +17,9 @@
 package android.service.notification;
 
 import android.app.Notification;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -40,6 +43,7 @@ public class StatusBarNotification implements Parcelable {
     private final long postTime;
 
     private final int score;
+    private Context mContext; // used for inflation & icon expansion
 
     /** @hide */
     public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
@@ -260,5 +264,25 @@ public class StatusBarNotification implements Parcelable {
      */
     public String getGroupKey() {
         return groupKey;
+    }
+
+    /**
+     * @hide
+     */
+    public Context getPackageContext(Context context) {
+        if (mContext == null) {
+            try {
+                ApplicationInfo ai = context.getPackageManager()
+                        .getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+                mContext = context.createApplicationContext(ai,
+                        Context.CONTEXT_RESTRICTED);
+            } catch (PackageManager.NameNotFoundException e) {
+                mContext = null;
+            }
+        }
+        if (mContext == null) {
+            mContext = context;
+        }
+        return mContext;
     }
 }

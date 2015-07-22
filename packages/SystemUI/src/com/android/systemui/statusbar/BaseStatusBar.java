@@ -1328,14 +1328,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         View bigContentViewLocal = null;
         View headsUpContentViewLocal = null;
         try {
-            contentViewLocal = contentView.apply(mContext, contentContainer,
+            contentViewLocal = contentView.apply(
+                    sbn.getPackageContext(mContext),
+                    contentContainer,
                     mOnClickHandler);
             if (bigContentView != null) {
-                bigContentViewLocal = bigContentView.apply(mContext, contentContainer,
+                bigContentViewLocal = bigContentView.apply(
+                        sbn.getPackageContext(mContext),
+                        contentContainer,
                         mOnClickHandler);
             }
             if (headsUpContentView != null) {
-                headsUpContentViewLocal = headsUpContentView.apply(mContext, contentContainer,
+                headsUpContentViewLocal = headsUpContentView.apply(
+                        sbn.getPackageContext(mContext),
+                        contentContainer,
                         mOnClickHandler);
             }
         }
@@ -1362,7 +1368,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         View publicViewLocal = null;
         if (publicNotification != null) {
             try {
-                publicViewLocal = publicNotification.contentView.apply(mContext,
+                publicViewLocal = publicNotification.contentView.apply(
+                        sbn.getPackageContext(mContext),
                         contentContainerPublic, mOnClickHandler);
 
                 if (publicViewLocal != null) {
@@ -1981,15 +1988,18 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Reapply the RemoteViews
         contentView.reapply(mContext, entry.getContentView(), mOnClickHandler);
         if (bigContentView != null && entry.getExpandedContentView() != null) {
-            bigContentView.reapply(mContext, entry.getExpandedContentView(),
+            bigContentView.reapply(notification.getPackageContext(mContext),
+                    entry.getExpandedContentView(),
                     mOnClickHandler);
         }
         View headsUpChild = entry.getHeadsUpContentView();
         if (headsUpContentView != null && headsUpChild != null) {
-            headsUpContentView.reapply(mContext, headsUpChild, mOnClickHandler);
+            headsUpContentView.reapply(notification.getPackageContext(mContext),
+                    headsUpChild, mOnClickHandler);
         }
         if (publicContentView != null && entry.getPublicContentView() != null) {
-            publicContentView.reapply(mContext, entry.getPublicContentView(), mOnClickHandler);
+            publicContentView.reapply(notification.getPackageContext(mContext),
+                    entry.getPublicContentView(), mOnClickHandler);
         }
         // update the contentIntent
         mNotificationClicker.register(entry.row, notification);
