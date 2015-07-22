@@ -65,7 +65,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.TextUtils;
@@ -83,7 +82,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -544,6 +542,8 @@ public class DirectoryFragment extends Fragment {
 
         private Selection mSelected = new Selection();
         private ActionMode mActionMode;
+        private int mNoDeleteCount = 0;
+        private Menu mMenu;
 
         @Override
         public boolean onBeforeItemStateChange(int position, boolean selected) {
@@ -560,17 +560,27 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public void onItemStateChanged(int position, boolean selected) {
+
+            final Cursor cursor = mAdapter.getItem(position);
+            checkNotNull(cursor, "Cursor cannot be null.");
+
+            final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+            if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
+                mNoDeleteCount += selected ? 1 : -1;
+            }
+
             mSelectionManager.getSelection(mSelected);
-            if (mSelected.size() == 0) {
-                if (DEBUG) Log.d(TAG, "Finishing action mode.");
-                if (mActionMode != null) {
-                    mActionMode.finish();
-                }
-            } else {
+            if (mSelected.size() > 0) {
                 if (DEBUG) Log.d(TAG, "Maybe starting action mode.");
                 if (mActionMode == null) {
                     if (DEBUG) Log.d(TAG, "Yeah. Starting action mode.");
                     mActionMode = getActivity().startActionMode(this);
+                }
+                updateActionMenu();
+            } else {
+                if (DEBUG) Log.d(TAG, "Finishing action mode.");
+                if (mActionMode != null) {
+                    mActionMode.finish();
                 }
             }
 
@@ -586,6 +596,8 @@ public class DirectoryFragment extends Fragment {
             mActionMode = null;
             // clear selection
             mSelectionManager.clearSelection();
+            mSelected.clear();
+            mNoDeleteCount = 0;
         }
 
         @Override
@@ -597,10 +609,15 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            // Delegate update logic to our owning action, since specialized
-            // logic is desired.
-            mFragmentTuner.updateActionMenu(menu, mType);
+            mMenu = menu;
+            updateActionMenu();
             return true;
+        }
+
+        private void updateActionMenu() {
+            checkNotNull(mMenu);
+            // Delegate update logic to our owning action, since specialized logic is desired.
+            mFragmentTuner.updateActionMenu(mMenu, mType, mNoDeleteCount == 0);
         }
 
         @Override
@@ -1608,7 +1625,7 @@ public class DirectoryFragment extends Fragment {
      * Feel free to expand the role of this class to handle other specializations.
      */
     private interface FragmentTuner {
-        void updateActionMenu(Menu menu, int dirType);
+        void updateActionMenu(Menu menu, int dirType, boolean canDelete);
     }
 
     /**
@@ -1643,7 +1660,7 @@ public class DirectoryFragment extends Fragment {
         }
 
         @Override
-        public void updateActionMenu(Menu menu, int dirType) {
+        public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
             Preconditions.checkState(mState.action != ACTION_BROWSE_ALL);
 
             final MenuItem open = menu.findItem(R.id.menu_open);
@@ -1658,7 +1675,7 @@ public class DirectoryFragment extends Fragment {
 
             open.setVisible(!manageOrBrowse);
             share.setVisible(manageOrBrowse);
-            delete.setVisible(manageOrBrowse);
+            delete.setVisible(manageOrBrowse && canDelete);
             // Disable copying from the Recents view.
             copyTo.setVisible(manageOrBrowse && dirType != TYPE_RECENT_OPEN);
             moveTo.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_move", false));
@@ -1673,9 +1690,9 @@ public class DirectoryFragment extends Fragment {
      */
     private static final class StandaloneTuner implements FragmentTuner {
         @Override
-        public void updateActionMenu(Menu menu, int dirType) {
+        public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
             menu.findItem(R.id.menu_share).setVisible(true);
-            menu.findItem(R.id.menu_delete).setVisible(true);
+            menu.findItem(R.id.menu_delete).setVisible(canDelete);
             menu.findItem(R.id.menu_copy_to_clipboard).setVisible(true);
 
             menu.findItem(R.id.menu_open).setVisible(false);
