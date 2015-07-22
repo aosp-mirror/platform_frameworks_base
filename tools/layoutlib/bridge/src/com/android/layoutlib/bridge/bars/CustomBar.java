@@ -68,7 +68,7 @@ abstract class CustomBar extends LinearLayout {
     protected abstract TextView getStyleableTextView();
 
     protected CustomBar(BridgeContext context, int orientation, String layoutPath,
-            String name, int simulatedPlatformVersion) throws XmlPullParserException {
+            String name, int simulatedPlatformVersion) {
         super(context);
         mSimulatedPlatformVersion = simulatedPlatformVersion;
         setOrientation(orientation);
@@ -81,11 +81,16 @@ abstract class CustomBar extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
-        XmlPullParser parser = ParserFactory.create(getClass().getResourceAsStream(layoutPath),
-                name);
+        XmlPullParser parser;
+        try {
+            parser = ParserFactory.create(getClass().getResourceAsStream(layoutPath), name);
+        } catch (XmlPullParserException e) {
+            // Should not happen as the resource is bundled with the jar, and  ParserFactory should
+            // have been initialized.
+            throw new AssertionError(e);
+        }
 
-        BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
-                parser, (BridgeContext) context, false /*platformFile*/);
+        BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(parser, context, false);
 
         try {
             inflater.inflate(bridgeParser, this, true);

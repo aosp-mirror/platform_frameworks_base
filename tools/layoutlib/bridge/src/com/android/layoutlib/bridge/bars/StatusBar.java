@@ -26,6 +26,7 @@ import com.android.resources.Density;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -47,17 +48,19 @@ public class StatusBar extends CustomBar {
      * Constructor to be used when creating the {@link StatusBar} as a regular control. This
      * is currently used by the theme editor.
      */
-    public StatusBar(Context context, AttributeSet attrs) throws XmlPullParserException {
+    @SuppressWarnings("UnusedParameters")
+    public StatusBar(Context context, AttributeSet attrs) {
         this((BridgeContext) context,
                 Density.getEnum(((BridgeContext) context).getMetrics().densityDpi),
-                LinearLayout.HORIZONTAL, // In this mode, it doesn't need to be render vertically
                 ((BridgeContext) context).getConfiguration().getLayoutDirection() ==
                         View.LAYOUT_DIRECTION_RTL,
+                (context.getApplicationInfo().flags & ApplicationInfo.FLAG_SUPPORTS_RTL) != 0,
                 context.getApplicationInfo().targetSdkVersion);
     }
 
-    public StatusBar(BridgeContext context, Density density, int direction, boolean RtlEnabled,
-            int simulatedPlatformVersion) throws XmlPullParserException {
+    @SuppressWarnings("UnusedParameters")
+    public StatusBar(BridgeContext context, Density density, boolean isRtl, boolean rtlEnabled,
+            int simulatedPlatformVersion) {
         // FIXME: if direction is RTL but it's not enabled in application manifest, mirror this bar.
         super(context, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml",
                 simulatedPlatformVersion);
