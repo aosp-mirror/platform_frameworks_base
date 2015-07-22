@@ -42,6 +42,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
+import android.net.NetworkScoreManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -812,6 +813,10 @@ public class UsageStatsService extends SystemService implements
             return false;
         }
 
+        if (isActiveNetworkScorer(packageName)) {
+            return false;
+        }
+
         if (mAppWidgetManager != null
                 && mAppWidgetManager.isBoundWidgetPackage(packageName, userId)) {
             return false;
@@ -845,6 +850,12 @@ public class UsageStatsService extends SystemService implements
         TelephonyManager telephonyManager = getContext().getSystemService(TelephonyManager.class);
         return telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+    }
+
+    private boolean isActiveNetworkScorer(String packageName) {
+        NetworkScoreManager nsm = (NetworkScoreManager) getContext().getSystemService(
+                Context.NETWORK_SCORE_SERVICE);
+        return packageName != null && packageName.equals(nsm.getActiveScorerPackage());
     }
 
     void informListeners(String packageName, int userId, boolean isIdle) {
