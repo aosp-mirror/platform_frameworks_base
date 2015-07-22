@@ -68,9 +68,13 @@ public class UserSwitcherController {
     private static final String SIMPLE_USER_SWITCHER_GLOBAL_SETTING =
             "lockscreenSimpleUserSwitcher";
     private static final String ACTION_REMOVE_GUEST = "com.android.systemui.REMOVE_GUEST";
+    private static final String ACTION_LOGOUT_USER = "com.android.systemui.LOGOUT_USER";
 
     private static final int ID_REMOVE_GUEST = 1010;
+    private static final int ID_LOGOUT_USER = 1011;
     private static final String TAG_REMOVE_GUEST = "remove_guest";
+    private static final String TAG_LOGOUT_USER = "logout_user";
+
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     private final Context mContext;
@@ -103,6 +107,7 @@ public class UserSwitcherController {
 
         filter = new IntentFilter();
         filter.addAction(ACTION_REMOVE_GUEST);
+        filter.addAction(ACTION_LOGOUT_USER);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
                 PERMISSION_SELF, null /* scheduler */);
 
@@ -280,6 +285,14 @@ public class UserSwitcherController {
         }
     }
 
+    private void stopUserId(int id) {
+        try {
+            ActivityManagerNative.getDefault().stopUser(id, null);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't stop user.", e);
+        }
+    }
+
     private void showExitGuestDialog(int id) {
         if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
             mExitGuestDialog.cancel();
@@ -323,6 +336,13 @@ public class UserSwitcherController {
                 }
                 return;
             }
+            if (ACTION_LOGOUT_USER.equals(intent.getAction())) {
+                int currentUser = ActivityManager.getCurrentUser();
+                if (currentUser != UserHandle.USER_SYSTEM) {
+                    switchToUserId(UserHandle.USER_SYSTEM);
+                    stopUserId(currentUser);
+                }
+            }
             if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                 final int currentId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 UserInfo userInfo = mUserManager.getUserInfo(currentId);
@@ -357,6 +377,11 @@ public class UserSwitcherController {
                     }
                 }
                 notifyAdapters();
+
+                if (UserManager.isSplitSystemUser() && userInfo != null && !userInfo.isGuest()
+                        && userInfo.id != UserHandle.USER_SYSTEM) {
+                    showLogoutNotification(currentId);
+                }
             }
             int forcePictureLoadForId = UserHandle.USER_NULL;
             if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
@@ -382,6 +407,24 @@ public class UserSwitcherController {
                     .build();
             NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST, ID_REMOVE_GUEST,
                     notification, new UserHandle(guestUserId));
+        }
+
+        private void showLogoutNotification(int userId) {
+            PendingIntent logoutPI = PendingIntent.getBroadcastAsUser(mContext,
+                    0, new Intent(ACTION_LOGOUT_USER), 0, UserHandle.SYSTEM);
+            Notification notification = new Notification.Builder(mContext)
+                    .setVisibility(Notification.VISIBILITY_SECRET)
+                    .setPriority(Notification.PRIORITY_MIN)
+                    .setSmallIcon(R.drawable.ic_person)
+                    .setContentTitle(mContext.getString(R.string.user_logout_notification_title))
+                    .setContentText(mContext.getString(R.string.user_logout_notification_text))
+                    .setShowWhen(false)
+                    .addAction(R.drawable.ic_delete,
+                            mContext.getString(R.string.user_logout_notification_action),
+                            logoutPI)
+                    .build();
+            NotificationManager.from(mContext).notifyAsUser(TAG_LOGOUT_USER, ID_LOGOUT_USER,
+                    notification, new UserHandle(userId));
         }
     };
 
