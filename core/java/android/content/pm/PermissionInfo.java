@@ -145,12 +145,10 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_COSTS_MONEY = 1<<0;
 
     /**
-     * Flag for {@link #protectionLevel}, corresponding
-     * to the <code>hide</code> value of
-     * {@link android.R.attr#permissionFlags}.
-     * @hide
+     * Flag for {@link #flags}, indicating that this permission has been
+     * installed into the system's globally defined permissions.
      */
-    public static final int PROTECTION_FLAG_HIDE = 1<<1;
+    public static final int FLAG_INSTALLED = 1<<30;
 
     /**
      * Additional flags about this permission as given by
@@ -209,6 +207,15 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level&PermissionInfo.PROTECTION_FLAG_PRE23) != 0) {
             protLevel += "|pre23";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_INSTALLER) != 0) {
+            protLevel += "|installer";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0) {
+            protLevel += "|verifier";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_PREINSTALLED) != 0) {
+            protLevel += "|preinstalled";
         }
         return protLevel;
     }
