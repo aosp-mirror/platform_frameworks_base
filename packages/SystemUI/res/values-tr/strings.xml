@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Bilgisayarın RSA anahtarı parmak izi:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Bu bilgisayardan her zaman izin ver"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB hata ayıklama işlevine izin verilmiyor"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Şu anda bu cihazda oturum açan kullanıcı, USB hata ayıklamayı açamaz. Bu özelliği kullanabilmek için lütfen Yönetici kullanıcıya geçin."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Şu anda bu cihazda oturum açan kullanıcı, USB hata ayıklamayı açamaz. Bu özelliği kullanabilmek için lütfen Yönetici olan kullanıcıya geçin."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Yakınlaştır (ekranı kaplasın)"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Genişlet (ekran kapansın)"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Ekran görüntüsü kaydediliyor..."</string>
