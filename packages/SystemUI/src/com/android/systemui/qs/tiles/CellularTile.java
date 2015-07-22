@@ -45,6 +45,8 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     private final MobileDataController mDataController;
     private final CellularDetailAdapter mDetailAdapter;
 
+    private final CellSignalCallback mSignalCallback = new CellSignalCallback();
+
     public CellularTile(Host host) {
         super(host);
         mController = host.getNetworkController();
@@ -90,8 +92,10 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     protected void handleUpdateState(SignalState state, Object arg) {
         state.visible = mController.hasMobileDataFeature();
         if (!state.visible) return;
-        final CallbackInfo cb = (CallbackInfo) arg;
-        if (cb == null) return;
+        CallbackInfo cb = (CallbackInfo) arg;
+        if (cb == null) {
+            cb = mSignalCallback.mInfo;
+        }
 
         final Resources r = mContext.getResources();
         final int iconId = cb.noSim ? R.drawable.ic_qs_no_sim
@@ -152,7 +156,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         boolean isDataTypeIconWide;
     }
 
-    private final SignalCallback mSignalCallback = new SignalCallbackAdapter() {
+    private final class CellSignalCallback extends SignalCallbackAdapter {
         private final CallbackInfo mInfo = new CallbackInfo();
         @Override
         public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
