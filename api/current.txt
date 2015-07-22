@@ -66,6 +66,7 @@ package android {
     field public static final java.lang.String FACTORY_TEST = "android.permission.FACTORY_TEST";
     field public static final java.lang.String FLASHLIGHT = "android.permission.FLASHLIGHT";
     field public static final java.lang.String GET_ACCOUNTS = "android.permission.GET_ACCOUNTS";
+    field public static final java.lang.String GET_ACCOUNTS_PRIVILEGED = "android.permission.GET_ACCOUNTS_PRIVILEGED";
     field public static final java.lang.String GET_PACKAGE_SIZE = "android.permission.GET_PACKAGE_SIZE";
     field public static final deprecated java.lang.String GET_TASKS = "android.permission.GET_TASKS";
     field public static final java.lang.String GLOBAL_SEARCH = "android.permission.GLOBAL_SEARCH";
