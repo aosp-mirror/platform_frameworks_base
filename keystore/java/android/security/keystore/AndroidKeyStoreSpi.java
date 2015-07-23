@@ -672,6 +672,11 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             KeymasterUtils.addUserAuthArgs(args,
                     params.isUserAuthenticationRequired(),
                     params.getUserAuthenticationValidityDurationSeconds());
+            KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
+                    args,
+                    keymasterAlgorithm,
+                    keymasterBlockModes,
+                    keymasterDigests);
             args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
                     params.getKeyValidityStart());
             args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
