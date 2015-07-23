@@ -20,6 +20,7 @@ import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_RENAME_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_COPY_DOCUMENT;
+import static android.provider.DocumentsContract.METHOD_MOVE_DOCUMENT;
 import static android.provider.DocumentsContract.buildDocumentUri;
 import static android.provider.DocumentsContract.buildDocumentUriMaybeUsingTree;
 import static android.provider.DocumentsContract.buildTreeDocumentUri;
@@ -277,6 +278,24 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new UnsupportedOperationException("Copy not supported");
     }
 
+    /**
+     * Move the requested document or a document tree.
+     * <p>
+     * Moves a document including all child documents to another location within
+     * the same document provider. Upon completion returns the document id of
+     * the copied document at the target destination. {@code null} must never
+     * be returned.
+     *
+     * @param sourceDocumentId the document to move.
+     * @param targetParentDocumentId the target document to be a new parent of the
+     *     source document.
+     * @hide
+     */
+    @SuppressWarnings("unused")
+    public String moveDocument(String sourceDocumentId, String targetParentDocumentId)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("Move not supported");
+    }
     /**
      * Return all roots currently provided. To display to users, you must define
      * at least one root. You should avoid making network requests to keep this
@@ -724,6 +743,32 @@ public abstract class DocumentsProvider extends ContentProvider {
 
                     out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
                 }
+
+            } else if (METHOD_MOVE_DOCUMENT.equals(method)) {
+                final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
+                final String targetId = DocumentsContract.getDocumentId(targetUri);
+
+                enforceReadPermissionInner(documentUri, null);
+                enforceWritePermissionInner(targetUri, null);
+
+                final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
+                final String newDocumentId = moveDocument(documentId, targetId);
+
+                if (newDocumentId != null) {
+                    final Uri newDocumentUri = buildDocumentUriMaybeUsingTree(documentUri,
+                            newDocumentId);
+
+                    if (!isTreeUri(newDocumentUri)) {
+                        final int modeFlags = getCallingOrSelfUriPermissionModeFlags(context,
+                                documentUri);
+                        context.grantUriPermission(getCallingPackage(), newDocumentUri, modeFlags);
+                    }
+
+                    out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
+                }
+
+                // Original document no longer exists, clean up any grants
+                revokeDocumentPermission(documentId);
 
             } else {
                 throw new UnsupportedOperationException("Method not supported " + method);

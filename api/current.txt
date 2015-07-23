@@ -26016,6 +26016,7 @@ package android.provider {
     field public static final int FLAG_DIR_SUPPORTS_CREATE = 8; // 0x8
     field public static final int FLAG_SUPPORTS_COPY = 128; // 0x80
     field public static final int FLAG_SUPPORTS_DELETE = 4; // 0x4
+    field public static final int FLAG_SUPPORTS_MOVE = 256; // 0x100
     field public static final int FLAG_SUPPORTS_RENAME = 64; // 0x40
     field public static final int FLAG_SUPPORTS_THUMBNAIL = 1; // 0x1
     field public static final int FLAG_SUPPORTS_WRITE = 2; // 0x2

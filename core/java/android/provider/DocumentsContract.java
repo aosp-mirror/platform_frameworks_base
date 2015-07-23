@@ -324,11 +324,20 @@ public final class DocumentsContract {
          * within the same document provider.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#copyDocument(ContentProviderClient, Uri,
-         *      String)
-         * @see DocumentsProvider#copyDocument(String, String, String)
+         * @see DocumentsContract#copyDocument(ContentProviderClient, Uri, Uri)
+         * @see DocumentsProvider#copyDocument(String, String)
          */
         public static final int FLAG_SUPPORTS_COPY = 1 << 7;
+
+        /**
+         * Flag indicating that a document can be moved to another location
+         * within the same document provider.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#moveDocument(ContentProviderClient, Uri, Uri)
+         * @see DocumentsProvider#moveDocument(String, String)
+         */
+        public static final int FLAG_SUPPORTS_MOVE = 1 << 8;
 
         /**
          * Flag indicating that document titles should be hidden when viewing
@@ -553,6 +562,8 @@ public final class DocumentsContract {
     public static final String METHOD_DELETE_DOCUMENT = "android:deleteDocument";
     /** {@hide} */
     public static final String METHOD_COPY_DOCUMENT = "android:copyDocument";
+    /** {@hide} */
+    public static final String METHOD_MOVE_DOCUMENT = "android:moveDocument";
 
     /** {@hide} */
     public static final String EXTRA_URI = "uri";
@@ -1062,6 +1073,40 @@ public final class DocumentsContract {
         in.putParcelable(DocumentsContract.EXTRA_TARGET_URI, targetParentDocumentUri);
 
         final Bundle out = client.call(METHOD_COPY_DOCUMENT, null, in);
+        return out.getParcelable(DocumentsContract.EXTRA_URI);
+    }
+
+    /**
+     * Moves the given document under a new parent.
+     *
+     * @param sourceDocumentUri document with {@link Document#FLAG_SUPPORTS_MOVE}
+     * @param targetParentDocumentUri document which will become a new parent of the source
+     *         document.
+     * @return the moved document, or {@code null} if failed.
+     * @hide
+     */
+    public static Uri moveDocument(ContentResolver resolver, Uri sourceDocumentUri,
+            Uri targetParentDocumentUri) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                sourceDocumentUri.getAuthority());
+        try {
+            return moveDocument(client, sourceDocumentUri, targetParentDocumentUri);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to move document", e);
+            return null;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /** {@hide} */
+    public static Uri moveDocument(ContentProviderClient client, Uri sourceDocumentUri,
+            Uri targetParentDocumentUri) throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, sourceDocumentUri);
+        in.putParcelable(DocumentsContract.EXTRA_TARGET_URI, targetParentDocumentUri);
+
+        final Bundle out = client.call(METHOD_MOVE_DOCUMENT, null, in);
         return out.getParcelable(DocumentsContract.EXTRA_URI);
     }
 
