@@ -114,19 +114,23 @@ specifications:</p>
 
 <h4>Small icon</h4>
 
-<p>Recommendation cards include a small icon that is imposed over a colored background. The icon and
-background color display at 100% opacity when the card is selected, and at 50% opacity when not
-selected.</p>
+<p>Recommendation cards include a small icon that is imposed over a colored
+background. The icon and background color both display at 100% opacity when the card
+is selected and at 50% opacity when the card is not selected.</p>
 
 <img src="{@docRoot}design/tv/images/icon.png" alt="Recommendation icon examples" />
 
-<p>Here are the requirements for recommendation small icons:</p>
+<p>Here are the requirements for a small recommendation icon:</p>
 
 <ul>
-  <li>Flat image</li>
-  <li>Monocolor: size 16x16dp, white (#fff) icon with transparent background, PNG format</li>
-  <li>Graphics should be centered within the icon image</li>
+  <li>Visually flat graphic, monocolor, 16x16dp</li>
+  <li>Color <code>#eeeeee</code> with transparency</li>
+  <li>Graphic centered over transparent background</li>
+  <li>PNG file format</li>
 </ul>
+
+<p class="note"><strong>Note:</strong> The color value <code>#eeeeee</code> is actually a light
+gray, but it is used by the system to create a background which appears white.</p>
 
 <h2>Audio Feedback</h2>
 
