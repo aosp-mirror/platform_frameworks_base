@@ -533,6 +533,12 @@ public class AppSecurityPermissions {
             int existingReqFlags) {
         final int base = pInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
         final boolean isNormal = (base == PermissionInfo.PROTECTION_NORMAL);
+
+        // We do not show normal permissions in the UI.
+        if (isNormal) {
+            return false;
+        }
+
         final boolean isDangerous = (base == PermissionInfo.PROTECTION_DANGEROUS)
                 || ((pInfo.protectionLevel&PermissionInfo.PROTECTION_FLAG_PRE23) != 0);
         final boolean isRequired =
@@ -546,7 +552,7 @@ public class AppSecurityPermissions {
 
         // Dangerous and normal permissions are always shown to the user if the permission
         // is required, or it was previously granted
-        if ((isNormal || isDangerous) && (isRequired || wasGranted || isGranted)) {
+        if (isDangerous && (isRequired || wasGranted || isGranted)) {
             return true;
         }
 
