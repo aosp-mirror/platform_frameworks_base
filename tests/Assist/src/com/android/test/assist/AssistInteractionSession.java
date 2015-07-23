@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.voice.VoiceInteractionSession;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewTreeObserver;
@@ -69,6 +70,7 @@ public class AssistInteractionSession extends VoiceInteractionSession {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         // Simulate slowness of Assist app
         try {
             Thread.sleep(1000);
@@ -103,6 +105,12 @@ public class AssistInteractionSession extends VoiceInteractionSession {
                         }
                     });
         }
+    }
+
+    @Override
+    public void onLockscreenShown() {
+        super.onLockscreenShown();
+        Log.i("Assistant", "Lockscreen was shown");
     }
 
     private void playAssistAnimation() {

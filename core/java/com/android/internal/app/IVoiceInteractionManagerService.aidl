@@ -131,4 +131,9 @@ interface IVoiceInteractionManagerService {
      * from the lockscreen.
      */
     boolean activeServiceSupportsLaunchFromKeyguard();
+
+    /**
+     * Called when the lockscreen got shown.
+     */
+    void onLockscreenShown();
 }
