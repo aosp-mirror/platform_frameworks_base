@@ -7319,6 +7319,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (i=0; i<N; i++) {
                 PackageParser.Permission p = pkg.permissions.get(i);
 
+                // Assume by default that we did not install this permission into the system.
+                p.info.flags &= ~PermissionInfo.FLAG_INSTALLED;
+
                 // Now that permission groups have a special meaning, we ignore permission
                 // groups for legacy apps to prevent unexpected behavior. In particular,
                 // permissions for one app being granted to someone just becuase they happen
@@ -7348,6 +7351,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             bp.perm = p;
                             bp.uid = pkg.applicationInfo.uid;
                             bp.sourcePackage = p.info.packageName;
+                            p.info.flags |= PermissionInfo.FLAG_INSTALLED;
                         } else if (!currentOwnerIsSystem) {
                             String msg = "New decl " + p.owner + " of permission  "
                                     + p.info.name + " is system; overriding " + bp.sourcePackage;
@@ -7373,6 +7377,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             bp.perm = p;
                             bp.uid = pkg.applicationInfo.uid;
                             bp.sourcePackage = p.info.packageName;
+                            p.info.flags |= PermissionInfo.FLAG_INSTALLED;
                             if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
                                 if (r == null) {
                                     r = new StringBuilder(256);
@@ -14686,12 +14691,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    s[hared-users]: dump shared user IDs");
                 pw.println("    m[essages]: print collected runtime messages");
                 pw.println("    v[erifiers]: print package verifier info");
-                pw.println("    version: print database version info");
-                pw.println("    write: write current settings now");
-                pw.println("    <package.name>: info about given package");
-                pw.println("    installs: details about install sessions");
                 pw.println("    d[omain-preferred-apps]: print domains preferred apps");
                 pw.println("    i[ntent-filter-verifiers]|ifv: print intent filter verifier info");
+                pw.println("    version: print database version info");
+                pw.println("    write: write current settings now");
+                pw.println("    installs: details about install sessions");
+                pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
                 checkin = true;
