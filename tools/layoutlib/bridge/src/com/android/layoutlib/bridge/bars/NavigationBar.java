@@ -19,8 +19,6 @@ package com.android.layoutlib.bridge.bars;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.Density;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.util.AttributeSet;
@@ -33,6 +31,8 @@ public class NavigationBar extends CustomBar {
 
     /** Navigation bar background color attribute name. */
     private static final String ATTR_COLOR = "navigationBarColor";
+    /** Attribute for translucency property. */
+    public static final String ATTR_TRANSLUCENT = "windowTranslucentNavigation";
     // These correspond to @dimen/navigation_side_padding in the system ui code.
     private static final int PADDING_WIDTH_DEFAULT = 36;
     private static final int PADDING_WIDTH_SW360 = 40;
@@ -49,8 +49,8 @@ public class NavigationBar extends CustomBar {
      * Constructor to be used when creating the {@link NavigationBar} as a regular control.
      * This is currently used by the theme editor.
      */
-    public NavigationBar(Context context, AttributeSet attrs)
-            throws XmlPullParserException {
+    @SuppressWarnings("unused")
+    public NavigationBar(Context context, AttributeSet attrs) {
         this((BridgeContext) context,
                 Density.getEnum(((BridgeContext) context).getMetrics().densityDpi),
                 LinearLayout.HORIZONTAL, // In this mode, it doesn't need to be render vertically
@@ -61,11 +61,11 @@ public class NavigationBar extends CustomBar {
     }
 
     public NavigationBar(BridgeContext context, Density density, int orientation, boolean isRtl,
-            boolean rtlEnabled, int simulatedPlatformVersion) throws XmlPullParserException {
+            boolean rtlEnabled, int simulatedPlatformVersion) {
         super(context, orientation, getShortestWidth(context)>= 600 ? LAYOUT_600DP_XML : LAYOUT_XML,
                 "navigation_bar.xml", simulatedPlatformVersion);
 
-        int color = getThemeAttrColor(ATTR_COLOR, true);
+        int color = getBarColor(ATTR_COLOR, ATTR_TRANSLUCENT);
         setBackgroundColor(color == 0 ? 0xFF000000 : color);
 
         // Cannot access the inside items through id because no R.id values have been

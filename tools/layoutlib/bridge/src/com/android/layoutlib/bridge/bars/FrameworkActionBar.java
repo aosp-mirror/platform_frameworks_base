@@ -60,23 +60,24 @@ public class FrameworkActionBar extends BridgeActionBar {
     /**
      * Inflate the action bar and attach it to {@code parentView}
      */
-    public FrameworkActionBar(@NonNull BridgeContext context, @NonNull SessionParams params,
-            @NonNull ViewGroup parentView) {
-        super(context, params, parentView);
+    public FrameworkActionBar(@NonNull BridgeContext context, @NonNull SessionParams params) {
+        super(context, params);
 
         View decorContent = getDecorContent();
 
         mActionBar = FrameworkActionBarWrapper.getActionBarWrapper(context, getCallBack(),
                 decorContent);
 
-        FrameLayout contentRoot = (FrameLayout) mEnclosingLayout.findViewById(android.R.id.content);
+        FrameLayout contentRoot = (FrameLayout) decorContent.findViewById(android.R.id.content);
 
         // If something went wrong and we were not able to initialize the content root,
         // just add a frame layout inside this and return.
         if (contentRoot == null) {
             contentRoot = new FrameLayout(context);
             setMatchParent(contentRoot);
-            mEnclosingLayout.addView(contentRoot);
+            if (mEnclosingLayout != null) {
+                mEnclosingLayout.addView(contentRoot);
+            }
             setContentRoot(contentRoot);
         } else {
             setContentRoot(contentRoot);
@@ -162,6 +163,7 @@ public class FrameworkActionBar extends BridgeActionBar {
         listView.setDivider(a.getDrawable(R.attr.actionBarDivider));
         a.recycle();
         listView.setElevation(mActionBar.getMenuPopupElevation());
+        assert mEnclosingLayout != null : "Unable to find view to attach ActionMenuPopup.";
         mEnclosingLayout.addView(listView);
     }
 
