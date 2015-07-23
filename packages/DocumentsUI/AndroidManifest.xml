@@ -51,7 +51,7 @@
             android:name=".StandaloneActivity"
             android:theme="@style/StandaloneTheme"
             android:icon="@drawable/ic_doc_text"
-            android:enabled="false">
+            android:enabled="@bool/productivity_device">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
