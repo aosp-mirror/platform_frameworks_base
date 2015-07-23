@@ -198,6 +198,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public static final boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
 
+    public static final String ACTION_FAKE_ARTWORK = "fake_artwork";
+
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_PANELS = 1001;
     private static final int MSG_OPEN_SETTINGS_PANEL = 1002;
@@ -890,11 +892,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
-        if (DEBUG_MEDIA_FAKE_ARTWORK) {
-            filter.addAction("fake_artwork");
-        }
-        filter.addAction(ACTION_DEMO);
         context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+
+        IntentFilter demoFilter = new IntentFilter();
+        if (DEBUG_MEDIA_FAKE_ARTWORK) {
+            demoFilter.addAction(ACTION_FAKE_ARTWORK);
+        }
+        demoFilter.addAction(ACTION_DEMO);
+        context.registerReceiverAsUser(mDemoReceiver, UserHandle.ALL, demoFilter,
+                android.Manifest.permission.DUMP, null);
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
@@ -2852,7 +2858,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mScreenOn = true;
                 notifyNavigationBarScreenOn(true);
             }
-            else if (ACTION_DEMO.equals(action)) {
+        }
+    };
+
+    private BroadcastReceiver mDemoReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) Log.v(TAG, "onReceive: " + intent);
+            String action = intent.getAction();
+            if (ACTION_DEMO.equals(action)) {
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
                     String command = bundle.getString("command", "").trim().toLowerCase();
@@ -2864,7 +2877,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         }
                     }
                 }
-            } else if ("fake_artwork".equals(action)) {
+            } else if (ACTION_FAKE_ARTWORK.equals(action)) {
                 if (DEBUG_MEDIA_FAKE_ARTWORK) {
                     updateMediaMetaData(true);
                 }
@@ -3188,6 +3201,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mHandlerThread = null;
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mDemoReceiver);
         mAssistManager.destroy();
 
         final SignalClusterView signalCluster =
