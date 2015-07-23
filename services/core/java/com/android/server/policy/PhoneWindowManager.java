@@ -635,6 +635,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_POWER_DELAYED_PRESS = 13;
     private static final int MSG_POWER_LONG_PRESS = 14;
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 15;
+    private static final int MSG_REQUEST_TRANSIENT_BARS = 16;
+
+    private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
+    private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -685,6 +689,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_UPDATE_DREAMING_SLEEP_TOKEN:
                     updateDreamingSleepToken(msg.arg1 != 0);
+                    break;
+                case MSG_REQUEST_TRANSIENT_BARS:
+                    WindowState targetBar = (msg.arg1 == MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS) ?
+                            mStatusBar : mNavigationBar;
+                    if (targetBar != null) {
+                        requestTransientBars(targetBar);
+                    }
                     break;
             }
         }
@@ -1502,6 +1513,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     @Override
                     public void onUpOrCancel() {
                         mOrientationListener.onTouchEnd();
+                    }
+                    @Override
+                    public void onMouseHoverAtTop() {
+                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
+                        Message msg = mHandler.obtainMessage(MSG_REQUEST_TRANSIENT_BARS);
+                        msg.arg1 = MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS;
+                        mHandler.sendMessageDelayed(msg, 500);
+                    }
+                    @Override
+                    public void onMouseHoverAtBottom() {
+                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
+                        Message msg = mHandler.obtainMessage(MSG_REQUEST_TRANSIENT_BARS);
+                        msg.arg1 = MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION;
+                        mHandler.sendMessageDelayed(msg, 500);
+                    }
+                    @Override
+                    public void onMouseLeaveFromEdge() {
+                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
                     }
                 });
         mImmersiveModeConfirmation = new ImmersiveModeConfirmation(mContext);

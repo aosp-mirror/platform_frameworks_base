@@ -50,6 +50,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private int mDownPointers;
     private boolean mSwipeFireable;
     private boolean mDebugFireable;
+    private boolean mMouseHoveringAtEdge;
 
     public SystemGesturesPointerEventListener(Context context, Callbacks callbacks) {
         mCallbacks = checkNull("callbacks", callbacks);
@@ -75,6 +76,10 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
                 mDebugFireable = true;
                 mDownPointers = 0;
                 captureDown(event, 0);
+                if (mMouseHoveringAtEdge) {
+                    mMouseHoveringAtEdge = false;
+                    mCallbacks.onMouseLeaveFromEdge();
+                }
                 mCallbacks.onDown();
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -100,6 +105,22 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
                     } else if (swipe == SWIPE_FROM_RIGHT) {
                         if (DEBUG) Slog.d(TAG, "Firing onSwipeFromRight");
                         mCallbacks.onSwipeFromRight();
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_MOVE:
+                if (event.getPointerCount() == 1
+                        && event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE) {
+                    if (!mMouseHoveringAtEdge && event.getY() == 0) {
+                        mCallbacks.onMouseHoverAtTop();
+                        mMouseHoveringAtEdge = true;
+                    } else if (!mMouseHoveringAtEdge && event.getY() >= screenHeight - 1) {
+                        mCallbacks.onMouseHoverAtBottom();
+                        mMouseHoveringAtEdge = true;
+                    } else if (mMouseHoveringAtEdge
+                            && (event.getY() > 0 && event.getY() < screenHeight - 1)) {
+                        mCallbacks.onMouseLeaveFromEdge();
+                        mMouseHoveringAtEdge = false;
                     }
                 }
                 break;
@@ -196,6 +217,9 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
         void onSwipeFromRight();
         void onDown();
         void onUpOrCancel();
+        void onMouseHoverAtTop();
+        void onMouseHoverAtBottom();
+        void onMouseLeaveFromEdge();
         void onDebug();
     }
 }
