@@ -15,6 +15,8 @@
  */
 package android.annotation;
 
+import android.content.Intent;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -22,6 +24,7 @@ import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
@@ -51,11 +54,31 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  *   &#64;RequiresPermission.Write(&#64;RequiresPermission(WRITE_HISTORY_BOOKMARKS))
  *   public static final Uri BOOKMARKS_URI = Uri.parse("content://browser/bookmarks");
  * }</pre>
+ * <p>
+ * When specified on a parameter, the annotation indicates that the method requires
+ * a permission which depends on the value of the parameter. For example, consider
+ * {@link android.app.Activity#startActivity(Intent)}:
+ * <pre>{@code
+ *   public void startActivity(&#64;RequiresPermission Intent intent) { ... }
+ * }</pre>
+ * Notice how there are no actual permission names listed in the annotation. The actual
+ * permissions required will depend on the particular intent passed in. For example,
+ * the code may look like this:
+ * <pre>{@code
+ *   Intent intent = new Intent(Intent.ACTION_CALL);
+ *   startActivity(intent);
+ * }</pre>
+ * and the actual permission requirement for this particular intent is described on
+ * the Intent name itself:
+ * <pre>{@code
+ *   &#64;RequiresPermission(Manifest.permission.CALL_PHONE)
+ *   public static final String ACTION_CALL = "android.intent.action.CALL";
+ * }</pre>
  *
  * @hide
  */
 @Retention(SOURCE)
-@Target({ANNOTATION_TYPE,METHOD,CONSTRUCTOR,FIELD})
+@Target({ANNOTATION_TYPE,METHOD,CONSTRUCTOR,FIELD,PARAMETER})
 public @interface RequiresPermission {
     /**
      * The name of the permission that is required, if precisely one permission
@@ -87,18 +110,28 @@ public @interface RequiresPermission {
     boolean conditional() default false;
 
     /**
-     * Specifies that the given permission is required for read operations
+     * Specifies that the given permission is required for read operations.
+     * <p>
+     * When specified on a parameter, the annotation indicates that the method requires
+     * a permission which depends on the value of the parameter (and typically
+     * the corresponding field passed in will be one of a set of constants which have
+     * been annotated with a {@code &#64;RequiresPermission} annotation.)
      */
-    @Target(FIELD)
+    @Target({FIELD, METHOD, PARAMETER})
     @interface Read {
-        RequiresPermission value();
+        RequiresPermission value() default @RequiresPermission;
     }
 
     /**
-     * Specifies that the given permission is required for write operations
+     * Specifies that the given permission is required for write operations.
+     * <p>
+     * When specified on a parameter, the annotation indicates that the method requires
+     * a permission which depends on the value of the parameter (and typically
+     * the corresponding field passed in will be one of a set of constants which have
+     * been annotated with a {@code &#64;RequiresPermission} annotation.)
      */
-    @Target(FIELD)
+    @Target({FIELD, METHOD, PARAMETER})
     @interface Write {
-        RequiresPermission value();
+        RequiresPermission value() default @RequiresPermission;
     }
 }
