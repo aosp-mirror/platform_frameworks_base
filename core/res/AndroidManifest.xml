@@ -331,7 +331,7 @@
 
     <!-- Used for runtime permissions related to user's contacts and profile. -->
     <permission-group android:name="android.permission-group.CONTACTS"
-        android:icon="@drawable/perm_group_social_info"
+        android:icon="@drawable/perm_group_contacts"
         android:label="@string/permgrouplab_contacts"
         android:description="@string/permgroupdesc_contacts"
         android:priority="100" />
@@ -391,7 +391,7 @@
 
     <!-- Used for runtime permissions related to user's SMS messages. -->
     <permission-group android:name="android.permission-group.SMS"
-        android:icon="@drawable/perm_group_messages"
+        android:icon="@drawable/perm_group_sms"
         android:label="@string/permgrouplab_sms"
         android:description="@string/permgroupdesc_sms"
         android:priority="300" />
@@ -729,6 +729,7 @@
     <!-- Used for permissions that are associated with accessing
          camera or capturing images/video from the device. -->
     <permission-group android:name="android.permission-group.SENSORS"
+        android:icon="@drawable/perm_group_sensors"
         android:label="@string/permgrouplab_sensors"
         android:description="@string/permgroupdesc_sensors"
         android:priority="800" />
@@ -1545,7 +1546,9 @@
     <permission android:name="android.permission.CHANGE_CONFIGURATION"
         android:protectionLevel="signature|privileged|development" />
 
-    <!-- Allows an application to read or write the system settings. -->
+    <!-- Allows an application to read or write the system settings.
+         <p>Protection level: signature
+    -->
     <permission android:name="android.permission.WRITE_SETTINGS"
         android:label="@string/permlab_writeSettings"
         android:description="@string/permdesc_writeSettings"
