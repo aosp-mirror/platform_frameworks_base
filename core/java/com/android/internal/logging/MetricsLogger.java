@@ -27,7 +27,20 @@ import android.view.View;
  */
 public class MetricsLogger implements MetricsConstants {
     // Temporary constants go here, to await migration to MetricsConstants.
-    // next value is 227;
+    // next value is 238;
+
+    public static final int TUNER = 227;
+    public static final int TUNER_QS = 228;
+    public static final int TUNER_DEMO_MODE = 229;
+
+    public static final int TUNER_QS_REORDER = 230;
+    public static final int TUNER_QS_ADD = 231;
+    public static final int TUNER_QS_REMOVE = 232;
+    public static final int TUNER_STATUS_BAR_ENABLE = 233;
+    public static final int TUNER_STATUS_BAR_DISABLE = 234;
+    public static final int TUNER_DEMO_MODE_ENABLED = 235;
+    public static final int TUNER_DEMO_MODE_ON = 236;
+    public static final int TUNER_BATTERY_PERCENTAGE = 237;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
