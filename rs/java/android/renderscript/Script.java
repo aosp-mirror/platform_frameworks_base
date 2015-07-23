@@ -284,6 +284,35 @@ public class Script extends BaseObj {
         mRS.nScriptForEach(getID(mRS), slot, in_ids, out_id, params, limits);
     }
 
+    /**
+     * Only intended for use by generated reflected code.
+     *
+     * @hide
+     */
+    protected void reduce(int slot, Allocation ain, Allocation aout, LaunchOptions sc) {
+        mRS.validate();
+        mRS.validateObject(ain);
+        mRS.validateObject(aout);
+
+        if (ain == null || aout == null) {
+            throw new RSIllegalArgumentException(
+                "Both ain and aout are required to be non-null.");
+        }
+
+        long in_id = ain.getID(mRS);
+        long out_id = aout.getID(mRS);
+
+        int[] limits = null;
+        if (sc != null) {
+            limits = new int[2];
+
+            limits[0] = sc.xstart;
+            limits[1] = sc.xend;
+        }
+
+        mRS.nScriptReduce(getID(mRS), slot, in_id, out_id, limits);
+    }
+
     long[] mInIdsBuffer;
 
     Script(long id, RenderScript rs) {
@@ -291,7 +320,6 @@ public class Script extends BaseObj {
 
         mInIdsBuffer = new long[1];
     }
-
 
     /**
      * Only intended for use by generated reflected code.
