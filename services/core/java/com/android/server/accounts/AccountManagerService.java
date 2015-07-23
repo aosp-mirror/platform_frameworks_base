@@ -3799,7 +3799,8 @@ public class AccountManagerService
          * access accounts of the specified account.
          */
         boolean isPermitted =
-                isPermitted(callingUid, Manifest.permission.GET_ACCOUNTS);
+                isPermitted(callingUid, Manifest.permission.GET_ACCOUNTS,
+                        Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
         boolean isAccountManagedByCaller = isAccountManagedByCaller(accountType, callingUid);
         Log.w(TAG, String.format(
                 "isReadAccountPermitted: isPermitted: %s, isAM: %s",
