@@ -49,8 +49,10 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -805,7 +807,8 @@ public class UsbDeviceManager {
         }
 
         private String getDefaultFunctions() {
-            return mAdbEnabled ? UsbManager.USB_FUNCTION_ADB : UsbManager.USB_FUNCTION_MTP;
+            return SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY,
+                    UsbManager.USB_FUNCTION_ADB);
         }
 
         public void dump(IndentingPrintWriter pw) {
