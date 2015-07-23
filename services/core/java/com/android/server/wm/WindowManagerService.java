@@ -10029,70 +10029,70 @@ public class WindowManagerService extends IWindowManager.Stub
                                         WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
                                 if (DEBUG_LAYOUT_REPEATS) {
                                     debugLayoutRepeats(
-                                        "dream and commitFinishDrawingLocked true",
-                                        displayContent.pendingLayoutChanges);
+                                            "dream and commitFinishDrawingLocked true",
+                                            displayContent.pendingLayoutChanges);
                                 }
                             }
                             if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                                 if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                                        "First draw done in potential wallpaper target " + w);
+                                            "First draw done in potential wallpaper target " + w);
                                 mInnerFields.mWallpaperMayChange = true;
                                 displayContent.pendingLayoutChanges |=
                                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                                 if (DEBUG_LAYOUT_REPEATS) {
                                     debugLayoutRepeats(
-                                        "wallpaper and commitFinishDrawingLocked true",
-                                        displayContent.pendingLayoutChanges);
+                                            "wallpaper and commitFinishDrawingLocked true",
+                                            displayContent.pendingLayoutChanges);
                                 }
                             }
                         }
 
                         winAnimator.setSurfaceBoundariesLocked(recoveringMemory);
+                    }
 
-                        final AppWindowToken atoken = w.mAppToken;
-                        if (DEBUG_STARTING_WINDOW && atoken != null
-                                && w == atoken.startingWindow) {
-                            Slog.d(TAG, "updateWindows: starting " + w + " isOnScreen="
-                                + w.isOnScreen() + " allDrawn=" + atoken.allDrawn
-                                + " freezingScreen=" + atoken.mAppAnimator.freezingScreen);
+                    final AppWindowToken atoken = w.mAppToken;
+                    if (DEBUG_STARTING_WINDOW && atoken != null
+                            && w == atoken.startingWindow) {
+                        Slog.d(TAG, "updateWindows: starting " + w + " isOnScreen="
+                            + w.isOnScreen() + " allDrawn=" + atoken.allDrawn
+                            + " freezingScreen=" + atoken.mAppAnimator.freezingScreen);
+                    }
+                    if (atoken != null
+                            && (!atoken.allDrawn || atoken.mAppAnimator.freezingScreen)) {
+                        if (atoken.lastTransactionSequence != mTransactionSequence) {
+                            atoken.lastTransactionSequence = mTransactionSequence;
+                            atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
+                            atoken.startingDisplayed = false;
                         }
-                        if (atoken != null
-                                && (!atoken.allDrawn || atoken.mAppAnimator.freezingScreen)) {
-                            if (atoken.lastTransactionSequence != mTransactionSequence) {
-                                atoken.lastTransactionSequence = mTransactionSequence;
-                                atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
-                                atoken.startingDisplayed = false;
+                        if ((w.isOnScreenIgnoringKeyguard()
+                                || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
+                                && !w.mExiting && !w.mDestroying) {
+                            if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
+                                Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
+                                        + ", isAnimating=" + winAnimator.isAnimating());
+                                if (!w.isDrawnLw()) {
+                                    Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceControl
+                                            + " pv=" + w.mPolicyVisibility
+                                            + " mDrawState=" + winAnimator.drawStateToString()
+                                            + " ah=" + w.mAttachedHidden
+                                            + " th=" + atoken.hiddenRequested
+                                            + " a=" + winAnimator.mAnimating);
+                                }
                             }
-                            if ((w.isOnScreenIgnoringKeyguard()
-                                    || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
-                                    && !w.mExiting && !w.mDestroying) {
-                                if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
-                                    Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
-                                            + ", isAnimating=" + winAnimator.isAnimating());
-                                    if (!w.isDrawnLw()) {
-                                        Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceControl
-                                                + " pv=" + w.mPolicyVisibility
-                                                + " mDrawState=" + winAnimator.drawStateToString()
-                                                + " ah=" + w.mAttachedHidden
-                                                + " th=" + atoken.hiddenRequested
-                                                + " a=" + winAnimator.mAnimating);
+                            if (w != atoken.startingWindow) {
+                                if (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing) {
+                                    atoken.numInterestingWindows++;
+                                    if (w.isDrawnLw()) {
+                                        atoken.numDrawnWindows++;
+                                        if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG,
+                                                "tokenMayBeDrawn: " + atoken
+                                                + " freezingScreen=" + atoken.mAppAnimator.freezingScreen
+                                                + " mAppFreezing=" + w.mAppFreezing);
+                                        updateAllDrawn = true;
                                     }
                                 }
-                                if (w != atoken.startingWindow) {
-                                    if (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing) {
-                                        atoken.numInterestingWindows++;
-                                        if (w.isDrawnLw()) {
-                                            atoken.numDrawnWindows++;
-                                            if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG,
-                                                    "tokenMayBeDrawn: " + atoken
-                                                    + " freezingScreen=" + atoken.mAppAnimator.freezingScreen
-                                                    + " mAppFreezing=" + w.mAppFreezing);
-                                            updateAllDrawn = true;
-                                        }
-                                    }
-                                } else if (w.isDrawnLw()) {
-                                    atoken.startingDisplayed = true;
-                                }
+                            } else if (w.isDrawnLw()) {
+                                atoken.startingDisplayed = true;
                             }
                         }
                     }
