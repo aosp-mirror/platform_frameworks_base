@@ -2274,4 +2274,9 @@
     <string-array name="config_cell_retries_per_error_code">
     </string-array>
 
+    <!-- The OEM specified sensor type for the gesture to launch the camear app. -->
+    <integer name="config_cameraLaunchGestureSensorType">-1</integer>
+    <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
+         must match the value of config_cameraLaunchGestureSensorType in OEM's HAL -->
+    <string translatable="false" name="config_cameraLaunchGestureSensorStringType"></string>
 </resources>

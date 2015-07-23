@@ -850,6 +850,11 @@ public final class SystemServer {
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_VOICE_RECOGNIZERS)) {
                     mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
                 }
+
+                if (GestureLauncherService.isGestureLauncherEnabled(context.getResources())) {
+                    Slog.i(TAG, "Gesture Launcher Service");
+                    mSystemServiceManager.startService(GestureLauncherService.class);
+                }
             }
 
             try {
