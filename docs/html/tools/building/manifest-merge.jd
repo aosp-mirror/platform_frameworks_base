@@ -303,7 +303,12 @@ attribute value.  </p>
 
 <p class="note"><strong>Note:</strong> Android Studio provides a default
 <code>&#36;{applicationId}</code> placeholder for the <code>build.gradle</code>
-<code>applicationId</code> value that is not shown in the build file.</p>
+<code>applicationId</code> value that is not shown in the build file.
+When building an AAR (Android ARchive) package for library modules, do not provide an
+automatic <code>&#64;{applicationId}</code> placeholder in the
+<a href="{@docRoot}tools/building/manifest-merge.html">manifest merge</a> settings.
+Instead, use a different placeholder, such as <code>&#64;{libApplicationId}</code> and
+provide a value for it if you want to include application Ids in the archive library. </p>
 
 
 <p>Manifest entry:</p>
