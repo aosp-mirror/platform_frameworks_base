@@ -1232,6 +1232,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (!nowPluggedIn && current.isBatteryLow() && current.level != old.level) {
             return true;
         }
+
+        // change in charging current while plugged in
+        if (nowPluggedIn && current.maxChargingCurrent != old.maxChargingCurrent) {
+            return true;
+        }
+
         return false;
     }
 
