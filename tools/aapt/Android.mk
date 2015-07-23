@@ -64,7 +64,7 @@ aaptHostStaticLibs := \
     libziparchive-host \
     libbase
 
-aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER)\"
+aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER_FROM_FILE)\"
 aaptCFlags += -Wall -Werror
 
 ifeq ($(HOST_OS),linux)
