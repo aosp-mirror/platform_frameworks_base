@@ -304,4 +304,8 @@ public class AssistManager {
     public void onUserSwitched(int newUserId) {
         updateAssistInfo();
     }
+
+    public void onLockscreenShown() {
+        mAssistUtils.onLockscreenShown();
+    }
 }
