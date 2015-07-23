@@ -3331,6 +3331,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDraggedDownRow.notifyHeightChanged(false  /* needsAnimation */);
             mDraggedDownRow = null;
         }
+        mAssistManager.onLockscreenShown();
     }
 
     private void onLaunchTransitionFadingEnded() {
