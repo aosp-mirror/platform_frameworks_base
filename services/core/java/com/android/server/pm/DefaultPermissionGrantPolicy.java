@@ -495,6 +495,16 @@ final class DefaultPermissionGrantPolicy {
                 }
             }
 
+            // Voice recognition
+            Intent voiceRecoIntent = new Intent("android.speech.RecognitionService");
+            voiceRecoIntent.addCategory(Intent.CATEGORY_DEFAULT);
+            PackageParser.Package voiceRecoPackage = getDefaultSystemHandlerServicePackageLPr(
+                    voiceRecoIntent, userId);
+            if (voiceRecoPackage != null
+                    && doesPackageSupportRuntimePermissions(voiceRecoPackage)) {
+                grantRuntimePermissionsLPw(voiceRecoPackage, MICROPHONE_PERMISSIONS, userId);
+            }
+
             // Location
             if (locationPackageNames != null) {
                 for (String packageName : locationPackageNames) {
@@ -620,6 +630,26 @@ final class DefaultPermissionGrantPolicy {
             ResolveInfo handler = handlers.get(i);
             PackageParser.Package handlerPackage = getSystemPackageLPr(
                     handler.activityInfo.packageName);
+            if (handlerPackage != null) {
+                return handlerPackage;
+            }
+        }
+        return null;
+    }
+
+    private PackageParser.Package getDefaultSystemHandlerServicePackageLPr(
+            Intent intent, int userId) {
+        List<ResolveInfo> handlers = mService.queryIntentServices(intent,
+                intent.resolveType(mService.mContext.getContentResolver()),
+                PackageManager.GET_DISABLED_COMPONENTS, userId);
+        if (handlers == null) {
+            return null;
+        }
+        final int handlerCount = handlers.size();
+        for (int i = 0; i < handlerCount; i++) {
+            ResolveInfo handler = handlers.get(i);
+            PackageParser.Package handlerPackage = getSystemPackageLPr(
+                    handler.serviceInfo.packageName);
             if (handlerPackage != null) {
                 return handlerPackage;
             }
