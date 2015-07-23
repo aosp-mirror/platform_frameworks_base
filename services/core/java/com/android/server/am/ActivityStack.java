@@ -617,12 +617,9 @@ final class ActivityStack {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = activities.get(activityNdx);
                 if (notCurrentUserTask && (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) == 0) {
-                    return null;
+                    continue;
                 }
                 if (!r.finishing && r.intent.getComponent().equals(cls) && r.userId == userId) {
-                    //Slog.i(TAG, "Found matching class!");
-                    //dump();
-                    //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
                     return r;
                 }
             }
