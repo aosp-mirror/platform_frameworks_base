@@ -510,8 +510,12 @@ public class DirectoryFragment extends Fragment {
             case MODE_GRID:
                 thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
                 if (mGridLayout == null) {
-                    int columnCount = Math.max(1, mRecView.getWidth() / thumbSize);
-                    mGridLayout = new GridLayoutManager(getContext(), columnCount);
+                    int itemPadding =
+                            getResources().getDimensionPixelSize(R.dimen.grid_item_padding);
+                    int viewPadding = mRecView.getPaddingLeft() + mRecView.getPaddingRight();
+                    int columnCount =
+                            (mRecView.getWidth() - viewPadding) / (thumbSize + itemPadding);
+                    mGridLayout = new GridLayoutManager(getContext(), Math.max(1, columnCount));
                 }
                 layout = mGridLayout;
                 break;
