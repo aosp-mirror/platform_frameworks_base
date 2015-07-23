@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -31,7 +32,11 @@ public class AssistStructure implements Parcelable {
     static final String TAG = "AssistStructure";
 
     static final boolean DEBUG_PARCEL = false;
+    static final boolean DEBUG_PARCEL_CHILDREN = false;
     static final boolean DEBUG_PARCEL_TREE = false;
+
+    static final int VALIDATE_WINDOW_TOKEN = 0x11111111;
+    static final int VALIDATE_VIEW_TOKEN = 0x22222222;
 
     boolean mHaveData;
 
@@ -173,6 +178,26 @@ public class AssistStructure implements Parcelable {
             mCurViewStackEntry = entry;
         }
 
+        void writeView(ViewNode child, Parcel out, PooledStringWriter pwriter, int levelAdj) {
+            if (DEBUG_PARCEL) Log.d(TAG, "write view: at " + out.dataPosition()
+                    + ", windows=" + mNumWrittenWindows
+                    + ", views=" + mNumWrittenViews
+                    + ", level=" + (mCurViewStackPos+levelAdj));
+            out.writeInt(VALIDATE_VIEW_TOKEN);
+            int flags = child.writeSelfToParcel(out, pwriter, mTmpMatrix);
+            mNumWrittenViews++;
+            // If the child has children, push it on the stack to write them next.
+            if ((flags&ViewNode.FLAGS_HAS_CHILDREN) != 0) {
+                if (DEBUG_PARCEL_TREE || DEBUG_PARCEL_CHILDREN) Log.d(TAG,
+                        "Preparing to write " + child.mChildren.length
+                                + " children: @ #" + mNumWrittenViews
+                                + ", level " + (mCurViewStackPos+levelAdj));
+                out.writeInt(child.mChildren.length);
+                int pos = ++mCurViewStackPos;
+                pushViewStackEntry(child, pos);
+            }
+        }
+
         boolean writeNextEntryToParcel(AssistStructure as, Parcel out, PooledStringWriter pwriter) {
             // Write next view node if appropriate.
             if (mCurViewStackEntry != null) {
@@ -182,20 +207,7 @@ public class AssistStructure implements Parcelable {
                             + mCurViewStackEntry.curChild + " in " + mCurViewStackEntry.node);
                     ViewNode child = mCurViewStackEntry.node.mChildren[mCurViewStackEntry.curChild];
                     mCurViewStackEntry.curChild++;
-                    if (DEBUG_PARCEL) Log.d(TAG, "write view: at " + out.dataPosition()
-                            + ", windows=" + mNumWrittenWindows
-                            + ", views=" + mNumWrittenViews);
-                    out.writeInt(1);
-                    int flags = child.writeSelfToParcel(out, pwriter, mTmpMatrix);
-                    mNumWrittenViews++;
-                    // If the child has children, push it on the stack to write them next.
-                    if ((flags&ViewNode.FLAGS_HAS_CHILDREN) != 0) {
-                        if (DEBUG_PARCEL_TREE) Log.d(TAG, "Preparing to write "
-                                + child.mChildren.length + " children under " + child);
-                        out.writeInt(child.mChildren.length);
-                        int pos = ++mCurViewStackPos;
-                        pushViewStackEntry(child, pos);
-                    }
+                    writeView(child, out, pwriter, 1);
                     return true;
                 }
 
@@ -223,13 +235,13 @@ public class AssistStructure implements Parcelable {
                 if (DEBUG_PARCEL) Log.d(TAG, "write window #" + pos + ": at " + out.dataPosition()
                         + ", windows=" + mNumWrittenWindows
                         + ", views=" + mNumWrittenViews);
-                out.writeInt(1);
+                out.writeInt(VALIDATE_WINDOW_TOKEN);
                 win.writeSelfToParcel(out, pwriter, mTmpMatrix);
                 mNumWrittenWindows++;
                 ViewNode root = win.mRoot;
                 mCurViewStackPos = 0;
-                if (DEBUG_PARCEL_TREE) Log.d(TAG, "Pushing initial root view " + root);
-                pushViewStackEntry(root, 0);
+                if (DEBUG_PARCEL_TREE) Log.d(TAG, "Writing initial root view " + root);
+                writeView(root, out, pwriter, 0);
                 return true;
             }
 
@@ -271,11 +283,16 @@ public class AssistStructure implements Parcelable {
                     + ", views=" + mNumReadViews);
         }
 
-        Parcel readParcel() {
+        Parcel readParcel(int validateToken, int level) {
             if (DEBUG_PARCEL) Log.d(TAG, "readParcel: at " + mCurParcel.dataPosition()
                     + ", avail=" + mCurParcel.dataAvail() + ", windows=" + mNumReadWindows
-                    + ", views=" + mNumReadViews);
-            if (mCurParcel.readInt() != 0) {
+                    + ", views=" + mNumReadViews + ", level=" + level);
+            int token = mCurParcel.readInt();
+            if (token != 0) {
+                if (token != validateToken) {
+                    throw new BadParcelableException("Got token " + Integer.toHexString(token)
+                            + ", expected token " + Integer.toHexString(validateToken));
+                }
                 return mCurParcel;
             }
             // We have run out of partial data, need to read another batch.
@@ -406,7 +423,7 @@ public class AssistStructure implements Parcelable {
         }
 
         WindowNode(ParcelTransferReader reader) {
-            Parcel in = reader.readParcel();
+            Parcel in = reader.readParcel(VALIDATE_WINDOW_TOKEN, 0);
             reader.mNumReadWindows++;
             mX = in.readInt();
             mY = in.readInt();
@@ -414,7 +431,7 @@ public class AssistStructure implements Parcelable {
             mHeight = in.readInt();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mDisplayId = in.readInt();
-            mRoot = new ViewNode(reader);
+            mRoot = new ViewNode(reader, 0);
         }
 
         void writeSelfToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {
@@ -548,8 +565,8 @@ public class AssistStructure implements Parcelable {
         ViewNode() {
         }
 
-        ViewNode(ParcelTransferReader reader) {
-            final Parcel in = reader.readParcel();
+        ViewNode(ParcelTransferReader reader, int nestingLevel) {
+            final Parcel in = reader.readParcel(VALIDATE_VIEW_TOKEN, nestingLevel);
             reader.mNumReadViews++;
             final PooledStringReader preader = reader.mStringReader;
             mClassName = preader.readString();
@@ -604,9 +621,13 @@ public class AssistStructure implements Parcelable {
             }
             if ((flags&FLAGS_HAS_CHILDREN) != 0) {
                 final int NCHILDREN = in.readInt();
+                if (DEBUG_PARCEL_TREE || DEBUG_PARCEL_CHILDREN) Log.d(TAG,
+                        "Preparing to read " + NCHILDREN
+                                + " children: @ #" + reader.mNumReadViews
+                                + ", level " + nestingLevel);
                 mChildren = new ViewNode[NCHILDREN];
                 for (int i=0; i<NCHILDREN; i++) {
-                    mChildren[i] = new ViewNode(reader);
+                    mChildren[i] = new ViewNode(reader, nestingLevel + 1);
                 }
             }
         }
