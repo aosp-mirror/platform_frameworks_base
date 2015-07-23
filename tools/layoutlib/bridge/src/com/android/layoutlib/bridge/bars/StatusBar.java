@@ -43,6 +43,8 @@ public class StatusBar extends CustomBar {
     private final int mSimulatedPlatformVersion;
     /** Status bar background color attribute name. */
     private static final String ATTR_COLOR = "statusBarColor";
+    /** Attribute for translucency property. */
+    public static final String ATTR_TRANSLUCENT = "windowTranslucentStatus";
 
     /**
      * Constructor to be used when creating the {@link StatusBar} as a regular control. This
@@ -69,7 +71,7 @@ public class StatusBar extends CustomBar {
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
 
-        int color = getThemeAttrColor(ATTR_COLOR, true);
+        int color = getBarColor(ATTR_COLOR, ATTR_TRANSLUCENT);
         setBackgroundColor(color == 0 ? Config.getStatusBarColor(simulatedPlatformVersion) : color);
 
         // Cannot access the inside items through id because no R.id values have been
