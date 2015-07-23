@@ -16,7 +16,7 @@ page.image=auto/images/assets/icons/auto_app_in_simulator.png
   <ol>
     <li><a href="#dev-project">Set Up an Auto Project</a></li>
     <li><a href="#build-it">Build Auto Apps</a></li>
-    <li><a href="#test-it">Run and Test Auto Apps</a></li>
+    <li><a href="#test-it-dhu">Run and Test Auto Apps </a></li>
   </ol>
 
  <h2>You should also read</h2>
@@ -149,57 +149,124 @@ requirements, you can reduce the effort for building and testing your app. For
 more information, see
 <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto App Quality</a>.</p>
 
-<h2 id="test-it">Run and Test Auto Apps</h2>
 
-<p>As you prepare to publish your app, make sure that your app looks correct
-when projected on the Auto user interface. Use the Android Media Browser
-simulator and Android Messaging simulators to view and test your audio or
-messaging apps in a screen that looks similar to what is projected on Auto.</p>
 
-<p>To get the simulators, open the
-<a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> and download
-them from <strong>Extras &gt; Android Auto API Simulators</strong>.</p>
+<h2 id="test-it-dhu">Run and Test Auto Apps </h2>
 
-<p>Before you begin testing, compile your app in your development environment.
-Install your app and the Android simulator for the features you want to test
-(that is, audio or messaging) on a physical or virtual device running Android
-5.0 (API level 21) or higher. To check the version of Android on the device, go
-to <strong>Settings &gt; About &gt; Android Version</strong>.</p>
+<p>
+  As you develop, you can run and test your app on your development machine
+  using the <em>Desktop Head Unit</em> (DHU). The DHU replaces the existing
+  simulators and enables your development machine to simulate a vehicle
+  dashboard system running Android Auto.
+</p>
 
-<h3 id="testing-audio-apps">Testing audio apps</h3>
-<p>To run and test audio apps:</p>
+<h3 id="installing-dhu">Installing the DHU</h3>
 
 <ol>
-<li>Install the Android Media Browser simulator
-({@code &lt;sdk&gt;/extras/google/simulators/media-browser-simulator.apk}) on
-the test device. You can do this using
-the <a href="{@docRoot}tools/help/adb.html#move">adb</a> command line tool.</li>
-<li>Enable <a href="{@docRoot}tools/device.html#device-developer-options">
-developer options</a> on the test device.</li>
-<li>Install your app on the test device.</li>
-<li>Launch the Android Media Browser simulator to see how your audio app
-appears in Auto. If your app does not appear, stop the simulator from
-<strong>Settings &gt; Apps</strong> then restart it.</li>
+  <li>Enable developer mode on your mobile device, as described in
+    <a href="{@docRoot}tools/device.html#developer-device-options">Enabling On-device
+    Developer Options</a>. </li>
+  <li>Compile your app in your development environment and install your app on
+    a physical mobile device running Android 5.0 (API level 21) or higher. To check the
+    version of Android on a Nexus device, go to
+    <strong>Settings &gt; About phone</strong> (or <strong>About tablet</strong>) <strong>&gt;
+    Android version</strong>.</li>
+
+  <li>Install the
+     <a class="external-link"
+     href="https://play.google.com/store/apps/details?id=com.google.android.projection.gearhead&hl=en"
+     >Android Auto app</a> on the mobile device.</li>
+  <li>Open the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> and
+    download the DHU package <strong>Android Auto Desktop Head Unit</strong> from the
+    <em>SDK Tools</em> tab. The DHU installs in the <code>&lt;sdk&gt;/extras/google/auto/</code>
+    directory.</li>
+  <li>If you are running the DHU on Linux, you must also install
+    the portaudio, libpng, sdl2, and sdl2_ttf libraries.
+    The procedure to do this varies depending on your Linux distribution. For example, on
+    Debian-derived Linux distributions, you can install the libraries with this command:
+
+<pre class="no-pretty-print">
+$ sudo apt-get install libsdl2-2.0-0 libsdl2-ttf-2.0-0 libportaudio2 libpng12-0
+</pre>
+
+  </li>
 </ol>
 
-<h3 id="testing-messaging-apps">Testing messaging apps</h3>
-<p>To run and test messaging apps:</p>
+<div class="figure" style="width:330px">
+  <img src="{@docRoot}images/training/auto-desktop-head-unit-server-running.png"
+      alt="" >
+  <p class="img-caption">
+    <strong>Figure 2.</strong> Notification that the head unit server is running.
+  </p>
+</div>
+<img src="{@docRoot}images/training/auto-desktop-head-unit-context-menu-enabled.png"
+    alt="" >
+<p class="img-caption">
+  <strong>Figure 1.</strong> Context menu with developer options.
+</p>
+
+<h3 id="connecting-dhu">Connecting the DHU to your mobile device</h3>
+
+<p>Run the DHU by connecting your mobile device to a development machine and setting up a connection to
+  the head unit server over <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge
+  (ADB)</a>. Follow these steps to set up tunneling and start the DHU:</p>
 
 <ol>
-<li>Install the Android Messaging simulator
-  ({@code &lt;sdk&gt;/extras/google/simulators/messaging-simulator.apk})
-on the test device. You can do this using the
-<a href="{@docRoot}tools/help/adb.html#move">adb</a> command line tool.</li>
-<li>Enable the simulator to read notifications posted on the system:
-<ol type="a">
-	<li>Enable <a href="{@docRoot}tools/device.html#device-developer-options">
-developer options</a> on the test device.</li>
-	<li>Click <strong>Settings &gt; Sounds &amp; Notifications &gt; Notification
-	Access</strong> and check the box labeled
-	<strong>Messaging Simulator</strong>.</li>
+  <li>On the mobile device, enable Android Auto developer mode by starting the Android Auto
+    companion app, and then tapping the header image 10 times.
+    This step is only required the first time you run the companion app.
+  </li>
+  <li>If the server is not already running, select <strong>Start head unit server</strong>
+     from the Android Auto menu.
+    <p>On the device, a foreground service appears in the notification area. </p>
+  </li>
+
+  <li>Connect the mobile device to the development machine via USB. Your device must be unlocked to
+    launch the DHU.
+  </li>
+  <li>On the development machine, run the following {@code adb} command to
+    forward socket connections from the
+    development machine's port 5277 to the same port number on the Android device.
+    This configuration allows the DHU to connect to the head unit server running on your phone over
+    a TCP socket.
+    <pre class="no-pretty-print">$ adb forward tcp:5277 tcp:5277</pre>
+  </li>
+
+  <li>Start the DHU by running the command <code>desktop-head-unit.exe</code> (on Windows)
+    or <code>./desktop-head-unit</code> (on Mac or Linux) from the
+    <code>&lt;sdk&gt;/extras/google/auto/</code> directory.
+
+<pre class="no-pretty-print">$ cd &lt;sdk&gt;/extras/google/auto
+$ ./desktop-head-unit</pre>
+
+    <p>
+      By default, the head unit server connects over port 5277. To override the host or port
+      (for example, to forward over SSH), use the <code>--adb</code> flag.
+    </p>
+
+  </li>
 </ol>
-<li>Install your app on the test device.</li>
-<li>Launch the Android Messaging Simulator to see how your messaging app appears
-in Auto. If your app does not appear, stop the simulator from
-<strong>Settings &gt; Apps</strong> then restart it.</li>
-</ol>
+
+<div class="figure" style="width:432px">
+
+    <img src="{@docRoot}images/training/auto-desktop-head-unit-wkst-launch.png"
+        alt="" >
+    <p class="img-caption">
+      <strong>Figure 4.</strong> DHU launches on the development machine.
+    </p>
+</div>
+
+    <img src="{@docRoot}images/training/auto-desktop-head-unit-launch.png"
+        alt="" >
+    <p class="img-caption">
+      <strong>Figure 3.</strong> Android Auto launches on the mobile device.
+    </p>
+
+<p>
+  After you set up and start the DHU, you can run DHU commands from the command line to run and
+  test your app from the terminal. You can also run these commands by using keyboard shortcuts. For
+  more information about DHU configuration and commands, see <a href=
+  "{@docRoot}tools/help/desktop-head-unit.html">Desktop Head Unit</a>.
+</p>
+
+
