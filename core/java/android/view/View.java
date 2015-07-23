@@ -7392,7 +7392,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void getOutsets(Rect outOutsetRect) {
-        outOutsetRect.set(mAttachInfo.mOutsets);
+        if (mAttachInfo != null) {
+            outOutsetRect.set(mAttachInfo.mOutsets);
+        } else {
+            outOutsetRect.setEmpty();
+        }
     }
 
     /**
