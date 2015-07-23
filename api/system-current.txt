@@ -9783,6 +9783,7 @@ package android.content.pm {
     method public java.lang.CharSequence loadDescription(android.content.pm.PackageManager);
     field public static final android.os.Parcelable.Creator<android.content.pm.PermissionInfo> CREATOR;
     field public static final int FLAG_COSTS_MONEY = 1; // 0x1
+    field public static final int FLAG_INSTALLED = 1073741824; // 0x40000000
     field public static final int PROTECTION_DANGEROUS = 1; // 0x1
     field public static final int PROTECTION_FLAG_APPOP = 64; // 0x40
     field public static final int PROTECTION_FLAG_DEVELOPMENT = 32; // 0x20
