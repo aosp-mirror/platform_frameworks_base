@@ -171,7 +171,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                         "Key size must be positive: " + mKeySizeBits);
             } else if ((mKeySizeBits % 8) != 0) {
                 throw new InvalidAlgorithmParameterException(
-                        "Key size in must be a multiple of 8: " + mKeySizeBits);
+                        "Key size must be a multiple of 8: " + mKeySizeBits);
             }
 
             try {
@@ -272,6 +272,11 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         KeymasterUtils.addUserAuthArgs(args,
                 spec.isUserAuthenticationRequired(),
                 spec.getUserAuthenticationValidityDurationSeconds());
+        KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
+                args,
+                mKeymasterAlgorithm,
+                mKeymasterBlockModes,
+                mKeymasterDigests);
         args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, spec.getKeyValidityStart());
         args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
                 spec.getKeyValidityForOriginationEnd());
