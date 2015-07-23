@@ -30,6 +30,8 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import java.util.ArrayList;
 
+// TODO: Clean up the whitespace that separates methods in this class.
+
 /**
  * This class provides access to a RenderScript context, which controls RenderScript
  * initialization, resource management, and teardown. An instance of the RenderScript
@@ -739,6 +741,14 @@ public class RenderScript {
                                      byte[] params, int[] limits) {
         validate();
         rsnScriptForEach(mContext, id, slot, ains, aout, params, limits);
+    }
+
+    native void rsnScriptReduce(long con, long id, int slot, long ain,
+                                long aout, int[] limits);
+    synchronized void nScriptReduce(long id, int slot, long ain, long aout,
+                                    int[] limits) {
+        validate();
+        rsnScriptReduce(mContext, id, slot, ain, aout, limits);
     }
 
     native void rsnScriptInvokeV(long con, long id, int slot, byte[] params);
