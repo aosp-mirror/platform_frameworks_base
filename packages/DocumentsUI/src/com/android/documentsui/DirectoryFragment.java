@@ -29,6 +29,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.internal.util.Preconditions.checkState;
 
 import android.annotation.NonNull;
 import android.app.Activity;
@@ -81,6 +82,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -148,8 +150,10 @@ public class DirectoryFragment extends Fragment {
     private DocumentClipper mClipper;
     private MultiSelectManager mSelectionManager;
     // These are lazily initialized.
-    private LayoutManager mListLayout;
-    private LayoutManager mGridLayout;
+    private LinearLayoutManager mListLayout;
+    private GridLayoutManager mGridLayout;
+    private OnLayoutChangeListener mRecyclerLayoutListener;
+    private int mColumnCount = 1;  // This will get updated when layout changes.
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
@@ -222,8 +226,25 @@ public class DirectoryFragment extends Fragment {
                         cancelThumbnailTask(holder.itemView);
                     }
                 });
-        // TODO: Add a divider between views (which might use RecyclerView.ItemDecoration).
 
+        // TODO: Rather than update columns on layout changes, push this
+        // code (or something like it) into GridLayoutManager.
+        mRecView.addOnLayoutChangeListener(
+                new OnLayoutChangeListener() {
+
+                    @Override
+                    public void onLayoutChange(
+                            View v, int left, int top, int right, int bottom, int oldLeft,
+                            int oldTop, int oldRight, int oldBottom) {
+                        int thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
+                        mColumnCount = pickColumnCount(thumbSize);
+                        if (mGridLayout != null) {
+                            mGridLayout.setSpanCount(mColumnCount);
+                        }
+                    }
+                });
+
+        // TODO: Add a divider between views (which might use RecyclerView.ItemDecoration).
         if (DEBUG_ENABLE_DND) {
             setupDragAndDropOnDirectoryView(mRecView);
         }
@@ -510,12 +531,7 @@ public class DirectoryFragment extends Fragment {
             case MODE_GRID:
                 thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
                 if (mGridLayout == null) {
-                    int itemPadding =
-                            getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
-                    int viewPadding = mRecView.getPaddingLeft() + mRecView.getPaddingRight();
-                    int columnCount =
-                            (mRecView.getWidth() - viewPadding) / (thumbSize + itemPadding);
-                    mGridLayout = new GridLayoutManager(getContext(), Math.max(1, columnCount));
+                    mGridLayout = new GridLayoutManager(getContext(), mColumnCount );
                 }
                 layout = mGridLayout;
                 break;
@@ -534,6 +550,16 @@ public class DirectoryFragment extends Fragment {
         mRecView.setLayoutManager(layout);
         // setting layout manager automatically invalidates existing ViewHolders.
         mThumbSize = new Point(thumbSize, thumbSize);
+    }
+
+    private int pickColumnCount(final int thumbSize) {
+        int itemPadding =
+                getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
+        int viewPadding = mRecView.getPaddingLeft() + mRecView.getPaddingRight();
+        checkState(mRecView.getWidth() > 0);
+        int columnCount = Math.max(1,
+                (mRecView.getWidth() - viewPadding) / (thumbSize + itemPadding));
+        return columnCount;
     }
 
     /**
