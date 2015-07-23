@@ -1001,7 +1001,7 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Puedes cambiar esta opción más tarde en Ajustes &gt; Aplicaciones."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Permitir siempre"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"No permitir nunca"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"Tarjeta SIM eliminada"</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"Tarjeta SIM retirada"</string>
     <string name="sim_removed_message" msgid="5450336489923274918">"La red móvil no estará disponible hasta que reinicies el dispositivo con una tarjeta SIM válida insertada."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Listo"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Tarjeta SIM añadida"</string>
