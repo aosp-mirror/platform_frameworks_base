@@ -26,7 +26,7 @@
 
     <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
         android:id="@+id/keyguard_indication_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
         android:layout_gravity="bottom|center_horizontal"
