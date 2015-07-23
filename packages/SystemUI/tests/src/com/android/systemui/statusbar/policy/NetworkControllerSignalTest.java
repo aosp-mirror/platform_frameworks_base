@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.os.Looper;
+import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
@@ -70,11 +71,20 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     public void testEmergencyOnlyNoSubscriptions() {
         setupDefaultSignal();
+        setSubscriptions();
+        mNetworkController.mLastServiceState = new ServiceState();
+        mNetworkController.mLastServiceState.setEmergencyOnly(true);
+        mNetworkController.recalculateEmergency();
+        verifyEmergencyOnly(true);
+    }
+
+    public void testNoEmengencyNoSubscriptions() {
+        setupDefaultSignal();
+        setSubscriptions();
+        mNetworkController.mLastServiceState = new ServiceState();
+        mNetworkController.mLastServiceState.setEmergencyOnly(false);
         mNetworkController.recalculateEmergency();
         verifyEmergencyOnly(false);
-
-        setSubscriptions();
-        verifyEmergencyOnly(true);
     }
 
     public void testNoSimlessIconWithoutMobile() {
