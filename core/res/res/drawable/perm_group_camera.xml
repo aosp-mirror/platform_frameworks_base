@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
     Copyright (C) 2015 The Android Open Source Project
 
@@ -14,11 +15,19 @@
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="24.0dp"
-        android:height="24.0dp"
-        android:viewportWidth="48.0"
-        android:viewportHeight="48.0">
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
     <path
-        android:fillColor="#FF000000"
-        android:pathData="M18.8,21.0l9.53,-16.51C26.94,4.18 25.49,4.0 24.0,4.0c-4.8,0.0 -9.19,1.69 -12.64,4.51l7.33,12.6 0.11,-0.2zm24.28,-3.0c-1.84,-5.85 -6.3,-10.52 -11.99,-12.68L23.77,18.0l19.31,0.0zm0.52,2.0L28.62,20.0l0.58,1.0 9.53,16.5C41.99,33.94 44.0,29.21 44.0,24.0c0.0,-1.37 -0.14,-2.71 -0.4,-4.0zm-26.53,4.0l-7.8,-13.5C6.01,14.06 4.0,18.79 4.0,24.0c0.0,1.3 0.14,2.7 0.4,4.0l14.98,0.0l-2.31,-4.0zM4.92,30.0c1.84,5.85 6.3,10.52 11.99,12.68L24.23,30.0L4.92,30.0zm22.54,0.0l-7.8,13.51c1.0,0.31 2.8,0.49 4.3,0.49 4.8,0.0 9.19,-1.69 12.64,-4.51L29.31,26.8 27.46,30.0z"/>
+        android:fillColor="#000000"
+        android:pathData="M 12 8.8 C 13.7673111995 8.8 15.2 10.2326888005 15.2 12 C 15.2 13.7673111995 13.7673111995 15.2 12 15.2 C 10.2326888005 15.2 8.8 13.7673111995 8.8 12 C 8.8 10.2326888005 10.2326888005 8.8 12 8.8 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1 .9 2 2 2h16c1.1 0 2-.9
+2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5
+5-2.24 5-5 5z" />
+    <path
+        android:pathData="M0 0h24v24H0z" />
 </vector>
