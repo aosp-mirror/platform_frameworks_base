@@ -51,6 +51,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_DIGEST = KM_ENUM_REP | 5;
     public static final int KM_TAG_PADDING = KM_ENUM_REP | 6;
     public static final int KM_TAG_CALLER_NONCE = KM_BOOL | 7;
+    public static final int KM_TAG_MIN_MAC_LENGTH = KM_UINT | 8;
 
     public static final int KM_TAG_RESCOPING_ADD = KM_ENUM_REP | 101;
     public static final int KM_TAG_RESCOPING_DEL = KM_ENUM_REP | 102;
@@ -194,6 +195,9 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_KEY_RATE_LIMIT_EXCEEDED = -54;
     public static final int KM_ERROR_CALLER_NONCE_PROHIBITED = -55;
     public static final int KM_ERROR_KEY_MAX_OPS_EXCEEDED = -56;
+    public static final int KM_ERROR_INVALID_MAC_LENGTH = -57;
+    public static final int KM_ERROR_MISSING_MIN_MAC_LENGTH = -58;
+    public static final int KM_ERROR_UNSUPPORTED_MIN_MAC_LENGTH = -59;
     public static final int KM_ERROR_UNIMPLEMENTED = -100;
     public static final int KM_ERROR_VERSION_MISMATCH = -101;
     public static final int KM_ERROR_UNKNOWN_ERROR = -1000;
@@ -237,6 +241,8 @@ public final class KeymasterDefs {
         sErrorCodeToString.put(KM_ERROR_INVALID_NONCE, "Invalid IV");
         sErrorCodeToString.put(KM_ERROR_CALLER_NONCE_PROHIBITED,
                 "Caller-provided IV not permitted");
+        sErrorCodeToString.put(KM_ERROR_INVALID_MAC_LENGTH,
+                "Invalid MAC or authentication tag length");
         sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
         sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");
     }
