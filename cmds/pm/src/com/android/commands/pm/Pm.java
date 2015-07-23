@@ -193,6 +193,10 @@ public final class Pm {
             return runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED);
         }
 
+        if ("default-state".equals(op)) {
+            return runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT);
+        }
+
         if ("hide".equals(op)) {
             return runSetHiddenSetting(true);
         }
@@ -2086,6 +2090,7 @@ public final class Pm {
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-user [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-until-used [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm default-state [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm hide [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm grant [--user USER_ID] PACKAGE PERMISSION");
@@ -2161,9 +2166,9 @@ public final class Pm {
         System.err.println("");
         System.err.println("pm clear: deletes all data associated with a package.");
         System.err.println("");
-        System.err.println("pm enable, disable, disable-user, disable-until-used: these commands");
-        System.err.println("  change the enabled state of a given package or component (written");
-        System.err.println("  as \"package/class\").");
+        System.err.println("pm enable, disable, disable-user, disable-until-used, default-state:");
+        System.err.println("  these commands change the enabled state of a given package or");
+        System.err.println("  component (written as \"package/class\").");
         System.err.println("");
         System.err.println("pm grant, revoke: these commands either grant or revoke permissions");
         System.err.println("    to apps. The permissions must be declared as used in the app's");
