@@ -111,7 +111,7 @@ public abstract class PanelView extends FrameLayout {
      */
     private float mNextCollapseSpeedUpFactor = 1.0f;
 
-    private boolean mExpanding;
+    protected boolean mExpanding;
     private boolean mGestureWaitForTouchSlop;
     private boolean mIgnoreXTouchSlop;
     private Runnable mPeekRunnable = new Runnable() {
@@ -137,7 +137,7 @@ public abstract class PanelView extends FrameLayout {
         }
     }
 
-    private void notifyExpandingFinished() {
+    protected final void notifyExpandingFinished() {
         if (mExpanding) {
             mExpanding = false;
             onExpandingFinished();

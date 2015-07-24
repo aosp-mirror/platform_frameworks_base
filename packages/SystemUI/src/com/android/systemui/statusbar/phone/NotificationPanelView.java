@@ -965,6 +965,7 @@ public class NotificationPanelView extends PanelView implements
     private void onQsExpansionStarted(int overscrollAmount) {
         cancelQsAnimation();
         cancelHeightAnimator();
+        notifyExpandingFinished();
 
         // Reset scroll position and apply that position to the expanded height.
         float height = mQsExpansionHeight - mScrollView.getScrollY() - overscrollAmount;
