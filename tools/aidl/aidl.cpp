@@ -675,6 +675,10 @@ generate_dep_file(const Options& options, const document_item_type* items)
 
     fprintf(to, "\n");
 
+    // Output "<input_aidl_file>: " so make won't fail if the input .aidl file
+    // has been deleted, moved or renamed in incremental build.
+    fprintf(to, "%s :\n", options.inputFileName.c_str());
+
     // Output "<imported_file>: " so make won't fail if the imported file has
     // been deleted, moved or renamed in incremental build.
     import = g_imports;
