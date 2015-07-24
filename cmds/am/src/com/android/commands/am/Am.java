@@ -301,7 +301,7 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am get-inactive: returns the inactive state of an app.\n" +
                 "\n" +
-                " am send-trim-memory: Send a memory trim event to a <PROCESS>.\n" +
+                "am send-trim-memory: Send a memory trim event to a <PROCESS>.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
