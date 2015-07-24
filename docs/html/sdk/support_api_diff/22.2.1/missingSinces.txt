@@ -1,0 +1,96 @@
+NO DOC BLOCK: android.support.v17.leanback.widget.DetailsOverviewLogoPresenter Class
+NO DOC BLOCK: android.support.v17.leanback.widget.DetailsOverviewLogoPresenter.ViewHolder Class
+NO DOC BLOCK: android.support.v17.leanback.widget.DetailsOverviewRow.Listener Class
+NO DOC BLOCK: android.support.v17.leanback.widget.FacetProvider Interface
+NO DOC BLOCK: android.support.v17.leanback.widget.FacetProviderAdapter Interface
+NO DOC BLOCK: android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter Class
+NO DOC BLOCK: android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter.Listener Class
+NO DOC BLOCK: android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter.ViewHolder Class
+NO DOC BLOCK: android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter.ViewHolder.DetailsOverviewRowListener Class
+NO DOC BLOCK: android.support.v17.leanback.widget.FullWidthDetailsOverviewSharedElementHelper Class
+NO DOC BLOCK: android.support.v17.leanback.widget.ItemAlignmentFacet Class
+NO DOC BLOCK: android.support.v17.leanback.widget.ItemAlignmentFacet.ItemAlignmentDef Class
+NO DOC BLOCK: android.support.v7.app.NotificationCompat Class
+NO DOC BLOCK: android.support.v7.app.NotificationCompat.Builder Class
+NO DOC BLOCK: android.support.v7.app.NotificationCompat.MediaStyle Class
+NO DOC BLOCK: android.support.v17.leanback.widget.OnChildViewHolderSelectedListener Class
+NO DOC BLOCK: android.support.v4.app.NotificationCompatBase Constructor ()
+NO DOC BLOCK: android.support.v7.util.SortedList Method addAll(T...)
+NO DOC BLOCK: android.support.v7.util.SortedList Method addAll(T[], boolean)
+NO DOC BLOCK: android.support.v7.util.SortedList Method addAll(java.util.Collection<T>)
+NO DOC BLOCK: android.support.v17.leanback.widget.ItemBridgeAdapter.ViewHolder Method getFacet(java.lang.Class<?>)
+NO DOC BLOCK: android.support.v17.leanback.widget.Presenter Method getFacet(java.lang.Class<?>)
+NO DOC BLOCK: android.support.v17.leanback.widget.Presenter.ViewHolder Method getFacet(java.lang.Class<?>)
+NO DOC BLOCK: android.support.v17.leanback.widget.ItemBridgeAdapter Method getFacetProvider(int)
+NO DOC BLOCK: android.support.v17.leanback.widget.PresenterSelector Method getPresenters()
+NO DOC BLOCK: android.support.design.widget.TabLayout Method getSelectedTabPosition()
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Method getShadowType()
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Method getWrappedView()
+NO DOC BLOCK: android.support.design.widget.FloatingActionButton Method hide()
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsFragment Method inflateTitle(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsSupportFragment Method inflateTitle(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
+NO DOC BLOCK: android.support.v17.leanback.widget.RowPresenter Method isClippingChildren()
+NO DOC BLOCK: android.support.design.widget.TabLayout.Tab Method isSelected()
+NO DOC BLOCK: android.support.design.widget.CoordinatorLayout.Behavior Method onDependentViewRemoved(android.support.design.widget.CoordinatorLayout, V, android.view.View)
+NO DOC BLOCK: android.support.design.widget.FloatingActionButton.Behavior Method onDependentViewRemoved(android.support.design.widget.CoordinatorLayout, android.support.design.widget.FloatingActionButton, android.view.View)
+NO DOC BLOCK: android.support.design.widget.FloatingActionButton.Behavior Method onLayoutChild(android.support.design.widget.CoordinatorLayout, android.support.design.widget.FloatingActionButton, int)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsFragment Method onSetDetailsOverviewRowStatus(android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter, android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter.ViewHolder, int, int, int)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsSupportFragment Method onSetDetailsOverviewRowStatus(android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter, android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter.ViewHolder, int, int, int)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsFragment Method onSetRowStatus(android.support.v17.leanback.widget.RowPresenter, android.support.v17.leanback.widget.RowPresenter.ViewHolder, int, int, int)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsSupportFragment Method onSetRowStatus(android.support.v17.leanback.widget.RowPresenter, android.support.v17.leanback.widget.RowPresenter.ViewHolder, int, int, int)
+NO DOC BLOCK: android.support.design.widget.Snackbar Method setActionTextColor(android.content.res.ColorStateList)
+NO DOC BLOCK: android.support.design.widget.Snackbar Method setActionTextColor(int)
+NO DOC BLOCK: android.support.v17.leanback.widget.Presenter Method setFacet(java.lang.Class<?>, java.lang.Object)
+NO DOC BLOCK: android.support.v17.leanback.widget.Presenter.ViewHolder Method setFacet(java.lang.Class<?>, java.lang.Object)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsFragment Method setupDetailsOverviewRowPresenter(android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsSupportFragment Method setupDetailsOverviewRowPresenter(android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsFragment Method setupPresenter(android.support.v17.leanback.widget.Presenter)
+NO DOC BLOCK: android.support.v17.leanback.app.DetailsSupportFragment Method setupPresenter(android.support.v17.leanback.widget.Presenter)
+NO DOC BLOCK: android.support.design.widget.FloatingActionButton Method show()
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Method supportsDynamicShadow()
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Method useDynamicShadow()
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Method useDynamicShadow(float, float)
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Method useStaticShadow()
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field action0
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field action_divider
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field Base_V12_Widget_AppCompat_AutoCompleteTextView
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field Base_V12_Widget_AppCompat_EditText
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field Base_V7_Widget_AppCompat_AutoCompleteTextView
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field Base_V7_Widget_AppCompat_EditText
+NO DOC BLOCK: android.support.v7.appcompat.R.attr Field borderlessButtonStyle
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field cancel_action
+NO DOC BLOCK: android.support.v7.appcompat.R.integer Field cancel_button_image_alpha
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field chronometer
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field end_padder
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field info
+NO DOC BLOCK: android.support.design.widget.Snackbar Field LENGTH_INDEFINITE
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field line1
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field line3
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field media_actions
+NO DOC BLOCK: android.support.v7.appcompat.R.dimen Field notification_large_icon_height
+NO DOC BLOCK: android.support.v7.appcompat.R.dimen Field notification_large_icon_width
+NO DOC BLOCK: android.support.v7.appcompat.R.layout Field notification_media_action
+NO DOC BLOCK: android.support.v7.appcompat.R.layout Field notification_media_cancel_action
+NO DOC BLOCK: android.support.v7.appcompat.R.dimen Field notification_subtext_size
+NO DOC BLOCK: android.support.v7.appcompat.R.layout Field notification_template_big_media
+NO DOC BLOCK: android.support.v7.appcompat.R.layout Field notification_template_big_media_narrow
+NO DOC BLOCK: android.support.v7.appcompat.R.drawable Field notification_template_icon_bg
+NO DOC BLOCK: android.support.v7.appcompat.R.layout Field notification_template_lines
+NO DOC BLOCK: android.support.v7.appcompat.R.layout Field notification_template_media
+NO DOC BLOCK: android.support.v7.appcompat.R.layout Field notification_template_part_chronometer
+NO DOC BLOCK: android.support.v7.appcompat.R.layout Field notification_template_part_time
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Field SHADOW_DYNAMIC
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Field SHADOW_NONE
+NO DOC BLOCK: android.support.v17.leanback.widget.ShadowOverlayContainer Field SHADOW_STATIC
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field status_bar_latest_event_content
+NO DOC BLOCK: android.support.v7.appcompat.R.integer Field status_bar_notification_info_maxnum
+NO DOC BLOCK: android.support.v7.appcompat.R.string Field status_bar_notification_info_overflow
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field text
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field text2
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field TextAppearance_StatusBar_EventContent
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field TextAppearance_StatusBar_EventContent_Info
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field TextAppearance_StatusBar_EventContent_Line2
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field TextAppearance_StatusBar_EventContent_Time
+NO DOC BLOCK: android.support.v7.appcompat.R.style Field TextAppearance_StatusBar_EventContent_Title
+NO DOC BLOCK: android.support.v7.appcompat.R.styleable Field Theme_borderlessButtonStyle
+NO DOC BLOCK: android.support.v7.appcompat.R.id Field time
