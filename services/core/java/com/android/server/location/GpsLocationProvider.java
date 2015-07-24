@@ -308,8 +308,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private int mInjectNtpTimePending = STATE_PENDING_NETWORK;
     private int mDownloadXtraDataPending = STATE_PENDING_NETWORK;
 
-    // set to true if the GPS engine does not do on-demand NTP time requests
-    private boolean mPeriodicTimeInjection;
+    // set to true if the GPS engine requested on-demand NTP time requests
+    private boolean mOnDemandTimeInjection;
 
     // true if GPS is navigating
     private boolean mNavigating;
@@ -819,8 +819,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 long delay;
 
                 // force refresh NTP cache when outdated
+                boolean refreshSuccess = true;
                 if (mNtpTime.getCacheAge() >= NTP_INTERVAL) {
-                    mNtpTime.forceRefresh();
+                    refreshSuccess = mNtpTime.forceRefresh();
                 }
 
                 // only update when NTP time is fresh
@@ -840,13 +841,21 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     delay = NTP_INTERVAL;
                     mNtpBackOff.reset();
                 } else {
-                    if (DEBUG) Log.d(TAG, "requestTime failed");
+                    Log.e(TAG, "requestTime failed");
                     delay = mNtpBackOff.nextBackoffMillis();
                 }
 
                 sendMessage(INJECT_NTP_TIME_FINISHED, 0, null);
 
-                if (mPeriodicTimeInjection) {
+                if (DEBUG) {
+                    String message = String.format(
+                            "onDemandTimeInjection=%s, refreshSuccess=%s, delay=%s",
+                            mOnDemandTimeInjection,
+                            refreshSuccess,
+                            delay);
+                    Log.d(TAG, message);
+                }
+                if (mOnDemandTimeInjection || !refreshSuccess) {
                     // send delayed message for next NTP injection
                     // since this is delayed and not urgent we do not hold a wake lock here
                     mHandler.sendEmptyMessageDelayed(INJECT_NTP_TIME, delay);
@@ -1600,8 +1609,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void setEngineCapabilities(int capabilities) {
         mEngineCapabilities = capabilities;
 
-        if (!hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME) && !mPeriodicTimeInjection) {
-            mPeriodicTimeInjection = true;
+        if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
+            mOnDemandTimeInjection = true;
             requestUtcTime();
         }
 
