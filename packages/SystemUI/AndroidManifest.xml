@@ -125,6 +125,11 @@
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
 
+    <!-- Self permission for internal broadcasts. -->
+    <permission android:name="com.android.systemui.permission.SELF"
+            android:protectionLevel="signature" />
+    <uses-permission android:name="com.android.systemui.permission.SELF" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
