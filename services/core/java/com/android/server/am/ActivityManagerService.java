@@ -1358,6 +1358,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int DISPATCH_UIDS_CHANGED_MSG = 54;
     static final int REPORT_TIME_TRACKER_MSG = 55;
     static final int REPORT_USER_SWITCH_COMPLETE_MSG = 56;
+    static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 57;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2022,6 +2023,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case REPORT_USER_SWITCH_COMPLETE_MSG: {
                 dispatchUserSwitchComplete(msg.arg1);
+            } break;
+            case SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG: {
+                IUiAutomationConnection connection = (IUiAutomationConnection) msg.obj;
+                try {
+                    connection.shutdown();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Error shutting down UiAutomationConnection");
+                }
+                // Only a UiAutomation can set this flag and now that
+                // it is finished we make sure it is reset to its default.
+                mUserIsMonkey = false;
             } break;
             }
         }
@@ -17135,16 +17147,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             } catch (RemoteException e) {
             }
         }
-        if (app.instrumentationUiAutomationConnection != null) {
-            try {
-                app.instrumentationUiAutomationConnection.shutdown();
-            } catch (RemoteException re) {
-                /* ignore */
-            }
-            // Only a UiAutomation can set this flag and now that
-            // it is finished we make sure it is reset to its default.
-            mUserIsMonkey = false;
-        }
+
+        // Can't call out of the system process with a lock held, so post a message.
+        mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
+                app.instrumentationUiAutomationConnection).sendToTarget();
+
         app.instrumentationWatcher = null;
         app.instrumentationUiAutomationConnection = null;
         app.instrumentationClass = null;
