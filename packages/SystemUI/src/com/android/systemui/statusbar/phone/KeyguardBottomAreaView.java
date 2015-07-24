@@ -106,6 +106,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private PhoneStatusBar mPhoneStatusBar;
 
     private final Interpolator mLinearOutSlowInInterpolator;
+    private boolean mUserSetupComplete;
     private boolean mPrewarmBound;
     private Messenger mPrewarmMessenger;
     private final ServiceConnection mPrewarmConnection = new ServiceConnection() {
@@ -250,6 +251,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateCameraVisibility(); // in case onFinishInflate() was called too early
     }
 
+    public void setUserSetupComplete(boolean userSetupComplete) {
+        mUserSetupComplete = userSetupComplete;
+        updateCameraVisibility();
+        updateLeftAffordanceIcon();
+    }
+
     private Intent getCameraIntent() {
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         boolean canSkipBouncer = updateMonitor.getUserCanSkipBouncer(
@@ -267,7 +274,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 PackageManager.MATCH_DEFAULT_ONLY,
                 KeyguardUpdateMonitor.getCurrentUser());
         boolean visible = !isCameraDisabledByDpm() && resolved != null
-                && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance);
+                && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance)
+                && mUserSetupComplete;
         mCameraImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
@@ -275,16 +283,16 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLeftIsVoiceAssist = canLaunchVoiceAssist();
         int drawableId;
         int contentDescription;
+        boolean visible = mUserSetupComplete;
         if (mLeftIsVoiceAssist) {
-            mLeftAffordanceView.setVisibility(View.VISIBLE);
             drawableId = R.drawable.ic_mic_26dp;
             contentDescription = R.string.accessibility_voice_assist_button;
         } else {
-            boolean visible = isPhoneVisible();
-            mLeftAffordanceView.setVisibility(visible ? View.VISIBLE : View.GONE);
+            visible &= isPhoneVisible();
             drawableId = R.drawable.ic_phone_24dp;
             contentDescription = R.string.accessibility_phone_button;
         }
+        mLeftAffordanceView.setVisibility(visible ? View.VISIBLE : View.GONE);
         mLeftAffordanceView.setImageDrawable(mContext.getDrawable(drawableId));
         mLeftAffordanceView.setContentDescription(mContext.getString(contentDescription));
     }
