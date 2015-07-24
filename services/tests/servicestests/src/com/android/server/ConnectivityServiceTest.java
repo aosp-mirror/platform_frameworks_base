@@ -896,6 +896,19 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private void tryNetworkFactoryRequests(int capability) throws Exception {
+        // Verify NOT_RESTRICTED is set appropriately
+        final NetworkCapabilities nc = new NetworkRequest.Builder().addCapability(capability)
+                .build().networkCapabilities;
+        if (capability == NET_CAPABILITY_CBS || capability == NET_CAPABILITY_DUN ||
+                capability == NET_CAPABILITY_EIMS || capability == NET_CAPABILITY_FOTA ||
+                capability == NET_CAPABILITY_IA || capability == NET_CAPABILITY_IMS ||
+                capability == NET_CAPABILITY_RCS || capability == NET_CAPABILITY_XCAP ||
+                capability == NET_CAPABILITY_TRUSTED || capability == NET_CAPABILITY_NOT_VPN) {
+            assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+        } else {
+            assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+        }
+
         NetworkCapabilities filter = new NetworkCapabilities();
         filter.addCapability(capability);
         final HandlerThread handlerThread = new HandlerThread("testNetworkFactoryRequests");
