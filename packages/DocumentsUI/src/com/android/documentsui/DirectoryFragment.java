@@ -511,7 +511,7 @@ public class DirectoryFragment extends Fragment {
                 thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
                 if (mGridLayout == null) {
                     int itemPadding =
-                            getResources().getDimensionPixelSize(R.dimen.grid_item_padding);
+                            getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
                     int viewPadding = mRecView.getPaddingLeft() + mRecView.getPaddingRight();
                     int columnCount =
                             (mRecView.getWidth() - viewPadding) / (thumbSize + itemPadding);

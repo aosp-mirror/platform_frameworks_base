@@ -23,7 +23,7 @@
 
     <dimen name="grid_item_width">152dp</dimen>
     <dimen name="grid_item_height">176dp</dimen>
-    <dimen name="grid_item_padding">4dp</dimen>
+    <dimen name="grid_item_margin">4dp</dimen>
 
     <dimen name="grid_padding_horiz">4dp</dimen>
     <dimen name="grid_padding_vert">4dp</dimen>
