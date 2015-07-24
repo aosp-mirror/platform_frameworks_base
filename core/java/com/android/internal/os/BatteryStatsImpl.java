@@ -2560,14 +2560,24 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, code, name, uid);
     }
 
+    boolean ensureStartClockTime(final long currentTime) {
+        final long ABOUT_ONE_YEAR = 365*24*60*60*1000L;
+        if (currentTime > ABOUT_ONE_YEAR && mStartClockTime < (currentTime-ABOUT_ONE_YEAR)) {
+            // If the start clock time has changed by more than a year, then presumably
+            // the previous time was completely bogus.  So we are going to figure out a
+            // new time based on how much time has elapsed since we started counting.
+            mStartClockTime = currentTime - (SystemClock.elapsedRealtime()-(mRealtimeStart/1000));
+            return true;
+        }
+        return false;
+    }
+
     public void noteCurrentTimeChangedLocked() {
         final long currentTime = System.currentTimeMillis();
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
         recordCurrentTimeChangeLocked(currentTime, elapsedRealtime, uptime);
-        if (isStartClockTimeValid()) {
-            mStartClockTime = currentTime;
-        }
+        ensureStartClockTime(currentTime);
     }
 
     public void noteProcessStartLocked(String name, int uid) {
@@ -4306,19 +4316,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    boolean isStartClockTimeValid() {
-        return mStartClockTime > 365*24*60*60*1000L;
-    }
-
     @Override public long getStartClockTime() {
-        if (!isStartClockTimeValid()) {
-            // If the last clock time we got was very small, then we hadn't had a real
-            // time yet, so try to get it again.
-            mStartClockTime = System.currentTimeMillis();
-            if (isStartClockTimeValid()) {
-                recordCurrentTimeChangeLocked(mStartClockTime, SystemClock.elapsedRealtime(),
-                        SystemClock.uptimeMillis());
-            }
+        final long currentTime = System.currentTimeMillis();
+        if (ensureStartClockTime(currentTime)) {
+            recordCurrentTimeChangeLocked(currentTime, SystemClock.elapsedRealtime(),
+                    SystemClock.uptimeMillis());
         }
         return mStartClockTime;
     }
