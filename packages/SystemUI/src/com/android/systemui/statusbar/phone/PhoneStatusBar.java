@@ -366,6 +366,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mUserSetup = userSetup;
                 if (!mUserSetup && mStatusBarView != null)
                     animateCollapseQuickSettings();
+                if (mKeyguardBottomArea != null) {
+                    mKeyguardBottomArea.setUserSetupComplete(mUserSetup);
+                }
             }
             if (mIconPolicy != null) {
                 mIconPolicy.setCurrentUserSetup(mUserSetup);
@@ -847,6 +850,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mFlashlightController = new FlashlightController(mContext);
         mKeyguardBottomArea.setFlashlightController(mFlashlightController);
         mKeyguardBottomArea.setPhoneStatusBar(this);
+        mKeyguardBottomArea.setUserSetupComplete(mUserSetup);
         mAccessibilityController = new AccessibilityController(mContext);
         mKeyguardBottomArea.setAccessibilityController(mAccessibilityController);
         mNextAlarmController = new NextAlarmController(mContext);
