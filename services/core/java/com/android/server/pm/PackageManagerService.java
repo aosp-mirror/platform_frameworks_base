@@ -3603,10 +3603,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "updatePermissionFlags");
 
-        // Only the system can change system fixed flags.
+        // Only the system can change these flags and nothing else.
         if (getCallingUid() != Process.SYSTEM_UID) {
             flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
             flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+            flagMask &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+            flagMask &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
         }
 
         synchronized (mPackages) {
@@ -12921,10 +12925,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
 
-            // Propagate the permissions state as we do want to drop on the floor
-            // runtime permissions. The update permissions method below will take
-            // care of removing obsolete permissions and grant install permissions.
-            ps.getPermissionsState().copyFrom(disabledPs.getPermissionsState());
             updatePermissionsLPw(newPkg.packageName, newPkg,
                     UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
 
@@ -12938,6 +12938,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 + " => " + perUserInstalled[i]);
                     }
                     ps.setInstalled(perUserInstalled[i], allUserHandles[i]);
+
+                    mSettings.writeRuntimePermissionsForUserLPr(allUserHandles[i], false);
                 }
                 // Regardless of writeSettings we need to ensure that this restriction
                 // state propagation is persisted
