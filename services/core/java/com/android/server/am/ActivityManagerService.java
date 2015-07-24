@@ -3652,7 +3652,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public boolean setProcessMemoryTrimLevel(String process, int userId, int level) {
         synchronized (this) {
-            final ProcessRecord app = getProcessRecordLocked(process, userId, true);
+            final ProcessRecord app = findProcessLocked(process, userId, "setProcessMemoryTrimLevel");
             if (app == null) {
                 return false;
             }
