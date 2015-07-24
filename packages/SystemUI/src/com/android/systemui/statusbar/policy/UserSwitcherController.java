@@ -69,6 +69,10 @@ public class UserSwitcherController {
             "lockscreenSimpleUserSwitcher";
     private static final String ACTION_REMOVE_GUEST = "com.android.systemui.REMOVE_GUEST";
 
+    private static final int ID_REMOVE_GUEST = 1010;
+    private static final String TAG_REMOVE_GUEST = "remove_guest";
+    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+
     private final Context mContext;
     private final UserManager mUserManager;
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
@@ -94,10 +98,13 @@ public class UserSwitcherController {
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_STOPPING);
-        filter.addAction(ACTION_REMOVE_GUEST);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter,
                 null /* permission */, null /* scheduler */);
 
+        filter = new IntentFilter();
+        filter.addAction(ACTION_REMOVE_GUEST);
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter,
+                PERMISSION_SELF, null /* scheduler */);
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(SIMPLE_USER_SWITCHER_GLOBAL_SETTING), true,
@@ -366,8 +373,8 @@ public class UserSwitcherController {
                             mContext.getString(R.string.guest_notification_remove_action),
                             removeGuestPI)
                     .build();
-            NotificationManager.from(mContext).notifyAsUser(null, 0, notification,
-                    new UserHandle(guestUserId));
+            NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST, ID_REMOVE_GUEST,
+                    notification, new UserHandle(guestUserId));
         }
     };
 
