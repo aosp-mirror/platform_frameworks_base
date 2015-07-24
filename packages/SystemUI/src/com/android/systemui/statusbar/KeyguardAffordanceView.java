@@ -69,7 +69,7 @@ public class KeyguardAffordanceView extends ImageView {
     private float mCircleStartValue;
     private boolean mCircleWillBeHidden;
     private int[] mTempPoint = new int[2];
-    private float mImageScale;
+    private float mImageScale = 1f;
     private int mCircleColor;
     private boolean mIsLeft;
     private View mPreviewView;
