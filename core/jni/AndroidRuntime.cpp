@@ -589,6 +589,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
+    char fingerprintBuf[sizeof("-Xfingerprint:") + PROPERTY_VALUE_MAX];
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -905,6 +906,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         addOption("-Ximage-compiler-option");
         addOption("--generate-debug-info");
     }
+
+    /*
+     * Retrieve the build fingerprint and provide it to the runtime. That way, ANR dumps will
+     * contain the fingerprint and can be parsed.
+     */
+    parseRuntimeOption("ro.build.fingerprint", fingerprintBuf, "-Xfingerprint:");
 
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
