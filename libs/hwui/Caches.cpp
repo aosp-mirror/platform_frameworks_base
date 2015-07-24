@@ -246,11 +246,6 @@ void Caches::clearGarbage() {
 void Caches::flush(FlushMode mode) {
     FLUSH_LOGD("Flushing caches (mode %d)", mode);
 
-    // We must stop tasks before clearing caches
-    if (mode > kFlushMode_Layers) {
-        tasks.stop();
-    }
-
     switch (mode) {
         case kFlushMode_Full:
             textureCache.clear();
