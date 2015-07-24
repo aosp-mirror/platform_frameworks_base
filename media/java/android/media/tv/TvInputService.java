@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -1200,12 +1201,15 @@ public abstract class TvInputService extends Service {
             // We make the overlay view non-focusable and non-touchable so that
             // the application that owns the window token can decide whether to consume or
             // dispatch the input events.
-            int flag = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            int flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+            if (ActivityManager.isHighEndGfx()) {
+                flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+            }
             mWindowParams = new WindowManager.LayoutParams(
                     frame.right - frame.left, frame.bottom - frame.top,
-                    frame.left, frame.top, type, flag, PixelFormat.TRANSPARENT);
+                    frame.left, frame.top, type, flags, PixelFormat.TRANSPARENT);
             mWindowParams.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
             mWindowParams.gravity = Gravity.START | Gravity.TOP;
