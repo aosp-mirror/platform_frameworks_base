@@ -20,6 +20,8 @@ import android.os.Bundle;
 
 public interface DemoMode {
 
+    public static final String DEMO_MODE_ALLOWED = "sysui_demo_allowed";
+
     void dispatchDemoCommand(String command, Bundle args);
 
     public static final String ACTION_DEMO = "com.android.systemui.demo";
