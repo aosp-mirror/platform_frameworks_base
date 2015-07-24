@@ -65,7 +65,10 @@ public class Wm extends BaseCommand {
                 "\n" +
                 "wm scaling: set display scaling mode.\n" +
                 "\n" +
-                "wm screen-capture: enable/disable screen capture.\n"
+                "wm screen-capture: enable/disable screen capture.\n" +
+                "\n" +
+                "wm dismiss-keyguard: dismiss the keyguard, prompting the user for auth if " +
+                "necessary.\n"
                 );
     }
 
@@ -90,6 +93,8 @@ public class Wm extends BaseCommand {
             runDisplayScaling();
         } else if (op.equals("screen-capture")) {
             runSetScreenCapture();
+        } else if (op.equals("dismiss-keyguard")) {
+            runDismissKeyguard();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -238,6 +243,10 @@ public class Wm extends BaseCommand {
         } else {
             System.err.println("Error: scaling must be 'auto' or 'off'");
         }
+    }
+
+    private void runDismissKeyguard() throws Exception {
+        mWm.dismissKeyguard();
     }
 
     private int parseDimension(String s) throws NumberFormatException {
