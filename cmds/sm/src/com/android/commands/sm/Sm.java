@@ -81,6 +81,8 @@ public final class Sm {
             runUnmount();
         } else if ("format".equals(op)) {
             runFormat();
+        } else if ("benchmark".equals(op)) {
+            runBenchmark();
         } else if ("forget".equals(op)) {
             runForget();
         } else {
@@ -89,9 +91,12 @@ public final class Sm {
     }
 
     public void runListDisks() throws RemoteException {
+        final boolean onlyAdoptable = "adoptable".equals(nextArg());
         final DiskInfo[] disks = mSm.getDisks();
         for (DiskInfo disk : disks) {
-            System.out.println(disk.getId());
+            if (!onlyAdoptable || disk.isAdoptable()) {
+                System.out.println(disk.getId());
+            }
         }
     }
 
@@ -161,6 +166,11 @@ public final class Sm {
         mSm.format(volId);
     }
 
+    public void runBenchmark() throws RemoteException {
+        final String volId = nextArg();
+        mSm.benchmark(volId);
+    }
+
     public void runForget() throws RemoteException{
         final String fsUuid = nextArg();
         if ("all".equals(fsUuid)) {
@@ -180,7 +190,7 @@ public final class Sm {
     }
 
     private static int showUsage() {
-        System.err.println("usage: sm list-disks");
+        System.err.println("usage: sm list-disks [adoptable]");
         System.err.println("       sm list-volumes [public|private|emulated|all]");
         System.err.println("       sm has-adoptable");
         System.err.println("       sm get-primary-storage-uuid");
@@ -190,6 +200,7 @@ public final class Sm {
         System.err.println("       sm mount VOLUME");
         System.err.println("       sm unmount VOLUME");
         System.err.println("       sm format VOLUME");
+        System.err.println("       sm benchmark VOLUME");
         System.err.println("");
         System.err.println("       sm forget [UUID|all]");
         System.err.println("");
