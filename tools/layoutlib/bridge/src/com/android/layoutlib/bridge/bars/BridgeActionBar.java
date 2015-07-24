@@ -24,6 +24,7 @@ import com.android.ide.common.rendering.api.SessionParams;
 import com.android.layoutlib.bridge.android.BridgeContext;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +40,7 @@ public abstract class BridgeActionBar {
     @NonNull protected final BridgeContext mBridgeContext;
     @NonNull protected final SessionParams mParams;
     // A Layout that contains the inflated action bar. The menu popup is added to this layout.
-    @NonNull protected final ViewGroup mEnclosingLayout;
+    @Nullable protected final ViewGroup mEnclosingLayout;
 
     private final View mDecorContent;
     private final ActionBarCallback mCallback;
@@ -47,8 +48,7 @@ public abstract class BridgeActionBar {
     @SuppressWarnings("NullableProblems")  // Should be initialized by subclasses.
     @NonNull private FrameLayout mContentRoot;
 
-    public BridgeActionBar(@NonNull BridgeContext context, @NonNull SessionParams params,
-            @NonNull ViewGroup parentView) {
+    public BridgeActionBar(@NonNull BridgeContext context, @NonNull SessionParams params) {
         mBridgeContext = context;
         mParams = params;
         mCallback = params.getLayoutlibCallback().getActionBarCallback();
@@ -75,14 +75,13 @@ public abstract class BridgeActionBar {
             // added.
             mEnclosingLayout = new RelativeLayout(mBridgeContext);
             setMatchParent(mEnclosingLayout);
-            parentView.addView(mEnclosingLayout);
         } else {
-            mEnclosingLayout = parentView;
+            mEnclosingLayout = null;
         }
 
         // Inflate action bar layout.
-        mDecorContent = getInflater(context).inflate(layoutId, mEnclosingLayout, true);
-
+        mDecorContent =
+                getInflater(context).inflate(layoutId, mEnclosingLayout, mEnclosingLayout != null);
     }
 
     /**
@@ -152,6 +151,13 @@ public abstract class BridgeActionBar {
     }
 
     public abstract void createMenuPopup();
+
+    /**
+     * The root view that represents the action bar and possibly the content included in it.
+     */
+    public View getRootView() {
+        return mEnclosingLayout == null ? mDecorContent : mEnclosingLayout;
+    }
 
     public ActionBarCallback getCallBack() {
         return mCallback;

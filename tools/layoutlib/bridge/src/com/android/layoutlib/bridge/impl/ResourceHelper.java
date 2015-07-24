@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
+import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
@@ -325,6 +326,25 @@ public final class ResourceHelper {
         }
 
         return null;
+    }
+
+    /**
+     * Looks for an attribute in the current theme.
+     *
+     * @param resources the render resources
+     * @param name the name of the attribute
+     * @param defaultValue the default value.
+     * @param isFrameworkAttr if the attribute is in android namespace
+     * @return the value of the attribute or the default one if not found.
+     */
+    public static boolean getBooleanThemeValue(@NonNull RenderResources resources, String name,
+            boolean isFrameworkAttr, boolean defaultValue) {
+        ResourceValue value = resources.findItemInTheme(name, isFrameworkAttr);
+        value = resources.resolveResValue(value);
+        if (value == null) {
+            return defaultValue;
+        }
+        return XmlUtils.convertValueToBoolean(value.getValue(), defaultValue);
     }
 
     // ------- TypedValue stuff
