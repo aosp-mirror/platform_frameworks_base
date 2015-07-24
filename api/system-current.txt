@@ -9608,6 +9608,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_FAKETOUCH = "android.hardware.faketouch";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT = "android.hardware.faketouch.multitouch.distinct";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_JAZZHAND = "android.hardware.faketouch.multitouch.jazzhand";
+    field public static final java.lang.String FEATURE_FINGERPRINT = "android.hardware.fingerprint";
     field public static final java.lang.String FEATURE_GAMEPAD = "android.hardware.gamepad";
     field public static final java.lang.String FEATURE_HIFI_SENSORS = "android.hardware.sensor.hifi_sensors";
     field public static final java.lang.String FEATURE_HOME_SCREEN = "android.software.home_screen";
@@ -30979,11 +30980,11 @@ package android.service.voice {
     method public void onHandleAssist(android.os.Bundle, android.app.assist.AssistStructure, android.app.assist.AssistContent);
     method public void onHandleScreenshot(android.graphics.Bitmap);
     method public void onHide();
-    method public void onLockscreenShown();
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public void onLockscreenShown();
     method public void onLowMemory();
     method public void onRequestAbortVoice(android.service.voice.VoiceInteractionSession.AbortVoiceRequest);
     method public void onRequestCommand(android.service.voice.VoiceInteractionSession.CommandRequest);
