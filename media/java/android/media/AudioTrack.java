@@ -1174,9 +1174,12 @@ public class AudioTrack
     * Poll for a timestamp on demand.
     * <p>
     * If you need to track timestamps during initial warmup or after a routing or mode change,
-    * you should request a new timestamp once per second until the reported timestamps
-    * show that the audio clock is stable.
-    * Thereafter, query for a new timestamp approximately once every 10 seconds to once per minute.
+    * you should request a new timestamp periodically until the reported timestamps
+    * show that the frame position is advancing, or until it becomes clear that
+    * timestamps are unavailable for this route.
+    * <p>
+    * After the clock is advancing at a stable rate,
+    * query for a new timestamp approximately once every 10 seconds to once per minute.
     * Calling this method more often is inefficient.
     * It is also counter-productive to call this method more often than recommended,
     * because the short-term differences between successive timestamp reports are not meaningful.
@@ -1199,6 +1202,11 @@ public class AudioTrack
     *         In the case that no timestamp is available, any supplied instance is left unaltered.
     *         A timestamp may be temporarily unavailable while the audio clock is stabilizing,
     *         or during and immediately after a route change.
+    *         A timestamp is permanently unavailable for a given route if the route does not support
+    *         timestamps.  In this case, the approximate frame position can be obtained
+    *         using {@link #getPlaybackHeadPosition}.
+    *         However, it may be useful to continue to query for
+    *         timestamps occasionally, to recover after a route change.
     */
     // Add this text when the "on new timestamp" API is added:
     //   Use if you need to get the most recent timestamp outside of the event callback handler.
