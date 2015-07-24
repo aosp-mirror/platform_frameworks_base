@@ -86,9 +86,9 @@ public class KeyguardAffordanceHelper {
         mContext = context;
         mCallback = callback;
         initIcons();
-        updateIcon(mLeftIcon, 0.0f, mLeftIcon.getRestingAlpha(), false, false);
-        updateIcon(mCenterIcon, 0.0f, mCenterIcon.getRestingAlpha(), false, false);
-        updateIcon(mRightIcon, 0.0f, mRightIcon.getRestingAlpha(), false, false);
+        updateIcon(mLeftIcon, 0.0f, mLeftIcon.getRestingAlpha(), false, false, true);
+        updateIcon(mCenterIcon, 0.0f, mCenterIcon.getRestingAlpha(), false, false, true);
+        updateIcon(mRightIcon, 0.0f, mRightIcon.getRestingAlpha(), false, false, true);
         initDimens();
     }
 
@@ -387,15 +387,15 @@ public class KeyguardAffordanceHelper {
             boolean slowAnimation = isReset && isBelowFalsingThreshold();
             if (!isReset) {
                 updateIcon(targetView, radius, alpha + fadeOutAlpha * targetView.getRestingAlpha(),
-                        false, false);
+                        false, false, false);
             } else {
                 updateIcon(targetView, 0.0f, fadeOutAlpha * targetView.getRestingAlpha(),
-                        animateIcons, slowAnimation);
+                        animateIcons, slowAnimation, false);
             }
             updateIcon(otherView, 0.0f, fadeOutAlpha * otherView.getRestingAlpha(),
-                    animateIcons, slowAnimation);
+                    animateIcons, slowAnimation, false);
             updateIcon(mCenterIcon, 0.0f, fadeOutAlpha * mCenterIcon.getRestingAlpha(),
-                    animateIcons, slowAnimation);
+                    animateIcons, slowAnimation, false);
 
             mTranslation = translation;
         }
@@ -431,13 +431,13 @@ public class KeyguardAffordanceHelper {
 
     public void animateHideLeftRightIcon() {
         cancelAnimation();
-        updateIcon(mRightIcon, 0f, 0f, true, false);
-        updateIcon(mLeftIcon, 0f, 0f, true, false);
+        updateIcon(mRightIcon, 0f, 0f, true, false, false);
+        updateIcon(mLeftIcon, 0f, 0f, true, false, false);
     }
 
     private void updateIcon(KeyguardAffordanceView view, float circleRadius, float alpha,
-            boolean animate, boolean slowRadiusAnimation) {
-        if (view.getVisibility() != View.VISIBLE) {
+            boolean animate, boolean slowRadiusAnimation, boolean force) {
+        if (view.getVisibility() != View.VISIBLE && !force) {
             return;
         }
         view.setCircleRadius(circleRadius, slowRadiusAnimation);
