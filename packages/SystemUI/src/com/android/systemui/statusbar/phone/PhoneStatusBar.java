@@ -130,6 +130,7 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -588,6 +589,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private HashSet<Entry> mHeadsUpEntriesToRemoveOnSwitch = new HashSet<>();
     private RankingMap mLatestRankingMap;
     private boolean mNoAnimationOnNextBarModeChange;
+    private LockedPhoneAnalytics mLockedPhoneAnalytics;
 
     @Override
     public void start() {
@@ -635,6 +637,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         notifyUserAboutHiddenNotifications();
 
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
+        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(mContext);
     }
 
     // ================================================================================
@@ -3755,6 +3758,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         mState = state;
         mGroupManager.setStatusBarState(state);
+        mLockedPhoneAnalytics.setStatusBarState(state);
         mStatusBarWindowManager.setStatusBarState(state);
         updateDozing();
     }
@@ -3776,6 +3780,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onUnlockHintStarted() {
+        mLockedPhoneAnalytics.onUnlockHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
     }
 
@@ -3785,14 +3790,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onCameraHintStarted() {
+        mLockedPhoneAnalytics.onCameraHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.camera_hint);
     }
 
     public void onVoiceAssistHintStarted() {
+        mLockedPhoneAnalytics.onLeftAffordanceHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.voice_hint);
     }
 
     public void onPhoneHintStarted() {
+        mLockedPhoneAnalytics.onLeftAffordanceHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.phone_hint);
     }
 
@@ -3867,7 +3875,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             row.setUserExpanded(true);
         }
         boolean fullShadeNeedsBouncer = !userAllowsPrivateNotificationsInPublic(mCurrentUserId)
-                || !mShowLockscreenNotifications;
+                || !mShowLockscreenNotifications || mLockedPhoneAnalytics.shouldEnforceBouncer();
         if (isLockscreenPublicMode() && fullShadeNeedsBouncer) {
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
@@ -3912,6 +3920,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDeviceInteractive = false;
         mWakeUpComingFromTouch = false;
         mWakeUpTouchLocation = null;
+        mLockedPhoneAnalytics.onScreenOff();
         mStackScroller.setAnimationsEnabled(false);
         updateVisibleToUser();
     }
@@ -3921,6 +3930,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setAnimationsEnabled(true);
         mNotificationPanel.setTouchDisabled(false);
         updateVisibleToUser();
+        mLockedPhoneAnalytics.onScreenOn();
     }
 
     public void onScreenTurningOn() {
@@ -4049,6 +4059,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mWakeUpTouchLocation = new PointF(event.getX(), event.getY());
             mNotificationPanel.setTouchDisabled(false);
             mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
+            mLockedPhoneAnalytics.onScreenOnFromTouch();
         }
     }
 

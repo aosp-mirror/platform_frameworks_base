@@ -34,6 +34,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.analytics.LockedPhoneAnalytics;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
@@ -128,6 +129,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final int mNormalColor;
     private final int mLowPriorityColor;
     private boolean mIsBelowSpeedBump;
+    private LockedPhoneAnalytics mLockedPhoneAnalytics;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -151,6 +153,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 R.color.notification_ripple_color_low_priority);
         mNormalRippleColor = context.getColor(
                 R.color.notification_ripple_untinted_color);
+        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
     }
 
     @Override
@@ -219,6 +222,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                         makeActive();
                         postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
                     } else {
+                        mLockedPhoneAnalytics.onNotificationDoubleTap();
                         boolean performed = performClick();
                         if (performed) {
                             removeCallbacks(mTapTimeoutRunnable);
@@ -238,6 +242,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void makeActive() {
+        mLockedPhoneAnalytics.onNotificationActive();
         startActivateAnimation(false /* reverse */);
         mActivated = true;
         if (mOnActivatedListener != null) {

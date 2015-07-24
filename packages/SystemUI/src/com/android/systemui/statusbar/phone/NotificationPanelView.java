@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -203,6 +204,7 @@ public class NotificationPanelView extends PanelView implements
     private int mLastOrientation = -1;
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
+    private LockedPhoneAnalytics mLockedPhoneAnalytics;
 
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
@@ -219,6 +221,7 @@ public class NotificationPanelView extends PanelView implements
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
+        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
@@ -820,6 +823,7 @@ public class NotificationPanelView extends PanelView implements
     private void handleQsDown(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN
                 && shouldQuickSettingsIntercept(event.getX(), event.getY(), -1)) {
+            mLockedPhoneAnalytics.onQsDown();
             mQsTracking = true;
             onQsExpansionStarted();
             mInitialHeightOnTouch = mQsExpansionHeight;
@@ -987,6 +991,7 @@ public class NotificationPanelView extends PanelView implements
             mQsExpanded = expanded;
             updateQsState();
             requestPanelHeightUpdate();
+            mLockedPhoneAnalytics.setQsExpanded(expanded);
             mNotificationStackScroller.setInterceptDelegateEnabled(expanded);
             mStatusBar.setQsExpanded(expanded);
             mQsPanel.setExpanded(expanded);
@@ -1312,6 +1317,10 @@ public class NotificationPanelView extends PanelView implements
             announceForAccessibility(getContext().getString(
                     R.string.accessibility_desc_quick_settings));
             mLastAnnouncementWasQuickSettings = true;
+        }
+        if (mQsFullyExpanded && mLockedPhoneAnalytics.shouldEnforceBouncer()) {
+            mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
+                    false /* dismissShade */, true /* afterKeyguardGone */);
         }
         if (DEBUG) {
             invalidate();
@@ -1840,6 +1849,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void onTrackingStarted() {
+        mLockedPhoneAnalytics.onTrackingStarted();
         super.onTrackingStarted();
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
@@ -1853,6 +1863,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void onTrackingStopped(boolean expand) {
+        mLockedPhoneAnalytics.onTrackingStopped();
         super.onTrackingStopped(expand);
         if (expand) {
             mNotificationStackScroller.setOverScrolledPixels(
@@ -1951,11 +1962,35 @@ public class NotificationPanelView extends PanelView implements
         if (start) {
             EventLogTags.writeSysuiLockscreenGesture(
                     EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DIALER, lengthDp, velocityDp);
-            mKeyguardBottomArea.launchLeftAffordance();
+
+            mLockedPhoneAnalytics.onLeftAffordanceOn();
+            if (mLockedPhoneAnalytics.shouldEnforceBouncer()) {
+                mStatusBar.executeRunnableDismissingKeyguard(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyguardBottomArea.launchLeftAffordance();
+                    }
+                }, null, true /* dismissShade */, false /* afterKeyguardGone */);
+            }
+            else {
+                mKeyguardBottomArea.launchLeftAffordance();
+            }
         } else {
             EventLogTags.writeSysuiLockscreenGesture(
                     EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_CAMERA, lengthDp, velocityDp);
-            mSecureCameraLaunchManager.startSecureCameraLaunch();
+
+            mLockedPhoneAnalytics.onCameraOn();
+            if (mLockedPhoneAnalytics.shouldEnforceBouncer()) {
+                mStatusBar.executeRunnableDismissingKeyguard(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSecureCameraLaunchManager.startSecureCameraLaunch();
+                    }
+                }, null, true /* dismissShade */, false /* afterKeyguardGone */);
+            }
+            else {
+                mSecureCameraLaunchManager.startSecureCameraLaunch();
+            }
         }
         mStatusBar.startLaunchTransitionTimeout();
         mBlockTouches = true;
@@ -1999,6 +2034,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onSwipingStarted(boolean rightIcon) {
+        mLockedPhoneAnalytics.onAffordanceSwipingStarted(rightIcon);
         boolean camera = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? !rightIcon
                 : rightIcon;
         if (camera) {
@@ -2012,6 +2048,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onSwipingAborted() {
+        mLockedPhoneAnalytics.onAffordanceSwipingAborted();
         mKeyguardBottomArea.unbindCameraPrewarmService(false /* launched */);
     }
 

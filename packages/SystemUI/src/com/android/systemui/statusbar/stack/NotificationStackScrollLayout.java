@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -231,6 +232,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mForceNoOverlappingRendering;
     private NotificationOverflowContainer mOverflowContainer;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
+    private LockedPhoneAnalytics mLockedPhoneAnalytics;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -264,6 +266,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDebugPaint.setStrokeWidth(2);
             mDebugPaint.setStyle(Paint.Style.STROKE);
         }
+        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
     }
 
     @Override
@@ -595,6 +598,12 @@ public class NotificationStackScrollLayout extends ViewGroup
             veto.performClick();
         }
         if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
+
+        mLockedPhoneAnalytics.onNotificationDismissed();
+        if (mLockedPhoneAnalytics.shouldEnforceBouncer()) {
+            mPhoneStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
+                    false /* dismissShade */, true /* afterKeyguardGone */);
+        }
     }
 
     @Override
@@ -622,6 +631,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onBeginDrag(View v) {
+        mLockedPhoneAnalytics.onNotificatonStartDismissing();
         setSwipingInProgress(true);
         mAmbientState.onBeginDrag(v);
         if (mAnimationsEnabled && (mIsExpanded || !isPinnedHeadsUp(v))) {
@@ -648,6 +658,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onDragCancelled(View v) {
+        mLockedPhoneAnalytics.onNotificatonStopDismissing();
         setSwipingInProgress(false);
     }
 
