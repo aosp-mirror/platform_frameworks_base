@@ -436,6 +436,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         public void onPlaybackStateChanged(PlaybackState state) {
             super.onPlaybackStateChanged(state);
             if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onPlaybackStateChanged: " + state);
+            if (state != null) {
+                if (!isPlaybackActive(state.getState())) {
+                    clearCurrentMediaNotification();
+                    updateMediaMetaData(true);
+                }
+            }
         }
 
         @Override
@@ -1219,6 +1225,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mHeadsUpManager.isHeadsUp(key)) {
             deferRemoval = !mHeadsUpManager.removeNotification(key);
         }
+        if (key.equals(mMediaNotificationKey)) {
+            clearCurrentMediaNotification();
+            updateMediaMetaData(true);
+        }
         if (deferRemoval) {
             mLatestRankingMap = ranking;
             mHeadsUpEntriesToRemoveOnSwitch.add(mHeadsUpManager.getEntry(key));
@@ -1512,23 +1522,31 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         synchronized (mNotificationData) {
             ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
             final int N = activeNotifications.size();
+
+            // Promote the media notification with a controller in 'playing' state, if any.
             Entry mediaNotification = null;
             MediaController controller = null;
             for (int i = 0; i < N; i++) {
                 final Entry entry = activeNotifications.get(i);
                 if (isMediaNotification(entry)) {
-                    final MediaSession.Token token = entry.notification.getNotification().extras
+                    final MediaSession.Token token =
+                            entry.notification.getNotification().extras
                             .getParcelable(Notification.EXTRA_MEDIA_SESSION);
                     if (token != null) {
-                        controller = new MediaController(mContext, token);
-                        if (controller != null) {
-                            // we've got a live one, here
+                        MediaController aController = new MediaController(mContext, token);
+                        if (PlaybackState.STATE_PLAYING ==
+                                getMediaControllerPlaybackState(aController)) {
+                            if (DEBUG_MEDIA) {
+                                Log.v(TAG, "DEBUG_MEDIA: found mediastyle controller matching "
+                                        + entry.notification.getKey());
+                            }
                             mediaNotification = entry;
+                            controller = aController;
+                            break;
                         }
                     }
                 }
             }
-
             if (mediaNotification == null) {
                 // Still nothing? OK, let's just look for live media sessions and see if they match
                 // one of our notifications. This will catch apps that aren't (yet!) using media
@@ -1541,81 +1559,86 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                     UserHandle.USER_ALL);
 
                     for (MediaController aController : sessions) {
-                        if (aController == null) continue;
-                        final PlaybackState state = aController.getPlaybackState();
-                        if (state == null) continue;
-                        switch (state.getState()) {
-                            case PlaybackState.STATE_STOPPED:
-                            case PlaybackState.STATE_ERROR:
-                                continue;
-                            default:
-                                // now to see if we have one like this
-                                final String pkg = aController.getPackageName();
+                        if (PlaybackState.STATE_PLAYING ==
+                                getMediaControllerPlaybackState(aController)) {
+                            // now to see if we have one like this
+                            final String pkg = aController.getPackageName();
 
-                                for (int i = 0; i < N; i++) {
-                                    final Entry entry = activeNotifications.get(i);
-                                    if (entry.notification.getPackageName().equals(pkg)) {
-                                        if (DEBUG_MEDIA) {
-                                            Log.v(TAG, "DEBUG_MEDIA: found controller matching "
-                                                + entry.notification.getKey());
-                                        }
-                                        controller = aController;
-                                        mediaNotification = entry;
-                                        break;
+                            for (int i = 0; i < N; i++) {
+                                final Entry entry = activeNotifications.get(i);
+                                if (entry.notification.getPackageName().equals(pkg)) {
+                                    if (DEBUG_MEDIA) {
+                                        Log.v(TAG, "DEBUG_MEDIA: found controller matching "
+                                            + entry.notification.getKey());
                                     }
+                                    controller = aController;
+                                    mediaNotification = entry;
+                                    break;
                                 }
+                            }
                         }
                     }
                 }
             }
 
-            if (!sameSessions(mMediaController, controller)) {
+            if (controller != null && !sameSessions(mMediaController, controller)) {
                 // We have a new media session
-
-                if (mMediaController != null) {
-                    // something old was playing
-                    Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
-                            + mMediaController);
-                    mMediaController.unregisterCallback(mMediaListener);
-                }
+                clearCurrentMediaNotification();
                 mMediaController = controller;
-
-                if (mMediaController != null) {
-                    mMediaController.registerCallback(mMediaListener);
-                    mMediaMetadata = mMediaController.getMetadata();
-                    if (DEBUG_MEDIA) {
-                        Log.v(TAG, "DEBUG_MEDIA: insert listener, receive metadata: "
-                                + mMediaMetadata);
-                    }
-
-                    final String notificationKey = mediaNotification == null
-                            ? null
-                            : mediaNotification.notification.getKey();
-
-                    if (notificationKey == null || !notificationKey.equals(mMediaNotificationKey)) {
-                        // we have a new notification!
-                        if (DEBUG_MEDIA) {
-                            Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
-                                    + notificationKey + " controller=" + controller);
-                        }
-                        mMediaNotificationKey = notificationKey;
-                    }
-                } else {
-                    mMediaMetadata = null;
-                    mMediaNotificationKey = null;
-                }
-
-                metaDataChanged = true;
-            } else {
-                // Media session unchanged
-
+                mMediaController.registerCallback(mMediaListener);
+                mMediaMetadata = mMediaController.getMetadata();
                 if (DEBUG_MEDIA) {
-                    Log.v(TAG, "DEBUG_MEDIA: Continuing media notification: key=" + mMediaNotificationKey);
+                    Log.v(TAG, "DEBUG_MEDIA: insert listener, receive metadata: "
+                            + mMediaMetadata);
                 }
+
+                if (mediaNotification != null) {
+                    mMediaNotificationKey = mediaNotification.notification.getKey();
+                    if (DEBUG_MEDIA) {
+                        Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
+                                + mMediaNotificationKey + " controller=" + mMediaController);
+                    }
+                }
+                metaDataChanged = true;
             }
         }
 
+        if (metaDataChanged) {
+            updateNotifications();
+        }
         updateMediaMetaData(metaDataChanged);
+    }
+
+    private int getMediaControllerPlaybackState(MediaController controller) {
+        if (controller != null) {
+            final PlaybackState playbackState = controller.getPlaybackState();
+            if (playbackState != null) {
+                return playbackState.getState();
+            }
+        }
+        return PlaybackState.STATE_NONE;
+    }
+
+    private boolean isPlaybackActive(int state) {
+        if (state != PlaybackState.STATE_STOPPED
+                && state != PlaybackState.STATE_ERROR
+                && state != PlaybackState.STATE_NONE) {
+            return true;
+        }
+        return false;
+    }
+
+    private void clearCurrentMediaNotification() {
+        mMediaNotificationKey = null;
+        mMediaMetadata = null;
+        if (mMediaController != null) {
+            if (DEBUG_MEDIA) {
+                Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
+                        + mMediaController.getPackageName());
+            }
+            mMediaController.unregisterCallback(mMediaListener);
+        }
+        mMediaController = null;
     }
 
     private boolean sameSessions(MediaController a, MediaController b) {
