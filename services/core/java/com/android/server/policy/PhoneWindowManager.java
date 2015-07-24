@@ -3111,6 +3111,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void launchAssistAction(String hint, int deviceId) {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
+        if (!isUserSetupComplete()) {
+            // Disable opening assist window during setup
+            return;
+        }
         Bundle args = null;
         if (deviceId > Integer.MIN_VALUE) {
             args = new Bundle();
