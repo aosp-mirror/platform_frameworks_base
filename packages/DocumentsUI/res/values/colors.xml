@@ -19,5 +19,6 @@
     <color name="material_grey_300">#ffeeeeee</color>
 
     <color name="directory_background">@color/material_grey_300</color>
+    <color name="item_doc_grid_background">#FFFFFFFF</color>
     <color name="item_doc_grid_protect_background">#88000000</color>
 </resources>
