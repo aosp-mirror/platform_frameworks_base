@@ -3488,6 +3488,11 @@ class MountService extends IMountService.Stub
         }
 
         public boolean hasExternalStorage(int uid, String packageName) {
+            // No need to check for system uid. This avoids a deadlock between
+            // PackageManagerService and AppOpsService.
+            if (uid == Process.SYSTEM_UID) {
+                return true;
+            }
             // No locking - CopyOnWriteArrayList
             for (ExternalStorageMountPolicy policy : mPolicies) {
                 final boolean policyHasStorage = policy.hasExternalStorage(uid, packageName);
