@@ -16,6 +16,9 @@
 
 package com.android.documentsui;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.internal.util.Preconditions.checkState;
+
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.AdapterDataObserver;
@@ -94,13 +97,16 @@ public final class MultiSelectManager {
                 });
     }
 
+    /**
+     * Constructs a new instance with {@code adapter} and {@code helper}.
+     * @param adapter
+     * @param helper
+     * @hide
+     */
+    @VisibleForTesting
     MultiSelectManager(Adapter<?> adapter, RecyclerViewHelper helper) {
-        if (adapter == null) {
-            throw new IllegalArgumentException("Adapter cannot be null.");
-        }
-        if (helper == null) {
-            throw new IllegalArgumentException("Helper cannot be null.");
-        }
+        checkNotNull(adapter, "'adapter' cannot be null.");
+        checkNotNull(helper, "'helper' cannot be null.");
 
         mHelper = helper;
         mAdapter = adapter;
@@ -136,6 +142,12 @@ public final class MultiSelectManager {
                 });
     }
 
+    /**
+     * Adds {@code callback} such that it will be notified when {@code MultiSelectManager}
+     * events occur.
+     *
+     * @param callback
+     */
     public void addCallback(MultiSelectManager.Callback callback) {
         mCallbacks.add(callback);
     }
@@ -165,18 +177,45 @@ public final class MultiSelectManager {
         return dest;
     }
 
-    public void selectItem(int position) {
-        selectItems(position, 1);
-    }
+    /**
+     * Causes item at {@code position} in adapter to be selected.
+     *
+     * @param position Adapter position
+     * @param selected
+     * @return True if the selection state of the item changed.
+     */
+    public boolean setItemSelected(int position, boolean selected) {
+        boolean changed = (selected)
+                ? mSelection.add(position)
+                : mSelection.remove(position);
 
-    public void selectItems(int position, int length) {
-        for (int i = position; i < position + length; i++) {
-            mSelection.add(i);
+        if (changed) {
+            notifyItemStateChanged(position, true);
         }
+        return changed;
     }
 
+    /**
+     * @param position
+     * @param length
+     * @param selected
+     * @return True if the selection state of any of the items changed.
+     */
+    public boolean setItemsSelected(int position, int length, boolean selected) {
+        boolean changed = false;
+        for (int i = position; i < position + length; i++) {
+            changed |= setItemSelected(i, selected);
+        }
+        return changed;
+    }
+
+    /**
+     * Clears the selection.
+     */
     public void clearSelection() {
-        if (DEBUG) Log.d(TAG, "Clearing selection");
+        if (mSelection.isEmpty()) {
+            return;
+        }
         if (mIntermediateSelection == null) {
             mIntermediateSelection = new Selection();
         }
@@ -185,14 +224,17 @@ public final class MultiSelectManager {
 
         for (int i = 0; i < mIntermediateSelection.size(); i++) {
             int position = mIntermediateSelection.get(i);
-            mAdapter.notifyItemChanged(position);
             notifyItemStateChanged(position, false);
         }
     }
 
-    public boolean onSingleTapUp(MotionEvent e) {
+    /**
+     * @param e
+     * @return true if the event was consumed.
+     */
+    private boolean onSingleTapUp(MotionEvent e) {
         if (DEBUG) Log.d(TAG, "Handling tap event.");
-        if (mSelection.size() == 0) {
+        if (mSelection.isEmpty()) {
             return false;
         }
 
@@ -200,25 +242,30 @@ public final class MultiSelectManager {
     }
 
     /**
+     * TODO: Roll this into {@link #onSingleTapUp(MotionEvent)} once MotionEvent
+     * can be mocked.
+     *
      * @param position
+     * @return true if the event was consumed.
      * @hide
      */
     @VisibleForTesting
     boolean onSingleTapUp(int position) {
-        if (mSelection.size() == 0) {
+        if (mSelection.isEmpty()) {
             return false;
         }
 
         if (position == RecyclerView.NO_POSITION) {
-            if (DEBUG) Log.i(TAG, "View is null. Cannot handle tap event.");
-            return false;
+            if (DEBUG) Log.d(TAG, "View is null. Canceling selection.");
+            clearSelection();
+            return true;
         }
 
         toggleSelection(position);
         return true;
     }
 
-    public void onLongPress(MotionEvent e) {
+    private void onLongPress(MotionEvent e) {
         if (DEBUG) Log.d(TAG, "Handling long press event.");
 
         int position = mHelper.findEventPosition(e);
@@ -230,6 +277,9 @@ public final class MultiSelectManager {
     }
 
     /**
+     * TODO: Roll this back into {@link #onLongPress(MotionEvent)} once MotionEvent
+     * can be mocked.
+     *
      * @param position
      * @hide
      */
@@ -255,7 +305,6 @@ public final class MultiSelectManager {
         if (notifyBeforeItemStateChange(position, nextState)) {
             boolean selected = mSelection.flip(position);
             notifyItemStateChanged(position, selected);
-            mAdapter.notifyItemChanged(position);
             if (DEBUG) Log.d(TAG, "Selection after long press: " + mSelection);
         } else {
             Log.i(TAG, "Selection change cancelled by listener.");
@@ -283,13 +332,13 @@ public final class MultiSelectManager {
         for (int i = lastListener; i > -1; i--) {
             mCallbacks.get(i).onItemStateChanged(position, selected);
         }
+        mAdapter.notifyItemChanged(position);
     }
 
     /**
-     * Object representing the current selection.
+     * Object representing the current selection. Provides read only access
+     * public access, and private write access.
      */
-    // NOTE: Much of the code in this class was copious swiped from
-    // ArrayUtils, GrowingArrayUtils, and SparseBooleanArray.
     public static final class Selection {
 
         private SparseBooleanArray mSelection;
@@ -327,6 +376,13 @@ public final class MultiSelectManager {
             return mSelection.size();
         }
 
+        /**
+         * @return true if the selection is empty.
+         */
+        public boolean isEmpty() {
+            return mSelection.size() == 0;
+        }
+
         private boolean flip(int position) {
             if (contains(position)) {
                 remove(position);
@@ -339,14 +395,22 @@ public final class MultiSelectManager {
 
         /** @hide */
         @VisibleForTesting
-        void add(int position) {
-            mSelection.put(position, true);
+        boolean add(int position) {
+            if (!mSelection.get(position)) {
+                mSelection.put(position, true);
+                return true;
+            }
+            return false;
         }
 
         /** @hide */
         @VisibleForTesting
-        void remove(int position) {
-            mSelection.delete(position);
+        boolean remove(int position) {
+            if (mSelection.get(position)) {
+                mSelection.delete(position);
+                return true;
+            }
+            return false;
         }
 
         /**
@@ -360,12 +424,8 @@ public final class MultiSelectManager {
          */
         @VisibleForTesting
         void expand(int startPosition, int count) {
-            if (startPosition < 0) {
-                throw new IllegalArgumentException("startPosition must be non-negative");
-            }
-            if (count < 1) {
-                throw new IllegalArgumentException("countMust be greater than 0");
-            }
+            checkState(startPosition >= 0);
+            checkState(count > 0);
 
             for (int i = 0; i < mSelection.size(); i++) {
                 int itemPosition = mSelection.keyAt(i);
@@ -386,12 +446,8 @@ public final class MultiSelectManager {
          */
         @VisibleForTesting
         void collapse(int startPosition, int count) {
-            if (startPosition < 0) {
-                throw new IllegalArgumentException("startPosition must be non-negative");
-            }
-            if (count < 1) {
-                throw new IllegalArgumentException("countMust be greater than 0");
-            }
+            checkState(startPosition >= 0);
+            checkState(count > 0);
 
             int endPosition = startPosition + count - 1;
 
@@ -481,7 +537,7 @@ public final class MultiSelectManager {
 
     /**
      * A composite {@code OnGestureDetector} that allows us to delegate unhandled
-     * events to other interested parties.
+     * events to an outside party (presumably DirectoryFragment).
      */
     private static final class CompositeOnGestureListener implements OnGestureListener {
 
