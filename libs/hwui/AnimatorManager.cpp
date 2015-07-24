@@ -117,7 +117,6 @@ uint32_t AnimatorManager::animate(TreeInfo& info) {
 
     uint32_t dirty = animateCommon(info);
 
-    mParent.mProperties.updateMatrix();
     info.damageAccumulator->pushTransform(&mParent);
     mParent.damageSelf(info);
 
@@ -136,6 +135,7 @@ uint32_t AnimatorManager::animateCommon(TreeInfo& info) {
     newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.erase(newEnd, mAnimators.end());
     mAnimationHandle->notifyAnimationsRan();
+    mParent.mProperties.updateMatrix();
     return functor.dirtyMask;
 }
 
