@@ -28,13 +28,14 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
+import android.view.MenuItem;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 
 public class DemoModeFragment extends PreferenceFragment implements OnPreferenceChangeListener {
 
-    private static final String DEMO_MODE_ALLOWED = "sysui_demo_allowed";
     private static final String DEMO_MODE_ON = "sysui_tuner_demo_on";
 
     private static final String[] STATUS_ICONS = {
@@ -75,10 +76,33 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         updateDemoModeEnabled();
         updateDemoModeOn();
         ContentResolver contentResolver = getContext().getContentResolver();
-        contentResolver.registerContentObserver(Settings.Global.getUriFor(DEMO_MODE_ALLOWED), false,
-                mDemoModeObserver);
+        contentResolver.registerContentObserver(Settings.Global.getUriFor(
+                DemoMode.DEMO_MODE_ALLOWED), false, mDemoModeObserver);
         contentResolver.registerContentObserver(Settings.Global.getUriFor(DEMO_MODE_ON), false,
                 mDemoModeObserver);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getFragmentManager().popBackStack();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_DEMO_MODE, true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_DEMO_MODE, false);
     }
 
     @Override
@@ -89,7 +113,7 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
 
     private void updateDemoModeEnabled() {
         boolean enabled = Settings.Global.getInt(getContext().getContentResolver(),
-                DEMO_MODE_ALLOWED, 0) != 0;
+                DemoMode.DEMO_MODE_ALLOWED, 0) != 0;
         mEnabledSwitch.setChecked(enabled);
         mOnSwitch.setEnabled(enabled);
     }
@@ -102,15 +126,18 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        boolean enabled = newValue == Boolean.TRUE;
         if (preference == mEnabledSwitch) {
-            if (newValue != Boolean.TRUE) {
+            if (!enabled) {
                 // Make sure we aren't in demo mode when disabling it.
                 mOnSwitch.setChecked(false);
                 stopDemoMode();
             }
-            setGlobal(DEMO_MODE_ALLOWED, newValue == Boolean.TRUE ? 1 : 0);
+            MetricsLogger.action(getContext(), MetricsLogger.TUNER_DEMO_MODE_ENABLED, enabled);
+            setGlobal(DemoMode.DEMO_MODE_ALLOWED, enabled ? 1 : 0);
         } else if (preference == mOnSwitch) {
-            if (newValue == Boolean.TRUE) {
+            MetricsLogger.action(getContext(), MetricsLogger.TUNER_DEMO_MODE_ON, enabled);
+            if (enabled) {
                 startDemoMode();
             } else {
                 stopDemoMode();
