@@ -39,6 +39,8 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -69,6 +71,7 @@ public class UserSwitcherController {
             "lockscreenSimpleUserSwitcher";
     private static final String ACTION_REMOVE_GUEST = "com.android.systemui.REMOVE_GUEST";
     private static final String ACTION_LOGOUT_USER = "com.android.systemui.LOGOUT_USER";
+    private static final int PAUSE_REFRESH_USERS_TIMEOUT_MS = 3000;
 
     private static final int ID_REMOVE_GUEST = 1010;
     private static final int ID_LOGOUT_USER = 1011;
@@ -83,6 +86,7 @@ public class UserSwitcherController {
     private final GuestResumeSessionReceiver mGuestResumeSessionReceiver
             = new GuestResumeSessionReceiver();
     private final KeyguardMonitor mKeyguardMonitor;
+    private final Handler mHandler;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     private Dialog mExitGuestDialog;
@@ -90,11 +94,15 @@ public class UserSwitcherController {
     private int mLastNonGuestUser = UserHandle.USER_SYSTEM;
     private boolean mSimpleUserSwitcher;
     private boolean mAddUsersWhenLocked;
+    private boolean mPauseRefreshUsers;
+    private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
 
-    public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor) {
+    public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor,
+            Handler handler) {
         mContext = context;
         mGuestResumeSessionReceiver.register(context);
         mKeyguardMonitor = keyguardMonitor;
+        mHandler = handler;
         mUserManager = UserManager.get(context);
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
@@ -134,17 +142,26 @@ public class UserSwitcherController {
      */
     @SuppressWarnings("unchecked")
     private void refreshUsers(int forcePictureLoadForId) {
+        if (DEBUG) Log.d(TAG, "refreshUsers(forcePictureLoadForId=" + forcePictureLoadForId+")");
+        if (forcePictureLoadForId != UserHandle.USER_NULL) {
+            mForcePictureLoadForUserId.put(forcePictureLoadForId, true);
+        }
+
+        if (mPauseRefreshUsers) {
+            return;
+        }
 
         SparseArray<Bitmap> bitmaps = new SparseArray<>(mUsers.size());
         final int N = mUsers.size();
         for (int i = 0; i < N; i++) {
             UserRecord r = mUsers.get(i);
-            if (r == null || r.info == null
-                    || r.info.id == forcePictureLoadForId || r.picture == null) {
+            if (r == null || r.picture == null ||
+                    r.info == null || mForcePictureLoadForUserId.get(r.info.id)) {
                 continue;
             }
             bitmaps.put(r.info.id, r.picture);
         }
+        mForcePictureLoadForUserId.clear();
 
         final boolean addUsersWhenLocked = mAddUsersWhenLocked;
         new AsyncTask<SparseArray<Bitmap>, Void, ArrayList<UserRecord>>() {
@@ -233,6 +250,13 @@ public class UserSwitcherController {
         }.execute((SparseArray) bitmaps);
     }
 
+    private void pauseRefreshUsers() {
+        if (!mPauseRefreshUsers) {
+            mHandler.postDelayed(mUnpauseRefreshUsers, PAUSE_REFRESH_USERS_TIMEOUT_MS);
+            mPauseRefreshUsers = true;
+        }
+    }
+
     private void notifyAdapters() {
         for (int i = mAdapters.size() - 1; i >= 0; i--) {
             BaseUserAdapter adapter = mAdapters.get(i).get();
@@ -279,6 +303,7 @@ public class UserSwitcherController {
 
     private void switchToUserId(int id) {
         try {
+            pauseRefreshUsers();
             ActivityManagerNative.getDefault().switchUser(id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);
@@ -328,6 +353,10 @@ public class UserSwitcherController {
                 Log.v(TAG, "Broadcast: a=" + intent.getAction()
                        + " user=" + intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1));
             }
+
+            boolean unpauseRefreshUsers = false;
+            int forcePictureLoadForId = UserHandle.USER_NULL;
+
             if (ACTION_REMOVE_GUEST.equals(intent.getAction())) {
                 int currentUser = ActivityManager.getCurrentUser();
                 UserInfo userInfo = mUserManager.getUserInfo(currentUser);
@@ -335,23 +364,19 @@ public class UserSwitcherController {
                     showExitGuestDialog(currentUser);
                 }
                 return;
-            }
-            if (ACTION_LOGOUT_USER.equals(intent.getAction())) {
+            } else if (ACTION_LOGOUT_USER.equals(intent.getAction())) {
                 int currentUser = ActivityManager.getCurrentUser();
                 if (currentUser != UserHandle.USER_SYSTEM) {
                     switchToUserId(UserHandle.USER_SYSTEM);
                     stopUserId(currentUser);
                 }
-            }
-            if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
+            } else if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                 final int currentId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 UserInfo userInfo = mUserManager.getUserInfo(currentId);
                 if (userInfo != null && userInfo.isGuest()) {
                     showGuestNotification(currentId);
                 }
-            }
-
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+            } else if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
                     mExitGuestDialog.cancel();
                     mExitGuestDialog = null;
@@ -382,13 +407,15 @@ public class UserSwitcherController {
                         && userInfo.id != UserHandle.USER_SYSTEM) {
                     showLogoutNotification(currentId);
                 }
-            }
-            int forcePictureLoadForId = UserHandle.USER_NULL;
-            if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
+                unpauseRefreshUsers = true;
+            } else if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
                 forcePictureLoadForId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                         UserHandle.USER_NULL);
             }
             refreshUsers(forcePictureLoadForId);
+            if (unpauseRefreshUsers) {
+                mUnpauseRefreshUsers.run();
+            }
         }
 
         private void showGuestNotification(int guestUserId) {
@@ -425,6 +452,15 @@ public class UserSwitcherController {
                     .build();
             NotificationManager.from(mContext).notifyAsUser(TAG_LOGOUT_USER, ID_LOGOUT_USER,
                     notification, new UserHandle(userId));
+        }
+    };
+
+    private final Runnable mUnpauseRefreshUsers = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.removeCallbacks(this);
+            mPauseRefreshUsers = false;
+            refreshUsers(UserHandle.USER_NULL);
         }
     };
 
