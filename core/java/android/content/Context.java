@@ -24,6 +24,7 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
@@ -1263,7 +1264,7 @@ public abstract class Context {
      * @see #startActivity(Intent, Bundle)
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivity(Intent intent);
+    public abstract void startActivity(@RequiresPermission Intent intent);
 
     /**
      * Version of {@link #startActivity(Intent)} that allows you to specify the
@@ -1275,7 +1276,7 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    public void startActivityAsUser(Intent intent, UserHandle user) {
+    public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -1304,7 +1305,8 @@ public abstract class Context {
      * @see #startActivity(Intent)
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivity(Intent intent, @Nullable Bundle options);
+    public abstract void startActivity(@RequiresPermission Intent intent,
+            @Nullable Bundle options);
 
     /**
      * Version of {@link #startActivity(Intent, Bundle)} that allows you to specify the
@@ -1320,7 +1322,8 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    public void startActivityAsUser(Intent intent, @Nullable Bundle options, UserHandle userId) {
+    public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
+            UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -1363,7 +1366,7 @@ public abstract class Context {
      * @see #startActivities(Intent[], Bundle)
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivities(Intent[] intents);
+    public abstract void startActivities(@RequiresPermission Intent[] intents);
 
     /**
      * Launch multiple new activities.  This is generally the same as calling
@@ -1389,7 +1392,7 @@ public abstract class Context {
      * @see #startActivities(Intent[])
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivities(Intent[] intents, Bundle options);
+    public abstract void startActivities(@RequiresPermission Intent[] intents, Bundle options);
 
     /**
      * @hide
@@ -1490,7 +1493,7 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendBroadcast(Intent intent);
+    public abstract void sendBroadcast(@RequiresPermission Intent intent);
 
     /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
@@ -1516,7 +1519,7 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendBroadcast(Intent intent,
+    public abstract void sendBroadcast(@RequiresPermission Intent intent,
             @Nullable String receiverPermission);
 
 
@@ -1606,7 +1609,7 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendOrderedBroadcast(Intent intent,
+    public abstract void sendOrderedBroadcast(@RequiresPermission Intent intent,
             @Nullable String receiverPermission);
 
     /**
@@ -1649,7 +1652,7 @@ public abstract class Context {
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
      */
-    public abstract void sendOrderedBroadcast(@NonNull Intent intent,
+    public abstract void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
             @Nullable String receiverPermission, @Nullable BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
@@ -1723,7 +1726,8 @@ public abstract class Context {
      * @param user UserHandle to send the intent to.
      * @see #sendBroadcast(Intent)
      */
-    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user);
+    public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user);
 
     /**
      * Version of {@link #sendBroadcast(Intent, String)} that allows you to specify the
@@ -1740,8 +1744,8 @@ public abstract class Context {
      *
      * @see #sendBroadcast(Intent, String)
      */
-    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user,
-            @Nullable String receiverPermission);
+    public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, @Nullable String receiverPermission);
 
 
     /**
@@ -1762,8 +1766,8 @@ public abstract class Context {
      *
      * @hide
      */
-    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user,
-            @Nullable String receiverPermission, int appOp);
+    public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, @Nullable String receiverPermission, int appOp);
 
     /**
      * Version of
@@ -1795,8 +1799,8 @@ public abstract class Context {
      *
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
+    public abstract void sendOrderedBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable  Bundle initialExtras);
 
@@ -1848,7 +1852,7 @@ public abstract class Context {
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     @Deprecated
-    public abstract void sendStickyBroadcast(Intent intent);
+    public abstract void sendStickyBroadcast(@RequiresPermission Intent intent);
 
     /**
      * <p>Version of {@link #sendStickyBroadcast} that allows you to
@@ -1897,7 +1901,7 @@ public abstract class Context {
      * @see android.app.Activity#RESULT_OK
      */
     @Deprecated
-    public abstract void sendStickyOrderedBroadcast(Intent intent,
+    public abstract void sendStickyOrderedBroadcast(@RequiresPermission Intent intent,
             BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
@@ -1921,7 +1925,7 @@ public abstract class Context {
      * @see #sendStickyBroadcast
      */
     @Deprecated
-    public abstract void removeStickyBroadcast(Intent intent);
+    public abstract void removeStickyBroadcast(@RequiresPermission Intent intent);
 
     /**
      * <p>Version of {@link #sendStickyBroadcast(Intent)} that allows you to specify the
@@ -1943,7 +1947,8 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      */
     @Deprecated
-    public abstract void sendStickyBroadcastAsUser(Intent intent, UserHandle user);
+    public abstract void sendStickyBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user);
 
     /**
      * <p>Version of
@@ -1979,7 +1984,7 @@ public abstract class Context {
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     @Deprecated
-    public abstract void sendStickyOrderedBroadcastAsUser(Intent intent,
+    public abstract void sendStickyOrderedBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
@@ -2006,7 +2011,8 @@ public abstract class Context {
      * @see #sendStickyBroadcastAsUser
      */
     @Deprecated
-    public abstract void removeStickyBroadcastAsUser(Intent intent, UserHandle user);
+    public abstract void removeStickyBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user);
 
     /**
      * Register a BroadcastReceiver to be run in the main activity thread.  The
@@ -2270,8 +2276,8 @@ public abstract class Context {
      * @see #BIND_DEBUG_UNBIND
      * @see #BIND_NOT_FOREGROUND
      */
-    public abstract boolean bindService(Intent service, @NonNull ServiceConnection conn,
-            @BindServiceFlags int flags);
+    public abstract boolean bindService(@RequiresPermission Intent service,
+            @NonNull ServiceConnection conn, @BindServiceFlags int flags);
 
     /**
      * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
@@ -2280,7 +2286,7 @@ public abstract class Context {
      */
     @SystemApi
     @SuppressWarnings("unused")
-    public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+    public boolean bindServiceAsUser(@RequiresPermission Intent service, ServiceConnection conn,
             int flags, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }

@@ -24,6 +24,7 @@ import android.annotation.LayoutRes;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.StyleRes;
 import android.os.PersistableBundle;
 import android.transition.Scene;
@@ -3844,7 +3845,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #startActivity
      */
-    public void startActivityForResult(Intent intent, int requestCode) {
+    public void startActivityForResult(@RequiresPermission Intent intent, int requestCode) {
         startActivityForResult(intent, requestCode, null);
     }
 
@@ -3882,7 +3883,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #startActivity
      */
-    public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
+    public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,
+            @Nullable Bundle options) {
         if (mParent == null) {
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
@@ -4285,7 +4287,8 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      * @see #startActivityForResult
      */
-    public boolean startActivityIfNeeded(@NonNull Intent intent, int requestCode) {
+    public boolean startActivityIfNeeded(@RequiresPermission @NonNull Intent intent,
+            int requestCode) {
         return startActivityIfNeeded(intent, requestCode, null);
     }
 
@@ -4319,8 +4322,8 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      * @see #startActivityForResult
      */
-    public boolean startActivityIfNeeded(@NonNull Intent intent, int requestCode,
-            @Nullable Bundle options) {
+    public boolean startActivityIfNeeded(@RequiresPermission @NonNull Intent intent,
+            int requestCode, @Nullable Bundle options) {
         if (mParent == null) {
             int result = ActivityManager.START_RETURN_INTENT_TO_CALLER;
             try {
@@ -4372,7 +4375,7 @@ public class Activity extends ContextThemeWrapper
      * wasn't.  In general, if true is returned you will then want to call
      * finish() on yourself.
      */
-    public boolean startNextMatchingActivity(@NonNull Intent intent) {
+    public boolean startNextMatchingActivity(@RequiresPermission @NonNull Intent intent) {
         return startNextMatchingActivity(intent, null);
     }
 
@@ -4395,7 +4398,8 @@ public class Activity extends ContextThemeWrapper
      * wasn't.  In general, if true is returned you will then want to call
      * finish() on yourself.
      */
-    public boolean startNextMatchingActivity(@NonNull Intent intent, @Nullable Bundle options) {
+    public boolean startNextMatchingActivity(@RequiresPermission @NonNull Intent intent,
+            @Nullable Bundle options) {
         if (mParent == null) {
             try {
                 intent.migrateExtraStreamToClipData();
@@ -4425,7 +4429,7 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      * @see #startActivityForResult
      */
-    public void startActivityFromChild(@NonNull Activity child, Intent intent,
+    public void startActivityFromChild(@NonNull Activity child, @RequiresPermission Intent intent,
             int requestCode) {
         startActivityFromChild(child, intent, requestCode, null);
     }
@@ -4449,7 +4453,7 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      * @see #startActivityForResult
      */
-    public void startActivityFromChild(@NonNull Activity child, Intent intent,
+    public void startActivityFromChild(@NonNull Activity child, @RequiresPermission Intent intent,
             int requestCode, @Nullable Bundle options) {
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
@@ -4476,8 +4480,8 @@ public class Activity extends ContextThemeWrapper
      * @see Fragment#startActivity
      * @see Fragment#startActivityForResult
      */
-    public void startActivityFromFragment(@NonNull Fragment fragment, Intent intent,
-            int requestCode) {
+    public void startActivityFromFragment(@NonNull Fragment fragment,
+            @RequiresPermission Intent intent, int requestCode) {
         startActivityFromFragment(fragment, intent, requestCode, null);
     }
 
@@ -4501,8 +4505,8 @@ public class Activity extends ContextThemeWrapper
      * @see Fragment#startActivity
      * @see Fragment#startActivityForResult
      */
-    public void startActivityFromFragment(@NonNull Fragment fragment, Intent intent,
-            int requestCode, @Nullable Bundle options) {
+    public void startActivityFromFragment(@NonNull Fragment fragment,
+            @RequiresPermission Intent intent, int requestCode, @Nullable Bundle options) {
         startActivityForResult(fragment.mWho, intent, requestCode, options);
     }
 
