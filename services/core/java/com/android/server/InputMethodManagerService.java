@@ -114,6 +114,7 @@ import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodManagerInternal;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import android.widget.ArrayAdapter;
@@ -166,6 +167,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_UNBIND_METHOD = 3000;
     static final int MSG_BIND_METHOD = 3010;
     static final int MSG_SET_ACTIVE = 3020;
+    static final int MSG_SET_INTERACTIVE = 3030;
     static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 3040;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
@@ -394,9 +396,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     SessionState mEnabledSession;
 
     /**
-     * True if the screen is on.  The value is true initially.
+     * True if the device is currently interactive with user.  The value is true initially.
      */
-    boolean mScreenOn = true;
+    boolean mIsInteractive = true;
 
     int mCurUserActionNotificationSequenceNumber = 0;
 
@@ -492,30 +494,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     class ImmsBroadcastReceiver extends android.content.BroadcastReceiver {
-        private void updateActive() {
-            // Inform the current client of the change in active status
-            if (mCurClient != null && mCurClient.client != null) {
-                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                        MSG_SET_ACTIVE, mScreenOn ? 1 : 0, mCurClient));
-            }
-        }
-
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                mScreenOn = true;
-                updateSystemUi(mCurToken, mImeWindowVis, mBackDisposition);
-                updateActive();
-                return;
-            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mScreenOn = false;
-                updateSystemUi(mCurToken, 0 /* vis */, mBackDisposition);
-                updateActive();
-                return;
-            } else if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 hideInputMethodMenu();
-                // No need to updateActive
+                // No need to update mIsInteractive
                 return;
             } else if (Intent.ACTION_USER_ADDED.equals(action)
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
@@ -817,8 +801,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mShowOngoingImeSwitcherForPhones = false;
 
         final IntentFilter broadcastFilter = new IntentFilter();
-        broadcastFilter.addAction(Intent.ACTION_SCREEN_ON);
-        broadcastFilter.addAction(Intent.ACTION_SCREEN_OFF);
         broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
         broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
@@ -938,6 +920,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     }
                 }, filter);
+        LocalServices.addService(InputMethodManagerInternal.class, new LocalServiceImpl(mHandler));
     }
 
     private void resetDefaultImeLocked(Context context) {
@@ -1379,9 +1362,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + cs.client.asBinder() + " keyguard=" + mCurClientInKeyguard);
 
             // If the screen is on, inform the new client it is active
-            if (mScreenOn) {
+            if (mIsInteractive) {
                 executeOrSendMessage(cs.client, mCaller.obtainMessageIO(
-                        MSG_SET_ACTIVE, mScreenOn ? 1 : 0, cs));
+                        MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, cs));
             }
         }
 
@@ -2851,6 +2834,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + ((ClientState)msg.obj).uid);
                 }
                 return true;
+            case MSG_SET_INTERACTIVE:
+                handleSetInteractive(msg.arg1 != 0);
+                return true;
             case MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER: {
                 final int sequenceNumber = msg.arg1;
                 final ClientState clientState = (ClientState)msg.obj;
@@ -2872,6 +2858,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return true;
         }
         return false;
+    }
+
+    private void handleSetInteractive(final boolean interactive) {
+        synchronized (mMethodMap) {
+            mIsInteractive = interactive;
+            updateSystemUiLocked(mCurToken, interactive ? mImeWindowVis : 0, mBackDisposition);
+
+            // Inform the current client of the change in active status
+            if (mCurClient != null && mCurClient.client != null) {
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                        MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, mCurClient));
+            }
+        }
     }
 
     private boolean chooseNewDefaultIMELocked() {
@@ -3734,6 +3733,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private static final class LocalServiceImpl implements InputMethodManagerInternal {
+        @NonNull
+        private final Handler mHandler;
+
+        LocalServiceImpl(@NonNull final Handler handler) {
+            mHandler = handler;
+        }
+
+        @Override
+        public void setInteractive(boolean interactive) {
+            // Do everything in handler so as not to block the caller.
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_INTERACTIVE,
+                    interactive ? 1 : 0, 0));
+        }
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -3784,7 +3799,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " mInputShown=" + mInputShown);
             p.println("  mCurUserActionNotificationSequenceNumber="
                     + mCurUserActionNotificationSequenceNumber);
-            p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mScreenOn);
+            p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
             p.println("  mSettingsObserver=" + mSettingsObserver);
             p.println("  mSwitchingController:");
             mSwitchingController.dump(p);
