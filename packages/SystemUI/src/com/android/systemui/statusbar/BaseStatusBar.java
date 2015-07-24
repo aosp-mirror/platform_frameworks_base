@@ -733,11 +733,15 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void setNotificationShown(StatusBarNotification n) {
-        mNotificationListener.setNotificationsShown(new String[] { n.getKey() });
+        setNotificationsShown(new String[]{n.getKey()});
     }
 
     protected void setNotificationsShown(String[] keys) {
-        mNotificationListener.setNotificationsShown(keys);
+        try {
+            mNotificationListener.setNotificationsShown(keys);
+        } catch (RuntimeException e) {
+            Log.d(TAG, "failed setNotificationsShown: ", e);
+        }
     }
 
     protected boolean isCurrentProfile(int userId) {
