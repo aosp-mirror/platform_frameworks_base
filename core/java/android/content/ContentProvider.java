@@ -16,8 +16,11 @@
 
 package android.content;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_ERRORED;
+import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,8 +43,8 @@ import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.UserHandle;
-import android.util.Log;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -474,14 +477,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         private int enforceReadPermission(String callingPkg, Uri uri, IBinder callerToken)
                 throws SecurityException {
-            enforceReadPermissionInner(uri, callerToken);
-
-            final int permOp = AppOpsManager.permissionToOpCode(mReadPermission);
-            if (permOp != AppOpsManager.OP_NONE) {
-                final int mode = mAppOpsManager.noteProxyOp(permOp, callingPkg);
-                if (mode != AppOpsManager.MODE_ALLOWED) {
-                    return mode;
-                }
+            final int mode = enforceReadPermissionInner(uri, callingPkg, callerToken);
+            if (mode != MODE_ALLOWED) {
+                return mode;
             }
 
             if (mReadOp != AppOpsManager.OP_NONE) {
@@ -493,14 +491,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         private int enforceWritePermission(String callingPkg, Uri uri, IBinder callerToken)
                 throws SecurityException {
-            enforceWritePermissionInner(uri, callerToken);
-
-            final int permOp = AppOpsManager.permissionToOpCode(mWritePermission);
-            if (permOp != AppOpsManager.OP_NONE) {
-                final int mode = mAppOpsManager.noteProxyOp(permOp, callingPkg);
-                if (mode != AppOpsManager.MODE_ALLOWED) {
-                    return mode;
-                }
+            final int mode = enforceWritePermissionInner(uri, callingPkg, callerToken);
+            if (mode != MODE_ALLOWED) {
+                return mode;
             }
 
             if (mWriteOp != AppOpsManager.OP_NONE) {
@@ -518,26 +511,47 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 == PERMISSION_GRANTED;
     }
 
+    /**
+     * Verify that calling app holds both the given permission and any app-op
+     * associated with that permission.
+     */
+    private int checkPermissionAndAppOp(String permission, String callingPkg,
+            IBinder callerToken) {
+        if (getContext().checkPermission(permission, Binder.getCallingPid(), Binder.getCallingUid(),
+                callerToken) != PERMISSION_GRANTED) {
+            return MODE_ERRORED;
+        }
+
+        final int permOp = AppOpsManager.permissionToOpCode(permission);
+        if (permOp != AppOpsManager.OP_NONE) {
+            return mTransport.mAppOpsManager.noteProxyOp(permOp, callingPkg);
+        }
+
+        return MODE_ALLOWED;
+    }
+
     /** {@hide} */
-    protected void enforceReadPermissionInner(Uri uri, IBinder callerToken)
+    protected int enforceReadPermissionInner(Uri uri, String callingPkg, IBinder callerToken)
             throws SecurityException {
         final Context context = getContext();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         String missingPerm = null;
+        int strongestMode = MODE_ALLOWED;
 
         if (UserHandle.isSameApp(uid, mMyUid)) {
-            return;
+            return MODE_ALLOWED;
         }
 
         if (mExported && checkUser(pid, uid, context)) {
             final String componentPerm = getReadPermission();
             if (componentPerm != null) {
-                if (context.checkPermission(componentPerm, pid, uid, callerToken)
-                        == PERMISSION_GRANTED) {
-                    return;
+                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg, callerToken);
+                if (mode == MODE_ALLOWED) {
+                    return MODE_ALLOWED;
                 } else {
                     missingPerm = componentPerm;
+                    strongestMode = Math.max(strongestMode, mode);
                 }
             }
 
@@ -551,14 +565,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 for (PathPermission pp : pps) {
                     final String pathPerm = pp.getReadPermission();
                     if (pathPerm != null && pp.match(path)) {
-                        if (context.checkPermission(pathPerm, pid, uid, callerToken)
-                                == PERMISSION_GRANTED) {
-                            return;
+                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg, callerToken);
+                        if (mode == MODE_ALLOWED) {
+                            return MODE_ALLOWED;
                         } else {
                             // any denied <path-permission> means we lose
                             // default <provider> access.
                             allowDefaultRead = false;
                             missingPerm = pathPerm;
+                            strongestMode = Math.max(strongestMode, mode);
                         }
                     }
                 }
@@ -566,7 +581,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
             // if we passed <path-permission> checks above, and no default
             // <provider> permission, then allow access.
-            if (allowDefaultRead) return;
+            if (allowDefaultRead) return MODE_ALLOWED;
         }
 
         // last chance, check against any uri grants
@@ -575,7 +590,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 ? maybeAddUserId(uri, callingUserId) : uri;
         if (context.checkUriPermission(userUri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION,
                 callerToken) == PERMISSION_GRANTED) {
-            return;
+            return MODE_ALLOWED;
+        }
+
+        // If the worst denial we found above was ignored, then pass that
+        // ignored through; otherwise we assume it should be a real error below.
+        if (strongestMode == MODE_IGNORED) {
+            return MODE_IGNORED;
         }
 
         final String failReason = mExported
@@ -587,25 +608,27 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /** {@hide} */
-    protected void enforceWritePermissionInner(Uri uri, IBinder callerToken)
+    protected int enforceWritePermissionInner(Uri uri, String callingPkg, IBinder callerToken)
             throws SecurityException {
         final Context context = getContext();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         String missingPerm = null;
+        int strongestMode = MODE_ALLOWED;
 
         if (UserHandle.isSameApp(uid, mMyUid)) {
-            return;
+            return MODE_ALLOWED;
         }
 
         if (mExported && checkUser(pid, uid, context)) {
             final String componentPerm = getWritePermission();
             if (componentPerm != null) {
-                if (context.checkPermission(componentPerm, pid, uid, callerToken)
-                        == PERMISSION_GRANTED) {
-                    return;
+                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg, callerToken);
+                if (mode == MODE_ALLOWED) {
+                    return MODE_ALLOWED;
                 } else {
                     missingPerm = componentPerm;
+                    strongestMode = Math.max(strongestMode, mode);
                 }
             }
 
@@ -619,14 +642,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 for (PathPermission pp : pps) {
                     final String pathPerm = pp.getWritePermission();
                     if (pathPerm != null && pp.match(path)) {
-                        if (context.checkPermission(pathPerm, pid, uid, callerToken)
-                                == PERMISSION_GRANTED) {
-                            return;
+                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg, callerToken);
+                        if (mode == MODE_ALLOWED) {
+                            return MODE_ALLOWED;
                         } else {
                             // any denied <path-permission> means we lose
                             // default <provider> access.
                             allowDefaultWrite = false;
                             missingPerm = pathPerm;
+                            strongestMode = Math.max(strongestMode, mode);
                         }
                     }
                 }
@@ -634,13 +658,19 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
             // if we passed <path-permission> checks above, and no default
             // <provider> permission, then allow access.
-            if (allowDefaultWrite) return;
+            if (allowDefaultWrite) return MODE_ALLOWED;
         }
 
         // last chance, check against any uri grants
         if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                 callerToken) == PERMISSION_GRANTED) {
-            return;
+            return MODE_ALLOWED;
+        }
+
+        // If the worst denial we found above was ignored, then pass that
+        // ignored through; otherwise we assume it should be a real error below.
+        if (strongestMode == MODE_IGNORED) {
+            return MODE_IGNORED;
         }
 
         final String failReason = mExported
