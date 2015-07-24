@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
@@ -117,6 +118,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     // Handler that all callbacks are made on.
     private final CallbackHandler mCallbackHandler;
 
+    @VisibleForTesting
+    ServiceState mLastServiceState;
+
     /**
      * Construct this controller object and register for updates.
      */
@@ -194,6 +198,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED);
+        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
@@ -259,6 +264,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     public boolean isEmergencyOnly() {
+        if (mMobileSignalControllers.size() == 0) {
+            // When there are no active subscriptions, determine emengency state from last
+            // broadcast.
+            return mLastServiceState != null && mLastServiceState.isEmergencyOnly();
+        }
         int voiceSubId = mSubDefaults.getDefaultVoiceSubId();
         if (!SubscriptionManager.isValidSubscriptionId(voiceSubId)) {
             for (MobileSignalController mobileSignalController :
@@ -353,6 +363,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
         } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
             // Might have different subscriptions now.
             updateMobileControllers();
+        } else if (action.equals(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED)) {
+            mLastServiceState = ServiceState.newFromBundle(intent.getExtras());
+            if (mMobileSignalControllers.size() == 0) {
+                // If none of the subscriptions are active, we might need to recalculate
+                // emergency state.
+                recalculateEmergency();
+            }
         } else {
             int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
@@ -587,6 +604,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.println(mAirplaneMode);
         pw.print("  mLocale=");
         pw.println(mLocale);
+        pw.print("  mLastServiceState=");
+        pw.println(mLastServiceState);
 
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.dump(pw);
