@@ -48,6 +48,7 @@ import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.WindowManagerPolicy;
+import android.view.inputmethod.InputMethodManagerInternal;
 
 /**
  * Sends broadcasts about important power state changes.
@@ -89,6 +90,7 @@ final class Notifier {
     private final WindowManagerPolicy mPolicy;
     private final ActivityManagerInternal mActivityManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
+    private final InputMethodManagerInternal mInputMethodManagerInternal;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -133,6 +135,7 @@ final class Notifier {
         mPolicy = policy;
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+        mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
 
         mHandler = new NotifierHandler(looper);
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
@@ -314,6 +317,7 @@ final class Notifier {
 
             // Start input as soon as we start waking up or going to sleep.
             mInputManagerInternal.setInteractive(interactive);
+            mInputMethodManagerInternal.setInteractive(interactive);
 
             // Notify battery stats.
             try {
