@@ -44,6 +44,7 @@ import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
@@ -69,6 +70,7 @@ public class PhoneStatusBarPolicy {
     private final CastController mCast;
     private final HotspotController mHotspot;
     private final AlarmManager mAlarmManager;
+    private final UserInfoController mUserInfoController;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -111,12 +113,14 @@ public class PhoneStatusBarPolicy {
         }
     };
 
-    public PhoneStatusBarPolicy(Context context, CastController cast, HotspotController hotspot) {
+    public PhoneStatusBarPolicy(Context context, CastController cast, HotspotController hotspot,
+            UserInfoController userInfoController) {
         mContext = context;
         mCast = cast;
         mHotspot = hotspot;
         mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mUserInfoController = userInfoController;
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -360,6 +364,7 @@ public class PhoneStatusBarPolicy {
             new IUserSwitchObserver.Stub() {
                 @Override
                 public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                    mUserInfoController.reloadUserInfo();
                 }
 
                 @Override
