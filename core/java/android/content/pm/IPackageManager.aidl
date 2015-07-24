@@ -253,7 +253,7 @@ interface IPackageManager {
 
     List<PackageInfo> getPreferredPackages(int flags);
 
-    void resetPreferredActivities(int userId);
+    void resetApplicationPreferences(int userId);
 
     ResolveInfo getLastChosenActivity(in Intent intent,
             String resolvedType, int flags);

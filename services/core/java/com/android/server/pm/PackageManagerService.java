@@ -3555,7 +3555,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         continue;
                     }
                     PackageSetting ps = (PackageSetting) pkg.mExtras;
-                    resetUserChangesToRuntimePermissionsAndFlagsLocked(ps, userId);
+                    resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, userId);
                 }
             }
         }
@@ -13090,7 +13090,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (clearPackagePreferredActivitiesLPw(packageName, removeUser)) {
                     scheduleWritePackageRestrictionsLocked(removeUser);
                 }
-                resetUserChangesToRuntimePermissionsAndFlagsLocked(ps, removeUser);
+                resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, removeUser);
             }
             return true;
         }
@@ -13251,7 +13251,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             PackageSetting ps = (PackageSetting) pkg.mExtras;
-            resetUserChangesToRuntimePermissionsAndFlagsLocked(ps, userId);
+            resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, userId);
         }
 
         // Always delete data directories for package, even if we found no other
@@ -13283,12 +13283,27 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
+     * Reverts user permission state changes (permissions and flags) in
+     * all packages for a given user.
+     *
+     * @param userId The device user for which to do a reset.
+     */
+    private void resetUserChangesToRuntimePermissionsAndFlagsLPw(int userId) {
+        final int packageCount = mPackages.size();
+        for (int i = 0; i < packageCount; i++) {
+            PackageParser.Package pkg = mPackages.valueAt(i);
+            PackageSetting ps = (PackageSetting) pkg.mExtras;
+            resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, userId);
+        }
+    }
+
+    /**
      * Reverts user permission state changes (permissions and flags).
      *
      * @param ps The package for which to reset.
      * @param userId The device user for which to do a reset.
      */
-    private void resetUserChangesToRuntimePermissionsAndFlagsLocked(
+    private void resetUserChangesToRuntimePermissionsAndFlagsLPw(
             final PackageSetting ps, final int userId) {
         if (ps.pkg == null) {
             return;
@@ -13788,6 +13803,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    private void clearIntentFilterVerificationsLPw(int userId) {
+        final int packageCount = mPackages.size();
+        for (int i = 0; i < packageCount; i++) {
+            PackageParser.Package pkg = mPackages.valueAt(i);
+            clearIntentFilterVerificationsLPw(pkg.packageName, userId);
+        }
+    }
+
+    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     void clearIntentFilterVerificationsLPw(String packageName, int userId) {
         if (userId == UserHandle.USER_ALL) {
             if (mSettings.removeIntentFilterVerificationLPw(packageName,
@@ -13803,7 +13827,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-
     void clearDefaultBrowserIfNeeded(String packageName) {
         for (int oneUserId : sUserManager.getUserIds()) {
             String defaultBrowserPackageName = getDefaultBrowserPackageName(oneUserId);
@@ -13815,17 +13838,27 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void resetPreferredActivities(int userId) {
+    public void resetApplicationPreferences(int userId) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
         // writer
         synchronized (mPackages) {
-            clearPackagePreferredActivitiesLPw(null, userId);
-            mSettings.applyDefaultPreferredAppsLPw(this, userId);
-            applyFactoryDefaultBrowserLPw(userId);
-            primeDomainVerificationsLPw(userId);
-
-            scheduleWritePackageRestrictionsLocked(userId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                clearPackagePreferredActivitiesLPw(null, userId);
+                mSettings.applyDefaultPreferredAppsLPw(this, userId);
+                // TODO: We have to reset the default SMS and Phone. This requires
+                // significant refactoring to keep all default apps in the package
+                // manager (cleaner but more work) or have the services provide
+                // callbacks to the package manager to request a default app reset.
+                applyFactoryDefaultBrowserLPw(userId);
+                clearIntentFilterVerificationsLPw(userId);
+                primeDomainVerificationsLPw(userId);
+                resetUserChangesToRuntimePermissionsAndFlagsLPw(userId);
+                scheduleWritePackageRestrictionsLocked(userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
