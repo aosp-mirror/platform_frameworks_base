@@ -93,7 +93,7 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
     // Defines the number of int fields used to represent a single entry
     // in the atlas map. This number defines the size of the array returned
     // by the getMap(). See the mAtlasMap field for more information
-    private static final int ATLAS_MAP_ENTRY_FIELD_COUNT = 4;
+    private static final int ATLAS_MAP_ENTRY_FIELD_COUNT = 3;
 
     // Specifies how our GraphicBuffer will be used. To get proper swizzling
     // the buffer will be written to using OpenGL (from JNI) so we can leave
