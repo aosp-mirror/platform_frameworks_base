@@ -27,6 +27,8 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
+#include <atomic>
+#include <cinttypes>
 #include <limits.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
@@ -55,6 +57,8 @@
 #include "com_android_server_power_PowerManagerService.h"
 #include "com_android_server_input_InputApplicationHandle.h"
 #include "com_android_server_input_InputWindowHandle.h"
+
+#define INDENT "  "
 
 namespace android {
 
@@ -124,6 +128,10 @@ inline static T min(const T& a, const T& b) {
 template<typename T>
 inline static T max(const T& a, const T& b) {
     return a > b ? a : b;
+}
+
+static inline const char* toString(bool value) {
+    return value ? "true" : "false";
 }
 
 static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
@@ -262,7 +270,7 @@ private:
         wp<PointerController> pointerController;
     } mLocked;
 
-    volatile bool mInteractive;
+    std::atomic<bool> mInteractive;
 
     void updateInactivityTimeoutLocked(const sp<PointerController>& controller);
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
@@ -292,6 +300,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.pointerGesturesEnabled = true;
         mLocked.showTouches = false;
     }
+    mInteractive = true;
 
     sp<EventHub> eventHub = new EventHub();
     mInputManager = new InputManager(eventHub, this, this);
@@ -305,6 +314,21 @@ NativeInputManager::~NativeInputManager() {
 }
 
 void NativeInputManager::dump(String8& dump) {
+    dump.append("Input Manager State:\n");
+    {
+        dump.appendFormat(INDENT "Interactive: %s\n", toString(mInteractive.load()));
+    }
+    {
+        AutoMutex _l(mLock);
+        dump.appendFormat(INDENT "System UI Visibility: 0x%0" PRIx32 "\n",
+                mLocked.systemUiVisibility);
+        dump.appendFormat(INDENT "Pointer Speed: %" PRId32 "\n", mLocked.pointerSpeed);
+        dump.appendFormat(INDENT "Pointer Gestures Enabled: %s\n",
+                toString(mLocked.pointerGesturesEnabled));
+        dump.appendFormat(INDENT "Show Touches: %s\n", toString(mLocked.showTouches));
+    }
+    dump.append("\n");
+
     mInputManager->getReader()->dump(dump);
     dump.append("\n");
 
@@ -830,7 +854,8 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
     // - Ignore untrusted events and pass them along.
     // - Ask the window manager what to do with normal events and trusted injected events.
     // - For normal events wake and brighten the screen if currently off or dim.
-    if (mInteractive) {
+    bool interactive = mInteractive.load();
+    if (interactive) {
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
     if ((policyFlags & POLICY_FLAG_TRUSTED)) {
@@ -854,7 +879,7 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
 
         handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
     } else {
-        if (mInteractive) {
+        if (interactive) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
         }
     }
@@ -866,7 +891,8 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
     // - No special filtering for injected events required at this time.
     // - Filter normal events based on screen state.
     // - For normal events brighten (but do not wake) the screen if currently dim.
-    if (mInteractive) {
+    bool interactive = mInteractive.load();
+    if (interactive) {
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
     if ((policyFlags & POLICY_FLAG_TRUSTED) && !(policyFlags & POLICY_FLAG_INJECTED)) {
@@ -885,7 +911,7 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
             handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
         }
     } else {
-        if (mInteractive) {
+        if (interactive) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
         }
     }
