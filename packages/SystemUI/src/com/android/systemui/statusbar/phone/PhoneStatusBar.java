@@ -1710,7 +1710,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             if (metaDataChanged) {
                 if (mBackdropBack.getDrawable() != null) {
-                    Drawable drawable = mBackdropBack.getDrawable();
+                    Drawable drawable =
+                            mBackdropBack.getDrawable().getConstantState().newDrawable().mutate();
                     mBackdropFront.setImageDrawable(drawable);
                     if (mScrimSrcModeEnabled) {
                         mBackdropFront.getDrawable().mutate().setXfermode(mSrcOverXferMode);
