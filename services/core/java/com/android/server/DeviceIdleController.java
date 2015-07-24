@@ -253,6 +253,8 @@ public class DeviceIdleController extends SystemService
                 "max_temp_app_whitelist_duration";
         private static final String KEY_MMS_TEMP_APP_WHITELIST_DURATION =
                 "mms_temp_app_whitelist_duration";
+        private static final String KEY_SMS_TEMP_APP_WHITELIST_DURATION =
+                "sms_temp_app_whitelist_duration";
 
         /**
          * This is the time, after becoming inactive, at which we start looking at the
@@ -357,6 +359,13 @@ public class DeviceIdleController extends SystemService
          */
         public long MMS_TEMP_APP_WHITELIST_DURATION;
 
+        /**
+         * Amount of time we would like to whitelist an app that is receiving an SMS.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_SMS_TEMP_APP_WHITELIST_DURATION
+         */
+        public long SMS_TEMP_APP_WHITELIST_DURATION;
+
         private final ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -410,6 +419,8 @@ public class DeviceIdleController extends SystemService
                         KEY_MAX_TEMP_APP_WHITELIST_DURATION, 5 * 60 * 1000L);
                 MMS_TEMP_APP_WHITELIST_DURATION = mParser.getLong(
                         KEY_MMS_TEMP_APP_WHITELIST_DURATION, 60 * 1000L);
+                SMS_TEMP_APP_WHITELIST_DURATION = mParser.getLong(
+                        KEY_SMS_TEMP_APP_WHITELIST_DURATION, 20 * 1000L);
             }
         }
 
@@ -464,6 +475,10 @@ public class DeviceIdleController extends SystemService
 
             pw.print("    "); pw.print(KEY_MMS_TEMP_APP_WHITELIST_DURATION); pw.print("=");
             TimeUtils.formatDuration(MMS_TEMP_APP_WHITELIST_DURATION, pw);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_SMS_TEMP_APP_WHITELIST_DURATION); pw.print("=");
+            TimeUtils.formatDuration(SMS_TEMP_APP_WHITELIST_DURATION, pw);
             pw.println();
         }
     }
@@ -613,6 +628,13 @@ public class DeviceIdleController extends SystemService
         @Override public long addPowerSaveTempWhitelistAppForMms(String packageName,
                 int userId, String reason) throws RemoteException {
             long duration = mConstants.MMS_TEMP_APP_WHITELIST_DURATION;
+            addPowerSaveTempWhitelistApp(packageName, duration, userId, reason);
+            return duration;
+        }
+
+        @Override public long addPowerSaveTempWhitelistAppForSms(String packageName,
+                int userId, String reason) throws RemoteException {
+            long duration = mConstants.SMS_TEMP_APP_WHITELIST_DURATION;
             addPowerSaveTempWhitelistApp(packageName, duration, userId, reason);
             return duration;
         }
