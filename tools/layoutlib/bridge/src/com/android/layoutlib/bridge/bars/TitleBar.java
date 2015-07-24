@@ -27,8 +27,7 @@ public class TitleBar extends CustomBar {
 
     private TextView mTextView;
 
-    public TitleBar(BridgeContext context, String label, int simulatedPlatformVersion)
-            throws XmlPullParserException {
+    public TitleBar(BridgeContext context, String label, int simulatedPlatformVersion) {
         super(context, LinearLayout.HORIZONTAL, "/bars/title_bar.xml", "title_bar.xml",
                 simulatedPlatformVersion);
 
