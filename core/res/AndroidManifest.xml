@@ -1749,6 +1749,10 @@
     <!-- ==================================== -->
     <eat-comment />
 
+    <!-- @SystemApi Allows access to the list of accounts in the Accounts Service. -->
+    <permission android:name="android.permission.GET_ACCOUNTS_PRIVILEGED"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows applications to RW to diagnostic resources.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.DIAGNOSTIC"
