@@ -1807,6 +1807,7 @@ package android {
     field public static final int defaultVoiceMailAlphaTag = 17039364; // 0x1040004
     field public static final int dialog_alert_title = 17039380; // 0x1040014
     field public static final int emptyPhoneNumber = 17039366; // 0x1040006
+    field public static final int fingerprint_icon_content_description = 17039384; // 0x1040018
     field public static final int httpErrorBadUrl = 17039367; // 0x1040007
     field public static final int httpErrorUnsupportedScheme = 17039368; // 0x1040008
     field public static final int no = 17039369; // 0x1040009
