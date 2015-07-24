@@ -231,6 +231,8 @@ public class UsbHostManager {
             mNewConfigurations = null;
             mNewInterfaces = null;
             mNewEndpoints = null;
+            mNewConfiguration = null;
+            mNewInterface = null;
         }
     }
 
