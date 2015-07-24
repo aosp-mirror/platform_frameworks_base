@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A helper class for retrieving the power usage information for all applications and services.
@@ -267,15 +268,20 @@ public final class BatteryStatsHelper {
 
     public static String makemAh(double power) {
         if (power == 0) return "0";
-        else if (power < .00001) return String.format("%.8f", power);
-        else if (power < .0001) return String.format("%.7f", power);
-        else if (power < .001) return String.format("%.6f", power);
-        else if (power < .01) return String.format("%.5f", power);
-        else if (power < .1) return String.format("%.4f", power);
-        else if (power < 1) return String.format("%.3f", power);
-        else if (power < 10) return String.format("%.2f", power);
-        else if (power < 100) return String.format("%.1f", power);
-        else return String.format("%.0f", power);
+
+        final String format;
+        if (power < .00001) format = "%.8f";
+        else if (power < .0001) format = "%.7f";
+        else if (power < .001) format = "%.6f";
+        else if (power < .01) format = "%.5f";
+        else if (power < .1) format = "%.4f";
+        else if (power < 1) format = "%.3f";
+        else if (power < 10) format = "%.2f";
+        else if (power < 100) format = "%.1f";
+        else format = "%.0f";
+
+        // Use English locale because this is never used in UI (only in checkin and dump).
+        return String.format(Locale.ENGLISH, format, power);
     }
 
     /**
