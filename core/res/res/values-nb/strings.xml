@@ -746,7 +746,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"The FACTORY_TEST action is only supported for packages installed in /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"No package was found that provides the FACTORY_TEST action."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Omstart"</string>
-    <string name="js_dialog_title" msgid="1987483977834603872">"Siden på «<xliff:g id="TITLE">%s</xliff:g>» sier:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"Varsel fra «<xliff:g id="TITLE">%s</xliff:g>»:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Bekreft navigasjon"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Forlat denne siden"</string>
