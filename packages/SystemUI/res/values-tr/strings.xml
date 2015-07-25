@@ -398,7 +398,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ses denetimi iletişim kutusu olarak ayarlandı"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Orijinali geri yüklemek için dokunun."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"İş profilinizi kullanıyorsunuz"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sistem Arayüzü ayarlayıcısı"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Sistem Arayüzü Ayarlayıcısı"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Yerleşik pil yüzdesini göster"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Şarj olmazken durum çubuğu simgesinin içinde pil düzeyi yüzdesini göster"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hızlı Ayarlar"</string>
@@ -419,4 +419,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hızlı Ayarlar, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"İş profili"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Bazıları eğlence içindir, ancak hepsi değil"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Sistem Kullanıcı Arayüzü Ayarlayıcı, Android kullanıcı arayüzünde değişiklikler yapmanız ve arayüzü özelleştirmeniz için ekstra yollar sağlar. Bu deneysel özellikler değişebilir, bozulabilir veya gelecekteki sürümlerde yer almayabilir. Dikkatli bir şekilde devam edin."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Bu deneysel özellikler değişebilir, bozulabilir veya gelecekteki sürümlerde yer almayabilir. Dikkatli bir şekilde devam edin."</string>
+    <string name="got_it" msgid="2239653834387972602">"Anladım"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Tebrikler! Sistem Kullanıcı Arayüzü Ayarlayıcı Ayarlar\'a eklendi"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Ayarlar\'dan kaldır"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Sistem Kullanıcı Arayüzü Ayarlayıcısı Ayarlar\'dan kaldırılsın ve tüm özelliklerinin kullanılması durdurulsun mu?"</string>
 </resources>

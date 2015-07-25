@@ -398,7 +398,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"직장 프로필을 사용하고 있습니다."</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"시스템 UI 튜너"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"시스템 UI 튜너"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"내장형 배터리 잔량 비율 표시"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"충전 중이 아닌 경우 상태 표시줄 아이콘 내에 배터리 잔량 비율 표시"</string>
     <string name="quick_settings" msgid="10042998191725428">"빠른 설정"</string>
@@ -419,4 +419,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"빠른 설정하기, <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"핫스팟"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"직장 프로필"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"마음에 들지 않을 수도 있음"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"시스템 UI 튜너를 사용하면 Android 사용자 인터페이스를 변경 및 맞춤설정할 수 있습니다. 이러한 실험실 기능은 향후 출시 버전에서는 변경되거나 다운되거나 사라질 수 있습니다. 신중하게 진행하시기 바랍니다."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"이러한 실험실 기능은 향후 출시 버전에서는 변경되거나 다운되거나 사라질 수 있습니다. 신중하게 진행하시기 바랍니다."</string>
+    <string name="got_it" msgid="2239653834387972602">"확인"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"축하합니다. 시스템 UI 튜너가 설정에 추가되었습니다."</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"설정에서 삭제"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"시스템 UI 튜너를 설정에서 삭제하고 모든 관련 기능의 사용을 중지하시겠습니까?"</string>
 </resources>

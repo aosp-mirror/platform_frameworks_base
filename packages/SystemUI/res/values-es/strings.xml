@@ -398,7 +398,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> es el cuadro de diálogo de volumen"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar la versión original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estás usando tu perfil de trabajo"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Configurador de IU del sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Configurador de IU del sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaje de batería insertado"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar el porcentaje del nivel de batería en el icono de la barra de estado cuando no se esté cargando"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ajustes rápidos"</string>
@@ -419,4 +419,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona Wi-Fi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil de trabajo"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Diversión solo para algunos"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"El configurador de IU del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
+    <string name="got_it" msgid="2239653834387972602">"Entendido"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"¡Enhorabuena! El configurador de IU del sistema se ha añadido a Ajustes"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Eliminar de Ajustes"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Eliminar el configurador de IU del sistema de Ajustes y dejar de utilizar sus funciones?"</string>
 </resources>

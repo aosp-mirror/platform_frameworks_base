@@ -400,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> е дијалог за јачина на звук"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Допрете за да го вратите оригиналот."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Го користите работниот профил"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Дотерување на кориснички интерфејс"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Адаптер на УИ на системот"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Прикажи вграден процент на батеријата"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Прикажи процент на ниво на батеријата во внатрешноста на иконата со статусна лента кога не се полни"</string>
     <string name="quick_settings" msgid="10042998191725428">"Брзи поставки"</string>
@@ -421,4 +421,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Брзи поставки, <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Точка на пристап"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Работен профил"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Забава за некои, но не за сите"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Адаптерот на УИ на системот ви дава дополнителни начини за дотерување и приспособување на корисничкиот интерфејс на Android. Овие експериментални функции можеби ќе се изменат, расипат или ќе исчезнат во следните изданија. Продолжете со претпазливост."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Овие експериментални функции можеби ќе се изменат, расипат или ќе исчезнат во следните изданија. Продолжете со претпазливост."</string>
+    <string name="got_it" msgid="2239653834387972602">"Разбрав"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Честито! Го додадовте Адаптерот на УИ на системот на Поставки"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Отстрани од поставки"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Да се отстрани Адаптерот на УИ на системот од Поставки и да престанат да се користат сите негови функции?"</string>
 </resources>
