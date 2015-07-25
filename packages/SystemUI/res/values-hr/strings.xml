@@ -345,6 +345,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Gostujući korisnik"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Da biste izbrisali aplikacije i podatke, uklonite gostujućeg korisnika"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"UKLONI GOSTA"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"Dodati novog korisnika?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kada dodate novog korisnika, ta osoba mora postaviti vlastiti prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Štednja baterije je uključena"</string>
@@ -399,7 +405,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> predstavlja dijaloški okvir za upravljanje glasnoćom"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Dodirnite da biste vratili izvorno."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Upotrebljavate radni profil"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Prijamnik korisničkog sučelja sustava"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Ugađanje korisničkog sučelja sustava"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Prikaži ugrađeni postotak baterije"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Prikazivanje postotka razine baterije na ikoni trake statusa kada se ne puni"</string>
     <string name="quick_settings" msgid="10042998191725428">"Brze postavke"</string>
@@ -420,4 +426,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Brze postavke, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Žarišna točka"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Radni profil"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Zabava za neke, ali ne za sve"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Ugađanje korisničkog sučelja sustava pruža vam dodatne načine za prilagodbu korisničkog sučelja Androida. Te se eksperimentalne značajke mogu promijeniti, prekinuti ili nestati u budućim izdanjima. Nastavite uz oprez."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Te se eksperimentalne značajke mogu promijeniti, prekinuti ili nestati u budućim izdanjima. Nastavite uz oprez."</string>
+    <string name="got_it" msgid="2239653834387972602">"Shvaćam"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Čestitamo! Ugađanje korisničkog sučelja sustava dodano je u Postavke"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Ukloni iz Postavki"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Želite li ukloniti Ugađanje korisničkog sučelja sustava iz Postavki i prestati upotrebljavati njegove značajke?"</string>
 </resources>

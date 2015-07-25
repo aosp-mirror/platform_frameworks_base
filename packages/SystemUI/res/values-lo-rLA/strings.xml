@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"ຜູ້​ໃຊ້​ແຂກ"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"ເພື່ອລຶບແອັບ ແລະຂໍ້ມູນ, ໃຫ້ເອົາຜູ້ໃຊ້ທີ່ເປັນແຂກອອກ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ເອົາ​ແຂກອອກ​"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່​ບໍ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່, ຜູ່​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ່​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯ​ຂອງ​ຜູ່​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ເປີດ​ໃຊ້​ໂຕ​ປະຢັດ​ແບັດເຕີຣີ​ແລ້ວ"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ແມ່ນ​ໜ້າ​ຕ່າງ​ລະ​ດັບ​ສຽງ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ສໍາ​ຜັດ​ເພື່ອກູ້​ຄືນ​ຕົ້ນ​ສະ​ບັບ​."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ທ່ານກຳລັງໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານ"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"ຕົວ​ປັບ UI ລະ​ບົບ"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ສະ​ແດງ​ເປີ​ເຊັນ​ແບັດ​ເຕີ​ຣີ​ທີ່​ຕິດ​ມາ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ສະ​ແດງ​ເປີ​ເຊັນ​ລະ​ດັບ​ແບັດ​ເຕີ​ຣີ​ຢູ່​ດ້ານ​ໃນ​ໄອ​ຄອນ​ແຖບ​ສະ​ຖາ​ນະ ເມື່ອ​ບໍ່​ສາກ​ຢູ່"</string>
     <string name="quick_settings" msgid="10042998191725428">"ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ການຕັ້ງຄ່າດ່ວນ, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"​ຮັອດ​ສະ​ປອດ"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"ມ່ວນຊື່ນສຳລັບບາງຄົນ ແຕ່ບໍ່ແມ່ນສຳລັບທຸກຄົນ"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner ໃຫ້ທ່ານມີວິທີພິເສດຕື່ມອີກໃນການປັບປ່ຽນ ແລະຕົບແຕ່ງສ່ວນຕໍ່ປະສານຜູ້ໃຊ້ຂອງ Android. ຄຸນສົມບັດທົດລອງໃຊ້ເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການວາງຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງດຳເນີນຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ຄຸນສົມບັດທົດລອງໃຊ້ງານເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການອອກຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງສືບຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
+    <string name="got_it" msgid="2239653834387972602">"ໄດ້​ແລ້ວ"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"ຍິນດີດ້ວຍ! System UI Tuner ໄດ້ຖືກເພີ່ມໃສ່ການຕັ້ງຄ່າແລ້ວ"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"ເອົາອອກ​ຈາກ​ການ​ຕັ້ງ​ຄ່າ"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ເອົາ System UI Tuner ອອກຈາກການຕັ້ງຄ່າ ແລະຢຸດການໃຊ້ທຸກຄຸນສົມບັດໃຊ້ງານຂອງມັນ?"</string>
 </resources>

@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Përdorues vizitor"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Për të fshirë aplikacionet dhe të dhënat, hiqe përdoruesin vizitor"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"HIQ VIZITORIN"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"Të shtohet përdorues i ri?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kur shton një përdorues të ri, ai person duhet të konfigurojë hapësirën e vet.\n\nÇdo përdorues mund t\'i përditësojë aplikacionet për të gjithë përdoruesit e tjerë."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Kursimi i baterisë është i aktivizuar"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> është dialogu i volumit"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Prek për të restauruar origjinalin."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Po përdor profilin tënd të punës"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sintonizuesi SystemUI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Shfaq përqindjen e baterisë së integruar"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Shfaq përqindjen e nivelit të baterisë brenda ikonës së shiritit të statusit kur nuk është duke u ngarkuar."</string>
     <string name="quick_settings" msgid="10042998191725428">"Cilësimet e shpejta"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Cilësimet e shpejta, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona e qasjes për internet"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profili i punës"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Argëtim për disa, por jo për të gjithë!"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit të jep mënyra shtesë për të tërhequr dhe personalizuar ndërfaqen Android të përdoruesit. Këto funksione eksperimentale mund të ndryshojnë, prishen ose zhduken në versionet e ardhshme. Vazhdo me kujdes."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Këto karakteristika eksperimentale mund të ndryshojnë, prishen ose të zhduken në versionet e ardhshme. Vazhdo me kujdes."</string>
+    <string name="got_it" msgid="2239653834387972602">"E kuptova"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Urime! Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit u shtua te Cilësimet"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Hiqe nga Cilësimet"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Të hiqet Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit nga Cilësimet dhe të ndërpritet përdorimi i të gjitha funksioneve të tij?"</string>
 </resources>

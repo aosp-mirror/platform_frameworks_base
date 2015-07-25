@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"ಅತಿಥಿ ಬಳಕೆದಾರ"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾ ಅಳಿಸಲು, ಅತಿಥಿ ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸುವುದೇ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸ್ಥಾಪಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನವೀಕರಿಸಬಹುದು."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ಬ್ಯಾಟರಿ ರಕ್ಷಕ ಆನ್ ಆಗಿದೆ"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ವಾಲ್ಯೂಮ್ ಸಂವಾದವಾಗಿದೆ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ಮೂಲ ಮರುಸ್ಥಾಪಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ನೀವು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ಎಂಬೆಡ್ ಮಾಡಲಾದ ಬ್ಯಾಟರಿ ಶೇಕಡಾ ತೋರಿಸಿ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ಚಾರ್ಜ್ ಮಾಡದಿರುವಾಗ ಸ್ಥಿತಿ ಪಟ್ಟಿ ಐಕಾನ್ ಒಳಗೆ ಬ್ಯಾಟರಿ ಮಟ್ಟದ ಶೇಕಡಾವನ್ನು ತೋರಿಸಿ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"ಕೆಲವರಿಗೆ ಮೋಜು ಆಗಿದೆ ಎಲ್ಲರಿಗೆ ಇಲ್ಲ"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ನಿಮಗೆ Android ಬಳಕೆದಾರ ಅಂತರಸಂಪರ್ಕವನ್ನು ಸರಿಪಡಿಸಲು ಮತ್ತು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಹೆಚ್ಚುವರಿ ಮಾರ್ಗಗಳನ್ನು ನೀಡುತ್ತದೆ. ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
+    <string name="got_it" msgid="2239653834387972602">"ಅರ್ಥವಾಯಿತು"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"ಅಭಿನಂದನೆಗಳು! ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ಅನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಸೇರಿಸಲಾಗಿದೆ"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ತೆಗೆದುಹಾಕುವುದೇ ಮತ್ತು ಅದರ ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಬಳಸುವುದನ್ನು ನಿಲ್ಲಿಸುವುದೇ?"</string>
 </resources>

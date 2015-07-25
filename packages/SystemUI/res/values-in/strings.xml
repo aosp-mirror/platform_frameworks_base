@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Pengguna tamu"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Untuk menghapus aplikasi dan data, hapus pengguna tamu"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"HAPUS TAMU"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"Tambahkan pengguna baru?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\n1Pengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Penghemat baterai aktif"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> adalah dialog volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Sentuh untuk memulihkan aslinya."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Anda menggunakan profil kerja"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Penyetel Antarmuka Sistem"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Penyetel Antarmuka Pengguna Sistem"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Tampilkan persentase baterai yang tersemat"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Tampilkan persentase tingkat baterai dalam ikon bilah status saat tidak mengisi daya"</string>
     <string name="quick_settings" msgid="10042998191725428">"Setelan Cepat"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Setelan Cepat, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil kerja"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Tidak semua orang menganggapnya baik"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Penyetel Antarmuka Pengguna Sistem memberikan cara tambahan untuk mengubah dan menyesuaikan antarmuka pengguna Android. Fitur eksperimental ini dapat berubah, rusak, atau menghilang dalam rilis di masa mendatang. Lanjutkan dengan hati-hati."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Fitur eksperimental ini dapat berubah, rusak, atau menghilang dalam rilis di masa mendatang. Lanjutkan dengan hati-hati."</string>
+    <string name="got_it" msgid="2239653834387972602">"Mengerti"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Selamat! Penyetel Antarmuka Pengguna Sistem telah ditambahkan ke Setelan"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Hapus dari Setelan"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Hapus Penyetel Antarmuka Pengguna Sistem dari Setelan dan berhenti menggunakan semua fiturnya?"</string>
 </resources>

@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"ผู้ใช้ที่เป็นผู้เข้าร่วม"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"หากต้องการลบแอปและข้อมูล ให้นำผู้ใช้ที่เป็นผู้เข้าร่วมออก"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"นำผู้เข้าร่วมออก"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"ต้องการเพิ่มผู้ใช้ใหม่ใช่ไหม"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"เมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตนเอง\n\nผู้ใช้ทุกคนสามารถอัปเดตแอปสำหรับผู้ใช้รายอื่นทุกคนได้"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> เป็นช่องโต้ตอบระดับเสียง"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"แตะเพื่อคืนค่าดั้งเดิม"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"คุณกำลังใช้โปรไฟล์งานของคุณ"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"ตัวปรับ UI ระบบ"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"ตัวรับสัญญาณ UI ระบบ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"แสดงเปอร์เซ็นต์ของแบตเตอรี่ในตัว"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"แสดงเปอร์เซ็นต์ของระดับแบตเตอรี่ภายในไอคอนแถบสถานะเมื่อไม่มีการชาร์จ"</string>
     <string name="quick_settings" msgid="10042998191725428">"การตั้งค่าด่วน"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"การตั้งค่าด่วน <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ฮอตสปอต"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"โปรไฟล์งาน"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"เพลิดเพลินกับบางส่วนแต่ไม่ใช่ทั้งหมด"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"ตัวรับสัญญาณ UI ระบบช่วยให้คุณมีวิธีพิเศษในการปรับแต่งและกำหนดค่าส่วนติดต่อผู้ใช้ Android คุณลักษณะรุ่นทดลองเหล่านี้อาจมีการเปลี่ยนแปลง ขัดข้อง หรือหายไปในเวอร์ชันอนาคต โปรดดำเนินการด้วยความระมัดระวัง"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"คุณลักษณะรุ่นทดลองเหล่านี้อาจมีการเปลี่ยนแปลง ขัดข้อง หรือหายไปในเวอร์ชันอนาคต โปรดดำเนินการด้วยความระมัดระวัง"</string>
+    <string name="got_it" msgid="2239653834387972602">"รับทราบ"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"ยินดีด้วย! เพิ่มตัวรับสัญญาณ UI ระบบไปยังการตั้งค่าแล้ว"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"นำออกจากการตั้งค่า"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"นำตัวรับสัญญาณ UI ระบบออกจากการตั้งค่าและหยุดใช้คุณลักษณะทั้งหมดของตัวรับสัญญาณใช่ไหม"</string>
 </resources>

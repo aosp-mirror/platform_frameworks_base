@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"የእንግዳ ተጠቃሚ"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"መተግበሪያዎችና ውሂብ ለመሰረዝ እንግዳ ተጣቀሚን ያስወግዱ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"እንግዳን አስወግድ"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"አዲስ ተጠቃሚ ይታከል?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"እርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምን ይችላል።"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"የባትሪ ኃይል ቆጣቢ በርቷል"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> የድምጽ መጠን መገናኛው ነው"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"የመጀመሪያውን ወደነበረበት ለመመለስ ይንኩ።"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"የስራ መገለጫዎን እየተጠቀሙ ነው"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"የስርዓት በይነገጽ መቃኛ"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"የስርዓት በይነገጽ መቃኛ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"የተቀላቀለ የባትሪ አጠቃቀም መቶኛ አሳይ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ኃይል በማይሞላበት ጊዜ በሁነታ አሞሌ አዶ ውስጥ የባትሪ ደረጃ መቶኛን አሳይ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ፈጣን ቅንብሮች"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ፈጣን ቅንብሮች፣ <xliff:g id="TITLE">%s</xliff:g>።"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"መገናኛ ነጥብ"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"የስራ መገለጫ"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"ለአንዳንዶች አስደሳች ቢሆንም ለሁሉም አይደለም"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"የስርዓት በይነገጽ መቃኛ የAndroid ተጠቃሚ በይነገጹን የሚነካኩበት እና የሚያበጁበት ተጨማሪ መንገዶች ይሰጠዎታል። እነዚህ የሙከራ ባህሪዎች ወደፊት በሚኖሩ ልቀቶች ላይ ሊለወጡ፣ ሊሰበሩ ወይም ሊጠፉ ይችላሉ። ከጥንቃቄ ጋር ወደፊት ይቀጥሉ።"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"እነዚህ የሙከራ ባህሪዎች ወደፊት በሚኖሩ ልቀቶች ላይ ሊለወጡ፣ ሊሰበሩ ወይም ሊጠፉ ይችላሉ። ከጥንቃቄ ጋር ወደፊት ይቀጥሉ።"</string>
+    <string name="got_it" msgid="2239653834387972602">"ገባኝ"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"እንኳን ደስ ያለዎት! የስርዓት በይነገጽ መቃኛ ወደ ቅንብሮች ታክሏል"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"ከቅንብሮች አስወግድ"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ከቅንብሮች ላይ የስርዓት በይነገጽ መቃኛ ተወግዶ ሁሉም ባህሪዎቹን መጠቀም ይቁም?"</string>
 </resources>

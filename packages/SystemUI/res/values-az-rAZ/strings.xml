@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Qonaq istifadəçi"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Tətbiq və datanı silmək üçün qonaq istifadəçini silin"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"QONAĞI ÇIXARIN"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"Yeni istifadəçi əlavə edilsin?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yeni istifadəçi əlavə etdiyiniz zaman həmin şəxs öz yerini quraşdırmalıdır. \n\n İstənilən istifadəçi bütün digər istifadəçilərdən olan tətbiqləri güncəlləşdirə bilər."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Enerji qənaəti aktivdir"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> proqramı səs səviyyəsi dialoqudur"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Orijinalı bərpa etmək üçün toxun."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"İş profilinizi istifadə edirsiniz"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sistem UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Daxil batareya faizini göstərin"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Elektrik şəbəsinə qoşulu olmayan zaman batareya səviyyəsini status paneli ikonası daxilində göstərin"</string>
     <string name="quick_settings" msgid="10042998191725428">"Sürətli Ayarlar"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Sürətli Ayarlar, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"İş profili"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Hamı üçün deyil, bəziləri üçün əyləncəli"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner Android istifadəçi interfeysini dəyişdirmək və fərdiləşdirmək üçün Sizə ekstra yollar təklif edir."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Bu eksperimental funksiyalar gələcək buraxılışlarda dəyişə, məhv ola və ya yoxa çıxa bilər. Ehtiyatlı olun."</string>
+    <string name="got_it" msgid="2239653834387972602">"Anladım"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Təbriklər! System UI Tuner Ayarlara əlavə edildi"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Ayarlardan Silin"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner Ayarlardan silinsin və onun bütün funksiyalarından istifadə dayandırılsın?"</string>
 </resources>

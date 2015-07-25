@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"სტუმარი მომხმარებელი"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"აპებისა და მონაცემების წასაშლელად ამოშალეთ სტუმარი"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"სტუმრის ამოშლა"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"დაემატოს ახალი მომხმარებელი?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ახალი მომხმარებლის დამატებისას, ამ მომხმარებელს საკუთარი სივრცის შექმნა მოუწევს.\n\nნებისმიერ მომხმარებელს შეუძლია აპები ყველა სხვა მომხმარებლისათვის განაახლოს."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ბატარეის დამზოგი ჩართულია"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ხმოვან დიალოგშია"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ორიგინალის აღდგენისათვის, შეეხეთ."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"თქვენ სამსახურის პროფილს იყენებთ"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI ტუნერი"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"სისტემის UI ტუნერი"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ჩამაგრებული ბატარეის პროცენტის ჩვენება"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ბატარეის დონის პროცენტის ჩვენება სტატუსის ზოლის ხატულას შიგნით, როდესაც არ იტენება"</string>
     <string name="quick_settings" msgid="10042998191725428">"სწრაფი პარამეტრები"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"სწრაფი პარამეტრები, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"წვდომის წერტილი"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"სამსახურის პროფილი"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"ზოგისთვის გასართობია, მაგრამ არა ყველასთვის"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"სისტემის UI ტუნერი გაძლევთ დამატებით გზებს Android-ის სამომხმარებლო ინტერფეისის პარამეტრების დაყენებისთვის. ეს ექსპერიმენტული მახასიათებლები შეიძლება შეიცვალოს, შეწყდეს ან გაქრეს მომავალ ვერსიებში. სიფრთხილით გააგრძელეთ."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ეს ექსპერიმენტული მახასიათებლები შეიძლება შეიცვალოს, შეწყდეს ან გაქრეს მომავალ ვერსიებში. სიფრთხილით გააგრძელეთ."</string>
+    <string name="got_it" msgid="2239653834387972602">"გასაგებია"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"გილოცავთ! სისტემის UI ტუნერი დაემატა პარამეტრებს"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"პარამეტრებიდან წაშლა"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"გსურთ სისტემის UI ტუნერის პარამეტრებიდან წაშლა და მისი ყველა ფუნქციის გამოყენების შეწყვეტა?"</string>
 </resources>

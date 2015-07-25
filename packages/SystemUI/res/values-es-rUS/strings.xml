@@ -346,6 +346,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Usuario invitado"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Para borrar aplicaciones y datos, quita el usuario invitado"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"QUITAR INVITADO"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"¿Agregar usuario nuevo?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Cuando agregas un nuevo usuario, esa persona debe configurar su espacio.\n\nCualquier usuario puede actualizar aplicaciones para todos los usuarios."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Ahorro de batería activado"</string>
@@ -400,7 +406,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> es el cuadro de diálogo de volumen."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar el original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estás usando tu perfil de trabajo"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaje de la batería integrada"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar porcentaje del nivel de batería en el ícono de la barra de estado cuando no se está cargando"</string>
     <string name="quick_settings" msgid="10042998191725428">"Configuración rápida"</string>
@@ -421,4 +427,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Configuración rápida: <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil de trabajo"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Diversión para algunos, pero no para todos"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner te brinda más formas para editar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, dejar de funcionar o no incluirse en futuras versiones. Procede con precaución."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Estas funciones experimentales pueden cambiar, dejar de funcionar o no incluirse en futuras versiones. Procede con precaución."</string>
+    <string name="got_it" msgid="2239653834387972602">"Entendido"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Se agregó System UI Tuner a Configuración"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Quitar de Configuración"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Quieres quitar System UI Tuner de Configuración y dejar de utilizar todas sus funciones?"</string>
 </resources>

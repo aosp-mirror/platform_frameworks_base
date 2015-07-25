@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"अतिथि उपयोगकर्ता"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"ऐप्‍स और डेटा हटाने के लिए, अतिथि उपयोगकर्ता को निकालें"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"अतिथि को निकालें"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"नया उपयोगकर्ता जोड़ें?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उस व्यक्ति को अपना स्थान सेट करना होता है.\n\nकोई भी उपयोगकर्ता अन्य सभी उपयोगकर्ताओं के लिए ऐप्स अपडेट कर सकता है."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"बैटरी सेवर चालू है"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> वॉल्यूम संवाद है"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल वॉल्यूम को फिर से लाने के लिए स्पर्श करें."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आप अपनी कार्य प्रोफ़ाइल का उपयोग कर रहे हैं"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI ट्यूनर"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेड किया गया बैटरी प्रतिशत दिखाएं"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"जब चार्ज नहीं किया जा रहा हो तब स्थिति बार आइकन में बैटरी स्तर का प्रतिशत दिखाएं"</string>
     <string name="quick_settings" msgid="10042998191725428">"तेज़ सेटिंग"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"तेज़ सेटिंग, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"हॉटस्पॉट"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"कार्य प्रोफ़ाइल"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"कुछ के लिए मज़ेदार लेकिन सबके लिए नहीं"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"सिस्टम UI ट्यूनर आपको Android उपयोगकर्ता इंटरफ़ेस में सुधार करने और उसे कस्टमाइज़ करने के अतिरिक्त तरीके प्रदान करता है. ये प्रयोगात्मक सुविधाएं आगामी रिलीज़ में बदल सकती हैं, रुक सकती हैं या दिखाई देना बंद हो सकती हैं. सावधानी से आगे बढ़ें."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ये प्रयोगात्मक सुविधाएं आगामी रिलीज़ में बदल सकती हैं, रुक सकती हैं या दिखाई देना बंद हो सकती हैं. सावधानी से आगे बढ़ें."</string>
+    <string name="got_it" msgid="2239653834387972602">"समझ लिया"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"बधाई हो! सिस्टम UI ट्यूनर को सेटिंग में जोड़ दिया गया है"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"सेटिंग से निकालें"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"सेटिंग से सिस्टम UI ट्यूनर निकालें और इसकी सभी सुविधाओं का उपयोग रोक दें?"</string>
 </resources>

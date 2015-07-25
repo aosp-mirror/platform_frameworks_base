@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Utilizador convidado"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Para eliminar aplicações e dados, remover utiliz. convidado"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"REMOVER CONVIDADO"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"Adicionar um novo utilizador?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"A poupança de bateria está ligada"</string>
@@ -398,7 +404,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> é a caixa de diálogo do volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toque para restaurar o original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Está a utilizar o seu perfil de trabalho"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sintonizador da IU do sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Sintonizador da interface do sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar percentagem da bateria incorporada"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar a percentagem do nível da bateria no ícone da barra de estado quando não estiver a carregar"</string>
     <string name="quick_settings" msgid="10042998191725428">"Definições rápidas"</string>
@@ -419,4 +425,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Definições rápidas, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona Wi-Fi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil de trabalho"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Diversão para alguns, mas não para todos"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"O Sintonizador da interface do sistema disponibiliza-lhe formas adicionais ajustar e personalizar a interface do utilizador do Android. Estas funcionalidades experimentais podem ser alteradas, deixar de funcionar ou desaparecer em versões futuras. Prossiga com cuidado."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Estas funcionalidades experimentais podem ser alteradas, deixar de funcionar ou desaparecer em versões futuras. Prossiga com cuidado."</string>
+    <string name="got_it" msgid="2239653834387972602">"Compreendi"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Parabéns! O Sintonizador da interface do sistema foi adicionado às Definições"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Remover das Definições"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Pretende remover o Sintonizador da interface do sistema das Definições e deixar de utilizar todas as respetivas funcionalidades?"</string>
 </resources>

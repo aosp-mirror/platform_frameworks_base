@@ -344,6 +344,12 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"مہمان صارف"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"ایپس اور ڈیٹا حذف کرنے کیلئے مہمان صارف کو ہٹائیں"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"مہمان کو ہٹائیں"</string>
+    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
+    <skip />
+    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"نیا صارف شامل کریں؟"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے۔\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"بیٹری سیور آن ہے"</string>
@@ -398,7 +404,8 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> والیوم ڈائلاگ ہے"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"اصل کو بحال کرنے کیلئے ٹچ کریں۔"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"آپ اپنا دفتری پروفائل استعمال کر رہے ہیں۔"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"‏سسٹم UI ٹیونر"</string>
+    <!-- no translation found for system_ui_tuner (708224127392452018) -->
+    <skip />
     <string name="show_battery_percentage" msgid="5444136600512968798">"سرایت کردہ بیٹری کی فیصد دکھائیں"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"جب چارج نہ ہو رہا ہو تو بیٹری کی سطح کی فیصد اسٹیٹس بار آئیکن کے اندر دکھائیں"</string>
     <string name="quick_settings" msgid="10042998191725428">"فوری ترتیبات"</string>
@@ -419,4 +426,18 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"فوری ترتیبات، <xliff:g id="TITLE">%s</xliff:g>۔"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ہاٹ اسپاٹ"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"دفتری پروفائل"</string>
+    <!-- no translation found for tuner_warning_title (7094689930793031682) -->
+    <skip />
+    <!-- no translation found for tuner_warning (8730648121973575701) -->
+    <skip />
+    <!-- no translation found for tuner_persistent_warning (8597333795565621795) -->
+    <skip />
+    <!-- no translation found for got_it (2239653834387972602) -->
+    <skip />
+    <!-- no translation found for tuner_toast (603429811084428439) -->
+    <skip />
+    <!-- no translation found for remove_from_settings (8389591916603406378) -->
+    <skip />
+    <!-- no translation found for remove_from_settings_prompt (6069085993355887748) -->
+    <skip />
 </resources>
