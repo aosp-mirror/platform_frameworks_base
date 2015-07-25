@@ -1022,25 +1022,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"Omogućuje aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nije potrebno dopuštenje"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"možda ćete morati platiti"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB masovna pohrana"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB povezan"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Povezali ste se s računalom putem USB-a. Dodirnite gumb u nastavku ako želite kopirati datoteke između računala i USB pohrane uređaja Android."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Povezali ste se s računalom putem USB-a. Dodirnite donji gumb ako želite kopirati datoteke između računala i SD kartice svog uređaja Android."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Uključi USB pohranjivanje"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Došlo je do problema s upotrebom USB pohrane za USB masovnu pohranu."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Došlo je do problema s upotrebom SD kartice za USB masovnu pohranu."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB povezan"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Dodirnite za kopiranje datoteka na računalo ili s računala."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Isključi USB pohranjivanje"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Dodirnite za isključivanje USB pohrane."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB pohrana se koristi"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Prije isključivanja USB pohrane uklonite (\"izbacite\") USB pohranu svojeg Android uređaja iz računala."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Prije isključivanja USB pohrane uklonite (\"izbacite\") SD karticu uređaja Android iz računala."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Isključi USB pohranjivanje"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Došlo je do problema pri isključivanju USB pohrane. Provjerite jeste li uklonili USB host, a zatim pokušajte ponovo."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Uključi USB pohranjivanje"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Ako uključite USB pohranu, neke aplikacije koje upotrebljavate zaustavit će se i možda neće biti dostupne dok ne isključite USB pohranu."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"Rad USB-a nije uspio"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"U redu"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB za punjenje"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB za prijenos datoteka"</string>

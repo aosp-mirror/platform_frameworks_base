@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> द्वारा प्रदत्त."</string>
     <string name="no_permissions" msgid="7283357728219338112">"किसी अनुमति की आवश्‍यकता नहीं है"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"इससे आपको धन देना पड़ सकता है"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB विशाल मेमोरी"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB कनेक्ट किया गया"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"आप USB द्वारा अपने कंप्‍यूटर से कनेक्‍ट हो चुके हैं. यदि आप अपने कंप्‍यूटर और Android के USB मेमोरी के बीच फ़ाइलों की प्रतिलिपि बनाना चाहते हैं तो नीचे दिया गया बटन स्‍पर्श करें."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"आप USB द्वारा अपने कंप्‍यूटर से कनेक्‍ट हैं. यदि आप अपने कंप्‍यूटर और Android के SD कार्ड के बीच फ़ाइलों की प्रतिलिपि बनाना चाहते हैं तो नीचे दिए गए बटन को स्‍पर्श करें."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB मेमोरी चालू करें"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB विशाल मेमोरी के लिए आपके USB मेमोरी का उपयोग करने में समस्‍या है."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB विशाल मेमोरी के लिए आपके SD कार्ड का उपयोग करने में समस्‍या है."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB कनेक्ट किया गया"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"आपके कंप्‍यूटर में/से फ़ाइल की प्रतिलिपि बनाने के लिए चुनें."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB मेमोरी बंद करें"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB मेमोरी बंद करने के लिए स्‍पर्श करें."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB मेमोरी उपयोग में है"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB मेमोरी बंद करने से पहले, अपने कंप्‍यूटर से अपने Android का USB मेमोरी अनमाउंट (\"इजेक्ट\") करें."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB मेमोरी बंद करने से पहले, अपने कंप्‍यूटर से अपने Android का SD कार्ड अनमाउंट (\"इजेक्‍ट\") करें."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB मेमोरी बंद करें"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB मेमोरी बंद करने में कोई समस्‍या हुई थी. जांचें कि आपने USB होस्‍ट अनमाउंट किया है या नहीं, तब पुन: प्रयास करें."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB मेमोरी चालू करें"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"यदि आप USB मेमोरी चालू करते हैं, तो आपके द्वारा उपयोग किए जा रहे कुछ ऐप्स रुक जाएंगे और हो सकता है कि वे तब तक अनुपलब्‍ध रहें जब तक कि आप USB मेमोरी बंद नहीं कर देते."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB कार्यवाही विफल"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ठीक है"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"चार्जिंग के लिए USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"फ़ाइल स्‍थानांतरण के लिए USB"</string>

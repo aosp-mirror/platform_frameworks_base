@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"Disediakan oleh <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Tidak perlu izin"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ini mungkin tidak gratis"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"Penyimpanan massal USB"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB terhubung"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Anda telah tersambung ke komputer melalui USB. Sentuh tombol di bawah jika Anda ingin menyalin file antara komputer dan penyimpanan USB Android Anda."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Anda telah tersambung ke komputer melalui USB. Sentuh tombol di bawah jika Anda ingin menyalin file antara komputer dan kartu SD Android Anda."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Hidupkan penyimpanan USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Terjadi masalah saat menggunakan penyimpanan USB Anda untuk penyimpanan massal USB."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Terjadi masalah saat menggunakan kartu SD Anda untuk penyimpanan massal USB."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB terhubung"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Sentuh untuk menyalin file ke/dari komputer Anda."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Matikan penyimpanan USB"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Sentuh untuk mematikan penyimpanan USB."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"Penyimpanan USB sedang digunakan"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Sebelum mematikan penyimpanan USB, lepaskan (\"keluarkan\") penyimpanan USB Anda dari komputer."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Sebelum mematikan penyimpanan USB, lepaskan (\"keluarkan\") kartu SD Android dari komputer."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Matikan penyimpanan USB"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Terjadi masalah saat mematikan penyimpanan USB. Periksa apakah Anda telah melepaskan host USB, lalu coba sekali lagi."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Hidupkan penyimpanan USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Jika Anda menyalakan penyimpanan USB, beberapa apl yang Anda gunakan akan berhenti dan mungkin tidak dapat dibuka hingga penyimpanan USB dimatikan."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"Operasi USB gagal"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Oke"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB untuk pengisian daya"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB untuk transfer file"</string>

@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> દ્વારા પ્રદાન."</string>
     <string name="no_permissions" msgid="7283357728219338112">"કોઈ પરવાનગીઓ જરૂરી નથી"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"આનાથી તમારા પૈસા ખર્ચ થઈ શકે છે"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB માસ સ્ટોરેજ"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB કનેક્ટ થયું"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"તમે તમારા કમ્પ્યુટર સાથે USB મારફતે કનેક્ટ થયેલા છો. જો તમે તમારા કમ્પ્યુટર અને તમારા Android ના USB સંગ્રહ વચ્ચે ફાઇલો કૉપિ કરવા માંગતા હો, તો નીચેના બટનને ટચ કરો."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"તમે તમારા કમ્પ્યુટર સાથે USB મારફતે કનેક્ટ થયેલા છો. જો તમે તમારા કમ્પ્યુટર અને તમારા Android ના SD કાર્ડ વચ્ચે ફાઇલો કૉપિ કરવા માંગતા હો, તો નીચેના બટનને ટચ કરો."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB સંગ્રહ ચાલુ કરો"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB માસ સ્ટોરેજ માટે તમારા USB સંગ્રહના ઉપયોગમાં સમસ્યા છે."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB માસ સ્ટોરેજ માટે તમારા SD કાર્ડના ઉપયોગમાં સમસ્યા છે."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB કનેક્ટ થયું"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"તમારા કમ્પ્યુટર પર/માંથી ફાઇલો કૉપિ કરવા માટે ટચ કરો."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB સંગ્રહ બંધ કરો"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB સંગ્રહ બંધ કરવા માટે ટચ કરો."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB સંગ્રહ ઉપયોગમાં છે"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB સંગ્રહને બંધ કરતાં પહેલાં, તમારા કમ્પ્યુટરથી તમારા Android ના USB સંગ્રહને અનમાઉન્ટ કરો (\"બહાર કાઢો\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB સંગ્રહને બંધ કરતાં પહેલાં, તમારા કમ્પ્યુટરથી તમારા Android ના SD કાર્ડને અનમાઉન્ટ કરો (\"બહાર કાઢો\")."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB સંગ્રહ બંધ કરો"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB સંગ્રહને બંધ કરવામાં સમસ્યા હતી. તમે USB હોસ્ટને અનમાઉન્ટ કર્યું છે તે તપાસો, પછી ફરી પ્રયાસ કરો."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB સંગ્રહ ચાલુ કરો"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"જો તમે USB સંગ્રહને ચાલુ કરો છો, તો તમે ઉપયોગમાં લઈ રહ્યાં છો તે કેટલીક એપ્લિકેશનો બંધ થઈ જશે અને જ્યાં સુધી તમે USB સંગ્રહ બંધ ન કરી લો ત્યાં સુધી અનુપલબ્ધ હોઈ શકે છે."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB ઓપરેશન અસફળ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ઑકે"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"ચાર્જ કરવા માટે USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ફાઇલ ટ્રાન્સફર માટે USB"</string>
