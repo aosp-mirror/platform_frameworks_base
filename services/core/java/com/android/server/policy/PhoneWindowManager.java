@@ -5556,7 +5556,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void finishKeyguardDrawn() {
         synchronized (mLock) {
-            if (!mAwake || mKeyguardDrawComplete) {
+            if (!mScreenOnEarly || mKeyguardDrawComplete) {
                 return; // We are not awake yet or we have already informed of this event.
             }
 
