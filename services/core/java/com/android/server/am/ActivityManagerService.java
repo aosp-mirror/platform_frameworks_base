@@ -3662,7 +3662,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (app.trimMemoryLevel < level && app.thread != null &&
                     (level < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN ||
-                            app.trimMemoryLevel >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)) {
+                            app.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND)) {
                 try {
                     app.thread.scheduleTrimMemory(level);
                     app.trimMemoryLevel = level;
