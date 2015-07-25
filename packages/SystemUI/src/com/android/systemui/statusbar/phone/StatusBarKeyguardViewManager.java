@@ -150,6 +150,7 @@ public class StatusBarKeyguardViewManager {
             } else {
                 showBouncerOrKeyguard();
             }
+            KeyguardUpdateMonitor.getInstance(mContext).sendKeyguardReset();
             updateStates();
         }
     }

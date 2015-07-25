@@ -112,7 +112,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_DEVICE_PROVISIONED = 308;
     private static final int MSG_DPM_STATE_CHANGED = 309;
     private static final int MSG_USER_SWITCHING = 310;
-    private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
+    private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 311;
+    private static final int MSG_KEYGUARD_RESET = 312;
     private static final int MSG_BOOT_COMPLETED = 313;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
     private static final int MSG_USER_INFO_CHANGED = 317;
@@ -136,6 +137,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mKeyguardIsVisible;
     private boolean mBouncer;
     private boolean mBootCompleted;
+    private boolean mUserHasAuthenticatedSinceBoot;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -194,6 +196,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_KEYGUARD_VISIBILITY_CHANGED:
                     handleKeyguardVisibilityChanged(msg.arg1);
+                    break;
+                case MSG_KEYGUARD_RESET:
+                    handleKeyguardReset();
                     break;
                 case MSG_KEYGUARD_BOUNCER_CHANGED:
                     handleKeyguardBouncerChanged(msg.arg1);
@@ -498,7 +503,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public boolean getUserCanSkipBouncer(int userId) {
-        return getUserHasTrust(userId) || mUserFingerprintAuthenticated.get(userId);
+        return getUserHasTrust(userId) || (mUserFingerprintAuthenticated.get(userId)
+                && isUnlockingWithFingerprintAllowed());
     }
 
     public boolean getUserHasTrust(int userId) {
@@ -507,6 +513,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public boolean getUserTrustIsManaged(int userId) {
         return mUserTrustIsManaged.get(userId) && !isTrustDisabled(userId);
+    }
+
+    public boolean isUnlockingWithFingerprintAllowed() {
+        return mUserHasAuthenticatedSinceBoot;
     }
 
     static class DisplayClientState {
@@ -883,14 +893,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return mKeyguardIsVisible && !mSwitchingUser
-                && mTrustManager.hasUserAuthenticatedSinceBoot(ActivityManager.getCurrentUser());
+        return mKeyguardIsVisible && !mSwitchingUser;
     }
 
     private void startListeningForFingerprint() {
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
         int userId = ActivityManager.getCurrentUser();
         if (isUnlockWithFingerPrintPossible(userId)) {
+            mUserHasAuthenticatedSinceBoot = mTrustManager.hasUserAuthenticatedSinceBoot(
+                    ActivityManager.getCurrentUser());
             if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
             }
@@ -1184,6 +1195,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
+     * Handle {@link #MSG_KEYGUARD_RESET}
+     */
+    private void handleKeyguardReset() {
+        if (DEBUG) Log.d(TAG, "handleKeyguardReset");
+        if (!isUnlockingWithFingerprintAllowed()) {
+            updateFingerprintListeningState();
+        }
+    }
+
+    /**
      * Handle {@link #MSG_KEYGUARD_BOUNCER_CHANGED}
      * @see #sendKeyguardBouncerChanged(boolean)
      */
@@ -1294,6 +1315,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         Message message = mHandler.obtainMessage(MSG_KEYGUARD_VISIBILITY_CHANGED);
         message.arg1 = showing ? 1 : 0;
         message.sendToTarget();
+    }
+
+    public void sendKeyguardReset() {
+        mHandler.obtainMessage(MSG_KEYGUARD_RESET).sendToTarget();
     }
 
     /**
