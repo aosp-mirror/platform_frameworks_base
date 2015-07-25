@@ -59,9 +59,9 @@ static void wakeup_callback(bool success)
     }
 }
 
-static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobjectArray outReasons)
+static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
 {
-    if (outReasons == NULL) {
+    if (outBuf == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", "null argument");
         return -1;
     }
@@ -99,11 +99,11 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobjectArray outReasons
         return -1;
     }
 
-    ALOGV("Reading wakeup reasons");
+    char* mergedreason = (char*)env->GetDirectBufferAddress(outBuf);
+    int remainreasonlen = (int)env->GetDirectBufferCapacity(outBuf);
 
-    char mergedreason[MAX_REASON_SIZE];
+    ALOGV("Reading wakeup reasons");
     char* mergedreasonpos = mergedreason;
-    int remainreasonlen = MAX_REASON_SIZE;
     char reasonline[128];
     int i = 0;
     while (fgets(reasonline, sizeof(reasonline), fp) != NULL) {
@@ -161,21 +161,17 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobjectArray outReasons
     ALOGV("Got %d reasons", i);
     if (i > 0) {
         *mergedreasonpos = 0;
-        ScopedLocalRef<jstring> reasonString(env, env->NewStringUTF(mergedreason));
-        env->SetObjectArrayElement(outReasons, 0, reasonString.get());
-        i = 1;
     }
 
     if (fclose(fp) != 0) {
         ALOGE("Failed to close %s", LAST_RESUME_REASON);
         return -1;
     }
-
-    return i;
+    return mergedreasonpos - mergedreason;
 }
 
 static JNINativeMethod method_table[] = {
-    { "nativeWaitWakeup", "([Ljava/lang/String;)I", (void*)nativeWaitWakeup },
+    { "nativeWaitWakeup", "(Ljava/nio/ByteBuffer;)I", (void*)nativeWaitWakeup },
 };
 
 int register_android_server_BatteryStatsService(JNIEnv *env)
