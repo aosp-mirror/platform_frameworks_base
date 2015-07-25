@@ -136,6 +136,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.widget.TextViewActivity" android:label="TextViewActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.widget.focus.DescendantFocusability" android:label="DescendantFocusability">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1269,7 +1276,7 @@
 
     </application>
 
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
+    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
             android:targetPackage="com.android.frameworks.coretests"
             android:label="Frameworks Core Tests" />
     <key-sets>
