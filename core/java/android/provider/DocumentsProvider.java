@@ -726,8 +726,8 @@ public abstract class DocumentsProvider extends ContentProvider {
                 final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
                 final String targetId = DocumentsContract.getDocumentId(targetUri);
 
-                enforceReadPermissionInner(documentUri, null);
-                enforceWritePermissionInner(targetUri, null);
+                enforceReadPermissionInner(documentUri, getCallingPackage(), null);
+                enforceWritePermissionInner(targetUri, getCallingPackage(), null);
 
                 final String newDocumentId = copyDocument(documentId, targetId);
 
@@ -748,8 +748,8 @@ public abstract class DocumentsProvider extends ContentProvider {
                 final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
                 final String targetId = DocumentsContract.getDocumentId(targetUri);
 
-                enforceReadPermissionInner(documentUri, null);
-                enforceWritePermissionInner(targetUri, null);
+                enforceReadPermissionInner(documentUri, getCallingPackage(), null);
+                enforceWritePermissionInner(targetUri, getCallingPackage(), null);
 
                 final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
                 final String newDocumentId = moveDocument(documentId, targetId);
