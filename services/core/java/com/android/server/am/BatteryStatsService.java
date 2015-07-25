@@ -58,6 +58,11 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -897,7 +902,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     final class WakeupReasonThread extends Thread {
-        final String[] mReason = new String[1];
+        private static final int MAX_REASON_SIZE = 512;
+        private CharsetDecoder mDecoder;
+        private ByteBuffer mUtf8Buffer;
+        private CharBuffer mUtf16Buffer;
 
         WakeupReasonThread() {
             super("BatteryStats_wakeupReason");
@@ -906,25 +914,53 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
+            mDecoder = StandardCharsets.UTF_8
+                    .newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPLACE)
+                    .onUnmappableCharacter(CodingErrorAction.REPLACE)
+                    .replaceWith("?");
+
+            mUtf8Buffer = ByteBuffer.allocateDirect(MAX_REASON_SIZE);
+            mUtf16Buffer = CharBuffer.allocate(MAX_REASON_SIZE);
+
             try {
-                int num;
-                while ((num = nativeWaitWakeup(mReason)) >= 0) {
+                String reason;
+                while ((reason = waitWakeup()) != null) {
                     synchronized (mStats) {
-                        // num will be either 0 or 1.
-                        if (num > 0) {
-                            mStats.noteWakeupReasonLocked(mReason[0]);
-                        } else {
-                            mStats.noteWakeupReasonLocked("unknown");
-                        }
+                        mStats.noteWakeupReasonLocked(reason);
                     }
                 }
             } catch (RuntimeException e) {
                 Slog.e(TAG, "Failure reading wakeup reasons", e);
             }
         }
+
+        private String waitWakeup() {
+            mUtf8Buffer.clear();
+            mUtf16Buffer.clear();
+            mDecoder.reset();
+
+            int bytesWritten = nativeWaitWakeup(mUtf8Buffer);
+            if (bytesWritten < 0) {
+                return null;
+            } else if (bytesWritten == 0) {
+                return "unknown";
+            }
+
+            // Set the buffer's limit to the number of bytes written.
+            mUtf8Buffer.limit(bytesWritten);
+
+            // Decode the buffer from UTF-8 to UTF-16.
+            // Unmappable characters will be replaced.
+            mDecoder.decode(mUtf8Buffer, mUtf16Buffer, true);
+            mUtf16Buffer.flip();
+
+            // Create a String from the UTF-16 buffer.
+            return mUtf16Buffer.toString();
+        }
     }
 
-    private static native int nativeWaitWakeup(String[] outReason);
+    private static native int nativeWaitWakeup(ByteBuffer outBuffer);
 
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batterystats) dump options:");
