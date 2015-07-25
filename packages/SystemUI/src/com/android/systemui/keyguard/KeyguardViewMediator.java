@@ -460,15 +460,20 @@ public class KeyguardViewMediator extends SystemUI {
 
         @Override
         public void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) {
+            boolean unlockingWithFingerprintAllowed =
+                    mUpdateMonitor.isUnlockingWithFingerprintAllowed();
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                if (mUpdateMonitor.isUnlockingWithFingerprintAllowed()) {
+                if (unlockingWithFingerprintAllowed) {
                     mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated();
                 }
             } else {
-                if (wakeAndUnlocking) {
+                if (wakeAndUnlocking && unlockingWithFingerprintAllowed) {
                     mWakeAndUnlocking = true;
                     keyguardDone(true, true);
                 } else {
+                    if (wakeAndUnlocking) {
+                        mStatusBarKeyguardViewManager.notifyScreenWakeUpRequested();
+                    }
                     mStatusBarKeyguardViewManager.animateCollapsePanels(
                             FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
                 }
