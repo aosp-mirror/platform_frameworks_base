@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> দ্বারা পরিচালিত৷"</string>
     <string name="no_permissions" msgid="7283357728219338112">"কোনো অনুমতির প্রয়োজন নেই"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"এর জন্য অর্থপ্রদান করতে হতে পারে"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB বড় সঞ্চয়স্থান"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB সংযুক্ত আছে"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"আপনি USB এর মাধ্যমে আপনার কম্পিউটারের সাথে সংযুক্ত হয়েছেন৷ আপনার কম্পিউটার এবং Android এর USB সংগ্রহস্থলের মধ্যে আপনি যদি ফাইলগুলিকে অনুলিপি করতে চান তাহলে নীচের বোতামটি স্পর্শ করুন৷"</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"আপনি USB এর মাধ্যমে আপনার কম্পিউটারের সাথে সংযুক্ত হয়েছেন৷ আপনার কম্পিউটার এবং Android এর SD কার্ডের মধ্যে আপনি যদি ফাইলগুলিকে অনুলিপি করতে চান তাহলে নীচের বোতামটি স্পর্শ করুন৷"</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB সঞ্চয়স্থান চালু করুন"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB বড় সঞ্চয়স্থানের জন্য আপনার USB সংগ্রহস্থল ব্যবহার করার সময় একটি সমস্যা হয়েছে৷"</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB বড় সঞ্চয়স্থানের জন্য আপনার SD কার্ড ব্যবহার করার সময় একটি সমস্যা হয়েছে৷"</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB সংযুক্ত আছে"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"আপনার কম্পিউটারে বা কম্পিউটার থেকে ফাইলগুলি অনুলিপি করতে স্পর্শ করুন৷"</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB সঞ্চয়স্থান বন্ধ করুন"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB সংগ্রহস্থল বন্ধ করুন স্পর্শ করুন৷"</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB সঞ্চয়স্থান ব্যবহারে রয়েছে"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB সংগ্রহস্থল বন্ধ করার আগে, আপনার Android এর USB সংগ্রহস্থল আপনার কম্পিউটার থেকে আনমাউন্ট (\"বের করে নিন\") করুন৷"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB সংগ্রহস্থল বন্ধ করার আগে, আপনার Android এর SD কার্ড আপনার কম্পিউটার থেকে আনমাউন্ট (\"বের করে নিন\") করুন৷"</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB সঞ্চয়স্থান বন্ধ করুন"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB সংগ্রহস্থল বন্ধ করার সময় একটি সমস্যা হয়েছে৷ আপনি USB হোস্ট যে আনমাউন্ট করেছেন তা পরীক্ষা করে নিয়ে আবার চেষ্টা করুন৷"</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB সঞ্চয়স্থান চালু করুন"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"আপনি যদি USB সঞ্চয়স্থান চালু করেন তাহলে আপনার USB সঞ্চয়স্থান বন্ধ না করা পর্যন্ত আপনার ব্যবহৃত অ্যাপ্লিকেশানগুলির মধ্যে কয়েকটি বন্ধ হয়ে যাবে এবং অনুপলব্ধ হতে পারে৷"</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB প্রক্রিয়াটি অসফল হয়েছে"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ঠিক আছে"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"চার্জ করার জন্য USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ফাইল স্থানান্তরের জন্য USB"</string>

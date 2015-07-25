@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"Жабдықтаған <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Рұқсат қажет емес"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"бұған төлем қажет болуы мүмкін"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB көпшілік жады"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB қосылған"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Компьютеріңізге USB арқылы қосылдыңыз. Компьютер және Android  USB жады арасында файлдарды көшіру үшін төмендегі түймені түртіңіз."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Компьютеріңізге USB арқылы қосылдыңыз. Компьютер және Android SD картасы арасында файлдарды көшіру үшін төмендегі түймені түртіңіз."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB жадын қосу"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB көпшілік жады үшін USB жадын қолдануда мәселе орын алды."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB көпшілік жады үшін SD картасын қолдануда мәселе орын алды."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB қосылған"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Компьютеріңізден/ге файл көшіру үшін түртіңіз."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB жадын өшіру"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB жадын өшіру үшін түртіңіз."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB жады қолданыста"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB жадын өшірмес бұрын компьютеріңізден Android USB жадын шығарыңыз (\"eject\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB жадын өшірмес бұрын компьютеріңізден Android SD картасын шығарыңыз (\"eject\")."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB жадын өшіру"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB жадын өшіру кезінде мәселе орын алды. USB хостының шығарылғанын тексеріп, қайта әрекеттеніңіз."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB жадын қосу"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Егер USB жадын қоссаңыз, қолданыстағы қолданбалар тоқтайды және USB жадын қайта қосқанша қол жетімсіз болады."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB жұмысы сәтсіз"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Жарайды"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"Зарядтауға арналған USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Файлды тасымалдауға арналған USB"</string>

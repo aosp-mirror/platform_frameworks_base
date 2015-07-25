@@ -1021,25 +1021,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g>द्वारा प्रदान गरिएको।"</string>
     <string name="no_permissions" msgid="7283357728219338112">"कुनै अनुमति आवश्यक छैन"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"सायद तपाईँलाई पैसा पर्न सक्छ।"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB ठूलो भण्डारण"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB जोडिएको छ"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"तपाईं आफ्नो कम्प्युटरमा USB मार्फत जडान हुनुभयो। तलको बटन टच गर्नुहोस् यदि तपाईं आफ्नो कम्प्युटर र एन्ड्रोइडको USB भण्डारण बीच फाइलहरू प्रतिलिपि गर्न चाहनुहुन्छ भने।"</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"तपाईं आफ्नो कम्प्युटरमा USB मार्फत जडान हुनुभयो। तलको बटन टच गर्नुहोस् यदि तपाईं आफ्नो कम्प्युटर र एन्ड्रोइडको SD कार्ड बीच फाइलहरू प्रतिलिपि गर्न चाहनुहुन्छ भने।"</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB भण्डारण चालु गर्नुहोस्"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB आम भण्डारणको लागि तपाईँको USB भण्डारण प्रयोग गर्दा एउटा समस्या भयो।"</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB आम भण्डारणको लागि तपाईँको SD कार्ड प्रयोग गर्दा एउटा समस्या भयो।"</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB जोडिएको छ"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"तपाईँको कम्प्युटरबाट वा तिर फाइलहरू प्रतिलिप गर्न छुनुहोस्।"</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB भण्डारण बन्द गर्नुहोस्"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB भण्डारण बन्द गर्न छुनुहोस्।"</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB भण्डारण प्रयोगमा छ"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB भण्डारण बन्द हुनुभन्दा पहीले तपाईँको कम्प्युटरबाट तपाईँको एन्ड्रोइड USB भण्डारण अनमाउन्ट (\"झिक्नुहोस्\") गर्नुहोस् ।"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB भण्डारण बन्द गर्नुअघि तपाईँको कम्प्युटरबाट तपाईँको एन्ड्रोइडको SD कार्ड अनमाउन्ट (\"निकालेको\") गर्नुहोस्।"</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB भण्डारण बन्द गर्नुहोस्"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB भण्डारण बन्द गर्दा एउटा समस्या भयो। तपाईँले USB होस्ट अनमाउन्ट गर्नु भएको जाँच गर्नुहोस्, त्यसपछि फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB भण्डारण खोल्नुहोस्"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"यदि तपाईँले USB भण्डारण खोल्नु भयो भने तपाईँले प्रयोग गरिरहनु भएका केही अनुप्रयोगहरू रोकिने छन् र तपाईँले USB भण्डारण बन्द नगरेसम्म अनुपलब्ध हुन सक्छन्।"</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB संचालन असफल"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ठिक छ"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"चार्जका लागि USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"फाइल स्थानान्तरणको लागि USB"</string>

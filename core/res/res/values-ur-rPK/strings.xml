@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے ذریعہ فراہم کردہ۔"</string>
     <string name="no_permissions" msgid="7283357728219338112">"کوئی اجازتیں درکار نہیں ہیں"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"اس میں آپ کا پیسہ خرچ ہو سکتا ہے"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"‏USB ضخیم اسٹوریج"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"‏بذریعہ USB مربوط کر دیا گیا"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"‏آپ نے USB کی معرفت اپنے کمپیوٹر سے مربوط کیا ہے۔ اگر آپ اپنے کمپیوٹر اور اپنے Android کے USB اسٹوریج کے بیچ فائلیں کاپی کرنا چاہتے ہیں تو ذیل کے بٹن کو چھوئیں۔"</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"‏آپ نے USB کی معرفت اپنے کمپیوٹر سے مربوط کیا ہے۔ اگر آپ اپنے کمپیوٹر اور اپنے Android کے SD کارڈ کے بیچ فائلیں کاپی کرنا چاہتے ہیں تو ذیل کے بٹن کو چھوئیں۔"</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"‏USB اسٹوریج آن کریں"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"‏USB ضخیم اسٹوریج کیلئے آپ کا USB اسٹوریج استعمال کرنے میں ایک دشواری ہے۔"</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"‏USB ضخیم اسٹوریج کیلئے آپ کا SD کارڈ استعمال کرنے میں ایک دشواری ہے۔"</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"‏بذریعہ USB مربوط کر دیا گیا"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"اپنے کمپیوٹر میں/سے فائلیں کاپی کرنے کیلئے چھوئیں۔"</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"‏USB اسٹوریج آف کریں"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"‏USB اسٹوریج کو بند کرنے کیلئے چھوئیں۔"</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"‏USB اسٹوریج استعمال ہو رہا ہے"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"‏USB اسٹوریج آف کرنے سے پہلے، اپنے Android کا USB اسٹوریج اپنے کمپیوٹر سے اَن ماؤںٹ کریں (\"نکالیں\")۔"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"‏USB اسٹوریج آف کرنے سے پہلے، اپنے Android کا SD کارڈ اپنے کمپیوٹر سے اَن ماؤںٹ کریں  (\"نکالیں\")۔"</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"‏USB اسٹوریج آف کریں"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"‏USB اسٹوریج کو آف کرنے میں ایک دشواری تھی۔ چیک کریں کہ آپ نے USB میزبان کو اَن ماؤںٹ کر لیا ہے، پھر دوبارہ کوشش کریں۔"</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"‏USB اسٹوریج آن کریں"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"‏اگر آپ USB اسٹوریج کو آن کرتے ہیں تو آپ کے زیر استعمال کچھ ایپس بند ہو جائیں گے اور جب تک آپ USB اسٹوریج آف نہ کر دیں تب تک غیر دستیاب رہ سکتی ہیں۔"</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"‏USB کارروائی ناکام رہی"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ٹھیک ہے"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"‏چارجنگ کیلئے USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏فائل کی منتقلی کیلئے USB"</string>

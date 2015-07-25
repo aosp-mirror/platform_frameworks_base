@@ -1350,32 +1350,6 @@
     <!-- no translation found for no_permissions (7283357728219338112) -->
     <skip />
     <string name="perm_costs_money" msgid="4902470324142151116">"бул үчүн акы алынышы мүмкүн"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB сактагыч"</string>
-    <!-- no translation found for usb_storage_title (5901459041398751495) -->
-    <skip />
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Компүтериңизге USB аркылуу туташтыңыз. Компүтериңиз менен Android\'уңуздун USB сактагычы ортосунда файл алмашууну жүргүзө турган болсоңуз, төмөндөгү баскычты басыңыз."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Компүтериңизге USB аркылуу туташтыңыз. Компүтериңиз менен  Android\'уңуздун SD-картасы ортосунда файл алмашууну жүргүзө турган болсоңуз, төмөндөгү баскычты басыңыз."</string>
-    <!-- no translation found for usb_storage_button_mount (1052259930369508235) -->
-    <skip />
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB сактагычыңызды USB топтогуч катары колдонуу кыйрады."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"SD-картаңызды USB топтогуч катары колдонуу кыйрады."</string>
-    <!-- no translation found for usb_storage_notification_title (8175892554757216525) -->
-    <skip />
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Компүтериңизге же андан файлдарды көчүрүү үчүн басыңыз."</string>
-    <!-- no translation found for usb_storage_stop_notification_title (2336058396663516017) -->
-    <skip />
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB сактагычын өчүрүү үчүн басыңыз."</string>
-    <!-- no translation found for usb_storage_stop_title (660129851708775853) -->
-    <skip />
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB сактагычты өчүрүүдөн мурда, Android\'уңуздун USB сактагычын компүтериңизден ажыратыңыз (\"чыгарыңыз\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB сактагычты өчүрүүдөн мурда, Android\'уңуздун SD-картасын компүтериңизден ажыратыңыз (\"чыгарыңыз\")."</string>
-    <!-- no translation found for usb_storage_stop_button_mount (7060218034900696029) -->
-    <skip />
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB сактагычты өчүрүү кыйрады. Сиз USB хостун чыгарганыңызды текшерип, кайра аракет кылыңыз."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"USB сактагычты жандырсаңыз, сиз колдонуп жаткан кээ бир колдонмолор токтоп калышы жана USB сактагычты өчүрмөйүнчө, алар жеткиликсиз болушу мүмкүн."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB иши ийгиликсиз болду"</string>
     <!-- no translation found for dlg_ok (7376953167039865701) -->
     <skip />
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"Кубаттоо үчүн USB"</string>

@@ -1029,25 +1029,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"Zagotavlja aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Ni zahtevanih dovoljenj"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"to je lahko plačljivo"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"Masovni pomnilnik USB"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"Povezava USB je vzpostavljena"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Z računalnikom ste vzpostavili povezavo z USB-jem. Dotaknite se spodnjega gumba, če želite kopirati datoteke med računalnikom in pomnilnikom USB v Androidu."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Z računalnikom ste vzpostavili povezavo prek USB-ja. Če želite kopirati datoteke med računalnikom in kartico SD v Androidu, se dotaknite spodnjega gumba."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Vklop shrambe USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Težava pri uporabi pomnilnika USB kot masovnega pomnilnika USB."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Težava pri uporabi kartice SD za masovni pomnilnik USB."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"Povezava USB je vzpostavljena"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Dotaknite se, če želite kopirati datoteke v računalnik ali iz njega."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Izklopi shrambo USB"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Dotaknite se, da izklopite pomnilnik USB."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"Shramba USB je v uporabi"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Preden izklopite pomnilnik USB, iz računalnika izpnite (»izvrzite«) Androidov pomnilnik USB."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Preden izklopite pomnilnik USB, iz računalnika izpnite (»izvrzite«) Androidovo kartico USB."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Izklopi shrambo USB"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Težava pri izklopu pomnilnika USB. Preverite, ali ste izpeli gostitelja USB, nato poskusite znova."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Vklop shrambe USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Če vklopite pomnilnik USB, se bodo nekatere aplikacije, ki jih uporabljate, ustavile in ne bodo na voljo, dokler ne izklopite pomnilnika USB."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"Operacija v pomnilniku USB ni uspela"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"V redu"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB za polnjenje"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB za prenos datotek"</string>

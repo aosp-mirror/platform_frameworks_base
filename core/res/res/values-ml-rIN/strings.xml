@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> നൽകുന്നത്."</string>
     <string name="no_permissions" msgid="7283357728219338112">"അനുമതികളൊന്നും ആവശ്യമില്ല"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ഇത് നിങ്ങൾക്ക് പണച്ചെലവിനിടയാക്കാം"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB മാസ്സ് സ്റ്റോറേജ്"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB കണക്റ്റുചെയ്‌തു"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"നിങ്ങൾ USB മുഖേന നിങ്ങളുടെ കമ്പ്യൂട്ടറിൽ കണക്റ്റുചെയ്‌തു. നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും Android-ന്റെ USB സംഭർണത്തിനുമിടയിൽ ഫയലുകൾ പകർത്തണമെങ്കിൽ ചുവടെയുള്ള ബട്ടൺ സ്‌പർശിക്കുക."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"നിങ്ങൾ USB മുഖേന നിങ്ങളുടെ കമ്പ്യൂട്ടറിൽ കണക്റ്റുചെയ്‌തു. നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും Android-ന്റെ SD കാർഡിനുമിടയിൽ ഫയലുകൾ പകർത്തണമെങ്കിൽ ചുവടെയുള്ള ബട്ടൺ സ്‌പർശിക്കുക."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB സ്റ്റോറേജ്  ഓണാക്കുക"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB മാസ്സ് സംഭരണത്തിനായി നിങ്ങളുടെ USB സ്റ്റോറേജ്  ഉപയോഗിക്കുന്നതിൽ ഒരു പ്രശ്‌നമുണ്ട്."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB മാസ്സ് സംഭരണത്തിനായി നിങ്ങളുടെ SD കാർഡ് ഉപയോഗിക്കുന്നതിൽ ഒരു പ്രശ്‌നമുണ്ട്."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB കണക്റ്റുചെയ്‌തു"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"നിങ്ങളുടെ കമ്പ്യൂട്ടറിലേക്ക്/കമ്പ്യൂട്ടറിൽ നിന്നും ഫയലുകൾ പകർത്താൻ സ്‌പർശിക്കുക."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB സ്റ്റോറേജ്  ഓഫാക്കുക"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB സ്റ്റോറേജ്  ഓഫുചെയ്യാൻ സ്‌പർശിക്കുക."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB സ്റ്റോറേജ്  ഉപയോഗത്തിലാണ്"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB സ്റ്റോറേജ്  ഓഫുചെയ്യുന്നതിന് മുമ്പ്, നിങ്ങളുടെ കമ്പ്യൂട്ടറിൽ നിന്നും Android-ന്റെ USB സ്റ്റോറേജ്  അൺമൗണ്ടുചെയ്യുക (\"ഒഴിവാക്കുക\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB സ്റ്റോറേജ്  ഓഫുചെയ്യുന്നതിന് മുമ്പ്, നിങ്ങളുടെ കമ്പ്യൂട്ടറിൽ നിന്നും Android-ന്റെ SD കാർഡ് അൺമൗണ്ടുചെയ്യുക (\"ഒഴിവാക്കുക\")."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB സ്റ്റോറേജ്  ഓഫാക്കുക"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB സ്റ്റോറേജ്  ഓഫുചെയ്യുന്നതിൽ ഒരു പ്രശ്‌നമുണ്ടായിരുന്നു. നിങ്ങൾ USB ഹോസ്‌റ്റ് മൗണ്ടുചെയ്‌തിട്ടുണ്ടെന്ന് ഉറപ്പുവരുത്തിയതിനുശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB സ്റ്റോറേജ്  ഓണാക്കുക"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"നിങ്ങൾ USB സ്റ്റോറേജ്  ഓൺ ചെയ്യുകയാണെങ്കിൽ, നിങ്ങൾ ഉപയോഗിക്കുന്ന ചില അപ്ലിക്കേഷനുകൾ USB സ്റ്റോറേജ്  ഓഫുചെയ്യുന്നതുവരെ പ്രവർത്തനം നിർത്താനും ലഭ്യമാകാതിരിക്കാനും ഇടയുണ്ട്."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB പ്രവർത്തനം പരാജയപ്പെട്ടു"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ശരി"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"ചാർജ്ജിംഗിനായുള്ള USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ഫയൽ കൈമാറ്റത്തിനുള്ള USB"</string>

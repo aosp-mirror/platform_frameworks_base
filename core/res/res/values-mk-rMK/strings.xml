@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"Обезбедено од <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Не се потребни дозволи"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ова може да ве чини пари"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"Масовна меморија на УСБ"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"УСБ меморијата е поврзана"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Се поврзавте со вашиот компјутер преку УСБ. Допрете го копчето подолу ако сакате да разменувате датотеки меѓу вашиот компјутер и УСБ меморијата на вашиот Android."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Се поврзавте со вашиот компјутер преку УСБ. Допрете го копчето подолу ако сакате да разменувате датотеки меѓу вашиот компјутер и СД картичката на вашиот Android."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Вклучи УСБ меморија"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Настана проблем со користење на вашата УСБ меморија за масовно меморирање на УСБ."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Настана проблем со користење на вашата СД картичка за масовно меморирање на УСБ."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"УСБ меморијата е поврзана"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Допри за да копираш датотеки на/од својот компјутер."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Исклучи УСБ меморија"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Допри за да ја исклучиш УСБ меморијата."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"УСБ меморијата е во употреба"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Пред да ја исклучите УСБ меморијата, одмонтирајте („извадете“) ја УСБ меморијата на вашиот Android од вашиот компјутер."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Пред да ја исклучите УСБ меморијата, одмонтирајте („извадете“) ја СД картичката на вашиот Android од вашиот компјутер."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Исклучи УСБ меморија"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Настана проблем со исклучување на УСБ меморијата. Проверете дали сте го одмонтирале УСБ домаќинот, па обидете се повторно."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Вклучи УСБ меморија"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Ако вклучите УСБ меморија, некои апликации што ги користите ќе запрат и може да се недостапни додека не ја исклучите УСБ меморијата."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"Операцијата со УСБ уредот е неуспешна"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Во ред"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"УСБ за полнење"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"УСБ за пренос на датотеки"</string>

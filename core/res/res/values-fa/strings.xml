@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"ارائه شده توسط <xliff:g id="APP_NAME">%1$s</xliff:g> ."</string>
     <string name="no_permissions" msgid="7283357728219338112">"مجوزی لازم نیست"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ممکن است برای شما هزینه داشته باشد"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"‏حافظه انبوه USB"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"‏USB متصل شد"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"‏شما از طریق USB به رایانهٔ خود متصل شده‎اید. اگر می‎خواهید فایل‎ها را بین رایانهٔ خود و حافظهٔ USB در Android کپی کنید، دکمه زیر را لمس کنید."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"‏شما از طریق USB به رایانهٔ خود متصل شده‎اید. اگر می‎خواهید فایل‎ها را بین رایانهٔ خود و کارت SD در Android کپی کنید، دکمه زیر را لمس کنید."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"‏روشن کردن دستگاه ذخیره‌سازی USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"‏هنگام استفاده از حافظهٔ USB برای حافظه انبوه USB مشکلی بوجود آمد."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"‏هنگام استفاده از کارت SD برای حافظه ذخیره انبوه USB مشکلی بوجود آمد."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"‏USB متصل شد"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"برای کپی کردن فایل‌ها از/به رایانهٔ خود لمس کنید."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"‏خاموش کردن دستگاه ذخیره‌سازی USB"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"‏برای غیرفعال کردن حافظهٔ USB، لمس کنید."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"‏دستگاه ذخیره‌سازی USB در حال استفاده است"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"‏قبل از غیرفعال کردن حافظهٔ USB، حافظهٔ USB مربوط به Android را در رایانهٔ خود لغو نصب کنید (\"خارج کنید\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"‏قبل از غیرفعال کردن حافظهٔ USB، کارت SD مربوط به Android را در رایانه لغو نصب کنید (\"خارج کنید\")."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"‏خاموش کردن دستگاه ذخیره‌سازی USB"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"‏هنگام غیرفعال کردن حافظهٔ USB مشکلی بوجود آمد. بررسی کنید میزبان USB را لغو نصب کرده باشید، سپس دوباره امتحان کنید."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"‏روشن کردن دستگاه ذخیره‌سازی USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"‏در صورت فعال کردن حافظهٔ USB، برخی از برنامه‎هایی که از آن‌ها استفاده می‎کنید متوقف می‎شوند و تا زمانی که حافظهٔ USB را غیرفعال نکنید امکان استفاده از آن‌ها وجود نخواهد داشت."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"‏راه‌اندازی USB ناموفق بود."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"تأیید"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"‏USB برای شارژ کردن"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB برای انتقال فایل"</string>

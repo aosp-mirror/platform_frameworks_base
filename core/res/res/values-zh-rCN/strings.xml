@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"由“<xliff:g id="APP_NAME">%1$s</xliff:g>”提供。"</string>
     <string name="no_permissions" msgid="7283357728219338112">"不需要任何权限"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"这可能会产生费用"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB大容量存储设备"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"已连接USB"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"您已通过USB连接至计算机。如果您要在计算机与Android设备的USB存储设备之间复制文件，请按下面的按钮。"</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"您已通过USB连接至计算机。如果您要在计算机和Android设备的SD卡之间复制文件，请按下面的按钮。"</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"打开USB存储设备"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"使用USB存储设备作为USB大容量存储设备时出现问题。"</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"使用SD卡作为USB大容量存储设备时出现问题。"</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"已连接USB"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"触摸可将文件复制到计算机或从计算机复制到存储设备。"</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"关闭USB存储设备"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"触摸可关闭USB存储设备。"</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB存储设备正在使用中"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"在关闭USB存储设备前，请从计算机中卸载（“弹出”）Android设备的USB存储设备。"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"在关闭USB存储设备前，请从计算机中卸载（“弹出”）Android设备的SD卡。"</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"关闭USB存储设备"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"关闭USB存储设备时遇到问题。请检查您是否已卸载了USB主设备，然后重试。"</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"打开USB存储设备"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"如果您打开USB存储设备，您正在使用的某些应用将会停止，并且在您关闭USB存储设备前都将无法使用。"</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB操作失败"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"确定"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"正在通过 USB 充电"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"正在通过 USB 传输文件"</string>

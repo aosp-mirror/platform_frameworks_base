@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"由「<xliff:g id="APP_NAME">%1$s</xliff:g>」提供。"</string>
     <string name="no_permissions" msgid="7283357728219338112">"不需授權"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"這可能需要付費"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB 大量儲存裝置"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"已連接 USB"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"您已透過 USB 連接電腦。如要在電腦和 Android 手機的 USB 儲存裝置之間複製檔案，請輕觸下方的按鈕。"</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"您已透過 USB 連接電腦。如要在電腦和 Android 手機的 SD 記憶卡之間複製檔案，請輕觸下方的按鈕。"</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"開啟 USB 儲存裝置"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"使用您的 USB 儲存裝置作為 USB 大量儲存裝置時發生問題。"</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"使用您的 SD 記憶卡作為 USB 大量儲存裝置時發生問題。"</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"已連接 USB"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"輕觸即可將檔案複製到電腦或從電腦複製。"</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"關閉 USB 儲存裝置"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"輕觸即可關閉 USB 儲存裝置。"</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB 儲存裝置正在使用中"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"關閉 USB 儲存裝置前，請先從電腦卸載 (退出) Android 手機的 USB 儲存裝置。"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"關閉 USB 儲存裝置前，請先從電腦卸載 (退出) Android 手機的 SD 記憶卡。"</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"關閉 USB 儲存裝置"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"關閉 USB 儲存裝置時發生問題。請檢查您是否已卸載 USB Host，然後再試一次。"</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"開啟 USB 儲存裝置"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"如果您開啟 USB 儲存裝置，則某些正在使用中的應用程式會停止運作，而且可能無法使用，直到關閉 USB 儲存裝置後才會恢復正常。"</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB 操作失敗"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"確定"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB 充電"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB 檔案傳輸"</string>

@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> வழங்கியது."</string>
     <string name="no_permissions" msgid="7283357728219338112">"அனுமதிகள் தேவையில்லை"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"இதனால் நீங்கள் கட்டணம் செலுத்த வேண்டியிருக்கலாம்"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB அதிகச் சேமிப்பிடம்"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB இணைக்கப்பட்டது"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"USB வழியாக உங்கள் கணினியுடன் இணைக்கப்பட்டுள்ளீர்கள். உங்கள் கணினி மற்றும் உங்கள் Android இன் USB சேமிப்பிடம் ஆகியவற்றிற்கு இடையே கோப்புகளைப் பகிர விரும்பினால் கீழேயுள்ள பொத்தானைத் தொடவும்."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"USB வழியாக உங்கள் கணினியுடன் இணைக்கப்பட்டுள்ளீர்கள். உங்கள் கணினி மற்றும் உங்கள் Android இன் SD கார்டு ஆகியவற்றிற்கு இடையே கோப்புகளைப் பகிர விரும்பினால் கீழேயுள்ள பொத்தானைத் தொடவும்."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB சேமிப்பிடத்தை இயக்கு"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB அதிகச் சேமிப்பிடத்திற்கான உங்கள் USB சேமிப்பிடத்தைப் பயன்படுத்துவதில் சிக்கல் ஏற்பட்டது."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB அதிகச் சேமிப்பிடத்திற்கான உங்கள் SD கார்டைப் பயன்படுத்துவதில் சிக்கல் ஏற்பட்டது."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB இணைக்கப்பட்டது"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"உங்கள் கணினிக்கு/கணினியிலிருந்து கோப்புகளை நகலெடுக்க தொடவும்."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB சேமிப்பிடத்தை முடக்கு"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB சேமிப்பிடத்தை முடக்க, தொடவும்."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB சேமிப்பிடம் பயன்பாட்டில் உள்ளது"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB சேமிப்பிடத்தை முடக்குவதற்கு முன், உங்கள் கணினியிலிருந்து உங்கள் Android இன் USB சேமிப்பிடத்தை இணைப்பு நீக்கவும் (\"வெளியேறு\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB சேமிப்பிடத்தை முடக்குவதற்கு முன், உங்கள் கணினியிலிருந்து உங்கள் Android இன் SD கார்டை இணைப்பு நீக்கவும் (\"வெளியேறு\")."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB சேமிப்பிடத்தை முடக்கு"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB சேமிப்பிடத்தை முடக்குவதில் சிக்கல் ஏற்பட்டது. USB ஹோஸ்ட்டை நீங்கள் இணைப்பு நீக்கியதைச் சரிபார்க்கவும், பிறகு மீண்டும் முயற்சிக்கவும்."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB சேமிப்பிடத்தை இயக்கு"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"நீங்கள் USB சேமிப்பிடத்தை இயக்கினால், நீங்கள் பயன்படுத்தும் சில பயன்பாடுகள் நின்றுவிடும், மேலும் நீங்கள் USB சேமிப்பிடத்தை முடக்கும்வரை அவை கிடைக்காமல் இருக்கலாம்."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB செயல்முறை தோல்வியடைந்தது"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"சரி"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB, சார்ஜ் செய்வதற்கு மட்டும்"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB, கோப்புப் பரிமாற்றத்துக்கு மட்டும்"</string>

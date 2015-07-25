@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"Sağlayan: <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"İzin gerektirmez"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"bunun için sizden ücret alınabilir"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB yığın belleği"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB bağlandı"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Cihazınızı USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin USB belleği arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeye dokunun."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Cihazınızı USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin SD kartı arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeye dokunun."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB belleği aç"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB belleğinizi USB yığın belleği amaçlı kullanmayla ilgili bir sorun var."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"SD kartınızı USB yığın belleği olarak kullanmada sorun var."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB bağlandı"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Bilgisayarınıza/bilgisayarınızdan dosya kopyalamak için dokunun."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB belleği kapat"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB belleği kapatmak için dokunun."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB bellek kullanılıyor"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB belleği kapatmadan önce Android\'inizin USB belleğin bilgisayarınızla olan bağlantısını kesin (\"çıkarın\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB belleği kapatmadan önce Android\'inizin SD kartının bilgisayarınızla olan bağlantısını kesin (\"çıkarın\")."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB belleği kapat"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB belleği kapatırken bir sorun oluştu. USB birimini kaldırdığınızdan emin olun ve daha sonra tekrar deneyin."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB belleği aç"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"USB belleği açarsanız, kullanmakta olduğunuz bazı uygulamalar durur ve USB bellek kapatılıncaya kadar kullanılamayabilir."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB işlemi başarısız oldu"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"Şarj için USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Dosya aktarımı için USB"</string>

@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"Zur Verfügung gestellt von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Keine Berechtigungen erforderlich"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"Hierfür können Gebühren anfallen."</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-Massenspeicher"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB-Verbindung"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Sie haben eine USB-Verbindung mit Ihrem Computer hergestellt. Berühren Sie die Schaltfläche unten, wenn Sie Dateien von Ihrem Computer in den USB-Speicher Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Sie haben Ihr Android-Gerät über USB mit Ihrem Computer verbunden. Berühren Sie die Schaltfläche unten, wenn Sie Dateien von Ihrem Computer auf die SD-Karte Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB-Speicher aktivieren"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Bei der Verwendung Ihres USB-Speichers als USB-Massenspeicher ist ein Problem aufgetreten."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Bei der Verwendung Ihrer SD-Karte als USB-Massenspeicher ist ein Problem aufgetreten."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB-Verbindung"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Zum Kopieren von Dateien berühren"</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB-Speicher deaktivieren"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Zum Deaktivieren des USB-Speichers berühren"</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-Speicher in Verwendung"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Bevor Sie den USB-Speicher deaktivieren, trennen Sie den USB-Speicher Ihres Android-Geräts von Ihrem Computer (\"auswerfen\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Bevor Sie den USB-Speicher deaktivieren, trennen Sie die SD-Karte Ihres Android-Geräts von Ihrem Computer (\"auswerfen\")."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB-Speicher deaktivieren"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Beim Ausschalten des USB-Speichergeräts wurde ein Problem festgestellt. Bitte überprüfen Sie, ob der USB-Host getrennt wurde, und versuchen Sie es erneut."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB-Speicher aktivieren"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Wenn Sie den USB-Speicher aktivieren, werden einige von Ihnen verwendeten Apps beendet und sind möglicherweise erst wieder verfügbar, wenn Sie den USB-Speicher wieder deaktivieren."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB-Vorgang fehlgeschlagen"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB zum Aufladen"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB für die Dateiübertragung"</string>

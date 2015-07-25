@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"Palvelun tarjoaa <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Lupia ei tarvita"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"tämä voi maksaa"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-massamuisti"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB yhdistetty"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Olet yhdistänyt laitteesi tietokoneeseen USB-kaapelin kautta. Kosketa alla olevaa painiketta, jos haluat kopioida tiedostoja tietokoneesi ja Androidin USB-tallennustilan välillä."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Olet yhdistänyt laitteesi tietokoneeseesi USB-kaapelin kautta. Kosketa alla olevaa painiketta, jos haluat kopioida tiedostoja tietokoneesi ja Androidin SD-kortin välillä."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Ota USB-tallennustila käyttöön"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Ongelma käytettäessä USB-tilaa USB-massamuistina."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Ongelma käytettäessä SD-korttia USB-massamuistina."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB yhdistetty"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Kopioi tiedostoja tietokoneelle tai tietokoneelta koskettamalla tätä."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Poista USB-tallennustila käytöstä"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Poista USB-tallennustila käytöstä koskettamalla tätä."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-tallennustila käytössä"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Poista Androidin USB-tallennustila käytöstä tietokoneellasi ennen USB-tallennustilan sammuttamista."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Poista Androidin SD-kortti käytöstä tietokoneellasi ennen USB-tallennustilan sammuttamista."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Poista USB-tallennustila käytöstä"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Ongelma USB-tallennustilan sammuttamisessa. Tarkista, että olet poistanut USB-laitteen käytöstä, ja yritä uudelleen."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Ota USB-tallennustila käyttöön"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Jos otat USB-tallennustilan käyttöön, osa käyttämistäsi sovelluksista pysähtyy eikä ehkä ole käytettävissä, ennen kuin poistat USB-tallennustilan käytöstä."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB-toiminto epäonnistui."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB on lataustilassa"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB on tiedonsiirtotilassa"</string>

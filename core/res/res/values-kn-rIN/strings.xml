@@ -1015,25 +1015,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಮೂಲಕ ಒದಗಿಸಲಾಗಿದೆ."</string>
     <string name="no_permissions" msgid="7283357728219338112">"ಯಾವುದೇ ಅನುಮತಿಗಳ ಅಗತ್ಯವಿಲ್ಲ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ಇದು ನಿಮ್ಮ ಹಣವನ್ನು ವ್ಯಯಿಸಬಹುದು"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB ಸಮೂಹ ಸಂಗ್ರಹಣೆ"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"USB ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"ನೀವು USB ಮುಖಾಂತರ ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‍‍ಗೆ ಸಂಪರ್ಕಗೊಂಡಿರುವಿರಿ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ Android ನ USB ಸಂಗ್ರಹಣೆಯ ನಡುವೆ ಫೈಲ್‍‍ಗಳನ್ನು ನಕಲಿಸಬೇಕೆಂದಿದ್ದರೆ, ಕೆಳಗಿನ ಬಟನ್ ಸ್ಪರ್ಶಿಸಿ."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"ನೀವು USB ಮುಖಾಂತರ ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‍‍ಗೆ ಸಂಪರ್ಕಗೊಂಡಿರುವಿರಿ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ Android ನ SD ಕಾರ್ಡ್ ನಡುವೆ ಫೈಲ್‍‍ಗಳನ್ನು ನಕಲಿಸಬೇಕೆಂದಿದ್ದರೆ, ಕೆಳಗಿನ ಬಟನ್ ಸ್ಪರ್ಶಿಸಿ."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆನ್ ಮಾಡಿ"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB ಸಮೂಹ ಸಂಗ್ರಹಣೆಗಾಗಿ ನಿಮ್ಮ USB ಸಂಗ್ರಹಣೆಯನ್ನು ಬಳಸುವಲ್ಲಿ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB ಸಮೂಹ ಸಂಗ್ರಹಣೆಗಾಗಿ ನಿಮ್ಮ SD ಕಾರ್ಡ್ ಬಳಸುವಲ್ಲಿ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‍‌ನಿಂದ/ಗೆ ಫೈಲ್‍‍ಗಳನ್ನು ನಕಲಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆಫ್ ಮಾಡಿ"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆಫ್ ಮಾಡಲು ಸ್ಪರ್ಶಿಸಿ."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB ಸಂಗ್ರಹಣೆ ಬಳಕೆಯಲ್ಲಿದೆ"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆಫ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು, ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‍‍ನಿಂದ ನಿಮ್ಮ Android ನ USB ಸಂಗ್ರಹಣೆಯ ಅಳವಡಿಕೆಯನ್ನು (\"ಹೊರ ತೆಗೆ\") ತೆಗೆಯಿರಿ."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆಫ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು, ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‍‍ನಿಂದ ನಿಮ್ಮ Android ನ SD ಕಾರ್ಡ್ ಅಳವಡಿಕೆಯನ್ನು (\"ಹೊರ ತೆಗೆ\") ತೆಗೆಯಿರಿ."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆಫ್ ಮಾಡಿ"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆಫ್ ಮಾಡುವಲ್ಲಿ ಸಮಸ್ಯೆ ಎಂದುರಾಗಿದೆ. ನೀವು USB ಹೋಸ್ಟ್ ಅಳವಡಿಕೆಯನ್ನು ತೆಗೆದಿರುವಿರಾ ಎಂಬುದನ್ನು ಪರಿಶೀಲಿಸಿ, ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆನ್ ಮಾಡಿ"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"ನೀವು USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆನ್ ಮಾಡಿದರೆ, ನೀವು ಬಳಸುತ್ತಿರುವ ಕೆಲವು ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ಸ್ಥಗಿತಗೊಳ್ಳಬಹುದು ಮತ್ತು ನೀವು USB ಸಂಗ್ರಹಣೆಯನ್ನು ಆಫ್ ಮಾಡುವವರೆಗೆ ಅಲಭ್ಯವಾಗಿಯೇ ಇರಬಹುದು."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB ಕಾರ್ಯಾಚರಣೆ ವಿಫಲವಾಗಿದೆ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ಸರಿ"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"ಚಾರ್ಜ್ ಮಾಡುವುದಕ್ಕಾಗಿ USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ಫೈಲ್‌ ವರ್ಗಾವಣೆಗೆ USB"</string>

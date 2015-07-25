@@ -1043,25 +1043,6 @@
     <string name="perms_description_app" msgid="5139836143293299417">"يقدمه <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"لا أذونات مطلوبة"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"قد يكلفك هذا مالاً."</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"‏تخزين USB كبير السعة"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"‏USB متصل"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"‏لقد اتصلت بجهاز الكمبيوتر من خلال USB. المس الزر أدناه إذا كنت تريد نسخ الملفات بين جهاز الكمبيوتر ووحدة تخزين USB في Android."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"‏لقد اتصلت بجهاز الكمبيوتر من خلال USB. المس الزر أدناه إذا كنت تريد نسخ الملفات بين جهاز الكمبيوتر وبطاقة SD لـ Android."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"‏تشغيل سعة تخزين USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"‏حدثت مشكلة أثناء استخدام وحدة تخزين USB لتخزين كبير السعة عبر USB."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"‏حدثت مشكلة أثناء استخدام بطاقة SD لتخزين كبير السعة عبر USB."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"‏USB متصل"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"المس لنسخ الملفات إلى/من جهاز الكمبيوتر."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"‏إيقاف تشغيل سعة تخزين USB"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"‏المس لإيقاف وحدة تخزين USB."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"‏سعة USB التخزينية المستخدمة"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"‏قبل إيقاف وحدة تخزين USB، الغ تحميل (\"أخرج\") وحدة تخزين USB لـ Android من الكمبيوتر."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"‏قبل إيقاف وحدة تخزين USB، الغ تحميل (\"أخرج\") بطاقة SD لـ Android من الكمبيوتر."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"‏إيقاف تشغيل سعة تخزين USB"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"‏حدثت مشكلة أثناء إيقاف وحدة تخزين USB. تحقق من إلغاء تحميل مضيف USB، ثم أعد المحاولة."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"‏تشغيل سعة تخزين USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"‏إذا تم تشغيل وحدة تخزين USB، فستتوقف بعض التطبيقات التي تستخدمها وربما تصبح غير متاحة إلى أن يتم إيقاف وحدة تخزين USB."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"‏لم تتم عملية USB بنجاح"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"موافق"</string>
     <string name="usb_charging_notification_title" msgid="4004114449249406402">"‏USB للشحن"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB لنقل الملفات"</string>
