@@ -49,6 +49,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.ZenModeConfig;
@@ -104,6 +105,7 @@ public class ZenModeHelper {
     private AudioManagerInternal mAudioManager;
     private PackageManager mPm;
     private long mSuppressedEffects;
+    private boolean mAllowLights;
 
     public static final long SUPPRESSED_EFFECT_NOTIFICATIONS = 1;
     public static final long SUPPRESSED_EFFECT_CALLS = 1 << 1;
@@ -727,6 +729,15 @@ public class ZenModeHelper {
         }
     }
 
+    public boolean getAreLightsAllowed() {
+        return mAllowLights;
+    }
+
+    public void readLightsAllowedModeFromSetting() {
+        mAllowLights = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.ALLOW_LIGHTS, 1, UserHandle.USER_CURRENT) == 1;
+    }
+
     private void applyRestrictions() {
         final boolean zen = mZenMode != Global.ZEN_MODE_OFF;
 
@@ -1031,6 +1042,7 @@ public class ZenModeHelper {
 
     private final class SettingsObserver extends ContentObserver {
         private final Uri ZEN_MODE = Global.getUriFor(Global.ZEN_MODE);
+        private final Uri ALLOW_LIGHTS = Settings.System.getUriFor(Settings.System.ALLOW_LIGHTS);
 
         public SettingsObserver(Handler handler) {
             super(handler);
@@ -1039,6 +1051,7 @@ public class ZenModeHelper {
         public void observe() {
             final ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(ZEN_MODE, false /*notifyForDescendents*/, this);
+            resolver.registerContentObserver(ALLOW_LIGHTS, false /*notifyForDescendents*/, this);
             update(null);
         }
 
@@ -1053,6 +1066,8 @@ public class ZenModeHelper {
                     if (DEBUG) Log.d(TAG, "Fixing zen mode setting");
                     setZenModeSetting(mZenMode);
                 }
+            } else if (ALLOW_LIGHTS.equals(uri)) {
+                readLightsAllowedModeFromSetting();
             }
         }
     }
