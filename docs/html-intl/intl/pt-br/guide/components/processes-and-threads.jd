@@ -1,0 +1,411 @@
+page.title=Processos e encadeamentos
+page.tags=lifecycle,background
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento</h2>
+<ol>
+<li><a href="#Processes">Processos</a>
+  <ol>
+    <li><a href="#Lifecycle">Ciclo de vida dos processos</a></li>
+  </ol>
+</li>
+<li><a href="#Threads">Encadeamentos</a>
+  <ol>
+    <li><a href="#WorkerThreads">Encadeamentos de trabalho</a></li>
+    <li><a href="#ThreadSafe">Métodos seguros de encadeamento</a></li>
+  </ol>
+</li>
+<li><a href="#IPC">Comunicação entre processos</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Quando um componente de aplicativo inicia e o aplicativo não tem nenhum outro componente em execução,
+o sistema Android inicia um novo processo no Linux para o aplicativo com um único encadeamento
+de execução. Por padrão, todos os componentes do mesmo aplicativo são executados no mesmo processo
+e encadeamento (chamado de encadeamento "principal"). Se um componente de aplicativo iniciar e já existir um processo
+para este aplicativo (pois outro componente do aplicativo já existe), ele será iniciado
+dentro deste processo e usará o mesmo encadeamento de execução. No entanto, é possível organizar para que vários componentes
+no aplicativo sejam executados em processos separados e criar encadeamentos
+adicionais para qualquer processo.</p>
+
+<p>Este documento discute como os processos e os encadeamentos funcionam em um aplicativo do Android.</p>
+
+
+<h2 id="Processes">Processos</h2>
+
+<p>Por padrão, todos os componentes do mesmo aplicativo são executados no mesmo processo
+e a maioria dos aplicativos não deve alterar isso. No entanto, se achar que precisa de controle sobre o processo a que um certo
+componente pertence, é possível fazer isto no arquivo de manifesto.</p>
+
+<p>A entrada do manifesto para cada tipo de elemento de componente &mdash; <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
+&lt;service&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+&lt;receiver&gt;}</a> e <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
+&lt;provider&gt;}</a> &mdash; é compatível com um atributo {@code android:process} que pode especificar
+um processo em que este componente deverá ser executado. É possível definir este atributo para que cada componente
+seja executado em seu próprio processo ou para que alguns componentes compartilhem um processo, enquanto que outros não.  Também é possível definir
+{@code android:process} para que os componentes de aplicativos diferentes sejam executados no mesmo
+processo &mdash; fornecido para que os aplicativos compartilhem o mesmo ID de usuário do Linux e sejam assinados
+com os mesmos certificados.</p>
+
+<p>O elemento <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
+&lt;application&gt;}</a> também suporta um atributo {@code android:process}
+para definir um valor padrão que se aplique a todos os elementos.</p>
+
+<p>O Android pode decidir desativar um processo em certo ponto, quando a memória estiver baixa e for necessária
+para outros processos que atendem o usuário de forma mais imediata. Os componentes
+de aplicativo em execução no processo que é eliminado são consequentemente eliminados.  Um processo é iniciado
+novamente para aqueles componentes quando houver trabalho para eles.</p>
+
+<p>Ao decidir que processo eliminar, o sistema Android avalia a importância relativa dele
+para o usuário.  Por exemplo, ele fechará mais prontamente um processo que hospede atividades que não estejam mais
+visíveis na tela, comparado a um processo que hospede atividades visíveis. A decisão
+é exterminar processo ou não, portanto, depende do estado dos componentes em execução neste processo. As regras
+usadas para decidir quais processos serão exterminados são discutidas abaixo. </p>
+
+
+<h3 id="Lifecycle">Ciclo de vida dos processos</h3>
+
+<p>O sistema Android tenta manter um processo do aplicativo pelo maior período possível,
+mas eventualmente precisa remover processos antigos para recuperar memória para processos novos e mais importantes.  Para determinar
+quais processos manter
+e quais exterminar, o sistema posiciona cada um em uma "hierarquia de importância" com base
+nos componentes em execução e no estado deles.  Processos com menos importância
+serão eliminados primeiro e, em seguida, aqueles com a menor importância depois deles também serão, consecutivamente, até que os recursos
+do sistema sejam recuperados.</p>
+
+<p>Há cinco níveis na hierarquia de importância. A lista a seguir mostra os tipos
+de processo em ordem de importância (o primeiro processo é o <em>mais importante</em>
+e o <em>eliminado por último</em>):</p>
+
+<ol>
+  <li><b>Processos em primeiro plano</b>
+    <p>Um processo necessário para o que o usuário está fazendo.  Considera-se
+      um processo como em primeiro plano se qualquer uma das condições for verdadeira:</p>
+
+      <ul>
+        <li>Se ele hospedar uma {@link android.app.Activity} com a qual o usuário esteja interagindo (se o método {@link android.app.Activity#onResume onResume()} de {@link
+android.app.Activity}
+for chamado).</li>
+
+        <li>Se ele hospedar um {@link android.app.Service} vinculado à atividade com a qual o usuário
+esteja interagindo.</li>
+
+        <li>Se ele hospedar um {@link android.app.Service} em execução "em primeiro plano"&mdash; se o serviço
+tiver chamado {@link android.app.Service#startForeground startForeground()}.
+
+        <li>Se ele hospedar um {@link android.app.Service} que esteja executando um de seus retornos de chamada
+do ciclo de vida ({@link android.app.Service#onCreate onCreate()}, {@link android.app.Service#onStart
+onStart()}, ou {@link android.app.Service#onDestroy onDestroy()}).</li>
+
+        <li>Se ele hospedar um {@link android.content.BroadcastReceiver} que esteja executando seu método {@link
+        android.content.BroadcastReceiver#onReceive onReceive()}.</li>
+    </ul>
+
+    <p>Geralmente, somente poucos processos em primeiro plano existem em um determinado momento.  Eles serão eliminados
+somente como último recurso &mdash; se a memória estiver baixa demais para suportar a execução de todos.  Geralmente, neste ponto,
+o dispositivo atingiu o estado de paginação de memória. Portanto, eliminar alguns processos em primeiro plano
+é necessário para que a interface permaneça responsiva.</p></li>
+
+  <li><b>Processos visíveis</b>
+    <p>Um processo que não tenha nenhum componente em primeiro plano,
+      mas que ainda possa afetar o que o usuário vê na tela. Um processo é considerado visível
+      se uma das condições a seguir for verdadeira:</p>
+
+      <ul>
+        <li>Se ele hospedar um {@link android.app.Activity} que não esteja em primeiro plano,
+mas ainda seja visível para o usuário (o seu método {@link android.app.Activity#onPause onPause()} tiver sido chamado). 
+Isto poderá ocorrer, por exemplo, se a atividade em primeiro plano iniciar um diálogo, o que permitirá
+que a atividade anterior seja vista por trás dela.</li>
+
+        <li>Se ele hospedar um {@link android.app.Service} que esteja vinculado a uma atividade visível
+(ou em primeiro plano).</li>
+      </ul>
+
+      <p>Um processo visível é considerado extremamente importante e não será eliminado a não ser
+que seja necessário para manter em execução os processos em primeiro plano. </p>
+    </li>
+
+  <li><b>Processos de serviço</b>
+    <p>Um processo que esteja executando um serviço que tenha sido iniciado com o método {@link
+android.content.Context#startService startService()} e não
+esteja em uma das duas categorias mais altas. Apesar de processos de serviço não estarem diretamente ligados a tudo o que os usuários veem,
+eles estão geralmente fazendo coisas com que o usuário se importa (como reproduzindo música em segundo plano
+ou baixando dados na rede), então o sistema os mantém em execução a não ser que haja memória suficiente
+para retê-los juntamente com todos os processos visíveis e em primeiro plano. </p>
+  </li>
+
+  <li><b>Processos em segundo plano</b>
+    <p>Um processo que mantenha uma atividade que não esteja atualmente visível para o usuário (se o método
+{@link android.app.Activity#onStop onStop()} da atividade tiver sido chamado). Esses processos não têm impacto direto
+na experiência do usuário e o sistema poderá eliminá-los a qualquer momento para recuperar memória para processos
+em primeiro plano,
+visíveis ou de serviço. Geralmente há vários processos em segundo plano em execução e eles são mantidos
+em uma lista LRU (least recently used - menos usados recentemente) para garantir que o processo com a atividade
+que foi mais vista recentemente pelo usuário seja a última a ser eliminada. Se uma atividade implementar o seu método de ciclo de vida
+corretamente e salvar o estado atual, eliminar o seu processo não terá efeito visível
+na experiência do usuário, pois quando ele navegar de volta à atividade, ela restaurará
+todo o estado visível. Consulte o documento <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Atividades</a>
+para obter informações sobre os estados de restauração e de gravação.</p>
+  </li>
+
+  <li><b>Processos vazios</b>
+    <p>Um processo que não possui nenhum componente de aplicativo ativo.  O único motivo para manter este tipo de processo
+ativo é para armazenamento em cache, para aprimorar o tempo de inicialização
+na próxima vez em que um componente precisar executá-lo.  O sistema frequentemente elimina esses processos para equilibrar os recursos do sistema em geral
+entre os armazenamentos em cache do processo e os de núcleo subjacente.</p>
+  </li>
+</ol>
+
+
+  <p>O Android coloca o processo no maior nível possível, com base na importância dos componentes
+atualmente ativos no processo.  Por exemplo, se um processo hospedar um serviço e uma atividade visível
+, ele terá a classificação de um processo visível, e não a de um processo de serviço.</p>
+
+  <p>Além disso, a classificação de um processo pode ser elevada porque outros processos
+dependem dele &mdash; um processo que está servindo a outro processo nunca pode ter classificação menor
+do que a do processo que está sendo servido. Por exemplo, se um provedor de conteúdo no processo A estiver servindo um cliente no processo B,
+ou se um serviço no processo A estiver vinculado a um componente no processo B, o processo A será sempre considerado
+menos importante do que o processo B.</p>
+
+  <p>Como um processo que executa um serviço tem classificação maior do que um processo com atividades em segundo plano,
+uma atividade que iniciar uma operação de longo prazo poderá também iniciar um <a href="{@docRoot}guide/components/services.html">serviço</a> para esta operação, em vez de simplesmente
+criar um encadeamento de trabalho &mdash; especificamente se a operação exceder a atividade.
+Por exemplo, uma atividade que esteja fazendo upload de uma imagem para um site deverá iniciar um serviço
+para fazer o upload para que ele possa continuar em segundo plano mesmo se o usuário deixar a atividade.
+Usar um serviço garante que a operação tenha pelo menos a prioridade "processo de serviço",
+independente do que acontecer à atividade. Este é o mesmo motivo pelo qual os receptores de transmissão devem
+empregar serviços em vez de simplesmente usar operações que consomem tempo em um encadeamento.</p>
+
+
+
+
+<h2 id="Threads">Encadeamentos</h2>
+
+<p>Quando um aplicativo é executado, o sistema cria um encadeamento de execução para ele,
+chamado de "principal". Este encadeamento é muito importante, pois está encarregado de despachar eventos
+para os widgets adequados da interface do usuário, incluindo eventos de desenho. É também o encadeamento
+em que o aplicativo interage com componentes do kit de ferramentas da IU do Android (componentes dos pacotes {@link
+android.widget} e {@link android.view}). Portanto, o encadeamento principal, às vezes,
+também chama o encadeamento da IU.</p>
+
+<p>O sistema <em>não</em> cria um encadeamento separado para cada instância de um componente. Todos os componentes
+executados no mesmo processo são instanciados no encadeamento da IU, e as chamadas do sistema
+para cada componente são despachadas deste encadeamento. Consequentemente, métodos que respondam aos retornos de chamada
+(como {@link android.view.View#onKeyDown onKeyDown()} para informar ações de usuário
+ou um método de retorno de chamada do ciclo de vida) sempre serão executados no encadeamento da IU do processo.</p>
+
+<p>Por exemplo, quando o usuário toca em um botão na tela, o encadeamento da IU do aplicativo despacha
+o evento de toque para o widget que, em troca, ativa o seu estado pressionado e publica uma solicitação de invalidação
+à fila do evento. O encadeamento da IU retira a solicitação da fila e notifica o widget de que ele deve
+desenhar novamente por conta própria.</p>
+
+<p>Quando o aplicativo realiza trabalho intenso em resposta à interação do usuário, este modelo de único encadeamento
+pode produzir desempenho inferior a não ser que você implemente o aplicativo adequadamente. Especificamente, se tudo estiver
+acontecendo no encadeamento da IU, realizar operações longas, como acesso à rede
+ou consultas a banco de dados, bloqueará toda a IU. Quando o encadeamento é bloqueado, nenhum evento pode ser despachado,
+incluindo eventos de desenho. Da perspectiva do usuário,
+o aplicativo parece travar. Pior ainda, se o encadeamento da IU for bloqueado por mais do que alguns segundos
+(cerca de 5 segundos atualmente), o usuário receberá a vergonhosa mensagem "<a href="http://developer.android.com/guide/practices/responsiveness.html">aplicativo
+não respondendo</a>" (ANR). O usuário poderá, então, decidir fechar o aplicativo e desinstalá-lo
+se estiver descontente.</p>
+
+<p>Além disso, o kit de ferramentas de IU do Android <em>não</em> é seguro para encadeamentos. Portanto, você não deve manipular a IU
+a partir de um encadeamento de trabalho &mdash; deve-se realizar toda a manipulação para a interface do usuário
+a partir do encadeamento da IU. Com isso dito, há duas regras simples para o modelo de encadeamento único do Android:</p>
+
+<ol>
+<li>Não bloquear o encadeamento da IU
+<li>Não acessar o kit de ferramentas de IU do Android fora do encadeamento da IU
+</ol>
+
+<h3 id="WorkerThreads">Encadeamentos de trabalho</h3>
+
+<p>Por causa do modelo de encadeamento único descrito acima, é essencial para a capacidade de resposta da IU do aplicativo
+que você não bloqueie o encadeamento da IU. Caso tenha operações a realizar
+que não sejam instantâneas, deverá certificar-se de fazê-las em encadeamentos separados (encadeamentos de "segundo plano"
+ou "de trabalho").</p>
+
+<p>Por exemplo, abaixo apresenta-se o código de uma escuta de clique que baixa uma imagem de um encadeamento separado
+e exibe-a em uma {@link android.widget.ImageView}:</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            Bitmap b = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.setImageBitmap(b);
+        }
+    }).start();
+}
+</pre>
+
+<p>À primeira vista, parece não apresentar problemas, pois ele cria um novo encadeamento para lidar
+com a operação de rede. No entanto, ele viola a segunda regra do modelo de encadeamento único: <em>não acessar o kit de ferramentas de IU do Android
+de fora do encadeamento da IU</em> &mdash; este exemplo modifica o {@link
+android.widget.ImageView} a partir do encadeamento de trabalho em vez de o encadeamento da IU. Isto pode resultar em comportamentos
+inesperados e indefinidos, que podem ser difíceis de rastrear e consumir bastante tempo.</p>
+
+<p>Para resolver este problema, o Android oferece várias maneiras de acessar o encadeamento da IU a partir
+de outros encadeamentos. Abaixo há uma lista dos métodos que podem ajudar:</p>
+
+<ul>
+<li>{@link android.app.Activity#runOnUiThread(java.lang.Runnable)
+Activity.runOnUiThread(Runnable)}</li>
+<li>{@link android.view.View#post(java.lang.Runnable) View.post(Runnable)}</li>
+<li>{@link android.view.View#postDelayed(java.lang.Runnable, long) View.postDelayed(Runnable,
+long)}</li>
+</ul>
+
+<p>Por exemplo, é possível resolver o código acima usando o método {@link
+android.view.View#post(java.lang.Runnable) View.post(Runnable)}:</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            final Bitmap bitmap = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.post(new Runnable() {
+                public void run() {
+                    mImageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }).start();
+}
+</pre>
+
+<p>Agora esta implementação é segura para encadeamentos: a operação de rede é concluída a partir de um encadeamento separado
+enquanto que a {@link android.widget.ImageView} é manipulada a partir do encadeamento da IU.</p>
+
+<p>No entanto, à medida que a complexidade da operação aumenta, este tipo de código pode tornar-se complexo
+e difícil demais para ser mantido. Para lidar com interações mais complexas com um encadeamento de trabalho, considere
+usar um {@link android.os.Handler} nele para processar as mensagens entregues
+pelo encadeamento da IU. Apesar de que, talvez, a melhor solução seja estender a classe {@link android.os.AsyncTask},
+que simplifica a execução das tarefas do encadeamento de trabalho que precisam interagir com a IU.</p>
+
+
+<h4 id="AsyncTask">Uso de AsyncTask</h4>
+
+<p>{@link android.os.AsyncTask} permite que você trabalhe de forma assíncrona
+na interface do usuário. Ela realiza operações de bloqueio em um encadeamento de trabalho e, em seguida, publica os resultados
+no encadeamento da IU, sem que você precise lidar com os encadeamentos e/ou os manipuladores.</p>
+
+<p>Para usá-la, você deve atribuir a subclasse {@link android.os.AsyncTask} e implementar o método de retorno de chamada {@link
+android.os.AsyncTask#doInBackground doInBackground()}, que executa uma série
+de encadeamentos de segundo plano. Para atualizar a IU, deve-se implementar {@link
+android.os.AsyncTask#onPostExecute onPostExecute()}, que entrega o resultado de {@link
+android.os.AsyncTask#doInBackground doInBackground()} e é executado no encadeamento da IU para que seja possível
+atualizar a IU de forma segura. É possível, em seguida, executar a tarefa chamando {@link android.os.AsyncTask#execute execute()}
+a partir do encadeamento da IU.</p>
+
+<p>Por exemplo, é possível implementar o exemplo anterior usando {@link android.os.AsyncTask}
+da seguinte forma:</p>
+
+<pre>
+public void onClick(View v) {
+    new DownloadImageTask().execute("http://example.com/image.png");
+}
+
+private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
+    /** The system calls this to perform work in a worker thread and
+      * delivers it the parameters given to AsyncTask.execute() */
+    protected Bitmap doInBackground(String... urls) {
+        return loadImageFromNetwork(urls[0]);
+    }
+    
+    /** The system calls this to perform work in the UI thread and delivers
+      * the result from doInBackground() */
+    protected void onPostExecute(Bitmap result) {
+        mImageView.setImageBitmap(result);
+    }
+}
+</pre>
+
+<p>Agora a IU está segura e o código está mais simples, pois ele separa o trabalho
+em uma parte que deve ser feita em um encadeamento de trabalho e outra parte que deve ser feita no encadeamento da IU.</p>
+
+<p>Leia a referência {@link android.os.AsyncTask} para compreender melhor
+o uso desta classe, mas a seguir há uma visão geral rápida sobre como ela funciona:</p>
+
+<ul>
+<li>É possível especificar o tipo dos parâmetros, valores de progresso e valor final
+da tarefa, usando genéricos</li>
+<li>O método {@link android.os.AsyncTask#doInBackground doInBackground()} é executado automaticamente
+em um encadeamento de trabalho</li>
+<li>{@link android.os.AsyncTask#onPreExecute onPreExecute()}, {@link
+android.os.AsyncTask#onPostExecute onPostExecute()} e {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()} são invocados no encadeamento da IU</li>
+<li>O valor retornado por {@link android.os.AsyncTask#doInBackground doInBackground()}
+é enviado para {@link android.os.AsyncTask#onPostExecute onPostExecute()}</li>
+<li>É possível chamar {@link android.os.AsyncTask#publishProgress publishProgress()} a qualquer momento em {@link
+android.os.AsyncTask#doInBackground doInBackground()} para executar {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()} no encadeamento da IU</li>
+<li>É possível cancelar a tarefa a qualquer momento, a partir de qualquer encadeamento</li>
+</ul>
+
+<p class="caution"><strong>Atenção:</strong> outro problema que pode ocorrer ao usar
+um encadeamento de trabalho são reinicializações inesperadas da atividade devido a <a href="{@docRoot}guide/topics/resources/runtime-changes.html">alterações na configuração em tempo de execução</a>
+(como quando o usuário altera a orientação da tela), que podem eliminar o encadeamento de trabalho. Para ver como é possível
+manter uma tarefa durante uma dessas reinicializações e como cancelar adequadamente a tarefa
+quando a atividade for eliminada, consulte o código fonte do aplicativo <a href="http://code.google.com/p/shelves/">Prateleiras</a> de exemplo.</p>
+
+
+<h3 id="ThreadSafe">Métodos seguros de encadeamento</h3>
+
+<p> Em algumas situações, os métodos implementados podem ser chamados a partir de mais de um encadeamento e, portanto,
+devem ser programados para serem seguros para encadeamento. </p>
+
+<p>Isto é especialmente verdadeiro para métodos que podem ser cancelados remotamente &mdash; como métodos em um <a href="{@docRoot}guide/components/bound-services.html">serviço vinculado</a>. Quando uma chamada
+de um método implementado em um {@link android.os.IBinder} tiver origem no mesmo processo
+em que {@link android.os.IBinder IBinder} estiver em execução, o método será executado no encadeamento do autor da chamada.
+No entanto, quando a chamada tiver origem em outro processo, o método será executado em um encadeamento
+escolhido a partir de uma série de encadeamentos que o sistema mantém no mesmo processo que {@link android.os.IBinder
+IBinder} (ele não será executado no encadeamento da IU do processo).  Por exemplo, enquanto o método
+{@link android.app.Service#onBind onBind()} de um serviço seria chamado a partir de um encadeamento da IU do processo
+de um serviço, os métodos implementados no objeto que {@link android.app.Service#onBind
+onBind()} retorna (por exemplo, uma subclasse que implementa métodos de RPC) seriam chamados
+a partir dos encadeamentos no conjunto. Como um serviço pode ter mais de um cliente, mais de um encadeamento no conjunto
+pode envolver o mesmo método {@link android.os.IBinder IBinder} ao mesmo tempo. Os métodos {@link android.os.IBinder
+IBinder} devem, portanto, ser implementados para serem seguros para encadeamentos.</p>
+
+<p> De forma semelhante, um provedor de conteúdo pode receber solicitações de dados que tenham origem em outros processos.
+Apesar de as classes {@link android.content.ContentResolver} e {@link android.content.ContentProvider}
+ocultarem os detalhes de como a comunicação entre processos é gerenciada, os métodos {@link
+android.content.ContentProvider} que respondem a essas solicitações &mdash; os métodos {@link
+android.content.ContentProvider#query query()}, {@link android.content.ContentProvider#insert
+insert()}, {@link android.content.ContentProvider#delete delete()}, {@link
+android.content.ContentProvider#update update()} e {@link android.content.ContentProvider#getType
+getType()} &mdash; serão chamados de um conjunto de encadeamentos no processo do provedor de conteúdo, não no encadeamento da IU
+para o processo.  Como esses métodos podem ser chamados a partir de qualquer quantidade de encadeamentos
+ao mesmo tempo, eles também devem ser implementados para serem seguros para encadeamento. </p>
+
+
+<h2 id="IPC">Comunicação entre processos</h2>
+
+<p>O Android oferece um mecanismo para comunicação entre processos (IPC) usando chamadas de procedimento remoto (RPCs),
+onde um método é chamado por uma atividade ou outro componente de aplicativo, mas é executado
+remotamente (em outro processo), com qualquer resultado retornado
+de volta ao autor da chamada. Isto acarreta na decomposição de uma chamada de método e de seus dados para um nível em que o sistema operacional
+possa entender, transmitindo-a do processo local e do espaço de endereço ao processo remoto
+e ao espaço de endereço e, em seguida, remontando e restabelecendo a chamada lá.  Os valores de retorno
+são transmitidos na direção oposta.  O Android fornece todo o código para realizar essas operações
+de IPC para que você possa concentrar-se em definir e implementar a interface de programação de RPC. </p>
+
+<p>Para realizar o IPC, o aplicativo deve vincular-se a um serviço usando {@link
+android.content.Context#bindService bindService()}. Para obter mais informações, consulte o guia do desenvolvedor <a href="{@docRoot}guide/components/services.html">Serviços</a>.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For information about how to perform work in the background for an indefinite period of time
+(without a user interface), continue with the <b><a
+href="{@docRoot}guide/components/services.html">Services</a></b> document.</p>
+-->

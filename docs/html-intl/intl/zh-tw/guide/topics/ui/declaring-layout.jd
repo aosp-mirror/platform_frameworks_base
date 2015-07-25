@@ -1,0 +1,492 @@
+page.title=版面配置
+page.tags=view,viewgroup
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本文件內容</h2>
+<ol>
+  <li><a href="#write">編寫 XML</a></li>
+  <li><a href="#load">載入 XML 資源</a></li>
+  <li><a href="#attributes">屬性</a>
+    <ol>
+      <li><a href="#id">ID</a></li>
+      <li><a href="#layout-params">版面配置參數</a></li>
+    </ol>
+  </li>
+  <li><a href="#Position">版面配置位置</a></li>
+  <li><a href="#SizePaddingMargins">大小、邊距和邊界</a></li>
+  <li><a href="#CommonLayouts">常見版面配置</a></li>
+  <li><a href="#AdapterViews">使用配接器建置版面配置</a>
+    <ol>
+      <li><a href="#FillingTheLayout">將資料填入配接器檢視</a></li>
+      <li><a href="#HandlingUserSelections">處理點擊事件</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>重要類別</h2>
+  <ol>
+    <li>{@link android.view.View}</li>
+    <li>{@link android.view.ViewGroup}</li>
+    <li>{@link android.view.ViewGroup.LayoutParams}</li>
+  </ol>
+
+  <h2>另請參閱</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/firstapp/building-ui.html">建置簡易使用者
+介面</a></li> </div>
+</div>
+
+<p>版面配置會定義使用者介面 (例如 <a href="{@docRoot}guide/components/activities.html">Activity</a> 或<a href="{@docRoot}guide/topics/appwidgets/index.html">應用程式小工具</a>的使用者介面) 的視覺結構。您可以兩種方式宣告版面配置：
+</p>
+<ul>
+<li><strong>在 XML 中宣告 UI 元素</strong>。Android 提供的 XML 字彙不僅簡單明瞭，還可對應至 View 類別和子類別 (例如小工具和版面配置)。
+</li>
+<li><strong>在執行階段啟動版面配置元素</strong>。您的應用程式可透過程式建立 View 和 ViewGroup 物件 (以及操控其屬性)。
+ </li>
+</ul>
+
+<p>Android 架構可讓您彈性使用上述任一或兩種方法來宣告及管理應用程式的 UI。例如，您可以在 XML 中宣告應用程式的預設版面配置，包括會顯示在應用程式中的元素及其屬性。接著，您可在執行階段為應用程式加入程式碼來修改螢幕物件的狀態，包括您在 XML 中宣告的物件。 </p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <ul>
+  <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">Eclipse 專用的 ADT 外掛程式</a>可提供 XML 的版面配置預覽 &mdash; 只要開啟您想預覽的 XML 檔案，然後選取 [版面配置]<strong></strong> 標籤即可。
+
+</li>
+  <li>同時也建議您使用 <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">階層檢視器</a>工具針對版面配置進行除錯 &mdash; 這項工具會顯示版面配置屬性值、繪製線框並在其中加上編距/邊界標記，以及提供完整檢視 (如果您是透過模擬器或裝置進行除錯的話)。
+
+
+
+</li>
+  <li><a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> 工具可讓您快速分析版面配置和階層，以找出效能不佳等其他問題。
+</li>
+</div>
+</div>
+
+<p>在 XML 中宣告 UI 可讓您進一步將應用程式的顯示畫面與控制應用程式行為的程式碼區隔開來。這樣可將 UI 說明置於應用程式的程式碼外部，方便您修改或調整使用者介面說明，而不必修改並重新編譯原始碼。例如，您可以針對不同的螢幕方向、裝置螢幕大小和語言建立各種 XML 檔案。此外，在 XML 中宣告版面配置可協助以視覺效果呈現 UI 的結構，方便您進行除錯。針對上述優點，本文件著重於說明如何在 XML 中宣告版面配置。如果您想在執行階段啟動 View 物件，請參閱 {@link android.view.ViewGroup} 和 {@link android.view.View} 類別參考文件。
+
+</p>
+
+<p>一般來說，用於宣告 UI 元素的 XML 字彙會遵從類別與方法的結構和名稱，其中元素名稱對應至類別名稱，而屬性名稱則對應至方法。事實上，這些對應關係十分直接，您可以輕易猜出某個 XML 屬性對應的哪個類別方法，或某個類別對應的特定 XML 元素為何。不過請注意，並非所有字彙均為相同。在部分情況下，您會發現某些不同的名稱。例如，EditText 元素包含對應至 <code>EditText.setText()</code> 的 <code>text</code> 屬性。
+
+ </p>
+
+<p class="note"><strong>提示：</strong>如要進一步瞭解各種版面配置類型，請參閱<a href="{@docRoot}guide/topics/ui/layout-objects.html">常見版面配置物件</a>。
+您也可以參閱 <a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a> 教學指南，取得一系列說明如何建置各種版面配置的教學課程。
+</p>
+
+<h2 id="write">編寫 XML</h2>
+
+<p>您可以使用 Android 的 XML 字彙，快速設計 UI 版面配置和其中包含的螢幕元素，方法與採用 HTML 建立網頁相同 &mdash; 都需要建置一系列巢狀元素。 </p>
+
+<p>每個版面配置檔案均需包含 1 個根元素 (必須為 View 或 ViewGroup 物件)。定義根元素後，您就可以將額外的物件或小工具新增為子元素，逐步建置檢檢視階層視階層來定義您的版面配置。例如，以下是使用直向 {@link android.widget.LinearLayout} 以納入
+{@link android.widget.TextView} 和 {@link android.widget.Button} 的 XML 版面配置：</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hello, I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>在 XML 中宣告版面配置後，請使用 <code>.xml</code> 副檔名將檔案儲存到 Android 專案的 <code>res/layout/</code> 目錄中，藉此讓系統妥善加以編譯。
+ </p>
+
+<p>如要進一步瞭解 XML 版面配置檔案的語法，請參閱<a href="{@docRoot}guide/topics/resources/layout-resource.html">版面配置資源</a>。</p>
+
+<h2 id="load">載入 XML 資源</h2>
+
+<p>當您編譯應用程式時，系統會將所有 XML 版面配置檔案編入
+{@link android.view.View} 資源。在這種情況下，您必須透過 {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()} 回呼，載入應用程式的程式碼中的版面配置資源，方法是呼叫 <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>，然後採用以下格式將其參考資源傳送到版面配置資源：
+<code>R.layout.<em>layout_file_name</em></code>。例如，假設您將 XML 版面配置儲存成 <code>main_layout.xml</code>，您就必須針對如下所示的 Activity 載入該 XML：
+
+
+
+
+</p>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main_layout);
+}
+</pre>
+
+<p>Android 架構會在 Activity 啟動時呼叫 Activity 中的 <code>onCreate()</code> 回呼方法 (如需生命週期相關資訊，請參閱 <a href="{@docRoot}guide/components/activities.html#Lifecycle">Activity</a>)。
+
+
+</p>
+
+
+<h2 id="attributes">屬性</h2>
+
+<p>所有 View 和 ViewGroup 物件均支援本身專用的各種 XML 屬性。部分屬性僅適用於 View 物件 (例如 TextView 可支援 <code>textSize</code> 屬性)，不過可能延伸這個類別的 View 物件也會沿用這些屬性。由於某些屬性是沿用自 View 根類別，因此會成為所有 View 物件的常用屬性 (例如 <code>id</code> 屬性)。
+
+
+
+而系統會將其他屬性視為「版面配置參數」，這些屬性可說明 View 物件的特定版面配置方向 (View 由物件的 ViewGroup 上層物件所定義)。
+
+</p>
+
+<h3 id="id">ID</h3>
+
+<p>任何 View 物件都可能包含一個相關聯的整數 ID，可用於識別樹狀結構中的 View。在應用程式編寫期間，雖然這個 ID 通常是在 XML 版面配置檔案的 <code>id</code> 屬性中指派為字串，系統仍會將其解讀為整數。此為所有 View 物件常用的 XML 屬性 (由 {@link android.view.View} 類別所定義)；您會經常使用的這項屬性。以下是 XML 標記中的 ID 語法：
+
+
+
+
+</p>
+<pre>android:id="&#64;+id/my_button"</pre>
+
+<p>字串開頭的 @ 符號可指示 XML 剖析器應剖析或展開 ID 字串的其餘部分，並且將其視為 ID 資源。
+加號符號 (+) 表示此為系統必須建立並加到資源 (<code>R.java</code> 檔案) 中的新資源名稱。
+Android 架構提供了多種其他 ID 資源。
+參照 Android 資源 ID 時，您不必加入 + 符號，但必須加入 <code>android</code> 套件命名空間，如下所示：
+</p>
+<pre>android:id="&#64;android:id/empty"</pre>
+<p>只要加入 <code>android</code> 套件命名空間，系統就會從 <code>android.R</code> 資源類別參照 ID，而不是從本機資源類別。
+</p>
+
+<p>以下是透過應用程式建立檢視和參照的一般方法：</p>
+<ol>
+  <li>在版面配置檔案中定義檢視/小工具，並為該檔案指派不重複 ID：
+<pre>
+&lt;Button android:id="&#64;+id/my_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#64;string/my_button_text"/>
+</pre>
+  </li>
+  <li>接著，建立檢視物件執行個體，並從版面配置中擷取該執行個體 (通常使用 <code>{@link android.app.Activity#onCreate(Bundle) onCreate()}</code> 方法進行擷取)：
+
+<pre>
+Button myButton = (Button) findViewById(R.id.my_button);
+</pre>
+  </li>
+</ol>
+<p>請務必在建立 {@link android.widget.RelativeLayout} 時為檢視物件定義 ID。在相關的版面配置中，同層級的檢視可將本身的版面配置與其他同層級的檢視建立關聯，而不重複 ID 正是這些版面配置的參照依據。
+
+</p>
+<p>整個樹狀結構的 ID 不必是不重複 ID，但您所搜尋樹狀結構部分的 ID 就必須是不重複 ID (由於您搜尋的部分通常是整個樹狀結構，因此建議您為其定義不重複 ID)。
+
+</p>
+
+
+<h3 id="layout-params">版面配置參數</h3>
+
+<p>名為 <code>layout_<em>something</em></code> 的 XML 版面配置屬性會為適用於所屬 ViewGroup 的 View 定義版面配置參數。
+</p>
+
+<p>所有 ViewGroup 類別都會實作可延伸 {@link
+android.view.ViewGroup.LayoutParams} 的巢狀類別。這個子類別包含定義下層檢視大小和位置的屬性類型，而這些屬性類型也適用於檢視群組。
+
+如圖 1 所示，上層檢視群組為每個下層檢視 (包括下層檢視群組) 定義了版面配置參數。
+</p>
+
+<img src="{@docRoot}images/layoutparams.png" alt="" />
+<p class="img-caption"><strong>圖 1.</strong>檢視層級以及與每個檢視相關聯的版面配置參數。
+</p>
+
+<p>請注意，所有 LayoutParams 子類別都包含用於設定值的專屬語法。
+而每個子元素都必須定義適用於其上層元素的 LayoutParams，即便子元素也會為其下層物件定義不同的 LayoutParams。
+ </p>
+
+<p>所有檢視群組均包含寬度和高度 (<code>layout_width</code> 和
+<code>layout_height</code>)，而每個檢視都必須定義這些值。大多數 LayoutParams 還會包含選用的標界和邊框。
+ <p>
+
+<p>您可以依據測量結果指定寬度和高度 (您通常不必經常指定這些值)。
+在大多數情況下，您需使用以下任一常數設定寬度或高度：
+ </p>
+
+<ul>
+  <li><var>wrap_content</var> 可指示檢視自行將大小調整成其內容所需的尺寸。
+</li>
+  <li><var>match_parent</var> (在 API 級別 8 之前稱為 <var>fill_parent</var> ) 可指示檢視自行將大小擴展成上層檢視群組允許的上限。
+</li>
+</ul>
+
+<p>一般來說，我們不建議您使用絕對單位 (例如像素) 指定版面配置的寬度和高度。
+建議做法是使用相對測量單位 (例如依據密度的像素單位 (
+<var>dp</var>)、 <var>wrap_content</var>或
+<var>match_parent</var>指定這些值，這是因為這樣可協助確保應用程式在各種裝置螢幕大小中能保有最佳顯示效果。如需支援的測量類型的定義，請參閱<a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">可用資源</a>。
+
+
+
+</p>
+
+
+<h2 id="Position">版面配置位置</h2>
+   <p>
+   檢視的形狀為矩形。檢視包含一個位置值 (以一組「水平」<em></em>和「垂直」<em></em>座標表示)，以及兩個尺寸值 (以寬度和高度表示)。
+
+位置和尺寸的單位均為像素。
+
+   </p>
+
+   <p>
+   您可以呼叫 {@link android.view.View#getLeft()} 和 {@link android.view.View#getTop()} 方法來擷取檢視的位置值。
+第一個方法會傳回顯示檢視的矩形區塊的水平座標 (X 座標)；
+第二個方法則會傳回顯示檢視的矩形區塊的垂直座標 (Y 座標)。
+這兩個方法都會傳回檢視相對於其上層項目的位置。
+例如，假設 <code>getLeft()</code> 傳回 20，表示該檢視位於其直屬上層項目左側邊緣向右平移 20 像素的位置。
+
+
+   </p>
+
+   <p>
+   我們也提供了 {@link android.view.View#getRight()} 和 {@link android.view.View#getBottom()} 這兩個簡易方法，可用於避免不必要的運算程序。
+
+   這些方法會傳回險是檢視的矩形區塊的右下角座標。
+例如，呼叫 {@link android.view.View#getRight()} 的用途與以下運算式類似：<code>getLeft() + getWidth()</code>。
+
+   </p>
+
+
+<h2 id="SizePaddingMargins">大小、邊距和邊界</h2>
+   <p>
+   檢視的大小是以寬度和高度表示。單一檢視會包含兩組寬度和高度值。
+
+   </p>
+
+   <p>
+   第一組值稱為「寬度測定值」<em></em>和「高度測定值」<em></em>，
+可定義檢視在上層項目中的尺寸。
+您可以呼叫 {@link android.view.View#getMeasuredWidth()} 和 {@link android.view.View#getMeasuredHeight()} 來取得尺寸測定值。
+
+
+   </p>
+
+   <p>
+   第二組值簡稱「寬度」<em></em>和「高度」<em></em>，或是「寬度描繪值」<em></em>和「高度描繪值」<em></em>，
+可定義檢視在螢幕中的實際大小 (描繪期間以及版面配置之後)。
+
+這些值可能 (但未必) 會與寬度和高度測量值不同。
+您可以呼叫 
+{@link android.view.View#getWidth()} 和 {@link android.view.View#getHeight()} 來取得尺寸描繪值。
+   </p>
+
+   <p>
+   測量檢視的尺寸時，系統會將檢視的邊距納入考量。邊距是指檢視的上、下、左、右部分 (單位為像素)，
+
+   可用於將檢視內容偏移特定像素。
+例如，2 像素的左側邊距可將檢視內容由左側邊緣向右平移 2 像素。
+您可以使用
+{@link android.view.View#setPadding(int, int, int, int)} 方法來設定邊距，以及呼叫
+{@link android.view.View#getPaddingLeft()}、{@link android.view.View#getPaddingTop()}、
+{@link android.view.View#getPaddingRight()} 和 {@link android.view.View#getPaddingBottom()} 來查詢邊距。
+   </p>
+
+   <p>
+   雖然檢視可定義邊距，但無法針對邊界提供任何支援。
+不過，檢視群組可提供這類支援。詳情請參閱
+{@link android.view.ViewGroup} 和
+{@link android.view.ViewGroup.MarginLayoutParams}。
+   </p>
+
+   <p>如要進一步瞭解尺寸，請參閱<a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">尺寸值</a>。
+
+   </p>
+
+
+
+
+
+
+<style type="text/css">
+div.layout {
+  float:left;
+  width:200px;
+  margin:0 0 20px 20px;
+}
+div.layout.first {
+  margin-left:0;
+  clear:left;
+}
+</style>
+
+
+
+
+<h2 id="CommonLayouts">常見版面配置</h2>
+
+<p>{@link android.view.ViewGroup} 類別的所有子類別均可以獨有方式顯示您在當中套疊的檢視。
+以下提供幾個 Android 平台內建的常見版面配置類型。
+</p>
+
+<p class="note"><strong>注意：</strong>雖然您可以將版面配置套疊在一起來符合您的 UI 設計，但建議您盡可能讓版面配置階層維持淺薄。
+
+套疊的版面配置越少，版面配置的描繪速度就越快 (建議您使用寬的檢視階層，而不是深的檢視階層)。
+</p>
+
+<!--
+<h2 id="framelayout">FrameLayout</h2>
+<p>{@link android.widget.FrameLayout FrameLayout} is the simplest type of layout
+object. It's basically a blank space on your screen that you can
+later fill with a single object &mdash; for example, a picture that you'll swap in and out.
+All child elements of the FrameLayout are pinned to the top left corner of the screen; you cannot
+specify a different location for a child view. Subsequent child views will simply be drawn over
+previous ones,
+partially or totally obscuring them (unless the newer object is transparent).
+</p>
+-->
+
+
+<div class="layout first">
+  <h4><a href="layout/linear.html">線性版面配置</a></h4>
+  <a href="layout/linear.html"><img src="{@docRoot}images/ui/linearlayout-small.png" alt="" /></a>
+  <p>這種版面配置可將其下層物件整合至單一水平或垂直列。如果視窗長度超過螢幕長度，線性版面配置就會建立捲軸方便使用者捲動畫面。
+</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/relative.html">相對版面配置</a></h4>
+  <a href="layout/relative.html"><img src="{@docRoot}images/ui/relativelayout-small.png" alt="" /></a>
+  <p>這種版面配置可讓您指定下層物件之間的相對位置 (指定下層物件 A 位於下層物件 B 的左側)，或指定下層物件與上層物件的相對位置 (指定下層物件緊貼上層物件的頂端)。
+</p>
+</div>
+
+<div class="layout">
+  <h4><a href="{@docRoot}guide/webapps/webview.html">網頁檢視</a></h4>
+  <a href="{@docRoot}guide/webapps/webview.html"><img src="{@docRoot}images/ui/webview-small.png" alt="" /></a>
+  <p>這種版面配置可顯示網頁。</p>
+</div>
+
+
+
+
+<h2 id="AdapterViews" style="clear:left">使用配接器建置版面配置</h2>
+
+<p>如果您版面配置的內容為動態內容，而不是預先定義的內容，您可以在執行階段將子類別為 {@link android.widget.AdapterView} 的版面配置填入檢視中。
+
+{@link android.widget.AdapterView} 類別的子類別會使用 {@link android.widget.Adapter} 將資料繫結至本身的版面配置。
+{@link android.widget.Adapter} 就如同是資料來源與 {@link android.widget.AdapterView} 版面配置的中間人 &mdash; {@link android.widget.Adapter} 會從陣列或資料庫查詢等來源擷取資料，然後將這些資料轉換成可加入 {@link android.widget.AdapterView} 版面配置的檢視。
+
+
+</p>
+
+<p>以下是配接器支援的常見版面配置：</p>
+
+<div class="layout first">
+  <h4><a href="layout/listview.html">清單檢視</a></h4>
+  <a href="layout/listview.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
+  <p>這種版面配置可顯示能夠捲動的單欄清單。</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/gridview.html">格狀檢視</a></h4>
+  <a href="layout/gridview.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
+  <p>這種版面配置可顯示能夠捲動的資料欄和資料列網格。</p>
+</div>
+
+
+
+<h3 id="FillingTheLayout" style="clear:left">將資料填入配接器檢視</h3>
+
+<p>您可將 {@link android.widget.AdapterView} 執行個體繫結至
+{@link android.widget.Adapter} 以便從外部來源擷取資料，並建立可顯示所有資料的 {@link
+android.view.View}，藉此填入 {@link android.widget.AdapterView} (例如 {@link android.widget.ListView} 或 {@link android.widget.GridView}。
+</p>
+
+<p>Android 提供數個 {@link android.widget.Adapter} 子類別可用於擷取不同資料類型以及為 {@link android.widget.AdapterView} 建置檢視。
+以下是兩種常見的配接器：
+</p>
+
+<dl>
+  <dt>{@link android.widget.ArrayAdapter}</dt>
+    <dd>如果您的資料來源是陣列，請使用這個配接器。在預設情況下，{@link
+android.widget.ArrayAdapter} 會針對每個陣列項目呼叫 {@link
+java.lang.Object#toString()} 並取代 {@link
+android.widget.TextView} 中的內容，藉此為每個陣列項目建立檢視。
+      <p>例如，如果您想在 {@link
+android.widget.ListView} 中顯示一系列字串，請使用建構函式為每個字串和字串陣列指定版面配置，藉此初始化新的 {@link android.widget.ArrayAdapter}：
+</p>
+<pre>
+ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
+        android.R.layout.simple_list_item_1, myStringArray);
+</pre>
+<p>這個建構函式的引數包括：</p>
+<ul>
+  <li>您的應用程式 {@link android.content.Context}</li>
+  <li>含有陣列中所有字串的 {@link android.widget.TextView} 的版面配置</li>
+  <li>字串陣列</li>
+</ul>
+<p>接著，針對您的 {@link android.widget.ListView} 呼叫 
+{@link android.widget.ListView#setAdapter setAdapter()}：</p>
+<pre>
+ListView listView = (ListView) findViewById(R.id.listview);
+listView.setAdapter(adapter);
+</pre>
+
+      <p>如要自訂每個項目的外觀，您可以針對陣列中的物件覆寫 {@link
+java.lang.Object#toString()} 方法。或者，如果想為 {@link android.widget.TextView} 以外的所有項目建立檢視 (例如，如果您想為所有陣列項目建立 {@link android.widget.ImageView})，請延伸 {@link
+android.widget.ArrayAdapter} 類別並覆寫 {@link android.widget.ArrayAdapter#getView
+getView()}，以傳回您想為所有項目建立的檢視類型。
+
+</p>
+
+</dd>
+
+  <dt>{@link android.widget.SimpleCursorAdapter}</dt>
+    <dd>如果您的資料來自 {@link android.database.Cursor}，請使用這個配接器。使用
+{@link android.widget.SimpleCursorAdapter} 時，您必須指定要用於 {@link android.database.Cursor} 中所有資料列的版面配置，以及指定要將 {@link android.database.Cursor} 中的哪些資料欄插入哪些版面配置檢視。
+
+例如，如果您想建立一份列出使用者名稱和電話號碼的清單，請執行查詢來傳回 {@link
+android.database.Cursor}，其中包含一個列出每位使用者的資料列，以及多個列出名稱和電話號碼的資料欄。
+
+接著，請建立一個字串陣列以便從 {@link
+android.database.Cursor} 指定您想在版面配置中列出每項結果的資料欄，以及建立一個整數陣列為每個資料欄指定對應的值：
+</p>
+<pre>
+String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER};
+int[] toViews = {R.id.display_name, R.id.phone_number};
+</pre>
+<p>當您啟動 {@link android.widget.SimpleCursorAdapter} 時，請傳送用於顯示所有結果的版面配置、包含結果的 {@link android.database.Cursor}，以及下列兩個陣列：
+</p>
+<pre>
+SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+        R.layout.person_name_and_number, cursor, fromColumns, toViews, 0);
+ListView listView = getListView();
+listView.setAdapter(adapter);
+</pre>
+<p>{@link android.widget.SimpleCursorAdapter} 隨即會將每個 {@code
+fromColumns} 項目插入相對應的 {@code toViews} 檢視，藉此利用提供的版面配置為
+{@link android.database.Cursor} 中的所有資料列建立專屬檢視。</p>.</dd>
+</dl>
+
+
+<p>如果您在應用程式的效期內更改配接器讀取的底層資料，您就必須呼叫 {@link android.widget.ArrayAdapter#notifyDataSetChanged()}。
+這樣會通知附加的檢視由於資料已變更，因此需進行重新整理。
+</p>
+
+
+
+<h3 id="HandlingUserSelections">處理點擊事件</h3>
+
+<p>只要實作 {@link android.widget.AdapterView.OnItemClickListener} 介面，即可回應 {@link android.widget.AdapterView} 中所有項目的點擊事件。
+例如：</p>
+
+<pre>
+// Create a message handling object as an anonymous class.
+private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
+    public void onItemClick(AdapterView parent, View v, int position, long id) {
+        // Do something in response to the click
+    }
+};
+
+listView.setOnItemClickListener(mMessageClickedHandler);
+</pre>
+
+
+

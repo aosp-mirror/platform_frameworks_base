@@ -1,0 +1,798 @@
+page.title=Caixas de diálogo
+page.tags=diálogodealerta,fragmentodediálogo
+
+@jd:body
+
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Neste documento</h2>
+<ol>
+  <li><a href="#DialogFragment">Criação de um fragmento de caixa de diálogo</a></li>
+  <li><a href="#AlertDialog">Construção de uma caixa de diálogo de alerta</a>
+    <ol>
+      <li><a href="#AddingButtons">Adição de botões</a></li>
+      <li><a href="#AddingAList">Adição de listas</a></li>
+      <li><a href="#CustomLayout">Criação de layout personalizado</a></li>
+    </ol>
+  </li>
+  <li><a href="#PassingEvents">Direcionamento de eventos de volta ao host da caixa de diálogo</a></li>
+  <li><a href="#ShowingADialog">Exibição de uma caixa de diálogo</a></li>
+  <li><a href="#FullscreenDialog">Exibição de uma caixa de diálogo em tela cheia ou como um fragmento incorporado</a>
+    <ol>
+      <li><a href="#ActivityAsDialog">Exibição de uma atividade como uma caixa de diálogo em telas grandes</a></li>
+    </ol>
+  </li>
+  <li><a href="#DismissingADialog">Dispensa de uma caixa de diálogo</a></li>
+</ol>
+
+    <h2>Classes principais</h2>
+    <ol>
+      <li>{@link android.app.DialogFragment}</li>
+      <li>{@link android.app.AlertDialog}</li>
+    </ol>
+    
+    <h2>Veja também</h2>
+    <ol>
+      <li><a href="{@docRoot}design/building-blocks/dialogs.html">Guia de projeto de caixas de diálogo</a></li>
+      <li><a href="{@docRoot}guide/topics/ui/controls/pickers.html">Seletores</a> (caixas de diálogo de data e hora)</li>
+    </ol>
+  </div>
+</div>
+
+<p>As caixas de diálogo são pequenas janelas que levam o usuário
+a tomar uma decisão ou inserir informações adicionais. Elas não ocupam toda a tela e são
+normalmente susada para eventos modais que exijam que usuários realizem uma ação antes de continuar.</p>
+
+<div class="note design">
+<p><strong>Projeto de caixas de diálogo</strong></p>
+  <p>Para obter mais informações sobre como projetar caixas de diálogo, inclusive sobre recomendações
+  de idioma, leia o guia de projeto <a href="{@docRoot}design/building-blocks/dialogs.html">Caixas de diálogo</a>.</p>
+</div>
+
+<img src="{@docRoot}images/ui/dialogs.png" />
+
+<p>A classe {@link android.app.Dialog} é a classe de base para caixas de diálogo, mas
+deve-se evitar instanciar {@link android.app.Dialog} diretamente.
+Em vez disso, use uma das subclasses a seguir:</p>
+<dl>
+  <dt>{@link android.app.AlertDialog}</dt>
+  <dd>Caixa de diálogo que pode exibir um título, até três botões, uma lista
+    de itens selecionáveis ou um layout personalizado.</dd>
+  <dt>{@link android.app.DatePickerDialog} ou {@link android.app.TimePickerDialog}</dt>
+  <dd>Caixa de diálogo com uma IU predefinida que permite ao usuário selecionar uma data ou hora.</dd>
+</dl>
+
+<div class="sidebox">
+<h2>Evite ProgressDialog</h2>
+<p>O Android tem outra classe de caixa de diálogo chamada
+{@link android.app.ProgressDialog}, que exibe uma caixa de diálogo com uma barra de andamento. Entretanto, se for
+necessário indicar carregamento ou andamento indeterminado, deve-se seguir as orientações
+de projeto de <a href="{@docRoot}design/building-blocks/progress.html">Progresso e
+atividade</a> e usar uma {@link android.widget.ProgressBar} no layout.</p>
+</div>
+
+<p>Essas classes definem o estilo e a estrutura da caixa de diálogo, mas deve-se
+usar um {@link android.support.v4.app.DialogFragment} como um contêiner para a caixa de diálogo.
+A classe {@link android.support.v4.app.DialogFragment} fornece todos os controles
+necessários para criar uma caixa de diálogo e gerenciar sua aparência em vez de chamar métodos
+no objeto {@link android.app.Dialog}.</p>
+
+<p>O uso de {@link android.support.v4.app.DialogFragment} para gerenciar a caixa de diálogo
+garante que ela trate corretamente os eventos de ciclos de vida,
+como quando o usuário pressiona o botão <em>Voltar</em> ou gira a tela. A classe {@link
+android.support.v4.app.DialogFragment} também permite a reutilização da IU da caixa de diálogo como
+um componente incorporável em uma IU maior, assim como um {@link
+android.support.v4.app.Fragment} tradicional (como nas vezes em que se deseja que a IU da caixa de diálogo apareça de modos diferentes
+em telas grandes e pequenas).</p>
+
+<p>As seções a seguir neste guia descrevem como usar um {@link
+android.support.v4.app.DialogFragment} combinado com um objeto
+{@link android.app.AlertDialog}. Se você quiser criar um seletor de data ou hora, leia o guia
+<a href="{@docRoot}guide/topics/ui/controls/pickers.html">Seletores</a>.</p>
+
+<p class="note"><strong>Observação:</strong>
+como a classe {@link android.app.DialogFragment} foi adicionada originalmente com
+o Android 3.0 (API de nível 11), este documento descreve como usar a classe {@link
+android.support.v4.app.DialogFragment} fornecida com a <a href="{@docRoot}tools/support-library/index.html">Biblioteca de Suporte</a>. Ao adicionar essa biblioteca
+ao aplicativo, pode-se usar {@link android.support.v4.app.DialogFragment} e uma variedade de outras
+APIs em dispositivos que executam o Android 1.6 ou versão posterior. Se a versão mais antiga com a qual seu aplicativo é compatível
+for a API de nível 11 ou posterior, é possível usar a versão de estrutura de {@link
+android.app.DialogFragment}, mas esteja ciente de que os links neste documento são para APIs
+de biblioteca de suporte. Ao usar a biblioteca de suporte,
+certifique-se de importar a classe <code>android.support.v4.app.DialogFragment</code>
+e <em>não</em> a <code>android.app.DialogFragment</code>.</p>
+
+
+<h2 id="DialogFragment">Criação de um fragmento de caixa de diálogo</h2>
+
+<p>É possível realizar uma grande variedade de projetos de caixas de diálogo &mdash; inclusive
+layouts personalizados e outros descritos no guia de projeto <a href="{@docRoot}design/building-blocks/dialogs.html">Caixas de diálogo</a>
+ &mdash;, estendendo
+{@link android.support.v4.app.DialogFragment} e criando uma{@link android.app.AlertDialog}
+no método de retorno de chamada {@link android.support.v4.app.DialogFragment#onCreateDialog
+onCreateDialog()}.</p>
+
+<p>Por exemplo, a seguir há um {@link android.app.AlertDialog} básico gerenciado dentro
+de um {@link android.support.v4.app.DialogFragment}:</p>
+
+<pre>
+public class FireMissilesDialogFragment extends DialogFragment {
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.dialog_fire_missiles)
+               .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // FIRE ZE MISSILES!
+                   }
+               })
+               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // User cancelled the dialog
+                   }
+               });
+        // Create the AlertDialog object and return it
+        return builder.create();
+    }
+}
+</pre>
+
+<div class="figure" style="width:290px;margin:0 0 0 20px">
+<img src="{@docRoot}images/ui/dialog_buttons.png" alt="" />
+<p class="img-caption"><strong>Figura 1.</strong>
+Caixa de diálogo com uma mensagem e dois botões de ação.</p>
+</div>
+
+<p>Ao criar uma instância dessa classe e chamar {@link
+android.support.v4.app.DialogFragment#show show()} nesse objeto, a caixa de diálogo será exibida como
+ilustrado na figura 1.</p>
+
+<p>A próxima seção descreve em mais detalhes o uso das APIs{@link android.app.AlertDialog.Builder}
+para a criação de uma caixa de diálogo.</p>
+
+<p>Conforme o nível de complexidade da caixa de diálogo, é possível implementar diversos outros métodos
+de retorno de chamada no {@link android.support.v4.app.DialogFragment}, inclusive todos os
+<a href="{@docRoot}guide/components/fragments.html#Lifecycle">métodos de ciclo de vida de fragmentos</a> básicos.
+
+
+
+
+
+<h2 id="AlertDialog">Construção de uma caixa de diálogo de alerta</h2>
+
+
+<p>A classe {@link android.app.AlertDialog} permite a criação de diversos projetos de caixa de diálogo
+e normalmente é a única classe de caixa de diálogo necessária.
+Como ilustrado na figura 2, há três regiões de uma caixa de diálogo de alerta:</p>
+
+<div class="figure" style="width:311px;margin-top:0">
+<img src="{@docRoot}images/ui/dialogs_regions.png" alt="" style="margin-bottom:0" />
+<p class="img-caption"><strong>Figura 2.</strong> Layout de uma caixa de diálogo.</p>
+</div>
+
+<ol>
+<li><b>Título</b>
+  <p>É opcional e deve ser usado somente quando a área do conteúdo
+  estiver ocupada por uma mensagem detalhada, uma lista ou layout personalizado. Se for necessário declarar
+  uma mensagem ou pergunta simples (como a caixa de diálogo na figura 1), o título não é necessário.</li>
+<li><b>Área do conteúdo</b>
+  <p>Pode exibir uma mensagem, uma lista ou outro layout personalizado.</p></li>
+<li><b>Botões de ação</b>
+  <p>Não deve haver mais de três botões em uma caixa de diálogo.</p></li>
+</ol>
+
+<p>A classe {@link android.app.AlertDialog.Builder}
+ fornece APIs que permitem a criação de uma {@link android.app.AlertDialog}
+ com esses tipos de conteúdo, inclusive um layout personalizado.</p>
+
+<p>Para criar uma {@link android.app.AlertDialog}:</p>
+
+<pre>
+<b>// 1. Instantiate an {@link android.app.AlertDialog.Builder} with its constructor</b>
+AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+<b>// 2. Chain together various setter methods to set the dialog characteristics</b>
+builder.setMessage(R.string.dialog_message)
+       .setTitle(R.string.dialog_title);
+
+<b>// 3. Get the {@link android.app.AlertDialog} from {@link android.app.AlertDialog.Builder#create()}</b>
+AlertDialog dialog = builder.create();
+</pre>
+
+<p>Os tópicos a seguir mostram como definir diversos atributos de caixas de diálogo
+com a classe {@link android.app.AlertDialog.Builder}.</p>
+
+
+
+
+<h3 id="AddingButtons">Adição de botões</h3>
+
+<p>Para adicionar botões de ação como os da figura 2,
+chame os métodos {@link android.app.AlertDialog.Builder#setPositiveButton setPositiveButton()} e
+{@link android.app.AlertDialog.Builder#setNegativeButton setNegativeButton()}:</p>
+
+<pre style="clear:right">
+AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+// Add the buttons
+builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+               // User clicked OK button
+           }
+       });
+builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+               // User cancelled the dialog
+           }
+       });
+// Set other dialog properties
+...
+
+// Create the AlertDialog
+AlertDialog dialog = builder.create();
+</pre>
+
+<p>Os métodos <code>set...Button()</code> exigem um título para o botão (fornecido
+por um <a href="{@docRoot}guide/topics/resources/string-resource.html">recurso de string</a>) e um 
+{@link android.content.DialogInterface.OnClickListener} que defina a ação a realizar 
+quando o usuário pressionar o botão.</p>
+
+<p>Há três botões de ação diferente que podem ser adicionados:</p>
+<dl>
+  <dt>Positivo</dt>
+  <dd>É o que se deve usar para aceitar e continuar a ação (a ação "OK").</dd>
+  <dt>Negativo</dt>
+  <dd>É o que se deve usar para cancelar a ação.</dd>
+  <dt>Neutro</dt>
+  <dd>É o que se deve usar quando houver a opção de o usuário não querer continuar a ação,
+  mas não necessariamente cancelá-la. Ele aparece entre os botões positivo
+  e negativo. Por exemplo: a ação pode ser "Notifique-me mais tarde".</dd> 
+</dl>
+
+<p>É possível adicionar somente um de cada tipo de botão a uma {@link
+android.app.AlertDialog}, ou seja, não é possível ter mais de um botão "positivo".</p>
+
+
+
+<div class="figure" style="width:290px;margin:0 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_list.png" alt="" />
+<p class="img-caption"><strong>Figura 3.</strong>
+Caixa de diálogo com um título e uma lista.</p>
+</div>
+
+<h3 id="AddingAList">Adição de listas</h3>
+
+<p>Há três tipos de listas disponíveis nas APIs {@link android.app.AlertDialog}:</p>
+<ul>
+<li>Lista de escolha única tradicional</li>
+<li>Lista de escolha única persistente (botões de opção)</li>
+<li>Lista de escolhas múltiplas persistentes (caixas de seleção)</li>
+</ul>
+
+<p>Para criar uma lista de escolha única como a da figura 3, 
+use o método {@link android.app.AlertDialog.Builder#setItems setItems()}:</p>
+
+<pre style="clear:right">
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    builder.setTitle(R.string.pick_color)
+           .setItems(R.array.colors_array, new DialogInterface.OnClickListener() {
+               public void onClick(DialogInterface dialog, int which) {
+               // The 'which' argument contains the index position
+               // of the selected item
+           }
+    });
+    return builder.create();
+}
+</pre>
+
+<p>Como a lista aparece na área do conteúdo da caixa de diálogo,
+a caixa não pode exibir uma mensagem e uma lista, e será preciso definir um título
+para ela com {@link android.app.AlertDialog.Builder#setTitle setTitle()}. 
+Para especificar os itens da lista, chame {@link
+android.app.AlertDialog.Builder#setItems setItems()} passando uma matriz.
+Alternativamente, é possível especificar uma lista com {@link
+android.app.AlertDialog.Builder#setAdapter setAdapter()}. Isso permite retroceder a lista
+com dados dinâmicos (como os de um banco de dados) com um {@link android.widget.ListAdapter}.</p>
+
+<p>Se você optar por retroceder a lista com um {@link android.widget.ListAdapter},
+sempre use um {@link android.support.v4.content.Loader} para que o conteúdo carregue
+assincronamente. Veja mais detalhes sobre isso nos guias
+<a href="{@docRoot}guide/topics/ui/declaring-layout.html#AdapterViews">Criação de layouts
+com um adaptador</a> e
+<a href="{@docRoot}guide/components/loaders.html">Carregadores</a>.</p>
+
+<p class="note"><strong>Observação:</strong> por padrão, o toque em um item de lista dispensa a caixa de diálogo
+a menos que você esteja usando uma das listas de escolha persistentes a seguir.</p>
+
+<div class="figure" style="width:290px;margin:-30px 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_checkboxes.png" />
+<p class="img-caption"><strong>Figura 4.</strong>
+Lista de itens de múltipla escolha.</p>
+</div>
+
+
+<h4 id="Checkboxes">Adição de uma lista de escolha única ou de múltipla escolha persistente</h4>
+
+<p>Para adicionar uma lista de itens de múltipla escolha (caixas de seleção)
+ou itens de escolha única (botões de rádio), use os métodos
+{@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} ou 
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+setSingleChoiceItems()} respectivamente.</p>
+
+<p>Por exemplo, a seguir apresenta-se como criar uma lista de múltipla escolha como
+a ilustrada na figura 4, que salva os itens
+selecionados em uma {@link java.util.ArrayList}:</p>
+
+<pre style="clear:right">
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    mSelectedItems = new ArrayList();  // Where we track the selected items
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    // Set the dialog title
+    builder.setTitle(R.string.pick_toppings)
+    // Specify the list array, the items to be selected by default (null for none),
+    // and the listener through which to receive callbacks when items are selected
+           .setMultiChoiceItems(R.array.toppings, null,
+                      new DialogInterface.OnMultiChoiceClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int which,
+                       boolean isChecked) {
+                   if (isChecked) {
+                       // If the user checked the item, add it to the selected items
+                       mSelectedItems.add(which);
+                   } else if (mSelectedItems.contains(which)) {
+                       // Else, if the item is already in the array, remove it 
+                       mSelectedItems.remove(Integer.valueOf(which));
+                   }
+               }
+           })
+    // Set the action buttons
+           .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   // User clicked OK, so save the mSelectedItems results somewhere
+                   // or return them to the component that opened the dialog
+                   ...
+               }
+           })
+           .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   ...
+               }
+           });
+
+    return builder.create();
+}
+</pre>
+
+<p>Embora a lista tradicional e uma lista com botões de opção
+forneçam uma ação de "escolha única", deve-se usar {@link
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+setSingleChoiceItems()} se você desejar manter a escolha do usuário.
+Ou seja, se a caixa de diálogo abrir novamente mais tarde, deve indicar qual é a escolha atual do usuário,
+portanto deve-se criar uma lista com botões de opção.</p>
+
+
+
+
+
+<h3 id="CustomLayout">Criação de layout personalizado</h3>
+
+<div class="figure" style="width:290px;margin:-30px 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_custom.png" alt="" />
+<p class="img-caption"><strong>Figura 5.</strong> Layout personalizado da caixa de diálogo.</p>
+</div>
+
+<p>Se você deseja um layout personalizado em uma caixa de diálogo, crie um layout e adicione-o a uma
+{@link android.app.AlertDialog} chamando {@link
+android.app.AlertDialog.Builder#setView setView()} no objeto {@link
+android.app.AlertDialog.Builder}.</p>
+
+<p>Por padrão, o layout personalizado preenche a janela da caixa de diálogo, mas ainda é possível
+usar métodos {@link android.app.AlertDialog.Builder} para adicionar botões e um título.</p>
+
+<p>Por exemplo, a seguir há o arquivo de layout para a caixa de diálogo na figura 5:</p>
+
+<p style="clear:right" class="code-caption">res/layout/dialog_signin.xml</p>
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    &lt;ImageView
+        android:src="@drawable/header_logo"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:scaleType="center"
+        android:background="#FFFFBB33"
+        android:contentDescription="@string/app_name" />
+    &lt;EditText
+        android:id="@+id/username"
+        android:inputType="textEmailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:hint="@string/username" />
+    &lt;EditText
+        android:id="@+id/password"
+        android:inputType="textPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif"
+        android:hint="@string/password"/>
+&lt;/LinearLayout>
+</pre>
+
+<p class="note"><strong>Dica:</strong> por padrão, ao definir um elemento
+{@link android.widget.EditText} para usar o tipo de entrada {@code "textPassword"}, a família da fonte é definida como de espaço único, portanto
+deve-se alterar a família da fonte para {@code "sans-serif"} para que os campos de texto usem
+um estilo de fonte compatível.</p>
+
+<p>Para inflar o layout no {@link android.support.v4.app.DialogFragment},
+obtenha um {@link android.view.LayoutInflater} com 
+{@link android.app.Activity#getLayoutInflater()} e chame
+{@link android.view.LayoutInflater#inflate inflate()}, em que o primeiro parâmetro
+é o ID de recurso do layout e o segundo é uma vista pai do layout.
+Em seguida, pode-se chamar {@link android.app.AlertDialog#setView setView()}
+para posicionar o layout na caixa de diálogo.</p>
+
+<pre>
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    // Get the layout inflater
+    LayoutInflater inflater = getActivity().getLayoutInflater();
+
+    // Inflate and set the layout for the dialog
+    // Pass null as the parent view because its going in the dialog layout
+    builder.setView(inflater.inflate(R.layout.dialog_signin, null))
+    // Add action buttons
+           .setPositiveButton(R.string.signin, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   // sign in the user ...
+               }
+           })
+           .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+               public void onClick(DialogInterface dialog, int id) {
+                   LoginDialogFragment.this.getDialog().cancel();
+               }
+           });      
+    return builder.create();
+}
+</pre>
+
+<div class="note">
+<p><strong>Dica:</strong> se você deseja uma caixa de diálogo personalizada,
+pode exibir uma {@link android.app.Activity} como uma caixa de diálogo
+em vez de usar as APIs {@link android.app.Dialog}. Basta criar uma atividade e definir seu tema como
+{@link android.R.style#Theme_Holo_Dialog Theme.Holo.Dialog}
+no elemento <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> do manifesto:</p>
+
+<pre>
+&lt;activity android:theme="&#64;android:style/Theme.Holo.Dialog" >
+</pre>
+<p>Pronto. Agora a atividade é exibida em uma janela da caixa de diálogo em vez de tela cheia.</p>
+</div>
+
+
+
+<h2 id="PassingEvents">Direcionamento de eventos de volta ao host da caixa de diálogo</h2>
+
+<p>Quando o usuário toca em um dos botões de ação da caixa de diálogo ou seleciona um item de sua lista,
+o {@link android.support.v4.app.DialogFragment} pode realizar a ação
+necessária sozinho, mas normalmente será necessário fornecer o evento à atividade ou ao fragmento
+que abriu a caixa de diálogo. Para isso, defina uma interface com um método para cada tipo de evento de clique.
+Em seguida, implemente essa interface no componente do host
+que receberá os eventos de ação da caixa de diálogo.</p>
+
+<p>Por exemplo, a seguir há um {@link android.support.v4.app.DialogFragment} que define
+uma interface por meio da qual entrega os eventos de volta à atividade do host:</p>
+
+<pre>
+public class NoticeDialogFragment extends DialogFragment {
+    
+    /* The activity that creates an instance of this dialog fragment must
+     * implement this interface in order to receive event callbacks.
+     * Each method passes the DialogFragment in case the host needs to query it. */
+    public interface NoticeDialogListener {
+        public void onDialogPositiveClick(DialogFragment dialog);
+        public void onDialogNegativeClick(DialogFragment dialog);
+    }
+    
+    // Use this instance of the interface to deliver action events
+    NoticeDialogListener mListener;
+    
+    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the NoticeDialogListener so we can send events to the host
+            mListener = (NoticeDialogListener) activity;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(activity.toString()
+                    + " must implement NoticeDialogListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>A atividade que hospeda a caixa de diálogo cria uma instância da caixa
+com o construtor do fragmento da caixa de diálogo e recebe os eventos
+dela por meio de uma implementação da interface {@code NoticeDialogListener}:</p>
+
+<pre>
+public class MainActivity extends FragmentActivity
+                          implements NoticeDialogFragment.NoticeDialogListener{
+    ...
+    
+    public void showNoticeDialog() {
+        // Create an instance of the dialog fragment and show it
+        DialogFragment dialog = new NoticeDialogFragment();
+        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
+    }
+
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following methods
+    // defined by the NoticeDialogFragment.NoticeDialogListener interface
+    &#64;Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button
+        ...
+    }
+
+    &#64;Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // User touched the dialog's negative button
+        ...
+    }
+}
+</pre>
+
+<p>Como a atividade do host implementa o {@code NoticeDialogListener} &mdash; que é
+forçado pelo método de retorno de chamada {@link android.support.v4.app.Fragment#onAttach onAttach()}
+exibido acima &mdash;, o fragmento da caixa de diálogo pode usar
+os métodos de retorno de chamada da interface para entregar eventos de clique à atividade:</p>
+
+<pre>
+public class NoticeDialogFragment extends DialogFragment {
+    ...
+
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Build the dialog and set up the button click handlers
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.dialog_fire_missiles)
+               .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // Send the positive button event back to the host activity
+                       mListener.onDialogPositiveClick(NoticeDialogFragment.this);
+                   }
+               })
+               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // Send the negative button event back to the host activity
+                       mListener.onDialogNegativeClick(NoticeDialogFragment.this);
+                   }
+               });
+        return builder.create();
+    }
+}
+</pre>
+
+
+
+<h2 id="ShowingADialog">Exibição de uma caixa de diálogo</h2>
+
+<p>Para exibir a caixa de diálogo, crie uma instância do {@link
+android.support.v4.app.DialogFragment} e chame {@link android.support.v4.app.DialogFragment#show
+show()} passando o {@link android.support.v4.app.FragmentManager} e um nome de tag
+para o fragmento da caixa de diálogo.</p>
+
+<p>Para obter o {@link android.support.v4.app.FragmentManager}, chama-se
+{@link android.support.v4.app.FragmentActivity#getSupportFragmentManager()}
+da {@link android.support.v4.app.FragmentActivity} ou {@link
+android.support.v4.app.Fragment#getFragmentManager()} de um {@link
+android.support.v4.app.Fragment}. Por exemplo:</p>
+
+<pre>
+public void confirmFireMissiles() {
+    DialogFragment newFragment = new FireMissilesDialogFragment();
+    newFragment.show(getSupportFragmentManager(), "missiles");
+}
+</pre>
+
+<p>O segundo argumento, {@code "missiles"}, é um nome de tag exclusivo que o sistema usa para salvar
+e restaurar o estado do fragmento quando necessário. Para que a tag obtenha um identificador
+do fragmento, chama-se {@link android.support.v4.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}.</p>
+
+
+
+
+<h2 id="FullscreenDialog">Exibição de uma caixa de diálogo em tela cheia ou como um fragmento incorporado</h2>
+
+<p>Pode-se ter um projeto de IU em que uma parte da IU apareça como uma caixa de diálogo em determinadas
+situações, mas como tela cheia ou fragmento incorporado em outras (dependendo, talvez,
+do tamanho da tela do dispositivo). A classe {@link android.support.v4.app.DialogFragment}
+oferece esta flexibilidade porque ainda pode comportar-se como um {@link
+android.support.v4.app.Fragment} incorporável.</p>
+
+<p>Contudo, não é possível usar {@link android.app.AlertDialog.Builder AlertDialog.Builder}
+nem outros objetos {@link android.app.Dialog} para criar a caixa de diálogo nesse caso. Se
+você deseja que {@link android.support.v4.app.DialogFragment} seja
+incorporável, defina a IU da caixa de diálogo em um layout e carregue ou layout no retorno de chamada
+{@link android.support.v4.app.DialogFragment#onCreateView
+onCreateView()}.</p>
+
+<p>A seguir há um exemplo de {@link android.support.v4.app.DialogFragment} que pode aparecer tanto como
+caixa de diálogo quanto como fragmento incorporável (usando um layout chamado <code>purchase_items.xml</code>):</p>
+
+<pre>
+public class CustomDialogFragment extends DialogFragment {
+    /** The system calls this to get the DialogFragment's layout, regardless
+        of whether it's being displayed as a dialog or an embedded fragment. */
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        // Inflate the layout to use as dialog or embedded fragment
+        return inflater.inflate(R.layout.purchase_items, container, false);
+    }
+  
+    /** The system calls this only when creating the layout in a dialog. */
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // The only reason you might override this method when using onCreateView() is
+        // to modify any dialog characteristics. For example, the dialog includes a
+        // title by default, but your custom layout might not need it. So here you can
+        // remove the dialog title, but you must call the superclass to get the Dialog.
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        return dialog;
+    }
+}
+</pre>
+
+<p>A seguir, veja alguns códigos que decidem por exibir o fragmento como uma caixa de diálogo
+ou como uma IU de tela cheia com base no tamanho da tela:</p>
+
+<pre>
+public void showDialog() {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    CustomDialogFragment newFragment = new CustomDialogFragment();
+    
+    if (mIsLargeLayout) {
+        // The device is using a large layout, so show the fragment as a dialog
+        newFragment.show(fragmentManager, "dialog");
+    } else {
+        // The device is smaller, so show the fragment fullscreen
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction.add(android.R.id.content, newFragment)
+                   .addToBackStack(null).commit();
+    }
+}
+</pre>
+
+<p>Para obter mais informações sobre a realização de operações de fragmentos, consulte o guia 
+<a href="{@docRoot}guide/components/fragments.html">Fragmentos</a>.</p>
+
+<p>Nesse exemplo, o booleano <code>mIsLargeLayout</code> especifica se o dispositivo atual
+deve usar o projeto de layout grande do aplicativo (e, portanto, exibir esse fragmento como uma caixa de diálogo em
+vez de tela cheia). O melhor modo de definir esse tipo de booleano é declarar
+um <a href="{@docRoot}guide/topics/resources/more-resources.html#Bool">valor de recurso bool</a>
+com um valor de <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">recurso alternativo</a> para diferentes tamanhos de tela. Por exemplo, a seguir há duas
+versões de recurso bool para diferentes tamanhos de tela:</p>
+
+<p class="code-caption">res/values/bools.xml</p>
+<pre>
+&lt;!-- Default boolean values -->
+&lt;resources>
+    &lt;bool name="large_layout">false&lt;/bool>
+&lt;/resources>
+</pre>
+
+<p class="code-caption">res/values-large/bools.xml</p>
+<pre>
+&lt;!-- Large screen boolean values -->
+&lt;resources>
+    &lt;bool name="large_layout">true&lt;/bool>
+&lt;/resources>
+</pre>
+
+<p>Assim, é possível inicializar o valor {@code mIsLargeLayout} durante o método 
+{@link android.app.Activity#onCreate onCreate()} da atividade:</p>
+
+<pre>
+boolean mIsLargeLayout;
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    mIsLargeLayout = getResources().getBoolean(R.bool.large_layout);
+}
+</pre>
+
+
+
+<h3 id="ActivityAsDialog">Exibição de uma atividade como uma caixa de diálogo em telas grandes</h3>
+
+<p>Em vez de exibir uma caixa de diálogo como uma IU de tela cheia em telas pequenas, é possível obter
+o mesmo resultado exibindo uma {@link android.app.Activity} como uma caixa de diálogo
+em telas grandes. A abordagem escolhida depende do projeto do aplicativo,
+mas a exibição de uma atividade como caixa de diálogo normalmente é útil quando o aplicativo já está projetado
+para telas pequenas e é preciso melhorar a experiência em tablets exibindo uma atividade de vida curta
+como uma caixa de diálogo.</p>
+
+<p>Para exibir uma atividade como uma caixa de diálogo somente em telas grandes,
+aplique o tema {@link android.R.style#Theme_Holo_DialogWhenLarge Theme.Holo.DialogWhenLarge}
+no elemento <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> do manifesto:</p>
+
+<pre>
+&lt;activity android:theme="&#64;android:style/Theme.Holo.DialogWhenLarge" >
+</pre>
+
+<p>Para obter mais informações sobre estilizar as atividades com temas, consulte o guia <a href="{@docRoot}guide/topics/ui/themes.html">Estilos e temas</a>.</p>
+
+
+
+<h2 id="DismissingADialog">Dispensa de uma caixa de diálogo</h2>
+
+<p>Quando o usuário toca em qualquer botão de ação criado
+com um {@link android.app.AlertDialog.Builder}, o sistema dispensa a caixa de diálogo.</p>
+
+<p>O sistema também dispensa a caixa de diálogo quando o usuário toca em um item em uma lista da caixa de diálogo, exceto
+quanto a lista usa botões de opção ou caixas de seleção. Caso contrário, é possível dispensá-la manualmente
+chamando {@link android.support.v4.app.DialogFragment#dismiss()} no {@link
+android.support.v4.app.DialogFragment}.</p>
+
+<p>Se for necessário realizar determinadas
+ações quando a caixa de diálogo é dispensada, é possível implementar o método {@link
+android.support.v4.app.DialogFragment#onDismiss onDismiss()} no {@link
+android.support.v4.app.DialogFragment}.</p>
+
+<p>Também é possível <em>cancelar</em> uma caixa de diálogo. Trata-se de um evento especial que indica que o usuário
+se retirou explicitamente da caixa de diálogo sem concluir a tarefa. Isso ocorre se o usuário pressionar o botão 
+<em>Voltar</em>, tocar na tela fora da área da caixa de diálogo
+ou se você chamar {@link android.app.Dialog#cancel()} explicitamente no {@link
+android.app.Dialog} (como em resposta a um botão "Cancelar" na caixa de diálogo).</p>
+
+<p>Como mostrado no exemplo acima, é possível responder ao evento de cancelamento implementando
+{@link android.support.v4.app.DialogFragment#onCancel onCancel()} na classe {@link
+android.support.v4.app.DialogFragment}.</p>
+
+<p class="note"><strong>Observação:</strong> o sistema chama
+{@link android.support.v4.app.DialogFragment#onDismiss onDismiss()} para cada evento que
+chama o retorno de chamada {@link android.support.v4.app.DialogFragment#onCancel onCancel()}. Entretanto,
+se você chamar {@link android.app.Dialog#dismiss Dialog.dismiss()} ou  {@link
+android.support.v4.app.DialogFragment#dismiss DialogFragment.dismiss()},
+ o sistema chamará {@link android.support.v4.app.DialogFragment#onDismiss onDismiss()}, <em>mas
+não</em> {@link android.support.v4.app.DialogFragment#onCancel onCancel()}. Portanto, geralmente, deve-se
+chamar {@link android.support.v4.app.DialogFragment#dismiss dismiss()} quando o usuário pressiona
+o botão <em>positivo</em> na caixa de diálogo para removê-la da vista.</p>
+
+

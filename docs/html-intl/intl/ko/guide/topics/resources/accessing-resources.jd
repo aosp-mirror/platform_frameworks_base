@@ -1,0 +1,337 @@
+page.title=리소스 액세스
+parent.title=애플리케이션 리소스
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>간략히 보기</h2>
+  <ul>
+    <li>리소스는 {@code R.java}의 정수를 사용하는 코드, 예를 들어 
+{@code R.drawable.myimage}에서 참조할 수 있습니다.</li>
+    <li>리소스는 특수 XML 구문을 사용하는 리소스, 예를 들어 {@code
+&#64;drawable/myimage}에서 참조할 수 있습니다.</li>
+    <li>
+{@link android.content.res.Resources}의 메서드로 앱 리소스에 액세스할 수도 있습니다.</li>
+  </ul>
+
+  <h2>Key 클래스</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+  </ol>
+
+  <h2>이 문서의 내용</h2>
+  <ol>
+    <li><a href="#ResourcesFromCode">코드에서 리소스 액세스</a></li>
+    <li><a href="#ResourcesFromXml">XML에서 리소스 액세스</a>
+      <ol>
+        <li><a href="#ReferencesToThemeAttributes">스타일 속성 참조</a></li>
+      </ol>
+    </li>
+    <li><a href="#PlatformResources">플랫폼 리소스 액세스</a></li>
+  </ol>
+
+  <h2>참고 항목</h2>
+  <ol>
+    <li><a href="providing-resources.html">리소스 제공</a></li>
+    <li><a href="available-resources.html">리소스 유형</a></li>
+  </ol>
+</div>
+</div>
+
+
+
+
+<p>일단 어떤 리소스를 애플리케이션에 제공한 다음에는(<a href="providing-resources.html">리소스 제공</a>에서 논의), 
+해당 리소스의 리소스 ID를 참조함으로써 이를 적용할 수 있습니다. 모든 리소스 ID는 
+{@code aapt} 도구가 자동으로 생성하는 프로젝트의 {@code R} 클래스에서 정의됩니다.</p>
+
+<p>애플리케이션이 컴파일링되면, {@code aapt}가 {@code R} 클래스를 생성하며, 이 클래스 안에 {@code
+res/} 디렉터리에 있는 모든 리소스의 
+리소스 ID가 들어있습니다. 각 리소스 유형에는 {@code R} 하위 클래스가 있고(예: 모든 드로어블 리소스에 대한 
+{@code R.drawable}), 해당 유형의 각 리소스에는 정적
+정수가 있습니다(예: {@code R.drawable.icon}). 이 정수가 
+리소스를 검색하는 데 사용할 수 있는 리소스 ID입니다.</p>
+
+<p>{@code R} 클래스가 리소스 ID가 지정되는 곳이기는 하지만, 리소스 ID를 찾기 위해 
+이곳을 볼 필요는 전혀 없습니다. 하나의 리소스 ID는 항상 다음과 같이 구성됩니다.</p>
+<ul>
+  <li><em>리소스 유형</em>: 각 리소스는 "유형"으로 그룹화됩니다. 예: {@code
+string}, {@code drawable} 및 {@code layout} 다양한 유형에 관한 자세한 정보는 <a href="available-resources.html">리소스 유형</a>을 참조하십시오.
+  </li>
+  <li><em>리소스 이름</em>: 
+리소스가 단순 값(예: 문자열 등)일 경우, 
+확장자를 제외한 파일 이름이나 XML {@code android:name} 속성 값 중 하나입니다.</li>
+</ul>
+
+<p>리소스에 액세스하는 방법은 두 가지가 있습니다.</p>
+<ul>
+  <li><strong>코드 내부에서:</strong> {@code R}
+클래스의 하위 클래스에서 정적 정수를 사용합니다. 예:
+    <pre class="classic no-pretty-print">R.string.hello</pre>
+    <p>{@code string}은 리소스 유형이고 {@code hello}는 리소스 이름입니다. 리소스 ID를 이 형식으로 제공하면 리소스에 액세스할 수 있는 
+Android API가 많습니다. 
+<a href="#ResourcesFromCode">코드 내 리소스 액세스</a>를 참조하십시오.</p>
+  </li>
+  <li><strong>XML 내부에서:</strong> {@code R} 클래스에서 정의된 
+리소스 ID에 상응하기도 하는 특수 XML 구문을 사용합니다. 예:
+    <pre class="classic no-pretty-print">&#64;string/hello</pre>
+    <p>{@code string}은 리소스 유형이고 {@code hello}는 리소스 이름입니다. 이 
+구문은 리소스로 값을 제공할 것으로 예상되는 어느 곳에서나 XML 리소스 형태로 사용할 수 있습니다. <a href="#ResourcesFromXml">XML에서 리소스 액세스</a>를 참조하십시오.</p>
+  </li>
+</ul>
+
+
+
+<h2 id="ResourcesFromCode">코드 내 리소스 액세스 </h2>
+
+<p>리소스 ID를 메서드 매개변수로 전달하면 코드 내 리소스를 사용할 수 있습니다. 예를 들어
+, {@link android.widget.ImageView}를 설정하여 {@link android.widget.ImageView#setImageResource(int) setImageResource()}를 사용하는 {@code res/drawable/myimage.png}
+리소스를 사용할 수 있습니다.</p>
+<pre>
+ImageView imageView = (ImageView) findViewById(R.id.myimageview);
+imageView.setImageResource(<strong>R.drawable.myimage</strong>);
+</pre>
+
+<p>{@link
+android.content.res.Resources}에서 메서드를 사용하는 개별 리소스를 검색할 수도 있으며, 이는 
+{@link android.content.Context#getResources()}로 인스턴스를 가져올 수 있습니다.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>원본 파일에 액세스</h2>
+
+<p>흔한 일은 아니지만, 원본 파일과 디렉터리에 액세스해야 하는 경우가 있습니다. 이 경우에는 
+{@code res/}에 파일을 저장하더라도 소용이 없습니다. 
+{@code res/}에서 리소스를 읽는 방법은 리소스 ID를 사용하는 것뿐이기 때문입니다. 그 대신 리소스를 
+{@code assets/} 디렉터리에 저장하면 됩니다.</p>
+<p>{@code assets/} 디렉터리에 저장된 파일은 리소스
+ID가 부여되지 <em>않으므로</em>, 이와 같은 리소스는 {@code R} 클래스나 XML 리소스에서 참조할 수 없습니다. 그 대신 
+일반 파일 시스템처럼 {@code assets/} 디렉터리에 파일을 쿼리하고 
+{@link android.content.res.AssetManager}를 사용하여 원시 데이터를 읽을 수 있습니다.</p>
+<p>하지만 필요한 것이 원시 데이터(동영상 또는 오디오 파일 등)를 읽는 능력뿐인 경우라면,
+파일을 {@code res/raw/} 디렉터리에 저장한 다음 일련의 바이트 스트림을 {@link
+android.content.res.Resources#openRawResource(int) openRawResource()}를 사용하여 읽으면 됩니다.</p>
+
+</div>
+</div>
+
+
+<h3>구문</h3>
+
+<p>다음은 코드로 리소스를 참조하는 데 쓰는 구문입니다.</p>
+
+<pre class="classic no-pretty-print">
+[<em>&lt;package_name&gt;</em>.]R.<em>&lt;resource_type&gt;</em>.<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li><em>{@code &lt;package_name&gt;}</em>은(는) 리소스가 위치한 패키지의 이름입니다(
+자체 패키지의 리소스를 참조할 경우에는 필요하지 않습니다).</li>
+  <li><em>{@code &lt;resource_type&gt;}</em>은(는) 해당 리소스 유형의 {@code R} 하위 클래스입니다.</li>
+  <li><em>{@code &lt;resource_name&gt;}</em>은(는) 확장자가 없는 리소스 파일 이름이거나
+XML 요소의 {@code android:name} 속성 값입니다(단순
+값의 경우).</li>
+</ul>
+<p>각 리소스 유형과 참조 방법에 관한 자세한 내용은 <a href="available-resources.html">리소스 유형</a>
+을 참조하십시오.</p>
+
+
+<h3>사용 사례</h3>
+
+<p>리소스 ID 매개변수를 허용하는 메서드가 많이 있고, {@link android.content.res.Resources}에서 메서드를
+ 사용하여 리소스를 검색할 수 있습니다. {@link android.content.Context#getResources
+Context.getResources()}로 {@link
+android.content.res.Resources}의 인스턴스를 가져올 수 있습니다.</p>
+
+
+<p>다음은 코드로 리소스에 액세스한 몇 가지 예시입니다.</p>
+
+<pre>
+// Load a background for the current screen from a drawable resource
+{@link android.app.Activity#getWindow()}.{@link
+android.view.Window#setBackgroundDrawableResource(int)
+setBackgroundDrawableResource}(<strong>R.drawable.my_background_image</strong>) ;
+
+// Set the Activity title by getting a string from the Resources object, because
+//  this method requires a CharSequence rather than a resource ID
+{@link android.app.Activity#getWindow()}.{@link android.view.Window#setTitle(CharSequence)
+setTitle}(getResources().{@link android.content.res.Resources#getText(int)
+getText}(<strong>R.string.main_title</strong>));
+
+// Load a custom layout for the current screen
+{@link android.app.Activity#setContentView(int)
+setContentView}(<strong>R.layout.main_screen</strong>);
+
+// Set a slide in animation by getting an Animation from the Resources object
+mFlipper.{@link android.widget.ViewAnimator#setInAnimation(Animation)
+setInAnimation}(AnimationUtils.loadAnimation(this,
+        <strong>R.anim.hyperspace_in</strong>));
+
+// Set the text on a TextView object using a resource ID
+TextView msgTextView = (TextView) findViewById(<strong>R.id.msg</strong>);
+msgTextView.{@link android.widget.TextView#setText(int)
+setText}(<strong>R.string.hello_message</strong>);
+</pre>
+
+
+<p class="caution"><strong>주의:</strong> 손으로 {@code
+R.java} 파일을 수정해서는 안 됩니다.&mdash;이것은 프로젝트가
+컴파일되었을 때 {@code aapt} 도구가 생성한 파일입니다. 모든 변경 사항은 다음 번 컴파일에서 재정의됩니다.</p>
+
+
+
+<h2 id="ResourcesFromXml">XML에서 리소스 액세스</h2>
+
+<p>기존 리소스에 대한 참조를 사용하여
+일부 XML 속성과 요소의 값을 정의할 수 있습니다. 이 작업은 레이아웃 파일을 생성할 때 위젯에 문자열과 이미지를 제공하기 위해 
+자주 하게 됩니다.</p>
+
+<p>예를 들어, 레이아웃에 {@link android.widget.Button}을 추가하면 
+해당 버튼 텍스트에 <a href="string-resource.html">문자열 리소스</a>를 사용해야 합니다.</p>
+
+<pre>
+&lt;Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="<strong>@string/submit</strong>" /&gt;
+</pre>
+
+
+<h3>구문</h3>
+
+<p>다음은 XML 리소스로 리소스를 참조하는 데 쓰는 구문입니다.</p>
+
+<pre class="classic no-pretty-print">
+&#64;[<em>&lt;package_name&gt;</em>:]<em>&lt;resource_type&gt;</em>/<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li>{@code &lt;package_name&gt;}은(는) 리소스가 위치한 패키지의 이름입니다(
+같은 패키지의 리소스를 참조할 경우에는 필요하지 않습니다).</li>
+  <li>{@code &lt;resource_type&gt;}은(는) 해당 리소스 유형의 
+{@code R} 하위 클래스입니다.</li>
+  <li>{@code &lt;resource_name&gt;}은(는) 확장자가 없는 리소스 파일 이름이거나
+XML 요소의 {@code android:name} 속성 값입니다(단순
+값의 경우).</li>
+</ul>
+
+<p>각 리소스 유형과 참조 방법에 관한 자세한 내용은 <a href="available-resources.html">리소스 유형</a>
+을 참조하십시오.</p>
+
+
+<h3>사용 사례</h3>
+
+<p>몇몇 경우에는 값에 대한 리소스를 반드시 XML로 사용해야 하지만(예: 위젯에 드로어블 이미지를
+ 적용하기 위해), 단순 값을 허용하는 곳이라면 어디서든 XML로 리소스를 사용할 수도 있습니다. 예를 들어
+, <a href="more-resources.html#Color">색상 리소스</a>와 <a href="string-resource.html">문자열 리소스</a>를 포함한 다음과 같은 리소스 파일을 가지고 있다고 합시다.</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+   &lt;color name="opaque_red">#f00&lt;/color>
+   &lt;string name="hello">Hello!&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>텍스트 색상과 
+텍스트 문자열을 설정하는 데 이와 같은 리소스를 다음의 레이아웃 파일에서 사용할 수 있습니다.</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;color/opaque_red</strong>&quot;
+    android:text=&quot;<strong>&#64;string/hello</strong>&quot; /&gt;
+</pre>
+
+<p>이 경우, 리소스를 자체 패키지에서 가져왔으므로 리소스 참조에 패키지 이름을
+지정하지 않아도 됩니다. 
+시스템 리소스를 참조하려면 패키지 이름을 포함해야 합니다. 예:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;android:color/secondary_text_dark</strong>&quot;
+    android:text=&quot;&#64;string/hello&quot; /&gt;
+</pre>
+
+<p class="note"><strong>참고:</strong> 항상 문자열 리소스를 사용해야
+사용자의 애플리케이션이 다른 언어에 맞게 지역화될 수 있습니다. 
+대체
+리소스(예: 지역화된 문자열) 생성에 관한 자세한 정보는 <a href="providing-resources.html#AlternativeResources">대체
+리소스 제공</a>을 참조하십시오. 다른 언어로 애플리케이션을 지역화하기 위한 전체 지침은
+<a href="localization.html">지역화</a>를 참조하십시오.</p>
+
+<p>XML의 리소스를 사용하여 별명을 생성할 수도 있습니다. 예를 들어, 드로어블 리소스이면서 
+또 다른 드로어블 리소스의 별명인 것을 생성할 수 있습니다.</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/other_drawable" />
+</pre>
+
+<p>이것은 일견 중복되는 것처럼 들리지만, 대체 리소스를 사용할 때 매우 유용하게 쓰일 수 있습니다. 
+<a href="providing-resources.html#AliasResources">별명 리소스 생성</a>에 관해 자세히 알아보십시오.</p>
+
+
+
+<h3 id="ReferencesToThemeAttributes">스타일 속성 참조</h3>
+
+<p>스타일 속성 리소스는 현재 적용된 테마의 속성 값을
+참조할 수 있게 해줍니다. 스타일 속성을 참조하면 
+하드 코드로 작성된 값을 제공하는 것 대신에 UI 요소의 외관을 사용자 지정하여 
+현재 테마에서 제공한 표준 변형에 맞춰 스타일링할 수 있습니다. 스타일 속성을 참조하는 것은 
+기본적으로 "이 속성이 정의한 스타일을 현재 테마로 사용하라"는 말과 같습니다.</p>
+
+<p>스타일 속성을 참조하는 경우, 이름 구문은 보통 
+리소스와 거의 똑같습니다. 다만 앳 기호({@code @})를 사용하는 대신 물음표({@code ?})를 사용하며, 
+리소스 유형 부분이 선택 사항이라는 점만이 다릅니다. 예:</p>
+
+<pre class="classic">
+?[<em>&lt;package_name&gt;</em>:][<em>&lt;resource_type&gt;</em>/]<em>&lt;resource_name&gt;</em>
+</pre>
+
+<p>예컨대 다음은 텍스트 색상을 시스템 테마의 "기본" 텍스트 색상에 
+일치하도록 설정하기 위해 속성을 참조하는 방법을 나타낸 것입니다.</p>
+
+<pre>
+&lt;EditText id=&quot;text&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:textColor=&quot;<strong>?android:textColorSecondary</strong>&quot;
+    android:text=&quot;&#64;string/hello_world&quot; /&gt;
+</pre>
+
+<p>여기서 {@code android:textColor} 속성이 주어진 스타일 속성의 이름을 현재 테마대로 
+지정합니다. Android는 이제 {@code android:textColorSecondary}
+스타일 속성에 적용된 값을 이 위젯의 {@code android:textColor}에 대한 값으로 사용합니다. 시스템
+리소스 도구는 속성 리소스가 이 컨텍스트에서 예상된다는 것을 알기 때문에
+유형(
+<code>?android:attr/textColorSecondary</code>)을 명시적으로 선언하지 않아도 됩니다.&mdash;{@code attr} 유형은 배제해도 됩니다.</p>
+
+
+
+
+<h2 id="PlatformResources">플랫폼 리소스 액세스</h2>
+
+<p>Android에는 스타일, 테마 및 레이아웃 등 여러 가지 표준 리소스가 포함되어 있습니다. 
+이와 같은 리소스에 액세스하려면 
+<code>android</code> 패키지 이름으로 리소스 참조를 한정합니다. 예를 들어 Android는 
+{@link android.widget.ListAdapter}의 목록 항목으로 사용할 수 있는 레이아웃 리소스를 제공합니다.</p>
+
+<pre>
+{@link android.app.ListActivity#setListAdapter(ListAdapter)
+setListAdapter}(new {@link
+android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple_list_item_1</strong>, myarray));
+</pre>
+
+<p>이 예시에서 {@link android.R.layout#simple_list_item_1}은 
+{@link android.widget.ListView}의 항목에 대해 플랫폼이 정의한 레이아웃 리소스입니다. 목록 항목에 대해 나름의 레이아웃을 
+만드는 대신 이것을 사용해도 됩니다. 자세한 내용은 
+<a href="{@docRoot}guide/topics/ui/layout/listview.html">목록 보기</a> 개발자 가이드를 참조하십시오.</p>
+

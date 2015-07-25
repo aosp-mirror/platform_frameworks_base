@@ -1,0 +1,227 @@
+page.title=SDK 패키지 추가하기
+
+page.tags=sdk manager
+helpoutsWidget=true
+
+@jd:body
+
+<style>
+ol.large {
+  margin-left:0;
+}
+ol.large > li {
+  list-style-position: inside;
+  list-style-type:none;
+  margin:30px 0 0 0;
+  padding:30px 20px;
+  background:#eee;
+}
+ol.large > li:nth-child(odd) {
+}
+ol.large > li:before {
+  display:inline;
+  left:-40px;
+  float:left;
+  width:20px;
+  font-size:20px;
+  line-height:20px;
+}
+ol.large > li > h2 {
+  font-size:20px;
+  line-height:20px;
+  padding:0 0 0 20px;
+  margin:0 0 20px 0;
+  display:inline-block;
+  font-weight:normal;
+}
+ol.large > li:nth-child(1):before {
+  content:"1. ";
+}
+ol.large > li:nth-child(2):before {
+  content:"2. ";
+}
+ol.large > li:nth-child(3):before {
+  content:"3. ";
+}
+ol.large > li:nth-child(4):before {
+  content:"4. ";
+}
+ol.large > li:nth-child(5):before {
+  content:"5. ";
+}
+ol.large > li:nth-child(6):before {
+  content:"6. ";
+}
+</style>
+
+
+<p>
+기본적으로 Android SDK에는 개발을 시작하는 데 필요한 모든 것이 포함되어 있지 않습니다. 
+SDK는 도구, 플랫폼과 기타 구성요소를 여러 개의 
+패키지로 구분하여 필요에 따라 
+<a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>를 사용하여 다운로드할 수 있습니다.
+따라서 시작하기 전에 Android SDK에 추가해야 하는 패키지가 몇 개 있습니다.</p>
+
+<p>패키지를 추가하려면, 다음 중 한 가지 방법을 사용하여 Android SDK Manager를 시작합니다.</p>
+<ul>
+  <li>Android Studio의 도구 모음에서 <strong>SDK Manager</strong>
+<img src="{@docRoot}images/tools/sdk-manager-studio.png" style="vertical-align:bottom;margin:0;height:17px" />를 클릭합니다.</li>
+  <li>Android Studio를 사용하지 않는 경우:
+    <ul>
+      <li>Windows: Android
+ SDK 디렉터리의 루트에 있는 <code>SDK Manager.exe</code> 파일을 더블 클릭합니다.</li>
+      <li>Mac/Linux: 터미널을 열고 Android SDK가 설치된 <code>tools/</code> 디렉터리로
+이동한 후 <code>android sdk</code>를 실행합니다.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>SDK Manager를 처음 열 때에는, 여러 개의 패키지가 기본적으로 선택되어 
+있습니다. 이들은 선택된 상태로 두십시오. 다만 다음 단계를 따라 시작하는 데 필요한 모든 것을 
+갖추고 있는지 확인해야 합니다.</p>
+
+
+<ol class="large">
+<li>
+  <h2 id="GetTools" class="norule">최신 SDK 도구 다운로드</h2>
+
+<img src="/images/sdk_manager_packages.png" alt="" width="350" style="float:right;margin-left:20px" />
+
+  <p>Android SDK를 설정할 때는 
+최신 도구와 Android 플랫폼 다운로드가 최소한의 준비 사항입니다.</p>
+  <ol>
+   <li>도구 디렉터리를 열고 다음을 선택합니다.
+     <ul>
+       <li><strong>Android SDK Tools</strong></li>
+       <li><strong>Android SDK Platform-tools</strong></li>
+       <li><strong>Android SDK Build-tools</strong>(최상위 버전)</li>
+     </ul>
+   </li>
+   <li>첫 번째 Android X.X 폴더(최신 버전)를 열고 다음을 선택합니다.
+     <ul>
+      <li><strong>SDK Platform</strong></li>
+      <li>에뮬레이터용 시스템 이미지(다음 예시 참조) <br>
+      <strong>ARM EABI v7a 시스템 이미지</strong></li>
+     </ul>
+   </li>
+  </ol>
+</li>
+
+<li>
+  <h2 id="GetSupportLib" class="norule">추가 API를 위한 지원 라이브러리 가져오기</h2>
+
+  <div class="sidebox">
+    <p>지원 라이브러리는 다음 용도에 필요합니다.</p>
+    <ul>
+      <li><a href="{@docRoot}wear/index.html">Android Wear</a></li>
+      <li><a href="{@docRoot}tv/index.html">Android TV</a></li>
+      <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
+    </ul>
+
+    <p>또한 다음과 같은 인기 API를 제공하기도 합니다.</p>
+    <ul>
+      <li><a href="{@docRoot}reference/android/support/v4/widget/DrawerLayout.html">탐색
+창</a></li>
+      <li><a href="{@docRoot}reference/android/support/v4/view/ViewPager.html">보기 스와이프</a></li>
+      <li><a href="{@docRoot}reference/android/support/v7/app/ActionBar.html">이전 버전 호환
+동작 막대</a></li>
+    </ul>
+  </div>
+
+  <p><a href="{@docRoot}tools/support-library/features.html">Android 지원 라이브러리</a>는
+ 대부분의 Android 버전과 호환되는 광범위한 집합의 API를 제공합니다.</p>
+
+  <p><strong>Extras</strong> 디렉터리를 열고 다음을 선택합니다.</p>
+     <ul>
+       <li><strong>Android 지원 리포지토리</strong></li>
+       <li><strong>Android 지원 라이브러리</strong></li>
+     </ul>
+
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+
+</li>
+
+
+<li>
+  <h2 id="GetGoogle" class="norule">더 많은 API를 위해 Google Play 서비스 가져오기</h2>
+
+  <div class="sidebox">
+
+    <p>Google Play 서비스 API는 Android
+ 앱에 다음과 같이 다양한 기능과 서비스를 제공합니다.</p>
+    <ul>
+      <li><a href="{@docRoot}google/play-services/plus.html">사용자 인증</a></li>
+      <li><a href="{@docRoot}google/play-services/maps.html">Google Maps</a></li>
+      <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
+      <li><a href="{@docRoot}google/play-services/games.html">게임 도전 과제 및
+ 리더보드</a></li>
+      <li><a href="{@docRoot}google/play-services/index.html">그 외 다수</a></li>
+    </ul>
+  </div>
+
+  <p>Google API로 개발하려면 Google Play 서비스 패키지가 필요합니다.</p>
+  <p><strong>Extras</strong> 디렉터리를 열고 다음을 선택합니다.</p>
+     <ul>
+       <li><strong>Google Repository</strong></li>
+       <li><strong>Google Play 서비스</strong></li>
+     </ul>
+
+  <p class="note"><strong>참고:</strong> Google Play 서비스를 모든 Android 구동 기기에서 
+사용할 수 있는 것은 아니지만, Google Play Store가 있는 기기에서는 모두 사용할 수 있습니다. 이와 같은 API를 
+Android 에뮬레이터에서 사용하려면, SDK Manager의 최신 Android X.X 디렉터리에서 <strong>Google API</strong>
+ 시스템 이미지도 설치해야 합니다.</p>
+</li>
+
+
+<li>
+  <h2 id="Install" class="norule">패키지 설치</h2>
+  <p>원하는 패키지를 모두 선택하면 계속 진행하여 설치합니다.</p>
+  <ol>
+   <li><strong>X 패키지 설치</strong>를 클릭합니다.</li>
+   <li>다음 창에서, 왼쪽에 있는 각 패키지 이름을 더블 클릭하여 각각의 
+라이선스 동의서를 수락합니다.</li>
+   <li><strong>설치</strong>를 클릭합니다.</li>
+  </ol>
+  <p>다운로드 진행률이 SDK Manager 창 맨 아래에 표시됩니다.
+  <strong>SDK Manager를 종료하지 마십시오</strong>. 다운로드가 취소됩니다.</p>
+</li>
+
+<li>
+  <h2 id="Build" class="norule">뭐든 구축하세요!</h2>
+
+<p>이제 Android SDK에 위의 패키지를 설치했으니 Android용 앱을 구축할 준비가 끝난 
+셈입니다. 새로운 도구와 다른 API를 사용할 수 있게 되면, SDK Manager를 시작하여 
+사용자의 SDK에 새 패키지를 다운로드할 수 있습니다.</p>
+
+<p>진행 방법에 대한 몇 가지 옵션을 소개합니다.</p>
+
+<div class="cols" style="padding:10px 0">
+<div class="col-4">
+<h3>시작하기</h3>
+<p>Android 개발이 처음인 경우, Android 앱의 기초를 배울 수 있는 
+<strong><a href="{@docRoot}training/basics/firstapp/index.html">첫 앱 구축하기</a></strong> 가이드를 참조하십시오.</p>
+
+</div>
+<div class="col-4 box">
+<h3>웨어러블용 앱 구축하기</h3>
+<p>Android 웨어러블용 앱을 구축할 준비가 되었다면 
+<strong><a href="{@docRoot}wear/preview/start.html">Android Wear용 앱 구축하기</a></strong> 가이드를 참조하십시오.</p>
+
+</div>
+<div class="col-4 box">
+<h3>Google API 사용</h3>
+<p>Maps 또는 Play Game 서비스와 같은 
+Google API를 사용하려면 
+<strong><a href="{@docRoot}google/play-services/setup.html">Google Play
+서비스 설정하기</a></strong> 가이드를 참조하십시오.</p>
+
+</div>
+</div><!-- end cols -->
+
+
+</li>
+
+</ol>
+
+

@@ -1,0 +1,1031 @@
+page.title=Menu
+parent.title=Giao diện Người dùng
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#xml">Định nghĩa một Menu trong XML</a></li>
+  <li><a href="#options-menu">Tạo một Menu Tùy chọn</a>
+    <ol>
+      <li><a href="#RespondingOptionsMenu">Xử lý sự kiện nhấp</a></li>
+      <li><a href="#ChangingTheMenu">Thay đổi các mục menu vào thời gian chạy</a></li>
+    </ol>
+  </li>
+  <li><a href="#context-menu">Tạo một Menu Ngữ cảnh</a>
+    <ol>
+      <li><a href="#FloatingContextMenu">Tạo một menu ngữ cảnh nổi</a></li>
+      <li><a href="#CAB">Sử dụng chế độ hành động theo ngữ cảnh</a></li>
+    </ol>
+  </li>
+  <li><a href="#PopupMenu">Tạo một Menu Bật lên</a>
+    <ol>
+      <li><a href="#PopupEvents">Xử lý sự kiện nhấp</a></li>
+    </ol>
+  </li>
+  <li><a href="#groups">Tạo Nhóm Menu</a>
+    <ol>
+      <li><a href="#checkable">Sử dụng mục menu có thể chọn</a></li>
+    </ol>
+  </li>
+  <li><a href="#intents">Thêm Mục Menu dựa trên Ý định</a>
+    <ol>
+      <li><a href="#AllowingToAdd">Cho phép hoạt động của bạn được thêm vào các menu khác</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>Lớp khóa</h2>
+  <ol>
+    <li>{@link android.view.Menu}</li>
+    <li>{@link android.view.MenuItem}</li>
+    <li>{@link android.view.ContextMenu}</li>
+    <li>{@link android.view.ActionMode}</li>
+  </ol>
+
+  <h2>Xem thêm</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Thanh Hành động</a></li>
+    <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">Tài nguyên Menu</a></li>
+    <li><a href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">Nói
+Tạm biệt với Nút Menu</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Menu là một thành phần giao diện người dùng phổ biến trong nhiều loại ứng dụng. Để cung cấp một
+trải nghiệm người dùng quen thuộc và nhất quán, bạn nên sử dụng các API {@link android.view.Menu} để trình bày
+hành động người dùng và các tùy chọn khác trong hoạt động của mình.</p>
+
+<p>Bắt đầu với Android 3.0 (API mức 11), các thiết bị dựa trên nền tảng Android không còn phải
+cung cấp một nút <em>Menu</em> chuyên dụng nữa. Với sự thay đổi này, các ứng dụng Android cần tránh khỏi
+sự phụ thuộc vào bảng điều khiển menu 6 mục truyền thống này mà thay vào đó cung cấp một thanh hành động để trình bày
+các hành động người dùng thông dụng.</p>
+
+<p>Mặc dù thiết kế và trải nghiệm người dùng đối với một số mục menu đã thay đổi, ngữ nghĩa để định nghĩa
+tập hợp hành động và tùy chọn thì vẫn dựa trên các API {@link android.view.Menu}. Hướng dẫn
+này trình bày cách tạo ba loại menu hay trình bày hành động cơ bản trên tất cả
+phiên bản Android:</p>
+
+<dl>
+  <dt><strong>Menu tùy chọn và thanh hành động</strong></dt>
+    <dd><a href="#options-menu">Menu tùy chọn</a> là tập hợp các mục menu cơ bản cho một
+hoạt động. Đó là nơi bạn nên đặt các hành động có tác động chung tới ứng dụng, chẳng hạn như
+"Tìm kiếm," "Soạn e-mail" và "Cài đặt."
+  <p>Nếu bạn đang phát triển cho phiên bản Android 2.3 hoặc thấp hơn, người dùng có thể
+hiện bảng điều khiển menu tùy chọn bằng cách nhấn nút <em>Menu</em>.</p>
+  <p>Trên phiên bản Android 3.0 trở lên, các mục từ menu tùy chọn được trình bày bởi <a href="{@docRoot}guide/topics/ui/actionbar.html">thanh hành động</a>, là sự kết hợp giữa các mục hành động
+trên màn hình và các tùy chọn tràn. Bắt đầu với phiên bản Android 3.0, nút <em>Menu</em> bị bỏ đi (một số
+thiết bị
+không có), vì thế bạn nên chuyển sang sử dụng thanh hành động để cho phép truy cập vào hành động và
+các tùy chọn khác.</p>
+  <p>Xem phần về <a href="#options-menu">Tạo một Menu Tùy chọn</a>.</p>
+    </dd>
+    
+  <dt><strong>Menu ngữ cảnh và chế độ hành động theo ngữ cảnh</strong></dt>
+  
+   <dd>Menu ngữ cảnh là một <a href="#FloatingContextMenu">menu nổi</a> xuất hiện khi
+người dùng thực hiện nhấp giữ trên một phần tử. Nó cung cấp các hành động ảnh hưởng tới nội dung hoặc
+khung ngữ cảnh được chọn.
+  <p>Khi phát triển cho phiên bản Android 3.0 trở lên, thay vào đó, bạn nên sử dụng <a href="#CAB">chế độ hành động theo ngữ cảnh</a> để kích hoạt các hành động trên nội dung được chọn. Chế độ này hiển thị
+các mục hành động ảnh hưởng tới nội dung được chọn trong một thanh ở trên cùng của màn hình và cho phép người dùng
+chọn nhiều mục.</p>
+  <p>Xem phần nói về <a href="#context-menu">Tạo Menu Ngữ cảnh</a>.</p>
+</dd>
+    
+  <dt><strong>Menu bật lên</strong></dt>
+    <dd>Menu bật lên sẽ hiển thị danh sách các mục trong một danh sách thẳng đứng được neo vào dạng xem
+đã gọi ra menu. Nên cung cấp một phần tràn gồm các hành động liên quan tới nội dung cụ thể hoặc
+nhằm cung cấp các tùy chọn cho phần thứ hai của một lệnh. Các hành động trong một menu bật lên
+<strong>không</strong> nên trực tiếp ảnh hưởng tới nội dung tương ứng&mdash;đó là việc của hành động ngữ cảnh
+. Thay vào đó, menu bật lên áp dụng cho các hành động mở rộng liên quan tới các vùng nội dung trong hoạt động
+của bạn.
+  <p>Xem phần về <a href="#PopupMenu">Tạo một Menu Bật lên</a>.</p>
+</dd>
+</dl>
+
+
+
+<h2 id="xml">Định nghĩa một Menu trong XML</h2>
+
+<p>Đối với tất cả các loại menu, Android cung cấp một định dạng XML chuẩn để định nghĩa các mục menu.
+Thay vì xây dựng một menu trong mã của hoạt động của bạn, bạn nên định nghĩa một menu và tất cả các mục của nó trong một
+<a href="{@docRoot}guide/topics/resources/menu-resource.html">tài nguyên menu</a> XML. Khi đó, bạn có thể
+bung tài nguyên menu (tải nó như một đối tượng {@link android.view.Menu}) trong hoạt động hoặc
+phân đoạn của mình.</p>
+
+<p>Sử dụng một tài nguyên menu là một cách làm hay vì một vài lý do:</p>
+<ul>
+  <li>Nó dễ trực quan hóa cấu trúc menu trong XML hơn.</li>
+  <li>Nó tách riêng nội dung cho menu với mã hành vi của ứng dụng của bạn.</li>
+  <li>Nó cho phép bạn tạo các cấu hình menu phái sinh cho các phiên bản nền tảng,
+kích cỡ màn hình khác nhau và các cấu hình khác bằng cách tận dụng khuôn khổ <a href="{@docRoot}guide/topics/resources/index.html">tài nguyên ứng dụng</a>.</li>
+</ul>
+
+<p>Để định nghĩa menu, hãy tạo một tệp XML bên trong thư mục <code>res/menu/</code>
+dự án của bạn và xây dựng menu với các phần tử sau:</p>
+<dl>
+  <dt><code>&lt;menu></code></dt>
+    <dd>Định nghĩa một {@link android.view.Menu}, đó là một bộ chứa các mục menu. Phần tử 
+<code>&lt;menu></code> phải là một nút gốc cho tệp và có thể giữ một hoặc nhiều phần tử
+<code>&lt;item></code> và <code>&lt;group></code>.</dd>
+
+  <dt><code>&lt;item></code></dt>
+    <dd>Tạo một {@link android.view.MenuItem}, nó biểu diễn một mục đơn trong một menu. Phần tử
+này có thể chứa một phần tử <code>&lt;menu></code> được lồng nhau để tạo một menu con.</dd>
+    
+  <dt><code>&lt;group></code></dt>
+    <dd>Một bộ chứa tùy chọn, vô hình cho các phần tử {@code &lt;item&gt;}. Nó cho phép bạn
+phân loại các mục menu sao cho chúng chia sẻ các tính chất như trạng thái hiện hoạt và khả năng hiển thị. Để biết thêm
+thông tin, hãy xem phần nói về <a href="#groups">Tạo Nhóm Menu</a>.</dd>
+</dl>
+
+
+<p>Sau đây là một menu ví dụ có tên là <code>game_menu.xml</code>:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/new_game"
+          android:icon="@drawable/ic_new_game"
+          android:title="@string/new_game"
+          android:showAsAction="ifRoom"/&gt;
+    &lt;item android:id="@+id/help"
+          android:icon="@drawable/ic_help"
+          android:title="@string/help" /&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Phần tử <code>&lt;item></code> hỗ trợ một vài thuộc tính bạn có thể sử dụng để định nghĩa biểu hiện bên ngoài
+và hành vi của một mục. Các mục trong menu trên bao gồm những thuộc tính sau:</p>
+
+<dl>
+  <dt>{@code android:id}</dt>
+    <dd>Một ID tài nguyên duy nhất đối với mục, nó cho phép ứng dụng có thể nhận ra mục đó
+khi người dùng chọn nó.</dd>
+  <dt>{@code android:icon}</dt>
+    <dd>Một tham chiếu tới một nội dung vẽ được để dùng làm biểu tượng của mục.</dd>
+  <dt>{@code android:title}</dt>
+    <dd>Một tham chiếu tới một xâu để dùng làm tiêu đề của mục.</dd>
+  <dt>{@code android:showAsAction}</dt>
+    <dd>Quy định thời điểm và cách thức mục này nên xuất hiện như một mục hành động trong <a href="{@docRoot}guide/topics/ui/actionbar.html">thanh hành động</a>.</dd>
+</dl>
+
+<p>Đây là những thuộc tính quan trọng nhất bạn nên sử dụng, nhưng còn nhiều thuộc tính sẵn có khác.
+Để biết thông tin về tất cả thuộc tính được hỗ trợ, hãy xem tài liệu <a href="{@docRoot}guide/topics/resources/menu-resource.html">Tài nguyên Menu</a>.</p>
+
+<p>Bạn có thể thêm một menu con vào một mục trong bất kỳ menu nào (ngoại trừ menu con) bằng cách thêm một phần tử {@code &lt;menu&gt;}
+làm con của {@code &lt;item&gt;}. Các menu con thường hữu ích khi ứng dụng của bạn có nhiều
+chức năng mà có thể được tổ chức thành các chủ đề, như các mục trong thanh menu của một ứng dụng PC (Tệp,
+Chỉnh sửa, Dạng xem, v.v.). Ví dụ:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/file"
+          android:title="@string/file" &gt;
+        &lt;!-- "file" submenu --&gt;
+        &lt;menu&gt;
+            &lt;item android:id="@+id/create_new"
+                  android:title="@string/create_new" /&gt;
+            &lt;item android:id="@+id/open"
+                  android:title="@string/open" /&gt;
+        &lt;/menu&gt;
+    &lt;/item&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Để sử dụng menu trong hoạt động của mình, bạn cần bung tài nguyên menu (chuyển tài nguyên XML
+thành một đối tượng có thể lập trình) bằng cách sử dụng {@link android.view.MenuInflater#inflate(int,Menu)
+MenuInflater.inflate()}. Trong những phần sau, bạn sẽ biết cách bung một menu đối với mỗi
+loại menu.</p>
+
+
+
+<h2 id="options-menu">Tạo một Menu Tùy chọn</h2>
+
+<div class="figure" style="width:200px;margin:0">
+  <img src="{@docRoot}images/options_menu.png" height="333" alt="" />
+  <p class="img-caption"><strong>Hình 1.</strong> Các menu tùy chọn trong
+Trình duyệt, trên Android 2.3.</p>
+</div>
+
+<p>Menu tùy chọn là nơi bạn nên đưa vào hành động và các tùy chọn khác liên quan tới
+ngữ cảnh hoạt động hiện tại, chẳng hạn như "Tìm kiếm," "Soạn e-mail," và "Cài đặt."</p>
+
+<p>Nơi mà các mục trong menu tùy chọn của bạn xuất hiện trên màn hình sẽ phụ thuộc vào phiên bản mà bạn
+phát triển ứng dụng của mình cho:</p>
+
+<ul>
+  <li>Nếu bạn phát triển ứng dụng của mình cho phiên bản <strong>Android 2.3.x (API mức 10) hoặc
+thấp hơn</strong>, nội dung của menu tùy chọn sẽ xuất hiện ở dưới cùng màn hình khi người dùng
+nhấn nút <em>Menu</em> như minh họa trong hình 1. Khi được mở, phần hiển thị đầu tiên là
+menu biểu tượng
+với tối đa sáu mục menu. Nếu menu của bạn bao gồm nhiều hơn sáu mục, Android sẽ đặt
+mục thứ sáu và phần còn lại vào một menu tràn mà người dùng có thể mở bằng cách chọn
+<em>Thêm nữa</em>.</li>
+
+  <li>Nếu bạn phát triển ứng dụng của mình cho phiên bản <strong>Android 3.0 (API mức 11) và
+cao hơn</strong>, các mục từ menu tùy chọn sẵn ở trong <a href="{@docRoot}guide/topics/ui/actionbar.html">thanh hành động</a>. Theo mặc định, hệ thống
+đặt tất cả các mục trong phần tràn hành động mà người dùng có thể hiện bằng biểu tượng tràn hành động phía
+bên phải của thanh hành động (hoặc bằng cách nhấn nút <em>Menu</em> của thiết bị nếu có). Để
+kích hoạt
+truy cập nhanh vào các hành động quan trọng, bạn có thể đưa lên một vài mục xuất hiện trong thanh hành động bằng cách thêm
+{@code android:showAsAction="ifRoom"} vào phần tử {@code &lt;item&gt;} tương ứng (xem hình
+2). <p>Để biết thêm thông tin về các mục hành động và hành vi khác của thanh hành động, hãy xem hướng dẫn <a href="{@docRoot}guide/topics/ui/actionbar.html">Thanh Hành động</a>. </p>
+<p class="note"><strong>Lưu ý:</strong> Ngay cả khi bạn <em>không</em> đang phát triển cho phiên bản Android 3.0 hoặc
+cao hơn, bạn có thể xây dựng bố trí thanh hành động của chính mình cho hiệu ứng tương tự. Để xem ví dụ về cách bạn có thể hỗ trợ các phiên bản cao hơn
+của Android bằng một thanh hành động, hãy xem mẫu <a href="{@docRoot}resources/samples/ActionBarCompat/index.html">Tương thích với Thanh Hành động</a>
+.</p>
+</li>
+</ul>
+
+<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<p class="img-caption"><strong>Hình 2.</strong> Thanh hành động từ ứng dụng <a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a>, hiển thị
+các tab điều hướng và một mục hành động máy ảnh (cộng với nút tràn hành động).</p>
+
+<p>Bạn có thể khai báo các mục cho menu tùy chọn từ lớp con {@link android.app.Activity}
+của bạn hoặc một lớp con {@link android.app.Fragment}. Nếu cả hoạt động của bạn và (các) phân đoạn
+đều khai báo các mục cho menu tùy chọn, chúng sẽ được kết hợp lại trong UI. Các mục của hoạt động xuất hiện
+trước, sau đó là các mục của từng phân đoạn theo thứ tự phân đoạn được thêm vào
+hoạt động. Nếu cần, bạn có thể sắp xếp lại các mục menu bằng thuộc tính {@code android:orderInCategory}
+trong mỗi {@code &lt;item&gt;} mà bạn cần di chuyển.</p>
+
+<p>Để quy định menu tùy chọn cho một hoạt động, hãy khống chế {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (các phân đoạn cung cấp
+phương pháp gọi lại {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()} của chính mình). Trong
+phương pháp này, bạn có thể bung tài nguyên menu của mình (<a href="#xml">được định nghĩa trong XML</a>) vào {@link
+android.view.Menu} được cung cấp trong phương pháp gọi lại. Ví dụ:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = {@link android.app.Activity#getMenuInflater()};
+    inflater.inflate(R.menu.game_menu, menu);
+    return true;
+}
+</pre>
+
+<p>Bạn cũng có thể thêm các mục menu bằng cách sử dụng {@link android.view.Menu#add(int,int,int,int)
+add()} và truy xuất các mục bằng {@link android.view.Menu#findItem findItem()} để xem lại
+tính chất của chúng bằng các API {@link android.view.MenuItem}.</p>
+
+<p>Nếu bạn phát triển ứng dụng của mình cho phiên bản Android 2.3.x và thấp hơn, hệ thống gọi {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} để tạo menu tùy chọn
+khi người dùng mở menu lần đầu tiên. Nếu bạn phát triển cho phiên bản Android 3.0 vào cao hơn, 
+hệ thống sẽ gọi {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} khi
+bắt đầu hoạt động để hiển thị các mục cho thanh hành động.</p>
+
+
+
+<h3 id="RespondingOptionsMenu">Xử lý sự kiện nhấp</h3>
+
+<p>Khi người dùng chọn một mục từ menu tùy chọn (bao gồm các mục hành động trong thanh hành động),
+hệ thống sẽ gọi phương pháp {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} của hoạt động của bạn. Phương pháp này thông qua {@link android.view.MenuItem} được chọn. Bạn
+có thể nhận biết mục bằng cách gọi {@link android.view.MenuItem#getItemId()}, nó trả về ID duy nhất
+cho mục menu (được định nghĩa bởi thuộc tính {@code android:id} trong tài nguyên menu hoặc bằng một
+số nguyên được cấp cho phương pháp {@link android.view.Menu#add(int,int,int,int) add()}). Bạn có thể khớp
+ID này với các mục menu đã biết để thực hiện hành động phù hợp. Ví dụ:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle item selection
+    switch (item.getItemId()) {
+        case R.id.new_game:
+            newGame();
+            return true;
+        case R.id.help:
+            showHelp();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>Khi bạn xử lý thành công một mục menu, trả về {@code true}. Nếu không xử lý được
+mục menu, bạn nên gọi triển khai siêu lớp của {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} (triển khai
+mặc định trả về sai).</p>
+
+<p>Nếu hoạt động của bạn bao gồm các phân đoạn, trước tiên hệ thống sẽ gọi {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} cho hoạt động, rồi mới
+cho từng phân đoạn (theo thứ tự thêm phân đoạn) tới khi trả về
+{@code true} hoặc tất cả phân đoạn đều được gọi.</p>
+
+<p class="note"><strong>Mẹo:</strong> Android 3.0 thêm khả năng cho phép bạn định nghĩa hành vi
+khi nhấp đối với một mục menu trong XML, bằng cách sử dụng thuộc tính {@code android:onClick}. Giá trị cho
+thuộc tính phải là tên của một phương pháp được định nghĩa bởi hoạt động sử dụng menu. Phương pháp
+phải công khai và chấp nhận một tham số {@link android.view.MenuItem} đơn&mdash;khi hệ thống
+gọi phương pháp này, nó thông qua mục menu được chọn. Để biết thêm thông tin và ví dụ, hãy xem tài liệu <a href="{@docRoot}guide/topics/resources/menu-resource.html">Tài nguyên Menu</a>.</p>
+
+<p class="note"><strong>Mẹo:</strong> Nếu ứng dụng của bạn chứa nhiều hoạt động và
+một số chúng cung cấp menu tùy chọn tương tự, hãy xem xét tạo
+ một hoạt động chỉ triển khai các phương pháp {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} và {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()}. Sau đó, mở rộng lớp này đối với mỗi hoạt động cần chia sẻ
+menu tùy chọn tương tự. Bằng cách này, bạn có thể quản lý một bộ mã để xử lý các hành động
+menu và từng lớp hậu duệ kế thừa các hành vi menu.
+Nếu bạn muốn thêm các mục menu vào một trong các hoạt động hậu duệ,
+hãy khống chế {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} trong hoạt động đó. Gọi {@code super.onCreateOptionsMenu(menu)} sao cho
+các mục menu gốc được tạo, sau đó thêm các mục menu mới bằng {@link
+android.view.Menu#add(int,int,int,int) menu.add()}. Bạn cũng có thể khống chế hành vi
+của siêu lớp đối với các mục menu riêng lẻ.</p>
+
+
+<h3 id="ChangingTheMenu">Thay đổi các mục menu vào thời gian chạy</h3>
+
+<p>Sau khi hệ thống gọi {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}, nó sẽ giữ lại một thực thể của {@link android.view.Menu} mà bạn đưa vào và
+sẽ không gọi lại {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}
+trừ khi menu bị vô hiệu hóa vì lý do nào đó. Tuy nhiên, bạn chỉ nên sử dụng {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} để tạo trạng thái menu
+ban đầu chứ không phải để thực hiện thay đổi trong vòng đời của hoạt động.</p>
+
+<p>Nếu bạn muốn sửa đổi menu tùy chọn dựa trên 
+các sự kiện xảy ra trong vòng đời của hoạt động, bạn có thể làm vậy trong phương pháp
+ {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}. Phương pháp
+này chuyển cho bạn đối tượng {@link android.view.Menu} như hiện đang có để bạn có thể sửa đổi nó,
+chẳng hạn như thêm, xóa bỏ, hoặc vô hiệu hóa các mục. (Phân đoạn cũng cung cấp lệnh gọi lại {@link
+android.app.Fragment#onPrepareOptionsMenu onPrepareOptionsMenu()}.)</p>
+
+<p>Trên phiên bản Android 2.3.x và thấp hơn, hệ thống gọi {@link
+android.app.Activity#onPrepareOptionsMenu(Menu)
+onPrepareOptionsMenu()} mỗi lần người dùng mở menu tùy chọn (nhấn nút <em>Menu</em>
+).</p>
+
+<p>Trên phiên bản Android 3.0 trở lên, menu tùy chọn được coi như luôn mở khi các mục menu được
+trình bày trong thanh hành động. Khi một sự kiện xảy ra và bạn muốn thực hiện một cập nhật menu, bạn phải
+gọi {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} để yêu cầu
+hệ thống gọi {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
+
+<p class="note"><strong>Lưu ý:</strong> 
+Bạn không nên thay đổi các mục trong menu tùy chọn dựa trên {@link android.view.View} đang
+trong tiêu điểm. Khi ở chế độ cảm ứng (khi người dùng không sử dụng bi xoay hay d-pad), các dạng xem
+không thể lấy tiêu điểm, vì thế bạn không nên sử dụng tiêu điểm làm cơ sở để sửa đổi
+các mục trong menu tùy chọn. Nếu bạn muốn cung cấp các mục menu nhạy cảm với ngữ cảnh cho một {@link
+android.view.View}, hãy sử dụng một <a href="#context-menu">Menu Ngữ cảnh</a>.</p>
+
+
+
+
+<h2 id="context-menu">Tạo một Menu Ngữ cảnh</h2>
+
+<div class="figure" style="width:420px;margin-top:-1em">
+  <img src="{@docRoot}images/ui/menu-context.png" alt="" />
+  <p class="img-caption"><strong>Hình 3.</strong> Ảnh chụp màn hình một menu ngữ cảnh nổi (trái)
+và thanh hành động ngữ cảnh (phải).</p>
+</div>
+
+<p>Menu ngữ cảnh sẽ đưa ra các hành động ảnh hưởng tới một mục hoặc khung ngữ cảnh cụ thể trong UI. Bạn
+có thể cung cấp một menu ngữ cảnh cho bất kỳ dạng xem nào, nhưng chúng thường được sử dụng nhiều nhất cho các mục trong một {@link
+android.widget.ListView}, {@link android.widget.GridView}, hoặc các bộ sưu tập dạng xem khác mà
+người dùng có thể thực hiện hành động trực tiếp trên mỗi mục.</p>
+
+<p>Có hai cách để cung cấp các hành động ngữ cảnh:</p>
+<ul>
+  <li>Trong một <a href="#FloatingContextMenu">menu ngữ cảnh nổi</a>. Menu xuất hiện như một
+danh sách nổi gồm nhiều mục menu (tương tự như một hộp thoại) khi người dùng thực hiện nhấp giữ (nhấn và
+giữ) trên một dạng xem có khai báo hỗ trợ menu ngữ cảnh. Người dùng có thể thực hiện hành động
+ngữ cảnh trên một mục vào một thời điểm.</li>
+
+  <li>Trong <a href="#CAB">chế độ hành động theo ngữ cảnh</a>. Chế độ này là một hệ thống triển khai
+{@link android.view.ActionMode} có chức năng hiển thị một <em>thanh hành động ngữ cảnh</em> ở bên trên
+màn hình với các mục hành động ảnh hưởng tới (các) mục được chọn. Khi chế độ này hiện hoạt, người dùng
+có thể thực hiện một hành động trên nhiều mục ngay lập tức (nếu ứng dụng của bạn cho phép).</li>
+</ul>
+
+<p class="note"><strong>Lưu ý:</strong> Chế độ hành động theo ngữ cảnh sẵn có trên phiên bản Android 3.0 (API
+mức 11) và cao hơn và là kỹ thuật được ưu tiên cho việc hiển thị các hành động theo ngữ cảnh khi
+sẵn có. Nếu ứng dụng của bạn hỗ trợ các phiên bản thấp hơn 3.0, vậy bạn nên quay lại menu ngữ cảnh
+nổi trên những thiết bị đó.</p>
+
+
+<h3 id="FloatingContextMenu">Tạo một menu ngữ cảnh nổi</h3>
+
+<p>Để cung cấp một menu ngữ cảnh nổi:</p>
+<ol>
+  <li>Đăng ký {@link android.view.View} mà menu ngữ cảnh nên được liên kết với bằng cách
+gọi {@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()} và chuyển
+cho nó {@link android.view.View}.
+  <p>Nếu hoạt động của bạn sử dụng một {@link android.widget.ListView} hoặc {@link android.widget.GridView} và
+bạn muốn từng mục cung cấp cùng menu ngữ cảnh, hãy đăng ký tất cả mục cho một menu ngữ cảnh bằng cách
+chuyển {@link android.widget.ListView} hoặc {@link android.widget.GridView} cho {@link
+android.app.Activity#registerForContextMenu(View) registerForContextMenu()}.</p>
+</li>
+
+  <li>Triển khai phương pháp {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+trong {@link android.app.Activity} hoặc {@link android.app.Fragment} của bạn.
+  <p>Khi dạng xem được đăng ký nhận được một sự kiện nhấp giữ, hệ thống sẽ gọi phương pháp {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+của bạn. Đây là nơi bạn định nghĩa các mục menu, thường bằng cách bung một tài nguyên menu. Ví
+dụ:</p>
+<pre>
+&#64;Override
+public void onCreateContextMenu(ContextMenu menu, View v,
+                                ContextMenuInfo menuInfo) {
+    super.onCreateContextMenu(menu, v, menuInfo);
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.context_menu, menu);
+}
+</pre>
+
+<p>{@link android.view.MenuInflater} cho phép bạn bung menu ngữ cảnh từ một <a href="{@docRoot}guide/topics/resources/menu-resource.html">tài nguyên menu</a>. Các tham số của phương pháp gọi lại
+bao gồm {@link android.view.View}
+mà người dùng đã chọn và một đối tượng {@link android.view.ContextMenu.ContextMenuInfo} cung cấp
+thông tin bổ sung về mục được chọn. Nếu hoạt động của bạn có một vài dạng xem mà mỗi dạng cung cấp
+một menu ngữ cảnh khác nhau, bạn có thể sử dụng những tham số này để xác định menu ngữ cảnh nào cần
+bung.</p>
+</li>
+
+<li>Triển khai {@link android.app.Activity#onContextItemSelected(MenuItem)
+onContextItemSelected()}.
+  <p>Khi người dùng chọn một mục menu, hệ thống sẽ gọi phương pháp này để bạn có thể thực hiện
+hành động phù hợp. Ví dụ:</p>
+
+<pre>
+&#64;Override
+public boolean onContextItemSelected(MenuItem item) {
+    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    switch (item.getItemId()) {
+        case R.id.edit:
+            editNote(info.id);
+            return true;
+        case R.id.delete:
+            deleteNote(info.id);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+    }
+}
+</pre>
+
+<p>Phương pháp {@link android.view.MenuItem#getItemId()} sẽ truy vấn ID cho
+mục menu được chọn, bạn nên gán mục này cho từng mục menu trong XML bằng cách sử dụng thuộc tính {@code
+android:id} như trình bày trong phần về <a href="#xml">Định nghĩa một Menu trong
+XML</a>.</p>
+
+<p>Khi bạn xử lý thành công một mục menu, trả về {@code true}. Nếu bạn không xử lý mục menu,
+bạn nên chuyển mục menu đó tới triển khai siêu lớp. Nếu hoạt động của bạn bao gồm nhiều phân đoạn,
+hoạt động sẽ nhận được lệnh gọi lại này trước. Bằng cách gọi siêu lớp khi chưa được xử lý, hệ thống
+sẽ chuyển sự kiện tới phương pháp gọi lại tương ứng trong từng phân đoạn, lần lượt (theo thứ tự
+thêm phân đoạn) tới khi {@code true} hoặc {@code false} được trả về. (Triển khai
+mặc định cho {@link android.app.Activity} và {@code android.app.Fragment} sẽ trả về {@code
+false}, vì thế bạn nên luôn gọi siêu lớp khi chưa được xử lý.)</p>
+</li>
+</ol>
+
+
+<h3 id="CAB">Sử dụng chế độ hành động theo ngữ cảnh</h3>
+
+<p>Chế độ hành động theo ngữ cảnh là một triển khai hệ thống {@link android.view.ActionMode}
+tập trung vào tương tác người dùng hướng tới việc thực hiện các hành động theo ngữ cảnh. Khi một
+người dùng kích hoạt chế độ này bằng cách chọn một mục, một <em>thanh hành động ngữ cảnh</em> sẽ xuất hiện bên trên
+màn hình để trình bày các hành động mà người dùng có thể thực hiện trên (các) mục đang được chọn. Trong khi
+chế độ này được kích hoạt, người dùng có thể chọn nhiều mục (nếu bạn cho phép), bỏ chọn mục, và tiếp tục
+điều hướng trong hoạt động (miễn là bạn sẵn lòng cho phép). Chế độ hành động bị vô hiệu hóa
+và thanh hành động ngữ cảnh biến mất khi người dùng bỏ chọn tất cả các mục, nhấn nút QUAY LẠI,
+hoặc chọn hành động <em>Xong</em> ở phía bên trái của thanh.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Thanh hành động ngữ cảnh không nhất thiết
+phải được liên kết với <a href="{@docRoot}guide/topics/ui/actionbar.html">thanh hành động</a>. Chúng vận hành
+độc lập, mặc dù thanh hành động ngữ cảnh đè lên vị trí của thanh hành động
+về mặt hiển thị.</p>
+
+<p>Nếu bạn đang phát triển cho phiên bản Android 3.0 (API mức 11) hoặc cao hơn, bạn
+nên sử dụng chế độ hành động theo ngữ cảnh để trình bày các hành động ngữ cảnh, thay vì sử dụng <a href="#FloatingContextMenu">menu ngữ cảnh nổi</a>.</p>
+
+<p>Đối với các dạng xem cung cấp hành động ngữ cảnh, bạn nên thường xuyên gọi ra chế độ hành động theo ngữ cảnh
+khi xảy ra một trong hai sự kiện sau (hoặc cả hai):</p>
+<ul>
+  <li>Người dùng thực hiện nhấp giữ trên dạng xem.</li>
+  <li>Người dùng chọn một hộp kiểm hoặc một thành phần UI tương tự trong dạng xem.</li>
+</ul>
+
+<p>Cách ứng dụng của bạn gọi ra chế độ hành động theo ngữ cảnh và định nghĩa hành vi cho từng
+hành động phụ thuộc vào thiết kế của bạn. Cơ bản có hai thiết kế:</p>
+<ul>
+  <li>Đối với các hành động ngữ cảnh trên các dạng xem riêng lẻ, tùy ý.</li>
+  <li>Đối với các hành động ngữ cảnh hàng loạt trên các nhóm mục trong một {@link
+android.widget.ListView} hoặc {@link android.widget.GridView} (cho phép người dùng chọn nhiều
+mục và thực hiện một hành động trên tất cả).</li>
+</ul>
+
+<p>Các phần sau mô tả phần thiết lập cần thiết đối với từng kịch bản.</p>
+
+
+<h4 id="CABforViews">Kích hoạt chế độ hành động theo ngữ cảnh cho các dạng xem riêng lẻ</h4>
+
+<p>Nếu muốn gọi ra chế độ hành động theo ngữ cảnh chỉ khi người dùng chọn các dạng xem
+cụ thể, bạn nên:</p>
+<ol>
+  <li>Triển khai giao diện {@link android.view.ActionMode.Callback}. Trong các phương pháp gọi lại của giao diện, bạn
+có thể quy định các hành động cho thanh hành động ngữ cảnh, hồi đáp các sự kiện nhấp trên mục hành động, và
+xử lý các sự kiện vòng đời khác đối với chế độ hành động.</li>
+  <li>Gọi {@link android.app.Activity#startActionMode startActionMode()} khi bạn muốn hiển thị
+thanh (chẳng hạn như khi người dùng nhấp giữ dạng xem).</li>
+</ol>
+
+<p>Ví dụ:</p>
+
+<ol>
+  <li>Triển khai giao diện {@link android.view.ActionMode.Callback ActionMode.Callback}:
+<pre>
+private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+    // Called when the action mode is created; startActionMode() was called
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate a menu resource providing context menu items
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+        return true;
+    }
+
+    // Called each time the action mode is shown. Always called after onCreateActionMode, but
+    // may be called multiple times if the mode is invalidated.
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false; // Return false if nothing is done
+    }
+
+    // Called when the user selects a contextual menu item
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share:
+                shareCurrentItem();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Called when the user exits the action mode
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
+    }
+};
+</pre>
+
+<p>Lưu ý rằng những phương pháp gọi lại sự kiện này hầu như giống với các phương pháp gọi lại đối với <a href="#options-menu">menu tùy chọn</a>, khác ở chỗ từng phương pháp cũng chuyển đối tượng {@link
+android.view.ActionMode} được liên kết với sự kiện đó. Bạn có thể sử dụng các API {@link
+android.view.ActionMode} để thực hiện những thay đổi khác nhau với CAB, chẳng hạn như sửa đổi tiêu đề và
+phụ đề bằng {@link android.view.ActionMode#setTitle setTitle()} và {@link
+android.view.ActionMode#setSubtitle setSubtitle()} (hữu ích khi muốn cho biết có bao nhiêu mục
+được chọn).</p>
+
+<p>Cũng lưu ý rằng các bộ mẫu trên sẽ đặt biến {@code mActionMode} là rỗng khi
+chế độ hành động bị hủy. Ở bước tiếp theo, bạn sẽ thấy cách nó được khởi tạo và việc lưu
+biến thành viên trong hoạt động hoặc phân đoạn của bạn có thể hữu ích như thế nào.</p>
+</li>
+
+  <li>Gọi {@link android.app.Activity#startActionMode startActionMode()} để kích hoạt chế độ hành động theo ngữ cảnh
+khi phù hợp, chẳng hạn như để hồi đáp lại một sự kiện nhấp giữ trên một {@link
+android.view.View}:</p>
+
+<pre>
+someView.setOnLongClickListener(new View.OnLongClickListener() {
+    // Called when the user long-clicks on someView
+    public boolean onLongClick(View view) {
+        if (mActionMode != null) {
+            return false;
+        }
+
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = getActivity().startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        return true;
+    }
+});
+</pre>
+
+<p>Khi bạn gọi {@link android.app.Activity#startActionMode startActionMode()}, hệ thống sẽ trả về
+{@link android.view.ActionMode} được tạo. Bằng cách lưu điều này trong một biến thành viên, bạn có thể
+thực hiện thay đổi thanh hành động theo ngữ cảnh để hồi đáp những sự kiện khác. Trong mẫu trên, 
+{@link android.view.ActionMode} được sử dụng để đảm bảo rằng thực thể {@link android.view.ActionMode} không
+được tạo lại nếu nó đã hiện hoạt, bằng cách kiểm tra xem thành viên có rỗng không trước khi khởi động
+chế độ hành động.</p>
+</li>
+</ol>
+
+
+
+<h4 id="CABforListView">Kích hoạt hành động theo ngữ cảnh hàng loạt trong ListView hoặc GridView</h4>
+
+<p>Nếu bạn có một bộ sưu tập các mục trong một {@link android.widget.ListView} hoặc {@link
+android.widget.GridView} (hoặc một phần mở rộng khác của {@link android.widget.AbsListView}) và muốn
+cho phép người dùng thực hiện các hành động hàng loạt, bạn nên:</p>
+
+<ul>
+  <li>Triển khai giao diện {@link android.widget.AbsListView.MultiChoiceModeListener} và đặt nó
+cho nhóm dạng xem bằng {@link android.widget.AbsListView#setMultiChoiceModeListener
+setMultiChoiceModeListener()}. Trong các phương pháp gọi lại của trình nghe, bạn có thể quy định các hành động
+cho thanh hành động theo ngữ cảnh, hồi đáp các sự kiện nhấp trên các mục hành động, và xử lý các phương pháp gọi lại khác
+được kế thừa từ giao diện {@link android.view.ActionMode.Callback}.</li>
+
+  <li>Gọi {@link android.widget.AbsListView#setChoiceMode setChoiceMode()} bằng tham đối {@link
+android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL}.</li>
+</ul>
+
+<p>Ví dụ:</p>
+
+<pre>
+ListView listView = getListView();
+listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+
+    &#64;Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                          long id, boolean checked) {
+        // Here you can do something when items are selected/de-selected,
+        // such as update the title in the CAB
+    }
+
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        // Respond to clicks on the actions in the CAB
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                deleteSelectedItems();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate the menu for the CAB
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context, menu);
+        return true;
+    }
+
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        // Here you can make any necessary updates to the activity when
+        // the CAB is removed. By default, selected items are deselected/unchecked.
+    }
+
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        // Here you can perform updates to the CAB due to
+        // an {@link android.view.ActionMode#invalidate} request
+        return false;
+    }
+});
+</pre>
+
+<p>Vậy là xong. Lúc này, khi người dùng chọn một mục bằng nhấp giữ, hệ thống sẽ gọi phương pháp {@link
+android.widget.AbsListView.MultiChoiceModeListener#onCreateActionMode onCreateActionMode()}
+và hiển thị thanh hành động theo ngữ cảnh với các hành động được quy định. Trong khi thanh hành động theo ngữ cảnh
+hiển thị, người dùng có thể chọn thêm mục.</p>
+
+<p>Trong một số trường hợp mà các hành động ngữ cảnh cung cấp các mục hành động chung, bạn có thể muốn
+thêm một hộp kiểm hoặc một phần tử UI tương tự để cho phép người dùng chọn các mục, vì
+họ có thể không phát hiện được hành vi nhấp giữ. Khi một người dùng chọn hộp kiểm, bạn
+có thể gọi ra chế độ hành động theo ngữ cảnh bằng cách thiết đặt mục danh sách tương ứng về trạng thái
+đã chọn bằng {@link android.widget.AbsListView#setItemChecked setItemChecked()}.</p>
+
+
+
+
+<h2 id="PopupMenu">Tạo một Menu Bật lên</h2>
+
+<div class="figure" style="width:220px">
+<img src="{@docRoot}images/ui/popupmenu.png" alt="" />
+<p><strong>Hình 4.</strong> Menu bật lên trong ứng dụng Gmail, được neo vào nút tràn
+ở trên cùng bên phải.</p>
+</div>
+
+<p>{@link android.widget.PopupMenu} là một menu mô thái được neo vào một {@link android.view.View}.
+Nó xuất hiện bên dưới dạng xem dấu neo nếu có khoảng trống, hoặc bên trên dạng xem nếu không. Nó có ích cho việc:</p>
+<ul>
+  <li>Cung cấp một menu kiểu tràn cho các hành động mà <em>liên quan tới</em> nội dung cụ thể (chẳng hạn như tiêu đề e-mail
+của Gmail như minh họa trong hình 4).
+    <p class="note"><strong>Lưu ý:</strong> Nó không giống như một menu ngữ cảnh, vốn thường
+áp dụng cho các hành động mà <em>ảnh hưởng</em> tới nội dung được chọn. Đối với những hành động ảnh hưởng tới nội dung
+được chọn, hãy sử dụng <a href="#CAB">chế độ hành động theo ngữ cảnh</a> hoặc <a href="#FloatingContextMenu">menu ngữ cảnh nổi</a>.</p></li>
+  <li>Cung cấp một phần thứ hai của câu lệnh (chẳng hạn như một nút được đánh dấu "Thêm"
+có chức năng tạo ra một menu bật lên với các tùy chọn "Thêm" khác nhau).</li>
+  <li>Cung cấp một danh sách thả xuống tương tự như {@link android.widget.Spinner}, nó không giữ lại một
+lựa chọn liên tục.</li>
+</ul>
+
+
+<p class="note"><strong>Lưu ý:</strong> {@link android.widget.PopupMenu} sẵn có với API
+mức 11 trở lên.</p>
+
+<p>Nếu bạn định nghĩa <a href="#xml">menu của mình trong XML</a>, sau đây là cách bạn có thể hiển thị menu bật lên:</p>
+<ol>
+  <li>Khởi tạo một {@link android.widget.PopupMenu} bằng hàm dựng của nó, có chức năng đưa
+ứng dụng hiện tại {@link android.content.Context} và {@link android.view.View} tới menu
+mà sẽ được neo.</li>
+  <li>Sử dụng {@link android.view.MenuInflater} để bung tài nguyên menu của bạn vào đối tượng {@link
+android.view.Menu} được trả về bởi {@link
+android.widget.PopupMenu#getMenu() PopupMenu.getMenu()}. Trên API mức 14 trở lên, bạn có thể sử dụng
+{@link android.widget.PopupMenu#inflate PopupMenu.inflate()} thay thế.</li>
+  <li>Gọi {@link android.widget.PopupMenu#show() PopupMenu.show()}.</li>
+</ol>
+
+<p>Ví dụ, sau đây là một nút với thuộc tính {@link android.R.attr#onClick android:onClick} có chức năng
+hiển thị một menu bật lên:</p>
+
+<pre>
+&lt;ImageButton
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:src="@drawable/ic_overflow_holo_dark"
+    android:contentDescription="@string/descr_overflow_button"
+    android:onClick="showPopup" />
+</pre>
+
+<p>Khi đó, hoạt động có thể hiển thị menu bật lên như sau:</p>
+
+<pre>
+public void showPopup(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+    MenuInflater inflater = popup.getMenuInflater();
+    inflater.inflate(R.menu.actions, popup.getMenu());
+    popup.show();
+}
+</pre>
+
+<p>Trong API mức 14 trở lên, bạn có thể kết hợp hai dòng có chức năng bung menu bằng {@link
+android.widget.PopupMenu#inflate PopupMenu.inflate()}.</p>
+
+<p>Menu bị bỏ qua khi người dùng chọn một mục hoặc chạm vào bên ngoài vùng
+menu. Bạn có thể lắng nghe báo hiệu sự kiện bỏ bằng cách sử dụng {@link
+android.widget.PopupMenu.OnDismissListener}.</p>
+
+<h3 id="PopupEvents">Xử lý sự kiện nhấp</h3>
+
+<p>Để thực hiện một
+hành động khi người dùng chọn một mục menu, bạn phải triển khai giao diện {@link
+android.widget.PopupMenu.OnMenuItemClickListener} và đăng ký nó với {@link
+android.widget.PopupMenu} của mình bằng cách gọi {@link android.widget.PopupMenu#setOnMenuItemClickListener
+setOnMenuItemclickListener()}. Khi người dùng chọn một mục, hệ thống sẽ gọi lệnh gọi lại {@link
+android.widget.PopupMenu.OnMenuItemClickListener#onMenuItemClick onMenuItemClick()} trong
+giao diện của bạn.</p>
+
+<p>Ví dụ:</p>
+
+<pre>
+public void showMenu(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+
+    // This activity implements OnMenuItemClickListener
+    popup.setOnMenuItemClickListener(this);
+    popup.inflate(R.menu.actions);
+    popup.show();
+}
+
+&#64;Override
+public boolean onMenuItemClick(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.archive:
+            archive(item);
+            return true;
+        case R.id.delete:
+            delete(item);
+            return true;
+        default:
+            return false;
+    }
+}
+</pre>
+
+
+<h2 id="groups">Tạo Nhóm Menu</h2>
+
+<p>Nhóm menu là một tập hợp các mục menu chia sẻ những đặc điểm nhất định. Với một nhóm, bạn có thể
+:</p>
+<ul>
+  <li>Hiển thị hoặc ẩn tất cả các mục bằng {@link android.view.Menu#setGroupVisible(int,boolean)
+setGroupVisible()}</li>
+  <li>Kích hoạt hoặc vô hiệu hóa tất cả các mục bằng {@link android.view.Menu#setGroupEnabled(int,boolean)
+setGroupEnabled()}</li>
+  <li>Quy định xem tất cả các mục có thể chọn hay không bằng {@link
+android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()}</li>
+</ul>
+
+<p>Bạn có thể tạo một nhóm bằng cách lồng các phần tử {@code &lt;item&gt;} bên trong một phần tử {@code &lt;group&gt;}
+vào tài nguyên menu của bạn hoặc bằng cách quy định một ID nhóm bằng phương pháp {@link
+android.view.Menu#add(int,int,int,int) add()}.</p>
+
+<p>Sau đây là một ví dụ về tài nguyên menu bao gồm một nhóm:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/menu_save"
+          android:icon="@drawable/menu_save"
+          android:title="@string/menu_save" /&gt;
+    &lt;!-- menu group --&gt;
+    &lt;group android:id="@+id/group_delete"&gt;
+        &lt;item android:id="@+id/menu_archive"
+              android:title="@string/menu_archive" /&gt;
+        &lt;item android:id="@+id/menu_delete"
+              android:title="@string/menu_delete" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Các mục nằm trong nhóm xuất hiện ở cùng cấp như mục đầu tiên&mdash;tất cả ba mục
+trong menu đều là các mục đồng cấp. Tuy nhiên, bạn có thể sửa đổi các đặc điểm của hai
+mục trong nhóm bằng cách tham chiếu ID nhóm và sử dụng các phương pháp được liệt kê bên trên. Hệ thống cũng sẽ
+không bao giờ tách riêng các mục đã ghép nhóm. Ví dụ, nếu bạn khai báo {@code
+android:showAsAction="ifRoom"} cho từng mục, chúng sẽ hoặc đều xuất hiện trong thanh hành động
+hoặc đều xuất hiện trong phần tràn hành động.</p>
+
+
+<h3 id="checkable">Sử dụng mục menu có thể chọn</h3>
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/radio_buttons.png" height="333" alt="" />
+  <p class="img-caption"><strong>Hình 5.</strong> Ảnh chụp màn hình một menu con với các mục
+có thể chọn.</p>
+</div>
+
+<p>Một mục có thể có ích như một giao diện để bật và tắt các tùy chọn, bằng cách sử dụng một hộp kiểm cho
+các tùy chọn độc lập, hoặc nút chọn một cho các nhóm
+tùy chọn loại trừ lẫn nhau. Hình 5 minh họa một menu con với các mục có thể chọn bằng các nút
+ chọn một.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Các mục menu trong Menu Biểu tượng (từ menu tùy chọn) không thể
+hiển thị một hộp kiểm hay nút chọn một. Nếu bạn chọn đặt các mục trong Menu Biểu tượng là có thể chọn,
+bạn phải chỉ định trạng thái được chọn bằng cách tráo đổi biểu tượng và/hoặc văn bản
+mỗi lần trạng thái thay đổi một cách thủ công.</p>
+
+<p>Bạn có thể định nghĩa hành vi có thể chọn cho các mục menu riêng lẻ bằng cách sử dụng thuộc tính {@code
+android:checkable} trong phần tử {@code &lt;item&gt;}, hoặc cho toàn bộ nhóm với
+thuộc tính {@code android:checkableBehavior} trong phần tử {@code &lt;group&gt;}. Ví
+dụ, tất cả các mục trong nhóm menu này có thể chọn bằng một nút chọn một:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;group android:checkableBehavior="single"&gt;
+        &lt;item android:id="@+id/red"
+              android:title="@string/red" /&gt;
+        &lt;item android:id="@+id/blue"
+              android:title="@string/blue" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Thuộc tính {@code android:checkableBehavior} chấp nhận hoặc:
+<dl>
+  <dt>{@code single}</dt>
+    <dd>Chỉ chọn được một mục từ nhóm (nút chọn một)</dd>
+  <dt>{@code all}</dt>
+    <dd>Có thể chọn được tất cả các mục (hộp kiểm)</dd>
+  <dt>{@code none}</dt>
+    <dd>Không chọn được mục nào</dd>
+</dl>
+
+<p>Bạn có thể áp dụng một trạng thái được chọn mặc định cho một mục bằng cách sử dụng thuộc tính {@code android:checked} trong
+phần tử {@code &lt;item&gt;} và thay đổi nó trong mã bằng phương pháp {@link
+android.view.MenuItem#setChecked(boolean) setChecked()}.</p>
+
+<p>Khi chọn một mục có thể chọn, hệ thống sẽ gọi phương pháp gọi lại mục được chọn tương ứng
+(chẳng hạn như {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}). Chính
+ở đây bạn phải đặt trạng thái của hộp kiểm, vì hộp kiểm hay nút chọn một đều không
+tự động thay đổi trạng thái của nó. Bạn có thể truy vấn trạng thái hiện tại của mục (như trước khi
+người dùng chọn) bằng {@link android.view.MenuItem#isChecked()} và sau đó đặt trạng thái được chọn bằng
+{@link android.view.MenuItem#setChecked(boolean) setChecked()}. Ví dụ:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.vibrate:
+        case R.id.dont_vibrate:
+            if (item.isChecked()) item.setChecked(false);
+            else item.setChecked(true);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>Nếu bạn không đặt trạng thái được chọn bằng cách này, khi đó trạng thái hiển thị của mục (hộp kiểm hoặc
+nút chọn một) sẽ không
+thay đổi khi người dùng chọn nó. Khi bạn đặt trạng thái, hoạt động sẽ giữ nguyên trạng thái được chọn
+của mục đó để khi người dùng mở menu sau, trạng thái được chọn mà bạn đặt
+sẽ được hiển thị.</p>
+
+<p class="note"><strong>Lưu ý:</strong>
+Các mục menu có thể chọn được chỉ định sử dụng trên mỗi phiên và không được lưu sau khi
+ứng dụng bị hủy. Nếu bạn có các cài đặt ứng dụng mà bạn muốn lưu cho người dùng,
+bạn nên lưu trữ dữ liệu bằng cách sử dụng <a href="{@docRoot}guide/topics/data/data-storage.html#pref">Tùy chọn dùng chung</a>.</p>
+
+
+
+<h2 id="intents">Thêm Mục Menu dựa trên Ý định</h2>
+
+<p>Đôi khi bạn sẽ muốn một mục menu khởi chạy một hoạt động bằng cách sử dụng một {@link android.content.Intent}
+(dù đó là một hoạt động trong ứng dụng của bạn hay một ứng dụng khác). Khi bạn biết ý định mà mình
+muốn sử dụng và có một mục menu cụ thể sẽ khởi tạo ý định, bạn có thể thực thi ý định
+bằng {@link android.app.Activity#startActivity(Intent) startActivity()} trong phương pháp gọi lại
+phù hợp theo mục được chọn (chẳng hạn như lệnh gọi lại {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}).</p>
+
+<p>Tuy nhiên, nếu bạn không chắc chắn rằng thiết bị của người dùng
+chứa một ứng dụng xử lý ý định đó thì việc thêm một mục menu gọi nó ra có thể dẫn đến
+mục menu không hoạt động, do ý định có thể không phân giải thành một
+hoạt động. Để giải quyết điều này, Android cho phép bạn linh hoạt thêm các mục menu vào menu của mình
+khi Android tìm các hoạt động trên thiết bị để xử lý ý định của bạn.</p>
+
+<p>Để thêm các mục menu dựa trên các hoạt động sẵn có mà chấp nhận ý định:</p>
+<ol>
+  <li>Định nghĩa một
+ý định bằng thể loại {@link android.content.Intent#CATEGORY_ALTERNATIVE} và/hoặc
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE}, cộng với bất kỳ yêu cầu nào khác.</li>
+  <li>Gọi {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+Menu.addIntentOptions()}. Sau đó, Android tìm kiếm bất kỳ ứng dụng nào có thể thực hiện ý định
+và thêm chúng vào menu của bạn.</li>
+</ol>
+
+<p>Nếu không có ứng dụng được cài đặt
+mà thỏa mãn ý định thì không có mục menu nào được thêm vào.</p>
+
+<p class="note"><strong>Lưu ý:</strong>
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} được sử dụng để xử lý
+phần tử đang được chọn trên màn hình. Vì vậy, nó chỉ nên được sử dụng khi tạo một Menu trong {@link
+android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenuInfo)
+onCreateContextMenu()}.</p>
+
+<p>Ví dụ:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu){
+    super.onCreateOptionsMenu(menu);
+
+    // Create an Intent that describes the requirements to fulfill, to be included
+    // in our menu. The offering app must include a category value of Intent.CATEGORY_ALTERNATIVE.
+    Intent intent = new Intent(null, dataUri);
+    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+
+    // Search and populate the menu with acceptable offering applications.
+    menu.addIntentOptions(
+         R.id.intent_group,  // Menu group to which new items will be added
+         0,      // Unique item ID (none)
+         0,      // Order for the items (none)
+         this.getComponentName(),   // The current activity name
+         null,   // Specific items to place first (none)
+         intent, // Intent created above that describes our requirements
+         0,      // Additional flags to control items (none)
+         null);  // Array of MenuItems that correlate to specific items (none)
+
+    return true;
+}</pre>
+
+<p>Đối với mỗi hoạt động được tìm thấy mà cung cấp một bộ lọc ý định khớp với ý định được định nghĩa, một mục menu
+được thêm, bằng cách sử dụng giá trị trong <code>android:label</code> của bộ lọc ý định làm
+tiêu đề của mục menu và biểu tượng của ứng dụng làm biểu tượng của mục menu. Phương pháp
+{@link android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()} trả về số mục menu được thêm.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Khi bạn gọi {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()}, nó sẽ khống chế bất kỳ và tất cả các mục menu theo nhóm menu được quy định trong tham đối
+đầu tiên.</p>
+
+
+<h3 id="AllowingToAdd">Cho phép hoạt động của bạn được thêm vào các menu khác</h3>
+
+<p>Bạn cũng có thể cung cấp các dịch vụ của hoạt động của mình cho các ứng dụng khác, vì vậy ứng dụng của bạn
+có thể nằm trong menu của các ứng dụng khác (đảo ngược vai trò nêu trên).</p>
+
+<p>Để được nằm trong menu của ứng dụng khác, bạn cần định nghĩa một bộ lọc
+ý định như bình thường, nhưng đảm bảo thêm các giá trị {@link android.content.Intent#CATEGORY_ALTERNATIVE}
+và/hoặc {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} cho thể loại
+bộ lọc ý định. Ví dụ:</p>
+<pre>
+&lt;intent-filter label="&#64;string/resize_image">
+    ...
+    &lt;category android:name="android.intent.category.ALTERNATIVE" />
+    &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+    ...
+&lt;/intent-filter>
+</pre>
+
+<p>Tìm hiểu thêm về việc ghi các bộ lọc ý định trong tài liệu
+<a href="/guide/components/intents-filters.html">Ý định và Bộ lọc Ý định</a>.</p>
+
+<p>Để tham khảo một ứng dụng mẫu sử dụng kỹ thuật này, hãy xem mã mẫu 
+<a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note
+Pad</a>.</p>

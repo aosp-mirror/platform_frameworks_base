@@ -1,0 +1,256 @@
+page.title=Màn hình Tổng quan
+page.tags="recents","overview"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#adding">Thêm Tác vụ vào Màn hình Tổng quan</a>
+      <ol>
+        <li><a href="#flag-new-doc">Sử dụng cờ Ý định để thêm một tác vụ</a></li>
+        <li><a href="#attr-doclaunch">Sử dụng thuộc tính Hoạt động để thêm một tác vụ</a></li>
+      </ol>
+    </li>
+    <li><a href="#removing">Loại bỏ Tác vụ</a>
+      <ol>
+        <li><a href="#apptask-remove">Sử dụng lớp AppTask để loại bỏ tác vụ</a></li>
+        <li><a href="#retain-finished">Giữ lại tác vụ đã hoàn thành</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>Lớp khóa</h2>
+  <ol>
+    <li>{@link android.app.ActivityManager.AppTask}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+
+  <h2>Mã mẫu</h2>
+  <ol>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">Ứng dụng tập trung vào tài liệu</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Màn hình tổng quan (còn được gọi là màn hình gần đây, danh sách tác vụ gần đây, hay ứng dụng gần đây)
+là một UI cấp hệ thống liệt kê các <a href="{@docRoot}guide/components/activities.html">
+hoạt động</a> và <a href="{@docRoot}guide/components/tasks-and-back-stack.html">tác vụ</a> mới được truy cập gần đây. Người dùng
+có thể điều hướng qua danh sách này và chọn một tác vụ để tiếp tục, hoặc người dùng có thể loại bỏ một tác vụ khỏi
+danh sách bằng cách trượt nhanh nó đi. Với việc phát hành Android 5.0 (API mức 21), nhiều thực thể của
+hoạt động tương tự chứa các tài liệu khác nhau có thể xuất hiện dưới dạng các tác vụ trong màn hình tổng quan. Ví dụ,
+Google Drive có thể có một tác vụ cho từng tài liệu trong một vài tài liệu Google. Mỗi tài liệu xuất hiện thành một
+tác vụ trong màn hình tổng quan.</p>
+
+<img src="{@docRoot}images/components/recents.png" alt="" width="284" />
+<p class="img-caption"><strong>Hình 1.</strong> Màn hình tổng quan hiển thị ba tài liệu Google Drive
+, mỗi tài liệu được biểu diễn như một tác vụ riêng.</p>
+
+<p>Thường thì bạn sẽ cho phép hệ thống định nghĩa cách tác vụ và
+hoạt động của mình được biểu diễn như thế nào trong màn hình tổng quan, và bạn không cần sửa đổi hành vi này.
+Tuy nhiên, ứng dụng của bạn có thể xác định cách thức và thời gian các hoạt động xuất hiện trong màn hình tổng quan. Lớp
+{@link android.app.ActivityManager.AppTask} cho phép bạn quản lý tác vụ, và cờ hoạt động của
+lớp {@link android.content.Intent} cho phép bạn quy định khi nào thì một hoạt động được thêm hoặc loại bỏ khỏi
+màn hình tổng quan. Đồng thời, thuộc tính <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> cho phép bạn đặt hành vi trong bản kê khai.</p>
+
+<h2 id="adding">Thêm Tác vụ vào Màn hình Tổng quan</h2>
+
+<p>Sử dụng cờ của lớp {@link android.content.Intent} để thêm một tác vụ cho phép kiểm soát nhiều hơn
+đối với thời điểm và cách thức một tài liệu được mở hoặc mở lại trong màn hình tổng quan. Khi sử dụng các thuộc tính
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, bạn có thể chọn giữa luôn mở tài liệu trong một tác vụ mới hoặc sử dụng lại một
+tác vụ hiện có cho tài liệu.</p>
+
+<h3 id="flag-new-doc">Sử dụng cờ Ý định để thêm một tác vụ</h3>
+
+<p>Khi tạo một tài liệu mới cho hoạt động của bạn, bạn gọi phương pháp
+{@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()}
+của lớp {@link android.app.ActivityManager.AppTask}, chuyển cho nó ý định có
+chức năng khởi chạy hoạt động. Để chèn một ngắt lô-gic sao cho hệ thống coi hoạt động của bạn như một tác vụ
+mới trong màn hình tổng quan, hãy chuyển cờ {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+trong phương pháp {@link android.content.Intent#addFlags(int) addFlags()} của {@link android.content.Intent}
+có chức năng khởi chạy hoạt động.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Cờ {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+thay thế cờ {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET},
+được rút bớt kể từ phiên bản Android 5.0 (API mức 21).</p>
+
+<p>Nếu bạn đặt cờ {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} khi tạo
+tài liệu mới, hệ thống sẽ luôn tạo một tác vụ mới lấy hoạt động mục tiêu đó làm gốc.
+Thiết đặt này cho phép mở cùng tài liệu trong nhiều hơn một tác vụ. Đoạn mã sau thể hiện
+cách mà hoạt động chính thực hiện điều này:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+public void createNewDocument(View view) {
+      final Intent newDocumentIntent = newDocumentIntent();
+      if (useMultipleTasks) {
+          newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+      }
+      startActivity(newDocumentIntent);
+  }
+
+  private Intent newDocumentIntent() {
+      boolean useMultipleTasks = mCheckbox.isChecked();
+      final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+      newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+      newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+      return newDocumentIntent;
+  }
+
+  private static int incrementAndGet() {
+      Log.d(TAG, "incrementAndGet(): " + mDocumentCounter);
+      return mDocumentCounter++;
+  }
+}
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Các hoạt động được khởi chạy bằng cờ {@code FLAG_ACTIVITY_NEW_DOCUMENT}
+phải có giá trị thuộc tính {@code android:launchMode="standard"} (mặc định) được đặt trong
+bản kê khai.</p>
+
+<p>Khi hoạt động chính khởi chạy một hoạt động mới, hệ thống sẽ tìm kiếm thông qua các tác vụ hiện tại để
+xem tác vụ nào có ý định khớp với tên thành phần ý định và dữ liệu Ý định cho hoạt động đó. Nếu tác vụ
+không được tìm thấy, hoặc ý định chứa cờ {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}
+thì một tác vụ mới sẽ được tạo lấy hoạt động làm gốc. Nếu tìm thấy, nó sẽ mang tác vụ đó
+tới phía trước và chuyển ý định mới tới {@link android.app.Activity#onNewIntent onNewIntent()}.
+Hoạt động mới sẽ nhận ý định và tạo một tài liệu mới trong màn hình tổng quan, như trong ví dụ
+sau:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_new_document);
+    mDocumentCount = getIntent()
+            .getIntExtra(DocumentCentricActivity.KEY_EXTRA_NEW_DOCUMENT_COUNTER, 0);
+    mDocumentCounterTextView = (TextView) findViewById(
+            R.id.hello_new_document_text_view);
+    setDocumentCounterText(R.string.hello_new_document_counter);
+}
+
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    /* If FLAG_ACTIVITY_MULTIPLE_TASK has not been used, this activity
+    is reused to create a new document.
+     */
+    setDocumentCounterText(R.string.reusing_document_counter);
+}
+</pre>
+
+
+<h3 id="#attr-doclaunch">Sử dụng thuộc tính hoạt động để thêm một tác vụ</h3>
+
+<p>Một hoạt động cũng có thể quy định trong bản kê khai của nó rằng nó luôn khởi chạy vào một tác vụ mới bằng cách sử dụng
+thuộc tính <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, <a href="{@docRoot}guide/topics/manifest/activity-element.html#dlmode">
+{@code android:documentLaunchMode}</a>. Thuộc tính này có bốn giá trị tạo ra hiệu ứng
+sau khi người dùng mở một tài liệu bằng ứng dụng:</p>
+
+<dl>
+  <dt>"{@code intoExisting}"</dt>
+  <dd>Hoạt động sử dụng lại một tác vụ hiện có cho tài liệu. Điều này giống như khi thiết đặt cờ
+  {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} mà <em>không</em> thiết đặt cờ
+  {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, như được mô tả trong phần
+  <a href="#flag-new-doc">Sử dụng cờ Ý định để thêm một tác vụ</a> bên trên.</dd>
+
+  <dt>"{@code always}"</dt>
+  <dd>Hoạt động tạo một tác vụ mới cho tài liệu, ngay cả khi tài liệu đã được mở. Sử dụng
+  giá trị này giống như thiết đặt cả cờ {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+  và {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}.</dd>
+
+  <dt>"{@code none”}"</dt>
+  <dd>Hoạt động không tạo một tác vụ mới cho tài liệu. Màn hình tổng quan xử lý hoạt động
+  như theo mặc định: nó hiển thị một tác vụ đơn lẻ cho ứng dụng, tác vụ này
+  tiếp tục từ bất kỳ hoạt động nào mà người dùng đã gọi ra cuối cùng.</dd>
+
+  <dt>"{@code never}"</dt>
+  <dd>Hoạt động không tạo một tác vụ mới cho tài liệu. Việc thiết đặt giá trị này sẽ khống chế
+  hành vi của {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+  và cờ {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, nếu một trong hai được đặt
+  trong ý định, và màn hình tổng quan sẽ hiển thị một tác vụ đơn lẻ cho ứng dụng, tác vụ này tiếp tục từ
+  bất kỳ hoạt động nào mà người dùng đã gọi ra cuối cùng.</dd>
+</dl>
+
+<p class="note"><strong>Lưu ý:</strong> Đối với những giá trị ngoài {@code none} và {@code never} 
+hoạt động phải được định nghĩa bằng {@code launchMode="standard"}. Nếu thuộc tính này không được quy định thì
+{@code documentLaunchMode="none"} sẽ được sử dụng.</p>
+
+<h2 id="removing">Loại bỏ Tác vụ</h2>
+
+<p>Theo mặc định, một tác vụ tài liệu sẽ tự động được loại bỏ khỏi màn hình tổng quan khi hoạt động của nó
+hoàn thành. Bạn có thể khống chế hành vi này bằng lớp {@link android.app.ActivityManager.AppTask},
+bằng một cờ {@link android.content.Intent}, hoặc bằng một thuộc tính<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code>.</p>
+
+<p>Bạn có thể luôn loại trừ hoàn toàn một tác vụ khỏi màn hình tổng quan bằng cách thiết đặt thuộc tính 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, <a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">
+{@code android:excludeFromRecents}</a> thành {@code true}.</p>
+
+<p>Bạn có thể thiết đặt số lượng tác vụ tối đa mà ứng dụng của bạn có thể bao gồm trong màn hình tổng quan bằng cách đặt thuộc tính
+ <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+ <a href="{@docRoot}guide/topics/manifest/activity-element.html#maxrecents">{@code android:maxRecents}
+</a> thành một giá trị số nguyên. Mặc định là 16. Khi đạt được số tác vụ tối đa,
+tác vụ ít sử dụng gần đây nhất sẽ bị loại bỏ khỏi màn hình tổng quan. Giá trị tối đa {@code android:maxRecents}
+bằng 50 (25 trên các thiết bị có bộ nhớ thấp); giá trị thấp hơn 1 không hợp lệ.</p>
+
+<h3 id="#apptask-remove">Sử dụng lớp AppTask để loại bỏ tác vụ</h3>
+
+<p>Trong hoạt động mà tạo một tác vụ mới trong màn hình tổng quan, bạn có thể
+quy định khi nào thì loại bỏ tác vụ và hoàn thành tất cả các hoạt động gắn liền với nó bằng cách gọi
+phương pháp {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+public void onRemoveFromRecents(View view) {
+    // The document is no longer needed; remove its task.
+    finishAndRemoveTask();
+}
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Sử dụng phương pháp
+{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}
+sẽ khống chế việc sử dụng tag {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS},
+như được trình bày ở bên dưới.</p>
+
+<h3 id="#retain-finished">Giữ lại tác vụ đã hoàn thành</h3>
+
+<p>Nếu bạn muốn giữ lại một tác vụ trong màn hình tổng quan, ngay cả khi hoạt động của nó đã hoàn thành, hãy chuyển
+cờ {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} trong phương pháp
+{@link android.content.Intent#addFlags(int) addFlags()} của Ý định mà khởi chạy hoạt động.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+private Intent newDocumentIntent() {
+    final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+    newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+      android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+    newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+    return newDocumentIntent;
+}
+</pre>
+
+<p>Để đạt được cùng kết quả như vậy, hãy đặt thuộc tính
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#autoremrecents">
+{@code android:autoRemoveFromRecents}</a> thành {@code false}. Giá trị mặc định bằng {@code true}
+đối với các hoạt động tài liệu, và {@code false} đối với các hoạt động thông thường. Việc sử dụng thuộc tính này sẽ khống chế
+cờ {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}, như đã trình bày trước đó.</p>
+
+
+
+
+
+
+

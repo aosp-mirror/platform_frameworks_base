@@ -1,0 +1,108 @@
+page.title=콘텐츠 제공자
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<!-- In this document -->
+<h2>주제</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        콘텐츠 제공자 기본 정보</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+        콘텐츠 제공자 생성</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/calendar-provider.html">캘린더 제공자</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">연락처 제공자</a>
+    </li>
+</ol>
+
+    <!-- Related Samples -->
+<h2>관련 샘플</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/ContactManager/index.html">
+            연락처 관리자</a> 애플리케이션
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        "커서(피플 애플리케이션)"
+        </a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        "커서(전화)"</a>
+        </li>
+        <li>
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+            샘플 동기화 어댑터</a>
+        </li>
+    </ol>
+</div>
+</div>
+<p>
+    콘텐츠 제공자는 구조화된 데이터 세트로의 액세스를 관리합니다. 
+데이터를 캡슐화하여 데이터 보안을 정의하는 데 필요한 메커니즘을 제공하기도 합니다. 
+콘텐츠 제공자는 한 프로세스의 데이터에 다른 프로세스에서 실행 중인 코드를 연결하는 표준 인터페이스입니다.
+</p>
+<p>
+    콘텐츠 제공자 내의 데이터에 액세스하고자 하는 경우, 
+애플리케이션의 {@link android.content.Context}에 있는
+{@link android.content.ContentResolver} 개체를 사용하여 클라이언트로서 제공자와 통신을 주고받으면 됩니다.
+    {@link android.content.ContentResolver} 개체가 제공자 개체와 통신하며, 이 개체는 
+{@link android.content.ContentProvider}를 구현하는 클래스의 인스턴스입니다. 
+제공자 개체가 클라이언트로부터 데이터 요청을 받아 요청된 작업을 수행하며 결과를 반환합니다.
+
+</p>
+<p>
+    데이터를 다른 애플리케이션과 공유할 생각이 없으면 나름의 제공자를 개발하지 않아도 됩니다.
+ 그러나, 자체 애플리케이션에서 사용자 지정 검색 제안을 제공하려면 나름의 제공자가 꼭 필요합니다.
+ 또한, 복잡한 데이터나 파일을 자신의 애플리케이션에서 다른 애플리케이션으로 복사하여 붙여넣고자 하는 경우에도 
+나름의 제공자가 필요합니다.
+</p>
+<p>
+    Android 자체에 오디오, 동영상, 이미지 및 개인 연락처 정보 등의 데이터를 관리하는 콘텐츠 제공자가 
+포함되어 있습니다. 그중 몇 가지를 목록으로 나열한 것을 
+
+<code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
+    </code> 패키지에 대한 참조 문서에서 확인할 수 있습니다. 이와 같은 제공자는 몇 가지 제약이 있지만, 
+어느 Android 애플리케이션에나 액세스할 수 있습니다.
+</p><p>
+    다음 주제에서는 콘텐츠 제공자에 대해 좀 더 자세히 설명합니다.
+</p>
+<dl>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        콘텐츠 제공자 기본 정보</a></strong>
+    </dt>
+    <dd>
+        데이터가 여러 개의 표로 정리되어 있을 때 콘텐츠 제공자 내의 데이터에 액세스하는 방법입니다.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+        콘텐츠 제공자 생성</a></strong>
+    </dt>
+    <dd>
+        나름의 콘텐츠 제공자를 직접 만드는 방법입니다.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+        캘린더 제공자</a></strong>
+    </dt>
+    <dd>
+        Android 플랫폼의 일부인 캘린더 제공자에 액세스하는 방법입니다.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+        연락처 제공자</a></strong>
+    </dt>
+    <dd>
+        Android 플랫폼의 일부인 연락처 제공자에 액세스하는 방법입니다.
+    </dd>
+</dl>

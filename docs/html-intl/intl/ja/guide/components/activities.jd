@@ -1,0 +1,756 @@
+page.title=アクティビティ
+page.tags=activity,intent
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>本書の内容</h2>
+<ol>
+  <li><a href="#Creating">アクティビティを作成する</a>
+    <ol>
+      <li><a href="#UI">ユーザー インターフェースを実装する</a></li>
+      <li><a href="#Declaring">マニフェストでアクティビティを宣言する</a></li>
+    </ol>
+  </li>
+  <li><a href="#StartingAnActivity">アクティビティを開始する</a>
+    <ol>
+      <li><a href="#StartingAnActivityForResult">結果待ちのアクティビティを開始する</a></li>
+    </ol>
+  </li>
+  <li><a href="#ShuttingDown">アクティビティをシャットダウンする</a></li>
+  <li><a href="#Lifecycle">アクティビティのライフサイクルを管理する</a>
+    <ol>
+      <li><a href="#ImplementingLifecycleCallbacks">ライフサイクル コールバックを実装する</a></li>
+      <li><a href="#SavingActivityState">アクティビティの状態を保存する</a></li>
+      <li><a href="#ConfigurationChanges">構成の変更を処理する</a></li>
+      <li><a href="#CoordinatingActivities">アクティビティを連携する</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>キークラス</h2>
+<ol>
+  <li>{@link android.app.Activity}</li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">タスクとバックスタック
+</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>{@link android.app.Activity} は、電話をかける、写真を撮影する、メールを送る、マップを閲覧するといった操作をユーザーができる画面を提供するアプリケーション コンポーネントです。
+
+各アクティビティには、ユーザー インターフェースを描画できるウィンドウがあります。一般的にはウィンドウは画面と同じ大きさになりますが、画面より小さくしたり、他のウィンドウ上にフローティングさせたりすることもできます。
+
+</p>
+
+<p> 通常、アプリケーションは複数のアクティビティで構成されており、各アプリケーションはそれぞれ緩やかにつながっています。
+一般的には、アプリケーションの 1 つのアクティビティが「メイン」アクティビティとして指定され、ユーザーが初めてアプリケーションを起動したときに表示されるのがこのアクティビティになります。
+その後、各アクティビティで別のアクティビティを開始して別の操作を実行できます。
+新しいアクティビティの開始時には、前のアクティビティは停止しますが、そのアクティビティはシステムによってスタック（「バックスタック」）に維持されます 
+
+新しいアクティビティが開始すると、それがバックスタックに入ってユーザーに表示されます。
+バックスタックは「後入れ先出し」の基本的なスタック メカニズムを順守するため、ユーザーが現在のアクティビティを完了して [<em>戻る</em>] ボタンを押すと、そのアクティビティはスタックから消え（破棄され）、前のアクティビティが再開します。
+
+（バックスタックの詳細については、<a href="{@docRoot}guide/components/tasks-and-back-stack.html">タスクとバックスタック</a>ドキュメントで説明します）。
+
+</p>
+
+<p>新しいアクティビティが開始したことで、別のアクティビティが停止した場合、その状態の変化がアクティビティのライフサイクル コールバック メソッド経由で通知されます。システムがアクティビティを作成しているのか、停止しているのか、再開しているのか、破棄しているのかという状態の変化によって、アクティビティが受け取るコールバック メソッドにはいくつかの種類があり、各コールバックではユーザーがその状態の変化に応じた特定の操作を実行できます。
+
+
+&mdash;&mdash;
+
+たとえば、アクティビティが停止した場合は、ネットワーク接続やデータベース接続などの大きなオブジェクトを解放することになります。
+アクティビティが再開した場合は、必要なリソースを再度取得し、中断したところから操作を再開できます。
+このような状態の推移はすべて、アクティビティのライフサイクルの一部です。
+</p>
+
+<p>このドキュメントでは、さまざまなアクティビティの状態間の切り替えを正しく管理できるよう、アクティビティのライフサイクルの仕組みについてさらに詳しく説明する他、アクティビティのビルド方法と使用方法の基本について解説します。
+
+</p>
+
+
+
+<h2 id="Creating">アクティビティを作成する</h2>
+
+<p>アクティビティを作成するには、{@link android.app.Activity} のサブクラス（またはその既存のサブクラス）を作成する必要があります。
+サブクラスでは、アクティビティのライフサイクルの状態の切り替え時（アクティビティの作成、停止、再開、破棄など）にシステムが呼び出すコールバック メソッドを実装する必要があります。
+
+最も重要なコールバック メソッドは次の 2 つです。
+</p>
+
+<dl>
+  <dt>{@link android.app.Activity#onCreate onCreate()}</dt>
+  <dd>このメソッドは必ず実装してください。システムはアクティビティ作成の際にこのメソッドを呼び出します。
+実装の際には、アクティビティの必須コンポーネントを初期化する必要があります。
+
+    さらに重要な点は、ここで {@link android.app.Activity#setContentView
+    setContentView()} を呼び出してアクティビティのユーザー インターフェースのレイアウトを定義する必要があるということです。</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>システムは、ユーザーがアクティビティを終了したことを始めて示すときに、このメソッドを呼び出します（アクティビティが破棄されていない場合も含む）。
+通常はここで、現在のユーザー セッション後も維持する必要のある変更点を保存しておきます（ユーザーが戻ってこない可能性があるため）。
+
+</dd>
+</dl>
+
+<p>アクティビティ間の滑らかな操作感を実現し、アクティビティが停止したり破棄されたりする可能性のある予想外の中断に対応するために使用できるライフサイクル コールバック メソッドは他にもいくつかあります。
+
+すべてのライフサイクル コールバック メソッドについては、<a href="#Lifecycle">アクティビティのライフサイクルを管理する</a>のセクションで説明します。
+</p>
+
+
+
+<h3 id="UI">ユーザー インターフェースを実装する</h3>
+
+<p> アクティビティのユーザー インターフェースは、ビューの階層、 {@link android.view.View} から派生したオブジェクトから提供されます。&mdash;
+各ビューはアクティビティ ウィンドウ内の特定の長方形のエリアを制御し、ユーザーの操作に応答します。
+たとえば、1 つのビューが、ユーザーがタップしたときに操作を開始するボタンである場合があります。
+</p>
+
+<p>Android には、レイアウトのデザインや整理に使用できる既成のビューが多数用意されています。
+「ウィジェット」は、ボタン、テキスト フィールド、チェックボックス、画像といった画像の視覚的（操作可能な）要素を提供するビューです。
+「レイアウト」は、{@link
+android.view.ViewGroup} から派生したビューで、線形レイアウト、グリッド レイアウト、相対レイアウトなど、子ビューの特有のレイアウト モデルを提供するものです。
+また、{@link android.view.View} クラスと {@link android.view.ViewGroup} クラス（または既存のサブクラス）のサブクラスを作成し、独自のウィジェットやレイアウトを作ってアクティビティのレイアウトに適用することもできます。
+
+</p>
+
+<p>ビューを使用したレイアウトの定義で最も一般的なのは、XML レイアウト ファイルをアプリケーション リソースに保存する方法です。
+この方法では、ユーザー インターフェースのデザインを、アクティビティの挙動を定義するソース コードとは別に維持できます。
+{@link android.app.Activity#setContentView(int) setContentView()} を使用して、レイアウトのリソース ID を渡すと、アクティビティの UI としてレイアウトを設定できます。
+
+ただし、アクティビティ コードに新しい {@link android.view.View} を作成して、{@link android.view.ViewGroup} に新しい {@link
+android.view.View} を挿入してビュー階層をビルドし、ルートの {@link android.view.ViewGroup} を {@link android.app.Activity#setContentView(View)
+setContentView()} に渡して、そのレイアウトを使うこともできます。
+
+</p>
+
+<p>ユーザー インターフェースの作成の詳細については、「<a href="{@docRoot}guide/topics/ui/index.html">ユーザー インターフェース</a>」のドキュメントをご覧ください。</p>
+
+
+
+<h3 id="Declaring">マニフェストでアクティビティを宣言する</h3>
+
+<p>アクティビティがシステムにアクセスできるようにするには、マニフェストでアクティビティを宣言する必要があります。
+アクティビティを宣言するには、マニフェスト ファイルを開いて、<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 要素を <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a> の子要素として追加します。
+
+次に例を示します。</p>
+
+<pre>
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+      &lt;activity android:name=".ExampleActivity" /&gt;
+      ...
+  &lt;/application ... &gt;
+  ...
+&lt;/manifest &gt;
+</pre>
+
+<p>この要素には他にも、アクティビティのラベル、アクティビティのアイコン、アクティビティの UI を決めるテーマなどのプロパティを定義する属性を含めることができます。<a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">{@code android:name}</a> 属性は、アクティビティのクラス名を指定するもので、唯一の必須属性です。
+
+
+&mdash;アプリケーションを発行したら、この名前は変更できません。変更すると、アプリケーションのショートカットなどの一部の機能が破損する可能性があります（ブログの投稿「<a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things That Cannot Change</a>」をご覧ください）。
+
+
+</p>
+
+<p>マニフェストでのアクティビティの宣言に関する詳細については、<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 要素のリファレンスをご覧ください。
+</p>
+
+
+<h4>インテント フィルタを使用する</h4>
+
+<p><a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> 要素でも &mdash; <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> 要素を使用してさまざまなインテント フィルタを指定して &mdash; 他のアプリケーション コンポーネントでのアクティベート方法を宣言できます。
+</p>
+
+<p>Android SDK ツールを使用して新しいアプリケーションを作成する際、自動的に作成されるスタブ アクティビティには、「メイン」アクションに応答するアクティビティで、「ランチャー」カテゴリに置かれるべきものを宣言するインテント フィルタが含まれます。
+
+インテント フィルタは次のように表示されます。
+</p>
+
+<pre>
+&lt;activity android:name=".ExampleActivity" android:icon="@drawable/app_icon"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> 要素は、これがアプリケーションへの「メイン」エントリ ポイントであることを指定します。<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 要素は、アクティビティをシステムのアプリケーション ランチャーに入れるべきであると指定します（ユーザーがこのアクティビティを起動できるようにします）。
+</p>
+
+<p>アプリケーションを自己完結型にして、他のアプリケーションでアクティビティをアクティベートできないようにする場合は、他のインテント フィルタは必要ありません。
+前の例のように、「メイン」アクションを持ち、「ランチャー」カテゴリにできるのは 1 つのアクティビティのみです。
+アクティビティを他のアプリケーションで利用できないようにする場合は、そのアクティビティにはインテント フィルタを使用せず、明示的なインテントを使用して自身でアクティビティを開始するようにできます（次のセクションで説明します）。
+
+</p>
+
+<p>ただし、他のアプリケーション（と自身のアプリケーション）から派生した暗黙的なインテントにアクティビティが応答するようにする場合は、アクティビティで追加のインテント フィルタを定義する必要があります。
+
+応答するインテントのタイプごとに、<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> 要素を含む <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> と、任意で <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 要素や <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> 要素を含める必要があります。
+これらの要素は、アクティビティが応答できるインテントのタイプを指定します。
+</p>
+
+<p>アクティビティがインテントに応答する方法の詳細については、「<a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>」のドキュメントをご覧ください。
+</p>
+
+
+
+<h2 id="StartingAnActivity">アクティビティを開始する</h2>
+
+<p>@link android.app.Activity#startActivity
+  startActivity()} を呼び出して、開始するアクティビティを記述する {@link android.content.Intent} を渡すと、新しいアクティビティを開始できます。
+インテントは開始するアクティビティを正確に指定するか、実行する操作のタイプを記述します（システムが適切なアクティビティを選択しますが、それが他のアプリケーションのアクティビティである場合もあります）。
+
+
+また、インテントには開始したアクティビティで使用する少量のデータを含めることもできます。
+</p>
+
+<p>自身のアプリケーションを操作するとき、既知のアクティビティを起動することが頻繁にあります。
+ そのような場合、クラス名を使用して開始するアクティビティを明示的に定義するインテントを作成できます。
+例として、1 つのアクティビティで {@code
+SignInActivity} という名前の他のアクティビティを開始する方法を次に示します。</p>
+
+<pre>
+Intent intent = new Intent(this, SignInActivity.class);
+startActivity(intent);
+</pre>
+
+<p>ただし、アクティビティからのデータを使用して、アプリケーションでメールやテキスト メッセージの送信、ステータスのアップデートといった操作を実行する場合もあります。
+アプリケーションにそのような操作を実行できるアクティビティがない場合、代わりに、端末上の他のアプリケーションによるアクティビティを活用できます。
+
+ここが、インテントがその存在意義を発揮する場面です。実行する操作を記述するインテントを作成し、システムが適切なアクティビティを他のアプリケーションから起動します。
+&mdash;
+
+インテントを処理できるアクティビティが複数ある場合は、使用するアクティビティを 1 つユーザーが選択できます。
+たとえば、メールを送信できるようにする場合は、次のようなインテントを作成します。
+
+</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.putExtra(Intent.EXTRA_EMAIL, recipientArray);
+startActivity(intent);
+</pre>
+
+<p>インテントに追加された {@link android.content.Intent#EXTRA_EMAIL} のエクストラは、メールの送信先となるメールアドレスの文字列配列です。
+メール アプリケーションがこのインテントに応答するとき、エクストラにある文字列配列を読み取り、それをメール作成フォームの「宛先」フィールドに置きます。
+
+この場合、メール アプリケーションのアクティビティが開始してユーザーが操作を完了したときにアクティビティが再開します。
+</p>
+
+
+
+
+<h3 id="StartingAnActivityForResult">結果待ちのアクティビティを開始する</h3>
+
+<p>開始するアクティビティから結果を受け取りたい場合は、{@link android.app.Activity#startActivityForResult
+  startActivityForResult()}（{@link android.app.Activity#startActivity
+  startActivity()} の代わりに）を呼び出してアクティビティを開始します。
+その後のアクティビティから結果を受け取るには、
+{@link android.app.Activity#onActivityResult onActivityResult()} コールバック メソッドを実装します。
+後続のアクティビティが完了すると、{@link
+android.content.Intent} の結果を {@link android.app.Activity#onActivityResult onActivityResult()} メソッドに返します。
+</p>
+
+<p>たとえば、連絡先を 1 つ受け取って、アクティビティでその連絡先情報を使用する場合は、
+次のようにインテントを作成して結果を処理できます。
+</p>
+
+<pre>
+private void pickContact() {
+    // Create an intent to "pick" a contact, as defined by the content provider URI
+    Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
+    startActivityForResult(intent, PICK_CONTACT_REQUEST);
+}
+
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+    if (resultCode == Activity.RESULT_OK &amp;&amp; requestCode == PICK_CONTACT_REQUEST) {
+        // Perform a query to the contact's content provider for the contact's name
+        Cursor cursor = getContentResolver().query(data.getData(),
+        new String[] {Contacts.DISPLAY_NAME}, null, null, null);
+        if (cursor.moveToFirst()) { // True if the cursor is not empty
+            int columnIndex = cursor.getColumnIndex(Contacts.DISPLAY_NAME);
+            String name = cursor.getString(columnIndex);
+            // Do something with the selected contact's name...
+        }
+    }
+}
+</pre>
+
+<p>この例では、アクティビティの結果を処理するために {@link
+android.app.Activity#onActivityResult onActivityResult()} メソッドで使用すべき基本ロジックを示しています。
+1 つ目の条件では、要求が成功したかどうかを確認し、成功した場合は {@code resultCode} が{@link android.app.Activity#RESULT_OK} になり、この結果への要求が応答しているかどうかが判明します。この場合、{@code requestCode} が {@link android.app.Activity#startActivityForResult
+startActivityForResult()} で送信された 2 つ目のパラメータに一致しています。&mdash;
+&mdash;&mdash;
+
+そこから、コードが {@link android.content.Intent}（{@code data} パラメータ）に返されたデータを照会することでアクティビティの結果を処理します。
+</p>
+
+<p>ここで、{@link
+android.content.ContentResolver} がコンテンツ プロバイダに対してクエリを実行し、照会されたデータを読み取れるようにする {@link android.database.Cursor} が返されます。
+詳細については、「<a href="{@docRoot}guide/topics/providers/content-providers.html">コンテンツ プロバイダ</a>」のドキュメントをご覧ください。
+</p>
+
+<p>インテントの使用に関する詳細については、「<a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>」のドキュメントをご覧ください。
+</p>
+
+
+<h2 id="ShuttingDown">アクティビティをシャットダウンする</h2>
+
+<p>アクティビティは、{@link android.app.Activity#finish
+finish()} メソッドを呼び出すことでシャットダウンできます。また、{@link android.app.Activity#finishActivity finishActivity()} を呼び出すと以前に開始した別のアクティビティをシャットダウンすることもできます。
+</p>
+
+<p class="note"><strong>注:</strong> ほとんどの場合、これらのメソッドを用いてアクティビティを明示的に終了しないでください。
+後述のアクティビティのライフサイクルでも説明していますが、Android システム自体がアクティビティのライフサイクルを管理するため、アクティビティを自身で終了させる必要はありません。
+
+これらのメソッドを呼び出すと、期待された操作性に影響を与えることがあるため、ユーザーが絶対にアクティビティのこのインスタンスに戻らないようにする場合にのみ使用するようにしてください。
+
+</p>
+
+
+<h2 id="Lifecycle">アクティビティのライフサイクルを管理する</h2>
+
+<p>コールバック メソッドを実装したアクティビティのライフサイクルの管理は、強固で柔軟なアプリケーションの開発にとって重要です。
+
+アクティビティのライフサイクルは、他のアクティビティ、タスク、バックスタックとの関連による影響を直接受けます。
+</p>
+
+<p>基本的に、アクティビティには次の 3 つの状態があります。</p>
+
+<dl>
+  <dt><i>再開状態</i></dt>
+    <dd>アクティビティが画面のフォアグラウンドにあり、ユーザー フォーカスのある状態。（この状態は「実行中」とも呼ばれます）。
+</dd>
+
+  <dt><i>一時停止状態</i></dt>
+    <dd>他のアクティビティがフォアグラウンドにあり、メインに表示されているが、このアクティビティも表示されている。つまり、このアクティビティの上に他のアクティビティが表示されており、他方のアクティビティは一部が透明であるか、画面全体を覆ってはいない状態です。
+
+一時停止状態のアクティビティは完全に生きている状態ですが（{@link android.app.Activity} オブジェクトがメモリに保持されており、すべての状態やメンバー情報が維持され、ウィンドウ マネージャーにもアタッチされたまま）、メモリ量が極端に低下した場合にはシステムによって強制停止される場合もあります。
+
+</dd>
+
+  <dt><i>停止状態</i></dt>
+    <dd>アクティビティは、他のアクティビティによって完全に見えない状態です（アクティビティが「バックグラウンド」にある）。
+停止状態のアクティビティもまだ生きていますが（{@link android.app.Activity} オブジェクトがメモリに保持されており、すべての状態やメンバー情報が維持されているが、ウィンドウ マネージャーにはアタッチ<em>されていない</em>状態です）。
+
+ただし、ユーザーには表示されておらず、別の場所でメモリが必要になればシステムによって強制終了される場合もあります。
+</dd>
+</dl>
+
+<p>アクティビティが一時停止か停止状態の場合、システムはアクティビティに終了するかどうかを尋ねる（{@link android.app.Activity#finish finish()} メソッドを呼び出す）か、単純にプロセスを強制終了してメモリから解放できます。
+
+アクティビティを再度開くとき（終了や強制終了後）は、もう一度最初から作成する必要があります。
+</p>
+
+
+
+<h3 id="ImplementingLifecycleCallbacks">ライフサイクル コールバックを実装する</h3>
+
+<p>アクティビティが上記の異なる状態の間を遷移するとき、さまざまなコールバック メソッドを介して通知されます。
+すべてのコールバック メソッドは、アクティビティの状態が変化したときに必要な操作を実行するようオーバーライドできるフックになります。
+次のスケルトン アクティビティには、基本的なライフサイクル メソッドがそれぞれ含まれています。
+</p>
+
+
+<pre>
+public class ExampleActivity extends Activity {
+    &#64;Override
+    public void {@link android.app.Activity#onCreate onCreate}(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // The activity is being created.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStart onStart()} {
+        super.onStart();
+        // The activity is about to become visible.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onResume onResume()} {
+        super.onResume();
+        // The activity has become visible (it is now "resumed").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onPause onPause()} {
+        super.onPause();
+        // Another activity is taking focus (this activity is about to be "paused").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStop onStop()} {
+        super.onStop();
+        // The activity is no longer visible (it is now "stopped")
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onDestroy onDestroy()} {
+        super.onDestroy();
+        // The activity is about to be destroyed.
+    }
+}
+</pre>
+
+<p class="note"><strong>注:</strong> これらのライフサイクル メソッドを実装する際は、上記の例のように、すべての操作の前にスーパークラスの実装を呼び出す必要があります。
+</p>
+
+<p>これらのメソッドすべてで、アクティビティのライフサイクル全体を定義します。これらのメソッドを実装すると、アクティビティのライフサイクル内の次の 3 つのネストされたループを監視できます。
+ </p>
+
+<ul>
+<li>アクティビティの<b> entire lifetime</b> は、{@link
+android.app.Activity#onCreate onCreate()} の呼び出しから、{@link
+android.app.Activity#onDestroy} の呼び出しまでの間です。アクティビティは、{@link android.app.Activity#onCreate onCreate()} で「グローバル」状態のセットアップ（レイアウトの定義など）を実行し、{@link android.app.Activity#onDestroy} に残っているすべてのリソースを解放する必要があります。
+
+たとえば、アクティビティにネットワークからデータをダウンロードするためバックグラウンドで実行しているスレッドがある場合、そのスレッドが {@link android.app.Activity#onCreate onCreate()} に作成され、{@link
+android.app.Activity#onDestroy} のスレッドが停止される場合があります。
+
+</li>
+
+<li><p>アクティビティの<b>visible lifetime</b> は、{@link
+android.app.Activity#onStart onStart()} の呼び出しから、{@link
+android.app.Activity#onStop onStop()} の呼び出しまでの間です。この間、アクティビティは画面上に表示され、ユーザーが操作できる状態です。
+たとえば {@link android.app.Activity#onStop onStop()} は、新たなアクティビティが開始してこのアクティビティが表示されなくなったときに呼び出されます。
+これらの 2 つのメソッド間で、アクティビティをユーザーに表示するのに必要なリソースは保持できます
+たとえば、{@link android.content.BroadcastReceiver} を {@link
+android.app.Activity#onStart onStart()} に登録して UI に影響のある変更を監視し、ユーザーが表示内容の閲覧をやめたときに {@link android.app.Activity#onStop onStop()} で登録解除できます
+
+
+アクティビティがユーザーに表示されたり、非表示になったりとアクティビティの状態が変化する場合、アクティビティの entire lifetime 中にシステムが {@link android.app.Activity#onStart onStart()} と {@link
+android.app.Activity#onStop onStop()} を複数回呼び出すこともあります。
+</p></li>
+
+<li><p>アクティビティの <b>foreground lifetime</b> は {@link
+android.app.Activity#onResume onResume()} の呼び出しから、{@link android.app.Activity#onPause
+onPause()} の呼び出しまでの間です。この間、アクティビティは画面上の他のすべてのアクティビティの前面にあり、ユーザーの入力フォーカスがある状態です。
+アクティビティは フォアグラウンドにある状態からそうでない状態に頻繁に遷移する可能性があります。たとえば、端末がスリープ状態になったり、ダイアログが表示されたりしたときには{@link android.app.Activity#onPause onPause()} が呼び出されます。
+&mdash;
+この状態遷移は頻繁に起こるため、この 2 つのメソッドのコードはユーザーを待たせてしまうような遅い遷移にならないよう、適正な軽い処理にしておく必要があります。
+</p></li>
+</ul>
+
+<p>図 1 では、状態間でアクティビティがたどる可能性のあるループと経路を表しています。長方形はアクティビティが状態間で遷移したときの処理用に実装できるコールバック メソッドを表しています。
+
+ <p>
+
+<img src="{@docRoot}images/activity_lifecycle.png" alt="" />
+<p class="img-caption"><strong>図 1.</strong> アクティビティのライフサイクル</p>
+
+<p>表 1 には同じライフサイクル コールバック メソッドがリストされており、各コールバック メソッドの詳細と、アクティビティのライフサイクル全体でのそれぞれの位置関係、コールバック メソッドの完了後にシステムによってアクティビティが強制終了されるかどうかを示しています。
+
+
+</p>
+
+<p class="table-caption"><strong>表 1.</strong> ライフサイクル コールバック メソッドの概要
+</p>
+
+<table border="2" width="85%" frame="hsides" rules="rows">
+<colgroup align="left" span="3"></colgroup>
+<colgroup align="left"></colgroup>
+<colgroup align="center"></colgroup>
+<colgroup align="center"></colgroup>
+
+<thead>
+<tr><th colspan="3">メソッド</th> <th>説明</th> <th>完了後の強制終了</th> <th>次のメソッド</th></tr>
+</thead>
+
+<tbody>
+<tr>
+  <td colspan="3" align="left"><code>{@link android.app.Activity#onCreate onCreate()}</code></td>
+  <td>アクティビティが最初に作成されるときに呼び出されます。
+      ここで、ビューの作成、リストとのデータバインドといった、通常の静的なセットアップを行います。&mdash;
+アクティビティの前の状態を含む Bundle オブジェクトを取り出せた場合、それをメソッドに渡します（後半の<a href="#actstate">アクティビティの状態を保存する</a>をご覧ください）。
+
+
+
+      <p>常に {@code onStart()} が後に続きます。</p></td>
+  <td align="center">いいえ</td>
+      <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td rowspan="5" style="border-left: none; border-right: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onRestart
+onRestart()}</code></td>
+   <td>アクティビティが停止した後、再開する直前に呼び出されます。
+
+       <p>常に {@code onStart()} が後に続きます。</p></td>
+   <td align="center">いいえ</td>
+   <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStart onStart()}</code></td>
+   <td>アクティビティがユーザーに見える状態になる直前に呼び出されます。
+       <p>アクティビティがフォアグラウンドになったときは {@code onResume()} が後に続き、アクティビティが非表示になったときは {@code onStop()} が後に続きます。
+</p></td>
+    <td align="center">いいえ</td>
+    <td align="center">{@code onResume()} <br/>または<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td rowspan="2" style="border-left: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td align="left"><code>{@link android.app.Activity#onResume onResume()}</code></td>
+   <td>アクティビティとユーザーとの操作が開始する直前に呼び出されます。
+この時点で、アクティビティはアクティビティ スタックの先頭にあり、ユーザー入力の準備ができています。
+
+       <p>常に {@code onPause()} が後に続きます。</p></td>
+   <td align="center">いいえ</td>
+   <td align="center">{@code onPause()}</td>
+</tr>
+
+<tr>
+   <td align="left"><code>{@link android.app.Activity#onPause onPause()}</code></td>
+   <td>システムが別のアクティビティを再開する直前に呼び出されます。
+通常、このメソッドは永続化データへの未保存の変更をコミットしたり、アニメーションや CPU を消費する可能性のあるその他の動作を停止したりする際に使用されます。
+
+それが完了するまで次のアクティビティが再開できないため、それらの操作は迅速に行う必要があります。
+
+       <p>アクティビティが前面に戻るときは {@code onResume()} が後に続き、アクティビティが非表示になるときは {@code onStop()} が後に続きます。
+
+</td>
+   <td align="center"><strong style="color:#800000">はい</strong></td>
+   <td align="center">{@code onResume()} <br/>または<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStop onStop()}</code></td>
+   <td>アクティビティがユーザーに見えなくなると呼び出されます。これは、アクティビティが破棄されたか、別のアクティビティ（既存のアクティビティや新しいアクティビティ）が再開されてこのアクティビティを覆っている場合に起こります。
+
+
+       <p>アクティビティのユーザー操作が可能に戻るときは {@code onRestart()} が後に続き、アクティビティがなくなるときは {@code onDestroy()} が後に続きます。
+
+</p></td>
+   <td align="center"><strong style="color:#800000">はい</strong></td>
+   <td align="center">{@code onRestart()} <br/>または<br/> {@code onDestroy()}</td>
+</tr>
+
+<tr>
+   <td colspan="3" align="left"><code>{@link android.app.Activity#onDestroy
+onDestroy()}</code></td>
+   <td>アクティビティが破棄される前に呼び出されます。これはアクティビティが受け取る最後の呼び出しです。
+アクティビティが終了した（<code>{@link android.app.Activity#finish
+       finish()}</code> が呼び出された）か、アクティビティ領域を節約するためにシステムが一時的にこのアクティビティを破棄した場合に呼び出されます。
+
+この 2 つのシナリオは、<code>{@link
+       android.app.Activity#isFinishing isFinishing()}</code> メソッドで区別できます。
+</td>
+   <td align="center"><strong style="color:#800000">はい</strong></td>
+   <td align="center"><em>なし</em></td>
+</tr>
+</tbody>
+</table>
+
+<p>「完了後の強制終了」の列は、<em>メソッドが戻った後</em>に、アクティビティのコードの後続行を実行することなく、アクティビティをホストするプロセスをシステムが強制終了できるかどうかを示しています。
+
+3 つのメソッド（{@link
+android.app.Activity#onPause
+onPause()}、{@link android.app.Activity#onStop onStop()}、{@link android.app.Activity#onDestroy
+onDestroy()}）が「はい」になっています。{@link android.app.Activity#onPause onPause()} は 3 つのなかで最初であるため、アクティビティが作成された後は{@link android.app.Activity#onPause onPause()} がプロセスが強制終了される<em>可能性がある</em>前に呼び出されることが保証される最後のメソッドです。システムが緊急でメモリを空ける必要がある場合は、{@link
+android.app.Activity#onStop onStop()} と {@link android.app.Activity#onDestroy onDestroy()} は呼び出されない場合があります。
+
+&mdash;
+
+そのため、重要な永続的データ（ユーザーの編集内容など）をストレージに書き込む際は、{@link android.app.Activity#onPause onPause()} を使用する必要があります。
+ただし、このメソッドで後続のアクティビティへの遷移をブロックしてしまい、ユーザー操作の速度を送らせてしまうことから、{@link android.app.Activity#onPause onPause()} 中にどんな情報を保持するかについては吟味する必要があります。
+
+
+</p>
+
+<p> <b>「強制終了」</b>列で「いいえ」となっているメソッドでは、アクティビティが呼び出された時点から、アクティビティをホストするプロセスが強制終了されないよう保護します。
+つまり、アクティビティが強制終了される可能性があるのは、{@link android.app.Activity#onPause onPause()} が戻ってから、{@link android.app.Activity#onResume onResume()} が呼び出されるまでの間です。
+
+{@link android.app.Activity#onPause onPause()} が再度呼び出されて戻るまでは、再度強制終了されることはありません。
+ </p>
+
+<p class="note"><strong>注:</strong> 表 1 の定義では技術的に「強制終了」できないアクティビティでも、システムによって強制終了されることがありますが、そうなるのはリソース不足などの緊急時のみです。
+&mdash;
+アクティビティが強制終了されるケースについては、<a href="{@docRoot}guide/components/processes-and-threads.html">Processes and Threading</a> のドキュメントで説明しています。
+
+</p>
+
+
+<h3 id="SavingActivityState">アクティビティの状態を保存する</h3>
+
+<p><a href="#Lifecycle">アクティビティのライフサイクルを管理する</a>でも簡単に説明したように、アクティビティが一時停止や停止したとき、アクティビティの状態は保持されます。
+
+これは、一時停止や停止されたときも {@link android.app.Activity} オブジェクトがメモリに保持されるためです &mdash; メンバーや現在の状態といったすべての情報は残っています。
+
+つまり、アクティビティ内でユーザーが加えた変更点は保持されるため、アクティビティがフォアグラウンドに戻ったとき（「再開」したとき）、それらの変更点はそのまま表示されます。
+
+</p>
+
+<p>ただし、メモリを確保するためにシステムがアクティビティを破棄すると、 {@link
+android.app.Activity} オブジェクトが破棄されるため、システムはそれをそのままの状態で再開できなくなります。
+代わりに、ユーザーがそれに戻る操作を行った場合、システムは {@link android.app.Activity} オブジェクトを再作成します。
+ユーザーにはシステムがアクティビティを破棄して再作成したことはわからないため、アクティビティが以前の状態のままであることを期待します。
+
+この場合、アクティビティの状態情報を保存できる追加のコールバック メソッド（{@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}）を実装することで、アクティビティの状態に関する重要な情報を維持できます。
+
+</p>
+
+<p>アクティビティが破棄されるような状態になる前に、システムが {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} を呼び出します。
+システムはこのメソッドを {@link android.os.Bundle} に渡し、そこでアクティビティの状態情報を名前と値のペアとして {@link
+android.os.Bundle#putString putString()} や {@link
+android.os.Bundle#putInt putInt()} などのメソッドを使用して保存できます。
+
+その後、システムがアプリケーション プロセスを強制終了して、ユーザーがアクティビティに戻った場合、システムはアクティビティを再作成して {@link android.os.Bundle} を {@link android.app.Activity#onCreate onCreate()} と {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} の両方に渡します。
+
+いずれのメソッドを使った場合でも、保存した状態を {@link android.os.Bundle} から抽出してアクティビティの状態を復元できます。
+
+復元する状態情報がない場合は、{@link
+android.os.Bundle} は null で渡されます（アクティビティを最初に作成した場合がこれにあたります）。
+</p>
+
+<img src="{@docRoot}images/fundamentals/restore_instance.png" alt="" />
+<p class="img-caption"><strong>図 2.</strong> アクティビティが前の状態のままでユーザー フォーカスに戻るには、アクティビティが破棄され、再作成された後にアクティビティが保存された以前の状態を復元する必要があるか、アクティビティが停止し、再開した後にアクティビティの状態が以前のままになるか、の 2 つの方法があります。
+
+
+</p>
+
+<p class="note"><strong>注:</strong> アクティビティが破棄される前に {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} が呼び出される保証はありません。これは、状態を保存する必要がないケースがあるためです（ユーザーが [<em>戻る</em>] ボタンを使用してアクティビティを離れることで明示的にアクティビティを閉じた場合など）。
+
+
+
+システムが {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} を呼び出す場合、呼び出しは常に {@link
+android.app.Activity#onStop onStop()} の前、場合によっては {@link android.app.Activity#onPause
+onPause()} の前に行われます。</p>
+
+<p>ただし、何もせず {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} も実装しない場合でも、{@link android.app.Activity} クラスの {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} のデフォルトの実装によって、アクティビティの状態が復元されるものもあります。
+具体的には、デフォルトの実装がレイアウト内のすべての {@link
+android.view.View} の {@link
+android.view.View#onSaveInstanceState onSaveInstanceState()} を呼び出すことで、各ビューが保存すべき情報を提供できるようになります。
+
+Android フレームワークの大半のウィジェットが必要に応じてこのメソッドを実装しており、UI への視覚的な変更は自動的に保存され、アクティビティが再作成されると復元されるようになっています。
+
+たとえば、{@link android.widget.EditText} ウィジェットではユーザーが入力したすべてのテキストを保存し、{@link android.widget.CheckBox} ウィジェットはオンにされたかどうかを保存するようになっています。
+
+ここで必要な作業は、状態を保存する各ウィジェット用の一意の ID（<a href="{@docRoot}guide/topics/resources/layout-resource.html#idvalue">{@code android:id}</a>）を提供するだけです。
+ウィジェットに ID がないと、システムは状態を保存できません。
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>また、レイアウトのビューでの状態の保存を明示的に停止するには、{@link android.R.attr#saveEnabled android:saveEnabled} 属性を {@code "false"} に設定するか、{@link android.view.View#setSaveEnabled setSaveEnabled()} メソッドを呼び出します。
+
+通常はこの機能を無効にしませんが、アクティビティ UI の状態を別の方法で復元する場合には無効にできます。
+</p>
+</div>
+</div>
+
+<p>{@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} のデフォルトの実装によってアクティビティの UI に関する有用な情報は保存されますが、追加の情報を保存するようそれをオーバーライドすることもできます。例としては、アクティビティの期間に変更されたメンバー値を保存する必要があるケースなどがあります。（UI で復元された値に関連している場合でも、それらの UI 値を持つメンバーはデフォルトでは復元されません）。
+
+
+
+</p>
+
+<p>{@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} のデフォルトの実装で UI の状態を保存できるため、状態の追加情報を保存するようメソッドをオーバーライドする場合は、常に作業前に {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} のスーパークラス実装を呼び出す必要があります。
+
+
+同様に、オーバーライドする場合はデフォルトの実装でビューの状態を復元できるよう、{@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} のスーパークラスの実装も呼び出す必要があります。
+</p>
+
+<p class="note"><strong>注:</strong> {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} は呼び出される保証がないため、これはアクティビティの一時的な状態の記録用にのみ使用し、永続的データの保存には使用しないようにします。
+
+&mdash;代わりに {@link
+android.app.Activity#onPause onPause()} を使用して、ユーザーがアクティビティを離れたときの永続的データ（データベースに保存するインストール必要のあるデータなど）を保存します。
+</p>
+
+<p>アプリケーションが状態を復元できるかどうかテストするには、端末を回転してみて、方向が変化するかを確認します
+画面の方向が変わるとき、システムがアクティビティを破棄して再作成し、新しい画面構成に利用可能な別のリソースを適用します。
+
+アプリケーションの使用中にユーザーが端末を回転させるという場面は日常的にあるため、アクティビティが再作成されたときに状態を完全に復元することは非常に重要です。
+
+</p>
+
+
+<h3 id="ConfigurationChanges">構成の変更を処理する</h3>
+
+<p>端末の構成の中には、実行の際に変化するものがあります（画面の向き、キーボードの可用性、言語など）。
+そのような変化が生じたとき、Android は実行中のアクティビティを再作成します（システムが {@link android.app.Activity#onDestroy} を呼び出し、その後すぐに {@link
+android.app.Activity#onCreate onCreate()}）を呼び出します。
+この動作は、提供した別のリソース（異なる画面の向きやサイズに応じたレイアウトなど）を使用してアプリケーションを自動的にリロードすることで、アプリケーションを新しい構成に適応させることを目的としています。
+
+
+</p>
+
+<p>前述のように画面の向きの変化による再起動を処理して、アクティビティの状態を復元するようアプリケーションを適切にデザインしていれば、アプリケーションはアクティビティのライフサイクルでの予期しない他のイベントに対しても回復力を持つことができます。
+
+</p>
+
+<p>このような再起動を処理するのに最適な方法は、前のセクションで説明したように、{@link
+  android.app.Activity#onSaveInstanceState onSaveInstanceState()} と {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}（または {@link
+android.app.Activity#onCreate onCreate()}）を使用してアクティビティの状態を保存、復元する方法です。
+</p>
+
+<p>実行の際に起こる構成の変更と、その処理方法の詳細については、「<a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更の処理</a>」のガイドをご覧ください。
+
+</p>
+
+
+
+<h3 id="CoordinatingActivities">アクティビティを連携する</h3>
+
+ <p>1 つのアクティビティで別のアクティビティを開始すると、双方でライフサイクルの遷移が生じます。1 つ目のアクティビティが一時停止したり停止したりすると（バックグラウンドにある場合は停止しません）、もう一方のアクティビティが作成されます。
+
+これらのアクティビティでディスクなどに保存されているデータを共有している場合は、2 つ目のアクティビティが作成される前に 1 つ目のアクティビティが完全に停止することはないということを理解しておくことが重要です。むしろ、2 つ目の開始プロセスは、1 つ目の停止プロセスにオーバーラップします。
+
+
+</p>
+
+<p>特に 2 つのアクティビティが同じプロセスにあって 1 つが別のアクティビティを開始する場合、ライフサイクル コールバックの順序は厳密に定義されています。
+アクティビティ A がアクティビティ B を開始する場合の動作の順序を次に示します。
+ </p>
+
+<ol>
+<li>アクティビティ A の {@link android.app.Activity#onPause onPause()} メソッドが実行されます。</li>
+
+<li>アクティビティ B の {@link android.app.Activity#onCreate onCreate()}、{@link
+android.app.Activity#onStart onStart()}、{@link android.app.Activity#onResume onResume()} メソッドが順次実行されます
+（このとき、ユーザー フォーカスはアクティビティ B にあります）。</li>
+
+<li>次に、アクティビティ A が画面から消えた場合、{@link
+android.app.Activity#onStop onStop()} メソッドが実行されます。</li>
+</ol>
+
+ <p>このライフサイクル コールバックの順序を予測しておくことで、1 つのアクティビティから他のアクティビティへの情報の遷移を管理できるようになります。
+たとえば、1 つ目のアクティビティが停止したときに、後続のアクティビティが読み取れるようにデータベースに書き込む必要がある場合、データベースに書き込むタイミングは {@link
+android.app.Activity#onStop onStop()} ではなく {@link android.app.Activity#onPause onPause()} の間になります。
+
+</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how Android maintains a history of activities and
+enables user multitasking, continue with the <b><a
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back
+Stack</a></b> document.</p>
+-->

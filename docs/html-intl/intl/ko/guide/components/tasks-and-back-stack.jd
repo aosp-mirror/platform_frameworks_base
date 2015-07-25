@@ -1,0 +1,578 @@
+page.title=작업 및 백 스택
+parent.title=액티비티
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 문서의 내용</h2>
+<ol>
+<li><a href="#ActivityState">액티비티 상태 저장하기</a></li></li>
+<li><a href="#ManagingTasks">작업 관리하기</a>
+  <ol>
+    <li><a href="#TaskLaunchModes">시작 모드 정의하기</a></li>
+    <li><a href="#Affinities">유사성 처리하기</a></li>
+    <li><a href="#Clearing">백 스택 지우기</a></li>
+    <li><a href="#Starting">작업 시작하기</a></li>
+  </ol>
+</li>
+</ol>
+
+<h2>글</h2>
+<ol>
+  <li><a href="http://android-developers.blogspot.com/2010/04/multitasking-android-way.html">
+Android식 멀티태스킹</a></li>
+</ol>
+
+<h2>참고 항목</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/navigation.html">Android 디자인:
+탐색</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;} 매니페스트
+요소</a></li>
+  <li><a href="{@docRoot}guide/components/recents.html">개요 화면</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>하나의 애플리케이션에는 보통 여러 개의 <a href="{@docRoot}guide/components/activities.html">액티비티</a>가 들어있습니다. 각 액티비티는 
+사용자가 수행할 수 있는 특정한 종류의 작업을 중심으로 디자인되어야 하며 다른 액티비티를 
+시작할 수 있는 기능이 있습니다. 예를 들어 이메일 애플리케이션에는 새 메시지 목록을 표시하는 하나의 액티비티가 있을 수 있습니다.
+사용자가 메시지를 하나 선택하면, 새 액티비티가 열려 해당 메시지를 볼 수 있게 합니다.</p>
+
+<p>액티비티는 기기에서 다른 애플리케이션에 존재하는 액티비티를 시작할 수도 있습니다. 예를 들어 
+애플리케이션이 이메일 메시지를 보내고자 하는 경우, "전송" 작업을 수행할 인텐트를 
+정의하여 이메일 주소와 메시지 등의 몇 가지 데이터를 포함시키면 됩니다. 그러면 다른 애플리케이션에서 가져온 액티비티 중 
+이러한 종류의 인텐트를 처리한다고 스스로 선언한 것이 열립니다. 이 경우, 이 인텐트는 
+이메일을 전송하기 위한 것이므로 이메일 애플리케이션의 "작성" 액티비티가 시작됩니다(같은 인텐트를 
+지원하는 액티비티가 여러 개 있는 경우, 시스템은 사용자에게 어느 것을 사용할지 선택하도록 합니다). 이메일이 전송되면 
+액티비티가 재개되고 해당 이메일 액티비티가 애플리케이션의 일부였던 것처럼 보입니다. 액티비티는 
+서로 다른 애플리케이션에서 온 것일 수 있지만, Android는 두 액티비티를 
+모두 같은 <em>작업</em> 안에 유지하여 이처럼 막힘 없는 사용자 환경을 유지합니다.</p>
+
+<p>작업이란 액티비티 컬렉션을 일컫는 말로, 사용자가 특정 작업을 수행할 때 이것과 
+상호 작용합니다. 액티비티는 스택 안에 정렬되며(<em>백 스택</em>), 이때 
+순서는 각 액티비티가 열린 순서와 같습니다.</p>
+
+<!-- SAVE FOR WHEN THE FRAGMENT DOC IS ADDED
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h3>Adding fragments to a task's back stack</h3>
+
+<p>Your activity can also include {@link android.app.Fragment}s to the back stack. For example,
+suppose you have a two-pane layout using fragments, one of which is a list view (fragment A) and the
+other being a layout to display an item from the list (fragment B). When the user selects an item
+from the list, fragment B is replaced by a new fragment (fragment C). In this case, it might be
+desireable for the user to navigate back to reveal fragment B, using the <em>Back</em> button.</p>
+<p>In order to add fragment B to the back stack so that this is possible, you must call {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()} before you {@link
+android.app.FragmentTransaction#commit()} the transaction that replaces fragment B with fragment
+C.</p>
+<p>For more information about using fragments and adding them to the back stack, see the {@link
+android.app.Fragment} class documentation.</p>
+
+</div>
+</div>
+-->
+
+<p>기기 메인 스크린이 대다수 작업의 시작 지점입니다. 사용자가 
+애플리케이션 
+시작 관리자에 있는 아이콘(또는 메인 스크린의 바로 가기)을 터치하면 해당 애플리케이션의 작업이 전경으로 나옵니다. 해당 애플리케이션에 대한 
+작업이 존재하지 않으면(이 애플리케이션을 최근에 사용한 적이 없는 경우), 새 작업이 생성되고 
+해당 애플리케이션의 "기본" 액티비티가 스택에 있는 루트 액티비티로 열립니다.</p>
+
+<p>현재 액티비티가 또 다른 액티비티를 시작하는 경우, 새 액티비티가 스택의 맨 위로 밀어올려지고 
+사용자의 초점이 이에 맞춰집니다. 이전 액티비티는 스택에 유지되지만, 중단됩니다. 액티비티가 중단되면 
+시스템은 이 액티비티의 사용자 인터페이스의 현재 상태를 보존합니다. 사용자가 
+<em>뒤로</em>
+ 버튼을 누르면, 현재 액티비티가 스택의 맨 위에서 튀어나오고(해당 액티비티는 소멸됩니다) 
+이전 액티비티가 재개됩니다(이것의 UI 이전 상태가 복원됩니다). 스택에 있는 액티비티는 
+결코 다시 정렬되지 않습니다. 다만 스택에서 밀어올려지거나 튀어나올 뿐입니다. 즉, 현재 액티비티에 의해 
+시작되면 스택 위로 밀어올려지고, 사용자가 <em>뒤로</em> 버튼을 사용하여 액티비티를 떠나면 튀어나와 사라지는 것입니다. 따라서, 
+백 스택은 
+일종의 "후입선출" 객체 구조로서 작동한다고 할 수 있습니다. 그림 1은 
+이 행동을 시간 표시 막대와 함께 표시하여 여러 액티비티 사이의 진행률을 보여주며, 
+각 시점에서 현재 백 스택의 모습을 나타낸 것입니다.</p>
+
+<img src="{@docRoot}images/fundamentals/diagram_backstack.png" alt="" />
+<p class="img-caption"><strong>그림 1.</strong> 작업에 있는 각각의 새 액티비티가 백 스택에 항목을 추가하는 
+방법을 나타낸 것입니다. 사용자가 <em>뒤로</em> 버튼을 누르면 현재 
+액티비티가 
+소멸되고 이전 액티비티가 재개됩니다.</p>
+
+
+<p>사용자가 계속해서 <em>뒤로</em> 버튼을 누르면, 스택에 있는 각 액티비티가 하나씩 튀어나가 
+이전 것을 
+드러내고, 마침내는 사용자가 메인 스크린으로 되돌아가게 됩니다(아니면 작업이 시작되었을 때 
+실행 중이던 액티비티가 무엇이든 그것으로 되돌아갑니다). 스택에서 모든 액티비티가 제거되면 이 작업은 더 이상 존재하지 않게 됩니다.</p>
+
+<div class="figure" style="width:287px">
+<img src="{@docRoot}images/fundamentals/diagram_multitasking.png" alt="" /> <p
+class="img-caption"><strong>그림 2.</strong> 두 개의 작업: 작업 B가 전경에서 사용자 상호 작용을 수신하는 한편, 
+작업 A는 배경에서 재개되기를 기다립니다.</p>
+</div>
+<div class="figure" style="width:215px">
+  <img src="{@docRoot}images/fundamentals/diagram_multiple_instances.png" alt="" /> <p
+class="img-caption"><strong>그림 3.</strong> 하나의 액티비티가 여러 번 인스턴트화됩니다.</p>
+</div>
+
+<p>작업이란 하나의 잘 짜여진 단위로 사용자가 새 작업을 시작할 때 "배경"으로 이동할 수도 있고 
+<em>홈</em> 버튼을 통해 메인 스크린으로 이동할 수도 있습니다. 작업의 모든 액티비티는 배경에 있는 동안은 
+중단되지만
+, 해당 작업에 대한 백 스택은 그대로 변함 없이 유지됩니다. 이 작업은 또 다른 작업이 발생하는 동안 
+초점을 잃을 뿐입니다(그림 2 참조). 그런 다음 작업이 "전경"으로 되돌아와 사용자가 
+이전에 하던 일을 계속할 수 있습니다. 예를 들어 현재 작업(작업 A)의 스택에 세 개의 액티비티가 있다고 
+가정하면 그 중 둘은 현재 액티비티 아래에 있습니다. 사용자가 <em>홈</em>
+ 버튼을 누른 다음 
+애플리케이션 시작 관리자로부터 새 애플리케이션을 시작합니다. 메인 스크린이 나타나면 작업 A는 
+배경으로 이동합니다. 새 애플리케이션이 시작되면 시스템은 해당 애플리케이션에 대한 작업을 시작하며
+(작업 B) 여기에는 나름의 액티비티 스택이 딸려 있습니다. 해당 애플리케이션과 
+상호 작용한 후, 사용자는 다시 홈으로 돌아와 원래 작업 A를 시작한 
+애플리케이션을 선택합니다. 이제 작업 A가 전경으로 옵니다.
+이 스택에 있는 액티비티 세 개는 모두 멀쩡하고, 스택 맨 위에 있는 액티비티가 
+재개됩니다. 이 시점에서 
+사용자는 작업 B로 도로 전환할 수도 있습니다. 홈으로 이동하여 해당 작업을 
+시작한 애플리케이션 아이콘을 선택하면 됩니다(아니면 
+<a href="{@docRoot}guide/components/recents.html">개요 화면</a>에서 해당 앱의 작업을 선택해도 됩니다). 
+이것이 Android에서 멀티태스킹을 하는 작업의 예시입니다.</p>
+
+<p class="note"><strong>참고:</strong> 여러 개의 작업을 배경에 한꺼번에 대기시킬 수 있습니다. 
+하지만, 사용자가 수많은 배경 작업을 동시에 실행하면 시스템이 메모리를 복원하기 위해 
+배경 액티비티를 소멸시키기 시작할 수 있고, 그러면 액티비티 상태가 손실됩니다. 
+다음의 <a href="#ActivityState">액티비티 상태</a>에 관한 섹션을 참조하십시오.</p>
+
+<p>백 스택에 있는 액티비티는 결코 다시 정렬되지 않으므로, 애플리케이션에서 
+사용자에게 하나 이상의 액티비티로부터 특정 액티비티를 시작하도록 허용하는 경우, 해당 액티비티의 새 인스턴스가 
+생성되어 스택 위로 밀려옵니다(해당 액티비티의 기존 인스턴스를 
+맨 위로 가져오는 대신). 따라서, 애플리케이션 안의 한 액티비티가 여러 번 
+인스턴트화될 수 있으며(서로 다른 작업으로부터도 가능), 이를 나타낸 것이 그림 3입니다. 이 때문에 사용자가 
+<em>뒤로</em> 버튼을 사용하여 뒤로 이동하는 경우, 액티비티의 각 인스턴스가 열린 순서대로 드러납니다
+(각자 나름의 
+UI 상태를 가지고). 다만, 액티비티가 한 번 이상 인스턴트화되는 것을 원치 않으면 이 행동은 수정할 수 
+있습니다. 그 방법에 대해서는 <a href="#ManagingTasks">작업 관리하기</a>에 관한 이후 섹션에서 이야기합니다.</p>
+
+
+<p>액티비티 및 작업에 대한 기본 행동을 요약하려면 다음과 같이 합니다.</p>
+
+<ul>
+  <li>액티비티 A가 액티비티 B를 시작하면 액티비티 A는 중단되지만, 시스템이 그 상태를
+(예: 스크롤 위치 및 양식에 입력된 텍스트 등) 보존합니다.
+사용자가 액티비티 B에 있는 동안 <em>뒤로</em> 버튼을 누르면 액티비티 A가 재개되며 상태도 
+복원됩니다.</li>
+  <li>사용자가 <em>홈</em> 버튼을 눌러 작업을 떠나면 현재 액티비티가 
+중단되고 
+그 소속 작업이 배경으로 들어갑니다. 시스템은 작업에 속한 모든 액티비티의 상태를 보존합니다. 사용자가 
+나중에 작업을 시작한 시작 관리자 아이콘을 선택하여 해당 작업을 재개하면, 그 작업이 
+전경으로 나오고 스택 맨 위에서 액티비티를 재개합니다.</li>
+  <li>사용자가 <em>뒤로</em> 버튼을 누르면, 현재 액티비티가 스택에서 튀어나오고 
+소멸됩니다.
+ 스택에 있던 이전 액티비티가 재개됩니다. 액티비티가 소멸되면, 시스템은 그 액티비티의 상태를 
+보존하지 <em>않습니다.</em></li>
+  <li>액티비티는 여러 번 인스턴트화할 수 있으며, 다른 작업에서도 이를 수행할 수 있습니다.</li>
+</ul>
+
+
+<div class="note design">
+<p><strong>탐색 디자인</strong></p>
+  <p>Android에서 앱 탐색의 작동 원리를 자세히 알아보려면, Android 디자인의 <a href="{@docRoot}design/patterns/navigation.html">탐색</a> 가이드를 읽어보십시오.</p>
+</div>
+
+
+<h2 id="ActivityState">액티비티 상태 저장하기</h2>
+
+<p>위에서 논한 바와 같이, 시스템의 기본 행동은 액티비티가 중단되면 그 상태를 보존해두는 
+것입니다. 이렇게 하면, 사용자가 이전 액티비티로 도로 이동했을 때 그에 속한 사용자 인터페이스가 이전 상태 
+그대로 표시됩니다. 그러나 액티비티의 상태를 미리 보존할 수도 있으며 사전에 이렇게 <strong>해야 합니다.</strong>
+이때에는, 액티비티가 소멸되고 다시 만들어야 하는 경우를 대비해 
+콜백 메서드를 사용합니다.</p>
+
+<p>시스템이 액티비티 중 하나를 중단시키는 경우(예를 들어 새 액티비티가 시작되었을 때 또는 작업이 
+배경으로 이동하는 경우), 시스템은 시스템 메모리를 회복해야 하는 경우 액티비티를 
+완전히 소멸시켜버릴 수도 있습니다. 이런 상황이 벌어지면, 액티비티 상태에 대한 정보는 손실됩니다. 이런 일이 벌어지더라도, 
+시스템은 여전히 
+백 스택에 해당 액티비티의 자리가 있다는 것을 알고 있습니다. 다만 액티비티가 스택 맨 위로 올라오면 
+시스템이 이를 (재개하는 것이 아니라) 재생성해야만 합니다. 사용자의 작업 내용을 
+잃어버리는 불상사를 피하려면 그 내용을 미리 보존해두어야 합니다. 이때 액티비티의 
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} 콜백 
+메서드를 구현하는 방법을 씁니다.</p>
+
+<p>액티비티 상태를 저장하는 방법에 대한 자세한 정보는 <a href="{@docRoot}guide/components/activities.html#SavingActivityState">액티비티</a>
+문서를 참조하십시오.</p>
+
+
+
+<h2 id="ManagingTasks">작업 관리하기</h2>
+
+<p>Android가 작업과 백 스택을 관리하는 방식은 위에 설명된 바와 같고&mdash;같은 작업 안에서 
+연이어 시작된 모든 작업을 한곳에 배치하되 "후입선출" 스택에 두는 것&mdash;이 방식은 
+대부분의 애플리케이션에 아주 효과적입니다. 여러분은 액티비티가 작업과 연관된 방식이나 
+백 스택에서의 존재 방식에 대해 염려하지 않아도 됩니다. 그러나, 정상적인 동작을 인터럽트하기로 결정할 수도 
+있습니다. 애플리케이션의 액티비티 하나가 시작되면 새 작업을 시작하려 
+할 수도 있습니다(현재 작업 내에 배치되는 것 대신에). 아니면, 액티비티를 시작하면 그것의 
+기존 인스턴스 하나를 앞으로 가져오고자 할 수도 있습니다(백 스택 맨 위에서 새 인스턴스를 
+생성하는 것 대신에). 또는 백 스택에서 사용자가 작업을 떠날 때의 루트 액티비티를 제외하고 
+모든 액티비티를 지우고자 할 수도 있습니다.</p>
+
+<p>이 모든 것과 그 외에도 많은 것을 할 수 있는 것이 바로 
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+매니페스트 요소 안에 있는 속성과, 
+{@link android.app.Activity#startActivity startActivity()}에 전달한 인텐트에 있는 플래그입니다.</p>
+
+<p>이런 면에서, 여러분이 사용할 수 있는 주요 <a href="{@docRoot}guide/topics/manifest/activity-element.html">
+{@code &lt;activity&gt;}</a> 속성은 다음과 같습니다.</p>
+
+<ul class="nolist">
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">
+  {@code taskAffinity}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">
+  {@code launchMode}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">
+  {@code allowTaskReparenting}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">
+  {@code clearTaskOnLaunch}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
+  {@code alwaysRetainTaskState}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">
+  {@code finishOnTaskLaunch}</a></li>
+</ul>
+
+<p>그리고 다음은 여러분이 사용할 수 있는 주요 인텐트 플래그입니다.</p>
+
+<ul class="nolist">
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</li>
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</li>
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</li>
+</ul>
+
+<p>다음 섹션에서는 이와 같은 매니페스트 속성과 인텐트 플래그를 사용하여 
+액티비티가 작업과 연관되는 방식을 정의하고 백 스택에서 액티비티가 동작하는 방식을 정의하는 방법을 배우게 됩니다.</p>
+
+<p>이외에도 별도로 작업과 액티비티를 표시하는 방법에 대한 고려 사항과 
+개요 화면에서의 관리 방법을 논합니다. 자세한 정보는 <a href="{@docRoot}guide/components/recents.html">개요 화면</a>을 
+참조하십시오. 보통은 개요 화면에 작업과 액티비티가 어떻게 표현될지는 
+시스템이 정의하도록 두어야 합니다. 이 동작을 개발자가 수정할 필요도 없습니다.</p>
+
+<p class="caution"><strong>주의:</strong> 대부분의 애플리케이션은 액티비티와 작업에 대한 
+기본 동작을 인터럽트하지 않는 것이 정상입니다. 액티비티가 기본 동작을 수정하는 것이 필요하다는 
+판단이 서면, 시작 과정 중에 액티비티의 유용성을 테스트하십시오. 
+또한 다른 액티비티와 작업에서 <em>뒤로</em> 버튼을 써서 해당 액티비티로 돌아올 때에도 유용성을 테스트해야 합니다.
+사용자의 예상되는 동작과 충돌할 가능성이 있는 탐색 동작을 꼭 테스트하십시오.</p>
+
+
+<h3 id="TaskLaunchModes">시작 모드 정의하기</h3>
+
+<p>시작 모드를 사용하면 액티비티의 새 인스턴스가 현재 작업과 연관된 방식을 정의할 수 있게 
+해줍니다. 여러 가지 시작 모드를 두 가지 방식으로 정의할 수 있습니다.</p>
+<ul class="nolist">
+  <li><a href="#ManifestForTasks">매니페스트 파일 사용하기</a>
+    <p>매니페스트 파일에서 액티비티를 선언하는 경우, 액티비티가 시작될 때 여러 작업과 어떤 식으로 
+연관을 맺어야 하는지 지정할 수 있습니다.</li>
+  <li><a href="#IntentFlagsForTasks">인텐트 플래그 사용하기</a>
+    <p>{@link android.app.Activity#startActivity startActivity()}를 호출하는 경우 
+{@link android.content.Intent}에 플래그를 포함시켜 새 액티비티가 현재 작업과 어떻게 연관되어야 할지(또는 
+애초에 연관을 맺을지 아닐지) 선언하도록 할 수 있습니다.</p></li>
+</ul>
+
+<p>따라서, 액티비티 A가 액티비티 B를 시작하면 액티비티 B는 자신의 매니페스트에서 
+현재 작업과 연관을 맺는 데 적당한 방식(연관을 맺어야 한다면)을 정의할 수 있고 액티비티 A 또한 
+액티비티 B가 현재 작업과 연관을 맺는 방식을 요청할 수 있습니다. 두 액티비티가 모두 액티비티 B가 작업과 
+연관되는 방식을 정의하는 경우, 액티비티 A의 요청(인텐트에 정의된 바를 따름)을 액티비티 B의 
+요청(자신의 매니페스트에서 정의)보다 우위로 인식합니다.</p>
+
+<p class="note"><strong>참고:</strong> 매니페스트 파일에 사용할 수 있는 시작 모드 중에는 
+인텐트의 플래그로 사용할 수는 없는 것도 있으며, 이와 마찬 가지로 인텐트의 플래그로 사용할 수 있는 시작 모드 중에는 
+매니페스트에서 정의할 수 없는 것도 있습니다.</p>
+
+
+<h4 id="ManifestForTasks">매니페스트 파일 사용하기</h4>
+
+<p>매니페스트 파일에서 액티비티를 선언하는 경우, 액티비티가 작업과 
+어떤 식으로 연관되어야 할지 지정하려면 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+요소의 <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
+launchMode}</a> 속성을 사용하면 됩니다.</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
+launchMode}</a> 속성은 액티비티가 작업 안으로 들어가며 시작되는 방법에 대한 지침을 
+나타냅니다. 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">launchMode</a></code>
+속성에 할당할 수 있는 시작 모드는 네 가지가 있습니다.</p>
+
+<dl>
+<dt>{@code "standard"} (기본 모드)</dt>
+  <dd>기본입니다. 시스템이 액티비티가 시작된 작업에서 액티비티의 새 인스턴스를 만들고 
+인텐트의 경로를 이것으로 지정합니다. 액티비티는 여러 번 인스턴트화될 수 있고, 
+각 인스턴스는 서로 다른 작업에 속할 수 있으며 한 작업에 여러 개의 인스턴스가 있을 수 있습니다.</dd>
+<dt>{@code "singleTop"}</dt>
+  <dd>액티비티의 인스턴스가 이미 현재 작업의 맨 위에 존재하는 경우, 시스템은 인텐트의 경로를 
+해당 인스턴스로 지정합니다. 이때 액티비티의 새 인스턴스를 만들기보다는 해당 인스턴스의 {@link
+android.app.Activity#onNewIntent onNewIntent()} 메서드를 호출하는 방법을 
+통합니다. 액티비티는 여러 번 인스턴트화될 수 있고, 각 인스턴스는 서로 다른 작업에 
+속할 수 있으며 한 작업에 여러 개의 인스턴스가 있을 수 있습니다(다만 백 스택의 맨 위에 있는 
+액티비티가 액티비티의 기존 인스턴스가 <em>아닌</em> 경우에만 이것이 적용됩니다).
+  <p>예를 들어 어느 작업의 백 스택이 루트 액티비티 A와 액티비티 B, C, 그리고 맨 위의 액티비티 D로 
+구성되어 있다고 가정합니다(이 스택은 A-B-C-D 형태를 띠며 D가 맨 위에 있습니다). 유형 D의 액티비티에 대한 인텐트가 도착합니다.
+D에 기본 {@code "standard"} 시작 모드가 있는 경우, 클래스의 새 인스턴스가 시작되고 이 스택은 
+A-B-C-D-D가 됩니다. 하지만, D의 시작 모드가 {@code "singleTop"}인 경우, D의 
+기존 인스턴스가 해당 인텐트를 {@link
+android.app.Activity#onNewIntent onNewIntent()}를 통해 받게 됩니다. 이것이 스택의 맨 위에 있기 때문입니다. 스택은 
+계속 A-B-C-D로 유지됩니다. 그러나 유형 B의 액티비티에 대한 인텐트가 도착하는 경우, 
+B의 새 인스턴스가 스택에 추가되며 이는 액티비티의 시작 모드가 {@code "singleTop"}이더라도 무관하게 적용됩니다.</p>
+  <p class="note"><strong>참고:</strong> 어느 액티비티의 새 인스턴스가 생성되면, 
+사용자가 <em>뒤로</em> 버튼을 눌러 이전 액티비티로 되돌아갈 수 있게 됩니다. 그러나 액티비티의 기존 
+인스턴스가 
+새 인텐트를 처리하는 경우, 사용자가 <em>뒤로</em> 버튼을 눌러도 새 인텐트가 {@link android.app.Activity#onNewIntent
+onNewIntent()}에 도착하기 전의 액티비티 
+상태로 
+되돌아갈 수 없습니다.</p>
+</dd>
+
+<dt>{@code "singleTask"}</dt>
+  <dd>시스템이 새 작업을 만들고 새 작업의 루트에 있는 액티비티를 인스턴트화합니다.
+하지만, 액티비티의 인스턴스가 이미 별개의 작업에 존재하는 경우, 시스템은 인텐트의 경로를 
+기존 인스턴스로 지정합니다. 이때 새 인스턴스를 만들기보다 해당 인스턴스의 {@link
+android.app.Activity#onNewIntent onNewIntent()} 메서드를 호출하는 방법을 통합니다. 한 번에 
+액티비티 인스턴스 한 개씩만 존재할 수 있습니다.
+  <p class="note"><strong>참고:</strong> 액티비티가 새 작업에서 시작되더라도, 
+<em>뒤로</em> 버튼을 누르면 여전히 사용자를 이전 액티비티로 돌려보냅니다.</p></dd>
+<dt>{@code "singleInstance"}.</dt>
+  <dd>{@code "singleTask"}와 같습니다. 다만 시스템이 인스턴스를 보유하고 있는 작업 안으로 
+다른 어떤 액티비티도 시작하지 않는다는 것은 예외입니다. 액티비티는 언제나 자신의 작업의 유일무이한 구성원입니다. 
+이것으로 시작한 액티비티는 모두 별개의 작업에서 열립니다.</dd>
+</dl>
+
+
+<p>또 다른 예로 Android 브라우저 애플리케이션이 있습니다. 이것은 웹 브라우저 액티비티가 항상 
+자신만의 작업에서 열려야 한다고 선언합니다. 이때 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 요소에 {@code singleTask} 시작 모드를 지정하는 방법을 씁니다. 
+다시 말해 애플리케이션이 Android 브라우저를 열라는 인텐트를 발행하면 
+브라우저의 액티비티가 애플리케이션과 같은 작업에 배치되지 <em>않는다</em>는 
+뜻입니다. 그 대신, 브라우저에 대한 새 작업이 시작되거나, 브라우저에 이미 
+배경에서 실행 중인 작업이 있는 경우 해당 작업이 전경으로 불려나와 새 인텐트를 처리하게 
+됩니다.</p>
+
+<p>액티비티가 새 작업에서 시작되었든 액티비티를 시작한 것과 같은 작업에서 시작되었든 관계 없이 
+<em>뒤로</em> 버튼을 사용하면 언제나 사용자를 이전 액티비티로 돌려보냅니다. 다만, 
+{@code singleTask} 시작 모드를 나타내는 액티비티를 시작한 다음 해당 
+액티비티의 인스턴스가 이미 배경 작업에 존재하는 경우, 그 작업 전체가 전경에 불려나옵니다. 이 시점에서 
+백 스택에는 이제 앞으로 가져온 작업에서 가져온 모든 액티비티가 포함되어 있으며, 이는 스택의 
+맨 위에 위치합니다. 그림 4는 이와 같은 유형의 시나리오를 나타낸 것입니다.</p>
+
+<img src="{@docRoot}images/fundamentals/diagram_backstack_singletask_multiactivity.png" alt="" />
+<p class="img-caption"><strong>그림 4.</strong> 시작 모드가 "singleTask"인 액티비티가 
+백 스택에 추가되는 방법을 표현한 것입니다. 이 액티비티가 이미 자신의 백 스택을 가지고 있는 
+배경 작업의 일부인 경우, 해당 백 스택도 모두 전경으로 
+불려나오며, 이는 현재 작업 위에 배치됩니다.</p>
+
+<p>매니페스트 파일에서 시작 모드를 사용하는 것에 대한 자세한 정보는 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+요소 문서를 참조하십시오. 여기에서 {@code launchMode} 속성과 허용된 값을 더 자세히 
+논합니다.</p>
+
+<p class="note"><strong>참고:</strong> 액티비티에 대하여 <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 속성으로 지정한 동작을 
+재정의하려면 액티비티를 시작한 인텐트에 포함된 플래그를 사용하면 됩니다. 이 내용은 
+다음 섹션에서 논합니다.</p>
+
+
+
+<h4 id="#IntentFlagsForTasks">인텐트 플래그 사용하기</h4>
+
+<p>액티비티를 시작할 때면, 액티비티가 자신의 작업과 연관되는 기본 방식을 수정할 수 있습니다. 
+{@link
+android.app.Activity#startActivity startActivity()}에 전달한 인텐트 안에 있는 플래그를 포함시키면 됩니다. 기본 동작을 수정하는 데 사용할 수 있는 
+플래그는 다음과 같습니다.</p>
+
+<p>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</dt>
+    <dd>액티비티를 새 작업에서 시작합니다. 지금 시작하고 있는 액티비티에 대해 이미 실행 중인 작업이 있으면, 
+해당 작업의 마지막 상태를 복원하여 전경으로 불려나오고 액티비티는 새 인텐트를 
+{@link android.app.Activity#onNewIntent onNewIntent()}에서 수신합니다.
+    <p>이렇게 하면 {@code "singleTask"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 값에서와 같은 동작을 발생시키며, 
+이는 이전 섹션에서 논한 것과 같습니다.</p></dd>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</dt>
+    <dd>시작되고 있는 액티비티가 현재 액티비티인 경우(백 스택 맨 위에 있는), 해당 액티비티의 새 인스턴스를 생성하는 대신 기존 
+인스턴스가 {@link android.app.Activity#onNewIntent onNewIntent()}에 
+대한 호출을 받습니다.
+    <p>이렇게 하면 {@code "singleTop"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 값에서와 같은 동작을 발생시키며, 
+이는 이전 섹션에서 논한 것과 같습니다.</p></dd>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</dt>
+    <dd>시작되고 있는 액티비티가 이미 현재 작업에서 실행 중인 경우, 해당 액티비티의 
+새 인스턴스를 시작하는 대신 그 위에 있는 모든 다른 액티비티가 
+소멸되고 이 인텐트는 해당 액티비티(이제 맨 위로 올라옴)의 재개된 인스턴스로, 
+{@link android.app.Activity#onNewIntent onNewIntent()}를 통해 전달됩니다.
+    <p>이 동작을 발생시키는 <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
+속성에 대한 값은 없습니다.</p>
+    <p>{@code FLAG_ACTIVITY_CLEAR_TOP}는 
+{@code FLAG_ACTIVITY_NEW_TASK}와 함께 쓰이는 경우가 가장 보편적입니다. 
+이들 플래그를 함께 사용하면 다른 작업에 있는 기존 액티비티의 위치를 
+찾아 이를 인텐트에 응답할 수 있는 위치에 놓을 한 가지 방편이 됩니다. </p>
+    <p class="note"><strong>참고:</strong> 지정된 액티비티의 시작 모드가 
+{@code "standard"}인 경우, 
+이것 또한 스택에서 제거되고 그 자리에 새 인스턴스가 대신 생성되어 수신되는 인텐트를 
+처리하게 됩니다.  이는 시작 모드가 
+{@code "standard"}인 경우, 새 인텐트에 대해서는 항상 새 인스턴스가 생성되기 때문입니다. </p>
+</dd>
+</dl>
+
+
+
+
+
+<h3 id="Affinities">유사성 처리하기</h3>
+
+<p><em>유사성</em>이란 액티비티가 어느 작업에 소속되기를 선호하는지를 나타내는 것입니다. 기본적으로, 
+같은 애플리케이션에서 나온 액티비티는 서로 유사성을 지니고 있습니다. 따라서, 기본적으로 
+같은 애플리케이션 안에 있는 모든 액티비티는 같은 작업 안에 있는 것을 선호합니다. 하지만 액티비티에 대한 기본 유사성은 개발자가 
+수정할 수 있습니다. 각기 다른 애플리케이션에서 정의된 
+액티비티가 하나의 유사성을 공유할 수도 있고, 같은 애플리케이션에서 정의된 여러 액티비티에 
+서로 다른 작업 유사성을 할당할 수도 있습니다.</p>
+
+<p>어느 액티비티라도 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+요소의 <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a> 속성을 
+사용하여 유사성을 수정할 수 있습니다.</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
+속성은 문자열 값을 취합니다. 이는 
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">
+{@code &lt;manifest&gt;}
+</a> 요소에서 선언한 기본 패키지 이름과 달리 고유해야 합니다. 왜냐하면 시스템이 이 이름을 사용하여 애플리케이션의 기본 작업 유사성을 
+식별하기 때문입니다.</p>
+
+<p>유사성이 역할을 갖는 것은 다음과 같은 두 가지 상황에서입니다.</p>
+<ul>
+  <li>액티비티를 시작한 인텐트에 
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
+ 플래그가 들어 있는 경우.
+
+<p>새로운 액티비티는 기본적으로 
+{@link android.app.Activity#startActivity startActivity()}를 호출한 액티비티의 작업 안으로 들어가며 시작됩니다. 이것은 발신자와 같은 
+백 스택 위로 밀어내집니다.  하지만 
+{@link android.app.Activity#startActivity startActivity()}에 
+전달된 인텐트에 {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
+ 플래그가 들어있는 경우, 시스템은 새 액티비티를 담을 다른 작업을 찾습니다. 이는 새 작업인 경우가 많습니다.
+그렇지만 꼭 그래야 하는 것은 아닙니다.  새 액티비티와 같은 유사성을 가진 기존 작업이 이미 존재하는 경우, 
+해당 액티비티는 그 작업 안으로 들어가며 시작됩니다.  그렇지 않으면, 새 작업을 시작합니다.</p>
+
+<p>이 플래그 때문에 액티비티가 새 작업을 시작하게 되고 사용자가 <em>홈</em> 버튼을 눌러 이 액티비티를 
+떠나고자 
+하는 경우, 사용자가 작업으로 도로 이동할 방법이 있어야 합니다. 엔티티 중에는(예를 들어 
+알림 관리자) 액티비티를 항상 외부 작업으로만 시작하고 자신의 일부로서는 절대 시작하지 않는 것이 있습니다. 
+따라서 이들은 {@code FLAG_ACTIVITY_NEW_TASK}를 
+{@link android.app.Activity#startActivity startActivity()}에 전달하는 인텐트에 포함시킵니다. 
+이 플래그를 사용할 수 있는 외부 엔티티가 
+호출할 수 있는 액티비티를 가지고 있는 경우, 사용자가 시작된 작업에 돌아갈 수 있는 
+방법을 따로 가지고 있어야 합니다. 예를 들어 시작 관리자 아이콘을 이용한다든지 하는 방법입니다(작업의 루트 액티비티에 
+{@link android.content.Intent#CATEGORY_LAUNCHER} 인텐트 필터가 있습니다. 아래의 <a href="#Starting">작업 시작하기</a> 섹션을 참조하십시오).</p>
+</li>
+
+  <li>액티비티의 <a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">
+{@code allowTaskReparenting}</a> 속성이 {@code "true"}로 설정된 경우.
+  <p>이 경우, 액티비티는 자신이 시작한 작업에서 벗어나 유사성을 가진 다른 작업이 전경으로 
+나오면 그 작업으로 이동할 수 있습니다.</p>
+  <p>예를 들어 선택한 몇몇 도시에서 기상 상태를 예보하는 어느 액티비티가 
+여행 애플리케이션의 일부로 정의되어 있다고 가정합니다.  이것은 같은 애플리케이션에 있는 
+다른 여러 액티비티와 같은 유사성을 가지며(기본 애플리케이션 유사성) 이 속성으로 상위 재지정을 허용하기도 합니다. 
+액티비티 중 하나가 일기 예보 액티비티를 시작하면, 이는 처음에는 액티비티와 같은 작업에 
+속합니다. 하지만 여행 애플리케이션의 작업이 전경으로 불려나오면 
+일기 예보 액티비티는 그 작업에 다시 할당되며 그 안에 표시됩니다.</p>
+</li>
+</ul>
+
+<p class="note"><strong>팁:</strong> {@code .apk} 파일에 사용자 쪽에서 보기에 하나 이상의 "애플리케이션"이 
+들어있는 경우, <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
+속성을 사용하여 각 "애플리케이션"과 연관된 액티비티에 서로 다른 유사성을 할당하는 것이 좋습니다.</p>
+
+
+
+<h3 id="Clearing">백 스택 지우기</h3>
+
+<p>사용자가 작업을 오랜 시간 동안 떠나 있으면, 시스템이 루트 액티비티만 빼고 모든 액티비티를 
+해당 작업에서 지웁니다.  사용자가 다시 작업으로 돌아오면, 루트 액티비티만 복원됩니다. 
+시스템이 이런 식으로 동작하는 것은 오랜 시간이 지난 다음에는 사용자가 전에 하던 일을 중단하고 
+새로운 일을 시작하기 위해 작업에 돌아올 가능성이 크기 때문입니다. </p>
+
+<p>이 동작을 수정하는 데 사용할 수 있는 액티비티 속성이 몇 가지 있습니다. </p>
+
+<dl>
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#always">alwaysRetainTaskState</a></code>
+</dt>
+<dd>이 속성이 작업의 루트 액티비티 안에서 {@code "true"}로 설정되어 있는 경우, 
+방금 설명한 기본 동작이 일어나지 않습니다. 
+작업은 오랜 시간이 지난 뒤에도 자신의 스택에 있는 모든 액티비티를 유지합니다.</dd>
+
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#clear">clearTaskOnLaunch</a></code></dt>
+<dd>이 속성이 작업의 루트 액티비티 안에서 {@code "true"}로 설정되어 있는 경우, 
+사용자가 작업을 떠났다가 다시 돌아올 때마다 스택을 루트 액티비티까지 
+지웁니다.  바꿔 말하면, 이것은 
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
+{@code alwaysRetainTaskState}</a>와 정반대입니다. 사용자는 항상 작업의 초기 상태로 돌아오게 되며, 
+이는 아주 잠깐 동안만 작업을 떠난 경우에도 마찬가지입니다.</dd>
+
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#finish">finishOnTaskLaunch</a></code>
+</dt>
+<dd>이 속성은 <a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">{@code clearTaskOnLaunch}</a>와 같지만, 
+작업 전체가 아니라 
+하나의 액티비티에서 작동합니다.  이것은 루트 액티비티를 포함한 모든 액티비티가 없어지게 
+하기도 합니다.  이것을 {@code "true"}로 설정하면, 
+액티비티는 현재 세션에 대해서만 작업의 일부로 유지됩니다.  사용자가 작업을 떠났다가 
+다시 돌아오면 이 작업은 더 이상 존재하지 않습니다.</dd>
+</dl>
+
+
+
+
+<h3 id="Starting">작업 시작하기</h3>
+
+<p>액티비티를 작업의 진입 지점으로 설정하려면 여기에 작업에서 지정한 대로 
+{@code "android.intent.action.MAIN"}이 있는 인텐트 필터를 부여하고 
+{@code "android.intent.category.LAUNCHER"}를 
+지정된 카테고리로 설정하면 됩니다. 예:</p>
+
+<pre>
+&lt;activity ... &gt;
+    &lt;intent-filter ... &gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+    ...
+&lt;/activity&gt;
+</pre>
+
+<p>이런 종류의 인텐트 필터를 사용하면 액티비티에 대한 아이콘과 레이블이 
+애플리케이션 시작 관리자에 표시되어 사용자에게 액티비티를 시작할 방법을 부여하며, 
+액티비티를 시작하고 나면 이것이 생성한 작업에 언제든 돌아올 수 있게 됩니다.
+</p>
+
+<p>이 두 번째 능력이 중요합니다. 사용자는 작업을 떠났다가 이 액티비티 시작 관리자를 사용하여 나중에 작업에 
+돌아올 수 있어야 합니다. 이러한 이유로, 액티비티가 항상 작업을 시작하는 것으로 표시하는 <a href="#LaunchModes">시작
+모드</a> 두 가지, 즉 {@code "singleTask"}와 
+{@code "singleInstance"}는 액티비티에 
+{@link android.content.Intent#ACTION_MAIN}
+ 및 {@link android.content.Intent#CATEGORY_LAUNCHER} 필터가 있을 때에만 사용해야 합니다. 예를 들어 필터가 누락되면 다음과 같은 일이 
+발생합니다. 어느 인텐트가 {@code "singleTask"} 액티비티를 시작하여 새 작업을 시작하고, 
+사용자가 이 작업에서 일하며 어느 정도 시간을 보냅니다. 그런 다음 사용자가 <em>홈</em>
+ 버튼을 누릅니다. 이제 이 작업은 배경으로 전송되었으며 눈에 보이지 않습니다. 이제 사용자가 작업으로 되돌아갈 
+방법이 없어졌습니다. 이는 애플리케이션 시작 관리자에 표시되지 않기 때문입니다.</p>
+
+<p>사용자가 액티비티로 되돌아갈 수 있도록 하는 것을 원치 않는 경우, 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+ 요소의 
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code finishOnTaskLaunch}</a>
+를 {@code "true"}로 설정하면 됩니다(<a href="#Clearing">스택 지우기</a>를 참조하십시오).</p>
+
+<p>작업과 액티비티가 개요 화면에서 어떻게 표시되고 관리되는지에 대한 
+자세한 정보는 <a href="{@docRoot}guide/components/recents.html">
+개요 화면</a>에서 확인하실 수 있습니다.</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how to use intents to
+activate other application components and publish the intents to which your components
+respond, continue with the <b><a
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
+Filters</a></b> document.</p>
+-->

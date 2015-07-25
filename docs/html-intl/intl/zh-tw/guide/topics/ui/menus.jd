@@ -1,0 +1,1031 @@
+page.title=選單
+parent.title=使用者介面
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本文件內容</h2>
+<ol>
+  <li><a href="#xml">在 XML 中定義選單</a></li>
+  <li><a href="#options-menu">建立選項選單</a>
+    <ol>
+      <li><a href="#RespondingOptionsMenu">處理點擊事件</a></li>
+      <li><a href="#ChangingTheMenu">在執行階段變更選單項目</a></li>
+    </ol>
+  </li>
+  <li><a href="#context-menu">建立內容關聯選單</a>
+    <ol>
+      <li><a href="#FloatingContextMenu">建立浮動內容選單</a></li>
+      <li><a href="#CAB">使用內容關聯動作模式</a></li>
+    </ol>
+  </li>
+  <li><a href="#PopupMenu">建立彈出式選單</a>
+    <ol>
+      <li><a href="#PopupEvents">處理點擊事件</a></li>
+    </ol>
+  </li>
+  <li><a href="#groups">建立選單群組</a>
+    <ol>
+      <li><a href="#checkable">使用可核取的選單項目</a></li>
+    </ol>
+  </li>
+  <li><a href="#intents">根據意圖新增選單項目</a>
+    <ol>
+      <li><a href="#AllowingToAdd">允許將 Activity 新增至其他選單</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>重要類別</h2>
+  <ol>
+    <li>{@link android.view.Menu}</li>
+    <li>{@link android.view.MenuItem}</li>
+    <li>{@link android.view.ContextMenu}</li>
+    <li>{@link android.view.ActionMode}</li>
+  </ol>
+
+  <h2>另請參閱</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a></li>
+    <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">選單資源</a></li>
+    <li><a href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">和選單按鈕說再見
+</a></li>
+  </ol>
+</div>
+</div>
+
+<p>選單在許多類型的應用程式中都是常見的使用者介面元件。為提供熟悉且一致的使用者體驗，您應該使用
+{@link android.view.Menu} API 來呈現 Activity 中的使用者動作與其他選項。
+</p>
+
+<p>從 Android 3.0 (API 級別 11) 開始，提供 Android 的裝置不再需要提供專屬的「選單」<em></em>按鈕。
+有此變更之後，Android 應用程式應可脫離對傳統有 6 個項目的選單面板的依賴，改為提供動作列來呈現一般的使用者動作。
+
+</p>
+
+<p>雖然有些選單項目的設計與使用者體驗有所變更，但依然是根據
+{@link android.view.Menu} API 來定義一組動作與選項的語意。本指南說明如何在所有版本的 Android 上，建立三個基本類型的選單或動作呈現方式：
+
+</p>
+
+<dl>
+  <dt><strong>選項選單和動作列</strong></dt>
+    <dd><a href="#options-menu">選項選單</a>是 Activity 的主要選單項目集合。
+您應該將對應用程式有全域影響的動作放置在此，例如「搜尋」、「撰寫電子郵件」及「設定」。
+
+  <p>如果您是為 Android 2.3 以下版本進行開發，使用者可按下「選單」<em></em>按鈕來顯示選項選單面板。
+</p>
+  <p>在 Android 3.0 以上版本，選項選單的項目是當成螢幕上的動作項目與溢出選項組合，以<a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a>呈現。
+從 Android 3.0 開始，「選單」<em></em>按鈕已淘汰 (有些裝置甚至沒有)，因此您應轉向使用動作列來存取動作和其他選項。
+
+
+</p>
+  <p>請參閱<a href="#options-menu">建立選項選單</a>。</p>
+    </dd>
+    
+  <dt><strong>內容選單和內容關聯動作模式</strong></dt>
+  
+   <dd>內容選單是會在使用者長按某元素時顯示的<a href="#FloatingContextMenu">浮動選單</a>。
+它提供的動作會影響所選取內容或內容畫面。
+
+  <p>針對 Android 3.0 以上版本進行開發時，您應該改為使用<a href="#CAB">關聯比對動作模式</a>，以啟用所選取內容的動作。此模式顯示的動作項目會影響畫面頂端列中選取的內容，並允許使用者選取多個項目。
+
+</p>
+  <p>請參閱<a href="#context-menu">建立內容關聯選單</a>。</p>
+</dd>
+    
+  <dt><strong>彈出式選單</strong></dt>
+    <dd>彈出式選單顯示的項目清單會以垂直清單的方式，錨定在呼叫該選單的檢視。
+它很適合用來提供與特定內容有關的動作溢出，或針對第二部分的命令提供選項。
+彈出式選單中的動作「不」<strong></strong>應直接影響對應內容，應由內容關聯動作直接影響。
+
+彈出式選單主要用於您 Activity 中與內容區域相關的延伸動作。
+
+  <p>請參閱<a href="#PopupMenu">建立彈出式選單</a>。</p>
+</dd>
+</dl>
+
+
+
+<h2 id="xml">在 XML 中定義選單</h2>
+
+<p>對於所有選單類型，Android 提供標準 XML 格式來定義選單項目。
+您應該在 XML <a href="{@docRoot}guide/topics/resources/menu-resource.html">選單資源</a>中定義選單與其相關項目，而不是在您 Activity 的程式碼中建置選單。
+接著，您可以擴大 Activity 或片段中的選單資源 (當成
+{@link android.view.Menu} 物件載入)。
+</p>
+
+<p>建議使用選單資源的幾個理由如下：</p>
+<ul>
+  <li>較容易視覺化 XML 中的選單結構。</li>
+  <li>可將選單內容和您應用程式的行為程式碼分開。</li>
+  <li>可讓您運用<a href="{@docRoot}guide/topics/resources/index.html">應用程式資源</a>架構，為不同的平台版本、螢幕大小及其他設定，建立替代選單設定。
+</li>
+</ul>
+
+<p>如要定義選單，可在專案的 <code>res/menu/</code> 目錄內建立 XML 檔案，然後利用下列元素建置選單：
+</p>
+<dl>
+  <dt><code>&lt;menu></code></dt>
+    <dd>定義選單項目的容器 {@link android.view.Menu}。<code>&lt;menu></code> 元素必須是檔案的根節點，並可保留一或多個
+<code>&lt;item></code> 與 <code>&lt;group></code> 元素。
+</dd>
+
+  <dt><code>&lt;item></code></dt>
+    <dd>建立代表選單中單一項目的 {@link android.view.MenuItem}。此元素可以包含巢狀
+<code>&lt;menu></code> 元素以建立子選單。</dd>
+    
+  <dt><code>&lt;group></code></dt>
+    <dd>可供 {@code &lt;item&gt;} 元素選用的不可見容器。它可讓您將選單項目分類，以便分享屬性，例如有效狀態與可見度。
+如需詳細資訊，請參閱<a href="#groups">建立選單群組</a>。
+</dd>
+</dl>
+
+
+<p>稱為 <code>game_menu.xml</code> 的範例選單如下：</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/new_game"
+          android:icon="@drawable/ic_new_game"
+          android:title="@string/new_game"
+          android:showAsAction="ifRoom"/&gt;
+    &lt;item android:id="@+id/help"
+          android:icon="@drawable/ic_help"
+          android:title="@string/help" /&gt;
+&lt;/menu&gt;
+</pre>
+
+<p><code>&lt;item></code> 元素支援數個屬性，您可以用來定義項目的外觀與行為。
+上述選單中的項目包括下列屬性：</p>
+
+<dl>
+  <dt>{@code android:id}</dt>
+    <dd>項目獨有的資源 ID，當使用者選取該項目時可讓應用程式辨識出來。
+</dd>
+  <dt>{@code android:icon}</dt>
+    <dd>要當成項目圖示使用的可繪項目參考資料。</dd>
+  <dt>{@code android:title}</dt>
+    <dd>要當成項目標題使用的字串參考資料。</dd>
+  <dt>{@code android:showAsAction}</dt>
+    <dd>指定此項目應何時且如何顯示為<a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a>中的動作項目。</dd>
+</dl>
+
+<p>這些都是您應該使用的最重要屬性，但不侷限於上述這幾個。
+如需所有支援屬性的詳細資訊，請參閱<a href="{@docRoot}guide/topics/resources/menu-resource.html">選單資源</a>。</p>
+
+<p>您可以藉由將 {@code &lt;menu&gt;} 元素新增為 {@code &lt;item&gt;} 的子項，將子選單新增至任何選單 (子選單除外) 的項目。
+當您的應用程式有很多可按主題分類的功能，例如 PC 應用程式選單列中的項目 (檔案、編輯、檢視等等) 時，子選單相當有用。
+
+例如：</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/file"
+          android:title="@string/file" &gt;
+        &lt;!-- "file" submenu --&gt;
+        &lt;menu&gt;
+            &lt;item android:id="@+id/create_new"
+                  android:title="@string/create_new" /&gt;
+            &lt;item android:id="@+id/open"
+                  android:title="@string/open" /&gt;
+        &lt;/menu&gt;
+    &lt;/item&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>如要在 Activity 中使用選單，您必須使用 {@link android.view.MenuInflater#inflate(int,Menu)
+MenuInflater.inflate()} 擴大選單資源 (將 XML 轉換成可程式化的物件)。
+下列各節將說明如何擴大各種
+選單類型的選單。</p>
+
+
+
+<h2 id="options-menu">建立選項選單</h2>
+
+<div class="figure" style="width:200px;margin:0">
+  <img src="{@docRoot}images/options_menu.png" height="333" alt="" />
+  <p class="img-caption"><strong>圖 1.</strong>Android 2.3 裝置上瀏覽器中的選項選單。
+</p>
+</div>
+
+<p>您應該在選項選單中包括與目前 Activity 內容關聯動作和其他選項，例如「搜尋」、「撰寫電子郵件」及「設定」。
+</p>
+
+<p>選項選單中的項目會顯示在螢幕上的哪個位置，取決於您為其開發應用程式的版本。
+</p>
+
+<ul>
+  <li>如果您為「Android 2.3.x (API 級別 10) 以下版本」<strong></strong>開發應用程式，當使用者按下[選單]<em></em> 按鈕，選項選單的內容會顯示在螢幕底部，如圖 1 所示。
+
+開啟時，第一個可見部分就是最多可保留六個選單項目的圖示選單。
+
+如果您的選單包含六個以上的項目，Android 會將第六個與其餘的項目放入溢出選單，使用者可透過選取[更多]<em></em> 來開啟。
+
+</li>
+
+  <li>如果您為「Android 3.0 (API 級別 11) 以上版本」<strong></strong>開發應用程式，選項選單中的項目會顯示在<a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a>。
+在預設情況下，系統會將所有項目放入動作溢出，使用者可以利用動作列右側的動作溢出圖示來顯示 (或按裝置的「選單」<em></em>按鈕，如果有的話)。
+
+為了能夠快速存取重要的動作，您可以將 {@code android:showAsAction="ifRoom"} 新增至對應的 {@code &lt;item&gt;} 元素，將要顯示在動作列的幾個項目升階 (請參閱圖 2)。
+
+
+
+ <p>如需動作項目與其他動作列行為的詳細資訊，請參閱<a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a>指南。 </p>
+<p class="note"><strong>注意：</strong>即使您「並非」<em></em>為 Android 3.0 以上版本進行開發，您仍可建置自己的動作列版面配置，達到類似的效果。
+如需如何支援舊版Android 提供動作列的範例，請參閱<a href="{@docRoot}resources/samples/ActionBarCompat/index.html">動作列相容性</a>範例。
+
+</p>
+</li>
+</ul>
+
+<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<p class="img-caption"><strong>圖 2.</strong><a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb 圖片庫</a>應用程式的動作列，顯示導覽索引標籤與相機動作項目 (再加上動作溢出按鈕)。
+</p>
+
+<p>您可以從 {@link android.app.Activity} 子類別或 {@link android.app.Fragment} 子類別宣告選項選單的項目。
+如果您的 Activity 與片段都宣告選項選單的項目，兩者會在 UI 中結合。
+
+先顯示 Activity 的項目，接著會依片段新增至 Activity 的順序顯示各片段的項目。
+您可以視需要在您想移動的 {@code &lt;item&gt;} 中，利用其 {@code android:orderInCategory}屬性重新排列選單項目的順序。
+</p>
+
+<p>如要指定 Activity 的選項選單，可覆寫 {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (片段會提供自己的
+{@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()} 回呼)。在這種方法中，您可以將選單資源(<a href="#xml">在 XML 中完成定義</a>) 擴大回呼中提供的 {@link
+android.view.Menu}。
+例如：</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = {@link android.app.Activity#getMenuInflater()};
+    inflater.inflate(R.menu.game_menu, menu);
+    return true;
+}
+</pre>
+
+<p>透過 {@link android.view.MenuItem} API，您也可以使用 {@link android.view.Menu#add(int,int,int,int)
+add()} 來新增選單項目，以及利用 {@link android.view.Menu#findItem findItem()} 擷取項目來修訂它們的屬性。
+</p>
+
+<p>如果您是為 Android 2.3.x 以下版本開發應用程式，當使用者初次開啟選單時，系統會呼叫 {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}，以建立選項選單。
+如果您是為 Android 3.0 以上版本開發應用程式，啟動 Activity 時，系統會呼叫
+{@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}，以在動作列顯示項目。
+</p>
+
+
+
+<h3 id="RespondingOptionsMenu">處理點擊事件</h3>
+
+<p>使用者從選項選單 (包括動作列中的動作項目) 中選取項目時，系統會呼叫您 Activity 的
+{@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} 方法。此方法會傳送所選取的 {@link android.view.MenuItem}。您可以呼叫
+{@link android.view.MenuItem#getItemId()} 傳回選單項目的唯一 ID (由選單資源中的
+{@code android:id} 屬性或透過指定給
+{@link android.view.Menu#add(int,int,int,int) add()} 方法的整數來定義) 來識別該項目。您可以將此 ID 和已知選單項目比對，以執行適當動作。
+例如：</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle item selection
+    switch (item.getItemId()) {
+        case R.id.new_game:
+            newGame();
+            return true;
+        case R.id.help:
+            showHelp();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>當您成功處理選單項目時會傳回 {@code true}。如果您不處理選單項目，應該呼叫
+{@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} 的超級類別實作 (預設實作會傳回 false)。
+</p>
+
+<p>如果您的 Activity 包含片段，系統會先呼叫 Activity 的 {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}，再依片段的新增順序呼叫各片段，直到其中之一傳回
+{@code true} 或所有片段均已呼叫。
+</p>
+
+<p class="note"><strong>提示：</strong>Android 3.0 新增的功能可讓您在 XML 中使用
+{@code android:onClick} 屬性定義選單項目的點擊行為。該屬性值必須是使用選單的 Activity 所定義的方法名稱。
+它必須是公用方法且接受單一
+{@link android.view.MenuItem} 參數，當系統呼叫此方法時，它會傳送選取的選單項目。
+如需詳細資訊與範例，請參閱<a href="{@docRoot}guide/topics/resources/menu-resource.html">選單資源</a>文件。</p>
+
+<p class="note"><strong>提示：</strong>如果您的應用程式包含多個 Activity 且有一些提供相同的選項選單，可考慮建立只實作
+{@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} 與 {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} 方法的 Activity。
+接著，針對應共用相同選項選單的 Activity 擴充此類別。
+如此一來，您可以管理一組處理選單動作的程式碼，以及每一個繼承選單行為的子系類別。
+
+
+如果您想要將選單項目新增至其中一個子系 Activity，請覆寫該 Activity 中的 {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}。呼叫 {@code super.onCreateOptionsMenu(menu)} 以建立原始的選單項目，然後利用
+{@link
+android.view.Menu#add(int,int,int,int) menu.add()} 來新增選單項目。您也可以覆寫個別選單項目的超級類別行為。
+</p>
+
+
+<h3 id="ChangingTheMenu">在執行階段變更選單項目</h3>
+
+<p>系統呼叫 {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} 之後，會保留您填入的 {@link android.view.Menu} 執行個體，除非該選單因某種理由而變無效，否則不會再次呼叫
+{@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}。
+不過，{@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} 應該只用來建立初始選單狀態，您不要在 Activity 生命週期間用來進行變更。
+</p>
+
+<p>如果您想要根據 Activity 生命週期當中發生的事件來修改選項選單，您可以使用
+{@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()} 方法這麼做。
+這個方法會將目前存在的
+{@link android.view.Menu} 物件傳送給您加以修改，例如新增、移除或停用項目
+(片段也會提供 {@link
+android.app.Fragment#onPrepareOptionsMenu onPrepareOptionsMenu()} 回呼)。</p>
+
+<p>在 Android 2.3.x 以下版本，每當使用者開啟選項選單 (按下 [選單]<em></em>
+按鈕) 時，系統都會呼叫 {@link
+android.app.Activity#onPrepareOptionsMenu(Menu)
+onPrepareOptionsMenu()}。</p>
+
+<p>在 Android 3.0 以上版本，當選單項目顯示在動作列時會一律將選項選單視為開啟。
+當事件發生且您想要執行選單更新時，您必須呼叫
+{@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()}，以要求系統呼叫
+{@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}。</p>
+
+<p class="note"><strong>注意：</strong>您不應該根據目前處於焦點狀態的
+{@link android.view.View}，變更選項選單中的項目。
+處於輕觸模式 (使用者未使用軌跡球或導覽用的方向鍵) 時，檢視無法成為焦點，因此您不應該使用焦點當成修改選項選單中項目時的依據。
+
+如果您想要在 {@link
+android.view.View} 提供具內容相關性的選單項目，請使用<a href="#context-menu">內容選單</a>。</p>
+
+
+
+
+<h2 id="context-menu">建立內容關聯選單</h2>
+
+<div class="figure" style="width:420px;margin-top:-1em">
+  <img src="{@docRoot}images/ui/menu-context.png" alt="" />
+  <p class="img-caption"><strong>圖 3.</strong>浮動內容選單的螢幕擷取畫面 (左) 與內容關聯動作列 (右)。
+</p>
+</div>
+
+<p>內容關聯選單提供的動作會影響 UI 中的特定項或內容畫面。
+
+您可以為任何檢視提供內容選單，但它們通常用於使用者能直接對各項目執行動作的 {@link
+android.widget.ListView}、{@link android.widget.GridView} 或其他檢視集合中的項目。</p>
+
+<p>您有兩種方式可提供內容關聯動作：</p>
+<ul>
+  <li>在<a href="#FloatingContextMenu">浮動內容選單</a>中。當使用者長按 (按住不放) 某個宣告支援內容選單的檢視時，選單會顯示為浮動的選單項目清單 (類似於對話方塊)。
+
+使用者一次可對一個項目執行內容關聯動作。
+</li>
+
+  <li>在<a href="#CAB">內容關聯動作模式</a>中。此模式是
+{@link android.view.ActionMode} 的系統實作，在畫面頂端將會影響將所選項目的動作項目顯示在「內容關聯動作列」<em></em>。
+此模式處於使用中時，使用者能一次對多個項目執行某一動作 (如果您的應用程式允許的話)。
+</li>
+</ul>
+
+<p class="note"><strong>注意：</strong>Android 3.0 (API 級別 11) 以上版本可以使用內容關聯動作模式，此模式同時是可以顯示內容關聯動作時的偏好技術。
+
+如果您的應用程式支援 3.0 以下版本，您應該在這類裝置上切換為浮動內容選單。
+</p>
+
+
+<h3 id="FloatingContextMenu">建立浮動內容選單</h3>
+
+<p>如何提供浮動內容選單：</p>
+<ol>
+  <li>呼叫 {@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()} 並將 {@link android.view.View} 傳送給它，向應該建立關聯的內容選單註冊 {@link android.view.View}。
+
+
+  <p>如果您的 Activity 使用 {@link android.widget.ListView} 或 {@link android.widget.GridView}，且您希望每個項目都提供相同的內容選單，可將 {@link android.widget.ListView} 或 {@link android.widget.GridView} 傳送至 {@link
+android.app.Activity#registerForContextMenu(View) registerForContextMenu()} 來註冊內容選單的所有項目。
+
+</p>
+</li>
+
+  <li>在您的 {@link android.app.Activity} 或 {@link android.app.Fragment} 中實作 {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()} 方法。
+
+  <p>當註冊的檢視收到長按事件時，系統會呼叫 {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()} 方法。
+您可以在這裡定義選單項目，方法通常是擴大選單資源。例如：
+</p>
+<pre>
+&#64;Override
+public void onCreateContextMenu(ContextMenu menu, View v,
+                                ContextMenuInfo menuInfo) {
+    super.onCreateContextMenu(menu, v, menuInfo);
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.context_menu, menu);
+}
+</pre>
+
+<p>{@link android.view.MenuInflater} 可讓您從<a href="{@docRoot}guide/topics/resources/menu-resource.html">選單資源</a>擴大內容選單。回呼方法參數包括使用者選取的
+{@link android.view.View}，以及提供其他所選取項目相關資訊的 {@link android.view.ContextMenu.ContextMenuInfo} 物件。
+
+如果 Activity 有數個分別提供不同內容選單的檢視，您可以使用這些參數來決定要擴大的內容選單。
+
+</p>
+</li>
+
+<li>實作 {@link android.app.Activity#onContextItemSelected(MenuItem)
+onContextItemSelected()}。
+  <p>當使用者選取選單項目時，系統會呼叫此方法，以便您執行適當的動作。
+例如：</p>
+
+<pre>
+&#64;Override
+public boolean onContextItemSelected(MenuItem item) {
+    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    switch (item.getItemId()) {
+        case R.id.edit:
+            editNote(info.id);
+            return true;
+        case R.id.delete:
+            deleteNote(info.id);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+    }
+}
+</pre>
+
+<p>{@link android.view.MenuItem#getItemId()} 方法會查詢選定選單項目的 ID，使用
+{@code
+android:id} 屬性在 XML 中指派給各個選單項目，如<a href="#xml">在 XML 中定義選單</a>一節所述。
+</p>
+
+<p>當您成功處理選單項目時會傳回 {@code true}。如果您不處理選單項目，請將選單項目傳送至超級類別實作。
+如果您的 Activity 包括片段，該 Activity 會先收到此回呼。
+在不處理時呼叫超級類別，系統就可以一次一個 (依片段的新增順序) 將事件傳送至各片段中的個別回呼方法，直到傳回
+{@code true} 或 {@code false}。
+(
+{@link android.app.Activity} 與 {@code android.app.Fragment} 的預設實作會傳回 {@code
+false}，因此當您不處理時，務必要呼叫超級類別。)</p>
+</li>
+</ol>
+
+
+<h3 id="CAB">使用內容關聯動作模式</h3>
+
+<p>內容關聯動作模式是 {@link android.view.ActionMode} 的系統實作，執行內容關聯動作時著重於與使用者互動。
+當使用者選取項目而啟用此模式時，「內容關聯動作列」<em></em>會出現在畫面頂端，呈現使用者可在目前所選項目上執行的動作。
+
+此模式啟用時，使用者能選取多個項目 (如果您允許的話)、取消選取項目，還可以在 Activity 內繼續瀏覽 (在您允許的範圍內)。
+
+當使用者取消選取所有項目、按下 [後退] 按鈕，或選取該列左側的[完成]<em></em> 按鈕時，動作模式會停用且內容　關聯　動作列也會消失。
+
+</p>
+
+<p class="note"><strong>注意：</strong>內容關聯動作列不一定要與<a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a>關聯。
+即使內容相關動作列在視覺上覆蓋動作列的位置，兩者依然獨立運作。
+
+</p>
+
+<p>如果您在為 Android 3.0 (API 級別 11) 以上版本進行開發，您應使用內容關聯動作模式來呈現內容動作，而不是<a href="#FloatingContextMenu">浮動內容選單</a>。
+</p>
+
+<p>針對提供內容相關動作的檢視，您應該就下列兩種事件之一 (或兩者) 呼叫內容關聯動作模式：
+</p>
+<ul>
+  <li>使用者長按檢視。</li>
+  <li>使用者選取檢視內的核取方塊或類似 UI 元件。</li>
+</ul>
+
+<p>應用程式如何呼叫內容關聯動作模式以及如何定義每個動作的行為，視您的設計而定。
+基本上可分為兩種設計：</p>
+<ul>
+  <li>在個別的任意檢視上執行內容關聯動作。</li>
+  <li>針對 {@link
+android.widget.ListView} 或 {@link android.widget.GridView} (允許使用者選取多個項目並對全部執行同一動作) 中的項目群組批次執行內容關聯動作。
+</li>
+</ul>
+
+<p>下列各節說明每種情況所需的設定。</p>
+
+
+<h4 id="CABforViews">為個別的檢視啟用內容關離動作模式</h4>
+
+<p>如果您只有在使用者選取特定檢視時，才想要呼叫內容關聯動作模式，建議您採取以下動作：
+</p>
+<ol>
+  <li>實作 {@link android.view.ActionMode.Callback} 介面。在它的回呼方法中，您可以指定內容相關動作列的動作、回應動作項目的點擊事件，以及處理動作模式的其他生命週期事件。
+
+</li>
+  <li>當您想要顯示該列時 (例如當使用者長按檢視時)，可呼叫 {@link android.app.Activity#startActionMode startActionMode()}。
+</li>
+</ol>
+
+<p>例如：</p>
+
+<ol>
+  <li>實作 {@link android.view.ActionMode.Callback ActionMode.Callback} 介面：
+<pre>
+private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+    // Called when the action mode is created; startActionMode() was called
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate a menu resource providing context menu items
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+        return true;
+    }
+
+    // Called each time the action mode is shown. Always called after onCreateActionMode, but
+    // may be called multiple times if the mode is invalidated.
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false; // Return false if nothing is done
+    }
+
+    // Called when the user selects a contextual menu item
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share:
+                shareCurrentItem();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Called when the user exits the action mode
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
+    }
+};
+</pre>
+
+<p>請注意，這些事件回呼幾乎和<a href="#options-menu">選項選單</a>的回呼一模一樣，只是每一個都會傳送與事件關聯的 {@link
+android.view.ActionMode} 物件。您可以使用 {@link
+android.view.ActionMode} API 對 CAB 進行各種變更，例如使用
+{@link android.view.ActionMode#setTitle setTitle()} 與 {@link
+android.view.ActionMode#setSubtitle setSubtitle()} 修改標題與子標題 (指出已選取的項目數量相當有用)。
+</p>
+
+<p>同時請注意，當動作模式終結時，上述範例會將 {@code mActionMode} 變數設為 null。
+在下個步驟中，您將看到它是如何初始化，以及如何儲存 Activity 或片段中的成員變數，非常實用。
+</p>
+</li>
+
+  <li>呼叫 {@link android.app.Activity#startActionMode startActionMode()} (可以的話) 以啟用內容關聯動作模式，例如回應長按 {@link
+android.view.View}。
+</p>
+
+<pre>
+someView.setOnLongClickListener(new View.OnLongClickListener() {
+    // Called when the user long-clicks on someView
+    public boolean onLongClick(View view) {
+        if (mActionMode != null) {
+            return false;
+        }
+
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = getActivity().startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        return true;
+    }
+});
+</pre>
+
+<p>當您呼叫 {@link android.app.Activity#startActionMode startActionMode()} 時，系統會傳回建立的
+{@link android.view.ActionMode}。只要將此儲存在成員變數中，您就可以變更內容關聯動作列以回應其他事件。
+在上述範例中，
+{@link android.view.ActionMode} 是用來確保不會重新建立已在使用中的 {@link android.view.ActionMode} 執行個體，方法是在將動作模式啟動之前，檢查成員是否為 null。
+
+</p>
+</li>
+</ol>
+
+
+
+<h4 id="CABforListView">啟用 ListView 或 GridView 中的批次內容相關動作</h4>
+
+<p>如果您在 {@link android.widget.ListView} 或 {@link
+android.widget.GridView} (或 {@link android.widget.AbsListView} 的另一個延伸) 中有一系列項目，且想要允許使用者執行批次動作，請進行以下動作：
+</p>
+
+<ul>
+  <li>實作 {@link android.widget.AbsListView.MultiChoiceModeListener} 介面並使用
+{@link android.widget.AbsListView#setMultiChoiceModeListener
+setMultiChoiceModeListener()} 加以設定以供檢視群組使用。在接聽器的回呼方法中，您可以指定內容相關動作列的動作、回應動作項目的點擊事件，以及處理從 {@link android.view.ActionMode.Callback} 介面繼承的其他回呼。
+
+</li>
+
+  <li>使用 {@link
+android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL} 引數呼叫 {@link android.widget.AbsListView#setChoiceMode setChoiceMode()}。</li>
+</ul>
+
+<p>例如：</p>
+
+<pre>
+ListView listView = getListView();
+listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+
+    &#64;Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                          long id, boolean checked) {
+        // Here you can do something when items are selected/de-selected,
+        // such as update the title in the CAB
+    }
+
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        // Respond to clicks on the actions in the CAB
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                deleteSelectedItems();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate the menu for the CAB
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context, menu);
+        return true;
+    }
+
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        // Here you can make any necessary updates to the activity when
+        // the CAB is removed. By default, selected items are deselected/unchecked.
+    }
+
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        // Here you can perform updates to the CAB due to
+        // an {@link android.view.ActionMode#invalidate} request
+        return false;
+    }
+});
+</pre>
+
+<p>這樣一來，當使用者以長按的方式選取項目時，系統就會呼叫 {@link
+android.widget.AbsListView.MultiChoiceModeListener#onCreateActionMode onCreateActionMode()}
+方法，並顯示包含指定動作的內容相關動作列。可以看見內容關聯動作列時，使用者即可選取其他項目。
+</p>
+
+<p>在某些情況下，內容關聯動作提供一般動作項目，因為使用者可能未發現有長按行為，所以您可能希望新增核取方塊或類似的 UI 元素，讓他們選取項目。
+
+當使用者選取核取方塊時，您可以使用 {@link android.widget.AbsListView#setItemChecked setItemChecked()} 將個別的清單項目設定成已核取狀態，以呼叫內容關聯動作模式。
+
+</p>
+
+
+
+
+<h2 id="PopupMenu">建立彈出式選單</h2>
+
+<div class="figure" style="width:220px">
+<img src="{@docRoot}images/ui/popupmenu.png" alt="" />
+<p><strong>圖 4.</strong>Gmail 應用程式中的彈出式選單錨定於右上角的溢出按鈕。
+</p>
+</div>
+
+<p>{@link android.widget.PopupMenu} 是錨定於 {@link android.view.View} 的強制回應選單。
+有空間的畫會顯示在錨定檢視下方或檢視上方。適合用途：</p>
+<ul>
+  <li>為與特定內容關聯動作提供溢出樣式選單 (例如 Gmail 的電子郵件標頭，如圖 4 所示)。<em></em>
+
+    <p class="note"><strong>注意：</strong>內容選單一般用於會「影響」<em></em>所選取內容的動作，與這並不相同。
+對於會影響所選取內容的動作，請使用<a href="#CAB">內容關聯動作模式</a>或<a href="#FloatingContextMenu">浮動內容選單</a>。
+</p></li>
+  <li>提供命令句的第二部分 (例如，標示為「新增」的按鈕會產生包含不同「新增」選項的彈出式選單)。
+</li>
+  <li>提供類似於 {@link android.widget.Spinner} (不保留永續性選擇) 的下拉式清單。
+</li>
+</ul>
+
+
+<p class="note"><strong>注意：</strong> API 級別 11 以上版本才可以使用 {@link android.widget.PopupMenu}。
+</p>
+
+<p>如果您<a href="#xml">在 XML 中定義選單</a>，以下說明如何顯示彈出式選單：</p>
+<ol>
+  <li>透過其建構函式將 {@link android.widget.PopupMenu} 具現化，使用應錨定選單的目前應用程式
+{@link android.content.Context} 與 {@link android.view.View}。
+</li>
+  <li>使用 {@link android.view.MenuInflater} 將您的選單資源擴大成
+{@link
+android.widget.PopupMenu#getMenu() PopupMenu.getMenu()} 所傳回的 {@link android.view.Menu} 物件。針對 14 以上的 API 級別，您可以改用
+{@link android.widget.PopupMenu#inflate PopupMenu.inflate()}。</li>
+  <li>呼叫 {@link android.widget.PopupMenu#show() PopupMenu.show()}。</li>
+</ol>
+
+<p>例如，以下是含有 {@link android.R.attr#onClick android:onClick} 屬性可顯示彈出式選單的按鈕。
+</p>
+
+<pre>
+&lt;ImageButton
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:src="@drawable/ic_overflow_holo_dark"
+    android:contentDescription="@string/descr_overflow_button"
+    android:onClick="showPopup" />
+</pre>
+
+<p>接著，該 Activity 可以顯示彈出式選單，如下所示：</p>
+
+<pre>
+public void showPopup(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+    MenuInflater inflater = popup.getMenuInflater();
+    inflater.inflate(R.menu.actions, popup.getMenu());
+    popup.show();
+}
+</pre>
+
+<p>在 14 以上的 API 級別中，您可以利用 {@link
+android.widget.PopupMenu#inflate PopupMenu.inflate()} 將兩行結合來擴大選單。</p>
+
+<p>當使用者選取某項目或輕觸選單區域外時會關閉選單。
+您可以使用 {@link
+android.widget.PopupMenu.OnDismissListener} 來接聽關閉事件。</p>
+
+<h3 id="PopupEvents">處理點擊事件</h3>
+
+<p>如要在使用者選取選單項目時執行動作，您必須呼叫 {@link android.widget.PopupMenu#setOnMenuItemClickListener
+setOnMenuItemclickListener()} 來實作 {@link
+android.widget.PopupMenu.OnMenuItemClickListener} 介面並向您的 {@link
+android.widget.PopupMenu} 註冊。
+當使用者選取項目時，系統會在您的介面中呼叫 {@link
+android.widget.PopupMenu.OnMenuItemClickListener#onMenuItemClick onMenuItemClick()} 回呼。
+</p>
+
+<p>例如：</p>
+
+<pre>
+public void showMenu(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+
+    // This activity implements OnMenuItemClickListener
+    popup.setOnMenuItemClickListener(this);
+    popup.inflate(R.menu.actions);
+    popup.show();
+}
+
+&#64;Override
+public boolean onMenuItemClick(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.archive:
+            archive(item);
+            return true;
+        case R.id.delete:
+            delete(item);
+            return true;
+        default:
+            return false;
+    }
+}
+</pre>
+
+
+<h2 id="groups">建立選單群組</h2>
+
+<p>選單群組是指某些特性相同的選單項目集合。您可以利用群組：
+</p>
+<ul>
+  <li>透過 {@link android.view.Menu#setGroupVisible(int,boolean)
+setGroupVisible()} 來顯示或隱藏所有項目</li>
+  <li>透過 {@link android.view.Menu#setGroupEnabled(int,boolean)
+setGroupEnabled()} 來啟用或停用所有項目</li>
+  <li>透過 {@link
+android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()} 指定是否可核取所有項目</li>
+</ul>
+
+<p>您可以將 {@code &lt;item&gt;} 元素堆疊在選單資源中的 {@code &lt;group&gt;}元素內，或使用 {@link
+android.view.Menu#add(int,int,int,int) add()} 方法指定群組 ID 來建立群組。
+</p>
+
+<p>以下是包含群組的範例選單資源：</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/menu_save"
+          android:icon="@drawable/menu_save"
+          android:title="@string/menu_save" /&gt;
+    &lt;!-- menu group --&gt;
+    &lt;group android:id="@+id/group_delete"&gt;
+        &lt;item android:id="@+id/menu_archive"
+              android:title="@string/menu_archive" /&gt;
+        &lt;item android:id="@+id/menu_delete"
+              android:title="@string/menu_delete" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>群組中的項目和第一個項目都會顯示在同一層，選單中的這三個項目都屬於同層級。
+不過，您可以參考群組 ID 並使用上方所述的方法，修改群組當中兩個項目的特性。
+系統也絕不會將群組的項目分離。
+例如，如果您針對每個項目宣告 {@code
+android:showAsAction="ifRoom"}，它們都會顯示在動作列中或顯示在動作溢出中。
+</p>
+
+
+<h3 id="checkable">使用可勾選的選單項目</h3>
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/radio_buttons.png" height="333" alt="" />
+  <p class="img-caption"><strong>圖 5.</strong>包含可勾選項目的子選單螢幕擷取畫面。
+</p>
+</div>
+
+<p>對於獨立選項使用核取方塊，或對互斥選項群組使用選項按鈕，將選單當成開啟或關閉選項的介面，相當實用。
+
+圖 5 顯示的子選單包含能以圓形按鈕勾選的項目。
+</p>
+
+<p class="note"><strong>注意：</strong>圖示選單 (出自選項選單) 中的選單項目無法顯示核取方塊或選項按鈕。
+如果您選擇要將圖示選單中的項目設為可勾選，每當狀態變更時，您都必須切換圖示和/或文字，手動指出勾選狀態。
+
+</p>
+
+<p>您可以使用 {@code &lt;item&gt;} 元素中的 {@code
+android:checkable} 屬性，為個別的選單項目定義可勾選行為，或利用 {@code &lt;group&gt;} 元素中的 {@code android:checkableBehavior} 屬性來為整個群組定義。
+例如，此選單群組中的所有項目都可以利用選項按鈕勾選。
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;group android:checkableBehavior="single"&gt;
+        &lt;item android:id="@+id/red"
+              android:title="@string/red" /&gt;
+        &lt;item android:id="@+id/blue"
+              android:title="@string/blue" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>{@code android:checkableBehavior} 屬性可接受其中一項：
+<dl>
+  <dt>{@code single}</dt>
+    <dd>只能勾選群組中的一個項目 (圓形按鈕)</dd>
+  <dt>{@code all}</dt>
+    <dd>可勾選所有項目 (核取方塊)</dd>
+  <dt>{@code none}</dt>
+    <dd>沒有任何項目可供勾選</dd>
+</dl>
+
+<p>您可以使用
+{@code &lt;item&gt;} 元素中的 {@code android:checked} 屬性將預設的勾選狀態套用至項目，並使用 {@link
+android.view.MenuItem#setChecked(boolean) setChecked()} 方法在程式碼中變更它。</p>
+
+<p>已選取可勾選項目時，系統會呼叫所選取個別項目的回呼方法 (例如 {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()})。
+您必須在這裡設定核取方塊的狀態，原因是核取方塊或選項按鈕並不會自動變更其狀態。
+
+您可以利用 
+{@link android.view.MenuItem#isChecked()} 來查詢項目的目前狀態 (使用者選取它之前的狀態)，然後利用
+{@link android.view.MenuItem#setChecked(boolean) setChecked()} 來設定勾選狀態。例如：</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.vibrate:
+        case R.id.dont_vibrate:
+            if (item.isChecked()) item.setChecked(false);
+            else item.setChecked(true);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>如果您不以這種方式設定已勾選狀態，將無法在使用者選取時變更項目 (核取方塊或選項按鈕) 的可見狀態。
+
+當您確實設定狀態，Activity 會保留項目的已勾選狀態，當使用者稍後開啟選單時，即可看見您設定的已勾選狀態。
+
+</p>
+
+<p class="note"><strong>注意：</strong>可勾選的選單項目只能在各工作階段上使用，並不會在應用程式終結後儲存。
+
+如果想為使用者儲存特定應用程式設定，請使用<a href="{@docRoot}guide/topics/data/data-storage.html#pref">共用偏好設定</a>。
+</p>
+
+
+
+<h2 id="intents">根據意圖新增選單項目</h2>
+
+<p>有時候您會希望選單項目使用 {@link android.content.Intent}來啟動 Activity (不論是您的應用程式或另一應用程式中的 Activity)。
+當您知道想要使用的意圖，同時有應繼承該意圖的特定選單項目時，您可在使用者選取項目時才回呼的適當方法實作期間使用
+{@link android.app.Activity#startActivity(Intent) startActivity()} 執行該意圖 (例如 {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} callback) 回呼)。
+
+</p>
+
+<p>不過，如果您不確定使用者的裝置是否包含可處理該意圖的應用程式，而新增可呼叫它的選單項目會導致選單項目無法運作，原因可能是該意圖不會解析成 Activity。
+
+
+為解決這個問題，當 Android 在處理您意圖的裝置上找到 Activity 時，Android 會讓您將選單項目動態新增至選單。
+</p>
+
+<p>如何根據接受意圖的可用 Activity 來新增選單項目：</p>
+<ol>
+  <li>定義類別為
+{@link android.content.Intent#CATEGORY_ALTERNATIVE} 和/或
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} 的意圖，再加上其他需求。</li>
+  <li>呼叫 {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+Menu.addIntentOptions()}。Android 接著會搜尋可執行該意圖的任何應用程式，並將其新增至您的選單。
+</li>
+</ol>
+
+<p>如果未安裝可滿足該意圖的應用程式，則不會新增任何選單項目。
+</p>
+
+<p class="note"><strong>注意：</strong>
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} 是用來處理畫面上目前選取的元素。
+因此，請只在 {@link
+android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenuInfo)
+onCreateContextMenu()} 中建立選單的情況下才使用。</p>
+
+<p>例如：</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu){
+    super.onCreateOptionsMenu(menu);
+
+    // Create an Intent that describes the requirements to fulfill, to be included
+    // in our menu. The offering app must include a category value of Intent.CATEGORY_ALTERNATIVE.
+    Intent intent = new Intent(null, dataUri);
+    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+
+    // Search and populate the menu with acceptable offering applications.
+    menu.addIntentOptions(
+         R.id.intent_group,  // Menu group to which new items will be added
+         0,      // Unique item ID (none)
+         0,      // Order for the items (none)
+         this.getComponentName(),   // The current activity name
+         null,   // Specific items to place first (none)
+         intent, // Intent created above that describes our requirements
+         0,      // Additional flags to control items (none)
+         null);  // Array of MenuItems that correlate to specific items (none)
+
+    return true;
+}</pre>
+
+<p>找到的各個 Activity 提供的意圖篩選器如果與定義的意圖相符，就會新增選單項目，使用意圖篩選器的 <code>android:label</code> 中的值當成選單項目標題，並將應用程式圖示當成選單項目圖示。
+
+此外，
+{@link android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()} 方法還會傳回新增的選單項目數量。</p>
+
+<p class="note"><strong>注意：</strong>當您呼叫 {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()} 時，它會覆寫第一個引數中所指定選單群組中的任何或所有選單項目。
+</p>
+
+
+<h3 id="AllowingToAdd">允許將 Activity 新增至其他選單</h3>
+
+<p>您也能向其他應用程式提供 Activity 的服務，這樣即可在其他應用程式的選單中包含您的應用程式 (與上述的角色顛倒)。
+</p>
+
+<p>如要包含在其他應用程式選單中，您必須照常定義意圖篩選器，但務必為意圖篩選器類別納入 
+{@link android.content.Intent#CATEGORY_ALTERNATIVE} 和/或 {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} 值。
+
+例如：</p>
+<pre>
+&lt;intent-filter label="&#64;string/resize_image">
+    ...
+    &lt;category android:name="android.intent.category.ALTERNATIVE" />
+    &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+    ...
+&lt;/intent-filter>
+</pre>
+
+<p>如要進一步瞭解如何編寫意圖篩選器，請參閱<a href="/guide/components/intents-filters.html">意圖和意圖篩選器</a>。
+</p>
+
+<p>如需採用此技術的範例應用程式，請參閱 <a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">NotePad</a> 範例程式碼。
+
+</p>

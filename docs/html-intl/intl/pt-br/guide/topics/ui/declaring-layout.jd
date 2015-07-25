@@ -1,0 +1,492 @@
+page.title=Layouts
+page.tags=vista,grupodevistas
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Neste documento</h2>
+<ol>
+  <li><a href="#write">Programação do XML</a></li>
+  <li><a href="#load">Carregamento do recurso XML</a></li>
+  <li><a href="#attributes">Atributos</a>
+    <ol>
+      <li><a href="#id">ID</a></li>
+      <li><a href="#layout-params">Parâmetros do layout</a></li>
+    </ol>
+  </li>
+  <li><a href="#Position">Posição do layout</a></li>
+  <li><a href="#SizePaddingMargins">Tamanho, preenchimento e margens</a></li>
+  <li><a href="#CommonLayouts">Layouts comuns</a></li>
+  <li><a href="#AdapterViews">Criação de layouts com um adaptador</a>
+    <ol>
+      <li><a href="#FillingTheLayout">Preenchimento da vista de um adaptador com dados</a></li>
+      <li><a href="#HandlingUserSelections">Tratamento de eventos de clique</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>Classes principais</h2>
+  <ol>
+    <li>{@link android.view.View}</li>
+    <li>{@link android.view.ViewGroup}</li>
+    <li>{@link android.view.ViewGroup.LayoutParams}</li>
+  </ol>
+
+  <h2>Veja também</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/firstapp/building-ui.html">Construção de uma interface do usuário
+simples</a></li> </div>
+</div>
+
+<p>O layout define a estrutura visual para uma interface do usuário, como a IU de uma <a href="{@docRoot}guide/components/activities.html">atividade</a> ou de um <a href="{@docRoot}guide/topics/appwidgets/index.html">widget de aplicativo</a>.
+É possível declarar um layout de dois modos:</p>
+<ul>
+<li><strong>Declarar elementos da IU em XML</strong>. O Android fornece um vocabulário XML
+direto que corresponde às classes e subclasses de View, como as de widgets e layouts.</li>
+<li><strong>Instanciar elementos do layout em tempo de execução</strong>. 
+O aplicativo pode criar objetos de View e ViewGroup (e manipular suas propriedades) programaticamente. </li>
+</ul>
+
+<p>A estrutura do Android é flexível para usar um destes métodos ou ambos para declarar e gerenciar a IU do seu aplicativo. Por exemplo: você pode declarar um layout padrão do aplicativo em XML, e incluir os elementos da tela que aparecerão neles e suas propriedades. Em seguida, você poderia adicionar códigos ao aplicativo que modificariam o estado dos objetos da tela, inclusive os declarados em XML, em tempo de execução. </p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <ul>
+  <li>A <a href="{@docRoot}tools/sdk/eclipse-adt.html">Extensão
+ADT para Eclipse</a> oferece uma pré-visualização do layout do XML &mdash;
+com o arquivo XML aberto, selecione a guia <strong>Layout</strong>.</li>
+  <li>Pode-se usar também a
+  ferramenta de <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Visualização de hierarquia</a>
+para depurar layouts &mdash; ela revela os valores de propriedades do layout,
+desenha o esqueleto do layout com indicadores de preenchimento/margens e vistas totalmente renderizadas
+e a depuração pode ocorrer no emulador ou no dispositivo.</li>
+  <li>A ferramenta <a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> permite
+  a rápida análise dos layouts e hierarquias com relação a ineficiências e outros problemas.</li>
+</div>
+</div>
+
+<p>A vantagem de declarar a IU em XML é separar melhor a apresentação do aplicativo a partir do código que controla seu comportamento. As descrições da IU são externas ao código do aplicativo, ou seja, é possível modificá-la ou adaptá-la sem modificar o código-fonte e recompilar. Por exemplo: é possível criar layouts XML para diferentes orientações de tela, diferentes tamanhos de tela de dispositivos e diferentes idiomas. Além disso, a declaração de layout em XML facilita a exibição da estrutura da sua IU, o que facilita a depuração de problemas. Assim sendo, este documento se concentrará em ensinar a declarar o layout em XML. Se você
+estiver interessado em instanciar objetos View em tempo de execução, consulte as referências das classes
+{@link android.view.ViewGroup} e {@link android.view.View}.</p>
+
+<p>Em geral, o vocabulário XML para declarar elementos da IU segue rigorosamente a estrutura e a atribuição de nome às classes e aos métodos, em que os nomes de elementos correspondem a nomes de classe e nomes de atributos correspondem a métodos. Na verdade, a correspondência normalmente é tão direta que é possível supor qual atributo XML corresponde a determinado método de classe ou supor qual classe corresponde a certo elemento XML. Contudo, observe que nem todo vocabulário é idêntico. Em alguns casos, há pequenas diferenças de nome. Por exemplo:
+o elemento EditText tem um atributo <code>text</code> que corresponde
+a <code>EditText.setText()</code>. </p>
+
+<p class="note"><strong>Dica:</strong> Veja os diferentes tipos de layout em <a href="{@docRoot}guide/topics/ui/layout-objects.html">Objetos
+de layout comuns</a>. Também há uma coleção de tutoriais sobre a criação de diversos layouts
+no guia de tutorial <a href="{@docRoot}resources/tutorials/views/index.html">Vistas de boas-vindas</a>.</p>
+
+<h2 id="write">Programação do XML</h2>
+
+<p>Usando o vocabulário XML do Android, é possível projetar rapidamente layouts de IU e os elementos de tela intrínsecos do mesmo modo que se cria páginas web em HTML &mdash; com uma série de elementos aninhados. </p>
+
+<p>Cada arquivo de layout deve conter exatamente um elemento raiz, que deve ser um objeto View ou ViewGroup. Com o elemento raiz definido, é possível adicionar objetos ou widgets de layout extras como elementos filho para construir gradualmente uma hierarquia de View que define o layout. Por exemplo: eis um layout XML que usa um {@link android.widget.LinearLayout} vertical
+para conter uma {@link android.widget.TextView} e um {@link android.widget.Button}:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hello, I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Após declarar o layout no XML, salve o arquivo com uma extensão <code>.xml</code>
+no diretório <code>res/layout/</code> do projeto do Android para compilá-lo adequadamente. </p>
+
+<p>Veja mais informações sobre a sintaxe de um arquivo XML de layout no documento <a href="{@docRoot}guide/topics/resources/layout-resource.html">Recursos de layout</a>.</p>
+
+<h2 id="load">Carregamento do recurso XML</h2>
+
+<p>Ao compilar o aplicativo, cada arquivo de layout XML é compilado
+em um recurso {@link android.view.View}. Deve-se carregar o recurso de layout do código do aplicativo
+na implementação de retorno de chamada {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()}.
+Para isso, chame <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>,
+passando a referência para o recurso de layout na forma:
+<code>R.layout.<em>layout_file_name</em></code>.
+Por exemplo: se o layout XML for salvo como <code>main_layout.xml</code>, será necessário carregá-lo
+para a Atividade desta forma:</p>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main_layout);
+}
+</pre>
+
+<p>O método de retorno de chamada <code>onCreate()</code> na Atividade é chamado pela estrutura do Android quando
+ela é inicializada (veja a discussão sobre ciclos de vida no documento 
+<a href="{@docRoot}guide/components/activities.html#Lifecycle">Atividades</a>
+).</p>
+
+
+<h2 id="attributes">Atributos</h2>
+
+<p>Cada objeto View e ViewGroup aceita uma variedade própria de atributos XML.
+Alguns atributos são específicos de um objeto View (por exemplo, TextView aceita o atributo
+<code>textSize</code>), mas esses atributos também são herdados de objetos View que possam estender essa classe.
+Alguns são comuns a todos os objetos View porque são herdados da classe View raiz (como
+o atributo <code>id</code>). Além disso, outros atributos são considerados "parâmetros do layout", que são
+os que descrevem determinadas orientações de layout do objeto View conforme definido pelo objeto
+ViewGroup pai daquele objeto.</p>
+
+<h3 id="id">ID</h3>
+
+<p>Qualquer objeto View pode ter um ID de número inteiro associado para identificar exclusivamente o View dentro da árvore.
+Ao compilar o aplicativo, esse ID é referenciado como um número inteiro, mas o ID normalmente
+é atribuído no arquivo XML do layout como uma string, no atributo <code>id</code>.
+É um atributo XML comum a todos os objetos View
+(definido pela classe {@link android.view.View}) e você o usará com frequência.
+A sintaxe de um ID, dentro de uma tag XML, é:</p>
+<pre>android:id="&#64;+id/my_button"</pre>
+
+<p>Um símbolo de arroba (@) no início da string indica que o analisador XML deve analisar e expandir o restante
+da string de ID e identificá-la como um recurso de ID. O símbolo de mais (+) significa que é um novo nome de recurso que precisa
+ser criado e adicionado aos recursos (no arquivo <code>R.java</code>). Há diversos outros recursos de ID
+oferecidos pela estrutura do Android. Ao referenciar um ID de recurso do Android, não é necessário ter o símbolo de mais,
+mas deve-se adicionar o conjunto de nomes (namespace) do pacote <code>android</code> da seguinte maneira:</p>
+<pre>android:id="&#64;android:id/empty"</pre>
+<p>Com o conjunto de nomes (namespace) do pacote <code>android</code> em vigor, podemos referenciar um ID da classe
+de recursos <code>android.R</code> em vez de um da classe de recursos locais.</p>
+
+<p>Para criar vistas e referenciá-las a partir do aplicativo, um modo padrão comum é:</p>
+<ol>
+  <li>Definir uma visualizaçãovistawidget no arquivo de layout e atribuir um ID exclusivo a ele/ela:
+<pre>
+&lt;Button android:id="&#64;+id/my_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#64;string/my_button_text"/>
+</pre>
+  </li>
+  <li>Em seguida, crie uma instância do objeto de vista e capture-a do layout
+(normalmente no método <code>{@link android.app.Activity#onCreate(Bundle) onCreate()}</code>):
+<pre>
+Button myButton = (Button) findViewById(R.id.my_button);
+</pre>
+  </li>
+</ol>
+<p>Definir IDs para objetos de vista é importante ao criar um {@link android.widget.RelativeLayout}.
+Em um layout relativo, vistas irmãs podem definir o layout relativo para outra vista irmã
+referenciada pelo ID exclusivo.</p>
+<p>Os Ids não precisam ser exclusivo por toda a árvore, mas devem ser
+exclusivos dentro da parte da árvore em que se está procurando (que pode, com frequência, ser toda a árvore, portanto é preferível
+ser totalmente exclusivo sempre que possível).</p>
+
+
+<h3 id="layout-params">Parâmetros do layout</h3>
+
+<p>Os atributos do layout XML chamados <code>layout_<em>something</em></code> definem
+parâmetros para a View que for apropriado para a ViewGroup em que reside.</p>
+
+<p>Cada classe ViewGroup implementa uma classe aninhada que estende {@link
+android.view.ViewGroup.LayoutParams}. Essa subclasse
+contém tipos de propriedade que definem o tamanho e a posição de cada vista filha, conforme
+o necessário para o grupo de vistas. Como se pode ver na figura 1, um grupo de vistas
+pais define parâmetros de layout para cada vista filha (incluindo o grupo de vistas filhas).</p>
+
+<img src="{@docRoot}images/layoutparams.png" alt="" />
+<p class="img-caption"><strong>Figura 1.</strong> Vista de uma hierarquia de vistas com parâmetros
+de layout associados a cada uma delas.</p>
+
+<p>Observe que cada subclasse LayoutParams tem a própria sintaxe para definir
+valores. Cada elemento filho deve definir LayoutParams apropriados para seu pai,
+embora possa também definir diferentes LayoutParams para os próprios filhos. </p>
+
+<p>Todos os grupos de vistas contêm largura e altura (<code>layout_width</code> e 
+<code>layout_height</code>) e cada vista é obrigatória para defini-las. Muitos
+LayoutParams também contêm margens e bordas opcionais. <p>
+
+<p>É possível especificar largura e altura com medidas exatas, embora não seja
+recomendável na maioria dos casos. Em geral, usa-se uma destas constantes para
+definir a largura e a altura: </p>
+
+<ul>
+  <li><var>wrap_content</var> instrui a vista a dimensionar-se de acordo com
+as medidas exigidas pelo conteúdo.</li>
+  <li><var>match_parent</var> (de nome <var>fill_parent</var> antes da API de nível 8)
+instrui a vista a tornar-se tão grande quanto o grupo de vistas pais permitir.</li>
+</ul>
+
+<p>Em geral, a especificação de largura e altura de um layout com unidades absolutas, como
+pixels, não é recomendada. Em vez disso, usam-se medidas relativas como
+unidades de pixel independentes de densidade (<var>dp</var>), <var>wrap_content</var>ou
+<var>match_parent</var>, é uma abordagem melhor porque ajuda a garantir
+que o aplicativo exiba o conteúdo adequadamente dentre diversos tamanhos de tela de dispositivos.
+Os tipos de medidas aceitos são definidos no documento
+<a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">
+Recursos disponíveis</a>.</p>
+
+
+<h2 id="Position">Posição do layout</h2>
+   <p>
+   A geometria de uma vista de um retângulo. As vistas têm uma localização,
+   expressa como um par de coordenadas <em>esquerda</em> e <em>topo</em> 
+   e duas dimensões, expressas como largura e altura. A unidade de localização
+   e de dimensões é o pixel.
+   </p>
+
+   <p>
+   É possível recuperar a localização de uma vista chamando os métodos
+   {@link android.view.View#getLeft()} e {@link android.view.View#getTop()}. O primeiro retorna a coordenada
+   esquerda, ou X, do retângulo que representa a vista. O último retorna a coordenada
+   topo, ou Y, do retângulo que representa a vista. Esses métodos
+   retornam a localização da vista em relação ao pai correspondente. Por exemplo:
+   quando <code>getLeft()</code> retorna 20, significa que a vista se localiza 20 pixels à
+   direita da borda esquerda do seu pai direto.
+   </p>
+
+   <p>
+   Adicionalmente, diversos métodos de conveniência são oferecidos para evitar cálculos
+desnecessárias, chamados {@link android.view.View#getRight()} e {@link android.view.View#getBottom()}.
+   Esses métodos retornam as coordenadas das bordas direita e de baixo
+   do retângulo que representa a vista. Por exemplo: chamar {@link android.view.View#getRight()}
+   é semelhante ao seguinte cálculo: <code>getLeft() + getWidth()</code>.
+   </p>
+
+
+<h2 id="SizePaddingMargins">Tamanho, preenchimento e margens</h2>
+   <p>
+   O tamanho de uma vista é expresso por largura e altura. As vistas, na verdade,
+   têm dois pares de valores de largura e altura.
+   </p>
+
+   <p>
+   O primeiro par é conhecido como <em>largura medida</em>
+   e <em>altura medida</em>. Essas dimensões definem o tamanho que a vista terá
+   dentro da vista pai. 
+   Para obter as dimensões medidas, chamam-se {@link android.view.View#getMeasuredWidth()}
+   e {@link android.view.View#getMeasuredHeight()}.
+   </p>
+
+   <p>
+   O segundo par é simplesmente conhecido como <em>largura</em> e <em>altura</em> ou,
+   às vezes, <em>largura do desenho</em> e <em>altura do desenho</em>. Essas
+   dimensões definem o tamanho real da vista na tela, em tempo de desenho e
+   após o layout. Esses valores podem diferir da largura
+   e da altura medidas. Para obter os valores de largura e altura, chamam-se
+   {@link android.view.View#getWidth()} e {@link android.view.View#getHeight()}.
+   </p>
+
+   <p>
+   Para medir as dimensões, a vista leva em conta o preenchimento. O preenchimento
+   é expresso em pixels para a esquerda, a direita e as partes de cima e de baixo da vista.
+   O preenchimento pode ser usado para compensar o conteúdo da vista por um número específico
+   de pixels. Por exemplo: um preenchimento à esquerda de 2 empurrará o conteúdo da vista
+   em 2 pixels para a direita da borda esquerda. Para definir o preenchimento, usa-se
+   o método {@link android.view.View#setPadding(int, int, int, int)} e consulta-se com as chamadas
+   {@link android.view.View#getPaddingLeft()}, {@link android.view.View#getPaddingTop()},
+   {@link android.view.View#getPaddingRight()} e {@link android.view.View#getPaddingBottom()}.
+   </p>
+
+   <p>
+   Mesmo que cada vista possa definir um preenchimento, ela não fornece nenhuma compatibilidade
+   com margens. No entanto, os grupos de vistas oferecem essa compatibilidade. Consulte
+   {@link android.view.ViewGroup}
+   e {@link android.view.ViewGroup.MarginLayoutParams} para ver mais informações.
+   </p>
+
+   <p>Para obter mais informações sobre dimensões, consulte
+   <a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">Valores de dimensões</a>.
+   </p>
+
+
+
+
+
+
+<style type="text/css">
+div.layout {
+  float:left;
+  width:200px;
+  margin:0 0 20px 20px;
+}
+div.layout.first {
+  margin-left:0;
+  clear:left;
+}
+</style>
+
+
+
+
+<h2 id="CommonLayouts">Layouts comuns</h2>
+
+<p>Cada subclasse da classe {@link android.view.ViewGroup} fornece um modo exclusivo de exibir
+as vistas aninhadas dentro dela. Eis alguns dos tipos de layout mais comuns criados
+na plataforma Android.</p>
+
+<p class="note"><strong>Observação:</strong> Embora seja possível aninhar um ou mais layouts em outro
+layout para obter o projeto de IU, deve-se procurar manter a hierarquia do layout a menos profunda
+possível. O layout carrega mais rápido se tiver menos layouts aninhados (uma hierarquia de vistas grande é
+melhor do que uma hierarquia de vistas profunda).</p>
+
+<!--
+<h2 id="framelayout">FrameLayout</h2>
+<p>{@link android.widget.FrameLayout FrameLayout} is the simplest type of layout
+object. It's basically a blank space on your screen that you can
+later fill with a single object &mdash; for example, a picture that you'll swap in and out.
+All child elements of the FrameLayout are pinned to the top left corner of the screen; you cannot
+specify a different location for a child view. Subsequent child views will simply be drawn over
+previous ones,
+partially or totally obscuring them (unless the newer object is transparent).
+</p>
+-->
+
+
+<div class="layout first">
+  <h4><a href="layout/linear.html">Layout linear</a></h4>
+  <a href="layout/linear.html"><img src="{@docRoot}images/ui/linearlayout-small.png" alt="" /></a>
+  <p>Layout que organiza os filhos em uma única linha horizontal ou vertical. Ele
+  cria uma barra de rolagem se o comprimento da janela exceder o comprimento da tela.</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/relative.html">Layout relativo</a></h4>
+  <a href="layout/relative.html"><img src="{@docRoot}images/ui/relativelayout-small.png" alt="" /></a>
+  <p>Permite especificar a localização de objetos filhos relativos entre si (filho A
+à esquerda do filho B) ou relativos aos pais (alinhados no topo do pai).</p>
+</div>
+
+<div class="layout">
+  <h4><a href="{@docRoot}guide/webapps/webview.html">Vista web</a></h4>
+  <a href="{@docRoot}guide/webapps/webview.html"><img src="{@docRoot}images/ui/webview-small.png" alt="" /></a>
+  <p>Exibe páginas da web.</p>
+</div>
+
+
+
+
+<h2 id="AdapterViews" style="clear:left">Criação de layouts com um adaptador</h2>
+
+<p>Quando o conteúdo do layout é dinâmico ou não predeterminado, é possível usar um layout que
+torne {@link android.widget.AdapterView} uma subclasse para preencher o layout com vistas em tempo de execução. 
+Uma subclasse da classe {@link android.widget.AdapterView} usa um {@link android.widget.Adapter}
+para agrupar dados ao seu layout. O {@link android.widget.Adapter} se comporta como um intermediário entre a fonte
+dos dados e o layout do {@link android.widget.AdapterView} &mdash; o {@link android.widget.Adapter}
+recupera os dados (de uma fonte como uma matriz ou uma consulta de banco de dados) e converte cada entrada
+em uma vista que pode ser adicionada ao layout do {@link android.widget.AdapterView}.</p>
+
+<p>Alguns layouts comuns retornados por um adaptador:</p>
+
+<div class="layout first">
+  <h4><a href="layout/listview.html">Vista em lista</a></h4>
+  <a href="layout/listview.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
+  <p>Exibe uma lista de rolagem de coluna única.</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/gridview.html">Vista em grade</a></h4>
+  <a href="layout/gridview.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
+  <p>Exibe uma grade de rolagem de colunas e linhas.</p>
+</div>
+
+
+
+<h3 id="FillingTheLayout" style="clear:left">Preenchimento da vista de adaptador com dados</h3>
+
+<p>É possível preencher um {@link android.widget.AdapterView} como {@link android.widget.ListView}
+ou {@link android.widget.GridView} agrupando-se a instância do {@link android.widget.AdapterView}
+a um {@link android.widget.Adapter}, o que recupera dados de uma fonte externa e cria uma {@link
+android.view.View} que representa cada entrada de dados.</p>
+
+<p>O Android oferece diversas subclasses de {@link android.widget.Adapter} que são úteis para
+recuperar diferentes tipos de dados e criar vistas de um {@link android.widget.AdapterView}. 
+Os dois adaptadores mais comuns são:</p>
+
+<dl>
+  <dt>{@link android.widget.ArrayAdapter}</dt>
+    <dd>Use esse adaptador quando a fonte de dados for uma matriz. Por padrão, {@link
+android.widget.ArrayAdapter} cria uma vista para cada item de matriz chamando {@link
+java.lang.Object#toString()} em cada item e posicionando o conteúdo em uma {@link
+android.widget.TextView}.
+      <p>Por exemplo: se você tiver uma matriz de strings que deseja exibir em uma {@link
+android.widget.ListView}, inicialize um novo {@link android.widget.ArrayAdapter} com
+um construtor para especificar o layout de cada string e a matriz de strings:</p>
+<pre>
+ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
+        android.R.layout.simple_list_item_1, myStringArray);
+</pre>
+<p>Os argumentos desse construtor são:</p>
+<ul>
+  <li>O {@link android.content.Context} do aplicativo</li>
+  <li>O layout que contém uma {@link android.widget.TextView} para cada string na matriz</li>
+  <li>A matriz de strings</li>
+</ul>
+<p>Em seguida, simplesmente chame
+{@link android.widget.ListView#setAdapter setAdapter()} na {@link android.widget.ListView}:</p>
+<pre>
+ListView listView = (ListView) findViewById(R.id.listview);
+listView.setAdapter(adapter);
+</pre>
+
+      <p>Para personalizar a aparência de cada item, é possível suspender o método {@link
+java.lang.Object#toString()} para os objetos na matriz. Ou, para criar uma vista para cada
+item diferente de uma {@link android.widget.TextView} (por exemplo, se você quiser
+uma {@link android.widget.ImageView} para cada item da matriz), estenda a classe {@link
+android.widget.ArrayAdapter} e suspenda {@link android.widget.ArrayAdapter#getView
+getView()} para retornar o tipo de vista que deseja para cada item.</p>
+
+</dd>
+
+  <dt>{@link android.widget.SimpleCursorAdapter}</dt>
+    <dd>Use este adaptador quando os dados vierem de um {@link android.database.Cursor}. 
+Ao usar {@link android.widget.SimpleCursorAdapter}, é necessário especificar um layout a usar para cada
+linha no {@link android.database.Cursor} e que colunas no {@link android.database.Cursor}
+devem ser inseridas em determinadas vistas do layout. Por exemplo: se você deseja criar uma lista
+de nome e número de telefone de pessoas, pode-se realizar uma consulta que retorna um {@link
+android.database.Cursor} que contém uma linha para cada pessoa e colunas para os nomes
+e números. Assim, cria-se uma matriz de strings especificando quais colunas do {@link
+android.database.Cursor} estarão no layout para cada resultado e uma matriz de números inteiros especificando
+as vistas correspondentes em que cada coluna deve ser colocada:</p>
+<pre>
+String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER};
+int[] toViews = {R.id.display_name, R.id.phone_number};
+</pre>
+<p>Ao instanciar o {@link android.widget.SimpleCursorAdapter}, passe o layout a usar
+para cada resultado, o {@link android.database.Cursor} contendo os resultados e estas duas matrizes:</p>
+<pre>
+SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+        R.layout.person_name_and_number, cursor, fromColumns, toViews, 0);
+ListView listView = getListView();
+listView.setAdapter(adapter);
+</pre>
+<p>Em seguida, o {@link android.widget.SimpleCursorAdapter} cria uma vista de cada linha
+no{@link android.database.Cursor} usando o layout fornecido por meio da inserção de cada item de {@code
+fromColumns} na vista {@code toViews} correspondente.</p>.</dd>
+</dl>
+
+
+<p>Se durante o curso de vida do aplicativo, você mudar os dados subjacentes lidos 
+pelo adaptador, chame {@link android.widget.ArrayAdapter#notifyDataSetChanged()}. Isso
+notificará à vista anexada que os dados foram alterados e que ela deve se atualizar.</p>
+
+
+
+<h3 id="HandlingUserSelections">Tratamento de eventos de clique</h3>
+
+<p>Para responder a eventos de clique em cada item em um {@link android.widget.AdapterView},
+implementa-se a interface {@link android.widget.AdapterView.OnItemClickListener}. Por exemplo:</p>
+
+<pre>
+// Create a message handling object as an anonymous class.
+private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
+    public void onItemClick(AdapterView parent, View v, int position, long id) {
+        // Do something in response to the click
+    }
+};
+
+listView.setOnItemClickListener(mMessageClickedHandler);
+</pre>
+
+
+

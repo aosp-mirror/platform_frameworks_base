@@ -1,0 +1,578 @@
+page.title=タスクとバックスタック
+parent.title=アクティビティ
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本書の内容</h2>
+<ol>
+<li><a href="#ActivityState">アクティビティの状態を保存する</a></li></li>
+<li><a href="#ManagingTasks">タスクを管理する</a>
+  <ol>
+    <li><a href="#TaskLaunchModes">起動モードを定義する</a></li>
+    <li><a href="#Affinities">アフィニティを処理する</a></li>
+    <li><a href="#Clearing">バックスタックをクリアする</a></li>
+    <li><a href="#Starting">タスクを開始する</a></li>
+  </ol>
+</li>
+</ol>
+
+<h2>記事</h2>
+<ol>
+  <li><a href="http://android-developers.blogspot.com/2010/04/multitasking-android-way.html">Multitasking the Android Way</a>
+</li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a>
+</li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;} manifest element</a>
+</li>
+  <li><a href="{@docRoot}guide/components/recents.html">オーバービュー画面</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>通常、アプリケーションには複数の<a href="{@docRoot}guide/components/activities.html">アクティビティ</a>が含まれています。それぞれのアクティビティは、ユーザーが実行して、他のアクティビティを開始するといった特定のアクションを中心に設計されています。
+
+たとえば、メール アプリケーションに新規メッセージ一覧を表示する 1 つのアクティビティがあるとします。ユーザーがメッセージを選択すると、そのメッセージを表示するための新しいアクティビティが開きます。
+</p>
+
+<p>アクティビティでは、端末上の他のアプリケーションに存在するアクティビティを開始することもできます。たとえば、アプリケーションがメールの送信を求める場合は、「送信」アクションを実行し、メールアドレスや本文などのデータを含めるインテントを定義できます。
+
+その結果、この種のインテントの処理を宣言している別のアプリケーションのアクティビティが開きます。
+この場合、インテントはメールを送信することであるため、メール アプリケーションの「作成」アクティビティが開始されます（複数のアクティビティが同じインテントに対応している場合、システムはユーザーに選択を求めます）。
+
+メールが送信されると、元のアクティビティが再開され、まるでメール アクティビティがそのアプリケーションの一部であるように見えます。
+アクティビティは異なるアプリケーションのものでも、Android は両方のアクティビティを同じ<em>タスク</em>内に保つことによって、このシームレスな操作性を維持しています。
+
+</p>
+
+<p>タスクとは、ユーザーが特定の作業を行う時に情報のやり取りを行うアクティビティの集まりです。
+アクティビティは、各アクティビティが開かれた順にスタック（<em>バックスタック</em>）形式で配置されます。
+</p>
+
+<!-- SAVE FOR WHEN THE FRAGMENT DOC IS ADDED
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h3>Adding fragments to a task's back stack</h3>
+
+<p>Your activity can also include {@link android.app.Fragment}s to the back stack. For example,
+suppose you have a two-pane layout using fragments, one of which is a list view (fragment A) and the
+other being a layout to display an item from the list (fragment B). When the user selects an item
+from the list, fragment B is replaced by a new fragment (fragment C). In this case, it might be
+desireable for the user to navigate back to reveal fragment B, using the <em>Back</em> button.</p>
+<p>In order to add fragment B to the back stack so that this is possible, you must call {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()} before you {@link
+android.app.FragmentTransaction#commit()} the transaction that replaces fragment B with fragment
+C.</p>
+<p>For more information about using fragments and adding them to the back stack, see the {@link
+android.app.Fragment} class documentation.</p>
+
+</div>
+</div>
+-->
+
+<p>ほとんどのタスクは、端末のホーム画面から開始されます。ユーザーがアプリケーション ランチャーでアイコン（またはホーム画面のショートカット）にタッチすると、アプリケーションのタスクがフォアグラウンドに移動します。
+
+アプリケーションにタスクが存在しない（アプリケーションが最近使われていない）場合は、新しいタスクが作成され、そのアプリケーションの「メイン」アクティビティがスタック内のルート アクティビティとして開きます。
+
+</p>
+
+<p>現在のアクティビティが別のアクティビティを開始すると、新しいアクティビティがスタックの一番上にプッシュされ、アクティブになります。
+前のアクティビティはスタックに残りますが、停止されます。アクティビティが停止すると、システムはそのユーザー インターフェースの状態を維持します。
+ユーザーが [<em>戻る</em>] ボタンを押すと、現在のアクティビティがスタックの一番上から消え（アクティビティは破棄され）、前のアクティビティが再開します（UI は前の状態で復元されます）。
+
+
+スタック内のアクティビティが並べ替えられることはなく、スタック上にプッシュされるかスタックから消されるかのみです &mdash; 現在のアクティビティにより開始されるとスタック上にプッシュされ、ユーザーが [<em>戻る</em>] ボタンを押すと破棄されます。
+
+このように、バックスタックは「後入れ先出し」オブジェクト構造となっています。
+
+図 1 は、この動作を時系列に視覚化し、アクティビティとそれに伴うその時点でのバックスタックの状態を示したものです。
+
+</p>
+
+<img src="{@docRoot}images/fundamentals/diagram_backstack.png" alt="" />
+<p class="img-caption"><strong>図 1.</strong>タスク内の新しいアクティビティがバックスタックにアイテムを追加するプロセスを示しています。
+ユーザーが [<em>戻る</em>] ボタンを押すと、現在のアクティビティは破棄され、前のアクティビティが再開します。
+
+</p>
+
+
+<p>ユーザーが続けて [<em>戻る</em>] ボタンを押すと、スタック内のアクティビティは消えていき、前のアクティビティが表示されます。最終的に、ユーザーはホーム画面（またはタスクの開始時に実行されていたアクティビティ）に戻ります。
+
+
+すべてのアクティビティがスタックから削除されると、タスクはなくなります。</p>
+
+<div class="figure" style="width:287px">
+<img src="{@docRoot}images/fundamentals/diagram_multitasking.png" alt="" /> <p
+class="img-caption"><strong>図 2.</strong> 2 つのタスク: タスク B がフォアグラウンドでユーザー操作を受け入れます。タスク A は再開されるまでバックグラウンドで待機します。
+</p>
+</div>
+<div class="figure" style="width:215px">
+  <img src="{@docRoot}images/fundamentals/diagram_multiple_instances.png" alt="" /> <p
+class="img-caption"><strong>図 3.</strong> 1 つのアクティビティが複数回インスタンス化されます。</p>
+</div>
+
+<p>タスクは結束した構成単位で、ユーザーが新しいタスクを開始したり [<em>ホーム</em>] ボタンを使ってホーム画面に移動したりすると「バックグラウンド」に移動できます。
+バックグラウンドでは、タスク内のすべてのアクティビティが停止されますが、タスクのバックスタックは元の状態を保ちます &mdash; 図 2 に示すように、別のタスクが行われている間、タスクはフォーカスを失った状態になります。
+
+
+タスクはその後「フォアグラウンド」に戻り、ユーザーは操作の続きを行うことができます。
+たとえば、現在のタスク（タスク A）のスタックに 3 つのアクティビティがあるとします。現在のアクティビティの下に 2 つのアクティビティがある状態です。
+ユーザーが [<em>ホーム</em>] ボタンを押し、アプリケーション ランチャーから新しいアプリケーションを起動します。
+
+ホーム画面が表示されると、タスク A はバックグラウンドに移動します。
+新しいアプリケーションが起動すると、システムはそのアプリケーションのタスク（タスク B）を開始します。タスク B には独自のアクティビティ スタックがあります。
+アプリケーションの操作が終了すると、ユーザーはホームに戻り、タスク A を開始した元のアプリケーションを選択します。ここでタスク A はフォアグラウンドに移動します &mdash; 3 つのアクティビティはすべて元のままで、スタックの一番上にあるアクティビティが再開します。
+
+
+
+この時点で、ユーザーはホームに移動してタスク B を開始したアプリケーションを選択して（または<a href="{@docRoot}guide/components/recents.html">オーバービュー画面</a>でアプリのタスクを選択して）タスク B に切り替えることもできます。これは、Android のマルチタスク操作の一例です。
+
+
+
+</p>
+
+<p class="note"><strong>注:</strong> バックグラウンドには複数のタスクを一度に置くことができます。しかし、ユーザーが多数のバックグラウンド タスクを同時に実行すると、システムがメモリを回復するためにバックグラウンド アクティビティを破棄する場合があります。その結果、アクティビティの状態は失われます。<a href="#ActivityState">アクティビティの状態</a>セクションをご覧ください。
+
+
+</p>
+
+<p>バックスタック内のアクティビティが並べ替えられることはないため、アプリケーションが複数のアクティビティからの特定のアクティビティ開始を許可すると、（アクティビティの前のインスタンスを一番上に移動させるのではなく）そのアクティビティの新しいインスタンスが作成されてスタック上にプッシュされます。
+
+
+これによって、図 3 に示すように、アプリケーションの 1 つのアクティビティが（別のタスクからも）複数回インスタンス化される場合があります。
+この場合は、ユーザーが [<em>戻る</em>] ボタンを使って移動すると、アクティビティの各インスタンスが（UI の状態はそれぞれそのままで）開いた順に表示されます。
+
+
+しかし、1 つのアクティビティを何度もインスタンス化したくない場合は、この動作を修正できます。
+その方法については、後述のセクション<a href="#ManagingTasks">タスクを管理する</a>で説明します。</p>
+
+
+<p>以下は、アクティビティとタスクのデフォルトの動作をまとめたものです。</p>
+
+<ul>
+  <li>アクティビティ A がアクティビティ B を開始すると、アクティビティ A は停止しますが、システムはその状態（スクロールの位置やフォームに入力されたテキストなど）を保持します。アクティビティ B が開いた状態でユーザーが [<em>戻る</em>] ボタンを押すと、アクティビティ A が再開し、その状態が復元されます。
+
+
+</li>
+  <li>ユーザーが [<em>ホーム</em>] ボタンを押してタスクを離れると、現在のアクティビティは停止し、そのタスクはバックグラウンドに移動します。
+
+システムはタスク内のすべてのアクティビティの状態を保持します。後にユーザーがタスクを開始したランチャー アイコンを選択してタスクを再開すると、タスクはフォアグラウンドに移動し、スタックの一番上にあるアクティビティを開始します。
+
+</li>
+  <li>ユーザーが [<em>戻る</em>] ボタンを押すと、現在のアクティビティはスタックから消え、破棄されます。
+
+スタック内にある前のアクティビティが再開します。アクティビティが破棄された場合、システムはその状態を<em>保持しません</em>。
+</li>
+  <li>アクティビティは、別のタスクからでも複数回インスタンス化できます。</li>
+</ul>
+
+
+<div class="note design">
+<p><strong>ナビゲーション デザイン</strong></p>
+  <p>Android 上でのアプリ ナビゲーションの仕組みの詳細については、Android Design の「<a href="{@docRoot}design/patterns/navigation.html">Navigation</a>」ガイドをご覧ください。</p>
+</div>
+
+
+<h2 id="ActivityState">アクティビティの状態を保存する</h2>
+
+<p>上述のように、デフォルト動作では、システムはアクティビティが停止するとその状態を保持します。
+この方法では、ユーザーが前のアクティビティに戻ると、ユーザー インターフェースが前の状態のままで表示されます。
+しかし、コールバック メソッドを使って積極的にアクティビティの状態を保持することもできます。破棄されたアクティビティを再作成しなければならないことを考えると、アクティビティの状態は積極的に<strong>保持すべき</strong>です。
+
+</p>
+
+<p>システムが（新しいアクティビティの開始時やバックグラウンドへのタスクの移動時などに）アクティビティの 1 つを停止している時にシステム メモリの回復が必要になると、システムはそのアクティビティを完全に破棄する可能性があります。
+
+これにより、アクティビティの状態に関する情報が失われてしまいます。システムは、アクティビティがバックスタックに留まっていることは認識していますが、アクティビティがスタックの一番上に置かれるとアクティビティを（再開ではなく）再作成しなければなりません。
+
+
+ユーザーの作業内容が失われるのを回避するには、{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} コールバック メソッドをアクティビティに実装することによって、作業状態を積極的に保持する必要があります。
+
+
+</p>
+
+<p>アクティビティの状態の保存方法の詳細については、「<a href="{@docRoot}guide/components/activities.html#SavingActivityState">Activities</a>」ドキュメントをご覧ください。
+</p>
+
+
+
+<h2 id="ManagingTasks">タスクを管理する</h2>
+
+<p>上記のように、Android は、連続して開始されたすべてのアクティビティを同じタスクの「後入れ先出し」式スタックに置くことによって、タスクやバックスタックを管理します。この方法は、ほとんどのアプリケーションでうまく動作し、アクティビティがどのようにタスクに関連付けられ、どのようにバックスタックに置かれているのかを心配する必要はありません。
+
+
+しかし、通常の動作に割り込みたい場合もあります。
+アプリケーション内のアクティビティが開始された時に（現在のタスク内に置かれる代わりに）新しいタスクを開始させたり、アクティビティの開始時に（新しいインスタンスをバックスタックの一番上に作成する代わりに）アクティビティの既存インスタンスを前に持ってきたり、ユーザーがタスクを離れる時にルート アクティビティ以外のすべてのアクティビティをバックスタックからクリアする場合などが考えられます。
+
+
+
+</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> マニフェスト エレメントの属性と {@link android.app.Activity#startActivity startActivity()} に渡すインテント内のフラグを使って、これらの、さらに他の動作を実現できます。
+
+
+</p>
+
+<p>この件に関して、使用できる主な <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 属性には以下のものがあります。
+</p>
+
+<ul class="nolist">
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">  {@code taskAffinity}</a>
+</li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">  {@code launchMode}</a>
+</li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">  {@code allowTaskReparenting}</a>
+</li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">  {@code clearTaskOnLaunch}</a>
+</li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#always">  {@code alwaysRetainTaskState}</a>
+</li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">  {@code finishOnTaskLaunch}</a>
+</li>
+</ul>
+
+<p>使用できる主なインテント フラグには以下のものがあります。</p>
+
+<ul class="nolist">
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</li>
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</li>
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</li>
+</ul>
+
+<p>以下のセクションでは、これらのマニフェスト属性とインテント フラグを使ってアクティビティをタスクに関連付ける方法とバックスタック内での動作を定義する方法を説明します。
+</p>
+
+<p>また、タスクとアクティビティの提示方法やオーバービュー画面での管理方法に関する考慮点について別途記載しています。
+詳細については、「<a href="{@docRoot}guide/components/recents.html">オーバービュー画面</a>」をご覧ください。
+通常、オーバービュー画面にタスクとアクティビティを提示する方法はシステムが定義できるよう許可し、この動作を変更する必要はありません。
+</p>
+
+<p class="caution"><strong>警告:</strong> ほとんどのアプリケーションはアクティビティとタスクに対するデフォルトの動作に割り込むべきではありません。
+アクティビティがデフォルトの動作を変更する必要があると判断した場合は、起動時と他のアクティビティやタスクからの [<em>戻る</em>] ボタンによる移動時のアクティビティのユーザビリティを慎重にテストする必要があります。ユーザーが想定する動作と競合する恐れのあるナビゲーション時の動作については必ずテストを行ってください。
+
+
+</p>
+
+
+<h3 id="TaskLaunchModes">起動モードを定義する</h3>
+
+<p>起動モードでは、アクティビティの新しいインスタンスを現在のタスクに関連付ける方法を定義できます。
+次の 2 つの方法を使ってさまざまな起動モードを定義できます。</p>
+<ul class="nolist">
+  <li><a href="#ManifestForTasks">マニフェスト ファイルを使用する</a>
+    <p>マニフェスト ファイルにアクティビティを宣言する際に、開始時にアクティビティをタスクに関連付ける方法を指定できます。
+</li>
+  <li><a href="#IntentFlagsForTasks">インテント フラグを使用する</a>
+    <p>{@link android.app.Activity#startActivity startActivity()} を呼び出す際に、新しいアクティビティを現在のタスクに関連付ける方法（または関連付けるかどうか）を宣言する {@link android.content.Intent} にフラグを置くことができます。
+
+</p></li>
+</ul>
+
+<p>アクティビティ A がアクティビティ B を開始する場合、アクティビティ B は自身を現在のタスクに関連付ける方法（もしあれば）をマニフェストに定義し、アクティビティ A はアクティビティ B を現在のタスクに関連付ける方法を要求できます。
+
+両方のアクティビティがアクティビティ B をタスクに関連付ける方法を定義している場合は、アクティビティ B の要求よりも（インテントに定義される）アクティビティ A の要求が優先されます。
+
+</p>
+
+<p class="note"><strong>注:</strong> マニフェスト ファイルで使用できる起動モードの中にはインテントのフラグとして使用できないものもあります。同様に、インテントのフラグとして使用できる起動モードの中には、マニフェストで定義できないものもあります。
+
+</p>
+
+
+<h4 id="ManifestForTasks">マニフェスト ファイルを使用する</h4>
+
+<p>マニフェスト ファイルでアクティビティを宣言する際に、<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> エレメントの <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 属性を使ってアクティビティをタスクに関連付ける方法を定義できます。
+
+
+</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 属性は、アクティビティをタスク内で起動する方法についての指示を定めます。
+
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">launchMode</a></code> 属性には、次の 4 つの起動モードを割り当てることができます。
+
+</p>
+
+<dl>
+<dt>{@code "standard"}（デフォルトのモード）</dt>
+  <dd>デフォルトの設定です。システムは、開始されたタスクからアクティビティの新しいインスタンスをタスク内に作成し、インテントを渡します。
+アクティビティは複数回インスタンス化できます。各インスタンスは異なるタスクに所属でき、1 つのタスクは複数のインスタンスを持つことができます。
+</dd>
+<dt>{@code "singleTop"}</dt>
+  <dd>アクティビティのインスタンスが現在のタスクの一番上に既に存在する場合は、システムはアクティビティの新しいインスタンスを作成せずに、{@link android.app.Activity#onNewIntent onNewIntent()} メソッドを呼び出して、インテントをそのインスタンスに渡します。
+
+
+アクティビティは複数回インスタンス化できます。各インスタンスは異なるタスクに所属でき、1 つのタスクは複数のインスタンスを持つことができます（バックスタックの一番上にあるアクティビティがそのアクティビティの既存のインスタンスで<em>ない</em>場合のみ）。
+
+
+  <p>たとえば、タスクのバックスタックがアクティビティ B、C、そしてアクティビティ D を一番上に持つルート アクティビティ A で構成されているとします（スタックは A-B-C-D で D が一番上）。
+D タイプのアクティビティにインテントが届きます。もし D の起動モードがデフォルトの {@code "standard"} である場合は、そのクラスの新しいインスタンスが起動し、スタックは A-B-C-D-D となります。しかし、D の起動モードが {@code "singleTop"} である場合は、スタックの一番上にある D の既存のインスタンスが {@link android.app.Activity#onNewIntent onNewIntent()} を介してインテントを受け取ります &mdash; この場合、スタックは A-B-C-D のままとなります。ただし、B タイプのアクティビティのインテントが届くと、その起動モードが {@code "singleTop"} であっても、B の新しいインスタンスがスタックに追加されます。
+
+
+
+
+
+</p>
+  <p class="note"><strong>注:</strong> アクティビティの新しいインスタンスが作成されると、ユーザーは [<em>戻る</em>] ボタンを押して前のアクティビティに戻ることができます。
+しかし、アクティビティの既存のインスタンスが新しいインテントに対応すると、ユーザーは、新しいインテントが {@link android.app.Activity#onNewIntent onNewIntent()} で届く前の状態に [<em>戻る</em>] ボタンを押して戻ることはできません。
+
+
+
+
+</p>
+</dd>
+
+<dt>{@code "singleTask"}</dt>
+  <dd>システムは新しいタスクを作成し、新しいタスクのルートにアクティビティをインスタンス化します。しかし、そのアクティビティのインスタンスが別のタスクに既に存在する場合は、システムは新しいインスタンスを作成せずに、{@link android.app.Activity#onNewIntent onNewIntent()} メソッドを呼び出して、インテントを既存のインスタンスに渡します。
+
+
+同時に存在できるアクティビティのインスタンスは 1 つだけです。
+
+  <p class="note"><strong>注:</strong> アクティビティは新しいタスク内で開始されますが、ユーザーは [<em>戻る</em>] ボタンを押して前のアクティビティに戻ることができます。
+</p></dd>
+<dt>{@code "singleInstance"}</dt>
+  <dd>システムが、他のアクティビティをインスタンスを保持しているタスクで起動しないことを除いて {@code "singleTask"} と同じです。
+アクティビティは、常にタスクの唯一の構成要素となります。このアクティビティによって開始されたアクティビティは別のタスクで開きます。
+</dd>
+</dl>
+
+
+<p>たとえば、Android Browser アプリケーションは、<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> エレメントの {@code singleTask} 起動モードを指定することによって、ウェブブラウザ アクティビティを常に自身のタスクで開くことを宣言しています。これは、開発されたアプリケーションが Android Browser を開くインテントを発行すると、そのアクティビティがアプリケーションのタスクには配置<em>されない</em>ことを意味します。
+
+
+
+代わりに、Android Browser の新しいタスクが開始されるか、Android Browser に既に実行中のバックグラウンド タスクがある場合は、そのタスクがフォアグラウンドに移動し、新しいインテントに対応します。
+
+</p>
+
+<p>アクティビティを新しいタスク内で開始するかアクティビティを起動したアクティビティと同じタスクで開始するかにかかわらず、ユーザーは [<em>戻る</em>] ボタンを押して前のアクティビティに戻ることができます。
+ただし、{@code singleTask} 起動モードを設定したアクティビティを開始し、そのアクティビティのインスタンスがバックグラウンド タスクに存在する場合は、そのタスク全体がフォアグラウンドに移動します。
+
+この時点で、バックスタックの一番上に、フォアグラウンドに移動したタスクのすべてのアクティビティが含まれてます。
+
+図 4 は、このタイプのシナリオを示しています。</p>
+
+<img src="{@docRoot}images/fundamentals/diagram_backstack_singletask_multiactivity.png" alt="" />
+<p class="img-caption"><strong>図 4.</strong>「singleTask」起動モードを持つアクティビティをバックスタックに追加する方法を示しています。
+アクティビティが自身のバックスタックを持つバックグラウンド タスクの一部である場合は、バックスタック全体がフォアグラウンドに移動し、現在のタスクの上に置かれます。
+
+</p>
+
+<p>マニフェスト ファイルでの起動モードの使用の詳細については、<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> エレメントのドキュメントをご覧ください。{@code launchMode} 属性と利用できる値について詳しく説明しています。
+
+
+</p>
+
+<p class="note"><strong>注:</strong> 次のセクションで説明しますが、<a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 属性を使ってアクティビティに指定する動作は、アクティビティを開始するインテントに含まれるフラグによって上書きされる場合があります。
+
+</p>
+
+
+
+<h4 id="#IntentFlagsForTasks">インテント フラグを使用する</h4>
+
+<p>アクティビティの開始時に、{@link android.app.Activity#startActivity startActivity()} に渡すインテントにフラグを含めることによってアクティビティとタスクのデフォルトの関連付けを変更できます。
+
+以下は、デフォルトの動作を変更するために使用できるフラグです。
+</p>
+
+<p>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</dt>
+    <dd>新しいタスクでアクティビティを開始します。開始しようとしているアクティビティに対してタスクが既に実行されている場合は、そのタスクの最新の状態が復元されてフォアグラウンドに移動し、アクティビティが {@link android.app.Activity#onNewIntent onNewIntent()} で新しいインテントを受け取ります。
+
+
+    <p>この手順は、上述のセクションで説明した {@code "singleTask"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> の値の動作と同じものです。
+</p></dd>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</dt>
+    <dd>開始されるアクティビティが（バックスタックの一番上にある）現在のアクティビティである場合は、アクティビティの新しいインスタンスを作成する代わりに、既存のインスタンスが {@link android.app.Activity#onNewIntent onNewIntent()} の呼び出しを受け取ります。
+
+
+    <p>この手順は、上述のセクションで説明した {@code "singleTop"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> の値の動作と同じものです。
+</p></dd>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</dt>
+    <dd>開始されるアクティビティが既に現在のタスクを実行している場合は、そのアクティビティの新しいインスタンスを起動する代わりに、上に置かれたその他すべてのアクティビティを破棄し、{@link android.app.Activity#onNewIntent onNewIntent()} を介してこのインテントを（一番上に移動した）アクティビティの再開されたインスタンスに渡します。
+
+
+
+    <p>この動作を起こす <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 属性には値はありません。
+</p>
+    <p>ほとんどのケースで {@code FLAG_ACTIVITY_CLEAR_TOP} は {@code FLAG_ACTIVITY_NEW_TASK} と併用されます。同時に使用することで、これらのフラグは、別のタスクにある既存のアクティビティを捜し出し、インテントに対応できる位置に置く手段を提供します。
+
+
+ </p>
+    <p class="note"><strong>注:</strong> 指定されたアクティビティの起動モードが {@code "standard"} である場合は、やはりスタックから削除されます。その場所に、渡されるインテントに対応する新しいインスタンスが開始されます。
+
+
+これは、起動モードが {@code "standard"} である場合は、新しいインテントに対して常に新しいインスタンスが作成されるためです。
+ </p>
+</dd>
+</dl>
+
+
+
+
+
+<h3 id="Affinities">アフィニティを処理する</h3>
+
+<p><em>アフィニティ</em>は、アクティビティの所属が望ましいタスクを示します。 デフォルトでは、同じアプリケーションのすべてアクティビティに相互のアフィニティが設定されています。
+このため、同じアプリケーションのすべてのアクティビティは、デフォルトで同じタスクに属します。
+しかし、アクティビティのデフォルトのアフィニティは変更できます。
+異なるアプリケーションに定義されているアクティビティがアフィニティを共有したり、同じアプリケーションに定義されたアクティビティに別のタスクのアフィニティを割り当てたりすることができます。
+
+</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> エレメントの <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a> 属性を使って、任意のアクティビティのアフィニティを変更できます。
+
+</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a> 属性には文字列を指定します。これは、<a href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code &lt;manifest&gt;}</a> エレメントに宣言されたデフォルトのパッケージ名とは異なる一意のものでなければなりません。理由は、システムがアプリケーションに対するデフォルトのタスク アフィニティを識別するためにこの名前を使用するためです。
+
+
+
+
+</p>
+
+<p>アフィニティは、以下の 2 つの状況で役立ちます。</p>
+<ul>
+  <li>アクティビティを開始するインテントが {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} フラグを含んでいる場合
+
+
+
+<p>新しいアクティビティは、デフォルトで、{@link android.app.Activity#startActivity startActivity()} を呼び出したアクティビティのタスクで開始されます。
+呼び出し元と同じバックスタックにプッシュされます。
+しかし、{@link android.app.Activity#startActivity startActivity()} に渡されたインテントに {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} フラグが含まれると、システムは新しいアクティビティを収容する別のタスクを捜します。
+
+
+これは、通常新しいタスクですが、新しいタスクである必要はありません。
+新しいアクティビティとして同じアフィニティを持つ既存のタスクが存在する場合は、アクティビティはそのタスクで開始されます。
+存在しない場合は、新しいタスクを開始します。</p>
+
+<p>このフラグによってアクティビティが新しいタスクを開始し、ユーザーが [<em>ホーム</em>] ボタンを押してタスクを離れる場合には、ユーザーがそのタスクに戻るための手段が必要です。
+
+エンティティの中には（通知マネージャーなど）、自身の一部としてではなく、常に外部タスクでアクティビティを開始するものがあります。そのために、これらのエンティティが {@link android.app.Activity#startActivity startActivity()} に渡すインテントには常に {@code FLAG_ACTIVITY_NEW_TASK} が含まれます。このフラグを使った外部エンティティにより起動される可能性があるアクティビティがある場合は、起動アイコンなどを使って、アクティビティが開始したタスクにユーザーが戻れるよう独立した手段を確保します。（タスクのルート アクティビティには {@link android.content.Intent#CATEGORY_LAUNCHER} インテント フィルタがあります。後述の<a href="#Starting">タスクを開始する</a>セクションをご覧ください）。
+
+
+
+
+
+
+</p>
+</li>
+
+  <li>アクティビティの <a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">{@code allowTaskReparenting}</a> 属性が {@code "true"} に設定されている場合。
+
+  <p>この場合は、タスクがフォアグラウンドに移動した時に、アクティビティは自身が開始したタスクから、アフィニティがあるタスクへと移動できます。
+</p>
+  <p>たとえば、選ばれた都市の天気を予報するアクティビティが旅行アプリケーションの一部として定義されているケースを考えてみましょう。
+このアクティビティは、アプリケーション内のその他のアクティビティと同じアフィニティ（デフォルトのアプリケーション アフィニティ）を持ち、この属性による親への再割り当てが許可されています。いずれかのアクティビティにより開始された天気予報アクティビティは、最初はそのアクティビティと同じタスクに属しています。
+
+
+しかし、旅行アプリケーションのタスクがフォアグラウンドに移動すると、天気予報アクティビティはそのタスクに再度割り当てられ、タスク内に表示されます。
+</p>
+</li>
+</ul>
+
+<p class="note"><strong>ヒント:</strong> {@code .apk} ファイルがユーザーの視点で 1 つ以上の「アプリケーション」を含んでいる場合は、各「アプリケーション」に関連付けられたアクティビティに <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a> 属性を使って異なるアフィニティを割り当てることをお勧めします。
+
+</p>
+
+
+
+<h3 id="Clearing">バックスタックをクリアする</h3>
+
+<p>ユーザーがタスクを長時間離れると、システムはルート アクティビティを除くすべてのアクティビティをタスクからクリアします。
+ユーザーが再びタスクに戻ると、ルート アクティビティのみが復元されます。システムがこの動作を行うのは、しばらく時間が経過した後は、ユーザーが前に行っていた作業を放棄した可能性が高く、新しいことを始めるためにタスクに戻ったとみなされるためです。
+
+ </p>
+
+<p>この動作を変更するために、以下のアクティビティ属性を使用できます。 </p>
+
+<dl>
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#always">alwaysRetainTaskState</a></code>
+</dt>
+<dd>タスクのルート アクティビティでこの属性が {@code "true"} に設定されていると、上記のデフォルトの動作は発生しません。長時間が経過しても、タスクはすべてのアクティビティをスタックに保持します。
+
+</dd>
+
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#clear">clearTaskOnLaunch</a></code></dt>
+<dd>タスクのルート アクティビティでこの属性が {@code "true"} に設定されている場合、ユーザーがタスクを離れて戻るたびに、スタックがルート アクティビティまでクリアされます。
+
+つまり、<a href="{@docRoot}guide/topics/manifest/activity-element.html#always">{@code alwaysRetainTaskState}</a> の逆の動作となります。
+
+ユーザーがタスクをほんの少しの間離れた場合でも、タスクは常に初期状態に戻ります。
+</dd>
+
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#finish">finishOnTaskLaunch</a></code>
+</dt>
+<dd>この属性は、<a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">{@code clearTaskOnLaunch}</a> に似ていますが、タスク全体ではなく 1 つのアクティビティに作用します。
+
+ルート アクティビティを含むあらゆるアクティビティを消すことができます。
+この属性が {@code "true"} に設定されていると、アクティビティは現在のセッションが開かれている間のみタスクの一部として留まります。
+ユーザーがタスクから離れて戻ると、アクティビティは消えています。
+</dd>
+</dl>
+
+
+
+
+<h3 id="Starting">タスクを開始する</h3>
+
+<p>指定するアクションとして {@code "android.intent.action.MAIN"}、指定するカテゴリとして {@code "android.intent.category.LAUNCHER"} を持つインテント フィルタを付加することによって、アクティビティをタスクのエントリ ポイントとして設定できます。
+
+
+次に例を示します。</p>
+
+<pre>
+&lt;activity ... &gt;
+    &lt;intent-filter ... &gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+    ...
+&lt;/activity&gt;
+</pre>
+
+<p>この種類のインテント フィルタを使うことによって、アクティビティのアイコンとラベルがアプリケーション ランチャーに表示されるようになります。これにより、ユーザーは、アクティビティを起動し、アクティビティの起動後は、作成されたタスクにいつでも戻ることができるようになります。
+
+
+</p>
+
+<p>ユーザーがタスクを離れた後に、このアクティビティ ランチャーを使って戻ってくることが可能でなければならないため、2 番目の機能が重要になります。
+アクティビティが {@link android.content.Intent#ACTION_MAIN} と {@link android.content.Intent#CATEGORY_LAUNCHER} フィルタを持つ場合のみに、アクティビティが常にタスクを開始することを示す {@code "singleTask"} と {@code "singleInstance"} の 2 つの<a href="#LaunchModes">起動モード</a>を使用すべきなのはこのためです。
+
+
+
+たとえば、フィルタがない場合にどうなるのかを想像してみてください。
+インテントが {@code "singleTask"} アクティビティを起動し、新しいタスクを開始し、ユーザーがそのタスクでしばらくの間作業を行います。
+その後、ユーザーは [<em>ホーム</em>] ボタンを押します。
+タスクはバックグラウンドに移動し、見えなくなります。タスクはアプリケーション ランチャーに表示されていないため、この状態ではユーザーがタスクに戻る手段がありません。
+</p>
+
+<p>ユーザーがアクティビティに戻るのを防ぐには、<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> エレメントの <a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code finishOnTaskLaunch}</a> を {@code "true"} に設定します（<a href="#Clearing">スタックをクリアする</a>をご覧ください）。
+
+
+
+</p>
+
+<p>オーバービュー画面でのタスクとアクティビティの表示方法と管理方法の詳細については、「<a href="{@docRoot}guide/components/recents.html">オーバービュー画面</a>」をご覧ください。
+
+</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how to use intents to
+activate other application components and publish the intents to which your components
+respond, continue with the <b><a
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
+Filters</a></b> document.</p>
+-->

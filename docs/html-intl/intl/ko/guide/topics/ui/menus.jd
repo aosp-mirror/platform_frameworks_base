@@ -1,0 +1,1031 @@
+page.title=메뉴
+parent.title=사용자 인터페이스
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>이 문서의 내용</h2>
+<ol>
+  <li><a href="#xml">XML로 메뉴 정의</a></li>
+  <li><a href="#options-menu">옵션 메뉴 만들기</a>
+    <ol>
+      <li><a href="#RespondingOptionsMenu">클릭 이벤트 처리</a></li>
+      <li><a href="#ChangingTheMenu">런타임에 메뉴 항목 변경</a></li>
+    </ol>
+  </li>
+  <li><a href="#context-menu">상황별 메뉴 만들기</a>
+    <ol>
+      <li><a href="#FloatingContextMenu">부동 컨텍스트 메뉴 만들기</a></li>
+      <li><a href="#CAB">상황별 동작 모드 사용</a></li>
+    </ol>
+  </li>
+  <li><a href="#PopupMenu">팝업 메뉴 만들기</a>
+    <ol>
+      <li><a href="#PopupEvents">클릭 이벤트 처리</a></li>
+    </ol>
+  </li>
+  <li><a href="#groups">메뉴 그룹 만들기</a>
+    <ol>
+      <li><a href="#checkable">확인 가능한 메뉴 항목 사용</a></li>
+    </ol>
+  </li>
+  <li><a href="#intents">인텐트에 기반한 메뉴 항목 추가</a>
+    <ol>
+      <li><a href="#AllowingToAdd">다른 메뉴에 액티비티 추가 허용</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>Key 클래스</h2>
+  <ol>
+    <li>{@link android.view.Menu}</li>
+    <li>{@link android.view.MenuItem}</li>
+    <li>{@link android.view.ContextMenu}</li>
+    <li>{@link android.view.ActionMode}</li>
+  </ol>
+
+  <h2>참고 항목</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a></li>
+    <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">메뉴 리소스</a></li>
+    <li><a href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">
+메뉴 버튼에 작별을 고하세요</a></li>
+  </ol>
+</div>
+</div>
+
+<p>메뉴는 수많은 유형의 애플리케이션에서 사용되는 보편적인 사용자 인터페이스 구성 요소입니다. 친숙하고 일관적인
+사용자 경험을 제공하기 위해 액티비티에서 사용자 작업과 다른 옵션을 제시하는 {@link android.view.Menu} API를
+사용해야 합니다.</p>
+
+<p>Android 3.0(API 레벨 11)부터 Android 구성 기기는
+전용 <em>메뉴</em> 버튼을 하지 않아도 됩니다. 이번 변경 사항부터 Android 앱은
+종래의 6항목 메뉴 패널에 의존하지 않고 작업 모음을 사용하여
+공통 사용자 작업을 표현합니다.</p>
+
+<p>일부 메뉴 항목의 디자인과 사용자 경험이 변경되었지만, 작업과 옵션 세트를 정의하는
+의미 체계 세트는 여전히 {@link android.view.Menu} API를 기초로 사용합니다. 이 가이드는
+모든 버전의 Android에서 세 가지 기본적인 유형의 메뉴나 작업 표시를
+생성하는 법을 보여줍니다.</p>
+
+<dl>
+  <dt><strong>옵션 메뉴 및 작업 모음</strong></dt>
+    <dd><a href="#options-menu">옵션 메뉴</a>는 액티비티에 대한 기본 메뉴 항목 컬렉션
+입니다. 
+이곳에 "검색", "이메일 작성" 및 "설정"과 같이 앱에 전체적인 영향을 미치는 작업을 배치해야 합니다.
+  <p>Android 2.3 이하를 대상으로 개발하는 경우 사용자는
+<em>메뉴</em> 버튼을 눌러서 옵션 메뉴 패널을 표시할 수 있습니다.</p>
+  <p>Android 3.0 이상의 경우, 옵션 메뉴의 항목은 <a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a>에서 화면 작업 항목과 오버플로 옵션의 조합으로
+표시됩니다. Android 3.0부터 <em>메뉴</em> 버튼의 사용이 중단되므로(일부
+기기는
+메뉴 버튼이 없습니다), 작업과 다른 옵션에 대한 액세스를 제공하려면 작업 모음을
+사용하기 시작해야 합니다.</p>
+  <p><a href="#options-menu">옵션 메뉴 만들기</a> 섹션을 참조하십시오.</p>
+    </dd>
+    
+  <dt><strong>컨텍스트 메뉴 및 상황별 작업 모드</strong></dt>
+  
+   <dd>컨텍스트 메뉴는 사용자가 요소를 길게 클릭하면 나타나는 <a href="#FloatingContextMenu">부동 메뉴</a>
+입니다. 이것은 선택한 콘텐츠나 컨텍스트 프레임에
+영향을 주는 작업을 제공합니다.
+  <p>Android 3.0 이상을 대상으로 개발하는 경우, <a href="#CAB">상황별 작업 모드</a>를 사용하여 선택한 콘텐츠의 작업을 활성화해야 합니다. 이 모드는
+화면 위에 있는 막대에서 선택된 콘텐츠에 영향을 미치는 작업 항목을 표시하고 사용자가
+여러 항목을 선택할 수 있습니다.</p>
+  <p><a href="#context-menu">상황별 메뉴 만들기</a>에 관한 섹션을 참조하십시오.</p>
+</dd>
+    
+  <dt><strong>팝업 메뉴</strong></dt>
+    <dd>팝업 메뉴는 메뉴를 호출하는 보기에 고정된 수직 목록에서 항목 목록을
+표시합니다. 이것은 정 콘텐츠와 관련이 되는 작업의 오버플로를 제공하거나
+명령의 두 번째 부분에 대한 옵션을 제공하는 데 좋습니다. 팝업 메뉴의 작업은
+해당 콘텐츠에 직접적 영향을 미쳐서는 <strong>안 됩니다</strong>. 이는 상황별 작업의 역할입니다.
+ 팝업 메뉴는 그보다는 티비티의 콘텐츠 영역과 관련이 있는
+확장 작업을 위한 것입니다.
+  <p><a href="#PopupMenu">팝업 메뉴 만들기</a> 섹션을 참조하십시오.</p>
+</dd>
+</dl>
+
+
+
+<h2 id="xml">XML로 메뉴 정의</h2>
+
+<p>모든 메뉴 유형에 대하여, Android는 표준 XML 형식으로 메뉴 항목을 정의합니다.
+액티비티 코드에서 메뉴를 구축하는 대신
+XML <a href="{@docRoot}guide/topics/resources/menu-resource.html">메뉴 리소스</a>에서 메뉴와 모든 항목을 정의해야 합니다. 그러면 
+액티비티나 프래그먼트에서 메뉴 리소스를 팽창시킬 수 있습니다({@link android.view.Menu} 개체로 로딩하면 됩니다).
+</p>
+
+<p>메뉴 리소스를 사용하는 것이 좋은 이유로 다음과 같은 몇 가지를 들 수 있습니다.</p>
+<ul>
+  <li>메뉴 구조를 XML로 시작화하면 다른 방식보다 쉽습니다.</li>
+  <li>애플리케이션의 동작 코드에서 메뉴의 콘텐츠를 분리합니다.</li>
+  <li><a href="{@docRoot}guide/topics/resources/index.html">앱 리소스</a> 프레임워크를 활용하여 다양한 플랫폼 버전, 화면 크기 및 기타 구성에 대한
+대체 메뉴 프레임워크를 생성할 수 있습니다.</li>
+</ul>
+
+<p>메뉴를 정의하려면 프로젝트의 <code>res/menu/</code>
+디렉터리에서 XML 파일을 생성하고 다음 요소로 메뉴를 구축합니다.</p>
+<dl>
+  <dt><code>&lt;menu></code></dt>
+    <dd>메뉴 항목의 컨테이너인 {@link android.view.Menu}를 정의합니다. 
+<code>&lt;menu></code> 요소는 파일의 루트 노드여야 하고 하나 이상의
+<code>&lt;item></code>와 <code>&lt;group></code> 요소를 보유할 수 있습니다.</dd>
+
+  <dt><code>&lt;item></code></dt>
+    <dd>메뉴 안의 항목 하나를 나타내는 {@link android.view.MenuItem}을 생성합니다. 
+이 요소 안에는 하위 메뉴를 생성하기 위한 중첩 <code>&lt;menu></code> 요소가 들어있을 수 있습니다.</dd>
+    
+  <dt><code>&lt;group></code></dt>
+    <dd>{@code &lt;item&gt;} 요소를 위한 선택적인 투명 컨테이너입니다. 이것을 사용하면 활성 상태와 가시성 등의 속성을 공유할 수 있도록
+메뉴 항목을 분류하도록 해줍니다. 
+자세한 정보를 보려면 <a href="#groups">메뉴 그룹 만들기</a>를 참조하십시오.</dd>
+</dl>
+
+
+<p>다음은 <code>game_menu.xml</code>이라는 메뉴의 예시입니다.</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/new_game"
+          android:icon="@drawable/ic_new_game"
+          android:title="@string/new_game"
+          android:showAsAction="ifRoom"/&gt;
+    &lt;item android:id="@+id/help"
+          android:icon="@drawable/ic_help"
+          android:title="@string/help" /&gt;
+&lt;/menu&gt;
+</pre>
+
+<p><code>&lt;item></code> 요소는 항목의 외관과 동작을
+정의하는 데 사용할 수 있는 여러 속성을 지원합니다. 위 메뉴의 항목에는 다음 속성이 포함되어 있습니다.</p>
+
+<dl>
+  <dt>{@code android:id}</dt>
+    <dd>항목에 고유한 리소스 ID입니다. 사용자가 항목을 선택하면
+애플리케이션이 이것으로 해당 항목을 인식할 수 있게 해줍니다.</dd>
+  <dt>{@code android:icon}</dt>
+    <dd>항목의 아이콘으로 사용할 수 있는 드로어블에 대한 참조입니다.</dd>
+  <dt>{@code android:title}</dt>
+    <dd>항목의 제목으로 사용할 문자열에 대한 참조입니다.</dd>
+  <dt>{@code android:showAsAction}</dt>
+    <dd><a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a>에서 작업 항목을 나타낼 시기와 방법을 나타냅니다.</dd>
+</dl>
+
+<p>이들이 여러분이 꼭 사용해야 할 가장 중요한 속성이지만, 사용할 수 있는 요소는 이외에도 많이 있습니다.
+모든 지원 속성에 관한 정보는 <a href="{@docRoot}guide/topics/resources/menu-resource.html">메뉴 리소스</a> 문서를 참조하십시오.</p>
+
+<p>{@code &lt;menu&gt;} 요소를
+{@code &lt;item&gt;}의 요소로 추가하면 어떤 메뉴 항목이든 하위 메뉴를 추가할 수 있습니다(하위 메뉴 제외). 하위 메뉴는 애플리케이션에 PC 애플리케이션의 메뉴 막대(파일,
+편집, 보기 등)의 항목과 같이 주제별로 체계화할 수 있는 기능이 많을 때
+유용합니다. 예:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/file"
+          android:title="@string/file" &gt;
+        &lt;!-- "file" submenu --&gt;
+        &lt;menu&gt;
+            &lt;item android:id="@+id/create_new"
+                  android:title="@string/create_new" /&gt;
+            &lt;item android:id="@+id/open"
+                  android:title="@string/open" /&gt;
+        &lt;/menu&gt;
+    &lt;/item&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>액티비티에서 메뉴를 사용하려면
+{@link android.view.MenuInflater#inflate(int,Menu)
+MenuInflater.inflate()}를 사용하여 메뉴 리소스를 팽창해야 합니다(XML 리소스를 프로그램 가능 개체로 변환). 다음 섹션에서는 각 메뉴 유형에 대해
+메뉴를 팽창하는 방법을 보여줍니다.</p>
+
+
+
+<h2 id="options-menu">옵션 메뉴 만들기</h2>
+
+<div class="figure" style="width:200px;margin:0">
+  <img src="{@docRoot}images/options_menu.png" height="333" alt="" />
+  <p class="img-caption"><strong>그림 1.</strong> Android 2.3에서 실행되는 
+브라우저의 옵션 메뉴입니다.</p>
+</div>
+
+<p>옵션 메뉴에 "검색", "이메일 작성" 및 "설정"과 같이
+현재 액티비티 컨텍스트와 관련이 있는 작업과 다른 옵션을 포함해야 합니다.</p>
+
+<p>화면의 옵션 메뉴에 항목이 나타나는 위치는
+개발자가 애플리케이션을 어느 버전에서 개발했는지에 따라 달라집니다.</p>
+
+<ul>
+  <li><strong>Android 2.3.x(API 레벨 10)
+이하</strong>에서 애플리케이션을 개발했을 경우,
+그림 1과 같이 사용자가 <em>메뉴</em> 버튼을 누르면 화면 아래에 옵션 메뉴의 콘텐츠가 나타납니다. 이것이 열렸을 때 가장 먼저 보이는 부분은 
+아이콘
+메뉴이고, 이는 최대 여섯 개의 메뉴 항목을 보유합니다. 메뉴에 여섯 개를 넘는 항목이 포함되어 있는 경우, Android는 
+여섯 번째 항목과 나머지 항목을 더보기 메뉴에 배치합니다. 이것은 사용자가 
+<em>더보기</em>를 선택하면 열 수 있습니다.</li>
+
+  <li><strong>Android 3.0(API 레벨 11)
+이상</strong>에서 애플리케이션을 개발했을 경우, 옵션 메뉴의 항목은 <a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a>에서 이용할 수 있습니다. 기본적으로 시스템은 모든 항목을 작업 더보기에 배치합니다.
+사용자는 작업 모음 오른쪽에 있는
+작업 더보기 아이콘으로 이를 표시할 수 있습니다(또는 이용할 수 있을 경우 기기 <em>메뉴</em> 버튼을 누르면 됩니다). 
+중요한 작업에 대한 빠른 액세스를
+ 활성화하려면
+{@code android:showAsAction="ifRoom"}을 해당 {@code &lt;item&gt;} 요소에 추가하여 몇 가지 항목이 작업 모음에 표시되도록 수준을 올립니다(그림
+2 참조). <p>작업 항목과 다른 작업 모음 동작에 관한 자세한 정보는 <a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a> 가이드를 참조하십시오. </p>
+<p class="note"><strong>참고:</strong> Andoid 3.0 이상을 대상으로 개발하지 <em>않더라도</em> 
+개발자 나름의 작업 모음 레이아웃을 구축하여 비슷한 효과를 낼 수 있습니다. 예를 들어,
+작업 모음이 포함된 Android 이전 버전을 지원하는 방법은 <a href="{@docRoot}resources/samples/ActionBarCompat/index.html">작업 모음 호환성</a>
+샘플을 참조하십시오.</p>
+</li>
+</ul>
+
+<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<p class="img-caption"><strong>그림 2.</strong> <a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb 갤러리</a> 앱의 작업 모음으로
+탐색 탭과 카메라 작업 항목(및 작업 더보기 버튼)을 표시합니다.</p>
+
+<p>{@link android.app.Activity}
+하위 클래스나 {@link android.app.Fragment} 하위 클래스에서 옵션 메뉴용 항목을 선언할 수 있습니다. 액티비티와 프래그먼트가 모두
+옵션 메뉴용 항목을 선언할 경우, 이들은 UI에서 조합됩니다. 액티비티의 항목이 먼저 나타나고, 
+뒤이어 각 프래그먼트의 항목이 나타나며 이때 순서는 각 프래그먼트가 액티비티에 추가된 순서를 
+따릅니다. 필요한 경우 이동해야 하는 각 {@code &lt;item&gt;}에서{@code android:orderInCategory} 속성이 포함된
+메뉴 항목을 다시 정렬할 수 있습니다.</p>
+
+<p>액티비티에 대한 옵션 메뉴를 지정하려면 {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}를 재정의합니다(프래그먼트는 
+자신만의 {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()} 콜백을 제공합니다). 이 메서드에서
+(<a href="#xml">XML에서 정의된</a>) 메뉴 리소스를 콜백에서 제공된 {@link
+android.view.Menu}로 팽창할 수 있습니다. 예:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = {@link android.app.Activity#getMenuInflater()};
+    inflater.inflate(R.menu.game_menu, menu);
+    return true;
+}
+</pre>
+
+<p>또한, {@link android.view.Menu#add(int,int,int,int)
+add()}를 사용하여 메뉴 항목을 추가하고 {@link android.view.Menu#findItem findItem()}로 항목을 검색하여
+{@link android.view.MenuItem} API로 속성을 수정할 수 있습니다.</p>
+
+<p>Android 2.3.x 이하를 대상으로 애플리케이션을 개발했을 경우, 사용자가 처음으로 메뉴를 열었을 때 시스템이 {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}를
+호출합니다. Android 3.0 이상을 대상으로 개발할 경우,
+액티비티를 시작할 때 작업 모음에 항목을 보여주기 위해 시스템이 {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}를
+호출합니다.</p>
+
+
+
+<h3 id="RespondingOptionsMenu">클릭 이벤트 처리</h3>
+
+<p>사용자가 옵션 메뉴에서 항목을 선택하면(작업 모음의 작업 항목 포함),
+시스템이 액티비티의 {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} 메서드를 호출합니다. 이 메서드가 선택한 {@link android.view.MenuItem}을 전달합니다. 항목을 식별하려면 
+{@link android.view.MenuItem#getItemId()}을 호출하면 됩니다. 이 메서드는(메뉴 리소스의 {@code android:id} 속성으로 지정되거나
+{@link android.view.Menu#add(int,int,int,int) add()} 메서드에 제공된 정수가 포함된) 메뉴 항목에 대한 고유 ID를 반환합니다
+. 이 ID와
+알려진 메뉴 항목을 일치시켜 적절한 작업을 수행할 수 있습니다. 예:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle item selection
+    switch (item.getItemId()) {
+        case R.id.new_game:
+            newGame();
+            return true;
+        case R.id.help:
+            showHelp();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>메뉴 항목을 성공적으로 처리하면 {@code true}를 반환합니다. 메뉴 항목을
+처리하지 않으면, {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}의 슈퍼 클래스 구현을 호출해야 합니다(기본
+구현은 '거짓'을 반환합니다).</p>
+
+<p>액티비티에 프래그먼트가 포함되어 있으면, 액티비티에 대해 {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}를 호출하고, 그 다음에는
+하나의 프래그먼트가
+{@code true}를 반환하거나 모든 프래그먼트가 호출될 때까지 (각 프래그먼트가 추가된 순서대로) 각 프래그먼트에 대해 해당 메서드를 호출합니다.</p>
+
+<p class="note"><strong>팁:</strong> Android 3.0에는
+{@code android:onClick} 속성을 사용하여 XML에 있는 메뉴 항목에 대한 온-클릭 동작을 정의하는 기능이 추가됩니다. 
+속성 값은 메뉴를 사용하여 액티비티가 정의한 메서드의 이름이어야 합니다. 메서드는
+공개여야 하며 하나의 {@link android.view.MenuItem} 매개변수를 수락해야 합니다. 시스템이 이 메서드를 호출하면
+메서드가 선택한 메뉴 항목을 전달합니다. 자세한 정보와 예시는 <a href="{@docRoot}guide/topics/resources/menu-resource.html">메뉴 리소스</a> 문서를 참조하십시오.</p>
+
+<p class="note"><strong>팁:</strong> 애플리케이션에 여러 액티비티가 포함되어 있고, 그 중 몇몇이 같은 옵션 메뉴를 제공할 경우,
+
+{@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}와 {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} 메서드를 제외하고 아무것도 구현하지 않는 액티비티를 만드는 것을 고려해보십시오. 그런 다음 이 클래스를 같은 옵션 메뉴를 공유해야 하는 각 액티비티에 대해 
+확장하면 됩니다. 이렇게 하면 메뉴 작업을 처리하는 코드 세트 하나를 관리할 수 있고,
+각 하위 클래스가 메뉴 동작을 상속합니다.
+이런 하위 액티비티 중 하나에 메뉴 항목을 추가하려면,
+해당 액티비티에서 {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}를 재정의하십시오. {@code super.onCreateOptionsMenu(menu)}를 호출하여
+원래 메뉴 항목을 생성하고, {@link
+android.view.Menu#add(int,int,int,int) menu.add()}이 포함된 새로운 메뉴 항목을 추가합니다. 각각의 메뉴 항목에 대한 슈퍼클래스의 동작을 
+재정의할 수도 있습니다.</p>
+
+
+<h3 id="ChangingTheMenu">런타임에 메뉴 항목 변경</h3>
+
+<p>시스템이 {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}를 호출하면, 개발자가 채우는 {@link android.view.Menu}의 인스턴스를 유지하고
+어떤 이유로 메뉴가 무효화되지 않으면{@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}를
+호출하지 않습니다. 그러나 {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}는 초기
+메뉴 상태를 생성할 때만 사용하고, 액티비티 수명 주기에서 변경할 때는 사용하지 않습니다.</p>
+
+<p>액티비티 수명 주기에서 발생하는 이벤트에
+기반하여 옵션을 수정하고자 할 경우, 이는
+{@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()} 메서드에서 할 수 있습니다. 이
+메서드는 현재 존재하는 상태대로 {@link android.view.Menu} 개체를 전달하므로,
+항목을 추가, 삭제, 비활성화하는 등의 수정을 할 수 있습니다 (프래그먼트도 {@link
+android.app.Fragment#onPrepareOptionsMenu onPrepareOptionsMenu()} 콜백을 제공합니다).</p>
+
+<p>Android 2.3.x 이하에서는, 사용자가 옵션 메뉴를 열 때마다(<em>메뉴</em>
+버튼 누름) 시스템이{@link
+android.app.Activity#onPrepareOptionsMenu(Menu)
+onPrepareOptionsMenu()}를 호출합니다.</p>
+
+<p>Android 3.0 이상에서는 메뉴 항목이 작업 모음에 표시되어 있을 때마다
+옵션 메뉴는 항상 열려 있는 것으로 간주됩니다. 이벤트가 발생하고 메뉴 업데이트를 수행하고자 하는 경우,
+{@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()}를 호출하여
+시스템이 {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}를 호출하도록 요청해야 합니다.</p>
+
+<p class="note"><strong>참고:</strong> 
+현재 초점이 맞춰져 있는 {@link android.view.View}를 기반으로 한 
+옵션 메뉴의 항목을 절대로 변경해서는 안 됩니다. 터치 모드에서는(사용자가 트랙볼이나 d-패드를 사용하지 않는 경우), 
+보기가 초점을 취할 수 없으므로 옵션 메뉴에 있는 항목을 수정할 
+근거로 초점을 사용해서는 결코 안 됩니다. {@link
+android.view.View}의 컨텍스트에 민감한 메뉴를 제공하고자 하는 경우, <a href="#context-menu">컨텍스트 메뉴</a>를 사용하십시오.</p>
+
+
+
+
+<h2 id="context-menu">상황별 메뉴 만들기</h2>
+
+<div class="figure" style="width:420px;margin-top:-1em">
+  <img src="{@docRoot}images/ui/menu-context.png" alt="" />
+  <p class="img-caption"><strong>그림 3.</strong> 부동 컨텍스트 메뉴(왼쪽)
+와 상황별 작업 모음(오른쪽)의 스크린샷입니다.</p>
+</div>
+
+<p>상황별 메뉴는 UI에서 특정 항목이나 컨텍스트 프레임에 영향을 미치는 작업을 제공합니다.
+컨텍스트 메뉴는 어느 보기에나 제공할 수 있지만, {@link
+android.widget.ListView}나 {@link android.widget.GridView}, 사용자가 각 항목에서 직접 작업을 수행하는 기타 보기 컬렉션의
+항목에 가장 자주 사용합니다.</p>
+
+<p>상황별 작업을 제공하는 방법에는 두 가지가 있습니다.</p>
+<ul>
+  <li><a href="#FloatingContextMenu">부동 컨텍스트 메뉴</a>를 사용합니다. 사용자가 컨텍스트 메뉴에 대한 지원을 선언하는 보기를 길게 클릭하면
+(대화와 유사한) 메뉴 항목의 부동 목록이
+나타납니다. 사용자는 한 항목에서 한 번에 하나의 상황별 
+작업을 수행할 수 있습니다.</li>
+
+  <li><a href="#CAB">상황별 작업 모드</a>를 사용합니다. 이 모드는 화면 위에 있는 막대에서 선택된 항목에 영향을 미치는 작업 항목이 포함된 <em>상황별 작업 막대</em>를 표시하는
+{@link android.view.ActionMode}의 시스템 구현입니다.
+ 이 모드가 활성 상태이면 사용자는 
+여러 개의 항목에서 한 작업을 한꺼번에 수행할 수 있습니다(앱이 이를 허용하는 경우).</li>
+</ul>
+
+<p class="note"><strong>참고:</strong> 상황별 작업 모드는 Android 3.0(API
+레벨 11) 이상에서 이용할 수 있으며, 이용 가능할 때 컨텍스트 작업 표시용으로 기본 설정된 기술입니다.
+ 앱이 3.0 이하의 버전을 지원할 경우 해당 기기에서는 
+부동 컨텍스트 메뉴로 돌아가야 합니다.</p>
+
+
+<h3 id="FloatingContextMenu">부동 컨텍스트 메뉴 만들기</h3>
+
+<p>부동 컨텍스트 메뉴를 제공하려면 다음과 같이 합니다.</p>
+<ol>
+  <li>컨텍스트 메뉴가 연관되어야 하는 {@link android.view.View}를 등록합니다. 그러려면 
+{@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()}를 호출하고 여기에 
+{@link android.view.View}를 전달하면 됩니다.
+  <p>액티비티가 {@link android.widget.ListView} 또는 {@link android.widget.GridView}를 사용하고
+각 항목이 같은 컨텍스트 메뉴를 제공하게 하고 싶을 경우,
+{@link android.widget.ListView}나 {@link android.widget.GridView}를 {@link
+android.app.Activity#registerForContextMenu(View) registerForContextMenu()}에 전달하여 컨텍스트 메뉴에 모든 항목을 등록합니다.</p>
+</li>
+
+  <li>{@link android.app.Activity}나 {@link android.app.Fragment}에서 {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()} 메서드를 
+구현합니다.
+  <p>등록된 보기가 롱-클릭 이벤트를 수신하면, 시스템이 {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+메서드를 호출합니다. 이곳이 바로 메뉴 항목을 정의하는 곳입니다. 주로 메뉴 리소스를 팽창시키는 방법을 씁니다. 예:
+</p>
+<pre>
+&#64;Override
+public void onCreateContextMenu(ContextMenu menu, View v,
+                                ContextMenuInfo menuInfo) {
+    super.onCreateContextMenu(menu, v, menuInfo);
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.context_menu, menu);
+}
+</pre>
+
+<p>{@link android.view.MenuInflater}를 사용하면 <a href="{@docRoot}guide/topics/resources/menu-resource.html">메뉴 리소스</a>에서 컨텍스트 메뉴를 팽창하게 해줍니다. 콜백 메서드
+매개변수에는 사용자가 선택한 {@link android.view.View}와
+선택한 항목에 대한 추가 정보를 제공하는 {@link android.view.ContextMenu.ContextMenuInfo} 객체가 
+포함됩니다. 액티비티에 여러 개의 보기가 있고 이들이 각각 서로 다른 컨텍스트 메뉴를 제공하는 경우, 
+이와 같은 매개변수를 사용하여 팽창할 컨텍스트 메뉴가 무엇인지 
+판별할 수 있습니다.</p>
+</li>
+
+<li>{@link android.app.Activity#onContextItemSelected(MenuItem)
+onContextItemSelected()}를 구현합니다.
+  <p>사용자가 메뉴 항목을 선택할 경우, 시스템이 이 메서드를 호출하여
+적절한 작업을 수행하게 해줍니다. 예:</p>
+
+<pre>
+&#64;Override
+public boolean onContextItemSelected(MenuItem item) {
+    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    switch (item.getItemId()) {
+        case R.id.edit:
+            editNote(info.id);
+            return true;
+        case R.id.delete:
+            deleteNote(info.id);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+    }
+}
+</pre>
+
+<p>{@link android.view.MenuItem#getItemId()} 메서드는 선택된 메뉴 항목의 ID를 쿼리하고,
+<a href="#xml">
+XML에서 메뉴 정의</a> 섹션에 나타난 바와 같이 {@code
+android:id} 속성을 사용하여 XML의 각 메뉴 항목에 이를 할당해야 합니다.</p>
+
+<p>메뉴 항목을 성공적으로 처리하면 {@code true}를 반환합니다. 메뉴 항목을 처리하지 않는 경우, 
+해당 메뉴 항목을 슈퍼클래스 구현에 전달해야 합니다. 액티비티에 프래그먼트가 포함되어 있는 경우 
+해당 액티비티가 첫 번째로 이 콜백을 수신합니다. 처리되지 않을 때 슈퍼클래스를 호출하면 시스템이
+이벤트를 각 프래그먼트의 각 콜백 메서드에 전달합니다.
+{@code true} 또는 {@code false}가 반환될 때까지 (각 프래그먼트가 추가된 순서대로) 한 번에 하나씩 전달됩니다 (
+{@link android.app.Activity}와 {@code android.app.Fragment}의 기본 구현이 {@code
+false}를 반환하므로 처리되지 않을 때는 언제나 슈퍼 클래스를 호출해야 합니다).</p>
+</li>
+</ol>
+
+
+<h3 id="CAB">상황별 동작 모드 사용</h3>
+
+<p>상황별 작업 모드는 사용자 상호 작용을 컨텍스트 작업 수행에 집중시키는 {@link android.view.ActionMode}의
+시스템 구현입니다. 사용자가 항목을 선택하여 
+이 모드를 활성화하면, <em>상황별 작업 모음</em>이 화면 위에 나타나서
+사용자가 현재 선택된 항목에서 수행할 수 있는 작업을 표시합니다. 이 모드가
+활성화되면 사용자는 여러 항목을 선택하고(개발자가 이를 허용하는 경우), 항목을 선택 해제하고, 액티비티 내에서
+탐색을 계속합니다(개발자가 허용하고자 하는 만큼). 사용자가 모든 항목에서 선택을 해제하고, '뒤로' 버튼을 누르거나
+
+작업 모음 왼쪽의 <em>완료</em> 작업을 누르면 작업 모드가 비활성화되고 상황별 작업 모음이 사라집니다.</p>
+
+<p class="note"><strong>참고:</strong> 상황별 작업 모음이 
+반드시 <a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a>과 연관되어 있는 것은 아닙니다. 이들은 서로 
+독립적으로 작동합니다. 이는 겉으로 보기에는 상황별 작업 모음이 작업 모음의 위치를 능가하는 것으로 
+보이더라도 적용됩니다.</p>
+
+<p>Android 3.0 (API level 11) 이상을 대상으로 개발하는 경우, 
+일반적으로 상황별 작업 모드를 사용하여 <a href="#FloatingContextMenu">부동 컨텍스트 메뉴</a>가 아닌 상황별 작업을 표시합니다.</p>
+
+<p>상황별 작업을 제공하는 보기의 경우, 일반적으로 두 이벤트 중 하나(또는 두 가지 모두)에서 상황별 작업 모드를 
+호출해야 합니다.</p>
+<ul>
+  <li>사용자가 보기에서 롱-클릭을 수행합니다.</li>
+  <li>사용자가 보기에서 확인란 또는 그와 유사한 UI 구성 요소를 선택합니다.</li>
+</ul>
+
+<p>애플리케이션이 상황별 작업 모드를 호출하고 디자인에 따라 각 작업의 동작을
+정의합니다. 기본적으로 두 가지 디자인이 있습니다.</p>
+<ul>
+  <li>개별적인 임의의 보기에 대한 상황별 작업의 경우.</li>
+  <li>{@link
+android.widget.ListView} 또는 {@link android.widget.GridView}에서 항목 그룹의 일괄 상황별 작업의 경우(사용자가 여러 항목을
+선택하도록 허용하고 모든 항목에서 작업을 수행).</li>
+</ul>
+
+<p>다음 섹션은 각 시나리오에 필요한 설정을 설명합니다.</p>
+
+
+<h4 id="CABforViews">각각의 보기에 대한 상황별 작업 모드의 활성화</h4>
+
+<p>사용자가 특정 보기를 선택했을 때만 상황별 작업 모드를 호출하고자 하는 경우 
+다음과 같이 해야 합니다.</p>
+<ol>
+  <li>{@link android.view.ActionMode.Callback} 인터페이스를 구현합니다. 콜백 메서드에서 
+상황별 작업 모음의 작업을 지정하고, 작업 항목에 대한 클릭 이벤트에 응답하고, 작업 모드에 대한 
+다른 수명 주기 이벤트를 처리합니다.</li>
+  <li>모음을 표시하고자 하는 경우{@link android.app.Activity#startActionMode startActionMode()}를 호출합니다
+(사용자가 보기를 롱-클릭하는 경우).</li>
+</ol>
+
+<p>예:</p>
+
+<ol>
+  <li>{@link android.view.ActionMode.Callback ActionMode.Callback} 인터페이스를 구현합니다.
+<pre>
+private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+    // Called when the action mode is created; startActionMode() was called
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate a menu resource providing context menu items
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+        return true;
+    }
+
+    // Called each time the action mode is shown. Always called after onCreateActionMode, but
+    // may be called multiple times if the mode is invalidated.
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false; // Return false if nothing is done
+    }
+
+    // Called when the user selects a contextual menu item
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share:
+                shareCurrentItem();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Called when the user exits the action mode
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
+    }
+};
+</pre>
+
+<p>이벤트 콜백은 <a href="#options-menu">옵션 메뉴</a>의 콜백과 거의 똑같다는 점을 눈여겨 보십시오. 단, 각 콜백은 이벤트와 연결된 {@link
+android.view.ActionMode} 객체를 전달합니다. {@link
+android.view.ActionMode} API를 사용하여
+{@link android.view.ActionMode#setTitle setTitle()}과 {@link
+android.view.ActionMode#setSubtitle setSubtitle()}이 포함된 제목과 하위 제목을 수정하는 등과 같이 CAB를 다양하게 변경합니다(몇 개의 
+항목이 선택되었는지 나타낼 때 유용합니다).</p>
+
+<p>또한, 위 샘플은 작업 모드가 소멸될 때 {@code mActionMode} 변수를 null로
+설정한다는 점도 유의하십시오. 다음 단계에서는 액티비티나 프래그먼트의 구성원 변수를 초기화하고 저장하는 방법을 
+볼 수 있습니다.</p>
+</li>
+
+  <li>{@link android.app.Activity#startActionMode startActionMode()}를 호출하여
+{@link
+android.view.View}를 롱-클릭했을 경우와 같이 상황에 따라 상황별 작업 모드를 활성화합니다.</p>
+
+<pre>
+someView.setOnLongClickListener(new View.OnLongClickListener() {
+    // Called when the user long-clicks on someView
+    public boolean onLongClick(View view) {
+        if (mActionMode != null) {
+            return false;
+        }
+
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = getActivity().startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        return true;
+    }
+});
+</pre>
+
+<p>{@link android.app.Activity#startActionMode startActionMode()}를 호출하면 시스템이
+생성된 {@link android.view.ActionMode}를 반환합니다. 이것을 구성원 변수에 저장하면 
+다른 이벤트에 대한 응답으로 상황별 작업 모음을 변경할 수 있습니다. 위 샘플에서
+{@link android.view.ActionMode}를 사용하여 {@link android.view.ActionMode} 인스턴스가 이미 활성화되었을 경우
+작업 모드를 시작하기 전에 구성원이 null인지 여부를 점검하여 
+해당 인스턴스가 재생성되지 않게 합니다.</p>
+</li>
+</ol>
+
+
+
+<h4 id="CABforListView">ListView 또는 GridView에서 일괄 상황별 작업 활성화</h4>
+
+<p>{@link android.widget.ListView} 또는 {@link
+android.widget.GridView}(또는 {@link android.widget.AbsListView}의 또 다른 확장)에 항목 컬렉션이 있고 
+사용자가 일괄 작업을 수행하도록 허용하려면 다음과 같이 해야 합니다.</p>
+
+<ul>
+  <li>{@link android.widget.AbsListView.MultiChoiceModeListener} 인터페이스를 구현하고 이를 
+{@link android.widget.AbsListView#setMultiChoiceModeListener
+setMultiChoiceModeListener()}가 있는 보기 그룹에 대해 설정합니다. 수신기 콜백 메서드에서 상황별 작업 모음에 대한 
+작업을 지정하고, 작업 항목에 대한 클릭 이벤트에 대응하고,
+{@link android.view.ActionMode.Callback} 인터페이스에서 상속한 다른 콜백을 처리할 수 있습니다.</li>
+
+  <li>{@link
+android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL} 인수로 {@link android.widget.AbsListView#setChoiceMode setChoiceMode()}를 호출합니다.</li>
+</ul>
+
+<p>예:</p>
+
+<pre>
+ListView listView = getListView();
+listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+
+    &#64;Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                          long id, boolean checked) {
+        // Here you can do something when items are selected/de-selected,
+        // such as update the title in the CAB
+    }
+
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        // Respond to clicks on the actions in the CAB
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                deleteSelectedItems();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate the menu for the CAB
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context, menu);
+        return true;
+    }
+
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        // Here you can make any necessary updates to the activity when
+        // the CAB is removed. By default, selected items are deselected/unchecked.
+    }
+
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        // Here you can perform updates to the CAB due to
+        // an {@link android.view.ActionMode#invalidate} request
+        return false;
+    }
+});
+</pre>
+
+<p>완료되었습니다. 이제 사용자가 롱-클릭하여 항목을 선택하면 시스템이 {@link
+android.widget.AbsListView.MultiChoiceModeListener#onCreateActionMode onCreateActionMode()}
+메서드를 호출하고 지정된 작업으로 상황별 작업 모음을 표시합니다. 상황별 작업 모음이 표시되는 동안
+사용자가 추가 항목을 선택할 수 있습니다.</p>
+
+<p>상황별 작업이 공통 작업 항목을 제공하는 몇몇 경우, 
+확인란이나 그와 비슷한 UI요소를 추가하여 사용자가 항목을 선택할 수 있도록 해주는 것이 좋습니다. 
+사용자가 롱-클릭 동작을 발견하지 못할 수도 있기 때문입니다. 사용자가 확인란을 선택하면 
+{@link android.widget.AbsListView#setItemChecked setItemChecked()}로 
+확인된 상태에 각 목록 항목을 설정하여 상황별 작업 모드를 호출할 수 있습니다.</p>
+
+
+
+
+<h2 id="PopupMenu">팝업 메뉴 만들기</h2>
+
+<div class="figure" style="width:220px">
+<img src="{@docRoot}images/ui/popupmenu.png" alt="" />
+<p><strong>그림 4.</strong> Gmail 앱의 팝업 메뉴는 오른쪽 위에 있는 더보기 
+버튼에 고정되어 있습니다.</p>
+</div>
+
+<p>{@link android.widget.PopupMenu}는 {@link android.view.View}에 고정된 모달 메뉴입니다.
+이것은 앵커 보기 아래에 공간이 있으면 아래에, 없으면 보기 위에 나타납니다. 이것은 다음과 같은 상황에 유용합니다.</p>
+<ul>
+  <li>특정 콘텐츠와 <em>관련된</em> 작업에 대한 더보기 스타일 메뉴를 제공합니다(예: 
+그림 4의 Gmail 이메일 헤더 등).
+    <p class="note"><strong>참고:</strong> 이것은 컨텍스트 메뉴와는 다릅니다. 컨텍스트 메뉴는 
+일반적으로 선택된 콘텐츠에 <em>영향을 미치는</em> 작업입니다. 선택된
+콘텐츠에 영향을 미치는 작업의 경우, <a href="#CAB">상황별 작업 모드</a> 또는 <a href="#FloatingContextMenu">부동 컨텍스트 메뉴</a>를 사용하십시오.</p></li>
+  <li>명령문의 두 번째 부분을 제공합니다(예: "추가"라고 표시된 버튼으로, 
+각기 다른 "추가" 옵션이 있는 팝업 메뉴를 발생시킵니다).</li>
+  <li>영구적인 선택이 포함되지 않은 {@link android.widget.Spinner}와 유사한 드롭다운을 제공합니다.
+</li>
+</ul>
+
+
+<p class="note"><strong>참고:</strong> {@link android.widget.PopupMenu}는 API
+레벨 11 이상에서 이용할 수 있습니다.</p>
+
+<p><a href="#xml">XML로 메뉴를 정의</a>하는 경우, 팝업 메뉴를 표시하는 방법은 다음과 같습니다.</p>
+<ol>
+  <li>자신의 생성자로 {@link android.widget.PopupMenu}를 인스턴트화합니다. 생성자는 
+현재 애플리케이션 {@link android.content.Context} 및 {@link android.view.View}를 
+메뉴를 고정시켜야 하는 곳에 가져갑니다.</li>
+  <li>{@link android.view.MenuInflater}를 사용하여{@link
+android.widget.PopupMenu#getMenu() PopupMenu.getMenu()}가 반환한 {@link
+android.view.Menu} 객체에 메뉴 리소스를 팽창합니다. API 레벨 14 이상에서는 이 대신 
+{@link android.widget.PopupMenu#inflate PopupMenu.inflate()}를 사용할 수 있습니다.</li>
+  <li>{@link android.widget.PopupMenu#show() PopupMenu.show()}를 호출합니다.</li>
+</ol>
+
+<p>예를 들어, 다음은 팝업 메뉴를 표시하는 {@link android.R.attr#onClick android:onClick} 속성이 
+있는 버튼입니다.</p>
+
+<pre>
+&lt;ImageButton
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:src="@drawable/ic_overflow_holo_dark"
+    android:contentDescription="@string/descr_overflow_button"
+    android:onClick="showPopup" />
+</pre>
+
+<p>그러면 액티비티가 이렇게 팝업 메뉴를 표시할 수 있습니다.</p>
+
+<pre>
+public void showPopup(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+    MenuInflater inflater = popup.getMenuInflater();
+    inflater.inflate(R.menu.actions, popup.getMenu());
+    popup.show();
+}
+</pre>
+
+<p>API 레벨 14 이상의 경우, {@link
+android.widget.PopupMenu#inflate PopupMenu.inflate()}로 메뉴를 팽창하는 두 개의 줄을 결합시킬 수 있습니다.</p>
+
+<p>사용자가 항목을 선택하거나 메뉴 영역 바깥쪽을 터치하면 이 메뉴는 
+무시됩니다. {@link
+android.widget.PopupMenu.OnDismissListener}를 사용하여 무시 이벤트를 수신 대기할 수 있습니다.</p>
+
+<h3 id="PopupEvents">클릭 이벤트 처리</h3>
+
+<p>사용자가 메뉴 항목을 선택할 때 작업을 수행하려면,{@link android.widget.PopupMenu#setOnMenuItemClickListener
+setOnMenuItemclickListener()}를 호출하여
+{@link
+android.widget.PopupMenu.OnMenuItemClickListener} 인터페이스를 구현하고 {@link
+android.widget.PopupMenu}를 등록합니다. 사용자가 항목을 선택하면 시스템이 인터페이스에서 {@link
+android.widget.PopupMenu.OnMenuItemClickListener#onMenuItemClick onMenuItemClick()} 콜백을
+호출합니다.</p>
+
+<p>예:</p>
+
+<pre>
+public void showMenu(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+
+    // This activity implements OnMenuItemClickListener
+    popup.setOnMenuItemClickListener(this);
+    popup.inflate(R.menu.actions);
+    popup.show();
+}
+
+&#64;Override
+public boolean onMenuItemClick(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.archive:
+            archive(item);
+            return true;
+        case R.id.delete:
+            delete(item);
+            return true;
+        default:
+            return false;
+    }
+}
+</pre>
+
+
+<h2 id="groups">메뉴 그룹 만들기</h2>
+
+<p>메뉴 그룹은 특정한 특성을 공유하는 메뉴 항목의 컬렉션입니다. 그룹으로 다음과 같은 작업을 
+할 수 있습니다.</p>
+<ul>
+  <li>{@link android.view.Menu#setGroupVisible(int,boolean)
+setGroupVisible()}로 모든 항목 표시 또는 숨기기</li>
+  <li>{@link android.view.Menu#setGroupEnabled(int,boolean)
+setGroupEnabled()}로 모든 항목 활성화 또는 비활성화</li>
+  <li>{@link
+android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()}로 모든 항목이 확인 가능한지 여부 지정</li>
+</ul>
+
+<p>메뉴 리소스의 {@code &lt;group&gt;} 요소 안에 {@code &lt;item&gt;} 요소를 중첩시키거나
+{@link
+android.view.Menu#add(int,int,int,int) add()} 메서드로 그룹 ID를 지정하여 그룹을 생성할 수 있습니다.</p>
+
+<p>다음은 그룹을 포함하는 메뉴 리소스의 예시입니다.</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/menu_save"
+          android:icon="@drawable/menu_save"
+          android:title="@string/menu_save" /&gt;
+    &lt;!-- menu group --&gt;
+    &lt;group android:id="@+id/group_delete"&gt;
+        &lt;item android:id="@+id/menu_archive"
+              android:title="@string/menu_archive" /&gt;
+        &lt;item android:id="@+id/menu_delete"
+              android:title="@string/menu_delete" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>그룹에 있는 항목은 첫 항목과 같은 레벨에서 표시됩니다. 메뉴 안에 있는 세 가지 항목은 모두 
+형제입니다. 그러나 이 그룹에 있는 항목 두 개의 특성을 개발자가 수정할 수 있습니다. 
+그룹 ID를 참조하고 위에 나령된 메서드를 사용하면 됩니다. 시스템 또한 
+그룹화된 항목은 절대 분리하지 않습니다. 예를 들어, 각 항목에 대해 {@code
+android:showAsAction="ifRoom"}을 선언하면, 두 가지 모두 작업 모음에 나타나거나 
+작업 더보기에 나타납니다.</p>
+
+
+<h3 id="checkable">확인 가능한 메뉴 항목 사용</h3>
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/radio_buttons.png" height="333" alt="" />
+  <p class="img-caption"><strong>그림 5.</strong> 확인 가능한 
+항목이 있는 하위 메뉴의 스크린샷입니다.</p>
+</div>
+
+<p>메뉴는 옵션을 켜고 끄거나, 독립적 옵션에 대한 확인란으로 사용하거나, 
+상호 배타적인 옵션의 그룹에 대한 무선 버튼으로 사용하기 위한 인터페이스로 
+유용합니다. 그림 5는 무선 버튼이 있으며 확인 가능한 항목이 포함된 하위 메뉴를
+표시합니다.</p>
+
+<p class="note"><strong>참고:</strong> (옵션 메뉴의) 아이콘 메뉴의 메뉴 항목은 
+확인란이나 무선 버튼을 표시할 수 없습니다. 확인 가능한 아이콘 메뉴에서 항목을 만들기로 선택하는 경우, 
+상태가 변경될 때마다 아이콘 및/또는 텍스트를 교체하여 
+확인된 상태를 수동으로 나타내야 합니다.</p>
+
+<p>{@code &lt;item&gt;} 요소의 {@code
+android:checkable} 속성을 사용하여 개별 메뉴 항목에 대한 확인 가능한 동작을 정의하거나
+{@code &lt;group&gt;} 요소에서 {@code android:checkableBehavior} 속성으로 전체 그룹에 대한 확인 가능한 동작을 사용할 수 있습니다. 
+예를 들어, 이 메뉴 그룹의 모든 항목은 무선 버튼으로 확인할 수 있습니다.</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;group android:checkableBehavior="single"&gt;
+        &lt;item android:id="@+id/red"
+              android:title="@string/red" /&gt;
+        &lt;item android:id="@+id/blue"
+              android:title="@string/blue" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>{@code android:checkableBehavior} 속성은 다음 중 하나를 수락합니다.
+<dl>
+  <dt>{@code single}</dt>
+    <dd>그룹의 한 항목만 확인할 수 있습니다(무선 버튼).</dd>
+  <dt>{@code all}</dt>
+    <dd>모든 항목을 확인할 수 있습니다(확인란).</dd>
+  <dt>{@code none}</dt>
+    <dd>확인할 수 있는 항목이 없습니다.</dd>
+</dl>
+
+<p>{@code &lt;item&gt;} 요소의 {@code android:checked} 속성을 이용하여 항목에 기본 확인된 상태를 적용하고 
+{@link
+android.view.MenuItem#setChecked(boolean) setChecked()} 메서드로 코드 내에서 이를 변경할 수 있습니다.</p>
+
+<p>확인 가능한 항목이 선택되면, 시스템이 각 항목이 선택된 콜백 메서드를 호출합니다
+(예: {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}). 바로 여기에서 
+확인란의 상태를 설정해야 합니다. 확인란이나 무선 버튼은 자신의 상태를 자동으로 
+변경하지 않기 때문입니다. 
+{@link android.view.MenuItem#isChecked()}로 항목의 현재 상태를 (사용자가 이를 선택하기 전 상태 그대로) 쿼리하고 그런 다음 
+{@link android.view.MenuItem#setChecked(boolean) setChecked()}로 확인된 상태를 설정할 수 있습니다. 예:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.vibrate:
+        case R.id.dont_vibrate:
+            if (item.isChecked()) item.setChecked(false);
+            else item.setChecked(true);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>이런 방식으로 확인된 상태를 설정하지 않으면, 사용자가 선택했을 때 항목의 가시적 상태(확인란 또는 무선 버튼)가
+변경되지 않습니다.
+ 상태를 설정할 경우, 액티비티는 항목의 확인된 상태를 보존해서
+사용자가 나중에 메뉴를 열었을 때 개발자가 설정한 확인된 상태가
+보이게 합니다.</p>
+
+<p class="note"><strong>참고:</strong>
+확인 가능한 메뉴 항목은 세션별 기준으로만 사용하도록 만들어져 있으며 애플리케이션이 소멸된 후에는 
+저장되지 않습니다. 사용자에 대해 저장하고자 하는 애플리케이션 설정이 있으면,
+<a href="{@docRoot}guide/topics/data/data-storage.html#pref">공유 기본 설정</a>으로 해당 데이터를 저장해야 합니다.</p>
+
+
+
+<h2 id="intents">인텐트에 기반한 메뉴 항목 추가</h2>
+
+<p>{@link android.content.Intent}를 이용하여
+액티비티를 시작하는 메뉴 항목을 원할 수도 있습니다(액티비티가 본인의 애플리케이션 안에 있는 것이든 또 다른 애플리케이션에 있는 것이든 무관합니다). 사용하고자 하는 인텐트를 알고 
+인텐트를 시작해야 하는 특정 메뉴 항목이 있을 경우,
+항목에 대해 선택된 적절한 콜백 메서드에서 {@link android.app.Activity#startActivity(Intent) startActivity()}가 
+포함된 인텐트를 실행합니다(예: {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} 콜백).</p>
+
+<p>그러나 사용자 기기에 
+해당 인텐트를 처리하는 애플리케이션이 있는지 모르는 경우, 이를 호출하는 메뉴 항목을 추가하면
+해당 인텐트가 액티비티에 대해 확인되지 못해서 메뉴 항목이 기능하지 못할 수도 있습니다.
+ 이것을 해결하기 위해 Android는 개발자가 동적으로 자신의 메뉴에 메뉴 항목을 추가할 수 있도록 허용합니다. 
+이는 Android가 기기에서 개발자의 인텐트를 처리하는 액티비티를 찾을 경우에 해당됩니다.</p>
+
+<p>인텐트를 수락하는 이용 가능한 액티비티에 기반하여 메뉴 항목을 추가하려면 다음과 같이 합니다.</p>
+<ol>
+  <li>
+카테고리 {@link android.content.Intent#CATEGORY_ALTERNATIVE} 및/또는
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE}, 기타 요구 사항으로 인텐트를 정의합니다.</li>
+  <li>{@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+Menu.addIntentOptions()}을 호출합니다. 그러면 Android가 인텐트를 수행하는 애플리케이션을 검색하고 
+이들을 개발자의 메뉴에 추가합니다.</li>
+</ol>
+
+<p>인텐트를 만족하는 애플리케이션이 설치되어 있지 않으면, 
+메뉴 항목이 추가되지 않습니다.</p>
+
+<p class="note"><strong>참고:</strong>
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} 를 사용하여 화면에서 현재 선택된 
+요소를 처리합니다. 그러므로 이것은 {@link
+android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenuInfo)
+onCreateContextMenu()}에서 메뉴를 생성할 때만 사용해야 합니다.</p>
+
+<p>예:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu){
+    super.onCreateOptionsMenu(menu);
+
+    // Create an Intent that describes the requirements to fulfill, to be included
+    // in our menu. The offering app must include a category value of Intent.CATEGORY_ALTERNATIVE.
+    Intent intent = new Intent(null, dataUri);
+    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+
+    // Search and populate the menu with acceptable offering applications.
+    menu.addIntentOptions(
+         R.id.intent_group,  // Menu group to which new items will be added
+         0,      // Unique item ID (none)
+         0,      // Order for the items (none)
+         this.getComponentName(),   // The current activity name
+         null,   // Specific items to place first (none)
+         intent, // Intent created above that describes our requirements
+         0,      // Additional flags to control items (none)
+         null);  // Array of MenuItems that correlate to specific items (none)
+
+    return true;
+}</pre>
+
+<p>정의된 인텐트와 일치하는 인텐트 필터를 제공하는 것으로 발견된 각 액티비티에
+인텐트 필터의 <code>android:label</code>를
+메뉴 항목 제목으로, 애플리케이션 아이콘을 메뉴 항목 아이콘으로 사용하여 메뉴 항목을 추가합니다. 
+{@link android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()} 메서드는 추가된 메뉴 항목 개수를 반환합니다.</p>
+
+<p class="note"><strong>참고:</strong> {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()}을 호출할 때 첫 번째 인수에서 지정된 메뉴 그룹이 모든 메뉴 항목을
+재정의합니다.</p>
+
+
+<h3 id="AllowingToAdd">다른 메뉴에 액티비티 추가 허용</h3>
+
+<p>본인의 액티비티의 서비스를 다른 애플리케이션에 제공하여 다른 
+애플리케이션의 메뉴에 본인의 애플리케이션이 추가되도록 할 수도 있습니다(위에서 설명한 것과 역할이 반대입니다).</p>
+
+<p>다른 애플리케이션 메뉴에 추가되려면, 인텐트 필터는 평소와 같이 
+정의해야 하지만, 인텐트 필터 카테고리에 {@link android.content.Intent#CATEGORY_ALTERNATIVE}
+및/또는{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} 값을
+반드시 포함해야 합니다. 예:</p>
+<pre>
+&lt;intent-filter label="&#64;string/resize_image">
+    ...
+    &lt;category android:name="android.intent.category.ALTERNATIVE" />
+    &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+    ...
+&lt;/intent-filter>
+</pre>
+
+<p>인텐트 필터 작성에 관한 자세한 내용은 
+<a href="/guide/components/intents-filters.html">인텐트와 인텐트 필터</a> 문서를 참조하십시오.</p>
+
+<p>이 기법을 사용하는 샘플 애플리케이션은 
+<a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note
+Pad</a> 샘플 코드를 참조하십시오.</p>

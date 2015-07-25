@@ -1,0 +1,1094 @@
+page.title=Fornecimento de recursos
+parent.title=Recursos de aplicativo
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Visualização rápida</h2>
+  <ul>
+    <li>Tipos diferentes de recursos pertencem a subdiretórios diferentes de {@code res/}</li>
+    <li>Recursos alternativos fornecem arquivos de recurso específicos de configuração</li>
+    <li>Sempre inclua recursos padrão para que o aplicativo não dependa de configurações
+específicas do dispositivo</li>
+  </ul>
+  <h2>Neste documento</h2>
+  <ol>
+    <li><a href="#ResourceTypes">Agrupamento de tipos de recursos</a></li>
+    <li><a href="#AlternativeResources">Fornecimento de recursos alternativos</a>
+      <ol>
+        <li><a href="#QualifierRules">Regras de nome do qualificador</a></li>
+        <li><a href="#AliasResources">Criação de recursos de alias</a></li>
+      </ol>
+    </li>
+    <li><a href="#Compatibility">Fornecimento da melhor compatibilidade de dispositivo com recursos</a></li>
+    <li><a href="#BestMatch">Como o Android encontra o melhor recurso compatível</a></li>
+  </ol>
+
+  <h2>Veja também</h2>
+  <ol>
+    <li><a href="accessing-resources.html">Acesso aos recursos</a></li>
+    <li><a href="available-resources.html">Tipos de recursos</a></li>
+    <li><a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
+várias telas</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Deve-se sempre exteriorizar os recursos do aplicativo, como imagens e strings do código,
+para que você possa mantê-los independentemente. Deve-se também fornecer recursos alternativos para
+configurações específicas do dispositivo, agrupando-os em diretórios de recursos especialmente nomeados. Em
+tempo de execução, o Android usa o recurso adequado com base na configuração atual. Por
+exemplo, você pode querer fornecer um layout de IU diferente dependendo do tamanho da tela ou
+strings diferentes dependendo da configuração de idioma.</p>
+
+<p>Ao exteriorizar os recursos do aplicativo, é possível acessá-los
+usando IDs de recurso que são gerados na classe {@code R} do projeto. O procedimento para usar
+recursos no aplicativo é discutido em <a href="accessing-resources.html">Acesso aos
+recursos</a>. Este documento mostra como agrupar os recursos no projeto do Android
+e fornecer recursos alternativos para configurações específicas do dispositivo.</p>
+
+
+<h2 id="ResourceTypes">Agrupamento de tipos de recursos</h2>
+
+<p>Você deve posicionar cada tipo de recurso em um subdiretório específico do diretório
+{@code res/} do projeto. Por exemplo, abaixo está a hierarquia de arquivos para um projeto simples:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    src/  <span style="color:black">
+        MyActivity.java  </span>
+    res/
+        drawable/  <span style="color:black">
+            graphic.png  </span>
+        layout/  <span style="color:black">
+            main.xml
+            info.xml</span>
+        mipmap/  <span style="color:black">
+            icon.png </span>
+        values/  <span style="color:black">
+            strings.xml  </span>
+</pre>
+
+<p>Como pode ver neste exemplo, o diretório {@code res/} contém todos os recursos (em subdiretórios):
+um recurso de imagem, dois recursos de layout, diretórios {@code mipmap/} para ícones de 
+inicialização e um arquivo de recurso de string. Os nomes dos diretórios
+de recursos são importantes e são descritos na tabela 1.</p>
+
+<p class="note"><strong>Observação:</strong> para obter mais informações sobre o uso de pastas de mipmap, consulte
+<a href="{@docRoot}tools/projects/index.html#mipmap">Visão geral do gerenciamento de projetos</a>.</p>
+
+<p class="table-caption" id="table1"><strong>Tabela 1.</strong> Os diretórios de recursos
+compatíveis dentro do diretório {@code res/} do projeto.</p>
+
+<table>
+  <tr>
+    <th scope="col">Diretório</th>
+    <th scope="col">Tipo de recurso</th>
+  </tr>
+
+  <tr>
+    <td><code>animator/</code></td>
+    <td>Arquivos XML que definem as <a href="{@docRoot}guide/topics/graphics/prop-animation.html">animações
+da propriedade</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>anim/</code></td>
+    <td>Arquivos XML que definem as <a href="{@docRoot}guide/topics/graphics/view-animation.html#tween-animation">animações
+intermediárias</a>. (As animações de propriedade também podem ser salvas neste diretório,
+mas o diretório {@code animator/} é o preferencial para animações de propriedade para distinguir os dois
+tipos.)</td>
+  </tr>
+
+  <tr>
+    <td><code>color/</code></td>
+    <td>Arquivos XML que definem uma lista de estado de cores. Consulte <a href="color-list-resource.html">Recurso de
+lista de estado de cores</a></td>
+  </tr>
+
+  <tr>
+    <td><code>drawable/</code></td>
+
+    <td><p>Os arquivos Bitmap ({@code .png}, {@code .9.png}, {@code .jpg}, {@code .gif}) ou arquivos XML
+são compilados nos seguintes subtipos de recurso desenhável:</p>
+      <ul>
+        <li>Arquivos Bitmap</li>
+        <li>Nine-Patch (bitmaps redimensionáveis)</li>
+        <li>Listas de estado</li>
+        <li>Formatos</li>
+        <li>Desenháveis de animação</li>
+        <li>Outros desenháveis</li>
+      </ul>
+      <p>Veja <a href="drawable-resource.html">Recursos desenháveis</a>.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>mipmap/</code></td>
+    <td>Arquivos desenháveis para diferentes densidades do ícone do inicializador. Para obter mais informações sobre o gerenciamento de
+    ícones do inicializador com pastas {@code mipmap/}, consulte
+    <a href="{@docRoot}tools/project/index.html#mipmap">Visão geral do gerenciamento de projetos</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>layout/</code></td>
+    <td>Arquivos XML que definem um layout de interface do usuário.
+        Consulte <a href="layout-resource.html">Recurso de layout</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>menu/</code></td>
+    <td>Arquivos XML que definem os menus do aplicativo, como Menu de opções, Menu de contexto
+ou Submenu. Consulte <a href="menu-resource.html">Recurso de menu</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>raw/</code></td>
+    <td><p>Arquivos arbitrários para salvar na forma bruta. Para abrir esses recursos
+com {@link java.io.InputStream} bruto, chame {@link android.content.res.Resources#openRawResource(int)
+Resources.openRawResource()} com o ID do recurso, que é {@code R.raw.<em>filename</em>}.</p>
+      <p>No entanto, caso precise de acesso aos nomes e à hierarquia dos arquivos originais, considere salvar
+alguns recursos no diretório {@code
+assets/} (em vez de {@code res/raw/}). Os arquivos em {@code assets/} não recebem um ID de recurso,
+então é possível lê-los usando apenas o {@link android.content.res.AssetManager}.</p></td>
+  </tr>
+
+  <tr>
+    <td><code>values/</code></td>
+    <td><p>Arquivos XML que contêm valores simples, como strings, números inteiros e cores.</p>
+      <p>Enquanto os arquivos de recurso XML estiverem em outros subdiretórios {@code res/}, defina um único recurso
+com base no nome do arquivo XML, os arquivos no diretório {@code values/} descrevem vários recursos.
+Para cada arquivo neste diretório, cada filho do elemento {@code &lt;resources&gt;} define um único
+recurso. Por exemplo, um elemento {@code &lt;string&gt;} cria
+um recurso {@code R.string} e um elemento {@code &lt;color&gt;} cria um recurso 
+{@code R.color}.</p>
+      <p>Como cada recurso é definido com seu próprio elemento XML, é possível nomear o arquivo
+da forma que quiser e colocar tipos de recurso variados em um arquivo. No entanto, para esclarecer, você pode
+querer colocar tipos de recursos únicos em arquivos diferentes. Por exemplo, a seguir há algumas convenções
+de nome de arquivo para recursos que podem ser criados neste diretório:</p>
+      <ul>
+        <li>arrays.xml para matriz de recurso (<a href="more-resources.html#TypedArray">matriz digitadas</a>).</li>
+        <li>colors.xml para <a href="more-resources.html#Color">valores de cor</a></li>
+        <li>dimens.xml para <a href="more-resources.html#Dimension">valores de dimensão</a>.</li>
+        <li>strings.xml para <a href="string-resource.html">valores
+de string</a>.</li>
+        <li>styles.xml para <a href="style-resource.html">estilos</a>.</li>
+      </ul>
+      <p>Consulte <a href="string-resource.html">Recursos de string</a>,
+        <a href="style-resource.html">Recurso de estilo</a>
+        e <a href="more-resources.html">Mais tipos de recursos</a>.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>xml/</code></td>
+    <td>Arquivos arbitrários XML que podem ser lidos em tempo de execução chamando {@link
+android.content.res.Resources#getXml(int) Resources.getXML()}. Vários arquivos de configuração XML
+devem ser salvos aqui, como uma <a href="{@docRoot}guide/topics/search/searchable-config.html">configuração buscável</a>.
+<!-- or preferences configuration. --></td>
+  </tr>
+</table>
+
+<p class="caution"><strong>Atenção:</strong> nunca salve arquivos de recurso diretamente no diretório
+{@code res/} &mdash; isto provocará um erro ao compilador.</p>
+
+<p>Para obter mais informações sobre determinados tipos de recursos, consulte a documentação <a href="available-resources.html">Tipos de recursos</a>.</p>
+
+<p>Os recursos salvos nos subdiretórios definidos na tabela 1 são os recursos
+"padrão". Ou seja, esses recursos definem projeto e conteúdo padrão para o aplicativo.
+No entanto, tipos diferentes de dispositivos com Android podem chamar diferentes tipos de recursos.
+Por exemplo: se um dispositivo tiver uma tela maior do que o normal, deve-se fornecer
+recursos de layout diferentes que aproveitem o espaço extra na tela. Ou, se um dispositivo tiver
+uma configuração de idioma diferente, deve-se fornecer recursos de string diferentes que traduzam
+o texto na interface do usuário. Para fornecer esses diferentes recursos para configurações de dispositivo
+diferentes, você precisa fornecer recursos alternativos, além dos recursos
+padrão.</p>
+
+
+<h2 id="AlternativeResources">Fornecimento de recursos alternativos</h2>
+
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Figura 1.</strong> Dois dispositivos diferentes, cada um usando recursos diferentes de layout.</p>
+</div>
+
+<p>Quase todos os aplicativos devem fornecer recursos alternativos para suportar
+configurações específicas do dispositivo. Por exemplo: deve-se incluir recursos desenháveis alternativos para densidades
+de tela diferentes e recursos alternativos de string para idiomas diferentes. Em tempo de execução,
+o Android detecta a configuração atual do dispositivo e carrega os recursos
+adequados para o aplicativo.</p>
+
+<p>Para especificar as alternativas de configuração específica para um conjunto de recursos:</p>
+<ol>
+  <li>Crie um novo diretório no {@code res/} nomeado na forma de {@code
+<em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em>}.
+    <ul>
+      <li><em>{@code &lt;resources_name&gt;}</em> é o nome do diretório dos recursos padrão correspondentes
+(definido na tabela 1).</li>
+      <li><em>{@code &lt;qualifier&gt;}</em> é um nome que especifica uma configuração individual
+para a qual esses recursos destinam-se (definido na tabela 2).</li>
+    </ul>
+    <p>É possível anexar mais de um <em>{@code &lt;qualifier&gt;}</em>. Separe cada
+um com um travessão.</p>
+    <p class="caution"><strong>Atenção:</strong> ao anexar vários qualificadores, deve-se
+colocá-los na mesma ordem em que foram listados na tabela 2. Se os qualificadores forem ordenados
+de forma incorreta, os recursos serão ignorados.</p>
+  </li>
+  <li>Salve os respectivos recursos alternativos neste novo diretório. Os arquivos de recurso devem ser
+nomeados exatamente da mesma forma que os arquivos de recurso padrão.</li>
+</ol>
+
+<p>Por exemplo, a seguir há alguns recursos alternativos e outros padrão:</p>
+
+<pre class="classic no-pretty-print">
+res/
+    drawable/   <span style="color:black">
+        icon.png
+        background.png    </span>
+    drawable-hdpi/  <span style="color:black">
+        icon.png
+        background.png  </span>
+</pre>
+
+<p>O qualificador {@code hdpi} indica que os recursos neste diretório são para os dispositivos
+com tela de alta densidade. As imagens em cada um desses diretórios desenháveis são dimensionadas para uma densidade de tela
+específica, mas os nomes dos arquivos
+são exatamente os mesmos. Desta maneira, o ID de recurso usado para referenciar {@code icon.png} ou a imagem {@code
+background.png} é sempre o mesmo, mas o Android seleciona
+a versão de cada arquivo que melhor compatibiliza-se com o dispositivo atual, comparando as informações de configuração
+com os qualificadores no nome do diretório do recurso.</p>
+
+<p>O Android é compatível com vários qualificadores de configuração e é possível
+adicionar vários qualificadores a um nome de diretório separando cada qualificador com um travessão. A tabela 2
+lista os qualificadores de configuração válidos, em ordem de precedência &mdash; caso use vários
+qualificadores para um diretório de recursos, você deve adicioná-los ao nome do diretório na ordem que foram listados
+na tabela.</p>
+
+
+<p class="table-caption" id="table2"><strong>Tabela 2.</strong> Nomes de qualificadores
+de configuração.</p>
+<table>
+    <tr>
+        <th>Configuração</th>
+        <th>Valores do qualificador</th>
+        <th>Descrição</th>
+    </tr>
+    <tr id="MccQualifier">
+      <td>MCC e MNC</td>
+      <td>Exemplos:<br/>
+        <code>mcc310</code><br/>
+        <code><nobr>mcc310-mnc004</nobr></code><br/>
+        <code>mcc208-mnc00</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>O código de dispositivos móveis do país (MCC), opcionalmente seguido do código de rede móvel (MNC)
+        do cartão SIM no dispositivo. Por exemplo, <code>mcc310</code> é dos E.U.A. em qualquer operadora,
+        <code>mcc310-mnc004</code> é dos E.U.A., em Verizon, e <code>mcc208-mnc00</code> é da França,
+        em Orange.</p>
+        <p>Se o dispositivo usar uma conexão de rádio (telefone GSM), os valores MCC e MNC serão
+        os do cartão SIM.</p>
+        <p>Você também pode usar somente o MCC (por exemplo, para incluir recursos legais específicos do país
+no aplicativo). Caso precise especificar com base somente no idioma, use o qualificador
+de <em>idioma e região</em> (discutido a seguir). Caso decida usar o qualificador
+de MCC e MNC, tome cuidado e teste o seu funcionamento.</p>
+        <p>Veja também os campos de configuração {@link
+android.content.res.Configuration#mcc} e {@link
+android.content.res.Configuration#mnc}, que indicam o código de dispositivos móveis do país atual
+e o código de rede móvel, respectivamente.</p>
+      </td>
+    </tr>
+    <tr id="LocaleQualifier">
+      <td>Idioma e região</td>
+      <td>Exemplos:<br/>
+        <code>en</code><br/>
+        <code>fr</code><br/>
+        <code>en-rUS</code><br/>
+        <code>fr-rFR</code><br/>
+        <code>fr-rCA</code><br/>
+        etc.
+      </td>
+      <td><p>O idioma é definido por um código de idioma<a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
+              639-1</a> de duas letras, opcionalmente seguido por um código da região
+              <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
+              3166-1-alpha-2</a> (precedido de "{@code r}" em minúsculo).
+        </p><p>
+        Os códigos <em>não</em> diferenciam maiúsculas e minúsculas; o prefixo {@code r} é usado
+        para distinguir a parte da região.
+        Não é possível especificar uma região só.</p>
+        <p>Isto pode mudar durante a vida útil
+do aplicativo se o usuário mudar o idioma nas configurações do sistema. Consulte <a href="runtime-changes.html">Tratamento de alterações em tempo de execução</a> para obter informações
+sobre como isto pode afetar o aplicativo em tempo de execução.</p>
+        <p>Consulte <a href="localization.html">Localização</a> para obter um guia completo para localizar
+os aplicativos para outros idiomas.</p>
+        <p>Veja também o campo de configuração {@link android.content.res.Configuration#locale},
+que indica a localidade atual.</p>
+      </td>
+    </tr>
+    <tr id="LayoutDirectionQualifier">
+      <td>Direção do layout</td>
+      <td><code>ldrtl</code><br/>
+        <code>ldltr</code><br/>
+      </td>
+      <td><p>A direção do layout do aplicativo. {@code ldrtl} significa "layout-direction-right-to-left" (direção do layout da direita para a esquerda).
+      {@code ldltr} significa "layout-direction-left-to-right" (direção do layout da esquerda para a direita) e é o valor implícito padrão.
+      </p>
+      <p>Isto pode aplicar-se a qualquer recurso, como layouts, desenháveis ou valores.
+      </p>
+      <p>Por exemplo, caso queira fornecer um layout específico para o idioma arábico e
+      layouts genéricos para outros idiomas que seguem a leitura da direita para a esquerda, como os idiomas hebreu e persa, então você teria:
+      </p>
+<pre class="classic no-pretty-print">
+res/
+    layout/   <span style="color:black">
+        main.xml  </span>(Default layout)
+    layout-ar/  <span style="color:black">
+        main.xml  </span>(Specific layout for Arabic)
+    layout-ldrtl/  <span style="color:black">
+        main.xml  </span>(Any "right-to-left" language, except
+                  for Arabic, because the "ar" language qualifier
+                  has a higher precedence.)
+</pre>
+        <p class="note"><strong>Observação:</strong> para ativar recursos de layout de leitura da direita para a esquerda
+        para o aplicativo, você deve definir <a href="{@docRoot}guide/topics/manifest/application-element.html#supportsrtl">{@code
+        supportsRtl}</a> como {@code "true"} e <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> como 17 ou maior.</p>
+        <p><em>Adicionado à API de nível 17.</em></p>
+      </td>
+    </tr>
+    <tr id="SmallestScreenWidthQualifier">
+      <td>smallestWidth</td>
+      <td><code>sw&lt;N&gt;dp</code><br/><br/>
+        Exemplos:<br/>
+        <code>sw320dp</code><br/>
+        <code>sw600dp</code><br/>
+        <code>sw720dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>O tamanho fundamental de uma tela, como indicado pela menor dimensão da área da tela
+disponível. Especificamente, o valor smallestWidth do dispositivo é o menor da altura e largura
+da tela (pode-se também interpretar isso como a "menor largura possível" da tela). É possível
+usar este qualificador para garantir que, independentemente da orientação atual da tela,
+o aplicativo tenha pelo menos {@code &lt;N&gt;} dps de largura disponível para a IU.</p>
+        <p>Por exemplo, se o seu layout exigir que a menor dimensão da área da tela seja de pelo menos
+600 dp, é possível usar o seguinte qualificador para criar os recursos do layout: {@code
+res/layout-sw600dp/}. O sistema usará esses recursos somente quando a menor dimensão
+da tela disponível for de pelo menos 600 dp, independentemente se o lado de 600 dp é a altura ou a largura
+percebida pelo usuário. O valor smallestWidth é uma característica fixa do tamanho da tela do dispositivo;<strong>o valor smallestWidth
+do dispositivo não altera quando a orientação da tela muda</strong>.</p>
+        <p>O smallestWidth de um dispositivo considera a IU do sistema e as decorações da tela. Por exemplo,
+se o dispositivo tiver alguns elementos de IU persistentes na tela que considera o espaço ao longo do eixo
+de smallestWidth, o sistema declara que smallestWidth é menor do que o tamanho
+atual da tela, pois são pixels de tela não disponíveis para a IU. Portanto, o valor usado
+deve ser a dimensão real menor <em>necessária para o layout</em> (geralmente, este valor
+é a "menor largura" compatível com o layout, independente da orientação atual da tela).</p>
+        <p>Alguns dos valores que você pode usar para tamanhos de tela comuns:</p>
+        <ul>
+          <li>320, para dispositivos com configurações de tela como:
+            <ul>
+              <li>240 x 320 ldpi (celular QVGA)</li>
+              <li>320 x 480 mdpi (celular)</li>
+              <li>480 x 800 hdpi (celular de alta densidade)</li>
+            </ul>
+          </li>
+          <li>480, para telas como 480 x 800 mdpi (tablet/celular).</li>
+          <li>600, para telas como 600 x 1024 mdpi (tablet de 7 polegadas).</li>
+          <li>720, para telas como 720 x 1280 mdpi (tablet de 10 polegadas).</li>
+        </ul>
+        <p>Quando o aplicativo fornece vários diretórios de recursos com valores diferentes
+          para o qualificador smallestWidth, o sistema usa o mais próximo (sem exceder) ao
+de smallestWidth do dispositivo. </p>
+        <p><em>Adicionado à API de nível 13.</em></p>
+        <p>Veja também o atributo <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html#requiresSmallest">{@code
+android:requiresSmallestWidthDp}</a>, que declara a smallestWidth mínima compatível
+com o aplicativo e o campo de configuração {@link
+android.content.res.Configuration#smallestScreenWidthDp}, que retém
+o valor de smallestWidth do dispositivo.</p>
+        <p>Para obter mais informações sobre como projetar para telas diferentes e usar
+este qualificador, consulte o guia do desenvolvedor <a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
+várias telas</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenWidthQualifier">
+      <td>Largura disponível</td>
+      <td><code>w&lt;N&gt;dp</code><br/><br/>
+        Exemplos:<br/>
+        <code>w720dp</code><br/>
+        <code>w1024dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>Especifica uma largura mínima disponível da tela, em unidades {@code dp} em que o recurso
+          deve ser usado &mdash; definido pelo valor <code>&lt;N&gt;</code>.  Este valor
+          de configuração mudará quando a orientação
+          alternar entre paisagem e retrato para corresponder à largura atual.</p>
+        <p>Quando o aplicativo fornece vários diretórios de recurso com valores diferentes
+          para esta configuração, o sistema usa o mais próximo (sem exceder)
+          da largura atual da tela do dispositivo.  O
+          valor aqui considera as decorações da tela. Portanto, se o dispositivo tiver alguns
+          elementos de IU persistentes na borda esquerda ou direita da tela, ele usa
+          um valor para a largura menor do que o tamanho atual da tela, considerando
+          esses elementos de IU e reduzindo o espaço disponível do aplicativo.</p>
+        <p><em>Adicionado à API de nível 13.</em></p>
+        <p>Veja também o campo de configuração {@link android.content.res.Configuration#screenWidthDp},
+          que possui a largura atual da tela.</p>
+        <p>Para obter mais informações sobre como projetar para telas diferentes e usar
+este qualificador, consulte o guia do desenvolvedor <a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
+várias telas</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenHeightQualifier">
+      <td>Altura disponível</td>
+      <td><code>h&lt;N&gt;dp</code><br/><br/>
+        Exemplos:<br/>
+        <code>h720dp</code><br/>
+        <code>h1024dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>Especifica uma altura mínima disponível da tela, em unidades "dp" em que o recurso
+          deve ser usado &mdash; definido pelo valor <code>&lt;N&gt;</code>.  Este valor
+          de configuração mudará quando a orientação
+          alternar entre paisagem e retrato para corresponder à altura atual.</p>
+        <p>Quando o aplicativo fornece vários diretórios de recursos com valores diferentes
+          para esta configuração, o sistema usa o mais próximo (sem exceder)
+          da altura atual da tela do dispositivo.  O
+          valor aqui considera as decorações da tela. Portanto, se o dispositivo tiver alguns
+          elementos de IU persistentes na borda superior ou inferior da tela, ele usa
+          um valor para a altura menor do que o tamanho atual da tela, considerando
+          esses elementos da IU e reduzindo o espaço disponível do aplicativo.  As decorações da tela
+          que não forem fixas (como uma barra de status do telefone que pode ser
+          ocultada com tela cheia) <em>não</em> são consideradas aqui, assim como
+          as decorações da janela, como a barra de título ou a barra de ação. Portanto, os aplicativos devem ser preparados para
+          lidar com o espaço um pouco menor do que especificam.
+        <p><em>Adicionado à API de nível 13.</em></p>
+        <p>Veja também o campo de configuração {@link android.content.res.Configuration#screenHeightDp},
+          que possui a largura atual da tela.</p>
+        <p>Para obter mais informações sobre como projetar para telas diferentes e usar
+este qualificador, consulte o guia do desenvolvedor <a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
+várias telas</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenSizeQualifier">
+      <td>Tamanho da tela</td>
+      <td>
+        <code>small</code><br/>
+        <code>normal</code><br/>
+        <code>large</code><br/>
+        <code>xlarge</code>
+      </td>
+      <td>
+        <ul class="nolist">
+        <li>{@code small}: Telas de tamanho semelhante
+        à tela de pouca densidade QVGA. O tamanho mínimo do layout para uma tela pequena
+        é de aproximadamente 320 x 426 unidades dp.  Exemplos são QVGA de pouca densidade e VGA de alta
+        densidade.</li>
+        <li>{@code normal}: Telas de tamanho semelhante
+        à tela de média densidade HVGA. O tamanho mínimo do layout para uma tela normal
+        é de aproximadamente 320 x 470 unidades dp.  Exemplos
+        de tais delas são as WQVGA de pouca densidade, HVGA de média densidade e WVGA
+        de alta densidade.</li>
+        <li>{@code large}: Telas de tamanho semelhante
+        à tela de média densidade VGA.
+        O tamanho mínimo do layout para uma tela grande é de aproximadamente 480 x 640 unidades dp.
+        Exemplos são as telas de densidade média VGA e WVGA.</li>
+        <li>{@code xlarge}: Telas que são consideravelmente maiores do que a
+        tela tradicional de média densidade HVGA. O tamanho mínimo do layout para uma tela muito grande
+        é de aproximadamente 720x960 unidades dp.  Na maioria dos casos, dispositivos com telas
+        muito grandes seriam grandes demais para serem carregados em bolsos e, provavelmente,
+        seriam dispositivos no estilo tablet. <em>Adicionado à API de nível 9.</em></li>
+        </ul>
+        <p class="note"><strong>Observação:</strong> usar um qualificador de tamanho não significa
+que os recursos sejam <em>apenas</em> para telas deste tamanho. Caso não forneça recursos
+alternativos com qualificadores que melhor correspondem à configuração atual do dispositivo, o sistema poderá usar
+quaisquer recursos que representarem a <a href="#BestMatch">melhor correspondência</a>.</p>
+        <p class="caution"><strong>Atenção:</strong> se todos os recursos usarem um qualificador de tamanho
+<em>maior</em> do que a tela atual, o sistema <strong>não</strong> os usará
+e o aplicativo apresentará um erro em tempo de execução (por exemplo, se todos os recursos de layout receberem tag com o qualificador {@code
+xlarge}, mas o dispositivo tiver uma tela de tamanho normal).</p>
+        <p><em>Adicionado à API de nível 4.</em></p>
+        
+        <p>Consulte <a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
+várias telas</a> para obter mais informações.</p>
+        <p>Consulte também o campo de configuração {@link android.content.res.Configuration#screenLayout},
+que indica se a tela é pequena, normal
+ou grande.</p>
+      </td>
+    </tr>
+    <tr id="ScreenAspectQualifier">
+      <td>Aspecto da tela</td>
+      <td>
+        <code>long</code><br/>
+        <code>notlong</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code long}: Telas grandes, como WQVGA, WVGA, FWVGA</li>
+          <li>{@code notlong}: Telas que não são grandes, como QVGA, HVGA e VGA</li>
+        </ul>
+        <p><em>Adicionado à API de nível 4.</em></p>
+        <p>Isto baseia-se puramente na relação de aspecto da tela (uma tela "grande" é mais larga). Isto
+não está relacionado à orientação da tela.</p>
+        <p>Consulte também o campo de configuração {@link android.content.res.Configuration#screenLayout},
+que indica se a tela é grande.</p>
+      </td>
+    </tr>
+    <tr id="OrientationQualifier">
+      <td>Orientação da tela</td>
+      <td>
+        <code>port</code><br/>
+        <code>land</code>  <!-- <br/>
+        <code>square</code>  -->
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code port}: O dispositivo está na orientação de retrato (vertical)</li>
+          <li>{@code land}: O dispositivo está na orientação de paisagem (horizontal)</li>
+          <!-- Square mode is currently not used. -->
+        </ul>
+        <p>Isto pode mudar durante a vida útil do aplicativo se o usuário girar
+a tela. Consulte <a href="runtime-changes.html">Tratamento de alterações em tempo de execução</a> para obter informações
+sobre como isto pode afetar o aplicativo em tempo de execução.</p>
+        <p>Veja também o campo de configuração {@link android.content.res.Configuration#orientation},
+que indica a orientação atual do dispositivo.</p>
+      </td>
+    </tr>
+    <tr id="UiModeQualifier">
+      <td>Modo de IU</td>
+      <td>
+        <code>car</code><br/>
+        <code>desk</code><br/>
+        <code>television</code><br/>
+        <code>appliance</code>
+        <code>watch</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code car}: O dispositivo está exibindo em uma estação de acoplamento de carro</li>
+          <li>{@code desk}: O dispositivo está exibindo em uma estação de acoplamento de mesa</li>
+          <li>{@code television}: O dispositivo está exibindo em uma televisão, fornecendo
+          uma experiência à distância, onde a IU é em tela grande,
+          o usuário está longe, orientado principalmente por um controle direcional ou por outro tipo de
+          interação sem indicador</li>
+          <li>{@code appliance}: O dispositivo está servindo como uma aplicação,
+          sem tela</li>
+          <li>{@code watch}: O dispositivo tem uma tela que é usada no braço</li>
+        </ul>
+        <p><em>Adicionado à API de nível 8, televisão adicionada à API de nível 13 e relógio adicionado à API de nível 20.</em></p>
+        <p>Para obter informações sobre como o aplicativo pode responder quando o dispositivo é inserido
+        ou removido de um dock, consulte <a href="{@docRoot}training/monitoring-device-state/docking-monitoring.html">Determinação
+e monitoramento do tipo e do estado do dock</a>.</p>
+        <p>Isto pode mudar durante a vida útil do aplicativo se o usuário colocar o dispositivo
+em um dock. É possível ativar ou desativar alguns desses modos usando {@link
+android.app.UiModeManager}. Consulte <a href="runtime-changes.html">Tratamento de alterações em tempo de execução</a> para obter informações
+sobre como isto pode afetar o aplicativo em tempo de execução.</p>
+      </td>
+    </tr>
+    <tr id="NightQualifier">
+      <td>Modo noturno</td>
+      <td>
+        <code>night</code><br/>
+        <code>notnight</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code night}: Noite</li>
+          <li>{@code notnight}: Dia</li>
+        </ul>
+        <p><em>Adicionado à API de nível 8.</em></p>
+        <p>Isto pode mudar durante a vida útil do aplicativo se o modo noturno for deixado
+no modo automático (padrão), em que o modo altera-se com base no horário.  É possível ativar
+ou desativar este modo usando {@link android.app.UiModeManager}. Consulte <a href="runtime-changes.html">Tratamento de alterações em tempo de execução</a> para obter informações
+sobre como isto pode afetar o aplicativo em tempo de execução.</p>
+      </td>
+    </tr>
+    <tr id="DensityQualifier">
+      <td>Densidade de pixel da tela (dpi)</td>
+      <td>
+        <code>ldpi</code><br/>
+        <code>mdpi</code><br/>
+        <code>hdpi</code><br/>
+        <code>xhdpi</code><br/>
+        <code>xxhdpi</code><br/>
+        <code>xxxhdpi</code><br/>
+        <code>nodpi</code><br/>
+        <code>tvdpi</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code ldpi}: Telas de pouca densidade, aproximadamente 120 dpi.</li>
+          <li>{@code mdpi}: Telas de média densidade (em HVGA tradicional); aproximadamente
+160 dpi.</li>
+          <li>{@code hdpi}: Telas de alta densidade, aproximadamente 240 dpi.</li>
+          <li>{@code xhdpi}: Telas de densidade extra-alta, aproximadamente 320 dpi. <em>Adicionado à API de
+nível 8</em></li>
+          <li>{@code xxhdpi}: Telas de densidade extra-extra-alta, aproximadamente 480 dpi. <em>Adicionado à API de
+nível 16</em></li>
+          <li>{@code xxxhdpi}: Usos de densidade extra-extra-extra-alta (somente ícone do inicializador, consulte a 
+            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">observação</a> 
+            em <em>Compatibilidade com várias telas</em>), aproximadamente 640 dpi. <em>Adicionado à API de
+nível 18</em></li>
+          <li>{@code nodpi}: Isto pode ser usado para recursos de bitmap que você não deseja dimensionar
+para corresponder à densidade do dispositivo.</li>
+          <li>{@code tvdpi}: Telas entre mdpi e hdpi, aproximadamente 213 dpi. Não é considerado
+um grupo de densidade "principal". Geralmente usado para televisões
+e a maioria dos aplicativos não precisam &mdash; fornecer recursos mdpi e hdpi é o suficiente para a maioria dos aplicativos
+e o sistema dimensionará de forma adequada. Este qualificador foi introduzido com a API de nível 13.</li>
+        </ul>
+        <p>Há uma razão de dimensionamento de 3:4:6:8:12:16 entre as seis densidades principais (ignorando
+a densidade tvdpi). Então, um bitmap de 9 x 9 em ldpi é 12 x 12 em mdpi, 18 x 18 em hdpi, 24 x 24 em xhdpi e por aí em diante.
+</p>
+        <p>Caso decida que os recursos de imagem não parecem suficientemente bons para uma televisão
+ou outros dispositivos e queira testar recursos tvdpi, o fator de dimensionamento é 1,33*mdpi. Por exemplo:
+uma imagem de 100 px x 100 px para telas mdpi deve ser de 133 px x 133 px para tvdpi.</p>
+        <p class="note"><strong>Observação:</strong> usar um qualificador de densidade não significa
+que os recursos sejam <em>apenas</em> para telas desta densidade. Caso não forneça recursos
+alternativos com qualificadores que melhor correspondem à configuração atual do dispositivo, o sistema poderá usar
+quaisquer recursos que representarem a <a href="#BestMatch">melhor correspondência</a>.</p>
+        <p>Consulte <a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
+várias telas</a> para obter mais informações sobre como lidar com as diferentes densidades de tela e como o Android
+pode dimensionar os bitmaps para encaixá-los na densidade atual.</p>
+       </td>
+    </tr>
+    <tr id="TouchscreenQualifier">
+      <td>Tipo de tela sensível ao toque</td>
+      <td>
+        <code>notouch</code><br/>
+        <code>finger</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code notouch}: Os dispositivos não têm uma tela sensível ao toque.</li>
+          <li>{@code finger}: O dispositivo tem uma tela sensível ao toque que destina-se
+          à interação direcional do dedo do usuário.</li>
+        </ul>
+        <p>Veja também o campo de configuração {@link android.content.res.Configuration#touchscreen},
+que indica o tipo de tela sensível ao toque no dispositivo.</p>
+      </td>
+    </tr>
+    <tr id="KeyboardAvailQualifier">
+      <td>Disponibilidade de teclado</td>
+      <td>
+        <code>keysexposed</code><br/>
+        <code>keyshidden</code><br/>
+        <code>keyssoft</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code keysexposed}: O dispositivo tem um teclado disponível. Se o dispositivo tiver um teclado de software
+ativo (o que é provável), ele deve ser usado mesmo quando o teclado de hardware
+<em>não</em> estiver exposto ao usuário, mesmo se o dispositivo não tiver teclado de hardware. Caso nenhum teclado de software
+seja fornecido ou esteja desativado, então isto será usado apenas quando um teclado de hardware
+for exposto.</li>
+          <li>{@code keyshidden}: O dispositivo tem um teclado de hardware disponível,
+mas está oculto <em>e</em> o dispositivo <em>não</em> tem um teclado de software ativo.</li>
+          <li>{@code keyssoft}: O dispositivo tem um teclado de software ativo,
+visível ou não.</li>
+        </ul>
+        <p>Se você fornecer os recursos <code>keysexposed</code>, mas não os recursos <code>keyssoft</code>,
+ o sistema usará os recursos <code>keysexposed</code> independente da visibilidade
+do teclado, contanto que o sistema tenha um teclado de software ativo.</p>
+        <p>Isto pode mudar durante a vida útil do aplicativo se o usuário abrir um teclado
+de hardware. Consulte <a href="runtime-changes.html">Tratamento de alterações em tempo de execução</a> para obter informações
+sobre como isto pode afetar o aplicativo em tempo de execução.</p>
+        <p>Veja também os campos de configuração {@link
+android.content.res.Configuration#hardKeyboardHidden} e {@link
+android.content.res.Configuration#keyboardHidden}, que indicam a visibilidade de um teclado de hardware
+e a visibilidade de qualquer tipo de teclado (incluindo software), respectivamente.</p>
+      </td>
+    </tr>
+    <tr id="ImeQualifier">
+      <td>Método principal de entrada de texto</td>
+      <td>
+        <code>nokeys</code><br/>
+        <code>qwerty</code><br/>
+        <code>12key</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nokeys}: O dispositivo não tem teclas de hardware para entradas de texto.</li>
+          <li>{@code qwerty}: O dispositivo tem um teclado QWERTY de hardware, esteja ele visível ao
+usuário
+ou não.</li>
+          <li>{@code 12key}: O dispositivo tem um teclado de hardware de 12 teclas, esteja ele visível ao usuário
+ou não.</li>
+        </ul>
+        <p>Veja também o campo de configuração {@link android.content.res.Configuration#keyboard},
+que indica o método de entrada de texto principal disponível.</p>
+      </td>
+    </tr>
+    <tr id="NavAvailQualifier">
+      <td>Disponibilidade da chave de navegação</td>
+      <td>
+        <code>navexposed</code><br/>
+        <code>navhidden</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code navexposed}: As teclas de navegação estão disponíveis para o usuário.</li>
+          <li>{@code navhidden}: As teclas de navegação não estão disponíveis (como as que ficam atrás
+de uma tampa fechada).</li>
+        </ul>
+        <p>Isto pode mudar durante a vida útil do aplicativo se o usuário revelar
+as teclas de navegação. Consulte <a href="runtime-changes.html">Tratamento de alterações em tempo de execução</a> para obter informações
+sobre como isto pode afetar o aplicativo em tempo de execução.</p>
+        <p>Consulte também o campo de configuração {@link android.content.res.Configuration#navigationHidden},
+que indica se as teclas de navegação estão ocultas.</p>
+      </td>
+    </tr>
+    <tr id="NavigationQualifier">
+      <td>Método principal de navegação sem toque</td>
+      <td>
+        <code>nonav</code><br/>
+        <code>dpad</code><br/>
+        <code>trackball</code><br/>
+        <code>wheel</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nonav}: O dispositivo não tem recursos de navegação além
+da tela sensível ao toque.</li>
+          <li>{@code dpad}: O dispositivo tem um teclado direcional (d-pad) para navegação.</li>
+          <li>{@code trackball}: O dispositivo tem um cursor de bola para navegação.</li>
+          <li>{@code wheel}: O dispositivo tem rodas direcionais para navegação (incomum).</li>
+        </ul>
+        <p>Veja também o campo de configuração {@link android.content.res.Configuration#navigation},
+que indica o tipo de método de navegação disponível.</p>
+      </td>
+    </tr>
+<!-- DEPRECATED
+    <tr>
+      <td>Screen dimensions</td>
+      <td>Examples:<br/>
+        <code>320x240</code><br/>
+        <code>640x480</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>The larger dimension must be specified first. <strong>This configuration is deprecated
+and should not be used</strong>. Instead use "screen size," "wider/taller screens," and "screen
+orientation" described above.</p>
+      </td>
+    </tr>
+-->
+    <tr id="VersionQualifier">
+      <td>Versão da plataforma (nível de API)</td>
+      <td>Exemplos:<br/>
+        <code>v3</code><br/>
+        <code>v4</code><br/>
+        <code>v7</code><br/>
+        etc.</td>
+      <td>
+        <p>O nível de API suportado pelo dispositivo. Por exemplo, <code>v1</code> para a API de nível 1
+(dispositivos com Android 1.0 ou mais recente) e <code>v4</code> para API de nível 4 (dispositivos com Android
+1.6 ou mais recente). Veja o documento <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Níveis de API do Android</a> para obter mais informações
+sobre esses valores.</p>
+      </td>
+    </tr>
+</table>
+
+
+<p class="note"><strong>Observação:</strong> alguns qualificadores de configuração foram adicionados desde o Android 1.0,
+ então nem todas as versões do Android suportam todos eles. Usar um novo qualificador
+adiciona implicitamente um qualificador da versão de plataforma, então dispositivos mais antigos com certeza o ignorarão. Por exemplo, usar
+um qualificador <code>w600dp</code> incluirá automaticamente o qualificador <code>v13</code>,
+pois o qualificador de largura disponível era novo na API de nível 13. Para evitar quaisquer problemas, sempre inclua um conjunto
+de recursos padrão (um conjunto de recursos <em>sem qualificadores</em>). Para obter mais informações, consulte
+a seção <a href="#Compatibility">Fornecimento da melhor compatibilidade de dispositivo com
+recursos</a>.</p>
+
+
+
+<h3 id="QualifierRules">Regras de nome do qualificador</h3>
+
+<p>A seguir há algumas regras sobre como usar nomes de qualificador de configuração:</p>
+
+<ul>
+    <li>É possível especificar vários qualificadores para um único conjunto de recursos, separados por travessões. Por exemplo,
+<code>drawable-en-rUS-land</code> aplica-se aos dispositivos em inglês dos E.U.A.
+na orientação de paisagem.</li>
+    <li>Os qualificador devem estar na ordem listada na <a href="#table2">tabela 2</a>. Por
+exemplo:
+      <ul>
+        <li>Incorreto: <code>drawable-hdpi-port/</code></li>
+        <li>Correto: <code>drawable-port-hdpi/</code></li>
+      </ul>
+    </li>
+    <li>Os diretórios de recursos alternativos não podem ser aninhados. Por exemplo, não é possível ter
+<code>res/drawable/drawable-en/</code>.</li>
+    <li>Os valores não diferenciam letras maiúsculas e minúsculas.  O compilador de recursos converte nomes de diretório
+    para letras minúsculas antes de processar para evitar problemas nos sistemas de arquivo
+    que não diferenciam maiúsculas e minúsculas. Qualquer letra maiúscula nos nomes é apenas para o benefício da leitura.</li>
+    <li>Somente um valor para cada tipo de qualificador é suportado. Por exemplo, se quiser usar
+os mesmos arquivos desenháveis para Espanha e França, <em>não</em> é possível ter um diretório chamado 
+<code>drawable-rES-rFR/</code>. Em vez disso, você precisa de dois diretórios de recursos, como
+<code>drawable-rES/</code> e <code>drawable-rFR/</code>, que contenham arquivos adequados.
+No entanto, não é necessário duplicar os mesmos arquivos em ambos os locais. Em vez disso,
+é possível criar um alias para um recurso. Consulte <a href="#AliasResources">Criação de recursos
+de alias</a> abaixo.</li>
+</ul>
+
+<p>Após salvar os recursos alternativos nos diretórios nomeados
+com esses qualificadores, o Android aplicará automaticamente os recursos no aplicativo com base
+na configuração atual do dispositivo. Sempre que um recurso for solicitado, o Android verificará diretórios de recursos alternativos
+que contenham o arquivo de recurso solicitado e, em seguida,<a href="#BestMatch">encontrará o melhor
+recurso correspondente</a> (discutido abaixo). Se não houver recursos alternativos que correspondam
+a uma configuração de dispositivo específica, o Android usará os recursos padrão correspondentes
+(o conjunto de recursos para um tipo de recurso específico que não inclua um qualificador
+de configuração).</p>
+
+
+
+<h3 id="AliasResources">Criação de recursos de alias</h3>
+
+<p>Quando estiver com um recurso que gostaria de usar para mais
+de uma configuração de dispositivo, mas não quer fornecê-lo como um recurso padrão), não será necessário usar o mesmo
+recurso em mais de um diretório de recursos alternativos. Em vez disso, é possível (em alguns casos) criar um
+recurso
+alternativo que age como um alias para um recurso salvo no diretório de recurso padrão.</p>
+
+<p class="note"><strong>Observação:</strong> nem todos os recursos oferecem um mecanismo que possibilita
+criar um alias para outro recurso. Em particular, recursos de animação, de menu, brutos
+e de outros tipos no diretório {@code xml/} não oferecem esta função.</p>
+
+<p>Por exemplo, imagine que você possui um ícone do aplicativo, {@code icon.png}, e precisa da versão exclusiva
+para diferentes localidades. No entanto, duas localidades, inglês canadense e francês canadense,
+precisam usar a mesma versão. Você pode presumir que precisa copiar a mesma imagem
+para o diretório do recurso do inglês canadense e do francês canadense,
+mas não é verdade. Em vez disso, é possível salvar a imagem que é usada para ambos como {@code icon_ca.png} (qualquer
+nome que não seja {@code icon.png}) e colocá-la
+no diretório {@code res/drawable/} padrão. Em seguida, crie um arquivo {@code icon.xml} em {@code
+res/drawable-en-rCA/} e em {@code res/drawable-fr-rCA/} que mencione o recurso {@code icon_ca.png}
+usando o elemento {@code &lt;bitmap&gt;}. Isto permite que você armazene apenas uma versão do arquivo
+PNG e dois arquivos XML pequenos que apontam para ele. (Um exemplo de arquivo XML é exibido abaixo)</p>
+
+
+<h4>Desenhável</h4>
+
+<p>Para criar um alias para um desenhável existente, use o elemento {@code &lt;bitmap&gt;}.
+Por exemplo:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/icon_ca" />
+</pre>
+
+<p>Se salvar esse arquivo como {@code icon.xml} (em um diretório de recursos alternativos,
+como {@code res/drawable-en-rCA/}), ele será compilado em um recurso
+que pode ser mencionado como {@code R.drawable.icon}, mas é um alias para o recurso {@code
+R.drawable.icon_ca}, que é salvo em{@code res/drawable/}.</p>
+
+
+<h4>Layout</h4>
+
+<p>Para criar um alias para um layout existente, use o elemento {@code &lt;include&gt;}
+, agrupado em um {@code &lt;merge&gt;}. Por exemplo:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;merge>
+    &lt;include layout="@layout/main_ltr"/>
+&lt;/merge>
+</pre>
+
+<p>Se salvar esse arquivo como {@code main.xml}, ele será compilado em um recurso
+que pode ser mencionado como {@code R.layout.main}, mas é um alias para o recurso {@code R.layout.main_ltr}
+.</p>
+
+
+<h4>Strings e outros valores simples</h4>
+
+<p>Para criar um alias para uma string existente, basta usar o ID de recurso da string
+desejado como o valor para a nova string. Por exemplo:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello">Hello&lt;/string>
+    &lt;string name="hi">@string/hello&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>O recurso {@code R.string.hi} é agora um alias para {@code R.string.hello}.</p>
+
+<p> <a href="{@docRoot}guide/topics/resources/more-resources.html">Outros valores simples</a> funcionam
+da mesma forma. Por exemplo, uma cor:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;color name="yellow">#f00&lt;/color>
+    &lt;color name="highlight">@color/red&lt;/color>
+&lt;/resources>
+</pre>
+
+
+
+
+<h2 id="Compatibility">Fornecimento da melhor compatibilidade de dispositivo com recursos</h2>
+
+<p>Para o aplicativo suportar várias configurações de dispositivo, é muito importante
+que você sempre forneça recursos padrão para cada tipo de recurso que o aplicativo usar.</p>
+
+<p>Por exemplo, se o aplicativo suportar vários idiomas, sempre inclua um diretório {@code
+values/} (em que as strings sejam salvas) <em>sem</em> um <a href="#LocaleQualifier">qualificador de região e idioma</a>. Se colocar todos os arquivos de string
+em diretórios que têm qualificadores de região e idioma, o aplicativo apresentará erros ao entrar em execução
+em dispositivo configurado para um idioma que as strings não suportem. Mas, contanto que você forneça recursos
+{@code values/} padrão, o aplicativo será executado sem problemas (mesmo que o usuário
+não entenda o idioma &mdash; é melhor do que apresentar erros).</p>
+
+<p>Do mesmo modo, se você fornecer recursos de layout diferentes com base na orientação da tela, deve
+escolher uma orientação como a padrão. Por exemplo, em vez de fornecer recursos de layout em {@code
+layout-land/} para paisagem e {@code layout-port/} para retrato, deixe uma como padrão, como
+{@code layout/} para paisagem e {@code layout-port/} para retrato.</p>
+
+<p>Fornecer recursos padrão é importante não só porque o aplicativo pode ser executado
+em uma configuração que você não tenha antecipado, mas também as novas versões do Android, às vezes, adicionam
+qualificadores de configuração que as versões mais antigas não suportam. Se usar um novo qualificador de recurso,
+mas mantiver a compatibilidade do código com versões mais antigas do Android, quando uma versão mais antiga
+do Android executar seu aplicativo, ocorrerá um erro caso você não forneça os recursos padrão, pois ele
+não poderá usar os recursos nomeados com o novo qualificador. Por exemplo, se <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+minSdkVersion}</a> estiver definido como 4 e você qualificar todos os recursos desenháveis usando o <a href="#NightQualifier">modo noturno</a> ({@code night} ou {@code notnight}, que foram adicionados à API de nível 8),
+então o dispositivo com API de nível 4 não poderá acessar os recursos desenháveis e apresentará erro. Neste caso,
+você provavelmente quererá que {@code notnight} seja o recurso padrão, então deverá excluir esse qualificador
+para que os recursos desenháveis fiquem em {@code drawable/} ou {@code drawable-night/}.</p>
+
+<p>Então, para fornecer a melhor compatibilidade de dispositivo, sempre forneça os recursos
+padrão para os recursos imprescindíveis para o aplicativo para obter o desempenho adequado. Em seguida,
+crie recursos para configurações específicas de dispositivo usando os qualificadores de configuração.</p>
+
+<p>Há uma exceção a esta regra: Se a <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> do aplicativo for 4
+ou maior, você <em>não</em> precisará de recursos desenháveis padrão ao fornecer recursos desenháveis alternativos
+com o qualificador de <a href="#DensityQualifier">densidade da tela</a>. Mesmo sem os recursos desenháveis
+padrão, o Android poderá encontrar a melhor correspondência dentre as densidades de tela alternativas e dimensionar
+os bitmaps conforme necessário. No entanto, para obter a melhor experiência em todos os tipos de dispositivo,
+você deve fornecer desenháveis alternativos para todos os três tipos de densidade.</p>
+
+
+
+<h2 id="BestMatch">Como o Android encontra o melhor recurso correspondente</h2>
+
+<p>Ao solicitar um recurso para o qual você fornece alternativas, o Android seleciona
+quais recursos alternativos usar em tempo de execução, dependendo da configuração do dispositivo atual. Para demonstrar
+como o Android seleciona um recurso alternativo, presuma que os seguintes diretórios desenháveis
+contenham versões diferentes das mesmas imagens:</p>
+
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+drawable-fr-rCA/
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+
+<p>E presuma que a configuração do dispositivo é a seguinte:</p>
+
+<p style="margin-left:1em;">
+Localidade = <code>en-GB</code> <br/>
+Orientação da tela = <code>port</code> <br/>
+Densidade de pixel da tela = <code>hdpi</code> <br/>
+Tipo de tela sensível ao toque = <code>notouch</code> <br/>
+Método principal de entrada de texto = <code>12key</code>
+</p>
+
+<p>Ao comparar a configuração do dispositivo com os recursos alternativos disponíveis, o Android seleciona
+desenháveis de {@code drawable-en-port}.</p>
+
+<p>O sistema chega à conclusão de quais recursos deve usar
+com a seguinte lógica:</p>
+
+
+<div class="figure" style="width:371px">
+<img src="{@docRoot}images/resources/res-selection-flowchart.png" alt="" height="471" />
+<p class="img-caption"><strong>Figura 2.</strong> Fluxograma de como o Android
+encontra o melhor recurso correspondente.</p>
+</div>
+
+
+<ol>
+  <li>Elimine os arquivos de recurso que contradizem a configuração do dispositivo.
+    <p>O diretório <code>drawable-fr-rCA/</code> é eliminado,
+pois contradiz a localidade <code>en-GB</code>.</p>
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+<strike>drawable-fr-rCA/</strike>
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+<p class="note"><strong>Exceção:</strong> a densidade de pixel da tela é a que o qualificador
+não eliminou devido a uma contradição. Apesar de a densidade da tela do dispositivo ser hdpi,
+<code>drawable-port-ldpi/</code> não é eliminado, pois todas as densidades de telas
+são consideradas uma correspondência neste ponto. Obtenha mais informações no documento <a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
+várias telas</a>.</p></li>
+
+  <li>Escolha o (próximo) qualificador de maior precedência na lista (<a href="#table2">tabela 2</a>).
+(Comece com MCC e, em seguida, siga para baixo.) </li>
+  <li>Algum dos diretórios de recurso incluem este qualificador?  </li>
+    <ul>
+      <li>Se não, volte à etapa 2 e veja o próximo qualificador. (Neste exemplo,
+  a resposta é "não" até que o qualificador de idioma seja alcançado.)</li>
+      <li>Se sim, prossiga para a etapa 4.</li>
+    </ul>
+  </li>
+
+  <li>Elimine os diretórios de recurso que não incluem este qualificador. No exemplo, o sistema
+elimina todos os diretórios que não incluem um qualificador de idioma:</li>
+<pre class="classic no-pretty-print">
+<strike>drawable/</strike>
+drawable-en/
+drawable-en-port/
+drawable-en-notouch-12key/
+<strike>drawable-port-ldpi/</strike>
+<strike>drawable-port-notouch-12key/</strike>
+</pre>
+<p class="note"><strong>Exceção:</strong> se o qualificador em questão for a densidade de pixel da tensidade da tela
+do dispositivo de forma mais aproximada.
+Geralmente, o Android prefere dimensionar uma imagem original maior
+em vez de uma maior. Consulte <a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
+várias telas</a>.</p>
+  </li>
+
+  <li>Volte e repita as etapas 2, 3 e 4 até que reste apenas um diretório. No exemplo, a orientação da tela
+é o próximo qualificador, onde há várias correspondências.
+Portanto, os recursos que não especificarem uma orientação de tela serão eliminados:
+<pre class="classic no-pretty-print">
+<strike>drawable-en/</strike>
+drawable-en-port/
+<strike>drawable-en-notouch-12key/</strike>
+</pre>
+<p>O diretório restante é {@code drawable-en-port}.</p>
+  </li>
+</ol>
+
+<p>Apesar de este processo ser executado para cada recurso solicitado, o sistema posteriormente aprimora
+alguns aspectos. Tal otimização, quando a configuração do dispositivo é conhecida,
+pode eliminar os recursos alternativos que nunca correspondem. Por exemplo, se o idioma
+da configuração for inglês ("en"), então qualquer diretório de recurso que tiver um qualificador de idioma definido para
+outro idioma que não seja inglês nunca será incluído no conjunto de recursos verificados (apesar de um
+diretório de recursos <em>sem</em> o qualificador de idioma ainda ser incluído).</p>
+
+<p>Ao selecionar os recursos com base nos qualificadores de tamanho da tela, o sistema usará os recursos
+projetados para uma tela menor do que a tela atual, caso não tenha recursos que correspondam de forma mais eficaz
+(por exemplo: uma tela de tamanho grande usará os recursos de tela de tamanho normal se necessário). No entanto,
+se os únicos recursos disponíveis forem <em>maiores</em> do que a tela atual, o sistema
+<strong>não</strong> os usará e o aplicativo apresentará erros se nenhum outro recurso corresponder à configuração
+do dispositivo (por exemplo, se todos os recursos de layout estiverem com a tag do qualificador {@code xlarge},
+mas o dispositivo tiver uma tela de tamanho normal).</p>
+
+<p class="note"><strong>Observação:</strong> a <em>precedência</em> do qualificador (na <a href="#table2">tabela 2</a>) é mais importante
+do que o número de qualificadores que correspondem exatamente ao dispositivo. Por exemplo, na etapa 4 acima, a última
+escolha na lista inclui três qualificadores que correspondem exatamente ao dispositivo (orientação, tipo de
+tela sensível ao toque e método de entrada), enquanto que <code>drawable-en</code> possui apenas um parâmetro que corresponde
+(idioma). No entanto, o idioma tem uma precedência maior que esses outros qualificadores, então 
+<code>drawable-port-notouch-12key</code> está fora.</p>
+
+<p>Para obter mais informações sobre como usar os recursos no aplicativo, acesse <a href="accessing-resources.html">Acesso aos recursos</a>.</p>

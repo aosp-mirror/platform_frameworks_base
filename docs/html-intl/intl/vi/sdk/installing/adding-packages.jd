@@ -1,0 +1,227 @@
+page.title=Thêm Gói SDK
+
+page.tags=trình quản lý sdk
+helpoutsWidget=true
+
+@jd:body
+
+<style>
+ol.large {
+  margin-left:0;
+}
+ol.large > li {
+  list-style-position: inside;
+  list-style-type:none;
+  margin:30px 0 0 0;
+  padding:30px 20px;
+  background:#eee;
+}
+ol.large > li:nth-child(odd) {
+}
+ol.large > li:before {
+  display:inline;
+  left:-40px;
+  float:left;
+  width:20px;
+  font-size:20px;
+  line-height:20px;
+}
+ol.large > li > h2 {
+  font-size:20px;
+  line-height:20px;
+  padding:0 0 0 20px;
+  margin:0 0 20px 0;
+  display:inline-block;
+  font-weight:normal;
+}
+ol.large > li:nth-child(1):before {
+  content:"1. ";
+}
+ol.large > li:nth-child(2):before {
+  content:"2. ";
+}
+ol.large > li:nth-child(3):before {
+  content:"3. ";
+}
+ol.large > li:nth-child(4):before {
+  content:"4. ";
+}
+ol.large > li:nth-child(5):before {
+  content:"5. ";
+}
+ol.large > li:nth-child(6):before {
+  content:"6. ";
+}
+</style>
+
+
+<p>
+Theo mặc định, SDK Android không bao gồm mọi thứ bạn cần để bắt đầu phát triển.
+SDK chia những công cụ, nền tảng và các thành phần khác vào các gói mà bạn có thể
+tải xuống nếu cần bằng cách sử dụng
+<a href="{@docRoot}tools/help/sdk-manager.html">Trình quản lý SDK Android</a>.
+Vì vậy, trước khi có thể bắt đầu, có một vài gói bạn nên thêm vào SDK Android của mình.</p>
+
+<p>Để bắt đầu thêm gói, hãy khởi chạy Trình quản lý SDK Android bằng một trong những cách sau:</p>
+<ul>
+  <li>Trong Android Studio, nhấp vào <strong>Trình quản lý SDK</strong>
+<img src="{@docRoot}images/tools/sdk-manager-studio.png" style="vertical-align:bottom;margin:0;height:17px" /> ở thanh công cụ.</li>
+  <li>Nếu bạn không đang sử dụng Android Studio:
+    <ul>
+      <li>Windows: Bấm đúp tệp <code>SDK Manager.exe</code> ở gốc của thư mục SDK
+  Android.</li>
+      <li>Mac/Linux: Mở một terminal và điều hướng đến thư mục <code>tools/</code> ở vị trí
+      nơi cài đặt SDK Android, rồi chạy <code>android sdk</code>.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Khi bạn mở Trình quản lý SDK lần đầu, một vài gói sẽ được chọn
+theo mặc định. Để nguyên những gói được chọn này, nhưng hãy chắc chắn bạn có mọi thứ mình cần
+để bắt đầu bằng cách làm theo những bước sau:</p>
+
+
+<ol class="large">
+<li>
+  <h2 id="GetTools" class="norule">Tải công cụ SDK mới nhất</h2>
+
+<img src="/images/sdk_manager_packages.png" alt="" width="350" style="float:right;margin-left:20px" />
+
+  <p>Tối thiểu khi thiết đặt SDK Android,
+  bạn nên tải xuống những công cụ và nền tảng Android mới nhất:</p>
+  <ol>
+   <li>Mở thư mục Tools và chọn:
+     <ul>
+       <li><strong>Công cụ SDK Android</strong></li>
+       <li><strong>Công cụ Nền tảng SDK Android</strong></li>
+       <li><strong>Công cụ Xây dựng SDK Android</strong> (phiên bản mới nhất)</li>
+     </ul>
+   </li>
+   <li>Mở thư mục Android X.X đầu tiên (phiên bản mới nhất) và chọn:
+     <ul>
+      <li><strong>Nền tảng SDK</strong></li>
+      <li>Một ảnh hệ thống cho trình mô phỏng, chẳng hạn như <br>
+      <strong>Ảnh Hệ thống ARM EABI v7a</strong></li>
+     </ul>
+   </li>
+  </ol>
+</li>
+
+<li>
+  <h2 id="GetSupportLib" class="norule">Tải thư viện hỗ trợ cho các API bổ sung</h2>
+
+  <div class="sidebox">
+    <p>Phải có thư viện hỗ trợ đối với:</p>
+    <ul>
+      <li><a href="{@docRoot}wear/index.html">Android Wear</a></li>
+      <li><a href="{@docRoot}tv/index.html">Android TV</a></li>
+      <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
+    </ul>
+
+    <p>Nó cũng cung cấp những API phổ biến sau:</p>
+    <ul>
+      <li><a href="{@docRoot}reference/android/support/v4/widget/DrawerLayout.html">Ngăn kéo
+      điều hướng</a></li>
+      <li><a href="{@docRoot}reference/android/support/v4/view/ViewPager.html">Chế độ xem trượt nhanh</a></li>
+      <li><a href="{@docRoot}reference/android/support/v7/app/ActionBar.html">Thanh hành động
+      tương thích ngược</a></li>
+    </ul>
+  </div>
+
+  <p><a href="{@docRoot}tools/support-library/features.html">Thư viện Hỗ trợ Android</a>
+  cung cấp một tập API mở rộng tương thích với hầu hết các phiên bản của Android.</p>
+
+  <p>Mở thư mục <strong>Extras</strong> và chọn:</p>
+     <ul>
+       <li><strong>Kho Hỗ trợ Android</strong></li>
+       <li><strong>Thư viện Hỗ trợ Android</strong></li>
+     </ul>
+
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+
+</li>
+
+
+<li>
+  <h2 id="GetGoogle" class="norule">Tải dịch vụ Google Play để có nhiều API hơn nữa</h2>
+
+  <div class="sidebox">
+
+    <p>Các API dịch vụ Google Play sẽ cung cấp nhiều tính năng và dịch vụ cho các ứng dụng Android
+    của bạn, chẳng hạn như:</p>
+    <ul>
+      <li><a href="{@docRoot}google/play-services/plus.html">Xác thực người dùng</a></li>
+      <li><a href="{@docRoot}google/play-services/maps.html">Google Maps</a></li>
+      <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
+      <li><a href="{@docRoot}google/play-services/games.html">Thành tích và bảng xếp hạng
+      trò chơi</a></li>
+      <li><a href="{@docRoot}google/play-services/index.html">Và nhiều hơn nữa</a></li>
+    </ul>
+  </div>
+
+  <p>Để phát triển bằng các API của Google, bạn cần gói dịch vụ Google Play.</p>
+  <p>Mở thư mục <strong>Extras</strong> và chọn:</p>
+     <ul>
+       <li><strong>Kho Google</strong></li>
+       <li><strong>Dịch vụ Google Play</strong></li>
+     </ul>
+
+  <p class="note"><strong>Lưu ý:</strong> Các API dịch vụ Google Play không có sẵn trên tất cả
+  thiết bị dựa trên nền tảng Android, nhưng có sẵn trên tất cả thiết bị có Google Play Store. Để sử dụng những
+  API này trong trình mô phỏng Android, bạn cũng phải cài đặt ảnh hệ thống <strong>Google API</strong>
+  từ thư mục Android X.X mới nhất trong Trình quản lý SDK.</p>
+</li>
+
+
+<li>
+  <h2 id="Install" class="norule">Cài đặt gói</h2>
+  <p>Sau khi bạn đã chọn tất cả gói mong muốn, hãy tiếp tục cài đặt:</p>
+  <ol>
+   <li>Bấm <strong>Cài đặt X gói</strong>.</li>
+   <li>Trong cửa sổ tiếp theo, bấm đúp vào tên của từng gói ở bên trái
+   để chấp nhận thỏa thuận cấp phép cho từng gói.</li>
+   <li>Bấm <strong>Cài đặt</strong>.</li>
+  </ol>
+  <p>Tiến trình tải xuống được hiện ở dưới cùng của cửa sổ Trình quản lý SDK.
+  <strong>Không được thoát Trình quản lý SDK</strong> nếu không nó sẽ hủy bỏ việc tải xuống.</p>
+</li>
+
+<li>
+  <h2 id="Build" class="norule">Xây dựng một thứ gì đó!</h2>
+
+<p>Với những gói trên có trong SDK Android của bạn, giờ bạn đã sẵn sàng để xây dựng ứng dụng
+cho Android. Khi có sẵn các công cụ mới và API khác, chỉ cần khởi chạy Trình quản lý SDK
+  để tải xuống các gói mới cho SDK của bạn.</p>
+
+<p>Sau đây là một vài tùy chọn về cách bạn nên tiến hành:</p>
+
+<div class="cols" style="padding:10px 0">
+<div class="col-4">
+<h3>Bắt đầu</h3>
+<p>Nếu bạn mới làm quen với phát triển Android, hãy tìm hiểu những nội dung cơ bản của ứng dụng Androi bằng cách làm theo
+hướng dẫn <strong><a href="{@docRoot}training/basics/firstapp/index.html">Xây dựng Ứng dụng Đầu tiên của bạn</a></strong>.</p>
+
+</div>
+<div class="col-4 box">
+<h3>Xây dựng cho thiết bị đeo được</h3>
+<p>Nếu bạn sẵn sàng bắt đầu xây dựng ứng dụng cho thiết bị đeo được Android, hãy xem hướng dẫn
+<strong><a href="{@docRoot}wear/preview/start.html">Xây dựng Ứng dụng cho Android Wear</a></strong>.</p>
+
+</div>
+<div class="col-4 box">
+<h3>Sử dụng API của Google</h3>
+<p>Để bắt đầu sử dụng các API của Google, chẳng hạn như các dịch vụ Bản đồ hoặc
+Chơi Trò chơi, hãy xem hướng dẫn
+<strong><a href="{@docRoot}google/play-services/setup.html">Thiết đặt Dịch vụ Google Play
+</a></strong>.</p>
+
+</div>
+</div><!-- end cols -->
+
+
+</li>
+
+</ol>
+
+

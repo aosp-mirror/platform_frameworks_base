@@ -1,0 +1,813 @@
+page.title=Службы
+@jd:body
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>Содержание документа</h2>
+<ol>
+<li><a href="#Basics">Основы</a></li>
+<ol>
+  <li><a href="#Declaring">Объявление службы в манифесте</a></li>
+</ol>
+<li><a href="#CreatingAService">Создание запущенной службы</a>
+  <ol>
+    <li><a href="#ExtendingIntentService">Наследование класса IntentService</a></li>
+    <li><a href="#ExtendingService">Наследование класса Service</a></li>
+    <li><a href="#StartingAService">Запуск службы</a></li>
+    <li><a href="#Stopping">Остановка службы</a></li>
+  </ol>
+</li>
+<li><a href="#CreatingBoundService">Создание привязанной службы</a></li>
+<li><a href="#Notifications">Отправка уведомлений пользователю</a></li>
+<li><a href="#Foreground">Запуск службы на переднем плане</a></li>
+<li><a href="#Lifecycle">Управление жизненным циклом службы</a>
+<ol>
+  <li><a href="#LifecycleCallbacks">Реализация обратных вызовов жизненного цикла</a></li>
+</ol>
+</li>
+</ol>
+
+<h2>Ключевые классы</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.app.IntentService}</li>
+</ol>
+
+<h2>Примеры</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ServiceStartArguments.html">{@code
+      ServiceStartArguments}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>См. также:</h2>
+<ol>
+<li><a href="{@docRoot}guide/components/bound-services.html">Привязанные службы</a></li>
+</ol>
+
+</div>
+
+
+<p>{@link android.app.Service} является компонентом приложения, который может выполнять
+длительные операции в фоновом режиме и не содержит пользовательского интерфейса. Другой компонент
+приложения может запустить службу, которая продолжит работу в фоновом режиме даже в том случае, когда пользователь
+перейдет в другое приложение. Кроме того, компонент может привязаться к службе для
+взаимодействия с ней и даже выполнять межпроцессное взаимодействие (IPC). Например, служба может
+обрабатывать сетевые транзакции, воспроизводить музыку, выполнять ввод-вывод файла или взаимодействовать с поставщиком контента, и все
+это в фоновом режиме.</p>
+
+<p>Фактически служба может принимать две формы:</p>
+
+<dl>
+  <dt>Запущенная</dt>
+  <dd>Служба является «запущенной», когда компонент приложения (например, операция) запускает ее
+вызовом {@link android.content.Context#startService startService()}. После запуска служба
+может работать в фоновом режиме в течение неограниченного времени, даже если уничтожен компонент, который ее запустил. Обычно
+запущенная служба выполняет одну операцию и не возвращает результатов вызывающему компоненту.
+Например, она может загружать или выгружать файл по сети. Когда операция выполнена,
+служба должна остановиться самостоятельно.</dd>
+  <dt>Привязанная</dt>
+  <dd>Служба является «привязанной», когда компонент приложения привязывается к ней вызовом {@link
+android.content.Context#bindService bindService()}. Привязанная служба предлагает интерфейс клиент-сервер,
+который позволяет компонентам взаимодействовать со службой, отправлять запросы, получать результаты и даже
+делать это между разными процессами посредством межпроцессного взаимодействия (IPC). Привязанная служба работает только пока
+к ней привязан другой компонент приложения. К службе могут быть привязаны несколько компонентов одновременно,
+но когда все они отменяют привязку, служба уничтожается.</dd>
+</dl>
+
+<p>Хотя в этой документации эти два типа служб обсуждаются отдельно, служба может
+работать обеими способами — она может быть запущенной (и работать в течение неограниченного времени) и допускать привязку.
+Это зависит от реализации пары методов обратного вызова: {@link
+android.app.Service#onStartCommand onStartCommand()} позволяет компонентам запускать службу, а {@link
+android.app.Service#onBind onBind()} позволяет выполнять привязку.</p>
+
+<p>Независимо от состояния приложения (запущенное, привязанное или и оба сразу) любой компонент приложения
+может использовать службу (даже из отдельного приложения) подобно тому, как любой компонент может использовать
+операцию — запустив ее с помощью {@link android.content.Intent}. Однако вы можете объявить закрытую
+службу в файле манифеста и заблокировать доступ к ней из других приложений. Более подробно
+это обсуждается в разделе <a href="#Declaring">Объявление службы
+в манифесте</a>.</p>
+
+<p class="caution"><strong>Внимание!</strong> Служба работает
+в основном потоке ведущего процесса — служба <strong>не</strong> создает своего потока
+и <strong>не</strong> выполняется в отдельном процессе (если вы не указали иное). Это означает,
+что если ваша служба собирается выполнять любую работу с высокой нагрузкой ЦП или блокирующие операции (например, воспроизведение MP3
+или сетевые операции), вы должны создать в службе новый поток для выполнения этой работы. Используя
+отдельный поток, вы снижаете риск возникновения ошибок «Приложение не отвечает», и
+основной поток приложения может отрабатывать взаимодействие пользователя с вашими операциями.</p>
+
+
+<h2 id="Basics">Основы</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Что лучше использовать — службу или поток?</h3>
+  <p>Служба — это просто компонент, который может выполняться в фоновом режиме, даже когда пользователь
+не взаимодействует с приложением. Следовательно, вы должны создавать службу только в том случае, если вам нужно
+именно это.</p>
+  <p>Если вам требуется выполнить работу за пределами основного потока, но только в то время, когда пользователь взаимодействует
+с приложением, то вам, вероятно, следует создать новый поток, а не службу. Например,
+если вы хотите воспроизводить определенную музыку, но только во время работы операции, вы можете создать
+поток в {@link android.app.Activity#onCreate onCreate()}, запустить его выполнение в методе {@link
+android.app.Activity#onStart onStart()}, а затем остановить его в методе {@link android.app.Activity#onStop
+onStop()}. Также рассмотрите возможность использования класса {@link android.os.AsyncTask} или {@link android.os.HandlerThread}
+вместо обычного класса {@link java.lang.Thread}. В документе <a href="{@docRoot}guide/components/processes-and-threads.html#Threads">Процессы
+и потоки</a> содержится дополнительная информация об этих потоках.</p>
+  <p>Помните, что если вы действительно используете службу, она выполняется в основном потоке вашего приложения по умолчанию,
+поэтому вы должны создать новый поток в службе, если она выполняет интенсивные или
+блокирующие операции.</p>
+</div>
+</div>
+
+<p>Чтобы создать службу, необходимо создать подкласс класса {@link android.app.Service} (или одного
+из существующих его подклассов). В вашей реализации необходимо переопределить некоторые методы обратного вызова,
+которые обрабатывают ключевые моменты жизненного цикла службы и при необходимости
+предоставляют механизм привязывания компонентов. Наиболее важные методы обратного вызова, которые необходимо переопределить:</p>
+
+<dl>
+  <dt>{@link android.app.Service#onStartCommand onStartCommand()}</dt>
+    <dd>Система вызывает этот метод, когда другой компонент, например, операция,
+запрашивает запуск этой службы, вызывая {@link android.content.Context#startService
+startService()}. После выполнения этого метода служба запускается и может в течение неограниченного времени
+работать в фоновом режиме. Если вы реализуете такой метод, вы обязаны остановить службу
+посредством вызова {@link android.app.Service#stopSelf stopSelf()} или {@link
+android.content.Context#stopService stopService()}. (Если требуется только обеспечить привязку,
+реализовывать этот метод не обязательно).</dd>
+  <dt>{@link android.app.Service#onBind onBind()}</dt>
+    <dd>Система вызывает этот метод, когда другой компонент хочет выполнить привязку
+к службе (например, для выполнения удаленного вызова процедуры) путем вызова {@link android.content.Context#bindService
+bindService()}. В вашей реализации этого метода вы должны обеспечить интерфейс, который клиенты
+используют для взаимодействия со службой, возвращая {@link android.os.IBinder}. Всегда необходимо реализовывать
+этот метод, но если вы не хотите разрешать привязку, необходимо возвращать значение null.</dd>
+  <dt>{@link android.app.Service#onCreate()}</dt>
+    <dd>Система вызывает этот метод при первом создании службы для выполнения однократных
+процедур настройки (перед вызовом {@link android.app.Service#onStartCommand onStartCommand()} или
+{@link android.app.Service#onBind onBind()}). Если служба уже запущена, этот метод не
+вызывается.</dd>
+  <dt>{@link android.app.Service#onDestroy()}</dt>
+    <dd>Система вызывает этот метод, когда служба более не используется и выполняется ее уничтожение.
+Ваша служба должна реализовать это для очистки ресурсов, таких как потоки, зарегистрированные
+приемники, ресиверы и т. д. Это последний вызов, который получает служба.</dd>
+</dl>
+
+<p>Если компонент запускает службу посредством вызова {@link
+android.content.Context#startService startService()} (что приводит к вызову {@link
+android.app.Service#onStartCommand onStartCommand()}), то служба
+продолжает работу, пока она не остановится самостоятельно с помощью {@link android.app.Service#stopSelf()} или другой
+компонент не остановит ее посредством вызова {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Если компонент вызывает
+{@link android.content.Context#bindService bindService()} для создания службы (и {@link
+android.app.Service#onStartCommand onStartCommand()} <em>не</em> вызывается), то служба работает, пока
+к ней привязан компонент. Как только выполняется отмена привязки службы ко всем клиентам,
+система уничтожает службу.</p>
+
+<p>Система Android будет принудительно останавливать службу только в том случае, когда не хватает памяти, и необходимо восстановить системные
+для операции, которая отображается на переднем плане. Если служба привязана к операции, которая отображается на переднем плане,
+менее вероятно, что она будет уничтожена, и если служба объявлена для <a href="#Foreground">выполнения в фоновом режиме</a> (как обсуждалось выше), она почти никогда не будет уничтожаться.
+В противном случае, если служба была запущена и является длительной, система со временем будет опускать ее положение в списке
+фоновых задач, и служба станет очень чувствительной к
+уничтожению — если ваша служба запущена, вы должны предусмотреть изящную обработку ее перезапуска
+системой. Если система уничтожает вашу службу, она перезапускает ее, как только снова появляется
+доступ к ресурсам (хотя это также зависит от значения, возвращаемого методом {@link
+android.app.Service#onStartCommand onStartCommand()}, как обсуждается ниже). Дополнительная информация
+о ситуациях, в которых система может уничтожить службу приведена в документе <a href="{@docRoot}guide/components/processes-and-threads.html">Процессы и потоки</a>
+.</p>
+
+<p>В следующих разделах описаны способы создания служб каждого типа и использования
+их из других компонентов приложения.</p>
+
+
+
+<h3 id="Declaring">Объявление службы в манифесте</h3>
+
+<p>Все службы, как и операции (и другие компоненты), должны быть объявлены в файле
+манифеста вашего приложения.</p>
+
+<p>Чтобы объявить службу, добавьте элемент <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>
+, в качестве дочернегоэлемента <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+. Например:</p>
+
+<pre>
+&lt;manifest ... &gt;
+  ...
+  &lt;application ... &gt;
+      &lt;service android:name=".ExampleService" /&gt;
+      ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>Дополнительные сведения об объявлении службы
+в манифесте см. в справке по элементу <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>.</p>
+
+<p>Имеются другие атрибуты, которые можно включить в элемент <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> для
+задания свойств, например, необходимых для запуска разрешений, и процесса,
+в котором должна выполняться служба. Атрибут <a href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a>
+является единственным обязательным атрибутом — он указывает имя класса для службы. После
+публикации вашего приложения вам не следует менять это имя, поскольку это может разрушить
+код из-за зависимости от явных намерений, используемых, чтобы запустить или привязать службу (ознакомьтесь с публикацией <a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Вещи, которые
+нельзя менять</a> в блоге разработчиков).
+
+<p>Для обеспечения безопасности приложения <strong>всегда используйте явное намерение при запуске
+или привязке {@link android.app.Service}</strong> и не объявляйте фильтров намерений для службы. Если вам
+важно допустить некоторую неопределенность в отношении того, какая служба запускается, вы можете
+предоставить фильтры намерений для ваших служб и исключить имя компонента из {@link
+android.content.Intent}, но затем вы должны установить пакет для намерения с помощью {@link
+android.content.Intent#setPackage setPackage()}, который обеспечивает достаточное устранение неоднозначности
+для целевой службы.</p>
+
+<p>Дополнительно можно обеспечить доступность вашей службы только для вашего приложения,
+включив атрибут <a href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a>
+и установив для него значение {@code "false"}. Это не позволяет другим приложениям запускать
+вашу службу даже при использовании явного намерения.</p>
+
+
+
+
+<h2 id="CreatingStartedService">Создание запущенной службы</h2>
+
+<p>Запущенная служба — это служба, которую запускает другой компонент вызовом {@link
+android.content.Context#startService startService()}, что приводит к вызову
+метода {@link android.app.Service#onStartCommand onStartCommand()} службы.</p>
+
+<p>При запуске служба обладает сроком жизни, не зависящим от запустившего ее компонента,
+и может работать в фоновом режиме в течение неограниченного времени,
+даже если уничтожен компонент, который ее запустил. Поэтому после выполнения своей работы служба должна остановиться самостоятельно
+посредством вызова метода {@link android.app.Service#stopSelf stopSelf()}, либо ее может остановить другой компонент
+посредством вызова метода{@link android.content.Context#stopService stopService()}.</p>
+
+<p>Компонент приложения, например, операция, может запустить службу, вызвав метод {@link
+android.content.Context#startService startService()} и передав объект {@link android.content.Intent},
+который указывает службу и любые данные, которые служба должна использовать. Служба получает
+этот объект {@link android.content.Intent} в методе {@link android.app.Service#onStartCommand
+onStartCommand()}.</p>
+
+<p>Предположим, что операции требуется сохранить некоторые данные в сетевой базе данных. Операция может
+запустить службу и предоставить ей данные для сохранения, передав намерение в метод {@link
+android.content.Context#startService startService()}. Служба получает намерение в методе {@link
+android.app.Service#onStartCommand onStartCommand()}, подключается к Интернету и выполняет транзакцию
+с базой данных. Когда транзакция выполнена, служба останавливается
+самостоятельно и уничтожается.</p>
+
+<p class="caution"><strong>Внимание!</strong> По умолчанию службы работают в том же процессе, что и приложение,
+в котором они объявлены, а также в основном потоке этого приложения. Поэтому, если ваша служба
+выполняет интенсивные или блокирующие операции, в то время как пользователь взаимодействует с операцией из того же
+приложения, служба будет замедлять выполнение операции. Чтобы избежать негативного воздействия на скорость работы
+приложения, вы должны запустить новый поток внутри службы.</p>
+
+<p>Традиционно имеется два класса, которые вы можете наследовать для создания запущенной службы:</p>
+<dl>
+  <dt>{@link android.app.Service}</dt>
+  <dd>Это базовый класс для всех служб. Когда вы наследуете этот класс, важно
+создать новый поток, в котором будет выполняться вся работа службы, поскольку по умолчанию служба использует основной поток вашего
+приложения, что может замедлить любую операцию, которую
+выполняет ваше приложение.</dd>
+  <dt>{@link android.app.IntentService}</dt>
+  <dd>Это подкласс класса {@link android.app.Service}, который использует рабочий поток для обработки всех
+запросов запуска поочередно. Это оптимальный вариант, если вам не требуется, чтобы ваша служба
+обрабатывала несколько запросов одновременно. Достаточно реализовать метод {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}, который получает намерение для каждого
+запроса запуска, позволяя выполнять фоновую работу.</dd>
+</dl>
+
+<p>В следующих разделах описано, как реализовать службу с помощью любого их этих
+классов.</p>
+
+
+<h3 id="ExtendingIntentService">Наследование класса IntentService</h3>
+
+<p>Так как большинству запущенных приложений не требуется обрабатывать несколько запросов одновременно,
+(что может быть действительно опасным сценарием), вероятно будет лучше, если вы
+реализуете свою службу с помощью класса {@link android.app.IntentService}.</p>
+
+<p>Класс {@link android.app.IntentService} делает следующее:</p>
+
+<ul>
+  <li>Создает рабочий поток по умолчанию, который выполняет все намерения, доставленные в метод {@link
+android.app.Service#onStartCommand onStartCommand()}, отдельно от основного потока
+вашего приложения.</li>
+  <li>Создает рабочую очередь, которая передает намерения по одному в вашу реализацию метода {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}, поэтому вы не должны беспокоиться
+относительно многопоточности.</li>
+  <li>Останавливает службу после обработки всех запросов запуска, поэтому вам никогда не требуется вызывать 
+{@link android.app.Service#stopSelf}.</li>
+  <li>Предоставляет реализацию метода {@link android.app.IntentService#onBind onBind()} по умолчанию, которая
+возвращает null.</li>
+  <li>Предоставляет реализацию метода {@link android.app.IntentService#onStartCommand
+onStartCommand()} по умолчанию, которая отправляет намерение в рабочую очередь и затем в вашу реализацию {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}.</li>
+</ul>
+
+<p>Все это означает, что вам достаточно реализовать метод {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} для выполнения работы, предоставленной
+клиентом. (Хотя, кроме того, вы должны предоставить маленький конструктор для службы).</p>
+
+<p>Здесь приведен пример реализации класса {@link android.app.IntentService}:</p>
+
+<pre>
+public class HelloIntentService extends IntentService {
+
+  /**
+   * A constructor is required, and must call the super {@link android.app.IntentService#IntentService}
+   * constructor with a name for the worker thread.
+   */
+  public HelloIntentService() {
+      super("HelloIntentService");
+  }
+
+  /**
+   * The IntentService calls this method from the default worker thread with
+   * the intent that started the service. When this method returns, IntentService
+   * stops the service, as appropriate.
+   */
+  &#64;Override
+  protected void onHandleIntent(Intent intent) {
+      // Normally we would do some work here, like download a file.
+      // For our sample, we just sleep for 5 seconds.
+      long endTime = System.currentTimeMillis() + 5*1000;
+      while (System.currentTimeMillis() &lt; endTime) {
+          synchronized (this) {
+              try {
+                  wait(endTime - System.currentTimeMillis());
+              } catch (Exception e) {
+              }
+          }
+      }
+  }
+}
+</pre>
+
+<p>Это все, что нужно: конструктор и реализация класса {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}.</p>
+
+<p>Если вы решили переопределить также и другие методы обратного вызова, такие как {@link
+android.app.IntentService#onCreate onCreate()}, {@link
+android.app.IntentService#onStartCommand onStartCommand()} или {@link
+android.app.IntentService#onDestroy onDestroy()}, обязательно вызовите реализацию суперкласса,
+чтобы класс {@link android.app.IntentService} мог правильно обрабатывать жизненный цикл рабочего потока.</p>
+
+<p>Например, метод {@link android.app.IntentService#onStartCommand onStartCommand()} должен возвращать
+реализацию по умолчанию (которая доставляет намерение в {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}):</p>
+
+<pre>
+&#64;Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+    return super.onStartCommand(intent,flags,startId);
+}
+</pre>
+
+<p>Помимо {@link android.app.IntentService#onHandleIntent onHandleIntent()}, единственный метод,
+из которого вам не требуется вызывать суперкласс, это метод {@link android.app.IntentService#onBind
+onBind()} (но его нужно реализовывать только в случае, если ваша служба допускает привязку).</p>
+
+<p>В следующем разделе вы увидите, как реализовывается служба такого же типа при наследовании
+базового класса {@link android.app.Service}, которая содержит намного больше кода, но которая может
+подойти, если вам требуется обрабатывать одновременные запросы запуска.</p>
+
+
+<h3 id="ExtendingService">Наследование класса Service</h3>
+
+<p>Как вы видели в предыдущем разделе, использование класса {@link android.app.IntentService} значительно упрощает
+реализацию запущенной службы. Однако, если необходимо, чтобы ваша служба
+поддерживала многопоточность (вместо обработки запросов запуска через рабочую очередь), можно
+наследовать класс {@link android.app.Service} для обработки каждого намерения.</p>
+
+<p>В качестве примера приведена следующая реализация класса {@link
+android.app.Service}, которая выполняет ту же работу, как и пример выше, использующий класс {@link
+android.app.IntentService}. То есть для каждого запроса запуска он использует рабочий поток для выполнения
+задания и обрабатывает запросы по одному.</p>
+
+<pre>
+public class HelloService extends Service {
+  private Looper mServiceLooper;
+  private ServiceHandler mServiceHandler;
+
+  // Handler that receives messages from the thread
+  private final class ServiceHandler extends Handler {
+      public ServiceHandler(Looper looper) {
+          super(looper);
+      }
+      &#64;Override
+      public void handleMessage(Message msg) {
+          // Normally we would do some work here, like download a file.
+          // For our sample, we just sleep for 5 seconds.
+          long endTime = System.currentTimeMillis() + 5*1000;
+          while (System.currentTimeMillis() &lt; endTime) {
+              synchronized (this) {
+                  try {
+                      wait(endTime - System.currentTimeMillis());
+                  } catch (Exception e) {
+                  }
+              }
+          }
+          // Stop the service using the startId, so that we don't stop
+          // the service in the middle of handling another job
+          stopSelf(msg.arg1);
+      }
+  }
+
+  &#64;Override
+  public void onCreate() {
+    // Start up the thread running the service.  Note that we create a
+    // separate thread because the service normally runs in the process's
+    // main thread, which we don't want to block.  We also make it
+    // background priority so CPU-intensive work will not disrupt our UI.
+    HandlerThread thread = new HandlerThread("ServiceStartArguments",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    thread.start();
+
+    // Get the HandlerThread's Looper and use it for our Handler
+    mServiceLooper = thread.getLooper();
+    mServiceHandler = new ServiceHandler(mServiceLooper);
+  }
+
+  &#64;Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+      Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+
+      // For each start request, send a message to start a job and deliver the
+      // start ID so we know which request we're stopping when we finish the job
+      Message msg = mServiceHandler.obtainMessage();
+      msg.arg1 = startId;
+      mServiceHandler.sendMessage(msg);
+
+      // If we get killed, after returning from here, restart
+      return START_STICKY;
+  }
+
+  &#64;Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  &#64;Override
+  public void onDestroy() {
+    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+  }
+}
+</pre>
+
+<p>Как можно видеть, этот код значительно длиннее, чем код с использованием класса {@link android.app.IntentService}.</p>
+
+<p>Однако, так как вы обрабатываете каждый вызов {@link android.app.Service#onStartCommand
+onStartCommand()} самостоятельно, вы можете выполнять несколько запросов одновременно. Данный код
+выполняет не совсем эту работу, но при необходимости вы можете создавать новые потоки для каждого
+запроса и сразу запускать их (а не ожидать завершения предыдущего запроса).</p>
+
+<p>Обратите внимание, что метод {@link android.app.Service#onStartCommand onStartCommand()} должен
+возвращать целое число. Это целое число описывает, как система должна продолжать выполнение службы в случае,
+когда система уничтожила ее (как описано выше, реализация по умолчанию для класса {@link
+android.app.IntentService} обрабатывает эту ситуацию, хотя вы изменить ход реализации). Значение,
+возвращаемое методом {@link android.app.Service#onStartCommand onStartCommand()}, должно быть одной из следующих
+констант:</p>
+
+<dl>
+  <dt>{@link android.app.Service#START_NOT_STICKY}</dt>
+    <dd>Если система уничтожает службу после возвращения из {@link android.app.Service#onStartCommand
+onStartCommand()}, <em>не нужно</em> повторно создавать службу, если нет ожидающих
+доставки намерений. Это самый безопасный вариант, позволяющий избежать запуска вашей службы, когда это не нужно
+и когда ваше приложение может просто перезапустить любые незавершенные задания.</dd>
+  <dt>{@link android.app.Service#START_STICKY}</dt>
+    <dd>Если система уничтожает службу после возвращения из {@link android.app.Service#onStartCommand
+onStartCommand()}, повторно создайте службу и вызовите {@link
+android.app.Service#onStartCommand onStartCommand()}, но <em>не</em> передавайте последнее намерение повторно.
+Вместо этого система вызывает метод {@link android.app.Service#onStartCommand onStartCommand()} с намерением,
+которое имеет значение null, если нет ожидающих намерений для запуска службы. Если ожидающие намерения есть,
+они доставляются. Это подходит для мультимедийных проигрывателей (или подобных служб), которые не
+выполняют команды, а работают независимо и ожидают задание.</dd>
+  <dt>{@link android.app.Service#START_REDELIVER_INTENT}</dt>
+    <dd>Если система уничтожает службу после возвращения из {@link android.app.Service#onStartCommand
+onStartCommand()}, повторно создайте службу и вызовите {@link
+android.app.Service#onStartCommand onStartCommand()} с последним намерением, которое было доставлено
+в службу. Все ожидающие намерения доставляются по очереди. Это подходит для служб,
+активно выполняющих задание, которое должно быть возобновлено немедленно, например, для загрузок файла.</dd>
+</dl>
+<p>Для получения дополнительных сведений об этих возвращаемых значениях см. справочную документацию по ссылке для каждой
+константы.</p>
+
+
+
+<h3 id="StartingAService">Запуск службы</h3>
+
+<p>Можно запустить службу из операции или другого компонента приложения, передав объект
+{@link android.content.Intent} (указывающий службу, которую требуется запустить) в {@link
+android.content.Context#startService startService()}. Система Android вызывает метод {@link
+android.app.Service#onStartCommand onStartCommand()} службы и передает ей {@link
+android.content.Intent}. (Ни в коем случае не следует вызывать метод {@link android.app.Service#onStartCommand
+onStartCommand()} напрямую).</p>
+
+<p>Например, операция может запустить службу из примера в предыдущем разделе ({@code
+HelloSevice}), используя явное намерение с помощью {@link android.content.Context#startService
+startService()}:</p>
+
+<pre>
+Intent intent = new Intent(this, HelloService.class);
+startService(intent);
+</pre>
+
+<p>Метод {@link android.content.Context#startService startService()} возвращается немедленно, и система
+Android вызывает метод службы {@link android.app.Service#onStartCommand
+onStartCommand()}. Если служба еще не выполняется, система сначала вызывает {@link
+android.app.Service#onCreate onCreate()}, а затем {@link android.app.Service#onStartCommand
+onStartCommand()}.</p>
+
+<p>Если служба также не представляет привязку, намерение, доставляемое с помощью {@link
+android.content.Context#startService startService()}, является единственным режимом связи между
+компонентом приложения и службой. Однако, если вы хотите, чтобы служба оправляла результат обратно,
+клиент, который запускает службу, может создать объект {@link android.app.PendingIntent} для сообщения
+(с помощью {@link android.app.PendingIntent#getBroadcast getBroadcast()}) и доставить его в службу
+в объекте {@link android.content.Intent}, который запускает службу. Затем служба может использовать
+сообщение для доставки результата.</p>
+
+<p>Несколько запросов запуска службы приводят к нескольким соответствующим вызовам метода
+{@link android.app.Service#onStartCommand onStartCommand()} службы. Однако для ее остановки достаточно только одного запроса на остановку
+службы (с помощью {@link android.app.Service#stopSelf stopSelf()} или {@link
+android.content.Context#stopService stopService()}).</p>
+
+
+<h3 id="Stopping">Остановка службы</h3>
+
+<p>Запущенная служба должна управлять своим жизненным циклом. То есть, система не останавливает и не
+уничтожает службу, если не требуется восстановить память системы, и служба
+продолжает работу после возвращения из метода {@link android.app.Service#onStartCommand onStartCommand()}. Поэтому
+служба должна останавливаться самостоятельно посредством вызова метода {@link android.app.Service#stopSelf stopSelf()}, либо другой
+компонент может остановить ее посредством вызова метода {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Получив запрос на остановку посредством {@link android.app.Service#stopSelf stopSelf()} или {@link
+android.content.Context#stopService stopService()}, система как можно скорее уничтожает службу
+.</p>
+
+<p>Однако, если служба обрабатывает несколько запросов {@link
+android.app.Service#onStartCommand onStartCommand()} одновременно, вы не должны останавливать службу
+после завершения обработки запроса запуска, поскольку вы, вероятно, уже получили новый
+запрос запуска (остановка в конце первого запроса привела бы к прерыванию второго). Чтобы избежать
+этой проблемы, вы можете использовать метод {@link android.app.Service#stopSelf(int)}, гарантирующий, что ваш запрос на
+остановку службы всегда основан на самом последнем запросе запуска. То есть, когда вы вызываете {@link
+android.app.Service#stopSelf(int)}, вы передаете идентификатор запроса запуска (идентификатор <code>startId</code>,
+доставленный в {@link android.app.Service#onStartCommand onStartCommand()}), которому соответствует ваш
+запрос остановки. Тогда, если служба получит новый запрос запуска до того, как вы сможете вызвать {@link
+android.app.Service#stopSelf(int)}, идентификатор не будет совпадать и служба не будет остановлена.</p>
+
+<p class="caution"><strong>Внимание!</strong> Ваше приложение обязательно должно останавливать свои службы по окончании работы,
+чтобы избежать расходования ресурсов системы и потребления энергии аккумулятора. При необходимости
+другие компоненты могут остановить службу посредством вызова метода {@link
+android.content.Context#stopService stopService()}. Даже если вы можете выполнять привязку службы,
+следует всегда останавливать службу самостоятельно, если она когда-либо получила вызов {@link
+android.app.Service#onStartCommand onStartCommand()}.</p>
+
+<p>Дополнительные сведения о жизненном цикле службы представлены в разделе <a href="#Lifecycle">Управление жизненным циклом службы</a> ниже.</p>
+
+
+
+<h2 id="CreatingBoundService">Создание привязанной службы</h2>
+
+<p>Привязанная служба — это служба, которая допускает привязку к ней компонентов приложения посредством вызова {@link
+android.content.Context#bindService bindService()} для создания долговременного соединения
+(и обычно не позволяет компонентам <em>запускать</em> ее посредством вызова {@link
+android.content.Context#startService startService()}).</p>
+
+<p>Вы должны создать привязанную службу, когда вы хотите взаимодействовать со службой из операций
+и других компонентов вашего приложения или показывать некоторые функции вашего приложения
+другим приложениям посредством межпроцессного взаимодействия (IPC).</p>
+
+<p>Чтобы создать привязанную службу, необходимо реализовать метод обратного вызова {@link
+android.app.Service#onBind onBind()} для возвращения объекта {@link android.os.IBinder},
+который определяет интерфейс взаимодействия со службой. После этого другие компоненты приложения могут вызвать
+метод {@link android.content.Context#bindService bindService()} для извлечения интерфейса и
+начать вызывать методы службы. Служба существует только для обслуживания привязанного к ней компонента приложения,
+поэтому, когда нет компонентов, привязанных к службе, система уничтожает ее
+(вам <em>не</em> требуется останавливать привязанную службу, как это требуется для службы, запущенной
+посредством {@link android.app.Service#onStartCommand onStartCommand()}).</p>
+
+<p>Чтобы создать привязанную службу, необходимо в первую очередь определить интерфейс, взаимодействия
+клиента со службой. Этот интерфейс между службой
+и клиентом должен быть реализацией объекта {@link android.os.IBinder}, которую ваша служба должна
+возвращать из метода обратного вызова {@link android.app.Service#onBind
+onBind()}. После того, как клиент получает объект {@link android.os.IBinder}, он может начать
+взаимодействие со службой посредством этого интерфейса.</p>
+
+<p>Одновременно к службе могут быть привязаны несколько клиентов. Когда клиент заканчивает взаимодействие
+со службой, он вызывает {@link android.content.Context#unbindService unbindService()} для отмены привязки. Как только
+не остается ни одного клиента, привязанного к службе, система уничтожает службу.</p>
+
+<p>Существует несколько способов реализации привязанной службы, и эти реализации сложнее,
+чем реализации запущенной службы, поэтому обсуждение привязанной службы приведено в отдельном
+документе <a href="{@docRoot}guide/components/bound-services.html">Привязанные службы</a>.</p>
+
+
+
+<h2 id="Notifications">Отправка уведомлений пользователю</h2>
+
+<p>После запуска служба может уведомлять пользователя о событиях, используя <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Всплывающие уведомления</a> или <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Уведомления в строке состояния</a>.</p>
+
+<p>Всплывающее уведомление — это сообщение, кратковременно появляющееся на поверхности текущего окна,
+тогда как уведомление в строке состояния — это значок в строке состояния с сообщением,
+который пользователь может выбрать, чтобы выполнить действие (такое как запуск операции).</p>
+
+<p>Обычно уведомление в строке состояния является самым удобным решением, когда завершается какая-то фоновая работа
+(например, завершена
+загрузка файла), и пользователь может действовать. Когда пользователь выбирает уведомление в
+расширенном виде, уведомление может запустить операцию (например, для просмотра загруженного файла).</p>
+
+<p>Дополнительную информацию см. в руководствах для разработчиков <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Всплывающие уведомления</a> и<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">
+Уведомления в строке состояния</a>.</p>
+
+
+
+<h2 id="Foreground">Запуск службы на переднем плане</h2>
+
+<p>Служба переднего плана — это служба, о которой пользователь активно
+осведомлен, и поэтому она не является кандидатом для удаления системой в случае нехватки памяти. Служба
+переднего плана должна выводить уведомление в строку состояния, которая находится под заголовком
+«Постоянные». Это означает, что уведомление не может быть удалено, пока служба
+не будет остановлена или удалена с переднего плана.</p>
+
+<p>Например, музыкальный проигрыватель, который воспроизводит музыку из службы, должен быть настроен на работу
+на переднем плане, так как пользователь точно знает о
+его работе. Уведомление в строке состояния может показывать текущее произведение и позволять пользователю
+запускать операцию для взаимодействия с музыкальным проигрывателем.</p>
+
+<p>Для запроса на выполнение вашей службы на переднем плане вызовите метод {@link
+android.app.Service#startForeground startForeground()}. Этот метод имеет два параметра: целое число,
+которое однозначно идентифицирует уведомление и объект {@link
+android.app.Notification} для строки состояния. Например:</p>
+
+<pre>
+Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text),
+        System.currentTimeMillis());
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+notification.setLatestEventInfo(this, getText(R.string.notification_title),
+        getText(R.string.notification_message), pendingIntent);
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+</pre>
+
+<p class="caution"><strong>Внимание!</strong> Целочисленный идентификатор ID, который вы передаете в метод {@link
+android.app.Service#startForeground startForeground()}, не должен быть равен 0.</p>
+
+
+<p>Чтобы удалить службу с переднего плана, вызовите {@link
+android.app.Service#stopForeground stopForeground()}. Этот метод содержит логическое значение, указывающее,
+следует ли также удалять уведомление в строке состояния. Этот метод <em>не</em> останавливает
+службу. Однако, если вы останавливаете службу, работающую на переднем плане,
+уведомление также удаляется.</p>
+
+<p>Дополнительную информацию об уведомлениях см. в разделе <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Создание уведомлений
+в строке состояния</a>.</p>
+
+
+
+<h2 id="Lifecycle">Управление жизненным циклом службы</h2>
+
+<p>Жизненный цикл службы намного проще, чем жизненный цикл операции. Однако, намного важнее
+уделить пристальное внимание тому, как ваша служба создается и уничтожается, так как служба
+может работать в фоновом режиме без ведома пользователя.</p>
+
+<p>Жизненный цикл службы от создания до уничтожения может следовать двум 
+разным путям:</p>
+
+<ul>
+<li>Запущенная служба
+  <p>Служба создается, когда другой компонент вызывает метод {@link
+android.content.Context#startService startService()}. Затем служба работает в течение неограниченного времени и должна
+остановиться самостоятельно посредством вызова метода {@link
+android.app.Service#stopSelf() stopSelf()}. Другой компонент также может остановить службу
+посредством вызова метода {@link android.content.Context#stopService
+stopService()}. Когда служба останавливается, система уничтожает ее.</p></li>
+
+<li>Привязанная служба
+  <p>Служба создается, когда другой компонент (клиент) вызывает метод {@link
+android.content.Context#bindService bindService()}. Затем клиент взаимодействует со службой
+через интерфейс {@link android.os.IBinder}. Клиент может закрыть соединение посредством вызова
+метода {@link android.content.Context#unbindService unbindService()}. К одной службе могут быть привязано
+несколько клиентов, и когда все они отменяют привязку, система уничтожает службу. (Служба
+<em>не</em> должна останавливаться самостоятельно.)</p></li>
+</ul>
+
+<p>Эти два способа необязательно работают независимо друг от друга. То есть вы можете привязать службу, которая уже была
+запущена посредством метода {@link android.content.Context#startService startService()}. Например, фоновая
+музыкальная служба может быть запущена посредством вызова метода {@link android.content.Context#startService
+startService()} с объектом {@link android.content.Intent}, который идентифицирует музыку для воспроизведения. Позже,
+например, когда пользователь хочет получить доступ к управлению проигрывателем или информацию о текущем произведении,
+операция может установить привязку к службе посредством вызова метода {@link
+android.content.Context#bindService bindService()}. В подобных случаях методы {@link
+android.content.Context#stopService stopService()} и {@link android.app.Service#stopSelf
+stopSelf()} фактически не останавливают службу, пока не будет отменена привязка всех клиентов. </p>
+
+
+<h3 id="LifecycleCallbacks">Реализация обратных вызовов жизненного цикла</h3>
+
+<p>Подобно операции, служба содержит методы обратного вызова жизненного цикла, которые можно реализовать для контроля
+изменений состояния службы и выполнения работы в соответствующие моменты времени. Указанная ниже базовая
+служба показывает каждый из методов жизненного цикла.</p>
+
+<pre>
+public class ExampleService extends Service {
+    int mStartMode;       // indicates how to behave if the service is killed
+    IBinder mBinder;      // interface for clients that bind
+    boolean mAllowRebind; // indicates whether onRebind should be used
+
+    &#64;Override
+    public void {@link android.app.Service#onCreate onCreate}() {
+        // The service is being created
+    }
+    &#64;Override
+    public int {@link android.app.Service#onStartCommand onStartCommand}(Intent intent, int flags, int startId) {
+        // The service is starting, due to a call to {@link android.content.Context#startService startService()}
+        return <em>mStartMode</em>;
+    }
+    &#64;Override
+    public IBinder {@link android.app.Service#onBind onBind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()}
+        return <em>mBinder</em>;
+    }
+    &#64;Override
+    public boolean {@link android.app.Service#onUnbind onUnbind}(Intent intent) {
+        // All clients have unbound with {@link android.content.Context#unbindService unbindService()}
+        return <em>mAllowRebind</em>;
+    }
+    &#64;Override
+    public void {@link android.app.Service#onRebind onRebind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()},
+        // after onUnbind() has already been called
+    }
+    &#64;Override
+    public void {@link android.app.Service#onDestroy onDestroy}() {
+        // The service is no longer used and is being destroyed
+    }
+}
+</pre>
+
+<p class="note"><strong>Примечание.</strong> В отличие от методов обратного вызова жизненного цикла операции, вам
+<em>не</em> требуется вызывать реализацию суперкласса этих методов обратного вызова.</p>
+
+<img src="{@docRoot}images/service_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Рисунок 2.</strong> Жизненный цикл службы. На схеме слева
+показан жизненный цикл, когда служба создана посредством метода {@link android.content.Context#startService
+startService()}, а на схеме справа показан жизненный цикл, когда служба создана
+посредством метода {@link android.content.Context#bindService bindService()}.</p>
+
+<p>С помощью реализации этих методов можно отслеживать два вложенных цикла в жизненном цикле службы: </p>
+
+<ul>
+<li><strong>Весь жизненный цикл</strong> службы происходит между вызовом метода {@link
+android.app.Service#onCreate onCreate()} и возвратом из метода {@link
+android.app.Service#onDestroy}. Подобно операции, служба выполняет начальную настройку в методе
+{@link android.app.Service#onCreate onCreate()} и освобождает все оставшиеся ресурсы в методе {@link
+android.app.Service#onDestroy onDestroy()}.  Например,
+служба воспроизведения музыки может создать поток для воспроизведения музыки в методе {@link
+android.app.Service#onCreate onCreate()}, затем остановить поток в методе {@link
+android.app.Service#onDestroy onDestroy()}.
+
+<p>Методы {@link android.app.Service#onCreate onCreate()} и {@link android.app.Service#onDestroy
+onDestroy()} вызываются для всех служб, независимо от метода создания:
+{@link android.content.Context#startService startService()} или {@link
+android.content.Context#bindService bindService()}.</p></li>
+
+<li><strong>Активный жизненный цикл</strong> службы начинается с вызова метода {@link
+android.app.Service#onStartCommand onStartCommand()} или {@link android.app.Service#onBind onBind()}.
+Каждый метод направляется намерением {@link
+android.content.Intent}, которое было передано методу {@link android.content.Context#startService
+startService()} или {@link android.content.Context#bindService bindService()}, соответственно.
+<p>Если служба запущена, активный жизненный цикл заканчивается одновременно с окончанием
+всего жизненного цикла (служба активна даже после возврата из метода {@link android.app.Service#onStartCommand
+onStartCommand()}). Если служба является привязанной, активный жизненный цикл заканчивается, когда возвращается метод {@link
+android.app.Service#onUnbind onUnbind()}.</p>
+</li>
+</ul>
+
+<p class="note"><strong>Примечание.</strong> Хотя запущенная служба останавливается посредством вызова
+метода {@link android.app.Service#stopSelf stopSelf()} или {@link
+android.content.Context#stopService stopService()}, для службы не существует соответствующего обратного вызова
+(нет обратного вызова {@code onStop()}). Поэтому, если служба не привязана к клиенту,
+система уничтожает ее при остановке службы — метод {@link
+android.app.Service#onDestroy onDestroy()} является единственным получаемым методом обратного вызова.</p>
+
+<p>Рисунок 2 иллюстрирует типичные методы обратного вызова для службы. Хотя на рисунке отделены
+службы, созданные посредством метода {@link android.content.Context#startService startService()}, от служб,
+созданных посредством метода {@link android.content.Context#bindService bindService()}, помните,
+что любая служба, независимо от способа запуска, позволяет клиентам выполнять привязку к ней.
+Поэтому служба, изначально созданная посредством метода {@link android.app.Service#onStartCommand
+onStartCommand()} (клиентом, который вызвал {@link android.content.Context#startService startService()}),
+может получать вызов метода {@link android.app.Service#onBind onBind()} (когда клиент вызывает
+метод {@link android.content.Context#bindService bindService()}).</p>
+
+<p>Дополнительные сведения о создании службы, которая обеспечивает привязку, см. в документе <a href="{@docRoot}guide/components/bound-services.html">Привязанные службы</a>,
+который содержит дополнительную информацию о методе обратного вызова {@link android.app.Service#onRebind onRebind()}
+в разделе <a href="{@docRoot}guide/components/bound-services.html#Lifecycle">Управление жизненным циклом
+привязанной службы</a>.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>To learn how to query data from the system or other applications (such as contacts or media
+stored on the device), continue with the <b><a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></b>
+document.</p>
+-->

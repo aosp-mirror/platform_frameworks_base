@@ -1,0 +1,1094 @@
+page.title=Cung cấp Tài nguyên
+parent.title=Tài nguyên Ứng dụng
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Xem nhanh</h2>
+  <ul>
+    <li>Các loại tài nguyên khác nhau thuộc về các thư mục con khác nhau của {@code res/}</li>
+    <li>Tài nguyên thay thế cung cấp các tệp tài nguyên theo cấu hình cụ thể</li>
+    <li>Luôn bao gồm tài nguyên mặc định để ứng dụng của bạn không phụ thuộc vào các
+cấu hình thiết bị cụ thể</li>
+  </ul>
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#ResourceTypes">Nhóm các Loại Tài nguyên lại</a></li>
+    <li><a href="#AlternativeResources">Cung cấp Tài nguyên Thay thế</a>
+      <ol>
+        <li><a href="#QualifierRules">Quy tắc về tên hạn định</a></li>
+        <li><a href="#AliasResources">Tạo tài nguyên bí danh</a></li>
+      </ol>
+    </li>
+    <li><a href="#Compatibility">Cung cấp Tính tương thích giữa Thiết bị với Tài nguyên Tốt nhất</a></li>
+    <li><a href="#BestMatch">Cách Android tìm Tài nguyên Khớp Tốt nhất</a></li>
+  </ol>
+
+  <h2>Xem thêm</h2>
+  <ol>
+    <li><a href="accessing-resources.html">Truy cập Tài nguyên</a></li>
+    <li><a href="available-resources.html">Loại Tài nguyên</a></li>
+    <li><a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ Nhiều
+Màn hình</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Bạn nên luôn ngoại hiện hóa các tài nguyên ứng dụng chẳng hạn như hình ảnh và xâu từ mã
+của mình, sao cho bạn có thể duy trì chúng một cách độc lập. Bạn cũng nên cung cấp tài nguyên thay thế cho
+cấu hình thiết bị cụ thể bằng cách nhóm chúng lại trong những thư mục tài nguyên đích danh. Trong
+thời gian chạy, Android sẽ sử dụng tài nguyên phù hợp dựa trên cấu hình hiện tại. Ví
+dụ, bạn có thể muốn cung cấp một bố trí UI khác phụ thuộc vào kích cỡ màn hình hoặc các xâu
+khác nhau phụ thuộc vào thiết đặt ngôn ngữ.</p>
+
+<p>Sau khi ngoại hiện hóa các tài nguyên ứng dụng của mình, bạn có thể truy cập chúng
+bằng cách sử dụng các ID tài nguyên được khởi tạo trong lớp {@code R} của dự án của bạn. Cách sử dụng
+tài nguyên trong ứng dụng của bạn được trình bày trong phần <a href="accessing-resources.html">Truy cập
+Tài nguyên</a>. Tài liệu này trình bày với bạn cách nhóm các tài nguyên lại trong dự án Android của bạn và
+cung cấp tài nguyên thay thế cho những cấu hình thiết bị cụ thể.</p>
+
+
+<h2 id="ResourceTypes">Nhóm các Loại Tài nguyên lại</h2>
+
+<p>Bạn nên đặt từng loại tài nguyên vào một thư mục con cụ thể trong thư mục
+{@code res/} dự án của mình. Ví dụ, sau đây là phân cấp tệp của một dự án đơn giản:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    src/  <span style="color:black">
+        MyActivity.java  </span>
+    res/
+        drawable/  <span style="color:black">
+            graphic.png  </span>
+        layout/  <span style="color:black">
+            main.xml
+            info.xml</span>
+        mipmap/  <span style="color:black">
+            icon.png </span>
+        values/  <span style="color:black">
+            strings.xml  </span>
+</pre>
+
+<p>Như bạn có thể thấy trong ví dụ này, thư mục {@code res/} chứa tất cả tài nguyên (trong
+các thư mục con): một tài nguyên hình ảnh, hai tài nguyên bố trí, các thư mục{@code mipmap/} cho biểu tượng của trình khởi chạy
+, và một tệp tài nguyên xâu. Tên thư mục
+tài nguyên có vai trò quan trọng và được mô tả trong bảng 1.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Để biết thêm thông tin về cách sử dụng thư mục mipmap, hãy xem phần
+<a href="{@docRoot}tools/projects/index.html#mipmap">Tổng quan về Quản lý Dự án</a>.</p>
+
+<p class="table-caption" id="table1"><strong>Bảng 1.</strong> Các thư mục tài nguyên
+được hỗ trợ bên trong thư mục {@code res/} của dự án.</p>
+
+<table>
+  <tr>
+    <th scope="col">Thư mục</th>
+    <th scope="col">Loại Tài nguyên</th>
+  </tr>
+
+  <tr>
+    <td><code>animator/</code></td>
+    <td>Tệp XML định nghĩa <a href="{@docRoot}guide/topics/graphics/prop-animation.html">các hoạt hình
+tính chất</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>anim/</code></td>
+    <td>Tệp XML định nghĩa <a href="{@docRoot}guide/topics/graphics/view-animation.html#tween-animation">các hoạt hình
+tween</a>. (Các hoạt hình tính chất cũng có thể được lưu trong thư mục này, nhưng
+thư mục {@code animator/} được ưu tiên cho hoạt hình tính chất để phân biệt giữa hai
+loại này.)</td>
+  </tr>
+
+  <tr>
+    <td><code>color/</code></td>
+    <td>Tệp XML định nghĩa một danh sách trạng thái các màu. Xem phần <a href="color-list-resource.html">Tài nguyên
+Danh sách Trạng thái Màu</a></td>
+  </tr>
+
+  <tr>
+    <td><code>drawable/</code></td>
+
+    <td><p>Tệp bitmap ({@code .png}, {@code .9.png}, {@code .jpg}, {@code .gif}) hoặc tệp XML
+được biên dịch thành các loại tài nguyên con vẽ được sau:</p>
+      <ul>
+        <li>Tệp bitmap</li>
+        <li>Nine-Patche (tệp bitmap có thể thay đổi kích cỡ)</li>
+        <li>Danh sách trạng thái</li>
+        <li>Hình</li>
+        <li>Nội dung vẽ được hoạt hình</li>
+        <li>Nội dung vẽ được khác</li>
+      </ul>
+      <p>Xem phần <a href="drawable-resource.html">Tài nguyên Vẽ được</a>.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>mipmap/</code></td>
+    <td>Tệp vẽ được cho các mật độ biểu tượng trình khởi chạy khác nhau. Để biết thêm thông tin về việc quản lý
+    các biểu tượng trình khởi chạy bằng thư mục {@code mipmap/}, xem phần
+    <a href="{@docRoot}tools/project/index.html#mipmap">Tổng quan về Quản lý Dự án</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>layout/</code></td>
+    <td>Tệp XML định nghĩa một bố trí giao diện người dùng.
+        Xem phần <a href="layout-resource.html">Tài nguyên Bố trí</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>menu/</code></td>
+    <td>Tệp XML định nghĩa các menu ứng dụng, chẳng hạn như Menu Tùy chọn, Menu Ngữ cảnh, hoặc Menu
+Con. Xem phần <a href="menu-resource.html">Tài nguyên Menu</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>raw/</code></td>
+    <td><p>Tệp tùy ý để lưu trong dạng thô của chúng. Để mở những tài nguyên có một
+{@link java.io.InputStream} thô này, hãy gọi {@link android.content.res.Resources#openRawResource(int)
+Resources.openRawResource()} bằng ID tài nguyên, chính là {@code R.raw.<em>filename</em>}.</p>
+      <p>Tuy nhiên, nếu cần truy cập tên tệp gốc và phân cấp tệp, bạn có thể xem xét
+lưu một số tài nguyên trong thư mục {@code
+assets/} (thay vì {@code res/raw/}). Các tệp trong {@code assets/} không được cấp
+ID tài nguyên, vì thế bạn chỉ có thể đọc chúng bằng cách sử dụng {@link android.content.res.AssetManager}.</p></td>
+  </tr>
+
+  <tr>
+    <td><code>values/</code></td>
+    <td><p>Tệp XML chứa các giá trị đơn giản, chẳng hạn như xâu, số nguyên, và màu sắc.</p>
+      <p>Trong đó, tệp tài nguyên XML trong các thư mục con {@code res/} khác định nghĩa một tài nguyên đơn lẻ
+dựa trên tên tệp XML, tệp trong thư mục {@code values/} sẽ mô tả nhiều nguồn.
+Đối với tệp trong thư mục này, mỗi phần tử con của phần tử {@code &lt;resources&gt;} lại định nghĩa một tài nguyên
+duy nhất. Ví dụ, phần tử {@code &lt;string&gt;} tạo tài nguyên
+{@code R.string} và phần tử {@code &lt;color&gt;} tạo tài nguyên {@code R.color}
+.</p>
+      <p>Vì mỗi tài nguyên được định nghĩa bằng phần tử XML của chính nó, bạn có thể đặt tên tệp
+theo cách mình muốn và đặt các loại tài nguyên khác nhau vào một tệp. Tuy nhiên, để giải thích rõ, bạn có thể
+muốn đặt các loại tài nguyên duy nhất vào những tệp khác nhau. Ví dụ, sau đây là một số quy ước
+tên tệp cho các tài nguyên mà bạn có thể tạo trong thư mục này:</p>
+      <ul>
+        <li>arrays.xml cho mảng tài nguyên (<a href="more-resources.html#TypedArray">mảng có phân loại</a>).</li>
+        <li>colors.xml cho <a href="more-resources.html#Color">giá trị màu</a></li>
+        <li>dimens.xml cho <a href="more-resources.html#Dimension">giá trị kích thước</a>.</li>
+        <li>strings.xml cho <a href="string-resource.html">giá trị
+xâu</a>.</li>
+        <li>styles.xml cho <a href="style-resource.html">kiểu</a>.</li>
+      </ul>
+      <p>Xem các phần <a href="string-resource.html">Tài nguyên Xâu</a>,
+        <a href="style-resource.html">Tài nguyên Kiểu</a>, và
+        <a href="more-resources.html">các Loại Tài nguyên khác</a>.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>xml/</code></td>
+    <td>Tệp XML tùy ý mà có thể được đọc vào thời gian chạy bằng cách gọi {@link
+android.content.res.Resources#getXml(int) Resources.getXML()}. Các tệp cấu hình XML khác nhau
+phải được lưu ở đây, chẳng hạn như một <a href="{@docRoot}guide/topics/search/searchable-config.html">cấu hình có thể tìm kiếm</a>.
+<!-- or preferences configuration. --></td>
+  </tr>
+</table>
+
+<p class="caution"><strong>Chú ý:</strong> Không được lưu tệp tài nguyên trực tiếp vào trong thư mục 
+{@code res/}&mdash;nó sẽ gây ra lỗi với trình biên dịch.</p>
+
+<p>Để biết thêm thông tin về các loại tài nguyên, hãy xem tài liệu <a href="available-resources.html">Các Loại Tài nguyên</a>.</p>
+
+<p>Tài nguyên mà bạn lưu trong thư mục con được định nghĩa trong bảng 1 là những tài nguyên "mặc định"
+của bạn. Cụ thể, những tài nguyên này định nghĩa thiết kế và nội dung mặc định cho ứng dụng của bạn.
+Tuy nhiên, các loại thiết bị dựa trên nền tảng Android khác nhau có thể gọi các loại tài nguyên khác nhau.
+Ví dụ, nếu một thiết bị có một màn hình lớn hơn bình thường, khi đó bạn nên cung cấp
+các tài nguyên bố trí khác nhau để tận dụng diện tích màn hình tăng thêm. Hoặc, nếu một thiết bị có
+thiết đặt ngôn ngữ khác, khi đó bạn nên cung cấp các tài nguyên xâu khác để biên dịch
+văn bản trong giao diện người dùng của mình. Để cung cấp những tài nguyên khác nhau này cho các cấu hình
+thiết bị khác nhau, bạn cần cung cấp tài nguyên thay thế bên cạnh những tài nguyên
+mặc định của mình.</p>
+
+
+<h2 id="AlternativeResources">Cung cấp Tài nguyên Thay thế</h2>
+
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Hình 1.</strong> Hai thiết bị khác nhau, mỗi thiết bị sử dụng các tài nguyên bố trí khác nhau.</p>
+</div>
+
+<p>Hầu như mọi ứng dụng đều nên cung cấp các tài nguyên thay thế để hỗ trợ những cấu hình
+thiết bị cụ thể. Ví dụ, bạn nên bao gồm các tài nguyên vẽ được thay thế cho các mật độ
+màn hình khác nhau và tài nguyên xâu thay thế cho các ngôn ngữ khác nhau. Vào thời gian chạy, Android
+sẽ phát hiện cấu hình thiết bị hiện tại và tải các tài nguyên
+tương ứng cho ứng dụng của bạn.</p>
+
+<p>Để quy định các phương án thay thế theo cấu hình cụ thể cho một tập hợp tài nguyên:</p>
+<ol>
+  <li>Tạo một thư mục mới trong {@code res/} có tên theo dạng {@code
+<em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em>}.
+    <ul>
+      <li><em>{@code &lt;resources_name&gt;}</em> là tên thư mục của các tài nguyên mặc định tương ứng
+(được định nghĩa trong bảng 1).</li>
+      <li><em>{@code &lt;qualifier&gt;}</em> là tên quy định một cấu hình riêng
+mà những tài nguyên này sẽ được sử dụng cho nó (được định nghĩa trong bảng 2).</li>
+    </ul>
+    <p>Bạn có thể nối nhiều hơn một <em>{@code &lt;qualifier&gt;}</em>. Tách riêng từng cái
+bằng một nét gạch.</p>
+    <p class="caution"><strong>Chú ý:</strong> Khi nối nhiều hạn định, bạn phải
+đặt chúng theo cùng thứ tự liệt kê trong bảng 2. Nếu các hạn định được xếp thứ tự
+sai, tài nguyên sẽ bị bỏ qua.</p>
+  </li>
+  <li>Lưu các tài nguyên thay thế tương ứng vào thư mục mới này. Tệp tài nguyên phải được
+đặt tên đúng như các tệp tài nguyên mặc định.</li>
+</ol>
+
+<p>Ví dụ, sau đây là một số tài nguyên mặc định và thay thế:</p>
+
+<pre class="classic no-pretty-print">
+res/
+    drawable/   <span style="color:black">
+        icon.png
+        background.png    </span>
+    drawable-hdpi/  <span style="color:black">
+        icon.png
+        background.png  </span>
+</pre>
+
+<p>Hạn định {@code hdpi} cho biết rằng các tài nguyên trong thư mục đó áp dụng cho những thiết bị có
+màn hình mật độ cao. Hình ảnh trong từng thư mục vẽ được này được định cỡ cho một mật độ
+màn hình cụ thể, nhưng tên tệp thì
+giống hệt. Bằng cách này, ID tài nguyên mà bạn sử dụng để tham chiếu {@code icon.png} hoặc hình ảnh {@code
+background.png} luôn như nhau, nhưng Android sẽ chọn
+phiên bản của từng tài nguyên cho khớp tốt nhất với thiết bị hiện tại, bằng cách so sánh thông tin cấu hình thiết bị
+với các hạn định về tên thư mục tài nguyên.</p>
+
+<p>Android hỗ trợ một vài hạn định cấu hình và bạn có thể
+thêm nhiều hạn định vào một tên thư mục, bằng cách tách riêng từng hạn định bằng một nét gạch. Bảng 2
+liệt kê các hạn định cấu hình hợp lệ, theo thứ tự ưu tiên&mdash;nếu bạn sử dụng nhiều
+hạn định cho một thư mục tài nguyên, bạn phải thêm chúng vào tên thư mục theo thứ tự được liệt kê trong
+bảng.</p>
+
+
+<p class="table-caption" id="table2"><strong>Bảng 2.</strong> Tên của hạn định
+cấu hình.</p>
+<table>
+    <tr>
+        <th>Cấu hình</th>
+        <th>Giá trị Hạn định</th>
+        <th>Mô tả</th>
+    </tr>
+    <tr id="MccQualifier">
+      <td>MCC và MNC</td>
+      <td>Ví dụ:<br/>
+        <code>mcc310</code><br/>
+        <code><nobr>mcc310-mnc004</nobr></code><br/>
+        <code>mcc208-mnc00</code><br/>
+        v.v.
+      </td>
+      <td>
+        <p>Mã quốc gia di động (MCC), đằng sau có thể là mã mạng di động (MNC)
+        từ thẻ SIM trong thiết bị. Ví dụ, <code>mcc310</code> ở Hoa Kỳ đối với mọi nhà mạng,
+        <code>mcc310-mnc004</code> ở Hoa Kỳ đối với Verizon, và <code>mcc208-mnc00</code> ở Pháp đối với
+        Orange.</p>
+        <p>Nếu thiết bị sử dụng một kết nối vô tuyến (điện thoại GSM), các giá trị MCC và MNC sẽ lấy
+       từ thẻ SIM.</p>
+        <p>Bạn cũng có thể sử dụng chỉ MCC (ví dụ, để đưa các tài nguyên
+pháp lý theo quốc gia cụ thể vào ứng dụng của bạn). Nếu bạn cần quy định chỉ dựa trên ngôn ngữ, hãy sử dụng hạn định
+<em>ngôn ngữ và khu vực</em> để thay thế (được trình bày ở phần tiếp theo). Nếu bạn quyết định sử dụng hạn định MCC và
+MNC, bạn nên cẩn thận và kiểm tra xem nó có hoạt động như kỳ vọng không.</p>
+        <p>Ngoài ra, cũng xem các trường cấu hình {@link
+android.content.res.Configuration#mcc}, và {@link
+android.content.res.Configuration#mnc}, tương ứng cho biết mã quốc gia di động và
+mã mạng di động hiện tại.</p>
+      </td>
+    </tr>
+    <tr id="LocaleQualifier">
+      <td>Ngôn ngữ và khu vực</td>
+      <td>Ví dụ:<br/>
+        <code>en</code><br/>
+        <code>fr</code><br/>
+        <code>en-rUS</code><br/>
+        <code>fr-rFR</code><br/>
+        <code>fr-rCA</code><br/>
+        v.v.
+      </td>
+      <td><p>Ngôn ngữ được định nghĩa bằng một mã ngôn ngữ <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
+              639-1</a> gồm hai chữ cái, có thể theo sau là một mã khu vực 
+              <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
+              3166-1-alpha-2</a> dài hai chữ cái (đằng trước là "{@code r}" chữ thường).
+        </p><p>
+        Các mã <em>không</em> phân biệt chữ hoa/thường; tiền tố {@code r} được sử dụng để
+        phân biệt phần khu vực.
+        Bạn không thể chỉ quy định một khu vực.</p>
+        <p>Điều này có thể thay đổi trong suốt vòng đời
+ứng dụng của bạn nếu người dùng thay đổi ngôn ngữ của mình trong cài đặt hệ thống. Xem phần <a href="runtime-changes.html">Xử lý Thay đổi Thời gian chạy</a> để biết thông tin về
+ảnh hưởng có thể có của thay đổi này tới ứng dụng của bạn trong thời gian chạy.</p>
+        <p>Xem phần <a href="localization.html">Bản địa hóa</a> để biết hướng dẫn đầy đủ về việc bản địa hóa
+ứng dụng của bạn cho các ngôn ngữ khác.</p>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#locale}, trong đó
+cho biết địa phương hiện tại.</p>
+      </td>
+    </tr>
+    <tr id="LayoutDirectionQualifier">
+      <td>Chỉ hướng Bố trí</td>
+      <td><code>ldrtl</code><br/>
+        <code>ldltr</code><br/>
+      </td>
+      <td><p>Chỉ hướng bố trí của ứng dụng của bạn. {@code ldrtl} có nghĩa là "chỉ-hướng-bố-trí-phải-qua-trái".
+      {@code ldltr} có nghĩa là "chỉ-hướng-bố-trí-trái-qua-phải" và là giá trị không biểu thị mặc định.
+      </p>
+      <p>Điều này có thể áp dụng cho bất kỳ tài nguyên nào, chẳng hạn như bố trí, nội dung vẽ được hoặc giá trị.
+      </p>
+      <p>Ví dụ, nếu bạn muốn cung cấp một bố trí cụ thể cho ngôn ngữ Ả-rập và một
+      bố trí chung nào đó cho bất kỳ ngôn ngữ “phải-qua-trái" nào khác (như chữ Ba Tư hoặc Do Thái), vậy bạn sẽ phải:
+      </p>
+<pre class="classic no-pretty-print">
+res/
+    layout/   <span style="color:black">
+        main.xml  </span>(Default layout)
+    layout-ar/  <span style="color:black">
+        main.xml  </span>(Specific layout for Arabic)
+    layout-ldrtl/  <span style="color:black">
+        main.xml  </span>(Any "right-to-left" language, except
+                  for Arabic, because the "ar" language qualifier
+                  has a higher precedence.)
+</pre>
+        <p class="note"><strong>Lưu ý:</strong> Để kích hoạt các tính năng bố trí phải-qua-trái
+        cho ứng dụng của mình, bạn phải đặt <a href="{@docRoot}guide/topics/manifest/application-element.html#supportsrtl">{@code
+        supportsRtl}</a> thành {@code "true"} và đặt <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> thành 17 trở lên.</p>
+        <p><em>Được thêm trong API mức 17.</em></p>
+      </td>
+    </tr>
+    <tr id="SmallestScreenWidthQualifier">
+      <td>smallestWidth</td>
+      <td><code>sw&lt;N&gt;dp</code><br/><br/>
+        Ví dụ:<br/>
+        <code>sw320dp</code><br/>
+        <code>sw600dp</code><br/>
+        <code>sw720dp</code><br/>
+        v.v.
+      </td>
+      <td>
+        <p>Kích cỡ cơ bản của một màn hình, thể hiện bằng kích thước ngắn nhất của khu vực màn hình
+khả dụng. Cụ thể, smallestWidth của thiết bị bằng khoảng ngắn nhất giữa chiều cao và chiều rộng
+khả dụng của màn hình (bạn cũng có thể gọi là "chiều rộng nhỏ nhất có thể" cho màn hình). Bạn có thể
+sử dụng hạn định này để đảm bảo rằng, không phụ thuộc vào hướng hiện tại của màn hình, ứng dụng
+của bạn có ít nhất {@code &lt;N&gt;} dp chiều rộng khả dụng cho UI của mình.</p>
+        <p>Ví dụ, nếu bố trí của bạn yêu cầu rằng kích thước nhỏ nhất của khu vực màn hình tối thiểu
+phải luôn bằng 600 dp, vậy bạn có thể sử dụng hạn định này để tạo các tài nguyên bố trí, {@code
+res/layout-sw600dp/}. Hệ thống sẽ chỉ sử dụng những tài nguyên này khi kích thước nhỏ nhất của
+màn hình khả dụng tối thiểu bằng 600dp, không phụ thuộc vào cạnh 600dp là chiều cao hay chiều rộng
+theo nhận thức của người dùng. SmallestWidth là đặc trưng kích cỡ màn hình cố định của thiết bị; <strong>smallestWidth của
+thiết bị không thay đổi khi hướng của màn hình thay đổi</strong>.</p>
+        <p>SmallestWidth của một thiết bị sẽ xem xét cả trang trí màn hình và UI hệ thống. Ví
+dụ, nếu thiết bị có một số phần tử UI cố định trên màn hình mà chiếm mất khoảng trống dọc
+theo trục smallestWidth, hệ thống sẽ khai báo smallestWidth nhỏ hơn kích cỡ màn hình
+thực tế, bởi chúng là những điểm ảnh màn hình không khả dụng cho UI của bạn. Vì thế, giá trị mà bạn sử dụng
+nên là kích thước nhỏ nhất thực tế <em>mà bố trí của bạn yêu cầu</em> (thông thường, giá trị này bằng
+"chiều rộng nhỏ nhất" mà bố trí của bạn hỗ trợ, không phụ thuộc vào hướng hiện tại của màn hình).</p>
+        <p>Một số giá trị mà bạn có thể sử dụng ở đây đối với các kích cỡ màn hình phổ biến:</p>
+        <ul>
+          <li>320, cho các thiết bị có cấu hình màn hình như:
+            <ul>
+              <li>240x320 ldpi (thiết bị cầm tay QVGA)</li>
+              <li>320x480 mdpi (thiết bị cầm tay)</li>
+              <li>480x800 hdpi (thiết bị cầm tay mật độ cao)</li>
+            </ul>
+          </li>
+          <li>480, đối với những màn hình như 480x800 mdpi (máy tính bảng/thiết bị cầm tay).</li>
+          <li>600, đối với những màn hình như 600x1024 mdpi (máy tính bảng 7").</li>
+          <li>720, đối với những màn hình như 720x1280 mdpi (máy tính bảng 10").</li>
+        </ul>
+        <p>Khi ứng dụng của bạn cung cấp nhiều thư mục tài nguyên với những giá trị khác nhau cho
+        hạn định smallestWidth, hệ thống sẽ sử dụng hạn định gần nhất với (không vượt quá)
+smallestWidth của thiết bị. </p>
+        <p><em>Được thêm trong API mức 13.</em></p>
+        <p>Xem thêm thuộc tính <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html#requiresSmallest">{@code
+android:requiresSmallestWidthDp}</a>, trong đó khai báo smallestWidth tối thiểu mà ứng dụng của bạn
+tương thích với, và trường cấu hình {@link
+android.content.res.Configuration#smallestScreenWidthDp}, trong đó lưu trữ giá trị
+smallestWidth của thiết bị.</p>
+        <p>Để biết thêm thông tin về việc thiết kế cho các màn hình khác nhau và sử dụng hạn định
+này, hãy xem hướng dẫn dành cho nhà phát triển <a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ
+Nhiều Màn hình</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenWidthQualifier">
+      <td>Chiều rộng khả dụng</td>
+      <td><code>w&lt;N&gt;dp</code><br/><br/>
+        Ví dụ:<br/>
+        <code>w720dp</code><br/>
+        <code>w1024dp</code><br/>
+        v.v.
+      </td>
+      <td>
+        <p>Quy định một chiều rộng màn hình khả dụng tối thiểu theo đơn vị {@code dp} mà tại đó, tài nguyên
+          nên được sử dụng&mdash;được định nghĩa bởi giá trị <code>&lt;N&gt;</code>.  Giá trị
+          cấu hình này sẽ thay đổi khi hướng
+          thay đổi giữa khổ ngang và dọc để khớp với chiều rộng thực tế hiện tại.</p>
+        <p>Khi ứng dụng của bạn cung cấp nhiều thư mục tài nguyên với những giá trị khác nhau
+          cho cấu hình này, hệ thống sẽ sử dụng giá trị gần nhất với (không vượt quá)
+          chiều rộng hiện tại của màn hình.  Giá trị
+          ở đây xét cả trang trí trên màn hình, vì thế nếu thiết bị có một số
+          phần tử UI cố định ở cạnh trái hoặc phải của màn hình, nó
+          sẽ sử dụng một giá trị cho chiều rộng nhỏ hơn kích cỡ màn hình thực sự, dùng
+          cho những phần tử UI này và làm giảm khoảng trống khả dụng của ứng dụng.</p>
+        <p><em>Được thêm trong API mức 13.</em></p>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#screenWidthDp}
+ mà chứa chiều rộng màn hình hiện tại.</p>
+        <p>Để biết thêm thông tin về việc thiết kế cho các màn hình khác nhau và sử dụng hạn định
+này, hãy xem hướng dẫn dành cho nhà phát triển <a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ
+Nhiều Màn hình</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenHeightQualifier">
+      <td>Chiều cao khả dụng</td>
+      <td><code>h&lt;N&gt;dp</code><br/><br/>
+        Ví dụ:<br/>
+        <code>h720dp</code><br/>
+        <code>h1024dp</code><br/>
+        v.v.
+      </td>
+      <td>
+        <p>Quy định chiều cao màn hình khả dụng tối thiểu theo đơn vị "dp" mà tại đó tài nguyên
+          nên được sử dụng&mdash;được định nghĩa bởi giá trị <code>&lt;N&gt;</code>.  Giá trị
+          cấu hình này sẽ thay đổi khi hướng
+          thay đổi giữa khổ ngang và dọc để khớp với chiều cao thực tế hiện tại.</p>
+        <p>Khi ứng dụng của bạn cung cấp nhiều thư mục tài nguyên với những giá trị khác nhau
+          cho cấu hình này, hệ thống sẽ sử dụng giá trị gần nhất với (không vượt quá)
+          chiều cao hiện tại của màn hình.  Giá trị
+          ở đây xét cả trang trí trên màn hình, vì thế nếu thiết bị có một số
+          phần tử UI cố định trên cạnh trên hoặc dưới của màn hình, nó sẽ sử dụng
+          một giá trị cho chiều cao nhỏ hơn kích cỡ màn hình thực sự, dùng
+          cho những phần tử UI này và làm giảm khoảng trống khả dụng của ứng dụng.  Trang trí
+          trên màn hình mà không cố định (chẳng hạn như thanh trạng thái của điện thoại mà có thể được
+          ẩn khi ở toàn màn hình) <em>không</em> được xét ở đây, cả
+          những trang trí trên cửa sổ như thanh tiêu đề hay thanh hành động cũng vậy, vì thế ứng dụng phải được chuẩn bị để
+          xử lý một khoảng trống nhỏ hơn mức mà chúng quy định.
+        <p><em>Được thêm trong API mức 13.</em></p>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#screenHeightDp}
+ mà chứa chiều rộng màn hình hiện tại.</p>
+        <p>Để biết thêm thông tin về việc thiết kế cho các màn hình khác nhau và sử dụng hạn định
+này, hãy xem hướng dẫn dành cho nhà phát triển <a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ
+Nhiều Màn hình</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenSizeQualifier">
+      <td>Kích cỡ màn hình</td>
+      <td>
+        <code>small</code><br/>
+        <code>normal</code><br/>
+        <code>large</code><br/>
+        <code>xlarge</code>
+      </td>
+      <td>
+        <ul class="nolist">
+        <li>{@code small}: Các màn hình có kích cỡ tương tự như màn hình
+       QVGA mật độ thấp. Kích cỡ bố trí tối thiểu đối với một màn hình nhỏ
+        bằng xấp xỉ 320x426 đơn vị dp.  Các ví dụ như QVGA mật độ thấp và VGA mật độ
+        cao.</li>
+        <li>{@code normal}: Các màn hình có kích cỡ tương tự như màn hình
+       HVGA mật độ trung bình. Kích cỡ bố trí tối thiểu
+        đối với một màn hình bình thường bằng xấp xỉ 320x470 đơn vị dp.  Ví dụ
+        về những màn hình như vậy là WQVGA mật độ thấp, HVGA mật độ trung bình, WVGA
+        mật độ cao.</li>
+        <li>{@code large}: Các màn hình có kích cỡ tương tự như màn hình
+       VGA mật độ trung bình.
+        Kích cỡ bố trí tối thiểu đối với một màn hình lớn bằng xấp xỉ 480x640 đơn vị dp.
+        Ví dụ như các màn hình mật độ trung bình VGA và WVGA.</li>
+        <li>{@code xlarge}: Các màn hình lớn hơn đáng kể so với màn hình
+        HVGA mật độ trung bình truyền thống. Kích cỡ bố trí tối thiểu đối với một màn hình siêu lớn
+        bằng xấp xỉ 720x960 đơn vị dp.  Trong hầu hết trường hợp, những thiết bị có màn hình
+        siêu lớn sẽ quá lớn để mang trong túi và gần như là 
+        thiết bị kiểu máy tính bảng. <em>Được thêm trong API mức 9.</em></li>
+        </ul>
+        <p class="note"><strong>Lưu ý:</strong> Việc sử dụng một hạn định kích cỡ không hàm ý rằng các
+tài nguyên <em>chỉ</em> áp dụng cho màn hình có kích cỡ đó. Nếu bạn không cung cấp cho các tài nguyên
+thay thế với các hạn định khớp tốt hơn với cấu hình thiết bị hiện tại, hệ thống có thể sử dụng
+bất kỳ tài nguyên nào <a href="#BestMatch">phù hợp nhất</a>.</p>
+        <p class="caution"><strong>Chú ý:</strong> Nếu tất cả tài nguyên của bạn sử dụng một hạn định kích cỡ
+<em>lớn hơn</em> màn hình hiện tại, hệ thống sẽ <strong>không</strong> sử dụng chúng và
+ứng dụng của bạn sẽ bị lỗi vào thời gian chạy (ví dụ, nếu tất cả tài nguyên bố trí được gắn thẻ hạn định {@code
+xlarge} nhưng thiết bị lại có màn hình kích cỡ bình thường).</p>
+        <p><em>Được thêm trong API mức 4.</em></p>
+        
+        <p>Xem <a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ Nhiều
+Màn hình</a> để biết thêm thông tin.</p>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#screenLayout},
+ở đó cho biết màn hình là màn hình nhỏ, bình thường,
+hay lớn.</p>
+      </td>
+    </tr>
+    <tr id="ScreenAspectQualifier">
+      <td>Tỷ lệ màn hình</td>
+      <td>
+        <code>long</code><br/>
+        <code>notlong</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code long}: Màn hình dài, chẳng hạn như WQVGA, WVGA, FWVGA</li>
+          <li>{@code notlong}: Màn hình không dài, chẳng hạn như QVGA, HVGA và VGA</li>
+        </ul>
+        <p><em>Được thêm trong API mức 4.</em></p>
+        <p>Giá trị này thuần túy được dựa trên tỷ lệ khung ảnh của màn hình (màn hình "dài" sẽ rộng hơn). Nó 
+không liên quan tới hướng của màn hình.</p>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#screenLayout},
+ở đó cho biết màn hình có dài không.</p>
+      </td>
+    </tr>
+    <tr id="OrientationQualifier">
+      <td>Hướng của màn hình</td>
+      <td>
+        <code>port</code><br/>
+        <code>land</code>  <!-- <br/>
+        <code>square</code>  -->
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code port}: Thiết bị ở hướng đứng (thẳng đứng)</li>
+          <li>{@code land}: Thiết bị ở khổ ngang (nằm ngang)</li>
+          <!-- Square mode is currently not used. -->
+        </ul>
+        <p>Giá trị này có thể thay đổi trong suốt vòng đời ứng dụng của bạn nếu người dùng xoay
+màn hình. Xem phần <a href="runtime-changes.html">Xử lý Thay đổi Thời gian chạy</a> để biết thông tin về
+ảnh hưởng của điều này tới ứng dụng của bạn trong thời gian chạy.</p>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#orientation}, trong đó
+cho biết hướng thiết bị hiện tại.</p>
+      </td>
+    </tr>
+    <tr id="UiModeQualifier">
+      <td>Chế độ UI</td>
+      <td>
+        <code>car</code><br/>
+        <code>desk</code><br/>
+        <code>television</code><br/>
+        <code>appliance</code>
+        <code>watch</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code car}: Thiết bị đang hiển thị trong đế gắn trên ô-tô</li>
+          <li>{@code desk}: Thiết bị đang hiển thị trong đế gắn trên bàn</li>
+          <li>{@code television}: Thiết bị đang hiển thị trên một TV, mang đến một
+          trải nghiệm "10 foot" (3 mét) trong đó UI của nó nằm trên một màn hình lớn
+          cách xa người dùng, được định hướng chủ yếu quanh DPAD hoặc cách
+          tương tác không sử dụng con trỏ khác</li>
+          <li>{@code appliance}: Thiết bị đang đóng vai trò như một dụng cụ không
+          có màn hình hiển thị</li>
+          <li>{@code watch}: Thiết bị có một màn hình hiển thị và được đeo trên cổ tay</li>
+        </ul>
+        <p><em>Được thêm trong API mức 8, TV được thêm trong API 13, đồng hồ được thêm trong API 20.</em></p>
+        <p>Để biết thông tin về cách ứng dụng của bạn hồi đáp khi thiết bị được cắm vào hoặc
+        rút khỏi đế, hãy đọc <a href="{@docRoot}training/monitoring-device-state/docking-monitoring.html">Xác định
+và Theo dõi Trạng thái và Loại Đế</a>.</p>
+        <p>Giá trị này có thể thay đổi trong suốt vòng đời ứng dụng của bạn nếu người dùng đặt
+thiết bị vào đế. Bạn có thể kích hoạt hoặc vô hiệu hóa một số chế độ này bằng cách sử dụng {@link
+android.app.UiModeManager}. Xem phần <a href="runtime-changes.html">Xử lý Thay đổi Thời gian chạy</a> để
+biết thông tin về ảnh hưởng của điều này tới ứng dụng của bạn trong thời gian chạy.</p>
+      </td>
+    </tr>
+    <tr id="NightQualifier">
+      <td>Chế độ ban đêm</td>
+      <td>
+        <code>night</code><br/>
+        <code>notnight</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code night}: Thời gian ban đêm</li>
+          <li>{@code notnight}: Thời gian ban ngày</li>
+        </ul>
+        <p><em>Được thêm trong API mức 8.</em></p>
+        <p>Giá trị này có thể thay đổi trong suốt vòng đời ứng dụng của bạn nếu chế độ ban đêm được để ở
+chế độ tự động (mặc định), trong trường hợp đó chế độ sẽ thay đổi dựa vào thời gian trong ngày.  Bạn có thể kích hoạt
+hoặc vô hiệu hóa chế độ này bằng cách sử dụng {@link android.app.UiModeManager}. Xem phần <a href="runtime-changes.html">Xử lý Thay đổi Thời gian chạy</a> để biết thông tin về ảnh hưởng của điều này tới
+ứng dụng của bạn trong thời gian chạy.</p>
+      </td>
+    </tr>
+    <tr id="DensityQualifier">
+      <td>Mật độ điểm ảnh màn hình (dpi)</td>
+      <td>
+        <code>ldpi</code><br/>
+        <code>mdpi</code><br/>
+        <code>hdpi</code><br/>
+        <code>xhdpi</code><br/>
+        <code>xxhdpi</code><br/>
+        <code>xxxhdpi</code><br/>
+        <code>nodpi</code><br/>
+        <code>tvdpi</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code ldpi}: Màn hình mật độ thấp; xấp xỉ 120dpi.</li>
+          <li>{@code mdpi}: Màn hình mật độ trung bình (trên HVGA truyền thống); xấp xỉ
+160dpi.</li>
+          <li>{@code hdpi}: Màn hình mật độ cao; xấp xỉ 240dpi.</li>
+          <li>{@code xhdpi}: Màn hình mật độ siêu cao; xấp xỉ 320dpi. <em>Được thêm trong API
+Mức 8</em></li>
+          <li>{@code xxhdpi}: Màn hình mật độ siêu siêu cao; xấp xỉ 480dpi. <em>Được thêm trong API
+Mức 16</em></li>
+          <li>{@code xxxhdpi}: Mật độ siêu siêu siêu cao sử dụng (chỉ biểu tượng trình khởi chạy, xem
+            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">ghi chú</a> 
+            trong <em>Hỗ trợ Nhiều Màn hình</em>); xấp xỉ 640dpi. <em>Được thêm trong API
+Mức 18</em></li>
+          <li>{@code nodpi}: Loại này có thể được sử dụng cho tài nguyên bitmap mà bạn không muốn được định cỡ
+cho khớp với mật độ của thiết bị.</li>
+          <li>{@code tvdpi}: Màn hình trong khoảng giữa mdpi và hdpi; xấp xỉ 213dpi. Đây
+không được coi là nhóm mật độ "cơ bản". Nó được dành chủ yếu cho TV và hầu hết
+các ứng dụng không cần nó&mdash;với điều kiện các tài nguyên mdpi và hpdi đủ cho hầu hết ứng dụng
+và hệ thống sẽ định cỡ chúng cho phù hợp. Hạn định này đã được giới thiệu với API mức 13.</li>
+        </ul>
+        <p>Có tỷ lệ định cỡ 3:4:6:8:12:16 giữa sáu mật độ cơ bản (bỏ qua mật độ
+tvdpi). Vì thế, một tệp bimap 9x9 trong ldpi sẽ bằng 12x12 trong mdpi, 18x18 trong hdpi, 24x24 trong xhdpi, v.v.
+</p>
+        <p>Nếu bạn quyết định rằng tài nguyên hình ảnh của mình không đủ đẹp trên TV hoặc
+một số thiết bị khác và muốn thử tài nguyên tvdpi, hệ số định cỡ sẽ bằng 1,33*mdpi. Ví
+dụ, một hình ảnh 100px x 100px đối với màn hình mdpi sẽ bằng 133px x 133px đối với tvdpi.</p>
+        <p class="note"><strong>Lưu ý:</strong> Việc sử dụng một hạn định mật độ không hàm ý rằng các
+tài nguyên <em>chỉ</em> áp dụng cho màn hình có mật độ đó. Nếu bạn không cung cấp cho các tài nguyên
+thay thế với các hạn định khớp tốt hơn với cấu hình thiết bị hiện tại, hệ thống có thể sử dụng
+bất kỳ tài nguyên nào <a href="#BestMatch">phù hợp nhất</a>.</p>
+        <p>Xem <a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ Nhiều
+Màn hình</a> để biết thêm thông tin về cách xử lý các mật độ màn hình khác nhau và cách Android
+có thể định cỡ bitmap của mình cho vừa với mật độ hiện tại.</p>
+       </td>
+    </tr>
+    <tr id="TouchscreenQualifier">
+      <td>Loại màn hình cảm ứng</td>
+      <td>
+        <code>notouch</code><br/>
+        <code>finger</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code notouch}: Thiết bị không có màn hình cảm ứng.</li>
+          <li>{@code finger}: Thiết bị có màn hình cảm ứng để
+          được sử dụng thông qua tương tác hướng của ngón tay của người dùng.</li>
+        </ul>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#touchscreen},
+nó cho biết loại màn hình cảm ứng trên thiết bị.</p>
+      </td>
+    </tr>
+    <tr id="KeyboardAvailQualifier">
+      <td>Sự sẵn có của bàn phím</td>
+      <td>
+        <code>keysexposed</code><br/>
+        <code>keyshidden</code><br/>
+        <code>keyssoft</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code keysexposed}: Thiết bị có sẵn một bàn phím. Nếu thiết bị có một
+bàn phím mềm được kích hoạt (có khả năng), giá trị này có thể được sử dụng khi bàn phím cứng
+<em>không</em> hiển thị trước người dùng, ngay cả khi thiết bị không có bàn phím cứng. Nếu không có
+bàn phím mềm hoặc bàn phím mềm bị vô hiệu hóa, khi đó giá trị này chỉ được sử dụng khi một bàn phím cứng được
+hiển thị.</li>
+          <li>{@code keyshidden}: Thiết bị có sẵn một bàn phím cứng nhưng nó bị
+ẩn đi <em>và </em> thiết bị <em>không</em> có bàn phím mềm được kích hoạt.</li>
+          <li>{@code keyssoft}: Thiết bị có một bàn phím mềm được kích hoạt dù nó có
+hiển thị hay không.</li>
+        </ul>
+        <p>Nếu bạn cung cấp các tài nguyên <code>keysexposed</code>, nhưng không cung cấp tài nguyên <code>keyssoft</code>
+, hệ thống sẽ sử dụng tài nguyên <code>keysexposed</code> mà không phụ thuộc vào việc có hiển thị
+bàn phím hay không, miễn là hệ thống có kích hoạt một bàn phím mềm.</p>
+        <p>Giá trị này có thể thay đổi trong vòng đời ứng dụng của bạn nếu người dùng mở một bàn phím
+cứng. Xem phần <a href="runtime-changes.html">Xử lý Thay đổi Thời gian chạy</a> để biết thông tin về
+ảnh hưởng của điều này tới ứng dụng của bạn trong thời gian chạy.</p>
+        <p>Xem thêm các trường cấu hình {@link
+android.content.res.Configuration#hardKeyboardHidden} và {@link
+android.content.res.Configuration#keyboardHidden}, theo đó tương ứng cho biết mức độ hiển thị của bàn phím
+cứng và mức độ hiển thị của bất kỳ loại bàn phím nào (bao gồm bàn phím mềm).</p>
+      </td>
+    </tr>
+    <tr id="ImeQualifier">
+      <td>Phương pháp nhập liệu văn bản chính</td>
+      <td>
+        <code>nokeys</code><br/>
+        <code>qwerty</code><br/>
+        <code>12key</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nokeys}: Thiết bị không có phím cứng cho việc nhập liệu văn bản.</li>
+          <li>{@code qwerty}: Thiết bị có một bàn phím qwerty cứng, dù nó có hiển thị với
+người dùng
+hay không.</li>
+          <li>{@code 12key}: Thiết bị có một bàn phím 12-phím cứng, dù nó có hiển thị với
+người dùng hay không.</li>
+        </ul>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#keyboard}, trong đó
+cho biết phương pháp nhập liệu văn bản chính sẵn có.</p>
+      </td>
+    </tr>
+    <tr id="NavAvailQualifier">
+      <td>Sự sẵn có của phím điều hướng</td>
+      <td>
+        <code>navexposed</code><br/>
+        <code>navhidden</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code navexposed}: Có sẵn phím điều hướng cho người dùng.</li>
+          <li>{@code navhidden}: Không có sẵn phím điều hướng (chẳng hạn như phía sau một nắp
+đóng).</li>
+        </ul>
+        <p>Giá trị này có thể thay đổi trong suốt vòng đời ứng dụng của bạn nếu người dùng làm hiện
+phím điều hướng. Xem phần <a href="runtime-changes.html">Xử lý Thay đổi Thời gian chạy</a> để
+biết thông tin về ảnh hưởng của điều này tới ứng dụng của bạn trong thời gian chạy.</p>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#navigationHidden},
+ở đó có cho biết các phím điều hướng có bị ẩn không.</p>
+      </td>
+    </tr>
+    <tr id="NavigationQualifier">
+      <td>Phương pháp điều hướng không cảm ứng chính</td>
+      <td>
+        <code>nonav</code><br/>
+        <code>dpad</code><br/>
+        <code>trackball</code><br/>
+        <code>wheel</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nonav}: Thiết bị không có phương tiện điều hướng ngoài cách sử dụng
+màn hình cảm ứng.</li>
+          <li>{@code dpad}: Thiết bị có bàn điều hướng (d-pad) để điều hướng.</li>
+          <li>{@code trackball}: Thiết bị có bi xoay để điều hướng.</li>
+          <li>{@code wheel}: Thiết bị có bánh xe điều hướng để điều hướng (không phổ biến).</li>
+        </ul>
+        <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#navigation}, trong đó
+cho biết loại phương pháp điều hướng sẵn có.</p>
+      </td>
+    </tr>
+<!-- DEPRECATED
+    <tr>
+      <td>Screen dimensions</td>
+      <td>Examples:<br/>
+        <code>320x240</code><br/>
+        <code>640x480</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>The larger dimension must be specified first. <strong>This configuration is deprecated
+and should not be used</strong>. Instead use "screen size," "wider/taller screens," and "screen
+orientation" described above.</p>
+      </td>
+    </tr>
+-->
+    <tr id="VersionQualifier">
+      <td>Phiên bản Nền tảng (Mức API)</td>
+      <td>Ví dụ:<br/>
+        <code>v3</code><br/>
+        <code>v4</code><br/>
+        <code>v7</code><br/>
+        v.v.</td>
+      <td>
+        <p>Mức API được hỗ trợ bởi thiết bị. Ví dụ, <code>v1</code> đối với API mức
+1 (thiết bị ở phiên bản Android 1.0 hoặc cao hơn) và <code>v4</code> đối với API mức 4 (thiết bị ở phiên bản Android
+1.6 hoặc cao hơn). Xem tài liệu <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Mức API của Android</a> để biết thêm thông tin
+về những giá trị này.</p>
+      </td>
+    </tr>
+</table>
+
+
+<p class="note"><strong>Lưu ý:</strong> Một số hạn định cấu hình đã được thêm kể từ phiên bản Android
+1.0, vì thế không phải tất cả phiên bản Android đều hỗ trợ tất cả hạn định. Việc sử dụng một hạn định mới sẽ hàm ý
+thêm hạn định phiên bản nền tảng sao cho các thiết bị cũ hơn chắc chắn sẽ bỏ qua nó. Ví dụ, sử dụng
+một hạn định <code>w600dp</code> sẽ tự động bao gồm hạn định <code>v13</code>, vì
+hạn định chiều rộng khả dụng mới có trong API mức 13. Để tránh bất kỳ sự cố nào, hãy luôn đưa vào một tập hợp
+các tài nguyên mặc định (tập hợp các tài nguyên <em>không có hạn định</em>). Để biết thêm thông tin, hãy xem phần
+nói về <a href="#Compatibility">Cung cấp Tính tương thích giữa Thiết bị với Tài nguyên
+Tốt nhất</a>.</p>
+
+
+
+<h3 id="QualifierRules">Quy tắc về tên hạn định</h3>
+
+<p>Sau đây là một số quy tắc về việc sử dụng tên của hạn định cấu hình:</p>
+
+<ul>
+    <li>Bạn có thể quy định nhiều hạn định cho một tập hợp đơn lẻ các tài nguyên, được tách riêng bởi dấu gạch ngang. Ví
+dụ, <code>drawable-en-rUS-land</code> sẽ áp dụng cho các thiết bị US-English ở hướng
+khổ ngang.</li>
+    <li>Các hạn định phải theo thứ tự liệt kê trong <a href="#table2">bảng 2</a>. Ví
+dụ:
+      <ul>
+        <li>Sai: <code>drawable-hdpi-port/</code></li>
+        <li>Đúng: <code>drawable-port-hdpi/</code></li>
+      </ul>
+    </li>
+    <li>Các thư mục tài nguyên thay thế không được lồng nhau. Ví dụ, bạn không được có
+<code>res/drawable/drawable-en/</code>.</li>
+    <li>Các giá trị không phân biệt chữ hoa/thường.  Trình biên dịch tài nguyên sẽ chuyển tên thư mục
+    thành chữ thường trước khi xử lý để tránh các vấn đề xảy ra trên hệ thống tệp
+    không phân biệt chữ hoa/thường. Bất kỳ việc đổi sang chữ hoa nào trong tên chỉ nhằm mục đích dễ đọc hơn.</li>
+    <li>Chỉ hỗ trợ một giá trị cho mỗi loại hạn định. Ví dụ, nếu bạn muốn sử dụng
+cùng các tệp vẽ được cho tiếng Tây Ban Nha và tiếng Pháp, bạn <em>không thể</em> đặt tên thư mục là
+<code>drawable-rES-rFR/</code>. Thay vào đó, bạn cần hai thư mục tài nguyên chẳng hạn như
+<code>drawable-rES/</code> và <code>drawable-rFR/</code>, trong đó chứa các tệp phù hợp.
+Tuy nhiên, bạn không bắt buộc thực sự phải tạo bản sao các tệp như nhau ở cả hai vị trí. Thay vào đó, bạn có thể
+tạo một bí danh tới một tài nguyên. Xem phần <a href="#AliasResources">Tạo
+tài nguyên bí danh</a> ở bên dưới.</li>
+</ul>
+
+<p>Sau khi bạn lưu tài nguyên thay thế vào các thư mục được đặt tên bằng
+những hạn định này, Android sẽ tự động áp dụng các tài nguyên trong ứng dụng của bạn dựa trên
+cấu hình thiết bị hiện tại. Cứ mỗi lần yêu cầu một tài nguyên, Android lại kiểm tra các thư mục tài nguyên
+thay thế chứa tệp tài nguyên được yêu cầu, rồi <a href="#BestMatch">tìm tài nguyên
+so khớp phù hợp nhất</a> (được trình bày ở bên dưới). Nếu không có tài nguyên thay thế khớp
+với một cấu hình thiết bị cụ thể, khi đó Android sẽ sử dụng các tài nguyên mặc định tương ứng (
+tập hợp các tài nguyên cho một loại tài nguyên cụ thể không bao gồm hạn định
+cấu hình).</p>
+
+
+
+<h3 id="AliasResources">Tạo tài nguyên bí danh</h3>
+
+<p>Khi bạn có một tài nguyên muốn sử dụng cho nhiều hơn một cấu hình
+thiết bị (nhưng không muốn cung cấp làm tài nguyên mặc định), bạn không cần đặt
+cùng tài nguyên đó vào nhiều hơn một thư mục tài nguyên thay thế. Thay vào đó, bạn có thể (trong một số trường hợp) tạo một tài nguyên
+thay thế
+đóng vai trò như một bí danh cho tài nguyên được lưu trong thư mục tài nguyên mặc định của bạn.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Không phải tất cả tài nguyên đều đưa ra cơ chế mà theo đó bạn có thể
+tạo một bí danh tới một tài nguyên khác. Cụ thể, hoạt hình, menu, tài nguyên thô và các tài nguyên
+không được quy định khác trong thư mục {@code xml/} không cung cấp tính năng này.</p>
+
+<p>Ví dụ, hãy tưởng tượng bạn có một biểu tượng ứng dụng, {@code icon.png}, và cần phiên bản duy nhất của
+nó cho các bản địa khác nhau. Tuy nhiên, hai bản địa English-Canadian và French-Canadian, cần
+sử dụng cùng phiên bản. Bạn có thể giả sử rằng mình cần sao chép cùng hình ảnh
+vào thư mục tài nguyên cho cả English-Canadian và French-Canadian, nhưng điều đó
+không đúng. Thay vào đó, bạn có thể lưu hình ảnh được sử dụng cho cả hai thành {@code icon_ca.png} (bất kỳ
+tên nào khác ngoài {@code icon.png}) và đặt
+nó vào thư mục {@code res/drawable/} mặc định. Sau đó, tạo một tệp {@code icon.xml} trong {@code
+res/drawable-en-rCA/} và {@code res/drawable-fr-rCA/} tham chiếu tới tài nguyên {@code icon_ca.png}
+bằng cách sử dụng phần tử {@code &lt;bitmap&gt;}. Điều này cho phép bạn lưu trữ chỉ một phiên bản của tệp
+PNG và hai tệp XML nhỏ trỏ tới nó. (Ví dụ về tệp XML được trình bày ở bên dưới.)</p>
+
+
+<h4>Nội dung vẽ được</h4>
+
+<p>Để tạo một bí danh cho một nội dung vẽ được đang tồn tại, hãy sử dụng phần tử {@code &lt;bitmap&gt;}.
+Ví dụ:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/icon_ca" />
+</pre>
+
+<p>Nếu bạn lưu tệp này thành {@code icon.xml} (trong một thư mục tài nguyên thay thế chẳng hạn như
+{@code res/drawable-en-rCA/}), nó sẽ được biên dịch vào một tài nguyên mà bạn
+có thể tham chiếu như là {@code R.drawable.icon}, nhưng thực tế lại là bí danh cho tài nguyên {@code
+R.drawable.icon_ca} (được lưu trong {@code res/drawable/}).</p>
+
+
+<h4>Bố trí</h4>
+
+<p>Để tạo một bí danh cho một bố trí hiện tại, hãy sử dụng phần tử {@code &lt;include&gt;}
+, được bọc trong một {@code &lt;merge&gt;}. Ví dụ:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;merge>
+    &lt;include layout="@layout/main_ltr"/>
+&lt;/merge>
+</pre>
+
+<p>Nếu bạn lưu tệp này thành {@code main.xml}, nó sẽ được biên dịch thành một tài nguyên mà bạn có thể tham chiếu
+như là {@code R.layout.main}, nhưng thực tế lại là một bí danh cho tài nguyên {@code R.layout.main_ltr}
+.</p>
+
+
+<h4>Xâu và các giá trị đơn giản khác</h4>
+
+<p>Để tạo một bí danh cho một xâu hiện có, chỉ cần sử dụng ID tài nguyên của xâu
+mong muốn làm giá trị cho xâu mới. Ví dụ:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello">Hello&lt;/string>
+    &lt;string name="hi">@string/hello&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>Tài nguyên {@code R.string.hi} lúc này là một bí danh cho {@code R.string.hello}.</p>
+
+<p> <a href="{@docRoot}guide/topics/resources/more-resources.html">Các giá trị đơn giản khác</a> cũng
+hoạt động tương tự. Ví dụ, màu sắc:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;color name="yellow">#f00&lt;/color>
+    &lt;color name="highlight">@color/red&lt;/color>
+&lt;/resources>
+</pre>
+
+
+
+
+<h2 id="Compatibility">Cung cấp Tính tương thích giữa Thiết bị với Tài nguyên Tốt nhất</h2>
+
+<p>Để ứng dụng của bạn hỗ trợ nhiều cấu hình thiết bị, một điều rất quan trọng đó là
+bạn luôn cung cấp các tài nguyên mặc định cho từng loại tài nguyên mà ứng dụng của bạn sử dụng.</p>
+
+<p>Ví dụ, nếu ứng dụng của bạn hỗ trợ vài ngôn ngữ, hãy luôn bao gồm một thư mục {@code
+values/} (trong đó, xâu của bạn được lưu) <em>mà không cần</em> một <a href="#LocaleQualifier">hạn định ngôn ngữ và khu vực</a>. Nếu thay vào đó bạn đặt tất cả tệp xâu của mình
+vào các thư mục có một hạn định ngôn ngữ và khu vực, khi đó ứng dụng của bạn sẽ bị lỗi khi chạy
+trên một thiết bị được đặt ở một ngôn ngữ mà các xâu của bạn không hỗ trợ. Nhưng miễn là bạn cung cấp các tài nguyên
+{@code values/} mặc định, khi đó ứng dụng của bạn sẽ chạy bình thường (ngay cả khi người dùng không
+hiểu ngôn ngữ đó&mdash;vậy còn tốt hơn là bị lỗi).</p>
+
+<p>Tương tự, nếu bạn cung cấp các tài nguyên bố trí khác nhau dựa trên hướng của màn hình, bạn nên
+chọn một hướng làm mặc định của mình. Ví dụ, thay vì cung cấp tài nguyên bố trí trong {@code
+layout-land/} cho khổ ngang và {@code layout-port/} cho khổ dọc, hãy để một cái làm mặc định, chẳng hạn như
+{@code layout/} đối với khổ ngang và {@code layout-port/} đối với khổ dọc.</p>
+
+<p>Việc cung cấp tài nguyên mặc định quan trọng không chỉ bởi ứng dụng của bạn có thể chạy trên một
+cấu hình mà bạn chưa nghĩ đến, mà còn bởi các phiên bản Android mới đôi khi thêm
+hạn định cấu hình mà những phiên bản cũ hơn không hỗ trợ. Nếu bạn sử dụng một hạn định tài nguyên mới,
+nhưng vẫn duy trì tính tương thích về mã với các phiên bản cũ hơn của Android thì khi một phiên bản cũ hơn của
+Android chạy trên ứng dụng của bạn, nó sẽ bị lỗi nếu bạn không cung cấp tài nguyên mặc định, do nó 
+không thể sử dụng tài nguyên được đặt tên bằng hạn định mới. Ví dụ, nếu <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+minSdkVersion}</a> của bạn được đặt bằng 4, và bạn xác định tất cả tài nguyên vẽ được của mình bằng cách sử dụng <a href="#NightQualifier">chế độ ban đêm</a> ({@code night} hoặc {@code notnight}, đã được thêm trong API
+Mức 8), khi đó một thiết bị API mức 4 sẽ không thể truy cập tài nguyên vẽ được của bạn và sẽ bị lỗi. Trong trường hợp
+này, bạn có thể muốn {@code notnight} làm tài nguyên mặc định của mình, vì thế bạn nên loại trừ hạn định
+đó sao cho tài nguyên vẽ được của bạn ở trong {@code drawable/} hoặc {@code drawable-night/}.</p>
+
+<p>Vì vậy, để mang lại khả năng tương thích với thiết bị tốt nhất, hãy luôn cung cấp tài nguyên
+mặc định cho những tài nguyên mà ứng dụng của bạn cần thực hiện đúng cách. Sau đó, hãy tạo tài nguyên
+thay thế cho các cấu hình thiết bị cụ thể bằng cách sử dụng hạn định cấu hình.</p>
+
+<p>Có một ngoại lệ đối với quy tắc này: Nếu <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> của ứng dụng của bạn bằng 4 hoặc
+lớn hơn, bạn <em>không</em> cần đến tài nguyên vẽ được mặc định khi cung cấp tài nguyên
+vẽ được thay thế bằng hạn định <a href="#DensityQualifier">mật độ màn hình</a>. Kể cả khi không có
+tài nguyên vẽ được mặc định, Android cũng có thể tìm thấy kết quả khớp tốt nhất trong số các mật độ màn hình thay thế và sẽ định cỡ
+bitmap nếu cần. Tuy nhiên, để có trải nghiệm tốt nhất trên tất cả thiết bị, bạn nên
+cung cấp nội dung vẽ được thay thế cho cả ba loại mật độ.</p>
+
+
+
+<h2 id="BestMatch">Cách Android tìm Tài nguyên Khớp Tốt nhất</h2>
+
+<p>Khi bạn yêu cầu một tài nguyên mà bạn cung cấp nội dung thay thế cho nó, Android sẽ lựa chọn
+tài nguyên thay thế để sử dụng vào thời gian chạy, tùy vào cấu hình thiết bị hiện tại. Để
+diễn tả cách Android lựa chọn một tài nguyên thay thế, giả sử có các thư mục vẽ được sau,
+mỗi thư mục lại chứa các phiên bản khác nhau của cùng hình ảnh:</p>
+
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+drawable-fr-rCA/
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+
+<p>Và giả sử cấu hình thiết bị như sau:</p>
+
+<p style="margin-left:1em;">
+Bản địa = <code>en-GB</code> <br/>
+Hướng màn hình = <code>port</code> <br/>
+Mật độ điểm ảnh màn hình = <code>hdpi</code> <br/>
+Loại màn hình cảm ứng = <code>notouch</code> <br/>
+Phương pháp nhập liệu văn bản chính = <code>12key</code>
+</p>
+
+<p>Bằng cách so sánh cấu hình thiết bị với các tài nguyên thay thế sẵn có, Android sẽ lựa chọn
+nội dung vẽ được từ {@code drawable-en-port}.</p>
+
+<p>Hệ thống ra quyết định của mình về các tài nguyên nào sẽ sử dụng bằng lô-gic
+sau:</p>
+
+
+<div class="figure" style="width:371px">
+<img src="{@docRoot}images/resources/res-selection-flowchart.png" alt="" height="471" />
+<p class="img-caption"><strong>Hình 2.</strong> Lưu đồ về cách Android tìm tài nguyên
+khớp tốt nhất.</p>
+</div>
+
+
+<ol>
+  <li>Loại bỏ các tệp tài nguyên mà trái với cấu hình thiết bị.
+    <p>Thư mục <code>drawable-fr-rCA/</code> bị loại bỏ vì nó
+trái với bản địa <code>en-GB</code>.</p>
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+<strike>drawable-fr-rCA/</strike>
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+<p class="note"><strong>Ngoại lệ:</strong> Mật độ điểm ảnh màn hình là một hạn định không
+bị loại bỏ do trái ngược. Mặc dù mật độ màn hình của thiết bị là hdpi,
+<code>drawable-port-ldpi/</code> không bị loại bỏ vì mọi mật độ màn hình đều
+được coi là một kết quả khớp tại thời điểm này. Bạn có thể tham khảo thêm thông tin trong tài liệu <a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ Nhiều
+Màn hình</a>.</p></li>
+
+  <li>Chọn hạn định có mức ưu tiên cao nhất (tiếp theo) trong danh sách (<a href="#table2">bảng 2</a>).
+(Bắt đầu bằng MCC, sau đó di chuyển xuống.) </li>
+  <li>Có thư mục tài nguyên nào bao gồm hạn định này không?  </li>
+    <ul>
+      <li>Nếu Không, hãy quay lại bước 2 và tìm với hạn định tiếp theo. (Trong ví dụ,
+  câu trả lời là "không" tới khi đi đến hạn định ngôn ngữ.)</li>
+      <li>Nếu Có, tiếp tục sang bước 4.</li>
+    </ul>
+  </li>
+
+  <li>Loại bỏ các thư mục tài nguyên không bao gồm hạn định này. Trong ví dụ, hệ thống
+sẽ loại bỏ tất cả thư mục không bao gồm hạn định ngôn ngữ:</li>
+<pre class="classic no-pretty-print">
+<strike>drawable/</strike>
+drawable-en/
+drawable-en-port/
+drawable-en-notouch-12key/
+<strike>drawable-port-ldpi/</strike>
+<strike>drawable-port-notouch-12key/</strike>
+</pre>
+<p class="note"><strong>Ngoại lệ:</strong> Nếu hạn định đang xét là mật độ điểm ảnh màn hình,
+Android sẽ chọn tùy chọn khớp gần nhất với mật độ màn hình của thiết bị.
+Nhìn chung, Android ưu tiên giảm kích cỡ một hình ảnh ban đầu lớn hơn thay vì tăng kích cỡ một hình ảnh ban đầu
+nhỏ hơn. Xem phần <a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ Nhiều
+Màn hình</a>.</p>
+  </li>
+
+  <li>Quay lại và lặp lại các bước 2, 3 và 4 tới khi chỉ còn lại một thư mục. Trong ví dụ, hướng
+màn hình là hạn định tiếp theo nếu có kết quả khớp.
+Vì thế, các tài nguyên không quy định hướng màn hình sẽ bị loại bỏ:
+<pre class="classic no-pretty-print">
+<strike>drawable-en/</strike>
+drawable-en-port/
+<strike>drawable-en-notouch-12key/</strike>
+</pre>
+<p>Thư mục còn lại là {@code drawable-en-port}.</p>
+  </li>
+</ol>
+
+<p>Mặc dù quy trình này được thực thi cho từng tài nguyên được yêu cầu, hệ thống sẽ tối ưu hóa hơn nữa
+một số khía cạnh. Một cách tối ưu hóa như vậy đó là sau khi biết cấu hình thiết bị, nó có thể
+loại bỏ các tài nguyên thay thế mà không thể khớp được. Ví dụ, nếu ngôn ngữ cấu hình
+là English ("en"), khi đó bất kỳ thư mục tài nguyên nào có hạn định ngôn ngữ được đặt thành
+ngôn ngữ khác English đều sẽ không được bao gồm trong tập hợp các tài nguyên được kiểm tra (mặc dù
+thư mục tài nguyên <em>không có</em> hạn định ngôn ngữ vẫn được bao gồm).</p>
+
+<p>Khi lựa chọn tài nguyên dựa trên hạn định kích cỡ màn hình, hệ thống sẽ sử dụng các tài nguyên
+được thiết kế cho màn hình nhỏ hơn màn hình hiện tại nếu không có tài nguyên nào khớp tốt hơn
+(ví dụ, một màn hình kích cỡ lớn sẽ sử dụng các tài nguyên màn hình kích cỡ bình thường nếu cần). Tuy nhiên, nếu
+những tài nguyên duy nhất sẵn có lại <em>lớn hơn</em> màn hình hiện tại, hệ thống sẽ
+<strong>không</strong> sử dụng chúng và ứng dụng của bạn sẽ bị lỗi nếu không có tài nguyên nào khác khớp với cấu hình
+thiết bị (ví dụ, nếu tất cả tài nguyên bố trí đều được gắn thẻ bằng hạn định {@code xlarge},
+nhưng thiết bị lại có một màn hình kích cỡ bình thường).</p>
+
+<p class="note"><strong>Lưu ý:</strong> <em>Mức ưu tiên</em> của hạn định (trong <a href="#table2">bảng 2</a>) quan trọng
+hơn số lượng hạn định khớp chính xác với thiết bị. Ví dụ, trong bước 4 bên trên
+lựa chọn trên danh sách bao gồm ba hạn định khớp chính xác với thiết bị (hướng, loại
+màn hình cảm ứng, và phương pháp nhập liệu), trong khi <code>drawable-en</code> chỉ có một tham số khớp
+(ngôn ngữ). Tuy nhiên, ngôn ngữ có mức ưu tiên cao hơn cả ba hạn định khác này, vì thế
+<code>drawable-port-notouch-12key</code> bị loại.</p>
+
+<p>Để tìm hiểu thêm về cách sử dụng tài nguyên trong ứng dụng của bạn, hãy tiếp tục sang phần <a href="accessing-resources.html">Truy cập Tài nguyên</a>.</p>

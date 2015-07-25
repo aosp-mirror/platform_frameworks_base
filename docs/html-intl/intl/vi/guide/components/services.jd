@@ -1,0 +1,813 @@
+page.title=Dịch vụ
+@jd:body
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>Trong tài liệu này</h2>
+<ol>
+<li><a href="#Basics">Nội dung Cơ bản</a></li>
+<ol>
+  <li><a href="#Declaring">Khai báo một dịch vụ trong bản kê khai</a></li>
+</ol>
+<li><a href="#CreatingAService">Tạo một Dịch vụ được Bắt đầu</a>
+  <ol>
+    <li><a href="#ExtendingIntentService">Mở rộng lớp IntentService</a></li>
+    <li><a href="#ExtendingService">Mở rộng lớp Dịch vụ</a></li>
+    <li><a href="#StartingAService">Bắt đầu một dịch vụ</a></li>
+    <li><a href="#Stopping">Dừng một dịch vụ</a></li>
+  </ol>
+</li>
+<li><a href="#CreatingBoundService">Tạo một Dịch vụ Gắn kết</a></li>
+<li><a href="#Notifications">Gửi Thông báo tới Người dùng</a></li>
+<li><a href="#Foreground">Chạy một Dịch vụ trong Tiền cảnh</a></li>
+<li><a href="#Lifecycle">Quản lý Vòng đời của một Dịch vụ</a>
+<ol>
+  <li><a href="#LifecycleCallbacks">Triển khai gọi lại vòng đời</a></li>
+</ol>
+</li>
+</ol>
+
+<h2>Lớp khóa</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.app.IntentService}</li>
+</ol>
+
+<h2>Mẫu</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ServiceStartArguments.html">{@code
+      ServiceStartArguments}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+<li><a href="{@docRoot}guide/components/bound-services.html">Dịch vụ Gắn kết</a></li>
+</ol>
+
+</div>
+
+
+<p>{@link android.app.Service} là một thành phần ứng dụng có khả năng thực hiện
+các thao tác chạy kéo dài trong nền và không cung cấp giao diện người dùng. Một
+thành phần ứng dụng khác có thể bắt đầu một dịch vụ và nó sẽ tiếp tục chạy ngầm ngay cả khi người dùng
+chuyển sang một ứng dụng khác. Ngoài ra, một thành phần có thể gắn kết với một dịch vụ để
+tương tác với nó và thậm chí thực hiện truyền thông liên tiến trình (IPC). Ví dụ, một dịch vụ có thể
+xử lý các giao dịch mạng, phát nhạc, thực hiện I/O tệp, hoặc tương tác với một trình cung cấp nội dung, tất cả
+đều xuất phát từ nền.</p>
+
+<p>Về cơ bản, một dịch vụ có thể có hai dạng:</p>
+
+<dl>
+  <dt>Được bắt đầu</dt>
+  <dd>Dịch vụ có dạng "được bắt đầu" khi một thành phần ứng dụng (chẳng hạn như một hoạt động) bắt đầu nó bằng cách
+gọi {@link android.content.Context#startService startService()}. Sau khi được bắt đầu, dịch vụ
+có thể chạy ngầm vô thời hạn, ngay cả khi thành phần bắt đầu nó bị hủy. Thông thường,
+dịch vụ được bắt đầu sẽ thực hiện một thao tác đơn lẻ và không trả về kết quả cho hàm gọi.
+Ví dụ, nó có thể tải xuống hoặc tải lên một tệp thông qua mạng. Khi thao tác được hoàn thành, dịch vụ
+tự nó sẽ dừng lại.</dd>
+  <dt>Gắn kết</dt>
+  <dd>Dịch vụ có dạng "gắn kết" khi một thành phần ứng dụng gắn kết với nó bằng cách gọi {@link
+android.content.Context#bindService bindService()}. Dịch vụ gắn kết sẽ đưa ra
+một giao diện máy khách-máy chủ cho phép các thành phần tương tác với dịch vụ, gửi yêu cầu, nhận kết quả, và thậm chí
+làm vậy thông qua truyền thông liên tiến trình (IPC). Dịch vụ gắn kết chỉ chạy trong khi
+một thành phần ứng dụng khác được gắn kết với nó. Nhiều thành phần có thể gắn kết cùng lúc với dịch vụ,
+nhưng khi tất cả bị bỏ gắn kết thì dịch vụ sẽ bị hủy.</dd>
+</dl>
+
+<p>Mặc dù tài liệu này thường đề cập tới hai loại dịch vụ riêng rẽ, dịch vụ
+của bạn có thể hoạt động theo cả hai cách&mdash;nó có thể được bắt đầu (để chạy vô thời hạn) và cũng cho phép gắn kết.
+Đó đơn giản là vấn đề bạn có triển khai một cặp phương pháp gọi lại hay không: {@link
+android.app.Service#onStartCommand onStartCommand()} để cho phép thành phần bắt đầu nó và {@link
+android.app.Service#onBind onBind()} để cho phép nó gắn kết.</p>
+
+<p>Không phụ thuộc vào việc ứng dụng của bạn được bắt đầu, gắn kết, hay cả hai, bất kỳ thành phần ứng dụng nào
+cũng có thể sử dụng dịch vụ (thậm chí từ một ứng dụng riêng biệt), giống như cách mà bất kỳ thành phần nào cũng có thể sử dụng
+một hoạt động&mdash;bằng cách bắt đầu nó bằng một {@link android.content.Intent}. Tuy nhiên, bạn có thể khai báo
+dịch vụ là riêng tư trong tệp bản kê khai, và chặn truy cập từ các ứng dụng khác. Điều này
+được trình bày kỹ hơn trong phần về <a href="#Declaring">Khai báo dịch vụ trong
+bản kê khai</a>.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Một dịch vụ chạy trong
+luồng chính của tiến trình lưu trữ của nó&mdash;dịch vụ <strong>không</strong> tạo luồng của chính nó
+và <strong>không</strong> chạy trong một tiến trình riêng biệt (trừ khi bạn quy định khác). Điều này có nghĩa
+là, nếu dịch vụ của bạn định thực hiện bất kỳ công việc nặng nào đối với CPU hay chặn các thao tác (chẳng hạn như phát lại MP3
+hay kết nối mạng), bạn nên tạo một luồng mới bên trong dịch vụ để thực hiện công việc đó. Bằng cách sử dụng
+một luồng riêng biệt, bạn sẽ giảm rủi ro gặp lỗi Ứng dụng Không Hồi đáp (ANR) và luồng chính của ứng dụng có thể
+vẫn dành riêng cho tương tác giữa người dùng với các hoạt động của bạn.</p>
+
+
+<h2 id="Basics">Nội dung Cơ bản</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Bạn nên sử dụng dịch vụ hay luồng?</h3>
+  <p>Dịch vụ đơn thuần là một thành phần có thể chạy ngầm ngay cả khi người dùng không
+đang tương tác với ứng dụng của bạn. Vì thế, bạn chỉ nên tạo một dịch vụ nếu đó là điều bạn
+cần.</p>
+  <p>Nếu bạn cần thực hiện công việc bên ngoài luồng chính của mình, nhưng chỉ trong khi người dùng đang tương tác với
+ứng dụng của bạn, thì thay vào đó, bạn nên tạo một luồng mới chứ không phải một dịch vụ. Ví
+dụ, nếu bạn muốn phát một bản nhạc, nhưng chỉ trong khi hoạt động của bạn đang chạy, bạn có thể tạo
+một luồng trong {@link android.app.Activity#onCreate onCreate()}, bắt đầu chạy nó trong {@link
+android.app.Activity#onStart onStart()}, rồi dừng nó trong {@link android.app.Activity#onStop
+onStop()}. Cũng xem xét việc sử dụng {@link android.os.AsyncTask} hoặc {@link android.os.HandlerThread},
+thay vì sử dụng lớp {@link java.lang.Thread} truyền thống. Xem tài liệu <a href="{@docRoot}guide/components/processes-and-threads.html#Threads">Tiến trình và
+Luồng</a> để biết thêm thông tin về luồng.</p>
+  <p>Hãy nhớ rằng nếu bạn sử dụng một dịch vụ, nó vẫn chạy trong luồng chính của ứng dụng của bạn theo
+mặc định, vì thế bạn vẫn nên tạo một luồng mới trong dịch vụ nếu nó thực hiện các thao tác tăng cường hoặc
+chặn.</p>
+</div>
+</div>
+
+<p>Để tạo một dịch vụ, bạn phải tạo một lớp con của {@link android.app.Service} (hoặc một
+trong các lớp con hiện tại của nó). Trong triển khai của mình, bạn cần khống chế một số phương pháp gọi lại có chức năng
+xử lý những khía cạnh chính trong vòng đời của dịch vụ và cung cấp một cơ chế để các thành phần gắn kết với
+dịch vụ đó, nếu phù hợp. Những phương pháp gọi lại quan trọng nhất mà bạn nên khống chế là:</p>
+
+<dl>
+  <dt>{@link android.app.Service#onStartCommand onStartCommand()}</dt>
+    <dd>Hệ thống sẽ gọi phương pháp này khi một thành phần khác, chẳng hạn như một hoạt động,
+yêu cầu dịch vụ phải được bắt đầu, bằng cách gọi {@link android.content.Context#startService
+startService()}. Sau khi phương pháp này thực thi, dịch vụ sẽ được bắt đầu và có thể chạy vô thời hạn trong
+nền. Nếu bạn triển khai điều này, bạn có trách nhiệm dừng dịch vụ khi
+công việc của nó được hoàn thành, bằng cách gọi {@link android.app.Service#stopSelf stopSelf()} hoặc {@link
+android.content.Context#stopService stopService()}. (Nếu chỉ muốn cung cấp khả năng gắn kết, bạn không
+cần triển khai phương pháp này.)</dd>
+  <dt>{@link android.app.Service#onBind onBind()}</dt>
+    <dd>Hệ thống sẽ gọi phương pháp này khi một thành phần khác muốn gắn kết với
+dịch vụ (chẳng hạn như để thực hiện RPC), bằng cách gọi {@link android.content.Context#bindService
+bindService()}. Trong triển khai phương pháp này của mình, bạn phải cung cấp một giao diện mà các máy khách
+sử dụng để giao tiếp với dịch vụ, bằng cách trả về {@link android.os.IBinder}. Bạn phải luôn
+triển khai phương pháp này, nhưng nếu bạn không muốn cho phép gắn kết thì bạn nên trả về rỗng.</dd>
+  <dt>{@link android.app.Service#onCreate()}</dt>
+    <dd>Hệ thống sẽ gọi phương pháp này khi dịch vụ được tạo lập lần đầu, để thực hiện quy trình thiết lập một lần
+(trước khi nó có thể gọi hoặc {@link android.app.Service#onStartCommand onStartCommand()} hoặc
+{@link android.app.Service#onBind onBind()}). Nếu dịch vụ đã đang chạy, phương pháp này sẽ không được
+gọi.</dd>
+  <dt>{@link android.app.Service#onDestroy()}</dt>
+    <dd>Hệ thống sẽ gọi phương pháp này khi dịch vụ không còn được sử dụng và đang bị hủy.
+Dịch vụ của bạn sẽ triển khai phương pháp này để dọn dẹp mọi tài nguyên như luồng, đối tượng theo dõi
+được đăng ký, hàm nhận, v.v... Đây là lệnh gọi cuối cùng mà dịch vụ nhận được.</dd>
+</dl>
+
+<p>Nếu một thành phần bắt đầu dịch vụ bằng cách gọi {@link
+android.content.Context#startService startService()} (kết quả là một lệnh gọi tới {@link
+android.app.Service#onStartCommand onStartCommand()}), khi đó dịch vụ
+sẽ vẫn chạy tới khi tự nó dừng bằng {@link android.app.Service#stopSelf()} hoặc một
+thành phần khác dừng nó bằng cách gọi {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Nếu một thành phần gọi
+{@link android.content.Context#bindService bindService()} để tạo dịch vụ (và {@link
+android.app.Service#onStartCommand onStartCommand()} <em>không</em> được gọi), khi đó dịch vụ sẽ chỉ chạy
+khi nào mà thành phần đó còn gắn kết với nó. Sau khi dịch vụ được bỏ gắn kết khỏi tất cả máy khách, hệ thống
+sẽ hủy nó.</p>
+
+<p>Hệ thống Android sẽ buộc dừng một dịch vụ chỉ khi bộ nhớ thấp và nó phải khôi phục tài nguyên
+của hệ thống cho hoạt động có tiêu điểm của người dùng. Nếu dịch vụ gắn kết với một hoạt động mà có tiêu điểm
+của người dùng, khi đó sẽ có ít khả năng nó sẽ bị tắt bỏ hơn, và nếu dịch vụ được khai báo là <a href="#Foreground">chạy trong tiền cảnh</a> (đề cập sau), khi đó nó sẽ hầu như không bao giờ bị tắt bỏ.
+Mặt khác, nếu dịch vụ được bắt đầu và chạy trong thời gian dài, hệ thống sẽ hạ thấp vị trí của nó
+trong danh sách tác vụ chạy ngầm qua thời gian và dịch vụ sẽ rất có thể bị
+tắt bỏ&mdash;nếu dịch vụ của bạn được bắt đầu, khi đó bạn phải thiết kế nó để
+xử lý việc khởi động lại do hệ thống một cách uyển chuyển. Nếu hệ thống tắt bỏ dịch vụ của bạn, nó sẽ khởi động lại dịch vụ ngay khi tài nguyên
+có sẵn trở lại (mặc dù điều này cũng phụ thuộc vào giá trị mà bạn trả về từ {@link
+android.app.Service#onStartCommand onStartCommand()}, vấn đề này sẽ được bàn sau). Để biết thêm thông tin
+về thời điểm mà hệ thống có thể hủy một dịch vụ, hãy xem tài liệu <a href="{@docRoot}guide/components/processes-and-threads.html">Tiến trình và Luồng</a>
+.</p>
+
+<p>Trong những phần sau, bạn sẽ thấy cách bạn có thể tạo từng loại dịch vụ và cách sử dụng
+nó từ các thành phần ứng dụng khác.</p>
+
+
+
+<h3 id="Declaring">Khai báo một dịch vụ trong bản kê khai</h3>
+
+<p>Giống như hoạt động (và các thành phần khác), bạn phải khai báo tất cả dịch vụ trong tệp bản kê khai
+của ứng dụng của mình.</p>
+
+<p>Để khai báo dịch vụ của bạn, hãy thêm một phần tử <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> làm
+con của phần tử <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+. Ví dụ:</p>
+
+<pre>
+&lt;manifest ... &gt;
+  ...
+  &lt;application ... &gt;
+      &lt;service android:name=".ExampleService" /&gt;
+      ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>Xem tham chiếu phần tử <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 
+để biết thêm thông tin về việc khai báo dịch vụ của bạn trong bản kê khai.</p>
+
+<p>Có các thuộc tính khác mà bạn có thể bao gồm trong phần tử <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> để
+định nghĩa các tính chất chẳng hạn như những quyền cần để bắt đầu dịch vụ và tiến trình mà
+dịch vụ sẽ chạy trong đó. Thuộc tính <a href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a>
+là thuộc tính bắt buộc duy nhất&mdash;nó quy định tên lớp của dịch vụ. Một khi
+bạn phát hành ứng dụng của mình, bạn không nên thay đổi tên này, vì nếu bạn làm vậy, bạn sẽ gặp rủi ro làm gãy
+mã do sự phụ thuộc vào các ý định biểu thị để bắt đầu hoặc gắn kết dịch vụ (đọc bài đăng blog, <a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Những Điều
+Không Thay Đổi Được</a>).
+
+<p>Để đảm bảo ứng dụng của bạn được bảo mật, <strong>luôn sử dụng một ý định biểu thị khi bắt đầu hoặc gắn kết
+{@link android.app.Service}</strong> của bạn và không được khai báo bộ lọc ý định cho dịch vụ. Nếu
+điều trọng yếu là bạn phải cho phép một chút không rõ ràng về dịch vụ nào sẽ bắt đầu, bạn có thể
+cung cấp bộ lọc ý định cho dịch vụ của mình và loại bỏ tên thành phần khỏi {@link
+android.content.Intent}, nhưng sau đó bạn có thể đặt gói cho ý định bằng {@link
+android.content.Intent#setPackage setPackage()}, điều này cung cấp sự không rõ ràng vừa đủ cho
+dịch vụ mục tiêu đó.</p>
+
+<p>Ngoài ra, bạn có thể đảm bảo rằng dịch vụ của mình chỉ sẵn có cho ứng dụng của bạn bằng cách
+đưa vào thuộc tính <a href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a>
+và đặt nó thành {@code "false"}. Điều này sẽ dừng việc các ứng dụng khác bắt đầu
+dịch vụ của bạn, ngay cả khi sử dụng một ý định biểu thị.</p>
+
+
+
+
+<h2 id="CreatingStartedService">Tạo một Dịch vụ được Bắt đầu</h2>
+
+<p>Dịch vụ được bắt đầu là dịch vụ mà một thành phần khác bắt đầu bằng cách gọi {@link
+android.content.Context#startService startService()}, kết quả là một lệnh gọi tới phương pháp
+{@link android.app.Service#onStartCommand onStartCommand()} của dịch vụ.</p>
+
+<p>Khi một dịch vụ được bắt đầu, nó có một vòng đời độc lập với
+thành phần đã bắt đầu nó và dịch vụ có thể chạy ngầm vô thời hạn, ngay cả khi
+thành phần bắt đầu nó bị hủy. Như vậy, dịch vụ sẽ tự dừng khi làm xong công việc của nó
+bằng cách gọi {@link android.app.Service#stopSelf stopSelf()}, hoặc một thành phần khác có thể dừng nó
+bằng cách gọi {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Một thành phần ứng dụng chẳng hạn như một hoạt động có thể bắt đầu dịch vụ bằng cách gọi {@link
+android.content.Context#startService startService()} và chuyển một {@link android.content.Intent}
+trong đó quy định dịch vụ và bao gồm bất kỳ dữ liệu nào để cho dịch vụ sử dụng. Dịch vụ sẽ nhận
+{@link android.content.Intent} này trong phương pháp {@link android.app.Service#onStartCommand
+onStartCommand()}.</p>
+
+<p>Ví dụ, giả sử một hoạt động cần lưu một số dữ liệu vào cơ sở dữ liệu trực tuyến. Hoạt động có thể
+bắt đầu một dịch vụ đồng hành và truyền cho nó dữ liệu để lưu bằng cách chuyển một ý định tới {@link
+android.content.Context#startService startService()}. Dịch vụ sẽ nhận ý định trong {@link
+android.app.Service#onStartCommand onStartCommand()}, kết nối với Internet và thực hiện
+giao tác cơ sở dữ liệu. Khi giao tác được thực hiện, dịch vụ sẽ tự dừng lại và nó bị
+hủy.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Một dịch vụ sẽ chạy trong cùng tiến trình như ứng dụng
+mà nó được khai báo trong đó và trong luồng chính của ứng dụng đó theo mặc định. Vì vậy, nếu dịch vụ của bạn
+thực hiện các thao tác tăng cường hoặc chặn trong khi người dùng tương tác với một hoạt động từ cùng
+ứng dụng, dịch vụ sẽ làm chậm hiệu năng của hoạt động. Để tránh tác động tới hiệu năng của
+ứng dụng, bạn nên bắt đầu một luồng mới bên trong dịch vụ.</p>
+
+<p>Thông thường, có hai lớp mà bạn có thể mở rộng để tạo một dịch vụ được bắt đầu:</p>
+<dl>
+  <dt>{@link android.app.Service}</dt>
+  <dd>Đây là lớp cơ bản cho tất cả dịch vụ. Khi bạn mở rộng lớp này, điều quan trọng là
+bạn tạo một luồng mới để thực hiện tất cả công việc của dịch vụ trong đó, do dịch vụ sử dụng luồng chính
+của ứng dụng của bạn, theo mặc định, điều này có thể làm chậm hiệu năng của bất kỳ hoạt động nào mà ứng dụng
+của bạn đang chạy.</dd>
+  <dt>{@link android.app.IntentService}</dt>
+  <dd>Đây là một lớp con của {@link android.app.Service} có chức năng sử dụng một luồng trình thực hiện để xử lý tất cả
+yêu cầu bắt đầu một cách lần lượt. Đây là lựa chọn tốt nhất nếu bạn không yêu cầu dịch vụ của mình
+xử lý đồng thời nhiều yêu cầu. Tất cả những gì bạn cần làm đó là triển khai {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}, nó sẽ nhận ý định cho mỗi
+yêu cầu bắt đầu để bạn có thể thực hiện công việc chạy ngầm.</dd>
+</dl>
+
+<p>Các phần sau mô tả cách bạn có thể triển khai dịch vụ của mình bằng cách sử dụng một trong các cách cho những lớp
+này.</p>
+
+
+<h3 id="ExtendingIntentService">Mở rộng lớp IntentService</h3>
+
+<p>Vì phần lớn các dịch vụ được bắt đầu không cần xử lý nhiều yêu cầu một cách đồng thời
+(điều này thực sự có thể là một kịch bản tạo đa luồng nguy hiểm), có lẽ tốt nhất là nếu bạn
+triển khai dịch vụ của mình bằng cách sử dụng lớp {@link android.app.IntentService}.</p>
+
+<p>{@link android.app.IntentService} làm điều sau đây:</p>
+
+<ul>
+  <li>Tạo một luồng trình thực hiện mặc định để thực thi tất cả ý định được chuyển tới {@link
+android.app.Service#onStartCommand onStartCommand()} tách riêng với luồng
+chính của ứng dụng của bạn.</li>
+  <li>Tạo một hàng đợi công việc để chuyển lần lượt từng ý định tới triển khai {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} của bạn, vì thế bạn không bao giờ phải
+lo lắng về vấn đề tạo đa luồng.</li>
+  <li>Dừng dịch vụ sau khi tất cả yêu cầu bắt đầu đều đã được xử lý, vì thế bạn không bao giờ phải gọi
+{@link android.app.Service#stopSelf}.</li>
+  <li>Cung cấp triển khai mặc định của {@link android.app.IntentService#onBind onBind()} mà
+trả về rỗng.</li>
+  <li>Cung cấp triển khai mặc định của {@link android.app.IntentService#onStartCommand
+onStartCommand()} mà gửi ý định tới hàng đợi công việc rồi tới triển khai {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} của bạn.</li>
+</ul>
+
+<p>Tất cả đều nói lên một thực tế rằng tất cả những việc bạn cần làm đó là triển khai {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} để thực hiện công việc mà
+máy khách cung cấp. (Mặc dù bạn cũng cần cung cấp một hàm dựng nhỏ cho dịch vụ.)</p>
+
+<p>Sau đây là ví dụ về triển khai {@link android.app.IntentService}:</p>
+
+<pre>
+public class HelloIntentService extends IntentService {
+
+  /**
+   * A constructor is required, and must call the super {@link android.app.IntentService#IntentService}
+   * constructor with a name for the worker thread.
+   */
+  public HelloIntentService() {
+      super("HelloIntentService");
+  }
+
+  /**
+   * The IntentService calls this method from the default worker thread with
+   * the intent that started the service. When this method returns, IntentService
+   * stops the service, as appropriate.
+   */
+  &#64;Override
+  protected void onHandleIntent(Intent intent) {
+      // Normally we would do some work here, like download a file.
+      // For our sample, we just sleep for 5 seconds.
+      long endTime = System.currentTimeMillis() + 5*1000;
+      while (System.currentTimeMillis() &lt; endTime) {
+          synchronized (this) {
+              try {
+                  wait(endTime - System.currentTimeMillis());
+              } catch (Exception e) {
+              }
+          }
+      }
+  }
+}
+</pre>
+
+<p>Đó là tất cả những gì bạn cần: một hàm dựng và triển khai {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}.</p>
+
+<p>Nếu bạn quyết định cũng khống chế các phương pháp gọi lại khác, chẳng hạn như {@link
+android.app.IntentService#onCreate onCreate()}, {@link
+android.app.IntentService#onStartCommand onStartCommand()}, hoặc {@link
+android.app.IntentService#onDestroy onDestroy()}, hãy nhớ gọi ra siêu triển khai, sao
+cho {@link android.app.IntentService} có thể xử lý hợp lý vòng đời của luồng trình thực hiện.</p>
+
+<p>Ví dụ, {@link android.app.IntentService#onStartCommand onStartCommand()} phải trả về
+triển khai mặc định (đó là cách mà ý định được chuyển tới {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}):</p>
+
+<pre>
+&#64;Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+    return super.onStartCommand(intent,flags,startId);
+}
+</pre>
+
+<p>Bên cạnh {@link android.app.IntentService#onHandleIntent onHandleIntent()}, phương pháp duy nhất mà
+từ đó bạn không cần gọi siêu lớp là {@link android.app.IntentService#onBind
+onBind()} (nhưng bạn chỉ cần triển khai điều đó nếu dịch vụ của bạn cho phép gắn kết).</p>
+
+<p>Trong phần tiếp theo, bạn sẽ thấy cách mà cùng loại dịch vụ được triển khai khi mở rộng
+lớp {@link android.app.Service} cơ sở, nó có nhiều mã hơn nhưng có thể
+phù hợp nếu bạn cần xử lý các yêu cầu bắt đầu đồng thời.</p>
+
+
+<h3 id="ExtendingService">Mở rộng lớp Dịch vụ</h3>
+
+<p>Như bạn thấy trong phần trước, sử dụng {@link android.app.IntentService} giúp việc
+triển khai một dịch vụ được bắt đầu của bạn trở nên rất đơn giản. Tuy nhiên, nếu bạn cần dịch vụ của mình
+thực hiện tạo đa luồng (thay vì xử lý các yêu cầu bắt đầu thông qua một hàng đợi công việc), khi đó bạn
+có thể mở rộng lớp {@link android.app.Service} để xử lý từng ý định.</p>
+
+<p>Để so sánh, đoạn mã mẫu sau là triển khai lớp {@link
+android.app.Service} mà thực hiện chính xác cùng công việc như ví dụ bên trên bằng cách sử dụng {@link
+android.app.IntentService}. Cụ thể, đối với mỗi yêu cầu bắt đầu, nó sẽ sử dụng một luồng trình thực hiện để thực hiện
+công việc và chỉ xử lý lần lượt từng yêu cầu một.</p>
+
+<pre>
+public class HelloService extends Service {
+  private Looper mServiceLooper;
+  private ServiceHandler mServiceHandler;
+
+  // Handler that receives messages from the thread
+  private final class ServiceHandler extends Handler {
+      public ServiceHandler(Looper looper) {
+          super(looper);
+      }
+      &#64;Override
+      public void handleMessage(Message msg) {
+          // Normally we would do some work here, like download a file.
+          // For our sample, we just sleep for 5 seconds.
+          long endTime = System.currentTimeMillis() + 5*1000;
+          while (System.currentTimeMillis() &lt; endTime) {
+              synchronized (this) {
+                  try {
+                      wait(endTime - System.currentTimeMillis());
+                  } catch (Exception e) {
+                  }
+              }
+          }
+          // Stop the service using the startId, so that we don't stop
+          // the service in the middle of handling another job
+          stopSelf(msg.arg1);
+      }
+  }
+
+  &#64;Override
+  public void onCreate() {
+    // Start up the thread running the service.  Note that we create a
+    // separate thread because the service normally runs in the process's
+    // main thread, which we don't want to block.  We also make it
+    // background priority so CPU-intensive work will not disrupt our UI.
+    HandlerThread thread = new HandlerThread("ServiceStartArguments",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    thread.start();
+
+    // Get the HandlerThread's Looper and use it for our Handler
+    mServiceLooper = thread.getLooper();
+    mServiceHandler = new ServiceHandler(mServiceLooper);
+  }
+
+  &#64;Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+      Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+
+      // For each start request, send a message to start a job and deliver the
+      // start ID so we know which request we're stopping when we finish the job
+      Message msg = mServiceHandler.obtainMessage();
+      msg.arg1 = startId;
+      mServiceHandler.sendMessage(msg);
+
+      // If we get killed, after returning from here, restart
+      return START_STICKY;
+  }
+
+  &#64;Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  &#64;Override
+  public void onDestroy() {
+    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+  }
+}
+</pre>
+
+<p>Như bạn có thể thấy, có nhiều việc hơn nhiều so với việc sử dụng {@link android.app.IntentService}.</p>
+
+<p>Tuy nhiên, do bạn tự mình xử lý từng lệnh gọi đến {@link android.app.Service#onStartCommand
+onStartCommand()}, bạn có thể thực hiện nhiều yêu cầu một cách đồng thời. Đó không phải là việc
+mà ví dụ này làm, nhưng nếu đó là việc bạn muốn, vậy bạn có thể tạo một luồng mới cho từng
+yêu cầu và ngay lập tức trả chúng về (thay vì đợi tới khi yêu cầu trước hoàn thành).</p>
+
+<p>Để ý rằng phương pháp {@link android.app.Service#onStartCommand onStartCommand()} phải trả về một
+số nguyên. Số nguyên là một giá trị mô tả cách hệ thống nên tiếp tục dịch vụ trong
+trường hợp hệ thống tắt bỏ nó (như được đề cập ở trên, triển khai mặc định cho {@link
+android.app.IntentService} sẽ xử lý điều này cho bạn dù bạn có thể sửa đổi nó). Giá trị trả về
+từ {@link android.app.Service#onStartCommand onStartCommand()} phải là một trong các
+hằng số sau:</p>
+
+<dl>
+  <dt>{@link android.app.Service#START_NOT_STICKY}</dt>
+    <dd>Nếu hệ thống tắt bỏ dịch vụ sau khi {@link android.app.Service#onStartCommand
+onStartCommand()} trả về, <em>không</em> được tạo lại dịch vụ đó, trừ khi có các ý định
+đang chờ để được chuyển. Đây là lựa chọn an toàn nhất để tránh chạy dịch vụ của bạn khi không cần thiết
+và khi ứng dụng của bạn có thể đơn thuần khởi động lại bất kỳ công việc chưa hoàn thành nào.</dd>
+  <dt>{@link android.app.Service#START_STICKY}</dt>
+    <dd>Nếu hệ thống tắt bỏ dịch vụ sau khi {@link android.app.Service#onStartCommand
+onStartCommand()} trả về, hãy tạo lại dịch vụ và gọi {@link
+android.app.Service#onStartCommand onStartCommand()}, nhưng <em>không</em> chuyển lại ý định cuối cùng.
+Thay vào đó, hệ thống sẽ gọi {@link android.app.Service#onStartCommand onStartCommand()} bằng một
+ý định rỗng, trừ khi có các ý định đang chờ để bắt đầu dịch vụ, trong trường hợp đó,
+những ý định này sẽ được chuyển. Điều này phù hợp với các trình phát phương tiện (hoặc dịch vụ tương tự) mà không
+đang thực thi lệnh, nhưng đang chạy vô thời hạn và chờ một tác vụ.</dd>
+  <dt>{@link android.app.Service#START_REDELIVER_INTENT}</dt>
+    <dd>Nếu hệ thống tắt bỏ dịch vụ sau khi {@link android.app.Service#onStartCommand
+onStartCommand()} trả về, hãy tạo lại dịch vụ và gọi {@link
+android.app.Service#onStartCommand onStartCommand()} bằng ý định cuối cùng được chuyển tới
+dịch vụ. Mọi ý định chờ đều được chuyển lần lượt. Điều này phù hợp với các dịch vụ đang
+chủ động thực hiện một công việc mà nên được tiếp tục ngay lập tức, chẳng hạn như tải xuống một tệp.</dd>
+</dl>
+<p>Để biết thêm chi tiết về những giá trị trả về này, hãy xem tài liệu tham khảo được liên kết cho từng
+hằng số.</p>
+
+
+
+<h3 id="StartingAService">Bắt đầu một Dịch vụ</h3>
+
+<p>Bạn có thể bắt đầu một dịch vụ từ một hoạt động hoặc thành phần ứng dụng khác bằng cách chuyển một
+{@link android.content.Intent} (quy định dịch vụ sẽ bắt đầu) đến {@link
+android.content.Context#startService startService()}. Hệ thống Android sẽ gọi phương pháp {@link
+android.app.Service#onStartCommand onStartCommand()} của dịch vụ và chuyển cho nó {@link
+android.content.Intent}. (Bạn tuyệt đối không nên trực tiếp gọi {@link android.app.Service#onStartCommand
+onStartCommand()}.)</p>
+
+<p>Ví dụ, một hoạt động có thể bắt đầu dịch vụ ví dụ trong phần trước ({@code
+HelloSevice}) bằng cách sử dụng một ý định biểu thị với {@link android.content.Context#startService
+startService()}:</p>
+
+<pre>
+Intent intent = new Intent(this, HelloService.class);
+startService(intent);
+</pre>
+
+<p>Phương pháp {@link android.content.Context#startService startService()} ngay lập tức trả về và
+hệ thống Android sẽ gọi phương pháp {@link android.app.Service#onStartCommand
+onStartCommand()} của dịch vụ. Nếu dịch vụ không đang chạy, trước tiên hệ thống sẽ gọi {@link
+android.app.Service#onCreate onCreate()}, rồi gọi {@link android.app.Service#onStartCommand
+onStartCommand()}.</p>
+
+<p>Nếu dịch vụ cũng không cung cấp khả năng gắn kết, ý định được chuyển bằng {@link
+android.content.Context#startService startService()} sẽ là phương thức giao tiếp duy nhất giữa
+thành phần ứng dụng và dịch vụ. Tuy nhiên, nếu bạn muốn dịch vụ gửi một kết quả trở lại, khi đó
+máy khách mà bắt đầu dịch vụ có thể tạo một {@link android.app.PendingIntent} cho một quảng bá
+(bằng {@link android.app.PendingIntent#getBroadcast getBroadcast()}) và chuyển nó tới dịch vụ
+trong {@link android.content.Intent} mà bắt đầu dịch vụ. Khi đó, dịch vụ có thể sử dụng
+quảng bá để chuyển kết quả.</p>
+
+<p>Nhiều yêu cầu bắt đầu dịch vụ sẽ dẫn đến nhiều lệnh gọi tương ứng tới
+{@link android.app.Service#onStartCommand onStartCommand()} của dịch vụ. Tuy nhiên, chỉ có một yêu cầu dừng
+dịch vụ (bằng {@link android.app.Service#stopSelf stopSelf()} hoặc {@link
+android.content.Context#stopService stopService()}) là bắt buộc để dừng nó.</p>
+
+
+<h3 id="Stopping">Dừng một dịch vụ</h3>
+
+<p>Dịch vụ được bắt đầu phải quản lý vòng đời của chính nó. Cụ thể, hệ thống không dừng
+hay hủy dịch vụ trừ khi nó phải khôi phục bộ nhớ của hệ thống và dịch vụ
+sẽ tiếp tục chạy sau khi {@link android.app.Service#onStartCommand onStartCommand()} trả về. Vì vậy,
+dịch vụ phải tự dừng bằng cách gọi {@link android.app.Service#stopSelf stopSelf()} hoặc một thành phần
+khác có thể dừng nó bằng cách gọi {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Sau khi được yêu cầu dừng bằng {@link android.app.Service#stopSelf stopSelf()} hoặc {@link
+android.content.Context#stopService stopService()}, hệ thống sẽ hủy dịch vụ ngay khi
+có thể.</p>
+
+<p>Tuy nhiên, nếu dịch vụ của bạn xử lý nhiều yêu cầu {@link
+android.app.Service#onStartCommand onStartCommand()} đồng thời, khi đó bạn không nên dừng
+dịch vụ khi bạn đã hoàn thành xử lý yêu cầu bắt đầu, vì bạn có thể đã nhận được một
+yêu cầu bắt đầu mới kể từ thời điểm đó (dừng khi kết thúc yêu cầu thứ nhất sẽ chấm dứt yêu cầu thứ hai). Để tránh
+vấn đề này, bạn có thể sử dụng {@link android.app.Service#stopSelf(int)} để đảm bảo rằng yêu cầu
+dừng dịch vụ của bạn luôn được dựa trên yêu cầu bắt đầu gần đây nhất. Cụ thể, khi bạn gọi {@link
+android.app.Service#stopSelf(int)}, bạn sẽ chuyển ID của yêu cầu bắt đầu (<code>startId</code>
+được chuyển tới {@link android.app.Service#onStartCommand onStartCommand()}) mà yêu cầu dừng của bạn
+tương ứng với. Khi đó, nếu dịch vụ đã nhận được một yêu cầu bắt đầu mới trước khi bạn có thể gọi {@link
+android.app.Service#stopSelf(int)}, vậy ID sẽ không khớp và dịch vụ sẽ không dừng.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Điều quan trọng là ứng dụng của bạn dừng dịch vụ của nó
+khi nó hoàn thành xong công việc để tránh lãng phí tài nguyên của hệ thống và tốn pin. Nếu cần,
+các thành phần khác có thể dừng dịch vụ bằng cách gọi {@link
+android.content.Context#stopService stopService()}. Ngay cả khi bạn kích hoạt gắn kết cho dịch vụ,
+bạn phải luôn tự mình dừng dịch vụ nếu dịch vụ đã nhận được lệnh gọi tới {@link
+android.app.Service#onStartCommand onStartCommand()}.</p>
+
+<p>Để biết thêm thông tin về vòng đời của một dịch vụ, hãy xem phần bên dưới về <a href="#Lifecycle">Quản lý Vòng đời của một Dịch vụ</a>.</p>
+
+
+
+<h2 id="CreatingBoundService">Tạo một Dịch vụ Gắn kết</h2>
+
+<p>Dịch vụ gắn kết là một dịch vụ cho phép các thành phần ứng dụng gắn kết với nó bằng cách gọi {@link
+android.content.Context#bindService bindService()} để tạo một kết nối lâu dài
+(và thường không cho phép các thành phần <em>bắt đầu</em> nó bằng cách gọi {@link
+android.content.Context#startService startService()}).</p>
+
+<p>Bạn nên tạo một dịch vụ gắn kết khi muốn tương tác với dịch vụ từ hoạt động
+và các thành phần khác trong ứng dụng của mình hoặc để hiển thị một số tính năng trong ứng dụng của bạn cho
+các ứng dụng khác thông qua truyền thông liên tiến trình (IPC).</p>
+
+<p>Để tạo một dịch vụ gắn kết, bạn phải triển khai phương pháp gọi lại {@link
+android.app.Service#onBind onBind()} để trả về một {@link android.os.IBinder} mà
+định nghĩa giao diện cho giao tiếp với dịch vụ đó. Khi đó, các thành phần ứng dụng khác có thể gọi
+{@link android.content.Context#bindService bindService()} để truy xuất giao diện và
+bắt đầu các phương pháp gọi trên dịch vụ. Dịch vụ tồn tại chỉ nhằm phục vụ thành phần ứng dụng mà
+được gắn kết với nó, vì thế khi không có thành phần được gắn kết với dịch vụ, hệ thống sẽ hủy nó
+(bạn <em>không</em> cần dừng một dịch vụ gắn kết theo cách phải làm khi dịch vụ được bắt đầu
+thông qua {@link android.app.Service#onStartCommand onStartCommand()}).</p>
+
+<p>Để tạo một dịch vụ gắn kết, điều đầu tiên bạn phải làm là định nghĩa giao diện quy định
+cách thức mà một máy khách có thể giao tiếp với dịch vụ. Giao diện giữa dịch vụ và
+máy khách này phải là một triển khai {@link android.os.IBinder} và được dịch vụ của bạn phải
+trả về từ phương pháp gọi lại {@link android.app.Service#onBind
+onBind()}. Sau khi máy khách nhận được {@link android.os.IBinder}, nó có thể bắt đầu
+tương tác với dịch vụ thông qua giao diện đó.</p>
+
+<p>Nhiều máy khách có thể gắn kết với dịch vụ đồng thời. Khi một máy khách hoàn thành tương tác với
+dịch vụ, nó sẽ gọi {@link android.content.Context#unbindService unbindService()} để bỏ gắn kết. Sau khi
+không còn máy khách nào được gắn kết với dịch vụ, hệ thống sẽ hủy dịch vụ.</p>
+
+<p>Có nhiều cách để triển khai một dịch vụ gắn kết và triển khai sẽ phức tạp
+hơn so với dịch vụ được bắt đầu, vì thế nội dung bàn về dịch vụ gắn kết được trình bày trong một
+tài liệu riêng về <a href="{@docRoot}guide/components/bound-services.html">Dịch vụ Gắn kết</a>.</p>
+
+
+
+<h2 id="Notifications">Gửi Thông báo tới Người dùng</h2>
+
+<p>Sau khi chạy, một dịch vụ có thể thông báo cho người dùng về sự kiện bằng cách sử dụng <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Thông báo Cửa sổ</a> hoặc <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Thông báo Thanh Trạng thái</a>.</p>
+
+<p>Thông báo cửa sổ là một thông báo xuất hiện một lúc trên bề mặt của cửa sổ hiện tại 
+rồi biến mất, trong khi thông báo thanh trạng thái cung cấp một biểu tượng trong thanh trạng thái cùng một
+thông báo, người dùng có thể chọn nó để thực hiện một hành động (chẳng hạn như bắt đầu một hoạt động).</p>
+
+<p>Thông thường thông báo thanh trạng thái là kỹ thuật tốt nhất khi một công việc nền nào đó đã hoàn thành
+(chẳng hạn như một tệp đã hoàn thành
+việc tải xuống) và lúc này người dùng có thể hành động dựa trên nó. Khi người dùng chọn thông báo từ dạng xem mở rộng
+, thông báo có thể bắt đầu một hoạt động (chẳng hạn như xem tệp được tải xuống).</p>
+
+<p>Xem hướng dẫn dành cho nhà phát triển <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Thông báo Cửa sổ</a> hoặc <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Thông báo Thanh Trạng thái</a>
+để biết thêm thông tin.</p>
+
+
+
+<h2 id="Foreground">Chạy một Dịch vụ trong Tiền cảnh</h2>
+
+<p>Dịch vụ tiền cảnh là một dịch vụ được coi là điều mà
+người dùng đang chủ động quan tâm, vì thế nó không được đề nghị để hệ thống tắt bỏ khi bộ nhớ thấp. Dịch vụ
+tiền cảnh phải cung cấp một thông báo cho thanh trạng thái, nó được đặt dưới tiêu đề
+"Đang diễn ra", điều này có nghĩa là thông báo không thể loại bỏ được trừ khi dịch vụ
+bị dừng hoặc loại bỏ khỏi tiền cảnh.</p>
+
+<p>Ví dụ, một trình chơi nhạc đang phát nhạc từ một dịch vụ nên được đặt để chạy trong
+tiền cảnh, vì người dùng rõ ràng ý thức được
+hoạt động của nó. Thông báo trong thanh trạng thái có thể cho biết bài hát đang chơi và cho phép
+người dùng khởi chạy một hoạt động để tương tác với trình chơi nhạc.</p>
+
+<p>Để yêu cầu dịch vụ của bạn chạy trong tiền cảnh, hãy gọi {@link
+android.app.Service#startForeground startForeground()}. Phương pháp này dùng hai tham số: một số nguyên
+để xác định duy nhất thông báo và {@link
+android.app.Notification} cho thanh trạng thái. Ví dụ:</p>
+
+<pre>
+Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text),
+        System.currentTimeMillis());
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+notification.setLatestEventInfo(this, getText(R.string.notification_title),
+        getText(R.string.notification_message), pendingIntent);
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+</pre>
+
+<p class="caution"><strong>Chú ý:</strong> ID số nguyên mà bạn cấp cho {@link
+android.app.Service#startForeground startForeground()} không được bằng 0.</p>
+
+
+<p>Để xóa bỏ dịch vụ khỏi tiền cảnh, hãy gọi {@link
+android.app.Service#stopForeground stopForeground()}. Phương pháp này dùng một boolean, cho biết
+có loại bỏ cả thông báo thanh trạng thái hay không. Phương pháp này <em>không</em> dừng
+dịch vụ. Tuy nhiên, nếu bạn dừng dịch vụ trong khi nó vẫn đang chạy trong tiền cảnh, khi đó thông báo
+cũng bị loại bỏ.</p>
+
+<p>Để biết thêm thông tin về thông báo, hãy xem phần <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Tạo Thông báo
+Thanh Trạng thái</a>.</p>
+
+
+
+<h2 id="Lifecycle">Quản lý Vòng đời của một Dịch vụ</h2>
+
+<p>Vòng đời của một dịch vụ đơn giản hơn nhiều so với vòng đời của một hoạt động. Tuy nhiên, một điều thậm chí còn quan trọng hơn
+đó là bạn phải thật chú ý tới cách dịch vụ của bạn được tạo và hủy, bởi một dịch vụ
+có thể chạy ngầm mà người dùng không biết.</p>
+
+<p>Vòng đời của dịch vụ&mdash;từ khi nó được tạo tới khi nó bị hủy&mdash;có thể đi theo hai
+con đường khác nhau:</p>
+
+<ul>
+<li>Dịch vụ được bắt đầu
+  <p>Dịch vụ được tạo khi một thành phần khác gọi {@link
+android.content.Context#startService startService()}. Sau đó, dịch vụ sẽ chạy vô thời hạn và phải
+tự dừng bằng cách gọi {@link
+android.app.Service#stopSelf() stopSelf()}. Một thành phần khác cũng có thể dừng
+dịch vụ bằng cách gọi {@link android.content.Context#stopService
+stopService()}. Khi dịch vụ bị dừng, hệ thống sẽ hủy nó.</p></li>
+
+<li>Dịch vụ gắn kết
+  <p>Dịch vụ được tạo khi một thành phần khác (máy khách) gọi {@link
+android.content.Context#bindService bindService()}. Khi đó, máy khách giao tiếp với dịch vụ
+thông qua một giao diện {@link android.os.IBinder}. Máy khách có thể đóng kết nối bằng cách gọi
+{@link android.content.Context#unbindService unbindService()}. Nhiều máy khách có thể gắn kết với
+cùng dịch vụ và khi tất cả chúng bỏ gắn kết, hệ thống sẽ hủy dịch vụ. (Dịch vụ
+<em>không</em> cần tự mình dừng.)</p></li>
+</ul>
+
+<p>Hai con đường này hoàn toàn riêng biệt. Cụ thể, bạn có thể gắn kết với một dịch vụ đã
+được bắt đầu bằng {@link android.content.Context#startService startService()}. Ví dụ, một dịch vụ
+nhạc nền có thể được bắt đầu bằng cách gọi {@link android.content.Context#startService
+startService()} bằng một {@link android.content.Intent} mà sẽ nhận biết nhạc để phát. Sau đó,
+có thể là khi người dùng muốn thực thi một quyền điều khiển đối với trình phát đó hoặc lấy thông tin về
+bài hát đang phát, hoạt động có thể gắn kết với dịch vụ bằng cách gọi {@link
+android.content.Context#bindService bindService()}. Trong những trường hợp như vậy, {@link
+android.content.Context#stopService stopService()} hoặc {@link android.app.Service#stopSelf
+stopSelf()} không thực sự dừng dịch vụ tới khi tất cả máy khách bỏ gắn kết. </p>
+
+
+<h3 id="LifecycleCallbacks">Triển khai gọi lại vòng đời</h3>
+
+<p>Giống như một hoạt động, dịch vụ có các phương pháp gọi lại vòng đời mà bạn có thể triển khai để theo dõi
+những thay đổi về trạng thái của dịch vụ và thực hiện công việc tại những thời điểm phù hợp. Dịch vụ khung sau
+minh họa từng phương pháp vòng đời:</p>
+
+<pre>
+public class ExampleService extends Service {
+    int mStartMode;       // indicates how to behave if the service is killed
+    IBinder mBinder;      // interface for clients that bind
+    boolean mAllowRebind; // indicates whether onRebind should be used
+
+    &#64;Override
+    public void {@link android.app.Service#onCreate onCreate}() {
+        // The service is being created
+    }
+    &#64;Override
+    public int {@link android.app.Service#onStartCommand onStartCommand}(Intent intent, int flags, int startId) {
+        // The service is starting, due to a call to {@link android.content.Context#startService startService()}
+        return <em>mStartMode</em>;
+    }
+    &#64;Override
+    public IBinder {@link android.app.Service#onBind onBind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()}
+        return <em>mBinder</em>;
+    }
+    &#64;Override
+    public boolean {@link android.app.Service#onUnbind onUnbind}(Intent intent) {
+        // All clients have unbound with {@link android.content.Context#unbindService unbindService()}
+        return <em>mAllowRebind</em>;
+    }
+    &#64;Override
+    public void {@link android.app.Service#onRebind onRebind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()},
+        // after onUnbind() has already been called
+    }
+    &#64;Override
+    public void {@link android.app.Service#onDestroy onDestroy}() {
+        // The service is no longer used and is being destroyed
+    }
+}
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Không như các phương pháp gọi lại vòng đời của hoạt động, bạn
+<em>không</em> phải gọi triển khai siêu lớp với những phương pháp gọi lại này.</p>
+
+<img src="{@docRoot}images/service_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Hình 2.</strong> Vòng đời dịch vụ. Sơ đồ phía bên trái
+minh họa vòng đời khi dịch vụ được tạo bằng {@link android.content.Context#startService
+startService()} và sơ đồ phía bên phải minh họa vòng đời khi dịch vụ được tạo
+bằng {@link android.content.Context#bindService bindService()}.</p>
+
+<p>Bằng việc triển khai những phương pháp này, bạn có thể theo dõi hai vòng lặp lồng nhau trong vòng đời của dịch vụ: </p>
+
+<ul>
+<li><strong>Toàn bộ vòng đời</strong> của một dịch vụ xảy ra giữa thời điểm gọi {@link
+android.app.Service#onCreate onCreate()} và thời điểm {@link
+android.app.Service#onDestroy} trả về. Giống như hoạt động, dịch vụ thực hiện thiết lập ban đầu của nó trong
+{@link android.app.Service#onCreate onCreate()} và giải phóng tất cả tài nguyên còn lại trong {@link
+android.app.Service#onDestroy onDestroy()}.  Ví dụ, một
+dịch vụ phát lại nhạc có thể tạo luồng mà tại đó nhạc sẽ được phát trong {@link
+android.app.Service#onCreate onCreate()}, sau đó dừng luồng trong {@link
+android.app.Service#onDestroy onDestroy()}.
+
+<p>Các phương pháp {@link android.app.Service#onCreate onCreate()} và {@link android.app.Service#onDestroy
+onDestroy()} được gọi cho tất cả dịch vụ, dù
+chúng được tạo bởi {@link android.content.Context#startService startService()} hay {@link
+android.content.Context#bindService bindService()}.</p></li>
+
+<li><strong>Vòng đời hiện hoạt</strong> của một dịch vụ sẽ bắt đầu bằng một lệnh gọi đến hoặc {@link
+android.app.Service#onStartCommand onStartCommand()} hoặc {@link android.app.Service#onBind onBind()}.
+Mỗi phương pháp sẽ được giao {@link
+android.content.Intent} mà được chuyển tương ứng cho hoặc {@link android.content.Context#startService
+startService()} hoặc {@link android.content.Context#bindService bindService()}.
+<p>Nếu dịch vụ được bắt đầu, vòng đời hiện hoạt sẽ chấm dứt tại cùng thời điểm khi toàn bộ vòng đời
+chấm dứt (dịch vụ sẽ vẫn hiện hoạt ngay cả sau khi {@link android.app.Service#onStartCommand
+onStartCommand()} trả về). Nếu dịch vụ bị gắn kết, vòng đời hiện hoạt sẽ chấm dứt khi {@link
+android.app.Service#onUnbind onUnbind()} trả về.</p>
+</li>
+</ul>
+
+<p class="note"><strong>Lưu ý:</strong> Mặc dù dịch vụ được bắt đầu bị dừng bởi một lệnh gọi đến
+hoặc {@link android.app.Service#stopSelf stopSelf()} hoặc {@link
+android.content.Context#stopService stopService()}, sẽ không có một lệnh gọi lại tương ứng cho
+dịch vụ (không có lệnh gọi lại {@code onStop()}). Vì thế, trừ khi dịch vụ được gắn kết với một máy khách,
+hệ thống sẽ hủy nó khi dịch vụ bị dừng&mdash;{@link
+android.app.Service#onDestroy onDestroy()} là lệnh gọi lại duy nhất nhận được.</p>
+
+<p>Hình 2 minh họa các phương pháp gọi lại điển hình cho một dịch vụ. Mặc dù hình tách riêng
+các dịch vụ được tạo bởi {@link android.content.Context#startService startService()} với các dịch vụ
+được tạo bởi {@link android.content.Context#bindService bindService()}, hãy
+ghi nhớ rằng bất kỳ dịch vụ nào, dù được bắt đầu như thế nào, đều có thể cho phép máy khách gắn kết với nó.
+Vì thế, một dịch vụ được bắt đầu từ đầu bằng {@link android.app.Service#onStartCommand
+onStartCommand()} (bởi một máy khách gọi {@link android.content.Context#startService startService()})
+vẫn có thể nhận một lệnh gọi đến {@link android.app.Service#onBind onBind()} (khi máy khách gọi
+{@link android.content.Context#bindService bindService()}).</p>
+
+<p>Để biết thêm thông tin về việc tao một dịch vụ có tính năng gắn kết, hãy xem tài liệu <a href="{@docRoot}guide/components/bound-services.html">Dịch vụ Gắn kết</a>,
+trong đó có thêm thông tin về phương pháp gọi lại {@link android.app.Service#onRebind onRebind()}
+trong phần về <a href="{@docRoot}guide/components/bound-services.html#Lifecycle">Quản lý Vòng đời của
+một Dịch vụ Gắn kết</a>.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>To learn how to query data from the system or other applications (such as contacts or media
+stored on the device), continue with the <b><a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></b>
+document.</p>
+-->

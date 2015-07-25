@@ -1,0 +1,916 @@
+page.title=ストレージ アクセス フレームワーク
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本書の内容
+ <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">詳細を表示</span>
+        <span class="less" style="display:none">詳細を非表示</span></a></h2>
+<ol id="toc44" class="hide-nested">
+    <li>
+        <a href="#overview">概要</a>
+    </li>
+    <li>
+        <a href="#flow">コントロール フロー</a>
+    </li>
+    <li>
+        <a href="#client">クライアント アプリを作成する</a>
+        <ol>
+        <li><a href="#search">ドキュメントを検索する</a></li>
+        <li><a href="#process">プロセスの結果</a></li>
+        <li><a href="#metadata">ドキュメント メタデータを確認する</a></li>
+        <li><a href="#open">ドキュメントを開く</a></li>
+        <li><a href="#create">新しいドキュメントを作成する</a></li>
+        <li><a href="#delete">ドキュメントを削除する</a></li>
+        <li><a href="#edit">ドキュメントを編集する</a></li>
+        <li><a href="#permissions">パーミッションを固定する</a></li>
+        </ol>
+    </li>
+    <li><a href="#custom">カスタム ドキュメント プロバイダを作成する</a>
+        <ol>
+        <li><a href="#manifest">マニフェスト</a></li>
+        <li><a href="#contract">コントラクト</a></li>
+        <li><a href="#subclass">サブクラス DocumentsProvider</a></li>
+        <li><a href="#security">セキュリティ</a></li>
+        </ol>
+    </li>
+
+</ol>
+<h2>キークラス</h2>
+<ol>
+    <li>{@link android.provider.DocumentsProvider}</li>
+    <li>{@link android.provider.DocumentsContract}</li>
+</ol>
+
+<h2>ビデオ</h2>
+
+<ol>
+    <li><a href="http://www.youtube.com/watch?v=zxHVeXbK1P4">
+DevBytes: Android 4.4 ストレージ アクセス フレームワーク: プロバイダ</a></li>
+     <li><a href="http://www.youtube.com/watch?v=UFj9AEz0DHQ">
+DevBytes: Android 4.4 ストレージ アクセス フレームワーク: クライアント</a></li>
+</ol>
+
+
+<h2>コードサンプル</h2>
+
+<ol>
+    <li><a href="{@docRoot}samples/StorageProvider/index.html">
+StorageProvider</a></li>
+     <li><a href="{@docRoot}samples/StorageClient/index.html">
+StorageClient</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">        コンテンツ プロバイダの基本        </a>
+
+
+    </li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Android 4.4 （API レベル 19）は、ストレージ アクセス フレームワーク（SAF）を採用しています。SAF を利用することで、ユーザーは設定したドキュメント ストレージ プロバイダ全体から簡単にドキュメント、画像、その他のファイルを参照して開くことができます。
+
+標準の使いやすい UI により、アプリやプロバイダを通じて一貫性のある方法でファイルを参照したり、最近使用したファイルにアクセスしたりできます。
+</p>
+
+<p>サービスをカプセル化する {@link android.provider.DocumentsProvider} を実装することで、クラウドやローカル ストレージ サービスをエコシステムに参加させることができます。
+プロバイダのドキュメントへのアクセスが必要なクライアントも、数行のコードだけで SAF と統合できます。
+
+</p>
+
+<p>SAF には次の項目が含まれます。</p>
+
+<ul>
+<li><strong>ドキュメント プロバイダ</strong>&mdash;ストレージ サービス（Google ドライブなど）が管理するファイルの表示を許可するコンテンツ プロバイダです。
+ドキュメント プロバイダは {@link android.provider.DocumentsProvider} クラスのサブクラスとして実装されます。document-provider スキーマは従来のファイル階層に基づくものですが、ドキュメント プロバイダが物理的にどのようにファイルを格納するかはその設定次第です。Android プラットフォームには、ダウンロード、画像、ビデオなどの組み込みのドキュメント プロバイダがいくつか用意されています。
+
+
+
+
+</li>
+
+<li><strong>クライアント アプリ</strong>&mdash;{@link android.content.Intent#ACTION_OPEN_DOCUMENT} または {@link android.content.Intent#ACTION_CREATE_DOCUMENT} インテントを呼び出し、ドキュメント プロバイダが返したファイルを受け取るカスタムアプリです。
+
+
+</li>
+
+<li><strong>ピッカー</strong>&mdash;クライアントアプリの検索条件を満たすすべてのドキュメント プロバイダのドキュメントにアクセスできるシステム UI です。
+</li>
+</ul>
+
+<p>SAF は次のような機能も提供します。</p>
+<ul>
+<li>ユーザーは 1 つのアプリだけではなく、すべてのドキュメント プロバイダのコンテンツを参照できます。</li>
+<li>アプリからドキュメント プロバイダが所有するドキュメントへの、長期間の固定アクセスを可能にします。
+このアクセスにより、ユーザーはプロバイダ上でのファイルの追加、編集、保存、削除が可能になります。
+</li>
+<li>複数のユーザー アカウントと USB ストレージ プロバイダなどの一時的なルートをサポートします。一時的なルートはドライブを挿入した場合にのみ表示されます。
+ </li>
+</ul>
+
+<h2 id ="overview">概要</h2>
+
+<p>SAF は、{@link android.provider.DocumentsProvider} クラスのサブクラスであるコンテンツ プロバイダを中心に展開します。
+ドキュメント プロバイダでは、データは下図のように従来のファイル階層で構造化されます。<em></em>
+</p>
+<p><img src="{@docRoot}images/providers/storage_datamodel.png" alt="data model" /></p>
+<p class="img-caption"><strong>図 1.</strong> ドキュメント プロバイダのデータモデル。ルートポイントが 1 つのドキュメントを指し、そこからツリー全体が広がります。
+</p>
+
+<p>注: </p>
+<ul>
+
+<li>各ドキュメント プロバイダは、ドキュメントのツリーの検索の出発点である 1 つ以上の「ルート」を報告します。各ルートは一意の {@link android.provider.DocumentsContract.Root#COLUMN_ROOT_ID} を持ち、該当するルートの下のコンテンツを表すドキュメント（ディレクトリ）を指します。ルートはデザインによって動的に変化し、複数アカウント、一時的な USB ストレージ ドライブ、ユーザーのログインとログアウトなどのユースケースをサポートします。
+
+
+
+
+
+</li>
+
+<li>各ルートの下のドキュメントは 1 つだけになります。そのドキュメントは、1 ～ <em>N</em> 個のドキュメントを指し、さらにそれぞれのドキュメントも 1 ～ <em>N</em> 個のドキュメントを指すことができます。
+ </li>
+
+<li>各ストレージ バックエンドは、一意の {@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} を使って個々のファイルやディレクトリを参照して表示します。端末の再起動後も使用できる永続的な URI の付与に使用することから、ドキュメント ID は一意でなければならず、一度発行すると変更できません。
+
+
+
+</li>
+
+
+<li>ドキュメントには、開くことができるファイル（特定の MIME タイプを持つもの）か、追加のドキュメント（{@link android.provider.DocumentsContract.Document#MIME_TYPE_DIR} MIME タイプを持つもの）を含むディレクトリのいずれかに設定できます。
+
+</li>
+
+<li>各ドキュメントはさまざまな機能を持つことができ、{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS} を使って記述します。たとえば、{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_WRITE}、{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE}、{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_THUMBNAIL} といった機能です。同一の {@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} は複数のディレクトリに含めることができます。
+
+
+
+
+
+</li>
+</ul>
+
+<h2 id="flow">コントロール フロー</h2>
+<p>前述のように、ドキュメント プロバイダのデータモデルは従来のファイル階層を基本とします。
+ただし、{@link android.provider.DocumentsProvider} API でアクセスできるのであれば、任意の方法でデータを物理的に格納できます。たとえば、データにタグベースのクラウド ストレージを使用できます。
+
+</p>
+
+<p>図 2 の例は、写真アプリが格納されたデータに SAF を使ってアクセスする様子を表しています。
+</p>
+<p><img src="{@docRoot}images/providers/storage_dataflow.png" alt="app" /></p>
+
+<p class="img-caption"><strong>図 2.</strong> ストレージ アクセス フレームワーク フロー</p>
+
+<p>注: </p>
+<ul>
+
+<li>SAF では、プロバイダとクライアントは直接やり取りできません。
+クライアントが、ファイルを操作（ファイルの読み取り、編集、作成、削除）するためのパーミッションを要求します。
+</li>
+
+<li>アプリケーション（この例では写真アプリ）がインテント {@link android.content.Intent#ACTION_OPEN_DOCUMENT} または {@link android.content.Intent#ACTION_CREATE_DOCUMENT} を起動すると、やり取りが始まります。
+インテントには、基準を詳細に調整するためのフィルタが含まれる場合があります。&mdash;たとえば、「画像」の MIME タイプを持つ、開くことができるすべてのファイルを取得する、のように設定できます。
+
+</li>
+
+<li>インテントが起動すると、システム ピッカーが登録済みの各プロバイダに移動し、一致するコンテンツのルートをユーザーに表示します。
+</li>
+
+<li>基礎となるドキュメント プロバイダの種類に関係なく、ドキュメントにアクセスするための標準的なインターフェースがピッカーから提供されます。
+図 2 には、Google Drive プロバイダ、USB プロバイダ、クラウド プロバイダの例を示しています。
+</li>
+</ul>
+
+<p>図 3 は、Google Drive アカウントを選択したユーザーが画像を検索するピッカーを表しています。
+</p>
+
+<p><img src="{@docRoot}images/providers/storage_picker.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>図 3.</strong> ピッカー</p>
+
+<p>ユーザーが Google Drive を選択すると、図 4 のように画像が表示されます。
+この時点から、ユーザーはプロバイダとクライアント アプリがサポートするすべての操作方法を使って、画像を操作できるようになります。
+
+
+<p><img src="{@docRoot}images/providers/storage_photos.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>図 4.</strong>画像</p>
+
+<h2 id="client">クライアント アプリを作成する</h2>
+
+<p>Android 4.3 以前では、別のアプリからファイルを取得する場合、{@link android.content.Intent#ACTION_PICK} や {@link android.content.Intent#ACTION_GET_CONTENT} といったインテントを呼び出す必要があります。
+
+その後ユーザーは、ファイルを選択するためのアプリを 1 つ選びます。選択されたアプリはユーザーが使用可能なファイルを参照して選択するためのユーザー インターフェースを提供する必要があります。
+
+ </p>
+
+<p>Android 4.4 以降であれば、{@link android.content.Intent#ACTION_OPEN_DOCUMENT} インテントを使用するという選択肢もあります。このインテントではシステム制御のピッカー UI が表示され、ユーザーはそこから他のアプリで利用可能なすべてのファイル参照できます。
+
+
+ユーザーは、この 1 つの UI から、サポートされるすべてのアプリのファイルを選択できます。
+</p>
+
+<p>{@link android.content.Intent#ACTION_OPEN_DOCUMENT} は、{@link android.content.Intent#ACTION_GET_CONTENT} との置き換えを意図したものではありません。どちらを使用するかは、アプリのニーズによって異なります。
+
+</p>
+
+<ul>
+<li>アプリでデータの読み取りとインポートのみを行う場合は、{@link android.content.Intent#ACTION_GET_CONTENT} を使用します。
+この方法を使用すると、アプリは、画像ファイルなどのデータのコピーをインポートします。
+</li>
+
+<li>アプリからドキュメント プロバイダが所有するドキュメントへの、長期間の固定アクセスを可能にするには、{@link android.content.Intent#ACTION_OPEN_DOCUMENT} を使用します。
+
+ドキュメント プロバイダに格納されている画像をユーザーが編集するための、写真編集アプリなどの例が挙げられます。
+ </li>
+
+</ul>
+
+
+<p>ここでは、{@link android.content.Intent#ACTION_OPEN_DOCUMENT} と {@link android.content.Intent#ACTION_CREATE_DOCUMENT} インテントに基づいたクライアント アプリの作成方法について説明します。
+
+</p>
+
+
+<h3 id="search">ドキュメントを検索する</h3>
+
+<p>
+次のスニペットでは {@link android.content.Intent#ACTION_OPEN_DOCUMENT} を使って、画像ファイルがあるドキュメント プロバイダを検索します。
+
+</p>
+
+<pre>private static final int READ_REQUEST_CODE = 42;
+...
+/**
+ * Fires an intent to spin up the &quot;file chooser&quot; UI and select an image.
+ */
+public void performFileSearch() {
+
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+    // browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones)
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only images, using the image MIME data type.
+    // If one wanted to search for ogg vorbis files, the type would be &quot;audio/ogg&quot;.
+    // To search for all documents available via installed storage providers,
+    // it would be &quot;*/*&quot;.
+    intent.setType(&quot;image/*&quot;);
+
+    startActivityForResult(intent, READ_REQUEST_CODE);
+}</pre>
+
+<p>注: </p>
+<ul>
+<li>アプリが {@link android.content.Intent#ACTION_OPEN_DOCUMENT} インテントを開始すると、ピッカーが起動し、条件に一致するすべてのドキュメント プロバイダが表示されます。
+</li>
+
+<li>カテゴリ {@link android.content.Intent#CATEGORY_OPENABLE} をインテントに追加すると、結果がフィルタリングされ、画像ファイルなどの開くことができるドキュメントのみが表示されます。
+</li>
+
+<li>{@code intent.setType("image/*")} 文は結果をさらにフィルタリングし、画像 MIME データタイプを持つドキュメントのみを表示します。
+</li>
+</ul>
+
+<h3 id="results">プロセスの結果</h3>
+
+<p>ユーザーがピッカーでドキュメントを選択すると、{@link android.app.Activity#onActivityResult onActivityResult()} が呼び出されます。選択したドキュメントを指す URI は {@code resultData} パラメータに含まれます。
+
+
+{@link android.content.Intent#getData getData()} を使って URI を抽出します。URI を抽出したら、その URI を使ってユーザーが希望するドキュメントを取得できます。
+次に例を示します。
+</p>
+
+<pre>&#64;Override
+public void onActivityResult(int requestCode, int resultCode,
+        Intent resultData) {
+
+    // The ACTION_OPEN_DOCUMENT intent was sent with the request code
+    // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
+    // response to some other intent, and the code below shouldn't run at all.
+
+    if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        // The document selected by the user won't be returned in the intent.
+        // Instead, a URI to that document will be contained in the return intent
+        // provided to this method as a parameter.
+        // Pull that URI using resultData.getData().
+        Uri uri = null;
+        if (resultData != null) {
+            uri = resultData.getData();
+            Log.i(TAG, "Uri: " + uri.toString());
+            showImage(uri);
+        }
+    }
+}
+</pre>
+
+<h3 id="metadata">ドキュメント メタデータを確認する</h3>
+
+<p>ドキュメントのURI を取得したら、そのメタデータにアクセスできます。次のスニペットは、URI で指定したドキュメントのメタデータを取得して、ログに記録します。
+</p>
+
+<pre>public void dumpImageMetaData(Uri uri) {
+
+    // The query, since it only applies to a single document, will only return
+    // one row. There's no need to filter, sort, or select fields, since we want
+    // all fields for one document.
+    Cursor cursor = getActivity().getContentResolver()
+            .query(uri, null, null, null, null, null);
+
+    try {
+    // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+    // &quot;if there's anything to look at, look at it&quot; conditionals.
+        if (cursor != null &amp;&amp; cursor.moveToFirst()) {
+
+            // Note it's called &quot;Display Name&quot;.  This is
+            // provider-specific, and might not necessarily be the file name.
+            String displayName = cursor.getString(
+                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            Log.i(TAG, &quot;Display Name: &quot; + displayName);
+
+            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+            // If the size is unknown, the value stored is null.  But since an
+            // int can't be null in Java, the behavior is implementation-specific,
+            // which is just a fancy term for &quot;unpredictable&quot;.  So as
+            // a rule, check if it's null before assigning to an int.  This will
+            // happen often:  The storage API allows for remote files, whose
+            // size might not be locally known.
+            String size = null;
+            if (!cursor.isNull(sizeIndex)) {
+                // Technically the column stores an int, but cursor.getString()
+                // will do the conversion automatically.
+                size = cursor.getString(sizeIndex);
+            } else {
+                size = &quot;Unknown&quot;;
+            }
+            Log.i(TAG, &quot;Size: &quot; + size);
+        }
+    } finally {
+        cursor.close();
+    }
+}
+</pre>
+
+<h3 id="open-client">ドキュメントを開く</h3>
+
+<p>ドキュメントのURI を取得したら、そのドキュメントを開いてさまざまな操作を行うことができます。
+</p>
+
+<h4>ビットマップ</h4>
+
+<p>{@link android.graphics.Bitmap} を開く方法の例を次に示します。</p>
+
+<pre>private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+    ParcelFileDescriptor parcelFileDescriptor =
+            getContentResolver().openFileDescriptor(uri, "r");
+    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+    Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+    parcelFileDescriptor.close();
+    return image;
+}
+</pre>
+
+<p>この操作を UI スレッドで実行しないでください。{@link android.os.AsyncTask} を使ってバックグラウンドで実行します。
+ビットマップを開いたら、{@link android.widget.ImageView} で表示できます。
+
+</p>
+
+<h4>InputStream を取得する</h4>
+
+<p>URI から {@link java.io.InputStream} を取得する方法の例を次に示します。このスニペットでは、ファイルの行が文字列に読み込まれます。
+</p>
+
+<pre>private String readTextFromUri(Uri uri) throws IOException {
+    InputStream inputStream = getContentResolver().openInputStream(uri);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+            inputStream));
+    StringBuilder stringBuilder = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+        stringBuilder.append(line);
+    }
+    fileInputStream.close();
+    parcelFileDescriptor.close();
+    return stringBuilder.toString();
+}
+</pre>
+
+<h3 id="create">新しいドキュメントを作成する</h3>
+
+<p>{@link android.content.Intent#ACTION_CREATE_DOCUMENT} インテントを使用すると、アプリでドキュメント プロバイダに新しいドキュメントを作成できます。
+
+ファイルを作成するには、インテントに MIME タイプとファイル名を渡し、一意の要求コードを使ってインテントを起動します。
+後は自分で設定します。</p>
+
+
+<pre>
+// Here are some examples of how you might call this method.
+// The first parameter is the MIME type, and the second parameter is the name
+// of the file you are creating:
+//
+// createFile("text/plain", "foobar.txt");
+// createFile("image/png", "mypicture.png");
+
+// Unique request code.
+private static final int WRITE_REQUEST_CODE = 43;
+...
+private void createFile(String mimeType, String fileName) {
+    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as
+    // a file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Create a file with the requested MIME type.
+    intent.setType(mimeType);
+    intent.putExtra(Intent.EXTRA_TITLE, fileName);
+    startActivityForResult(intent, WRITE_REQUEST_CODE);
+}
+</pre>
+
+<p>新しいドキュメントを作成したら、{@link android.app.Activity#onActivityResult onActivityResult()} で URI を取得して、ドキュメントに書き込み操作を実行できます。
+
+</p>
+
+<h3 id="delete">ドキュメントを削除する</h3>
+
+<p>ドキュメントの URI と、{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE SUPPORTS_DELETE} を含むドキュメントの {@link android.provider.DocumentsContract.Document#COLUMN_FLAGS Document.COLUMN_FLAGS} を取得すると、ドキュメントを削除できます。
+
+
+
+次に例を示します。</p>
+
+<pre>
+DocumentsContract.deleteDocument(getContentResolver(), uri);
+</pre>
+
+<h3 id="edit">ドキュメントを編集する</h3>
+
+<p>SAF を使用するとテキスト ドキュメントを直接編集できます。このスニペットは {@link android.content.Intent#ACTION_OPEN_DOCUMENT} インテントを起動し、カテゴリ {@link android.content.Intent#CATEGORY_OPENABLE} を使って、開くことができるドキュメントのみを表示します。
+
+
+
+次のように、テキスト ファイルのみを表示するようにフィルタリングします。</p>
+
+<pre>
+private static final int EDIT_REQUEST_CODE = 44;
+/**
+ * Open a file for writing and append some text to it.
+ */
+ private void editDocument() {
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's
+    // file browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only text files.
+    intent.setType(&quot;text/plain&quot;);
+
+    startActivityForResult(intent, EDIT_REQUEST_CODE);
+}
+</pre>
+
+<p>次に、{@link android.app.Activity#onActivityResult onActivityResult()}（「<a href="#results">プロセスの結果</a>」をご覧ください）からコードを呼び出して、編集を行います。次のスニペットは {@link android.content.ContentResolver} から {@link java.io.FileOutputStream} を取得します。
+
+
+デフォルトでは、「書き込み」モードを使用します。必要最小限のアクセスのみを要求することをお勧めします。書き込みのみが必要な場合に読み込みと書き込みを要求しないでください。
+
+</p>
+
+<pre>private void alterDocument(Uri uri) {
+    try {
+        ParcelFileDescriptor pfd = getActivity().getContentResolver().
+                openFileDescriptor(uri, "w");
+        FileOutputStream fileOutputStream =
+                new FileOutputStream(pfd.getFileDescriptor());
+        fileOutputStream.write(("Overwritten by MyCloud at " +
+                System.currentTimeMillis() + "\n").getBytes());
+        // Let the document provider know you're done by closing the stream.
+        fileOutputStream.close();
+        pfd.close();
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}</pre>
+
+<h3 id="permissions">パーミッションを固定する</h3>
+
+<p>アプリで読み込みや書き込み用にファイルを開くと、システムからアプリに対して、該当するファイルの URI パーミッションが付与されます。
+このパーミッションはユーザーが端末を再起動するまで有効です。ただし、画像アプリでユーザーが最近編集した 5 つの画像にアプリから直接アクセスできるようにするにはどうすればいいでしょう。ユーザーの端末が再起動されたら、ファイルを検索するためにユーザーをシステム ピッカーに戻す必要がありますが、これは明らかにいい方法とは言えません。
+
+
+
+</p>
+
+<p>このような状況を避けるために、システムがアプリに付与するパーミッションを固定します。実際は、システムが提供する固定可能な URI パーミッションをアプリで「取得」します。
+
+これにより、端末を再起動した場合でも、ユーザーはアプリからファイルに継続的にアクセスできます。
+</p>
+
+
+<pre>final int takeFlags = intent.getFlags()
+            &amp; (Intent.FLAG_GRANT_READ_URI_PERMISSION
+            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+// Check for the freshest data.
+getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
+
+<p>最後にもう 1 つ手順があります。アプリが最近アクセスした URI は、保存されていても既に無効になっている場合があります。&mdash;別のアプリによってドキュメントが削除されたり、修正されたりすることが考えられます。
+
+そこで、最新のデータを確認するには、常に {@code getContentResolver().takePersistableUriPermission()} を呼び出す必要があります。
+
+</p>
+
+<h2 id="custom">カスタム ドキュメント プロバイダを作成する</h2>
+
+<p>
+ファイル用のストレージ サービスを提供するアプリ（クラウド保存サービスなど）を開発する場合、カスタム ドキュメント プロバイダを作成すれば、SAF を介してファイルを利用可能にできます。
+
+ここではその方法について説明します。
+</p>
+
+
+<h3 id="manifest">マニフェスト</h3>
+
+<p>カスタム ドキュメント プロバイダを実装するには、アプリケーションのマニフェストに次のものを追加します。
+</p>
+<ul>
+
+<li>API レベル 19 以降のターゲット。</li>
+
+<li>カスタム ストレージ プロバイダを宣言する <code>&lt;provider&gt;</code> 要素。
+ </li>
+
+<li>クラス名となる、プロバイダの名前。パッケージ名を含みます。例: <code>com.example.android.storageprovider.MyCloudProvider</code>。
+</li>
+
+<li>認証局の名前。これはパッケージ名（この例では <code>com.example.android.storageprovider</code>）とコンテンツ プロバイダのタイプを合わせたもの（<code>documents</code>）。
+
+たとえば、{@code com.example.android.storageprovider.documents} のようになります。</li>
+
+<li><code>&quot;true&quot;</code> に設定された属性 <code>android:exported</code>。他のアプリで認識できるようにプロバイダをエクスポートする必要があります。
+</li>
+
+<li><code>&quot;true&quot;</code> に設定された属性 <code>android:grantUriPermissions</code>。
+この設定により、プロバイダのコンテンツにアクセスできるように、システムが他のアプリにアクセス権を付与します。
+特定のドキュメントへのアクセス権を固定する方法については、「<a href="#permissions">パーミッションを固定する</a>」をご覧ください。
+</li>
+
+<li>{@code MANAGE_DOCUMENTS} パーミッション。デフォルトでは、プロバイダはすべてのユーザーが利用可能です。
+このパーミッションを追加することで、プロバイダをシステムに制限できます。セキュリティ上この制限は重要です。
+</li>
+
+<li>リソース ファイルで定義したブール値に設定された {@code android:enabled} 属性。
+この属性は、Android 4.3 以前を実行する端末でプロバイダを無効にすることを目的としています。たとえば、{@code android:enabled="@bool/atLeastKitKat"} のようになります。
+マニフェストのこの属性に加え、次の操作を実行する必要があります。
+
+<ul>
+<li>{@code res/values/} にある {@code bool.xml} リソース ファイルに、次の行を追加します。
+ <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>{@code res/values-v19/} にある {@code bool.xml} リソース ファイルに、次の行を追加します。
+ <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;true&lt;/bool&gt;</pre></li>
+</ul></li>
+
+<li>{@code android.content.action.DOCUMENTS_PROVIDER} アクションを含むインテント フィルタ。システムがプロバイダを検索したときに、プロバイダがピッカーに表示されます。
+
+</li>
+
+</ul>
+<p>プロバイダを含むサンプル マニフェストの抜粋を次に示します。</p>
+
+<pre>&lt;manifest... &gt;
+    ...
+    &lt;uses-sdk
+        android:minSdkVersion=&quot;19&quot;
+        android:targetSdkVersion=&quot;19&quot; /&gt;
+        ....
+        &lt;provider
+            android:name=&quot;com.example.android.storageprovider.MyCloudProvider&quot;
+            android:authorities=&quot;com.example.android.storageprovider.documents&quot;
+            android:grantUriPermissions=&quot;true&quot;
+            android:exported=&quot;true&quot;
+            android:permission=&quot;android.permission.MANAGE_DOCUMENTS&quot;
+            android:enabled=&quot;&#64;bool/atLeastKitKat&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.content.action.DOCUMENTS_PROVIDER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/provider&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;</pre>
+
+<h4 id="43">Android 4.3 以前を実行する端末をサポートする</h4>
+
+<p>{@link android.content.Intent#ACTION_OPEN_DOCUMENT} インテントは、Android 4.4 以降を実行する端末でのみ利用可能です。Android 4.3 以前を実行する端末に対応するためにアプリケーションで {@link android.content.Intent#ACTION_GET_CONTENT} をサポートするには、Android 4.4 以降を実行する端末のマニフェストで {@link android.content.Intent#ACTION_GET_CONTENT} インテント フィルタを無効にする必要があります。
+
+
+
+
+
+ドキュメント プロバイダと {@link android.content.Intent#ACTION_GET_CONTENT} は互いに排他的な関係にあると考える必要があります。
+
+両方を同時にサポートする場合、アプリはシステム ピッカー UI に 2 度表示され、格納されたデータへの 2 つの異なる方法を提供します。
+
+これではユーザーも操作に迷ってしまいます。</p>
+
+<p>ここでは、Android バージョン 4.4 以降を実行する端末で {@link android.content.Intent#ACTION_GET_CONTENT} インテント フィルタを無効にする際に推奨される方法を紹介します。
+
+</p>
+
+<ol>
+<li>{@code res/values/} にある {@code bool.xml} リソース ファイルに、次の行を追加します。
+ <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;true&lt;/bool&gt;</pre></li>
+
+<li>{@code res/values-v19/} にある {@code bool.xml} リソース ファイルに、次の行を追加します。
+ <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>4.4 （API レベル 19）以降のバージョンに対して {@link android.content.Intent#ACTION_GET_CONTENT} インテント フィルタを無効にするには、<a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">アクティビティ エイリアス</a>を追加します。
+
+
+次に例を示します。
+
+<pre>
+&lt;!-- This activity alias is added so that GET_CONTENT intent-filter
+     can be disabled for builds on API level 19 and higher. --&gt;
+&lt;activity-alias android:name=&quot;com.android.example.app.MyPicker&quot;
+        android:targetActivity=&quot;com.android.example.app.MyActivity&quot;
+        ...
+        android:enabled=&quot;@bool/atMostJellyBeanMR2&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.GET_CONTENT&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.OPENABLE&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;image/*&quot; /&gt;
+        &lt;data android:mimeType=&quot;video/*&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity-alias&gt;
+</pre>
+</li>
+</ol>
+<h3 id="contract">コントラクト</h3>
+
+<p>通常、カスタム コンテンツ プロバイダを作成するときには、<a href="{@docRoot}guide/topics/providers/content-provider-creating.html#ContractClass">コンテンツ プロバイダ</a>のデベロッパー ガイドに記載があるように、コントラクト クラスを実装するタスクが必要になります。
+
+
+コントラクト クラスは {@code public final} クラスであり、URI、列名、MIME タイプ、プロバイダに関連するその他のメタデータを含みます。
+
+コントラクト クラスは SAF によって提供されるため、独自に作成する必要はありません。
+
+</p>
+
+<ul>
+   <li>{@link android.provider.DocumentsContract.Document}</li>
+   <li>{@link android.provider.DocumentsContract.Root}</li>
+</ul>
+
+<p>たとえば、ドキュメント プロバイダでドキュメントやルートを照会したときには、カーソルに次のような列が返されることがあります。
+</p>
+
+<pre>private static final String[] DEFAULT_ROOT_PROJECTION =
+        new String[]{Root.COLUMN_ROOT_ID, Root.COLUMN_MIME_TYPES,
+        Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
+        Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
+        Root.COLUMN_AVAILABLE_BYTES,};
+private static final String[] DEFAULT_DOCUMENT_PROJECTION = new
+        String[]{Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE,
+        Document.COLUMN_DISPLAY_NAME, Document.COLUMN_LAST_MODIFIED,
+        Document.COLUMN_FLAGS, Document.COLUMN_SIZE,};
+</pre>
+
+<h3 id="subclass">サブクラス DocumentsProvider</h3>
+
+<p>カスタム ドキュメント プロバイダの作成の次の手順では、抽象クラス {@link android.provider.DocumentsProvider} をサブクラス化します。
+少なくとも、次のメソッドを実装する必要があります。
+</p>
+
+<ul>
+<li>{@link android.provider.DocumentsProvider#queryRoots queryRoots()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryDocument queryDocument()}</li>
+
+<li>{@link android.provider.DocumentsProvider#openDocument openDocument()}</li>
+</ul>
+
+<p>これらは実装する必要があるメソッドですが、これ以外にも多くのメソッドを実装できます。
+詳細については、{@link android.provider.DocumentsProvider} をご覧ください。
+</p>
+
+<h4 id="queryRoots">queryRoots を実装する</h4>
+
+<p>{@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} を実装すると、{@link android.provider.DocumentsContract.Root} で定義される列を使って、ドキュメント プロバイダのすべてのルート ディレクトリを指す {@link android.database.Cursor} が返されます。
+
+</p>
+
+<p>次のスニペットの {@code projection} パラメータは、呼び出し側が取得する特定のフィールドを表します。
+スニペットは新しいカーソルを作成し、それに行を 1 つ追加します。&mdash;[ダウンロード] や [画像] と同じように、1 つのルートに対して最上位のディレクトリが 1 つになります。
+
+ほとんどのプロバイダでルートは 1 つになります。複数のユーザー アカウントを使用するような場合は、1 つ以上のルートを設定できます。
+その場合、カーソルに 2 つ目の行を追加します。
+</p>
+
+<pre>
+&#64;Override
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+
+    // Create a cursor with either the requested fields, or the default
+    // projection if "projection" is null.
+    final MatrixCursor result =
+            new MatrixCursor(resolveRootProjection(projection));
+
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+    }
+
+    // It's possible to have multiple roots (e.g. for multiple accounts in the
+    // same app) -- just add multiple cursor rows.
+    // Construct one row for a root called &quot;MyCloud&quot;.
+    final MatrixCursor.RowBuilder row = result.newRow();
+    row.add(Root.COLUMN_ROOT_ID, ROOT);
+    row.add(Root.COLUMN_SUMMARY, getContext().getString(R.string.root_summary));
+
+    // FLAG_SUPPORTS_CREATE means at least one directory under the root supports
+    // creating documents. FLAG_SUPPORTS_RECENTS means your application's most
+    // recently used documents will show up in the &quot;Recents&quot; category.
+    // FLAG_SUPPORTS_SEARCH allows users to search all documents the application
+    // shares.
+    row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE |
+            Root.FLAG_SUPPORTS_RECENTS |
+            Root.FLAG_SUPPORTS_SEARCH);
+
+    // COLUMN_TITLE is the root title (e.g. Gallery, Drive).
+    row.add(Root.COLUMN_TITLE, getContext().getString(R.string.title));
+
+    // This document id cannot change once it's shared.
+    row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(mBaseDir));
+
+    // The child MIME types are used to filter the roots and only present to the
+    //  user roots that contain the desired type somewhere in their file hierarchy.
+    row.add(Root.COLUMN_MIME_TYPES, getChildMimeTypes(mBaseDir));
+    row.add(Root.COLUMN_AVAILABLE_BYTES, mBaseDir.getFreeSpace());
+    row.add(Root.COLUMN_ICON, R.drawable.ic_launcher);
+
+    return result;
+}</pre>
+
+<h4 id="queryChildDocuments">queryChildDocuments を実装する</h4>
+
+<p>{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()} を実装すると、{@link android.provider.DocumentsContract.Document} で定義される列を使って、指定したディレクトリ内のすべてのファイルを指す {@link android.database.Cursor} が返されます。
+
+
+
+</p>
+
+<p>ピッカー UI でアプリケーション ルートを選択すると、このメソッドが呼び出されます。ルートの下のディレクトリの子ドキュメントを取得します。
+ルートだけでなく、ファイル階層内の任意のレベルで呼び出せます。
+このスニペットでは、要求した列を持つ新しいカーソルが作成され、親ディレクトリのすぐ下のそれぞれの子の情報がカーソルに追加されます。子は、画像、別のディレクトリなど&mdash;任意のファイルとなります。
+
+
+</p>
+
+<pre>&#64;Override
+public Cursor queryChildDocuments(String parentDocumentId, String[] projection,
+                              String sortOrder) throws FileNotFoundException {
+
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    final File parent = getFileForDocId(parentDocumentId);
+    for (File file : parent.listFiles()) {
+        // Adds the file's display name, MIME type, size, and so on.
+        includeFile(result, null, file);
+    }
+    return result;
+}
+</pre>
+
+<h4 id="queryDocument">queryDocument を実装する</h4>
+
+<p>{@link android.provider.DocumentsProvider#queryDocument queryDocument()} を実装すると、{@link android.provider.DocumentsContract.Document} で定義される列を使って、指定したファイルを指す {@link android.database.Cursor} が返されます。
+
+
+
+</p>
+
+<p>{@link android.provider.DocumentsProvider#queryDocument queryDocument()} メソッドでは、特定のファイルの情報ではなく、{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()} に渡したのと同じ情報が返されます。
+
+
+</p>
+
+
+<pre>&#64;Override
+public Cursor queryDocument(String documentId, String[] projection) throws
+        FileNotFoundException {
+
+    // Create a cursor with the requested projection, or the default projection.
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    includeFile(result, documentId, null);
+    return result;
+}
+</pre>
+
+<h4 id="openDocument">openDocument を実装する</h4>
+
+<p>指定したファイルを表す {@link android.os.ParcelFileDescriptor} を返すには、{@link android.provider.DocumentsProvider#openDocument
+openDocument()} を実装する必要があります。
+他のアプリは、返された {@link android.os.ParcelFileDescriptor} を使ってデータをストリーミングします。
+ユーザーがファイルを選択するとシステムがこのメソッドを呼び出し、クライアント アプリは {@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()} を呼び出してファイルへのアクセスを要求します。次に例を示します。
+
+
+</p>
+
+<pre>&#64;Override
+public ParcelFileDescriptor openDocument(final String documentId,
+                                         final String mode,
+                                         CancellationSignal signal) throws
+        FileNotFoundException {
+    Log.v(TAG, &quot;openDocument, mode: &quot; + mode);
+    // It's OK to do network operations in this method to download the document,
+    // as long as you periodically check the CancellationSignal. If you have an
+    // extremely large file to transfer from the network, a better solution may
+    // be pipes or sockets (see ParcelFileDescriptor for helper methods).
+
+    final File file = getFileForDocId(documentId);
+
+    final boolean isWrite = (mode.indexOf('w') != -1);
+    if(isWrite) {
+        // Attach a close listener if the document is opened in write mode.
+        try {
+            Handler handler = new Handler(getContext().getMainLooper());
+            return ParcelFileDescriptor.open(file, accessMode, handler,
+                        new ParcelFileDescriptor.OnCloseListener() {
+                &#64;Override
+                public void onClose(IOException e) {
+
+                    // Update the file with the cloud server. The client is done
+                    // writing.
+                    Log.i(TAG, &quot;A file with id &quot; +
+                    documentId + &quot; has been closed!
+                    Time to &quot; +
+                    &quot;update the server.&quot;);
+                }
+
+            });
+        } catch (IOException e) {
+            throw new FileNotFoundException(&quot;Failed to open document with id &quot;
+            + documentId + &quot; and mode &quot; + mode);
+        }
+    } else {
+        return ParcelFileDescriptor.open(file, accessMode);
+    }
+}
+</pre>
+
+<h3 id="security">セキュリティ</h3>
+
+<p>たとえば、ドキュメント プロバイダがパスワードで保護されたクラウド ストレージ サービスであり、ファイル共有を開始する前にユーザーがログインしているかどうかを確認するとします。ユーザーがログインしていない場合、アプリはどのような動作を行う必要があるでしょうか。
+
+このような場合、{@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} の実装のゼロルートを返すようにします。
+つまり、空のルートカーソルになります。</p>
+
+<pre>
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+...
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+}
+</pre>
+
+<p>その他に {@code getContentResolver().notifyChange()} を呼び出す手順もあります。{@link android.provider.DocumentsContract} については既に説明してあります。
+これを使ってこの URI を作成します。次のスニペットは、ユーザーのログイン ステータスが変わった場合に、ドキュメント プロバイダのルートを照会するようシステムに指示します。
+
+ユーザーがログインしてない場合は、上述のように、{@link android.provider.DocumentsProvider#queryRoots queryRoots()} を呼び出すと空のカーソルが返されます。
+
+こうすることで、ユーザーがプロバイダにログインしている場合にのみ、プロバイダのドキュメントを利用できます。
+</p>
+
+<pre>private void onLoginButtonClick() {
+    loginOrLogout();
+    getContentResolver().notifyChange(DocumentsContract
+            .buildRootsUri(AUTHORITY), null);
+}
+</pre>

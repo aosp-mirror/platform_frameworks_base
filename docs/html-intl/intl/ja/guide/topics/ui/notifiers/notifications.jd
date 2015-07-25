@@ -1,0 +1,979 @@
+page.title=通知
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>本書の内容</h2>
+<ol>
+  <li><a href="#Design">設計上の考慮事項</a></li>
+  <li><a href="#CreateNotification">通知を作成する</a>
+    <ol>
+      <li><a href="#Required">必須通知コンテンツ</a></li>
+      <li><a href="#Optional">省略可能な通知コンテンツと設定</a></li>
+      <li><a href="#Actions">通知アクション</a></li>
+      <li><a href="#Priority">通知の優先度</a></li>
+      <li><a href="#SimpleNotification">簡単な通知を作成する</a></li>
+      <li><a href="#ApplyStyle">通知に拡張レイアウトを適用する</a></li>
+      <li><a href="#Compatibility">互換性を確保する</a></li>
+    </ol>
+  </li>
+  <li><a href="#Managing">通知を管理する</a>
+    <ol>
+      <li><a href="#Updating">通知を更新する</a></li>
+      <li><a href="#Removing">通知を削除する</a></li>
+    </ol>
+  </li>
+  <li><a href="#NotificationResponse">アクティビティの開始時にナビゲーションを維持する</a>
+    <ol>
+      <li><a href="#DirectEntry">通常のアクティビティの PendingIntent を設定する</a></li>
+      <li><a href="#ExtendedNotification">特殊なアクティビティの PendingIntent を設定する</a></li>
+    </ol>
+  </li>
+  <li><a href="#Progress">通知に進捗状況を表示する</a>
+    <ol>
+      <li><a href="#FixedProgress">範囲固定の進捗インジケーターを表示する</a></li>
+      <li><a href="#ActivityIndicator">進行中アクティビティ インジケーターを表示する</a></li>
+    </ol>
+  </li>
+  <li><a href="#metadata">通知メタデータ</a></li>
+  <li><a href="#Heads-up">ヘッドアップ通知</a></li>
+  <li><a href="#lockscreenNotification">ロック画面通知</a></li>
+    <ol>
+      <li><a href="#visibility">可視性を設定する</a></li>
+      <li><a href="#controllingMedia">ロック画面でのメディア再生をコントロールする</a></li>
+    </ol>
+  <li><a href="#CustomNotification">カスタム通知レイアウト</a></li>
+</ol>
+
+    <h2>キークラス</h2>
+    <ol>
+        <li>{@link android.app.NotificationManager}</li>
+        <li>{@link android.support.v4.app.NotificationCompat}</li>
+    </ol>
+    <h2>ビデオ</h2>
+    <ol>
+        <li>
+            <a href="http://www.youtube.com/watch?v=Yc8YrVc47TI&amp;feature=player_detailpage#t=1672s">Notifications in 4.1</a>
+
+        </li>
+    </ol>
+<h2>関連ドキュメント</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Android Design: Notifications</a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    通知は、アプリケーションの通常の UI 以外で、ユーザーに表示できるメッセージです。システムが通知を発行通知すると、通知はまず<strong>通知エリア</strong>にアイコンで表示されます。
+
+通知の詳細を確認するには、ユーザーが<strong>通知ドロワー</strong>を開く必要があります。
+ドロワー通知エリアと通知ドロワーはどちらも、システムによって制御されているエリアであり、ユーザーはいつでも見ることができます。
+
+</p>
+<img id="figure1" src="{@docRoot}images/ui/notifications/notification_area.png" height="" alt="" />
+<p class="img-caption">
+    <strong>図 1.</strong> 通知エリアの通知。
+</p>
+<img id="figure2" src="{@docRoot}images/ui/notifications/notification_drawer.png" width="280px" alt="" />
+<p class="img-caption">
+    <strong>図 2.</strong> 通知ドロワーの通知。
+</p>
+
+<p class="note"><strong>注:</strong> 別途記載がある場合を除き、このガイドでは、バージョン 4 の <a href="{@docRoot}tools/support-library/index.html">サポート ライブラリ</a>の {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} クラスについて記述しています。クラス {@link android.app.Notification.Builder Notification.Builder} は、Android 3.0（API レベル 11）で追加されました。
+
+
+
+</p>
+
+<h2 id="Design">設計上の考慮事項</h2>
+
+<p>通知は、Android ユーザー インターフェースの重要なパーツであり、独自の設計ガイドラインが設けられています。Android 5.0 （API レベル 21）で導入されたマテリアル デザインの変更は特に重要です。詳細については、「<a href="{@docRoot}training/material/index.html">マテリアル デザイン</a>」をご覧ください。
+
+
+通知とその操作の設計方法については、<a href="{@docRoot}design/patterns/notifications.html">通知</a>設計ガイドをご覧ください。
+</p>
+
+<h2 id="CreateNotification">通知を作成する</h2>
+
+<p>通知のための UI 情報とアクションを、{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} オブジェクトに指定します。通知自体を作成するには、{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()} を呼び出します。これにより、指定された UI 情報とアクションを含む {@link android.app.Notification} オブジェクトが返されます。
+
+
+
+通知を発行するには、{@link android.app.NotificationManager#notify NotificationManager.notify()} を呼び出して、この {@link android.app.Notification} オブジェクトをシステムに渡します。
+
+</p>
+
+<h3 id="Required">必須通知コンテンツ</h3>
+<p>
+    {@link android.app.Notification} オブジェクトの<em>必須</em>コンテンツは次のとおりです。
+</p>
+<ul>
+    <li>
+        小さなアイコン。{@link android.support.v4.app.NotificationCompat.Builder#setSmallIcon setSmallIcon()} で設定します。
+
+    </li>
+    <li>
+        タイトル。{@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()} で設定します。
+
+    </li>
+    <li>
+        詳細テキスト。{@link android.support.v4.app.NotificationCompat.Builder#setContentText setContentText()} で設定します。
+
+    </li>
+</ul>
+<h3 id="Optional">省略可能な通知コンテンツと設定</h3>
+<p>
+    上記以外のすべての通知設定とコンテンツは省略可能です。省略可能な通知設定とコンテンツについては、{@link android.support.v4.app.NotificationCompat.Builder} のリファレンスをご覧ください。
+
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Actions">通知アクション</h3>
+<p>
+    通知アクションは省略可能ですが、通知には、少なくとも 1 つのアクションを追加する必要があります。
+    アクションは、ユーザーが通知からアプリケーションの {@link android.app.Activity} に直接移動することを可能にします。ユーザーは、移動先で、イベントを確認したりさらに作業を行ったりすることができます。
+
+
+</p>
+<p>
+    1 つの通知が複数のアクションを提供することもあります。そのため、ユーザーが通知をクリックした時にトリガーされるアクションを必ず定義してください。通常、このアクションは、アプリケーション内で {@link android.app.Activity} を開きます。
+
+また、アラームのスヌーズやテキスト メッセージへの即時返信などの追加のアクションを実行するボタンを、通知に追加することもできます。この機能は、Android 4.1 から利用できるようになりました。
+
+追加のアクション ボタンを使用する場合、それらのボタンの機能をアプリの {@link android.app.Activity} で利用できるようにする必要があります。詳細については、<a href="#Compatibility">互換性の確保</a>についてのセクションをご覧ください。
+
+
+</p>
+<p>
+    {@link android.app.Notification} 内部では、アクションは、アプリケーションで {@link android.app.Activity} を開始する {@link android.content.Intent} が含まれる {@link android.app.PendingIntent} によって定義されます。
+
+
+{@link android.app.PendingIntent} を操作と関連付けるには、{@link android.support.v4.app.NotificationCompat.Builder} の該当するメソッドを呼び出します。
+
+たとえば、ユーザーが通知ドロワーで通知のテキストをクリックしたときに {@link android.app.Activity} を開始する場合、{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()} を呼び出して {@link android.app.PendingIntent} を追加します。
+
+
+
+</p>
+<p>
+    ユーザーが通知をクリックしたときに {@link android.app.Activity} を開始することは、最も一般的なアクション シナリオです。
+ユーザーが通知を閉じた場合に {@link android.app.Activity} を開始することもできます。
+Android 4.1 以降では、アクション ボタンから {@link android.app.Activity} を開始できます。
+詳細については、{@link android.support.v4.app.NotificationCompat.Builder} のリファレンスをご覧ください。
+
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Priority">通知の優先度</h3>
+<p>
+    必要に応じて、通知の優先度を設定できます。通知の優先度は、通知の表示方法についての端末 UI へのヒントの役割を果たします。
+
+    通知の優先度を設定するには、{@link android.support.v4.app.NotificationCompat.Builder#setPriority(int) otificationCompat.Builder.setPriority()} を呼び出し、{@link android.support.v4.app.NotificationCompat} 優先度定数の 1 つを渡します。
+
+
+優先度レベルには、{@link android.support.v4.app.NotificationCompat#PRIORITY_MIN} （-2）から {@link android.support.v4.app.NotificationCompat#PRIORITY_MAX} （2）までの 5 段階あります。優先度レベルが設定されていない場合、優先度はデフォルト値の {@link android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} （0）になります。
+
+
+
+
+
+</p>
+<p> 適切な優先順位の設定方法については、<a href="{@docRoot}design/patterns/notifications.html">通知</a>設計ガイドの「Correctly set and manage notification priority」をご覧ください。
+
+
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="SimpleNotification">簡単な通知を作成する</h3>
+<p>
+    次のスニペットでは、ユーザーに通知がクリックされたときに起動するアクティビティを指定する簡単な通知を作成しています。
+このコードでは {@link android.support.v4.app.TaskStackBuilder} オブジェクトを作成し、そのオブジェクトを使用して、アクションのための {@link android.app.PendingIntent} を作成していることにご注意ください。
+
+詳細は、<a href="#NotificationResponse">アクティビティの開始時のナビゲーションの維持</a>セクションで説明しています。
+
+
+</p>
+<pre>
+NotificationCompat.Builder mBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.notification_icon)
+        .setContentTitle("My notification")
+        .setContentText("Hello World!");
+// Creates an explicit intent for an Activity in your app
+Intent resultIntent = new Intent(this, ResultActivity.class);
+
+// The stack builder object will contain an artificial back stack for the
+// started Activity.
+// This ensures that navigating backward from the Activity leads out of
+// your application to the Home screen.
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack for the Intent (but not the Intent itself)
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(
+            0,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        );
+mBuilder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+mNotificationManager.notify(mId, mBuilder.build());
+</pre>
+<p>これで、ユーザーに通知が行われました。</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ApplyStyle">通知に拡張レイアウトを適用する</h3>
+<p>
+    通知を拡張ビューに表示するには、まず {@link android.support.v4.app.NotificationCompat.Builder} オブジェクトを任意の標準ビュー オプションで作成します。
+
+次に、{@link android.support.v4.app.NotificationCompat.Builder#setStyle Builder.setStyle()} を拡張レイアウト オブジェクトを引数に指定して呼び出します。
+
+</p>
+<p>
+    通知の拡張機能は、Android 4.1 より前のバージョンでは利用できないことにご注意ください。Android 4.1 とそれ以前のプラットフォームでの通知の処理方法については、<a href="#Compatibility">互換性の確保</a>についてのセクションをご覧ください。
+
+
+</p>
+<p>
+    たとえば、次のコード スニペットでは、先ほどのスニペットで作成した通知を変更して、拡張レイアウトを使用するようにしています。
+
+</p>
+<pre>
+NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+    .setSmallIcon(R.drawable.notification_icon)
+    .setContentTitle("Event tracker")
+    .setContentText("Events received")
+NotificationCompat.InboxStyle inboxStyle =
+        new NotificationCompat.InboxStyle();
+String[] events = new String[6];
+// Sets a title for the Inbox in expanded layout
+inboxStyle.setBigContentTitle("Event tracker details:");
+...
+// Moves events into the expanded layout
+for (int i=0; i &lt; events.length; i++) {
+
+    inboxStyle.addLine(events[i]);
+}
+// Moves the expanded layout object into the notification object.
+mBuilder.setStyle(inBoxStyle);
+...
+// Issue the notification here.
+</pre>
+
+<h3 id="Compatibility">互換性を確保する</h3>
+
+<p>
+    通知機能をセットするメソッドはサポート ライブラリのクラス {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} に登録されていますが、特定のバージョンですべての通知機能が利用できるわけではありません。
+
+
+    たとえば、アクション ボタンは拡張通知の機能ですが、拡張通知自体が Android 4.1 以上でしか利用できないため、Android 4.1 以上でのみ表示されます。
+
+
+</p>
+<p>
+    可能な限り互換性を確保するには、{@link android.support.v4.app.NotificationCompat NotificationCompat} とそのサブクラス、特に {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} を使用して通知を作成します。
+
+
+さらに、通知の実装時に次の処理を行ってください。
+</p>
+<ol>
+    <li>
+        ユーザーが利用しているバージョンにかかわらず、通知機能のすべてをすべてのユーザーに提供します。
+それには、アプリの {@link android.app.Activity} からすべての機能が利用できるようにする必要があります。このために、新しい {@link android.app.Activity} を追加した方がよい場合もあります。
+
+
+        <p>
+            たとえば、{@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()} を使用してメディア再生の開始と停止を行うコントロールを提供する場合、まずこのコントロールをアプリの {@link android.app.Activity} に実装します。
+
+
+
+        </p>
+    </li>
+    <li>
+        ユーザーが通知をクリックしたときにその {@link android.app.Activity} が起動するようにして、すべてのユーザーがその機能にアクセスできるようにします。
+それには、{@link android.app.Activity} のための {@link android.app.PendingIntent} を作成する必要があります。
+
+{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()} を呼び出し、{@link android.app.PendingIntent} を通知に追加してください。
+
+
+    </li>
+    <li>
+        利用したい拡張通知機能を通知に追加します。追加した機能は、ユーザーが通知をクリックしたときに開始する {@link android.app.Activity} でも利用できることにご注意ください。
+
+
+    </li>
+</ol>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Managing">通知を管理する</h2>
+<p>
+    同じタイプのイベントのために通知を複数回発行する場合、そのたびに新しい通知を作成することは避ける必要があります。
+新しい通知を作成する代わりに、以前の通知を更新して一部の値を変更することやいくつかの値を追加することを検討してください。
+
+</p>
+<p>
+    たとえば、Gmail は新しいメールが届いたことを、未読メッセージの数を増やし通知に各メールの概要を追加することで、ユーザーに通知します。
+これは、通知の「スタッキング」と呼ばれています。詳細については、<a href="{@docRoot}design/patterns/notifications.html">通知</a>設計ガイドをご覧ください。
+
+
+</p>
+<p class="note">
+    <strong>注:</strong> この Gmail 機能には、「受信トレイ」の拡張レイアウトが必要です。これは、Android 4.1 以降で利用可能な拡張通知機能の 1 つです。
+
+</p>
+<p>
+    次のセクションでは、通知の更新方法と通知の削除方法を説明します。
+</p>
+<h3 id="Updating">通知を更新する</h3>
+<p>
+    後で更新できるように通知をセットアップするには、{@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()} を呼び出し、通知 ID を指定して通知を発行します。
+
+    発行後に通知を更新するには、{@link android.support.v4.app.NotificationCompat.Builder} オブジェクトを更新または作成し、そのオブジェクトから {@link android.app.Notification} オブジェクトをビルドし、以前使用した ID と同じ ID で {@link android.app.Notification} を発行します。
+
+
+以前の通知がそのまま表示されている場合は、{@link android.app.Notification} オブジェクトのコンテンツから、その通知が更新されます。
+
+以前の通知が閉じられている場合は、代わりに新しい通知が作成されます。
+
+</p>
+<p>
+    次のスニペットでは、発生したイベントの数を反映するために通知が更新されています。
+このスニペットは通知をスタックし、概要を表示します。
+</p>
+<pre>
+mNotificationManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Sets an ID for the notification, so it can be updated
+int notifyID = 1;
+mNotifyBuilder = new NotificationCompat.Builder(this)
+    .setContentTitle("New Message")
+    .setContentText("You've received new messages.")
+    .setSmallIcon(R.drawable.ic_notify_status)
+numMessages = 0;
+// Start of a loop that processes data and then notifies the user
+...
+    mNotifyBuilder.setContentText(currentText)
+        .setNumber(++numMessages);
+    // Because the ID remains unchanged, the existing notification is
+    // updated.
+    mNotificationManager.notify(
+            notifyID,
+            mNotifyBuilder.build());
+...
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Removing">通知を削除する</h3>
+<p>
+    次のいずれかが発生するまで、通知は表示され続けます。
+</p>
+<ul>
+    <li>
+        ユーザーが通知を個別に閉じるか、[Clear All] を使用して通知をすべて閉じる（通知を削除することができる場合）。
+
+    </li>
+    <li>
+        作成時に {@link android.support.v4.app.NotificationCompat.Builder#setAutoCancel setAutoCancel()} の呼び出しが行われた通知を、ユーザーがクリックする。
+
+
+    </li>
+    <li>
+        特定の通知 ID を指定して {@link android.app.NotificationManager#cancel(int) cancel()} を呼び出す（このメソッドは、実行中の処理に関する通知も削除します）。
+
+    </li>
+    <li>
+        {@link android.app.NotificationManager#cancelAll() cancelAll()} を呼び出す（このメソッドは、それまでに発行したすべての通知を削除します）。
+
+    </li>
+</ul>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="NotificationResponse">アクティビティの開始時にナビゲーションを維持する</h2>
+<p>
+    通知から {@link android.app.Activity} を開始する場合、ユーザーが期待するナビゲーション操作を変えないようにする必要があります。
+たとえば、 <i>[戻る]</i>  がクリックされた場合、アプリケーションの標準的なワークフローでは、ホーム画面に戻る必要があります。また、
+ <i>[最近使ったアプリ]</i>  がクリックされた場合、{@link android.app.Activity} を別のタスクとして表示する必要があります。
+このナビゲーション操作を変えないようにするには、新たなタスクで {@link android.app.Activity} を開始する必要があります。
+{@link android.app.PendingIntent} を設定して新たなタスクを生成する方法は、開始する {@link android.app.Activity} の性質によって異なります。
+
+通常は、次の 2 つの場合があります。
+</p>
+<dl>
+    <dt>
+        通常のアクティビティ
+    </dt>
+    <dd>
+        アプリケーションの標準的なワークフローの一部である {@link android.app.Activity} を開始します。
+この場合、{@link android.app.PendingIntent} を設定して新たなタスクを開始し、{@link android.app.PendingIntent} にバックスタックを提供します。これにより、アプリケーションの標準的な
+
+ <i>「戻る」</i> 動作を再現します。
+        <p>
+            Gmail アプリからの通知は、このタイプのアクティビティの一例です。1 つの電子メール メッセージの通知をクリックすると、メッセージそれ自体が表示されます。
+[<b>戻る</b>] をタップすると、通知から移動してきたのでなくホーム画面から Gmail に移動してきたかのように、Gmail からホーム画面に戻ります。
+
+
+        </p>
+        <p>
+            これは、通知のタップ時に使用していたアプリケーションに関係なく発生します。
+たとえば、Gmail でメッセージを作成しているときに、1 つのメールの通知をクリックすると、すぐにそのメールに移動します。
+その場合、 <i>[戻る]</i>
+             をタップすると、作成中のメッセージに戻るのではなく、受信トレイ、ホーム画面の順に移動します。
+
+        </p>
+    </dd>
+    <dt>
+        特殊なアクティビティ
+    </dt>
+    <dd>
+        ユーザーは、この {@link android.app.Activity} を、通知から開始した場合のみ見ることができます。
+        ある意味では、通知自体に表示するのは難しい情報を提供することで、この {@link android.app.Activity} が通知を拡張しているということができます。
+このタイプのアクティビティでは、{@link android.app.PendingIntent} を設定して新たなタスクを開始します。
+ただし、開始した {@link android.app.Activity} はアプリケーションのアクティビティ フローには含まれていないので、バックスタックを作成する必要はありません。
+
+たとえば、 <i>[戻る]</i>  をクリックすると、ユーザーはホーム画面に移動します。
+
+    </dd>
+</dl>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="DirectEntry">通常のアクティビティの PendingIntent を設定する</h3>
+<p>
+    ダイレクト エントリの {@link android.app.Activity} を開始する {@link android.app.PendingIntent} を設定するには、次の手順に従います。
+
+</p>
+<ol>
+    <li>
+        マニフェストに、アプリケーションの {@link android.app.Activity} の階層を定義します。
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Android 4.0.3 以前へのサポートを追加します。これには、<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code> 要素を <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> の子として追加して、開始する {@link android.app.Activity} の親を指定します。
+
+
+
+
+                <p>
+                    この要素に、<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code> を設定します。
+
+                    <code>&lt;parent_activity_name&gt;</code> が親 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 要素の <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code> の値の場合は、<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code> を設定します。
+
+
+
+
+
+例については、以下の XML をご覧ください。
+                </p>
+            </li>
+            <li>
+                また、Android 4.1 以降のサポートを追加します。これには、開始する {@link android.app.Activity} の <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 要素に、<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code> 属性を追加します。
+
+
+
+
+            </li>
+        </ol>
+        <p>
+            最終的な XML は、次のようになります。
+        </p>
+<pre>
+&lt;activity
+    android:name=".MainActivity"
+    android:label="&#64;string/app_name" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+&lt;activity
+    android:name=".ResultActivity"
+    android:parentActivityName=".MainActivity"&gt;
+    &lt;meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".MainActivity"/&gt;
+&lt;/activity&gt;
+</pre>
+    </li>
+    <li>
+        {@link android.app.Activity} を開始する {@link android.content.Intent} に基づくバックスタックを作成します。
+
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                {@link android.app.Activity} を開始する {@link android.content.Intent} を作成します。
+            </li>
+            <li>
+                {@link android.app.TaskStackBuilder#create TaskStackBuilder.create()} を呼び出して、スタック ビルダーを作成します。
+
+            </li>
+            <li>
+                {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()} を呼び出し、バックスタックをスタック ビルダーに追加します。
+
+                マニフェストに定義した階層のそれぞれの {@link android.app.Activity} ごとに、バックスタックに、{@link android.app.Activity} を開始する {@link android.content.Intent} が含まれます。
+
+このメソッドは、新たなタスクでスタックを開始するためのフラグも追加します。
+
+                <p class="note">
+                    <strong>注:</strong> {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()} の引数は開始した {@link android.app.Activity} への参照ですが、このメソッドの呼び出しによって、{@link android.app.Activity} を開始する {@link android.content.Intent} が追加されることはありません。
+
+
+
+追加は、次の d. で行われます。
+                </p>
+            </li>
+            <li>
+                {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()} を呼び出して、通知から {@link android.app.Activity} を開始する {@link android.content.Intent} を追加します。
+
+
+                a. で作成した {@link android.content.Intent} を、引数として {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()} に渡します。
+
+
+            </li>
+            <li>
+                必要に応じて、{@link android.support.v4.app.TaskStackBuilder#editIntentAt TaskStackBuilder.editIntentAt()} を呼び出し、スタック上の {@link android.content.Intent} オブジェクトに引数を追加します。
+
+これは、場合によっては、ターゲット {@link android.app.Activity} に、ユーザーが 
+
+ <i>[戻る]</i> を使って移動したときに、適切なデータが表示されるようにするために必要です。
+            </li>
+            <li>
+                {@link android.support.v4.app.TaskStackBuilder#getPendingIntent getPendingIntent()} を呼び出し、このバックスタックのための {@link android.app.PendingIntent} を取得します。
+
+                この {@link android.app.PendingIntent} は、{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()} の引数として使用できます。
+
+
+            </li>
+        </ol>
+     </li>
+</ol>
+<p>
+    次のコード スニペットでは、上記の処理を行っています。
+</p>
+<pre>
+...
+Intent resultIntent = new Intent(this, ResultActivity.class);
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+// Gets a PendingIntent containing the entire back stack
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+...
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+builder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mNotificationManager.notify(id, builder.build());
+</pre>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ExtendedNotification">特殊なアクティビティの PendingIntent を設定する</h3>
+<p>
+    次のセクションでは、特殊なアクティビティのための {@link android.app.PendingIntent} の設定方法を説明します。
+
+</p>
+<p>
+    特殊な {@link android.app.Activity} はバックスタックを必要としません。そのため、マニフェストにその {@link android.app.Activity} の階層を定義する必要はありません。また、バックスタックを作成するために {@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()} を呼び出す必要もありません。
+
+
+
+代わりに、マニフェストを利用して {@link android.app.Activity} のタスク オプションを設定し、{@link android.app.PendingIntent#getActivity getActivity()} を呼び出して {@link android.app.PendingIntent} を作成します。
+
+
+</p>
+<ol>
+    <li>
+        マニフェストで、{@link android.app.Activity} の <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 要素に、次の属性を追加します。
+
+
+        <dl>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
+            </dt>
+            <dd>
+                アクティビティの完全修飾クラス名。
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">android:taskAffinity</a>=""</code>
+            </dt>
+            <dd>
+                コードにセットした {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK} フラグと組み合わせて、{@link android.app.Activity} がアプリケーションのデフォルトのタスクに入ることがないようにします。
+
+
+アプリケーションのアフィニティがデフォルトのままの既存タスクは影響を受けません。
+
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">android:excludeFromRecents</a>="true"</code>
+            </dt>
+            <dd>
+                新しいタスクを、 <i>[最近使ったアプリ]</i> から除外し、ユーザーが新しいタスクに間違って戻ることがないようにします。
+
+            </dd>
+        </dl>
+        <p>
+            次のスニペットは、この要素を示しています。
+        </p>
+<pre>
+&lt;activity
+    android:name=".ResultActivity"
+...
+    android:launchMode="singleTask"
+    android:taskAffinity=""
+    android:excludeFromRecents="true"&gt;
+&lt;/activity&gt;
+...
+</pre>
+    </li>
+    <li>
+        通知をビルドし発行します。
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                {@link android.app.Activity} を開始する {@link android.content.Intent} を作成します。
+
+            </li>
+            <li>
+                フラグ {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK} と {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_CLEAR_TASK} を指定して {@link android.content.Intent#setFlags setFlags()} を呼び出し、{@link android.app.Activity} を新しい空のタスクで開始するように設定します。
+
+
+
+
+            </li>
+            <li>
+                {@link android.content.Intent} に、必要に応じてオプションを設定します。
+            </li>
+            <li>
+                {@link android.app.PendingIntent#getActivity getActivity()} を呼び出し、{@link android.content.Intent} から {@link android.app.PendingIntent} を作成します。
+
+                この {@link android.app.PendingIntent} は、{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()} の引数として使用できます。
+
+
+            </li>
+        </ol>
+    <p>
+        次のコード スニペットでは、上記の処理を行っています。
+    </p>
+<pre>
+// Instantiate a Builder object.
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+// Creates an Intent for the Activity
+Intent notifyIntent =
+        new Intent(this, ResultActivity.class);
+// Sets the Activity to start in a new, empty task
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// Creates the PendingIntent
+PendingIntent notifyPendingIntent =
+        PendingIntent.getActivity(
+        this,
+        0,
+        notifyIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// Puts the PendingIntent into the notification builder
+builder.setContentIntent(notifyPendingIntent);
+// Notifications are issued by sending them to the
+// NotificationManager system service.
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Builds an anonymous Notification object from the builder, and
+// passes it to the NotificationManager
+mNotificationManager.notify(id, builder.build());
+</pre>
+    </li>
+</ol>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Progress">通知に進捗状況を表示する</h2>
+<p>
+    通知には、進行中の処理の状況をユーザーに示すアニメーション表示の進捗インジケーターを表示できます。
+その処理にどれくらいの時間がかかるかと、ある時点でその処理がどれだけ完了しているかを見積もることができる場合、「確定（determinate）」タイプのインジケーター（プログレスバー）を使用します。
+
+処理にかかる時間を見積もることができない場合は、「不確定（indeterminate）」タイプのインジケーター（アクティビティ インジケーター）を使用します。
+
+</p>
+<p>
+    進捗インジケーターは、{@link android.widget.ProgressBar} クラスのプラットフォーム実装で表示されます。
+
+</p>
+<p>
+    Android 4.0 以降のプラットフォーム上で進捗インジケーターを使用するには、{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()} を呼び出します。
+それ以前のバージョンでは、{@link android.widget.ProgressBar} ビューを含むカスタム通知レイアウトを作成する必要があります。
+
+
+</p>
+<p>
+    次のセクションでは、{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()} を使用して、通知に進捗状況を表示する方法を説明します。
+
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="FixedProgress">範囲固定の進捗インジケーターを表示する</h3>
+<p>
+    確定プログレスバーを表示するには、{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(max, progress, false)} を呼び出して通知にバーを追加してから、その通知を発行します。
+
+処理の進行に合わせて、<code>progress</code> の値を増やし、通知を更新します。
+処理の最後には、<code>progress</code> が <code>max</code> と等しくなります。
+{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()} を呼び出す一般的な方法は、<code>max</code> に 100 を設定して、処理の「進捗度」の値である <code>progress</code> の値を増やすことです。
+
+
+
+</p>
+<p>
+    処理の完了時には、プログレスバーを表示したままにすることも、削除することもできます。いずれの場合でも、通知のテキストを更新して、処理が完了したことを示すことを忘れないでください。
+
+    プログレスバーを削除するには、{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, false)} を呼び出します。
+
+次に例を示します。
+</p>
+<pre>
+...
+mNotifyManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mBuilder = new NotificationCompat.Builder(this);
+mBuilder.setContentTitle("Picture Download")
+    .setContentText("Download in progress")
+    .setSmallIcon(R.drawable.ic_notification);
+// Start a lengthy operation in a background thread
+new Thread(
+    new Runnable() {
+        &#64;Override
+        public void run() {
+            int incr;
+            // Do the "lengthy" operation 20 times
+            for (incr = 0; incr &lt;= 100; incr+=5) {
+                    // Sets the progress indicator to a max value, the
+                    // current completion percentage, and "determinate"
+                    // state
+                    mBuilder.setProgress(100, incr, false);
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(0, mBuilder.build());
+                        // Sleeps the thread, simulating an operation
+                        // that takes time
+                        try {
+                            // Sleep for 5 seconds
+                            Thread.sleep(5*1000);
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "sleep failure");
+                        }
+            }
+            // When the loop is finished, updates the notification
+            mBuilder.setContentText("Download complete")
+            // Removes the progress bar
+                    .setProgress(0,0,false);
+            mNotifyManager.notify(ID, mBuilder.build());
+        }
+    }
+// Starts the thread by calling the run() method in its Runnable
+).start();
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ActivityIndicator">進行中アクティビティ インジケーターを表示する</h3>
+<p>
+    不確定アクティビティ インジケーターを表示するには、{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, true)}（最初の 2 つの引数は無視されます）を使用して通知に追加し、通知を発行します。
+
+このインジケーターの外見は、アニメーションが常時表示されていること以外はプログレスバーと同じです。
+
+</p>
+<p>
+    処理の開始時に通知を発行します。通知を変更するまで、アニメーションは表示され続けます。
+処理が完了したら、{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, false)} を呼び出し、次に通知を更新してアクティビティ インジケーターを削除します。
+
+
+    この操作を行わないと、処理が完了してもアニメーションが表示され続けることになります。また、通知のテキストを更新して、処理が完了したことを示すことを忘れないでください。
+
+</p>
+<p>
+    アクティビティ インジケーターの仕組みについては、上記のスニペットをご覧ください。次のコード行を探します。
+</p>
+<pre>
+// Sets the progress indicator to a max value, the current completion
+// percentage, and "determinate" state
+mBuilder.setProgress(100, incr, false);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+<p>
+    見つけたコードを次のコードに置き換えます。
+</p>
+<pre>
+ // Sets an activity indicator for an operation of indeterminate length
+mBuilder.setProgress(0, 0, true);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+
+<h2 id="metadata">通知メタデータ</h2>
+
+<p>通知は、次の {@link android.support.v4.app.NotificationCompat.Builder} メソッドを使用して割り当てるメタデータによって、ソートされることがあります。
+</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setCategory(java.lang.String) setCategory()} は、端末が優先モードの場合のアプリ通知の処理方法を設定します（たとえば、通知が着信、インスタント メッセージ、アラームを知らせる場合など）。
+
+</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setPriority(int) setPriority()} は優先度フィールドに {@code PRIORITY_MAX} または {@code PRIORITY_HIGH} が設定されている通知が、音声または振動を発する通知の場合、小さなフローティング ウィンドウに表示されるようにします。
+
+</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#addPerson(java.lang.String) addPerson()} を使用すると、通知に人物のリストを追加できます。
+アプリは、このリストを利用して、システムに合図を送り、特定の人達からの通知をグループ化したり、それらの人達からの通知を重要度が高い通知としてランク付けしたりします。
+
+</li>
+</ul>
+
+<div class="figure" style="width:230px">
+  <img src="{@docRoot}images/ui/notifications/heads-up.png" alt="" width="" height="" id="figure3" />
+  <p class="img-caption">
+    <strong>図 3.</strong> ヘッドアップ通知を表示する全画面アクティビティ
+  </p>
+</div>
+
+<h2 id="Heads-up">ヘッドアップ通知</h2>
+
+<p>Android 5.0（API レベル 21）では、端末がアクティブな場合（端末がロックされておらず、画面がオンになっている場合）に、小さなフローティング ウィンドウ（<em>ヘッドアップ通知</em>とも呼ばれます）に通知を表示することができます。
+
+これらの通知は、ヘッドアップ通知がアクション ボタンも表示すること以外は、通知をコンパクトにしたものと同じように表示されます。
+
+使用中のアプリから移動しなくても、ユーザーは、ヘッドアップ通知に反応したりヘッドアップ通知を閉じたりすることができます。
+</p>
+
+<p>ヘッドアップ通知のトリガーとなる条件には、たとえば以下のようなものがあります。</p>
+
+<ul>
+  <li>ユーザーのアクティビティが全画面モードであること（アプリが {@link android.app.Notification#fullScreenIntent} を使用していること）、または
+</li>
+  <li>その通知が高い優先度を持ち、着信音または振動を使用していること
+</li>
+</ul>
+
+<h2 id="lockscreenNotification">ロック画面通知</h2>
+
+<p>Android 5.0（API レベル 21）では、通知をロック画面に表示できるようになりました。
+アプリは、この機能を利用してメディア再生コントロールやその他の一般的なアクションを提供できます。
+ユーザーは設定でロック画面に通知を表示するかどうか選ぶことができます。また、開発者も、アプリからの通知をロック画面に表示するかどうか指定できます。
+</p>
+
+<h3 id="visibility">可視性を設定する</h3>
+
+<p>アプリでは、保護されたロック画面に表示される通知の表示の詳細レベルをコントロールできます。
+{@link android.support.v4.app.NotificationCompat.Builder#setVisibility(int) setVisibility()} を呼び出し、次の値のいずれかを指定してください。
+</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC} では、通知のフルコンテンツが表示されます。
+</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_SECRET} では、ロック画面に、通知のいずれの部分も表示しません。
+</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} では、通知のアイコンやコンテンツのタイトルなどの基本的な情報を表示しますが、通知のフルコンテンツは表示されません。
+</li>
+</ul>
+
+<p>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} を設定すると、特定の内容を非表示にした代替バージョンの通知コンテンツを提供できます。
+たとえば、SMS アプリで <em>3 件の新しいテキスト メッセージがある</em>ことを示す通知を表示する場合に、メッセージ コンテンツと送信者を非表示にできます。
+
+この代替通知を提供するには、{@link android.support.v4.app.NotificationCompat.Builder} を使用してまず置換用の通知を作成し、
+プライベート通知オブジェクトを作成したら、その置換用の通知をプライベート通知オブジェクトに {@link android.support.v4.app.NotificationCompat.Builder#setPublicVersion(android.app.Notification) setPublicVersion()} メソッドを使用してアタッチしてください。
+
+
+</p>
+
+<h3 id="controllingMedia">ロック画面でのメディア再生をコントロールする</h3>
+
+<p>Android 5.0（API レベル 21）では、{@link android.media.RemoteControlClient} を使用したメディア コントロールは、ロック画面に表示されません。このクラスは廃止済みです。
+代わりに、{@link android.app.Notification.MediaStyle} テンプレートと {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()} メソッドを使用します。このメソッドは、アクションをクリックできるアイコンに変換します。
+
+
+</p>
+
+<p class="note"><strong>注:</strong> このテンプレートと {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()} メソッドはサポート ライブラリには含まれません。そのため、これらの機能は Android 5.0 以降でのみ動作します。
+
+</p>
+
+<p>Android 5.0 でロック画面にメディア再生コントロールを表示するには、可視性を上記の{@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC} に設定します。
+その後、次のサンプルコードに従って、アクションを追加し {@link android.app.Notification.MediaStyle} テンプレートを設定します。
+
+</p>
+
+<pre>
+Notification notification = new Notification.Builder(context)
+    // Show controls on lock screen even when user hides sensitive content.
+    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setSmallIcon(R.drawable.ic_stat_player)
+    // Add media control buttons that invoke intents in your media service
+    .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
+    .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
+    .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
+    // Apply the media style template
+    .setStyle(new Notification.MediaStyle()
+    .setShowActionsInCompactView(1 /* #1: pause button */)
+    .setMediaSession(mMediaSession.getSessionToken())
+    .setContentTitle("Wonderful music")
+    .setContentText("My Awesome Band")
+    .setLargeIcon(albumArtBitmap)
+    .build();
+</pre>
+
+<p class="note"><strong>注:</strong> {@link android.media.RemoteControlClient} の廃止は、他の点でもメディアのコントロールに影響を与えています。
+新しい API でのメディア セッションの管理と再生のコントロールの詳細については、<a href="{@docRoot}about/versions/android-5.0.html#MediaPlaybackControl">メディア再生コントロール</a>をご覧ください。
+
+</p>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="CustomNotification">カスタム通知レイアウト</h2>
+<p>
+    通知フレームワークでは、カスタム通知レイアウトを定義することができます。カスタム通知レイアウトは、{@link android.widget.RemoteViews} オブジェクトに通知の外観を定義します。
+
+    カスタム レイアウトの通知は通常の通知と似ていますが、XML レイアウト ファイルに定義された {@link android.widget.RemoteViews} が使用されています。
+
+</p>
+<p>
+    カスタム通知レイアウトで使用できる高さは、通知ビューによって異なります。標準ビュー レイアウトでは 64 dp までで、拡張ビュー レイアウトでは 256 dp までです。
+
+</p>
+<p>
+    カスタム通知レイアウトを定義するには、まず、XML レイアウト ファイルをインフレートする {@link android.widget.RemoteViews} オブジェクトのインスタンスを作成します。
+次に、{@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()} などのメソッドを呼び出す代わりに、{@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()} を呼び出します。
+
+
+コンテンツの詳細をカスタム通知に設定するには、{@link android.widget.RemoteViews} のメソッドを使用してビューの子の値を設定します。
+
+
+</p>
+<ol>
+    <li>
+        別ファイルに通知の XML レイアウトを作成します。ファイル名はどのような名前でもかまいませんが、拡張子は必ず <code>.xml</code> にします。
+
+    </li>
+    <li>
+        アプリで、{@link android.widget.RemoteViews} メソッドを使用して、通知のアイコンとテキストを定義します。
+{@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()} を呼び出して、この {@link android.widget.RemoteViews} オブジェクトを {@link android.support.v4.app.NotificationCompat.Builder} にセットします。
+
+{@link android.widget.RemoteViews} オブジェクトに背景 {@link android.graphics.drawable.Drawable} を設定することは避けてください。文字が読めなくなる場合があります。
+
+
+    </li>
+</ol>
+<p>
+    {@link android.widget.RemoteViews} クラスには、通知のレイアウトに {@link android.widget.Chronometer} や {@link android.widget.ProgressBar} を簡単に追加できるメソッドも含まれています。
+
+通知のカスタム レイアウトの作成についての詳細は、{@link android.widget.RemoteViews} のリファレンスをご覧ください。
+
+</p>
+<p class="caution">
+    <strong>警告:</strong> カスタム通知レイアウトを使用する場合、そのカスタム通知レイアウトがさまざまな画面の向きと解像度で適切に表示されるかどうか、十分に注意してください。
+すべてのビュー レイアウトでさまざまな画面の向きと解像度への対応に注意する必要がありますが、通知ドロワーのスペースが限られているため、通知では特に注意する必要があります。
+
+カスタム レイアウトは複雑にし過ぎないようにしてください。また、必ずさまざまな構成でテストするようにしてください。
+
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h4>カスタム通知のテキストにスタイル リソースを使用する</h4>
+<p>
+    カスタム通知のテキストには、必ずスタイル リソースを使用してください。通知の背景色は端末やバージョンによって異なりますが、スタイル リソースを使用することで、この問題に対処できます。
+
+Android 2.3 以降では、標準の通知レイアウトのテキストのスタイルは、システムによって定義されています。
+Android 2.3 以降を対象とするアプリケーションで同じスタイルを使用する場合は、表示される背景でテキストを読むことができるかご確認ください。
+
+</p>

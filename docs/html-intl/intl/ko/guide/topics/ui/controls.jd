@@ -1,0 +1,90 @@
+page.title=입력 제어
+parent.title=사용자 인터페이스
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>입력 제어는 앱의 사용자 인터페이스에 있는 대화형 구성 요소입니다. 
+Android는 버튼, 텍스트 필드, 찾기 막대, 확인란, 확대 버튼, 전환 버튼 등과 같이
+UI에서 사용할 수 있도록 매우 다양한 제어를 제공합니다.</p>
+
+<p>UI에 입력 제어를 추가하려면 단순히 <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML 레이아웃</a>에 XML 요소를 하나 추가하기만 하면 됩니다. 
+다음은 텍스트 필드와 버튼이 있는 레이아웃을 예시로 나타낸 것입니다.</p>
+
+<pre style="clear:right">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>각 입력 제어는 특정한 입력 이벤트를 지원하므로, 사용자가 텍스트를 입력할 때 또는 버튼을 터치할 때 
+이벤트를 처리할 수 있게 해줍니다.</p>
+
+
+<h2 id="CommonControls">보편적인 제어</h2>
+<p>다음은 앱에서 사용할 수 있는 몇 가지 보편적인 제어를 목록으로 나열한 것입니다. 링크를 따라가면 각 제어에 대해 
+좀 더 자세히 알아볼 수 있습니다.</p>
+
+<p class="note"><strong>참고:</strong> Android는 여기에 나열된 것보다 몇 가지 더 많은 제어를 제공합니다.
+ 더 많은 내용을 알아보려면 {@link android.widget} 패키지를 탐색해보십시오. 
+앱에 특정한 종류의 입력 제어가 필요한 경우, 나름의 <a href="{@docRoot}guide/topics/ui/custom-components.html">사용자 지정 구성 요소</a>를 직접 구축해도 됩니다.</p>
+
+<table>
+    <tr>
+        <th scope="col">제어 유형</th>
+        <th scope="col">설명</th>
+	<th scope="col">관련 클래스</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">버튼</a></td>
+        <td>사용자가 누르거나 클릭하여 작업을 수행할 수 있는 누름 버튼입니다.</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">텍스트 필드</a></td>
+        <td>편집 가능한 텍스트 필드입니다. <code>AutoCompleteTextView</code> 위젯을 사용하면 자동 완성 제안을 제공하는 텍스트 입력 위젯을 만들 수 있습니다.</td>
+	<td>{@link android.widget.EditText EditText}, {@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">확인란</a></td>
+        <td>사용자가 전환할 수 있는 켜기/끄기 스위치입니다. 확인란은 사용자에게 선택 가능한 옵션 그룹을 제시할 때 사용합니다. 이들 옵션은 상호 배타적이지 않아야 합니다.</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">무선 버튼</a></td>
+        <td>확인란과 비슷하지만, 예외가 있다면 그룹 내에서 하나만 선택할 수 있다는 점입니다.</td>
+	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">전환 버튼</a></td>
+        <td>조명 표시기가 있는 켜기/끄기 버튼입니다.</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">회전자</a></td>
+        <td>드롭다운 목록으로, 이것을 사용하면 사용자가 주어진 집합에서 하나의 값을 선택할 수 있습니다.</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">선택기</a></td>
+        <td>사용자를 위한 대화로, 위/아래 버튼을 사용하거나 스와이프 동작을 사용하여 주어진 집합에 대한 하나의 값을 선택할 수 있게 해줍니다. 날짜(월, 일, 연도) 값을 입력하려면 <code>DatePicker</code>코드&gt; 위젯을 사용하면 되고, 아니면 시간(시, 분, 오전/오후) 값을 입력하는 데 <code>TimePicker</code> 위젯을 사용해도 됩니다. 이렇게 하면 사용자의 로케일에 맞게 자동으로 형식을 설정합니다.</td>
+	<td>{@link android.widget.DatePicker}, {@link android.widget.TimePicker}</td>
+    </tr>
+</table>

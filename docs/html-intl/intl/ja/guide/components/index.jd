@@ -1,0 +1,57 @@
+page.title=アプリ<br>コンポーネント
+page.landing=true
+page.landing.intro=Android のアプリケーション フレームワークでは、再利用可能なコンポーネント セットを使用して豊富な内容を備えた斬新なアプリを作成できます。このセクションでは、アプリの構成要素を定義するコンポーネントのビルド方法と、インテントを使用してそれらをつなぎ合わせる方法について説明します。
+page.metaDescription=Android のアプリケーション フレームワークでは、再利用可能なコンポーネント セットを使用して豊富な内容を備えた斬新なアプリを作成できます。このセクションでは、アプリの構成要素を定義するコンポーネントのビルド方法と、インテントを使用してそれらをつなぎ合わせる方法について説明します。
+page.landing.image=images/develop/app_components.png
+page.image=images/develop/app_components.png
+
+@jd:body
+
+<div class="landing-docs">
+
+  <div class="col-6">
+    <h3>ブログの記事</h3>
+    
+    <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
+      <h4>DialogFragments の使用</h4>
+      <p>この投稿では、DialogFragments を v4 サポート ライブラリで使用して（Honeycomb 以前の端末での下方互換性のため）ダイアログを編集したり、インターフェースを使用して呼び出し元の Activity に結果を返したりする方法について説明します。</p>
+    </a>
+
+    <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+      <h4>すべてに Fragments を</h4>
+      <p>本日、同じ Fragments API を利用できる静的なライブラリが公開され、Android 1.6 以降でもフラグメントを使用してタブレット対応のユーザー インターフェースを作成できるようになりました。 </p>
+    </a>
+    
+    <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
+      <h4>マルチスレッドでパフォーマンス向上</h4>
+      <p>応答の速いアプリケーションを作成する上で重要なのは、メイン UI スレッドが最小限の作業を行うようにすることです。
+アプリケーションのハングにつながる可能性のある長期的なタスクは、別のスレッドで処理するようにします。
+</p>
+    </a>
+  </div>
+
+  <div class="col-6">
+    <h3>トレーニング</h3>
+    
+    <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
+      <h4>アクティビティのライフサイクルの管理</h4>
+      <p>このレッスンでは、各 Activity インスタンスが受け取る重要なライフサイクル コールバック メソッドについて、それらを使用してユーザーの予期する内容でアクティビティを動作させる方法と、アクティビティがそれらを必要としないときに、システムのリソースを消費しないようにする方法について学習します。
+
+</p>
+    </a>
+
+    <a href="http://developer.android.com/training/basics/fragments/index.html">
+      <h4>フラグメントで動的 UI を構築</h4>
+      <p>このレッスンでは、Android 1.6 以降の旧バージョンを実行する端末に対応しながら、フラグメントを使用して動きのある使用感を実現し、異なる画面サイズでのアプリの操作感を最適化する方法について説明します。
+
+</p>
+    </a>
+
+    <a href="http://developer.android.com/training/sharing/index.html">
+      <h4>コンテンツの共有</h4>
+      <p>このレッスンでは、Intent API と ActionProvider オブジェクトを使用して、アプリケーション間でコンテンツを送受信する際の一般的な方法について説明します。
+</p>
+    </a>
+  </div>
+
+</div>

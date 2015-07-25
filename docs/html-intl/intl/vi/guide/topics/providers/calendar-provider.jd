@@ -1,0 +1,1184 @@
+page.title=Trình cung cấp Lịch
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>Trong tài liệu này</h2>
+    <ol>
+  <li><a href="#overview">Nội dung Cơ bản</a></li>
+  <li><a href="#manifest">Quyền của Người dùng</a></li>
+  <li><a href="#calendar">Bảng Lịch</a>
+<ol>
+      <li><a href="#query">Truy vấn một lịch</a></li>
+      <li><a href="#modify-calendar">Sửa đổi một lịch</a></li>
+      <li><a href="#insert-calendar">Chèn một lịch</a></li>
+    </ol>
+  </li>
+  <li><a href="#events">Bảng Sự kiện</a>
+<ol>
+      <li><a href="#add-event">Thêm Sự kiện</a></li>
+      <li><a href="#update-event">Cập nhật Sự kiện</a></li>
+      <li><a href="#delete-event">Xóa Sự kiện</a></li>
+    </ol>
+  </li>
+  <li><a href="#attendees">Bảng Người dự</a>
+<ol>
+      <li><a href="#add-attendees">Thêm Người dự</a></li>
+    </ol>
+  </li>
+  <li><a href="#reminders">Bảng Nhắc nhở</a>
+<ol>
+      <li><a href="#add-reminders">Thêm Nhắc nhở</a></li>
+    </ol>
+  </li>
+  <li><a href="#instances">Bảng Thực thể</a>
+  <ol>
+      <li><a href="#query-instances">Truy vấn bảng Thực thể</a></li>
+  </ol></li>
+  <li><a href="#intents">Ý định Lịch</a>
+  <ol>
+      <li><a href="#intent-insert">Sử dụng ý định để chèn một sự kiện</a></li>
+      <li><a href="#intent-edit">Sử dụng ý định để chỉnh sửa một sự kiện</a></li>
+      <li><a href="#intent-view">Sử dụng ý định để xem dữ liệu lịch</a></li>
+    </ol>
+  </li>
+  
+  <li><a href="#sync-adapter">Trình điều hợp Đồng bộ</a></li>
+</ol>
+
+    <h2>Lớp khóa</h2>
+    <ol>
+      <li>{@link android.provider.CalendarContract.Calendars}</li>
+      <li>{@link android.provider.CalendarContract.Events}</li>
+      <li>{@link android.provider.CalendarContract.Attendees}</li>
+      <li>{@link android.provider.CalendarContract.Reminders}</li>
+    </ol>
+</div>
+</div>
+
+<p>Trình cung cấp Lịch là một kho lưu trữ các sự kiện lịch của người dùng. API
+Trình cung cấp Lịch cho phép bạn thực hiện truy vấn, chèn, cập nhật và xóa
+các thao tác trên lịch, sự kiện, người dự, nhắc nhở, v.v.</p>
+
+
+<p>API Trình cung cấp Lịch có thể được sử dụng bởi các ứng dụng và trình điều hợp đồng bộ. Các quy tắc
+thay đổi tùy vào loại chương trình đang thực hiện lệnh gọi. Tài liệu này
+tập trung chủ yếu vào việc sử dụng API Trình cung cấp Lịch như một ứng dụng. Để bàn 
+về việc các trình điều hợp đồng bộ khác nhau như thế nào, hãy xem phần 
+<a href="#sync-adapter">Trình điều hợp Đồng bộ</a>.</p>
+
+
+<p>Thông thường, để đọc hoặc ghi dữ liệu lịch, bản kê khai của ứng dụng phải
+bao gồm các quyền thích hợp của người dùng, được nêu trong phần <a href="#manifest">Quyền
+của Người dùng</a>. Để thực hiện các thao tác chung dễ hơn, Trình cung cấp
+Lịch đưa ra một tập hợp ý định, như được mô tả trong phần <a href="#intents">Ý định
+Lịch</a>. Những ý định này đưa người dùng tới ứng dụng Lịch để chèn, xem,
+và chỉnh sửa sự kiện. Người dùng tương tác với ứng dụng Lịch rồi
+quay lại ứng dụng ban đầu. Vì thế, ứng dụng của bạn không cần yêu cầu quyền,
+và cũng không cần cung cấp một giao diện người dùng để xem hoặc tạo sự kiện.</p>
+
+<h2 id="overview">Nội dung Cơ bản</h2>
+
+<p><a href="{@docRoot}guide/topics/providers/content-providers.html">Các trình cung cấp nội dung</a> sẽ lưu trữ dữ liệu và cho phép truy cập 
+ứng dụng. Trình cung cấp nội dung được nền tảng Android giới thiệu (bao gồm Trình cung cấp Lịch) thường trình bày dữ liệu như một tập hợp gồm nhiều bảng dựa trên một
+mô hình cơ sở dữ liệu quan hệ, trong đó mỗi hàng là một bản ghi và mỗi cột là dữ liệu thuộc
+một loại và có ý nghĩa cụ thể. Thông qua API Trình cung cấp Lịch, các ứng dụng
+và trình điều hợp đồng bộ có thể nhận được quyền truy cập đọc/ghi vào các bảng trong cơ sở dữ liệu là nơi chứa
+dữ liệu lịch của người dùng.</p>
+
+<p>Mọi trình cung cấp nội dung đều đưa ra một URI công khai (được bẻ dòng như một đối tượng 
+{@link android.net.Uri}
+) để xác định tập dữ liệu của nó một cách duy nhất.  Trình cung cấp nội dung mà kiểm soát nhiều
+ tập dữ liệu (nhiều bảng) sẽ đưa ra một URI riêng cho từng bảng.  Tất cả 
+URI cho trình cung cấp đều bắt đầu bằng xâu "content://".  Điều này
+sẽ xác định dữ liệu là đang được kiểm soát bởi một trình cung cấp nội dung. Trình cung cấp
+Lịch định nghĩa các hằng số cho URI đối với từng lớp (bảng) của nó. Những URI
+này có định dạng <code><em>&lt;class&gt;</em>.CONTENT_URI</code>. Ví
+dụ, {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.</p>
+
+<p>Hình 1 cho biết biểu diễn đồ họa của mô hình dữ liệu Trình cung cấp Lịch. Nó cho biết
+các bảng chính và các trường liên kết chúng với nhau.</p>
+
+<img src="{@docRoot}images/providers/datamodel.png" alt="Calendar Provider Data Model" />
+<p class="img-caption"><strong>Hình 1.</strong> Mô hình dữ liệu Trình cung cấp Lịch.</p>
+
+<p>Một người dùng có thể có nhiều lịch, và các lịch khác nhau có thể được liên kết với các loại tài khoản khác nhau (Google Calendar, Exchange, v.v.).</p>
+
+<p>{@link android.provider.CalendarContract} sẽ định nghĩa mô hình dữ liệu của thông tin liên quan tới lịch và sự kiện. Dữ liệu này được lưu trữ trong nhiều bảng như liệt kê bên dưới.</p>
+
+<table>
+  <tr>
+    <th>Bảng (Lớp)</th>
+    <th>Mô tả</th>
+  </tr>
+  <tr>
+    <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
+    
+    <td>Bảng này chứa 
+thông tin riêng của lịch. Mỗi hàng trong bảng này chứa chi tiết của
+một lịch duy nhất, chẳng hạn như tên, màu, thông tin đồng bộ, v.v.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Events}</td>
+    
+    <td>Bảng này chứa
+thông tin riêng theo sự kiện. Mỗi hàng trong bảng có thông tin cho một
+sự kiện duy nhất&mdash;ví dụ: tiêu đề sự kiện, địa điểm, thời gian bắt đầu
+, thời gian kết thúc, v.v. Sự kiện có thể xảy ra một lần hoặc lặp lại nhiều lần. Người dự,
+nhắc nhở, và các tính chất mở rộng được lưu trữ trong các bảng riêng. 
+Mỗi mục đều có một {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 
+tham chiếu tới {@link android.provider.BaseColumns#_ID} trong bảng Sự kiện.</td>
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances}</td>
+    
+    <td>Bảng này chứa
+thời gian bắt đầu và thời gian kết thúc của mỗi lần xảy ra một sự kiện. Mỗi hàng trong bảng này
+đại diện cho một lần xảy ra sự kiện. Với các sự kiện xảy ra một lần thì có một ánh xạ 1:1
+của thực thể tới sự kiện. Đối với các sự kiện định kỳ, nhiều hàng sẽ tự động
+ được khởi tạo tương ứng với nhiều lần xảy ra sự kiện đó.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Attendees}</td>
+    
+    <td>Bảng này chứa
+thông tin về người dự (khách) của sự kiện. Mỗi hàng đại diện một khách duy nhất của
+một sự kiện. Nó quy định loại khách và phản hồi tham dự của khách
+cho một sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Reminders}</td>
+    
+    <td>Bảng này chứa
+dữ liệu về cảnh báo/thông báo. Mỗi hàng đại diện một cảnh báo duy nhất cho một sự kiện. Một
+sự kiện có thể có nhiều nhắc nhở. Số nhắc nhở tối đa của một sự kiện
+được quy định trong 
+{@link android.provider.CalendarContract.CalendarColumns#MAX_REMINDERS}, 
+được đặt bởi trình điều hợp đồng bộ đang
+sở hữu lịch đã cho. Nhắc nhở được quy định bằng số phút trước khi diễn ra sự kiện
+và có một phương pháp để xác định cách người dùng sẽ được cảnh báo.</td>
+  </tr>
+  
+</table>
+
+<p>API Trình cung cấp Lịch được thiết kế để linh hoạt và mạnh mẽ. Đồng
+thời, điều quan trọng là phải cung cấp một trải nghiệm người dùng cuối tốt và
+bảo vệ sự toàn vẹn của lịch và dữ liệu lịch. Để làm điều này, sau đây là một số
+điều cần ghi nhớ khi sử dụng API này:</p>
+
+<ul>
+
+<li><strong>Chèn, cập nhật, và xem sự kiện lịch.</strong> Để trực tiếp chèn, sửa đổi, và đọc sự kiện từ Trình cung cấp Lịch, bạn cần <a href="#manifest">các quyền</a> phù hợp. Tuy nhiên, nếu bạn không đang xây dựng một ứng dụng lịch hoặc trình điều hợp đồng bộ chính thức, việc yêu cầu những quyền này là không cần thiết. Thay vào đó, bạn có thể sử dụng những ý định được cung cấp bởi ứng dụng Lịch của Android để chuyển giao các thao tác đọc và ghi cho ứng dụng đó. Khi bạn sử dụng ý định, ứng dụng của bạn sẽ gửi người dùng tới ứng dụng Lịch để thực hiện thao tác mong muốn
+trong một mẫu được điền trước. Sau khi xong, họ sẽ được trả về ứng dụng của bạn.
+Bằng việc thiết kế ứng dụng của bạn để thực hiện các thao tác thường gặp thông qua Lịch,
+bạn cung cấp cho người dùng một giao diện người dùng nhất quán, thiết thực. Đây là phương pháp
+được khuyến cáo nên dùng. Để biết thêm thông tin, hãy xem phần <a href="#intents">Ý định
+Lịch</a>.</p>
+
+
+<li><strong>Trình điều hợp đồng bộ.</strong> Trình điều hợp đồng bộ có chức năng đồng bộ dữ liệu lịch
+lên thiết bị của một người dùng bằng một máy chủ hoặc nguồn dữ liệu khác. Trong bảng 
+{@link android.provider.CalendarContract.Calendars} và
+{@link android.provider.CalendarContract.Events}, 
+có các cột để cho trình điều hợp đồng bộ sử dụng.
+Trình cung cấp và ứng dụng không nên sửa đổi chúng. Trên thực tế, chúng không
+hiển thị trừ khi được truy cập như một trình điều hợp đồng bộ. Để biết thêm thông tin về
+trình điều hợp đồng bộ, hãy xem phần <a href="#sync-adapter">Trình điều hợp Đồng bộ</a>.</li>
+
+</ul>
+
+
+<h2 id="manifest">Quyền của Người dùng</h2>
+
+<p>Để đọc dữ liệu lịch, một ứng dụng phải bao gồm quyền {@link
+android.Manifest.permission#READ_CALENDAR} trong tệp bản kê khai của mình. Nó
+phải bao gồm quyền {@link android.Manifest.permission#WRITE_CALENDAR}
+để xóa, chèn hoặc cập nhật dữ liệu lịch:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;...&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;14&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.READ_CALENDAR&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_CALENDAR&quot; /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="calendar">Bảng Lịch</h2>
+
+<p>Bảng {@link android.provider.CalendarContract.Calendars} chứa thông tin chi tiết 
+cho từng lịch. Các cột
+Lịch sau có thể ghi được bởi cả ứng dụng và <a href="#sync-adapter">trình điều hợp đồng bộ</a>. 
+Để xem danh sách đầy đủ về các trường được hỗ trợ, hãy xem tài liệu tham khảo
+{@link android.provider.CalendarContract.Calendars}.</p>
+<table>
+  <tr>
+    <th>Hằng số</th>
+    <th>Mô tả</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#NAME}</td>
+    <td>Tên của lịch.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#CALENDAR_DISPLAY_NAME}</td>
+    <td>Tên của lịch này mà được hiển thị cho người dùng.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
+    
+    <td>Một boolean cho biết lịch có được chọn để hiển thị hay không. Giá trị
+bằng 0 cho biết các sự kiện liên kết với lịch này sẽ không được
+hiển thị.  Giá trị bằng 1 cho biết các sự kiện liên kết với lịch này sẽ được
+hiển thị. Giá trị này ảnh hưởng tới việc khởi tạo hàng trong bảng {@link
+android.provider.CalendarContract.Instances}.</td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
+    
+    <td>Một boolean cho biết lịch sẽ được đồng bộ và có các sự kiện
+của mình được lưu trữ trên thiết bị hay không. Giá trị bằng 0 tức là không đồng bộ lịch này hay
+lưu giữ các sự kiện của nó lên thiết bị.  Giá trị bằng 1 tức là đồng bộ các sự kiện cho lịch này 
+và lưu trữ các sự kiện của nó lên thiết bị.</td>
+  </tr>
+</table>
+
+<h3 id="query">Truy vấn một lịch</h3>
+
+<p>Sau đây là một ví dụ về cách nhận được lịch do một người dùng
+cụ thể sở hữu. Để đơn giản, trong ví dụ này, thao tác truy vấn được thể hiện trong
+ luồng giao diện người dùng ("luồng chính"). Trong thực hành, nên làm điều này trong một luồng
+không đồng bộ thay vì trên luồng chính. Để bàn thêm, hãy xem phần 
+<a href="{@docRoot}guide/components/loaders.html">Trình tải</a>. Nếu bạn đang không chỉ 
+đọc dữ liệu mà còn sửa đổi nó, hãy xem {@link android.content.AsyncQueryHandler}.
+</p>
+
+
+<pre>
+// Projection array. Creating indices for this array instead of doing
+// dynamic lookups improves performance.
+public static final String[] EVENT_PROJECTION = new String[] {
+    Calendars._ID,                           // 0
+    Calendars.ACCOUNT_NAME,                  // 1
+    Calendars.CALENDAR_DISPLAY_NAME,         // 2
+    Calendars.OWNER_ACCOUNT                  // 3
+};
+  
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
+private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
+private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
+  
+
+<div class="sidebox-wrapper"> <div class="sidebox"> <h3>Tại sao bạn phải nêu
+ACCOUNT_TYPE?</h3> <p>Nếu bạn truy vấn trên một {@link
+android.provider.CalendarContract.Calendars#ACCOUNT_NAME
+Calendars.ACCOUNT_NAME}, bạn cũng phải nêu 
+{@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}
+trong lựa chọn. Đó là vì một tài khoản đã cho chỉ
+được coi là duy nhất nếu có cả <code>ACCOUNT_NAME</code> và
+<code>ACCOUNT_TYPE</code> của nó. <code>ACCOUNT_TYPE</code> là xâu tương ứng với
+trình xác thực tài khoản mà đã được sử dụng khi tài khoản đó được đăng ký với
+{@link android.accounts.AccountManager}. Cũng có một loại tài khoản đặc biệt gọi là {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} dành cho các lịch
+không liên kết với một tài khoản thiết bị. Tài khoản {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} không được
+đồng bộ.</p> </div> </div> 
+
+
+<p> Trong phần tiếp theo của ví dụ, bạn sẽ xây dựng truy vấn của mình. Lựa chọn
+này sẽ quy định các tiêu chí cho truy vấn. Trong ví dụ này, truy vấn đang tìm
+các lịch có <code>ACCOUNT_NAME</code>
+"sampleuser@google.com", <code>ACCOUNT_TYPE</code>
+"com.google", và <code>OWNER_ACCOUNT</code>
+"sampleuser@google.com". Nếu bạn muốn xem tất cả lịch mà một người dùng
+đã xem, không chỉ các lịch mà người dùng sở hữu, hãy bỏ qua <code>OWNER_ACCOUNT</code>.
+Truy vấn sẽ trả về đối tượng {@link android.database.Cursor}
+mà bạn có thể sử dụng để xem xét tập kết quả được trả về bởi truy vấn
+cơ sở dữ liệu. Để bàn thêm về việc sử dụng các truy vấn trong trình cung cấp nội dung, 
+hãy xem phần <a href="{@docRoot}guide/topics/providers/content-providers.html">Trình cung cấp Nội dung</a>.</p>
+
+
+<pre>// Run query
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+Uri uri = Calendars.CONTENT_URI;   
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
+                        + Calendars.ACCOUNT_TYPE + " = ?) AND ("
+                        + Calendars.OWNER_ACCOUNT + " = ?))";
+String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
+        "sampleuser@gmail.com"}; 
+// Submit the query and get a Cursor object back. 
+cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
+
+<p>Phần tiếp theo sử dụng con chạy để duyệt qua tập kết quả. Nó sử dụng
+các hằng số được thiết lập ngay từ đầu ví dụ để trả về các giá trị
+cho mỗi trường.</p>
+    
+<pre>// Use the cursor to step through the returned records
+while (cur.moveToNext()) {
+    long calID = 0;
+    String displayName = null;
+    String accountName = null;
+    String ownerName = null;
+      
+    // Get the field values
+    calID = cur.getLong(PROJECTION_ID_INDEX);
+    displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
+    accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
+    ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
+              
+    // Do something with the values...
+
+   ...
+}
+</pre>
+  
+<h3 id="modify-calendar">Sửa đổi một lịch</h3>
+
+<p>Để thực hiện cập nhật một lịch, bạn có thể cung cấp {@link
+android.provider.BaseColumns#_ID} của lịch hoặc dưới dạng ID được nối vào cho
+Uri 
+
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 
+hoặc dưới dạng mục chọn đầu tiên. Lựa chọn
+nên bắt đầu bằng <code>&quot;_id=?&quot;</code>, và
+<code>selectionArg</code> đầu tiên sẽ là {@link
+android.provider.BaseColumns#_ID} của lịch. 
+Bạn cũng có thể thực hiện cập nhật bằng cách mã hóa ID trong URI. Ví dụ này thay đổi tên hiển thị
+của một lịch bằng cách sử dụng phương pháp 
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
+:</p>
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long calID = 2;
+ContentValues values = new ContentValues();
+// The new display name for the calendar
+values.put(Calendars.CALENDAR_DISPLAY_NAME, &quot;Trevor's Calendar&quot;);
+Uri updateUri = ContentUris.withAppendedId(Calendars.CONTENT_URI, calID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
+
+<h3 id="insert-calendar">Chèn một lịch</h2>
+
+<p>Lịch được thiết kế để được quản lý chủ yếu bởi một trình điều hợp đồng bộ, vì vậy bạn chỉ nên
+chèn các lịch mới như một trình điều hợp đồng bộ. Phần lớn thì các ứng dụng
+chỉ có thể thực hiện những thay đổi bề mặt về lịch chẳng hạn như thay đổi tên hiển thị. Nếu
+một ứng dụng cần tạo một lịch cục bộ, nó có thể làm điều này bằng cách thực hiện
+chèn lịch dưới dạng một trình điều hợp đồng bộ, sử dụng {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} của {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}.
+{@link android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} 
+là một loại tài khoản đặc biệt dành cho các lịch không
+liên kết với một tài khoản thiết bị. Các lịch loại này không được đồng bộ với một máy chủ. Để
+bàn về trình điều hợp đồng bộ, hãy xem phần <a href="#sync-adapter">Trình điều hợp Đồng bộ</a>.</p>
+
+<h2 id="events">Bảng Sự kiện</h2>
+
+<p>Bảng {@link android.provider.CalendarContract.Events} chứa thông tin chi tiết
+cho các sự kiện riêng lẻ. Để thêm, cập nhật hoặc xóa sự kiện, ứng dụng phải
+bao gồm quyền {@link android.Manifest.permission#WRITE_CALENDAR} trong
+<a href="#manifest">tệp bản kê khai</a> của mình.</p>
+
+<p>Các cột Sự kiện sau có thể ghi được bởi cả ứng dụng và trình điều hợp
+đồng bộ. Để xem danh sách đầy đủ về các trường được hỗ trợ, hãy xem tài liệu tham khảo {@link
+android.provider.CalendarContract.Events}.</p>
+
+<table>
+  <tr>
+    <th>Hằng số</th>
+    <th>Mô tả</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#CALENDAR_ID}</td>
+    <td>{@link android.provider.BaseColumns#_ID} của lịch mà chứa sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ORGANIZER}</td>
+    <td>E-mail của người tổ chức (người chủ) của sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE}</td>
+    <td>Tiêu đề của sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION}</td>
+    <td>Nơi sự kiện diễn ra. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION}</td>
+    <td>Mô tả sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTSTART}</td>
+    <td>Thời gian sự kiện bắt đầu tính bằng mili giây UTC trôi qua kể từ giờ epoch. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTEND}</td>
+    <td>Thời gian sự kiện kết thúc tính bằng mili giây UTC trôi qua kể từ giờ epoch. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}</td>
+    <td>Múi giờ của sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_END_TIMEZONE}</td>
+    <td>Múi giờ của thời điểm kết thúc sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
+    
+    <td>Thời lượng của sự kiện theo định dạng <a href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RFC5545</a>.
+Ví dụ, giá trị bằng <code>&quot;PT1H&quot;</code> cho biết sự kiện sẽ kéo dài
+một giờ và giá trị bằng <code>&quot;P2W&quot;</code> cho biết
+thời lượng là 2 tuần. </td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
+    
+    <td>Giá trị bằng 1 cho biết sự kiện này chiếm cả ngày, được xác định bởi
+múi giờ tại địa phương. Giá trị bằng 0 cho biết đó là một sự kiện thường xuyên mà có thể bắt đầu
+và kết thúc vào bất cứ lúc nào trong một ngày.</td>
+
+    
+  </tr>
+  
+  
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
+    
+    <td>Quy tắc lặp lại đối với định dạng sự kiện. Ví
+dụ, <code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code>. Bạn có thể tìm thêm
+nhiều ví dụ hơn <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">ở đây</a>.</td>
+    
+  </tr>
+  
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
+    <td>Ngày lặp lại đối với sự kiện. 
+    Bạn thường sử dụng {@link android.provider.CalendarContract.EventsColumns#RDATE} 
+    cùng với {@link android.provider.CalendarContract.EventsColumns#RRULE} 
+    để định nghĩa một tập tổng hợp
+các trường hợp xảy ra lặp lại. Để bàn thêm, hãy xem phần <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">RFC5545 spec</a>.</td>
+</tr>
+ 
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
+    
+    <td>Xem sự kiện này được tính là thời gian bận hay là thời gian rảnh có thể được 
+xếp lại lịch. </td>
+    
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
+    <td>Khách có thể sửa đổi sự kiện được hay không. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_INVITE_OTHERS}</td>
+    <td>Khách có thể mời khách khác được hay không. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_SEE_GUESTS}</td>
+    <td>Khách có thể xem danh sách người dự được hay không.</td>
+  </tr>
+</table>
+
+<h3 id="add-event">Thêm Sự kiện</h3>
+
+<p>Khi ứng dụng của bạn chèn một sự kiện mới, chúng tôi khuyến cáo bạn nên sử dụng một Ý định
+{@link android.content.Intent#ACTION_INSERT INSERT}, như được mô tả trong <a href="#intent-insert">Sử dụng ý định để chèn một sự kiện</a>. Tuy nhiên, nếu
+cần, bạn có thể chèn sự kiện trực tiếp. Phần này mô tả cách làm điều
+này.</p>
+
+
+<p>Sau đây là các quy tắc để chèn một sự kiện mới: </p>
+<ul>
+
+  <li>Bạn phải đưa vào {@link
+android.provider.CalendarContract.EventsColumns#CALENDAR_ID} và {@link
+android.provider.CalendarContract.EventsColumns#DTSTART}.</li>
+
+<li>Bạn phải đưa vào một {@link
+android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}. Để nhận một danh sách
+các ID múi giờ được cài đặt của hệ thống, hãy sử dụng {@link
+java.util.TimeZone#getAvailableIDs()}. Lưu ý rằng quy tắc này không áp dụng nếu
+bạn đang chèn một sự kiện thông qua Ý định {@link
+android.content.Intent#ACTION_INSERT INSERT} như được mô tả trong <a href="#intent-insert">Sử dụng ý định để chèn một sự kiện</a>&mdash;trong kịch bản
+đó, một múi giờ mặc định sẽ được cung cấp.</li>
+  
+  <li>Đối với các sự kiện không định kỳ, bạn phải đưa vào {@link
+android.provider.CalendarContract.EventsColumns#DTEND}. </li>
+  
+  
+  <li>Đối với các sự kiện định kỳ, bạn phải đưa vào một {@link
+android.provider.CalendarContract.EventsColumns#DURATION} bên cạnh {@link
+android.provider.CalendarContract.EventsColumns#RRULE} hay {@link
+android.provider.CalendarContract.EventsColumns#RDATE}. Lưu ý rằng quy tắc này không áp dụng nếu
+bạn đang chèn một sự kiện thông qua Ý định {@link
+android.content.Intent#ACTION_INSERT INSERT} như được mô tả trong <a href="#intent-insert">Sử dụng ý định để chèn một sự kiện</a>&mdash;trong kịch bản
+đó, bạn có thể sử dụng một {@link
+android.provider.CalendarContract.EventsColumns#RRULE} cùng với {@link android.provider.CalendarContract.EventsColumns#DTSTART} và {@link android.provider.CalendarContract.EventsColumns#DTEND}, và ứng dụng Lịch 
+sẽ tự động chuyển nó thành một thời lượng.</li>
+  
+</ul>
+
+<p>Sau đây là một ví dụ về cách chèn một sự kiện. Ví dụ này đang được thực hiện trong luồng
+UI để cho đơn giản. Trong thực hành, chèn và cập nhật nên được thực hiện trong một
+luồng không đồng bộ để di chuyển hành động vào một luồng chạy ngầm. Để biết thêm
+thông tin, hãy xem phần {@link android.content.AsyncQueryHandler}.</p>
+
+
+<pre>
+long calID = 3;
+long startMillis = 0; 
+long endMillis = 0;     
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 9, 14, 7, 30);
+startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 9, 14, 8, 45);
+endMillis = endTime.getTimeInMillis();
+...
+
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Events.DTSTART, startMillis);
+values.put(Events.DTEND, endMillis);
+values.put(Events.TITLE, &quot;Jazzercise&quot;);
+values.put(Events.DESCRIPTION, &quot;Group workout&quot;);
+values.put(Events.CALENDAR_ID, calID);
+values.put(Events.EVENT_TIMEZONE, "America/Los_Angeles");
+Uri uri = cr.insert(Events.CONTENT_URI, values);
+
+// get the event ID that is the last element in the Uri
+long eventID = Long.parseLong(uri.getLastPathSegment());
+// 
+// ... do something with event ID
+//
+//</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Xem cách mà ví dụ này bắt được ID
+sự kiện sau khi sự kiện được tạo. Đây là cách dễ nhất để nhận được một ID sự kiện. Bạn thường
+cần ID sự kiện để thực hiện các thao tác lịch khác&mdash;ví dụ: để thêm
+người dự hoặc nhắc nhở vào một sự kiện.</p>
+
+
+<h3 id="update-event">Cập nhật Sự kiện</h3>
+
+<p>Khi ứng dụng của bạn muốn cho phép người dùng chỉnh sửa một sự kiện, chúng tôi khuyến cáo
+bạn nên sử dụng một Ý định {@link android.content.Intent#ACTION_EDIT EDIT} như được mô tả
+trong <a href="#intent-edit">Sử dụng ý định để chỉnh sửa một sự kiện</a>.
+Tuy nhiên, nếu cần, bạn có thể chỉnh sửa sự kiện trực tiếp. Để thực hiện cập nhật
+một Sự kiện, bạn có thể cung cấp <code>_ID</code> của sự kiện 
+hoặc dưới dạng ID được nối vào cho Uri ({@link
+android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 
+hoặc dưới dạng mục chọn đầu tiên. 
+Lựa chọn nên bắt đầu bằng <code>&quot;_id=?&quot;</code>, và
+<code>selectionArg</code> đầu tiên nên là <code>_ID</code> của sự kiện. Bạn cũng có thể
+thực hiện cập nhật bằng cách sử dụng một lựa chọn không có ID. Sau đây là một ví dụ về cách cập nhật một
+sự kiện. Nó thay đổi tiêu đề của sự kiện bằng cách sử dụng phương pháp 
+{@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}
+:</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 188;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri updateUri = null;
+// The new title for the event
+values.put(Events.TITLE, &quot;Kickboxing&quot;); 
+updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
+
+<h3 id="delete-event">Xóa Sự kiện</h3>
+
+<p>Bạn có thể xóa một sự kiện hoặc theo {@link
+android.provider.BaseColumns#_ID} của nó như một ID được nối trên URI, hoặc bằng cách sử dụng
+lựa chọn tiêu chuẩn. Nếu sử dụng một ID được nối, bạn không thể lựa chọn đồng thời.
+Có hai kiểu xóa: như một ứng dụng và như một trình điều hợp đồng bộ. Xóa
+như một ứng dụng sẽ đặt cột <em>đã xóa</em> thành 1. Cờ này sẽ báo cho
+trình điều hợp đồng bộ rằng hàng đó đã được xóa và rằng việc xóa này nên
+được truyền tới máy chủ. Xóa trình điều hợp đồng bộ sẽ gỡ bỏ sự kiện khỏi
+cơ sở dữ liệu cùng với tất cả dữ liệu được liên kết của nó. Sau đây là một ví dụ về ứng dụng
+xóa một sự kiện thông qua {@link android.provider.BaseColumns#_ID} của nó:</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 201;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri deleteUri = null;
+deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().delete(deleteUri, null, null);
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);  
+</pre>
+
+<h2 id="attendees">Bảng Người dự</h2>
+
+<p>Mỗi hàng của bảng {@link android.provider.CalendarContract.Attendees} đại diện
+cho một người dự hoặc khách duy nhất của một sự kiện. Gọi 
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()} 
+sẽ trả về một danh sách người dự cho sự kiện
+với {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} đã cho. 
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} này
+phải khớp với {@link
+android.provider.BaseColumns#_ID} của một sự kiện cụ thể.</p> 
+
+<p>Bảng sau liệt kê các trường
+có thể ghi được. Khi chèn một người dự mới, bạn phải điền tất cả 
+ngoại trừ <code>ATTENDEE_NAME</code>.
+</p>
+
+
+<table>
+  <tr>
+    <th>Hằng số</th>
+    <th>Mô tả</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}</td>
+    <td>ID của sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_NAME}</td>
+    <td>Tên của người dự.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_EMAIL}</td>
+    <td>Địa chỉ e-mail của người dự.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_RELATIONSHIP}</td>
+    <td><p>Mối quan hệ của người dự với sự kiện. Một trong:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ATTENDEE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ORGANIZER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_PERFORMER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_SPEAKER}</li>
+    </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_TYPE}</td>
+    <td><p>Loại người dự. Một trong: </p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_REQUIRED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_OPTIONAL}</li>
+    </ul></td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS}</td>
+    <td><p>Trạng thái tham dự của người dự. Một trong:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_ACCEPTED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_DECLINED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_INVITED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_TENTATIVE}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-attendees">Thêm Người dự</h3>
+
+<p>Sau đây là một ví dụ về cách thêm một người dự vào một sự kiện. Lưu ý rằng
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 
+là bắt buộc:</p>
+
+<pre>
+long eventID = 202;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Attendees.ATTENDEE_NAME, &quot;Trevor&quot;);
+values.put(Attendees.ATTENDEE_EMAIL, &quot;trevor@example.com&quot;);
+values.put(Attendees.ATTENDEE_RELATIONSHIP, Attendees.RELATIONSHIP_ATTENDEE);
+values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_OPTIONAL);
+values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_INVITED);
+values.put(Attendees.EVENT_ID, eventID);
+Uri uri = cr.insert(Attendees.CONTENT_URI, values);
+</pre>
+
+<h2 id="reminders">Bảng Nhắc nhở</h2>
+
+<p>Mỗi hàng của bảng {@link android.provider.CalendarContract.Reminders} đại diện
+cho một nhắc nhở của một sự kiện. Gọi 
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}  sẽ trả về một danh sách nhắc nhở cho
+sự kiện với 
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} đã cho.</p>
+
+
+<p>Bảng sau liệt kê các trường ghi được đối với nhắc nhở. Tất cả đều phải được
+đưa vào khi chèn một nhắc nhở mới. Lưu ý rằng các trình điều hợp đồng bộ quy định
+các loại nhắc nhở chúng hỗ trợ trong bảng {@link
+android.provider.CalendarContract.Calendars}. Xem 
+{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_REMINDERS} 
+để biết chi tiết.</p>
+
+
+<table>
+  <tr>
+    <th>Hằng số</th>
+    <th>Mô tả</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#EVENT_ID}</td>
+    <td>ID của sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#MINUTES}</td>
+    <td>Số phút trước khi diễn ra sự kiện mà nhắc nhở cần báo.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#METHOD}</td>
+    <td><p>Phương pháp báo thức, như được đặt trên máy chủ. Một trong:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_ALERT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_DEFAULT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_EMAIL}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_SMS}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-reminders">Thêm Nhắc nhở</h3>
+
+<p>Ví dụ này thêm nhắc nhở vào một sự kiện. Nhắc nhở sẽ báo 15
+phút trước khi xảy ra sự kiện.</p>
+<pre>
+long eventID = 221;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Reminders.MINUTES, 15);
+values.put(Reminders.EVENT_ID, eventID);
+values.put(Reminders.METHOD, Reminders.METHOD_ALERT);
+Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
+
+<h2 id="instances">Bảng Thực thể</h2>
+
+<p>Bảng 
+{@link android.provider.CalendarContract.Instances} chứa
+thời gian bắt đầu và thời gian kết thúc của các lần xảy ra một sự kiện. Mỗi hàng trong bảng này
+đại diện cho một lần xảy ra sự kiện. Bảng thực thể không ghi được và chỉ
+đưa ra một cách để truy vấn các lần xảy ra sự kiện. </p>
+
+<p>Bảng sau liệt kê một số trường mà bạn có thể truy vấn đối với một thực thể. Lưu ý 
+rằng múi giờ được định nghĩa bởi 
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE} 
+và 
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_INSTANCES}.</p>
+
+
+<table>
+  <tr>
+    <th>Hằng số</th>
+    <th>Mô tả</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#BEGIN}</td>
+    <td>Thời gian bắt đầu của thực thể, tính bằng mili giây UTC.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END}</td>
+    <td>Thời gian kết thúc của thực thể, tính bằng mili giây UTC.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
+    
+    <td>Ngày kết thúc theo lịch Julian của thực thể theo múi giờ
+của Lịch. 
+    
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
+    
+    <td>Phút kết thúc của thực thể được xác định từ nửa đêm theo múi giờ
+của Lịch.</td>
+    
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
+    <td><code>_ID</code> của sự kiện đối với thực thể này.</td>
+  </tr>
+    <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
+    <td>Ngày bắt đầu theo lịch Julian của thực thể theo múi giờ của Lịch. 
+ </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
+    
+    <td>Phút bắt đầu của thực thể được xác định từ nửa đêm theo múi giờ
+của Lịch. 
+</td>
+    
+  </tr>
+
+</table>
+
+<h3 id="query-instances">Truy vấn bảng Thực thể</h3>
+
+<p>Để truy vấn bảng Thực thể, bạn cần chỉ định một khoảng thời gian cho truy vấn
+trong URI. Trong ví dụ này, {@link android.provider.CalendarContract.Instances}
+có quyền truy cập trường {@link
+android.provider.CalendarContract.EventsColumns#TITLE} thông qua việc
+triển khai giao diện {@link android.provider.CalendarContract.EventsColumns} của nó. 
+Nói cách khác, {@link
+android.provider.CalendarContract.EventsColumns#TITLE} được trả về qua một
+chế độ xem cơ sở dữ liệu, chứ không qua việc truy vấn bảng {@link
+android.provider.CalendarContract.Instances} thô.</p>
+
+<pre>
+private static final String DEBUG_TAG = "MyActivity";
+public static final String[] INSTANCE_PROJECTION = new String[] {
+    Instances.EVENT_ID,      // 0
+    Instances.BEGIN,         // 1
+    Instances.TITLE          // 2
+  };
+  
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_BEGIN_INDEX = 1;
+private static final int PROJECTION_TITLE_INDEX = 2;
+...
+
+// Specify the date range you want to search for recurring
+// event instances
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2011, 9, 23, 8, 0);
+long startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2011, 10, 24, 8, 0);
+long endMillis = endTime.getTimeInMillis();
+  
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+
+// The ID of the recurring event whose instances you are searching
+// for in the Instances table
+String selection = Instances.EVENT_ID + " = ?";
+String[] selectionArgs = new String[] {"207"};
+
+// Construct the query with the desired date range.
+Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
+ContentUris.appendId(builder, startMillis);
+ContentUris.appendId(builder, endMillis);
+
+// Submit the query
+cur =  cr.query(builder.build(), 
+    INSTANCE_PROJECTION, 
+    selection, 
+    selectionArgs, 
+    null);
+   
+while (cur.moveToNext()) {
+    String title = null;
+    long eventID = 0;
+    long beginVal = 0;    
+    
+    // Get the field values
+    eventID = cur.getLong(PROJECTION_ID_INDEX);
+    beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
+    title = cur.getString(PROJECTION_TITLE_INDEX);
+              
+    // Do something with the values. 
+    Log.i(DEBUG_TAG, "Event:  " + title); 
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(beginVal);  
+    DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));    
+    }
+ }</pre>
+
+<h2 id="intents">Ý định Lịch</h2>
+<p>Ứng dụng của bạn không cần <a href="#manifest">quyền</a> để ghi và đọc dữ liệu lịch. Thay vào đó, nó có thể sử dụng những ý định được cung cấp bởi ứng dụng Lịch của Android để chuyển giao các thao tác đọc và ghi cho ứng dụng đó. Bảng sau đây liệt kê các ý định được Trình cung cấp Lịch hỗ trợ:</p>
+<table>
+  <tr>
+    <th>Hành động</th>
+    <th>URI</th>
+
+    <th>Mô tả</th>
+    <th>Phụ thêm</th>
+  </tr>
+  <tr>
+    <td><br>
+    {@link android.content.Intent#ACTION_VIEW VIEW} <br></td>
+    <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
+    Bạn cũng có thể tham khảo tới URI bằng 
+{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI}. 
+Để xem một ví dụ về cách sử dụng ý định này, hãy xem <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Sử dụng ý định để xem dữ liệu lịch</a>. 
+
+    </td>
+    <td>Mở lịch đến thời gian được chỉ định bởi <code>&lt;ms_since_epoch&gt;</code>.</td>
+    <td>Không có.</td>
+  </tr>
+  <tr>
+    <td><p>{@link android.content.Intent#ACTION_VIEW VIEW} </p>
+
+     </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+    
+    Bạn cũng có thể tham khảo tới URI bằng 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+Để xem một ví dụ về cách sử dụng ý định này, hãy xem <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Sử dụng ý định để xem dữ liệu lịch</a>.
+    
+    </td>
+    <td>Xem sự kiện được chỉ định bởi <code>&lt;event_id&gt;</code>.</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+    
+  Bạn cũng có thể tham khảo tới URI bằng 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+Để xem một ví dụ về cách sử dụng ý định này, hãy xem <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">Sử dụng ý định để chỉnh sửa một sự kiện</a>.
+    
+    
+    </td>
+    <td>Chỉnh sửa sự kiện được chỉ định bởi <code>&lt;event_id&gt;</code>.</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} <br>
+    <br>
+    {@link android.content.Intent#ACTION_INSERT INSERT} </td>
+    <td><p><code>content://com.android.calendar/events</code></p>
+    
+   Bạn cũng có thể tham khảo tới URI bằng 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+Để xem một ví dụ về cách sử dụng ý định này, hãy xem <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">Sử dụng ý định để chèn một sự kiện</a>.
+    
+    </td>
+
+    <td>Tạo một sự kiện.</td>
+    <td>Bất kỳ phụ thêm nào được liệt kê trong bảng bên dưới.</td>
+  </tr>
+</table>
+
+<p>Bảng sau đây liệt kê các phụ thêm ý định được Trình cung cấp Lịch hỗ trợ:
+</p>
+<table>
+  <tr>
+    <th>Phụ thêm Ý định</th>
+    <th>Mô tả</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE Events.TITLE}</td>
+    <td>Tên cho sự kiện.</td>
+  </tr>
+  <tr>
+  
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
+    <td>Thời gian bắt đầu sự kiện tính bằng mili giây trôi qua kể từ giờ epoch.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME}</td>
+    
+    <td>Thời gian kết thúc sự kiện tính bằng mili giây trôi qua kể từ giờ epoch.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY
+CalendarContract.EXTRA_EVENT_ALL_DAY}</td>
+    
+    <td>Một boolean cho biết đó là một sự kiện cả ngày. Giá trị có thể bằng
+<code>true</code> hoặc <code>false</code>.</td> </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION
+Events.EVENT_LOCATION}</td>
+    
+    <td>Địa điểm của sự kiện.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION
+Events.DESCRIPTION}</td>
+    
+    <td>Mô tả sự kiện.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}</td>
+    <td>Địa chỉ e-mail của những người cần mời dưới dạng một danh sách phân cách bởi dấu phẩy.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#RRULE Events.RRULE}</td>
+    <td>Quy tắc lặp lại đối với sự kiện.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL
+Events.ACCESS_LEVEL}</td>
+    
+    <td>Sự kiện là riêng tư hay công khai.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY
+Events.AVAILABILITY}</td>
+    
+    <td>Xem sự kiện này tính là thời gian bận hay là thời gian rảnh có thể được xếp lại lịch.</td>
+    
+</table> 
+<p>Các phần sau mô tả cách sử dụng những ý định này.</p>
+
+
+<h3 id="intent-insert">Sử dụng ý định để chèn một sự kiện</h3>
+
+<p>Sử dụng Ý định {@link android.content.Intent#ACTION_INSERT INSERT} cho phép
+ứng dụng của bạn chuyển giao tác vụ chèn sự kiện cho bản thân Lịch.
+Bằng cách này, ứng dụng của bạn thậm chí không cần phải có quyền {@link
+android.Manifest.permission#WRITE_CALENDAR} được bao gồm trong <a href="#manifest">tệp bản kê khai</a> của mình.</p>
+
+  
+<p>Khi người dùng chạy một ứng dụng mà sử dụng cách này, ứng dụng sẽ gửi
+chúng tới Lịch để hoàn thành việc thêm một sự kiện. Ý định {@link
+android.content.Intent#ACTION_INSERT INSERT} sử dụng các trường phụ thêm để
+điền trước vào một mẫu bằng các chi tiết của sự kiện trong Lịch. Khi đó, người dùng có thể
+hủy bỏ sự kiện, chỉnh sửa mẫu nếu cần, hoặc lưu sự kiện vào lịch
+của mình.</p>
+  
+
+
+<p>Sau đây là một đoạn mã HTML lập biểu một sự kiện vào ngày 19/1/2012, diễn ra
+từ 7:30 sáng đến 8:30 sáng. Lưu ý điều sau đây về đoạn mã HTML này:</p>
+
+<ul>
+  <li>Nó quy định {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 
+ là Uri.</li>
+  
+  <li>Nó sử dụng các trường phụ {@link
+android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME} và {@link
+android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME} để điền trước thời gian của sự kiện
+vào mẫu. Các giá trị đối với những thời gian này phải tính bằng mili giây UTC
+trôi qua kể từ giờ epoch.</li>
+  
+  <li>Nó sử dụng trường phụ {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}
+để cung cấp một danh sách người được mời phân cách bằng dấu phẩy, được chỉ định theo địa chỉ e-mail.</li>
+  
+</ul>
+<pre>
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 0, 19, 8, 30);
+Intent intent = new Intent(Intent.ACTION_INSERT)
+        .setData(Events.CONTENT_URI)
+        .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis())
+        .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis())
+        .putExtra(Events.TITLE, &quot;Yoga&quot;)
+        .putExtra(Events.DESCRIPTION, &quot;Group class&quot;)
+        .putExtra(Events.EVENT_LOCATION, &quot;The gym&quot;)
+        .putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
+        .putExtra(Intent.EXTRA_EMAIL, &quot;rowan@example.com,trevor@example.com&quot;);
+startActivity(intent);
+</pre>
+
+<h3 id="intent-edit">Sử dụng ý định để chỉnh sửa một sự kiện</h3>
+
+<p>Bạn có thể cập nhật một sự kiện trực tiếp như được mô tả trong phần <a href="#update-event">Cập nhật sự kiện</a>. Nhưng việc sử dụng Ý định {@link
+android.content.Intent#ACTION_EDIT EDIT} cho phép một ứng dụng
+không có quyền được chuyển giao chỉnh sửa sự kiện cho ứng dụng Lịch.
+Khi người dùng hoàn thành chỉnh sửa sự kiện của mình trong Lịch, họ được trả về ứng dụng
+ban đầu.</p> <p>Sau đây là một ví dụ về ý định đặt một tiêu đề mới
+cho một sự kiện được quy định và cho phép người dùng chỉnh sửa sự kiện trong Lịch.</p>
+
+
+<pre>long eventID = 208;
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_EDIT)
+    .setData(uri)
+    .putExtra(Events.TITLE, &quot;My New Title&quot;);
+startActivity(intent);</pre>
+
+<h3 id="intent-view">Sử dụng ý định để xem dữ liệu lịch</h3>
+<p>Trình cung cấp Lịch giới thiệu hai cách khác nhau để sử dụng Ý định {@link android.content.Intent#ACTION_VIEW VIEW}:</p>
+<ul>
+  <li>Để mở Lịch tới một ngày cụ thể.</li>
+  <li>Để xem một sự kiện.</li>
+
+</ul>
+<p>Sau đây là một ví dụ cho biết cách mở Lịch tới một ngày cụ thể:</p>
+<pre>// A date-time specified in milliseconds since the epoch.
+long startMillis;
+...
+Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
+builder.appendPath(&quot;time&quot;);
+ContentUris.appendId(builder, startMillis);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+    .setData(builder.build());
+startActivity(intent);</pre>
+
+<p>Sau đây là một ví dụ cho biết cách mở một sự kiện để xem:</p>
+<pre>long eventID = 208;
+...
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+   .setData(uri);
+startActivity(intent);
+</pre>
+
+
+<h2 id="sync-adapter">Trình điều hợp Đồng bộ</h2>
+
+
+<p>Chỉ có vài điểm khác nhau nhỏ giữa cách một ứng dụng và cách một trình điều hợp đồng bộ
+truy cập Trình cung cấp Lịch:</p>
+
+<ul>
+  <li>Trình điều hợp đồng bộ cần chỉ định rằng nó là một trình điều hợp đồng bộ bằng cách đặt {@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER} thành <code>true</code>.</li>
+  
+  
+  <li>Trình điều hợp đồng bộ cần cung cấp một {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME} và một {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} làm tham số truy vấn trong URI. </li>
+  
+  <li>Trình điều hợp đồng bộ có quyền truy nhập ghi vào nhiều cột hơn ứng dụng hay widget.
+  Ví dụ, một ứng dụng chỉ có thể sửa đổi một vài đặc điểm của một lịch, 
+  chẳng hạn như tên lịch, tên hiển thị, thiết đặt hiển thị, và lịch có được
+  đồng bộ hay không. Nếu so sánh, một trình điều hợp đồng bộ có thể truy cập không chỉ những cột đó, mà còn nhiều cột khác,
+  chẳng hạn như màu lịch, múi giờ, mức truy nhập, địa điểm, v.v.
+Tuy nhiên, trình điều hợp đồng bộ bị hạn chế đối với <code>ACCOUNT_NAME</code> và 
+<code>ACCOUNT_TYPE</code> mà nó quy định.</li> </ul>
+
+<p>Sau đây là một phương pháp hữu ích hơn mà bạn có thể sử dụng để trả về một URI để dùng với một trình điều hợp đồng bộ:</p>
+<pre> static Uri asSyncAdapter(Uri uri, String account, String accountType) {
+    return uri.buildUpon()
+        .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,&quot;true&quot;)
+        .appendQueryParameter(Calendars.ACCOUNT_NAME, account)
+        .appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType).build();
+ }
+</pre>
+<p>Để biết việc triển khai mẫu trình điều hợp đồng bộ (không liên quan cụ thể tới Lịch), hãy xem phần 
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>.

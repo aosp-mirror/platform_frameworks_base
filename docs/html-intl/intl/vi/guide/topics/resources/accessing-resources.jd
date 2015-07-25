@@ -1,0 +1,337 @@
+page.title=Truy cập Tài nguyên
+parent.title=Tài nguyên Ứng dụng
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Xem nhanh</h2>
+  <ul>
+    <li>Tài nguyên có thể được tham chiếu từ mã bằng các số nguyên từ {@code R.java}, chẳng hạn như
+{@code R.drawable.myimage}</li>
+    <li>Tài nguyên có thể được tham chiếu từ các tài nguyên bằng cách sử dụng một cú pháp XML đặc biệt, ví dụ như {@code
+&#64;drawable/myimage}</li>
+    <li>Bạn cũng có thể truy cập tài nguyên ứng dụng của mình bằng các phương pháp trong
+{@link android.content.res.Resources}</li>
+  </ul>
+
+  <h2>Lớp khóa</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+  </ol>
+
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#ResourcesFromCode">Truy cập Tài nguyên từ Mã</a></li>
+    <li><a href="#ResourcesFromXml">Truy cập Tài nguyên từ XML</a>
+      <ol>
+        <li><a href="#ReferencesToThemeAttributes">Tham chiếu các thuộc tính kiểu</a></li>
+      </ol>
+    </li>
+    <li><a href="#PlatformResources">Truy cập Tài nguyên Nền tảng</a></li>
+  </ol>
+
+  <h2>Xem thêm</h2>
+  <ol>
+    <li><a href="providing-resources.html">Cung cấp Tài nguyên</a></li>
+    <li><a href="available-resources.html">Loại Tài nguyên</a></li>
+  </ol>
+</div>
+</div>
+
+
+
+
+<p>Sau khi cung cấp một tài nguyên trong ứng dụng của mình (đề cập trong <a href="providing-resources.html">Cung cấp Tài nguyên</a>), bạn có thể áp dụng nó bằng cách
+tham chiếu ID tài nguyên đó. Tất cả ID tài nguyên được định nghĩa trong lớp {@code R} dự án của bạn, do
+công cụ {@code aapt} tự động khởi tạo.</p>
+
+<p>Khi ứng dụng của bạn được biên dịch, {@code aapt} khởi tạo lớp {@code R}, trong đó chứa
+ID tài nguyên cho tất cả tài nguyên trong thư mục {@code
+res/} của bạn. Với mỗi loại tài nguyên, có một lớp con {@code R} (ví dụ,
+{@code R.drawable} cho tất cả tài nguyên có thể vẽ), và với mỗi tài nguyên loại đó, có một số nguyên
+tĩnh (ví dụ, {@code R.drawable.icon}). Số nguyên này là ID tài nguyên mà bạn có thể sử dụng
+để truy xuất tài nguyên của mình.</p>
+
+<p>Mặc dù lớp {@code R} là nơi các ID tài nguyên được quy định, bạn sẽ không cần
+tìm ở đó để khám phá một ID tài nguyên. Một ID tài nguyên luôn bao gồm:</p>
+<ul>
+  <li><em>Loại tài nguyên</em>: Mỗi tài nguyên được nhóm vào một "loại," chẳng hạn như {@code
+string}, {@code drawable}, và {@code layout}. Để biết thêm về các loại khác nhau, hãy xem phần <a href="available-resources.html">Loại Tài nguyên</a>.
+  </li>
+  <li><em>Tên tài nguyên</em>, là, hoặc: tên tệp,
+không bao gồm phần mở rộng; hoặc giá trị trong thuộc tính XML {@code android:name}, nếu tài nguyên
+đó là một giá trị đơn giản (chẳng hạn như một xâu).</li>
+</ul>
+
+<p>Có hai cách để bạn có thể truy cập một tài nguyên:</p>
+<ul>
+  <li><strong>Trong mã:</strong> Sử dụng một số nguyên tĩnh từ một lớp con của lớp {@code R}
+của bạn, chẳng hạn như:
+    <pre class="classic no-pretty-print">R.string.hello</pre>
+    <p>{@code string} là loại tài nguyên và {@code hello} là tên tài nguyên. Có nhiều
+API Android mà có thể truy cập các tài nguyên của bạn khi bạn cung cấp một ID tài nguyên theo định dạng này. Xem
+<a href="#ResourcesFromCode">Truy cập Tài nguyên trong Mã</a>.</p>
+  </li>
+  <li><strong>Trong XML:</strong> Sử dụng một cú pháp XML đặc biệt mà cũng tương ứng với
+ID tài nguyên được định nghĩa trong lớp {@code R} của bạn, chẳng hạn như:
+    <pre class="classic no-pretty-print">&#64;string/hello</pre>
+    <p>{@code string} là loại tài nguyên và {@code hello} là tên tài nguyên. Bạn có thể sử dụng cú pháp
+này trong một tài nguyên XML ở bất kỳ nơi nào có kỳ vọng một giá trị mà bạn cung cấp trong một tài nguyên. Xem phần <a href="#ResourcesFromXml">Truy cập Tài nguyên từ XML</a>.</p>
+  </li>
+</ul>
+
+
+
+<h2 id="ResourcesFromCode">Truy cập Tài nguyên trong Mã </h2>
+
+<p>Bạn có thể sử dụng một tài nguyên trong mã bằng cách chuyển ID tài nguyên như một tham số phương pháp. Ví
+dụ, bạn có thể đặt một {@link android.widget.ImageView} để sử dụng tài nguyên {@code res/drawable/myimage.png}
+bằng cách sử dụng {@link android.widget.ImageView#setImageResource(int) setImageResource()}:</p>
+<pre>
+ImageView imageView = (ImageView) findViewById(R.id.myimageview);
+imageView.setImageResource(<strong>R.drawable.myimage</strong>);
+</pre>
+
+<p>Bạn cũng có thể truy xuất các tài nguyên riêng lẻ bằng các phương pháp trong {@link
+android.content.res.Resources}, theo đó bạn có thể nhận được một thực thể
+bằng {@link android.content.Context#getResources()}.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Truy cập các Tệp Gốc</h2>
+
+<p>Tuy không thường gặp, song bạn có thể cần truy cập các tệp và thư mục gốc của mình. Nếu bạn làm vậy thì việc
+lưu các tệp của bạn trong {@code res/} sẽ không có tác dụng với bạn, vì cách duy nhất để đọc một tài nguyên từ
+{@code res/} đó là bằng ID tài nguyên. Thay vào đó, bạn có thể lưu các tài nguyên của mình trong thư mục
+{@code assets/}.</p>
+<p>Các tệp lưu trong thư mục {@code assets/} <em>không</em> được cấp ID tài nguyên
+, vì thế bạn không thể tham chiếu chúng thông qua lớp {@code R} hoặc từ các tài nguyên XML. Thay vào đó, bạn có thể
+truy vấn các tệp trong thư mục {@code assets/} như một hệ thống tệp bình thường và đọc dữ liệu thô bằng cách sử dụng
+{@link android.content.res.AssetManager}.</p>
+<p>Tuy nhiên, nếu tất cả những gì bạn yêu cầu là khả năng đọc dữ liệu thô (chẳng hạn như một tệp video hoặc âm thanh),
+vậy bạn hãy lưu tệp trong thư mục {@code res/raw/} và đọc một luồng byte bằng cách sử dụng {@link
+android.content.res.Resources#openRawResource(int) openRawResource()}.</p>
+
+</div>
+</div>
+
+
+<h3>Cú pháp</h3>
+
+<p>Sau đây là cú pháp để tham chiếu một tài nguyên trong mã:</p>
+
+<pre class="classic no-pretty-print">
+[<em>&lt;package_name&gt;</em>.]R.<em>&lt;resource_type&gt;</em>.<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li><em>{@code &lt;package_name&gt;}</em> là tên của gói mà tài nguyên nằm trong đó (không
+bắt buộc khi tham chiếu các tài nguyên từ gói của chính bạn).</li>
+  <li><em>{@code &lt;resource_type&gt;}</em> là lớp con {@code R} cho loại tài nguyên.</li>
+  <li><em>{@code &lt;resource_name&gt;}</em> hoặc là tên tệp tài nguyên
+không có phần mở rộng hoặc là giá trị thuộc tính {@code android:name} trong phần tử XML (đối với các giá trị
+đơn giản).</li>
+</ul>
+<p>Xem phần <a href="available-resources.html">Loại Tài nguyên</a> để
+biết thêm thông tin về mỗi loại tài nguyên và cách tham chiếu chúng.</p>
+
+
+<h3>Trường hợp sử dụng</h3>
+
+<p>Có nhiều phương pháp chấp nhận một tham số ID tài nguyên và bạn có thể truy xuất tài nguyên bằng cách sử dụng
+các phương pháp trong {@link android.content.res.Resources}. Bạn có thể lấy một thực thể {@link
+android.content.res.Resources} bằng {@link android.content.Context#getResources
+Context.getResources()}.</p>
+
+
+<p>Sau đây là một số ví dụ về truy cập tài nguyên trong mã:</p>
+
+<pre>
+// Load a background for the current screen from a drawable resource
+{@link android.app.Activity#getWindow()}.{@link
+android.view.Window#setBackgroundDrawableResource(int)
+setBackgroundDrawableResource}(<strong>R.drawable.my_background_image</strong>) ;
+
+// Set the Activity title by getting a string from the Resources object, because
+//  this method requires a CharSequence rather than a resource ID
+{@link android.app.Activity#getWindow()}.{@link android.view.Window#setTitle(CharSequence)
+setTitle}(getResources().{@link android.content.res.Resources#getText(int)
+getText}(<strong>R.string.main_title</strong>));
+
+// Load a custom layout for the current screen
+{@link android.app.Activity#setContentView(int)
+setContentView}(<strong>R.layout.main_screen</strong>);
+
+// Set a slide in animation by getting an Animation from the Resources object
+mFlipper.{@link android.widget.ViewAnimator#setInAnimation(Animation)
+setInAnimation}(AnimationUtils.loadAnimation(this,
+        <strong>R.anim.hyperspace_in</strong>));
+
+// Set the text on a TextView object using a resource ID
+TextView msgTextView = (TextView) findViewById(<strong>R.id.msg</strong>);
+msgTextView.{@link android.widget.TextView#setText(int)
+setText}(<strong>R.string.hello_message</strong>);
+</pre>
+
+
+<p class="caution"><strong>Chú ý:</strong> Bạn không nên sửa đổi tệp {@code
+R.java} bằng cách thủ công&mdash;nó được khởi tạo bởi công cụ {@code aapt} khi dự án của bạn được
+biên dịch. Mọi thay đổi đều bị ghi đè vào lần biên dịch tới của bạn.</p>
+
+
+
+<h2 id="ResourcesFromXml">Truy cập Tài nguyên từ XML</h2>
+
+<p>Bạn có thể định nghĩa các giá trị cho một số thuộc tính và phần tử XML bằng cách sử dụng một
+tham chiếu tới một tài nguyên hiện có. Bạn sẽ thường làm điều này khi tạo các tệp bố trí, để
+cung cấp các xâu và hình ảnh cho widget của mình.</p>
+
+<p>Ví dụ, nếu thêm một {@link android.widget.Button} vào bố trí của mình, bạn nên sử dụng
+một <a href="string-resource.html">tài nguyên xâu</a> cho văn bản nút:</p>
+
+<pre>
+&lt;Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="<strong>@string/submit</strong>" /&gt;
+</pre>
+
+
+<h3>Cú pháp</h3>
+
+<p>Sau đây là cú pháp để tham chiếu một tài nguyên trong một tài nguyên XML:</p>
+
+<pre class="classic no-pretty-print">
+&#64;[<em>&lt;package_name&gt;</em>:]<em>&lt;resource_type&gt;</em>/<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li>{@code &lt;package_name&gt;} là tên của gói mà tài nguyên nằm trong đó (không
+bắt buộc khi tham chiếu các tài nguyên từ cùng gói đó)</li>
+  <li>{@code &lt;resource_type&gt;} là lớp con
+{@code R} cho loại tài nguyên.</li>
+  <li>{@code &lt;resource_name&gt;} hoặc là tên tệp tài nguyên
+không có phần mở rộng hoặc là giá trị thuộc tính {@code android:name} trong phần tử XML (đối với các giá trị
+đơn giản).</li>
+</ul>
+
+<p>Xem phần <a href="available-resources.html">Loại Tài nguyên</a> để
+biết thêm thông tin về mỗi loại tài nguyên và cách tham chiếu chúng.</p>
+
+
+<h3>Trường hợp sử dụng</h3>
+
+<p>Trong một số trường hợp bạn phải sử dụng một tài nguyên cho một giá trị trong XML (ví dụ, để áp dụng một hình ảnh có thể vẽ
+cho một widget), nhưng bạn cũng có thể sử dụng một tài nguyên trong XML ở bất kỳ nơi nào chấp nhận một giá trị đơn giản. Ví
+dụ, nếu bạn có tệp tài nguyên sau bao gồm một <a href="more-resources.html#Color">tài nguyên màu</a> và một <a href="string-resource.html">tài nguyên xâu</a>:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+   &lt;color name="opaque_red">#f00&lt;/color>
+   &lt;string name="hello">Hello!&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>Bạn có thể sử dụng những tài nguyên này trong tệp bố trí sau để đặt màu văn bản và
+xâu văn bản:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;color/opaque_red</strong>&quot;
+    android:text=&quot;<strong>&#64;string/hello</strong>&quot; /&gt;
+</pre>
+
+<p>Trong trường hợp này, bạn không cần quy định tên gói trong tham chiếu tài nguyên đó vì tài nguyên
+xuất phát từ gói của chính bạn. Để
+tham chiếu một tài nguyên hệ thống, bạn sẽ cần đưa vào tên gói. Ví dụ:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;android:color/secondary_text_dark</strong>&quot;
+    android:text=&quot;&#64;string/hello&quot; /&gt;
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Bạn nên sử dụng các tài nguyên xâu 
+vào mọi lúc, để ứng dụng của bạn có thể được bản địa hóa cho các ngôn ngữ khác. 
+Để biết thông tin về việc tạo các tài nguyên
+thay thế (chẳng hạn như xâu được bản địa hóa), hãy xem phần <a href="providing-resources.html#AlternativeResources">Cung cấp Tài nguyên
+Thay thế</a>. Để được hướng dẫn đầy đủ về việc bản địa hóa ứng dụng của bạn cho các ngôn ngữ khác,
+hãy xem phần <a href="localization.html">Bản địa hóa</a>.</p>
+
+<p>Bạn thậm chí có thể sử dụng tài nguyên trong XML để tạo các bí danh. Ví dụ, bạn có thể tạo một tài nguyên có thể vẽ
+là một bí danh cho một tài nguyên có thể vẽ khác:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/other_drawable" />
+</pre>
+
+<p>Nghe có vẻ thừa, nhưng có thể rất hữu ích khi sử dụng tài nguyên thay thế. Đọc thêm về
+<a href="providing-resources.html#AliasResources">Tạo tài nguyên bí danh</a>.</p>
+
+
+
+<h3 id="ReferencesToThemeAttributes">Tham chiếu các thuộc tính kiểu</h3>
+
+<p>Một tài nguyên thuộc tính kiểu sẽ cho phép bạn tham chiếu giá trị
+của một thuộc tính trong chủ đề đang áp dụng. Tham chiếu một thuộc tính kiểu sẽ cho phép bạn
+tùy chỉnh diện mạo của các phần tử UI bằng cách tạo kiểu cho chúng để phù hợp với các biến đổi tiêu chuẩn được cung cấp bởi
+chủ đề hiện tại, thay vì cung cấp một giá trị được mã hóa cố định. Tham chiếu một thuộc tính kiểu
+về cơ bản mà nói, là "sử dụng kiểu được định nghĩa bởi thuộc tính này, trong chủ đề hiện tại."</p>
+
+<p>Để tham chiếu một thuộc tính kiểu, cú pháp tên gần như tương tự với định dạng tài nguyên thường
+, nhưng thay vì biểu tượng @ ({@code @}), hãy sử dụng một dấu hỏi ({@code ?}), và
+phần loại tài nguyên là tùy chọn. Ví dụ:</p>
+
+<pre class="classic">
+?[<em>&lt;package_name&gt;</em>:][<em>&lt;resource_type&gt;</em>/]<em>&lt;resource_name&gt;</em>
+</pre>
+
+<p>Ví dụ, sau đây là cách bạn có thể tham chiếu một thuộc tính để đặt màu văn bản cho phù hợp với màu văn bản
+"chính" của chủ đề hệ thống:</p>
+
+<pre>
+&lt;EditText id=&quot;text&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:textColor=&quot;<strong>?android:textColorSecondary</strong>&quot;
+    android:text=&quot;&#64;string/hello_world&quot; /&gt;
+</pre>
+
+<p>Ở đây, thuộc tính {@code android:textColor} quy định tên của một thuộc tính kiểu
+trong chủ đề hiện tại. Hiện nay, Android sử dụng giá trị được áp dụng cho thuộc tính kiểu {@code android:textColorSecondary}
+làm giá trị cho {@code android:textColor} trong widget này. Vì công cụ tài nguyên
+hệ thống biết rằng một tài nguyên thuộc tính sẽ được yêu cầu trong ngữ cảnh này,
+bạn không cần nêu rõ loại (mà sẽ là
+<code>?android:attr/textColorSecondary</code>)&mdash;bạn có thể không nêu loại {@code attr}.</p>
+
+
+
+
+<h2 id="PlatformResources">Truy cập Tài nguyên Nền tảng</h2>
+
+<p>Android bao gồm nhiều tài nguyên tiêu chuẩn, chẳng hạn như kiểu, chủ đề và bố trí. Để
+truy cập các tài nguyên này, hãy xác định tham chiếu tài nguyên của bạn bằng tên gói
+<code>android</code>. Ví dụ, Android cung cấp một tài nguyên bố trí bạn có thể sử dụng cho
+các mục danh sách trong một {@link android.widget.ListAdapter}:</p>
+
+<pre>
+{@link android.app.ListActivity#setListAdapter(ListAdapter)
+setListAdapter}(new {@link
+android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple_list_item_1</strong>, myarray));
+</pre>
+
+<p>Trong ví dụ này, {@link android.R.layout#simple_list_item_1} là một tài nguyên bố trí được định nghĩa bởi
+nền tảng cho các mục trong một {@link android.widget.ListView}. Bạn có thể sử dụng điều này thay vì tạo
+bố trí riêng của mình cho các mục danh sách. Để biết thêm thông tin, hãy xem phần
+<a href="{@docRoot}guide/topics/ui/layout/listview.html">Dạng xem Danh sách</a> trong hướng dẫn cho nhà phát triển.</p>
+

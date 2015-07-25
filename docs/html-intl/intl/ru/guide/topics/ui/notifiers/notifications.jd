@@ -1,0 +1,979 @@
+page.title=Уведомления
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Содержание документа</h2>
+<ol>
+  <li><a href="#Design">Рекомендации по разработке</a></li>
+  <li><a href="#CreateNotification">Создание уведомления</a>
+    <ol>
+      <li><a href="#Required">Обязательное содержимое уведомления</a></li>
+      <li><a href="#Optional">Необязательные содержимое и настройки уведомления</a></li>
+      <li><a href="#Actions">Действия уведомлений</a></li>
+      <li><a href="#Priority">Приоритет уведомлений</a></li>
+      <li><a href="#SimpleNotification">Создание простого уведомления</a></li>
+      <li><a href="#ApplyStyle">Применение расширенного макета к уведомлению</a></li>
+      <li><a href="#Compatibility">Вопросы совместимости</a></li>
+    </ol>
+  </li>
+  <li><a href="#Managing">Управление уведомлениями</a>
+    <ol>
+      <li><a href="#Updating">Обновление уведомлений</a></li>
+      <li><a href="#Removing">Удаление уведомлений</a></li>
+    </ol>
+  </li>
+  <li><a href="#NotificationResponse">Сохранение навигации при запуске операции</a>
+    <ol>
+      <li><a href="#DirectEntry">Настройка PendingIntent обычной операции</a></li>
+      <li><a href="#ExtendedNotification">Настройка PendingIntent особой операции</a></li>
+    </ol>
+  </li>
+  <li><a href="#Progress">Отображение хода выполнения в уведомлении</a>
+    <ol>
+      <li><a href="#FixedProgress">Отображение индикатора хода выполнения фиксированной продолжительности</a></li>
+      <li><a href="#ActivityIndicator">Отображение непрерывного индикатора операции</a></li>
+    </ol>
+  </li>
+  <li><a href="#metadata">Метаданные уведомления</a></li>
+  <li><a href="#Heads-up">Уведомления heads-up</a></li>
+  <li><a href="#lockscreenNotification">Уведомления на экране блокировки</a></li>
+    <ol>
+      <li><a href="#visibility">Настройка видимости</a></li>
+      <li><a href="#controllingMedia">Управление воспроизведением мультимедиа на экране блокировки</a></li>
+    </ol>
+  <li><a href="#CustomNotification">Нестандартные макеты уведомлений</a></li>
+</ol>
+
+    <h2>Основные классы</h2>
+    <ol>
+        <li>{@link android.app.NotificationManager}</li>
+        <li>{@link android.support.v4.app.NotificationCompat}</li>
+    </ol>
+    <h2>Видеоролики</h2>
+    <ol>
+        <li>
+            <a href="http://www.youtube.com/watch?v=Yc8YrVc47TI&amp;feature=player_detailpage#t=1672s">
+            Уведомления в 4.1</a>
+        </li>
+    </ol>
+<h2>См. также</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Дизайн Android: уведомления</a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    Уведомление ― это сообщение, которое может быть выведено на экран за пределами обычного пользовательского
+    интерфейса приложения. Когда вы сообщаете системе о необходимости выдать уведомление, оно сначала отображается в виде значка в
+    <strong>области уведомлений</strong>. Чтобы просмотреть подробные сведения об уведомлении, пользователь открывает
+    <strong>панель уведомлений</strong>. И областью уведомлений, и панелью уведомлений
+    управляет система, а пользователь может их просматривать в любое время.
+</p>
+<img id="figure1" src="{@docRoot}images/ui/notifications/notification_area.png" height="" alt="" />
+<p class="img-caption">
+    <strong>Рисунок 1.</strong> Уведомления в области уведомлений.
+</p>
+<img id="figure2" src="{@docRoot}images/ui/notifications/notification_drawer.png" width="280px" alt="" />
+<p class="img-caption">
+    <strong>Рисунок 2.</strong> Уведомления в панели уведомлений.
+</p>
+
+<p class="note"><strong>Примечание.</strong> Если не указано иное, в этом руководстве речь идет о классе
+{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}
+в версии 4 <a href="{@docRoot}tools/support-library/index.html">вспомогательной библиотеки</a>.
+Класс{@link android.app.Notification.Builder Notification.Builder} был добавлен в Android
+3.0 (уровень API 11).</p>
+
+<h2 id="Design">Рекомендации по разработке</h2>
+
+<p>Поскольку уведомления являются как важной составной частью пользовательского интерфейса Android, для них имеются собственные инструкции по проектированию.
+Появившиеся в Android 5.0 (уровень API 21) значительные изменения дизайна имеют особо важное
+значение, поэтому для получения более подробной информации вам следует ознакомиться с учебником по интерфейсу <a href="{@docRoot}training/material/index.html">Material Design</a>
+. Чтобы узнать, как проектировать уведомления и взаимодействие с ними, прочитайте руководство по проектированию 
+<a href="{@docRoot}design/patterns/notifications.html">Уведомления</a>.</p>
+
+<h2 id="CreateNotification">Создание уведомления</h2>
+
+<p>Информация о пользовательском интерфейсе и действия для уведомления указываются в объекте
+{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}.
+Чтобы создать само уведомление, вызывается метод
+{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()},
+который возвращает объект {@link android.app.Notification}, содержащий заданные вами спецификации. Чтобы выдать
+уведомление, объект {@link android.app.Notification} передается в систему путем вызова метода
+{@link android.app.NotificationManager#notify NotificationManager.notify()}.</p>
+
+<h3 id="Required">Обязательное содержимое уведомления</h3>
+<p>
+    Объект {@link android.app.Notification} <em>должен</em> содержать следующие элементы:
+</p>
+<ul>
+    <li>
+        небольшой значок, заданный с помощью
+        {@link android.support.v4.app.NotificationCompat.Builder#setSmallIcon setSmallIcon()};
+    </li>
+    <li>
+        заголовок, заданный с помощью
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()};
+    </li>
+    <li>
+        подробный текст, заданный с помощью
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentText setContentText()}.
+    </li>
+</ul>
+<h3 id="Optional">Необязательные содержимое и настройки уведомления</h3>
+<p>
+    Все прочие настройки и содержимое уведомления являются необязательными. Подробные сведения о них
+    см. в справочной документации по {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Actions">Действия уведомлений</h3>
+<p>
+    Несмотря на то что действия не являются обязательными, в уведомление необходимо добавить хотя бы одно из них.
+    Действие позволяет пользователю перейти из уведомления прямо к
+    операции {@link android.app.Activity} из вашего приложения, где они могут просмотреть одно или несколько событий
+    либо выполнить какую-либо другую работу.
+</p>
+<p>
+    Уведомление может предоставлять возможность выполгить несколько действий. Следует всегда определять действие, которое
+    вызывается, когда пользователь нажимает уведомление; обычно это действие открывает
+    операцию {@link android.app.Activity} из вашего приложения. В уведомление также можно добавлять кнопки,
+    которые выполняют дополнительные действия, например отключение сигнала будильника или немедленный ответ на текстовое
+    сообщение; эта функция поддерживается начиная с версии Android 4.1. Если используются дополнительные кнопки действий, то также
+    необходимо сделать их функции доступными в операции {@link android.app.Activity} из вашего приложения (подробные
+    сведения см. в разделе <a href="#Compatibility">Вопросы совместимости</a>).
+</p>
+<p>
+    Внутри класса {@link android.app.Notification} само действие определяется
+    объектом {@link android.app.PendingIntent}, содержащим объект
+    {@link android.content.Intent}, который запускает
+    операцию {@link android.app.Activity} из вашего приложения. Чтобы связать объект
+    {@link android.app.PendingIntent} с жестом, вызовите соответствующий метод
+    {@link android.support.v4.app.NotificationCompat.Builder}. Например, если вам требуется запустить
+    операцию {@link android.app.Activity}, когда пользователь нажимает текст уведомления в
+    панели уведомлений, вы добавляете объект {@link android.app.PendingIntent} путем вызова метода
+    {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()}.
+</p>
+<p>
+    Запуск операции {@link android.app.Activity}, когда пользователь нажимает уведомление, является
+    наиболее распространенным вариантом действия. Операцию {@link android.app.Activity} также можно запускать, когда пользователь
+    закрывает уведомление. В версии Android 4.1 или более поздних версиях запускать
+    операцию {@link android.app.Activity} можно с помощью кнопки действия. Подробные сведения см. в справочном руководстве по классу
+    {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Priority">Приоритет уведомлений</h3>
+<p>
+    При желании уведомлению можно задать приоритет. Приоритет действует
+    как подсказка пользовательскому интерфейсу устройства о том, каким образом следует выводить уведомление.
+    Чтобы задать приоритет уведомления, вызовите метод {@link
+    android.support.v4.app.NotificationCompat.Builder#setPriority(int)
+    NotificationCompat.Builder.setPriority()} и передайте ему одну из констант приоритетов {@link
+    android.support.v4.app.NotificationCompat}. Имеется
+    пять уровней приоритета, начиная от {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MIN} (-2) и до {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2). Если приоритет не задан,
+    то по умолчанию он будет иметь значение {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} (0).
+</p>
+<p> Сведения о присвоении подходящего уровня приоритета см. в разделе "Правильная настройка
+    приоритета уведомления и управление им" в руководстве "Разработка <a href="{@docRoot}design/patterns/notifications.html">уведомлений</a>"
+.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="SimpleNotification">Создание простого уведомления</h3>
+<p>
+    Следующий фрагмент кода иллюстрирует простое уведомление, указывающее операцию, которую нужно будет открыть, когда
+    пользователь нажмет уведомление. Обратите внимание, что этот код создает объект
+    {@link android.support.v4.app.TaskStackBuilder} и использует его для создания объекта
+    {@link android.app.PendingIntent} для действия. Более подробно этот шаблон описан
+    в разделе <a href="#NotificationResponse">
+    "Сохранение навигации при запуске операции"</a>:
+</p>
+<pre>
+NotificationCompat.Builder mBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.notification_icon)
+        .setContentTitle("My notification")
+        .setContentText("Hello World!");
+// Creates an explicit intent for an Activity in your app
+Intent resultIntent = new Intent(this, ResultActivity.class);
+
+// The stack builder object will contain an artificial back stack for the
+// started Activity.
+// This ensures that navigating backward from the Activity leads out of
+// your application to the Home screen.
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack for the Intent (but not the Intent itself)
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(
+            0,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        );
+mBuilder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+mNotificationManager.notify(mId, mBuilder.build());
+</pre>
+<p>Готово. Теперь пользователь получит уведомление.</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ApplyStyle">Применение расширенного макета к уведомлению</h3>
+<p>
+    Чтобы уведомление отображалось в расширенном виде, сначала создайте объект
+    {@link android.support.v4.app.NotificationCompat.Builder} с требуемыми параметрами
+    обычного представления. Затем вызовите метод {@link android.support.v4.app.NotificationCompat.Builder#setStyle
+    Builder.setStyle()}, первым аргументом которого должен быть объект расширенного макета.
+</p>
+<p>
+    Помните, что расширенные уведомления не поддерживаются на платформах версии более ранней, чем Android 4.1. Сведения
+    о том, как обрабатывать уведомления для версий платформы Android 4.1 и более ранних, см. в
+    разделе <a href="#Compatibility">Вопросы совместимости</a>.
+</p>
+<p>
+    Например, следующий фрагмент кода демонстрирует, каким образом следует изменить уведомление, созданное
+    в предыдущем фрагменте, чтобы использовать расширенный макет:
+</p>
+<pre>
+NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+    .setSmallIcon(R.drawable.notification_icon)
+    .setContentTitle("Event tracker")
+    .setContentText("Events received")
+NotificationCompat.InboxStyle inboxStyle =
+        new NotificationCompat.InboxStyle();
+String[] events = new String[6];
+// Sets a title for the Inbox in expanded layout
+inboxStyle.setBigContentTitle("Event tracker details:");
+...
+// Moves events into the expanded layout
+for (int i=0; i &lt; events.length; i++) {
+
+    inboxStyle.addLine(events[i]);
+}
+// Moves the expanded layout object into the notification object.
+mBuilder.setStyle(inBoxStyle);
+...
+// Issue the notification here.
+</pre>
+
+<h3 id="Compatibility">Вопросы совместимости</h3>
+
+<p>
+    Не все функции уведомлений поддерживаются в той или иной версии платформы, даже несмотря на то, что
+    методы для их задания имеются в классе вспомогательной библиотеки
+    {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}.
+    Например, кнопки действий, которые зависят от расширенных уведомлений, отображаются только в версии Android
+    4.1 и последующих версиях, поскольку сами расширенные уведомления поддерживаются только начиная с версии
+    Android 4.1.
+</p>
+<p>
+    Для обеспечения наилучшей совместимости создавать уведомления следует с помощью класса
+    {@link android.support.v4.app.NotificationCompat NotificationCompat} и его подклассов,
+    в частности {@link android.support.v4.app.NotificationCompat.Builder
+    NotificationCompat.Builder}. Кроме того, при реализации уведомления придерживайтесь вот такого процесса:
+</p>
+<ol>
+    <li>
+        Предоставляйте все функции уведомления всем пользователям независимо от используемой ими
+        версии. Для этого убедитесь, что все функции вызываются из
+        операции {@link android.app.Activity} в вашем приложении. Возможно, для этого вам потребуется добавить новый объект
+        {@link android.app.Activity}.
+        <p>
+            Например, если требуется использовать
+            {@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()} для
+            создания элемента управления, который останавливает и запускает воспроизведение мультимедиа, сначала реализуйте этот
+            элемент управления в операции {@link android.app.Activity} из вашего приложения.
+        </p>
+    </li>
+    <li>
+        Обеспечьте доступ к этой функции операции {@link android.app.Activity} всех пользователей,
+        сделав так, чтобы эта операция запускалась, когда пользователь нажимает уведомление. Для этого
+        создайте объект {@link android.app.PendingIntent}
+        для операции {@link android.app.Activity}. Вызовите 
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+        setContentIntent()}, чтобы добавить объект {@link android.app.PendingIntent} в уведомление.
+    </li>
+    <li>
+        Затем добавьте в свое уведомление требуемые функции расширенного уведомления. Помните,
+        что любая добавляемая функция должна быть предусмотрена в операции {@link android.app.Activity},
+        которая запускается, когда пользователь нажимает уведомление.
+    </li>
+</ol>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Managing">Управление уведомлениями</h2>
+<p>
+    Когда уведомление требуется выдать несколько раз для однотипных событий, не следует
+    создавать совершенно новое уведомление. Вместо этого рассмотрите возможность обновить
+    предыдущее уведомление либо путем изменения некоторых его значений, либо путем добавления в него значений, либо обоими этими способами.
+</p>
+<p>
+    Например, Gmail уведомляет пользователя о поступлении новых сообщений электронной почты путем увеличения счетчика
+    непрочитанных сообщений и добавления в уведомления кратких сведений о каждом из них. Это называется
+    "укладкой уведомлений в стопку" (stacking) и подробно описано в  руководстве
+    "Разработка <a href="{@docRoot}design/patterns/notifications.html">уведомлений</a>".
+</p>
+<p class="note">
+    <strong>Примечание.</strong> Для этой функции Gmail требуется расширенный макет папки входящих сообщений, который
+    входит в состав функции расширенных уведомлений, поддержка которой предусмотрена начиная с версии Android 4.1.
+</p>
+<p>
+    В разделах ниже описано, как обновлять уведомления, а также как удалять их.
+</p>
+<h3 id="Updating">Обновление уведомлений</h3>
+<p>
+    Чтобы настроить уведомление таким образом, что его впоследствии можно было обновлять, его следует выдавать с идентификатором уведомления путем
+    вызова метода {@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()}.
+    Чтобы изменить это уведомление, после того как оно выдано,
+    обновите или создайте объект {@link android.support.v4.app.NotificationCompat.Builder},
+    постройте на его основе объект {@link android.app.Notification} и выдайте 
+    объект {@link android.app.Notification} с тем же идентификатором, который использовался ранее. Если
+    предыдущее уведомление все еще отображается на экране, система обновит его с использованием содержимого
+    объекта{@link android.app.Notification}. Если предыдущее уведомление было закрыто, то
+    вместо него будет создано новое уведомление.
+</p>
+<p>
+    Следующий фрагмент кода демонстрирует уведомление, которое обновляется с учетом
+    количества произошедших событий. Он накладывает уведомления друг на друга (укладывает в стопку), отображая сводную информацию:
+</p>
+<pre>
+mNotificationManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Sets an ID for the notification, so it can be updated
+int notifyID = 1;
+mNotifyBuilder = new NotificationCompat.Builder(this)
+    .setContentTitle("New Message")
+    .setContentText("You've received new messages.")
+    .setSmallIcon(R.drawable.ic_notify_status)
+numMessages = 0;
+// Start of a loop that processes data and then notifies the user
+...
+    mNotifyBuilder.setContentText(currentText)
+        .setNumber(++numMessages);
+    // Because the ID remains unchanged, the existing notification is
+    // updated.
+    mNotificationManager.notify(
+            notifyID,
+            mNotifyBuilder.build());
+...
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Removing">Удаление уведомлений</h3>
+<p>
+    Уведомления отображаются на экране, пока не произойдет одно из следующих событий:
+</p>
+<ul>
+    <li>
+        пользователь закроет уведомления по одному или командой "Очистить все" (если
+        уведомление можно очистить);
+    </li>
+    <li>
+        пользователь нажмет уведомление, а вы вызвали метод
+        {@link android.support.v4.app.NotificationCompat.Builder#setAutoCancel setAutoCancel()}, когда
+        создавали уведомление;
+    </li>
+    <li>
+        вы вызовете метод {@link android.app.NotificationManager#cancel(int) cancel()} для уведомления с определенным
+        идентификатором. Кроме того, этот метод удаляет текущие уведомления;
+    </li>
+    <li>
+        вы вызовете метод {@link android.app.NotificationManager#cancelAll() cancelAll()}, который удаляет
+        все ранее выданные вами уведомления.
+    </li>
+</ul>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="NotificationResponse">Сохранение навигации при запуске операции</h2>
+<p>
+    Когда вы запускаете операцию {@link android.app.Activity} из уведомления, вам необходимо сохранить
+    привычные пользователю приемы навигации. При нажатии <i>"Назад"</i> пользователь должен возвращаться назад в
+    обычном потоке операций приложения вплоть до главного экрана, а при нажатии <i>"Последние"</i> операция
+    {@link android.app.Activity} должна быть отображена как отдельная задача. Чтобы сохранить приемы навигации, операцию
+    {@link android.app.Activity} следует запускать в новой задаче. Как настроить объект
+    {@link android.app.PendingIntent} таким образом, чтобы получить новую задачу, зависит от типа операции
+    {@link android.app.Activity}, которую вы запускаете. В целом есть две ситуации:
+</p>
+<dl>
+    <dt>
+        Обычная операция
+    </dt>
+    <dd>
+        Вы запускаете операцию {@link android.app.Activity}, которая является частью обычного потока
+        работы приложения. В этом случае настройте объект {@link android.app.PendingIntent} на
+        запуск новой задачи и предоставьте объекту {@link android.app.PendingIntent} стек переходов назад,
+        который воспроизводит обычную работу приложения в ситуации, когда пользователь нажимает <i>"Назад"</i> .
+        <p>
+            Это можно увидеть на примере уведомлений приложения Gmail. При нажатии уведомления для
+            одного сообщения электронной почты отображается само сообщение. При нажатии <b>Назад</b> вы переходите
+            назад по представлениям Gmail вплоть до главного экрана точно так же, как если бы вы вошли в Gmail с
+            главного экрана, а не из уведомления.
+        </p>
+        <p>
+            Происходит это независимо от того, в каком приложении вы находились в тот момент, когда нажали
+            уведомление. Например, если при составлении сообщения в Gmail вы нажмете
+            уведомление об одном сообщении электронной почты, вы сразу же перейдете в это сообщение. При нажатии <i>"Назад"</i>
+            вы перейдете в папку входящих сообщений, а затем на главный экран, а не в
+            сообщение, которое составляли.
+        </p>
+    </dd>
+    <dt>
+        Особая операция
+    </dt>
+    <dd>
+        Пользователь может увидеть эту операцию {@link android.app.Activity}, только если она запущена из уведомления.
+        В некотором смысле операция {@link android.app.Activity} расширяет уведомление путем предоставления
+        информации, которую было бы сложно отобразить в самом уведомлении. В этом случае
+        настройте объект {@link android.app.PendingIntent} на запуск в новой задаче. При этом создавать
+        стек переходов назад не требуется, поскольку запущенная операция {@link android.app.Activity} не является частью
+        потока операций приложения. При нажатии <i>"Назад"</i> пользователь все же перейдет на
+        главный экран.
+    </dd>
+</dl>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="DirectEntry">Настройка PendingIntent обычной операции</h3>
+<p>
+    Чтобы настроить объект {@link android.app.PendingIntent}, который непосредственно запускает операцию
+    {@link android.app.Activity}, выполните следующие шаги:
+</p>
+<ol>
+    <li>
+        Определите иерархию операций {@link android.app.Activity} своего приложения в файле манифеста.
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Добавьте поддержку для версии Android 4.0.3 и более ранних версий. Для этого укажите родительский объект операции
+                {@link android.app.Activity}, которую запускаете, добавив элемент
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+                в качестве дочернего для элемента 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>.
+                <p>
+                    Для этого элемента задайте
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code>.
+                    Задайте
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>,
+                    где <code>&lt;parent_activity_name&gt;</code> ― это значение 
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code>
+                    для родительского элемента
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+. В качестве примера см. следующий код XML.
+                </p>
+            </li>
+            <li>
+                Также добавьте поддержку для версии Android 4.1 и более поздних версий. Для этого добавьте атрибут 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code>
+                в элемент
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+                запускаемой операции{@link android.app.Activity}.
+            </li>
+        </ol>
+        <p>
+            Итоговый код XML должен выглядеть следующим образом:
+        </p>
+<pre>
+&lt;activity
+    android:name=".MainActivity"
+    android:label="&#64;string/app_name" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+&lt;activity
+    android:name=".ResultActivity"
+    android:parentActivityName=".MainActivity"&gt;
+    &lt;meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".MainActivity"/&gt;
+&lt;/activity&gt;
+</pre>
+    </li>
+    <li>
+        Создайте стек переходов назад, основанный на объекте {@link android.content.Intent}, который запускает операцию
+        {@link android.app.Activity}:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Создайте объект {@link android.content.Intent}, который запускает операцию {@link android.app.Activity}.
+            </li>
+            <li>
+                Создайте построитель стека, вызвав метод {@link android.app.TaskStackBuilder#create
+                TaskStackBuilder.create()}.
+            </li>
+            <li>
+                Добавьте стек переходов назад в построитель стеков путем вызова метода
+                {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}.
+                Для каждой операции {@link android.app.Activity} из иерархии, определенной в
+                файле манифеста, в стеке переходов назад имеется объект {@link android.content.Intent}, который
+                запускает {@link android.app.Activity}. Этот метод также добавляет флаги, которые запускают
+                стек в новой задаче.
+                <p class="note">
+                    <strong>Примечание.</strong> Несмотря на то что аргумент 
+                    {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}
+                    является ссылкой на запускаемую операцию {@link android.app.Activity}, при вызове этого метода
+                    не добавляется объект {@link android.content.Intent}, который запускает операцию
+                    {@link android.app.Activity}. Это делается на следующем шаге.
+                </p>
+            </li>
+            <li>
+                Добавьте объект {@link android.content.Intent}, который запускает операцию {@link android.app.Activity}
+                из уведомления, путем вызова метода
+                {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()}.
+                Передайте объект {@link android.content.Intent}, созданный вами на первом шаге, в качестве
+                аргумента методу
+                {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()}.
+            </li>
+            <li>
+                При необходимости добавьте аргументы в объекты {@link android.content.Intent} из
+                стека путем вызова метода {@link android.support.v4.app.TaskStackBuilder#editIntentAt
+                TaskStackBuilder.editIntentAt()}. Иногда это требуется для того, чтобы
+                целевая операция {@link android.app.Activity} отображала значимые данные, когда пользователь переходит
+                в нее с помощью действия <i>"Назад"</i>.
+            </li>
+            <li>
+                Получите объект {@link android.app.PendingIntent} для этого стека переходов назад путем вызова метода 
+                {@link android.support.v4.app.TaskStackBuilder#getPendingIntent getPendingIntent()}.
+                Затем этот объект {@link android.app.PendingIntent} можно будет использовать в качестве аргумента для метода
+                {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+     </li>
+</ol>
+<p>
+    Следующий фрагмент кода демонстрирует этот процесс:
+</p>
+<pre>
+...
+Intent resultIntent = new Intent(this, ResultActivity.class);
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+// Gets a PendingIntent containing the entire back stack
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+...
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+builder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mNotificationManager.notify(id, builder.build());
+</pre>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ExtendedNotification">Настройка PendingIntent особой операции</h3>
+<p>
+    В приведенном далее разделе описывается настройка объекта
+    {@link android.app.PendingIntent} для особой операции.
+</p>
+<p>
+    Особой операции {@link android.app.Activity} не требуется стек перехода назад, поэтому не нужно
+    определять иерархию объектов {@link android.app.Activity} в файле манифеста и
+    вызывать
+    метод {@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()} для построения 
+    стека перехода назад. Вместо этого в файле манифеста задайте параметры задачи {@link android.app.Activity}
+    и создайте объект {@link android.app.PendingIntent} путем вызова метода
+    {@link android.app.PendingIntent#getActivity getActivity()}:
+</p>
+<ol>
+    <li>
+        Добавьте следующие атрибуты в элемент
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+        в файле манифеста для операции {@link android.app.Activity}
+        <dl>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
+            </dt>
+            <dd>
+                Полное имя класса операции.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">android:taskAffinity</a>=""</code>
+            </dt>
+            <dd>
+                В сочетании с 
+                флагом {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK},
+                который вы задали в коде, это гарантирует, что данная операция {@link android.app.Activity} не
+                перейдет в задачу приложения, используемую по умолчанию. Любые существующие задачи, имеющие
+                отношение к используемой по умолчанию задаче приложения, затронуты не будут.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">android:excludeFromRecents</a>="true"</code>
+            </dt>
+            <dd>
+                Исключает новую задачу из списка <i>"Последние",</i>с тем чтобы пользователь не мог случайно
+                вернуться в нее.
+            </dd>
+        </dl>
+        <p>
+            Данный элемент показан в этом фрагменте кода:
+        </p>
+<pre>
+&lt;activity
+    android:name=".ResultActivity"
+...
+    android:launchMode="singleTask"
+    android:taskAffinity=""
+    android:excludeFromRecents="true"&gt;
+&lt;/activity&gt;
+...
+</pre>
+    </li>
+    <li>
+        Построение и выдача уведомления:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Создайте объект {@link android.content.Intent}, который запускает операцию 
+                {@link android.app.Activity}.
+            </li>
+            <li>
+                Настройте операцию {@link android.app.Activity}, запускаемую в новой пустой задаче, путем вызова метода 
+                {@link android.content.Intent#setFlags setFlags()} с флагами
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
+                и
+                {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_CLEAR_TASK}.
+            </li>
+            <li>
+                Задайте для объекта {@link android.content.Intent} любые другие требуемые параметры.
+            </li>
+            <li>
+                Создайте объект {@link android.app.PendingIntent} из объекта {@link android.content.Intent}
+                путем вызова метода  {@link android.app.PendingIntent#getActivity getActivity()}.
+                Затем этот объект {@link android.app.PendingIntent} можно будет использовать в качестве аргумента для метода
+                {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+    <p>
+        Следующий фрагмент кода демонстрирует этот процесс:
+    </p>
+<pre>
+// Instantiate a Builder object.
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+// Creates an Intent for the Activity
+Intent notifyIntent =
+        new Intent(this, ResultActivity.class);
+// Sets the Activity to start in a new, empty task
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// Creates the PendingIntent
+PendingIntent notifyPendingIntent =
+        PendingIntent.getActivity(
+        this,
+        0,
+        notifyIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// Puts the PendingIntent into the notification builder
+builder.setContentIntent(notifyPendingIntent);
+// Notifications are issued by sending them to the
+// NotificationManager system service.
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Builds an anonymous Notification object from the builder, and
+// passes it to the NotificationManager
+mNotificationManager.notify(id, builder.build());
+</pre>
+    </li>
+</ol>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Progress">Отображение хода выполнения в уведомлении</h2>
+<p>
+    Уведомления могут содержать индикатор хода выполнения с эффектом анимации, который показывает пользователям состояние
+    текущей операции. Если имеется возможность оценить, сколько времени занимает операция и какой процент ее объема
+    уже завершен, используйте "определенную" форму индикатора
+    (индикатор хода выполнения). Если продолжительность операции оценить невозможно, используйте
+    "неопределенную" форму индикатора (индикатор операции).
+</p>
+<p>
+    Индикаторы хода выполнения отображаются с помощью реализации класса
+    {@link android.widget.ProgressBar} платформы.
+</p>
+<p>
+    Для использования индикатора хода выполнения на платформах начиная с Android 4.0 вызовите метод
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}. Для
+    предыдущих версий необходимо будет создать собственный нестандартный макет уведомлений, который
+    содержит представление {@link android.widget.ProgressBar}.
+</p>
+<p>
+    В приведенных далее разделах описывается отображение хода выполнения в уведомлении с помощью
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="FixedProgress">Отображение индикатора хода выполнения фиксированной продолжительности</h3>
+<p>
+    Чтобы вывести на экран определенный индикатор хода выполнения, добавьте его в свое уведомление, вызвав метод
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(max, progress, false)}, а затем выдайте уведомление. По мере выполнения
+    увеличивайте значение <code>progress</code> и обновляйте уведомление. По окончании операции
+    <code>progress</code> должен быть равен <code>max</code>. Стандартный способ вызова метода 
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}
+    заключается в следующем: задать значение <code>max</code> равным 100 с последующим увеличением <code>progress</code> в виде
+    величины "процента выполнения" операции.
+</p>
+<p>
+    По окончании операции можно оставить этот индикатор хода выполнения на экране или удалить его. В
+    любом случае не забывайте обновить текст уведомления, чтобы указать, что операция выполнена.
+    Чтобы удалить индикатор выполнения, вызовите метод
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(0, 0, false)}. Например:
+</p>
+<pre>
+...
+mNotifyManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mBuilder = new NotificationCompat.Builder(this);
+mBuilder.setContentTitle("Picture Download")
+    .setContentText("Download in progress")
+    .setSmallIcon(R.drawable.ic_notification);
+// Start a lengthy operation in a background thread
+new Thread(
+    new Runnable() {
+        &#64;Override
+        public void run() {
+            int incr;
+            // Do the "lengthy" operation 20 times
+            for (incr = 0; incr &lt;= 100; incr+=5) {
+                    // Sets the progress indicator to a max value, the
+                    // current completion percentage, and "determinate"
+                    // state
+                    mBuilder.setProgress(100, incr, false);
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(0, mBuilder.build());
+                        // Sleeps the thread, simulating an operation
+                        // that takes time
+                        try {
+                            // Sleep for 5 seconds
+                            Thread.sleep(5*1000);
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "sleep failure");
+                        }
+            }
+            // When the loop is finished, updates the notification
+            mBuilder.setContentText("Download complete")
+            // Removes the progress bar
+                    .setProgress(0,0,false);
+            mNotifyManager.notify(ID, mBuilder.build());
+        }
+    }
+// Starts the thread by calling the run() method in its Runnable
+).start();
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ActivityIndicator">Отображение непрерывного индикатора операции</h3>
+<p>
+    Для отображения неопределенного индикатора операции добавьте его в свое уведомление с помощью метода
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, true)}
+    (два первых аргумента игнорируются) и выдайте уведомление. В результате будет показан индикатор,
+    который будет иметь такой же стиль, что и индикатор хода выполнения, за исключением того, что его анимация будет непрерывной.
+</p>
+<p>
+    Выдайте уведомление в начале операции. Анимация будет воспроизводиться до тех пор, пока вы не
+    измените уведомление. Когда операция будет выполнена, вызовите метод
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, false)},
+    после чего обновите уведомление, удалив индикатор операции.
+    Всегда поступайте таким образом. В противном случае анимация будет воспроизводиться и после завершения операции. Также
+    не забывайте изменить текст уведомления, чтобы указать, что операция выполнена.
+</p>
+<p>
+    Чтобы посмотреть, как работают индикаторы операций, перейдите к  предыдущему фрагменту кода. Найдите следующие строки:
+</p>
+<pre>
+// Sets the progress indicator to a max value, the current completion
+// percentage, and "determinate" state
+mBuilder.setProgress(100, incr, false);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+<p>
+    Замените их вот этими строками:
+</p>
+<pre>
+ // Sets an activity indicator for an operation of indeterminate length
+mBuilder.setProgress(0, 0, true);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+
+<h2 id="metadata">Метаданные уведомления</h2>
+
+<p>Уведомления можно сортировать в соответствии с метаданными, которые назначаются с помощью
+следующих методов {@link android.support.v4.app.NotificationCompat.Builder}:</p>
+
+<ul>
+    <li>метод {@link android.support.v4.app.NotificationCompat.Builder#setCategory(java.lang.String) setCategory()}
+    информирует систему о том, как обрабатывать уведомления вашего приложения, когда устройство находится в режиме приоритета
+    (например, если ваше уведомление сообщает о входящем вызове, мгновенном сообщении или сигнале будильника);</li>
+    <li>метод{@link android.support.v4.app.NotificationCompat.Builder#setPriority(int) setPriority()} вызывает
+    отображение уведомлений, в поле приоритета которых задано значение {@code PRIORITY_MAX} или {@code PRIORITY_HIGH}
+, в небольшом плавающем окне, если уведомление также сопровождается звуковым сигналом или вибрацией;</li>
+    <li>метод {@link android.support.v4.app.NotificationCompat.Builder#addPerson(java.lang.String) addPerson()}
+    позволяет добавить к уведомлению список людей. С его помощью ваше уведомление может сигнализировать
+    системе о том, что она должна сгруппировать уведомления от указанных людей или считать уведомления
+    от этих людей более важными.</li>
+</ul>
+
+<div class="figure" style="width:230px">
+  <img src="{@docRoot}images/ui/notifications/heads-up.png" alt="" width="" height="" id="figure3" />
+  <p class="img-caption">
+    <strong>Рисунок 3</strong>. Полноэкранная операция, отображающая уведомление heads-up
+  </p>
+</div>
+
+<h2 id="Heads-up">Уведомления heads-up</h2>
+
+<p>В Android 5.0 (уровень API 21) уведомления могут отображаться в небольшом плавающем окне
+(оно также называется <em>уведомлением heads-up</em>), когда устройство активно
+(то есть устройство разблокировано и его экран включен). Эти уведомления
+выглядят так же, как компактная форма вашего уведомления, за исключением того, что в
+уведомлениях heads-up также отображаются кнопки действий. Пользователи могут выполнять действия или закрывать
+уведомление heads-up, не покидая текущее приложение.</p>
+
+<p>Примеры ситуаций, в которых могут быть вызваны уведомления heads-up:</p>
+
+<ul>
+  <li>операция пользователя выполняется в полноэкранном режиме (приложение использует 
+{@link android.app.Notification#fullScreenIntent}) или;</li>
+  <li>уведомление имеет высокий приоритет и использует рингтоны или
+    вибрацию.</li>
+</ul>
+
+<h2 id="lockscreenNotification">Уведомления на экране блокировки</h2>
+
+<p>С выходом версии Android 5.0 (уровень API 21) уведомления теперь могут отображаться на экране
+блокировки. С помощью этой функции можно выводит на экран элементы управления мультимедиа и другие стандартные
+действия. В настройках пользователи могут выбрать, следует ли отображать уведомления на экране блокировки, а
+вы можете указать, будет ли уведомление из вашего приложения видно на нем.</p>
+
+<h3 id="visibility">Настройка видимости</h3>
+
+<p>Ваше приложение может определять объем информации, отображаемой в уведомлениях, которые выводятся на экране
+блокировки. Метод {@link android.support.v4.app.NotificationCompat.Builder#setVisibility(int) setVisibility()}
+вызывается для того, чтобы указать одно из следующих значений:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC} показывает полное содержимое
+    уведомления;</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_SECRET} не отображает какую-либо часть
+    этого уведомления на экране блокировки;</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} показывает базовую информацию,
+    такую как значок уведомления и заголовок его содержимого, но скрывает полное содержимое уведомления.</li>
+</ul>
+
+<p>Когда задается значение {@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE}, вы также можете
+предоставить альтернативную версию содержимого уведомления, в который скрыты некоторые сведения. Например,
+приложение по работе с СМС может выводить уведомление, в котором говорится <em>У вас 3 новых текстовых сообщения</em>, а содержимое
+ и отправители сообщений скрыты. Чтобы предоставить возможность такого альтернативного уведомления, сначала создайте его
+с помощью {@link android.support.v4.app.NotificationCompat.Builder}. При создании
+частного объекта уведомления прикрепите к нему альтернативное уведомление, воспользовавшись методом
+{@link android.support.v4.app.NotificationCompat.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}
+.</p>
+
+<h3 id="controllingMedia">Управление воспроизведением мультимедиа на экране блокировки</h3>
+
+<p>В версии Android 5.0 (API уровня 21) на экране блокировки больше не отображаются элементы управления воспроизведением мультимедиа,
+основанные на классе {@link android.media.RemoteControlClient}, использование которого прекращено. Вместо этого используйте
+шаблон {@link android.app.Notification.MediaStyle} с методом
+{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+, который преобразует действия в доступные для нажатия значки.</p>
+
+<p class="note"><strong>Примечание.</strong> Шаблон и метод {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+не входят в состав вспомогательной библиотеки, поэтому эти функции работают только в версии Android 5.0 и
+последующих версиях.</p>
+
+<p>Чтобы отобразить элементы управления мультимедиа на экране блокировки в Android 5.0, задайте для видимости
+значение {@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, выполнив описанную выше процедуру. Затем добавьте
+действия и задайте шаблон {@link android.app.Notification.MediaStyle}, как описано в
+следующем образце кода:</p>
+
+<pre>
+Notification notification = new Notification.Builder(context)
+    // Show controls on lock screen even when user hides sensitive content.
+    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setSmallIcon(R.drawable.ic_stat_player)
+    // Add media control buttons that invoke intents in your media service
+    .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
+    .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
+    .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
+    // Apply the media style template
+    .setStyle(new Notification.MediaStyle()
+    .setShowActionsInCompactView(1 /* #1: pause button */)
+    .setMediaSession(mMediaSession.getSessionToken())
+    .setContentTitle("Wonderful music")
+    .setContentText("My Awesome Band")
+    .setLargeIcon(albumArtBitmap)
+    .build();
+</pre>
+
+<p class="note"><strong>Примечание.</strong> Прекращение использования класса {@link android.media.RemoteControlClient}
+имеет и другие последствия для управления мультимедиа. Подробные сведения о новых API-интерфейсах для управления сеансами воспроизведения мультимедиа см. в разделе 
+<a href="{@docRoot}about/versions/android-5.0.html#MediaPlaybackControl">Управление воспроизведением мультимедиа</a>
+.</p>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="CustomNotification">Нестандартные макеты уведомлений</h2>
+<p>
+    Платформа уведомлений позволяет задавать нестандартные макеты уведомлений, которые
+    определяют внешний вид уведомлений в объекте {@link android.widget.RemoteViews}.
+    Уведомления с нестандартным макетом — такие же, как обычные уведомления, но в их основе лежит класс
+    {@link android.widget.RemoteViews}, определенный в файле XML макета.
+</p>
+<p>
+    Высота изображения, которую можно получить с использованием нестандартного макета уведомления, зависит от представления уведомления. Обычные
+    макеты представления ограничены по высоте 64 пикселами, а расширенные — 256 пикселами.
+</p>
+<p>
+    Чтобы определить нестандартный макет уведомления, начните с инициализации объекта
+    {@link android.widget.RemoteViews}, который загружает файл XML макета. Затем,
+    вместо вызова методов, например
+    {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()},
+    вызовите {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}. Чтобы задать
+    сведения о содержимом в нестандартном уведомлении, используйте методы из
+    {@link android.widget.RemoteViews}, чтобы определить значения для дочерних представлений:
+</p>
+<ol>
+    <li>
+        Создайте макет XML для уведомления в отдельном файле. Можно использовать любое имя файла
+        по своему усмотрению, однако расширение должно быть <code>.xml</code>
+    </li>
+    <li>
+        В своем приложении с помощью методов {@link android.widget.RemoteViews} определите значки и текст
+        уведомления. Поместите этот объект {@link android.widget.RemoteViews} в свой
+        {@link android.support.v4.app.NotificationCompat.Builder}, вызвав метод
+        {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}. Не следует
+        задавать фон {@link android.graphics.drawable.Drawable} для объекта
+        {@link android.widget.RemoteViews}, поскольку цвет текста может стать нечитаемым.
+    </li>
+</ol>
+<p>
+    В классе {@link android.widget.RemoteViews} также имеются методы, с помощью которых можно легко
+    добавить {@link android.widget.Chronometer} или {@link android.widget.ProgressBar}
+    в свой макет уведомления. Подробные сведения о создании нестандартных макетов для
+    уведомлений см. в справочной документации по {@link android.widget.RemoteViews}.
+</p>
+<p class="caution">
+    <strong>Внимание!</strong> При использовании нестандартного макета уведомлений следует особое внимание уделять
+    обеспечению совместимости  такого макета с разными вариантами ориентации устройства и разрешения экрана. Этот
+    совет относится ко всем макетам View, но особенно важен он для уведомлений, поскольку
+    размер панели уведомлений весьма ограничен. Не следует делать свои нестандартные макеты слишком
+    сложными и обязательно нужно тестировать их на различных конфигурациях устройств.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h4>Использование ресурсов стиля для текста нестандартного уведомления</h4>
+<p>
+    Для форматирования текста нестандартного уведомления всегда используйте ресурсы стиля. Цвет фона
+    уведомления может меняться на разных устройствах и в разных версиях системы, а использование ресурсов стиля
+    позволяет это учесть. Начиная с версии Android 2.3 система определяет стиль для
+    текста уведомления со стандартным макетом. Если вы используете тот же стиль в приложениях, предназначенных для версии Android
+    2.3 и последующих версий, то вы гарантируете видимость своего текста на фоне экрана.
+</p>

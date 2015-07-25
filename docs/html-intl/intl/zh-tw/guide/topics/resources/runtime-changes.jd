@@ -1,0 +1,281 @@
+page.title=處理執行階段變更
+page.tags=Activity、生命週期
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>本文件內容</h2>
+  <ol>
+    <li><a href="#RetainingAnObject">變更設定期間保留物件</a></li>
+    <li><a href="#HandlingTheChange">自行處理設定變更</a>
+  </ol>
+
+  <h2>另請參閱</h2>
+  <ol>
+    <li><a href="providing-resources.html">提供資源</a></li>
+    <li><a href="accessing-resources.html">存取資源</a></li>
+    <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">快速的螢幕方向變更
+</a></li>
+  </ol>
+</div>
+</div>
+
+<p>有些裝置設定可以在執行階段期間進行變更 (例如，螢幕方向、鍵盤可用性和語言)。
+進行這類變更時，Android 會重新啟動執行中的 
+{@link android.app.Activity} (呼叫 {@link android.app.Activity#onDestroy()}，後面加上 {@link
+android.app.Activity#onCreate(Bundle) onCreate()})。
+重新啟動行為的設計是以符合新裝置設定的替代資源自動重新載入您的應用程式，以協助您的應用程式適應新的設定。
+
+</p>
+
+<p>如要正確處理重新啟動，務必透過一般 <a href="{@docRoot}guide/components/activities.html#Lifecycle">Activity 生命週期</a>將您的 Activity 還原為之前的狀態，其中 Android 會先呼叫
+{@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} 再終結您的 Activity，讓您能儲存應用程式狀態的相關資料。
+
+
+之後，您便能在 {@link android.app.Activity#onCreate(Bundle) onCreate()} 或 {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()} 期間還原狀態。
+</p>
+
+<p>如要測試您的應用程式是否使用原本的應用程式狀態重新啟動，您應該在應用程式執行各種工作時呼叫設定變更 (例如變更螢幕方向)。
+
+您的應用程式應該能隨時重新啟動而不會遺失使用者資料或狀態，以便處理設定變更這類事件，或是使用者接聽來電，然後很久後才在應用程式程序可能終結後才返回應用程式的這類情況。
+
+
+如要瞭解如何還原您的 Activity 狀態，請參閱 <a href="{@docRoot}guide/components/activities.html#Lifecycle">Activity 生命週期</a>。</p>
+
+<p>不過，您可能遇到重新啟動應用程式以及還原大量資料的成本很昂貴，而且會產生使用者體驗不佳的情況。
+在這種情況下，您有兩種其他選擇：
+</p>
+
+<ol type="a">
+  <li><a href="#RetainingAnObject">變更設定期間保留物件</a>
+  <p>允許您的 Activity 在設定變更時重新啟動，但將可設定狀態的物件帶到 Activity 的新執行個體中。
+</p>
+
+  </li>
+  <li><a href="#HandlingTheChange">自行處理設定變更</a>
+  <p>避免系統在某些設定變更期間重新啟動您的 Activity，但在設定變更時接收回呼，您便能視需要手動更新您的 Activity。
+
+</p>
+  </li>
+</ol>
+
+
+<h2 id="RetainingAnObject">變更設定期間保留物件</h2>
+
+<p>如果重新啟動您的 Activity 需要復原大量資料、重新建立網路連線或執行其他密集型操作，則由於設定變更造成的完整重新啟動可能會拖慢使用者體驗。
+
+此外，您可能無法透過 {@link android.os.Bundle} 完全還原您的 Activity 狀態，這是系統透過 {@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} 回呼所為您所儲存的&mdash;它的設計並不是用來傳送大型物件 (例如點陣圖)，而且其中的資料必須先序列化再還原序列化，這會耗用大量記憶體並讓設定變更變慢。
+
+
+
+在這種情況下，您可以在 Activity 因設定變更而重新啟動時，透過保留 {@link
+android.app.Fragment} 的方式來減少重新初始化 Activity 的負擔。
+這個片段可包含您要保留可設定狀態物件的參考資料。
+</p>
+
+<p>當 Android 系統因設定變更而關閉您的 Activity 時，您標示要保留的 Activity 片段不會被終結。
+您可以將這類片段新增至您的 Activity 以保留可設定狀態的物件。
+</p>
+
+<p>如要在執行階段設定變更期間，在片段中保留可設定狀態的物件：</p>
+
+<ol>
+  <li>延伸 {@link android.app.Fragment} 類別並宣告可設定狀態物件的參考資料。
+</li>
+  <li>片段建立之後，呼叫 {@link android.app.Fragment#setRetainInstance(boolean)}。
+      </li>
+  <li>將片段新增至您的 Activity。</li>
+  <li>當 Activity 重新啟動時，使用 {@link android.app.FragmentManager} 擷取片段。
+</li>
+</ol>
+
+<p>例如，將您的片段定義如下：</p>
+
+<pre>
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
+}
+</pre>
+
+<p class="caution"><strong>注意：</strong>雖然您可以儲存任何物件，但您不應該傳送與 {@link android.app.Activity} 相關的物件，例如 {@link
+android.graphics.drawable.Drawable}、{@link android.widget.Adapter}、{@link android.view.View} 或任何與 {@link android.content.Context} 關聯的其他物件。
+
+如果您這樣做，會流失原始 Activity 執行個體的所有檢視和資源。
+(資源流失表示您的應用程式會繼續保留資源但無法回收記憶體，因此會流失大量記憶體。)
+
+</p>
+
+<p>然後使用 {@link android.app.FragmentManager} 將片段新增至您的 Activity。您可以在執行階段設定變更期間，於 Activity 再次啟動時，從片段取得資料物件。
+
+例如，將您的 Activity 定義如下：</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
+}
+</pre>
+
+<p>在此範例中，{@link android.app.Activity#onCreate(Bundle) onCreate()} 會在 Activity 新增片段或還原參考資料。
+{@link android.app.Activity#onCreate(Bundle) onCreate()} 也會在片段執行個體內儲存可設定狀態的物件。
+
+{@link android.app.Activity#onDestroy() onDestroy()} 會在保留的片段執行個體內更新可設定狀態的物件。
+</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">自行處理設定變更</h2>
+
+<p>如果您的應用程式在特定設定變更期間不需要更新資源，「且」<em></em>您具有效能限制，要求您避免 Activity 重新啟動，則您可以宣告您的 Activity 自行處理設定變更，這樣可避免系統重新啟動您的 Activity。
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>自行處理設定變更讓替代資源的使用變得更加困難，因為系統無法幫您自動套用。
+
+當您必須避免因為設定變更而造成重新啟動時，應將這個方式視為最後手段，而且不建議對大部分的應用程式使用。
+</p>
+
+<p>如要宣告您的 Activity 處理設定變更，可在宣示說明檔案中編輯適當的 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 元素以包含 <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 屬性和值，代表您要處理的設定。
+
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 屬性的可能值列於文件中 (最常用的值是 {@code "orientation"}，可避免在螢幕方向變更時重新啟動，而 {@code "keyboardHidden"} 可避免鍵盤可用性變更時重新啟動)。
+
+您可以使用直立線符號 {@code |} 字元來分隔，在屬性中宣告多個設定值。
+</p>
+
+<p>例如，下列宣示說明程式碼宣告同時處理螢幕方向變更和鍵盤可用性變更的 Activity：
+</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>現在，當其中一個設定變更時， {@code MyActivity} 便不會重新啟動。
+而是由 {@code MyActivity} 接收對 {@link android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} 的呼叫。
+這個方法傳送一個 {@link android.content.res.Configuration} 物件，指定新裝置設定。
+
+讀取 {@link android.content.res.Configuration} 中的欄位時，您可判斷新的設定，並且更新您介面中使用的資源來進行適當的變更。
+
+此時，會呼叫這個方法，Activity 的 {@link android.content.res.Resources} 物件會根據新設定進行更新以傳回資源，因此您便能輕鬆地重新設定 UI 的元素，系統無需重新啟動您的 Activity。
+
+
+</p>
+
+<p class="caution"><strong>注意：</strong>從 Android 3.2 (API 級別 13) 開始，裝置在橫向與直向之間進行切換時，<strong>「螢幕大小」也會跟著變更</strong>。
+
+因此，在開發 API 級別 13 或更高級別時 (如 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> 和 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> 屬性所宣告)，如果您要避免因為方向變更而造成執行階段重新啟動，除了{@code
+"orientation"} 值之外，您還必須包含 {@code "screenSize"} 值。
+
+也就是說，您必須宣告 {@code
+android:configChanges="orientation|screenSize"}。不過，如果您的應用程式是針對 API 級別 12 或更低級別，則您的 Activity 一律要自行處理這個設定變更 (即使在 Android 3.2 或更高版本的裝置上執行時，這個設定變更也不會重新啟動您的 Activity)。
+
+</p>
+
+<p>例如，下列 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} 實作會檢查目前的裝置方向：
+</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>{@link android.content.res.Configuration} 物件代表目前所有的設定，而不只是已變更的設定。
+大多數情況下，您不用特別留意設定如何變更，只要重新指派所有的資源，提供替代項目給您正在處理的設定。
+
+例如，因為 {@link
+android.content.res.Resources} 物件現在已更新，您可以使用 {@link android.widget.ImageView#setImageResource(int)
+setImageResource()} 重新設定任何 {@link android.widget.ImageView}並且針對新設定，使用適當的資源 (如<a href="providing-resources.html#AlternateResources">提供資源</a>中所述)。
+
+</p>
+
+<p>請注意，{@link
+android.content.res.Configuration} 欄位的值，是與 {@link android.content.res.Configuration} 類別的特定常數相符的整數。
+如需與每個欄位搭配使用之常數的相關文件，請參閱 {@link
+android.content.res.Configuration} 參考資料中的適當欄位。
+</p>
+
+<p class="note"><strong>請記住：</strong>當您宣告您的 Activity 以處理設定變更時，您要負責為提供的替代項目重新設定所有元素。
+如果您宣告您的 Activity 以處理方向變更，而且具有應該在橫向與直向之間進行方向變更的影像，則您必須在 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} 期間對每個元素重新指派每個資源。
+
+</p>
+
+<p>如果您不需要根據這些設定變更來更新您的應用程式，可改為不必<em></em>實作 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}。
+在此情況下，仍然可使用設定變更前使用的所有資源，而您只要避免重新啟動您的 Activity 即可。
+
+不過，您的應用程式應該能夠關閉以及重新啟動成之前原本的狀態，因此在一般 Activity 生命週期期間無法保留您的狀態時，就不應考慮使用這個方法。
+
+這不只是因為有其他設定變更讓您無法防止重新啟動應用程式，還因為有您應該處理事件，例如當使用者離開應用程式後，使用者返回應用程式之前應用程式已終結。
+
+
+</p>
+
+<p>如需有關您在 Activity 中可以處理哪些設定變更的詳細資訊，請參閱 <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 文件和 {@link android.content.res.Configuration} 類別。
+</p>

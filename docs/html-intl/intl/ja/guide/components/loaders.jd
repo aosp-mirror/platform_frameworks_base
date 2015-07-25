@@ -1,0 +1,494 @@
+page.title=ローダ
+parent.title=アクティビティ
+parent.link=activities.html
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>本書の内容</h2>
+    <ol>
+    <li><a href="#summary">Loader API の概要</a></li>
+    <li><a href="#app">アプリケーションでローダを使用する</a>
+      <ol>
+        <li><a href="#requirements"></a></li>
+        <li><a href="#starting">ローダを開始する</a></li>
+        <li><a href="#restarting">ローダを再開する</a></li>
+        <li><a href="#callback">LoaderManager コールバックを使用する</a></li>
+      </ol>
+    </li>
+    <li><a href="#example">例</a>
+       <ol>
+         <li><a href="#more_examples">その他の例</a></li>
+        </ol>
+    </li>
+  </ol>
+    
+  <h2>キークラス</h2>
+    <ol>
+      <li>{@link android.app.LoaderManager}</li>
+      <li>{@link android.content.Loader}</li>
+
+    </ol>   
+    
+    <h2>関連サンプル</h2>
+   <ol>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
+LoaderCursor</a></li>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
+LoaderThrottle</a></li>
+   </ol>
+  </div>
+</div>
+
+<p>Android 3.0 で導入されたローダによって、アクティビティやフラグメントでのデータの非同期ロードが簡単になりました。
+ローダには、次の 3 つの特徴があります。</p>
+  <ul>
+    <li>すべての {@link android.app.Activity} と {@link
+android.app.Fragment} で使用できる。</li>
+    <li>非同期のデータロードを提供する。</li>
+    <li>データのソースを監視し、コンテンツが変更されたときに新しい結果を配信する。
+</li>
+    <li>設定の変更後に再作成されると、自動的に最後のローダのカーソルに再接続するため、
+再度データを問い合わせる必要がない。
+</li>
+  </ul>
+ 
+<h2 id="summary">Loader API の概要</h2>
+
+<p>アプリケーションでローダを使用するのに必要になりそうなクラスやインターフェースは複数あります。
+次の表で、それらの概要をまとめました。</p>
+
+<table>
+  <tr>
+    <th>クラス/インターフェース</th>
+    <th>説明</th>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager}</td>
+    <td>1 つ以上の {@link
+android.content.Loader} インスタンスを管理するための、{@link android.app.Activity} や {@link android.app.Fragment} に関連した抽象クラスです。
+これにより、アプリケーションは {@link android.app.Activity} や {@link android.app.Fragment} のライフサイクルと連動して長時間の操作を管理できるようになります。最も一般的なのは、{@link android.content.CursorLoader} で使用する方法ですが、アプリケーションでは他のタイプのデータのロード用に、独自のローダを自由に作成することもできます。
+
+
+
+
+    <br />
+    <br />
+    1 つのアクティビティやフラグメントごとに、{@link android.app.LoaderManager} は 1 つだけ存在しますが、{@link android.app.LoaderManager} は複数のローダを持つことができます。
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager.LoaderCallbacks}</td>
+    <td>クライアントが {@link
+android.app.LoaderManager} とやり取りするためのコールバック インターフェースです。たとえば、{@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()} コールバック メソッドを使用してと新しいローダを作成します。
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.Loader}</td>
+    <td>非同期のデータロードを実行する抽象クラスです。これは、ローダの基本クラスです。
+通常は {@link
+android.content.CursorLoader} を使用しますが、独自のサブクラスを実装することもできます。ローダがアクティブな間は、データのソースを管理し、コンテンツが変更されたときに新しい結果を配信します。
+
+ </td>
+  </tr>
+  <tr>
+    <td>{@link android.content.AsyncTaskLoader}</td>
+    <td>処理を行うための {@link android.os.AsyncTask} を提供する抽象的なローダです。</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.CursorLoader}</td>
+    <td>{@link android.content.ContentResolver} に問い合わせて {@link
+android.database.Cursor} を返す{@link android.content.AsyncTaskLoader} のサブクラスです。
+これは、カーソルのクエリ用に標準的な方法で {@link
+android.content.Loader} プロトコルを実装するクラスで、アプリケーションの UI をブロックせずにバックグラウンドでカーソルのクエリを実行するように、{@link android.content.AsyncTaskLoader} を基に構築されています。{@link
+android.content.ContentProvider} からデータを非同期的にロードする際は、フラグメントの API やアクティビティの API 経由でマネージド クエリを実行するのではなく、このローダを使用するのが最適です。
+
+
+
+</td>
+  </tr>
+</table>
+
+<p>上の表のクラスとインターフェースは、アプリケーションでローダを実装する際に使用する必須コンポーネントです。
+作成するローダごとにこれらすべてが必要になるわけではありませんが、{@link
+android.app.LoaderManager} への参照は、ローダを初期化したり {@link
+android.content.CursorLoader} などの {@link android.content.Loader} を実装したりするには {@link
+android.app.LoaderManager} への参照が常に必要になります。
+次のセクションでは、アプリケーションでのこれらのクラスとインターフェースの使用方法を説明します。
+</p>
+
+<h2 id ="app">アプリケーションでローダを使用する</h2>
+<p>このセクションでは、Android アプリケーションのローダの使用方法について説明します。通常、ローダを使用するアプリケーションには次の内容が含まれます。
+</p>
+<ul>
+  <li>{@link android.app.Activity} または {@link android.app.Fragment}。</li>
+  <li>{@link android.app.LoaderManager} のインスタンス。</li>
+  <li>{@link
+android.content.ContentProvider} でサポートされているデータをロードする {@link android.content.CursorLoader}。あるいは、{@link android.content.Loader} や{@link android.content.AsyncTaskLoader} の独自のサブクラスを実装して他のソースからデータをロードすることもできます。
+
+</li>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks} の実装。ここで、新しいローダを作成して既存のローダへの参照を管理します。
+
+</li> 
+<li>{@link
+android.widget.SimpleCursorAdapter} などのローダのデータを表示する方法。</li>
+  <li>{@link android.content.CursorLoader} を使用するときの、{@link android.content.ContentProvider} などのデータ ソース。
+</li>
+</ul>
+<h3 id="starting">ローダを開始する</h3>
+
+<p>{@link android.app.LoaderManager} は 1 つ以上の {@link
+android.content.Loader} インスタンスを {@link android.app.Activity} や {@link android.app.Fragment} 内で管理します。
+1 つのアクティビティやフラグメントごとに、{@link
+android.app.LoaderManager} は 1 つだけ存在します。</p> 
+
+<p>通常は、アクティビティの {@link
+android.app.Activity#onCreate onCreate()} メソッドか、フラグメントの {@link android.app.Fragment#onActivityCreated onActivityCreated()} メソッド内で {@link android.content.Loader} を初期化します。
+
+その方法は次のとおりです。
+</p>
+
+<pre>// Prepare the loader.  Either re-connect with an existing one,
+// or start a new one.
+getLoaderManager().initLoader(0, null, this);</pre>
+
+<p>{@link android.app.LoaderManager#initLoader initLoader()} メソッドが次のパラメータを受け取ります。
+</p>
+<ul>
+  <li>ローダを識別する一意の ID。この例では、ID は 0 です。</li>
+<li>ローダの構築時に提供する任意の引数（この例では <code>null</code>）。
+</li> 
+
+<li>{@link android.app.LoaderManager} がローダのイベントを報告する際に呼び出す {@link android.app.LoaderManager.LoaderCallbacks} の実装。
+この例では、ローカルクラスが {@link
+android.app.LoaderManager.LoaderCallbacks} インターフェースを実装するため、自身の {@code this} に参照を渡します。
+
+</li> 
+</ul>
+<p>{@link android.app.LoaderManager#initLoader initLoader()} の呼び出しによって、ローダが初期化され、アクティブになります。
+結果には次の 2 つの可能性があります。</p>
+<ul>
+  <li>ID で指定されたローダが既に存在する場合は、最後に作成されたローダが再利用されます。
+</li>
+  <li>ID で指定したローダが存在<em>しない</em>場合、{@link android.app.LoaderManager#initLoader initLoader()} が {@link android.app.LoaderManager.LoaderCallbacks} メソッドの {@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()} をトリガーします。ここで、インスタンスを作成して新しいローダを返すコードを実装します。詳細については、<a href="#onCreateLoader">onCreateLoader</a> のセクションをご覧ください。
+
+
+
+</li>
+</ul>
+<p>いずれの場合でも、その {@link android.app.LoaderManager.LoaderCallbacks} の実装はローダに関連付けられ、ローダの状態が変化したときに呼び出されます。
+
+この呼び出しの時点で、呼び出し側が開始された状態にあり、要求されたローダが既に存在し、データを生成済みの場合は、システムはただちに {@link
+android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()} を呼び出す（{@link android.app.LoaderManager#initLoader initLoader()} の間に）ため、それに備えておく必要があります。
+
+
+
+このコールバックの詳細については、<a href="#onLoadFinished">
+onLoadFinished</a> をご覧ください。</p>
+
+<p>{@link android.app.LoaderManager#initLoader initLoader()} メソッドは作成された {@link android.content.Loader} を返しますが、そこへの参照はキャプチャしないことに注意してください。
+
+{@link android.app.LoaderManager} は自動的にローダの生存状態を管理します。
+{@link android.app.LoaderManager} は必要に応じて開始と停止を行いし、ローダとそれに関連付けられたコンテンツの状態を管理します。
+
+このことからもわかるように、ローダと直接やり取りすることはほとんどありません（ローダの動作を微調整するローダ メソッドの使用例については、<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> のサンプルをご覧ください）。
+
+特定のイベントが発生したときにローディングの処理に干渉することを目的に、{@link
+android.app.LoaderManager.LoaderCallbacks} を使用することがよくあります。
+
+このトピックの詳細については、<a href="#callback">LoadManager コールバックを使用する</a>をご覧ください。</p>
+
+<h3 id="restarting">ローダを再開する</h3>
+
+<p>上記のように {@link android.app.LoaderManager#initLoader initLoader()} を使用する場合、指定した ID があれば既存のローダを使用し、なければ新たに作成します。
+
+ただし、古いデータを破棄して最初からやり直したいこともあります。
+</p>
+
+<p>古いデータを破棄するには、{@link
+android.app.LoaderManager#restartLoader restartLoader()} を使用します。たとえば、この {@link android.widget.SearchView.OnQueryTextListener} を実装すると、ユーザーのクエリが変化したときにローダが再開されます。
+
+新しい検索フィルタを使用して新しいクエリを実行できるように、ローダは再開される必要があります。
+</p>
+
+<pre>
+public boolean onQueryTextChanged(String newText) {
+    // Called when the action bar search text has changed.  Update
+    // the search filter, and restart the loader to do a new query
+    // with this filter.
+    mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+    getLoaderManager().restartLoader(0, null, this);
+    return true;
+}</pre>
+
+<h3 id="callback">LoaderManager コールバックを使用する</h3>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} はクライアントが {@link android.app.LoaderManager} とやり取りできるようにするコールバック インターフェースです。
+ </p>
+<p>特に、{@link android.content.CursorLoader} のローダでは、停止後もデータを保持しておくことが望まれます。
+これにより、アプリケーションがアクティビティやフラグメントの {@link android.app.Activity#onStop
+onStop()} メソッドや {@link android.app.Activity#onStart onStart()} メソッド全体でデータを維持することができるので、ユーザーがアプリケーションに戻ったときにデータの再ロードを待つ必要がありません。
+
+
+新しいローダを作成するタイミングを知りたいときや、ローダのデータの使用を停止するタイミングをアプリケーションに伝えるときは、{@link android.app.LoaderManager.LoaderCallbacks} メソッドを使用します。
+
+</p>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} には次のメソッドが含まれています。
+</p>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()} — 指定された ID の新しい {@link android.content.Loader} をインスタンス化して返します。
+
+</li></ul>
+<ul>
+  <li> {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}— 前に作成されたローダがロードを完了した時に呼び出されます。
+
+</li></ul>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()} — 前に作成されたローダがリセットされ、データが利用不可になったときに呼び出されます。
+
+
+</li>
+</ul>
+<p>これらのメソッドについては、次のセクションで詳しく説明します。</p>
+
+<h4 id ="onCreateLoader">onCreateLoader</h4>
+
+<p>ローダにアクセスしようとしたとき（たとえば、{@link
+android.app.LoaderManager#initLoader initLoader()} 経由など）、ID で指定したローダが存在するかどうかを確認されます。
+存在しない場合は、{@link
+android.app.LoaderManager.LoaderCallbacks} メソッドの {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()} をトリガーします。ここで、新しいローダを作成します。
+通常は、{@link
+android.content.CursorLoader} になりますが、独自の {@link
+android.content.Loader} サブクラスを実装することもできます。 </p>
+
+<p>この例では、{@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}
+コールバック メソッドが {@link android.content.CursorLoader} を作成します。{@link android.content.CursorLoader}は、そのコンストラクタ メソッドを使用して構築する必要があり、{@link
+android.content.ContentProvider} へのクエリを実行するのに必要なすべての情報が必要になります。
+
+具体的に必要な情報は次のとおりです。</p>
+<ul>
+  <li><em>uri</em> — 取得するコンテンツの URI。 </li>
+  <li><em>projection</em> — 返す列のリスト。<code>null</code> を渡すとすべての列が返されるため、効率的ではありません。
+ </li>
+  <li><em>selection</em> — SQL WHERE 句の書式で返す行を宣言するフィルタ（WHERE 自体は除く）。
+<code>null</code> を渡すと指定した URI のすべての行が返されます。
+ </li>
+  <li><em>selectionArgs</em> — selection に ? を含めると、selection に表示される順序で <em>selectionArgs</em> の値に置き換えられます。
+
+この値は、Strings 配列でバインドされます。 </li>
+  <li><em>sortOrder</em> — SQL
+ORDER BY 句（ORDER 自体は除く）の形式で行を順序付けします。<code>null</code> を渡すとデフォルトのソート順序が使用されるため、順序が付けられない場合があります。
+</li>
+</ul>
+<p>次に例を示します。</p>
+<pre>
+ // If non-null, this is the current filter the user has provided.
+String mCurFilter;
+...
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+    // This is called when a new Loader needs to be created.  This
+    // sample only has one Loader, so we don't care about the ID.
+    // First, pick the base URI to use depending on whether we are
+    // currently filtering.
+    Uri baseUri;
+    if (mCurFilter != null) {
+        baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                  Uri.encode(mCurFilter));
+    } else {
+        baseUri = Contacts.CONTENT_URI;
+    }
+
+    // Now create and return a CursorLoader that will take care of
+    // creating a Cursor for the data being displayed.
+    String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+            + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+            + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+    return new CursorLoader(getActivity(), baseUri,
+            CONTACTS_SUMMARY_PROJECTION, select, null,
+            Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+}</pre>
+<h4 id="onLoadFinished">onLoadFinished</h4>
+
+<p>このメソッドは、前に作成したローダがロードを完了したときに呼び出されます。このメソッドは、このローダが提供した最後のデータが解放される前に呼び出されることが保証されています。
+
+この時点で、すべての古いデータを削除する必要がありますが（まもなく解放されるため）、データの所有者はローダでありローダが処理するため、自身でデータを解放しないようにしてください。
+
+</p>
+
+
+<p>アプリケーションがもうデータを使用していないことを検知すると、ローダがデータを解放します。
+たとえば、データが {@link
+android.content.CursorLoader} からのカーソルの場合は、自身で {@link
+android.database.Cursor#close close()} を呼び出さないようにしてください。カーソルが {@link android.widget.CursorAdapter} に置かれている場合は、古い {@link android.database.Cursor} がクローズされないように {@link
+android.widget.SimpleCursorAdapter#swapCursor swapCursor()} メソッドを使用する必要があります。
+
+次に例を示します。</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.<br
+/>SimpleCursorAdapter mAdapter;
+...
+
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+    // Swap the new cursor in.  (The framework will take care of closing the
+    // old cursor once we return.)
+    mAdapter.swapCursor(data);
+}</pre>
+
+<h4 id="onLoaderReset">onLoaderReset</h4>
+
+<p>このメソッドは、前に作成されたローダがリセットされ、データが利用できなくなったときに呼び出されます。
+このコールバックにより、データが解放されるタイミングがわかり、そのデータへの参照を削除できます。
+  </p>
+<p>この実装では、<code>null</code> の値を使用して {@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()} を呼び出します。
+
+</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.
+SimpleCursorAdapter mAdapter;
+...
+
+public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+    // This is called when the last Cursor provided to onLoadFinished()
+    // above is about to be closed.  We need to make sure we are no
+    // longer using it.
+    mAdapter.swapCursor(null);
+}</pre>
+
+
+<h2 id="example">例</h2>
+
+<p>以下は、連絡先のコンテンツ プロバイダに対するクエリの結果が含まれた {@link android.widget.ListView} を表示する {@link
+android.app.Fragment} の完全な実装の例です。
+{@link
+android.content.CursorLoader} を使用してプロバイダへのクエリを管理しています。</p>
+ 
+<p>この例にあるように、アプリケーションがユーザーの連絡先にアクセスするには、マニフェストに {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS} の許可を含める必要があります。
+
+</p>
+
+<pre>
+public static class CursorLoaderListFragment extends ListFragment
+        implements OnQueryTextListener, LoaderManager.LoaderCallbacks&lt;Cursor&gt; {
+
+    // This is the Adapter being used to display the list's data.
+    SimpleCursorAdapter mAdapter;
+
+    // If non-null, this is the current filter the user has provided.
+    String mCurFilter;
+
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // Give some text to display if there is no data.  In a real
+        // application this would come from a resource.
+        setEmptyText(&quot;No phone numbers&quot;);
+
+        // We have a menu item to show in action bar.
+        setHasOptionsMenu(true);
+
+        // Create an empty adapter we will use to display the loaded data.
+        mAdapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_2, null,
+                new String[] { Contacts.DISPLAY_NAME, Contacts.CONTACT_STATUS },
+                new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+        setListAdapter(mAdapter);
+
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Place an action bar item for searching.
+        MenuItem item = menu.add(&quot;Search&quot;);
+        item.setIcon(android.R.drawable.ic_menu_search);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        SearchView sv = new SearchView(getActivity());
+        sv.setOnQueryTextListener(this);
+        item.setActionView(sv);
+    }
+
+    public boolean onQueryTextChange(String newText) {
+        // Called when the action bar search text has changed.  Update
+        // the search filter, and restart the loader to do a new query
+        // with this filter.
+        mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+        getLoaderManager().restartLoader(0, null, this);
+        return true;
+    }
+
+    @Override public boolean onQueryTextSubmit(String query) {
+        // Don't care about this.
+        return true;
+    }
+
+    @Override public void onListItemClick(ListView l, View v, int position, long id) {
+        // Insert desired behavior here.
+        Log.i(&quot;FragmentComplexList&quot;, &quot;Item clicked: &quot; + id);
+    }
+
+    // These are the Contacts rows that we will retrieve.
+    static final String[] CONTACTS_SUMMARY_PROJECTION = new String[] {
+        Contacts._ID,
+        Contacts.DISPLAY_NAME,
+        Contacts.CONTACT_STATUS,
+        Contacts.CONTACT_PRESENCE,
+        Contacts.PHOTO_ID,
+        Contacts.LOOKUP_KEY,
+    };
+    public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+        // This is called when a new Loader needs to be created.  This
+        // sample only has one Loader, so we don't care about the ID.
+        // First, pick the base URI to use depending on whether we are
+        // currently filtering.
+        Uri baseUri;
+        if (mCurFilter != null) {
+            baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                    Uri.encode(mCurFilter));
+        } else {
+            baseUri = Contacts.CONTENT_URI;
+        }
+
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+                + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+                + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+        return new CursorLoader(getActivity(), baseUri,
+                CONTACTS_SUMMARY_PROJECTION, select, null,
+                Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+    }
+
+    public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(data);
+    }
+
+    public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
+    }
+}</pre>
+<h3 id="more_examples">その他の例</h3>
+
+<p><strong>ApiDemos</strong> には、ローダの使用方法を示す他のサンプルがいくつか用意されています。
+</p>
+<ul>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
+LoaderCursor</a> — 上記のスニペットの完全バージョン。
+</li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> — スロットリングを使用して、データの変更時にコンテンツ プロバイダのクエリ数を軽減する方法の例です。
+</li>
+</ul>
+
+<p>SDK サンプルのダウンロードとインストールの詳細については、<a href="http://developer.android.com/resources/samples/get.html">Getting the Samples</a> をご覧ください。
+ </p>
+

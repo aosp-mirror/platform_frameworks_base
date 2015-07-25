@@ -1,0 +1,487 @@
+page.title=Tải xuống Android Studio và SDK Tools
+page.tags=sdk, android studio
+page.template=sdk
+header.hide=1
+page.metaDescription=Tải xuống Android IDE chính thức và bộ công cụ cho nhà phát triển để xây dựng ứng dụng cho điện thoại, máy tính bảng, thiết bị đeo được, TV chạy Android và nhiều thiết bị khác.
+
+studio.version=1.1.0
+
+studio.linux_bundle_download=android-studio-ide-135.1740770-linux.zip
+studio.linux_bundle_bytes=259336386
+studio.linux_bundle_checksum=e8d166559c50a484f83ebfec6731cc0e3f259208
+
+studio.mac_bundle_download=android-studio-ide-135.1740770-mac.dmg
+studio.mac_bundle_bytes=261303345
+studio.mac_bundle_checksum=f9745d0fec1eefd498f6160a2d6a1b5247d4cda3
+
+studio.win_bundle_exe_download=android-studio-bundle-135.1740770-windows.exe
+studio.win_bundle_exe_bytes=856233768
+studio.win_bundle_exe_checksum=7484b9989d2914e1de30995fbaa97a271a514b3f
+
+studio.win_notools_exe_download=android-studio-ide-135.1740770-windows.exe
+studio.win_notools_exe_bytes=242135128
+studio.win_notools_exe_checksum=5ea77661cd2300cea09e8e34f4a2219a0813911f
+
+studio.win_bundle_download=android-studio-ide-135.1740770-windows.zip
+studio.win_bundle_bytes=261667054
+studio.win_bundle_checksum=e903f17cc6a57c7e3d460c4555386e3e65c6b4eb
+
+
+
+sdk.linux_download=android-sdk_r24.1.2-linux.tgz
+sdk.linux_bytes=168121693
+sdk.linux_checksum=68980e4a26cca0182abb1032abffbb72a1240c51
+
+sdk.mac_download=android-sdk_r24.1.2-macosx.zip
+sdk.mac_bytes=89151287
+sdk.mac_checksum=00e43ff1557e8cba7da53e4f64f3a34498048256
+
+sdk.win_download=android-sdk_r24.1.2-windows.zip
+sdk.win_bytes=159778618
+sdk.win_checksum=704f6c874373b98e061fe2e7eb34f9fcb907a341
+
+sdk.win_installer=installer_r24.1.2-windows.exe
+sdk.win_installer_bytes=111364285
+sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
+
+
+
+
+
+
+@jd:body
+
+<style type="text/css">
+  .offline {display:none;}
+  a.download-bundle-button {display:block;}
+  h2.feature {
+    padding-top:30px;
+    margin-top:0;
+    clear:both;
+  }
+  .feature-blurb {
+  margin:0px; font-size:16px; font-weight:300;
+  padding:40px 0 0 0;
+  }
+
+  .landing-button.green {
+    font-size:16px;
+    background-color:#90c653;
+    padding:8px 10px 10px;
+    margin:0;
+    width:206px;
+    text-align:center;
+  }
+
+  .landing-button.green:hover {
+    background-color:#85b84f;
+  }
+
+  .landing-button .small {
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 12px;
+    display: block;
+  }
+
+  h1.studio-logo {
+    width:226px;
+    height:78px;
+    display:block;
+    padding:0;
+    white-space: nowrap;
+    text-indent: -10000px;
+    font-size:0px;
+    background: url(../images/tools/studio-logo.png);
+    background-image: -webkit-image-set(url(../images/tools/studio-logo.png) 1x, url(../images/tools/studio-logo_2x.png) 2x);
+    background-size: 226px 78px;
+  }
+
+</style>
+
+
+
+
+
+<div style="position:relative;">
+
+
+<div class="wrap" id="tos" style="display:none;width:inherit;height:650px">
+<div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
+
+<h1 id="tos-header" style="margin-top:0">Tải xuống</h1>
+
+<p class="sdk-terms-intro">Trước khi cài đặt Android Studio hoặc bộ công cụ SDK độc lập,
+bạn phải đồng ý với các điều khoản và điều kiện sau.</p>
+
+<div class="sdk-terms" onfocus="this.blur()">
+<h2 class="norule">Điều khoản và Điều kiện</h2>
+Đây là Thỏa thuận Cấp phép cho Bộ công cụ Phát triển Phần mềm Android
+
+<h3>1. Giới thiệu</h3>
+1.1 Bộ công cụ Phát triển Phần mềm Android (trong Thỏa thuận Cấp phép này gọi là "SDK" và cụ thể bao gồm các tệp hệ thống Android, các API dạng gói, và phần bổ sung Google API) được cấp phép cho bạn theo các điều khoản của Thỏa thuận Cấp phép này. Thỏa thuận Cấp phép hợp thành một hợp đồng ràng buộc pháp lý giữa bạn và Google liên quan tới việc bạn sử dụng SDK.
+
+1.2 "Android" có nghĩa là chồng phần mềm Android cho thiết bị, được cung cấp theo Dự án Nguồn mở Android, nằm ở địa chỉ URL sau: http://source.android.com/, được cập nhật trong từng thời kỳ.
+
+1.3 "Google" có nghĩa là Google Inc., một công ty ở Delaware với trụ sở kinh doanh chính tại 1600 Amphitheatre Parkway, Mountain View, CA 94043, Hoa Kỳ.
+
+
+<h3>2. Chấp nhận Thỏa thuận Cấp phép này</h3>
+2.1 Để sử dụng SDK, trước tiên bạn phải đồng ý với Thỏa thuận Cấp phép này. Bạn không được sử dụng SDK nếu không chấp nhận Thỏa thuận Cấp phép này.
+
+2.2 Bằng việc nhấp vào chấp nhận, theo đây bạn đồng ý với các điều khoản của Thỏa thuận Cấp phép này.
+
+2.3 Bạn không được sử dụng SDK và không được chấp nhận Thỏa thuận Cấp phép nếu bạn là người bị cấm nhận SDK theo pháp luật của Hoa Kỳ hoặc các quốc gia khác bao gồm quốc gia nơi bạn cư trú hoặc nơi mà bạn sử dụng SDK từ đó.
+
+2.4 Nếu bạn đồng ý chịu ràng buộc bởi Thỏa thuận Cấp phép này đại diện cho bên tuyển dụng của mình hoặc đơn vị khác, bạn tuyên bố và bảo đảm rằng bạn có đầy đủ thẩm quyền pháp lý để ràng buộc bên tuyển dụng của mình hoặc đơn vị đó với Thỏa thuận Cấp phép này. Nếu không có thẩm quyền cần thiết, bạn không được chấp nhận Thỏa thuận Cấp phép hay sử dụng SDK đại diện cho bên tuyển dụng của mình hoặc đơn vị khác.
+
+
+<h3>3. Giấy phép SDK từ Google</h3>
+3.1 Tùy thuộc vào các điều khoản của Thỏa thuận Cấp phép này, Google cấp cho bạn một giấy phép giới hạn, toàn cầu, miễn phí sử dụng, không thể chuyển nhượng và không độc quyền để sử dụng SDK cho mục đích duy nhất là phát triển các ứng dụng chạy trên nền tảng Android.
+
+3.2 Bạn đồng ý rằng Google hoặc các bên thứ ba sở hữu tất cả quyền, quyền sở hữu hoặc lợi ích hợp pháp trong và đối với SDK, bao gồm bất kỳ Quyền Sở hữu Trí tuệ nào nằm trong SDK. "Quyền Sở hữu Trí tuệ" có nghĩa là bất kỳ và tất cả các quyền theo luật về bằng sáng chế, luật về bản quyền, luật về bí mật thương mại, luật về nhãn hiệu thương mại và bất kỳ và tất cả các quyền sở hữu khác. Google bảo lưu tất cả các quyền không được cấp phép rõ ràng cho bạn.
+
+3.3 Bạn không được sử dụng SDK cho bất kỳ mục đích nào không được cho phép rõ ràng bởi Thỏa thuận Cấp phép này.  Trừ trường hợp được yêu cầu bởi giấy phép của bên thứ ba có liên quan, bạn không được: (a) sao chép (trừ trường hợp sao lưu), sửa đổi, điều chỉnh cho phù hợp, phân phối lại, biên dịch ngược, kỹ thuật đảo ngược, phân rã, hoặc tạo sản phẩm phái sinh từ SDK hay bất kỳ phần nào của SDK; hoặc (b) tải bất kỳ phần nào của SDK lên một thiết bị cầm tay di động hoặc bất kỳ thiết bị phần cứng nào khác ngoại trừ máy tính cá nhân, kết hợp bất kỳ phần nào của SDK với phần mềm khác, hay phân phối bất kỳ phần mềm hay thiết bị nào tích hợp một phần của SDK.
+
+3.4 Bạn đồng ý rằng bạn sẽ không thực hiện bất kỳ hành động nào mà có thể gây ra hoặc dẫn đến sự phân mảnh Android, bao gồm nhưng không giới hạn trong việc phân phối, tham gia vào việc tạo lập, hoặc xúc tiến một bộ phát triển phần mềm được tạo từ SDK dưới bất kỳ hình thức nào.
+
+3.5 Việc sử dụng, tái tạo lại và phân phối các thành phần của SDK được cấp phép theo một giấy phép phần mềm nguồn mở được chi phối chủ yếu bởi các điều khoản của giấy phép phần mềm nguồn mở đó chứ không phải Thỏa thuận Cấp phép này.
+
+3.6 Bạn đồng ý rằng hình thức và tính chất của SDK mà Google cung cấp có thể thay đổi mà không có thông báo trước cho bạn và rằng các phiên bản sau này của SDK có thể không tương thích với các ứng dụng được phát triển trên những phiên bản trước của SDK. Bạn đồng ý rằng Google có thể dừng (vĩnh viễn hoặc tạm thời) cung cấp SDK (hay bất kỳ tính năng nào trong SDK) cho bạn hoặc cho người dùng nói chung theo toàn quyền quyết định của Google mà không cần thông báo trước cho bạn.
+
+3.7 Không nội dung nào trong Thỏa thuận Cấp phép này trao cho bạn quyền được sử dụng bất kỳ tên thương mại, nhãn hiệu thương mại, nhãn hiệu dịch vụ, logo, tên miền, hay các đặc trưng thương hiệu riêng khác của Google.
+
+3.8 Bạn đồng ý rằng bạn sẽ không gỡ bỏ, che chắn hay thay đổi bất kỳ thông báo về quyền sở hữu nào (bao gồm thông báo về bản quyền và nhãn hiệu thương mại) mà có thể được gắn vào hay chứa trong SDK.
+
+
+<h3>4. Việc Bạn sử dụng SDK</h3>
+4.1 Google đồng ý rằng Google không có quyền, quyền sở hữu hay lợi ích từ bạn (hay bên cấp phép của bạn) theo Thỏa thuận Cấp phép này trong hoặc đối với bất kỳ ứng dụng phần mềm nào mà bạn phát triển bằng cách sử dụng SDK, bao gồm bất kỳ quyền sở hữu trí tuệ nào nằm trong những ứng dụng đó.
+
+4.2 Bạn đồng ý sử dụng SDK và viết ứng dụng chỉ cho các mục đích được cho phép bởi (a) Thỏa thuận Cấp phép này và (b) bất kỳ luật, quy định hoặc thực hành áp dụng nào hoặc hướng dẫn được chấp nhận chung ở các lãnh thổ pháp lý có liên quan (bao gồm bất kỳ luật nào về việc xuất khẩu dữ liệu hoặc phần mềm đến và từ Hoa Kỳ hoặc các nước có liên quan khác).
+
+4.3 Bạn đồng ý rằng nếu bạn sử dụng SDK để phát triển ứng dụng cho người dùng công cộng, bạn sẽ bảo vệ quyền riêng tư và các quyền hợp pháp của những người dùng đó. Nếu người dùng cung cấp cho bạn tên người dùng, mật khẩu hoặc thông tin đăng nhập hay thông tin cá nhân khác, bạn phải thông báo cho người dùng rằng thông tin sẽ được sử dụng cho ứng dụng của bạn, và bạn phải cung cấp thông báo về quyền riêng tư và sự bảo vệ thỏa đáng về mặt pháp lý cho những người dùng đó. Nếu ứng dụng của bạn lưu trữ thông tin cá nhân hoặc nhạy cảm được cung cấp bởi người dùng, ứng dụng phải làm vậy một cách bảo mật. Nếu người dùng cung cấp cho ứng dụng của bạn thông tin về Tài khoản Google, ứng dụng của bạn chỉ được sử dụng thông tin đó để truy cập Tài khoản Google của người dùng khi, và chỉ cho các mục đích giới hạn mà người dùng đã cấp phép cho bạn để thực hiện.
+
+4.4 Bạn đồng ý rằng bạn sẽ không tham gia vào bất kỳ hoạt động nào với SDK, bao gồm việc phát triển hoặc phân phối một ứng dụng, mà can thiệp vào, làm gián đoạn, gây thiệt hại, hoặc truy cập một cách trái phép vào máy chủ, mạng hoặc tài sản hay dịch vụ khác của bất kỳ bên thứ ba nào bao gồm nhưng không giới hạn ở Google hoặc bất kỳ nhà mạng truyền thông di động nào.
+
+4.5 Bạn đồng ý rằng bạn hoàn toàn chịu trách nhiệm (và rằng Google không có trách nhiệm đối với bạn hay bất kỳ bên thứ ba nào) về bất kỳ dữ liệu, nội dung hay tài nguyên nào mà bạn tạo lập, truyền hoặc hiển thị thông qua Android và/hoặc các ứng dụng cho Android, và về hậu quả của những hành động của bạn (bao gồm bất kỳ tổn thất hay thiệt hại nào mà Google có thể phải gánh chịu) bởi việc làm như vậy.
+
+4.6 Bạn đồng ý rằng bạn hoàn toàn chịu trách nhiệm (và rằng Google không có trách nhiệm đối với bạn hay bất kỳ bên thứ ba nào) về bất kỳ vi phạm nào đối với các nghĩa vụ của bạn theo Thỏa thuận Cấp phép này, bất kỳ hợp đồng với bên thứ ba áp dụng nào hoặc các Điều khoản Dịch vụ, hoặc bất kỳ luật hay quy định áp dụng nào, và về hậu quả của những hành động của bạn (bao gồm bất kỳ tổn thất hay thiệt hại nào mà Google hoặc bất kỳ bên thứ ba nào có thể phải gánh chịu) do bất kỳ sự vi phạm nào như vậy.
+
+
+<h3>5. Thông tin Xác thực Nhà phát triển của bạn</h3>
+5.1 Bạn đồng ý rằng bạn chịu trách nhiệm duy trì tính bảo mật của bất kỳ thông tin xác thực nhà phát triển nào mà có thể được phát hành cho bạn bởi Google hoặc bạn có thể tự chọn và rằng bạn sẽ hoàn toàn chịu trách nhiệm về tất cả ứng dụng được phát triển theo thông tin xác thực nhà phát triển của bạn.
+
+
+<h3>6. Quyền riêng tư và Thông tin</h3>
+6.1 Để tiếp tục đổi mới và cải thiện SDK, Google có thể thu thập một số thống kê về sử dụng từ phần mềm bao gồm nhưng không giới hạn trong mã nhận diện duy nhất, địa chỉ IP liên kết, số phiên bản của phần mềm, và thông tin về những công cụ và/hoặc dịch vụ trong SDK đang được sử dụng và chúng đang được sử dụng như thế nào. Trước khi bất kỳ thông tin nào được thu thập, SDK sẽ thông báo cho bạn và xin sự đồng ý của bạn. Nếu bạn từ chối cho phép, thông tin sẽ không được thu thập.
+
+6.2 Dữ liệu thu thập được kiểm tra ở dạng tổng hợp để cải thiện SDK và được duy trì theo Chính sách Quyền riêng tư của Google.
+
+
+<h3>7. Ứng dụng của Bên thứ ba</h3>
+7.1 Nếu bạn sử dụng Sử dụng để chạy các ứng dụng được phát triển bởi một bên thứ ba hoặc truy cập dữ liệu, nội dung hoặc tài nguyên được cung cấp bởi một bên thứ ba, bạn đồng ý rằng Google không chịu trách nhiệm về những ứng dụng, dữ liệu, nội dung hoặc tài nguyên đó. Bạn hiểu rằng tất cả dữ liệu, nội dung hoặc tài nguyên mà bạn có thể truy cập thông qua các ứng dụng của bên thứ ba như vậy hoàn toàn thuộc trách nhiệm của người cung cấp chúng và rằng Google không chịu trách nhiệm về bất kỳ tổn thất hay thiệt hại nào mà bạn có thể gặp phải do kết quả từ việc sử dụng hay truy cập bất kỳ ứng dụng của bên thứ ba, dữ liệu, nội dung hay tài nguyên nào như vậy.
+
+7.2 Bạn cần ý thức được rằng dữ liệu, nội dung và tài nguyên được trình bày cho bạn thông qua một ứng dụng của bên thứ ba như vậy có thể được bảo vệ bởi các quyền sở hữu trí tuệ thuộc sở hữu của các nhà cung cấp (hoặc bởi cá nhân hoặc công ty khác đại diện cho họ). Bạn không được sửa đổi, thuê, cho thuê, cho vay, bán, phân phối hoặc tạo sản phẩm phái sinh dựa trên những dữ liệu, nội dung hoặc tài nguyên này (hoặc toàn bộ hoặc một phần) trừ khi bạn đã được cấp phép cụ thể để làm vậy bởi chủ sở hữu có liên quan.
+
+7.3 Bạn hiểu rằng việc bạn sử dụng các ứng dụng, dữ liệu, nội dung hoặc tài nguyên của bên thứ ba như vậy có thể phải tuân thủ các điều khoản riêng giữa bạn và bên thứ ba có liên quan. Trong trường hợp đó, Thỏa thuận Cấp phép này không ảnh hưởng tới mối quan hệ pháp lý giữa bạn và những bên thứ ba này.
+
+
+<h3>8. Sử dụng các API Android</h3>
+8.1 API Google Data
+
+8.1.1 Nếu bạn sử dụng bất kỳ API nào để truy xuất dữ liệu từ Google, bạn hiểu rằng dữ liệu có thể được bảo vệ bởi quyền sở hữu trí tuệ thuộc sở hữu của Google hoặc những bên cung cấp dữ liệu (hoặc bởi cá nhân hoặc công ty khác đại diện cho họ). Việc bạn sử dụng bất kỳ API nào như vậy có thể phải tuân theo các Điều khoản Dịch vụ bổ sung. Bạn không được sửa đổi, thuê, cho thuê, cho vay, bán, phân phối hoặc tạo sản phẩm phái sinh dựa trên dữ liệu này (hoặc toàn bộ hoặc một phần) trừ khi được cho phép bởi các Điều khoản Dịch vụ có liên quan.
+
+8.1.2 Nếu bạn sử dụng bất kỳ API nào để truy xuất dữ liệu của một người dùng từ Google, bạn hiểu và đồng ý rằng bạn sẽ chỉ truy xuất dữ liệu với sự cho phép rõ ràng của người dùng và chỉ khi, và cho các mục đích giới hạn mà người dùng đã được cấp quyền để thực hiện.
+
+
+<h3>9. Chấm dứt Thỏa thuận Cấp phép này</h3>
+9.1 Thỏa thuận Cấp phép này sẽ tiếp tục áp dụng tới khi bị chấm dứt bởi bạn hoặc Google như quy định bên dưới.
+
+9.2 Nếu bạn muốn chấm dứt Thỏa thuận Cấp phép này, bạn có thể làm vậy bằng cách dừng sử dụng SDK và bất kỳ thông tin xác thực nhà phát triển có liên quan nào.
+
+9.3 Google có thể, vào bất cứ lúc nào, chấm dứt Thỏa thuận Cấp phép này với bạn nếu:
+(A) bạn đã vi phạm bất kỳ quy định nào của Thỏa thuận Cấp phép này; hoặc
+(B) Google bị pháp luật yêu cầu phải làm vậy; hoặc
+(C) đối tác mà cùng với họ Google đã cung cấp một số phần của SDK (chẳng hạn như API) cho bạn đã chấm dứt mối quan hệ với Google hoặc dừng cung cấp một số phần của SDK cho bạn; hoặc
+(D) Google quyết định không cung cấp SDK hoặc một số phần của SDK cho người dùng ở quốc gia nơi bạn cư trú hoặc nơi mà bạn sử dụng dịch vụ từ đó, hoặc việc cung cấp SDK hoặc một số dịch vụ SDK cho bạn bởi Google, theo quyết định của Google, không còn khả thi về mặt thương mại.
+
+9.4 Khi Thỏa thuận Cấp phép này kết thúc, tất cả các quyền, nghĩa vụ và trách nhiệm hợp pháp mà bạn và Google đã hưởng lợi từ đó, phải tuân theo (hoặc đã phát sinh qua thời gian trong khi Thỏa thuận Cấp phép này có hiệu lực) hoặc được biểu hiện là sẽ tiếp tục vô thời hạn, sẽ không bị ảnh hưởng bởi sự chấm dứt này, và các quy định của đoạn 14.7 sẽ tiếp tục áp dụng cho các quyền, nghĩa vụ và trách nhiệm đó trong thời hạn không xác định.
+
+
+<h3>10. TUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM BẢO ĐẢM</h3>
+10.1 BẠN HIỂU VÀ ĐỒNG Ý RÕ RÀNG RẰNG VIỆC BẠN SỬ DỤNG SDK HOÀN TOÀN LÀ RỦI RO CỦA BẠN VÀ RẰNG SDK ĐƯỢC CUNG CẤP TRÊN CƠ SỞ “NGUYÊN TRẠNG” VÀ “CÓ SẴN” MÀ KHÔNG CÓ BẤT KỲ SỰ BẢO ĐẢM NÀO TỪ GOOGLE.
+
+10.2 VIỆC BẠN SỬ DỤNG SDK VÀ BẤT KỲ TÀI NGUYÊN NÀO ĐƯỢC TẢI XUỐNG HOẶC CÓ ĐƯỢC BẰNG CÁCH KHÁC THÔNG QUA VIỆC SỬ DỤNG SDK LÀ QUYẾT ĐỊNH VÀ RỦI RO CỦA CHÍNH BẠN VÀ BẠN HOÀN TOÀN CHỊU TRÁCH NHIỆM VỀ BẤT KỲ THIỆT HẠI NÀO ĐỐI VỚI HỆ THỐNG MÁY TÍNH HOẶC BẠN HOẶC THIẾT BỊ KHÁC HOẶC VIỆC MẤT DỮ LIỆU LÀ KẾT QUẢ TỪ VIỆC SỬ DỤNG ĐÓ.
+
+10.3 GOOGLE CÔNG KHAI TUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM ĐỐI VỚI TẤT CẢ BẢO ĐẢM VÀ ĐIỀU KIỆN CÁC LOẠI, DÙ RÕ RÀNG HAY NGỤ Ý, BAO GỒM, NHƯNG KHÔNG GIỚI HẠN TRONG NHỮNG BẢO ĐẢM VÀ ĐIỀU KIỆN NGỤ Ý VỀ KHẢ NĂNG MUA BÁN ĐƯỢC, SỰ PHÙ HỢP CHO MỘT MỤC ĐÍCH CỤ THỂ VÀ KHÔNG XÂM PHẠM.
+
+
+<h3>11. GIỚI HẠN TRÁCH NHIỆM PHÁP LÝ</h3>
+11.1 BẠN HIỂU VÀ ĐỒNG Ý RÕ RÀNG RẰNG GOOGLE, CÁC CÔNG TY CON VÀ CÔNG TY LIÊN KẾT CỦA GOOGLE, VÀ CÁC BÊN CẤP PHÉP CỦA GOOGLE SẼ KHÔNG CHỊU TRÁCH NHIỆM PHÁP LÝ ĐỐI VỚI BẠN THEO BẤT KỲ QUY ĐỊNH TRÁCH NHIỆM PHÁP LÝ NÀO VỀ BẤT KỲ THIỆT HẠI MANG TÍNH TRỰC TIẾP, GIÁN TIẾP, NGẪU NHIÊN, ĐẶC BIỆT, HẬU QUẢ HOẶC BẤT THƯỜNG NÀO MÀ BẠN CÓ THỂ PHẢI CHỊU, BAO GỒM BẤT KỲ TRƯỜNG HỢP MẤT DỮ LIỆU NÀO, DÙ GOOGLE HAY ĐẠI DIỆN CỦA GOOGLE ĐÃ ĐƯỢC BIẾT VỀ KHẢ NĂNG PHÁT SINH MẤT MÁT NHƯ VẬY HAY KHÔNG.
+
+
+<h3>12. Bồi thường</h3>
+12.1 Trong giới hạn tối đa mà pháp luật cho phép, bạn đồng ý bảo vệ, bồi thường và đảm bảo Google, các công ty liên kết của họ và các giám đốc, viên chức, nhân viên và đại lý tương ứng của họ không bị thiệt hại trước và đối với bất kỳ và tất cả các khiếu nại, hành động, kiện tụng hoặc thủ tục pháp lý cũng như bất kỳ và tất cả các tổn thất, trách nhiệm pháp lý, thiệt hại, chi phí và phí tổn nào (bao gồm phí luật sư hợp lý) phát sinh từ hoặc phải trả từ (a) việc bạn sử dụng SDK, (b) bất kỳ ứng dụng nào do bạn phát triển trên SDK mà xâm phạm bất kỳ bản quyền, nhãn hiệu thương mại, bí mật thương mại, kiểu dáng thương mại, bằng sáng chế hay quyền sở hữu trí tuệ khác của bất kỳ người nào hay bôi nhọ bất kỳ người nào hoặc vi phạm các quyền công khai hoặc riêng tư của họ, và (c) bất kỳ sự không tuân thủ nào của bạn đối với Thỏa thuận Cấp phép này.
+
+
+<h3>13. Thay đổi Thỏa thuận Cấp phép</h3>
+13.1 Google có thể thực hiện các thay đổi về Thỏa thuận Cấp phép khi họ phân phối các phiên bản mới của SDK. Khi những thay đổi này được thực hiện, Google sẽ lập một phiên bản Thỏa thuận Cấp phép mới có sẵn trên trang web nơi SDK được cung cấp.
+
+
+<h3>14. Các Điều khoản Pháp lý Chung</h3>
+14.1 Thỏa thuận Cấp phép này cấu thành toàn bộ thỏa thuận pháp lý giữa bạn và Google và chi phối việc bạn sử dụng SDK (không bao gồm bất kỳ dịch vụ nào mà Google có thể cung cấp cho bạn theo một thỏa thuận riêng bằng văn bản), và hoàn toàn thay thế bất kỳ thỏa thuận nào trước đây giữa bạn và Google liên quan tới SDK.
+
+14.2 Bạn đồng ý rằng nếu Google không thực hiện hay thi hành bất kỳ quyền hợp pháp hay biện pháp khắc phục về mặt pháp lý nào có trong Thỏa thuận Cấp phép này (hoặc Google được hưởng lợi theo bất kỳ luật áp dụng nào), điều này sẽ không được coi như sự miễn trừ hình thức đối với các quyền của Google và rằng các quyền hoặc biện pháp khắc phục đó sẽ vẫn dành cho Google.
+
+14.3 Nếu bất kỳ tòa án pháp luật nào, có thẩm quyền tài phán quyết định vấn đề này, phán rằng bất kỳ quy định nào của Thỏa thuận Cấp phép này không có hiệu lực, thì quy định đó sẽ bị xóa bỏ khỏi Thỏa thuận Cấp phép này mà không ảnh hưởng tới phần còn lại của Thỏa thuận Cấp phép này. Các quy định còn lại của Thỏa thuận Cấp phép này sẽ tiếp tục có giá trị và thi hành được.
+
+14.4 Bạn hiểu và đồng ý rằng mỗi thành viên trong nhóm các công ty mà trong đó Google là công ty mẹ sẽ là bên thụ hưởng thứ ba của Thỏa thuận Cấp phép này và rằng những công ty khác đó sẽ có quyền trực tiếp thi hành, và dựa vào, bất kỳ quy định nào của Thỏa thuận Cấp phép này mà trao lợi ích cho họ (hoặc trao quyền có lợi cho họ). Ngoài điều này ra, không người hay công ty nào khác sẽ là bên thụ hưởng thứ ba của Thỏa thuận Cấp phép này.
+
+14.5 HẠN CHẾ VỀ XUẤT KHẨU. SDK PHẢI TUÂN THEO PHÁP LUẬT VÀ QUY ĐỊNH VỀ XUẤT KHẨU CỦA HOA KỲ. BẠN PHẢI TUÂN THỦ TẤT CẢ PHÁP LUẬT VÀ QUY ĐỊNH VỀ XUẤT KHẨU TRONG NƯỚC VÀ QUỐC TẾ ÁP DỤNG CHO SDK. NHỮNG LUẬT NÀY BAO GỒM CÁC HẠN CHẾ VỀ ĐIỂM ĐẾN, NGƯỜI DÙNG CUỐI VÀ MỤC ĐÍCH SỬ DỤNG CUỐI.
+
+14.6 Các quyền được cấp trong Thỏa thuận Cấp phép này không được phép cho nhượng lại hay chuyển nhượng bởi bạn hoặc Google khi chưa có sự phê duyệt trước bằng văn bản của bên còn lại. Cả bạn hay Google đều sẽ không được cho phép giao phó các trách nhiệm hoặc nghĩa vụ của mình theo Thỏa thuận Cấp phép này khi chưa có sự phê duyệt trước bằng văn bản của bên còn lại.
+
+14.7 Thỏa thuận Cấp phép này và mối quan hệ giữa bạn với Google theo Thỏa thuận Cấp phép này sẽ được điều chỉnh bởi pháp luật của Tiểu bang California, bất kể mâu thuẫn về các quy định trong luật của Tiểu bang. Bạn và Google đồng ý trình lên theo thẩm quyền tài phán độc quyền của các tòa án tại hạt Santa Clara, California để giải quyết bất kỳ vấn đề pháp lý nào phát sinh từ Thỏa thuận Cấp phép này. Không kể điều này, bạn đồng ý rằng Google sẽ vẫn được phép xin các lệnh chế tài của tòa (hoặc một hình thức chế tài pháp lý khẩn cấp tương đương) ở bất kỳ lãnh thổ pháp lý nào.
+
+
+<em>13 tháng 11 năm 2012</em>
+</div>
+
+
+
+
+
+<div id="next-steps" style="display:none;position:absolute;width:inherit">
+  <p>Bạn chỉ còn vài bước nữa là được bắt đầu xây dựng ứng dụng cho Android!</p>
+  <p>Trong chốc lát, bạn sẽ được chuyển hướng đến
+  <a id="next-link" href="{@docRoot}sdk/installing/index.html">Cài đặt SDK Android</a>.</p>
+
+</div><!-- end next-steps -->
+
+
+
+<div id="sdk-terms-form">
+<p>
+<input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+<label id="agreeLabel" for="agree">Tôi đã đọc và đồng ý với các điều khoản và điều kiện trên</label>
+</p>
+<p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+</div>
+
+
+</div><!-- end TOS -->
+
+
+
+
+
+
+<div id="landing">
+
+<div class="col-13">&nbsp;</div><!-- provides top margin for content -->
+
+<img src="{@docRoot}images/tools/studio-hero.png" srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x" width="760" height="400" alt="" style="margin-bottom:80px" />
+
+<div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
+
+<h1 class="studio-logo" style="margin:0 0 35px !important">Android Studio</h1>
+
+<p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
+width: 400px;text-align: center;">IDE Android chính thức</p>
+
+<ul style="font-size:12px">
+<li>IDE Android Studio</li>
+<li>Bộ công cụ SDK Android</li>
+<li>Nền tảng Android 5.0 (Lollipop)</li>
+<li>Ảnh hệ thống trình mô phỏng Android 5.0 cùng các API của Google</li>
+</ul>
+
+
+<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">Tải xuống Android Studio</a>
+
+<!-- this appears when viewing the offline docs -->
+<p class="offline">
+Để tải Android Studio hoặc bộ công cụ SDK độc lập, hãy truy cập <a href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
+</p>
+
+<ul style="margin-top:50px;color:#444">
+  <li><a href="#Requirements">Yêu cầu Hệ thống</a></li>
+  <li><a href="#Other">Tùy chọn Tải xuống Khác</a></li>
+  <li><a href="{@docRoot}sdk/installing/migrate.html">Di chuyển tới Android Studio</a></li>
+  <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform" target="_blank">Tham gia Khảo sát</a></li>
+</ul>
+
+</div>
+
+
+
+
+<h2 class="feature norule" >Trình chỉnh sửa mã thông minh</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-code.png" srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Nằm ở cốt lõi của Android Studio là một trình biên tập mã thông minh có khả năng hoàn thành
+  mã, dựng lại và phân tích mã nâng cao.</p>
+  <p>Trình chỉnh sửa mã mạnh mẽ này sẽ giúp bạn trở thành một nhà phát triển ứng dụng Android năng suất hơn.</p>
+</div>
+
+
+
+
+
+<h2 class="feature norule">Các ví dụ mã và tích hợp GitHub</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-import.png" srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Các trình hướng dẫn dự án mới sẽ giúp bắt đầu một dự án mới dễ hơn bao giờ hết.</p>
+
+  <p>Bắt đầu các dự án bằng cách sử dụng mã mẫu cho các kiểu mẫu như ngăn kéo điều hướng và các trình tạo trang dạng xem,
+  và thậm chí còn nhập được các ví dụ mã của Google từ GitHub.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">Phát triển ứng dụng đa màn hình</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-screens.png" srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Xây dựng ứng dụng cho điện thoại, máy tính bảng Android, Android Wear,
+  Android TV, Android Auto và Google Glass.</p>
+  <p>Với Dạng xem Dự án Android mới và hỗ trợ mô-đun trong Android Studio, việc
+  quản lý các dự án và tài nguyên ứng dụng trở nên dễ dàng hơn.
+</div>
+
+
+
+
+<h2 class="feature norule">Các thiết bị ảo cho tất cả hình dạng và kích cỡ</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-avds.png" srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Android Studio được cấu hình sẵn cùng một ảnh trình mô phỏng được tối ưu hóa.</p>
+  <p>Trình quản lý Thiết bị Ảo được cập nhật và hợp lý hoá sẽ cung cấp
+  các cấu hình thiết bị định nghĩa sẵn cho các thiết bị Android thông thường.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">
+Phát triển xây dựng Android bằng Gradle</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-gradle.png" srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Tạo nhiều tệp APK cho ứng dụng Android của bạn với các tính năng khác nhau bằng cách sử dụng cùng dự án.</p>
+  <p>Quản lý phụ thuộc của ứng dụng bằng Maven.</p>
+  <p>Xây dựng APK từ Android Studio hoặc dòng lệnh.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">Tìm hiểu thêm về Android Studio</h2>
+<div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">
+
+<a class="online landing-button green download-bundle-button" style="margin:0 0 40px 60px;float:right" href="">Tải xuống Android Studio</a>
+
+  <ul>
+  <li>Xây dựng Phiên bản Cộng đồng IntelliJ IDEA, IDE Java phổ biến của JetBrains.</li>
+  <li>Hệ thống xây dựng linh hoạt dựa trên Gradle.</li>
+  <li>Xây dựng các biến thể và khởi tạo nhiều APK.</li>
+  <li>Hỗ trợ mẫu mở rộng cho các Dịch vụ của Google và các loại thiết bị khác nhau.</li>
+  <li>Trình chỉnh sửa bố trí phong phú hỗ trợ chỉnh sửa chủ đề.</li>
+  <li>Bộ công cụ Lint để giải quyết các vấn đề về hiệu năng, khả năng sử dụng, tính tương thích với phiên bản và các vấn đề khác.</li>
+  <li>ProGuard và các khả năng ký ứng dụng.</li>
+  <li>Hỗ trợ tích hợp cho Nền tảng Đám mây của Google, giúp dễ dàng tích hợp Google Cloud
+  Nhắn tin và Công cụ Ứng dụng.</li>
+  </ul>
+
+<p style="margin:0">
+Để biết thêm chi tiết về các tính năng có sẵn trong Android Studio,
+hãy đọc hướng dẫn <a href="{@docRoot}tools/studio/index.html">Nội dung Cơ bản về Android Studio</a>.</p>
+</div>
+
+
+<p>Nếu bạn đang sử dụng Eclipse với ADT, hãy lưu ý rằng hiện Android Studio là IDE chính thức
+cho Android, vì thế bạn nên di chuyển sang Android Studio để nhận tất cả cập nhật
+IDE mới nhất. Để được trợ giúp về di chuyển các dự án,
+hãy xem phần <a href="{@docRoot}sdk/installing/migrate.html">Di chuyển sang Android
+Studio</a>.</p>
+
+
+
+
+
+
+
+<h2 id="Requirements">Yêu cầu Hệ thống</h2>
+
+<h3>Windows</h3>
+
+<ul>
+<li>Microsoft&reg;  Windows&reg;  8/7/Vista/2003 (32 hoặc 64-bit)</li>
+<li>Tối thiểu 2 GB RAM, khuyến nghị 4 GB RAM</li>
+<li>Dung lượng trống đĩa cứng 400 MB</li>
+<li>Ít nhất 1 GB cho SDK Android, các ảnh hệ thống trình mô phỏng và bộ đệm ẩn</li>
+<li>Độ phân giải màn hình tối thiểu 1280 x 800</li>
+<li>Java Development Kit (JDK) 7 </li>
+<li>Tùy chọn dành cho trình mô phỏng tăng tốc: Bộ xử lý Intel® có hỗ trợ Intel® VT-x, Intel® EM64T
+(Intel® 64), và tính năng Execute Disable (XD) Bit</li>
+</ul>
+
+
+<h3>Mac OS X</h3>
+
+<ul>
+<li>Mac&reg;  OS X&reg;  10.8.5 hoặc cao hơn, lên tới 10.9 (Mavericks)</li>
+<li>Tối thiểu 2 GB RAM, khuyến nghị 4 GB RAM</li>
+<li>Dung lượng trống đĩa cứng 400 MB</li>
+<li>Ít nhất 1 GB cho SDK Android, các ảnh hệ thống trình mô phỏng và bộ đệm ẩn</li>
+<li>Độ phân giải màn hình tối thiểu 1280 x 800</li>
+<li>Java Runtime Environment (JRE) 6</li>
+<li>Java Development Kit (JDK) 7</li>
+<li>Tùy chọn dành cho trình mô phỏng tăng tốc: Bộ xử lý Intel® có hỗ trợ Intel® VT-x, Intel® EM64T
+(Intel® 64), và tính năng Execute Disable (XD) Bit</li>
+</ul>
+
+<p>Trên Mac OS, hãy chạy Android Studio bằng Java Runtime Environment (JRE) 6 để dựng
+phông chữ tối ưu. Khi đó, bạn có thể cấu hình dự án của mình để sử dụng Java Development Kit (JDK) 6 hoặc JDK 7.</p>
+
+
+
+<h3>Linux</h3>
+
+<ul>
+<li>Máy tính bàn GNOME hoặc KDE</li>
+<li>GNU C Library (glibc) 2.15 hoặc mới hơn</li>
+<li>Tối thiểu 2 GB RAM, khuyến nghị 4 GB RAM</li>
+<li>Dung lượng trống đĩa cứng 400 MB</li>
+<li>Ít nhất 1 GB cho SDK Android, các ảnh hệ thống trình mô phỏng và bộ đệm ẩn</li>
+<li>Độ phân giải màn hình tối thiểu 1280 x 800</li>
+<li>Oracle&reg;  Java Development Kit (JDK) 7 </li>
+</ul>
+<p>Được thử nghiệm trên Ubuntu&reg;  14.04, Trusty Tahr (có khả năng phân phối 64-bit khi chạy các ứng dụng 
+32-bit).</p>
+
+
+
+
+<h2 id="Other" style="clear:left">Tùy chọn Tải xuống Khác</h2>
+
+<!-- alternative SDK options follows -->

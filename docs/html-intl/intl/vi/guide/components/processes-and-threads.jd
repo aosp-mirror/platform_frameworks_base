@@ -1,0 +1,411 @@
+page.title=Tiến trình và Luồng
+page.tags=vòng đời, nền
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Trong tài liệu này</h2>
+<ol>
+<li><a href="#Processes">Tiến trình</a>
+  <ol>
+    <li><a href="#Lifecycle">Vòng đời tiến trình</a></li>
+  </ol>
+</li>
+<li><a href="#Threads">Luồng</a>
+  <ol>
+    <li><a href="#WorkerThreads">Luồng trình thực hiện</a></li>
+    <li><a href="#ThreadSafe">Phương pháp an toàn với luồng</a></li>
+  </ol>
+</li>
+<li><a href="#IPC">Truyền thông Liên Tiến trình</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Khi một thành phần ứng dụng bắt đầu và ứng dụng không có bất kỳ thành phần nào khác
+đang chạy, hệ thống Android sẽ khởi động một tiến trình Linux mới cho ứng dụng bằng một luồng
+thực thi đơn lẻ. Theo mặc định, tất cả thành phần của cùng ứng dụng sẽ chạy trong cùng tiến trình và luồng
+(được gọi là luồng "chính"). Nếu một thành phần ứng dụng bắt đầu và đã tồn tại một tiến trình
+cho ứng dụng đó (bởi một thành phần khác từ ứng dụng đã tồn tại), khi đó thành phần được
+bắt đầu bên trong tiến trình đó và sử dụng cùng luồng thực thi. Tuy nhiên, bạn có thể sắp xếp cho
+các thành phần khác nhau trong ứng dụng của mình để chạy trong các tiến trình riêng biệt, và bạn có thể tạo thêm
+luồng cho bất kỳ tiến trình nào.</p>
+
+<p>Tài liệu này trình bày về cách các tiến trình và luồng vận hành trong một ứng dụng Android.</p>
+
+
+<h2 id="Processes">Tiến trình</h2>
+
+<p>Theo mặc định, tất cả thành phần của cùng ứng dụng sẽ chạy trong cùng tiến trình và hầu hết các ứng dụng
+sẽ không thay đổi điều này. Tuy nhiên, nếu bạn thấy rằng mình cần kiểm soát một thành phần
+cụ thể thuộc về một tiến trình nào đó, bạn có thể làm vậy trong tệp bản kê khai.</p>
+
+<p>Mục nhập bản kê khai đối với mỗi loại phần tử thành phần&mdash;<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
+&lt;service&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+&lt;receiver&gt;}</a>, và <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
+&lt;provider&gt;}</a>&mdash;sẽ hỗ trợ một thuộc tính {@code android:process} mà có thể quy định một
+tiến trình mà thành phần đó sẽ chạy trong đó. Bạn có thể đặt thuộc tính này sao cho từng thành phần chạy
+trong chính tiến trình của nó hoặc sao cho một số thành phần chia sẻ một tiến trình trong khi các thành phần khác thì không.  Bạn cũng có thể đặt
+{@code android:process} sao cho các thành phần của những ứng dụng khác nhau chạy trong cùng
+tiến trình&mdash;với điều kiện rằng ứng dụng chia sẻ cùng ID người dùng Linux và được ký bằng cùng các
+chứng chỉ.</p>
+
+<p>Phần tử <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
+&lt;application&gt;}</a> cũng hỗ trợ một thuộc tính {@code android:process}, để đặt một
+giá trị mặc định áp dụng cho tất cả thành phần.</p>
+
+<p>Android có thể quyết định tắt một tiến trình tại một thời điểm nào đó, khi bộ nhớ thấp và theo yêu cầu của các
+tiến trình khác đang phục vụ người dùng tức thì hơn. Các thành phần
+ứng dụng đang chạy trong tiến trình bị tắt bỏ thì sau đó sẽ bị hủy.  Tiến trình được
+khởi động lại cho những thành phần đó khi lại có việc cho chúng thực hiện.</p>
+
+<p>Khi quyết định bỏ những tiến trình nào, hệ thống Android sẽ cân nhắc tầm quan trọng tương đối so với
+người dùng.  Ví dụ, hệ thống sẵn sàng hơn khi tắt một tiến trình lưu trữ các hoạt động không còn
+hiển thị trên màn hình, so với một tiến trình lưu trữ các hoạt động đang hiển thị. Vì thế, quyết định về việc có
+chấm dứt một tiến trình hay không phụ thuộc vào trạng thái của các thành phần đang chạy trong tiến trình đó. Các quy tắc
+được sử dụng để quyết định sẽ chấm dứt tiến trình nào được trình bày ở bên dưới. </p>
+
+
+<h3 id="Lifecycle">Vòng đời tiến trình</h3>
+
+<p>Hệ thống Android cố gắng duy trì một tiến trình ứng dụng lâu nhất có thể, nhưng
+cuối cùng thì nó cũng cần loại bỏ các tiến trình cũ để lấy lại bộ nhớ cho các tiến trình mới hoặc quan trọng hơn.  Để
+xác định giữ lại những tiến trình nào
+và loại bỏ những tiến trình nào, hệ thống sẽ đặt từng tiến trình vào một "phân cấp tầm quan trọng" dựa trên
+những thành phần đang chạy trong tiến trình và trạng thái của những thành phần đó.  Những tiến trình có tầm quan trọng
+thấp nhất bị loại bỏ trước, rồi đến những tiến trình có tầm quan trọng thấp thứ hai, và cứ thế tiếp tục, miễn là còn cần thiết
+để khôi phục tài nguyên của hệ thống.</p>
+
+<p>Có năm cấp trong phân cấp tầm quan trọng. Danh sách sau trình bày các loại
+tiến trình khác nhau theo thứ tự tầm quan trọng (tiến trình thứ nhất là <em>quan trọng nhất</em> và được
+<em>tắt bỏ sau cùng</em>):</p>
+
+<ol>
+  <li><b>Tiến trình tiền cảnh</b>
+    <p>Một tiến trình được yêu cầu cho việc mà người dùng đang thực hiện.  Một
+      tiến trình được coi là đang trong tiền cảnh nếu bất kỳ điều nào sau đây là đúng:</p>
+
+      <ul>
+        <li>Nó lưu trữ một {@link android.app.Activity} mà người dùng đang tương tác với (phương pháp của {@link
+android.app.Activity}, {@link android.app.Activity#onResume onResume()}, đã được
+gọi).</li>
+
+        <li>Nó lưu trữ một {@link android.app.Service} gắn kết với hoạt động mà người dùng đang
+tương tác với.</li>
+
+        <li>Nó lưu trữ một {@link android.app.Service} đang chạy "trong tiền cảnh"&mdash;mà
+dịch vụ đã gọi {@link android.app.Service#startForeground startForeground()}.
+
+        <li>Nó lưu trữ một {@link android.app.Service} mà đang thực thi một trong các lệnh
+gọi lại của vòng đời của nó ({@link android.app.Service#onCreate onCreate()}, {@link android.app.Service#onStart
+onStart()}, hoặc {@link android.app.Service#onDestroy onDestroy()}).</li>
+
+        <li>Nó lưu trữ một {@link android.content.BroadcastReceiver} mà đang thực thi phương pháp {@link
+        android.content.BroadcastReceiver#onReceive onReceive()} của nó.</li>
+    </ul>
+
+    <p>Nhìn chung, tại bất kỳ thời điểm xác định nào cũng chỉ tồn tại một vài tiến trình tiền cảnh.  Chúng chỉ bị tắt bỏ
+như một giải pháp cuối cùng&mdash;nếu bộ nhớ quá thấp tới mức chúng đều không thể tiếp tục chạy được.  Nhìn chung, tại thời điểm
+đó, thiết bị đã đạt tới trạng thái phân trang bộ nhớ, vì thế việc tắt bỏ một số tiến trình tiền cảnh là
+bắt buộc để đảm bảo giao diện người dùng có phản hồi.</p></li>
+
+  <li><b>Tiến trình hiển thị</b>
+    <p>Một tiến trình mà không có bất kỳ thành phần tiền cảnh nào, nhưng vẫn có thể
+      ảnh hưởng tới nội dung mà người dùng nhìn thấy trên màn hình. Một tiến trình được coi là hiển thị nếu một trong hai
+      điều kiện sau là đúng:</p>
+
+      <ul>
+        <li>Nó lưu trữ một {@link android.app.Activity} mà không nằm trong tiền cảnh, nhưng vẫn
+hiển thị với người dùng (phương pháp {@link android.app.Activity#onPause onPause()} của nó đã được gọi). 
+Điều này có thể xảy ra, ví dụ, nếu hoạt động tiền cảnh đã bắt đầu một hộp thoại, nó cho phép
+hoạt động trước được nhìn thấy phía sau nó.</li>
+
+        <li>Nó lưu trữ một {@link android.app.Service} được gắn kết với một hoạt động
+hiển thị (hoặc tiền cảnh).</li>
+      </ul>
+
+      <p>Một tiến trình tiền cảnh được coi là cực kỳ quan trọng và sẽ không bị tắt bỏ trừ khi làm vậy
+là bắt buộc để giữ cho tất cả tiến trình tiền cảnh chạy. </p>
+    </li>
+
+  <li><b>Tiến trình dịch vụ</b>
+    <p>Một tiến trình mà đang chạy một dịch vụ đã được bắt đầu bằng phương pháp {@link
+android.content.Context#startService startService()} và không rơi vào một trong hai
+thể loại cao hơn. Mặc dù tiến trình dịch vụ không trực tiếp gắn với bất kỳ thứ gì mà người dùng thấy, chúng
+thường đang làm những việc mà người dùng quan tâm đến (chẳng hạn như phát nhạc chạy ngầm hoặc
+tải xuống dữ liệu trên mạng), vì thế hệ thống vẫn giữ chúng chạy trừ khi không có đủ bộ nhớ để
+duy trì chúng cùng với tất cả tiến trình tiền cảnh và hiển thị. </p>
+  </li>
+
+  <li><b>Tiến trình nền</b>
+    <p>Một tiến trình lưu trữ một hoạt động mà hiện tại không hiển thị với người dùng (phương pháp
+{@link android.app.Activity#onStop onStop()} của hoạt động đã được gọi). Những tiến trình này không có tác động
+trực tiếp tới trải nghiệm người dùng, và hệ thống có thể bỏ chúng đi vào bất cứ lúc nào để lấy lại bộ nhớ cho một
+tiến trình tiền cảnh,
+hiển thị hoặc dịch vụ. Thường thì có nhiều tiến trình ngầm đang chạy, vì thế chúng được giữ
+trong một danh sách LRU (ít sử dụng gần đây nhất) để đảm bảo rằng tiến trình với hoạt động
+mà người dùng nhìn thấy gần đây nhất là tiến trình cuối cùng sẽ bị tắt bỏ. Nếu một hoạt động triển khai các phương pháp vòng đời của nó
+đúng cách, và lưu trạng thái hiện tại của nó, việc tắt bỏ tiến trình của hoạt động đó sẽ không có ảnh hưởng có thể thấy được tới
+trải nghiệm người dùng, vì khi người dùng điều hướng lại hoạt động đó, hoạt động sẽ khôi phục
+tất cả trạng thái hiển thị của nó. Xem tài liệu <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Hoạt động</a>
+để biết thông tin về việc lưu và khôi phục trạng thái.</p>
+  </li>
+
+  <li><b>Tiến trình trống</b>
+    <p>Một tiến trình mà không giữ bất kỳ thành phần ứng dụng hiện hoạt nào.  Lý do duy nhất để giữ cho
+kiểu tiến trình này hoạt động đó là nhằm mục đích lưu bộ nhớ ẩn, để cải thiện thời gian khởi động vào lần tới khi thành phần
+cần chạy trong nó.  Hệ thống thường tắt bỏ những tiến trình này để cân bằng tài nguyên tổng thể
+của hệ thống giữa các bộ đệm ẩn tiến trình và bộ đệm ẩn nhân liên quan.</p>
+  </li>
+</ol>
+
+
+  <p>Android xếp hạng một tiến trình ở mức cao nhất mà nó có thể, dựa vào tầm quan trọng của
+các thành phần đang hoạt động trong tiến trình đó.  Ví dụ, nếu một tiến trình lưu giữ một dịch vụ và hoạt động
+hiển thị, tiến trình đó sẽ được xếp hạng là tiến trình hiển thị chứ không phải tiến trình dịch vụ.</p>
+
+  <p>Ngoài ra, xếp hạng của một tiến trình có thể tăng bởi các tiến trình khác phụ thuộc vào
+nó&mdash;một tiến trình mà đang phục vụ một tiến trình khác không thể bị xếp thấp hơn tiến trình mà nó
+đang phục vụ. Ví dụ, nếu một trình cung cấp nội dung trong tiến trình A đang phục vụ một máy khách trong tiến trình B, hoặc nếu một
+dịch vụ trong tiến trình A được gắn kết với một thành phần trong tiến trình B, ít nhất tiến trình A sẽ luôn được coi
+là quan trọng như tiến trình B.</p>
+
+  <p>Do một tiến trình đang chạy một dịch vụ được xếp hạng cao hơn một tiến trình có các hoạt động nền,
+một hoạt động mà khởi động một thao tác nhấp giữ có thể làm tốt việc khởi động một <a href="{@docRoot}guide/components/services.html">dịch vụ</a> cho thao tác đó, thay vì
+chỉ tạo một luồng trình thực hiện&mdash;nhất là khi thao tác đó sẽ có thể diễn ra lâu hơn hoạt động.
+Ví dụ, một hoạt động mà đang tải một ảnh lên một trang web nên bắt đầu một dịch vụ để thực hiện
+việc tải lên sao cho việc tải lên có thể tiếp tục chạy ngầm ngay cả khi người dùng rời khỏi hoạt động.
+Việc sử dụng một dịch vụ sẽ bảo đảm rằng thao tác ít nhất sẽ có mức ưu tiên như "tiến trình dịch vụ",
+không phụ thuộc vào điều xảy ra với hoạt động. Đây cũng chính là lý do hàm nhận quảng bá nên
+sử dụng dịch vụ thay vì chỉ đưa các thao tác tốn thời gian vào một luồng.</p>
+
+
+
+
+<h2 id="Threads">Luồng</h2>
+
+<p>Khi một ứng dụng được khởi chạy, hệ thống sẽ tạo một luồng thực thi cho ứng dụng,
+gọi là luồng "chính." Luồng này rất quan trọng bởi nó phụ trách phân phối các sự kiện tới
+những widget giao diện người dùng phù hợp, bao gồm các sự kiện vẽ. Nó cũng là luồng mà
+trong đó ứng dụng của bạn tương tác với các thành phần từ bộ công cụ UI của Android (các thành phần từ các gói {@link
+android.widget} và {@link android.view}). Như vậy, luồng chính đôi khi cũng được gọi là
+luồng UI.</p>
+
+<p>Hệ thống <em>không</em> tạo một luồng riêng cho từng thực thể của thành phần. Tất cả
+thành phần chạy trong cùng tiến trình đều được khởi tạo trong luồng UI, và các lệnh gọi của hệ thống tới
+từng thành phần được phân phối từ luồng đó. Hệ quả là các phương pháp hồi đáp lại lệnh
+gọi lại của hệ thống (chẳng hạn như {@link android.view.View#onKeyDown onKeyDown()} để báo cáo hành động của người dùng
+hoặc một phương pháp gọi lại vòng đời) sẽ luôn chạy trong luồng UI của tiến trình.</p>
+
+<p>Ví dụ, khi người dùng chạm vào một nút trên màn hình, luồng UI của ứng dụng của bạn sẽ phân phối
+sự kiện chạm tới widget, đến lượt mình, widget sẽ đặt trạng thái được nhấn và đăng một yêu cầu vô hiệu hóa tới 
+hàng đợi sự kiện. Luồng UI loại yêu cầu khỏi hàng đợi và thông báo với widget rằng nó nên tự vẽ lại
+.</p>
+
+<p>Khi ứng dụng của bạn thực hiện công việc nặng để hồi đáp tương tác của người dùng, mô hình luồng đơn nhất
+này có thể dẫn đến hiệu năng kém trừ khi bạn triển khai ứng dụng của mình một cách phù hợp. Cụ thể, nếu
+mọi thứ đang xảy ra trong luồng UI, việc thực hiện những thao tác kéo dài như truy cập mạng hay
+truy vấn cơ sở dữ liệu sẽ chặn toàn bộ UI. Khi luồng bị chặn, không sự kiện nào có thể được phân phối,
+bao gồm cả sự kiện vẽ. Từ phương diện của người dùng, ứng dụng
+có vẻ như đang bị treo. Thậm chí tệ hơn, nếu luồng UI bị chặn trong lâu hơn vài giây
+(hiện tại là khoảng 5 giây), người dùng sẽ được hiển thị hộp thoại không phổ biến "<a href="http://developer.android.com/guide/practices/responsiveness.html">ứng dụng
+không phản hồi</a>" (ANR). Khi đó, người dùng có thể quyết định thoát ứng dụng của mình và gỡ cài đặt nó
+nếu họ không thoải mái.</p>
+
+<p>Ngoài ra, bộ công cụ UI của Android <em>không</em> an toàn với luồng. Vì vậy, bạn không được thao tác
+UI của mình từ một luồng trình thực hiện&mdash;bạn phải thực hiện tất cả thao tác đối với giao diện người dùng của mình từ luồng
+UI. Vì vậy, có hai quy tắc đơn giản đối với mô hình luồng đơn lẻ của Android:</p>
+
+<ol>
+<li>Không được chặn luồng UI
+<li>Không được truy cập bộ công cụ UI của Android từ bên ngoài luồng UI
+</ol>
+
+<h3 id="WorkerThreads">Luồng trình thực hiện</h3>
+
+<p>Vì mô hình luồng đơn lẻ nêu trên, điều thiết yếu đối với tính phản hồi của UI
+ứng dụng của bạn đó là bạn không được chặn luồng UI. Nếu bạn có thao tác cần thực hiện
+không mang tính chất tức thời, bạn nên đảm bảo thực hiện chúng trong các luồng riêng (luồng “chạy ngầm" hoặc
+"trình thực hiện").</p>
+
+<p>Ví dụ, bên dưới là một số mã cho một đối tượng theo dõi nhấp có chức năng tải xuống một hình ảnh từ một luồng
+riêng và hiển thị nó trong một {@link android.widget.ImageView}:</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            Bitmap b = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.setImageBitmap(b);
+        }
+    }).start();
+}
+</pre>
+
+<p>Thoạt đầu, điều này có vẻ như diễn ra ổn thỏa, vì nó tạo một luồng mới để xử lý thao tác
+mạng. Tuy nhiên, nó vi phạm quy tắc thứ hai của mô hình luồng đơn nhất: <em>không được truy cập
+bộ công cụ UI của Android từ bên ngoài luồng UI</em>&mdash;mẫu này sửa đổi {@link
+android.widget.ImageView} từ luồng trình thực hiện thay vì từ luồng UI. Điều này có thể dẫn đến
+hành vi bất ngờ, không được định nghĩa mà có thể gây khó khăn và tốn thời gian theo dõi.</p>
+
+<p>Để sửa vấn đề này, Android giới thiệu một vài cách để truy cập luồng UI từ các luồng
+khác. Sau đây là một danh sách các phương pháp có thể trợ giúp:</p>
+
+<ul>
+<li>{@link android.app.Activity#runOnUiThread(java.lang.Runnable)
+Activity.runOnUiThread(Runnable)}</li>
+<li>{@link android.view.View#post(java.lang.Runnable) View.post(Runnable)}</li>
+<li>{@link android.view.View#postDelayed(java.lang.Runnable, long) View.postDelayed(Runnable,
+long)}</li>
+</ul>
+
+<p>Ví dụ, bạn có thể sửa mã trên bằng cách sử dụng phương pháp {@link
+android.view.View#post(java.lang.Runnable) View.post(Runnable)}:</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            final Bitmap bitmap = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.post(new Runnable() {
+                public void run() {
+                    mImageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }).start();
+}
+</pre>
+
+<p>Giờ thì triển khai này đã an toàn với luồng: thao tác mạng được thực hiện từ một luồng riêng
+trong khi {@link android.widget.ImageView} được thao tác từ luồng UI.</p>
+
+<p>Tuy nhiên, khi mà sự phức tạp của thao tác tăng lên, kiểu mã này có thể bị phức tạp hóa và
+khó duy trì. Để xử lý những tương tác phức tạp hơn bằng một luồng trình thực hiện, bạn có thể cân nhắc
+sử dụng một {@link android.os.Handler} trong luồng trình thực hiện của mình, để xử lý các thư được chuyển từ luồng
+UI. Mặc dù vậy, giải pháp tốt nhất là mở rộng lớp {@link android.os.AsyncTask},
+điều này sẽ đơn giản hóa việc thực thi các tác vụ của luồng trình thực hiện cần tương tác với UI.</p>
+
+
+<h4 id="AsyncTask">Sử dụng AsyncTask</h4>
+
+<p>{@link android.os.AsyncTask} cho phép bạn thực hiện công việc không đồng bộ trên giao diện
+người dùng của mình. Nó thực hiện các thao tác chặn trong một luồng trình thực hiện rồi phát hành kết quả trên
+luồng UI mà không yêu cầu bạn tự xử lý các luồng và/hoặc trình xử lý.</p>
+
+<p>Để sử dụng nó, bạn phải tạo lớp con {@link android.os.AsyncTask} và triển khai phương pháp gọi lại {@link
+android.os.AsyncTask#doInBackground doInBackground()}, phương pháp này chạy trong một tập hợp
+các luồng chạy ngầm. Để cập nhật UI của mình, bạn nên triển khai {@link
+android.os.AsyncTask#onPostExecute onPostExecute()}, nó sẽ mang lại kết quả từ {@link
+android.os.AsyncTask#doInBackground doInBackground()} và chạy trong luồng UI, vì thế bạn có thể nâng cấp
+UI của mình một cách an toàn. Sau đó, bạn có thể chạy tác vụ bằng cách gọi {@link android.os.AsyncTask#execute execute()}
+từ luồng UI.</p>
+
+<p>Ví dụ, bạn có thể triển khai ví dụ trước bằng cách sử dụng {@link android.os.AsyncTask} theo
+cách này:</p>
+
+<pre>
+public void onClick(View v) {
+    new DownloadImageTask().execute("http://example.com/image.png");
+}
+
+private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
+    /** The system calls this to perform work in a worker thread and
+      * delivers it the parameters given to AsyncTask.execute() */
+    protected Bitmap doInBackground(String... urls) {
+        return loadImageFromNetwork(urls[0]);
+    }
+    
+    /** The system calls this to perform work in the UI thread and delivers
+      * the result from doInBackground() */
+    protected void onPostExecute(Bitmap result) {
+        mImageView.setImageBitmap(result);
+    }
+}
+</pre>
+
+<p>Lúc này, UI an toàn và mã đơn giản hơn, vì nó tách riêng công việc thành
+phần sẽ được thực hiện trên một luồng trình thực hiện và phần sẽ được thực hiện trên luồng UI.</p>
+
+<p>Bạn nên đọc tài liệu tham khảo {@link android.os.AsyncTask}để hiểu đầy đủ về
+cách sử dụng lớp này, nhưng sau đây là phần trình bày tổng quan nhanh về hoạt động của nó:</p>
+
+<ul>
+<li>Bạn có thể quy định loại tham số, các giá trị tiến độ, và giá trị
+cuối cùng của tác vụ, bằng cách sử dụng các kiểu chung</li>
+<li>Phương pháp {@link android.os.AsyncTask#doInBackground doInBackground()} sẽ tự động thực thi
+trên một luồng trình thực hiện</li>
+<li>{@link android.os.AsyncTask#onPreExecute onPreExecute()}, {@link
+android.os.AsyncTask#onPostExecute onPostExecute()}, và {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()} đều được gọi ra trên luồng UI</li>
+<li>Giá trị được trả về bởi {@link android.os.AsyncTask#doInBackground doInBackground()} được gửi tới
+{@link android.os.AsyncTask#onPostExecute onPostExecute()}</li>
+<li>Bạn có thể gọi {@link android.os.AsyncTask#publishProgress publishProgress()} vào bất cứ lúc nào trong {@link
+android.os.AsyncTask#doInBackground doInBackground()} để thực thi {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()} trên luồng UI</li>
+<li>Bạn có thể hủy bỏ tác vụ vào bất cứ lúc nào từ bất kỳ luồng nào</li>
+</ul>
+
+<p class="caution"><strong>Chú ý:</strong> Một vấn đề khác mà bạn có thể gặp phải khi sử dụng một luồng
+trình thực hiện đó là những lần khởi động lại bất ngờ trong hoạt động của bạn do một <a href="{@docRoot}guide/topics/resources/runtime-changes.html">thay đổi trong cấu hình thời gian chạy</a>
+(chẳng hạn như khi người dùng thay đổi hướng màn hình), điều này có thể làm hỏng luồng trình thực hiện của bạn. Để
+xem cách bạn có thể duy trì tác vụ của mình khi diễn ra một trong những lần khởi động lại này và cách hủy bỏ tác vụ cho phù hợp
+khi hoạt động bị hủy, hãy xem mã nguồn cho ứng dụng mẫu <a href="http://code.google.com/p/shelves/">Shelves</a>.</p>
+
+
+<h3 id="ThreadSafe">Phương pháp an toàn với luồng</h3>
+
+<p> Trong một số tình huống, các phương pháp bạn triển khai có thể được gọi ra từ nhiều hơn một luồng, và vì thế
+phải được ghi sao cho an toàn với luồng. </p>
+
+<p>Điều này chủ yếu đúng với các phương pháp mà có thể được gọi từ xa&mdash;chẳng hạn như các phương pháp trong một <a href="{@docRoot}guide/components/bound-services.html">dịch vụ gắn kết</a>. Khi một lệnh gọi trên một
+phương pháp được triển khai trong một {@link android.os.IBinder} khởi đầu trong cùng tiến trình mà
+{@link android.os.IBinder IBinder} đang chạy, phương pháp đó sẽ được thực thi trong luồng của hàm gọi.
+Tuy nhiên, khi lệnh gọi khởi đầu trong một tiến trình khác, phương pháp sẽ được thực thi trong một luồng được chọn từ
+một tập hợp các luồng mà hệ thống duy trì trong cùng tiến trình như {@link android.os.IBinder
+IBinder} (nó không được thực thi trong luồng UI của tiến trình).  Ví dụ, trong khi phương pháp
+{@link android.app.Service#onBind onBind()} của dịch vụ sẽ được gọi từ luồng UI của tiến trình
+của dịch vụ, các phương pháp được triển khai trong đối tượng mà {@link android.app.Service#onBind
+onBind()} trả về (ví dụ, một lớp con triển khai các phương pháp RPC) sẽ được gọi từ các luồng
+trong tập hợp. Vì một dịch vụ có thể có nhiều hơn một máy khách, nhiều hơn một luồng tập hợp có thể sử dụng
+cùng một phương pháp {@link android.os.IBinder IBinder} tại cùng một thời điểm.  Vì thế, các phương pháp {@link android.os.IBinder
+IBinder} phải được triển khai sao cho an toàn với luồng.</p>
+
+<p> Tương tự, một trình cung cấp nội dung có thể nhận các yêu cầu dữ liệu khởi nguồn trong các tiến trình khác.
+Mặc dù các lớp {@link android.content.ContentResolver} và {@link android.content.ContentProvider}
+ẩn đi chi tiết về cách truyền thông liên tiến trình được quản lý, các phương pháp {@link
+android.content.ContentProvider} hồi đáp những yêu cầu đó&mdash;các phương pháp {@link
+android.content.ContentProvider#query query()}, {@link android.content.ContentProvider#insert
+insert()}, {@link android.content.ContentProvider#delete delete()}, {@link
+android.content.ContentProvider#update update()}, và {@link android.content.ContentProvider#getType
+getType()}&mdash;được gọi từ một tập hợp luồng trong tiến trình của trình cung cấp nội dung, chứ không phải luồng
+UI cho tiến trình đó.  Vì những phương pháp này có thể được gọi từ bất kỳ số lượng luồng nào tại
+cùng thời điểm, chúng cũng phải được triển khai sao cho an toàn với luồng. </p>
+
+
+<h2 id="IPC">Truyền thông Liên Tiến trình</h2>
+
+<p>Android cung cấp một cơ chế cho truyền thông liên tiến trình (IPC) bằng cách sử dụng các lệnh gọi thủ tục từ xa
+(RPC), trong đó một phương pháp được gọi bởi một hoạt động hoặc thành phần ứng dụng khác, nhưng được thực thi
+từ xa (trong một tiến trình khác), với bất kỳ kết quả nào được trả về
+hàm gọi. Điều này đòi hỏi việc phân tích một lệnh gọi phương pháp và dữ liệu của nó về cấp độ mà hệ điều hành
+có thể hiểu được, truyền phát nó từ tiến trình và khoảng trống địa chỉ cục bộ đến tiến trình và
+khoảng trống địa chỉ từ xa, sau đó tổ hợp lại và phát hành lại lệnh gọi ở đó.  Sau đó, các giá trị trả về được
+phát theo hướng ngược lại.  Android cung cấp tất cả mã để thực hiện những giao tác
+IPC này, vì thế bạn có thể tập trung vào việc định nghĩa và triển khai giao diện lập trình RPC. </p>
+
+<p>Để thực hiện IPC, ứng dụng của bạn phải liên kết với một dịch vụ, bằng cách sử dụng {@link
+android.content.Context#bindService bindService()}. Để biết thêm thông tin, hãy xem hướng dẫn cho nhà phát triển <a href="{@docRoot}guide/components/services.html">Dịch vụ</a>.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For information about how to perform work in the background for an indefinite period of time
+(without a user interface), continue with the <b><a
+href="{@docRoot}guide/components/services.html">Services</a></b> document.</p>
+-->

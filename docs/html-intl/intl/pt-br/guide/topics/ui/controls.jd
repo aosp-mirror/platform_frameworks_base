@@ -1,0 +1,90 @@
+page.title=Controles de entrada
+parent.title=Interface do usuário
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>Controles de entrada são os componentes interativos na interface do usuário de seu aplicativo. O Android oferece
+uma ampla variedade de controles que podem ser usados na IU, como botões, campos de texto, barras de busca,
+caixas de seleção, botões de zoom, botões de alternância e muito mais.</p>
+
+<p>Adicionar um controle de entrada à IU é tão simples quanto adicionar um elemento XML ao <a href="{@docRoot}guide/topics/ui/declaring-layout.html">layout XML</a>. Por exemplo, a seguir apresenta-se
+um layout com um campo de texto e um botão:</p>
+
+<pre style="clear:right">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Cada controle de entrada tem suporte para um conjunto específico de eventos de entrada, portanto, você pode tratar eventos como quando
+o usuário digita texto ou toca em um botão.</p>
+
+
+<h2 id="CommonControls">Controles comuns</h2>
+<p>A seguir há uma lista de alguns controles comuns que você pode usar no aplicativo. Siga os links para saber
+mais sobre o uso de cada um.</p>
+
+<p class="note"><strong>Observação:</strong> o Android fornece muitos outros controles além dos listados
+aqui. Navegue no pacote {@link android.widget} para descobrir mais. Se o aplicativo precisa
+de um tipo específico de controle de entrada, você pode criar os próprios <a href="{@docRoot}guide/topics/ui/custom-components.html">componentes personalizados</a>.</p>
+
+<table>
+    <tr>
+        <th scope="col">Tipo de controle</th>
+        <th scope="col">Descrição</th>
+	<th scope="col">Classes relacionadas</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">Botão</a></td>
+        <td>Um botão de pressão que pode ser pressionado ou clicado pelo usuário para realizar uma ação.</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">Campo de texto</a></td>
+        <td>Um campo de texto editável. É possível usar o widget <code>AutoCompleteTextView</code> para criar um widget de entrada de texto que forneça sugestões para preenchimento automático</td>
+	<td>{@link android.widget.EditText EditText}, {@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">Caixa de seleção</a></td>
+        <td>Uma chave liga/desliga que pode ser alternada pelo usuário. Use caixas de seleção ao apresentar aos usuários um grupo de opções selecionáveis que não sejam mutualmente exclusivas.</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">Botão de opção</a></td>
+        <td>Similar às caixas de seleção, exceto que somente uma opção pode ser selecionada no grupo.</td>
+	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">Botão de alternância</a></td>
+        <td>Um botão liga/desliga com um indicador de luz.</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">Controle giratório</a></td>
+        <td>Uma lista suspensa que permite que os usuários selecionem um valor de um conjunto.</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">Seletores</a></td>
+        <td>Uma caixa de diálogo para que os usuários selecionem um valor para um conjunto usando botões para cima/para baixo ou via gesto de deslizar. Use um widget <code>DatePicker</code>code&gt; para inserir os valores para a data (mês, dia, ano) ou um widget <code>TimePicker</code> para inserir valores para um horário (hora, minuto, AM/PM), que será formatado automaticamente para a localidade do usuário.</td>
+	<td>{@link android.widget.DatePicker}, {@link android.widget.TimePicker}</td>
+    </tr>
+</table>
