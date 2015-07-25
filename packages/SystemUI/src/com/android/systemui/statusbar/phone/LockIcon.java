@@ -224,13 +224,14 @@ public class LockIcon extends KeyguardAffordanceView {
     }
 
     private int getState() {
-        boolean fingerprintRunning =
-                KeyguardUpdateMonitor.getInstance(mContext).isFingerprintDetectionRunning();
+        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        boolean fingerprintRunning = updateMonitor.isFingerprintDetectionRunning();
+        boolean unlockingAllowed = updateMonitor.isUnlockingWithFingerprintAllowed();
         if (mUnlockMethodCache.canSkipBouncer()) {
             return STATE_LOCK_OPEN;
         } else if (mTransientFpError) {
             return STATE_FINGERPRINT_ERROR;
-        } else if (fingerprintRunning) {
+        } else if (fingerprintRunning && unlockingAllowed) {
             return STATE_FINGERPRINT;
         } else if (mUnlockMethodCache.isFaceUnlockRunning()) {
             return STATE_FACE_UNLOCK;
