@@ -16,7 +16,8 @@
 
 package com.android.server.wm;
 
-import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+import static android.app.ActivityManager.HOME_STACK_ID;
+
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 
@@ -190,15 +191,19 @@ class DisplayContent {
         out.set(left, top, left + width, top + height);
     }
 
-    /** Refer to {@link WindowManagerService#attachStack(int, int)} */
-    void attachStack(TaskStack stack) {
+    /** Refer to {@link WindowManagerService#attachStack(int, int, boolean)} */
+    void attachStack(TaskStack stack, boolean onTop) {
         if (stack.mStackId == HOME_STACK_ID) {
             if (mHomeStack != null) {
                 throw new IllegalArgumentException("attachStack: HOME_STACK_ID (0) not first.");
             }
             mHomeStack = stack;
         }
-        mStacks.add(stack);
+        if (onTop) {
+            mStacks.add(stack);
+        } else {
+            mStacks.add(0, stack);
+        }
         layoutNeeded = true;
     }
 

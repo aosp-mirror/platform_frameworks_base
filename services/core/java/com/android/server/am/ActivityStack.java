@@ -16,14 +16,14 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-
-import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.util.ArraySet;
 import com.android.internal.app.IVoiceInteractor;
@@ -1211,6 +1211,15 @@ final class ActivityStack {
             return true;
         }
 
+        // Any stack that isn't the front stack is not visible, except for the case of the home
+        // stack behind the main application stack since we can have dialog activities on the
+        // main application stack that need the home stack to display behind them.
+        // TODO(multi-window): Also need to add exception for side-by-side stacks.
+        final boolean homeStack = mStackId == HOME_STACK_ID;
+        if (!homeStack) {
+            return false;
+        }
+
         /**
          * Start at the task above this one and go up, looking for a visible
          * fullscreen activity, or a translucent activity that requested the
@@ -1218,10 +1227,10 @@ final class ActivityStack {
          */
         for (int i = mStacks.indexOf(this) + 1; i < mStacks.size(); i++) {
             final ActivityStack stack = mStacks.get(i);
-            // stack above isn't fullscreen, so, we assume we're still visible.
-            if (!stack.mFullscreen) {
-                continue;
+            if (stack.mStackId != FULLSCREEN_WORKSPACE_STACK_ID) {
+                return false;
             }
+
             final ArrayList<TaskRecord> tasks = stack.getAllTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = tasks.get(taskNdx);
@@ -2032,6 +2041,31 @@ final class ActivityStack {
             }
         }
         return null;
+    }
+
+    private void insertTaskAtPosition(TaskRecord task, int position) {
+        if (position >= mTaskHistory.size()) {
+            insertTaskAtTop(task, null);
+            return;
+        }
+        // Calculate maximum possible position for this task.
+        int maxPosition = mTaskHistory.size();
+        if (!mStackSupervisor.isCurrentProfileLocked(task.userId)
+                && task.topRunningActivityLocked(null) == null) {
+            // Put non-current user tasks below current user tasks.
+            while (maxPosition > 0) {
+                final TaskRecord tmpTask = mTaskHistory.get(maxPosition - 1);
+                if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.userId)
+                        || tmpTask.topRunningActivityLocked(null) == null) {
+                    break;
+                }
+                maxPosition--;
+            }
+        }
+        position = Math.min(position, maxPosition);
+        mTaskHistory.remove(task);
+        mTaskHistory.add(position, task);
+        updateTaskMovement(task, true);
     }
 
     private void insertTaskAtTop(TaskRecord task, ActivityRecord newActivity) {
@@ -4355,6 +4389,17 @@ final class ActivityStack {
             mTaskHistory.add(0, task);
             updateTaskMovement(task, false);
         }
+        if (!moving && task.voiceSession != null) {
+            try {
+                task.voiceSession.taskStarted(task.intent, task.taskId);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    void positionTask(final TaskRecord task, int position, boolean moving) {
+        task.stack = this;
+        insertTaskAtPosition(task, position);
         if (!moving && task.voiceSession != null) {
             try {
                 task.voiceSession.taskStarted(task.intent, task.taskId);

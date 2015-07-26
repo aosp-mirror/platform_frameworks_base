@@ -404,6 +404,42 @@ public class ActivityManager {
      */
     public static final int COMPAT_MODE_TOGGLE = 2;
 
+    /**
+     * First static stack stack ID.
+     * @hide
+     */
+    public static final int FIRST_STATIC_STACK_ID = 0;
+
+    /**
+     * Home activity stack ID.
+     * @hide
+     */
+    public static final int HOME_STACK_ID = FIRST_STATIC_STACK_ID;
+
+    /**
+     * ID of stack where fullscreen activities are normally launched into.
+     * @hide
+     */
+    public static final int FULLSCREEN_WORKSPACE_STACK_ID = 1;
+
+    /**
+     * ID of stack where freeform/resized activities are normally launched into.
+     * @hide
+     */
+    public static final int FREEFORM_WORKSPACE_STACK_ID = FULLSCREEN_WORKSPACE_STACK_ID + 1;
+
+    /**
+     * Last static stack stack ID.
+     * @hide
+     */
+    public static final int LAST_STATIC_STACK_ID = FREEFORM_WORKSPACE_STACK_ID;
+
+    /**
+     * Start of ID range used by stacks that are created dynamically.
+     * @hide
+     */
+    public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
+
     /** @hide */
     public int getFrontActivityScreenCompatMode() {
         try {

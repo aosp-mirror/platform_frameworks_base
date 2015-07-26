@@ -139,6 +139,7 @@ public interface IActivityManager extends IInterface {
     public void moveTaskBackwards(int task) throws RemoteException;
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
     public void resizeStack(int stackId, Rect bounds) throws RemoteException;
+    public void positionTaskInStack(int taskId, int stackId, int position) throws RemoteException;
     public List<StackInfo> getAllStackInfos() throws RemoteException;
     public StackInfo getStackInfo(int stackId) throws RemoteException;
     public boolean isInHomeStack(int taskId) throws RemoteException;
@@ -874,4 +875,5 @@ public interface IActivityManager extends IInterface {
     // Start of N transactions
     int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 340;
     int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 341;
+    int POSITION_TASK_IN_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 342;
 }
