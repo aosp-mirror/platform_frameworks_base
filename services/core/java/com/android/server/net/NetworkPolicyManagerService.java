@@ -1520,9 +1520,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         synchronized (mRulesLock) {
-            final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
-            if (oldPolicy != policy) {
-                setUidPolicyUncheckedLocked(uid, policy, true);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
+                if (oldPolicy != policy) {
+                    setUidPolicyUncheckedLocked(uid, policy, true);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
