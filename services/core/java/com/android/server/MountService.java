@@ -146,8 +146,6 @@ import javax.crypto.spec.PBEKeySpec;
 class MountService extends IMountService.Stub
         implements INativeDaemonConnectorCallbacks, Watchdog.Monitor {
 
-    // TODO: finish enforcing UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA
-
     // Static direct instance pointer for the tightly-coupled idle service to use
     static MountService sSelf = null;
 
@@ -631,6 +629,10 @@ class MountService extends IMountService.Stub
                 }
                 case H_VOLUME_MOUNT: {
                     final VolumeInfo vol = (VolumeInfo) msg.obj;
+                    if (isMountDisallowed(vol)) {
+                        Slog.i(TAG, "Ignoring mount " + vol.getId() + " due to policy");
+                        break;
+                    }
                     try {
                         mConnector.execute("volume", "mount", vol.id, vol.mountFlags,
                                 vol.mountUserId);
@@ -1305,10 +1307,16 @@ class MountService extends IMountService.Stub
         mContext.enforceCallingOrSelfPermission(perm, perm);
     }
 
-    private void enforceUserRestriction(String restriction) {
-        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        if (um.hasUserRestriction(restriction, Binder.getCallingUserHandle())) {
-            throw new SecurityException("User has restriction " + restriction);
+    /**
+     * Decide if volume is mountable per device policies.
+     */
+    private boolean isMountDisallowed(VolumeInfo vol) {
+        if (vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_PRIVATE) {
+            final UserManager userManager = mContext.getSystemService(UserManager.class);
+            return userManager.hasUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
+                    Binder.getCallingUserHandle());
+        } else {
+            return false;
         }
     }
 
@@ -1586,8 +1594,8 @@ class MountService extends IMountService.Stub
         waitForReady();
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
-        if (vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_PRIVATE) {
-            enforceUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
+        if (isMountDisallowed(vol)) {
+            throw new SecurityException("Mounting " + volId + " restricted by policy");
         }
         try {
             mConnector.execute("volume", "mount", vol.id, vol.mountFlags, vol.mountUserId);
