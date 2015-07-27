@@ -859,26 +859,35 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public boolean isOnBattery() {
         return mStats.isOnBattery();
     }
-    
-    public void setBatteryState(int status, int health, int plugType, int level,
-            int temp, int volt) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            final boolean onBattery = plugType == BatteryStatsImpl.BATTERY_PLUGGED_NONE;
-            if (mStats.isOnBattery() == onBattery) {
-                // The battery state has not changed, so we don't need to sync external
-                // stats immediately.
-                mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
-                return;
-            }
-        }
 
-        // Sync external stats first as the battery has changed states. If we don't sync
-        // immediately here, we may not collect the relevant data later.
-        updateExternalStats("battery-state", UPDATE_ALL);
-        synchronized (mStats) {
-            mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
-        }
+    @Override
+    public void setBatteryState(final int status, final int health, final int plugType,
+                                final int level, final int temp, final int volt) {
+        enforceCallingPermission();
+
+        // BatteryService calls us here and we may update external state. It would be wrong
+        // to block such a low level service like BatteryService on external stats like WiFi.
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mStats) {
+                    final boolean onBattery = plugType == BatteryStatsImpl.BATTERY_PLUGGED_NONE;
+                    if (mStats.isOnBattery() == onBattery) {
+                        // The battery state has not changed, so we don't need to sync external
+                        // stats immediately.
+                        mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
+                        return;
+                    }
+                }
+
+                // Sync external stats first as the battery has changed states. If we don't sync
+                // immediately here, we may not collect the relevant data later.
+                updateExternalStats("battery-state", UPDATE_ALL);
+                synchronized (mStats) {
+                    mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
+                }
+            }
+        });
     }
     
     public long getAwakeTimeBattery() {
