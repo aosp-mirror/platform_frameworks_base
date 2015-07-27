@@ -400,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> é o cadro de diálogo de volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar o orixinal."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estás usando o perfil de traballo"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Sintonizador da IU do sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Configurador da IU do sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaxe de batería inserida"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar porcentaxe do nivel de batería na icona da barra de estado cando non está en carga"</string>
     <string name="quick_settings" msgid="10042998191725428">"Configuración rápida"</string>
@@ -422,10 +422,10 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona wifi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil de traballo"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Diversión só para algúns"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"O sintonizador da IU do sistema fornéceche formas adicionais de modificar e personalizar a interface de usuario de Android. Estas funcións experimentais poden cambiar, interromperse ou desaparecer en futuras versións. Continúa con precaución."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"O configurador da IU do sistema ofréceche formas adicionais de modificar e personalizar a interface de usuario de Android. Estas funcións experimentais poden cambiar, interromperse ou desaparecer en futuras versións. Continúa con precaución."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Estas funcións experimentais poden cambiar, interromperse ou desaparecer en futuras versións. Continúa con precaución."</string>
     <string name="got_it" msgid="2239653834387972602">"De acordo"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Parabéns! O sintonizador da IU do sistema engadiuse a Configuración"</string>
-    <string name="remove_from_settings" msgid="8389591916603406378">"Eliminar da configuración"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Queres eliminar da configuración o sintonizador da IU do sistema e deixar de usar todas as súas funcións?"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Parabéns! O configurador da IU do sistema engadiuse a Configuración"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Eliminar da Configuración"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Queres eliminar o configurador da IU do sistema da Configuración e deixar de usar todas as súas funcións?"</string>
 </resources>
