@@ -19,7 +19,7 @@
 #include <utils/JenkinsHash.h>
 #include <utils/Trace.h>
 
-#include <SkDeviceProperties.h>
+#include <SkSurfaceProps.h>
 #include <SkGlyph.h>
 #include <SkGlyphCache.h>
 #include <SkUtils.h>
@@ -281,8 +281,8 @@ CachedGlyphInfo* Font::getCachedGlyph(const SkPaint* paint, glyph_t textUnit, bo
     if (cachedGlyph) {
         // Is the glyph still in texture cache?
         if (!cachedGlyph->mIsValid) {
-            SkDeviceProperties deviceProperties(kUnknown_SkPixelGeometry, 1.0f);
-            SkAutoGlyphCache autoCache(*paint, &deviceProperties, &mDescription.mLookupTransform);
+            SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
+            SkAutoGlyphCacheNoGamma autoCache(*paint, &surfaceProps, &mDescription.mLookupTransform);
             const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), textUnit);
             updateGlyphCache(paint, skiaGlyph, autoCache.getCache(), cachedGlyph, precaching);
         }
@@ -472,8 +472,8 @@ CachedGlyphInfo* Font::cacheGlyph(const SkPaint* paint, glyph_t glyph, bool prec
     CachedGlyphInfo* newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 
-    SkDeviceProperties deviceProperties(kUnknown_SkPixelGeometry, 1.0f);
-    SkAutoGlyphCache autoCache(*paint, &deviceProperties, &mDescription.mLookupTransform);
+    SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
+    SkAutoGlyphCacheNoGamma autoCache(*paint, &surfaceProps, &mDescription.mLookupTransform);
     const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), glyph);
     newGlyph->mIsValid = false;
     newGlyph->mGlyphIndex = skiaGlyph.fID;
