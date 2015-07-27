@@ -3117,7 +3117,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             final PackageParser.Package p = mPackages.get(pkgName);
             if (p != null && p.mExtras != null) {
                 final PackageSetting ps = (PackageSetting) p.mExtras;
-                if (ps.getPermissionsState().hasPermission(permName, userId)) {
+                final PermissionsState permissionsState = ps.getPermissionsState();
+                if (permissionsState.hasPermission(permName, userId)) {
+                    return PackageManager.PERMISSION_GRANTED;
+                }
+                // Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION
+                if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && permissionsState
+                        .hasPermission(Manifest.permission.ACCESS_FINE_LOCATION, userId)) {
                     return PackageManager.PERMISSION_GRANTED;
                 }
             }
@@ -3138,13 +3144,25 @@ public class PackageManagerService extends IPackageManager.Stub {
             Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
             if (obj != null) {
                 final SettingBase ps = (SettingBase) obj;
-                if (ps.getPermissionsState().hasPermission(permName, userId)) {
+                final PermissionsState permissionsState = ps.getPermissionsState();
+                if (permissionsState.hasPermission(permName, userId)) {
+                    return PackageManager.PERMISSION_GRANTED;
+                }
+                // Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION
+                if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && permissionsState
+                        .hasPermission(Manifest.permission.ACCESS_FINE_LOCATION, userId)) {
                     return PackageManager.PERMISSION_GRANTED;
                 }
             } else {
                 ArraySet<String> perms = mSystemPermissions.get(uid);
-                if (perms != null && perms.contains(permName)) {
-                    return PackageManager.PERMISSION_GRANTED;
+                if (perms != null) {
+                    if (perms.contains(permName)) {
+                        return PackageManager.PERMISSION_GRANTED;
+                    }
+                    if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && perms
+                            .contains(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        return PackageManager.PERMISSION_GRANTED;
+                    }
                 }
             }
         }
