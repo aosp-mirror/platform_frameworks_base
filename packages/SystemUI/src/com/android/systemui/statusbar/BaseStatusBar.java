@@ -1940,7 +1940,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             logUpdate(entry, n);
         }
         boolean applyInPlace = shouldApplyInPlace(entry, n);
-        boolean shouldInterrupt = shouldInterrupt(entry);
+        boolean shouldInterrupt = shouldInterrupt(entry, notification);
         boolean alertAgain = alertAgain(entry, n);
 
         entry.notification = notification;
@@ -2114,7 +2114,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean shouldInterrupt(Entry entry) {
-        StatusBarNotification sbn = entry.notification;
+        return shouldInterrupt(entry, entry.notification);
+    }
+
+    protected boolean shouldInterrupt(Entry entry, StatusBarNotification sbn) {
         if (mNotificationData.shouldFilterOut(sbn)) {
             if (DEBUG) {
                 Log.d(TAG, "Skipping HUN check for " + sbn.getKey() + " since it's filtered out.");
