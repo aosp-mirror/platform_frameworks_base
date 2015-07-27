@@ -18,6 +18,9 @@
     <!-- Title of the documents application [CHAR LIMIT=32] -->
     <string name="app_label">Documents</string>
 
+    <!-- Title of the standalone files activity. [CHAR LIMIT=32] -->
+    <string name="files_label">Files</string>
+
     <!-- Action bar title prompting user to choose a location to open a document from [CHAR LIMIT=32] -->
     <string name="title_open">Open from</string>
     <!-- Action bar title prompting user to choose a location to save a document to [CHAR LIMIT=32] -->
