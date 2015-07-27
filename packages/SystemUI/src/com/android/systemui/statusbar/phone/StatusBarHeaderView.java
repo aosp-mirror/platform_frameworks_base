@@ -789,7 +789,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                     mQsDetailHeader.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            detail.setToggleState(!mQsDetailHeaderSwitch.isChecked());
+                            boolean checked = !mQsDetailHeaderSwitch.isChecked();
+                            mQsDetailHeaderSwitch.setChecked(checked);
+                            detail.setToggleState(checked);
                         }
                     });
                 }
