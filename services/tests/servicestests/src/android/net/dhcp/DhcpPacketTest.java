@@ -21,12 +21,13 @@ import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
-import junit.framework.TestCase;
+import com.android.internal.util.HexDump;
 
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+import junit.framework.TestCase;
 import libcore.util.HexEncoding;
 
 import static android.net.dhcp.DhcpPacket.*;
@@ -369,5 +370,70 @@ public class DhcpPacketTest extends TestCase {
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("172.17.152.118/16", "172.17.1.1", "172.17.1.1",
                 null, "1.1.1.1", null, 43200, false, dhcpResults);
+    }
+
+    @SmallTest
+    public void testBug2111() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // IP header.
+            "4500014c00000000ff119beac3eaf3880a3f5d04" +
+            // UDP header. TODO: fix invalid checksum (due to MAC address obfuscation).
+            "0043004401387464" +
+            // BOOTP header.
+            "0201060002554812000a0000000000000a3f5d040000000000000000" +
+            // MAC address.
+            "00904c00000000000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options.
+            "638253633501023604c00002fe33040000bfc60104fffff00003040a3f50010608c0000201c0000202" +
+            "0f0f646f6d61696e3132332e636f2e756b0000000000ff00000000"
+        ).toCharArray(), false));
+
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
+        assertTrue(offerPacket instanceof DhcpOfferPacket);
+        DhcpResults dhcpResults = offerPacket.toDhcpResults();
+        assertDhcpResults("10.63.93.4/20", "10.63.80.1", "192.0.2.1,192.0.2.2",
+                "domain123.co.uk", "192.0.2.254", null, 49094, false, dhcpResults);
+    }
+
+    @SmallTest
+    public void testBug2136() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // Ethernet header.
+            "bcf5ac000000d0c7890000000800" +
+            // IP header.
+            "4500014c00000000ff119beac3eaf3880a3f5d04" +
+            // UDP header. TODO: fix invalid checksum (due to MAC address obfuscation).
+            "0043004401387574" +
+            // BOOTP header.
+            "0201060163339a3000050000000000000a209ecd0000000000000000" +
+            // MAC address.
+            "bcf5ac00000000000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options.
+            "6382536335010236040a20ff80330400001c200104fffff00003040a20900106089458413494584135" +
+            "0f0b6c616e63732e61632e756b000000000000000000ff00000000"
+        ).toCharArray(), false));
+
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
+        assertTrue(offerPacket instanceof DhcpOfferPacket);
+        assertEquals("BCF5AC000000", HexDump.toHexString(offerPacket.getClientMac()));
+        DhcpResults dhcpResults = offerPacket.toDhcpResults();
+        assertDhcpResults("10.32.158.205/20", "10.32.144.1", "148.88.65.52,148.88.65.53",
+                "lancs.ac.uk", "10.32.255.128", null, 7200, false, dhcpResults);
     }
 }
