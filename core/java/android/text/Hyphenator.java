@@ -45,6 +45,8 @@ public class Hyphenator {
     @GuardedBy("sLock")
     final static HashMap<Locale, Hyphenator> sMap = new HashMap<Locale, Hyphenator>();
 
+    final static Hyphenator sEmptyHyphenator = new Hyphenator(StaticLayout.nLoadHyphenator(""));
+
     final private long mNativePtr;
 
     private Hyphenator(long nativePtr) {
@@ -53,19 +55,19 @@ public class Hyphenator {
 
     public static long get(@Nullable Locale locale) {
         synchronized (sLock) {
-            if (sMap.containsKey(locale)) {
-                Hyphenator result = sMap.get(locale);
-                return (result == null) ? 0 : result.mNativePtr;
+            Hyphenator result = sMap.get(locale);
+            if (result != null) {
+                return result.mNativePtr;
             }
 
             // TODO: Convert this a proper locale-fallback system
 
             // Fall back to language-only, if available
             Locale languageOnlyLocale = new Locale(locale.getLanguage());
-            if (sMap.containsKey(languageOnlyLocale)) {
-                Hyphenator result = sMap.get(languageOnlyLocale);
+            result = sMap.get(languageOnlyLocale);
+            if (result != null) {
                 sMap.put(locale, result);
-                return (result == null) ? 0 : result.mNativePtr;
+                return result.mNativePtr;
             }
 
             // Fall back to script-only, if available
@@ -75,16 +77,16 @@ public class Hyphenator {
                         .setLanguage("und")
                         .setScript(script)
                         .build();
-                if (sMap.containsKey(scriptOnlyLocale)) {
-                    Hyphenator result = sMap.get(scriptOnlyLocale);
+                result = sMap.get(scriptOnlyLocale);
+                if (result != null) {
                     sMap.put(locale, result);
-                    return (result == null) ? 0 : result.mNativePtr;
+                    return result.mNativePtr;
                 }
             }
 
-            sMap.put(locale, null); // To remember we found nothing.
+            sMap.put(locale, sEmptyHyphenator);  // To remember we found nothing.
         }
-        return 0;
+        return sEmptyHyphenator.mNativePtr;
     }
 
     private static Hyphenator loadHyphenator(String languageTag) {
