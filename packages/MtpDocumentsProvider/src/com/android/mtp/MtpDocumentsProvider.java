@@ -35,34 +35,42 @@ import java.io.IOException;
  * DocumentsProvider for MTP devices.
  */
 public class MtpDocumentsProvider extends DocumentsProvider {
-    private static final String TAG = "MtpDocumentsProvider";
-    public static final String AUTHORITY = "com.android.mtp.documents";
-
+    static final String AUTHORITY = "com.android.mtp.documents";
+    static final String TAG = "MtpDocumentsProvider";
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_ICON,
             Root.COLUMN_TITLE, Root.COLUMN_DOCUMENT_ID,
             Root.COLUMN_AVAILABLE_BYTES,
     };
-
     private static final String[] DEFAULT_DOCUMENT_PROJECTION = new String[] {
             Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE,
             Document.COLUMN_DISPLAY_NAME, Document.COLUMN_LAST_MODIFIED,
             Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
     };
 
-    private MtpManager mDeviceModel;
+    private static MtpDocumentsProvider sSingleton;
+
+    private MtpManager mMtpManager;
     private ContentResolver mResolver;
+
+    /**
+     * Provides singleton instance to MtpDocumentsService.
+     */
+    static MtpDocumentsProvider getInstance() {
+        return sSingleton;
+    }
 
     @Override
     public boolean onCreate() {
-        mDeviceModel = new MtpManager(getContext());
+        sSingleton = this;
+        mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
         return true;
     }
 
     @VisibleForTesting
-    void onCreateForTesting(MtpManager deviceModel, ContentResolver resolver) {
-        this.mDeviceModel = deviceModel;
+    void onCreateForTesting(MtpManager mtpManager, ContentResolver resolver) {
+        this.mMtpManager = mtpManager;
         this.mResolver = resolver;
     }
 
@@ -90,35 +98,21 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         throw new FileNotFoundException();
     }
 
-    // TODO: Remove annotation when the method starts to be used.
-    @VisibleForTesting
-    void openDevice(int deviceId) {
-        try {
-            mDeviceModel.openDevice(deviceId);
-            notifyRootsUpdate();
-        } catch (IOException error) {
-            Log.d(TAG, "Failed to open the MTP device: " + deviceId);
-        }
+    void openDevice(int deviceId) throws IOException {
+        mMtpManager.openDevice(deviceId);
+        notifyRootsUpdate();
     }
 
-    // TODO: Remove annotation when the method starts to be used.
-    @VisibleForTesting
-    void closeDevice(int deviceId) {
-        try {
-            mDeviceModel.closeDevice(deviceId);
-            notifyRootsUpdate();
-        } catch (IOException error) {
-            Log.d(TAG, "Failed to close the MTP device: " + deviceId);
-        }
+    void closeDevice(int deviceId) throws IOException {
+        mMtpManager.closeDevice(deviceId);
+        notifyRootsUpdate();
     }
 
-    // TODO: Remove annotation when the method starts to be used.
-    @VisibleForTesting
     void closeAllDevices() {
         boolean closed = false;
-        for (int deviceId : mDeviceModel.getOpenedDeviceIds()) {
+        for (int deviceId : mMtpManager.getOpenedDeviceIds()) {
             try {
-                mDeviceModel.closeDevice(deviceId);
+                mMtpManager.closeDevice(deviceId);
                 closed = true;
             } catch (IOException d) {
                 Log.d(TAG, "Failed to close the MTP device: " + deviceId);
@@ -134,5 +128,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY),
                 null,
                 false);
+    }
+
+    boolean hasOpenedDevices() {
+        return mMtpManager.getOpenedDeviceIds().length != 0;
     }
 }
