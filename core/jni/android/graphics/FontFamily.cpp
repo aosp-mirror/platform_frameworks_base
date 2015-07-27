@@ -84,7 +84,7 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
     return true;
 }
 
-static void releaseAsset(const void* ptr, size_t length, void* context) {
+static void releaseAsset(const void* ptr, void* context) {
     delete static_cast<Asset*>(context);
 }
 
