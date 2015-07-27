@@ -17,6 +17,7 @@ package com.android.keyguard;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
@@ -27,6 +28,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -334,10 +336,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         enableClipping(false);
         setAlpha(1f);
         setTranslationY(mAppearAnimationUtils.getStartTranslation());
-        animate()
-                .setDuration(500)
-                .setInterpolator(mAppearAnimationUtils.getInterpolator())
-                .translationY(0);
+        AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 500 /* duration */,
+                0, mAppearAnimationUtils.getInterpolator());
         mAppearAnimationUtils.startAnimation2d(
                 mLockPatternView.getCellStates(),
                 new Runnable() {
@@ -362,10 +362,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.clearPattern();
         enableClipping(false);
         setTranslationY(0);
-        animate()
-                .setDuration(300)
-                .setInterpolator(mDisappearAnimationUtils.getInterpolator())
-                .translationY(-mDisappearAnimationUtils.getStartTranslation());
+        AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 300 /* duration */,
+                -mDisappearAnimationUtils.getStartTranslation(),
+                mDisappearAnimationUtils.getInterpolator());
         mDisappearAnimationUtils.startAnimation2d(mLockPatternView.getCellStates(),
                 new Runnable() {
                     @Override
@@ -398,43 +397,16 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             long duration, float translationY, final boolean appearing,
             Interpolator interpolator,
             final Runnable finishListener) {
-        if (appearing) {
-            animatedCell.scale = 0.0f;
-            animatedCell.alpha = 1.0f;
-        }
-        animatedCell.translateY = appearing ? translationY : 0;
-        ValueAnimator animator = ValueAnimator.ofFloat(animatedCell.translateY,
-                appearing ? 0 : translationY);
-        animator.setInterpolator(interpolator);
-        animator.setDuration(duration);
-        animator.setStartDelay(delay);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float animatedFraction = animation.getAnimatedFraction();
-                if (appearing) {
-                    animatedCell.scale = animatedFraction;
-                } else {
-                    animatedCell.alpha = 1 - animatedFraction;
-                }
-                animatedCell.translateY = (float) animation.getAnimatedValue();
-                mLockPatternView.invalidate();
-            }
-        });
+        mLockPatternView.startCellStateAnimation(animatedCell,
+                1f, appearing ? 1f : 0f, /* alpha */
+                appearing ? translationY : 0f, appearing ? 0f : translationY, /* translation */
+                appearing ? 0f : 1f, 1f /* scale */,
+                delay, duration, interpolator, finishListener);
         if (finishListener != null) {
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    finishListener.run();
-                }
-            });
-
             // Also animate the Emergency call
             mAppearAnimationUtils.createAnimation(mEcaView, delay, duration, translationY,
                     appearing, interpolator, null);
         }
-        animator.start();
-        mLockPatternView.invalidate();
     }
 
     @Override

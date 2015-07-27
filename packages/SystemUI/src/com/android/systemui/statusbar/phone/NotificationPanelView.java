@@ -26,11 +26,13 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
@@ -42,6 +44,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -78,6 +81,8 @@ public class NotificationPanelView extends PanelView implements
     private static final String COUNTER_PANEL_OPEN = "panel_open";
     private static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
     private static final String COUNTER_PANEL_OPEN_PEEK = "panel_open_peek";
+
+    private static final Rect mDummyDirtyRect = new Rect(0, 0, 1, 1);
 
     public static final long DOZE_ANIMATION_DURATION = 700;
 
@@ -1777,7 +1782,22 @@ public class NotificationPanelView extends PanelView implements
         mIsExpanding = false;
         mScrollYOverride = -1;
         if (isFullyCollapsed()) {
-            setListening(false);
+            DejankUtils.postAfterTraversal(new Runnable() {
+                @Override
+                public void run() {
+                    setListening(false);
+                }
+            });
+
+            // Workaround b/22639032: Make sure we invalidate something because else RenderThread
+            // thinks we are actually drawing a frame put in reality we don't, so RT doesn't go
+            // ahead with rendering and we jank.
+            postOnAnimation(new Runnable() {
+                @Override
+                public void run() {
+                    getParent().invalidateChild(NotificationPanelView.this, mDummyDirtyRect);
+                }
+            });
         } else {
             setListening(true);
         }
