@@ -960,9 +960,7 @@
         android:label="@string/permlab_changeWimaxState"
         android:protectionLevel="normal" />
 
-    <!--@SystemApi Allows applications to the the local WiFi and Bluetooth MAC address.
-        @hide
-    -->
+    <!-- Allows applications to act as network scorers. @hide @SystemApi-->
     <permission android:name="android.permission.SCORE_NETWORKS"
         android:protectionLevel="signature|privileged" />
 
@@ -2582,9 +2580,15 @@
     <permission android:name="android.permission.KILL_UID"
                 android:protectionLevel="signature|installer" />
 
-    <!-- Allows applications to act as network scorers. @hide @SystemApi-->
+    <!-- @SystemApi Allows applications to read the local WiFi and Bluetooth MAC address.
+        @hide -->
     <permission android:name="android.permission.LOCAL_MAC_ADDRESS"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows access to MAC addresses of WiFi and Bluetooth peer devices.
+        @hide -->
+    <permission android:name="android.permission.PEERS_MAC_ADDRESS"
+                android:protectionLevel="signature" />
 
     <!-- Allows the Nfc stack to dispatch Nfc messages to applications. Applications
         can use this permission to ensure incoming Nfc messages are from the Nfc stack
