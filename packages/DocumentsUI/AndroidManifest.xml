@@ -50,7 +50,8 @@
         <activity
             android:name=".StandaloneActivity"
             android:theme="@style/StandaloneTheme"
-            android:icon="@drawable/ic_doc_text"
+            android:icon="@drawable/ic_files_app"
+            android:label="@string/files_label"
             android:enabled="@bool/productivity_device">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
