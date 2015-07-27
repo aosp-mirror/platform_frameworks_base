@@ -445,8 +445,8 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Туташуу чекити"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Жумуш профили"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Баарына эле жага бербейт"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner Android колдонуучу интерфейсин жөнгө салып жана ыңгайлаштыруунун кошумча ыкмаларын камсыз кылат. Бул сынамык функциялар келечектеги чыгарылыштарда өзгөрүп, бузулуп же жоголуп кетиши мүмкүн. Абайлап колдонуңуз."</string>
-    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Бул сынамык функциялар келечектеги чыгарылыштарда өзгөрүп, бузулуп же жоголуп кетиши мүмкүн. Абайлап колдонуңуз."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner Android колдонуучу интерфейсин жөнгө салып жана ыңгайлаштыруунун кошумча ыкмаларын сунуштайт. Бул сынамык функциялар кийинки чыгарылыштарда өзгөрүлүп, бузулуп же жоголуп кетиши мүмкүн. Абайлап колдонуңуз."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Бул сынамык функциялар кийинки чыгарылыштарда өзгөрүлүп, бузулуп же жоголуп кетиши мүмкүн. Абайлап колдонуңуз."</string>
     <string name="got_it" msgid="2239653834387972602">"Түшүндүм"</string>
     <string name="tuner_toast" msgid="603429811084428439">"Куттуктайбыз! Жөндөөлөргө System UI Tuner кошулду"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Жөндөөлөрдөн алып салуу"</string>
