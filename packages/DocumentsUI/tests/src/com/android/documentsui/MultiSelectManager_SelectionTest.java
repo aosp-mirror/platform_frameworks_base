@@ -59,6 +59,13 @@ public class MultiSelectManager_SelectionTest {
     }
 
     @Test
+    public void isEmpty() {
+        assertTrue(new Selection().isEmpty());
+        selection.clear();
+        assertTrue(selection.isEmpty());
+    }
+
+    @Test
     public void sizeAndGet() {
         Selection other = new Selection();
         for (int i = 0; i < selection.size(); i++) {

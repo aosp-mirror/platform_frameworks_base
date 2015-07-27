@@ -1440,8 +1440,10 @@ public class DirectoryFragment extends Fragment {
     }
 
     void selectAllFiles() {
-        mSelectionManager.selectItems(0, mAdapter.getItemCount());
-        updateDisplayState();
+        boolean changed = mSelectionManager.setItemsSelected(0, mAdapter.getItemCount(), true);
+        if (changed) {
+            updateDisplayState();
+        }
     }
 
     private void setupDragAndDropOnDirectoryView(View view) {

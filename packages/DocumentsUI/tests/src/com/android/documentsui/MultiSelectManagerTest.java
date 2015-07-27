@@ -64,33 +64,41 @@ public class MultiSelectManagerTest {
     }
 
     @Test
-    public void singleTapDoesNotSelectBeforeLongPress() {
-        mManager.onSingleTapUp(99);
-        assertSelection();
-    }
-
-    @Test
-    public void longPressStartsSelectionMode() {
+    public void longPress_StartsSelectionMode() {
         mManager.onLongPress(7);
         assertSelection(7);
     }
 
     @Test
-    public void secondLongPressExtendsSelection() {
+    public void longPress_SecondPressExtendsSelection() {
         mManager.onLongPress(7);
         mManager.onLongPress(99);
         assertSelection(7, 99);
     }
 
     @Test
-    public void singleTapUnselectedLastItem() {
+    public void singleTapUp_DoesNotSelectBeforeLongPress() {
+        mManager.onSingleTapUp(99);
+        assertSelection();
+    }
+
+    @Test
+    public void singleTapUp_UnselectsSelectedItem() {
         mManager.onLongPress(7);
         mManager.onSingleTapUp(7);
         assertSelection();
     }
 
     @Test
-    public void singleTapUpExtendsSelection() {
+    public void singleTapUp_NoPositionClearsSelection() {
+        mManager.onLongPress(7);
+        mManager.onSingleTapUp(11);
+        mManager.onSingleTapUp(RecyclerView.NO_POSITION);
+        assertSelection();
+    }
+
+    @Test
+    public void singleTapUp_ExtendsSelection() {
         mManager.onLongPress(99);
         mManager.onSingleTapUp(7);
         mManager.onSingleTapUp(13);
