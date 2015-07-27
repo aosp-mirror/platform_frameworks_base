@@ -529,6 +529,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void setUserRestriction(String key, boolean value, int userId) {
+        checkManageUsersPermission("setUserRestriction");
         synchronized (mPackagesLock) {
             if (!SYSTEM_CONTROLLED_RESTRICTIONS.contains(key)) {
                 Bundle restrictions = getUserRestrictions(userId);
