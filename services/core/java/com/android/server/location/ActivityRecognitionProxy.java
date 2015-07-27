@@ -20,8 +20,10 @@ import com.android.server.ServiceWatcher;
 
 import android.content.Context;
 import android.hardware.location.ActivityRecognitionHardware;
+import android.hardware.location.IActivityRecognitionHardwareClient;
 import android.hardware.location.IActivityRecognitionHardwareWatcher;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -34,21 +36,24 @@ public class ActivityRecognitionProxy {
     private static final String TAG = "ActivityRecognitionProxy";
 
     private final ServiceWatcher mServiceWatcher;
-    private final ActivityRecognitionHardware mActivityRecognitionHardware;
+    private final boolean mIsSupported;
+    private final ActivityRecognitionHardware mInstance;
 
     private ActivityRecognitionProxy(
             Context context,
             Handler handler,
+            boolean activityRecognitionHardwareIsSupported,
             ActivityRecognitionHardware activityRecognitionHardware,
             int overlaySwitchResId,
             int defaultServicePackageNameResId,
             int initialPackageNameResId) {
-        mActivityRecognitionHardware = activityRecognitionHardware;
+        mIsSupported = activityRecognitionHardwareIsSupported;
+        mInstance = activityRecognitionHardware;
 
         Runnable newServiceWork = new Runnable() {
             @Override
             public void run() {
-                bindProvider(mActivityRecognitionHardware);
+                bindProvider();
             }
         };
 
@@ -72,6 +77,7 @@ public class ActivityRecognitionProxy {
     public static ActivityRecognitionProxy createAndBind(
             Context context,
             Handler handler,
+            boolean activityRecognitionHardwareIsSupported,
             ActivityRecognitionHardware activityRecognitionHardware,
             int overlaySwitchResId,
             int defaultServicePackageNameResId,
@@ -79,6 +85,7 @@ public class ActivityRecognitionProxy {
         ActivityRecognitionProxy activityRecognitionProxy = new ActivityRecognitionProxy(
                 context,
                 handler,
+                activityRecognitionHardwareIsSupported,
                 activityRecognitionHardware,
                 overlaySwitchResId,
                 defaultServicePackageNameResId,
@@ -89,25 +96,52 @@ public class ActivityRecognitionProxy {
             Log.e(TAG, "ServiceWatcher could not start.");
             return null;
         }
-
         return activityRecognitionProxy;
     }
 
     /**
      * Helper function to bind the FusedLocationHardware to the appropriate FusedProvider instance.
      */
-    private void bindProvider(ActivityRecognitionHardware activityRecognitionHardware) {
-        IActivityRecognitionHardwareWatcher watcher =
-                IActivityRecognitionHardwareWatcher.Stub.asInterface(mServiceWatcher.getBinder());
-        if (watcher == null) {
-            Log.e(TAG, "No provider instance found on connection.");
+    private void bindProvider() {
+        IBinder binder = mServiceWatcher.getBinder();
+        if (binder == null) {
+            Log.e(TAG, "Null binder found on connection.");
+            return;
+        }
+        String descriptor;
+        try {
+            descriptor = binder.getInterfaceDescriptor();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to get interface descriptor.", e);
             return;
         }
 
-        try {
-            watcher.onInstanceChanged(mActivityRecognitionHardware);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error delivering hardware interface.", e);
+        if (IActivityRecognitionHardwareWatcher.class.getCanonicalName().equals(descriptor)) {
+            IActivityRecognitionHardwareWatcher watcher =
+                    IActivityRecognitionHardwareWatcher.Stub.asInterface(binder);
+            if (watcher == null) {
+                Log.e(TAG, "No watcher found on connection.");
+                return;
+            }
+            try {
+                watcher.onInstanceChanged(mInstance);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error delivering hardware interface to watcher.", e);
+            }
+        } else if (IActivityRecognitionHardwareClient.class.getCanonicalName().equals(descriptor)) {
+            IActivityRecognitionHardwareClient client =
+                    IActivityRecognitionHardwareClient.Stub.asInterface(binder);
+            if (client == null) {
+                Log.e(TAG, "No client found on connection.");
+                return;
+            }
+            try {
+                client.onAvailabilityChanged(mIsSupported, mInstance);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error delivering hardware interface to client.", e);
+            }
+        } else {
+            Log.e(TAG, "Invalid descriptor found on connection: " + descriptor);
         }
     }
 }
