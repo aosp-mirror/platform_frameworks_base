@@ -16,11 +16,18 @@
 
 package com.android.settingslib.animation;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.view.RenderNodeAnimator;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import com.android.internal.widget.LockPatternView;
 import com.android.settingslib.R;
 
 /**
@@ -174,24 +181,63 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
     }
 
     @Override
-    public void createAnimation(View view, long delay, long duration, float translationY,
-            boolean appearing, Interpolator interpolator, Runnable endRunnable) {
+    public void createAnimation(final View view, long delay, long duration, float translationY,
+            boolean appearing, Interpolator interpolator, final Runnable endRunnable) {
         if (view != null) {
             view.setAlpha(appearing ? 0f : 1.0f);
             view.setTranslationY(appearing ? translationY : 0);
-            view.animate()
-                    .alpha(appearing ? 1f : 0f)
-                    .translationY(appearing ? 0 : translationY)
-                    .setInterpolator(interpolator)
-                    .setDuration(duration)
-                    .setStartDelay(delay);
+            Animator alphaAnim;
+            float targetAlpha =  appearing ? 1f : 0f;
+            if (view.isHardwareAccelerated()) {
+                RenderNodeAnimator alphaAnimRt = new RenderNodeAnimator(RenderNodeAnimator.ALPHA,
+                        targetAlpha);
+                alphaAnimRt.setTarget(view);
+                alphaAnim = alphaAnimRt;
+            } else {
+                alphaAnim = ObjectAnimator.ofFloat(view, View.ALPHA, view.getAlpha(), targetAlpha);
+            }
+            alphaAnim.setInterpolator(interpolator);
+            alphaAnim.setDuration(duration);
+            alphaAnim.setStartDelay(delay);
             if (view.hasOverlappingRendering()) {
-                view.animate().withLayer();
+                view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                alphaAnim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        view.setLayerType(View.LAYER_TYPE_NONE, null);
+                    }
+                });
             }
             if (endRunnable != null) {
-                view.animate().withEndAction(endRunnable);
+                alphaAnim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        endRunnable.run();
+                    }
+                });
             }
+            alphaAnim.start();
+            startTranslationYAnimation(view, delay, duration, appearing ? 0 : translationY,
+                    interpolator);
         }
+    }
+
+    public static void startTranslationYAnimation(View view, long delay, long duration,
+            float endTranslationY, Interpolator interpolator) {
+        Animator translationAnim;
+        if (view.isHardwareAccelerated()) {
+            RenderNodeAnimator translationAnimRt = new RenderNodeAnimator(
+                    RenderNodeAnimator.TRANSLATION_Y, endTranslationY);
+            translationAnimRt.setTarget(view);
+            translationAnim = translationAnimRt;
+        } else {
+            translationAnim = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y,
+                    view.getTranslationY(), endTranslationY);
+        }
+        translationAnim.setInterpolator(interpolator);
+        translationAnim.setDuration(duration);
+        translationAnim.setStartDelay(delay);
+        translationAnim.start();
     }
 
     public class AppearAnimationProperties {
