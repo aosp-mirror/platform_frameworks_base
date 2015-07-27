@@ -56,7 +56,7 @@ import java.util.Random;
 
 public class CaptivePortalLoginActivity extends Activity {
     private static final String TAG = "CaptivePortalLogin";
-    private static final String DEFAULT_SERVER = "connectivitycheck.android.com";
+    private static final String DEFAULT_SERVER = "connectivitycheck.gstatic.com";
     private static final int SOCKET_TIMEOUT_MS = 10000;
 
     private enum Result { DISMISSED, UNWANTED, WANTED_AS_IS };
