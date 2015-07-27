@@ -475,6 +475,14 @@ static void FromColor_D4444_Raw(void* dst, const SkColor src[], int width,
     }
 }
 
+static void FromColor_DA8(void* dst, const SkColor src[], int width, int x, int y) {
+    uint8_t* d = (uint8_t*)dst;
+
+    for (int stop = x + width; x < stop; x++) {
+        *d++ = SkColorGetA(*src++);
+    }
+}
+
 // can return NULL
 static FromColorProc ChooseFromColorProc(const SkBitmap& bitmap) {
     switch (bitmap.colorType()) {
@@ -485,6 +493,8 @@ static FromColorProc ChooseFromColorProc(const SkBitmap& bitmap) {
                     FromColor_D4444_Raw;
         case kRGB_565_SkColorType:
             return FromColor_D565;
+        case kAlpha_8_SkColorType:
+            return FromColor_DA8;
         default:
             break;
     }
@@ -632,6 +642,15 @@ static void ToColor_SI8_Opaque(SkColor dst[], const void* src, int width,
     } while (--width != 0);
 }
 
+static void ToColor_SA8(SkColor dst[], const void* src, int width, SkColorTable*) {
+    SkASSERT(width > 0);
+    const uint8_t* s = (const uint8_t*)src;
+    do {
+        uint8_t c = *s++;
+        *dst++ = SkColorSetARGB(c, c, c, c);
+    } while (--width != 0);
+}
+
 // can return NULL
 static ToColorProc ChooseToColorProc(const SkBitmap& src) {
     switch (src.colorType()) {
@@ -673,6 +692,8 @@ static ToColorProc ChooseToColorProc(const SkBitmap& src) {
                 default:
                     return NULL;
             }
+        case kAlpha_8_SkColorType:
+            return ToColor_SA8;
         default:
             break;
     }
