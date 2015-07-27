@@ -18,14 +18,12 @@ package com.android.layoutlib.bridge.android.support;
 
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.util.ReflectionUtils.ReflectionException;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.view.View;
 
-import java.lang.reflect.Method;
-
-import static com.android.layoutlib.bridge.util.ReflectionUtils.ReflectionException;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.getMethod;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.invoke;
 
@@ -53,10 +51,7 @@ public class DesignLibUtil {
             return;
         }
         try {
-            Method setTitle = getMethod(view.getClass(), "setTitle", CharSequence.class);
-            if (setTitle != null) {
-                invoke(setTitle, view, title);
-            }
+            invoke(getMethod(view.getClass(), "setTitle", CharSequence.class), view, title);
         } catch (ReflectionException e) {
             Bridge.getLog().warning(LayoutLog.TAG_INFO,
                     "Error occurred while trying to set title.", e);
