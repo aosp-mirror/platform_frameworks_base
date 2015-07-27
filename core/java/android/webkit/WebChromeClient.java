@@ -284,19 +284,13 @@ public class WebChromeClient {
      * currently set for that origin. The host application should invoke the
      * specified callback with the desired permission state. See
      * {@link GeolocationPermissions} for details.
-     *
-     * If this method isn't overridden, the callback is invoked with permission
-     * denied state.
-     *
      * @param origin The origin of the web content attempting to use the
      *               Geolocation API.
      * @param callback The callback to use to set the permission state for the
      *                 origin.
      */
     public void onGeolocationPermissionsShowPrompt(String origin,
-            GeolocationPermissions.Callback callback) {
-        callback.invoke(origin, false, false);
-    }
+            GeolocationPermissions.Callback callback) {}
 
     /**
      * Notify the host application that a request for Geolocation permissions,
