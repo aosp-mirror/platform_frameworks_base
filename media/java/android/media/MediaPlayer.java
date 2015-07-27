@@ -37,6 +37,7 @@ import android.os.Process;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.OsConstants;
@@ -1234,6 +1235,13 @@ public class MediaPlayer implements SubtitleController.Listener
      */
     public void setWakeMode(Context context, int mode) {
         boolean washeld = false;
+
+        /* Disable persistant wakelocks in media player based on property */
+        if (SystemProperties.getBoolean("audio.offload.ignore_setawake", false) == true) {
+            Log.w(TAG, "IGNORING setWakeMode " + mode);
+            return;
+        }
+
         if (mWakeLock != null) {
             if (mWakeLock.isHeld()) {
                 washeld = true;
