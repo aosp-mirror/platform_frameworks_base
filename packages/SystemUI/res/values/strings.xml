@@ -856,7 +856,7 @@
     <string name="user_logout_notification_title">Logout user</string>
 
     <!-- Text of the notification shown to logout the current user [CHAR LIMIT=60] -->
-    <string name="user_logout_notification_text">To logout the current user, stop user applications.</string>
+    <string name="user_logout_notification_text">Logout current user</string>
 
     <!-- Logout action in the notification shown to logout the current user [CHAR LIMIT=30] -->
     <string name="user_logout_notification_action">LOGOUT USER</string>
