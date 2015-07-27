@@ -345,12 +345,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Vieslietotājs"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Lai dzēstu lietotnes un datus, noņemiet vieslietotāju."</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"NOŅEMT VIESI"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Lietotāja atteikšana"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"Lai atteiktu pašreizējo lietotāju, apturiet lietotāja lietojumprogrammu darbību."</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"ATTEIKT LIETOTĀJU"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vai pievienot jaunu lietotāju?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kad pievienosiet jaunu lietotāju, viņam būs jāizveido savs profils.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Ieslēgts akumulatora enerģijas taupīšanas režīms"</string>

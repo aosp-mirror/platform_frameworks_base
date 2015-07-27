@@ -344,12 +344,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Người dùng khách"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Để xóa ứng dụng và dữ liệu, hãy xóa người dùng khách"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"XÓA KHÁCH"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Đăng xuất người dùng"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"Để đăng xuất người dùng hiện tại, dừng ƯD của người dùng."</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"ĐĂNG XUẤT NGƯỜI DÙNG"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Thêm người dùng mới?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Khi bạn thêm người dùng mới, người dùng đó cần thiết lập dung lượng lưu trữ của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Trình tiết kiệm pin đang bật"</string>

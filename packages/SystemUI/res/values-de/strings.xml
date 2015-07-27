@@ -346,12 +346,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Gastnutzer"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Zum Löschen von Apps und Daten Gastnutzer entfernen"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"Gast entfernen"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Nutzer abmelden"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"Um den aktuellen Nutzer abzumelden, beenden Sie seine Anwendungen."</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"Nutzer abmelden"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Neuen Nutzer hinzufügen?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Wenn Sie einen neuen Nutzer hinzufügen, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Energiesparmodus ist aktiviert"</string>

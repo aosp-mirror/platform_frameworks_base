@@ -344,12 +344,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"अतिथि उपयोगकर्ता"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"ऐप्‍स और डेटा हटाने के लिए, अतिथि उपयोगकर्ता को निकालें"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"अतिथि को निकालें"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"उपयोगकर्ता को प्रस्थान करवाना"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"वर्तमान उपयोगकर्ता को प्रस्थान कराने हेतु, उपयोगकर्ता ऐप्लिकेशन रोकें."</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"उपयोगकर्ता को प्रस्थान करवाएं"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नया उपयोगकर्ता जोड़ें?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उस व्यक्ति को अपना स्थान सेट करना होता है.\n\nकोई भी उपयोगकर्ता अन्य सभी उपयोगकर्ताओं के लिए ऐप्स अपडेट कर सकता है."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"बैटरी सेवर चालू है"</string>

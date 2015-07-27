@@ -344,12 +344,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Pengguna tamu"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Untuk menghapus aplikasi dan data, hapus pengguna tamu"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"HAPUS TAMU"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Mengeluarkan pengguna"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"Untuk mengeluarkan pengguna saat ini, hentikan aplikasi pengguna."</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"KELUARKAN PENGGUNA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Tambahkan pengguna baru?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\n1Pengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Penghemat baterai aktif"</string>

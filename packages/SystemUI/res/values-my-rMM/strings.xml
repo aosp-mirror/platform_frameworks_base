@@ -344,12 +344,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"ဧည့်သည် အသုံးပြုသူ"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"App များနှင့် ဒေတာအား ဖျက်ရန်၊ တခဏသုံးစွဲသူအား ဖယ်ရှားပါ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ဧည့်သည်ကို ဖယ်ထုတ်မည်"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"အသုံးပြုသူ ထွက်လိုက်ပါ"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"လက်ရှိ အသုံးပြုသူ ထွက်သွားရန် အသုံးပြုသူ၏ အပလီကေးရှင်းကို ရပ်လိုက်ပါ။"</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"အသုံးပြုသူ ထွက်လိုက်ပါ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"အသုံးပြုသူ အသစ်ကို ထည့်ရမလား?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"သင်က အသုံးပြုသူ အသစ် တစ်ဦးကို ထည့်ပေးလိုက်လျှင်၊ ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်မည်။\n\n အသုံးပြုသူ မည်သူမဆို ကျန်အသုံးပြုသူ အားလုံးတို့အတွက် appများကို မွမ်းမံပေးနိုင်သည်။"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ဘက်ထရီ ချွေတာသူ ဖွင့်ထား"</string>

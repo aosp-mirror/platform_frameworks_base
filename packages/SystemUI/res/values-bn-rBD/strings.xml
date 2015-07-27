@@ -344,12 +344,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"অতিথি ব্যবহারকারী"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"অ্যাপ্লিকেশান এবং ডেটা মুছে ফেলার জন্য অতিথি ব্যবহারকারী সরান।"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"অতিথি সরান"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"ব্যবহারকারীকে লগ-আউট করুন"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"বর্তমান ব্যবহারকারীকে অগ-আউট করতে, ব্যবহারকারী অ্যাপ্লিকেশানগুলিকে বন্ধ করুন৷"</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"ব্যবহারকারীকে লগ-আউট করুন"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট আপ করে নিতে হবে৷\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন৷"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ব্যাটারি সেভার চালু রয়েছে"</string>

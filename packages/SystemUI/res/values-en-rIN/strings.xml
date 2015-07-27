@@ -344,12 +344,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Guest user"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"To delete apps and data, remove guest user"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"REMOVE GUEST"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Logout user"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"To log out the current user, stop user applications."</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGOUT USER"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Add new user?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Battery saver is on"</string>

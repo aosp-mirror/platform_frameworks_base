@@ -346,12 +346,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"訪客使用者"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"如要刪除應用程式和資料，請移除訪客使用者"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"移除訪客"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"登出使用者"</string>
+    <string name="user_logout_notification_text" msgid="6058349308204461080">"如要登出目前的使用者，請停止使用者應用程式。"</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"登出使用者"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"新增使用者？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"新增的使用者需要自行設定個人空間。\n\n任何使用者均可為所有其他使用者更新應用程式。"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"省電模式已開啟"</string>
@@ -428,8 +425,8 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"熱點"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"工作設定檔"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"這只是測試版本，並不包含完整功能"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"使用者介面調諧器讓您以更多方法修改和自訂 Android 使用者介面。但請小心，這些實驗功能可能會在日後發布時更改、分拆或消失。"</string>
-    <string name="tuner_persistent_warning" msgid="8597333795565621795">"請小心，這些實驗功能可能會在日後發布時更改、分拆或消失。"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"使用者介面調諧器讓您以更多方法修改和自訂 Android 使用者介面。但請小心，這些實驗功能可能會在日後發佈時更改、分拆或消失。"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"請小心，這些實驗功能可能會在日後發佈時更改、分拆或消失。"</string>
     <string name="got_it" msgid="2239653834387972602">"知道了"</string>
     <string name="tuner_toast" msgid="603429811084428439">"恭喜您！系統使用者介面調諧器已新增至「設定」中"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"從「設定」移除"</string>
