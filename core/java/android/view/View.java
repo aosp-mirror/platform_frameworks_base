@@ -3594,6 +3594,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int DRAG_FLAG_GLOBAL = 1;
 
     /**
+     * Flag indicating that the drag shadow will be opaque.  When
+     * {@link #startDrag(ClipData, DragShadowBuilder, Object, int)} is called
+     * with this flag set, the drag shadow will be opaque, otherwise, it will be semitransparent.
+     */
+    public static final int DRAG_FLAG_OPAQUE = 1 << 9;
+
+    /**
      * Vertical scroll factor cached by {@link #getVerticalScrollFactor}.
      */
     private float mVerticalScrollFactor;

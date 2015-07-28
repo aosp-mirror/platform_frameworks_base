@@ -38680,6 +38680,7 @@ package android.view {
     field public static final int ACCESSIBILITY_LIVE_REGION_NONE = 0; // 0x0
     field public static final int ACCESSIBILITY_LIVE_REGION_POLITE = 1; // 0x1
     field public static final android.util.Property<android.view.View, java.lang.Float> ALPHA;
+    field public static final int DRAG_FLAG_OPAQUE = 512; // 0x200
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
     field public static final int DRAWING_CACHE_QUALITY_LOW = 524288; // 0x80000

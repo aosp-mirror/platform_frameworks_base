@@ -7482,9 +7482,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         // TODO(multi-display): support other displays
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
                         final Display display = displayContent.getDisplay();
+
                         SurfaceControl surface = new SurfaceControl(session, "drag surface",
                                 width, height, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
                         surface.setLayerStack(display.getLayerStack());
+                        if ((flags & View.DRAG_FLAG_OPAQUE) == 0) {
+                            surface.setAlpha(.7071f);
+                        }
+
                         if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
                                 + surface + ": CREATE");
                         outSurface.copyFrom(surface);
