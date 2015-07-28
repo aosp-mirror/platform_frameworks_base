@@ -18166,8 +18166,11 @@ package android.net {
     method public boolean requestBandwidthUpdate(android.net.Network);
     method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public void requestNetwork(android.net.NetworkRequest, android.app.PendingIntent);
+    method public deprecated boolean requestRouteToHost(int, int);
     method public deprecated void setNetworkPreference(int);
     method public static deprecated boolean setProcessDefaultNetwork(android.net.Network);
+    method public deprecated int startUsingNetworkFeature(int, java.lang.String);
+    method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
     method public void unregisterNetworkCallback(android.app.PendingIntent);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
