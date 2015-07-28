@@ -548,11 +548,6 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingStableInsets.set(mAttachInfo.mStableInsets);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
-                try {
-                    relayoutWindow(attrs, getHostVisibility(), false);
-                } catch (RemoteException e) {
-                    if (DEBUG_LAYOUT) Log.e(TAG, "failed to relayoutWindow", e);
-                }
                 if (DEBUG_LAYOUT) Log.v(TAG, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
