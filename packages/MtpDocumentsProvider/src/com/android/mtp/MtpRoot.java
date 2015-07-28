@@ -18,12 +18,27 @@ package com.android.mtp;
 
 import android.mtp.MtpStorageInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 class MtpRoot {
     final long mStorageId;
     final String mDescription;
     final long mFreeSpace;
     final long mMaxCapacity;
     final String mVolumeIdentifier;
+
+    @VisibleForTesting
+    MtpRoot(long storageId,
+            String description,
+            long freeSpace,
+            long maxCapacity,
+            String volumeIdentifier) {
+        this.mStorageId = storageId;
+        this.mDescription = description;
+        this.mFreeSpace = freeSpace;
+        this.mMaxCapacity = maxCapacity;
+        this.mVolumeIdentifier = volumeIdentifier;
+    }
 
     MtpRoot(MtpStorageInfo storageInfo) {
         mStorageId = storageInfo.getStorageId();
