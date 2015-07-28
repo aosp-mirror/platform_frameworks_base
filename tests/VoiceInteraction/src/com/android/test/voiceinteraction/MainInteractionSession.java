@@ -72,6 +72,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     VoiceInteractor.PickOptionRequest.Option[] mPendingOptions;
     CharSequence mPendingPrompt;
     Request mPendingRequest;
+    int mCurrentTask = -1;
 
     MainInteractionSession(Context context) {
         super(context);
@@ -310,6 +311,27 @@ public class MainInteractionSession extends VoiceInteractionSession
         if (mState != STATE_IDLE) {
             outInsets.contentInsets.top = mBottomContent.getTop();
             outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT;
+        }
+    }
+
+    @Override
+    public void onTaskStarted(Intent intent, int taskId) {
+        super.onTaskStarted(intent, taskId);
+        mCurrentTask = taskId;
+    }
+
+    @Override
+    public void onTaskFinished(Intent intent, int taskId) {
+        super.onTaskFinished(intent, taskId);
+        if (mCurrentTask == taskId) {
+            mCurrentTask = -1;
+        }
+    }
+
+    @Override
+    public void onLockscreenShown() {
+        if (mCurrentTask < 0) {
+            hide();
         }
     }
 

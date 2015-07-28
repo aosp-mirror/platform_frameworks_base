@@ -65,7 +65,7 @@ final class DreamController {
     private final Intent mDreamingStoppedIntent = new Intent(Intent.ACTION_DREAMING_STOPPED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
-    private final Intent mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+    private final Intent mCloseNotificationShadeIntent;
 
     private DreamRecord mCurrentDream;
 
@@ -92,6 +92,8 @@ final class DreamController {
         mHandler = handler;
         mListener = listener;
         mIWindowManager = WindowManagerGlobal.getWindowManagerService();
+        mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        mCloseNotificationShadeIntent.putExtra("reason", "dream");
     }
 
     public void dump(PrintWriter pw) {
