@@ -37,7 +37,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -55,6 +57,8 @@ import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -369,6 +373,34 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             } catch (RemoteException e) {
             }
         }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            DebugUtils.buildShortClassTag(this, sb);
+            sb.append(" ");
+            sb.append(mInterface.asBinder());
+            sb.append(" pkg=");
+            sb.append(mCallingPackage);
+            sb.append(" uid=");
+            UserHandle.formatUid(sb, mCallingUid);
+            sb.append('}');
+            return sb.toString();
+        }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            writer.print(prefix); writer.print("mInterface=");
+            writer.println(mInterface.asBinder());
+            writer.print(prefix); writer.print("mCallingPackage="); writer.print(mCallingPackage);
+            writer.print(" mCallingUid="); UserHandle.formatUid(writer, mCallingUid);
+            writer.println();
+            writer.print(prefix); writer.print("mCallback=");
+            writer.println(mCallback.asBinder());
+            if (mExtras != null) {
+                writer.print(prefix); writer.print("mExtras=");
+                writer.println(mExtras);
+            }
+        }
     }
 
     /**
@@ -421,6 +453,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 mCallback.deliverConfirmationResult(mInterface, confirmed, result);
             } catch (RemoteException e) {
             }
+        }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mPrompt=");
+            writer.println(mPrompt);
         }
     }
 
@@ -504,6 +542,34 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
             sendPickOptionResult(true, selections, result);
         }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mPrompt=");
+            writer.println(mPrompt);
+            if (mOptions != null) {
+                writer.print(prefix); writer.println("Options:");
+                for (int i=0; i<mOptions.length; i++) {
+                    VoiceInteractor.PickOptionRequest.Option op = mOptions[i];
+                    writer.print(prefix); writer.print("  #"); writer.print(i); writer.println(":");
+                    writer.print(prefix); writer.print("    mLabel=");
+                    writer.println(op.getLabel());
+                    writer.print(prefix); writer.print("    mIndex=");
+                    writer.println(op.getIndex());
+                    if (op.countSynonyms() > 0) {
+                        writer.print(prefix); writer.println("    Synonyms:");
+                        for (int j=0; j<op.countSynonyms(); j++) {
+                            writer.print(prefix); writer.print("      #"); writer.print(j);
+                            writer.print(": "); writer.println(op.getSynonymAt(j));
+                        }
+                    }
+                    if (op.getExtras() != null) {
+                        writer.print(prefix); writer.print("    mExtras=");
+                        writer.println(op.getExtras());
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -557,6 +623,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             } catch (RemoteException e) {
             }
         }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mPrompt=");
+            writer.println(mPrompt);
+        }
     }
 
     /**
@@ -606,6 +678,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 mCallback.deliverAbortVoiceResult(mInterface, result);
             } catch (RemoteException e) {
             }
+        }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mPrompt=");
+            writer.println(mPrompt);
         }
     }
 
@@ -660,6 +738,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          */
         public void sendResult(Bundle result) {
             sendCommandResult(true, result);
+        }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mCommand=");
+            writer.println(mCommand);
         }
     }
 
@@ -1445,5 +1529,38 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param request The request that is being canceled.
      */
     public void onCancelRequest(Request request) {
+    }
+
+    /**
+     * Print the Service's state into the given stream.  This gets invoked by
+     * {@link VoiceInteractionSessionService} when its Service
+     * {@link android.app.Service#dump} method is called.
+     *
+     * @param prefix Text to print at the front of each line.
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param writer The PrintWriter to which you should dump your state.  This will be
+     * closed for you after you return.
+     * @param args additional arguments to the dump request.
+     */
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        writer.print(prefix); writer.print("mToken="); writer.println(mToken);
+        writer.print(prefix); writer.print("mTheme=#"); writer.println(Integer.toHexString(mTheme));
+        writer.print(prefix); writer.print("mInitialized="); writer.println(mInitialized);
+        writer.print(prefix); writer.print("mWindowAdded="); writer.print(mWindowAdded);
+        writer.print(" mWindowVisible="); writer.println(mWindowVisible);
+        writer.print(prefix); writer.print("mWindowWasVisible="); writer.print(mWindowWasVisible);
+        writer.print(" mInShowWindow="); writer.println(mInShowWindow);
+        if (mActiveRequests.size() > 0) {
+            writer.print(prefix); writer.println("Active requests:");
+            String innerPrefix = prefix + "    ";
+            for (int i=0; i<mActiveRequests.size(); i++) {
+                Request req = mActiveRequests.valueAt(i);
+                writer.print(prefix); writer.print("  #"); writer.print(i);
+                writer.print(": ");
+                writer.println(req);
+                req.dump(innerPrefix, fd, writer, args);
+
+            }
+        }
     }
 }
