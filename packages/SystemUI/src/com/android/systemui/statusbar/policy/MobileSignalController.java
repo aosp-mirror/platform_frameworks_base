@@ -25,6 +25,7 @@ import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -389,7 +390,7 @@ public class MobileSignalController extends SignalController<
         }
         // Fill in the network name if we think we have it.
         if (mCurrentState.networkName == mNetworkNameDefault && mServiceState != null
-                && mServiceState.getOperatorAlphaShort() != null) {
+                && !TextUtils.isEmpty(mServiceState.getOperatorAlphaShort())) {
             mCurrentState.networkName = mServiceState.getOperatorAlphaShort();
         }
 
