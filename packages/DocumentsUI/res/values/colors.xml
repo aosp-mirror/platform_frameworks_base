@@ -17,8 +17,14 @@
 <resources>
     <color name="material_grey_50">#fffafafa</color>
     <color name="material_grey_300">#ffeeeeee</color>
+    <color name="material_grey_600">#ff757575</color>
+    <color name="material_grey_800">#ff424242</color>
+    <color name="material_blue_700">#ff1976d2</color>
+    <color name="material_blue_500">#ff2196f3</color>
 
     <color name="directory_background">@color/material_grey_300</color>
     <color name="item_doc_grid_background">#FFFFFFFF</color>
     <color name="item_doc_grid_protect_background">#88000000</color>
+    <color name="status_bar_background">@color/material_blue_700</color>
+    <color name="action_mode_status_bar_background">@color/material_grey_800</color>
 </resources>

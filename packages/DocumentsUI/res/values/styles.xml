@@ -54,12 +54,17 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
     </style>
 
+    <style name="ActionModeStyle" parent="@android:style/Widget.Material.Light.ActionMode">
+        <item name="android:background">@color/material_grey_600</item>
+    </style>
+
     <style name="StandaloneTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
         <item name="android:actionBarWidgetTheme">@null</item>
 
-        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
-        <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
-        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
+        <item name="android:colorPrimaryDark">@color/status_bar_background</item>
+        <item name="android:colorPrimary">@color/material_blue_500</item>
+        <item name="android:colorAccent">@color/material_blue_700</item>
+        <item name="android:actionModeStyle">@style/ActionModeStyle</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
