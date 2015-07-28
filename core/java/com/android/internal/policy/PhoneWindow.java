@@ -72,6 +72,7 @@ import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.DecorContentParent;
 import com.android.internal.widget.FloatingToolbar;
+import com.android.internal.widget.NonClientDecorView;
 import com.android.internal.widget.SwipeDismissLayout;
 
 import android.app.ActivityManager;
@@ -1270,7 +1271,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @param st The panel being initialized.
      */
     protected boolean initializePanelDecor(PanelFeatureState st) {
-        st.decorView = new DecorView(getContext(), st.featureId);
+        st.decorView = generateDecor(st.featureId);
         st.gravity = Gravity.CENTER | Gravity.BOTTOM;
         st.setStyle(getContext());
         TypedArray a = getContext().obtainStyledAttributes(null,
@@ -2203,6 +2204,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private final Rect mFramePadding = new Rect();
 
         private final Rect mFrameOffsets = new Rect();
+
+        // True if a non client area decor exists.
+        private boolean mHasNonClientDecor = false;
 
         private boolean mChanging;
 
@@ -3148,52 +3152,58 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return;
             }
 
-            setPadding(mFramePadding.left + mBackgroundPadding.left, mFramePadding.top
-                    + mBackgroundPadding.top, mFramePadding.right + mBackgroundPadding.right,
+            setPadding(mFramePadding.left + mBackgroundPadding.left,
+                    mFramePadding.top + mBackgroundPadding.top,
+                    mFramePadding.right + mBackgroundPadding.right,
                     mFramePadding.bottom + mBackgroundPadding.bottom);
             requestLayout();
             invalidate();
 
             int opacity = PixelFormat.OPAQUE;
-            // Note: if there is no background, we will assume opaque. The
-            // common case seems to be that an application sets there to be
-            // no background so it can draw everything itself. For that,
-            // we would like to assume OPAQUE and let the app force it to
-            // the slower TRANSLUCENT mode if that is really what it wants.
-            Drawable bg = getBackground();
-            Drawable fg = getForeground();
-            if (bg != null) {
-                if (fg == null) {
-                    opacity = bg.getOpacity();
-                } else if (mFramePadding.left <= 0 && mFramePadding.top <= 0
-                        && mFramePadding.right <= 0 && mFramePadding.bottom <= 0) {
-                    // If the frame padding is zero, then we can be opaque
-                    // if either the frame -or- the background is opaque.
-                    int fop = fg.getOpacity();
-                    int bop = bg.getOpacity();
-                    if (false)
-                        Log.v(TAG, "Background opacity: " + bop + ", Frame opacity: " + fop);
-                    if (fop == PixelFormat.OPAQUE || bop == PixelFormat.OPAQUE) {
-                        opacity = PixelFormat.OPAQUE;
-                    } else if (fop == PixelFormat.UNKNOWN) {
-                        opacity = bop;
-                    } else if (bop == PixelFormat.UNKNOWN) {
-                        opacity = fop;
+            if (windowHasShadow()) {
+                // If the window has a shadow, it must be translucent.
+                opacity = PixelFormat.TRANSLUCENT;
+            } else{
+                // Note: If there is no background, we will assume opaque. The
+                // common case seems to be that an application sets there to be
+                // no background so it can draw everything itself. For that,
+                // we would like to assume OPAQUE and let the app force it to
+                // the slower TRANSLUCENT mode if that is really what it wants.
+                Drawable bg = getBackground();
+                Drawable fg = getForeground();
+                if (bg != null) {
+                    if (fg == null) {
+                        opacity = bg.getOpacity();
+                    } else if (mFramePadding.left <= 0 && mFramePadding.top <= 0
+                            && mFramePadding.right <= 0 && mFramePadding.bottom <= 0) {
+                        // If the frame padding is zero, then we can be opaque
+                        // if either the frame -or- the background is opaque.
+                        int fop = fg.getOpacity();
+                        int bop = bg.getOpacity();
+                        if (false)
+                            Log.v(TAG, "Background opacity: " + bop + ", Frame opacity: " + fop);
+                        if (fop == PixelFormat.OPAQUE || bop == PixelFormat.OPAQUE) {
+                            opacity = PixelFormat.OPAQUE;
+                        } else if (fop == PixelFormat.UNKNOWN) {
+                            opacity = bop;
+                        } else if (bop == PixelFormat.UNKNOWN) {
+                            opacity = fop;
+                        } else {
+                            opacity = Drawable.resolveOpacity(fop, bop);
+                        }
                     } else {
-                        opacity = Drawable.resolveOpacity(fop, bop);
+                        // For now we have to assume translucent if there is a
+                        // frame with padding... there is no way to tell if the
+                        // frame and background together will draw all pixels.
+                        if (false)
+                            Log.v(TAG, "Padding: " + mFramePadding);
+                        opacity = PixelFormat.TRANSLUCENT;
                     }
-                } else {
-                    // For now we have to assume translucent if there is a
-                    // frame with padding... there is no way to tell if the
-                    // frame and background together will draw all pixels.
-                    if (false)
-                        Log.v(TAG, "Padding: " + mFramePadding);
-                    opacity = PixelFormat.TRANSLUCENT;
                 }
+                if (false)
+                    Log.v(TAG, "Background: " + bg + ", Frame: " + fg);
             }
 
-            if (false)
-                Log.v(TAG, "Background: " + bg + ", Frame: " + fg);
             if (false)
                 Log.v(TAG, "Selected default opacity: " + opacity);
 
@@ -3401,8 +3411,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         }
                     };
                 } else {
-                    ViewStub stub = (ViewStub) findViewById(
-                            R.id.action_mode_bar_stub);
+                    ViewStub stub = (ViewStub) findViewById(R.id.action_mode_bar_stub);
                     if (stub != null) {
                         mPrimaryActionModeView = (ActionBarContextView) stub.inflate();
                     }
@@ -3488,6 +3497,28 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mFloatingActionMode.invalidate();  // Will show the floating toolbar if necessary.
             mFloatingActionModeOriginatingView.getViewTreeObserver()
                 .addOnPreDrawListener(mFloatingToolbarPreDrawListener);
+        }
+
+        // Set when the window is free floating and a non client decor frame was added.
+        void enableNonClientDecor(boolean enable) {
+            if (mHasNonClientDecor != enable) {
+                mHasNonClientDecor = enable;
+                if (getForeground() != null) {
+                    drawableChanged();
+                }
+            }
+        }
+
+        // Returns true if the window has a non client decor.
+        private boolean windowHasNonClientDecor() {
+            return mHasNonClientDecor;
+        }
+
+        // Returns true if the Window is free floating and has a shadow. Note that non overlapping
+        // windows do not have a shadow since it could not be seen anyways (a small screen / tablet
+        // "tiles" the windows side by side but does not overlap them).
+        private boolean windowHasShadow() {
+            return windowHasNonClientDecor() && getElevation() > 0;
         }
 
         /**
@@ -3599,8 +3630,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    protected DecorView generateDecor() {
-        return new DecorView(getContext(), -1);
+    protected DecorView generateDecor(int featureId) {
+        return new DecorView(getContext(), featureId);
     }
 
     protected void setFeatureFromAttrs(int featureId, TypedArray attrs,
@@ -3879,8 +3910,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         mDecor.startChanging();
 
+        NonClientDecorView nonClientDecorView = createNonClientDecorView();
         View in = mLayoutInflater.inflate(layoutResource, null);
-        decor.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        if (nonClientDecorView != null) {
+            decor.addView(nonClientDecorView,
+                    new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+            nonClientDecorView.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        } else {
+            decor.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        }
         mContentRoot = (ViewGroup) in;
 
         ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);
@@ -3936,6 +3974,54 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return contentParent;
     }
 
+    // Free floating overlapping windows require a non client decor with a caption and shadow..
+    private NonClientDecorView createNonClientDecorView() {
+        boolean needsDecor = true;
+        NonClientDecorView nonClientDecorView = null;
+
+        final WindowManager.LayoutParams attrs = getAttributes();
+        // TODO(skuhne): Use the associated stack to figure out if the window is on the free style
+        // desktop, the side by side desktop or the full screen desktop. With that informations the
+        // choice is fairly easy to decide.
+        // => This is only a kludge for now to suppress fullscreen windows, recents, launcher, etc..
+        boolean isFullscreen =
+                0 != ((mDecor.getWindowSystemUiVisibility() | mDecor.getSystemUiVisibility()) &
+                        (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION));
+        boolean isApplication = attrs.type != TYPE_BASE_APPLICATION &&
+                attrs.type != TYPE_APPLICATION;
+
+        // We do not show the non client decor if...
+        // - this is a floating dialog (which is not a real window, e.g. it cannot be maximized).
+        // - it is not an application (special windows have special functions, e.g text selector).
+        // - the application is full screen, drawing everything (since the decor would be out of the
+        //   screen in that case and could not be seen).
+        if (isFloating() || isFullscreen || isApplication) {
+            needsDecor = false;
+        }
+
+        if (needsDecor) {
+            // TODO(skuhne): If running in side by side mode on a device - turn off the shadow.
+            boolean windowHasShadow = true;
+            // Dependent on the brightness of the used title we either use the
+            // dark or the light button frame.
+            TypedValue value = new TypedValue();
+            getContext().getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
+            if (Color.brightness(value.data) < 0.5) {
+                nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
+                        R.layout.non_client_decor_dark, null);
+            } else {
+                nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
+                        R.layout.non_client_decor_light, null);
+            }
+            nonClientDecorView.setPhoneWindow(this, windowHasShadow);
+        }
+
+        // Tell the Decor if it has a non client decor.
+        mDecor.enableNonClientDecor(needsDecor);
+
+        return nonClientDecorView;
+    }
+
     /** @hide */
     public void alwaysReadCloseOnTouchAttr() {
         mAlwaysReadCloseOnTouchAttr = true;
@@ -3943,7 +4029,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private void installDecor() {
         if (mDecor == null) {
-            mDecor = generateDecor();
+            mDecor = generateDecor(-1);
             mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
             mDecor.setIsRootNamespace(true);
             if (!mInvalidatePanelMenuPosted && mInvalidatePanelMenuFeatures != 0) {

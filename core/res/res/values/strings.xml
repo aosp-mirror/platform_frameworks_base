@@ -4056,6 +4056,12 @@
     <!-- Content description for the button that closes the floating toolbar overflow. [CHAR LIMIT=NONE] -->
     <string name="floating_toolbar_close_overflow_description">Close overflow</string>
 
+    <!-- Free style window strings -->
+    <!-- Accessibility text for the maximize window button -->
+    <string name="maximize_button_text">Maximize</string>
+    <!-- Accessibility text for the close window button -->
+    <string name="close_button_text">Close</string>
+
     <!-- Ellipsis character to appear in notification templates, e.g.
          notification_template_material_inbox.xml.
          DO NOT TRANSLATE -->

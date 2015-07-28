@@ -1939,6 +1939,10 @@
 
   <!-- From Phone -->
   <java-symbol type="bool" name="config_built_in_sip_phone" />
+  <java-symbol type="id" name="maximize_window" />
+  <java-symbol type="id" name="close_window" />
+  <java-symbol type="layout" name="non_client_decor_light" />
+  <java-symbol type="layout" name="non_client_decor_dark" />
 
   <!-- From TelephonyProvider -->
   <java-symbol type="xml" name="apns" />
