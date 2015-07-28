@@ -214,7 +214,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             disabledContext |= getUserDisabledShowContextLocked();
             boolean structureEnabled = isAssistDataAllowed
                     && (disabledContext&VoiceInteractionSession.SHOW_WITH_ASSIST) == 0;
-            boolean screenshotEnabled = isAssistDataAllowed
+            boolean screenshotEnabled = isAssistDataAllowed && structureEnabled
                     && (disabledContext&VoiceInteractionSession.SHOW_WITH_SCREENSHOT) == 0;
             mShowArgs = args;
             mShowFlags = flags;
