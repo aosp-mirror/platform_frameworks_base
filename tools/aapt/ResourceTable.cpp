@@ -4466,6 +4466,37 @@ static int getMinSdkVersion(const Bundle* bundle) {
     return 0;
 }
 
+static bool shouldGenerateVersionedResource(const sp<ResourceTable::ConfigList>& configList,
+                                            const ConfigDescription& sourceConfig,
+                                            const int sdkVersionToGenerate) {
+    assert(sdkVersionToGenerate > sourceConfig.sdkVersion);
+    const DefaultKeyedVector<ConfigDescription, sp<ResourceTable::Entry>>& entries
+            = configList->getEntries();
+    ssize_t idx = entries.indexOfKey(sourceConfig);
+
+    // The source config came from this list, so it should be here.
+    assert(idx >= 0);
+
+    idx += 1;
+    if (static_cast<size_t>(idx) >= entries.size()) {
+        // This is the last configuration, so we should generate a versioned resource.
+        return true;
+    }
+
+    const ConfigDescription& nextConfig = entries.keyAt(idx);
+
+    // Build a configuration that is the same as the source config,
+    // but with the SDK level of the next config. If they are the same,
+    // then they only differ in SDK level. If the next configs SDK level is
+    // higher than the one we want to generate, we must generate it.
+    ConfigDescription tempConfig(sourceConfig);
+    tempConfig.sdkVersion = nextConfig.sdkVersion;
+    if (nextConfig == tempConfig) {
+        return sdkVersionToGenerate < nextConfig.sdkVersion;
+    }
+    return false;
+}
+
 /**
  * Modifies the entries in the resource table to account for compatibility
  * issues with older versions of Android.
@@ -4574,6 +4605,11 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     for (size_t i = 0; i < sdkCount; i++) {
                         const int sdkLevel = attributesToRemove.keyAt(i);
 
+                        if (!shouldGenerateVersionedResource(c, config, sdkLevel)) {
+                            // There is a style that will override this generated one.
+                            continue;
+                        }
+
                         // Duplicate the entry under the same configuration
                         // but with sdkVersion == sdkLevel.
                         ConfigDescription newConfig(config);
@@ -4610,13 +4646,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
 
                 const size_t entriesToAddCount = entriesToAdd.size();
                 for (size_t i = 0; i < entriesToAddCount; i++) {
-                    if (entries.indexOfKey(entriesToAdd[i].key) >= 0) {
-                        // An entry already exists for this config.
-                        // That means that any attributes that were
-                        // defined in L in the original bag will be overriden
-                        // anyways on L devices, so we do nothing.
-                        continue;
-                    }
+                    assert(entries.indexOfKey(entriesToAdd[i].key) < 0);
 
                     if (bundle->getVerbose()) {
                         entriesToAdd[i].value->getPos()
@@ -4662,8 +4692,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     }
 
     sp<XMLNode> newRoot = NULL;
-    ConfigDescription newConfig(target->getGroupEntry().toParams());
-    newConfig.sdkVersion = SDK_LOLLIPOP_MR1;
+    int sdkVersionToGenerate = SDK_LOLLIPOP_MR1;
 
     Vector<sp<XMLNode> > nodesToVisit;
     nodesToVisit.push(root);
@@ -4689,9 +4718,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
                 // Find the smallest sdk version that we need to synthesize for
                 // and do that one. Subsequent versions will be processed on
                 // the next pass.
-                if (sdkLevel < newConfig.sdkVersion) {
-                    newConfig.sdkVersion = sdkLevel;
-                }
+                sdkVersionToGenerate = std::min(sdkLevel, sdkVersionToGenerate);
 
                 if (bundle->getVerbose()) {
                     SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
@@ -4721,8 +4748,10 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     // Look to see if we already have an overriding v21 configuration.
     sp<ConfigList> cl = getConfigList(String16(mAssets->getPackage()),
             String16(target->getResourceType()), resourceName);
-    if (cl->getEntries().indexOfKey(newConfig) < 0) {
+    if (shouldGenerateVersionedResource(cl, config, sdkVersionToGenerate)) {
         // We don't have an overriding entry for v21, so we must duplicate this one.
+        ConfigDescription newConfig(config);
+        newConfig.sdkVersion = sdkVersionToGenerate;
         sp<AaptFile> newFile = new AaptFile(target->getSourceFile(),
                 AaptGroupEntry(newConfig), target->getResourceType());
         String8 resPath = String8::format("res/%s/%s",
@@ -4760,7 +4789,8 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     return NO_ERROR;
 }
 
-void ResourceTable::getDensityVaryingResources(KeyedVector<Symbol, Vector<SymbolDefinition> >& resources) {
+void ResourceTable::getDensityVaryingResources(
+        KeyedVector<Symbol, Vector<SymbolDefinition> >& resources) {
     const ConfigDescription nullConfig;
 
     const size_t packageCount = mOrderedPackages.size();
@@ -4771,19 +4801,23 @@ void ResourceTable::getDensityVaryingResources(KeyedVector<Symbol, Vector<Symbol
             const Vector<sp<ConfigList> >& configs = types[t]->getOrderedConfigs();
             const size_t configCount = configs.size();
             for (size_t c = 0; c < configCount; c++) {
-                const DefaultKeyedVector<ConfigDescription, sp<Entry> >& configEntries = configs[c]->getEntries();
+                const DefaultKeyedVector<ConfigDescription, sp<Entry> >& configEntries
+                        = configs[c]->getEntries();
                 const size_t configEntryCount = configEntries.size();
                 for (size_t ce = 0; ce < configEntryCount; ce++) {
                     const ConfigDescription& config = configEntries.keyAt(ce);
                     if (AaptConfig::isDensityOnly(config)) {
                         // This configuration only varies with regards to density.
-                        const Symbol symbol(mOrderedPackages[p]->getName(),
+                        const Symbol symbol(
+                                mOrderedPackages[p]->getName(),
                                 types[t]->getName(),
                                 configs[c]->getName(),
-                                getResId(mOrderedPackages[p], types[t], configs[c]->getEntryIndex()));
+                                getResId(mOrderedPackages[p], types[t],
+                                         configs[c]->getEntryIndex()));
 
                         const sp<Entry>& entry = configEntries.valueAt(ce);
-                        AaptUtil::appendValue(resources, symbol, SymbolDefinition(symbol, config, entry->getPos()));
+                        AaptUtil::appendValue(resources, symbol,
+                                              SymbolDefinition(symbol, config, entry->getPos()));
                     }
                 }
             }
