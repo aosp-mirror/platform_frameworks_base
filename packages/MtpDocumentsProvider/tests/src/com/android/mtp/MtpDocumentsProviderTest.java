@@ -37,13 +37,23 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         provider.closeDevice(MtpManagerMock.SUCCESS_DEVICE_ID);
         assertEquals(2, resolver.changeCount);
 
-        provider.openDevice(MtpManagerMock.FAILURE_DEVICE_ID);
+        int exceptionCounter = 0;
+        try {
+            provider.openDevice(MtpManagerMock.FAILURE_DEVICE_ID);
+        } catch (IOException error) {
+            exceptionCounter++;
+        }
         assertEquals(2, resolver.changeCount);
-        provider.closeDevice(MtpManagerMock.FAILURE_DEVICE_ID);
+        try {
+            provider.closeDevice(MtpManagerMock.FAILURE_DEVICE_ID);
+        } catch (IOException error) {
+            exceptionCounter++;
+        }
         assertEquals(2, resolver.changeCount);
+        assertEquals(2, exceptionCounter);
     }
 
-    public void testCloseAllDevices() {
+    public void testCloseAllDevices() throws IOException {
         final ContentResolver resolver = new ContentResolver();
         final MtpDocumentsProvider provider = new MtpDocumentsProvider();
         provider.onCreateForTesting(new MtpManagerMock(getContext()), resolver);

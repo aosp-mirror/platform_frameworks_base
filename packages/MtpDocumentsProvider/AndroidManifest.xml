@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.mtp"
           android:sharedUserId="android.media">
+    <uses-feature android:name="android.hardware.usb.host" />
     <application android:label="@string/app_label">
         <provider
             android:name=".MtpDocumentsProvider"
@@ -14,5 +15,6 @@
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
         </provider>
+        <service android:name=".MtpDocumentsService"></service>
     </application>
 </manifest>
