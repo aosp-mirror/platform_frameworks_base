@@ -76,11 +76,7 @@ class MtpManager {
     }
 
     synchronized void closeDevice(int deviceId) throws IOException {
-        final MtpDevice device = mDevices.get(deviceId);
-        if (device == null) {
-            throw new IOException("USB device " + deviceId + " is not opened.");
-        }
-        mDevices.get(deviceId).close();
+        getDevice(deviceId).close();
         mDevices.remove(deviceId);
     }
 
@@ -90,5 +86,23 @@ class MtpManager {
             result[i] = mDevices.keyAt(i);
         }
         return result;
+    }
+
+    synchronized MtpRoot[] getRoots(int deviceId) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        final int[] storageIds = device.getStorageIds();
+        final MtpRoot[] results = new MtpRoot[storageIds.length];
+        for (int i = 0; i < storageIds.length; i++) {
+            results[i] = new MtpRoot(device.getStorageInfo(storageIds[i]));
+        }
+        return results;
+    }
+
+    private MtpDevice getDevice(int deviceId) throws IOException {
+        final MtpDevice device = mDevices.get(deviceId);
+        if (device == null) {
+            throw new IOException("USB device " + deviceId + " is not opened.");
+        }
+        return device;
     }
 }
