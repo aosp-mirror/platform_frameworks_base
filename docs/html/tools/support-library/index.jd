@@ -59,9 +59,52 @@ page.title=Support Library
 <p>This section provides details about the Support Library package releases.</p>
 
 
+
 <div class="toggle-content opened">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22.2.1</a> <em>(July 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added the {@code hide()} and {@code show()} methods to the
+            {@link android.support.design.widget.FloatingActionButton} class for programmatic
+            triggering of animations.  </li>
+          <li>Added the {@code LENGTH_INDEFINITE} constant to the
+            {@link android.support.design.widget.Snackbar} class for showing a snackbar
+            until it is dismissed or another snackbar is shown. Also, added the
+            {@link android.support.design.widget.Snackbar#setActionTextColor(int)} and
+            {@link android.support.design.widget.Snackbar#setActionTextColor(ColorStateList)}
+            methods.  </li>
+          <li>Added the {@code getSelectedTabPosition()} method to the
+            {@link android.support.design.widget.TabLayout} class for retrieving the currently
+            selected tab. </li>
+          <li>Provided a fully fluent API for the
+            {@link android.support.v7.app.NotificationCompat.MediaStyle} class for method
+            chaining.  </li>
+           <li>Added convenience methods to the
+             {@link android.support.v7.widget.RecyclerView} for batch insertion of items. </li>
+         </ul>
+       </dd>
+    </dl>
+
+    <p>For a complete list of the Support Library changes, see the
+    <a href="{@docRoot}sdk/support_api_diff/22.2.0/changes.html">Support
+    Library API Differences Report</a>.  </p>
+
+
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22.2.0</a> <em>(May 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -143,7 +186,7 @@ page.title=Support Library
             {@link android.support.v4.media.session.PlaybackStateCompat.Builder#setExtras setExtras()}
             methods to the
             {@link android.support.v4.media.session.PlaybackStateCompat.Builder} class for adding
-            adding custom actions to a playback state.
+            custom actions to a playback state.
           </li>
           <li>Added the
 {@link android.support.v4.media.session.PlaybackStateCompat.CustomAction#fromCustomAction fromCustomAction()} and
@@ -203,12 +246,14 @@ page.title=Support Library
        </ul>
       </dd>
 
+    <p>For a complete list of the Support Library changes, see the
+    <a href="{@docRoot}sdk/support_api_diff/22.2.0/changes.html">Support
+    Library API Differences Report</a>.  </p>
 
     </dl>
 
   </div>
 </div> <!-- end of collapsible section -->
-
 
 
 
