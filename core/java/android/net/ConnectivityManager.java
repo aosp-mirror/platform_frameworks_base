@@ -892,7 +892,6 @@ public class ConnectivityManager {
      *
      * @deprecated Deprecated in favor of the cleaner
      *             {@link #requestNetwork(NetworkRequest, NetworkCallback)} API.
-     * @removed
      */
     public int startUsingNetworkFeature(int networkType, String feature) {
         NetworkCapabilities netCap = networkCapabilitiesForFeature(networkType, feature);
@@ -939,8 +938,7 @@ public class ConnectivityManager {
      * implementation+feature combination, except that the value {@code -1}
      * always indicates failure.
      *
-     * @deprecated Deprecated in favor of the cleaner {@link unregisterNetworkCallback} API.
-     * @removed
+     * @deprecated Deprecated in favor of the cleaner {@link #unregisterNetworkCallback} API.
      */
     public int stopUsingNetworkFeature(int networkType, String feature) {
         NetworkCapabilities netCap = networkCapabilitiesForFeature(networkType, feature);
@@ -1356,7 +1354,6 @@ public class ConnectivityManager {
      * @deprecated Deprecated in favor of the
      *             {@link #requestNetwork(NetworkRequest, NetworkCallback)},
      *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} API.
-     * @removed
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
         return requestRouteToHostAddress(networkType, NetworkUtils.intToInetAddress(hostAddress));
@@ -1375,7 +1372,6 @@ public class ConnectivityManager {
      * @hide
      * @deprecated Deprecated in favor of the {@link #requestNetwork} and
      *             {@link #bindProcessToNetwork} API.
-     * @removed
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         try {

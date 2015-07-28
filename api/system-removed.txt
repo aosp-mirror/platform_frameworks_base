@@ -34,13 +34,6 @@ package android.media {
 
 package android.net {
 
-  public class ConnectivityManager {
-    method public deprecated boolean requestRouteToHost(int, int);
-    method public deprecated boolean requestRouteToHostAddress(int, java.net.InetAddress);
-    method public deprecated int startUsingNetworkFeature(int, java.lang.String);
-    method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
-  }
-
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
     method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
   }
