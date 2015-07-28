@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.android.tests.accessibilityeventslogger;
+package com.android.tests.accessibilityeventlogger;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -23,7 +23,7 @@ import android.widget.Toast;
 import java.util.Locale;
 
 public class AELogger extends AccessibilityService {
-    private static final String TAG = AELogger.class.getCanonicalName();
+    private static final String TAG = AELogger.class.getSimpleName();
 
     private static final int TOAST_EVENT_TYPES =
             AccessibilityEvent.TYPE_VIEW_CLICKED | AccessibilityEvent.TYPE_VIEW_LONG_CLICKED;
@@ -42,8 +42,10 @@ public class AELogger extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        final String eventClass = event.getClassName().toString();
-        final String eventText = String.valueOf(event.getText()).toLowerCase(Locale.getDefault());
+        final String eventClass = event.getClassName() != null
+                ? event.getClassName().toString() : null;
+        final String eventText = event.getText() != null
+                ? String.valueOf(event.getText()).toLowerCase(Locale.getDefault()) : null;
         final String eventType = AccessibilityEvent.eventTypeToString(event.getEventType());
 
         Log.d(TAG, String.format(
