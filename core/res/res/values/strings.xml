@@ -1221,6 +1221,9 @@
     <string-array name="fingerprint_error_vendor">
     </string-array>
 
+    <!-- Content description which should be used for the fingerprint icon. -->
+    <string name="fingerprint_icon_content_description">Fingerprint icon</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readSyncSettings">read sync settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

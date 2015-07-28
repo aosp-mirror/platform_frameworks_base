@@ -2653,6 +2653,8 @@
     <public type="id" name="accessibilityActionScrollRight" id="0x0102003b" />
     <public type="id" name="accessibilityActionContextClick" id="0x0102003c" />
 
+    <public type="string" name="fingerprint_icon_content_description" />
+
   <!-- ===============================================================
        Resources added in version N of the platform
        =============================================================== -->
