@@ -605,6 +605,8 @@ public class DirectoryFragment extends Fragment {
                 if (mActionMode == null) {
                     if (DEBUG) Log.d(TAG, "Yeah. Starting action mode.");
                     mActionMode = getActivity().startActionMode(this);
+                    getActivity().getWindow().setStatusBarColor(
+                        getResources().getColor(R.color.action_mode_status_bar_background));
                 }
                 updateActionMenu();
             } else {
@@ -612,6 +614,8 @@ public class DirectoryFragment extends Fragment {
                 if (mActionMode != null) {
                     mActionMode.finish();
                 }
+                getActivity().getWindow().setStatusBarColor(
+                    getResources().getColor(R.color.status_bar_background));
             }
 
             if (mActionMode != null) {
