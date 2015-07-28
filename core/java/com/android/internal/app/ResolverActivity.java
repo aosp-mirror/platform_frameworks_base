@@ -500,7 +500,7 @@ public class ResolverActivity extends Activity {
             mPackageMonitor.unregister();
             mRegistered = false;
         }
-        if ((getIntent().getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+        if ((getIntent().getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 && !isVoiceInteraction()) {
             // This resolver is in the unusual situation where it has been
             // launched at the top of a new task.  We don't let it be added
             // to the recent tasks shown to the user, and we need to make sure
@@ -810,8 +810,13 @@ public class ResolverActivity extends Activity {
 
     void configureContentView(List<Intent> payloadIntents, Intent[] initialIntents,
             List<ResolveInfo> rList, boolean alwaysUseOption) {
+        // The last argument of createAdapter is whether to do special handling
+        // of the last used choice to highlight it in the list.  We need to always
+        // turn this off when running under voice interaction, since it results in
+        // a more complicated UI that the current voice interaction flow is not able
+        // to handle.
         mAdapter = createAdapter(this, payloadIntents, initialIntents, rList,
-                mLaunchedFromUid, alwaysUseOption);
+                mLaunchedFromUid, alwaysUseOption && !isVoiceInteraction());
 
         final int layoutId;
         if (mAdapter.hasFilteredItem()) {
