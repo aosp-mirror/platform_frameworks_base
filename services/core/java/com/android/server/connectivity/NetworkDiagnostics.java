@@ -20,6 +20,7 @@ import static android.system.OsConstants.*;
 
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.os.SystemClock;
 import android.system.ErrnoException;
@@ -78,6 +79,10 @@ import libcore.io.IoUtils;
  */
 public class NetworkDiagnostics {
     private static final String TAG = "NetworkDiagnostics";
+
+    private static final InetAddress TEST_DNS4 = NetworkUtils.numericToInetAddress("8.8.8.8");
+    private static final InetAddress TEST_DNS6 = NetworkUtils.numericToInetAddress(
+            "2001:4860:4860::8888");
 
     // For brevity elsewhere.
     private static final long now() {
@@ -155,6 +160,21 @@ public class NetworkDiagnostics {
         mTimeoutMs = timeoutMs;
         mStartTime = now();
         mDeadlineTime = mStartTime + mTimeoutMs;
+
+        // Hardcode measurements to TEST_DNS4 and TEST_DNS6 in order to test off-link connectivity.
+        // We are free to modify mLinkProperties with impunity because ConnectivityService passes us
+        // a copy and not the original object. It's easier to do it this way because we don't need
+        // to check whether the LinkProperties already contains these DNS servers because
+        // LinkProperties#addDnsServer checks for duplicates.
+        if (mLinkProperties.isReachable(TEST_DNS4)) {
+            mLinkProperties.addDnsServer(TEST_DNS4);
+        }
+        // TODO: we could use mLinkProperties.isReachable(TEST_DNS6) here, because we won't set any
+        // DNS servers for which isReachable() is false, but since this is diagnostic code, be extra
+        // careful.
+        if (mLinkProperties.hasGlobalIPv6Address() || mLinkProperties.hasIPv6DefaultRoute()) {
+            mLinkProperties.addDnsServer(TEST_DNS6);
+        }
 
         for (RouteInfo route : mLinkProperties.getRoutes()) {
             if (route.hasGateway()) {
