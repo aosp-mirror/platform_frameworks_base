@@ -474,7 +474,6 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
     if (!mFunctor) return;
 
     bool first = true;
-    bool forceRebind = false;
     for (uint32_t i = 0; i < cacheTextures.size(); i++) {
         CacheTexture* texture = cacheTextures[i];
         if (texture->canDraw()) {
@@ -487,7 +486,6 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
             mFunctor->draw(*texture, mLinearFiltering);
 
             texture->resetMesh();
-            forceRebind = false;
         }
     }
 }
