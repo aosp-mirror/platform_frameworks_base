@@ -257,7 +257,16 @@ public abstract class Connection extends Conferenceable {
      * The value for this key should be an ArrayList of Strings.
      * @hide
      */
-    public static final String EXTRA_CALL_HISTORY_INFO = "EXTRA_CALL_HISTORY_INFO";
+    public static final String EXTRA_CALL_HISTORY_INFO = "android.telecom.EXTRA_CALL_HISTORY_INFO";
+
+    /**
+     * Connection {@link #mExtras} key used to store a child number associated with the current
+     * connection.  Used to communicate to the user interface that the connection was received via
+     * a child address (in telephony phone number) associated with the {@link PhoneAccount}'s
+     * primary address.
+     * @hide
+     */
+    public static final String EXTRA_CHILD_ADDRESS = "android.telecom.EXTRA_CHILD_ADDRESS";
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
