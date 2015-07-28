@@ -662,6 +662,17 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Returns true if this link or any of its stacked interfaces has an IPv4 address.
+     *
+     * @return {@code true} if there is an IPv4 address, {@code false} otherwise.
+     */
+    private boolean hasIPv4AddressOnInterface(String iface) {
+        return (mIfaceName.equals(iface) && hasIPv4Address()) ||
+                (iface != null && mStackedLinks.containsKey(iface) &&
+                        mStackedLinks.get(iface).hasIPv4Address());
+    }
+
+    /**
      * Returns true if this link has a global preferred IPv6 address.
      *
      * @return {@code true} if there is a global preferred IPv6 address, {@code false} otherwise.
@@ -792,7 +803,7 @@ public final class LinkProperties implements Parcelable {
 
         if (ip instanceof Inet4Address) {
             // For IPv4, it suffices for now to simply have any address.
-            return hasIPv4Address();
+            return hasIPv4AddressOnInterface(bestRoute.getInterface());
         } else if (ip instanceof Inet6Address) {
             if (ip.isLinkLocalAddress()) {
                 // For now, just make sure link-local destinations have
