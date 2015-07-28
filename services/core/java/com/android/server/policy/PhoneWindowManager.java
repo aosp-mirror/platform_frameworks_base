@@ -251,7 +251,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
-    static final int WAITING_FOR_DRAWN_TIMEOUT = 500;
+    static final int WAITING_FOR_DRAWN_TIMEOUT = 1000;
 
     /**
      * Lock protecting internal state.  Must not call out into window
@@ -2469,6 +2469,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return isKeyguard ? -1 : R.anim.dock_top_enter;
             }
         } else if (win == mNavigationBar) {
+            if (win.getAttrs().windowAnimations != 0) {
+                return 0;
+            }
             // This can be on either the bottom or the right.
             if (mNavigationBarOnBottom) {
                 if (transit == TRANSIT_EXIT
@@ -5556,6 +5559,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mWindowManagerDrawComplete = false;
             mScreenOnListener = null;
             updateOrientationListenerLp();
+
+            if (mKeyguardDelegate != null) {
+                mKeyguardDelegate.onScreenTurnedOff();
+            }
         }
     }
 
@@ -5577,6 +5584,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_WAKEUP) Slog.d(TAG,
                         "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
                 finishKeyguardDrawn();
+            }
+        }
+    }
+
+    // Called on the DisplayManager's DisplayPowerController thread.
+    @Override
+    public void screenTurnedOn() {
+        synchronized (mLock) {
+            if (mKeyguardDelegate != null) {
+                mKeyguardDelegate.onScreenTurnedOn();
             }
         }
     }

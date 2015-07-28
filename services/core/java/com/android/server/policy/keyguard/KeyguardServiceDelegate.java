@@ -144,6 +144,7 @@ public class KeyguardServiceDelegate {
                 mKeyguardService.onStartedWakingUp();
                 mKeyguardService.onScreenTurningOn(
                         new KeyguardShowDelegate(mDrawnListenerWhenConnect));
+                mKeyguardService.onScreenTurnedOn();
                 mDrawnListenerWhenConnect = null;
             }
             if (mKeyguardState.bootCompleted) {
@@ -229,6 +230,13 @@ public class KeyguardServiceDelegate {
         }
     }
 
+    public void onScreenTurnedOff() {
+        if (mKeyguardService != null) {
+            if (DEBUG) Log.v(TAG, "onScreenTurnedOff()");
+            mKeyguardService.onScreenTurnedOff();
+        }
+    }
+
     public void onScreenTurningOn(final DrawnListener drawnListener) {
         if (mKeyguardService != null) {
             if (DEBUG) Log.v(TAG, "onScreenTurnedOn(showListener = " + drawnListener + ")");
@@ -240,6 +248,13 @@ public class KeyguardServiceDelegate {
             // invoke the listener's callback after the service actually connects.
             mDrawnListenerWhenConnect = drawnListener;
             showScrim();
+        }
+    }
+
+    public void onScreenTurnedOn() {
+        if (mKeyguardService != null) {
+            if (DEBUG) Log.v(TAG, "onScreenTurnedOn()");
+            mKeyguardService.onScreenTurnedOn();
         }
     }
 
