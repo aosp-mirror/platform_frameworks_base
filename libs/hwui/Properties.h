@@ -151,11 +151,8 @@ enum DebugLevel {
 #define PROPERTY_SKIP_EMPTY_DAMAGE "debug.hwui.skip_empty_damage"
 
 /**
- * Setting this property will enable usage of EGL_KHR_swap_buffers_with_damage
+ * Setting this property will enable or disable usage of EGL_KHR_swap_buffers_with_damage
  * See: https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_swap_buffers_with_damage.txt
- * Default is "false" temporarily
- * TODO: Change to "true", make sure to remove the log in EglManager::swapBuffers
- * before changing this to default to true!
  */
 #define PROPERTY_SWAP_WITH_DAMAGE "debug.hwui.swap_with_damage"
 
