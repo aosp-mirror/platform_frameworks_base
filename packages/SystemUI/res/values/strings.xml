@@ -1129,4 +1129,7 @@
     <!-- Dialog asking if the tuner should really be removed from settings [CHAR LIMIT=NONE]-->
     <string name="remove_from_settings_prompt">Remove System UI Tuner from Settings and stop using all of its features?"</string>
 
+    <!-- Displayed when user launches an app that was uninstalled  [CHAR LIMIT=NONE] -->
+    <string name="activity_not_found">Application is not installed on your device</string>
+
 </resources>

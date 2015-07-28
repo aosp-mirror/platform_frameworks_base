@@ -232,7 +232,7 @@ class NavigationBarRecents extends LinearLayout {
             }
 
             if (DEBUG) Slog.d(TAG, "Start drag with " + intent);
-            NavigationBarApps.startAppDrag(icon, intent.getComponent());
+            NavigationBarApps.startAppDrag(icon, new AppInfo (intent.getComponent(), AppInfo.USER_UNSPECIFIED));
             return true;
         }
     }

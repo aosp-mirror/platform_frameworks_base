@@ -18,19 +18,26 @@ package com.android.systemui.statusbar.phone;
 
 import android.animation.LayoutTransition;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.AppGlobals;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.LauncherApps;
+import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -38,8 +45,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.android.systemui.R;
+
+import java.util.List;
 
 /**
  * Container for application icons that appear in the navigation bar. Their appearance is similar
@@ -51,11 +61,15 @@ class NavigationBarApps extends LinearLayout {
     private final static boolean DEBUG = false;
     private final static String TAG = "NavigationBarApps";
 
+    /**
+     * Intent extra to store user serial number.
+     */
+    static final String EXTRA_PROFILE = "profile";
+
     // There are separate NavigationBarApps view instances for landscape vs. portrait, but they
     // share the data model.
     private static NavigationBarAppsModel sAppsModel;
 
-    private final LauncherApps mLauncherApps;
     private final PackageManager mPackageManager;
     private final LayoutInflater mLayoutInflater;
 
@@ -74,7 +88,6 @@ class NavigationBarApps extends LinearLayout {
             sAppsModel = new NavigationBarAppsModel(context);
             sAppsModel.initialize();  // Load the saved icons, if any.
         }
-        mLauncherApps = (LauncherApps) context.getSystemService("launcherapps");
         mPackageManager = context.getPackageManager();
         mLayoutInflater = LayoutInflater.from(context);
 
@@ -121,12 +134,12 @@ class NavigationBarApps extends LinearLayout {
             ImageView button = createAppButton();
             addView(button);
 
-            ComponentName activityName = sAppsModel.getApp(i);
-            CharSequence appLabel = getAppLabel(mPackageManager, activityName);
-            button.setContentDescription(getAppLabel(mPackageManager, activityName));
+            AppInfo app = sAppsModel.getApp(i);
+            CharSequence appLabel = getAppLabel(mPackageManager, app.getComponentName());
+            button.setContentDescription(appLabel);
 
             // Load the icon asynchronously.
-            new GetActivityIconTask(mPackageManager, button).execute(activityName);
+            new GetActivityIconTask(mPackageManager, button).execute(app.getComponentName());
         }
     }
 
@@ -150,8 +163,8 @@ class NavigationBarApps extends LinearLayout {
         public boolean onLongClick(View v) {
             mDragView = v;
             ImageView icon = (ImageView) v;
-            ComponentName activityName = sAppsModel.getApp(indexOfChild(v));
-            startAppDrag(icon, activityName);
+            AppInfo app = sAppsModel.getApp(indexOfChild(v));
+            startAppDrag(icon, app);
             return true;
         }
     }
@@ -175,9 +188,13 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /** Helper function to start dragging an app icon (either pinned or recent). */
-    static void startAppDrag(ImageView icon, ComponentName activityName) {
+    static void startAppDrag(ImageView icon, AppInfo appInfo) {
         // The drag data is an Intent to launch the activity.
-        Intent mainIntent = Intent.makeMainActivity(activityName);
+        Intent mainIntent = Intent.makeMainActivity(appInfo.getComponentName());
+        long userSerialNumber = appInfo.getUserSerialNumber();
+        if (userSerialNumber != AppInfo.USER_UNSPECIFIED) {
+            mainIntent.putExtra(EXTRA_PROFILE, userSerialNumber);
+        }
         ClipData dragData = ClipData.newIntent("", mainIntent);
         // Use the ImageView to create the shadow.
         View.DragShadowBuilder shadow = new AppIconDragShadowBuilder(icon);
@@ -294,7 +311,7 @@ class NavigationBarApps extends LinearLayout {
         addView(mDragView, targetIndex);
 
         // Update the data model.
-        ComponentName app = sAppsModel.removeApp(dragViewIndex);
+        AppInfo app = sAppsModel.removeApp(dragViewIndex);
         sAppsModel.addApp(targetIndex, app);
     }
 
@@ -314,15 +331,15 @@ class NavigationBarApps extends LinearLayout {
         }
 
         // The drag view was a placeholder. Unpack the drop.
-        ComponentName activityName = getActivityNameFromDragEvent(event);
-        if (activityName == null) {
+        AppInfo appInfo = getAppFromDragEvent(event);
+        if (appInfo == null) {
             // This wasn't a valid drop. Clean up the placeholder and model.
             removePlaceholderDragViewIfNeeded();
-            return true;
+            return false;
         }
 
         // The drop had valid data. Update the placeholder with a real activity and icon.
-        updateAppAt(dragViewIndex, activityName);
+        updateAppAt(dragViewIndex, appInfo);
         endDrag();
         return true;
     }
@@ -334,8 +351,8 @@ class NavigationBarApps extends LinearLayout {
         sAppsModel.savePrefs();
     }
 
-    /** Returns an app launch Intent from a DragEvent, or null if the data wasn't valid. */
-    private ComponentName getActivityNameFromDragEvent(DragEvent event) {
+    /** Returns an app info from a DragEvent, or null if the data wasn't valid. */
+    private AppInfo getAppFromDragEvent(DragEvent event) {
         ClipData data = event.getClipData();
         if (data == null) {
             return null;
@@ -347,14 +364,16 @@ class NavigationBarApps extends LinearLayout {
         if (intent == null) {
             return null;
         }
-        return intent.getComponent();
+
+        long userSerialNumber = intent.getLongExtra(EXTRA_PROFILE, AppInfo.USER_UNSPECIFIED);
+        return new AppInfo(intent.getComponent(), userSerialNumber);
     }
 
     /** Updates the app at a given view index. */
-    private void updateAppAt(int index, ComponentName activityName) {
-        sAppsModel.setApp(index, activityName);
+    private void updateAppAt(int index, AppInfo appInfo) {
+        sAppsModel.setApp(index, appInfo);
         ImageView button = (ImageView) getChildAt(index);
-        new GetActivityIconTask(mPackageManager, button).execute(activityName);
+        new GetActivityIconTask(mPackageManager, button).execute(appInfo.getComponentName());
     }
 
     /** Removes the empty placeholder view and cleans up the data model. */
@@ -411,11 +430,26 @@ class NavigationBarApps extends LinearLayout {
     private class AppClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            ComponentName activityName = sAppsModel.getApp(indexOfChild(v));
+            AppInfo appInfo = sAppsModel.getApp(indexOfChild(v));
+            ComponentName component = appInfo.getComponentName();
 
-            // TODO: Support apps from multiple user profiles. The profile will need to be stored in
-            // the data model for each app shortcut.
-            UserHandle user = UserHandle.OWNER;
+            UserManager userManager =
+                    (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+
+            long appUserSerialNumber = appInfo.getUserSerialNumber();
+
+            UserHandle appUser = null;
+            if (appUserSerialNumber != AppInfo.USER_UNSPECIFIED) {
+                appUser = userManager.getUserForSerialNumber(appUserSerialNumber);
+            }
+
+            int appUserId;
+            if (appUser != null) {
+                appUserId = appUser.getIdentifier();
+            } else {
+                appUserId = ActivityManager.getCurrentUser();
+                appUser = new UserHandle(appUserId);
+            }
 
             // Play a scale-up animation while launching the activity.
             // TODO: Consider playing a different animation, or no animation, if the activity is
@@ -427,8 +461,53 @@ class NavigationBarApps extends LinearLayout {
                     ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getWidth(), v.getHeight());
             Bundle optsBundle = opts.toBundle();
 
-            // Launch the activity.
-            mLauncherApps.startMainActivity(activityName, user, sourceBounds, optsBundle);
+            // Launch the activity. This code is based on LauncherAppsService.startActivityAsUser code.
+            Intent launchIntent = new Intent(Intent.ACTION_MAIN);
+            launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            launchIntent.setSourceBounds(sourceBounds);
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            launchIntent.setPackage(component.getPackageName());
+
+            IPackageManager pm = AppGlobals.getPackageManager();
+            try {
+                ActivityInfo info = pm.getActivityInfo(component, 0, appUserId);
+                if (info == null) {
+                    Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Can't start activity " + component + " because it's not installed.");
+                    return;
+                }
+
+                if (!info.exported) {
+                    Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Can't start activity " + component + " because it doesn't have 'exported' attribute.");
+                    return;
+                }
+            } catch (RemoteException e) {
+                Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Failed to get activity info for " + component, e);
+                return;
+            }
+
+            // Check that the component actually has Intent.CATEGORY_LAUCNCHER
+            // as calling startActivityAsUser ignores the category and just
+            // resolves based on the component if present.
+            List<ResolveInfo> apps = getContext().getPackageManager().queryIntentActivitiesAsUser(launchIntent,
+                    0 /* flags */, appUserId);
+            final int size = apps.size();
+            for (int i = 0; i < size; ++i) {
+                ActivityInfo activityInfo = apps.get(i).activityInfo;
+                if (activityInfo.packageName.equals(component.getPackageName()) &&
+                        activityInfo.name.equals(component.getClassName())) {
+                    // Found an activity with category launcher that matches
+                    // this component so ok to launch.
+                    launchIntent.setComponent(component);
+                    mContext.startActivityAsUser(launchIntent, optsBundle, appUser);
+                    return;
+                }
+            }
+
+            Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Attempt to launch activity without category Intent.CATEGORY_LAUNCHER " + component);
         }
     }
 }
