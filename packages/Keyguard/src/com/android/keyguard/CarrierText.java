@@ -23,7 +23,6 @@ import java.util.Objects;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -59,11 +58,11 @@ public class CarrierText extends TextView {
             updateCarrierText();
         }
 
-        public void onScreenTurnedOff(int why) {
+        public void onFinishedGoingToSleep(int why) {
             setSelected(false);
         };
 
-        public void onScreenTurnedOn() {
+        public void onStartedWakingUp() {
             setSelected(true);
         };
     };
@@ -193,8 +192,8 @@ public class CarrierText extends TextView {
         super.onFinishInflate();
         mSeparator = getResources().getString(
                 com.android.internal.R.string.kg_text_message_separator);
-        final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
-        setSelected(screenOn); // Allow marquee to work.
+        boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
+        setSelected(shouldMarquee); // Allow marquee to work.
     }
 
     @Override
