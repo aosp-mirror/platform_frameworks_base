@@ -6758,7 +6758,13 @@ void ResTable::print(bool inclValues) const
                     printf("      NON-INTEGER ResTable_type ADDRESS: %p\n", type);
                     continue;
                 }
-                String8 configStr = type->config.toString();
+
+                // Always copy the config, as fields get added and we need to
+                // set the defaults.
+                ResTable_config thisConfig;
+                thisConfig.copyFromDtoH(type->config);
+
+                String8 configStr = thisConfig.toString();
                 printf("      config %s:\n", configStr.size() > 0
                         ? configStr.string() : "(default)");
                 size_t entryCount = dtohl(type->entryCount);
