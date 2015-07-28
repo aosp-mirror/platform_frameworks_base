@@ -1784,7 +1784,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // Start gathering diagnostic information.
                 netDiags.add(new NetworkDiagnostics(
                         nai.network,
-                        new LinkProperties(nai.linkProperties),
+                        new LinkProperties(nai.linkProperties),  // Must be a copy.
                         DIAG_TIME_MS));
             }
 
