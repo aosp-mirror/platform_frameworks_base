@@ -3163,9 +3163,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public boolean shouldDisableNavbarGestures() {
-        return !isDeviceProvisioned()
-                || mExpandedVisible
-                || (mDisabled1 & StatusBarManager.DISABLE_SEARCH) != 0;
+        return !isDeviceProvisioned() || (mDisabled1 & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
     public void postStartActivityDismissingKeyguard(final Intent intent, int delay) {
