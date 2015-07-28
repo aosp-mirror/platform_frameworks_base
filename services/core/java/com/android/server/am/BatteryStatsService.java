@@ -1261,9 +1261,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     Slog.v(TAG, "WiFi energy data was reset, new WiFi energy data is " + result);
                 }
 
+                // There is some accuracy error in reports so allow 30 milliseconds of error.
+                final long SAMPLE_ERROR_MILLIS = 30;
                 final long totalTimeMs = result.mControllerIdleTimeMs + result.mControllerRxTimeMs +
                         result.mControllerTxTimeMs;
-                if (totalTimeMs > timePeriodMs) {
+                if (totalTimeMs > timePeriodMs + SAMPLE_ERROR_MILLIS) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("Total time ");
                     TimeUtils.formatDuration(totalTimeMs, sb);
