@@ -1865,7 +1865,10 @@ public class Activity extends ContextThemeWrapper
         nci.children = children;
         nci.fragments = fragments;
         nci.loaders = loaders;
-        nci.voiceInteractor = mVoiceInteractor;
+        if (mVoiceInteractor != null) {
+            mVoiceInteractor.retainInstance();
+            nci.voiceInteractor = mVoiceInteractor;
+        }
         return nci;
     }
 
@@ -5551,6 +5554,9 @@ public class Activity extends ContextThemeWrapper
 
         mFragments.dumpLoaders(innerPrefix, fd, writer, args);
         mFragments.getFragmentManager().dump(innerPrefix, fd, writer, args);
+        if (mVoiceInteractor != null) {
+            mVoiceInteractor.dump(innerPrefix, fd, writer, args);
+        }
 
         if (getWindow() != null &&
                 getWindow().peekDecorView() != null &&

@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.DebugUtils;
 import android.util.Log;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractorCallback;
@@ -34,6 +35,8 @@ import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -68,6 +71,7 @@ public final class VoiceInteractor {
 
     Context mContext;
     Activity mActivity;
+    boolean mRetaining;
 
     final HandlerCaller mHandlerCaller;
     final HandlerCaller.Callback mHandlerCallerCallback = new HandlerCaller.Callback() {
@@ -272,6 +276,29 @@ public final class VoiceInteractor {
         public void onDetached() {
         }
 
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            DebugUtils.buildShortClassTag(this, sb);
+            sb.append(" ");
+            sb.append(getRequestTypeName());
+            sb.append(" name=");
+            sb.append(mName);
+            sb.append('}');
+            return sb.toString();
+        }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            writer.print(prefix); writer.print("mRequestInterface=");
+            writer.println(mRequestInterface.asBinder());
+            writer.print(prefix); writer.print("mActivity="); writer.println(mActivity);
+            writer.print(prefix); writer.print("mName="); writer.println(mName);
+        }
+
+        String getRequestTypeName() {
+            return "Request";
+        }
+
         void clear() {
             mRequestInterface = null;
             mContext = null;
@@ -331,6 +358,18 @@ public final class VoiceInteractor {
          * @param result Additional result information or null.
          */
         public void onConfirmationResult(boolean confirmed, Bundle result) {
+        }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mPrompt="); writer.println(mPrompt);
+            if (mExtras != null) {
+                writer.print(prefix); writer.print("mExtras="); writer.println(mExtras);
+            }
+        }
+
+        String getRequestTypeName() {
+            return "Confirmation";
         }
 
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
@@ -515,6 +554,38 @@ public final class VoiceInteractor {
         public void onPickOptionResult(boolean finished, Option[] selections, Bundle result) {
         }
 
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mPrompt="); writer.println(mPrompt);
+            if (mOptions != null) {
+                writer.print(prefix); writer.println("Options:");
+                for (int i=0; i<mOptions.length; i++) {
+                    Option op = mOptions[i];
+                    writer.print(prefix); writer.print("  #"); writer.print(i); writer.println(":");
+                    writer.print(prefix); writer.print("    mLabel="); writer.println(op.mLabel);
+                    writer.print(prefix); writer.print("    mIndex="); writer.println(op.mIndex);
+                    if (op.mSynonyms != null && op.mSynonyms.size() > 0) {
+                        writer.print(prefix); writer.println("    Synonyms:");
+                        for (int j=0; j<op.mSynonyms.size(); j++) {
+                            writer.print(prefix); writer.print("      #"); writer.print(j);
+                            writer.print(": "); writer.println(op.mSynonyms.get(j));
+                        }
+                    }
+                    if (op.mExtras != null) {
+                        writer.print(prefix); writer.print("    mExtras=");
+                        writer.println(op.mExtras);
+                    }
+                }
+            }
+            if (mExtras != null) {
+                writer.print(prefix); writer.print("mExtras="); writer.println(mExtras);
+            }
+        }
+
+        String getRequestTypeName() {
+            return "PickOption";
+        }
+
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
                 IVoiceInteractorCallback callback) throws RemoteException {
             return interactor.startPickOption(packageName, callback, mPrompt, mOptions, mExtras);
@@ -558,6 +629,18 @@ public final class VoiceInteractor {
         }
 
         public void onCompleteResult(Bundle result) {
+        }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mPrompt="); writer.println(mPrompt);
+            if (mExtras != null) {
+                writer.print(prefix); writer.print("mExtras="); writer.println(mExtras);
+            }
+        }
+
+        String getRequestTypeName() {
+            return "CompleteVoice";
         }
 
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
@@ -607,6 +690,18 @@ public final class VoiceInteractor {
         public void onAbortResult(Bundle result) {
         }
 
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mPrompt="); writer.println(mPrompt);
+            if (mExtras != null) {
+                writer.print(prefix); writer.print("mExtras="); writer.println(mExtras);
+            }
+        }
+
+        String getRequestTypeName() {
+            return "AbortVoice";
+        }
+
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
                 IVoiceInteractorCallback callback) throws RemoteException {
             return interactor.startAbortVoice(packageName, callback, mPrompt, mExtras);
@@ -648,6 +743,18 @@ public final class VoiceInteractor {
          * CommandRequest has completed.
          */
         public void onCommandResult(boolean isCompleted, Bundle result) {
+        }
+
+        void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            super.dump(prefix, fd, writer, args);
+            writer.print(prefix); writer.print("mCommand="); writer.println(mCommand);
+            if (mArgs != null) {
+                writer.print(prefix); writer.print("mArgs="); writer.println(mArgs);
+            }
+        }
+
+        String getRequestTypeName() {
+            return "Command";
         }
 
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
@@ -721,6 +828,30 @@ public final class VoiceInteractor {
             return mVisualPrompt;
         }
 
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            DebugUtils.buildShortClassTag(this, sb);
+            if (mVisualPrompt != null && mVoicePrompts != null && mVoicePrompts.length == 1
+                && mVisualPrompt.equals(mVoicePrompts[0])) {
+                sb.append(" ");
+                sb.append(mVisualPrompt);
+            } else {
+                if (mVisualPrompt != null) {
+                    sb.append(" visual="); sb.append(mVisualPrompt);
+                }
+                if (mVoicePrompts != null) {
+                    sb.append(", voice=");
+                    for (int i=0; i<mVoicePrompts.length; i++) {
+                        if (i > 0) sb.append(" | ");
+                        sb.append(mVoicePrompts[i]);
+                    }
+                }
+            }
+            sb.append('}');
+            return sb.toString();
+        }
+
         /** Constructor to support Parcelable behavior. */
         Prompt(Parcel in) {
             mVoicePrompts = in.readCharSequenceArray();
@@ -773,7 +904,7 @@ public final class VoiceInteractor {
         if (N < 1) {
             return null;
         }
-        ArrayList<Request> list = new ArrayList<Request>(N);
+        ArrayList<Request> list = new ArrayList<>(N);
         for (int i=0; i<N; i++) {
             list.add(mActiveRequests.valueAt(i));
         }
@@ -781,6 +912,7 @@ public final class VoiceInteractor {
     }
 
     void attachActivity(Activity activity) {
+        mRetaining = false;
         if (mActivity == activity) {
             return;
         }
@@ -797,6 +929,10 @@ public final class VoiceInteractor {
         }
     }
 
+    void retainInstance() {
+        mRetaining = true;
+    }
+
     void detachActivity() {
         ArrayList<Request> reqs = makeRequestList();
         if (reqs != null) {
@@ -806,6 +942,16 @@ public final class VoiceInteractor {
                 req.mActivity = null;
                 req.mContext = null;
             }
+        }
+        if (!mRetaining) {
+            reqs = makeRequestList();
+            if (reqs != null) {
+                for (int i=0; i<reqs.size(); i++) {
+                    Request req = reqs.get(i);
+                    req.cancel();
+                }
+            }
+            mActiveRequests.clear();
         }
         mContext = null;
         mActivity = null;
@@ -901,5 +1047,23 @@ public final class VoiceInteractor {
         } catch (RemoteException e) {
             throw new RuntimeException("Voice interactor has died", e);
         }
+    }
+
+    void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        String innerPrefix = prefix + "    ";
+        if (mActiveRequests.size() > 0) {
+            writer.print(prefix); writer.println("Active voice requests:");
+            for (int i=0; i<mActiveRequests.size(); i++) {
+                Request req = mActiveRequests.valueAt(i);
+                writer.print(prefix); writer.print("  #"); writer.print(i);
+                writer.print(": ");
+                writer.println(req);
+                req.dump(innerPrefix, fd, writer, args);
+            }
+        }
+        writer.print(prefix); writer.println("VoiceInteractor misc state:");
+        writer.print(prefix); writer.print("  mInteractor=");
+        writer.println(mInteractor.asBinder());
+        writer.print(prefix); writer.print("  mActivity="); writer.println(mActivity);
     }
 }
