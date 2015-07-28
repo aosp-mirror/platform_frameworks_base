@@ -30,6 +30,9 @@ import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * An active voice interaction session, initiated by a {@link VoiceInteractionService}.
  */
@@ -98,6 +101,16 @@ public abstract class VoiceInteractionSessionService extends Service {
         super.onTrimMemory(level);
         if (mSession != null) {
             mSession.onTrimMemory(level);
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (mSession == null) {
+            writer.println("(no active session)");
+        } else {
+            writer.println("VoiceInteractionSession:");
+            mSession.dump("  ", fd, writer, args);
         }
     }
 
