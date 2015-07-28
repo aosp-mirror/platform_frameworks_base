@@ -148,17 +148,17 @@ public class KeyguardUpdateMonitorCallback {
     }
 
     /**
-     * Called when the screen turns on
+     * Called when the device has started waking up.
      */
-    public void onScreenTurnedOn() { }
+    public void onStartedWakingUp() { }
 
     /**
-     * Called when the screen turns off
+     * Called when the device has finished going to sleep.
      * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_ADMIN},
      * {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER}, or
      * {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
      */
-    public void onScreenTurnedOff(int why) { }
+    public void onFinishedGoingToSleep(int why) { }
 
     /**
      * Called when trust changes for a user.

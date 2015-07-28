@@ -106,6 +106,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int BRIGHTNESS_RAMP_RATE_FAST = 200;
     private static final int BRIGHTNESS_RAMP_RATE_SLOW = 40;
 
+    private static final int REPORTED_TO_POLICY_SCREEN_OFF = 0;
+    private static final int REPORTED_TO_POLICY_SCREEN_TURNING_ON = 1;
+    private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
+
     private final Object mLock = new Object();
 
     private final Context mContext;
@@ -231,8 +235,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The elapsed real time when the screen on was blocked.
     private long mScreenOnBlockStartRealTime;
 
-    // True if we told the window manager policy that the screen was off.
-    private boolean mReportedScreenOffToPolicy;
+    // Screen state we reported to policy. Must be one of REPORTED_TO_POLICY_SCREEN_* fields.
+    private int mReportedScreenStateToPolicy;
 
     // Remembers whether certain kinds of brightness adjustments
     // were recently applied so that we can decide how to transition.
@@ -699,6 +703,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean finished = ready
                 && !mScreenBrightnessRampAnimator.isAnimating();
 
+        // Notify policy about screen turned on.
+        if (ready && state != Display.STATE_OFF
+                && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_TURNING_ON) {
+            mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_ON;
+            mWindowManagerPolicy.screenTurnedOn();
+        }
+
         // Grab a wake lock if we have unfinished business.
         if (!finished && !mUnfinishedBusiness) {
             if (DEBUG) {
@@ -776,12 +787,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // it is only removed once the window manager tells us that the activity has
         // finished drawing underneath.
         final boolean isOff = (state == Display.STATE_OFF);
-        if (isOff && !mReportedScreenOffToPolicy && !mScreenOffBecauseOfProximity) {
-            mReportedScreenOffToPolicy = true;
+        if (isOff && mReportedScreenStateToPolicy != REPORTED_TO_POLICY_SCREEN_OFF
+                && !mScreenOffBecauseOfProximity) {
+            mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_OFF;
             unblockScreenOn();
             mWindowManagerPolicy.screenTurnedOff();
-        } else if (!isOff && mReportedScreenOffToPolicy) {
-            mReportedScreenOffToPolicy = false;
+        } else if (!isOff && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_OFF) {
+            mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_TURNING_ON;
             if (mPowerState.getColorFadeLevel() == 0.0f) {
                 blockScreenOn();
             } else {
@@ -1095,7 +1107,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mAppliedLowPower=" + mAppliedLowPower);
         pw.println("  mPendingScreenOnUnblocker=" + mPendingScreenOnUnblocker);
         pw.println("  mPendingScreenOff=" + mPendingScreenOff);
-        pw.println("  mReportedScreenOffToPolicy=" + mReportedScreenOffToPolicy);
+        pw.println("  mReportedToPolicy=" + reportedToPolicyToString(mReportedScreenStateToPolicy));
 
         pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +
                 mScreenBrightnessRampAnimator.isAnimating());
@@ -1127,6 +1139,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 return "Negative";
             case PROXIMITY_POSITIVE:
                 return "Positive";
+            default:
+                return Integer.toString(state);
+        }
+    }
+
+    private static String reportedToPolicyToString(int state) {
+        switch (state) {
+            case REPORTED_TO_POLICY_SCREEN_OFF:
+                return "REPORTED_TO_POLICY_SCREEN_OFF";
+            case REPORTED_TO_POLICY_SCREEN_TURNING_ON:
+                return "REPORTED_TO_POLICY_SCREEN_TURNING_ON";
+            case REPORTED_TO_POLICY_SCREEN_ON:
+                return "REPORTED_TO_POLICY_SCREEN_ON";
             default:
                 return Integer.toString(state);
         }
