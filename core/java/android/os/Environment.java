@@ -80,7 +80,8 @@ public class Environment {
         }
 
         public File[] getExternalDirs() {
-            final StorageVolume[] volumes = StorageManager.getVolumeList(mUserId);
+            final StorageVolume[] volumes = StorageManager.getVolumeList(mUserId,
+                    StorageManager.FLAG_FOR_WRITE);
             final File[] files = new File[volumes.length];
             for (int i = 0; i < volumes.length; i++) {
                 files[i] = volumes[i].getPathFile();
