@@ -123,6 +123,12 @@ public class ActivityRecognitionProxy {
                 Log.e(TAG, "No watcher found on connection.");
                 return;
             }
+            if (mInstance == null) {
+                // to keep backwards compatibility do not update the watcher when there is no
+                // instance available, or it will cause an NPE
+                Log.d(TAG, "AR HW instance not available, binding will be a no-op.");
+                return;
+            }
             try {
                 watcher.onInstanceChanged(mInstance);
             } catch (RemoteException e) {
