@@ -124,6 +124,12 @@ public class DevicePolicyManager {
      *
      * <p> If provisioning fails, the managedProfile is removed so the device returns to its
      * previous state.
+     *
+     * <p>If launched with {@link android.app.Activity#startActivityForResult(Intent, int)} a
+     * result code of {@link android.app.Activity#RESULT_OK} implies that the synchronous part of
+     * the provisioning flow was successful, although this doesn't guarantee the full flow will
+     * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
+     * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_PROFILE
@@ -158,6 +164,10 @@ public class DevicePolicyManager {
      *
      * <p> If provisioning fails, the device is factory reset.
      *
+     * <p>A result code of {@link android.app.Activity#RESULT_OK} implies that the synchronous part
+     * of the provisioning flow was successful, although this doesn't guarantee the full flow will
+     * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
+     * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_DEVICE
