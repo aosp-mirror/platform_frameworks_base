@@ -9536,16 +9536,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             public void run() {
                 // clean up the session's bookkeeping
                 synchronized (mSession) {
-                    try {
-                        if (mSession.mRestoreTransport != null) {
-                            mSession.mRestoreTransport.finishRestore();
-                        }
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Error in finishRestore", e);
-                    } finally {
-                        mSession.mRestoreTransport = null;
-                        mSession.mEnded = true;
-                    }
+                    mSession.mRestoreTransport = null;
+                    mSession.mEnded = true;
                 }
 
                 // clean up the BackupManagerImpl side of the bookkeeping
