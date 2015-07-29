@@ -94,7 +94,7 @@ public class LockPatternView extends View {
      */
     private static final float DRAG_THRESHHOLD = 0.0f;
     public static final int VIRTUAL_BASE_VIEW_ID = 1;
-    public static final boolean DEBUG_A11Y = true;
+    public static final boolean DEBUG_A11Y = false;
     private static final String TAG = "LockPatternView";
 
     private OnPatternListener mOnPatternListener;
@@ -568,9 +568,11 @@ public class LockPatternView extends View {
 
     @Override
     protected boolean dispatchHoverEvent(MotionEvent event) {
-        // Give TouchHelper first right of refusal
-        boolean handled = mExploreByTouchHelper.dispatchHoverEvent(event);
-        return super.dispatchHoverEvent(event) || handled;
+        // Dispatch to onHoverEvent first so mPatternInProgress is up to date when the
+        // helper gets the event.
+        boolean handled = super.dispatchHoverEvent(event);
+        handled |= mExploreByTouchHelper.dispatchHoverEvent(event);
+        return handled;
     }
 
     /**
@@ -877,7 +879,7 @@ public class LockPatternView extends View {
                 return true;
             case MotionEvent.ACTION_CANCEL:
                 if (mPatternInProgress) {
-                    mPatternInProgress = false;
+                    setPatternInProgress(false);
                     resetPattern();
                     notifyPatternCleared();
                 }
@@ -890,6 +892,11 @@ public class LockPatternView extends View {
                 return true;
         }
         return false;
+    }
+
+    private void setPatternInProgress(boolean progress) {
+        mPatternInProgress = progress;
+        mExploreByTouchHelper.invalidateRoot();
     }
 
     private void handleActionMove(MotionEvent event) {
@@ -905,7 +912,7 @@ public class LockPatternView extends View {
             Cell hitCell = detectAndAddHit(x, y);
             final int patternSize = mPattern.size();
             if (hitCell != null && patternSize == 1) {
-                mPatternInProgress = true;
+                setPatternInProgress(true);
                 notifyPatternStarted();
             }
             // note current x and y for rubber banding of in progress patterns
@@ -963,7 +970,7 @@ public class LockPatternView extends View {
     private void handleActionUp() {
         // report pattern detected
         if (!mPattern.isEmpty()) {
-            mPatternInProgress = false;
+            setPatternInProgress(false);
             cancelLineAnimations();
             notifyPatternDetected();
             invalidate();
@@ -994,11 +1001,11 @@ public class LockPatternView extends View {
         final float y = event.getY();
         final Cell hitCell = detectAndAddHit(x, y);
         if (hitCell != null) {
-            mPatternInProgress = true;
+            setPatternInProgress(true);
             mPatternDisplayMode = DisplayMode.Correct;
             notifyPatternStarted();
         } else if (mPatternInProgress) {
-            mPatternInProgress = false;
+            setPatternInProgress(false);
             notifyPatternCleared();
         }
         if (hitCell != null) {
@@ -1315,6 +1322,9 @@ public class LockPatternView extends View {
         @Override
         protected void getVisibleVirtualViews(IntArray virtualViewIds) {
             if (DEBUG_A11Y) Log.v(TAG, "getVisibleVirtualViews(len=" + virtualViewIds.size() + ")");
+            if (!mPatternInProgress) {
+                return;
+            }
             for (int i = VIRTUAL_BASE_VIEW_ID; i < VIRTUAL_BASE_VIEW_ID + 9; i++) {
                 if (!mItems.containsKey(i)) {
                     VirtualViewContainer item = new VirtualViewContainer(getTextForVirtualView(i));
@@ -1337,6 +1347,16 @@ public class LockPatternView extends View {
         }
 
         @Override
+        public void onPopulateAccessibilityEvent(View host, AccessibilityEvent event) {
+            super.onPopulateAccessibilityEvent(host, event);
+            if (!mPatternInProgress) {
+                CharSequence contentDescription = getContext().getText(
+                        com.android.internal.R.string.lockscreen_access_pattern_area);
+                event.setContentDescription(contentDescription);
+            }
+        }
+
+        @Override
         protected void onPopulateNodeForVirtualView(int virtualViewId, AccessibilityNodeInfo node) {
             if (DEBUG_A11Y) Log.v(TAG, "onPopulateNodeForVirtualView(view=" + virtualViewId + ")");
 
@@ -1345,10 +1365,14 @@ public class LockPatternView extends View {
             node.setText(getTextForVirtualView(virtualViewId));
             node.setContentDescription(getTextForVirtualView(virtualViewId));
 
-            if (isClickable(virtualViewId)) {
-                // Mark this node of interest by making it clickable.
-                node.addAction(AccessibilityAction.ACTION_CLICK);
-                node.setClickable(isClickable(virtualViewId));
+            if (mPatternInProgress) {
+                node.setFocusable(true);
+
+                if (isClickable(virtualViewId)) {
+                    // Mark this node of interest by making it clickable.
+                    node.addAction(AccessibilityAction.ACTION_CLICK);
+                    node.setClickable(isClickable(virtualViewId));
+                }
             }
 
             // Compute bounds for this object
