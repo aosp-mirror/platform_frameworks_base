@@ -18,6 +18,7 @@ package com.android.mtp;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
@@ -76,7 +77,33 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     @Override
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
-        throw new FileNotFoundException();
+        if (projection == null) {
+            projection = MtpDocumentsProvider.DEFAULT_ROOT_PROJECTION;
+        }
+        final MatrixCursor cursor = new MatrixCursor(projection);
+        for (final int deviceId : mMtpManager.getOpenedDeviceIds()) {
+            try {
+                final MtpRoot[] roots = mMtpManager.getRoots(deviceId);
+                // TODO: Add retry logic here.
+
+                for (final MtpRoot root : roots) {
+                    final String rootId = Identifier.createRootId(deviceId, root.mStorageId);
+                    final MatrixCursor.RowBuilder builder = cursor.newRow();
+                    builder.add(Root.COLUMN_ROOT_ID, rootId);
+                    builder.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD);
+                    builder.add(Root.COLUMN_TITLE, root.mDescription);
+                    builder.add(
+                            Root.COLUMN_DOCUMENT_ID,
+                            Identifier.createDocumentId(rootId, MtpDocument.DUMMY_HANDLE_FOR_ROOT));
+                    builder.add(Root.COLUMN_AVAILABLE_BYTES , root.mFreeSpace);
+                }
+            } catch (IOException error) {
+                Log.d(TAG, error.getMessage());
+            }
+        }
+        cursor.setNotificationUri(
+                mResolver, DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY));
+        return cursor;
     }
 
     @Override
@@ -100,12 +127,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     void openDevice(int deviceId) throws IOException {
         mMtpManager.openDevice(deviceId);
-        notifyRootsUpdate();
+        notifyRootsChange();
     }
 
     void closeDevice(int deviceId) throws IOException {
         mMtpManager.closeDevice(deviceId);
-        notifyRootsUpdate();
+        notifyRootsChange();
     }
 
     void closeAllDevices() {
@@ -119,18 +146,18 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             }
         }
         if (closed) {
-            notifyRootsUpdate();
+            notifyRootsChange();
         }
-    }
-
-    private void notifyRootsUpdate() {
-        mResolver.notifyChange(
-                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY),
-                null,
-                false);
     }
 
     boolean hasOpenedDevices() {
         return mMtpManager.getOpenedDeviceIds().length != 0;
+    }
+
+    private void notifyRootsChange() {
+        mResolver.notifyChange(
+                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY),
+                null,
+                false);
     }
 }
