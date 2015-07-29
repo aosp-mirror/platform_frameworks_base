@@ -386,7 +386,8 @@ public final class KeyProtection implements ProtectionParameter {
          *
          * <p>For RSA private keys used by TLS/SSL servers to authenticate themselves to clients it
          * is usually necessary to authorize the use of no/any padding
-         * ({@link KeyProperties#ENCRYPTION_PADDING_NONE}). This is because RSA decryption is
+         * ({@link KeyProperties#ENCRYPTION_PADDING_NONE}) and/or PKCS#1 encryption padding
+         * ({@link KeyProperties#ENCRYPTION_PADDING_RSA_PKCS1}). This is because RSA decryption is
          * required by some cipher suites, and some stacks request decryption using no padding
          * whereas others request PKCS#1 padding.
          *
