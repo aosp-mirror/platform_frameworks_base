@@ -35,6 +35,7 @@
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
         android:textSize="@dimen/qs_time_collapsed_size"
+        android:importantForAccessibility="no"
         />
 
     <!-- Empty text view so we have the same height when expanded/collapsed-->
