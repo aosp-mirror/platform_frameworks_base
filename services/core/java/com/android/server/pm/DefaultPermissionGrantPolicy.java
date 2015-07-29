@@ -165,29 +165,22 @@ final class DefaultPermissionGrantPolicy {
 
         synchronized (mService.mPackages) {
             for (PackageParser.Package pkg : mService.mPackages.values()) {
-                if (!isSysComponentOrPersistentPlatformSignedPrivApp(pkg)
-                        || !doesPackageSupportRuntimePermissions(pkg)) {
+                if (!isSysComponentOrPersistentPlatformSignedPrivAppLPr(pkg)
+                        || !doesPackageSupportRuntimePermissions(pkg)
+                        || pkg.requestedPermissions.isEmpty()) {
                     continue;
                 }
+                Set<String> permissions = new ArraySet<>();
                 final int permissionCount = pkg.requestedPermissions.size();
                 for (int i = 0; i < permissionCount; i++) {
                     String permission = pkg.requestedPermissions.get(i);
                     BasePermission bp = mService.mSettings.mPermissions.get(permission);
                     if (bp != null && bp.isRuntime()) {
-                        final int flags = mService.getPermissionFlags(permission,
-                                pkg.packageName, userId);
-                        if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) == 0) {
-                            mService.grantRuntimePermission(pkg.packageName, permission, userId);
-                            mService.updatePermissionFlags(permission, pkg.packageName,
-                                    PackageManager.MASK_PERMISSION_FLAGS,
-                                    PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
-                                    | PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, userId);
-                            if (DEBUG) {
-                                Log.i(TAG, "Granted " + permission + " to system component "
-                                        + pkg.packageName);
-                            }
-                        }
+                        permissions.add(permission);
                     }
+                }
+                if (!permissions.isEmpty()) {
+                    grantRuntimePermissionsLPw(pkg, permissions, true, userId);
                 }
             }
         }
@@ -699,7 +692,7 @@ final class DefaultPermissionGrantPolicy {
     private PackageParser.Package getSystemPackageLPr(String packageName) {
         PackageParser.Package pkg = getPackageLPr(packageName);
         if (pkg != null && pkg.isSystemApp()) {
-            return !isSysComponentOrPersistentPlatformSignedPrivApp(pkg) ? pkg : null;
+            return !isSysComponentOrPersistentPlatformSignedPrivAppLPr(pkg) ? pkg : null;
         }
         return null;
     }
@@ -716,18 +709,36 @@ final class DefaultPermissionGrantPolicy {
 
     private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
             boolean systemFixed, boolean overrideUserChoice,  int userId) {
+        if (pkg.requestedPermissions.isEmpty()) {
+            return;
+        }
+
         List<String> requestedPermissions = pkg.requestedPermissions;
+        Set<String> grantablePermissions = null;
 
         if (pkg.isUpdatedSystemApp()) {
             PackageSetting sysPs = mService.mSettings.getDisabledSystemPkgLPr(pkg.packageName);
             if (sysPs != null) {
-                requestedPermissions = sysPs.pkg.requestedPermissions;
+                if (sysPs.pkg.requestedPermissions.isEmpty()) {
+                    return;
+                }
+                if (!requestedPermissions.equals(sysPs.pkg.requestedPermissions)) {
+                    grantablePermissions = new ArraySet<>(requestedPermissions);
+                    requestedPermissions = sysPs.pkg.requestedPermissions;
+                }
             }
         }
 
-        final int permissionCount = requestedPermissions.size();
-        for (int i = 0; i < permissionCount; i++) {
+        final int grantablePermissionCount = requestedPermissions.size();
+        for (int i = 0; i < grantablePermissionCount; i++) {
             String permission = requestedPermissions.get(i);
+
+            // If there is a disabled system app it may request a permission the updated
+            // version ot the data partition doesn't, In this case skip the permission.
+            if (grantablePermissions != null && !grantablePermissions.contains(permission)) {
+                continue;
+            }
+
             if (permissions.contains(permission)) {
                 final int flags = mService.getPermissionFlags(permission, pkg.packageName, userId);
 
@@ -763,12 +774,19 @@ final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private boolean isSysComponentOrPersistentPlatformSignedPrivApp(PackageParser.Package pkg) {
+    private boolean isSysComponentOrPersistentPlatformSignedPrivAppLPr(PackageParser.Package pkg) {
         if (UserHandle.getAppId(pkg.applicationInfo.uid) < FIRST_APPLICATION_UID) {
             return true;
         }
-        if ((pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) == 0
-                || (pkg.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) == 0) {
+        if (!pkg.isPrivilegedApp()) {
+            return false;
+        }
+        PackageSetting sysPkg = mService.mSettings.getDisabledSystemPkgLPr(pkg.packageName);
+        if (sysPkg != null) {
+            if ((sysPkg.pkg.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) == 0) {
+                return false;
+            }
+        } else if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) == 0) {
             return false;
         }
         return PackageManagerService.compareSignatures(mService.mPlatformPackage.mSignatures,
