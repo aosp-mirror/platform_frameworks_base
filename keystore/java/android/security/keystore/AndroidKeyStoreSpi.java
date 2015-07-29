@@ -292,7 +292,14 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                     new KeyProtection.Builder(
                             KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY);
             // Authorized to be used with any digest (including no digest).
-            specBuilder.setDigests(KeyProperties.DIGEST_NONE);
+            // MD5 was never offered for Android Keystore for ECDSA.
+            specBuilder.setDigests(
+                    KeyProperties.DIGEST_NONE,
+                    KeyProperties.DIGEST_SHA1,
+                    KeyProperties.DIGEST_SHA224,
+                    KeyProperties.DIGEST_SHA256,
+                    KeyProperties.DIGEST_SHA384,
+                    KeyProperties.DIGEST_SHA512);
         } else if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyAlgorithm)) {
             specBuilder =
                     new KeyProtection.Builder(
@@ -301,13 +308,25 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                             | KeyProperties.PURPOSE_SIGN
                             | KeyProperties.PURPOSE_VERIFY);
             // Authorized to be used with any digest (including no digest).
-            specBuilder.setDigests(KeyProperties.DIGEST_NONE);
-            // Authorized to be used with any encryption and signature padding scheme (including no
-            // padding).
+            specBuilder.setDigests(
+                    KeyProperties.DIGEST_NONE,
+                    KeyProperties.DIGEST_MD5,
+                    KeyProperties.DIGEST_SHA1,
+                    KeyProperties.DIGEST_SHA224,
+                    KeyProperties.DIGEST_SHA256,
+                    KeyProperties.DIGEST_SHA384,
+                    KeyProperties.DIGEST_SHA512);
+            // Authorized to be used with any encryption and signature padding
+            // schemes (including no padding).
             specBuilder.setEncryptionPaddings(
-                    KeyProperties.ENCRYPTION_PADDING_NONE);
-            // Disable randomized encryption requirement to support encryption padding NONE
-            // above.
+                    KeyProperties.ENCRYPTION_PADDING_NONE,
+                    KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1,
+                    KeyProperties.ENCRYPTION_PADDING_RSA_OAEP);
+            specBuilder.setSignaturePaddings(
+                    KeyProperties.SIGNATURE_PADDING_RSA_PKCS1,
+                    KeyProperties.SIGNATURE_PADDING_RSA_PSS);
+            // Disable randomized encryption requirement to support encryption
+            // padding NONE above.
             specBuilder.setRandomizedEncryptionRequired(false);
         } else {
             throw new KeyStoreException("Unsupported key algorithm: " + keyAlgorithm);
