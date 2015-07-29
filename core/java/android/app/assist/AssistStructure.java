@@ -141,10 +141,10 @@ public class AssistStructure implements Parcelable {
             if (DEBUG_PARCEL) Log.d(TAG, "Creating PooledStringWriter @ " + out.dataPosition());
             PooledStringWriter pwriter = new PooledStringWriter(out);
             while (writeNextEntryToParcel(as, out, pwriter)) {
-                // If the parcel contains more than 100K of data, then we are getting too
+                // If the parcel is above the IPC limit, then we are getting too
                 // large for a single IPC so stop here and let the caller come back when it
                 // is ready for more.
-                if (out.dataSize() > 1024*1024) {
+                if (out.dataSize() > IBinder.MAX_IPC_SIZE) {
                     if (DEBUG_PARCEL) Log.d(TAG, "Assist data size is " + out.dataSize()
                             + " @ pos " + out.dataPosition() + "; returning partial result");
                     out.writeInt(0);
