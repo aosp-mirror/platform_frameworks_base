@@ -63,7 +63,6 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -215,7 +214,14 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                                     KeyProperties.PURPOSE_SIGN
                                     | KeyProperties.PURPOSE_VERIFY);
                             // Authorized to be used with any digest (including no digest).
-                            specBuilder.setDigests(KeyProperties.DIGEST_NONE);
+                            // MD5 was never offered for Android Keystore for ECDSA.
+                            specBuilder.setDigests(
+                                    KeyProperties.DIGEST_NONE,
+                                    KeyProperties.DIGEST_SHA1,
+                                    KeyProperties.DIGEST_SHA224,
+                                    KeyProperties.DIGEST_SHA256,
+                                    KeyProperties.DIGEST_SHA384,
+                                    KeyProperties.DIGEST_SHA512);
                             break;
                         case KeymasterDefs.KM_ALGORITHM_RSA:
                             specBuilder = new KeyGenParameterSpec.Builder(
@@ -225,11 +231,23 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                                     | KeyProperties.PURPOSE_SIGN
                                     | KeyProperties.PURPOSE_VERIFY);
                             // Authorized to be used with any digest (including no digest).
-                            specBuilder.setDigests(KeyProperties.DIGEST_NONE);
+                            specBuilder.setDigests(
+                                    KeyProperties.DIGEST_NONE,
+                                    KeyProperties.DIGEST_MD5,
+                                    KeyProperties.DIGEST_SHA1,
+                                    KeyProperties.DIGEST_SHA224,
+                                    KeyProperties.DIGEST_SHA256,
+                                    KeyProperties.DIGEST_SHA384,
+                                    KeyProperties.DIGEST_SHA512);
                             // Authorized to be used with any encryption and signature padding
-                            // scheme (including no padding).
+                            // schemes (including no padding).
                             specBuilder.setEncryptionPaddings(
-                                    KeyProperties.ENCRYPTION_PADDING_NONE);
+                                    KeyProperties.ENCRYPTION_PADDING_NONE,
+                                    KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1,
+                                    KeyProperties.ENCRYPTION_PADDING_RSA_OAEP);
+                            specBuilder.setSignaturePaddings(
+                                    KeyProperties.SIGNATURE_PADDING_RSA_PKCS1,
+                                    KeyProperties.SIGNATURE_PADDING_RSA_PSS);
                             // Disable randomized encryption requirement to support encryption
                             // padding NONE above.
                             specBuilder.setRandomizedEncryptionRequired(false);
@@ -724,27 +742,11 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 // We use Bouncy Castle to generate self-signed RSA certificates. Bouncy Castle
                 // only supports RSA certificates signed using PKCS#1 padding scheme. The key needs
                 // to be authorized for PKCS#1 padding or padding NONE which means any padding.
-                boolean pkcs1SignaturePaddingSupported = false;
-                for (int keymasterPadding : KeyProperties.SignaturePadding.allToKeymaster(
-                        spec.getSignaturePaddings())) {
-                    if ((keymasterPadding == KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN)
-                            || (keymasterPadding == KeymasterDefs.KM_PAD_NONE)) {
-                        pkcs1SignaturePaddingSupported = true;
-                        break;
-                    }
-                }
-                if (!pkcs1SignaturePaddingSupported) {
-                    // Keymaster doesn't distinguish between encryption padding NONE and signature
-                    // padding NONE. In the Android Keystore API only encryption padding NONE is
-                    // exposed.
-                    for (int keymasterPadding : KeyProperties.EncryptionPadding.allToKeymaster(
-                            spec.getEncryptionPaddings())) {
-                        if (keymasterPadding == KeymasterDefs.KM_PAD_NONE) {
-                            pkcs1SignaturePaddingSupported = true;
-                            break;
-                        }
-                    }
-                }
+                boolean pkcs1SignaturePaddingSupported =
+                        com.android.internal.util.ArrayUtils.contains(
+                                KeyProperties.SignaturePadding.allToKeymaster(
+                                        spec.getSignaturePaddings()),
+                                KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN);
                 if (!pkcs1SignaturePaddingSupported) {
                     // Key not authorized for PKCS#1 signature padding -- can't sign
                     return null;
@@ -803,14 +805,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 : KeyProperties.Digest.allToKeymaster(supportedSignatureDigests)) {
             supportedKeymasterSignatureDigests.add(keymasterDigest);
         }
-        if (authorizedKeymasterKeyDigests.contains(KeymasterDefs.KM_DIGEST_NONE)) {
-            // Key is authorized to be used with any digest
-            return supportedKeymasterSignatureDigests;
-        } else {
-            // Key is authorized to be used only with specific digests.
-            Set<Integer> result = new HashSet<Integer>(supportedKeymasterSignatureDigests);
-            result.retainAll(authorizedKeymasterKeyDigests);
-            return result;
-        }
+        Set<Integer> result = new HashSet<Integer>(supportedKeymasterSignatureDigests);
+        result.retainAll(authorizedKeymasterKeyDigests);
+        return result;
     }
 }
