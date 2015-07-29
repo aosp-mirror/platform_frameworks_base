@@ -240,7 +240,7 @@ public class VpnService extends Service {
      * Adding an address implicitly allows traffic from that address family (i.e., IPv4 or IPv6) to
      * be routed over the VPN. @see Builder#allowFamily
      *
-     * @throws {@link IllegalArgumentException} if the address is invalid.
+     * @throws IllegalArgumentException if the address is invalid.
      *
      * @param address The IP address (IPv4 or IPv6) to assign to the VPN interface.
      * @param prefixLength The prefix length of the address.
@@ -271,7 +271,7 @@ public class VpnService extends Service {
      * family from being routed. In other words, once an address family has been allowed, it stays
      * allowed for the rest of the VPN's session. @see Builder#allowFamily
      *
-     * @throws {@link IllegalArgumentException} if the address is invalid.
+     * @throws IllegalArgumentException if the address is invalid.
      *
      * @param address The IP address (IPv4 or IPv6) to assign to the VPN interface.
      * @param prefixLength The prefix length of the address.
@@ -624,7 +624,7 @@ public class VpnService extends Service {
          * {@code packageName} must be the canonical name of a currently installed application.
          * {@link PackageManager.NameNotFoundException} is thrown if there's no such application.
          *
-         * @throws {@link PackageManager.NameNotFoundException} If the application isn't installed.
+         * @throws PackageManager.NameNotFoundException If the application isn't installed.
          *
          * @param packageName The full name (e.g.: "com.google.apps.contacts") of an application.
          *
@@ -656,7 +656,7 @@ public class VpnService extends Service {
          * {@code packageName} must be the canonical name of a currently installed application.
          * {@link PackageManager.NameNotFoundException} is thrown if there's no such application.
          *
-         * @throws {@link PackageManager.NameNotFoundException} If the application isn't installed.
+         * @throws PackageManager.NameNotFoundException If the application isn't installed.
          *
          * @param packageName The full name (e.g.: "com.google.apps.contacts") of an application.
          *
