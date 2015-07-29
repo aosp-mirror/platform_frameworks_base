@@ -250,6 +250,18 @@ public interface MetricsConstants {
     public static final int OVERVIEW_ACTIVITY = 224;
     public static final int ABOUT_LEGAL_SETTINGS = 225;
     public static final int ACTION_SEARCH_RESULTS = 226;
+    public static final int TUNER = 227;
+    public static final int TUNER_QS = 228;
+    public static final int TUNER_DEMO_MODE = 229;
+    public static final int TUNER_QS_REORDER = 230;
+    public static final int TUNER_QS_ADD = 231;
+    public static final int TUNER_QS_REMOVE = 232;
+    public static final int TUNER_STATUS_BAR_ENABLE = 233;
+    public static final int TUNER_STATUS_BAR_DISABLE = 234;
+    public static final int TUNER_DEMO_MODE_ENABLED = 235;
+    public static final int TUNER_DEMO_MODE_ON = 236;
+    public static final int TUNER_BATTERY_PERCENTAGE = 237;
+    public static final int FUELGAUGE_INACTIVE_APPS = 238;
 
     // These constants must match those in the analytic pipeline, do not edit.
     // Add temporary values to the top of MetricsLogger instead.
