@@ -18,6 +18,7 @@ package com.android.commands.telecom;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telecom.PhoneAccount;
@@ -43,6 +44,7 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_SET_PHONE_ACCOUNT_ENABLED = "set-phone-account-enabled";
     private static final String COMMAND_SET_PHONE_ACCOUNT_DISABLED = "set-phone-account-disabled";
     private static final String COMMAND_REGISTER_PHONE_ACCOUNT = "register-phone-account";
+    private static final String COMMAND_REGISTER_SIM_PHONE_ACCOUNT = "register-sim-phone-account";
     private static final String COMMAND_UNREGISTER_PHONE_ACCOUNT = "unregister-phone-account";
     private static final String COMMAND_SET_DEFAULT_DIALER = "set-default-dialer";
     private static final String COMMAND_GET_DEFAULT_DIALER = "get-default-dialer";
@@ -59,6 +61,7 @@ public final class Telecom extends BaseCommand {
                 "usage: telecom set-phone-account-enabled <COMPONENT> <ID>\n" +
                 "usage: telecom set-phone-account-disabled <COMPONENT> <ID>\n" +
                 "usage: telecom register-phone-account <COMPONENT> <ID> <LABEL>\n" +
+                "usage: telecom register-sim-phone-account <COMPONENT> <ID> <LABEL> <ADDRESS>\n" +
                 "usage: telecom unregister-phone-account <COMPONENT> <ID>\n" +
                 "usage: telecom set-default-dialer <PACKAGE>\n" +
                 "usage: telecom get-default-dialer\n" +
@@ -98,6 +101,9 @@ public final class Telecom extends BaseCommand {
             case COMMAND_REGISTER_PHONE_ACCOUNT:
                 runRegisterPhoneAccount();
                 break;
+            case COMMAND_REGISTER_SIM_PHONE_ACCOUNT:
+                runRegisterSimPhoneAccount();
+                break;
             case COMMAND_UNREGISTER_PHONE_ACCOUNT:
                 runUnregisterPhoneAccount();
                 break;
@@ -130,6 +136,24 @@ public final class Telecom extends BaseCommand {
         final String label = nextArgRequired();
         PhoneAccount account = PhoneAccount.builder(handle, label)
                 .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER).build();
+        mTelecomService.registerPhoneAccount(account);
+        System.out.println("Success - " + handle + " registered.");
+    }
+
+    private void runRegisterSimPhoneAccount() throws RemoteException {
+        final PhoneAccountHandle handle = getPhoneAccountHandleFromArgs();
+        final String label = nextArgRequired();
+        final String address = nextArgRequired();
+        PhoneAccount account = PhoneAccount.builder(
+            handle, label)
+            .setAddress(Uri.parse(address))
+            .setSubscriptionAddress(Uri.parse(address))
+            .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER |
+                    PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)
+            .setShortDescription(label)
+            .addSupportedUriScheme(PhoneAccount.SCHEME_TEL)
+            .addSupportedUriScheme(PhoneAccount.SCHEME_VOICEMAIL)
+            .build();
         mTelecomService.registerPhoneAccount(account);
         System.out.println("Success - " + handle + " registered.");
     }
