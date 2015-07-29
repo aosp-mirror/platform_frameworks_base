@@ -17201,8 +17201,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void updatePersistentConfiguration(Configuration values) {
         enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                 "updateConfiguration()");
-        enforceCallingPermission(android.Manifest.permission.WRITE_SETTINGS,
-                "updateConfiguration()");
+        enforceWriteSettingsPermission("updateConfiguration()");
         if (values == null) {
             throw new NullPointerException("Configuration must not be null");
         }
@@ -17212,6 +17211,25 @@ public final class ActivityManagerService extends ActivityManagerNative
             updateConfigurationLocked(values, null, true, false);
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    private void enforceWriteSettingsPermission(String func) {
+        int uid = Binder.getCallingUid();
+        if (uid == Process.ROOT_UID) {
+            return;
+        }
+
+        if (Settings.checkAndNoteWriteSettingsOperation(mContext, uid,
+                Settings.getPackageNameForUid(mContext, uid), false)) {
+            return;
+        }
+
+        String msg = "Permission Denial: " + func + " from pid="
+                + Binder.getCallingPid()
+                + ", uid=" + uid
+                + " requires " + android.Manifest.permission.WRITE_SETTINGS;
+        Slog.w(TAG, msg);
+        throw new SecurityException(msg);
     }
 
     public void updateConfiguration(Configuration values) {
