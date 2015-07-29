@@ -19,6 +19,8 @@ package android.provider;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
+import android.app.Application;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
@@ -3839,10 +3841,24 @@ public final class Settings {
                     }
                 }
                 if (sLockSettings != null && !sIsSystemProcess) {
-                    try {
-                        return sLockSettings.getString(name, "0", userHandle);
-                    } catch (RemoteException re) {
-                        // Fall through
+                    // No context; use the ActivityThread's context as an approximation for
+                    // determining the target API level.
+                    Application application = ActivityThread.currentApplication();
+
+                    boolean isPreMnc = application != null
+                            && application.getApplicationInfo() != null
+                            && application.getApplicationInfo().targetSdkVersion
+                            <= VERSION_CODES.LOLLIPOP_MR1;
+                    if (isPreMnc) {
+                        try {
+                            return sLockSettings.getString(name, "0", userHandle);
+                        } catch (RemoteException re) {
+                            // Fall through
+                        }
+                    } else {
+                        throw new SecurityException("Settings.Secure." + name
+                                + " is deprecated and no longer accessible."
+                                + " See API documentation for potential replacements.");
                     }
                 }
             }
@@ -4378,14 +4394,19 @@ public final class Settings {
          * Whether autolock is enabled (0 = false, 1 = true)
          *
          * @deprecated Use {@link android.app.KeyguardManager} to determine the state and security
-         *             level of the keyguard.
+         *             level of the keyguard. Accessing this setting from an app that is targeting
+         *             {@link VERSION_CODES#MNC} or later throws a {@code SecurityException}.
          */
         @Deprecated
         public static final String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
 
         /**
          * Whether lock pattern is visible as user enters (0 = false, 1 = true)
+         *
+         * @deprecated Accessing this setting from an app that is targeting
+         *             {@link VERSION_CODES#MNC} or later throws a {@code SecurityException}.
          */
+        @Deprecated
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
 
         /**
@@ -4395,6 +4416,8 @@ public final class Settings {
          * @deprecated Starting in {@link VERSION_CODES#JELLY_BEAN_MR1} the
          *             lockscreen uses
          *             {@link Settings.System#HAPTIC_FEEDBACK_ENABLED}.
+         *             Accessing this setting from an app that is targeting
+         *             {@link VERSION_CODES#MNC} or later throws a {@code SecurityException}.
          */
         @Deprecated
         public static final String
