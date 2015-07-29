@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ਉਂਗਲ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਆਈਕਨ"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਨਿਰਧਾਰਿਤ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਨਾਲ ਸਿੰਕ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ਸਿੰਕ ਟੌਗਲ ਚਾਲੂ ਅਤੇ ਬੰਦ"</string>

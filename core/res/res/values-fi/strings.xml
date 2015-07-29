@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Sormi <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Sormenjälkikuvake"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lue synkronointiasetuksia"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Antaa sovelluksen lukea tilien synkronointiasetuksia. Sovellus voi esimerkiksi määrittää, onko Henkilöt-sovellus synkronoitu tilin kanssa."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ota synkronointi käyttöön tai poista se käytöstä"</string>

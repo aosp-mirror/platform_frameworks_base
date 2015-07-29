@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> बोट"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फिंगरप्रिंट चिन्ह"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"संकालन सेटिंग्‍ज वाचा"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"खात्याच्या संकालन सेटिंग्ज वाचण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, हे खात्यासह लोकांचा अॅप संकालित केला आहे किंवा नाही हे निर्धारित करू शकते."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"संकालन चालू आणि बंद करा टॉगल करा"</string>

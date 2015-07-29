@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> саусағы"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Саусақ ізі белгішесі"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"синх параметрлерін оқу"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Қолданбаға есептік жазба синхрондау параметрлерін оқу мүмкіндігін береді. Мысалы, бұл арқылы People қолданбасының есептік жазбамен сихрондалғаны анықталуы мүмкін."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"синх қосу және өшіру арасында ауысу"</string>

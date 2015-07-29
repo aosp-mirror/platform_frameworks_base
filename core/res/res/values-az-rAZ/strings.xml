@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Barmaq <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Barmaq izi ikonası"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"sinx ayarlarını oxu"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Tətbiqə hesablar üçün sinxronizasiya nizamlarını oxuma icazəsi verir. Məsələn, bu Şəxslər tətbiqinin sinxronizə olunub-olunmadığını təyin edə bilər."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinxronizasiyaya davam edir və onu söndürür"</string>

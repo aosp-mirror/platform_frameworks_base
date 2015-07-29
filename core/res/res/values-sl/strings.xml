@@ -436,6 +436,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona prstnih odtisov"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"branje nastavitev sinhronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Aplikaciji omogoča branje nastavitev sinhronizacije za račun. S tem lahko aplikacija na primer ugotovi, ali je aplikacija Ljudje sinhronizirana z računom."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"vklop in izklop sinhronizacije"</string>

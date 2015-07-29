@@ -434,6 +434,8 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lar appen lese synkroniseringsinnstillingene for en konto. For eksempel kan den finne ut om Personer-appen er synkronisert med en konto."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"slå synkronisering av og på"</string>
@@ -950,7 +952,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"Standard ringetone"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Standard ringetone (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ingen"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringetoner"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringelyder"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Ukjent ringetone"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Wi-Fi-nettverk er tilgjengelig</item>

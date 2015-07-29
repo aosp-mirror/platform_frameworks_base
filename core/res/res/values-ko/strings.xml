@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>번째 손가락"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"지문 아이콘"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"앱이 계정의 동기화 설정을 읽을 수 있도록 허용합니다. 예를 들어, 계정에서 주소록 앱을 동기화할지 여부를 확인할 수 있습니다."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"동기화 사용 및 사용 중지 전환"</string>

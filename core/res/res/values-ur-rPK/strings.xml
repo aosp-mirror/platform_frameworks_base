@@ -434,6 +434,8 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"انگلی <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"‏ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کی ترتیبات پڑھنے کی اجازت دیتا ہے۔ مثلا، یہ تعین کرسکتا ہے کہ آیا People ایپ کسی اکاؤنٹ کے ساتھ مطابقت پذیر ہے۔"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"مطابقت پذیری آن اور آف ٹوگل کریں"</string>

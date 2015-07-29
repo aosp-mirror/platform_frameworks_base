@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"نماد اثر انگشت"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"خواندن تنظیمات همگام‌سازی"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"به برنامه اجازه می‌دهد تنظیمات را برای یک حساب بخواند. به‌عنوان مثال، این ویژگی می‌تواند تعیین کند آیا حساب «افراد» شما با یک حساب همگام‌سازی شده است."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"تغییر وضعیت همگام‌سازی بین فعال و غیرفعال"</string>
