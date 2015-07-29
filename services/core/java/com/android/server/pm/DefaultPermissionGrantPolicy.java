@@ -125,6 +125,7 @@ final class DefaultPermissionGrantPolicy {
     private PackagesProvider mVoiceInteractionPackagesProvider;
     private PackagesProvider mSmsAppPackagesProvider;
     private PackagesProvider mDialerAppPackagesProvider;
+    private PackagesProvider mSimCallManagerPackagesProvider;
     private SyncAdapterPackagesProvider mSyncAdapterPackagesProvider;
 
     public DefaultPermissionGrantPolicy(PackageManagerService service) {
@@ -149,6 +150,10 @@ final class DefaultPermissionGrantPolicy {
 
     public void setDialerAppPackagesProviderLPw(PackagesProvider provider) {
         mDialerAppPackagesProvider = provider;
+    }
+
+    public void setSimCallManagerPackagesProviderLPw(PackagesProvider provider) {
+        mSimCallManagerPackagesProvider = provider;
     }
 
     public void setSyncAdapterPackagesProviderLPw(SyncAdapterPackagesProvider provider) {
@@ -201,6 +206,7 @@ final class DefaultPermissionGrantPolicy {
         final PackagesProvider voiceInteractionPackagesProvider;
         final PackagesProvider smsAppPackagesProvider;
         final PackagesProvider dialerAppPackagesProvider;
+        final PackagesProvider simCallManagerPackagesProvider;
         final SyncAdapterPackagesProvider syncAdapterPackagesProvider;
 
         synchronized (mService.mPackages) {
@@ -209,6 +215,7 @@ final class DefaultPermissionGrantPolicy {
             voiceInteractionPackagesProvider = mVoiceInteractionPackagesProvider;
             smsAppPackagesProvider = mSmsAppPackagesProvider;
             dialerAppPackagesProvider = mDialerAppPackagesProvider;
+            simCallManagerPackagesProvider = mSimCallManagerPackagesProvider;
             syncAdapterPackagesProvider = mSyncAdapterPackagesProvider;
         }
 
@@ -222,6 +229,8 @@ final class DefaultPermissionGrantPolicy {
                 ? smsAppPackagesProvider.getPackages(userId) : null;
         String[] dialerAppPackageNames = (dialerAppPackagesProvider != null)
                 ? dialerAppPackagesProvider.getPackages(userId) : null;
+        String[] simCallManagerPackageNames = (simCallManagerPackagesProvider != null)
+                ? simCallManagerPackagesProvider.getPackages(userId) : null;
         String[] contactsSyncAdapterPackages = (syncAdapterPackagesProvider != null) ?
                 syncAdapterPackagesProvider.getPackages(ContactsContract.AUTHORITY, userId) : null;
         String[] calendarSyncAdapterPackages = (syncAdapterPackagesProvider != null) ?
@@ -309,6 +318,18 @@ final class DefaultPermissionGrantPolicy {
                     PackageParser.Package dialerPackage = getSystemPackageLPr(dialerAppPackageName);
                     if (dialerPackage != null) {
                         grantDefaultPermissionsToDefaultSystemDialerAppLPr(dialerPackage, userId);
+                    }
+                }
+            }
+
+            // Sim call manager
+            if (simCallManagerPackageNames != null) {
+                for (String simCallManagerPackageName : simCallManagerPackageNames) {
+                    PackageParser.Package simCallManagerPackage =
+                            getSystemPackageLPr(simCallManagerPackageName);
+                    if (simCallManagerPackage != null) {
+                        grantDefaultPermissionsToDefaultSimCallManagerLPr(simCallManagerPackage,
+                                userId);
                     }
                 }
             }
@@ -587,6 +608,25 @@ final class DefaultPermissionGrantPolicy {
             grantRuntimePermissionsLPw(dialerPackage, CONTACTS_PERMISSIONS, false, true, userId);
             grantRuntimePermissionsLPw(dialerPackage, SMS_PERMISSIONS, false, true, userId);
             grantRuntimePermissionsLPw(dialerPackage, MICROPHONE_PERMISSIONS, false, true, userId);
+        }
+    }
+
+    private void grantDefaultPermissionsToDefaultSimCallManagerLPr(
+            PackageParser.Package simCallManagerPackage, int userId) {
+        Log.i(TAG, "Granting permissions to sim call manager for user:" + userId);
+        if (doesPackageSupportRuntimePermissions(simCallManagerPackage)) {
+            grantRuntimePermissionsLPw(simCallManagerPackage, PHONE_PERMISSIONS, userId);
+            grantRuntimePermissionsLPw(simCallManagerPackage, MICROPHONE_PERMISSIONS, userId);
+        }
+    }
+
+    public void grantDefaultPermissionsToDefaultSimCallManagerLPr(String packageName, int userId) {
+        if (packageName == null) {
+            return;
+        }
+        PackageParser.Package simCallManagerPackage = getPackageLPr(packageName);
+        if (simCallManagerPackage != null) {
+            grantDefaultPermissionsToDefaultSimCallManagerLPr(simCallManagerPackage, userId);
         }
     }
 

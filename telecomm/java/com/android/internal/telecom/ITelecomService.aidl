@@ -93,6 +93,11 @@ interface ITelecomService {
     PhoneAccountHandle getSimCallManager();
 
     /**
+     * @see TelecomServiceImpl#getSimCallManagerForUser
+     */
+    PhoneAccountHandle getSimCallManagerForUser(int userId);
+
+    /**
      * @see TelecomServiceImpl#registerPhoneAccount
      */
     void registerPhoneAccount(in PhoneAccount metadata);
