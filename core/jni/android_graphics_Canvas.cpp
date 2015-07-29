@@ -69,11 +69,6 @@ static jint getHeight(JNIEnv*, jobject, jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->height());
 }
 
-static void setHighContrastText(JNIEnv*, jobject, jlong canvasHandle, jboolean highContrastText) {
-    Canvas* canvas = get_canvas(canvasHandle);
-    canvas->setHighContrastText(highContrastText);
-}
-
 static jint getSaveCount(JNIEnv*, jobject, jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->getSaveCount());
 }
@@ -435,16 +430,6 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
                                              vertA.ptr(), colorA.ptr(), paint);
 }
 
-static void simplifyPaint(int color, SkPaint* paint) {
-    paint->setColor(color);
-    paint->setShader(nullptr);
-    paint->setColorFilter(nullptr);
-    paint->setLooper(nullptr);
-    paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
-    paint->setStrokeJoin(SkPaint::kRound_Join);
-    paint->setLooper(nullptr);
-}
-
 class DrawTextFunctor {
 public:
     DrawTextFunctor(const Layout& layout, Canvas* canvas, uint16_t* glyphs, float* pos,
@@ -469,32 +454,9 @@ public:
         }
 
         size_t glyphCount = end - start;
-
-        if (CC_UNLIKELY(canvas->isHighContrastText())) {
-            // high contrast draw path
-            int color = paint.getColor();
-            int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
-            bool darken = channelSum < (128 * 3);
-
-            // outline
-            SkPaint outlinePaint(paint);
-            simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
-            outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
-            canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, outlinePaint, x, y,
-                    bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom, totalAdvance);
-
-            // inner
-            SkPaint innerPaint(paint);
-            simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
-            innerPaint.setStyle(SkPaint::kFill_Style);
-            canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, innerPaint, x, y,
-                    bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom, totalAdvance);
-        } else {
-            // standard draw path
-            canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, paint, x, y,
-                             bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom,
-                             totalAdvance);
-        }
+        canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, paint, x, y,
+                         bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom,
+                         totalAdvance);
     }
 private:
     const Layout& layout;
@@ -717,7 +679,6 @@ static JNINativeMethod gMethods[] = {
     {"native_isOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
     {"native_getWidth","(J)I", (void*) CanvasJNI::getWidth},
     {"native_getHeight","(J)I", (void*) CanvasJNI::getHeight},
-    {"native_setHighContrastText","(JZ)V", (void*) CanvasJNI::setHighContrastText},
     {"native_save","(JI)I", (void*) CanvasJNI::save},
     {"native_saveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
     {"native_saveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},

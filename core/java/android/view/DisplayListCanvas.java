@@ -147,9 +147,23 @@ public class DisplayListCanvas extends Canvas {
     private static native int nGetMaximumTextureWidth();
     private static native int nGetMaximumTextureHeight();
 
+    /**
+     * Returns the native OpenGLRenderer object.
+     */
+    long getRenderer() {
+        return mNativeCanvasWrapper;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Setup
     ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void setHighContrastText(boolean highContrastText) {
+        nSetHighContrastText(mNativeCanvasWrapper, highContrastText);
+    }
+
+    private static native void nSetHighContrastText(long renderer, boolean highContrastText);
 
     @Override
     public void insertReorderBarrier() {
