@@ -181,6 +181,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public String getPermissionControllerPackageName() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public boolean addPermission(PermissionInfo info) {
         throw new UnsupportedOperationException();

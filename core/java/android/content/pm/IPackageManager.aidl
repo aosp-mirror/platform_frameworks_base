@@ -505,4 +505,6 @@ interface IPackageManager {
     void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
+
+    String getPermissionControllerPackageName();
 }
