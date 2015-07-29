@@ -120,11 +120,15 @@ public class TextClock extends TextView {
 
     private CharSequence mFormat12;
     private CharSequence mFormat24;
+    private CharSequence mDescFormat12;
+    private CharSequence mDescFormat24;
 
     @ExportedProperty
     private CharSequence mFormat;
     @ExportedProperty
     private boolean mHasSeconds;
+
+    private CharSequence mDescFormat;
 
     private boolean mAttached;
 
@@ -301,6 +305,17 @@ public class TextClock extends TextView {
     }
 
     /**
+     * Like setFormat12Hour, but for the content description.
+     * @hide
+     */
+    public void setContentDescriptionFormat12Hour(CharSequence format) {
+        mDescFormat12 = format;
+
+        chooseFormat();
+        onTimeChanged();
+    }
+
+    /**
      * Returns the formatting pattern used to display the date and/or time
      * in 24-hour mode. The formatting pattern syntax is described in
      * {@link DateFormat}.
@@ -342,6 +357,17 @@ public class TextClock extends TextView {
     @RemotableViewMethod
     public void setFormat24Hour(CharSequence format) {
         mFormat24 = format;
+
+        chooseFormat();
+        onTimeChanged();
+    }
+
+    /**
+     * Like setFormat24Hour, but for the content description.
+     * @hide
+     */
+    public void setContentDescriptionFormat24Hour(CharSequence format) {
+        mDescFormat24 = format;
 
         chooseFormat();
         onTimeChanged();
@@ -460,8 +486,10 @@ public class TextClock extends TextView {
 
         if (format24Requested) {
             mFormat = abc(mFormat24, mFormat12, ld.timeFormat_Hm);
+            mDescFormat = abc(mDescFormat24, mDescFormat12, mFormat);
         } else {
             mFormat = abc(mFormat12, mFormat24, ld.timeFormat_hm);
+            mDescFormat = abc(mDescFormat12, mDescFormat24, mFormat);
         }
 
         boolean hadSeconds = mHasSeconds;
@@ -547,6 +575,7 @@ public class TextClock extends TextView {
     private void onTimeChanged() {
         mTime.setTimeInMillis(System.currentTimeMillis());
         setText(DateFormat.format(mFormat, mTime));
+        setContentDescription(DateFormat.format(mDescFormat, mTime));
     }
 
     /** @hide */
