@@ -1,12 +1,14 @@
 package com.android.systemui.statusbar.policy;
 
 import android.net.NetworkCapabilities;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+@SmallTest
 public class NetworkControllerEthernetTest extends NetworkControllerBaseTest {
 
     public void testEthernetIcons() {
