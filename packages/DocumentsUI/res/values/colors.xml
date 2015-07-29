@@ -27,4 +27,6 @@
     <color name="item_doc_grid_protect_background">#88000000</color>
     <color name="status_bar_background">@color/material_blue_700</color>
     <color name="action_mode_status_bar_background">@color/material_grey_800</color>
+    <color name="band_select_background">#88ffffff</color>
+    <color name="band_select_border">#44000000</color>
 </resources>
