@@ -141,6 +141,24 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override
+    public void onScreenTurnedOn() {
+        try {
+            mService.onScreenTurnedOn();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    @Override
+    public void onScreenTurnedOff() {
+        try {
+            mService.onScreenTurnedOff();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
     @Override // Binder interface
     public void setKeyguardEnabled(boolean enabled) {
         try {

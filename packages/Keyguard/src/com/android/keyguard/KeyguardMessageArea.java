@@ -58,10 +58,10 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
     };
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
-        public void onScreenTurnedOff(int why) {
+        public void onFinishedGoingToSleep(int why) {
             setSelected(false);
         };
-        public void onScreenTurnedOn() {
+        public void onStartedWakingUp() {
             setSelected(true);
         };
     };
@@ -126,8 +126,8 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
 
     @Override
     protected void onFinishInflate() {
-        final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
-        setSelected(screenOn); // This is required to ensure marquee works
+        boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
+        setSelected(shouldMarquee); // This is required to ensure marquee works
     }
 
     private void securityMessageChanged(CharSequence message) {
