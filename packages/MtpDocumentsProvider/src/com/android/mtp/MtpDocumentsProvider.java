@@ -87,14 +87,14 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 // TODO: Add retry logic here.
 
                 for (final MtpRoot root : roots) {
-                    final String rootId = Identifier.createRootId(deviceId, root.mStorageId);
+                    final Identifier rootIdentifier = new Identifier(deviceId, root.mStorageId);
                     final MatrixCursor.RowBuilder builder = cursor.newRow();
-                    builder.add(Root.COLUMN_ROOT_ID, rootId);
+                    builder.add(Root.COLUMN_ROOT_ID, rootIdentifier.toRootId());
                     builder.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD);
                     builder.add(Root.COLUMN_TITLE, root.mDescription);
                     builder.add(
                             Root.COLUMN_DOCUMENT_ID,
-                            Identifier.createDocumentId(rootId, MtpDocument.DUMMY_HANDLE_FOR_ROOT));
+                            rootIdentifier.toDocumentId());
                     builder.add(Root.COLUMN_AVAILABLE_BYTES , root.mFreeSpace);
                 }
             } catch (IOException error) {
@@ -109,13 +109,49 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     @Override
     public Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException {
-        throw new FileNotFoundException();
+        if (projection == null) {
+            projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
+        }
+        final Identifier identifier = Identifier.createFromDocumentId(documentId);
+
+        MtpDocument document = null;
+        if (identifier.mObjectHandle != MtpDocument.DUMMY_HANDLE_FOR_ROOT) {
+            try {
+                document = mMtpManager.getDocument(identifier.mDeviceId, identifier.mObjectHandle);
+            } catch (IOException e) {
+                throw new FileNotFoundException(e.getMessage());
+            }
+        } else {
+            MtpRoot[] roots;
+            try {
+                roots = mMtpManager.getRoots(identifier.mDeviceId);
+                if (roots != null) {
+                    for (final MtpRoot root : roots) {
+                        if (identifier.mStorageId == root.mStorageId) {
+                            document = new MtpDocument(root);
+                            break;
+                        }
+                    }
+                }
+                if (document == null) {
+                    throw new FileNotFoundException();
+                }
+            } catch (IOException e) {
+                throw new FileNotFoundException(e.getMessage());
+            }
+        }
+
+        final MatrixCursor cursor = new MatrixCursor(projection);
+        cursor.addRow(document.getRow(
+                new Identifier(identifier.mDeviceId, identifier.mStorageId),
+                projection));
+        return cursor;
     }
 
     @Override
-    public Cursor queryChildDocuments(String parentDocumentId,
-            String[] projection, String sortOrder)
-            throws FileNotFoundException {
+    public Cursor queryChildDocuments(
+            String parentDocumentId, String[] projection, String sortOrder)
+                    throws FileNotFoundException {
         throw new FileNotFoundException();
     }
 

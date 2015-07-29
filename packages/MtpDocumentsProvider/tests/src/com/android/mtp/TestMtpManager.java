@@ -19,6 +19,7 @@ package com.android.mtp;
 import android.content.Context;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,9 +27,14 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class TestMtpManager extends MtpManager {
+    private static String pack(int... args) {
+        return Arrays.toString(args);
+    }
+
     private final Set<Integer> mValidDevices = new HashSet<Integer>();
     private final Set<Integer> mOpenedDevices = new TreeSet<Integer>();
     private final Map<Integer, MtpRoot[]> mRoots = new HashMap<Integer, MtpRoot[]>();
+    private final Map<String, MtpDocument> mDocuments = new HashMap<String, MtpDocument>();
 
     TestMtpManager(Context context) {
         super(context);
@@ -40,6 +46,10 @@ public class TestMtpManager extends MtpManager {
 
     void setRoots(int deviceId, MtpRoot[] roots) {
         mRoots.put(deviceId, roots);
+    }
+
+    void setDocument(int deviceId, int objectHandle, MtpDocument document) {
+        mDocuments.put(pack(deviceId, objectHandle), document);
     }
 
     @Override
@@ -65,6 +75,11 @@ public class TestMtpManager extends MtpManager {
         } else {
             throw new IOException("getRoots error");
         }
+    }
+
+    @Override
+    MtpDocument getDocument(int deviceId, int objectHandle) {
+        return mDocuments.get(pack(deviceId, objectHandle));
     }
 
     @Override
