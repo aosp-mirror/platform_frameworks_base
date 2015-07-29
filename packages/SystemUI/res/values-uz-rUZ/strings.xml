@@ -130,8 +130,8 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Ikkita ustun."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Uchta ustun."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Signal to‘liq."</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"Yoqilgan."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"O‘chirilgan."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Yoniq"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"O‘chiq"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Ulangan."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Ulanmoqda…"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
@@ -419,8 +419,8 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Tezkor sozlamalar, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Ulanish nuqtasi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Ishchi profil"</string>
-    <string name="tuner_warning_title" msgid="7094689930793031682">"Ayrimlarga yoqadi, boshqalarga esa yo‘q"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner sizga Android foydalanuvchi interfeysini tuzatish va o‘zingizga moslashtirishingiz mumkin. Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Diqqat!"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner yordamida siz Android foydalanuvchi interfeysini tuzatish va o‘zingizga moslashtirishingiz mumkin. Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
     <string name="got_it" msgid="2239653834387972602">"OK"</string>
     <string name="tuner_toast" msgid="603429811084428439">"Tabriklaymiz! System UI Tuner Sozlamalarga qo‘shildi."</string>

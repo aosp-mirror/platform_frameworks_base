@@ -423,7 +423,7 @@
     <string name="tuner_warning" msgid="8730648121973575701">"Sistemako erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
     <string name="got_it" msgid="2239653834387972602">"Ados"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Zorionak! Sistemako erabiltzaile-interfazearen konfiguratzailea ezarpenetan gehitu da"</string>
-    <string name="remove_from_settings" msgid="8389591916603406378">"Kendu ezarpenetatik"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Sistemako erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren ezaugarri guztiak erabiltzeari utzi nahi diozu?"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Zorionak! Sistemako erabiltzaile-interfazearen konfiguratzailea Ezarpenak atalean gehitu da"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Kendu Ezarpenak ataletik"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Sistemako erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren eginbide guztiak erabiltzeari utzi nahi diozu?"</string>
 </resources>
