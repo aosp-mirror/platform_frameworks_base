@@ -5824,7 +5824,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         // We shouldn't already have a process under this name, but just in case we
         // need to clean up whatever may be there now.
         ProcessRecord old = removeProcessNameLocked(proc.processName, proc.uid);
-        if (old != null) {
+        if (old == proc && proc.persistent) {
+            // We are re-adding a persistent process.  Whatevs!  Just leave it there.
+            Slog.w(TAG, "Re-adding persistent process " + proc);
+        } else if (old != null) {
             Slog.wtf(TAG, "Already have existing proc " + old + " when adding " + proc);
         }
         UidRecord uidRec = mActiveUids.get(proc.uid);
