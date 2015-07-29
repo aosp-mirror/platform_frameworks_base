@@ -101,7 +101,7 @@
     <!-- Accessibility description of the password lock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_password_unlock">Password unlock.</string>
     <!-- Accessibility description of the unlock pattern area. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_pattern_area">Pattern area.</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">Pattern area.</string>
     <!-- Accessibility description of the unlock slide area. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_slide_area">Slide area.</string>
     <!-- Accessibility description of the PIN password view. [CHAR_LIMIT=none] -->
