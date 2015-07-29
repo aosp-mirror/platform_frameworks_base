@@ -6,6 +6,7 @@
 #include "Main.h"
 #include "Bundle.h"
 
+#include <utils/Compat.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
 #include <utils/List.h>
