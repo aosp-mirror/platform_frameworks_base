@@ -103,6 +103,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             = "com.android.facelock.FACE_UNLOCK_STOPPED";
     private static final String FINGERPRINT_WAKE_LOCK_NAME = "wake-and-unlock wakelock";
 
+    /**
+     * Mode in which we don't need to wake up the device when we get a fingerprint.
+     */
+    private static final int FP_WAKE_NONE = 0;
+
+    /**
+     * Mode in which we wake up the device, and directly dismiss Keyguard. Active when we acquire
+     * a fingerprint while the screen is off and the device was sleeping.
+     */
+    private static final int FP_WAKE_DIRECT_UNLOCK = 1;
+
+    /**
+     * Mode in which we wake up the device, but play the normal dismiss animation. Active when we
+     * acquire a fingerprint pulsing in doze mode.
+     * */
+    private static final int FP_WAKE_WAKE_TO_BOUNCER = 2;
+
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
     private static final int MSG_BATTERY_UPDATE = 302;
@@ -118,8 +135,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
     private static final int MSG_USER_INFO_CHANGED = 317;
     private static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
-    private static final int MSG_SCREEN_TURNED_ON = 319;
-    private static final int MSG_SCREEN_TURNED_OFF = 320;
+    private static final int MSG_STARTED_WAKING_UP = 319;
+    private static final int MSG_FINISHED_GOING_TO_SLEEP = 320;
     private static final int MSG_KEYGUARD_BOUNCER_CHANGED = 322;
     private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 327;
     private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 328;
@@ -156,6 +173,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private boolean mSwitchingUser;
 
+    private boolean mDeviceInteractive;
     private boolean mScreenOn;
     private SubscriptionManager mSubscriptionManager;
     private List<SubscriptionInfo> mSubscriptionInfo;
@@ -212,11 +230,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 case MSG_REPORT_EMERGENCY_CALL_ACTION:
                     handleReportEmergencyCallAction();
                     break;
-                case MSG_SCREEN_TURNED_OFF:
-                    handleScreenTurnedOff(msg.arg1);
+                case MSG_FINISHED_GOING_TO_SLEEP:
+                    handleFinishedGoingToSleep(msg.arg1);
                     break;
-                case MSG_SCREEN_TURNED_ON:
-                    handleScreenTurnedOn();
+                case MSG_STARTED_WAKING_UP:
+                    handleStartedWakingUp();
                     break;
                 case MSG_FACE_UNLOCK_STATE_CHANGED:
                     handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
@@ -249,7 +267,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private static int sCurrentUser;
 
-    private boolean mWakeAndUnlocking;
+    private int mFpWakeMode;
 
     public synchronized static void setCurrentUser(int currentUser) {
         sCurrentUser = currentUser;
@@ -372,19 +390,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (acquireInfo != FingerprintManager.FINGERPRINT_ACQUIRED_GOOD) {
             return;
         }
-        if (!mScreenOn) {
+        if (!mDeviceInteractive && !mScreenOn) {
             releaseFingerprintWakeLock();
             mWakeLock = mPowerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, FINGERPRINT_WAKE_LOCK_NAME);
             mWakeLock.acquire();
-            mWakeAndUnlocking = true;
+            mFpWakeMode = FP_WAKE_DIRECT_UNLOCK;
             if (DEBUG_FP_WAKELOCK) {
                 Log.i(TAG, "fingerprint acquired, grabbing fp wakelock");
             }
             mHandler.postDelayed(mReleaseFingerprintWakeLockRunnable,
                     FINGERPRINT_WAKELOCK_TIMEOUT_MS);
+        } else if (!mDeviceInteractive) {
+            mFpWakeMode = FP_WAKE_WAKE_TO_BOUNCER;
         } else {
-            mWakeAndUnlocking = false;
+            mFpWakeMode = FP_WAKE_NONE;
         }
     }
 
@@ -410,7 +430,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintAuthenticated() {
-        if (mWakeAndUnlocking) {
+        if (mFpWakeMode == FP_WAKE_WAKE_TO_BOUNCER || mFpWakeMode == FP_WAKE_DIRECT_UNLOCK) {
             if (DEBUG_FP_WAKELOCK) {
                 Log.i(TAG, "fp wakelock: Authenticated, waking up...");
             }
@@ -429,7 +449,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
                 return;
             }
-            onFingerprintAuthenticated(userId, mWakeAndUnlocking);
+            onFingerprintAuthenticated(userId, mFpWakeMode == FP_WAKE_DIRECT_UNLOCK);
         } finally {
             setFingerprintRunningDetectionRunning(false);
         }
@@ -765,24 +785,24 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return sInstance;
     }
 
-    protected void handleScreenTurnedOn() {
+    protected void handleStartedWakingUp() {
         updateFingerprintListeningState();
         final int count = mCallbacks.size();
         for (int i = 0; i < count; i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onScreenTurnedOn();
+                cb.onStartedWakingUp();
             }
         }
     }
 
-    protected void handleScreenTurnedOff(int arg1) {
+    protected void handleFinishedGoingToSleep(int arg1) {
         clearFingerprintRecognized();
         final int count = mCallbacks.size();
         for (int i = 0; i < count; i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onScreenTurnedOff(arg1);
+                cb.onFinishedGoingToSleep(arg1);
             }
         }
         updateFingerprintListeningState();
@@ -1450,22 +1470,34 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     // TODO: use these callbacks elsewhere in place of the existing notifyScreen*()
     // (KeyguardViewMediator, KeyguardHostView)
+    public void dispatchStartedWakingUp() {
+        synchronized (this) {
+            mDeviceInteractive = true;
+        }
+        mHandler.sendEmptyMessage(MSG_STARTED_WAKING_UP);
+    }
+
+    public void dispatchFinishedGoingToSleep(int why) {
+        synchronized(this) {
+            mDeviceInteractive = false;
+        }
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_FINISHED_GOING_TO_SLEEP, why, 0));
+    }
+
     public void dispatchScreenTurnedOn() {
         synchronized (this) {
             mScreenOn = true;
         }
-        mHandler.sendEmptyMessage(MSG_SCREEN_TURNED_ON);
     }
 
-    public void dispatchScreenTurnedOff(int why) {
+    public void dispatchScreenTurnedOff() {
         synchronized(this) {
             mScreenOn = false;
         }
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_SCREEN_TURNED_OFF, why, 0));
     }
 
-    public boolean isScreenOn() {
-        return mScreenOn;
+    public boolean isDeviceInteractive() {
+        return mDeviceInteractive;
     }
 
     /**

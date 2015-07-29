@@ -64,6 +64,16 @@ oneway interface IKeyguardService {
      */
     void onScreenTurningOn(IKeyguardDrawnCallback callback);
 
+    /**
+     * Called when the screen has actually turned on.
+     */
+    void onScreenTurnedOn();
+
+    /**
+     * Called when the screen has turned off.
+     */
+    void onScreenTurnedOff();
+
     void setKeyguardEnabled(boolean enabled);
     void onSystemReady();
     void doKeyguardTimeout(in Bundle options);

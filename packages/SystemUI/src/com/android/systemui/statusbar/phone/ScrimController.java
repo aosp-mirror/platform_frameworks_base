@@ -22,11 +22,12 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BackDropView;
@@ -62,6 +63,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     private boolean mDarkenWhileDragging;
     private boolean mBouncerShowing;
+    private boolean mWakeAndUnlocking;
     private boolean mAnimateChange;
     private boolean mUpdatePending;
     private boolean mExpanding;
@@ -71,7 +73,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private Runnable mOnAnimationFinished;
     private boolean mAnimationStarted;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
-    private final Interpolator mLinearOutSlowInInterpolator;
+    private final Interpolator mKeyguardFadeOutInterpolator = new PathInterpolator(0f, 0, 0.7f, 1f);
     private BackDropView mBackDropView;
     private boolean mScrimSrcEnabled;
     private boolean mDozing;
@@ -92,8 +94,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mHeadsUpScrim = headsUpScrim;
         final Context context = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                android.R.interpolator.linear_out_slow_in);
         mScrimSrcEnabled = scrimSrcEnabled;
         updateHeadsUpScrim(false);
     }
@@ -128,7 +128,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         scheduleUpdate();
     }
 
+    public void setWakeAndUnlocking() {
+        mWakeAndUnlocking = true;
+        scheduleUpdate();
+    }
+
     public void animateKeyguardFadingOut(long delay, long duration, Runnable onAnimationFinished) {
+        mWakeAndUnlocking = false;
         mAnimateKeyguardFadingOut = true;
         mDurationOverride = duration;
         mAnimationDelay = delay;
@@ -151,8 +157,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     public void setDozing(boolean dozing) {
-        mDozing = dozing;
-        scheduleUpdate();
+        if (mDozing != dozing) {
+            mDozing = dozing;
+            scheduleUpdate();
+        }
     }
 
     public void setDozeInFrontAlpha(float alpha) {
@@ -185,6 +193,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private void updateScrims() {
         if (mAnimateKeyguardFadingOut || mForceHideScrims) {
             setScrimInFrontColor(0f);
+            setScrimBehindColor(0f);
+        } else if (mWakeAndUnlocking) {
+
+            // During wake and unlock, we first hide everything behind a black scrim, which then
+            // gets faded out from animateKeyguardFadingOut.
+            setScrimInFrontColor(1f);
             setScrimBehindColor(0f);
         } else if (!mKeyguardShowing && !mBouncerShowing) {
             updateScrimNormal();
@@ -319,7 +333,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private Interpolator getInterpolator() {
-        return mAnimateKeyguardFadingOut ? mLinearOutSlowInInterpolator : mInterpolator;
+        return mAnimateKeyguardFadingOut ? mKeyguardFadeOutInterpolator : mInterpolator;
     }
 
     @Override

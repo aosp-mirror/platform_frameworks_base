@@ -132,6 +132,18 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
+        public void onScreenTurnedOn() {
+            checkPermission();
+            mKeyguardViewMediator.onScreenTurnedOn();
+        }
+
+        @Override // Binder interface
+        public void onScreenTurnedOff() {
+            checkPermission();
+            mKeyguardViewMediator.onScreenTurnedOff();
+        }
+
+        @Override // Binder interface
         public void setKeyguardEnabled(boolean enabled) {
             checkPermission();
             mKeyguardViewMediator.setKeyguardEnabled(enabled);

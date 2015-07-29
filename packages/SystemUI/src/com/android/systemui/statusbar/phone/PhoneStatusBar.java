@@ -3955,7 +3955,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mScreenOnComingFromTouch = true;
             mScreenOnTouchLocation = new PointF(event.getX(), event.getY());
             mNotificationPanel.setTouchDisabled(false);
-            mStatusBarKeyguardViewManager.notifyScreenWakeUpRequested();
+            mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
         }
     }
 
