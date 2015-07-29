@@ -21,11 +21,13 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
@@ -71,6 +73,7 @@ class NavigationBarApps extends LinearLayout {
     private static NavigationBarAppsModel sAppsModel;
 
     private final PackageManager mPackageManager;
+    private final UserManager mUserManager;
     private final LayoutInflater mLayoutInflater;
 
     // This view has two roles:
@@ -82,13 +85,26 @@ class NavigationBarApps extends LinearLayout {
     // When the user is not dragging this member is null.
     private View mDragView;
 
+    private long mCurrentUserSerialNumber = -1;
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                int currentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                onUserSwitched(currentUserId);
+            }
+        }
+    };
+
     public NavigationBarApps(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (sAppsModel == null) {
             sAppsModel = new NavigationBarAppsModel(context);
-            sAppsModel.initialize();  // Load the saved icons, if any.
         }
         mPackageManager = context.getPackageManager();
+        mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mLayoutInflater = LayoutInflater.from(context);
 
         // Dragging an icon removes and adds back the dragged icon. Use the layout transitions to
@@ -108,17 +124,32 @@ class NavigationBarApps extends LinearLayout {
     @Override
     protected void onAttachedToWindow() {
       super.onAttachedToWindow();
-      // When an icon is dragged out of the pinned area this view's width changes, which causes
-      // the parent container's layout to change and the divider and recents icons to shift left.
-      // Animate the parent's CHANGING transition.
-      ViewGroup parent = (ViewGroup) getParent();
-      LayoutTransition transition = new LayoutTransition();
-      transition.disableTransitionType(LayoutTransition.APPEARING);
-      transition.disableTransitionType(LayoutTransition.DISAPPEARING);
-      transition.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
-      transition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
-      transition.enableTransitionType(LayoutTransition.CHANGING);
-      parent.setLayoutTransition(transition);
+        // When an icon is dragged out of the pinned area this view's width changes, which causes
+        // the parent container's layout to change and the divider and recents icons to shift left.
+        // Animate the parent's CHANGING transition.
+        ViewGroup parent = (ViewGroup) getParent();
+        LayoutTransition transition = new LayoutTransition();
+        transition.disableTransitionType(LayoutTransition.APPEARING);
+        transition.disableTransitionType(LayoutTransition.DISAPPEARING);
+        transition.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
+        transition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+        transition.enableTransitionType(LayoutTransition.CHANGING);
+        parent.setLayoutTransition(transition);
+
+        mCurrentUserSerialNumber = mUserManager.getSerialNumberForUser(
+                new UserHandle(ActivityManager.getCurrentUser()));
+        sAppsModel.setCurrentUser(mCurrentUserSerialNumber);
+        recreateAppButtons();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mContext.unregisterReceiver(mBroadcastReceiver);
     }
 
     /**
@@ -433,14 +464,11 @@ class NavigationBarApps extends LinearLayout {
             AppInfo appInfo = sAppsModel.getApp(indexOfChild(v));
             ComponentName component = appInfo.getComponentName();
 
-            UserManager userManager =
-                    (UserManager) getContext().getSystemService(Context.USER_SERVICE);
-
             long appUserSerialNumber = appInfo.getUserSerialNumber();
 
             UserHandle appUser = null;
             if (appUserSerialNumber != AppInfo.USER_UNSPECIFIED) {
-                appUser = userManager.getUserForSerialNumber(appUserSerialNumber);
+                appUser = mUserManager.getUserForSerialNumber(appUserSerialNumber);
             }
 
             int appUserId;
@@ -508,6 +536,17 @@ class NavigationBarApps extends LinearLayout {
 
             Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Attempt to launch activity without category Intent.CATEGORY_LAUNCHER " + component);
+        }
+    }
+
+    private void onUserSwitched(int currentUserId) {
+        final long newUserSerialNumber =
+                mUserManager.getSerialNumberForUser(new UserHandle(currentUserId));
+
+        if (newUserSerialNumber != mCurrentUserSerialNumber) {
+            mCurrentUserSerialNumber = newUserSerialNumber;
+            sAppsModel.setCurrentUser(newUserSerialNumber);
+            recreateAppButtons();
         }
     }
 }
