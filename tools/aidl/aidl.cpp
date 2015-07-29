@@ -177,7 +177,7 @@ check_filename(const char* filename, const char* package, buffer_type* name)
     char cwd[MAXPATHLEN];
     bool valid = false;
 
-#ifdef HAVE_WINDOWS_PATHS
+#ifdef _WIN32
     if (isalpha(filename[0]) && filename[1] == ':'
         && filename[2] == OS_PATH_SEPARATOR) {
 #else
@@ -217,7 +217,7 @@ check_filename(const char* filename, const char* package, buffer_type* name)
     if (valid) {
         p = fn.c_str() + (len - expected.length());
 
-#ifdef HAVE_WINDOWS_PATHS
+#ifdef _WIN32
         if (OS_PATH_SEPARATOR != '/') {
             // Input filename under cygwin most likely has / separators
             // whereas the expected string uses \\ separators. Adjust
