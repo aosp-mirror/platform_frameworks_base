@@ -149,7 +149,14 @@ public interface IBinder {
      * processes.
      */
     int FLAG_ONEWAY             = 0x00000001;
-    
+
+    /**
+     * Limit that should be placed on IPC sizes to keep them safely under the
+     * transaction buffer limit.
+     * @hide
+     */
+    public static final int MAX_IPC_SIZE = 64 * 1024;
+
     /**
      * Get the canonical name of the interface supported by this binder.
      */

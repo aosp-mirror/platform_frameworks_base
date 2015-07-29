@@ -46,8 +46,7 @@ public class ParceledListSlice<T extends Parcelable> implements Parcelable {
      * TODO get this number from somewhere else. For now set it to a quarter of
      * the 1MB limit.
      */
-    private static final int MAX_IPC_SIZE = 256 * 1024;
-    private static final int MAX_FIRST_IPC_SIZE = MAX_IPC_SIZE / 2;
+    private static final int MAX_IPC_SIZE = IBinder.MAX_IPC_SIZE;
 
     private final List<T> mList;
 
@@ -150,7 +149,7 @@ public class ParceledListSlice<T extends Parcelable> implements Parcelable {
             final Class<?> listElementClass = mList.get(0).getClass();
             dest.writeParcelableCreator(mList.get(0));
             int i = 0;
-            while (i < N && dest.dataSize() < MAX_FIRST_IPC_SIZE) {
+            while (i < N && dest.dataSize() < MAX_IPC_SIZE) {
                 dest.writeInt(1);
 
                 final T parcelable = mList.get(i);
