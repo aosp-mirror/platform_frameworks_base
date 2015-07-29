@@ -112,6 +112,15 @@ public final class PhoneAccount implements Parcelable {
     public static final int CAPABILITY_MULTI_USER = 0x20;
 
     /**
+     * Flag indicating that this {@code PhoneAccount} supports a subject for Calls.  This means a
+     * caller is able to specify a short subject line for an outgoing call.  A capable receiving
+     * device displays the call subject on the incoming call screen.
+     * <p>
+     * See {@link #getCapabilities}
+     */
+    public static final int CAPABILITY_CALL_SUBJECT = 0x40;
+
+    /**
      * URI scheme for telephone number URIs.
      */
     public static final String SCHEME_TEL = "tel";
