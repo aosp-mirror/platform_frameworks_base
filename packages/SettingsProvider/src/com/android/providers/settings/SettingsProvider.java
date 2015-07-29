@@ -1867,7 +1867,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 121;
+            private static final int SETTINGS_VERSION = 122;
 
             private final int mUserId;
 
@@ -1999,6 +1999,24 @@ public class SettingsProvider extends ContentProvider {
                 // here; SettingsState knows how to handle pre-version 120 files.
                 currentVersion = 121;
 
+                if (currentVersion == 121) {
+                    // Version 122: allow OEMs to set a default payment component in resources.
+                    // Note that we only write the default if no default has been set;
+                    // if there is, we just leave the default at whatever it currently is.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    String defaultComponent = (getContext().getResources().getString(
+                            R.string.def_nfc_payment_component));
+                    Setting currentSetting = secureSettings.getSettingLocked(
+                            Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT);
+                    if (defaultComponent != null && !defaultComponent.isEmpty() &&
+                        currentSetting == null) {
+                        secureSettings.insertSettingLocked(
+                                Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
+                                defaultComponent,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 122;
+                }
                 // vXXX: Add new settings above this point.
 
                 // Return the current version.
