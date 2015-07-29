@@ -46,6 +46,19 @@ import java.util.Objects;
  * Information about a storage volume that may be mounted. A volume may be a
  * partition on a physical {@link DiskInfo}, an emulated volume above some other
  * storage medium, or a standalone container like an ASEC or OBB.
+ * <p>
+ * Volumes may be mounted with various flags:
+ * <ul>
+ * <li>{@link #MOUNT_FLAG_PRIMARY} means the volume provides primary external
+ * storage, historically found at {@code /sdcard}.
+ * <li>{@link #MOUNT_FLAG_VISIBLE} means the volume is visible to third-party
+ * apps for direct filesystem access. The system should send out relevant
+ * storage broadcasts and index any media on visible volumes. Visible volumes
+ * are considered a more stable part of the device, which is why we take the
+ * time to index them. In particular, transient volumes like USB OTG devices
+ * <em>should not</em> be marked as visible; their contents should be surfaced
+ * to apps through the Storage Access Framework.
+ * </ul>
  *
  * @hide
  */
@@ -255,8 +268,23 @@ public class VolumeInfo implements Parcelable {
         return (mountFlags & MOUNT_FLAG_VISIBLE) != 0;
     }
 
-    public boolean isVisibleToUser(int userId) {
-        if (type == TYPE_PUBLIC && userId == this.mountUserId) {
+    public boolean isVisibleForRead(int userId) {
+        if (type == TYPE_PUBLIC) {
+            if (isPrimary() && mountUserId != userId) {
+                // Primary physical is only visible to single user
+                return false;
+            } else {
+                return isVisible();
+            }
+        } else if (type == TYPE_EMULATED) {
+            return isVisible();
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isVisibleForWrite(int userId) {
+        if (type == TYPE_PUBLIC && mountUserId == userId) {
             return isVisible();
         } else if (type == TYPE_EMULATED) {
             return isVisible();
@@ -276,7 +304,7 @@ public class VolumeInfo implements Parcelable {
     public File getPathForUser(int userId) {
         if (path == null) {
             return null;
-        } else if (type == TYPE_PUBLIC && userId == this.mountUserId) {
+        } else if (type == TYPE_PUBLIC) {
             return new File(path);
         } else if (type == TYPE_EMULATED) {
             return new File(path, Integer.toString(userId));
@@ -306,6 +334,7 @@ public class VolumeInfo implements Parcelable {
         final boolean allowMassStorage = false;
         final String envState = reportUnmounted
                 ? Environment.MEDIA_UNMOUNTED : getEnvironmentForState(state);
+
         File userPath = getPathForUser(userId);
         if (userPath == null) {
             userPath = new File("/dev/null");
