@@ -1876,14 +1876,6 @@ public abstract class PackageManager {
             "android.content.pm.action.REQUEST_PERMISSIONS";
 
     /**
-     * The component name handling runtime permission grants.
-     *
-     * @hide
-     */
-    public static final String GRANT_PERMISSIONS_PACKAGE_NAME =
-            "com.android.packageinstaller";
-
-    /**
      * The names of the requested permissions.
      * <p>
      * <strong>Type:</strong> String[]
@@ -2431,7 +2423,17 @@ public abstract class PackageManager {
      * @return Whether the permission is restricted by policy.
      */
     @CheckResult
-    public abstract boolean isPermissionRevokedByPolicy(String permName, String pkgName);
+    public abstract boolean isPermissionRevokedByPolicy(@NonNull String permName,
+            @NonNull String pkgName);
+
+    /**
+     * Gets the package name of the component controlling runtime permissions.
+     *
+     * @return The package name.
+     *
+     * @hide
+     */
+    public abstract String getPermissionControllerPackageName();
 
     /**
      * Add a new dynamic permission to the system.  For this to work, your
@@ -2615,7 +2617,7 @@ public abstract class PackageManager {
         }
         Intent intent = new Intent(ACTION_REQUEST_PERMISSIONS);
         intent.putExtra(EXTRA_REQUEST_PERMISSIONS_NAMES, permissions);
-        intent.setPackage(GRANT_PERMISSIONS_PACKAGE_NAME);
+        intent.setPackage(getPermissionControllerPackageName());
         return intent;
     }
 
