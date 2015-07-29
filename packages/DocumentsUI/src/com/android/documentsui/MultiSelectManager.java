@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
@@ -26,8 +27,11 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.android.internal.util.Preconditions;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -43,9 +47,11 @@ public final class MultiSelectManager {
     private static final boolean DEBUG = false;
 
     private final Selection mSelection = new Selection();
+
     // Only created when selection is cleared.
     private Selection mIntermediateSelection;
 
+    private Ranger mRanger;
     private final List<MultiSelectManager.Callback> mCallbacks = new ArrayList<>(1);
 
     private Adapter<?> mAdapter;
@@ -213,6 +219,8 @@ public final class MultiSelectManager {
      * Clears the selection.
      */
     public void clearSelection() {
+        mRanger = null;
+
         if (mSelection.isEmpty()) {
             return;
         }
@@ -238,7 +246,7 @@ public final class MultiSelectManager {
             return false;
         }
 
-        return onSingleTapUp(mHelper.findEventPosition(e));
+        return onSingleTapUp(mHelper.findEventPosition(e), e.getMetaState());
     }
 
     /**
@@ -246,11 +254,12 @@ public final class MultiSelectManager {
      * can be mocked.
      *
      * @param position
+     * @param metaState as returned from {@link MotionEvent#getMetaState()}.
      * @return true if the event was consumed.
      * @hide
      */
     @VisibleForTesting
-    boolean onSingleTapUp(int position) {
+    boolean onSingleTapUp(int position, int metaState) {
         if (mSelection.isEmpty()) {
             return false;
         }
@@ -261,8 +270,16 @@ public final class MultiSelectManager {
             return true;
         }
 
-        toggleSelection(position);
+        if (isShiftPressed(metaState) && mRanger != null) {
+            mRanger.snapSelection(position);
+        } else {
+            toggleSelection(position);
+        }
         return true;
+    }
+
+    private static boolean isShiftPressed(int metaState) {
+        return (metaState & KeyEvent.META_SHIFT_ON) != 0;
     }
 
     private void onLongPress(MotionEvent e) {
@@ -273,7 +290,7 @@ public final class MultiSelectManager {
             if (DEBUG) Log.i(TAG, "View is null. Cannot handle tap event.");
         }
 
-        toggleSelection(position);
+        onLongPress(position);
     }
 
     /**
@@ -292,22 +309,87 @@ public final class MultiSelectManager {
         toggleSelection(position);
     }
 
-    private void toggleSelection(int position) {
+    /**
+     * Toggles the selection state at position. If an item does end up selected
+     * a new Ranger (range selection manager) at that point is created.
+     *
+     * @param position
+     * @return True if state changed.
+     */
+    private boolean toggleSelection(int position) {
         // Position may be special "no position" during certain
         // transitional phases. If so, skip handling of the event.
         if (position == RecyclerView.NO_POSITION) {
             if (DEBUG) Log.d(TAG, "Ignoring toggle for element with no position.");
-            return;
+            return false;
         }
 
-        if (DEBUG) Log.d(TAG, "Handling long press on view: " + position);
-        boolean nextState = !mSelection.contains(position);
-        if (notifyBeforeItemStateChange(position, nextState)) {
-            boolean selected = mSelection.flip(position);
-            notifyItemStateChanged(position, selected);
-            if (DEBUG) Log.d(TAG, "Selection after long press: " + mSelection);
+        if (mSelection.contains(position)) {
+            return attemptDeselect(position);
         } else {
-            Log.i(TAG, "Selection change cancelled by listener.");
+            boolean selected = attemptSelect(position);
+            // Here we're already in selection mode. In that case
+            // When a simple click/tap (without SHIFT) creates causes
+            // an item to be selected.
+            // By recreating Ranger at this point, we allow the user to create
+            // multiple separate contiguous ranges with SHIFT+Click & Click.
+            if (selected) {
+                mRanger = new Ranger(position);
+            }
+            return selected;
+        }
+    }
+
+    /**
+     * Try to select all elements in range. Not that callbacks can cancel selection
+     * of specific items, so some or even all items may not reflect the desired
+     * state after the update is complete.
+     *
+     * @param begin inclusive
+     * @param end inclusive
+     * @param selected
+     */
+    private void updateRange(int begin, int end, boolean selected) {
+        checkState(end >= begin);
+        if (DEBUG) Log.i(TAG, String.format("Updating range begin=%d, end=%d, selected=%b.", begin, end, selected));
+        for (int i = begin; i <= end; i++) {
+            if (selected) {
+                attemptSelect(i);
+            } else {
+                attemptDeselect(i);
+            }
+        }
+    }
+
+    /**
+     * @param position
+     * @return True if the update was applied.
+     */
+    private boolean attemptSelect(int position) {
+        if (notifyBeforeItemStateChange(position, true)) {
+            mSelection.add(position);
+            notifyItemStateChanged(position, true);
+            if (DEBUG) Log.d(TAG, "Selection after select: " + mSelection);
+            return true;
+        } else {
+            if (DEBUG) Log.d(TAG, "Select cancelled by listener.");
+            return false;
+        }
+    }
+
+    /**
+     * @param position
+     * @return True if the update was applied.
+     */
+    private boolean attemptDeselect(int position) {
+        if (notifyBeforeItemStateChange(position, false)) {
+            mSelection.remove(position);
+            notifyItemStateChanged(position, false);
+            if (DEBUG) Log.d(TAG, "Selection after deselect: " + mSelection);
+            return true;
+        } else {
+            if (DEBUG) Log.d(TAG, "Select cancelled by listener.");
+            return false;
         }
     }
 
@@ -333,6 +415,106 @@ public final class MultiSelectManager {
             mCallbacks.get(i).onItemStateChanged(position, selected);
         }
         mAdapter.notifyItemChanged(position);
+    }
+
+    /**
+     * Class providing support for managing range selections.
+     */
+    private final class Ranger {
+        private static final int UNDEFINED = -1;
+
+        final int mBegin;
+        int mEnd = UNDEFINED;
+
+        public Ranger(int begin) {
+            if (DEBUG) Log.d(TAG, String.format("New Ranger(%d) created.", begin));
+            mBegin = begin;
+        }
+
+        void snapSelection(int position) {
+            checkState(mRanger != null);
+            checkArgument(position != RecyclerView.NO_POSITION);
+
+            if (mEnd == UNDEFINED || mEnd == mBegin) {
+                // Reset mEnd so it can be established in establishRange.
+                mEnd = UNDEFINED;
+                establishRange(position);
+            } else {
+                reviseRange(position);
+            }
+        }
+
+        private void establishRange(int position) {
+            checkState(mRanger.mEnd == UNDEFINED);
+
+            if (position == mBegin) {
+                mEnd = position;
+            }
+
+            if (position > mBegin) {
+                updateRange(mBegin + 1, position, true);
+            } else if (position < mBegin) {
+                updateRange(position, mBegin - 1, true);
+            }
+
+            mEnd = position;
+        }
+
+        private void reviseRange(int position) {
+            checkState(mEnd != UNDEFINED);
+            checkState(mBegin != mEnd);
+
+            if (position == mEnd) {
+                if (DEBUG) Log.i(TAG, "Skipping no-op revision click on mEndRange.");
+            }
+
+            if (mEnd > mBegin) {
+                reviseAscendingRange(position);
+            } else if (mEnd < mBegin) {
+                reviseDescendingRange(position);
+            }
+            // the "else" case is covered by checkState at beginning of method.
+
+            mEnd = position;
+        }
+
+        /**
+         * Updates an existing ascending seleciton.
+         * @param position
+         */
+        private void reviseAscendingRange(int position) {
+            // Reducing or reversing the range....
+            if (position < mEnd) {
+                if (position < mBegin) {
+                    updateRange(mBegin + 1, mEnd, false);
+                    updateRange(position, mBegin -1, true);
+                } else {
+                    updateRange(position + 1, mEnd, false);
+                }
+            }
+
+            // Extending the range...
+            else if (position > mEnd) {
+                updateRange(mEnd + 1, position, true);
+            }
+        }
+
+        private void reviseDescendingRange(int position) {
+            // Reducing or reversing the range....
+            if (position > mEnd) {
+                if (position > mBegin) {
+                    updateRange(mEnd, mBegin - 1, false);
+                    updateRange(mBegin + 1, position, true);
+                } else {
+                    updateRange(mEnd, position - 1, false);
+                }
+            }
+
+            // Extending the range...
+            else if (position < mEnd) {
+                updateRange(position, mEnd - 1, true);
+            }
+        }
     }
 
     /**
