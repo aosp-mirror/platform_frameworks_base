@@ -2,9 +2,11 @@ package com.android.systemui.statusbar.policy;
 
 import android.os.Looper;
 import android.telephony.TelephonyManager;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import org.mockito.Mockito;
 
+@SmallTest
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
     public void test3gDataIcon() {
