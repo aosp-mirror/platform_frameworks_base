@@ -15,9 +15,6 @@
  */
 package android.service.dreams;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.Nullable;
@@ -33,26 +30,31 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.view.ActionMode;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import com.android.internal.policy.PhoneWindow;
 import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
-import android.util.MathUtils;
 
+import com.android.internal.policy.PhoneWindow;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.DumpUtils.Dump;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Extend this class to implement a custom dream (available to the user as a "Daydream").
@@ -364,6 +366,11 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public void onActionModeFinished(ActionMode mode) {
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, Menu menu) {
     }
     // end Window.Callback methods
 

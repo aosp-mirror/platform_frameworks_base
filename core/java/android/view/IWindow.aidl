@@ -25,6 +25,8 @@ import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import com.android.internal.os.IResultReceiver;
+
 /**
  * API back to a client window that the Window Manager uses to inform it of
  * interesting things happening.
@@ -83,4 +85,9 @@ oneway interface IWindow {
      * Called for non-application windows when the enter animation has completed.
      */
     void dispatchWindowShown();
+
+    /**
+     * Called when Keyboard Shortcuts are requested for the window.
+     */
+    void requestAppKeyboardShortcuts(IResultReceiver receiver);
 }

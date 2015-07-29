@@ -29,6 +29,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.util.List;
+
 
 /**
  * The interface that apps use to talk to the window manager.
@@ -117,6 +119,34 @@ public interface WindowManager extends ViewManager {
      * @param view The view to be removed.
      */
     public void removeViewImmediate(View view);
+
+    /**
+     * Used to asynchronously request Keyboard Shortcuts from the focused window.
+     *
+     * @hide
+     */
+    public interface KeyboardShortcutsReceiver {
+        /**
+         * Callback used when the focused window keyboard shortcuts are ready to be displayed.
+         *
+         * @param result The keyboard shortcuts to be displayed.
+         */
+        void onKeyboardShortcutsReceived(List<KeyboardShortcutGroup> result);
+    }
+
+    /**
+     * @hide
+     */
+    public static final String PARCEL_KEY_SHORTCUTS_ARRAY = "shortcuts_array";
+
+    /**
+     * Request for keyboard shortcuts to be retrieved asynchronously.
+     *
+     * @param receiver The callback to be triggered when the result is ready.
+     *
+     * @hide
+     */
+    public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver);
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**

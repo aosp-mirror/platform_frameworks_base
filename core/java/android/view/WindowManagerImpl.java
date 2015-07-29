@@ -17,7 +17,15 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.content.Context;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+
+import com.android.internal.os.IResultReceiver;
+import com.android.internal.R;
+
+import java.util.List;
 
 /**
  * Provides low-level communication with the system window manager for
@@ -114,6 +122,23 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public void removeViewImmediate(View view) {
         mGlobal.removeView(view, true);
+    }
+
+    @Override
+    public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver) {
+        IResultReceiver resultReceiver = new IResultReceiver.Stub() {
+            @Override
+            public void send(int resultCode, Bundle resultData) throws RemoteException {
+                List<KeyboardShortcutGroup> result =
+                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY);
+                receiver.onKeyboardShortcutsReceived(result);
+            }
+        };
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                .requestAppKeyboardShortcuts(resultReceiver);
+        } catch (RemoteException e) {
+        }
     }
 
     @Override

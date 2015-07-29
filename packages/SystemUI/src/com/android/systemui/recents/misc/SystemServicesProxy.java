@@ -60,6 +60,7 @@ import android.util.Pair;
 import android.view.Display;
 import android.view.IDockedStackListener;
 import android.view.WindowManager;
+import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import com.android.internal.app.AssistUtils;
@@ -914,5 +915,9 @@ public class SystemServicesProxy {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void requestKeyboardShortcuts(Context context, KeyboardShortcutsReceiver receiver) {
+        mWm.requestAppKeyboardShortcuts(receiver);
     }
 }

@@ -1281,4 +1281,13 @@
     <!-- Summary of switch for battery saver [CHAR LIMIT=NONE] -->
     <string name="battery_detail_switch_summary">Reduces performance and background data</string>
 
+    <!-- User visible title for the system-wide keyboard shortcuts list. -->
+    <string name="keyboard_shortcut_group_system">System</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the home screen. -->
+    <string name="keyboard_shortcut_group_system_home">Home</string>
+    <!-- User visible title for the the keyboard shortcut that takes the user to the recents screen. -->
+    <string name="keyboard_shortcut_group_system_recents">Recents</string>
+    <!-- User visible title for the the keyboard shortcut that triggers the back action. -->
+    <string name="keyboard_shortcut_group_system_back">Back</string>
+
 </resources>

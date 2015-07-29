@@ -79,6 +79,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
 import com.android.internal.R;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.view.BaseSurfaceHolder;
@@ -3235,6 +3236,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_WINDOW_MOVED = 23;
     private final static int MSG_SYNTHESIZE_INPUT_EVENT = 24;
     private final static int MSG_DISPATCH_WINDOW_SHOWN = 25;
+    private final static int MSG_REQUEST_KEYBOARD_SHORTCUTS = 26;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -3511,7 +3513,11 @@ public final class ViewRootImpl implements ViewParent,
             } break;
             case MSG_DISPATCH_WINDOW_SHOWN: {
                 handleDispatchWindowShown();
-            }
+            } break;
+            case MSG_REQUEST_KEYBOARD_SHORTCUTS: {
+                IResultReceiver receiver = (IResultReceiver) msg.obj;
+                handleRequestKeyboardShortcuts(receiver);
+            } break;
             }
         }
     }
@@ -5404,6 +5410,19 @@ public final class ViewRootImpl implements ViewParent,
         mAttachInfo.mTreeObserver.dispatchOnWindowShown();
     }
 
+    public void handleRequestKeyboardShortcuts(IResultReceiver receiver) {
+        Bundle data = new Bundle();
+        ArrayList<KeyboardShortcutGroup> list = new ArrayList<>();
+        if (mView != null) {
+            mView.requestKeyboardShortcuts(list);
+        }
+        data.putParcelableArrayList(WindowManager.PARCEL_KEY_SHORTCUTS_ARRAY, list);
+        try {
+            receiver.send(0, data);
+        } catch (RemoteException e) {
+        }
+    }
+
     public void getLastTouchPoint(Point outLocation) {
         outLocation.x = (int) mLastTouchPoint.x;
         outLocation.y = (int) mLastTouchPoint.y;
@@ -6333,6 +6352,10 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    public void dispatchRequestKeyboardShortcuts(IResultReceiver receiver) {
+        mHandler.obtainMessage(MSG_REQUEST_KEYBOARD_SHORTCUTS, receiver).sendToTarget();
+    }
+
     /**
      * Post a callback to send a
      * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event.
@@ -6905,6 +6928,14 @@ public final class ViewRootImpl implements ViewParent,
             if (viewAncestor != null) {
                 viewAncestor.dispatchWindowShown();
             }
+        }
+
+        @Override
+        public void requestAppKeyboardShortcuts(IResultReceiver receiver) {
+          ViewRootImpl viewAncestor = mViewAncestor.get();
+          if (viewAncestor != null) {
+            viewAncestor.dispatchRequestKeyboardShortcuts(receiver);
+          }
         }
     }
 
