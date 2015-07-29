@@ -284,7 +284,7 @@ public final class MediaStore {
      * If you don't set a ClipData, it will be copied there for you when calling
      * {@link Context#startActivity(Intent)}.
      *
-     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#MNC MNC} and above
+     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#M M} and above
      * and declares as using the {@link android.Manifest.permission#CAMERA} permission which
      * is not granted, then atempting to use this action will result in a {@link
      * java.lang.SecurityException}.
@@ -338,7 +338,7 @@ public final class MediaStore {
      * If you don't set a ClipData, it will be copied there for you when calling
      * {@link Context#startActivity(Intent)}.
      *
-     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#MNC MNC} and above
+     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#M M} and above
      * and declares as using the {@link android.Manifest.permission#CAMERA} permission which
      * is not granted, then atempting to use this action will result in a {@link
      * java.lang.SecurityException}.

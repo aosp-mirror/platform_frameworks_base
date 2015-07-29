@@ -8601,7 +8601,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!allowed) {
             if (!allowed && (bp.protectionLevel
                     & PermissionInfo.PROTECTION_FLAG_PRE23) != 0
-                    && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.MNC) {
+                    && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                 // If this was a previously normal/dangerous permission that got moved
                 // to a system permission as part of the runtime permission redesign, then
                 // we still want to blindly grant it to old apps.

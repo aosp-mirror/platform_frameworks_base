@@ -6423,7 +6423,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final ApplicationInfo ai = AppGlobals.getPackageManager()
                         .getApplicationInfo(packageName, 0, user.getIdentifier());
                 final int targetSdkVersion = ai == null ? 0 : ai.targetSdkVersion;
-                if (targetSdkVersion < android.os.Build.VERSION_CODES.MNC) {
+                if (targetSdkVersion < android.os.Build.VERSION_CODES.M) {
                     return false;
                 }
                 final PackageManager packageManager = mContext.getPackageManager();

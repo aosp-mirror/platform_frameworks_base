@@ -32,7 +32,6 @@ import android.os.UserHandle;
 
 import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.IRotationWatcher.Stub;
 import android.view.IWindowManager;
@@ -3533,7 +3532,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             public void onDestroyActionMode(ActionMode mode) {
                 mWrapped.onDestroyActionMode(mode);
                 final boolean isMncApp = mContext.getApplicationInfo().targetSdkVersion
-                        >= Build.VERSION_CODES.MNC;
+                        >= Build.VERSION_CODES.M;
                 final boolean isPrimary;
                 final boolean isFloating;
                 if (isMncApp) {

@@ -79,7 +79,6 @@ import android.widget.Scroller;
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PhoneFallbackEventHandler;
-import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 
@@ -5923,7 +5922,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void adjustInputEventForCompatibility(InputEvent e) {
-        if (mTargetSdkVersion < Build.VERSION_CODES.MNC && e instanceof MotionEvent) {
+        if (mTargetSdkVersion < Build.VERSION_CODES.M && e instanceof MotionEvent) {
             MotionEvent motion = (MotionEvent) e;
             final int mask =
                 MotionEvent.BUTTON_STYLUS_PRIMARY | MotionEvent.BUTTON_STYLUS_SECONDARY;
