@@ -25,7 +25,6 @@
 
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
-#include <utils/Vector.h>
 
 namespace android {
 namespace uirenderer {
@@ -183,7 +182,6 @@ private:
     bool mUseFloatTexture;
     bool mHasNpot;
 
-    Vector<SkShader*> mGarbage;
     mutable Mutex mLock;
 }; // class GradientCache
 

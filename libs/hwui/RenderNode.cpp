@@ -528,7 +528,7 @@ void RenderNode::computeOrdering() {
 void RenderNode::computeOrderingImpl(
         DrawRenderNodeOp* opState,
         const SkPath* outlineOfProjectionSurface,
-        Vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
+        std::vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
     mProjectedNodes.clear();
     if (mDisplayListData == nullptr || mDisplayListData->isEmpty()) return;
@@ -542,7 +542,7 @@ void RenderNode::computeOrderingImpl(
         // composited projectee, flag for out of order draw, save matrix, and store in proj surface
         opState->mSkipInOrderDraw = true;
         opState->mTransformFromCompositingAncestor.load(localTransformFromProjectionSurface);
-        compositedChildrenOfProjectionSurface->add(opState);
+        compositedChildrenOfProjectionSurface->push_back(opState);
     } else {
         // standard in order draw
         opState->mSkipInOrderDraw = false;
@@ -556,7 +556,7 @@ void RenderNode::computeOrderingImpl(
             RenderNode* child = childOp->mRenderNode;
 
             const SkPath* projectionOutline = nullptr;
-            Vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
+            std::vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
             const mat4* projectionTransform = nullptr;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
                 // if receiving projections, collect projecting descendant
@@ -638,7 +638,7 @@ void RenderNode::replay(ReplayStateStruct& replayStruct, const int level) {
 }
 
 void RenderNode::buildZSortedChildList(const DisplayListData::Chunk& chunk,
-        Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes) {
+        std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes) {
     if (chunk.beginChildIndex == chunk.endChildIndex) return;
 
     for (unsigned int i = chunk.beginChildIndex; i < chunk.endChildIndex; i++) {
@@ -647,7 +647,7 @@ void RenderNode::buildZSortedChildList(const DisplayListData::Chunk& chunk,
         float childZ = child->properties().getZ();
 
         if (!MathUtils::isZero(childZ) && chunk.reorderChildren) {
-            zTranslatedNodes.add(ZDrawRenderNodeOpPair(childZ, childOp));
+            zTranslatedNodes.push_back(ZDrawRenderNodeOpPair(childZ, childOp));
             childOp->mSkipInOrderDraw = true;
         } else if (!child->properties().getProjectBackwards()) {
             // regular, in order drawing DisplayList
@@ -719,7 +719,7 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
 
 template <class T>
 void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
-        const Matrix4& initialTransform, const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
+        const Matrix4& initialTransform, const std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
         OpenGLRenderer& renderer, T& handler) {
     const int size = zTranslatedNodes.size();
     if (size == 0
@@ -896,7 +896,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             for (size_t chunkIndex = 0; chunkIndex < mDisplayListData->getChunks().size(); chunkIndex++) {
                 const DisplayListData::Chunk& chunk = mDisplayListData->getChunks()[chunkIndex];
 
-                Vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
+                std::vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
                 buildZSortedChildList(chunk, zTranslatedNodes);
 
                 issueOperationsOf3dChildren(kNegativeZChildren,
@@ -910,7 +910,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
 #endif
                     handler(op, saveCountOffset, properties().getClipToBounds());
 
-                    if (CC_UNLIKELY(!mProjectedNodes.isEmpty() && projectionReceiveIndex >= 0 &&
+                    if (CC_UNLIKELY(!mProjectedNodes.empty() && projectionReceiveIndex >= 0 &&
                         opIndex == static_cast<size_t>(projectionReceiveIndex))) {
                         issueOperationsOfProjectedChildren(renderer, handler);
                     }

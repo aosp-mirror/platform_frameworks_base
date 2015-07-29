@@ -21,9 +21,10 @@
 
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
-#include <utils/Vector.h>
 
 #include "Debug.h"
+
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -165,7 +166,7 @@ private:
 
     bool mDebugEnabled;
 
-    Vector<uint32_t> mGarbage;
+    std::vector<uint32_t> mGarbage;
     mutable Mutex mLock;
 
     AssetAtlas* mAssetAtlas;

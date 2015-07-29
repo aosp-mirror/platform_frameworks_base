@@ -40,13 +40,13 @@ void DisplayListData::cleanupResources() {
     resourceCache.lock();
 
     for (size_t i = 0; i < patchResources.size(); i++) {
-        resourceCache.decrementRefcountLocked(patchResources.itemAt(i));
+        resourceCache.decrementRefcountLocked(patchResources[i]);
     }
 
     resourceCache.unlock();
 
     for (size_t i = 0; i < pathResources.size(); i++) {
-        const SkPath* path = pathResources.itemAt(i);
+        const SkPath* path = pathResources[i];
         if (path->unique() && Caches::hasInstance()) {
             Caches::getInstance().pathCache.removeDeferred(path);
         }
@@ -60,8 +60,10 @@ void DisplayListData::cleanupResources() {
 }
 
 size_t DisplayListData::addChild(DrawRenderNodeOp* op) {
-    mReferenceHolders.push(op->renderNode());
-    return mChildren.add(op);
+    mReferenceHolders.push_back(op->renderNode());
+    size_t index = mChildren.size();
+    mChildren.push_back(op);
+    return index;
 }
 
 }; // namespace uirenderer

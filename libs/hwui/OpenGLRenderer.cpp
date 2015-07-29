@@ -419,7 +419,7 @@ void OpenGLRenderer::updateLayers() {
 
         // Note: it is very important to update the layers in order
         for (int i = 0; i < count; i++) {
-            Layer* layer = mLayerUpdates.itemAt(i).get();
+            Layer* layer = mLayerUpdates[i].get();
             updateLayer(layer, false);
         }
 
@@ -438,7 +438,7 @@ void OpenGLRenderer::flushLayers() {
 
         // Note: it is very important to update the layers in order
         for (int i = 0; i < count; i++) {
-            mLayerUpdates.itemAt(i)->flush();
+            mLayerUpdates[i]->flush();
         }
 
         mLayerUpdates.clear();
@@ -455,7 +455,7 @@ void OpenGLRenderer::pushLayerUpdate(Layer* layer) {
         // the insertion order. The linear search is not an issue since
         // this list is usually very short (typically one item, at most a few)
         for (int i = mLayerUpdates.size() - 1; i >= 0; i--) {
-            if (mLayerUpdates.itemAt(i) == layer) {
+            if (mLayerUpdates[i] == layer) {
                 return;
             }
         }
@@ -466,8 +466,8 @@ void OpenGLRenderer::pushLayerUpdate(Layer* layer) {
 void OpenGLRenderer::cancelLayerUpdate(Layer* layer) {
     if (layer) {
         for (int i = mLayerUpdates.size() - 1; i >= 0; i--) {
-            if (mLayerUpdates.itemAt(i) == layer) {
-                mLayerUpdates.removeAt(i);
+            if (mLayerUpdates[i] == layer) {
+                mLayerUpdates.erase(mLayerUpdates.begin() + i);
                 break;
             }
         }

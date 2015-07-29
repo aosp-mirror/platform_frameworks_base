@@ -338,7 +338,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 
 void PathCache::removeDeferred(const SkPath* path) {
     Mutex::Autolock l(mLock);
-    mGarbage.push(path->getGenerationID());
+    mGarbage.push_back(path->getGenerationID());
 }
 
 void PathCache::clearGarbage() {
@@ -346,10 +346,7 @@ void PathCache::clearGarbage() {
 
     { // scope for the mutex
         Mutex::Autolock l(mLock);
-        size_t count = mGarbage.size();
-        for (size_t i = 0; i < count; i++) {
-            const uint32_t generationID = mGarbage.itemAt(i);
-
+        for (const uint32_t generationID : mGarbage) {
             LruCache<PathDescription, PathTexture*>::Iterator iter(mCache);
             while (iter.next()) {
                 const PathDescription& key = iter.key();

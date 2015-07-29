@@ -27,7 +27,6 @@
 #include <utils/Mutex.h>
 #include <utils/Timers.h>
 #include <utils/StrongPointer.h>
-#include <utils/Vector.h>
 
 #include "../Caches.h"
 #include "../IContextFactory.h"

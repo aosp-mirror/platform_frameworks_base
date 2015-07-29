@@ -206,8 +206,7 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
 
     // Record all non empty quads
     if (hasEmptyQuads) {
-        Rect bounds(x1, y1, x2, y2);
-        quads.add(bounds);
+        quads.emplace_back(x1, y1, x2, y2);
     }
 
     mUvMapper.map(u1, v1, u2, v2);

@@ -36,9 +36,6 @@ namespace uirenderer {
 // If turned on, text is interpreted as glyphs instead of UTF-16
 #define RENDER_TEXT_AS_GLYPHS 1
 
-// Indicates whether to remove the biggest layers first, or the smaller ones
-#define LAYER_REMOVE_BIGGEST_FIRST 0
-
 // Textures used by layers must have dimensions multiples of this number
 #define LAYER_SIZE 64
 

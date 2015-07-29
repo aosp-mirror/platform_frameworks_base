@@ -22,7 +22,6 @@
 #include <utils/LinearAllocator.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>
-#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
@@ -33,6 +32,8 @@
 #include "Matrix.h"
 #include "DisplayList.h"
 #include "RenderProperties.h"
+
+#include <vector>
 
 class SkBitmap;
 class SkPaint;
@@ -176,7 +177,7 @@ public:
 private:
     typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
 
-    static size_t findNonNegativeIndex(const Vector<ZDrawRenderNodeOpPair>& nodes) {
+    static size_t findNonNegativeIndex(const std::vector<ZDrawRenderNodeOpPair>& nodes) {
         for (size_t i = 0; i < nodes.size(); i++) {
             if (nodes[i].key >= 0.0f) return i;
         }
@@ -190,21 +191,21 @@ private:
 
     void computeOrderingImpl(DrawRenderNodeOp* opState,
             const SkPath* outlineOfProjectionSurface,
-            Vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
+            std::vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
 
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler);
 
     void buildZSortedChildList(const DisplayListData::Chunk& chunk,
-            Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
+            std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
 
     template<class T>
     inline void issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler);
 
     template <class T>
     inline void issueOperationsOf3dChildren(ChildrenSelectMode mode,
-            const Matrix4& initialTransform, const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
+            const Matrix4& initialTransform, const std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
             OpenGLRenderer& renderer, T& handler);
 
     template <class T>
@@ -267,7 +268,7 @@ private:
      */
 
     // for projection surfaces, contains a list of all children items
-    Vector<DrawRenderNodeOp*> mProjectedNodes;
+    std::vector<DrawRenderNodeOp*> mProjectedNodes;
 
     // How many references our parent(s) have to us. Typically this should alternate
     // between 2 and 1 (when a staging push happens we inc first then dec)

@@ -21,15 +21,15 @@
 #include "font/CacheTexture.h"
 #include "font/CachedGlyphInfo.h"
 #include "font/Font.h"
-#include "utils/SortedList.h"
 
 #include <utils/LruCache.h>
-#include <utils/Vector.h>
 #include <utils/StrongPointer.h>
 
 #include <SkPaint.h>
 
 #include <GLES2/gl2.h>
+
+#include <vector>
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
 #include "RenderScript.h"
@@ -75,7 +75,7 @@ public:
     FontRenderer();
     ~FontRenderer();
 
-    void flushLargeCaches(Vector<CacheTexture*>& cacheTextures);
+    void flushLargeCaches(std::vector<CacheTexture*>& cacheTextures);
     void flushLargeCaches();
 
     void setGammaTable(const uint8_t* gammaTable) {
@@ -127,7 +127,7 @@ private:
     CacheTexture* createCacheTexture(int width, int height, GLenum format, bool allocate);
     void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
             uint32_t *retOriginX, uint32_t *retOriginY, bool precaching);
-    CacheTexture* cacheBitmapInTexture(Vector<CacheTexture*>& cacheTextures, const SkGlyph& glyph,
+    CacheTexture* cacheBitmapInTexture(std::vector<CacheTexture*>& cacheTextures, const SkGlyph& glyph,
             uint32_t* startX, uint32_t* startY);
 
     void flushAllAndInvalidate();
@@ -136,7 +136,7 @@ private:
     void initRender(const Rect* clip, Rect* bounds, TextDrawFunctor* functor);
     void finishRender();
 
-    void issueDrawCommand(Vector<CacheTexture*>& cacheTextures);
+    void issueDrawCommand(std::vector<CacheTexture*>& cacheTextures);
     void issueDrawCommand();
     void appendMeshQuadNoClip(float x1, float y1, float u1, float v1,
             float x2, float y2, float u2, float v2,
@@ -164,8 +164,8 @@ private:
     uint32_t mLargeCacheWidth;
     uint32_t mLargeCacheHeight;
 
-    Vector<CacheTexture*> mACacheTextures;
-    Vector<CacheTexture*> mRGBACacheTextures;
+    std::vector<CacheTexture*> mACacheTextures;
+    std::vector<CacheTexture*> mRGBACacheTextures;
 
     Font* mCurrentFont;
     LruCache<Font::FontDescription, Font*> mActiveFonts;

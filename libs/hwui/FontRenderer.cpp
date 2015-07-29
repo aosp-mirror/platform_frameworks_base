@@ -134,7 +134,7 @@ FontRenderer::FontRenderer()
     sLogFontRendererCreate = false;
 }
 
-void clearCacheTextures(Vector<CacheTexture*>& cacheTextures) {
+void clearCacheTextures(std::vector<CacheTexture*>& cacheTextures) {
     for (uint32_t i = 0; i < cacheTextures.size(); i++) {
         delete cacheTextures[i];
     }
@@ -171,7 +171,7 @@ void FontRenderer::flushAllAndInvalidate() {
     mDrawn = false;
 }
 
-void FontRenderer::flushLargeCaches(Vector<CacheTexture*>& cacheTextures) {
+void FontRenderer::flushLargeCaches(std::vector<CacheTexture*>& cacheTextures) {
     // Start from 1; don't deallocate smallest/default texture
     for (uint32_t i = 1; i < cacheTextures.size(); i++) {
         CacheTexture* cacheTexture = cacheTextures[i];
@@ -191,7 +191,7 @@ void FontRenderer::flushLargeCaches() {
     flushLargeCaches(mRGBACacheTextures);
 }
 
-CacheTexture* FontRenderer::cacheBitmapInTexture(Vector<CacheTexture*>& cacheTextures,
+CacheTexture* FontRenderer::cacheBitmapInTexture(std::vector<CacheTexture*>& cacheTextures,
         const SkGlyph& glyph, uint32_t* startX, uint32_t* startY) {
     for (uint32_t i = 0; i < cacheTextures.size(); i++) {
         if (cacheTextures[i]->fitBitmap(glyph, startX, startY)) {
@@ -218,7 +218,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 
     // choose an appropriate cache texture list for this glyph format
     SkMask::Format format = static_cast<SkMask::Format>(glyph.fMaskFormat);
-    Vector<CacheTexture*>* cacheTextures = nullptr;
+    std::vector<CacheTexture*>* cacheTextures = nullptr;
     switch (format) {
         case SkMask::kA8_Format:
         case SkMask::kBW_Format:
@@ -399,17 +399,17 @@ void FontRenderer::initTextTexture() {
     clearCacheTextures(mRGBACacheTextures);
 
     mUploadTexture = false;
-    mACacheTextures.push(createCacheTexture(mSmallCacheWidth, mSmallCacheHeight,
+    mACacheTextures.push_back(createCacheTexture(mSmallCacheWidth, mSmallCacheHeight,
             GL_ALPHA, true));
-    mACacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
+    mACacheTextures.push_back(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
             GL_ALPHA, false));
-    mACacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
+    mACacheTextures.push_back(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
             GL_ALPHA, false));
-    mACacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight,
+    mACacheTextures.push_back(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight,
             GL_ALPHA, false));
-    mRGBACacheTextures.push(createCacheTexture(mSmallCacheWidth, mSmallCacheHeight,
+    mRGBACacheTextures.push_back(createCacheTexture(mSmallCacheWidth, mSmallCacheHeight,
             GL_RGBA, false));
-    mRGBACacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
+    mRGBACacheTextures.push_back(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
             GL_RGBA, false));
     mCurrentCacheTexture = mACacheTextures[0];
 }
@@ -425,7 +425,7 @@ void FontRenderer::checkInit() {
     mInitialized = true;
 }
 
-void checkTextureUpdateForCache(Caches& caches, Vector<CacheTexture*>& cacheTextures,
+void checkTextureUpdateForCache(Caches& caches, std::vector<CacheTexture*>& cacheTextures,
         bool& resetPixelStore, GLuint& lastTextureId) {
     for (uint32_t i = 0; i < cacheTextures.size(); i++) {
         CacheTexture* cacheTexture = cacheTextures[i];
@@ -470,7 +470,7 @@ void FontRenderer::checkTextureUpdate() {
     mUploadTexture = false;
 }
 
-void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
+void FontRenderer::issueDrawCommand(std::vector<CacheTexture*>& cacheTextures) {
     if (!mFunctor) return;
 
     bool first = true;
@@ -739,7 +739,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, flo
     Blur::vertical(gaussian.get(), intRadius, scratch.get(), *image, width, height);
 }
 
-static uint32_t calculateCacheSize(const Vector<CacheTexture*>& cacheTextures) {
+static uint32_t calculateCacheSize(const std::vector<CacheTexture*>& cacheTextures) {
     uint32_t size = 0;
     for (uint32_t i = 0; i < cacheTextures.size(); i++) {
         CacheTexture* cacheTexture = cacheTextures[i];

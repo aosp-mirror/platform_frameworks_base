@@ -54,7 +54,6 @@
 
 #include <math.h>
 #include <utils/Log.h>
-#include <utils/Vector.h>
 
 #include "AmbientShadow.h"
 #include "ShadowTessellator.h"
