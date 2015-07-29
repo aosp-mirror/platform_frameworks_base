@@ -643,11 +643,6 @@ public class SettingsProvider extends ContentProvider {
         // Make sure the caller can change the settings - treated as secure.
         enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
 
-        // Verify whether this operation is allowed for the calling package.
-        if (!isAppOpWriteSettingsAllowedForCallingPackage()) {
-            return false;
-        }
-
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
@@ -772,11 +767,6 @@ public class SettingsProvider extends ContentProvider {
             int operation) {
         // Make sure the caller can change the settings.
         enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
-
-        // Verify whether this operation is allowed for the calling package.
-        if (!isAppOpWriteSettingsAllowedForCallingPackage()) {
-            return false;
-        }
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
@@ -904,14 +894,13 @@ public class SettingsProvider extends ContentProvider {
 
     private boolean mutateSystemSetting(String name, String value, int runAsUserId,
             int operation) {
-        // Check for permissions first.
-        if (!hasPermissionsToMutateSystemSettings()) {
-            return false;
-        }
-
-        // Verify whether this operation is allowed for the calling package.
-        if (!isAppOpWriteSettingsAllowedForCallingPackage()) {
-            return false;
+        if (!hasWriteSecureSettingsPermission()) {
+            // If the caller doesn't hold WRITE_SECURE_SETTINGS, we verify whether this
+            // operation is allowed for the calling package through appops.
+            if (!Settings.checkAndNoteWriteSettingsOperation(getContext(),
+                    Binder.getCallingUid(), getCallingPackage(), true)) {
+                return false;
+            }
         }
 
         // Enforce what the calling package can mutate the system settings.
@@ -956,22 +945,10 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private boolean hasPermissionsToMutateSystemSettings() {
+    private boolean hasWriteSecureSettingsPermission() {
         // Write secure settings is a more protected permission. If caller has it we are good.
         if (getContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
                 == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-
-        // The write settings permission gates mutation of system settings.
-        if (getContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_SETTINGS)
-                == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-
-        // Excpet we let system apps change system settings without the permission.
-        PackageInfo packageInfo = getCallingPackageInfoOrThrow();
-        if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
             return true;
         }
 
@@ -1100,15 +1077,6 @@ public class SettingsProvider extends ContentProvider {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-    }
-
-    private boolean isAppOpWriteSettingsAllowedForCallingPackage() {
-        final int callingUid = Binder.getCallingUid();
-
-        mAppOpsManager.checkPackage(Binder.getCallingUid(), getCallingPackage());
-
-        return mAppOpsManager.noteOp(AppOpsManager.OP_WRITE_SETTINGS, callingUid,
-                getCallingPackage()) == AppOpsManager.MODE_ALLOWED;
     }
 
     private void enforceWritePermission(String permission) {
