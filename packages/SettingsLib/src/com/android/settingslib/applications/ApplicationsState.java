@@ -1239,6 +1239,21 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_PERSONAL_WITHOUT_DISABLED_UNTIL_USED = new AppFilter() {
+        private int mCurrentUser;
+
+        public void init() {
+            mCurrentUser = ActivityManager.getCurrentUser();
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return UserHandle.getUserId(entry.info.uid) == mCurrentUser &&
+                    entry.info.enabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
+        }
+    };
+
+
     public static final AppFilter FILTER_WORK = new AppFilter() {
         private int mCurrentUser;
 
