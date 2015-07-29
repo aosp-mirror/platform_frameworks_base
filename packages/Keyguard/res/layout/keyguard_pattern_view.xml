@@ -63,9 +63,6 @@
                 android:layout_marginStart="8dip"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
-                android:contentDescription="@string/keyguard_accessibility_pattern_area"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
                 android:clipChildren="false"
                 android:clipToPadding="false" />
 
