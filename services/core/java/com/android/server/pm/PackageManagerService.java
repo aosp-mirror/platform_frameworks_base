@@ -321,6 +321,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_BOOTING = 1<<8;
     static final int SCAN_TRUSTED_OVERLAY = 1<<9;
     static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<10;
+    static final int SCAN_REPLACING = 1<<11;
     static final int SCAN_REQUIRE_KNOWN = 1<<12;
     static final int SCAN_MOVE = 1<<13;
     static final int SCAN_INITIAL = 1<<14;
@@ -7131,6 +7132,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        // Request the ActivityManager to kill the process(only for existing packages)
+        // so that we do not end up in a confused state while the user is still using the older
+        // version of the application while the new one gets installed.
+        if ((scanFlags & SCAN_REPLACING) != 0) {
+            killApplication(pkg.applicationInfo.packageName,
+                        pkg.applicationInfo.uid, "replace pkg");
+        }
+
         // Also need to kill any apps that are dependent on the library.
         if (clientLibPkgs != null) {
             for (int i=0; i<clientLibPkgs.size(); i++) {
@@ -11768,7 +11777,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String pkgName = pkg.packageName;
         final int[] allUsers;
         final boolean[] perUserInstalled;
-        final boolean weFroze;
 
         // First find the old package info and check signatures
         synchronized(mPackages) {
@@ -11798,35 +11806,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (int i = 0; i < allUsers.length; i++) {
                 perUserInstalled[i] = ps != null ? ps.getInstalled(allUsers[i]) : false;
             }
-
-            // Mark the app as frozen to prevent launching during the upgrade
-            // process, and then kill all running instances
-            if (!ps.frozen) {
-                ps.frozen = true;
-                weFroze = true;
-            } else {
-                weFroze = false;
-            }
         }
 
-        // Now that we're guarded by frozen state, kill app during upgrade
-        killApplication(pkgName, oldPackage.applicationInfo.uid, "replace pkg");
-
-        try {
-            boolean sysPkg = (isSystemApp(oldPackage));
-            if (sysPkg) {
-                replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
-                        user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
-            } else {
-                replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
-                        user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
-            }
-        } finally {
-            // Regardless of success or failure of upgrade steps above, always
-            // unfreeze the package if we froze it
-            if (weFroze) {
-                unfreezePackage(pkgName);
-            }
+        boolean sysPkg = (isSystemApp(oldPackage));
+        if (sysPkg) {
+            replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
+                    user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
+        } else {
+            replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
+                    user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
         }
     }
 
@@ -11955,6 +11943,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
         }
+
+        killApplication(packageName, oldPkg.applicationInfo.uid, "replace sys pkg");
 
         res.removedInfo.uid = oldPkg.applicationInfo.uid;
         res.removedInfo.removedPackage = packageName;
@@ -12345,7 +12335,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         startIntentFilterVerifications(args.user.getIdentifier(), replace, pkg);
 
         if (replace) {
-            replacePackageLI(pkg, parseFlags, scanFlags, args.user,
+            replacePackageLI(pkg, parseFlags, scanFlags | SCAN_REPLACING, args.user,
                     installerPackageName, volumeUuid, res);
         } else {
             installNewPackageLI(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
