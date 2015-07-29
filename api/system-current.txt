@@ -30964,6 +30964,7 @@ package android.service.voice {
     ctor public VoiceInteractionSession(android.content.Context);
     ctor public VoiceInteractionSession(android.content.Context, android.os.Handler);
     method public void closeSystemDialogs();
+    method public void dump(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public void finish();
     method public android.content.Context getContext();
     method public int getDisabledShowContext();
