@@ -165,13 +165,13 @@ class Layout extends RelativeLayout {
         FrameLayout contentRoot = new FrameLayout(getContext());
         LayoutParams params = createLayoutParams(MATCH_PARENT, MATCH_PARENT);
         int rule = mBuilder.isNavBarVertical() ? START_OF : ABOVE;
-        if (mBuilder.solidBars()) {
+        if (mBuilder.hasNavBar() && mBuilder.solidBars()) {
             params.addRule(rule, getId(ID_NAV_BAR));
         }
         int below = -1;
         if (mBuilder.mActionBarSize <= 0 && mBuilder.mTitleBarSize > 0) {
             below = getId(ID_TITLE_BAR);
-        } else if (mBuilder.solidBars()) {
+        } else if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
             below = getId(ID_STATUS_BAR);
         }
         if (below != -1) {
@@ -238,10 +238,10 @@ class Layout extends RelativeLayout {
         }
         LayoutParams layoutParams = createLayoutParams(MATCH_PARENT, MATCH_PARENT);
         int rule = mBuilder.isNavBarVertical() ? START_OF : ABOVE;
-        if (mBuilder.solidBars()) {
+        if (mBuilder.hasNavBar() && mBuilder.solidBars()) {
             layoutParams.addRule(rule, getId(ID_NAV_BAR));
         }
-        if (mBuilder.solidBars()) {
+        if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
             layoutParams.addRule(BELOW, getId(ID_STATUS_BAR));
         }
         actionBar.getRootView().setLayoutParams(layoutParams);
@@ -254,7 +254,7 @@ class Layout extends RelativeLayout {
             int simulatedPlatformVersion) {
         TitleBar titleBar = new TitleBar(context, title, simulatedPlatformVersion);
         LayoutParams params = createLayoutParams(MATCH_PARENT, mBuilder.mTitleBarSize);
-        if (mBuilder.solidBars()) {
+        if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
             params.addRule(BELOW, getId(ID_STATUS_BAR));
         }
         if (mBuilder.isNavBarVertical() && mBuilder.solidBars()) {
@@ -331,10 +331,6 @@ class Layout extends RelativeLayout {
             findStatusBar();
             findActionBar();
             findNavBar();
-        }
-
-        public boolean isNavBarVertical() {
-            return mNavBarOrientation == VERTICAL;
         }
 
         private void findBackground() {
@@ -444,16 +440,27 @@ class Layout extends RelativeLayout {
         }
 
         /**
-         * Return if both status bar and nav bar are solid (content doesn't overlap with these
-         * bars).
+         * Return true if the status bar or nav bar are present, they are not translucent (i.e
+         * content doesn't overlap with them).
          */
         private boolean solidBars() {
-            return hasNavBar() && !mTranslucentNav && !mTranslucentStatus && mStatusBarSize > 0;
+            return !(hasNavBar() && mTranslucentNav) && !(hasStatusBar() && mTranslucentStatus);
         }
 
         private boolean hasNavBar() {
             return Config.showOnScreenNavBar(mParams.getSimulatedPlatformVersion()) &&
                     hasSoftwareButtons() && mNavBarSize > 0;
+        }
+
+        private boolean hasStatusBar() {
+            return mStatusBarSize > 0;
+        }
+
+        /**
+         * Return true if the nav bar is present and is vertical.
+         */
+        private boolean isNavBarVertical() {
+            return hasNavBar() && mNavBarOrientation == VERTICAL;
         }
     }
 }
