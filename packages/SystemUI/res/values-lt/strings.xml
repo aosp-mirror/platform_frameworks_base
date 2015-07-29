@@ -346,12 +346,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Naudotojas svečias"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Kad būtų ištr. programos ir duom., pašal. naudotoją svečią"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"PAŠALINTI SVEČIĄ"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Naudotojo atjungimas"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"ATJUNGTI NAUDOTOJĄ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Pridėti naują naudotoją?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kai pridedate naują naudotoją, šis asmuo turi nustatyti savo erdvę.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Akumuliatoriaus tausojimo priemonė įjungta"</string>
@@ -434,4 +432,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Sveikiname! Sistemos naudotojo sąsajos derinimo priemonė pridėta prie nustatymų"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Pašalinti iš nustatymų"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Ar norite pašalinti sistemos naudotojo sąsajos derinimo priemonę iš nustatymų ir nebenaudoti jokių jos funkcijų?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

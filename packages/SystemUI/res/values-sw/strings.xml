@@ -345,7 +345,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Ili uweze kufuta programu na data, mwondoe mtumiaji aliyealikwa"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ONDOA MGENI"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Ondoa mtumiaji"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"Ili kuondoa mtumiaji wa sasa, simamisha programu za mtumiaji."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ONDOA MTUMIAJI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Ungependa kuongeza mtumiaji?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Unapomwongeza mtumiaji mpya, mtu huyo anahitaji kusanidi nafasi yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa ajili ya watumiaji wengine wote."</string>
@@ -429,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Hongera! Kipokea Ishara cha System UI kimeongezwa kwenye Mipangilio"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ondoa kwenye Mipangilio"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Je, ungependa kuondoa Kipokea ishara cha SystemUI kwenye Mipangilio na uache kutumia vipengele vyake vyote?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

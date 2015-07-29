@@ -347,7 +347,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Zum Löschen von Apps und Daten Gastnutzer entfernen"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"Gast entfernen"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Nutzer abmelden"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"Um den aktuellen Nutzer abzumelden, beenden Sie seine Anwendungen."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"Nutzer abmelden"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Neuen Nutzer hinzufügen?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Wenn Sie einen neuen Nutzer hinzufügen, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
@@ -431,4 +432,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Herzlichen Glückwunsch! System UI Tuner wurde \"Einstellungen\" hinzugefügt."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Aus \"Einstellungen\" entfernen"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner aus \"Einstellungen\" entfernen und die Verwendung von allen zugehörigen Funktionen beenden?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

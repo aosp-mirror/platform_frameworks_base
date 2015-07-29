@@ -344,12 +344,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"ಅತಿಥಿ ಬಳಕೆದಾರ"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾ ಅಳಿಸಲು, ಅತಿಥಿ ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"ಬಳಕೆದಾರರನ್ನು ಲಾಗ್ಔಟ್ ಮಾಡಿ"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"ಬಳಕೆದಾರರನ್ನು ಲಾಗ್ಔಟ್ ಮಾಡಿ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸುವುದೇ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸ್ಥಾಪಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನವೀಕರಿಸಬಹುದು."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ಬ್ಯಾಟರಿ ರಕ್ಷಕ ಆನ್ ಆಗಿದೆ"</string>
@@ -432,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"ಅಭಿನಂದನೆಗಳು! ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ಅನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ತೆಗೆದುಹಾಕಿ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ತೆಗೆದುಹಾಕುವುದೇ ಮತ್ತು ಅದರ ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಬಳಸುವುದನ್ನು ನಿಲ್ಲಿಸುವುದೇ?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

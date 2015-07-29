@@ -345,7 +345,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"앱 및 데이터를 삭제하려면 게스트 사용자를 삭제하세요."</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"게스트 삭제"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"사용자 로그아웃"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"현재 사용자를 로그아웃시키려면 사용자 앱을 중지합니다."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"사용자 로그아웃"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"새 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
@@ -429,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"축하합니다. 시스템 UI 튜너가 설정에 추가되었습니다."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"설정에서 삭제"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"시스템 UI 튜너를 설정에서 삭제하고 모든 관련 기능의 사용을 중지하시겠습니까?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

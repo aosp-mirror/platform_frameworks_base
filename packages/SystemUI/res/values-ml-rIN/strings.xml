@@ -345,7 +345,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"ആപ്സും വിവരങ്ങളും ഇല്ലാതാക്കാൻ അതിഥി ഉപയോക്താവിനെ നീക്കുക"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"അതിഥിയെ നീക്കംചെയ്യുക"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"ഉപയോക്താവിനെ ലോഗൗട്ട് ചെയ്യുക"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"നിലവിലെ ഉപയോക്താവിനെ ലോഗൗട്ട് ചെയ്യാൻ, ഉപയോക്തൃ അപ്ലിക്കേഷനുകൾ നിർത്തുക."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ഉപയോക്താവിനെ ലോഗൗട്ട് ചെയ്യുക"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റുചെയ്യാനാവും."</string>
@@ -429,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"അഭിനന്ദനങ്ങൾ! ക്രമീകരണത്തിലേക്ക് സിസ്റ്റം UI ട്യൂണർ ചേർത്തിരിക്കുന്നു"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ക്രമീകരണത്തിൽ നിന്ന് നീക്കംചെയ്യുക"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ക്രമീകരണത്തിൽ നിന്ന് സിസ്റ്റം UI ട്യൂണർ നീക്കംചെയ്യുകയും അതിന്റെ ഫീച്ചറുകളെല്ലാം ഉപയോഗിക്കുന്നത് നിർത്തുകയും ചെയ്യണോ?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

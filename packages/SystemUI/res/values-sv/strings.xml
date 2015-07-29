@@ -344,12 +344,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Gästanvändare"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Ta bort gästanvändaren om du vill radera appar och data"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"TA BORT GÄSTEN"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Logga ut användaren"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGGA UT ANVÄNDAREN"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Lägga till ny användare?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"När du lägger till en ny användare måste den personen konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Batterisparläget har aktiverats"</string>
@@ -432,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Grattis! Inställningar för systemgränssnitt har lagts till i inställningarna."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ta bort från inställningarna"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vill du ta bort inställningar för systemgränssnitt från inställningarna och sluta använda alla tillhörande funktioner?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

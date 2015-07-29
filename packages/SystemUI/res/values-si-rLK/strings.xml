@@ -344,12 +344,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"ආගන්තුක පරිශිලකයා"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"යෙදුම් සහ දත්ත මැකීමට, ආගන්තුක පරිශීලකයා ඉවත් කරන්න"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ආගන්තුකයා ඉවත් කරන්නද?"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"පරිශීලකයා වරනය කිරීම"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"පරිශීලකයා වරනය කරන්න"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"අලුත් පරිශීලකයෙක් එකතු කරන්නද?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ඔබ අලුත් පරිශීලකයෙක් එකතු කරන විට, එම පුද්ගලයා ඔහුගේ වැඩ කරන ඉඩ සකසා ගත යුතුය.\n\nසියළුම අනෙක් පරිශීලකයින් සඳහා ඕනෑම පරිශීලකයෙකුට යාවත්කාලීන කළ හැක."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"බැටරිය සුරකින්නා සක්‍රීයයි"</string>
@@ -432,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"සුබ පැතුම්! පද්ධති UI සුසරකය සැකසීම් වෙත එක් කර ඇත"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"සැකසීම් වෙතින් ඉවත් කරන්න"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"සැකසීම් වෙතින් පද්ධති UI සුසරකය ඉවත් කර සහ එහි සියලු අංග භාවිතය නවත් වන්නද?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

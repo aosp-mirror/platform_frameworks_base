@@ -346,12 +346,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Режим гостя"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Щоб видалити додатки й дані, вилучіть профіль гостя"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ВИЙТИ З РЕЖИМУ ГОСТЯ"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Вийти з облікового запису"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"ВИЙТИ З ОБЛІКОВОГО ЗАПИСУ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Додати нового користувача?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Користувач має налаштувати свій профіль після створення.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Режим заощадження заряду акумулятора ввімкнено"</string>
@@ -434,4 +432,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Вітаємо! System UI Tuner установлено в додатку Налаштування"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Видалити з додатка Налаштування"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Видалити інструмент System UI Tuner із додатка Налаштування та припинити користуватися всіма його функціями?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

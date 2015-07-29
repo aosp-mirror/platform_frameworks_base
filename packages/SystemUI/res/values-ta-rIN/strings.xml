@@ -344,12 +344,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"அழைக்கப்பட்டவர்"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"பயன்பாடுகளையும் தரவையும் நீக்க, விருந்தினர் பயனரை அகற்றவும்"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"பயனரை வெளியேற்று"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"பயனரை வெளியேற்று"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"புதியவரைச் சேர்க்கவா?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"புதிய பயனரைச் சேர்க்கும்போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஎந்தவொரு பயனரும், மற்ற எல்லா பயனர்களுக்காகவும் பயன்பாடுகளைப் புதுப்பிக்கலாம்."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"பேட்டரி சேமிப்பான் இயக்கத்தில் உள்ளது"</string>
@@ -432,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"வாழ்த்துகள்! அமைப்புகளில் System UI Tuner சேர்க்கப்பட்டது"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"அமைப்புகளிலிருந்து அகற்று"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"அமைப்புகளிலிருந்து System UI Tunerஐ அகற்றிவிட்டு, அதன் எல்லா அம்சங்களையும் பயன்படுத்துவதை நிறுத்தவா?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

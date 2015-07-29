@@ -344,12 +344,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"అతిథి వినియోగదారు"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"అనువర్తనాలు, డేటా తొలగించేందుకు అతిథి వినియోగదారు తీసివేయండి"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"అతిథిని తీసివేయి"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"వినియోగదారుని లాగ్ అవుట్ చేయండి"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"వినియోగదారుని లాగ్ అవుట్ చేయి"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"కొత్త వినియోగదారుని జోడించాలా?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం అనువర్తనాలను నవీకరించగలరు."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"బ్యాటర్ సేవర్ ఆన్ చేయబడింది"</string>
@@ -432,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"అభినందనలు! సెట్టింగ్‌లకు సిస్టమ్ UI ట్యూనర్ జోడించబడింది"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"సెట్టింగ్‌ల నుండి తీసివేయి"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"సిస్టమ్ UI ట్యూనర్‌ను సెట్టింగ్‌ల నుండి తీసివేసి, దాని అన్ని లక్షణాలను ఉపయోగించడం ఆపివేయాలా?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

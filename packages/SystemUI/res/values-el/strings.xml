@@ -346,12 +346,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Χρήστης-επισκέπτης"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Για διαγρ. εφαρμ. και δεδομένων, καταργ. το χρήστη-επισκέπτη"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ΚΑΤΑΡΓΗΣΗ ΕΠΙΣΚΕΠΤΗ"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Αποσύνδεση χρήστη"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"ΑΠΟΣΥΝΔΕΣΗ ΧΡΗΣΤΗ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Προσθήκη νέου χρήστη;"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει το χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Η Εξοικονόμηση μπαταρίας είναι ενεργή"</string>
@@ -434,4 +432,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Συγχαρητήρια! Το System UI Tuner προστέθηκε στις Ρυθμίσεις"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Κατάργηση από τις Ρυθμίσεις"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Κατάργηση System UI Tuner από τις Ρυθμίσεις και διακοπή χρήσης όλων των λειτουργιών του;"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

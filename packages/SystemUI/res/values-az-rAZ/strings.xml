@@ -345,7 +345,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Tətbiq və datanı silmək üçün qonaq istifadəçini silin"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"QONAĞI ÇIXARIN"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"İstifadəçi çıxışı"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"Cari istifadəçidən çıxmaq üçün, istifadəçi tətbiqlərini dayandırın."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"İSTİFADƏÇİ ÇIXIŞI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Yeni istifadəçi əlavə edilsin?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yeni istifadəçi əlavə etdiyiniz zaman həmin şəxs öz yerini quraşdırmalıdır. \n\n İstənilən istifadəçi bütün digər istifadəçilərdən olan tətbiqləri güncəlləşdirə bilər."</string>
@@ -429,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Təbriklər! System UI Tuner Ayarlara əlavə edildi"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ayarlardan Silin"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner Ayarlardan silinsin və onun bütün funksiyalarından istifadə dayandırılsın?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

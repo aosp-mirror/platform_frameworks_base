@@ -345,7 +345,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"หากต้องการลบแอปและข้อมูล ให้นำผู้ใช้ที่เป็นผู้เข้าร่วมออก"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"นำผู้เข้าร่วมออก"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"ออกจากระบบผู้ใช้"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"ในการออกจากระบบผู้ใช้ปัจจุบัน โปรดหยุดแอปพลิเคชันของผู้ใช้"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ออกจากระบบผู้ใช้"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ต้องการเพิ่มผู้ใช้ใหม่ใช่ไหม"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"เมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตนเอง\n\nผู้ใช้ทุกคนสามารถอัปเดตแอปสำหรับผู้ใช้รายอื่นทุกคนได้"</string>
@@ -429,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"ยินดีด้วย! เพิ่มตัวรับสัญญาณ UI ระบบไปยังการตั้งค่าแล้ว"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"นำออกจากการตั้งค่า"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"นำตัวรับสัญญาณ UI ระบบออกจากการตั้งค่าและหยุดใช้คุณลักษณะทั้งหมดของตัวรับสัญญาณใช่ไหม"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

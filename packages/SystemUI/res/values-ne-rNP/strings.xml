@@ -345,7 +345,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"अनुप्रयोगहरू र डेटा मेटाउन, अतिथि प्रयोगकर्ता हटाउनुहोस्"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"अतिथिलाई हटाउनुहोस्"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"हालको प्रयोगकर्ता लगआउट गर्न प्रयोगकर्ता अनुप्रयोगहरू रोक्नुहोस्"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नयाँ प्रयोगकर्ता थप्नुहुन्छ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्।"</string>
@@ -426,7 +427,9 @@
     <string name="tuner_warning" msgid="8730648121973575701">"प्रणाली UI ट्युनरले तपाईँलाई Android प्रयोगकर्ता इन्टरफेस अनुकूलन गर्न र ट्विक गर्न थप तरिकाहरू प्रदान गर्छ। यी प्रयोगात्मक सुविधाहरू भावी विमोचनमा परिवर्तन हुन, बिग्रिन वा हराउन सक्ने छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"यी प्रयोगात्मक सुविधाहरू भावी विमोचनहरूमा परिवर्तन हुन, बिग्रन वा  हराउन सक्छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
     <string name="got_it" msgid="2239653834387972602">"बुझेँ"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"बधाइ छ! सेटिङहरूमा प्रणाली UI ट्युनर थप गरिएको छ"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"बधाईँ छ! सेटिङहरूमा प्रणाली UI ट्युनर थप गरिएको छ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"सेटिङहरूबाट हटाउनुहोस्"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"प्रणाली UI ट्युनर सेटिङहरूबाट हटाउने र यसका सबै सुविधाहरू प्रयोग गर्न रोक्ने हो?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>
