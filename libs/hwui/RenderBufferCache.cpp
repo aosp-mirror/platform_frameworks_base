@@ -98,9 +98,8 @@ void RenderBufferCache::deleteBuffer(RenderBuffer* buffer) {
 }
 
 void RenderBufferCache::clear() {
-    size_t count = mCache.size();
-    for (size_t i = 0; i < count; i++) {
-        deleteBuffer(mCache.itemAt(i).mBuffer);
+    for (auto entry : mCache) {
+        deleteBuffer(entry.mBuffer);
     }
     mCache.clear();
 }
@@ -109,11 +108,11 @@ RenderBuffer* RenderBufferCache::get(GLenum format, const uint32_t width, const 
     RenderBuffer* buffer = nullptr;
 
     RenderBufferEntry entry(format, width, height);
-    ssize_t index = mCache.indexOf(entry);
+    auto iter = mCache.find(entry);
 
-    if (index >= 0) {
-        entry = mCache.itemAt(index);
-        mCache.removeAt(index);
+    if (iter != mCache.end()) {
+        entry = *iter;
+        mCache.erase(iter);
 
         buffer = entry.mBuffer;
         mSize -= buffer->getSize();
@@ -139,16 +138,14 @@ bool RenderBufferCache::put(RenderBuffer* buffer) {
     const uint32_t size = buffer->getSize();
     if (size < mMaxSize) {
         while (mSize + size > mMaxSize) {
-            size_t position = 0;
-
-            RenderBuffer* victim = mCache.itemAt(position).mBuffer;
+            RenderBuffer* victim = mCache.begin()->mBuffer;
             deleteBuffer(victim);
-            mCache.removeAt(position);
+            mCache.erase(mCache.begin());
         }
 
         RenderBufferEntry entry(buffer);
 
-        mCache.add(entry);
+        mCache.insert(entry);
         mSize += size;
 
         RENDER_BUFFER_LOGD("Added %s render buffer (%dx%d)",

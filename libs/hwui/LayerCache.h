@@ -19,7 +19,8 @@
 
 #include "Debug.h"
 #include "Layer.h"
-#include "utils/SortedList.h"
+
+#include <set>
 
 namespace android {
 namespace uirenderer {
@@ -118,12 +119,8 @@ private:
             return compare(*this, other) != 0;
         }
 
-        friend inline int strictly_order_type(const LayerEntry& lhs, const LayerEntry& rhs) {
-            return LayerEntry::compare(lhs, rhs) < 0;
-        }
-
-        friend inline int compare_type(const LayerEntry& lhs, const LayerEntry& rhs) {
-            return LayerEntry::compare(lhs, rhs);
+        bool operator<(const LayerEntry& other) const {
+            return LayerEntry::compare(*this, other) < 0;
         }
 
         Layer* mLayer;
@@ -133,7 +130,7 @@ private:
 
     void deleteLayer(Layer* layer);
 
-    SortedList<LayerEntry> mCache;
+    std::multiset<LayerEntry> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

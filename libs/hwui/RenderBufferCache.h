@@ -20,7 +20,8 @@
 #include <GLES2/gl2.h>
 
 #include "RenderBuffer.h"
-#include "utils/SortedList.h"
+
+#include <set>
 
 namespace android {
 namespace uirenderer {
@@ -100,14 +101,8 @@ private:
             return compare(*this, other) != 0;
         }
 
-        friend inline int strictly_order_type(const RenderBufferEntry& lhs,
-                const RenderBufferEntry& rhs) {
-            return RenderBufferEntry::compare(lhs, rhs) < 0;
-        }
-
-        friend inline int compare_type(const RenderBufferEntry& lhs,
-                const RenderBufferEntry& rhs) {
-            return RenderBufferEntry::compare(lhs, rhs);
+        bool operator<(const RenderBufferEntry& other) const {
+            return RenderBufferEntry::compare(*this, other) < 0;
         }
 
         RenderBuffer* mBuffer;
@@ -118,7 +113,7 @@ private:
 
     void deleteBuffer(RenderBuffer* buffer);
 
-    SortedList<RenderBufferEntry> mCache;
+    std::multiset<RenderBufferEntry> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;
