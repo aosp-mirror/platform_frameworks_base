@@ -1,6 +1,7 @@
 
 #include "aidl_language.h"
 #include "options.h"
+#include "os.h"
 #include "search_path.h"
 #include "Type.h"
 #include "generate_java.h"
