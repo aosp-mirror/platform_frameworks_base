@@ -434,6 +434,8 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"انگلی <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"‏ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کی ترتیبات پڑھنے کی اجازت دیتا ہے۔ مثلا، یہ تعین کرسکتا ہے کہ آیا People ایپ کسی اکاؤنٹ کے ساتھ مطابقت پذیر ہے۔"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"مطابقت پذیری آن اور آف ٹوگل کریں"</string>
@@ -896,6 +898,8 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"بدقسمتی سے، <xliff:g id="APPLICATION">%1$s</xliff:g> بند ہو گیا۔"</string>
     <string name="aerr_process" msgid="4507058997035697579">"بدقسمتی سے، کارروائی <xliff:g id="PROCESS">%1$s</xliff:g> بند ہو گئی۔"</string>
+    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> جواب نہیں دے رہی ہے۔ \n\nکیا آپ اسے بند کرنا چاہتے ہیں؟"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"سرگرمی <xliff:g id="ACTIVITY">%1$s</xliff:g> جواب نہیں دے رہی ہے۔ \n\nکیا آپ اسے بند کرنا چاہتے ہیں؟"</string>

@@ -436,6 +436,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Відбиток пальця <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Значок відбитка пальця"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читати налаштування синхронізації"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Дозволяє програмі читати налаштування синхронізації для облікового запису, наприклад, визначати, чи програма Люди синхронізується з обліковим записом."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"вмикати й вимикати синхронізацію"</string>
@@ -906,6 +907,8 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"На жаль, програма <xliff:g id="APPLICATION">%1$s</xliff:g> припинила роботу."</string>
     <string name="aerr_process" msgid="4507058997035697579">"На жаль, програма <xliff:g id="PROCESS">%1$s</xliff:g> припинила роботу."</string>
+    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"Програма <xliff:g id="APPLICATION">%2$s</xliff:g> не відповідає.\n\nЗакрити її?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Дія <xliff:g id="ACTIVITY">%1$s</xliff:g> не відповідає.\n\nЗакінчити її?"</string>
