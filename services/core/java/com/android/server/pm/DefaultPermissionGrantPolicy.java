@@ -601,6 +601,7 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(carrierPackage)) {
                 grantRuntimePermissionsLPw(carrierPackage, PHONE_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(carrierPackage, LOCATION_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(carrierPackage, SMS_PERMISSIONS, userId);
             }
         }
     }
