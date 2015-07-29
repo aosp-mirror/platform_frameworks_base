@@ -112,6 +112,10 @@ public class StaticLayout extends Layout {
         // release any expensive state
         /* package */ void finish() {
             nFinishBuilder(mNativePtr);
+            mText = null;
+            mPaint = null;
+            mLeftIndents = null;
+            mRightIndents = null;
             mMeasuredText.finish();
         }
 
