@@ -101,6 +101,8 @@ public class SplitClockView extends LinearLayout {
         }
         mTimeView.setFormat12Hour(timeString);
         mTimeView.setFormat24Hour(timeString);
+        mTimeView.setContentDescriptionFormat12Hour(formatString);
+        mTimeView.setContentDescriptionFormat24Hour(formatString);
         mAmPmView.setFormat12Hour(amPmString);
         mAmPmView.setFormat24Hour(amPmString);
     }
