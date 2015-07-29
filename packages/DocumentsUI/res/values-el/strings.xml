@@ -17,6 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Έγγραφα"</string>
+    <!-- no translation found for files_label (6051402950202690279) -->
+    <skip />
     <string name="title_open" msgid="4353228937663917801">"Άνοιγμα από"</string>
     <string name="title_save" msgid="2433679664882857999">"Αποθήκευση σε"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Δημιουργία φακέλου"</string>
