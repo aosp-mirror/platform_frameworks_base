@@ -1206,7 +1206,7 @@ public class IntentFilter implements Parcelable {
      * {@link #MATCH_CATEGORY_PORT}, {@link #NO_MATCH_DATA}.
      */
     public final int matchDataAuthority(Uri data) {
-        if (mDataAuthorities == null) {
+        if (mDataAuthorities == null || data == null) {
             return NO_MATCH_DATA;
         }
         final int numDataAuthorities = mDataAuthorities.size();
@@ -1277,7 +1277,7 @@ public class IntentFilter implements Parcelable {
             }
 
             final ArrayList<PatternMatcher> schemeSpecificParts = mDataSchemeSpecificParts;
-            if (schemeSpecificParts != null) {
+            if (schemeSpecificParts != null && data != null) {
                 match = hasDataSchemeSpecificPart(data.getSchemeSpecificPart())
                         ? MATCH_CATEGORY_SCHEME_SPECIFIC_PART : NO_MATCH_DATA;
             }
