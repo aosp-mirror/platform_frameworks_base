@@ -172,6 +172,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public String getPermissionControllerPackageName() {
+        return null;
+    }
+
+    @Override
     public boolean addPermission(PermissionInfo info) {
         return false;
     }
