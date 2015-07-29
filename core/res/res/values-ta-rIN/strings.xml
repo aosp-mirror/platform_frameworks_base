@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"கைரேகை <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"கைரேகை ஐகான்"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ஒத்திசைவு அமைப்புகளைப் படித்தல்"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாடு கணக்குடன் ஒத்திசைக்கப்பட்டுள்ளதா என்பதை இது தீர்மானிக்கலாம்."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ஒத்திசைவை இயக்குவதையும், முடக்குவதையும் மாற்றுதல்"</string>

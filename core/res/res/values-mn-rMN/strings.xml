@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Хурууны хээ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Хурууны хээний дүрс"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"синк тохиргоог унших"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Апп нь акаунтын синк тохиргоог унших боломжтой. Жишээ нь энэ нь Хүмүүс апп акаунттай синк хийгдсэн эсэхийг тодорхойлох боломжтой."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"синкийг унтрааж асаах тохиргоо"</string>

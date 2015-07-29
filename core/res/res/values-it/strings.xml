@@ -434,6 +434,8 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lettura impostazioni di sincronizz."</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Consente all\'applicazione di leggere le impostazioni di sincronizzazione per un account. Ad esempio, questa autorizzazione può determinare se l\'applicazione Persone è sincronizzata con un account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"attivazione e disattivazione della sincronizzazione"</string>

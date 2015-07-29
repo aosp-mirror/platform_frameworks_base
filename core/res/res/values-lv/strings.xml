@@ -435,6 +435,8 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>. pirksts"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lasīt sinhronizācijas iestatījumus"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ļauj lietotnei lasīt konta sinhronizācijas iestatījumus. Piemēram, šādi var noteikt, vai lietotne Personas ir sinhronizēta ar kontu."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ieslēgt un izslēgt sinhronizāciju"</string>
