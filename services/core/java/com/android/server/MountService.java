@@ -69,7 +69,6 @@ import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
 import android.os.storage.IObbActionListener;
 import android.os.storage.MountServiceInternal;
-import android.os.storage.MountServiceInternal.ExternalStorageMountPolicy;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
@@ -809,7 +808,7 @@ class MountService extends IMountService.Stub
         synchronized (mVolumes) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
-                if (vol.isVisibleToUser(userId) && vol.isMountedReadable()) {
+                if (vol.isVisibleForRead(userId) && vol.isMountedReadable()) {
                     final StorageVolume userVol = vol.buildStorageVolume(mContext, userId, false);
                     mHandler.obtainMessage(H_VOLUME_BROADCAST, userVol).sendToTarget();
 
@@ -1252,7 +1251,7 @@ class MountService extends IMountService.Stub
             // started after this point will trigger additional
             // user-specific broadcasts.
             for (int userId : mStartedUsers) {
-                if (vol.isVisibleToUser(userId)) {
+                if (vol.isVisibleForRead(userId)) {
                     final StorageVolume userVol = vol.buildStorageVolume(mContext, userId, false);
                     mHandler.obtainMessage(H_VOLUME_BROADCAST, userVol).sendToTarget();
 
@@ -2667,13 +2666,14 @@ class MountService extends IMountService.Stub
     }
 
     @Override
-    public StorageVolume[] getVolumeList(int uid, String packageName) {
+    public StorageVolume[] getVolumeList(int uid, String packageName, int flags) {
+        final boolean forWrite = (flags & StorageManager.FLAG_FOR_WRITE) != 0;
+
         final ArrayList<StorageVolume> res = new ArrayList<>();
         boolean foundPrimary = false;
 
         final int userId = UserHandle.getUserId(uid);
         final boolean reportUnmounted;
-
         final long identity = Binder.clearCallingIdentity();
         try {
             reportUnmounted = !mMountServiceInternal.hasExternalStorage(
@@ -2685,7 +2685,7 @@ class MountService extends IMountService.Stub
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
-                if (vol.isVisibleToUser(userId)) {
+                if (forWrite ? vol.isVisibleForWrite(userId) : vol.isVisibleForRead(userId)) {
                     final StorageVolume userVol = vol.buildStorageVolume(mContext, userId,
                             reportUnmounted);
                     if (vol.isPrimary()) {
