@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 import android.os.HandlerThread;
 import android.telephony.SubscriptionInfo;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
@@ -32,6 +33,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+@SmallTest
 public class CallbackHandlerTest extends AndroidTestCase {
 
     private CallbackHandler mHandler;

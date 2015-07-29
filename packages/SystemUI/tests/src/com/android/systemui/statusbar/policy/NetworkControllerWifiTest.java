@@ -5,12 +5,14 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+@SmallTest
 public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     // These match the constants in WifiManager and need to be kept up to date.
     private static final int MIN_RSSI = -100;
