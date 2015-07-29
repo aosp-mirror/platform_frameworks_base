@@ -622,7 +622,7 @@ public class Build {
         /**
          * M comes after L.
          */
-        public static final int MNC = 23;
+        public static final int M = 23;
     }
 
     /** The type of build, like "user" or "eng". */
