@@ -1714,6 +1714,7 @@
   <java-symbol type="layout" name="launch_warning" />
   <java-symbol type="layout" name="safe_mode" />
   <java-symbol type="layout" name="simple_list_item_2_single_choice" />
+  <java-symbol type="layout" name="app_error_dialog_dont_show_again" />
   <java-symbol type="plurals" name="wifi_available" />
   <java-symbol type="plurals" name="wifi_available_detailed" />
   <java-symbol type="string" name="accessibility_binding_label" />
@@ -1721,6 +1722,7 @@
   <java-symbol type="string" name="adb_active_notification_title" />
   <java-symbol type="string" name="aerr_application" />
   <java-symbol type="string" name="aerr_process" />
+  <java-symbol type="string" name="aerr_process_silence" />
   <java-symbol type="string" name="aerr_title" />
   <java-symbol type="string" name="android_upgrading_fstrim" />
   <java-symbol type="string" name="android_upgrading_apk" />

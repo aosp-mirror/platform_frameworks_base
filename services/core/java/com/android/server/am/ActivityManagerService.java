@@ -1232,6 +1232,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ArrayList<UidRecord.ChangeItem> mPendingUidChanges = new ArrayList<>();
     final ArrayList<UidRecord.ChangeItem> mAvailUidChanges = new ArrayList<>();
 
+    ArraySet<String> mAppsNotReportingCrashes;
+
     /**
      * Runtime CPU use collection thread.  This object's lock is used to
      * perform synchronization with the thread (notifying it to run).
@@ -1420,7 +1422,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                         return;
                     }
-                    if (mShowDialogs && !mSleeping && !mShuttingDown) {
+                    final boolean crashSilenced = mAppsNotReportingCrashes != null &&
+                            mAppsNotReportingCrashes.contains(proc.info.packageName);
+                    if (mShowDialogs && !mSleeping && !mShuttingDown && !crashSilenced) {
                         Dialog d = new AppErrorDialog(mContext,
                                 ActivityManagerService.this, res, proc);
                         d.show();
@@ -20571,6 +20575,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
+    }
+
+    void stopReportingCrashesLocked(ProcessRecord proc) {
+        if (mAppsNotReportingCrashes == null) {
+            mAppsNotReportingCrashes = new ArraySet<>();
+        }
+        mAppsNotReportingCrashes.add(proc.info.packageName);
     }
 
     private final class LocalService extends ActivityManagerInternal {

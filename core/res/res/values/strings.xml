@@ -2555,6 +2555,9 @@
     <!-- Text of the alert that is displayed when an application has crashed. -->
     <string name="aerr_process">Unfortunately, the process <xliff:g id="process">%1$s</xliff:g> has
         stopped.</string>
+    <!-- Text of the alert that is displayed when an application has crashed. -->
+    <string name="aerr_process_silence">Silence crashes from <xliff:g id="process">%1$s</xliff:g>
+        until reboot.</string>
     <!-- Title of the alert when an application is not responding. -->
     <string name="anr_title"></string>
     <!-- Text of the alert that is displayed when an application is not responding. -->

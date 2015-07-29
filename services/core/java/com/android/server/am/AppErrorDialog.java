@@ -19,14 +19,22 @@ package com.android.server.am;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.CheckBox;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 final class AppErrorDialog extends BaseErrorDialog {
     private final ActivityManagerService mService;
     private final AppErrorResult mResult;
     private final ProcessRecord mProc;
+    private CharSequence mName;
 
     // Event 'what' codes
     static final int FORCE_QUIT = 0;
@@ -38,23 +46,22 @@ final class AppErrorDialog extends BaseErrorDialog {
     public AppErrorDialog(Context context, ActivityManagerService service,
             AppErrorResult result, ProcessRecord app) {
         super(context);
-        
+
         Resources res = context.getResources();
-        
+
         mService = service;
         mProc = app;
         mResult = result;
-        CharSequence name;
         if ((app.pkgList.size() == 1) &&
-                (name=context.getPackageManager().getApplicationLabel(app.info)) != null) {
+                (mName = context.getPackageManager().getApplicationLabel(app.info)) != null) {
             setMessage(res.getString(
                     com.android.internal.R.string.aerr_application,
-                    name.toString(), app.info.processName));
+                    mName.toString(), app.info.processName));
         } else {
-            name = app.processName;
+            mName = app.processName;
             setMessage(res.getString(
                     com.android.internal.R.string.aerr_process,
-                    name.toString()));
+                    mName.toString()));
         }
 
         setCancelable(false);
@@ -85,11 +92,32 @@ final class AppErrorDialog extends BaseErrorDialog {
                 DISMISS_TIMEOUT);
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (!ActivityManagerService.IS_USER_BUILD) {
+            FrameLayout frame = (FrameLayout) findViewById(android.R.id.custom);
+            Context context = getContext();
+            LayoutInflater.from(context).inflate(
+                    com.android.internal.R.layout.app_error_dialog_dont_show_again, frame, true);
+            ((TextView) frame.findViewById(com.android.internal.R.id.text)).setText(
+                    context.getResources().getString(
+                            com.android.internal.R.string.aerr_process_silence,
+                            mName.toString()));
+            findViewById(com.android.internal.R.id.customPanel).setVisibility(View.VISIBLE);
+        }
+    }
+
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
+            View view = findViewById(com.android.internal.R.id.checkbox);
+            final boolean stopReporting = view != null && ((CheckBox) view).isChecked();
             synchronized (mService) {
                 if (mProc != null && mProc.crashDialog == AppErrorDialog.this) {
                     mProc.crashDialog = null;
+                }
+                if (stopReporting) {
+                    mService.stopReportingCrashesLocked(mProc);
                 }
             }
             mResult.set(msg.what);
