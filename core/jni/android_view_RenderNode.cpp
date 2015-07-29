@@ -484,13 +484,13 @@ static JNINativeMethod gMethods[] = {
     { "nSetProjectBackwards",  "!(JZ)Z",  (void*) android_view_RenderNode_setProjectBackwards },
     { "nSetProjectionReceiver","!(JZ)Z",  (void*) android_view_RenderNode_setProjectionReceiver },
 
-    { "nSetOutlineRoundRect",  "(JIIIIFF)Z", (void*) android_view_RenderNode_setOutlineRoundRect },
-    { "nSetOutlineConvexPath", "(JJF)Z", (void*) android_view_RenderNode_setOutlineConvexPath },
-    { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
-    { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
+    { "nSetOutlineRoundRect",  "!(JIIIIFF)Z", (void*) android_view_RenderNode_setOutlineRoundRect },
+    { "nSetOutlineConvexPath", "!(JJF)Z", (void*) android_view_RenderNode_setOutlineConvexPath },
+    { "nSetOutlineEmpty",      "!(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
+    { "nSetOutlineNone",       "!(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
     { "nHasShadow",            "!(J)Z",   (void*) android_view_RenderNode_hasShadow },
     { "nSetClipToOutline",     "!(JZ)Z",  (void*) android_view_RenderNode_setClipToOutline },
-    { "nSetRevealClip",        "(JZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
+    { "nSetRevealClip",        "!(JZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
 
     { "nSetAlpha",             "!(JF)Z",  (void*) android_view_RenderNode_setAlpha },
     { "nSetHasOverlappingRendering", "!(JZ)Z",

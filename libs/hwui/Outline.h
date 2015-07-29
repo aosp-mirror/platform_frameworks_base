@@ -33,13 +33,29 @@ public:
             , mAlpha(0.0f) {}
 
     void setRoundRect(int left, int top, int right, int bottom, float radius, float alpha) {
+        mAlpha = alpha;
+        if (mType == kOutlineType_RoundRect
+                && left == mBounds.left
+                && right == mBounds.right
+                && top == mBounds.top
+                && bottom == mBounds.bottom
+                && radius == mRadius) {
+            // nothing to change, don't do any work
+            return;
+        }
+
         mType = kOutlineType_RoundRect;
         mBounds.set(left, top, right, bottom);
         mRadius = radius;
+
+        // update mPath to reflect new outline
         mPath.reset();
-        mPath.addRoundRect(SkRect::MakeLTRB(left, top, right, bottom),
-                radius, radius);
-        mAlpha = alpha;
+        if (MathUtils::isPositive(radius)) {
+            mPath.addRoundRect(SkRect::MakeLTRB(left, top, right, bottom),
+                    radius, radius);
+        } else {
+            mPath.addRect(left, top, right, bottom);
+        }
     }
 
     void setConvexPath(const SkPath* outline, float alpha) {
