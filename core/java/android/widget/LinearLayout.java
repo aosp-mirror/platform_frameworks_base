@@ -686,6 +686,7 @@ public class LinearLayout extends ViewGroup {
         int weightedMaxWidth = 0;
         boolean allFillParent = true;
         float totalWeight = 0;
+        int usedExcessSpace = 0;
 
         final int count = getVirtualChildCount();
         
@@ -730,14 +731,12 @@ public class LinearLayout extends ViewGroup {
                 mTotalLength = Math.max(totalLength, totalLength + lp.topMargin + lp.bottomMargin);
                 skippedMeasure = true;
             } else {
-                int oldHeight = Integer.MIN_VALUE;
-
-                if (lp.height == 0 && lp.weight > 0) {
+                final boolean fillExcessSpace = lp.height == 0 && lp.weight > 0;
+                if (fillExcessSpace) {
                     // heightMode is either UNSPECIFIED or AT_MOST, and this
                     // child wanted to stretch to fill available space.
                     // Translate that to WRAP_CONTENT so that it does not end up
-                    // with a height of 0
-                    oldHeight = 0;
+                    // with a height of 0.
                     lp.height = LayoutParams.WRAP_CONTENT;
                 }
 
@@ -749,11 +748,12 @@ public class LinearLayout extends ViewGroup {
                        child, i, widthMeasureSpec, 0, heightMeasureSpec,
                        totalWeight == 0 ? mTotalLength : 0);
 
-                if (oldHeight != Integer.MIN_VALUE) {
-                   lp.height = oldHeight;
+                final int childHeight = child.getMeasuredHeight();
+                if (fillExcessSpace) {
+                    usedExcessSpace += childHeight;
+                    lp.height = 0;
                 }
 
-                final int childHeight = child.getMeasuredHeight();
                 final int totalLength = mTotalLength;
                 mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin +
                        lp.bottomMargin + getNextLocationOffset(child));
@@ -857,7 +857,7 @@ public class LinearLayout extends ViewGroup {
         // Either expand children with weight to take up available space or
         // shrink them if they extend beyond our current bounds. If we skipped
         // measurement on any children, we need to measure them now.
-        int delta = heightSize - mTotalLength;
+        final int delta = heightSize - mTotalLength + usedExcessSpace;
         if (skippedMeasure || delta != 0 && totalWeight > 0.0f) {
             float weightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
 
@@ -874,34 +874,14 @@ public class LinearLayout extends ViewGroup {
                 
                 float childExtra = lp.weight;
                 if (childExtra > 0) {
-                    // Child said it could absorb extra space -- give him his share
-                    int share = (int) (childExtra * delta / weightSum);
-                    weightSum -= childExtra;
-                    delta -= share;
-
+                    // Distribute excess space to child.
+                    final int childHeight = Math.max(0, (int) (childExtra * delta / weightSum));
+                    final int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(childHeight,
+                            MeasureSpec.EXACTLY);
                     final int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
-                            mPaddingLeft + mPaddingRight +
-                                    lp.leftMargin + lp.rightMargin, lp.width);
-
-                    // TODO: Use a field like lp.isMeasured to figure out if this
-                    // child has been previously measured
-                    if ((lp.height != 0) || (heightMode != MeasureSpec.EXACTLY)) {
-                        // child was measured once already above...
-                        // base new measurement on stored values
-                        int childHeight = child.getMeasuredHeight() + share;
-                        if (childHeight < 0) {
-                            childHeight = 0;
-                        }
-                        
-                        child.measure(childWidthMeasureSpec,
-                                MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.EXACTLY));
-                    } else {
-                        // child was skipped in the loop above.
-                        // Measure for this first time here      
-                        child.measure(childWidthMeasureSpec,
-                                MeasureSpec.makeMeasureSpec(share > 0 ? share : 0,
-                                        MeasureSpec.EXACTLY));
-                    }
+                            mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin,
+                            lp.width);
+                    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
                     // Child may now not fit in vertical dimension.
                     childState = combineMeasuredStates(childState, child.getMeasuredState()
@@ -1017,6 +997,7 @@ public class LinearLayout extends ViewGroup {
         int weightedMaxHeight = 0;
         boolean allFillParent = true;
         float totalWeight = 0;
+        int usedExcessSpace = 0;
 
         final int count = getVirtualChildCount();
         
@@ -1094,14 +1075,12 @@ public class LinearLayout extends ViewGroup {
                     skippedMeasure = true;
                 }
             } else {
-                int oldWidth = Integer.MIN_VALUE;
-
-                if (lp.width == 0 && lp.weight > 0) {
+                final boolean fillExcessSpace = lp.width == 0 && lp.weight > 0;
+                if (fillExcessSpace) {
                     // widthMode is either UNSPECIFIED or AT_MOST, and this
-                    // child
-                    // wanted to stretch to fill available space. Translate that to
-                    // WRAP_CONTENT so that it does not end up with a width of 0
-                    oldWidth = 0;
+                    // child wanted to stretch to fill available space.
+                    // Translate that to WRAP_CONTENT so that it does not end up
+                    // with a width of 0.
                     lp.width = LayoutParams.WRAP_CONTENT;
                 }
 
@@ -1113,11 +1092,12 @@ public class LinearLayout extends ViewGroup {
                         totalWeight == 0 ? mTotalLength : 0,
                         heightMeasureSpec, 0);
 
-                if (oldWidth != Integer.MIN_VALUE) {
-                    lp.width = oldWidth;
+                final int childWidth = child.getMeasuredWidth();
+                if (fillExcessSpace) {
+                    usedExcessSpace += childWidth;
+                    lp.width = 0;
                 }
 
-                final int childWidth = child.getMeasuredWidth();
                 if (isExactly) {
                     mTotalLength += childWidth + lp.leftMargin + lp.rightMargin +
                             getNextLocationOffset(child);
@@ -1242,7 +1222,7 @@ public class LinearLayout extends ViewGroup {
         // Either expand children with weight to take up available space or
         // shrink them if they extend beyond our current bounds. If we skipped
         // measurement on any children, we need to measure them now.
-        int delta = widthSize - mTotalLength;
+        final int delta = widthSize - mTotalLength + usedExcessSpace;
         if (skippedMeasure || delta != 0 && totalWeight > 0.0f) {
             float weightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
 
@@ -1265,34 +1245,13 @@ public class LinearLayout extends ViewGroup {
                 float childExtra = lp.weight;
                 if (childExtra > 0) {
                     // Child said it could absorb extra space -- give him his share
-                    int share = (int) (childExtra * delta / weightSum);
-                    weightSum -= childExtra;
-                    delta -= share;
-
-                    final int childHeightMeasureSpec = getChildMeasureSpec(
-                            heightMeasureSpec,
+                    final int childWidth = Math.max(0, (int) (childExtra * delta / weightSum));
+                    final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(childWidth,
+                            MeasureSpec.EXACTLY);
+                    final int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
                             mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin,
                             lp.height);
-
-                    // TODO: Use a field like lp.isMeasured to figure out if this
-                    // child has been previously measured
-                    if ((lp.width != 0) || (widthMode != MeasureSpec.EXACTLY)) {
-                        // child was measured once already above ... base new measurement
-                        // on stored values
-                        int childWidth = child.getMeasuredWidth() + share;
-                        if (childWidth < 0) {
-                            childWidth = 0;
-                        }
-
-                        child.measure(
-                            MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
-                            childHeightMeasureSpec);
-                    } else {
-                        // child was skipped in the loop above. Measure for this first time here
-                        child.measure(MeasureSpec.makeMeasureSpec(
-                                share > 0 ? share : 0, MeasureSpec.EXACTLY),
-                                childHeightMeasureSpec);
-                    }
+                    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
                     // Child may now not fit in horizontal dimension.
                     childState = combineMeasuredStates(childState,
