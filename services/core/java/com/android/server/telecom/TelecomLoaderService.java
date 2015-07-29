@@ -16,9 +16,11 @@
 
 package com.android.server.telecom;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
@@ -31,6 +33,9 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telecom.DefaultDialerManager;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
+import android.telephony.CarrierConfigManager;
 import android.util.IntArray;
 import android.util.Slog;
 
@@ -39,6 +44,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telephony.SmsApplication;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerService;
 
 /**
  * Starts the telecom component by binding to its ITelecomService implementation. Telecom is setup
@@ -64,7 +70,8 @@ public class TelecomLoaderService extends SystemService {
                 ServiceManager.addService(Context.TELECOM_SERVICE, service);
 
                 synchronized (mLock) {
-                    if (mDefaultSmsAppRequests != null || mDefaultDialerAppRequests != null) {
+                    if (mDefaultSmsAppRequests != null || mDefaultDialerAppRequests != null
+                            || mDefaultSimCallManagerRequests != null) {
                         final PackageManagerInternal packageManagerInternal = LocalServices
                                 .getService(PackageManagerInternal.class);
 
@@ -95,6 +102,23 @@ public class TelecomLoaderService extends SystemService {
                                 }
                             }
                         }
+                        if (mDefaultSimCallManagerRequests != null) {
+                            TelecomManager telecomManager =
+                                (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+                            PhoneAccountHandle phoneAccount = telecomManager.getSimCallManager();
+                            if (phoneAccount != null) {
+                                final int requestCount = mDefaultSimCallManagerRequests.size();
+                                final String packageName =
+                                    phoneAccount.getComponentName().getPackageName();
+                                for (int i = requestCount - 1; i >= 0; i--) {
+                                    final int userId = mDefaultSimCallManagerRequests.get(i);
+                                    mDefaultSimCallManagerRequests.remove(i);
+                                    packageManagerInternal
+                                            .grantDefaultPermissionsToDefaultSimCallManager(
+                                                    packageName, userId);
+                                }
+                            }
+                        }
                     }
                 }
             } catch (RemoteException e) {
@@ -122,6 +146,9 @@ public class TelecomLoaderService extends SystemService {
     @GuardedBy("mLock")
     private IntArray mDefaultDialerAppRequests;
 
+    @GuardedBy("mLock")
+    private IntArray mDefaultSimCallManagerRequests;
+
     private final Context mContext;
 
     @GuardedBy("mLock")
@@ -141,6 +168,7 @@ public class TelecomLoaderService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             registerDefaultAppNotifier();
+            registerCarrierConfigChangedReceiver();
             connectToTelecom();
         }
     }
@@ -215,6 +243,30 @@ public class TelecomLoaderService extends SystemService {
                 return null;
             }
         });
+
+        // Set a callback for the package manager to query the default sim call manager.
+        packageManagerInternal.setSimCallManagerPackagesProvider(
+                new PackageManagerInternal.PackagesProvider() {
+            @Override
+            public String[] getPackages(int userId) {
+                synchronized (mLock) {
+                    if (mServiceConnection == null) {
+                        if (mDefaultSimCallManagerRequests == null) {
+                            mDefaultSimCallManagerRequests = new IntArray();
+                        }
+                        mDefaultSimCallManagerRequests.add(userId);
+                        return null;
+                    }
+                }
+                TelecomManager telecomManager =
+                    (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+                PhoneAccountHandle phoneAccount = telecomManager.getSimCallManager(userId);
+                if (phoneAccount != null) {
+                    return new String[]{phoneAccount.getComponentName().getPackageName()};
+                }
+                return null;
+            }
+        });
     }
 
     private void registerDefaultAppNotifier() {
@@ -245,6 +297,7 @@ public class TelecomLoaderService extends SystemService {
                         packageManagerInternal.grantDefaultPermissionsToDefaultDialerApp(
                                 packageName, userId);
                     }
+                    updateSimCallManagerPermissions(packageManagerInternal, userId);
                 }
             }
         };
@@ -253,5 +306,37 @@ public class TelecomLoaderService extends SystemService {
                 false, contentObserver, UserHandle.USER_ALL);
         mContext.getContentResolver().registerContentObserver(defaultDialerAppUri,
                 false, contentObserver, UserHandle.USER_ALL);
+    }
+
+
+    private void registerCarrierConfigChangedReceiver() {
+        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)) {
+                    for (int userId : UserManagerService.getInstance().getUserIds()) {
+                        updateSimCallManagerPermissions(packageManagerInternal, userId);
+                    }
+                }
+            }
+        };
+
+        mContext.registerReceiverAsUser(receiver, UserHandle.ALL,
+            new IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED), null, null);
+    }
+
+    private void updateSimCallManagerPermissions(PackageManagerInternal packageManagerInternal,
+            int userId) {
+        TelecomManager telecomManager =
+            (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+        PhoneAccountHandle phoneAccount = telecomManager.getSimCallManager(userId);
+        if (phoneAccount != null) {
+            Slog.i(TAG, "updating sim call manager permissions for userId:" + userId);
+            String packageName = phoneAccount.getComponentName().getPackageName();
+            packageManagerInternal.grantDefaultPermissionsToDefaultSimCallManager(
+                packageName, userId);
+        }
     }
 }
