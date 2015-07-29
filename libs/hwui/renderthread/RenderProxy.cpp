@@ -271,16 +271,15 @@ void RenderProxy::runWithGlContext(RenderTask* gltask) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE2(createTextureLayer, RenderThread* thread, CanvasContext* context) {
+CREATE_BRIDGE1(createTextureLayer, CanvasContext* context) {
     Layer* layer = args->context->createTextureLayer();
     if (!layer) return nullptr;
-    return new DeferredLayerUpdater(*args->thread, layer);
+    return new DeferredLayerUpdater(layer);
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {
     SETUP_TASK(createTextureLayer);
     args->context = mContext;
-    args->thread = &mRenderThread;
     void* retval = postAndWait(task);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
     return layer;

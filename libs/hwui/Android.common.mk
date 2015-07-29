@@ -1,10 +1,6 @@
 # getConfig in external/skia/include/core/SkBitmap.h is deprecated.
 # Allow Gnu extension: in-class initializer of static 'const float' member.
 # DeferredLayerUpdater.h: private field 'mRenderThread' is not used.
-LOCAL_CLANG_CFLAGS += \
-    -Wno-deprecated-declarations \
-    -Wno-gnu-static-float-init \
-    -Wno-unused-private-field
 
 LOCAL_SRC_FILES := \
     font/CacheTexture.cpp \
@@ -119,9 +115,4 @@ endif
 # Defaults for ATRACE_TAG and LOG_TAG for libhwui
 LOCAL_CFLAGS += -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\"
 LOCAL_CFLAGS += -Wall -Wno-unused-parameter -Wunreachable-code
-LOCAL_CFLAGS += -ffast-math -O3
-
-# b/21698669
-ifneq ($(USE_CLANG_PLATFORM_BUILD),true)
-    LOCAL_CFLAGS += -Werror
-endif
+LOCAL_CFLAGS += -ffast-math -O3 -Werror

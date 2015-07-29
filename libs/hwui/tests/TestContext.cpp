@@ -57,10 +57,7 @@ sp<Surface> TestContext::surface() {
 }
 
 void TestContext::waitForVsync() {
-#if HWUI_NULL_GPU
-    return;
-#endif
-
+#if !HWUI_NULL_GPU
     // Request vsync
     mDisplayEventReceiver.requestNextVsync();
 
@@ -70,6 +67,7 @@ void TestContext::waitForVsync() {
     // Drain it
     DisplayEventReceiver::Event buf[100];
     while (mDisplayEventReceiver.getEvents(buf, 100) > 0) { }
+#endif
 }
 
 } // namespace test

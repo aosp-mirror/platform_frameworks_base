@@ -24,14 +24,13 @@
 namespace android {
 namespace uirenderer {
 
-DeferredLayerUpdater::DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer)
+DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer)
         : mSurfaceTexture(nullptr)
         , mTransform(nullptr)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
         , mLayer(layer)
-        , mCaches(Caches::getInstance())
-        , mRenderThread(thread) {
+        , mCaches(Caches::getInstance()) {
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
     mBlend = mLayer->isBlend();
