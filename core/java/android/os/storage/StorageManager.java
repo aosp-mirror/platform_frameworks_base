@@ -86,6 +86,9 @@ public class StorageManager {
     /** {@hide} */
     public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
 
+    /** {@hide} */
+    public static final int FLAG_FOR_WRITE = 1 << 0;
+
     private final Context mContext;
     private final ContentResolver mResolver;
 
@@ -812,7 +815,7 @@ public class StorageManager {
 
     /** {@hide} */
     public static @Nullable StorageVolume getStorageVolume(File file, int userId) {
-        return getStorageVolume(getVolumeList(userId), file);
+        return getStorageVolume(getVolumeList(userId, 0), file);
     }
 
     /** {@hide} */
@@ -852,11 +855,11 @@ public class StorageManager {
 
     /** {@hide} */
     public @NonNull StorageVolume[] getVolumeList() {
-        return getVolumeList(mContext.getUserId());
+        return getVolumeList(mContext.getUserId(), 0);
     }
 
     /** {@hide} */
-    public static @NonNull StorageVolume[] getVolumeList(int userId) {
+    public static @NonNull StorageVolume[] getVolumeList(int userId, int flags) {
         final IMountService mountService = IMountService.Stub.asInterface(
                 ServiceManager.getService("mount"));
         try {
@@ -877,7 +880,7 @@ public class StorageManager {
             if (uid <= 0) {
                 return new StorageVolume[0];
             }
-            return mountService.getVolumeList(uid, packageName);
+            return mountService.getVolumeList(uid, packageName, flags);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
