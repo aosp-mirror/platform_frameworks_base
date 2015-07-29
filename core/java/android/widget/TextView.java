@@ -2270,6 +2270,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableRight
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
+    @android.view.RemotableViewMethod
     public void setCompoundDrawablesWithIntrinsicBounds(@Nullable Drawable left,
             @Nullable Drawable top, @Nullable Drawable right, @Nullable Drawable bottom) {
 
@@ -2302,6 +2303,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
+    @android.view.RemotableViewMethod
     public void setCompoundDrawablesRelative(@Nullable Drawable start, @Nullable Drawable top,
             @Nullable Drawable end, @Nullable Drawable bottom) {
         Drawables dr = mDrawables;
@@ -2472,6 +2474,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
+    @android.view.RemotableViewMethod
     public void setCompoundDrawablesRelativeWithIntrinsicBounds(@Nullable Drawable start,
             @Nullable Drawable top, @Nullable Drawable end, @Nullable Drawable bottom) {
 

@@ -3171,12 +3171,8 @@ public class Notification implements Parcelable
             RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
                     tombstone ? getActionTombstoneLayoutResource()
                               : getActionLayoutResource());
-            // TODO: support Bitmaps in action icons when TextView compound drawables support Icon
             final Icon ai = action.getIcon();
-            final int icon = (ai.getType() == Icon.TYPE_RESOURCE)
-                    ? ai.getResId()
-                    : 0;
-            button.setTextViewCompoundDrawablesRelative(R.id.action0, icon, 0, 0, 0);
+            button.setTextViewCompoundDrawablesRelative(R.id.action0, ai, null, null, null);
             button.setTextViewText(R.id.action0, processLegacyText(action.title));
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
