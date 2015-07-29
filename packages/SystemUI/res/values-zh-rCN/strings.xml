@@ -346,12 +346,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"访客用户"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"要删除应用和数据，请退出访客用户身份"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"移除访客"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"退出当前用户"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"退出当前用户"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"要添加新用户吗？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"当您添加新用户时，该用户必须设置自己的空间。\n\n任何用户均可为其他所有用户更新应用。"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"节电助手已开启"</string>
@@ -434,4 +432,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"恭喜！系统界面调谐器已添加到“设置”中"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"从“设置”中移除"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"要将系统界面调谐器从“设置”中移除，并停止使用所有相关功能吗？"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

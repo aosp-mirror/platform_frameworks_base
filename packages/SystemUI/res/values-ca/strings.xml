@@ -346,12 +346,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Usuari convidat"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Per suprimir aplicacions i dades, elimina l\'usuari convidat"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"SUPRIMEIX EL CONVIDAT"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Tanca la sessió de l\'usuari"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"TANCA LA SESSIÓ DE L\'USUARI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Estalvi de bateria activada"</string>
@@ -434,4 +432,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Enhorabona! El Configurador de la IU del sistema s\'ha afegit a Configuració."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Treu de Configuració"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vols treure el Configurador de la UI del sistema de Configuració i deixar d\'utilitzar-ne totes les funcions?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

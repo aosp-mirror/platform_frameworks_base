@@ -343,7 +343,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Апп болон өгөгдлийг устгахын тулд зочин хэрэглэгчийг хасна уу"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ЗОЧНЫГ ГАРГАХ"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Хэрэглэгчээс гарах"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"Одоогийн хэрэглэгчээс гарахын тулд хэрэглэгч апп-ыг зогсооно уу."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ХЭРЭГЛЭГЧЭЭС ГАРАХ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Шинэ хэрэглэгч нэмэх үү?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Та шинэ хэрэглэгч нэмбэл, тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
@@ -427,4 +428,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Баяр хүргэе! Системийн UI Tохируулагчийг тохиргоонд нэмлээ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Тохиргооноос устгах"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Системийн UI Тохируулагчийг тохиргооноос устгаж, үүнтэй холбоотой бүх тохиргоог ашиглахаа болих уу?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

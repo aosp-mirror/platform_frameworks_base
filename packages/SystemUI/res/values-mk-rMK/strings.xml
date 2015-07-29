@@ -347,7 +347,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"За да избришете апликации и податоци, отстранете го гостинот"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ОТСТРАНИ ГОСТИН"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Одјави го корисникот"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"За да одјавите корисник, запрете ги корисничките апликации."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ОДЈАВИ ГО КОРИСНИКОТ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Да се додаде нов корисник?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Кога додавате нов корисник, тоа лице треба да го постави својот простор.\n\nСекој корисник може да ажурира апликации за сите други корисници."</string>
@@ -431,4 +432,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Честито! Го додадовте Адаптерот на УИ на системот на Поставки"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Отстрани од поставки"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Да се отстрани Адаптерот на УИ на системот од Поставки и да престанат да се користат сите негови функции?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

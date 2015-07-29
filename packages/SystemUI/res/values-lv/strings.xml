@@ -346,7 +346,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Lai dzēstu lietotnes un datus, noņemiet vieslietotāju."</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"NOŅEMT VIESI"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Lietotāja atteikšana"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"Lai atteiktu pašreizējo lietotāju, apturiet lietotāja lietojumprogrammu darbību."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ATTEIKT LIETOTĀJU"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vai pievienot jaunu lietotāju?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kad pievienosiet jaunu lietotāju, viņam būs jāizveido savs profils.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā."</string>
@@ -430,4 +431,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Apsveicam! Sistēmas saskarnes regulators ir pievienots iestatījumiem."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Noņemt no iestatījumiem"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vai noņemt sistēmas saskarnes regulatoru no iestatījumiem un pārtraukt izmantot visas tā funkcijas?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

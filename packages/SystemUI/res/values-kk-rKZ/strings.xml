@@ -345,7 +345,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Қолданбалар мен деректерді жою үшін, қонақ пайдаланушыны алып тастаңыз"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ҚОНАҚТЫ КЕТІРУ"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Пайдаланушыны шығару"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"Ағымдағы пайдаланушыны шығару үшін пайдаланушы қолданбаларын тоқтатыңыз."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ПАЙДАЛАНУШЫНЫ ШЫҒАРУ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Жаңа пайд-ны қосу керек пе?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Жаңа пайдаланушыны қосқанда сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
@@ -429,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Құттықтаймыз! Жүйелік пайдаланушылық интерфейс тюнері \"Параметрлер\" тармағына қосылды"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Параметрлерден жою"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Жүйелік пайдаланушылық интерфейс тюнерін \"Параметрлер\" тармағынан жойып, оның барлық мүмкіндіктерін пайдалануды тоқтату керек пе?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

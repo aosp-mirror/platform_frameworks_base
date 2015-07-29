@@ -344,12 +344,10 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"ਮਹਿਮਾਨ ਉਪਭੋਗਤਾ"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"ਐਪਸ ਅਤੇ ਡਾਟਾ ਮਿਟਾਉਣ ਲਈ, ਮਹਿਮਾਨ ਉਪਭੋਗਤਾ ਹਟਾਓ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ਮਹਿਮਾਨ ਨੂੰ ਹਟਾਓ"</string>
-    <!-- no translation found for user_logout_notification_title (1453960926437240727) -->
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"ਉਪਭੋਗਤਾ ਨੂੰ ਲੌਗ ਆਉਟ ਕਰੋ"</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
     <skip />
-    <!-- no translation found for user_logout_notification_text (6058349308204461080) -->
-    <skip />
-    <!-- no translation found for user_logout_notification_action (1195428991423425062) -->
-    <skip />
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"ਉਪਭੋਗਤਾ ਨੂੰ ਲੌਗ ਆਉਟ ਕਰੋ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ਕੀ ਨਵਾਂ ਉਪਭੋਗਤਾ ਜੋੜਨਾ ਹੈ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਉਪਭੋਗਤਾ ਜੋੜਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣਾ ਸਪੇਸ ਸੈਟ ਅਪ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਉਪਭੋਗਤਾ ਹੋਰ ਸਾਰੇ ਉਪਭੋਗਤਾਵਾਂ ਦੇ ਐਪਸ ਨੂੰ ਅਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
@@ -432,4 +430,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"ਵਧਾਈਆਂ! ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਸੈਟਿੰਗਜ਼ ਵਿੱਚ ਜੋੜਿਆ ਗਿਆ ਹੈ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ਸੈਟਿੰਗਜ਼ ਤੋਂ ਹਟਾਓ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ਕੀ ਸੈਟਿੰਗਜ਼ ਤੋਂ ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਹਟਾਉਣਾ ਹੈ ਅਤੇ ਇਸਦੀਆਂ ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਉਪਯੋਗ ਕਰਨ ਤੋਂ ਰੋਕਣਾ ਹੈ?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>

@@ -347,7 +347,8 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Če želite izbrisati aplikacije in podatke, odstranite gosta"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ODSTRANI GOSTA"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Odjava uporabnika"</string>
-    <string name="user_logout_notification_text" msgid="6058349308204461080">"Če želite odjaviti tren. uporabnika, ustavite uporab. aplik."</string>
+    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
+    <skip />
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ODJAVA UPORABNIKA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Dodajanje novega uporabnika?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Ko dodate novega uporabnika, mora ta nastaviti svoj prostor.\n\nVsak uporabnik lahko posodobi aplikacije za vse druge uporabnike."</string>
@@ -431,4 +432,6 @@
     <string name="tuner_toast" msgid="603429811084428439">"Čestitke! Uglaševalnik uporabniškega vmesnika sistema je bil dodan v nastavitve."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Odstrani iz nastavitev"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Ali želite odstraniti Uglaševalnik uporabniškega vmesnika sistema iz nastavitev in prenehati uporabljati vse njegove funkcije?"</string>
+    <!-- no translation found for activity_not_found (348423244327799974) -->
+    <skip />
 </resources>
