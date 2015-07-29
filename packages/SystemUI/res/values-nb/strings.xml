@@ -398,7 +398,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er volumdialogen"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Trykk for å gå tilbake til den opprinnelige volumdialogen."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruker jobbprofilen din"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis prosent for det innebygde batteriet"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis batterinivåprosenten inni statusfeltikonet når du ikke lader"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hurtiginnstillinger"</string>
@@ -419,4 +419,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtiginnstillinger, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Wi-Fi-sone"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Work-profil"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Gøy for noen – ikke for alle"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Med System UI Tuner har du flere måter å justere og tilpasse Android-brukergrensesnittet på. Disse eksperimentelle funksjonene kan endres, avbrytes eller fjernes i fremtidige utgivelser. Fortsett med forbehold."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Disse eksperimentelle funksjonene kan endres, avbrytes eller fjernes i fremtidige utgivelser. Fortsett med forbehold."</string>
+    <string name="got_it" msgid="2239653834387972602">"Greit"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Gratulerer! System UI Tuner er lagt til i Innstillinger"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Fjern fra Innstillinger"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vil du fjerne System UI Tuner fra Innstillinger og slutte å bruke alle de tilknyttede funksjonene?"</string>
 </resources>

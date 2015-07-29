@@ -398,7 +398,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> da bolumenaren leihoa"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Ukitu jatorrizkora leheneratzeko"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Work profila erabiltzen ari zara"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Erakutsi txertatutako bateriaren ehunekoa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Erakutsi bateria-mailaren ehunekoa egoera-barraren ikonoan, kargatzen ari ez denean"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ezarpen bizkorrak"</string>
@@ -419,4 +419,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Ezarpen bizkorrak: <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Sare publikoa"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Work profila"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Sistemako erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
+    <string name="got_it" msgid="2239653834387972602">"Ados"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Zorionak! Sistemako erabiltzaile-interfazearen konfiguratzailea Ezarpenak atalean gehitu da"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Kendu Ezarpenak ataletik"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Sistemako erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren eginbide guztiak erabiltzeari utzi nahi diozu?"</string>
 </resources>

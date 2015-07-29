@@ -398,7 +398,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> là hộp thoại khối lượng"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Chạm để khôi phục bản gốc."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Bạn đang sử dụng hồ sơ công việc của mình"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Bộ điều hướng giao diện người dùng hệ thống"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Bộ điều hướng giao diện người dùng hệ thống"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Hiển thị tỷ lệ phần trăm pin được nhúng"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Hiển thị tỷ lệ phần trăm mức pin bên trong biểu tượng thanh trạng thái khi không sạc"</string>
     <string name="quick_settings" msgid="10042998191725428">"Cài đặt nhanh"</string>
@@ -419,4 +419,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Cài đặt nhanh, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Điểm phát sóng"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Hồ sơ công việc"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Thú vị đối với một số người nhưng không phải tất cả"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Bộ điều hướng giao diện người dùng hệ thống cung cấp thêm cho bạn những cách chỉnh sửa và tùy chỉnh giao diện người dùng Android. Những tính năng thử nghiệm này có thể thay đổi, hỏng hoặc biến mất trong các phiên bản tương lai. Hãy thận trọng khi tiếp tục."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Những tính năng thử nghiệm này có thể thay đổi, hỏng hoặc biến mất trong các phiên bản tương lai. Hãy thận trọng khi tiếp tục."</string>
+    <string name="got_it" msgid="2239653834387972602">"OK"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Xin chúc mừng! Bộ điều hướng giao diện người dùng hệ thống đã được thêm vào Cài đặt"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Xóa khỏi Cài đặt"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Xóa Bộ điều hướng giao diện người dùng hệ thống khỏi Cài đặt và ngừng sử dụng tất cả tính năng của ứng dụng này?"</string>
 </resources>

@@ -398,7 +398,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा व्हॉल्यूम संवाद आहे"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूळ पुनर्संचयित करण्यासाठी स्पर्श करा."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आपण आपले कार्य प्रोफाईल वापरत आहात"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"सिस्टीम UI ट्यूनर"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टीम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
     <string name="quick_settings" msgid="10042998191725428">"दृत सेटिंग्ज"</string>
@@ -419,4 +419,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"द्रुत सेटिंग्ज, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"हॉटस्पॉट"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"कार्य प्रोफाईल"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"सर्वांसाठी नाही तर काहींसाठी मजेदार असू शकते"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"सिस्टीम UI ट्यूनर आपल्‍याला Android वापरकर्ता इंटरफेस ट्विक आणि सानुकूल करण्‍याचे अनेक प्रकार देते. ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीझ मध्‍ये कदाचित दिसणार नाहीत. सावधगिरी बाळगून पुढे सुरु ठेवा."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीझ मध्‍ये कदाचित दिसणार नाहीत."</string>
+    <string name="got_it" msgid="2239653834387972602">"समजले"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"अभिनंदन! सिस्टीम UI ट्यूनर सेटिंग्जमध्‍ये जोडले गेले आहे"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"सेटिंग्ज मधून काढा"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"सेटिंग्ज मधून सिस्टीम UI ट्यूनर काढून त्याची सर्व वैशिष्ट्‍ये वापरणे थांबवायचे?"</string>
 </resources>

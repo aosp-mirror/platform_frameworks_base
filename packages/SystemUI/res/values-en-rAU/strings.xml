@@ -398,7 +398,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> is the volume dialogue"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Touch to restore the original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"You\'re using your work profile"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Show embedded battery percentage"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Show battery level percentage inside the status bar icon when not charging"</string>
     <string name="quick_settings" msgid="10042998191725428">"Quick Settings"</string>
@@ -419,4 +419,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Quick Settings, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Work profile"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Fun for some but not for all"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner gives you extra ways to tweak and customise the Android user interface. These experimental features may change, break or disappear in future releases. Proceed with caution."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"These experimental features may change, break or disappear in future releases. Proceed with caution."</string>
+    <string name="got_it" msgid="2239653834387972602">"Understood"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Congrats! System UI Tuner has been added to Settings"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Remove from settings"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Remove System UI Tuner from Settings and stop using all of its features?"</string>
 </resources>

@@ -400,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> correspond à la boîte de dialogue du volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Touchez pour restaurer l\'original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Vous utilisez votre profil professionnel."</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Paramètres SystemUI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Afficher le pourcentage intégré de charge"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Afficher le pourcentage correspondant au niveau de la pile dans l\'icône de la barre d\'état lorsque l\'appareil n\'est pas en charge."</string>
     <string name="quick_settings" msgid="10042998191725428">"Paramètres rapides"</string>
@@ -421,4 +421,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Configuration rapide – <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Point d\'accès sans fil"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil professionnel"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Divertissant pour certains, mais pas pour tous"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner vous propose de nouvelles manières d\'adapter et de personnaliser l\'interface utilisateur d\'Android. Ces fonctionnalités expérimentales peuvent être modifiées, cesser de fonctionner ou disparaître dans les versions futures. À utiliser avec prudence."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ces fonctionnalités expérimentales peuvent être modifiées, cesser de fonctionner ou disparaître dans les versions futures. À utiliser avec prudence."</string>
+    <string name="got_it" msgid="2239653834387972602">"J\'ai compris"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Félicitations! System UI Tuner a bien été ajouté aux paramètres."</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Supprimer des paramètres"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Supprimer « System UI Tuner » des paramètres et arrêter d\'utiliser toutes ses fonctionnalités?"</string>
 </resources>

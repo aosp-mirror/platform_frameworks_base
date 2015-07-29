@@ -400,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>を音量ダイアログとして使用"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"タップすると元の音量ダイアログが復元されます。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"仕事用プロファイルを使用しています"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"システムUI調整ツール"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"内蔵電池の残量の割合を表示する"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"充電していないときには電池残量の割合をステータスバーアイコンに表示する"</string>
     <string name="quick_settings" msgid="10042998191725428">"クイック設定"</string>
@@ -421,4 +421,11 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"クイック設定、<xliff:g id="TITLE">%s</xliff:g>。"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"アクセスポイント"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"仕事用プロファイル"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"一部の方のみお楽しみいただける限定公開ツール"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"システムUI調整ツールでは、Androidユーザーインターフェースの調整やカスタマイズを行えます。これらの試験運用機能は今後のリリースで変更となったり、中止となったり、削除されたりする可能性がありますのでご注意ください。"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"これらの試験運用機能は今後のリリースで変更となったり、中止となったり、削除されたりする可能性がありますのでご注意ください。"</string>
+    <string name="got_it" msgid="2239653834387972602">"OK"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"システムUI調整ツールを設定に追加しました"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"設定から削除"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"設定からシステムUI調整ツールを削除して、全機能の使用を停止しますか？"</string>
 </resources>
