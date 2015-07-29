@@ -284,7 +284,7 @@ public class Main {
                 ConfigGenerator.getEnumMap(attrs), getLayoutLog());
     }
 
-    /** Text activity.xml */
+    /** Test activity.xml */
     @Test
     public void testActivity() throws ClassNotFoundException {
         renderAndVerify("activity.xml", "activity.png");
