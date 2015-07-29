@@ -436,6 +436,8 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"אצבע <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"קרא את הגדרות הסינכרון"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"מאפשר לאפליקציה לקרוא את הגדרות הסנכרון של חשבון. לדוגמה, ניתן לגלות כך האם האפליקציה \'אנשים\' מסונכרן עם חשבון כלשהו."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"הפעלת וכיבוי סנכרון"</string>
@@ -906,6 +908,8 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"לצערנו, פעולת <xliff:g id="APPLICATION">%1$s</xliff:g> הופסקה."</string>
     <string name="aerr_process" msgid="4507058997035697579">"לצערנו, התהליך <xliff:g id="PROCESS">%1$s</xliff:g> הופסק."</string>
+    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> אינו מגיב.\n\nתרצה לסגור אותו?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"הפעילות <xliff:g id="ACTIVITY">%1$s</xliff:g> אינה מגיבה.\n\nתרצה לסגור אותה?"</string>

@@ -130,7 +130,7 @@
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chirilgan"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzal ko‘rilsin"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobil tarmoq afzal ko‘rilsin"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Faqat Wi-Fi"</string>
@@ -434,6 +434,8 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Barmoq izi <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"sinx-sh sozlamalarini o‘qish"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ilovaga hisobning sinxronlash sozlamalarini o‘qish uchun ruxsat beradi. Masalan, bu \"Odamlar\" ilovasi hisob bilan sinxronlangan yoki aksini aniqlay oladi."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinx.ni yoqish/o‘chirish"</string>
@@ -673,8 +675,8 @@
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"To‘xtatib turish"</string>
     <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"Ijro qilish"</string>
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"To‘xtatish"</string>
-    <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Tezkor orqaga qaytarish"</string>
-    <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Tezkor oldinga o‘tkazish"</string>
+    <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Orqaga o‘tkazish"</string>
+    <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Oldinga o‘tkazish"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Faqat favqulodda chaqiruvlar"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Tarmoq qulflangan"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-karta PUK kod bilan qulflangan."</string>
@@ -813,7 +815,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"O‘tgan oy"</string>
     <string name="older" msgid="5211975022815554840">"Eskiroq"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>da"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>da"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g>da"</string>
     <string name="day" msgid="8144195776058119424">"kun"</string>
@@ -875,8 +877,8 @@
     <string name="no" msgid="5141531044935541497">"Bekor qilish"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Diqqat"</string>
     <string name="loading" msgid="7933681260296021180">"Yuklanmoqda…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"YONIQ"</string>
-    <string name="capital_off" msgid="6815870386972805832">"O‘CHIQ"</string>
+    <string name="capital_on" msgid="1544682755514494298">"I"</string>
+    <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Ushbudan foydalanib amalni tugatish:"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"“%1$s” ilovasi yordamida bajarish"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Ochish…"</string>
@@ -896,6 +898,8 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Baxtga qarshi, <xliff:g id="APPLICATION">%1$s</xliff:g> to‘xtatildi."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Baxtga qarshi, <xliff:g id="PROCESS">%1$s</xliff:g> jarayoni to‘xtatildi."</string>
+    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> javob bermayapti.\n\nUni yopishni xohlaysizmi?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> harakati javob bermayapti.\n\nUni yopishni xohlaysizmi?"</string>
