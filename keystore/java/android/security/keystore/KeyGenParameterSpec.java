@@ -65,17 +65,16 @@ import javax.security.auth.x500.X500Principal;
  *
  * <p>NOTE: If a private key is not authorized to sign the self-signed certificate, then the
  * certificate will be created with an invalid signature which will not verify. Such a certificate
- * is still useful because it provides access to the public key. To generate a valid
- * signature for the certificate the key needs to be authorized for all of the following:
+ * is still useful because it provides access to the public key. To generate a valid signature for
+ * the certificate the key needs to be authorized for all of the following:
  * <ul>
  * <li>{@link KeyProperties#PURPOSE_SIGN},</li>
  * <li>operation without requiring the user to be authenticated (see
  * {@link Builder#setUserAuthenticationRequired(boolean)}),</li>
  * <li>signing/origination at this moment in time (see {@link Builder#setKeyValidityStart(Date)}
  * and {@link Builder#setKeyValidityForOriginationEnd(Date)}),</li>
- * <li>suitable digest or {@link KeyProperties#DIGEST_NONE},</li>
- * <li>(RSA keys only) padding scheme {@link KeyProperties#SIGNATURE_PADDING_RSA_PKCS1} or
- * {@link KeyProperties#ENCRYPTION_PADDING_NONE}.</li>
+ * <li>suitable digest,</li>
+ * <li>(RSA keys only) padding scheme {@link KeyProperties#SIGNATURE_PADDING_RSA_PKCS1}.</li>
  * </ul>
  *
  * <p>NOTE: The key material of the generated symmetric and private keys is not accessible. The key
@@ -668,7 +667,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          *
          * <p>For RSA private keys used by TLS/SSL servers to authenticate themselves to clients it
          * is usually necessary to authorize the use of no/any padding
-         * ({@link KeyProperties#ENCRYPTION_PADDING_NONE}). This is because RSA decryption is
+         * ({@link KeyProperties#ENCRYPTION_PADDING_NONE}) and/or PKCS#1 encryption padding
+         * ({@link KeyProperties#ENCRYPTION_PADDING_RSA_PKCS1}). This is because RSA decryption is
          * required by some cipher suites, and some stacks request decryption using no padding
          * whereas others request PKCS#1 padding.
          *
