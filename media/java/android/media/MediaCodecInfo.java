@@ -1216,7 +1216,7 @@ public final class MediaCodecInfo {
         private Range<Double> estimateFrameRatesFor(int width, int height) {
             Size size = findClosestSize(width, height);
             Range<Long> range = mMeasuredFrameRates.get(size);
-            Double ratio = (double)(width * height) / (size.getWidth() * size.getHeight());
+            Double ratio = (double)(size.getWidth() * size.getHeight()) / (width * height);
             return Range.create(range.getLower() * ratio, range.getUpper() * ratio);
         }
 
