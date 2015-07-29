@@ -149,10 +149,14 @@ interface ISms {
      *  broadcast when the message is delivered to the recipient.  The
      *  raw pdu of the status report is in the extended data ("pdu").
      * @param subId the subId on which the SMS has to be sent.
+     * @param persistMessageForNonDefaultSmsApp whether the sent message should
+     *   be automatically persisted in the SMS db. It only affects messages sent
+     *   by a non-default SMS app. Currently only the carrier app can set this
+     *   parameter to false to skip auto message persistence.
      */
     void sendTextForSubscriber(in int subId, String callingPkg, in String destAddr,
             in String scAddr, in String text, in PendingIntent sentIntent,
-            in PendingIntent deliveryIntent);
+            in PendingIntent deliveryIntent, in boolean persistMessageForNonDefaultSmsApp);
 
     /**
      * Send an SMS. Internal use only.
@@ -219,11 +223,15 @@ interface ISms {
      *   to the recipient.  The raw pdu of the status report is in the
      *   extended data ("pdu").
      * @param subId the subId on which the SMS has to be sent.
+     * @param persistMessageForNonDefaultSmsApp whether the sent message should
+     *   be automatically persisted in the SMS db. It only affects messages sent
+     *   by a non-default SMS app. Currently only the carrier app can set this
+     *   parameter to false to skip auto message persistence.
      */
     void sendMultipartTextForSubscriber(in int subId, String callingPkg,
             in String destinationAddress, in String scAddress,
             in List<String> parts, in List<PendingIntent> sentIntents,
-            in List<PendingIntent> deliveryIntents);
+            in List<PendingIntent> deliveryIntents, in boolean persistMessageForNonDefaultSmsApp);
 
     /**
      * Enable reception of cell broadcast (SMS-CB) messages with the given
