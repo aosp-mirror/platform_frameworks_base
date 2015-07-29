@@ -138,7 +138,7 @@ nativeCreate
 (JNIEnv *env, jclass clazz, jstring opPackageName)
 {
     ScopedUtfChars opPackageNameUtf(env, opPackageName);
-    return (jlong) new SensorManager(String16(opPackageNameUtf.c_str()));
+    return (jlong) &SensorManager::getInstanceForPackage(String16(opPackageNameUtf.c_str()));
 }
 
 static jboolean
