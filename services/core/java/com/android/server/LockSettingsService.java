@@ -335,7 +335,12 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     public String getStringUnchecked(String key, String defaultValue, int userId) {
         if (Settings.Secure.LOCK_PATTERN_ENABLED.equals(key)) {
-            return mLockPatternUtils.isLockPatternEnabled(userId) ? "1" : "0";
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return mLockPatternUtils.isLockPatternEnabled(userId) ? "1" : "0";
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         return mStorage.readKeyValue(key, defaultValue, userId);
