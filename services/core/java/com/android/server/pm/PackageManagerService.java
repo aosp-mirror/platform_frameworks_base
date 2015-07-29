@@ -16515,6 +16515,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
+        public void setSimCallManagerPackagesProvider(PackagesProvider provider) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.setSimCallManagerPackagesProviderLPw(provider);
+            }
+        }
+
+        @Override
         public void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider) {
             synchronized (mPackages) {
                 mDefaultPermissionPolicy.setSyncAdapterPackagesProviderLPw(provider);
@@ -16533,6 +16540,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         public void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId) {
             synchronized (mPackages) {
                 mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultDialerAppLPr(
+                        packageName, userId);
+            }
+        }
+        @Override
+        public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSimCallManagerLPr(
                         packageName, userId);
             }
         }
