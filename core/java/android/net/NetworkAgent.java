@@ -193,6 +193,13 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int CMD_SET_SIGNAL_STRENGTH_THRESHOLDS = BASE + 14;
 
+    /**
+     * Sent by ConnectivityService to the NeworkAgent to inform the agent to avoid
+     * automatically reconnecting to this network (e.g. via autojoin).  Happens
+     * when user selects "No" option on the "Stay connected?" dialog box.
+     */
+    public static final int CMD_PREVENT_AUTOMATIC_RECONNECT = BASE + 15;
+
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null);
@@ -306,6 +313,10 @@ public abstract class NetworkAgent extends Handler {
                     intThresholds[i] = thresholds.get(i);
                 }
                 setSignalStrengthThresholds(intThresholds);
+                break;
+            }
+            case CMD_PREVENT_AUTOMATIC_RECONNECT: {
+                preventAutomaticReconnect();
                 break;
             }
         }
@@ -472,6 +483,15 @@ public abstract class NetworkAgent extends Handler {
      * that when crossed should trigger a system wakeup and a NetworkCapabilities update.
      */
     protected void setSignalStrengthThresholds(int[] thresholds) {
+    }
+
+    /**
+     * Called when the user asks to not stay connected to this network because it was found to not
+     * provide Internet access.  Usually followed by call to {@code unwanted}.  The transport is
+     * responsible for making sure the device does not automatically reconnect to the same network
+     * after the {@code unwanted} call.
+     */
+    protected void preventAutomaticReconnect() {
     }
 
     protected void log(String s) {
