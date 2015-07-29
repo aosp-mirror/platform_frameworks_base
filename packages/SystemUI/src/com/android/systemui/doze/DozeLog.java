@@ -244,12 +244,12 @@ public class DozeLog {
         }
 
         @Override
-        public void onScreenTurnedOn() {
+        public void onStartedWakingUp() {
             traceScreenOn();
         }
 
         @Override
-        public void onScreenTurnedOff(int why) {
+        public void onFinishedGoingToSleep(int why) {
             traceScreenOff(why);
         }
 
