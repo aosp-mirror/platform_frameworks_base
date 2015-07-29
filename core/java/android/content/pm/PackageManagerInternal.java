@@ -83,6 +83,12 @@ public abstract class PackageManagerInternal {
     public abstract void setDialerAppPackagesProvider(PackagesProvider provider);
 
     /**
+     * Sets the sim call manager packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setSimCallManagerPackagesProvider(PackagesProvider provider);
+
+    /**
      * Sets the sync adapter packages provider.
      * @param provider The provider.
      */
@@ -101,4 +107,12 @@ public abstract class PackageManagerInternal {
      * @param userId The user for which to grant the permissions.
      */
     public abstract void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId);
+
+    /**
+     * Requests granting of the default permissions to the current default sim call manager.
+     * @param packageName The default sim call manager package name.
+     * @param userId The user for which to grant the permissions.
+     */
+    public abstract void grantDefaultPermissionsToDefaultSimCallManager(String packageName,
+            int userId);
 }

@@ -493,6 +493,26 @@ public class TelecomManager {
     }
 
     /**
+     * Returns the current SIM call manager for the specified user. Apps must be prepared for this
+     * method to return {@code null}, indicating that there currently exists no user-chosen default
+     * {@code PhoneAccount}.
+     *
+     * @return The phone account handle of the current sim call manager.
+     *
+     * @hide
+     */
+    public PhoneAccountHandle getSimCallManager(int userId) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getSimCallManagerForUser(userId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecomService#getSimCallManagerForUser");
+        }
+        return null;
+    }
+
+    /**
      * Returns the current connection manager. Apps must be prepared for this method to return
      * {@code null}, indicating that there currently exists no user-chosen default
      * {@code PhoneAccount}.
