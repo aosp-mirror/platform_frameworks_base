@@ -2378,14 +2378,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (!accept) {
-            // Tell the NetworkAgent that the network does not have Internet access (because that's
-            // what we just told the user). This will hint to Wi-Fi not to autojoin this network in
-            // the future. We do this now because NetworkMonitor might not yet have finished
-            // validating and thus we might not yet have received an EVENT_NETWORK_TESTED.
-            nai.asyncChannel.sendMessage(NetworkAgent.CMD_REPORT_NETWORK_STATUS,
-                    NetworkAgent.INVALID_NETWORK, 0, null);
-            // TODO: Tear the network down once we have determined how to tell WifiStateMachine not
-            // to reconnect to it immediately. http://b/20739299
+            // Tell the NetworkAgent to not automatically reconnect to the network.
+            nai.asyncChannel.sendMessage(NetworkAgent.CMD_PREVENT_AUTOMATIC_RECONNECT);
+            // Teardown the nework.
+            teardownUnneededNetwork(nai);
         }
 
     }
