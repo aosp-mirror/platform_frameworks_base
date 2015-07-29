@@ -128,7 +128,7 @@ public final class UsbMidiDevice implements Closeable {
             mReceiver = receiver;
         }
     }
-    
+
     public static UsbMidiDevice create(Context context, Bundle properties, int card, int device) {
         // FIXME - support devices with different number of input and output ports
         int subDeviceCount = nativeGetSubdeviceCount(card, device);
@@ -203,6 +203,8 @@ public final class UsbMidiDevice implements Closeable {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 try {
                     while (true) {
+                        // Record time of event immediately after waking.
+                        long timestamp = System.nanoTime();
                         synchronized (mLock) {
                             if (!mIsOpen) break;
 
@@ -215,14 +217,14 @@ public final class UsbMidiDevice implements Closeable {
                                 } else if ((pfd.revents & OsConstants.POLLIN) != 0) {
                                     // clear readable flag
                                     pfd.revents = 0;
-                                    
+
                                     if (index == mInputStreams.length - 1) {
                                         // last file descriptor is used only for unblocking Os.poll()
                                         break;
                                     }
 
                                     int count = mInputStreams[index].read(buffer);
-                                    outputReceivers[index].send(buffer, 0, count);
+                                    outputReceivers[index].send(buffer, 0, count, timestamp);
                                 }
                             }
                         }
