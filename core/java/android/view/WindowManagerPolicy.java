@@ -995,6 +995,12 @@ public interface WindowManagerPolicy {
     public void screenTurningOn(ScreenOnListener screenOnListener);
 
     /**
+     * Called when the device has actually turned on the screen, i.e. the display power state has
+     * been set to ON and the screen is unblocked.
+     */
+    public void screenTurnedOn();
+
+    /**
      * Called when the device has turned the screen off.
      */
     public void screenTurnedOff();

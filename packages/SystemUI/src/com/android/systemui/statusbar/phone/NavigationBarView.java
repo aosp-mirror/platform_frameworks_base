@@ -91,6 +91,7 @@ public class NavigationBarView extends LinearLayout {
 
     private OnVerticalChangedListener mOnVerticalChangedListener;
     private boolean mIsLayoutRtl;
+    private boolean mLayoutTransitionsEnabled;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -337,13 +338,6 @@ public class NavigationBarView extends LinearLayout {
                 if (!lt.getTransitionListeners().contains(mTransitionListener)) {
                     lt.addTransitionListener(mTransitionListener);
                 }
-                if (!mScreenOn && mCurrentView != null) {
-                    lt.disableTransitionType(
-                            LayoutTransition.CHANGE_APPEARING |
-                            LayoutTransition.CHANGE_DISAPPEARING |
-                            LayoutTransition.APPEARING |
-                            LayoutTransition.DISAPPEARING);
-                }
             }
         }
         if (inLockTask() && disableRecent && !disableHome) {
@@ -374,6 +368,44 @@ public class NavigationBarView extends LinearLayout {
     private void setVisibleOrGone(View view, boolean visible) {
         if (view != null) {
             view.setVisibility(visible ? VISIBLE : GONE);
+        }
+    }
+
+    public void setWakeAndUnlocking(boolean wakeAndUnlocking) {
+        setUseFadingAnimations(wakeAndUnlocking);
+        setLayoutTransitionsEnabled(!wakeAndUnlocking);
+    }
+
+    private void setLayoutTransitionsEnabled(boolean enabled) {
+        mLayoutTransitionsEnabled = enabled;
+        ViewGroup navButtons = (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
+        LayoutTransition lt = navButtons.getLayoutTransition();
+        if (enabled) {
+            lt.enableTransitionType(LayoutTransition.APPEARING);
+            lt.enableTransitionType(LayoutTransition.DISAPPEARING);
+            lt.enableTransitionType(LayoutTransition.CHANGE_APPEARING);
+            lt.enableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+        } else {
+            lt.disableTransitionType(LayoutTransition.APPEARING);
+            lt.disableTransitionType(LayoutTransition.DISAPPEARING);
+            lt.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
+            lt.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+        }
+    }
+
+    private void setUseFadingAnimations(boolean useFadingAnimations) {
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) getLayoutParams();
+        if (lp != null) {
+            boolean old = lp.windowAnimations != 0;
+            if (!old && useFadingAnimations) {
+                lp.windowAnimations = R.style.Animation_NavigationBarFadeIn;
+            } else if (old && !useFadingAnimations) {
+                lp.windowAnimations = 0;
+            } else {
+                return;
+            }
+            WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
+            wm.updateViewLayout(this, lp);
         }
     }
 
@@ -435,6 +467,7 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
+        setLayoutTransitionsEnabled(mLayoutTransitionsEnabled);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 

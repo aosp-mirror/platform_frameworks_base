@@ -206,6 +206,11 @@
         <item name="android:windowExitAnimation">@*android:anim/shrink_fade_out_from_bottom</item>
     </style>
 
+    <style name="Animation.NavigationBarFadeIn">
+        <item name="android:windowEnterAnimation">@anim/navbar_fade_in</item>
+        <item name="android:windowExitAnimation">@null</item>
+    </style>
+
     <!-- Standard animations for hiding and showing the status bar. -->
     <style name="Animation.StatusBar">
     </style>
