@@ -676,33 +676,42 @@ public class RelativeLayout extends ViewGroup {
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
-    private void measureChildHorizontal(View child, LayoutParams params, int myWidth, int myHeight) {
-        int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft,
-                params.mRight, params.width,
-                params.leftMargin, params.rightMargin,
-                mPaddingLeft, mPaddingRight,
+    private void measureChildHorizontal(
+            View child, LayoutParams params, int myWidth, int myHeight) {
+        final int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft, params.mRight,
+                params.width, params.leftMargin, params.rightMargin, mPaddingLeft, mPaddingRight,
                 myWidth);
-        int maxHeight = myHeight;
-        if (mMeasureVerticalWithPaddingMargin) {
-            maxHeight = Math.max(0, myHeight - mPaddingTop - mPaddingBottom -
-                    params.topMargin - params.bottomMargin);
-        }
-        int childHeightMeasureSpec;
+
+        final int childHeightMeasureSpec;
         if (myHeight < 0 && !mAllowBrokenMeasureSpecs) {
             if (params.height >= 0) {
                 childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
                         params.height, MeasureSpec.EXACTLY);
             } else {
-                // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
-                // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
+                // Negative values in a mySize/myWidth/myWidth value in
+                // RelativeLayout measurement is code for, "we got an
+                // unspecified mode in the RelativeLayout's measure spec."
                 // Carry it forward.
                 childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             }
-        } else if (params.width == LayoutParams.MATCH_PARENT) {
-            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.EXACTLY);
         } else {
-            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST);
+            final int maxHeight;
+            if (mMeasureVerticalWithPaddingMargin) {
+                maxHeight = Math.max(0, myHeight - mPaddingTop - mPaddingBottom
+                        - params.topMargin - params.bottomMargin);
+            } else {
+                maxHeight = Math.max(0, myHeight);
+            }
+
+            final int heightMode;
+            if (params.width == LayoutParams.MATCH_PARENT) {
+                heightMode = MeasureSpec.EXACTLY;
+            } else {
+                heightMode = MeasureSpec.AT_MOST;
+            }
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, heightMode);
         }
+
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
