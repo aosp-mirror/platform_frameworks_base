@@ -19,6 +19,7 @@ package com.android.documentsui;
 import static org.junit.Assert.*;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,32 +79,90 @@ public class MultiSelectManagerTest {
 
     @Test
     public void singleTapUp_DoesNotSelectBeforeLongPress() {
-        mManager.onSingleTapUp(99);
+        mManager.onSingleTapUp(99, 0);
         assertSelection();
     }
 
     @Test
     public void singleTapUp_UnselectsSelectedItem() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(7);
+        mManager.onSingleTapUp(7, 0);
         assertSelection();
     }
 
     @Test
     public void singleTapUp_NoPositionClearsSelection() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(11);
-        mManager.onSingleTapUp(RecyclerView.NO_POSITION);
+        mManager.onSingleTapUp(11, 0);
+        mManager.onSingleTapUp(RecyclerView.NO_POSITION, 0);
         assertSelection();
     }
 
     @Test
     public void singleTapUp_ExtendsSelection() {
         mManager.onLongPress(99);
-        mManager.onSingleTapUp(7);
-        mManager.onSingleTapUp(13);
-        mManager.onSingleTapUp(129899);
+        mManager.onSingleTapUp(7, 0);
+        mManager.onSingleTapUp(13, 0);
+        mManager.onSingleTapUp(129899, 0);
         assertSelection(7, 99, 13, 129899);
+    }
+
+    @Test
+    public void singleTapUp_ShiftCreatesRangeSelection() {
+        mManager.onLongPress(7);
+        mManager.onSingleTapUp(17, KeyEvent.META_SHIFT_ON);
+        assertRangeSelection(7, 17);
+    }
+
+    @Test
+    public void singleTapUp_ShiftCreatesRangeSeletion_Backwards() {
+        mManager.onLongPress(17);
+        mManager.onSingleTapUp(7, KeyEvent.META_SHIFT_ON);
+        assertRangeSelection(7, 17);
+    }
+
+    @Test
+    public void singleTapUp_SecondShiftClickExtendsSelection() {
+        mManager.onLongPress(7);
+        mManager.onSingleTapUp(11, KeyEvent.META_SHIFT_ON);
+        mManager.onSingleTapUp(17, KeyEvent.META_SHIFT_ON);
+        assertRangeSelection(7, 17);
+    }
+
+    @Test
+    public void singleTapUp_MultipleContiguousRangesSelected() {
+        mManager.onLongPress(7);
+        mManager.onSingleTapUp(11, KeyEvent.META_SHIFT_ON);
+        mManager.onSingleTapUp(20, 0);
+        mManager.onSingleTapUp(25, KeyEvent.META_SHIFT_ON);
+        assertRangeSelected(7, 11);
+        assertRangeSelected(20, 25);
+        assertSelectionSize(11);
+    }
+
+    @Test
+    public void singleTapUp_ShiftReducesSelectionRange_FromPreviousShiftClick() {
+        mManager.onLongPress(7);
+        mManager.onSingleTapUp(17, KeyEvent.META_SHIFT_ON);
+        mManager.onSingleTapUp(10, KeyEvent.META_SHIFT_ON);
+        assertRangeSelection(7, 10);
+    }
+
+    @Test
+    public void singleTapUp_ShiftReducesSelectionRange_FromPreviousShiftClick_Backwards() {
+        mManager.onLongPress(17);
+        mManager.onSingleTapUp(7, KeyEvent.META_SHIFT_ON);
+        mManager.onSingleTapUp(14, KeyEvent.META_SHIFT_ON);
+        assertRangeSelection(14, 17);
+    }
+
+
+    @Test
+    public void singleTapUp_ShiftReversesSelectionDirection() {
+        mManager.onLongPress(7);
+        mManager.onSingleTapUp(17, KeyEvent.META_SHIFT_ON);
+        mManager.onSingleTapUp(0, KeyEvent.META_SHIFT_ON);
+        assertRangeSelection(0, 7);
     }
 
     private void assertSelected(int... expected) {
@@ -120,9 +179,20 @@ public class MultiSelectManagerTest {
         assertSelected(expected);
     }
 
+    private void assertRangeSelected(int begin, int end) {
+        for (int i = begin; i <= end; i++) {
+            assertSelected(i);
+        }
+    }
+
+    private void assertRangeSelection(int begin, int end) {
+        assertSelectionSize(end - begin + 1);
+        assertRangeSelected(begin, end);
+    }
+
     private void assertSelectionSize(int expected) {
         Selection selection = mManager.getSelection();
-        assertEquals(expected, selection.size());
+        assertEquals(selection.toString(), expected, selection.size());
     }
 
     private static final class EventHelper implements RecyclerViewHelper {
