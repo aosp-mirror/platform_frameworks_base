@@ -31,7 +31,7 @@ capabilities, etc.</li>
   <li> Timestamps to avoid jitter.</li>
   <li> Support creation of <em>virtual MIDI devices</em> that can be connected to other devices.
   An example might be a synthesizer app that can be controlled by a composing app.</li>
-  <li> Support direction connection or &ldquo;patching&rdquo; of devices for lower latency.</li>
+  <li> Support direct connection or &ldquo;patching&rdquo; of devices for lower latency.</li>
 </ul>
 
 <h2 id=transports_supported>Transports Supported</h2>
@@ -338,5 +338,54 @@ public class MidiSynthDeviceService extends MidiDeviceService {
     }
 }
 </pre>
+
+<h1 id=using_midi_btle>Using MIDI Over Bluetooth LE</h1>
+
+<p>MIDI devices can be connected to Android using Bluetooth LE.</p>
+
+<p>Before using the device, the app must scan for available BTLE devices and then allow
+the user to connect. An example program
+will be provided so look for it on the Android developer website.</p>
+
+<h2 id=btle_location_permissions>Request Location Permission for BTLE</h2>
+
+<p>Applications that scan for Bluetooth devices must request permission in the
+manifest file. This LOCATION permission is required because it may be possible to
+guess the location of an Android device by seeing which BTLE devices are nearby.</p>
+
+<pre class=prettyprint>
+&lt;uses-permission android:name="android.permission.BLUETOOTH"/>
+&lt;uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+&lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+</pre>
+
+<p>Apps must also request location permission from the user at run-time.
+See the documentation for <code>Activity.requestPermissions()</code> for details and an example.
+</p>
+
+<h2 id=btle_scan_devices>Scan for MIDI Devices</h2>
+
+<p>The app will only want to see MIDI devices and not mice or other non-MIDI devices.
+So construct a ScanFilter using the UUID for standard MIDI over BTLE.</p>
+
+<pre class=prettyprint>
+MIDI over BTLE UUID = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"
+</pre>
+
+<h2 id=btle_open_device>Open a MIDI Bluetooth Device</h2>
+
+<p>See the documentation for <code>android.bluetooth.le.BluetoothLeScanner.startScan()</code>
+method for details. When the user selects a MIDI/BTLE device then you can open it
+using the MidiManager.</p>
+
+<pre class=prettyprint>
+m.openBluetoothDevice(bluetoothDevice, callback, handler);
+</pre>
+
+<p>Once the MIDI/BTLE device has been opened by one app then it will also become available to other
+apps using the
+<a href="#get_list_of_already_plugged_in_entities">MIDI device discovery calls described above</a>.
+</p>
+
 </body>
 </html>
