@@ -1223,6 +1223,9 @@ final class TaskRecord {
         if (lastDescription != null) {
             pw.print(prefix); pw.print("lastDescription="); pw.println(lastDescription);
         }
+        if (stack != null) {
+            pw.print(prefix); pw.print("stackId="); pw.println(stack.mStackId);
+        }
         pw.print(prefix); pw.print("hasBeenVisible="); pw.print(hasBeenVisible);
                 pw.print(" mResizeable="); pw.print(mResizeable);
                 pw.print(" firstActiveTime="); pw.print(lastActiveTime);
