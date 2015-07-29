@@ -279,8 +279,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final SparseIntArray mUidPolicy = new SparseIntArray();
     /** Currently derived rules for each UID. */
     final SparseIntArray mUidRules = new SparseIntArray();
-    /** Set of states for the child firewall chains. True if the chain is active. */
-    final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
 
     /**
      * UIDs that have been white-listed to always be able to have network access
@@ -2437,12 +2435,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Add or remove a uid to the firewall blacklist for all network ifaces.
      */
     private void enableFirewallChainLocked(int chain, boolean enable) {
-        if (mFirewallChainStates.indexOfKey(chain) >= 0 &&
-                mFirewallChainStates.get(chain) == enable) {
-            // All is the same, nothing to do.
-            return;
-        }
-        mFirewallChainStates.put(chain, enable);
         try {
             mNetworkManager.setFirewallChainEnabled(chain, enable);
         } catch (IllegalStateException e) {
