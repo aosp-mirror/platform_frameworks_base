@@ -25,6 +25,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -36,6 +37,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+@SmallTest
 public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     public void testNoIconWithoutMobile() {
