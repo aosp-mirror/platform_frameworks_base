@@ -126,6 +126,9 @@ public final class BatteryStatsHelper {
     PowerCalculator mCameraPowerCalculator;
     PowerCalculator mFlashlightPowerCalculator;
 
+    boolean mHasWifiPowerReporting = false;
+    boolean mHasBluetoothPowerReporting = false;
+
     public static boolean checkWifiOnly(Context context) {
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
@@ -349,21 +352,23 @@ public final class BatteryStatsHelper {
         }
         mMobileRadioPowerCalculator.reset(mStats);
 
-        if (mWifiPowerCalculator == null) {
-            if (checkHasWifiPowerReporting(mStats, mPowerProfile)) {
-                mWifiPowerCalculator = new WifiPowerCalculator(mPowerProfile);
-            } else {
-                mWifiPowerCalculator = new WifiPowerEstimator(mPowerProfile);
-            }
+        // checkHasWifiPowerReporting can change if we get energy data at a later point, so
+        // always check this field.
+        final boolean hasWifiPowerReporting = checkHasWifiPowerReporting(mStats, mPowerProfile);
+        if (mWifiPowerCalculator == null || hasWifiPowerReporting != mHasWifiPowerReporting) {
+            mWifiPowerCalculator = hasWifiPowerReporting ?
+                    new WifiPowerCalculator(mPowerProfile) :
+                    new WifiPowerEstimator(mPowerProfile);
+            mHasWifiPowerReporting = hasWifiPowerReporting;
         }
         mWifiPowerCalculator.reset();
 
-        if (mBluetoothPowerCalculator == null) {
-            if (checkHasBluetoothPowerReporting(mStats, mPowerProfile)) {
-                mBluetoothPowerCalculator = new BluetoothPowerCalculator(mPowerProfile);
-            } else {
-                mBluetoothPowerCalculator = new BluetoothPowerCalculator(mPowerProfile);
-            }
+        final boolean hasBluetoothPowerReporting = checkHasBluetoothPowerReporting(mStats,
+                                                                                   mPowerProfile);
+        if (mBluetoothPowerCalculator == null ||
+                hasBluetoothPowerReporting != mHasBluetoothPowerReporting) {
+            mBluetoothPowerCalculator = new BluetoothPowerCalculator(mPowerProfile);
+            mHasBluetoothPowerReporting = hasBluetoothPowerReporting;
         }
         mBluetoothPowerCalculator.reset();
 
