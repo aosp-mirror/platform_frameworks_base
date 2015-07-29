@@ -5658,7 +5658,6 @@ public final class Settings {
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
-            UI_NIGHT_MODE,
             SLEEP_TIMEOUT,
             DOUBLE_TAP_TO_WAKE,
         };
