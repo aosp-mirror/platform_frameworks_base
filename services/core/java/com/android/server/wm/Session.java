@@ -334,7 +334,6 @@ final class Session extends IWindowSession.Stub
             try {
                 surfaceControl.setPosition(touchX - thumbCenterX,
                         touchY - thumbCenterY);
-                surfaceControl.setAlpha(.7071f);
                 surfaceControl.setLayer(mService.mDragState.getDragLayerLw());
                 surfaceControl.setLayerStack(display.getLayerStack());
                 surfaceControl.show();
