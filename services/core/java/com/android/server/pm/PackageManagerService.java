@@ -3628,8 +3628,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (getCallingUid() != Process.SYSTEM_UID) {
             flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
             flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
-            flagMask &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
             flagMask &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
         }
