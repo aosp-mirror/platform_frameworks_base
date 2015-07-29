@@ -3195,6 +3195,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
+    public String getPermissionControllerPackageName() {
+        synchronized (mPackages) {
+            return mRequiredInstallerPackage;
+        }
+    }
+
     /**
      * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS
      * or INTERACT_ACROSS_USERS_FULL permissions, if the userid is not for the caller.
