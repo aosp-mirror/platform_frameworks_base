@@ -4140,6 +4140,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             mDeviceOwner.writeOwnerFile();
             updateDeviceOwnerLocked();
+            Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
+
+            ident = Binder.clearCallingIdentity();
+            try {
+                mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
             return true;
         }
     }
