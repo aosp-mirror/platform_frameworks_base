@@ -1013,14 +1013,10 @@ public class DownloadManager {
     /**
      * Returns the {@link Uri} of the given downloaded file id, if the file is
      * downloaded successfully. Otherwise, null is returned.
-     *<p>
-     * If the specified downloaded file is in external storage (for example, /sdcard dir),
-     * then it is assumed to be safe for anyone to read and the returned {@link Uri} corresponds
-     * to the filepath on sdcard.
      *
      * @param id the id of the downloaded file.
-     * @return the {@link Uri} of the given downloaded file id, if download was successful. null
-     * otherwise.
+     * @return the {@link Uri} of the given downloaded file id, if download was
+     *         successful. null otherwise.
      */
     public Uri getUriForDownloadedFile(long id) {
         // to check if the file is in cache, get its destination from the database
@@ -1034,24 +1030,7 @@ public class DownloadManager {
             if (cursor.moveToFirst()) {
                 int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
                 if (DownloadManager.STATUS_SUCCESSFUL == status) {
-                    int indx = cursor.getColumnIndexOrThrow(
-                            Downloads.Impl.COLUMN_DESTINATION);
-                    int destination = cursor.getInt(indx);
-                    // TODO: if we ever add API to DownloadManager to let the caller specify
-                    // non-external storage for a downloaded file, then the following code
-                    // should also check for that destination.
-                    if (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION ||
-                            destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION ||
-                            destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
-                            destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE) {
-                        // return private uri
-                        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
-                    } else {
-                        // return public uri
-                        String path = cursor.getString(
-                                cursor.getColumnIndexOrThrow(COLUMN_LOCAL_FILENAME));
-                        return Uri.fromFile(new File(path));
-                    }
+                    return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
                 }
             }
         } finally {
