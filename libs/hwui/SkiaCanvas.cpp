@@ -55,9 +55,6 @@ public:
     virtual int width() override;
     virtual int height() override;
 
-    virtual void setHighContrastText(bool highContrastText) override {}
-    virtual bool isHighContrastText() override { return false; }
-
     virtual int getSaveCount() const override;
     virtual int save(SkCanvas::SaveFlags flags) override;
     virtual void restore() override;

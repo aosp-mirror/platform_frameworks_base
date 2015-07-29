@@ -62,9 +62,6 @@ public:
     virtual int width() = 0;
     virtual int height() = 0;
 
-    virtual void setHighContrastText(bool highContrastText) = 0;
-    virtual bool isHighContrastText() = 0;
-
 // ----------------------------------------------------------------------------
 // Canvas state operations
 // ----------------------------------------------------------------------------
