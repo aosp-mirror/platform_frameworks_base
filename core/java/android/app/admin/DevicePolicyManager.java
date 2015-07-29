@@ -690,13 +690,23 @@ public class DevicePolicyManager {
             = "android.app.extra.PROFILE_OWNER_NAME";
 
     /**
-     * Activity action: send when any policy admin changes a policy.
+     * Broadcast action: send when any policy admin changes a policy.
      * This is generally used to find out when a new policy is in effect.
      *
      * @hide
      */
     public static final String ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
             = "android.app.action.DEVICE_POLICY_MANAGER_STATE_CHANGED";
+
+    /**
+     * Broadcast action: sent when the device owner is set or changed.
+     *
+     * This broadcast is sent only to the primary user.
+     * @see #ACTION_PROVISION_MANAGED_DEVICE
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEVICE_OWNER_CHANGED
+            = "android.app.action.DEVICE_OWNER_CHANGED";
 
     /**
      * The ComponentName of the administrator component.
