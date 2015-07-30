@@ -45,6 +45,7 @@ import android.widget.RelativeLayout;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.widget.LinearLayout.VERTICAL;
+import static com.android.layoutlib.bridge.impl.ResourceHelper.getBooleanThemeValue;
 
 /**
  * The Layout used to create the system decor.
@@ -165,13 +166,13 @@ class Layout extends RelativeLayout {
         FrameLayout contentRoot = new FrameLayout(getContext());
         LayoutParams params = createLayoutParams(MATCH_PARENT, MATCH_PARENT);
         int rule = mBuilder.isNavBarVertical() ? START_OF : ABOVE;
-        if (mBuilder.solidBars()) {
+        if (mBuilder.hasNavBar() && mBuilder.solidBars()) {
             params.addRule(rule, getId(ID_NAV_BAR));
         }
         int below = -1;
         if (mBuilder.mActionBarSize <= 0 && mBuilder.mTitleBarSize > 0) {
             below = getId(ID_TITLE_BAR);
-        } else if (mBuilder.solidBars()) {
+        } else if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
             below = getId(ID_STATUS_BAR);
         }
         if (below != -1) {
@@ -238,10 +239,10 @@ class Layout extends RelativeLayout {
         }
         LayoutParams layoutParams = createLayoutParams(MATCH_PARENT, MATCH_PARENT);
         int rule = mBuilder.isNavBarVertical() ? START_OF : ABOVE;
-        if (mBuilder.solidBars()) {
+        if (mBuilder.hasNavBar() && mBuilder.solidBars()) {
             layoutParams.addRule(rule, getId(ID_NAV_BAR));
         }
-        if (mBuilder.solidBars()) {
+        if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
             layoutParams.addRule(BELOW, getId(ID_STATUS_BAR));
         }
         actionBar.getRootView().setLayoutParams(layoutParams);
@@ -254,7 +255,7 @@ class Layout extends RelativeLayout {
             int simulatedPlatformVersion) {
         TitleBar titleBar = new TitleBar(context, title, simulatedPlatformVersion);
         LayoutParams params = createLayoutParams(MATCH_PARENT, mBuilder.mTitleBarSize);
-        if (mBuilder.solidBars()) {
+        if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
             params.addRule(BELOW, getId(ID_STATUS_BAR));
         }
         if (mBuilder.isNavBarVertical() && mBuilder.solidBars()) {
@@ -325,16 +326,12 @@ class Layout extends RelativeLayout {
             mParams = params;
             mContext = context;
             mResources = mParams.getResources();
-            mWindowIsFloating = ResourceHelper.getBooleanThemeValue(mResources, ATTR_WINDOW_FLOATING, true, true);
+            mWindowIsFloating = getBooleanThemeValue(mResources, ATTR_WINDOW_FLOATING, true, true);
             
             findBackground();
             findStatusBar();
             findActionBar();
             findNavBar();
-        }
-
-        public boolean isNavBarVertical() {
-            return mNavBarOrientation == VERTICAL;
         }
 
         private void findBackground() {
@@ -346,11 +343,11 @@ class Layout extends RelativeLayout {
 
         private void findStatusBar() {
             boolean windowFullScreen =
-                    ResourceHelper.getBooleanThemeValue(mResources, ATTR_WINDOW_FULL_SCREEN, true, false);
+                    getBooleanThemeValue(mResources, ATTR_WINDOW_FULL_SCREEN, true, false);
             if (!windowFullScreen && !mWindowIsFloating) {
                 mStatusBarSize =
                         getDimension(ATTR_STATUS_BAR_HEIGHT, true, DEFAULT_STATUS_BAR_HEIGHT);
-                mTranslucentStatus = ResourceHelper.getBooleanThemeValue(mResources,
+                mTranslucentStatus = getBooleanThemeValue(mResources,
                         ATTR_WINDOW_TRANSLUCENT_STATUS, true, false);
             }
         }
@@ -360,14 +357,14 @@ class Layout extends RelativeLayout {
                 return;
             }
             // Check if an actionbar is needed
-            boolean windowActionBar = ResourceHelper.getBooleanThemeValue(mResources, ATTR_WINDOW_ACTION_BAR,
+            boolean windowActionBar = getBooleanThemeValue(mResources, ATTR_WINDOW_ACTION_BAR,
                     !isThemeAppCompat(), true);
             if (windowActionBar) {
                 mActionBarSize = getDimension(ATTR_ACTION_BAR_SIZE, true, DEFAULT_TITLE_BAR_HEIGHT);
             } else {
                 // Maybe the gingerbread era title bar is needed
                 boolean windowNoTitle =
-                        ResourceHelper.getBooleanThemeValue(mResources, ATTR_WINDOW_NO_TITLE, true, false);
+                        getBooleanThemeValue(mResources, ATTR_WINDOW_NO_TITLE, true, false);
                 if (!windowNoTitle) {
                     mTitleBarSize =
                             getDimension(ATTR_WINDOW_TITLE_SIZE, true, DEFAULT_TITLE_BAR_HEIGHT);
@@ -395,7 +392,7 @@ class Layout extends RelativeLayout {
                 mNavBarOrientation = barOnBottom ? LinearLayout.HORIZONTAL : VERTICAL;
                 mNavBarSize = getDimension(barOnBottom ? ATTR_NAV_BAR_HEIGHT : ATTR_NAV_BAR_WIDTH,
                         true, DEFAULT_NAV_BAR_SIZE);
-                mTranslucentNav = ResourceHelper.getBooleanThemeValue(mResources,
+                mTranslucentNav = getBooleanThemeValue(mResources,
                         ATTR_WINDOW_TRANSLUCENT_NAV, true, false);
             }
         }
@@ -444,16 +441,27 @@ class Layout extends RelativeLayout {
         }
 
         /**
-         * Return if both status bar and nav bar are solid (content doesn't overlap with these
-         * bars).
+         * Return true if the status bar or nav bar are present, they are not translucent (i.e
+         * content doesn't overlap with them).
          */
         private boolean solidBars() {
-            return hasNavBar() && !mTranslucentNav && !mTranslucentStatus && mStatusBarSize > 0;
+            return !(hasNavBar() && mTranslucentNav) && !(hasStatusBar() && mTranslucentStatus);
         }
 
         private boolean hasNavBar() {
             return Config.showOnScreenNavBar(mParams.getSimulatedPlatformVersion()) &&
                     hasSoftwareButtons() && mNavBarSize > 0;
+        }
+
+        private boolean hasStatusBar() {
+            return mStatusBarSize > 0;
+        }
+
+        /**
+         * Return true if the nav bar is present and is vertical.
+         */
+        private boolean isNavBarVertical() {
+            return hasNavBar() && mNavBarOrientation == VERTICAL;
         }
     }
 }

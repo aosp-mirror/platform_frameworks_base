@@ -30,6 +30,10 @@ import android.widget.TextView;
  */
 public class MockView extends TextView {
 
+    public MockView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
     public MockView(Context context, AttributeSet attrs, int defStyle) {
         this(context, attrs, defStyle, 0);
     }

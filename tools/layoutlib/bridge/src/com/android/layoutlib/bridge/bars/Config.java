@@ -74,8 +74,8 @@ public class Config {
     }
 
     public static String getTime(int platformVersion) {
-        if (isGreaterOrEqual(platformVersion, LOLLIPOP_MR1)) {
-            return "5:10";
+        if (isGreaterOrEqual(platformVersion, MNC)) {
+            return "6:00";
         }
         if (platformVersion < GINGERBREAD) {
             return "2:20";
@@ -94,6 +94,9 @@ public class Config {
         }
         if (platformVersion < LOLLIPOP_MR1) {
             return "5:00";
+        }
+        if (platformVersion < MNC) {
+            return "5:10";
         }
         // Should never happen.
         return "4:04";
