@@ -19,12 +19,13 @@
 
 #include <utils/Errors.h>
 #include <utils/LinearAllocator.h>
-#include <utils/Vector.h>
 #include <utils/TinyHashMap.h>
 
 #include "Matrix.h"
 #include "OpenGLRenderer.h"
 #include "Rect.h"
+
+#include <vector>
 
 class SkBitmap;
 
@@ -100,7 +101,7 @@ public:
         kOpBatch_Count, // Add other batch ids before this
     };
 
-    bool isEmpty() { return mBatches.isEmpty(); }
+    bool isEmpty() { return mBatches.empty(); }
 
     /**
      * Plays back all of the draw ops recorded into batches to the renderer.
@@ -157,10 +158,10 @@ private:
      * that when an associated restoreToCount is deferred, it can be recorded as a
      * RestoreToCountBatch
      */
-    Vector<int> mSaveStack;
+    std::vector<int> mSaveStack;
     int mComplexClipStackStart;
 
-    Vector<Batch*> mBatches;
+    std::vector<Batch*> mBatches;
 
     // Maps batch ids to the most recent *non-merging* batch of that id
     Batch* mBatchLookup[kOpBatch_Count];

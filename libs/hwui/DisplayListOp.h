@@ -139,7 +139,7 @@ public:
      * reducing which operations are tagged as mergeable.
      */
     virtual void multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<OpStatePair>& ops, const Rect& bounds) {
+            const std::vector<OpStatePair>& ops, const Rect& bounds) {
         for (unsigned int i = 0; i < ops.size(); i++) {
             renderer.restoreDisplayState(*(ops[i].state), true);
             ops[i].op->applyDraw(renderer, dirty);
@@ -648,7 +648,7 @@ public:
      * the current layer, if any.
      */
     virtual void multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<OpStatePair>& ops, const Rect& bounds) override {
+            const std::vector<OpStatePair>& ops, const Rect& bounds) override {
         const DeferredDisplayState& firstState = *(ops[0].state);
         renderer.restoreDisplayState(firstState, true); // restore all but the clip
 
@@ -819,7 +819,7 @@ public:
      * is also responsible for dirtying the current layer, if any.
      */
     virtual void multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<OpStatePair>& ops, const Rect& bounds) override {
+            const std::vector<OpStatePair>& ops, const Rect& bounds) override {
         const DeferredDisplayState& firstState = *(ops[0].state);
         renderer.restoreDisplayState(firstState, true); // restore all but the clip
 
@@ -1358,7 +1358,7 @@ public:
     }
 
     virtual void multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<OpStatePair>& ops, const Rect& bounds) override {
+            const std::vector<OpStatePair>& ops, const Rect& bounds) override {
         for (unsigned int i = 0; i < ops.size(); i++) {
             const DeferredDisplayState& state = *(ops[i].state);
             DrawOpMode drawOpMode = (i == ops.size() - 1) ? DrawOpMode::kFlush : DrawOpMode::kDefer;

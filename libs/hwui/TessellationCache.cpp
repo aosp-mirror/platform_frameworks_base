@@ -225,13 +225,13 @@ static void tessellateShadows(
         VertexBuffer& ambientBuffer, VertexBuffer& spotBuffer) {
 
     // tessellate caster outline into a 2d polygon
-    Vector<Vertex> casterVertices2d;
+    std::vector<Vertex> casterVertices2d;
     const float casterRefinementThreshold = 2.0f;
     PathTessellator::approximatePathOutlineVertices(*casterPerimeter,
             casterRefinementThreshold, casterVertices2d);
 
     // Shadow requires CCW for now. TODO: remove potential double-reverse
-    reverseVertexArray(casterVertices2d.editArray(), casterVertices2d.size());
+    reverseVertexArray(&casterVertices2d.front(), casterVertices2d.size());
 
     if (casterVertices2d.size() == 0) return;
 
@@ -250,7 +250,7 @@ static void tessellateShadows(
 
     // map the centroid of the caster into 3d
     Vector2 centroid =  ShadowTessellator::centroid2d(
-            reinterpret_cast<const Vector2*>(casterVertices2d.array()),
+            reinterpret_cast<const Vector2*>(&casterVertices2d.front()),
             casterVertexCount);
     Vector3 centroid3d = {centroid.x, centroid.y, 0};
     mapPointFakeZ(centroid3d, casterTransformXY, casterTransformZ);

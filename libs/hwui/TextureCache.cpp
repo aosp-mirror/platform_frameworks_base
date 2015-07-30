@@ -216,14 +216,14 @@ Texture* TextureCache::get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType
 
 void TextureCache::releaseTexture(uint32_t pixelRefStableID) {
     Mutex::Autolock _l(mLock);
-    mGarbage.push(pixelRefStableID);
+    mGarbage.push_back(pixelRefStableID);
 }
 
 void TextureCache::clearGarbage() {
     Mutex::Autolock _l(mLock);
     size_t count = mGarbage.size();
     for (size_t i = 0; i < count; i++) {
-        uint32_t pixelRefId = mGarbage.itemAt(i);
+        uint32_t pixelRefId = mGarbage[i];
         mCache.remove(pixelRefId);
     }
     mGarbage.clear();

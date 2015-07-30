@@ -19,7 +19,6 @@
 
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
-#include <utils/Vector.h>
 
 #include "Debug.h"
 #include "utils/Macros.h"

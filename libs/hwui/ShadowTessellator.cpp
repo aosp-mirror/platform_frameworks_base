@@ -17,7 +17,6 @@
 #include <math.h>
 #include <utils/Log.h>
 #include <utils/Trace.h>
-#include <utils/Vector.h>
 #include <utils/MathUtils.h>
 
 #include "AmbientShadow.h"

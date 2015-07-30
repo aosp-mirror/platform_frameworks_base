@@ -271,7 +271,7 @@ private:
         // The points/verbs within the path are refcounted so this copy operation
         // is inexpensive and maintains the generationID of the original path.
         const SkPath* cachedPath = new SkPath(*path);
-        mDisplayListData->pathResources.add(cachedPath);
+        mDisplayListData->pathResources.push_back(cachedPath);
         return cachedPath;
     }
 
@@ -336,7 +336,7 @@ private:
     }
 
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
-        mDisplayListData->patchResources.add(patch);
+        mDisplayListData->patchResources.push_back(patch);
         mResourceCache.incrementRefcount(patch);
         return patch;
     }

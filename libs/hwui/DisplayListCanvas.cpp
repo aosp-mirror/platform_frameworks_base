@@ -516,11 +516,12 @@ void DisplayListCanvas::flushTranslate() {
 }
 
 size_t DisplayListCanvas::addOpAndUpdateChunk(DisplayListOp* op) {
-    int insertIndex = mDisplayListData->displayListOps.add(op);
+    int insertIndex = mDisplayListData->displayListOps.size();
+    mDisplayListData->displayListOps.push_back(op);
     if (mDeferredBarrierType != kBarrier_None) {
         // op is first in new chunk
-        mDisplayListData->chunks.push();
-        DisplayListData::Chunk& newChunk = mDisplayListData->chunks.editTop();
+        mDisplayListData->chunks.emplace_back();
+        DisplayListData::Chunk& newChunk = mDisplayListData->chunks.back();
         newChunk.beginOpIndex = insertIndex;
         newChunk.endOpIndex = insertIndex + 1;
         newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
@@ -530,7 +531,7 @@ size_t DisplayListCanvas::addOpAndUpdateChunk(DisplayListOp* op) {
         mDeferredBarrierType = kBarrier_None;
     } else {
         // standard case - append to existing chunk
-        mDisplayListData->chunks.editTop().endOpIndex = insertIndex + 1;
+        mDisplayListData->chunks.back().endOpIndex = insertIndex + 1;
     }
     return insertIndex;
 }
@@ -562,7 +563,7 @@ size_t DisplayListCanvas::addRenderNodeOp(DrawRenderNodeOp* op) {
     int childIndex = mDisplayListData->addChild(op);
 
     // update the chunk's child indices
-    DisplayListData::Chunk& chunk = mDisplayListData->chunks.editTop();
+    DisplayListData::Chunk& chunk = mDisplayListData->chunks.back();
     chunk.endChildIndex = childIndex + 1;
 
     if (op->renderNode()->stagingProperties().isProjectionReceiver()) {

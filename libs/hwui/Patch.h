@@ -21,12 +21,12 @@
 
 #include <GLES2/gl2.h>
 
-#include <utils/Vector.h>
-
 #include <androidfw/ResourceTypes.h>
 
 #include "Rect.h"
 #include "UvMapper.h"
+
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -52,7 +52,7 @@ public:
     uint32_t verticesCount = 0;
     uint32_t indexCount = 0;
     bool hasEmptyQuads = false;
-    Vector<Rect> quads;
+    std::vector<Rect> quads;
 
     GLintptr positionOffset = 0;
     GLintptr textureOffset = 0;

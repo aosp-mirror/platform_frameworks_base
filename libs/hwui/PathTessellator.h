@@ -17,12 +17,12 @@
 #ifndef ANDROID_HWUI_PATH_TESSELLATOR_H
 #define ANDROID_HWUI_PATH_TESSELLATOR_H
 
-#include <utils/Vector.h>
-
 #include "Matrix.h"
 #include "Rect.h"
 #include "Vertex.h"
 #include "VertexBuffer.h"
+
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -109,11 +109,11 @@ public:
      * @param outputVertices An empty Vector which will be populated with the output
      */
     static bool approximatePathOutlineVertices(const SkPath &path, float threshold,
-            Vector<Vertex> &outputVertices);
+            std::vector<Vertex> &outputVertices);
 
 private:
     static bool approximatePathOutlineVertices(const SkPath &path, bool forceClose,
-            const PathApproximationInfo& approximationInfo, Vector<Vertex> &outputVertices);
+            const PathApproximationInfo& approximationInfo, std::vector<Vertex> &outputVertices);
 
 /*
   endpoints a & b,
@@ -124,7 +124,7 @@ private:
             float bx, float by,
             float cx, float cy,
             const PathApproximationInfo& approximationInfo,
-            Vector<Vertex> &outputVertices, int depth = 0);
+            std::vector<Vertex> &outputVertices, int depth = 0);
 
 /*
   endpoints p1, p2
@@ -136,7 +136,7 @@ private:
             float p2x, float p2y,
             float c2x, float c2y,
             const PathApproximationInfo& approximationInfo,
-            Vector<Vertex> &outputVertices, int depth = 0);
+            std::vector<Vertex> &outputVertices, int depth = 0);
 };
 
 }; // namespace uirenderer

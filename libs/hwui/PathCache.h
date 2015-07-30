@@ -28,7 +28,8 @@
 #include <SkPath.h>
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
-#include <utils/Vector.h>
+
+#include <vector>
 
 class SkBitmap;
 class SkCanvas;
@@ -307,7 +308,7 @@ private:
 
     sp<PathProcessor> mProcessor;
 
-    Vector<uint32_t> mGarbage;
+    std::vector<uint32_t> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache
 

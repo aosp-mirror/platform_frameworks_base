@@ -43,11 +43,12 @@
 
 #include <utils/KeyedVector.h>
 #include <utils/Singleton.h>
-#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
 #include <SkPath.h>
+
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -201,7 +202,7 @@ private:
     std::unique_ptr<TextureVertex[]> mRegionMesh;
 
     mutable Mutex mGarbageLock;
-    Vector<Layer*> mLayerGarbage;
+    std::vector<Layer*> mLayerGarbage;
 
     bool mInitialized;
 

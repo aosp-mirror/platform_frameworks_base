@@ -39,7 +39,7 @@ TaskManager::TaskManager() {
     for (int i = 0; i < workerCount; i++) {
         String8 name;
         name.appendFormat("hwuiTask%d", i + 1);
-        mThreads.add(new WorkerThread(name));
+        mThreads.push_back(new WorkerThread(name));
     }
 }
 
@@ -89,15 +89,14 @@ status_t TaskManager::WorkerThread::readyToRun() {
 
 bool TaskManager::WorkerThread::threadLoop() {
     mSignal.wait();
-    Vector<TaskWrapper> tasks;
+    std::vector<TaskWrapper> tasks;
     {
         Mutex::Autolock l(mLock);
-        tasks = mTasks;
-        mTasks.clear();
+        tasks.swap(mTasks);
     }
 
     for (size_t i = 0; i < tasks.size(); i++) {
-        const TaskWrapper& task = tasks.itemAt(i);
+        const TaskWrapper& task = tasks[i];
         task.mProcessor->process(task.mTask);
     }
 
@@ -111,14 +110,13 @@ bool TaskManager::WorkerThread::addTask(TaskWrapper task) {
         return false;
     }
 
-    ssize_t index;
     {
         Mutex::Autolock l(mLock);
-        index = mTasks.add(task);
+        mTasks.push_back(task);
     }
     mSignal.signal();
 
-    return index >= 0;
+    return true;
 }
 
 size_t TaskManager::WorkerThread::getTaskCount() const {

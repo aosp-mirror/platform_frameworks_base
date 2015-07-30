@@ -44,11 +44,12 @@
 #include <utils/Functor.h>
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
-#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
 #include <androidfw/ResourceTypes.h>
+
+#include <vector>
 
 class SkShader;
 
@@ -855,7 +856,7 @@ private:
     // List of rectangles to clear after saveLayer() is invoked
     std::vector<Rect> mLayers;
     // List of layers to update at the beginning of a frame
-    Vector< sp<Layer> > mLayerUpdates;
+    std::vector< sp<Layer> > mLayerUpdates;
 
     // See PROPERTY_DISABLE_SCISSOR_OPTIMIZATION in
     // Properties.h

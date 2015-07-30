@@ -27,7 +27,6 @@
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
-#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
@@ -38,6 +37,8 @@
 #include "DeferredDisplayList.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
+
+#include <vector>
 
 class SkBitmap;
 class SkPaint;
@@ -124,28 +125,28 @@ public:
     ~DisplayListData();
 
     // pointers to all ops within display list, pointing into allocator data
-    Vector<DisplayListOp*> displayListOps;
+    std::vector<DisplayListOp*> displayListOps;
 
     // index of DisplayListOp restore, after which projected descendents should be drawn
     int projectionReceiveIndex;
 
-    Vector<const SkBitmap*> bitmapResources;
-    Vector<const SkPath*> pathResources;
-    Vector<const Res_png_9patch*> patchResources;
+    std::vector<const SkBitmap*> bitmapResources;
+    std::vector<const SkPath*> pathResources;
+    std::vector<const Res_png_9patch*> patchResources;
 
     std::vector<std::unique_ptr<const SkPaint>> paints;
     std::vector<std::unique_ptr<const SkRegion>> regions;
     Vector<Functor*> functors;
 
-    const Vector<Chunk>& getChunks() const {
+    const std::vector<Chunk>& getChunks() const {
         return chunks;
     }
 
     size_t addChild(DrawRenderNodeOp* childOp);
-    const Vector<DrawRenderNodeOp*>& children() { return mChildren; }
+    const std::vector<DrawRenderNodeOp*>& children() { return mChildren; }
 
     void ref(VirtualLightRefBase* prop) {
-        mReferenceHolders.push(prop);
+        mReferenceHolders.push_back(prop);
     }
 
     size_t getUsedSize() {
@@ -156,12 +157,12 @@ public:
     }
 
 private:
-    Vector< sp<VirtualLightRefBase> > mReferenceHolders;
+    std::vector< sp<VirtualLightRefBase> > mReferenceHolders;
 
     // list of children display lists for quick, non-drawing traversal
-    Vector<DrawRenderNodeOp*> mChildren;
+    std::vector<DrawRenderNodeOp*> mChildren;
 
-    Vector<Chunk> chunks;
+    std::vector<Chunk> chunks;
 
     // allocator into which all ops were allocated
     LinearAllocator allocator;

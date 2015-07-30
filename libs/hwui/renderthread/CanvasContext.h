@@ -31,7 +31,6 @@
 #include <SkBitmap.h>
 #include <SkRect.h>
 #include <utils/Functor.h>
-#include <utils/Vector.h>
 
 #include <set>
 #include <string>

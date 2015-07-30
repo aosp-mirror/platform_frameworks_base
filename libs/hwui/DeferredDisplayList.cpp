@@ -69,7 +69,7 @@ public:
         // NOTE: ignore empty bounds special case, since we don't merge across those ops
         mBounds.unionWith(state->mBounds);
         mAllOpsOpaque &= opaqueOverBounds;
-        mOps.add(OpStatePair(op, state));
+        mOps.push_back(OpStatePair(op, state));
     }
 
     bool intersects(const Rect& rect) {
@@ -133,7 +133,7 @@ public:
     inline int count() const { return mOps.size(); }
 
 protected:
-    Vector<OpStatePair> mOps;
+    std::vector<OpStatePair> mOps;
     Rect mBounds; // union of bounds of contained ops
 private:
     bool mAllOpsOpaque;
@@ -418,7 +418,7 @@ void DeferredDisplayList::addSaveLayer(OpenGLRenderer& renderer,
             this, op, op->getFlags(), newSaveCount);
 
     storeStateOpBarrier(renderer, op);
-    mSaveStack.push(newSaveCount);
+    mSaveStack.push_back(newSaveCount);
 }
 
 /**
@@ -433,7 +433,7 @@ void DeferredDisplayList::addSave(OpenGLRenderer& renderer, SaveOp* op, int newS
         // store and replay the save operation, as it may be needed to correctly playback the clip
         DEFER_LOGD("    adding save barrier with new save count %d", newSaveCount);
         storeStateOpBarrier(renderer, op);
-        mSaveStack.push(newSaveCount);
+        mSaveStack.push_back(newSaveCount);
     }
 }
 
@@ -456,11 +456,11 @@ void DeferredDisplayList::addRestoreToCount(OpenGLRenderer& renderer, StateOp* o
         resetBatchingState();
     }
 
-    if (mSaveStack.isEmpty() || newSaveCount > mSaveStack.top()) {
+    if (mSaveStack.empty() || newSaveCount > mSaveStack.back()) {
         return;
     }
 
-    while (!mSaveStack.isEmpty() && mSaveStack.top() >= newSaveCount) mSaveStack.pop();
+    while (!mSaveStack.empty() && mSaveStack.back() >= newSaveCount) mSaveStack.pop_back();
 
     storeRestoreToCountBarrier(renderer, op, mSaveStack.size() + FLUSH_SAVE_STACK_DEPTH);
 }
@@ -492,7 +492,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     // the merge path in those cases
     deferInfo.mergeable &= !recordingComplexClip();
     deferInfo.opaqueOverBounds &= !recordingComplexClip()
-            && mSaveStack.isEmpty()
+            && mSaveStack.empty()
             && !state->mRoundRectClipState;
 
     if (CC_LIKELY(mAvoidOverdraw) && mBatches.size() &&
@@ -507,7 +507,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
         // TODO: elegant way to reuse batches?
         DrawBatch* b = new DrawBatch(deferInfo);
         b->add(op, state, deferInfo.opaqueOverBounds);
-        mBatches.add(b);
+        mBatches.push_back(b);
         return;
     }
 
@@ -517,12 +517,12 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     // insertion point of a new batch, will hopefully be immediately after similar batch
     // (eventually, should be similar shader)
     int insertBatchIndex = mBatches.size();
-    if (!mBatches.isEmpty()) {
+    if (!mBatches.empty()) {
         if (state->mBounds.isEmpty()) {
             // don't know the bounds for op, so add to last batch and start from scratch on next op
             DrawBatch* b = new DrawBatch(deferInfo);
             b->add(op, state, deferInfo.opaqueOverBounds);
-            mBatches.add(b);
+            mBatches.push_back(b);
             resetBatchingState();
 #if DEBUG_DEFER
             DEFER_LOGD("Warning: Encountered op with empty bounds, resetting batches");
@@ -586,7 +586,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
         DEFER_LOGD("creating %singBatch %p, bid %x, at %d",
                 deferInfo.mergeable ? "Merg" : "Draw",
                 targetBatch, deferInfo.batchId, insertBatchIndex);
-        mBatches.insertAt(targetBatch, insertBatchIndex);
+        mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);
     }
 
     targetBatch->add(op, state, deferInfo.opaqueOverBounds);
@@ -597,7 +597,7 @@ void DeferredDisplayList::storeStateOpBarrier(OpenGLRenderer& renderer, StateOp*
 
     DeferredDisplayState* state = createState();
     renderer.storeDisplayState(*state, getStateOpDeferFlags());
-    mBatches.add(new StateOpBatch(op, state));
+    mBatches.push_back(new StateOpBatch(op, state));
     resetBatchingState();
 }
 
@@ -610,7 +610,7 @@ void DeferredDisplayList::storeRestoreToCountBarrier(OpenGLRenderer& renderer, S
     // doesn't have kClip_SaveFlag set
     DeferredDisplayState* state = createState();
     renderer.storeDisplayState(*state, getStateOpDeferFlags());
-    mBatches.add(new RestoreToCountBatch(op, state, newSaveCount));
+    mBatches.push_back(new RestoreToCountBatch(op, state, newSaveCount));
     resetBatchingState();
 }
 
@@ -618,7 +618,7 @@ void DeferredDisplayList::storeRestoreToCountBarrier(OpenGLRenderer& renderer, S
 // Replay / flush
 /////////////////////////////////////////////////////////////////////////////////
 
-static void replayBatchList(const Vector<Batch*>& batchList,
+static void replayBatchList(const std::vector<Batch*>& batchList,
         OpenGLRenderer& renderer, Rect& dirty) {
 
     for (unsigned int i = 0; i < batchList.size(); i++) {
@@ -664,7 +664,7 @@ void DeferredDisplayList::discardDrawingBatches(const unsigned int maxIndex) {
         // leave deferred state ops alone for simplicity (empty save restore pairs may now exist)
         if (mBatches[i] && mBatches[i]->purelyDrawBatch()) {
             delete mBatches[i];
-            mBatches.replaceAt(nullptr, i);
+            mBatches[i] = nullptr;
         }
     }
     mEarliestUnclearedIndex = maxIndex + 1;
