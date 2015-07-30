@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -34,6 +35,7 @@ public class KeyguardServiceDelegate {
     protected KeyguardServiceWrapper mKeyguardService;
     private final Context mContext;
     private final View mScrim; // shown if keyguard crashes
+    private final Handler mScrimHandler;
     private final KeyguardState mKeyguardState = new KeyguardState();
     private DrawnListener mDrawnListenerWhenConnect;
 
@@ -103,6 +105,7 @@ public class KeyguardServiceDelegate {
     public KeyguardServiceDelegate(Context context) {
         mContext = context;
         mScrim = createScrim(context);
+        mScrimHandler = new Handler();
     }
 
     public void bindService(Context context) {
@@ -337,7 +340,7 @@ public class KeyguardServiceDelegate {
     public void showScrim() {
         synchronized (mKeyguardState) {
             if (!mKeyguardState.deviceHasKeyguard) return;
-            mScrim.post(new Runnable() {
+            mScrimHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mScrim.setVisibility(View.VISIBLE);
@@ -347,7 +350,7 @@ public class KeyguardServiceDelegate {
     }
 
     public void hideScrim() {
-        mScrim.post(new Runnable() {
+        mScrimHandler.post(new Runnable() {
             @Override
             public void run() {
                 mScrim.setVisibility(View.GONE);
