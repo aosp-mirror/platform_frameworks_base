@@ -722,8 +722,10 @@ public class LinearLayout extends ViewGroup {
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
 
             totalWeight += lp.weight;
-            
-            if (heightMode == MeasureSpec.EXACTLY && lp.height == 0 && lp.weight > 0) {
+
+            final boolean fillExcessSpace = lp.weight > 0;
+            final boolean hasZeroHeight = lp.height == 0;
+            if (heightMode == MeasureSpec.EXACTLY && fillExcessSpace && hasZeroHeight) {
                 // Optimization: don't bother measuring children who are going to use
                 // leftover space. These views will get measured again down below if
                 // there is any leftover space.
@@ -731,12 +733,12 @@ public class LinearLayout extends ViewGroup {
                 mTotalLength = Math.max(totalLength, totalLength + lp.topMargin + lp.bottomMargin);
                 skippedMeasure = true;
             } else {
-                final boolean fillExcessSpace = lp.height == 0 && lp.weight > 0;
-                if (fillExcessSpace) {
-                    // heightMode is either UNSPECIFIED or AT_MOST, and this
-                    // child wanted to stretch to fill available space.
-                    // Translate that to WRAP_CONTENT so that it does not end up
-                    // with a height of 0.
+                if (fillExcessSpace && hasZeroHeight) {
+                    // The LinearLayout's heightMode is either UNSPECIFIED or
+                    // AT_MOST, and this child wanted to stretch to fill
+                    // available space. Translate the explicit height of 0 to
+                    // WRAP_CONTENT so that we can measure the view's ideal
+                    // height.
                     lp.height = LayoutParams.WRAP_CONTENT;
                 }
 
@@ -751,7 +753,11 @@ public class LinearLayout extends ViewGroup {
                 final int childHeight = child.getMeasuredHeight();
                 if (fillExcessSpace) {
                     usedExcessSpace += childHeight;
-                    lp.height = 0;
+
+                    // Restore original layout height.
+                    if (hasZeroHeight) {
+                        lp.height = 0;
+                    }
                 }
 
                 final int totalLength = mTotalLength;
@@ -1047,8 +1053,10 @@ public class LinearLayout extends ViewGroup {
                     child.getLayoutParams();
 
             totalWeight += lp.weight;
-            
-            if (widthMode == MeasureSpec.EXACTLY && lp.width == 0 && lp.weight > 0) {
+
+            final boolean fillExcessSpace = lp.weight > 0;
+            final boolean hasZeroWidth = lp.width == 0;
+            if (widthMode == MeasureSpec.EXACTLY && fillExcessSpace && hasZeroWidth) {
                 // Optimization: don't bother measuring children who are going to use
                 // leftover space. These views will get measured again down below if
                 // there is any leftover space.
@@ -1075,12 +1083,12 @@ public class LinearLayout extends ViewGroup {
                     skippedMeasure = true;
                 }
             } else {
-                final boolean fillExcessSpace = lp.width == 0 && lp.weight > 0;
-                if (fillExcessSpace) {
-                    // widthMode is either UNSPECIFIED or AT_MOST, and this
-                    // child wanted to stretch to fill available space.
-                    // Translate that to WRAP_CONTENT so that it does not end up
-                    // with a width of 0.
+                if (fillExcessSpace && hasZeroWidth) {
+                    // The LinearLayout's widthMode is either UNSPECIFIED or
+                    // AT_MOST, and this child wanted to stretch to fill
+                    // available space. Translate the explicit height of 0 to
+                    // WRAP_CONTENT so that we can measure the view's ideal
+                    // width.
                     lp.width = LayoutParams.WRAP_CONTENT;
                 }
 
@@ -1095,7 +1103,11 @@ public class LinearLayout extends ViewGroup {
                 final int childWidth = child.getMeasuredWidth();
                 if (fillExcessSpace) {
                     usedExcessSpace += childWidth;
-                    lp.width = 0;
+
+                    // Restore the original layout width.
+                    if (hasZeroWidth) {
+                        lp.width = 0;
+                    }
                 }
 
                 if (isExactly) {
