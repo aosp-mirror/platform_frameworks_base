@@ -452,8 +452,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             for (NotificationData.Entry entry : mEntriesToRemoveAfterExpand) {
                 removeHeadsUpEntry(entry);
             }
-            mEntriesToRemoveAfterExpand.clear();
         }
+        mEntriesToRemoveAfterExpand.clear();
     }
 
     public void setTrackingHeadsUp(boolean trackingHeadsUp) {
