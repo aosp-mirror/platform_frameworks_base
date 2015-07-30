@@ -119,6 +119,7 @@ public class Main {
                         "android.icu.**",                   // needed by LayoutLib
                         "android.annotation.NonNull",       // annotations
                         "android.annotation.Nullable",      // annotations
+                        "com.android.internal.transition.EpicenterTranslateClipReveal",
                     },
                     excludeClasses,
                     new String[] {
