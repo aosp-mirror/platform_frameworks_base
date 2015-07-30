@@ -58,8 +58,4 @@ public abstract class CurrentUserTracker extends BroadcastReceiver {
     }
 
     public abstract void onUserSwitched(int newUserId);
-
-    public boolean isCurrentUserOwner() {
-        return mCurrentUserId == UserHandle.USER_OWNER;
-    }
 }

@@ -79,8 +79,8 @@ public class KeyguardIndicationController {
         mBatteryInfo = IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
-        context.registerReceiverAsUser(
-                mReceiver, UserHandle.OWNER, new IntentFilter(Intent.ACTION_TIME_TICK), null, null);
+        context.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM,
+                new IntentFilter(Intent.ACTION_TIME_TICK), null, null);
     }
 
     public void setVisible(boolean visible) {

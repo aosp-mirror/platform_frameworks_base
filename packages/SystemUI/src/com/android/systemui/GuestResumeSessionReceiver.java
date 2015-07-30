@@ -47,7 +47,7 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
 
     public void register(Context context) {
         IntentFilter f = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        context.registerReceiverAsUser(this, UserHandle.OWNER,
+        context.registerReceiverAsUser(this, UserHandle.SYSTEM,
                 f, null /* permission */, null /* scheduler */);
     }
 
@@ -121,8 +121,8 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
 
         try {
             if (newGuest == null) {
-                Log.e(TAG, "Could not create new guest, switching back to owner");
-                ActivityManagerNative.getDefault().switchUser(UserHandle.USER_OWNER);
+                Log.e(TAG, "Could not create new guest, switching back to system user");
+                ActivityManagerNative.getDefault().switchUser(UserHandle.USER_SYSTEM);
                 userManager.removeUser(currentUser.id);
                 WindowManagerGlobal.getWindowManagerService().lockNow(null /* options */);
                 return;
