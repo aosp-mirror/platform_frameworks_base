@@ -32,7 +32,7 @@
 
 
 // The ideal size of a page allocation (these need to be multiples of 8)
-#define INITIAL_PAGE_SIZE ((size_t)4096) // 4kb
+#define INITIAL_PAGE_SIZE ((size_t)512) // 512b
 #define MAX_PAGE_SIZE ((size_t)131072) // 128kb
 
 // The maximum amount of wasted space we can have per page
@@ -40,7 +40,7 @@
 // If this is too low, we will malloc too much
 // Too high, and we may waste too much space
 // Must be smaller than INITIAL_PAGE_SIZE
-#define MAX_WASTE_SIZE ((size_t)1024)
+#define MAX_WASTE_RATIO (0.5f)
 
 #if ALIGN_DOUBLE
 #define ALIGN_SZ (sizeof(double))
@@ -114,7 +114,7 @@ private:
 
 LinearAllocator::LinearAllocator()
     : mPageSize(INITIAL_PAGE_SIZE)
-    , mMaxAllocSize(MAX_WASTE_SIZE)
+    , mMaxAllocSize(INITIAL_PAGE_SIZE * MAX_WASTE_RATIO)
     , mNext(0)
     , mCurrentPage(0)
     , mPages(0)
@@ -156,6 +156,7 @@ void LinearAllocator::ensureNext(size_t size) {
 
     if (mCurrentPage && mPageSize < MAX_PAGE_SIZE) {
         mPageSize = min(MAX_PAGE_SIZE, mPageSize * 2);
+        mMaxAllocSize = mPageSize * MAX_WASTE_RATIO;
         mPageSize = ALIGN(mPageSize);
     }
     mWastedSpace += mPageSize;
