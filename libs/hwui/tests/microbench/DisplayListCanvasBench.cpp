@@ -63,7 +63,7 @@ void BM_DisplayListCanvas_record_empty::Run(int iters) {
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
-        canvas.reset(100, 100);
+        canvas.resetRecording(100, 100);
         MicroBench::DoNotOptimize(&canvas);
         delete canvas.finishRecording();
     }
@@ -77,7 +77,7 @@ void BM_DisplayListCanvas_record_saverestore::Run(int iters) {
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
-        canvas.reset(100, 100);
+        canvas.resetRecording(100, 100);
         canvas.save(SaveFlags::MatrixClip);
         canvas.save(SaveFlags::MatrixClip);
         MicroBench::DoNotOptimize(&canvas);
@@ -95,7 +95,7 @@ void BM_DisplayListCanvas_record_translate::Run(int iters) {
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
-        canvas.reset(100, 100);
+        canvas.resetRecording(100, 100);
         canvas.scale(10, 10);
         MicroBench::DoNotOptimize(&canvas);
         delete canvas.finishRecording();
@@ -119,7 +119,7 @@ void BM_DisplayListCanvas_record_simpleBitmapView::Run(int iters) {
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
-        canvas.reset(100, 100);
+        canvas.resetRecording(100, 100);
         {
             canvas.save(SaveFlags::MatrixClip);
             canvas.drawRect(0, 0, 100, 100, rectPaint);

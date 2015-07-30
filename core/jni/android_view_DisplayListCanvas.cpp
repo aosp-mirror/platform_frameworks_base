@@ -27,13 +27,8 @@
 #include <SkBitmap.h>
 #include <SkRegion.h>
 
-#if HWUI_NEW_OPS
-#include <RecordingCanvas.h>
-typedef android::uirenderer::RecordingCanvas canvas_t;
-#else
-#include <DisplayListCanvas.h>
-typedef android::uirenderer::DisplayListCanvas canvas_t;
-#endif
+
+#include <Canvas.h>
 #include <Rect.h>
 #include <RenderNode.h>
 #include <CanvasProperty.h>
@@ -52,7 +47,7 @@ using namespace uirenderer;
 
 static void android_view_DisplayListCanvas_insertReorderBarrier(JNIEnv* env, jobject clazz,
         jlong canvasPtr, jboolean reorderEnable) {
-    canvas_t* canvas = reinterpret_cast<canvas_t*>(canvasPtr);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     canvas->insertReorderBarrier(reorderEnable);
 }
 
@@ -62,7 +57,7 @@ static void android_view_DisplayListCanvas_insertReorderBarrier(JNIEnv* env, job
 
 static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         jlong canvasPtr, jlong functorPtr) {
-    canvas_t* canvas = reinterpret_cast<canvas_t*>(canvasPtr);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
     canvas->callDrawGLFunction(functor);
 }
@@ -92,7 +87,7 @@ static jint android_view_DisplayListCanvas_getMaxTextureHeight(JNIEnv* env, jobj
 static void android_view_DisplayListCanvas_drawRoundRectProps(JNIEnv* env, jobject clazz,
         jlong canvasPtr, jlong leftPropPtr, jlong topPropPtr, jlong rightPropPtr,
         jlong bottomPropPtr, jlong rxPropPtr, jlong ryPropPtr, jlong paintPropPtr) {
-    canvas_t* canvas = reinterpret_cast<canvas_t*>(canvasPtr);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     CanvasPropertyPrimitive* leftProp = reinterpret_cast<CanvasPropertyPrimitive*>(leftPropPtr);
     CanvasPropertyPrimitive* topProp = reinterpret_cast<CanvasPropertyPrimitive*>(topPropPtr);
     CanvasPropertyPrimitive* rightProp = reinterpret_cast<CanvasPropertyPrimitive*>(rightPropPtr);
@@ -105,7 +100,7 @@ static void android_view_DisplayListCanvas_drawRoundRectProps(JNIEnv* env, jobje
 
 static void android_view_DisplayListCanvas_drawCircleProps(JNIEnv* env, jobject clazz,
         jlong canvasPtr, jlong xPropPtr, jlong yPropPtr, jlong radiusPropPtr, jlong paintPropPtr) {
-    canvas_t* canvas = reinterpret_cast<canvas_t*>(canvasPtr);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
     CanvasPropertyPrimitive* yProp = reinterpret_cast<CanvasPropertyPrimitive*>(yPropPtr);
     CanvasPropertyPrimitive* radiusProp = reinterpret_cast<CanvasPropertyPrimitive*>(radiusPropPtr);
@@ -119,25 +114,25 @@ static void android_view_DisplayListCanvas_drawCircleProps(JNIEnv* env, jobject 
 
 static jlong android_view_DisplayListCanvas_finishRecording(JNIEnv* env,
         jobject clazz, jlong canvasPtr) {
-    canvas_t* canvas = reinterpret_cast<canvas_t*>(canvasPtr);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     return reinterpret_cast<jlong>(canvas->finishRecording());
 }
 
 static jlong android_view_DisplayListCanvas_createDisplayListCanvas(JNIEnv* env, jobject clazz,
         jint width, jint height) {
-    return reinterpret_cast<jlong>(new canvas_t(width, height));
+    return reinterpret_cast<jlong>(Canvas::create_recording_canvas(width, height));
 }
 
 static void android_view_DisplayListCanvas_resetDisplayListCanvas(JNIEnv* env, jobject clazz,
         jlong canvasPtr, jint width, jint height) {
-    canvas_t* canvas = reinterpret_cast<canvas_t*>(canvasPtr);
-    canvas->reset(width, height);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
+    canvas->resetRecording(width, height);
 }
 
 
 static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
         jobject clazz, jlong canvasPtr, jlong renderNodePtr) {
-    canvas_t* canvas = reinterpret_cast<canvas_t*>(canvasPtr);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     canvas->drawRenderNode(renderNode);
 }
@@ -148,7 +143,7 @@ static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
 
 static void android_view_DisplayListCanvas_drawLayer(JNIEnv* env, jobject clazz,
         jlong canvasPtr, jlong layerPtr) {
-    canvas_t* canvas = reinterpret_cast<canvas_t*>(canvasPtr);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
     canvas->drawLayer(layer);
 }

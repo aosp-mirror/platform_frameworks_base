@@ -67,36 +67,33 @@ public:
     DisplayListCanvas(int width, int height);
     virtual ~DisplayListCanvas();
 
-    void reset(int width, int height);
-    WARN_UNUSED_RESULT DisplayList* finishRecording();
+    virtual void resetRecording(int width, int height) override;
+    virtual WARN_UNUSED_RESULT DisplayList* finishRecording() override;
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas state operations
 // ----------------------------------------------------------------------------
 
-    void insertReorderBarrier(bool enableReorder);
+    virtual void insertReorderBarrier(bool enableReorder) override;
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas draw operations
 // ----------------------------------------------------------------------------
 
     // Shapes
-    void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+    virtual void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
                 CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
                 CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
-                CanvasPropertyPaint* paint);
-    void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
-                CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint);
-
+                CanvasPropertyPaint* paint) override;
+    virtual void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+                CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) override;
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas draw operations - special
 // ----------------------------------------------------------------------------
-    void drawLayer(DeferredLayerUpdater* layerHandle);
-    void drawRenderNode(RenderNode* renderNode);
-
-    // TODO: rename for consistency
-    void callDrawGLFunction(Functor* functor);
+    virtual void drawLayer(DeferredLayerUpdater* layerHandle) override;
+    virtual void drawRenderNode(RenderNode* renderNode) override;
+    virtual void callDrawGLFunction(Functor* functor) override;
 
 // ----------------------------------------------------------------------------
 // CanvasStateClient interface

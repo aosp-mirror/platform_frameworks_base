@@ -42,7 +42,7 @@ DisplayListCanvas::DisplayListCanvas(int width, int height)
     , mDeferredBarrierType(kBarrier_None)
     , mHighContrastText(false)
     , mRestoreSaveCount(-1) {
-    reset(width, height);
+    resetRecording(width, height);
 }
 
 DisplayListCanvas::~DisplayListCanvas() {
@@ -50,7 +50,7 @@ DisplayListCanvas::~DisplayListCanvas() {
             "Destroyed a DisplayListCanvas during a record!");
 }
 
-void DisplayListCanvas::reset(int width, int height) {
+void DisplayListCanvas::resetRecording(int width, int height) {
     LOG_ALWAYS_FATAL_IF(mDisplayList,
             "prepareDirty called a second time during a recording!");
     mDisplayList = new DisplayList();

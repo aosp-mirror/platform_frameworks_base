@@ -27,7 +27,7 @@ namespace uirenderer {
 RecordingCanvas::RecordingCanvas(size_t width, size_t height)
         : mState(*this)
         , mResourceCache(ResourceCache::getInstance()) {
-    reset(width, height);
+    resetRecording(width, height);
 }
 
 RecordingCanvas::~RecordingCanvas() {
@@ -35,7 +35,7 @@ RecordingCanvas::~RecordingCanvas() {
             "Destroyed a RecordingCanvas during a record!");
 }
 
-void RecordingCanvas::reset(int width, int height) {
+void RecordingCanvas::resetRecording(int width, int height) {
     LOG_ALWAYS_FATAL_IF(mDisplayList,
             "prepareDirty called a second time during a recording!");
     mDisplayList = new DisplayList();

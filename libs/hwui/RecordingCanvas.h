@@ -50,22 +50,19 @@ public:
     RecordingCanvas(size_t width, size_t height);
     virtual ~RecordingCanvas();
 
-    void reset(int width, int height);
-    WARN_UNUSED_RESULT DisplayList* finishRecording();
-
+    virtual void resetRecording(int width, int height) override;
+    virtual WARN_UNUSED_RESULT DisplayList* finishRecording() override;
 // ----------------------------------------------------------------------------
 // MISC HWUI OPERATIONS - TODO: CATEGORIZE
 // ----------------------------------------------------------------------------
-    void insertReorderBarrier(bool enableReorder) {
+    virtual void insertReorderBarrier(bool enableReorder) override {
         mDeferredBarrierType = enableReorder
                 ? DeferredBarrierType::OutOfOrder : DeferredBarrierType::InOrder;
     }
 
-    void drawLayer(DeferredLayerUpdater* layerHandle);
-    void drawRenderNode(RenderNode* renderNode);
-
-    // TODO: rename for consistency
-    void callDrawGLFunction(Functor* functor);
+    virtual void drawLayer(DeferredLayerUpdater* layerHandle) override;
+    virtual void drawRenderNode(RenderNode* renderNode) override;
+    virtual void callDrawGLFunction(Functor* functor) override;
 
 // ----------------------------------------------------------------------------
 // CanvasStateClient interface
@@ -78,12 +75,12 @@ public:
 // HWUI Canvas draw operations
 // ----------------------------------------------------------------------------
 
-    void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+    virtual void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
             CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
             CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
-            CanvasPropertyPaint* paint);
-    void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
-            CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint);
+            CanvasPropertyPaint* paint) override;
+    virtual void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+            CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) override;
 
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas interface

@@ -18,6 +18,7 @@
 #define ANDROID_GRAPHICS_CANVAS_H
 
 #include <cutils/compiler.h>
+#include <utils/Functor.h>
 
 #include "utils/NinePatch.h"
 
@@ -26,6 +27,14 @@
 #include <SkMatrix.h>
 
 namespace android {
+
+namespace uirenderer {
+    class CanvasPropertyPaint;
+    class CanvasPropertyPrimitive;
+    class DeferredLayerUpdater;
+    class DisplayList;
+    class RenderNode;
+}
 
 namespace SaveFlags {
 
@@ -56,6 +65,8 @@ public:
 
     static Canvas* create_canvas(const SkBitmap& bitmap);
 
+    static Canvas* create_recording_canvas(int width, int height);
+
     /**
      *  Create a new Canvas object which delegates to an SkCanvas.
      *
@@ -81,14 +92,35 @@ public:
      */
     virtual SkCanvas* asSkCanvas() = 0;
 
+
     virtual void setBitmap(const SkBitmap& bitmap) = 0;
 
     virtual bool isOpaque() = 0;
     virtual int width() = 0;
     virtual int height() = 0;
 
+// ----------------------------------------------------------------------------
+// View System operations (not exposed in public Canvas API)
+// ----------------------------------------------------------------------------
+
+    virtual void resetRecording(int width, int height) = 0;
+    virtual uirenderer::DisplayList* finishRecording() = 0;
+    virtual void insertReorderBarrier(bool enableReorder) = 0;
+
     virtual void setHighContrastText(bool highContrastText) = 0;
     virtual bool isHighContrastText() = 0;
+
+    virtual void drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
+            uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
+            uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
+            uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* paint) = 0;
+    virtual void drawCircle(uirenderer::CanvasPropertyPrimitive* x,
+            uirenderer::CanvasPropertyPrimitive* y, uirenderer::CanvasPropertyPrimitive* radius,
+            uirenderer::CanvasPropertyPaint* paint) = 0;
+
+    virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) = 0;
+    virtual void drawRenderNode(uirenderer::RenderNode* renderNode) = 0;
+    virtual void callDrawGLFunction(Functor* functor) = 0;
 
 // ----------------------------------------------------------------------------
 // Canvas state operations
