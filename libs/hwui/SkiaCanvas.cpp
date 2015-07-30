@@ -55,6 +55,11 @@ public:
     virtual int width() override;
     virtual int height() override;
 
+    virtual void setHighContrastText(bool highContrastText) override {
+        mHighContrastText = highContrastText;
+    }
+    virtual bool isHighContrastText() override { return mHighContrastText; }
+
     virtual int getSaveCount() const override;
     virtual int save(SkCanvas::SaveFlags flags) override;
     virtual void restore() override;
@@ -134,6 +139,8 @@ private:
         int                 saveCount;
         SkCanvas::SaveFlags saveFlags;
     };
+
+    bool mHighContrastText = false;
 
     void recordPartialSave(SkCanvas::SaveFlags flags);
     void saveClipsForFrame(SkTArray<SkClipStack::Element>& clips, int frameSaveCount);
