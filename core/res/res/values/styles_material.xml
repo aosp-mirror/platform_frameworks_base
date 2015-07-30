@@ -809,13 +809,14 @@ please see styles_device_defaults.xml.
         <item name="navigationButtonStyle">@style/Widget.Material.Toolbar.Button.Navigation</item>
         <item name="titleTextAppearance">@style/TextAppearance.Material.Widget.Toolbar.Title</item>
         <item name="subtitleTextAppearance">@style/TextAppearance.Material.Widget.Toolbar.Subtitle</item>
+        <item name="paddingStart">@dimen/action_bar_default_padding_start_material</item>
+        <item name="paddingEnd">@dimen/action_bar_default_padding_end_material</item>
     </style>
 
     <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Material">
         <item name="background">@drawable/control_background_40dp_material</item>
         <item name="minWidth">56dp</item>
         <item name="scaleType">center</item>
-        <item name="paddingStart">@dimen/action_bar_navigation_padding_start_material</item>
     </style>
 
     <style name="Widget.Material.WebTextView" parent="Widget.WebTextView"/>
