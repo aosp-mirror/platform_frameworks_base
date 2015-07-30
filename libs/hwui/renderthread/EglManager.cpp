@@ -76,6 +76,7 @@ EglManager::EglManager(RenderThread& thread)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
         , mAllowPreserveBuffer(load_dirty_regions_property())
+        , mHasBufferAgeExt(false)
         , mCurrentSurface(EGL_NO_SURFACE)
         , mAtlasMap(nullptr)
         , mAtlasMapSize(0) {
@@ -98,7 +99,10 @@ void EglManager::initialize() {
 
     ALOGI("Initialized EGL, version %d.%d", (int)major, (int)minor);
 
-    loadConfig();
+    findExtensions(eglQueryString(mEglDisplay, EGL_EXTENSIONS), mEglExtensionList);
+    mHasBufferAgeExt = hasEglExtension("EGL_EXT_buffer_age");
+
+    loadConfig(mHasBufferAgeExt);
     createContext();
     createPBufferSurface();
     makeCurrent(mPBufferSurface);
@@ -110,8 +114,13 @@ bool EglManager::hasEglContext() {
     return mEglDisplay != EGL_NO_DISPLAY;
 }
 
-void EglManager::loadConfig() {
-    EGLint swapBehavior = mCanSetPreserveBuffer ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
+bool EglManager::hasEglExtension(const char* extension) const {
+   const std::string s(extension);
+   return mEglExtensionList.find(s) != mEglExtensionList.end();
+}
+
+void EglManager::loadConfig(bool useBufferAgeExt) {
+    EGLint swapBehavior = (!useBufferAgeExt && mCanSetPreserveBuffer) ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
     EGLint attribs[] = {
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
             EGL_RED_SIZE, 8,
@@ -133,7 +142,7 @@ void EglManager::loadConfig() {
             ALOGW("Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...");
             // Try again without dirty regions enabled
             mCanSetPreserveBuffer = false;
-            loadConfig();
+            loadConfig(useBufferAgeExt);
         } else {
             LOG_ALWAYS_FATAL("Failed to choose config, error = %s", egl_error_str());
         }
@@ -238,7 +247,7 @@ bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
     return true;
 }
 
-void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
+void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height, EGLint* framebufferAge) {
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
             "Tried to beginFrame on EGL_NO_SURFACE!");
     makeCurrent(surface);
@@ -247,6 +256,9 @@ void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
     }
     if (height) {
         eglQuerySurface(mEglDisplay, surface, EGL_HEIGHT, height);
+    }
+    if (useBufferAgeExt()) {
+        eglQuerySurface(mEglDisplay, surface, EGL_BUFFER_AGE_EXT, framebufferAge);
     }
     eglBeginFrame(mEglDisplay, surface);
 }
@@ -304,6 +316,10 @@ bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
     return false;
 }
 
+bool EglManager::useBufferAgeExt() {
+    return mAllowPreserveBuffer && mHasBufferAgeExt;
+}
+
 void EglManager::fence() {
     EGLSyncKHR fence = eglCreateSyncKHR(mEglDisplay, EGL_SYNC_FENCE_KHR, NULL);
     eglClientWaitSyncKHR(mEglDisplay, fence,
@@ -313,6 +329,9 @@ void EglManager::fence() {
 
 bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
     if (CC_UNLIKELY(!mAllowPreserveBuffer)) return false;
+
+    // Use EGL_EXT_buffer_age instead if supported
+    if (mHasBufferAgeExt) return true;
 
     bool preserved = false;
     if (mCanSetPreserveBuffer) {
@@ -335,6 +354,19 @@ bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
     }
 
     return preserved;
+}
+
+void EglManager::findExtensions(const char* extensions, std::set<std::string>& list) const {
+    const char* current = extensions;
+    const char* head = current;
+    do {
+        head = strchr(current, ' ');
+        std::string s(current, head ? head - current : strlen(current));
+        if (s.length()) {
+            list.insert(s);
+        }
+        current = head + 1;
+    } while (head);
 }
 
 } /* namespace renderthread */
