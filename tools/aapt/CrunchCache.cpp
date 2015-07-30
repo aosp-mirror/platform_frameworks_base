@@ -5,6 +5,7 @@
 // This file defines functions laid out and documented in
 // CrunchCache.h
 
+#include <utils/Compat.h>
 #include <utils/Vector.h>
 #include <utils/String8.h>
 
