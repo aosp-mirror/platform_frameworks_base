@@ -292,7 +292,9 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 //noinspection unchecked
-                return postResult(doInBackground(mParams));
+                Result result = doInBackground(mParams);
+                Binder.flushPendingCommands();
+                return postResult(result);
             }
         };
 
