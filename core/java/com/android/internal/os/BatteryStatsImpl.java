@@ -7674,6 +7674,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             final long totalTimeMs = txTimeMs + rxTimeMs + idleTimeMs;
 
             long leftOverRxTimeMs = rxTimeMs;
+            long leftOverTxTimeMs = txTimeMs;
 
             if (DEBUG_ENERGY) {
                 Slog.d(TAG, "------ BEGIN WiFi power blaming ------");
@@ -7705,6 +7706,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 Slog.d(TAG, "  !Estimated scan time > Actual rx time (" + totalScanTimeMs + " ms > "
                         + rxTimeMs + " ms). Normalizing scan time.");
             }
+            if (DEBUG_ENERGY && totalScanTimeMs > txTimeMs) {
+                Slog.d(TAG, "  !Estimated scan time > Actual tx time (" + totalScanTimeMs + " ms > "
+                        + txTimeMs + " ms). Normalizing scan time.");
+            }
 
             // Actually assign and distribute power usage to apps.
             for (int i = 0; i < uidStatsSize; i++) {
@@ -7716,23 +7721,34 @@ public final class BatteryStatsImpl extends BatteryStats {
                     // Set the new mark so that next time we get new data since this point.
                     uid.mWifiScanTimer.setMark(elapsedRealtimeMs);
 
+                    long scanRxTimeSinceMarkMs = scanTimeSinceMarkMs;
+                    long scanTxTimeSinceMarkMs = scanTimeSinceMarkMs;
+
+                    // Our total scan time is more than the reported Tx/Rx time.
+                    // This is possible because the cost of a scan is approximate.
+                    // Let's normalize the result so that we evenly blame each app
+                    // scanning.
+                    //
+                    // This means that we may have apps that transmitted/received packets not be
+                    // blamed for this, but this is fine as scans are relatively more expensive.
                     if (totalScanTimeMs > rxTimeMs) {
-                        // Our total scan time is more than the reported Rx time.
-                        // This is possible because the cost of a scan is approximate.
-                        // Let's normalize the result so that we evenly blame each app
-                        // scanning.
-                        //
-                        // This means that we may have apps that received packets not be blamed
-                        // for this, but this is fine as scans are relatively more expensive.
-                        scanTimeSinceMarkMs = (rxTimeMs * scanTimeSinceMarkMs) / totalScanTimeMs;
+                        scanRxTimeSinceMarkMs = (rxTimeMs * scanRxTimeSinceMarkMs) /
+                                totalScanTimeMs;
+                    }
+                    if (totalScanTimeMs > txTimeMs) {
+                        scanTxTimeSinceMarkMs = (txTimeMs * scanTxTimeSinceMarkMs) /
+                                totalScanTimeMs;
                     }
 
                     if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "  ScanTime for UID " + uid.getUid() + ": "
-                                + scanTimeSinceMarkMs + " ms)");
+                        Slog.d(TAG, "  ScanTime for UID " + uid.getUid() + ": Rx:"
+                                + scanRxTimeSinceMarkMs + " ms  Tx:"
+                                + scanTxTimeSinceMarkMs + " ms)");
                     }
-                    uid.noteWifiControllerActivityLocked(CONTROLLER_RX_TIME, scanTimeSinceMarkMs);
-                    leftOverRxTimeMs -= scanTimeSinceMarkMs;
+                    uid.noteWifiControllerActivityLocked(CONTROLLER_RX_TIME, scanRxTimeSinceMarkMs);
+                    uid.noteWifiControllerActivityLocked(CONTROLLER_TX_TIME, scanTxTimeSinceMarkMs);
+                    leftOverRxTimeMs -= scanRxTimeSinceMarkMs;
+                    leftOverTxTimeMs -= scanTxTimeSinceMarkMs;
                 }
 
                 // Distribute evenly the power consumed while Idle to each app holding a WiFi
@@ -7755,12 +7771,14 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             if (DEBUG_ENERGY) {
                 Slog.d(TAG, "  New RxPower: " + leftOverRxTimeMs + " ms");
+                Slog.d(TAG, "  New TxPower: " + leftOverTxTimeMs + " ms");
             }
 
-            // Distribute the Tx power appropriately between all apps that transmitted packets.
+            // Distribute the remaining Tx power appropriately between all apps that transmitted
+            // packets.
             for (int i = 0; i < txPackets.size(); i++) {
                 final Uid uid = getUidStatsLocked(txPackets.keyAt(i));
-                final long myTxTimeMs = (txPackets.valueAt(i) * txTimeMs) / totalTxPackets;
+                final long myTxTimeMs = (txPackets.valueAt(i) * leftOverTxTimeMs) / totalTxPackets;
                 if (DEBUG_ENERGY) {
                     Slog.d(TAG, "  TxTime for UID " + uid.getUid() + ": " + myTxTimeMs + " ms");
                 }
