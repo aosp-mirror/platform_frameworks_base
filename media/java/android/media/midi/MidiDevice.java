@@ -113,8 +113,13 @@ public final class MidiDevice implements Closeable {
     /**
      * Called to open a {@link MidiInputPort} for the specified port number.
      *
+     * An input port can only be used by one sender at a time.
+     * Opening an input port will fail if another application has already opened it for use.
+     * A {@link MidiDeviceStatus} can be used to determine if an input port is already open.
+     *
      * @param portNumber the number of the input port to open
-     * @return the {@link MidiInputPort}
+     * @return the {@link MidiInputPort} if the open is successful,
+     *         or null in case of failure.
      */
     public MidiInputPort openInputPort(int portNumber) {
         try {
@@ -133,8 +138,11 @@ public final class MidiDevice implements Closeable {
     /**
      * Called to open a {@link MidiOutputPort} for the specified port number.
      *
+     * An output port may be opened by multiple applications.
+     *
      * @param portNumber the number of the output port to open
-     * @return the {@link MidiOutputPort}
+     * @return the {@link MidiOutputPort} if the open is successful,
+     *         or null in case of failure.
      */
     public MidiOutputPort openOutputPort(int portNumber) {
         try {
