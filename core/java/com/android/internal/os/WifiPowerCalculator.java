@@ -57,6 +57,11 @@ public class WifiPowerCalculator extends PowerCalculator {
                 statsType);
         app.wifiTxBytes = u.getNetworkActivityBytes(BatteryStats.NETWORK_WIFI_TX_DATA,
                 statsType);
+
+        if (DEBUG && app.wifiPowerMah != 0) {
+            Log.d(TAG, "UID " + u.getUid() + ": idle=" + idleTime + "ms rx=" + rxTime + "ms tx=" +
+                    txTime + "ms power=" + BatteryStatsHelper.makemAh(app.wifiPowerMah));
+        }
     }
 
     @Override

@@ -16,11 +16,14 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.util.Log;
 
 /**
  * Estimates WiFi power usage based on timers in BatteryStats.
  */
 public class WifiPowerEstimator extends PowerCalculator {
+    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final String TAG = "WifiPowerEstimator";
     private final double mWifiPowerPerPacket;
     private final double mWifiPowerOn;
     private final double mWifiPowerScan;
@@ -75,6 +78,10 @@ public class WifiPowerEstimator extends PowerCalculator {
         }
 
         app.wifiPowerMah = wifiPacketPower + wifiLockPower + wifiScanPower + wifiBatchScanPower;
+        if (DEBUG && app.wifiPowerMah != 0) {
+            Log.d(TAG, "UID " + u.getUid() + ": power=" +
+                    BatteryStatsHelper.makemAh(app.wifiPowerMah));
+        }
     }
 
     @Override
