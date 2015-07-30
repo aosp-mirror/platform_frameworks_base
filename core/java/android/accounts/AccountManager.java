@@ -321,6 +321,10 @@ public class AccountManager {
      * <p>This method requires the caller to have a signature match with the
      * authenticator that owns the specified account.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission is needed for those platforms. See docs for
+     * this function in API level 22.
+     *
      * @param account The account to query for a password. Must not be {@code null}.
      * @return The account's password, null if none or if the account doesn't exist
      */
@@ -344,6 +348,10 @@ public class AccountManager {
      *
      * <p>This method requires the caller to have a signature match with the
      * authenticator that owns the specified account.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission is needed for those platforms. See docs
+     * for this function in API level 22.
      *
      * @param account The account to query for user data
      * @return The user data, null if the account or key doesn't exist
@@ -493,6 +501,10 @@ public class AccountManager {
      * {@link android.Manifest.permission#GET_ACCOUNTS} or share a uid with the
      * authenticator that owns the account type.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * GET_ACCOUNTS permission is needed for those platforms, irrespective of uid
+     * or signature match. See docs for this function in API level 22.
+     *
      * @param type The type of accounts to return, null to retrieve all accounts
      * @return An array of {@link Account}, one per matching account.  Empty
      *     (never null) if no accounts of the specified type have been added.
@@ -623,6 +635,11 @@ public class AccountManager {
      * @param type The type of accounts to return, must not be null
      * @param features An array of the account features to require,
      *     may be null or empty
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * GET_ACCOUNTS permission is needed for those platforms, irrespective of uid
+     * or signature match. See docs for this function in API level 22.
+     *
      * @param callback Callback to invoke when the request completes,
      *     null for no callback
      * @param handler {@link Handler} identifying the callback thread,
@@ -667,6 +684,10 @@ public class AccountManager {
      * <p>It is safe to call this method from the main thread.
      * <p>This method requires the caller to have a signature match with the
      * authenticator that owns the specified account.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission is needed for those platforms. See docs
+     * for this function in API level 22.
      *
      * @param account The {@link Account} to add
      * @param password The password to associate with the account, null for none
@@ -719,6 +740,10 @@ public class AccountManager {
      *
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission and same UID as account's authenticator
+     * is needed for those platforms. See docs for this function in API level 22.
      *
      * @param account The {@link Account} to rename
      * @param newName String name to be associated with the account.
@@ -784,6 +809,10 @@ public class AccountManager {
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS permission is needed for those platforms. See docs for
+     * this function in API level 22.
+     *
      * @param account The {@link Account} to remove
      * @param callback Callback to invoke when the request completes,
      *     null for no callback
@@ -825,6 +854,10 @@ public class AccountManager {
      *
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS permission is needed for those platforms. See docs for
+     * this function in API level 22.
      *
      * @param account The {@link Account} to remove
      * @param activity The {@link Activity} context to use for launching a new
@@ -919,6 +952,10 @@ public class AccountManager {
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission and same UID as account's authenticator
+     * is needed for those platforms. See docs for this function in API level 22.
+     *
      * @param account The {@link Account} to delete.
      * @return True if the account was successfully deleted, false if the
      *         account did not exist, the account is null, or another error
@@ -942,6 +979,10 @@ public class AccountManager {
      * or expire cached auth tokens otherwise.
      *
      * <p>It is safe to call this method from the main thread.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS or USE_CREDENTIALS permission is needed for those
+     * platforms. See docs for this function in API level 22.
      *
      * @param accountType The account type of the auth token to invalidate, must not be null
      * @param authToken The auth token to invalidate, may be null
@@ -968,6 +1009,10 @@ public class AccountManager {
      *
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission and same UID as account's authenticator
+     * is needed for those platforms. See docs for this function in API level 22.
      *
      * @param account The account for which an auth token is to be fetched. Cannot be {@code null}.
      * @param authTokenType The type of auth token to fetch. Cannot be {@code null}. 
@@ -998,6 +1043,10 @@ public class AccountManager {
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission and same UID as account's authenticator
+     * is needed for those platforms. See docs for this function in API level 22.
+     *
      * @param account The account whose password is to be set. Cannot be
      *            {@code null}.
      * @param password The password to set, null to clear the password
@@ -1025,6 +1074,10 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS permission is needed for those platforms. See docs for
+     * this function in API level 22.
+     *
      * @param account The account whose password to clear
      */
     public void clearPassword(final Account account) {
@@ -1046,6 +1099,10 @@ public class AccountManager {
      *
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission and same UID as account's authenticator
+     * is needed for those platforms. See docs for this function in API level 22.
      *
      * @param account Account whose user data is to be set. Must not be {@code null}.
      * @param key String user data key to set.  Must not be null
@@ -1073,6 +1130,10 @@ public class AccountManager {
      * <p>This method requires the caller to have a signature match with the
      * authenticator that manages the specified account.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * AUTHENTICATE_ACCOUNTS permission and same UID as account's authenticator
+     * is needed for those platforms. See docs for this function in API level 22.
+     *
      * @param account The account to set an auth token for
      * @param authTokenType The type of the auth token, see {#getAuthToken}
      * @param authToken The auth token to add to the cache
@@ -1094,6 +1155,10 @@ public class AccountManager {
      *
      * <p>This method may block while a network request completes, and must
      * never be made from the main thread.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * USE_CREDENTIALS permission is needed for those platforms. See docs for
+     * this function in API level 22.
      *
      * @param account The account to fetch an auth token for
      * @param authTokenType The auth token type, see {@link #getAuthToken getAuthToken()}
@@ -1142,6 +1207,10 @@ public class AccountManager {
      * is authenticator-dependent.  Some services use different token types to
      * access different functionality -- for example, Google uses different auth
      * tokens to access Gmail and Google Calendar for the same account.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * USE_CREDENTIALS permission is needed for those platforms. See docs for 
+     * this function in API level 22.
      *
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
@@ -1306,6 +1375,10 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * USE_CREDENTIALS permission is needed for those platforms. See docs for 
+     * this function in API level 22.
+     *
      * @param account The account to fetch an auth token for
      * @param authTokenType The auth token type, an authenticator-dependent
      *     string token, must not be null
@@ -1369,6 +1442,10 @@ public class AccountManager {
      *
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
+     * 
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS permission is needed for those platforms. See docs for
+     * this function in API level 22.
      *
      * @param accountType The type of account to add; must not be null
      * @param authTokenType The type of auth token (see {@link #getAuthToken})
@@ -1551,6 +1628,10 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS permission is needed for those platforms. See docs
+     * for this function in API level 22.
+     *
      * @param account The account to confirm password knowledge for
      * @param options Authenticator-specific options for the request;
      *     if the {@link #KEY_PASSWORD} string field is present, the
@@ -1629,6 +1710,10 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS permission is needed for those platforms. See docs for
+     * this function in API level 22.
+     *
      * @param account The account to update credentials for
      * @param authTokenType The credentials entered must allow an auth token
      *     of this type to be created (but no actual auth token is returned);
@@ -1688,6 +1773,10 @@ public class AccountManager {
      *
      * <p>This method requires the caller to have the same signature as the
      * authenticator associated with the specified account type.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS permission is needed for those platforms. See docs
+     * for this function in API level 22.
      *
      * @param accountType The account type associated with the authenticator
      *     to adjust
@@ -2208,6 +2297,10 @@ public class AccountManager {
      *
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
+     * MANAGE_ACCOUNTS permission is needed for those platforms. See docs for
+     * this function in API level 22.
      *
      * @param accountType The account type required
      *     (see {@link #getAccountsByType}), must not be null
