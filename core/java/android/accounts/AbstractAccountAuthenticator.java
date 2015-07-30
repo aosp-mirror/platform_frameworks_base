@@ -138,7 +138,9 @@ public abstract class AbstractAccountAuthenticator {
                     new AccountAuthenticatorResponse(response),
                         accountType, authTokenType, features, options);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    result.keySet(); // force it to be unparcelled
+                    if (result != null) {
+                        result.keySet(); // force it to be unparcelled
+                    }
                     Log.v(TAG, "addAccount: result " + AccountManager.sanitizeResult(result));
                 }
                 if (result != null) {
@@ -160,7 +162,9 @@ public abstract class AbstractAccountAuthenticator {
                 final Bundle result = AbstractAccountAuthenticator.this.confirmCredentials(
                     new AccountAuthenticatorResponse(response), account, options);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    result.keySet(); // force it to be unparcelled
+                    if (result != null) {
+                        result.keySet(); // force it to be unparcelled
+                    }
                     Log.v(TAG, "confirmCredentials: result "
                             + AccountManager.sanitizeResult(result));
                 }
@@ -185,7 +189,9 @@ public abstract class AbstractAccountAuthenticator {
                 result.putString(AccountManager.KEY_AUTH_TOKEN_LABEL,
                         AbstractAccountAuthenticator.this.getAuthTokenLabel(authTokenType));
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    result.keySet(); // force it to be unparcelled
+                    if (result != null) {
+                        result.keySet(); // force it to be unparcelled
+                    }
                     Log.v(TAG, "getAuthTokenLabel: result "
                             + AccountManager.sanitizeResult(result));
                 }
@@ -209,7 +215,9 @@ public abstract class AbstractAccountAuthenticator {
                         new AccountAuthenticatorResponse(response), account,
                         authTokenType, loginOptions);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    result.keySet(); // force it to be unparcelled
+                    if (result != null) {
+                        result.keySet(); // force it to be unparcelled
+                    }
                     Log.v(TAG, "getAuthToken: result " + AccountManager.sanitizeResult(result));
                 }
                 if (result != null) {
@@ -234,7 +242,10 @@ public abstract class AbstractAccountAuthenticator {
                     new AccountAuthenticatorResponse(response), account,
                         authTokenType, loginOptions);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    result.keySet(); // force it to be unparcelled
+                    // Result may be null.
+                    if (result != null) {
+                        result.keySet(); // force it to be unparcelled
+                    }
                     Log.v(TAG, "updateCredentials: result "
                             + AccountManager.sanitizeResult(result));
                 }
@@ -490,7 +501,7 @@ public abstract class AbstractAccountAuthenticator {
      * <ul>
      * <li> {@link AccountManager#KEY_INTENT}, or
      * <li> {@link AccountManager#KEY_ACCOUNT_NAME} and {@link AccountManager#KEY_ACCOUNT_TYPE} of
-     * the account that was added, or
+     * the account whose credentials were updated, or
      * <li> {@link AccountManager#KEY_ERROR_CODE} and {@link AccountManager#KEY_ERROR_MESSAGE} to
      * indicate an error
      * </ul>
