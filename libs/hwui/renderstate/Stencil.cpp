@@ -60,8 +60,14 @@ GLenum Stencil::getLayerStencilFormat() {
 }
 
 void Stencil::clear() {
+    glStencilMask(0xff);
     glClearStencil(0);
     glClear(GL_STENCIL_BUFFER_BIT);
+
+    if (mState == kTest) {
+        // reset to test state, with immutable stencil
+        glStencilMask(0);
+    }
 }
 
 void Stencil::enableTest(int incrementThreshold) {
@@ -104,17 +110,17 @@ void Stencil::enableDebugTest(GLint value, bool greater) {
     // We only want to test, let's keep everything
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     mState = kTest;
+    glStencilMask(0);
 }
 
 void Stencil::enableDebugWrite() {
-    if (mState != kWrite) {
-        enable();
-        glStencilFunc(GL_ALWAYS, 0x1, 0xffffffff);
-        // The test always passes so the first two values are meaningless
-        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        mState = kWrite;
-    }
+    enable();
+    glStencilFunc(GL_ALWAYS, 0x1, 0xffffffff);
+    // The test always passes so the first two values are meaningless
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    mState = kWrite;
+    glStencilMask(0xff);
 }
 
 void Stencil::enable() {
