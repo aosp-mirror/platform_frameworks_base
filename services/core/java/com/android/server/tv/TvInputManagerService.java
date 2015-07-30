@@ -117,7 +117,7 @@ public final class TvInputManagerService extends SystemService {
     private final Object mLock = new Object();
 
     // ID of the current user.
-    private int mCurrentUserId = UserHandle.USER_OWNER;
+    private int mCurrentUserId = UserHandle.USER_SYSTEM;
 
     // A map from user id to UserState.
     private final SparseArray<UserState> mUserStates = new SparseArray<>();

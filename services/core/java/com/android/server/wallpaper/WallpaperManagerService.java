@@ -484,8 +484,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mMonitor = new MyPackageMonitor();
         mMonitor.register(context, null, UserHandle.ALL, true);
-        getWallpaperDir(UserHandle.USER_OWNER).mkdirs();
-        loadSettingsLocked(UserHandle.USER_OWNER);
+        getWallpaperDir(UserHandle.USER_SYSTEM).mkdirs();
+        loadSettingsLocked(UserHandle.USER_SYSTEM);
     }
     
     private static File getWallpaperDir(int userId) {
@@ -503,7 +503,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     public void systemRunning() {
         if (DEBUG) Slog.v(TAG, "systemReady");
-        WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_OWNER);
+        WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
         switchWallpaper(wallpaper, null);
         wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
         wallpaper.wallpaperObserver.startWatching();
