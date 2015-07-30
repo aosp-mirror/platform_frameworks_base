@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.RemoteViews.RemoteView;
 
 import java.text.DateFormat;
@@ -228,14 +227,14 @@ public class DateTimeView extends TextView {
             final boolean register = mAttachedViews.isEmpty();
             mAttachedViews.add(v);
             if (register) {
-                register(v.getContext().getApplicationContext());
+                register(getApplicationContextIfAvailable(v.getContext()));
             }
         }
 
         public void removeView(DateTimeView v) {
             mAttachedViews.remove(v);
             if (mAttachedViews.isEmpty()) {
-                unregister(v.getContext().getApplicationContext());
+                unregister(getApplicationContextIfAvailable(v.getContext()));
             }
         }
 
@@ -256,6 +255,11 @@ public class DateTimeView extends TextView {
                 }
             }
             return result;
+        }
+
+        static final Context getApplicationContextIfAvailable(Context context) {
+            final Context ac = context.getApplicationContext();
+            return ac != null ? ac : context;
         }
 
         void register(Context context) {
