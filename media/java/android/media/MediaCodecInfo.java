@@ -525,6 +525,14 @@ public final class MediaCodecInfo {
 
         /**
          * Query whether codec supports a given {@link MediaFormat}.
+         *
+         * <p class=note>
+         * <strong>Note:</strong> On {@link android.os.Build.VERSION_CODES#LOLLIPOP},
+         * {@code format} must not contain a {@linkplain MediaFormat#KEY_FRAME_RATE
+         * frame rate}. Use
+         * <code class=prettyprint>format.setString(MediaFormat.KEY_FRAME_RATE, null)</code>
+         * to clear any existing frame rate setting in the format.
+         *
          * @param format media format with optional feature directives.
          * @throws IllegalArgumentException if format is not a valid media format.
          * @return whether the codec capabilities support the given format
@@ -1230,8 +1238,22 @@ public final class MediaCodecInfo {
          * May return {@code null}, if the codec did not publish any measurement
          * data.
          * <p>
-         * This is a performance estimate, based on full-speed decoding
-         * and encoding measurements of common video sizes supported by the codec.
+         * This is a performance estimate provided by the device manufacturer
+         * based on full-speed decoding and encoding measurements in various configurations
+         * of common video sizes supported by the codec. As such it should only be used to
+         * compare individual codecs on the device. The value is not suitable for comparing
+         * different devices or even different android releases for the same device.
+         * <p>
+         * The returned range corresponds to the fastest frame rates achieved in the tested
+         * configurations. It is interpolated from the nearest frame size(s) tested. Codec
+         * performance is severely impacted by other activity on the device, and can vary
+         * significantly.
+         * <p class=note>
+         * Use this method in cases where only codec performance matters, e.g. to evaluate if
+         * a codec has any chance of meeting a performance target. Codecs are listed
+         * in {@link MediaCodecList} in the preferred order as defined by the device
+         * manufacturer. As such, applications should use the first suitable codec in the
+         * list to achieve the best balance between power use and performance.
          *
          * @param width the width of the video
          * @param height the height of the video
