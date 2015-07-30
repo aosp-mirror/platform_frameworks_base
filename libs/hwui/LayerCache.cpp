@@ -87,9 +87,8 @@ void LayerCache::deleteLayer(Layer* layer) {
 }
 
 void LayerCache::clear() {
-    size_t count = mCache.size();
-    for (size_t i = 0; i < count; i++) {
-        deleteLayer(mCache.itemAt(i).mLayer);
+    for (auto entry : mCache) {
+        deleteLayer(entry.mLayer);
     }
     mCache.clear();
 }
@@ -98,11 +97,11 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
     Layer* layer = nullptr;
 
     LayerEntry entry(width, height);
-    ssize_t index = mCache.indexOf(entry);
+    auto iter = mCache.find(entry);
 
-    if (index >= 0) {
-        entry = mCache.itemAt(index);
-        mCache.removeAt(index);
+    if (iter != mCache.end()) {
+        entry = *iter;
+        mCache.erase(iter);
 
         layer = entry.mLayer;
         layer->state = Layer::kState_RemovedFromCache;
@@ -129,9 +128,7 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
 }
 
 void LayerCache::dump() {
-    size_t size = mCache.size();
-    for (size_t i = 0; i < size; i++) {
-        const LayerEntry& entry = mCache.itemAt(i);
+    for (auto entry : mCache) {
         ALOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
     }
 }
@@ -144,13 +141,9 @@ bool LayerCache::put(Layer* layer) {
     if (size < mMaxSize) {
         // TODO: Use an LRU
         while (mSize + size > mMaxSize) {
-            size_t position = 0;
-#if LAYER_REMOVE_BIGGEST_FIRST
-            position = mCache.size() - 1;
-#endif
-            Layer* victim = mCache.itemAt(position).mLayer;
+            Layer* victim = mCache.begin()->mLayer;
             deleteLayer(victim);
-            mCache.removeAt(position);
+            mCache.erase(mCache.begin());
 
             LAYER_LOGD("  Deleting layer %.2fx%.2f", victim->layer.getWidth(),
                     victim->layer.getHeight());
@@ -160,7 +153,7 @@ bool LayerCache::put(Layer* layer) {
 
         LayerEntry entry(layer);
 
-        mCache.add(entry);
+        mCache.insert(entry);
         mSize += size;
 
         layer->state = Layer::kState_InCache;
