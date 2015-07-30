@@ -5469,7 +5469,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // the wake lock and let the system suspend once this function returns.
         synchronized (mLock) {
             mAwake = false;
-            mKeyguardDrawComplete = false;
             updateWakeGestureListenerLp();
             updateOrientationListenerLp();
             updateLockScreenTimeout();
@@ -5491,7 +5490,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // may happen in a future call to goToSleep.
         synchronized (mLock) {
             mAwake = true;
-            mKeyguardDrawComplete = false;
             if (mKeyguardDelegate != null) {
                 mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
                 mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT, 1000);
@@ -5560,6 +5558,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             mScreenOnEarly = false;
             mScreenOnFully = false;
+            mKeyguardDrawComplete = false;
             mWindowManagerDrawComplete = false;
             mScreenOnListener = null;
             updateOrientationListenerLp();
@@ -5579,6 +5578,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             mScreenOnEarly = true;
             mScreenOnFully = false;
+            mKeyguardDrawComplete = false;
             mWindowManagerDrawComplete = false;
             mScreenOnListener = screenOnListener;
 
