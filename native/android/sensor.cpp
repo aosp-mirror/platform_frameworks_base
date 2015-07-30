@@ -38,10 +38,6 @@ using android::String8;
 using android::String16;
 
 /*****************************************************************************/
-
-android::Mutex android::SensorManager::sLock;
-std::map<String16, SensorManager*> android::SensorManager::sPackageInstances;
-
 ASensorManager* ASensorManager_getInstance()
 {
     return ASensorManager_getInstanceForPackage(NULL);
