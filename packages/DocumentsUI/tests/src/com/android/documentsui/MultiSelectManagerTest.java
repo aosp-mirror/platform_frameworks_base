@@ -65,6 +65,35 @@ public class MultiSelectManagerTest {
     }
 
     @Test
+    public void mouseClick_StartsSelectionMode() {
+        click(7);
+        assertSelection(7);
+    }
+
+    @Test
+    public void mouseClick_ShiftClickExtendsSelection() {
+        click(7);
+        shiftClick(11);
+        assertRangeSelection(7, 11);
+    }
+
+    @Test
+    public void mouseClick_NoPosition_ClearsSelection() {
+        mManager.onLongPress(7);
+        click(11);
+        click(RecyclerView.NO_POSITION);
+        assertSelection();
+    }
+
+    @Test
+    public void setSelectionFocusBegin() {
+        mManager.setItemSelected(7, true);
+        mManager.setSelectionFocusBegin(7);
+        shiftClick(11);
+        assertRangeSelection(7, 11);
+    }
+
+    @Test
     public void longPress_StartsSelectionMode() {
         mManager.onLongPress(7);
         assertSelection(7);
@@ -78,63 +107,57 @@ public class MultiSelectManagerTest {
     }
 
     @Test
-    public void singleTapUp_DoesNotSelectBeforeLongPress() {
-        mManager.onSingleTapUp(99, 0);
-        assertSelection();
-    }
-
-    @Test
     public void singleTapUp_UnselectsSelectedItem() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(7, 0);
+        tap(7);
         assertSelection();
     }
 
     @Test
-    public void singleTapUp_NoPositionClearsSelection() {
+    public void singleTapUp_NoPosition_ClearsSelection() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(11, 0);
-        mManager.onSingleTapUp(RecyclerView.NO_POSITION, 0);
+        tap(11);
+        tap(RecyclerView.NO_POSITION);
         assertSelection();
     }
 
     @Test
     public void singleTapUp_ExtendsSelection() {
         mManager.onLongPress(99);
-        mManager.onSingleTapUp(7, 0);
-        mManager.onSingleTapUp(13, 0);
-        mManager.onSingleTapUp(129899, 0);
+        tap(7);
+        tap(13);
+        tap(129899);
         assertSelection(7, 99, 13, 129899);
     }
 
     @Test
     public void singleTapUp_ShiftCreatesRangeSelection() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(17, KeyEvent.META_SHIFT_ON);
+        shiftTap(17);
         assertRangeSelection(7, 17);
     }
 
     @Test
     public void singleTapUp_ShiftCreatesRangeSeletion_Backwards() {
         mManager.onLongPress(17);
-        mManager.onSingleTapUp(7, KeyEvent.META_SHIFT_ON);
+        shiftTap(7);
         assertRangeSelection(7, 17);
     }
 
     @Test
     public void singleTapUp_SecondShiftClickExtendsSelection() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(11, KeyEvent.META_SHIFT_ON);
-        mManager.onSingleTapUp(17, KeyEvent.META_SHIFT_ON);
+        shiftTap(11);
+        shiftTap(17);
         assertRangeSelection(7, 17);
     }
 
     @Test
     public void singleTapUp_MultipleContiguousRangesSelected() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(11, KeyEvent.META_SHIFT_ON);
-        mManager.onSingleTapUp(20, 0);
-        mManager.onSingleTapUp(25, KeyEvent.META_SHIFT_ON);
+        shiftTap(11);
+        tap(20);
+        shiftTap(25);
         assertRangeSelected(7, 11);
         assertRangeSelected(20, 25);
         assertSelectionSize(11);
@@ -143,16 +166,16 @@ public class MultiSelectManagerTest {
     @Test
     public void singleTapUp_ShiftReducesSelectionRange_FromPreviousShiftClick() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(17, KeyEvent.META_SHIFT_ON);
-        mManager.onSingleTapUp(10, KeyEvent.META_SHIFT_ON);
+        shiftTap(17);
+        shiftTap(10);
         assertRangeSelection(7, 10);
     }
 
     @Test
     public void singleTapUp_ShiftReducesSelectionRange_FromPreviousShiftClick_Backwards() {
         mManager.onLongPress(17);
-        mManager.onSingleTapUp(7, KeyEvent.META_SHIFT_ON);
-        mManager.onSingleTapUp(14, KeyEvent.META_SHIFT_ON);
+        shiftTap(7);
+        shiftTap(14);
         assertRangeSelection(14, 17);
     }
 
@@ -160,9 +183,25 @@ public class MultiSelectManagerTest {
     @Test
     public void singleTapUp_ShiftReversesSelectionDirection() {
         mManager.onLongPress(7);
-        mManager.onSingleTapUp(17, KeyEvent.META_SHIFT_ON);
-        mManager.onSingleTapUp(0, KeyEvent.META_SHIFT_ON);
+        shiftTap(17);
+        shiftTap(0);
         assertRangeSelection(0, 7);
+    }
+
+    private void tap(int position) {
+        mManager.onSingleTapUp(position, 0, MotionEvent.TOOL_TYPE_MOUSE);
+    }
+
+    private void shiftTap(int position) {
+        mManager.onSingleTapUp(position, KeyEvent.META_SHIFT_ON, MotionEvent.TOOL_TYPE_FINGER);
+    }
+
+    private void click(int position) {
+        mManager.onSingleTapUp(position, 0, MotionEvent.TOOL_TYPE_MOUSE);
+    }
+
+    private void shiftClick(int position) {
+        mManager.onSingleTapUp(position, KeyEvent.META_SHIFT_ON, MotionEvent.TOOL_TYPE_MOUSE);
     }
 
     private void assertSelected(int... expected) {

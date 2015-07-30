@@ -16,7 +16,9 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Events.isMouseEvent;
 import static com.android.internal.util.Preconditions.checkState;
+import static java.lang.String.format;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -24,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -34,6 +37,8 @@ import android.view.View;
  */
 public class BandSelectManager extends RecyclerView.SimpleOnItemTouchListener {
 
+    private static final int NOT_SELECTED = -1;
+
     // For debugging purposes.
     private static final String TAG = "BandSelectManager";
     private static final boolean DEBUG = false;
@@ -41,10 +46,17 @@ public class BandSelectManager extends RecyclerView.SimpleOnItemTouchListener {
     private final RecyclerView mRecyclerView;
     private final MultiSelectManager mSelectManager;
     private final Drawable mRegionSelectorDrawable;
+    private final SparseBooleanArray mSelectedByBand = new SparseBooleanArray();
 
     private boolean mIsBandSelectActive = false;
     private Point mOrigin;
-    private Rect mRegionBounds;
+    private Rect mBounds;
+    // Maintain the last selection made by band, so if bounds shink back, we can unselect
+    // the respective items.
+
+    // Track information
+    private int mCursorDeltaY = 0;
+    private int mFirstSelected = NOT_SELECTED;
 
     /**
      * @param recyclerView
@@ -109,11 +121,17 @@ public class BandSelectManager extends RecyclerView.SimpleOnItemTouchListener {
      * @param pointerPosition
      */
     private void resizeBandSelectRectangle(Point pointerPosition) {
-        mRegionBounds = new Rect(Math.min(mOrigin.x, pointerPosition.x),
+
+        if (mBounds != null) {
+            mCursorDeltaY = pointerPosition.y - mBounds.bottom;
+        }
+
+        mBounds = new Rect(Math.min(mOrigin.x, pointerPosition.x),
                 Math.min(mOrigin.y, pointerPosition.y),
                 Math.max(mOrigin.x, pointerPosition.x),
                 Math.max(mOrigin.y, pointerPosition.y));
-        mRegionSelectorDrawable.setBounds(mRegionBounds);
+
+        mRegionSelectorDrawable.setBounds(mBounds);
     }
 
     /**
@@ -122,14 +140,53 @@ public class BandSelectManager extends RecyclerView.SimpleOnItemTouchListener {
      * Final optimized implementation, with support for managing offscreen selection to come.
      */
     private void selectChildrenCoveredBySelection() {
+
+        // track top and bottom selections. Details on why this is useful below.
+        int first = NOT_SELECTED;
+        int last = NOT_SELECTED;
+
         for (int i = 0; i < mRecyclerView.getChildCount(); i++) {
+
             View child = mRecyclerView.getChildAt(i);
             ViewHolder holder = mRecyclerView.getChildViewHolder(child);
             Rect childRect = new Rect();
             child.getHitRect(childRect);
 
-            boolean doRectsOverlap = Rect.intersects(childRect, mRegionBounds);
-            mSelectManager.setItemSelected(holder.getAdapterPosition(), doRectsOverlap);
+            boolean shouldSelect = Rect.intersects(childRect, mBounds);
+            int position = holder.getAdapterPosition();
+
+            // This also allows us to clear the selection of elements
+            // that only temporarily entered the bounds of the band.
+            if (mSelectedByBand.get(position) && !shouldSelect) {
+                mSelectManager.setItemSelected(position, false);
+                mSelectedByBand.delete(position);
+            }
+
+            // We need to keep track of the first and last items selected.
+            // We'll use this information along with cursor direction
+            // to determine the starting point of the selection.
+            // We provide this information to selection manager
+            // to enable more natural user interaction when working
+            // with Shift+Click and multiple contiguous selection ranges.
+            if (shouldSelect) {
+                if (first == NOT_SELECTED) {
+                    first = position;
+                } else {
+                    last = position;
+                }
+                mSelectManager.setItemSelected(position, true);
+                mSelectedByBand.put(position, true);
+            }
+        }
+
+        // Remember which is the last selected item, so we can
+        // share that with selection manager when band select ends.
+        // It'll use that as it's begin selection point when
+        // user SHIFT+Clicks.
+        if (mCursorDeltaY < 0 && last != NOT_SELECTED) {
+            mFirstSelected = last;
+        } else if (mCursorDeltaY > 0 && first != NOT_SELECTED) {
+            mFirstSelected = first;
         }
     }
 
@@ -139,16 +196,10 @@ public class BandSelectManager extends RecyclerView.SimpleOnItemTouchListener {
     private void endBandSelect() {
         if (DEBUG) Log.d(TAG, "Ending band select.");
         mIsBandSelectActive = false;
+        mSelectedByBand.clear();
         mRecyclerView.getOverlay().remove(mRegionSelectorDrawable);
-    }
-
-    /**
-     * Determines whether the provided event was triggered by a mouse (as opposed to a finger or
-     * stylus).
-     * @param e
-     * @return
-     */
-    private static boolean isMouseEvent(MotionEvent e) {
-        return e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
+        if (mFirstSelected != NOT_SELECTED) {
+            mSelectManager.setSelectionFocusBegin(mFirstSelected);
+        }
     }
 }
