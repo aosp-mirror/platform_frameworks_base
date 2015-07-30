@@ -21,16 +21,13 @@ import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
-import com.android.layoutlib.bridge.util.ReflectionUtils;
+import com.android.layoutlib.bridge.util.ReflectionUtils.ReflectionException;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.view.View;
 
-import java.lang.reflect.Method;
-
-import static com.android.layoutlib.bridge.util.ReflectionUtils.ReflectionException;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.getCause;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.getMethod;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.invoke;
@@ -98,8 +95,7 @@ public class RecyclerViewUtil {
 
     @Nullable
     private static Object getLayoutManager(View recyclerView) throws ReflectionException {
-        Method getLayoutManager = getMethod(recyclerView.getClass(), "getLayoutManager");
-        return getLayoutManager != null ? invoke(getLayoutManager, recyclerView) : null;
+        return invoke(getMethod(recyclerView.getClass(), "getLayoutManager"), recyclerView);
     }
 
     @Nullable
@@ -127,10 +123,7 @@ public class RecyclerViewUtil {
     private static void setProperty(@NonNull Object object, @NonNull Class<?> propertyClass,
             @Nullable Object propertyValue, @NonNull String propertySetter)
             throws ReflectionException {
-        Method setter = getMethod(object.getClass(), propertySetter, propertyClass);
-        if (setter != null) {
-            invoke(setter, object, propertyValue);
-        }
+        invoke(getMethod(object.getClass(), propertySetter, propertyClass), object, propertyValue);
     }
 
     /**
