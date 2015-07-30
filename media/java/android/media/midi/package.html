@@ -75,6 +75,18 @@ Then the app will not appear in the Play Store for old devices that do not suppo
 &lt;uses-feature android:name="android.software.midi" android:required="true"/>
 </pre>
 
+<h2 id=check_feature>Check for Feature Support</h2>
+
+<p>An app can also check at run-time whether the MIDI feature is supported on a platform.
+This is particularly useful during development when you install apps directly on a device.
+</p>
+
+<pre class=prettyprint>
+if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI)) {
+    // do MIDI stuff
+}
+</pre>
+
 <h2 id=the_midimanager>The MidiManager</h2>
 
 
