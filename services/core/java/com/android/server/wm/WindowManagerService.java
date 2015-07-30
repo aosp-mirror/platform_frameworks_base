@@ -327,7 +327,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Users that are profiles of the current user. These are also allowed to show windows
      * on the current user.
      */
-    int[] mCurrentProfileIds = new int[] {UserHandle.USER_OWNER};
+    int[] mCurrentProfileIds = new int[] {};
 
     final Context mContext;
 

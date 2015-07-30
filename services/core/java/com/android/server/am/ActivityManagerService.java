@@ -1278,7 +1278,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mTargetUserId = UserHandle.USER_NULL;
     // If there are multiple profiles for the current user, their ids are here
     // Currently only the primary user can have managed profiles
-    int[] mCurrentProfileIds = new int[] {UserHandle.USER_OWNER}; // Accessed by ActivityStack
+    int[] mCurrentProfileIds = new int[] {}; // Accessed by ActivityStack
 
     /**
      * Mapping from each known user ID to the profile group ID it is associated with.
