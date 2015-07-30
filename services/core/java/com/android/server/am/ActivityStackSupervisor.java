@@ -3205,10 +3205,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void handleAppCrashLocked(ProcessRecord app) {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
-            final int numStacks = stacks.size();
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                final ActivityStack stack = stacks.get(stackNdx);
-                stack.handleAppCrashLocked(app);
+            int stackNdx = stacks.size() - 1;
+            while (stackNdx >= 0) {
+                stacks.get(stackNdx).handleAppCrashLocked(app);
+                stackNdx--;
             }
         }
     }
