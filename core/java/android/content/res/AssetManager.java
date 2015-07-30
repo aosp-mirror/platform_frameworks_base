@@ -691,6 +691,9 @@ public final class AssetManager implements AutoCloseable {
      */
     public native final String[] getLocales();
 
+    /** {@hide} */
+    public native final Configuration[] getSizeConfigurations();
+
     /**
      * Change the configuation used when retrieving resources.  Not for use by
      * applications.

@@ -2139,7 +2139,12 @@ public class Resources {
     public Configuration getConfiguration() {
         return mConfiguration;
     }
-    
+
+    /** @hide */
+    public Configuration[] getSizeConfigurations() {
+        return mAssets.getSizeConfigurations();
+    };
+
     /**
      * Return the compatibility mode information for the application.
      * The returned object should be treated as read-only.

@@ -5660,11 +5660,15 @@ const DynamicRefTable* ResTable::getDynamicRefTableForCookie(int32_t cookie) con
     return NULL;
 }
 
-void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap) const
-{
+void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap,
+        bool ignoreAndroidPackage) const {
     const size_t packageCount = mPackageGroups.size();
+    String16 android("android");
     for (size_t i = 0; i < packageCount; i++) {
         const PackageGroup* packageGroup = mPackageGroups[i];
+        if (ignoreAndroidPackage && android == packageGroup->name) {
+            continue;
+        }
         const size_t typeCount = packageGroup->types.size();
         for (size_t j = 0; j < typeCount; j++) {
             const TypeList& typeList = packageGroup->types[j];
