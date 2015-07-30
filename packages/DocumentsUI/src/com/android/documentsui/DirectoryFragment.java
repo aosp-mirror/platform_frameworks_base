@@ -397,6 +397,7 @@ public class DirectoryFragment extends Fragment {
         // Kick off loader at least once
         getLoaderManager().restartLoader(LOADER_ID, null, mCallbacks);
 
+        mFragmentTuner.afterActivityCreated(this);
         updateDisplayState();
     }
 
@@ -1662,6 +1663,7 @@ public class DirectoryFragment extends Fragment {
      */
     private interface FragmentTuner {
         void updateActionMenu(Menu menu, int dirType, boolean canDelete);
+        void afterActivityCreated(DirectoryFragment fragment);
     }
 
     /**
@@ -1719,6 +1721,9 @@ public class DirectoryFragment extends Fragment {
             // Only shown in standalone mode.
             copyToClipboard.setVisible(false);
         }
+
+        @Override
+        public void afterActivityCreated(DirectoryFragment fragment) {}
     }
 
     /**
@@ -1734,6 +1739,11 @@ public class DirectoryFragment extends Fragment {
             menu.findItem(R.id.menu_open).setVisible(false);
             menu.findItem(R.id.menu_copy_to).setVisible(false);
             menu.findItem(R.id.menu_move_to).setVisible(false);
+        }
+
+        @Override
+        public void afterActivityCreated(DirectoryFragment fragment) {
+            new BandSelectManager(fragment.mRecView, fragment.mSelectionManager);
         }
     }
 }
