@@ -380,9 +380,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private void handleFingerprintAuthFailed() {
         releaseFingerprintWakeLock();
-        stopListeningForFingerprint();
         handleFingerprintHelp(-1, mContext.getString(R.string.fingerprint_not_recognized));
-        updateFingerprintListeningState();
     }
 
     private void handleFingerprintAcquired(int acquireInfo) {
