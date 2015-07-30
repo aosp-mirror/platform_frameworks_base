@@ -930,9 +930,9 @@ public class Notification implements Parcelable
         private Action(Parcel in) {
             if (in.readInt() != 0) {
                 mIcon = Icon.CREATOR.createFromParcel(in);
-            }
-            if (mIcon.getType() == Icon.TYPE_RESOURCE) {
-                icon = mIcon.getResId();
+                if (mIcon.getType() == Icon.TYPE_RESOURCE) {
+                    icon = mIcon.getResId();
+                }
             }
             title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             if (in.readInt() == 1) {
@@ -3174,7 +3174,8 @@ public class Notification implements Parcelable
             RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
                     tombstone ? getActionTombstoneLayoutResource()
                               : getActionLayoutResource());
-            button.setTextViewCompoundDrawablesRelative(R.id.action0, action.icon, 0, 0, 0);
+            final Icon ai = action.getIcon();
+            button.setTextViewCompoundDrawablesRelative(R.id.action0, ai, null, null, null);
             button.setTextViewText(R.id.action0, processLegacyText(action.title));
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
@@ -3193,7 +3194,7 @@ public class Notification implements Parcelable
         }
 
         private void processLegacyAction(Action action, RemoteViews button) {
-            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, action.icon)) {
+            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, action.getIcon())) {
                 button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
                         mContext.getColor(R.color.notification_action_color_filter),
                         PorterDuff.Mode.MULTIPLY);
@@ -3608,7 +3609,6 @@ public class Notification implements Parcelable
             mContentText = extras.getCharSequence(EXTRA_TEXT);
             mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
             mContentInfo = extras.getCharSequence(EXTRA_INFO_TEXT);
-            mSmallIcon = extras.getParcelable(EXTRA_SMALL_ICON);
             mProgress = extras.getInt(EXTRA_PROGRESS);
             mProgressMax = extras.getInt(EXTRA_PROGRESS_MAX);
             mProgressIndeterminate = extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
@@ -4442,7 +4442,7 @@ public class Notification implements Parcelable
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new BuilderRemoteViews(mBuilder.mContext.getApplicationInfo(),
                     R.layout.notification_material_media_action);
-            button.setImageViewResource(R.id.action0, action.icon);
+            button.setImageViewIcon(R.id.action0, action.getIcon());
             button.setDrawableParameters(R.id.action0, false, -1,
                     0xFFFFFFFF,
                     PorterDuff.Mode.SRC_ATOP, -1);
