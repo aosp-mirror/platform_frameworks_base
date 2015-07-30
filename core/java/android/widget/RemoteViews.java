@@ -1412,39 +1412,108 @@ public class RemoteViews implements Parcelable, Filter {
         public TextViewDrawableAction(int viewId, boolean isRelative, int d1, int d2, int d3, int d4) {
             this.viewId = viewId;
             this.isRelative = isRelative;
+            this.useIcons = false;
             this.d1 = d1;
             this.d2 = d2;
             this.d3 = d3;
             this.d4 = d4;
         }
 
+        public TextViewDrawableAction(int viewId, boolean isRelative,
+                Icon i1, Icon i2, Icon i3, Icon i4) {
+            this.viewId = viewId;
+            this.isRelative = isRelative;
+            this.useIcons = true;
+            this.i1 = i1;
+            this.i2 = i2;
+            this.i3 = i3;
+            this.i4 = i4;
+        }
+
         public TextViewDrawableAction(Parcel parcel) {
             viewId = parcel.readInt();
             isRelative = (parcel.readInt() != 0);
-            d1 = parcel.readInt();
-            d2 = parcel.readInt();
-            d3 = parcel.readInt();
-            d4 = parcel.readInt();
+            useIcons = (parcel.readInt() != 0);
+            if (useIcons) {
+                if (parcel.readInt() != 0) {
+                    i1 = Icon.CREATOR.createFromParcel(parcel);
+                }
+                if (parcel.readInt() != 0) {
+                    i2 = Icon.CREATOR.createFromParcel(parcel);
+                }
+                if (parcel.readInt() != 0) {
+                    i3 = Icon.CREATOR.createFromParcel(parcel);
+                }
+                if (parcel.readInt() != 0) {
+                    i4 = Icon.CREATOR.createFromParcel(parcel);
+                }
+            } else {
+                d1 = parcel.readInt();
+                d2 = parcel.readInt();
+                d3 = parcel.readInt();
+                d4 = parcel.readInt();
+            }
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(TAG);
             dest.writeInt(viewId);
             dest.writeInt(isRelative ? 1 : 0);
-            dest.writeInt(d1);
-            dest.writeInt(d2);
-            dest.writeInt(d3);
-            dest.writeInt(d4);
+            dest.writeInt(useIcons ? 1 : 0);
+            if (useIcons) {
+                if (i1 != null) {
+                    dest.writeInt(1);
+                    i1.writeToParcel(dest, 0);
+                } else {
+                    dest.writeInt(0);
+                }
+                if (i2 != null) {
+                    dest.writeInt(1);
+                    i2.writeToParcel(dest, 0);
+                } else {
+                    dest.writeInt(0);
+                }
+                if (i3 != null) {
+                    dest.writeInt(1);
+                    i3.writeToParcel(dest, 0);
+                } else {
+                    dest.writeInt(0);
+                }
+                if (i4 != null) {
+                    dest.writeInt(1);
+                    i4.writeToParcel(dest, 0);
+                } else {
+                    dest.writeInt(0);
+                }
+            } else {
+                dest.writeInt(d1);
+                dest.writeInt(d2);
+                dest.writeInt(d3);
+                dest.writeInt(d4);
+            }
         }
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
             final TextView target = (TextView) root.findViewById(viewId);
             if (target == null) return;
-            if (isRelative) {
-                target.setCompoundDrawablesRelativeWithIntrinsicBounds(d1, d2, d3, d4);
+            if (useIcons) {
+                final Context ctx = target.getContext();
+                final Drawable id1 = i1 == null ? null : i1.loadDrawable(ctx);
+                final Drawable id2 = i2 == null ? null : i2.loadDrawable(ctx);
+                final Drawable id3 = i3 == null ? null : i3.loadDrawable(ctx);
+                final Drawable id4 = i4 == null ? null : i4.loadDrawable(ctx);
+                if (isRelative) {
+                    target.setCompoundDrawablesRelativeWithIntrinsicBounds(id1, id2, id3, id4);
+                } else {
+                    target.setCompoundDrawablesWithIntrinsicBounds(id1, id2, id3, id4);
+                }
             } else {
-                target.setCompoundDrawablesWithIntrinsicBounds(d1, d2, d3, d4);
+                if (isRelative) {
+                    target.setCompoundDrawablesRelativeWithIntrinsicBounds(d1, d2, d3, d4);
+                } else {
+                    target.setCompoundDrawablesWithIntrinsicBounds(d1, d2, d3, d4);
+                }
             }
         }
 
@@ -1453,7 +1522,9 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         boolean isRelative = false;
+        boolean useIcons = false;
         int d1, d2, d3, d4;
+        Icon i1, i2, i3, i4;
 
         public final static int TAG = 11;
     }
@@ -2064,6 +2135,41 @@ public class RemoteViews implements Parcelable, Filter {
             throw new IllegalArgumentException("index must be in range [0, 3].");
         }
         addAction(new TextViewDrawableColorFilterAction(viewId, true, index, color, mode));
+    }
+
+    /**
+     * Equivalent to calling {@link
+     * TextView#setCompoundDrawablesWithIntrinsicBounds(Drawable, Drawable, Drawable, Drawable)}
+     * using the drawables yielded by {@link Icon#loadDrawable(Context)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param left an Icon to place to the left of the text, or 0
+     * @param top an Icon to place above the text, or 0
+     * @param right an Icon to place to the right of the text, or 0
+     * @param bottom an Icon to place below the text, or 0
+     *
+     * @hide
+     */
+    public void setTextViewCompoundDrawables(int viewId, Icon left, Icon top, Icon right, Icon bottom) {
+        addAction(new TextViewDrawableAction(viewId, false, left, top, right, bottom));
+    }
+
+    /**
+     * Equivalent to calling {@link
+     * TextView#setCompoundDrawablesRelativeWithIntrinsicBounds(Drawable, Drawable, Drawable, Drawable)}
+     * using the drawables yielded by {@link Icon#loadDrawable(Context)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param start an Icon to place before the text (relative to the
+     * layout direction), or 0
+     * @param top an Icon to place above the text, or 0
+     * @param end an Icon to place after the text, or 0
+     * @param bottom an Icon to place below the text, or 0
+     *
+     * @hide
+     */
+    public void setTextViewCompoundDrawablesRelative(int viewId, Icon start, Icon top, Icon end, Icon bottom) {
+        addAction(new TextViewDrawableAction(viewId, true, start, top, end, bottom));
     }
 
     /**
