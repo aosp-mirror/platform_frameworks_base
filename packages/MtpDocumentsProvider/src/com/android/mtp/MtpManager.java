@@ -103,6 +103,12 @@ class MtpManager {
         return new MtpDocument(device.getObjectInfo(objectHandle));
     }
 
+    synchronized byte[] getObject(int deviceId, int objectHandle, int expectedSize)
+            throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        return device.getObject(objectHandle, expectedSize);
+    }
+
     private MtpDevice getDevice(int deviceId) throws IOException {
         final MtpDevice device = mDevices.get(deviceId);
         if (device == null) {

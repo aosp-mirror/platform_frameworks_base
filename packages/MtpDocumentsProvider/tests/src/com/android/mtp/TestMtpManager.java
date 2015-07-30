@@ -35,6 +35,7 @@ public class TestMtpManager extends MtpManager {
     private final Set<Integer> mOpenedDevices = new TreeSet<Integer>();
     private final Map<Integer, MtpRoot[]> mRoots = new HashMap<Integer, MtpRoot[]>();
     private final Map<String, MtpDocument> mDocuments = new HashMap<String, MtpDocument>();
+    private final Map<String, byte[]> mObjectBytes = new HashMap<String, byte[]>();
 
     TestMtpManager(Context context) {
         super(context);
@@ -50,6 +51,10 @@ public class TestMtpManager extends MtpManager {
 
     void setDocument(int deviceId, int objectHandle, MtpDocument document) {
         mDocuments.put(pack(deviceId, objectHandle), document);
+    }
+
+    void setObjectBytes(int deviceId, int objectHandle, int expectedSize, byte[] bytes) {
+        mObjectBytes.put(pack(deviceId, objectHandle, expectedSize), bytes);
     }
 
     @Override
@@ -80,6 +85,16 @@ public class TestMtpManager extends MtpManager {
     @Override
     MtpDocument getDocument(int deviceId, int objectHandle) {
         return mDocuments.get(pack(deviceId, objectHandle));
+    }
+
+    @Override
+    byte[] getObject(int deviceId, int storageId, int expectedSize) throws IOException {
+        final String key = pack(deviceId, storageId, expectedSize);
+        if (mObjectBytes.containsKey(key)) {
+            return mObjectBytes.get(key);
+        } else {
+            throw new IOException("getObject error: " + key);
+        }
     }
 
     @Override

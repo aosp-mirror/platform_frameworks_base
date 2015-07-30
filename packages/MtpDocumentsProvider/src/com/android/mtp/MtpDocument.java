@@ -67,6 +67,10 @@ class MtpDocument {
         this.mThumbSize = thumbSize;
     }
 
+    int getSize() {
+        return mSize;
+    }
+
     String getMimeType() {
         // TODO: Add complete list of mime types.
         switch (mFormat) {
