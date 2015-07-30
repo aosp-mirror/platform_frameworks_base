@@ -18,3 +18,9 @@ to specify stdin or stdout.
 <p>
 You can use "-z" to filter out zygote allocations shared by all applications.
 </p>
+
+<p class="note"><strong>Note:</strong> Android Studio provides integrated access to this conversion
+process. To convert a heap dump to standard HPROF format in Android Studio, right-click a heap
+snapshot in the <em>Captures</em> view and select <strong>Export to standard .hprof</strong>. </p>
+
+
