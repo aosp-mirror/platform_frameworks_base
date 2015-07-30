@@ -2615,7 +2615,9 @@ public abstract class BatteryStats implements Parcelable {
                 getMobileRadioActiveAdjustedTime(which) / 1000, interactiveTime / 1000,
                 powerSaveModeEnabledTime / 1000, connChanges, deviceIdleModeEnabledTime / 1000,
                 getDeviceIdleModeEnabledCount(which), deviceIdlingTime / 1000,
-                getDeviceIdlingCount(which));
+                getDeviceIdlingCount(which),
+                getMobileRadioActiveCount(which),
+                getMobileRadioActiveUnknownTime(which) / 1000);
         
         // Dump screen brightness stats
         Object[] args = new Object[NUM_SCREEN_BRIGHTNESS_BINS];
