@@ -8091,6 +8091,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             keyValueAgentCleanup();
         }
 
+        // TODO: clean up naming; this is now used at finish by both k/v and stream restores
         void keyValueAgentCleanup() {
             mBackupDataName.delete();
             mStageName.delete();
@@ -8126,8 +8127,17 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     // usual full initialization.  Note that this is only done for
                     // full-system restores: when a single app has requested a restore,
                     // it is explicitly not killed following that operation.
-                    if (mTargetPackage == null && (mCurrentPackage.applicationInfo.flags
-                            & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0) {
+                    //
+                    // We execute this kill when these conditions hold:
+                    //    1. the app did not request its own restore (mTargetPackage == null), and either
+                    //    2a. the app is a full-data target (TYPE_FULL_STREAM) or
+                    //     b. the app does not state android:killAfterRestore="false" in its manifest
+                    final int appFlags = mCurrentPackage.applicationInfo.flags;
+                    final boolean killAfterRestore =
+                            (mRestoreDescription.getDataType() == RestoreDescription.TYPE_FULL_STREAM)
+                            || ((appFlags & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0);
+
+                    if (mTargetPackage == null && killAfterRestore) {
                         if (DEBUG) Slog.d(TAG, "Restore complete, killing host process of "
                                 + mCurrentPackage.applicationInfo.processName);
                         mActivityManager.killApplicationProcess(
