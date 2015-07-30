@@ -626,6 +626,7 @@ public class NotificationPanelView extends PanelView implements
                         && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
                     mQsTracking = true;
                     onQsExpansionStarted();
+                    notifyExpandingFinished();
                     mInitialHeightOnTouch = mQsExpansionHeight;
                     mInitialTouchY = y;
                     mInitialTouchX = x;
@@ -825,9 +826,7 @@ public class NotificationPanelView extends PanelView implements
             mInitialTouchX = event.getY();
 
             // If we interrupt an expansion gesture here, make sure to update the state correctly.
-            if (mIsExpanding) {
-                onExpandingFinished();
-            }
+            notifyExpandingFinished();
         }
     }
 
@@ -970,7 +969,6 @@ public class NotificationPanelView extends PanelView implements
     private void onQsExpansionStarted(int overscrollAmount) {
         cancelQsAnimation();
         cancelHeightAnimator();
-        notifyExpandingFinished();
 
         // Reset scroll position and apply that position to the expanded height.
         float height = mQsExpansionHeight - mScrollView.getScrollY() - overscrollAmount;
