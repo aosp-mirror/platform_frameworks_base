@@ -47,7 +47,7 @@
 
 namespace android {
 
-#ifdef HAVE_WINSOCK
+#if defined(_WIN32)
 #undef  nhtol
 #undef  htonl
 #define ntohl(x)    ( ((x) << 24) | (((x) >> 24) & 255) | (((x) << 8) & 0xff0000) | (((x) >> 8) & 0xff00) )
