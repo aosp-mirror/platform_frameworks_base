@@ -99,6 +99,12 @@ public class SystemConfig {
     // URL-handling state upon factory reset.
     final ArraySet<String> mLinkedApps = new ArraySet<>();
 
+    // These are the packages that are whitelisted to be able to run as system user
+    final ArraySet<String> mSystemUserWhitelistedApps = new ArraySet<>();
+
+    // These are the packages that should not run under system user
+    final ArraySet<String> mSystemUserBlacklistedApps = new ArraySet<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -142,6 +148,14 @@ public class SystemConfig {
 
     public ArraySet<String> getLinkedApps() {
         return mLinkedApps;
+    }
+
+    public ArraySet<String> getSystemUserWhitelistedApps() {
+        return mSystemUserWhitelistedApps;
+    }
+
+    public ArraySet<String> getSystemUserBlacklistedApps() {
+        return mSystemUserBlacklistedApps;
     }
 
     SystemConfig() {
@@ -380,7 +394,24 @@ public class SystemConfig {
                         mLinkedApps.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
-
+                } else if ("system-user-whitelisted-app".equals(name)) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<system-user-whitelisted-app> without package in " + permFile
+                                + " at " + parser.getPositionDescription());
+                    } else {
+                        mSystemUserWhitelistedApps.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                } else if ("system-user-blacklisted-app".equals(name)) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<system-user-blacklisted-app without package in " + permFile
+                                + " at " + parser.getPositionDescription());
+                    } else {
+                        mSystemUserBlacklistedApps.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
                 } else {
                     XmlUtils.skipCurrentTag(parser);
                     continue;

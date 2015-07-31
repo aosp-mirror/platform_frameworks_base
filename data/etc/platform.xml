@@ -143,4 +143,7 @@
          access while in power save mode, even if they aren't in the foreground. -->
     <allow-in-power-save-except-idle package="com.android.providers.downloads" />
 
+    <!-- These are the packages that shouldn't run as system user -->
+    <system-user-blacklisted-app package="com.android.wallpaper.livepicker" />
+    <system-user-blacklisted-app package="com.android.settings" />
 </permissions>

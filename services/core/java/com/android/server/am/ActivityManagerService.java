@@ -54,6 +54,7 @@ import android.app.assist.AssistStructure;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.content.pm.AppsQueryHelper;
 import android.content.pm.PermissionInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -101,6 +102,7 @@ import com.android.server.DeviceIdleController;
 import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.Watchdog;
@@ -208,7 +210,6 @@ import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -11983,6 +11984,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
+            enableSystemUserApps();
+
             // Start up initial activity.
             mBooting = true;
             startHomeActivityLocked(mCurrentUserId, "systemReady");
@@ -12030,6 +12033,42 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             mStackSupervisor.resumeTopActivitiesLocked();
             sendUserSwitchBroadcastsLocked(-1, mCurrentUserId);
+        }
+    }
+
+    private void enableSystemUserApps() {
+        // For system user, enable apps based on the following conditions:
+        // - app is whitelisted; or has no launcher icons; or has INTERACT_ACROSS_USERS permission
+        // - app is not in the blacklist
+        if (UserManager.isSplitSystemUser()) {
+            AppsQueryHelper queryHelper = new AppsQueryHelper(mContext);
+            Set<String> enableApps = new HashSet<>();
+            enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_NON_LAUNCHABLE_APPS
+                            | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM,
+                            /* systemAppsOnly */ true, UserHandle.SYSTEM));
+            ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
+            enableApps.addAll(wlApps);
+            ArraySet<String> blApps = SystemConfig.getInstance().getSystemUserBlacklistedApps();
+            enableApps.removeAll(blApps);
+
+            List<String> systemApps = queryHelper.queryApps(0, /* systemAppsOnly */ true,
+                    UserHandle.SYSTEM);
+            final int systemAppsSize = systemApps.size();
+            for (int i = 0; i < systemAppsSize; i++) {
+                String pName = systemApps.get(i);
+                boolean enable = enableApps.contains(pName);
+                try {
+                    if (enable) {
+                        AppGlobals.getPackageManager().installExistingPackageAsUser(pName,
+                                UserHandle.USER_SYSTEM);
+                    } else {
+                        AppGlobals.getPackageManager().deletePackageAsUser(pName, null,
+                                UserHandle.USER_SYSTEM, PackageManager.DELETE_SYSTEM_APP);
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error occured when processing package " + pName, e);
+                }
+            }
         }
     }
 
