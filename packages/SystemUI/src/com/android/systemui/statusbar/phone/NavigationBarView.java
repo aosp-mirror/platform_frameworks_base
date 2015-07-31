@@ -380,16 +380,18 @@ public class NavigationBarView extends LinearLayout {
         mLayoutTransitionsEnabled = enabled;
         ViewGroup navButtons = (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
         LayoutTransition lt = navButtons.getLayoutTransition();
-        if (enabled) {
-            lt.enableTransitionType(LayoutTransition.APPEARING);
-            lt.enableTransitionType(LayoutTransition.DISAPPEARING);
-            lt.enableTransitionType(LayoutTransition.CHANGE_APPEARING);
-            lt.enableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
-        } else {
-            lt.disableTransitionType(LayoutTransition.APPEARING);
-            lt.disableTransitionType(LayoutTransition.DISAPPEARING);
-            lt.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
-            lt.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+        if (lt != null) {
+            if (enabled) {
+                lt.enableTransitionType(LayoutTransition.APPEARING);
+                lt.enableTransitionType(LayoutTransition.DISAPPEARING);
+                lt.enableTransitionType(LayoutTransition.CHANGE_APPEARING);
+                lt.enableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+            } else {
+                lt.disableTransitionType(LayoutTransition.APPEARING);
+                lt.disableTransitionType(LayoutTransition.DISAPPEARING);
+                lt.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
+                lt.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+            }
         }
     }
 
