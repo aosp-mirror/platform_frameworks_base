@@ -29,6 +29,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -670,6 +671,7 @@ public class StackStateAnimator {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                HeadsUpManager.setIsClickedNotification(child, false);
                 child.setTag(TAG_ANIMATOR_TRANSLATION_Y, null);
                 child.setTag(TAG_START_TRANSLATION_Y, null);
                 child.setTag(TAG_END_TRANSLATION_Y, null);

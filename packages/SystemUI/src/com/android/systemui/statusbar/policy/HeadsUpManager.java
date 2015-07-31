@@ -51,6 +51,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private static final String TAG = "HeadsUpManager";
     private static final boolean DEBUG = false;
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
+    private static final int TAG_CLICKED_NOTIFICATION = R.id.is_clicked_heads_up_tag;
 
     private final int mHeadsUpNotificationDecay;
     private final int mMinimumDisplayTime;
@@ -524,6 +525,15 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
                 }
             }
         });
+    }
+
+    public static void setIsClickedNotification(View child, boolean clicked) {
+        child.setTag(TAG_CLICKED_NOTIFICATION, clicked ? true : null);
+    }
+
+    public static boolean isClickedHeadsUpNotification(View child) {
+        Boolean clicked = (Boolean) child.getTag(TAG_CLICKED_NOTIFICATION);
+        return clicked != null && clicked;
     }
 
     /**

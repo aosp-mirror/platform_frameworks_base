@@ -32,7 +32,6 @@ import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
@@ -203,10 +202,12 @@ public class NotificationPanelView extends PanelView implements
     private int mPositionMinSideMargin;
     private int mLastOrientation = -1;
     private boolean mClosingWithAlphaFadeOut;
+    private boolean mHeadsUpAnimatingAway;
 
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
         public void run() {
+            mHeadsUpAnimatingAway = false;
             notifyBarPanelExpansionChanged();
         }
     };
@@ -2292,6 +2293,7 @@ public class NotificationPanelView extends PanelView implements
             mHeadsUpExistenceChangedRunnable.run();
             updateNotificationTranslucency();
         } else {
+            mHeadsUpAnimatingAway = true;
             mNotificationStackScroller.runAfterAnimationFinished(
                     mHeadsUpExistenceChangedRunnable);
         }
@@ -2381,5 +2383,9 @@ public class NotificationPanelView extends PanelView implements
 
     public void clearNotificattonEffects() {
         mStatusBar.clearNotificationEffects();
+    }
+
+    protected boolean isPanelVisibleBecauseOfHeadsUp() {
+        return mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpAnimatingAway;
     }
 }
