@@ -162,7 +162,11 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
                     root.flags |= Root.FLAG_HAS_SETTINGS;
                 }
-                root.visiblePath = volume.getPathForUser(userId);
+                if (volume.isVisibleForRead(userId)) {
+                    root.visiblePath = volume.getPathForUser(userId);
+                } else {
+                    root.visiblePath = null;
+                }
                 root.path = volume.getInternalPathForUser(userId);
                 root.docId = getDocIdForFile(root.path);
 
