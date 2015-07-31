@@ -30,12 +30,12 @@ import java.io.IOException;
 public class MtpDocumentsProviderTest extends AndroidTestCase {
     private ContentResolver mResolver;
     private MtpDocumentsProvider mProvider;
-    private MtpManagerMock mMtpManager;
+    private TestMtpManager mMtpManager;
 
     @Override
     public void setUp() {
         mResolver = new ContentResolver();
-        mMtpManager = new MtpManagerMock(getContext());
+        mMtpManager = new TestMtpManager(getContext());
         mProvider = new MtpDocumentsProvider();
         mProvider.onCreateForTesting(mMtpManager, mResolver);
     }
