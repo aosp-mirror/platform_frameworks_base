@@ -1470,11 +1470,12 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Pauses any extra processing associated with this WebView and its
-     * associated DOM, plugins, JavaScript etc. For example, if this WebView is
-     * taken offscreen, this could be called to reduce unnecessary CPU or
-     * network traffic. When this WebView is again "active", call onResume().
-     * Note that this differs from pauseTimers(), which affects all WebViews.
+     * Does a best-effort attempt to pause any processing that can be paused
+     * safely, such as animations and geolocation. Note that this call
+     * does not pause JavaScript. To pause JavaScript globally, use
+     * {@link #pauseTimers}.
+     *
+     * To resume WebView, call {@link #onResume}.
      */
     public void onPause() {
         checkThread();
@@ -1482,7 +1483,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Resumes a WebView after a previous call to onPause().
+     * Resumes a WebView after a previous call to {@link #onPause}.
      */
     public void onResume() {
         checkThread();
