@@ -584,7 +584,7 @@ void DisplayListCanvas::refBitmapsInShader(const SkShader* shader) {
     // it to the bitmap pile
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
-    if (shader->asABitmap(&bitmap, nullptr, xy) == SkShader::kDefault_BitmapType) {
+    if (shader->isABitmap(&bitmap, nullptr, xy)) {
         refBitmap(bitmap);
         return;
     }

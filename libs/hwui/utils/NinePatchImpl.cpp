@@ -82,7 +82,7 @@ static void drawStretchyPatch(SkCanvas* canvas, SkIRect& src, const SkRect& dst,
         }
     } else {
     SLOW_CASE:
-        canvas->drawBitmapRect(bitmap, &src, dst, &paint);
+        canvas->drawBitmapRect(bitmap, SkRect::Make(src), dst, &paint);
     }
 }
 

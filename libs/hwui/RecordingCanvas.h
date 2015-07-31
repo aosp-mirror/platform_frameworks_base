@@ -27,6 +27,8 @@
 #include "Snapshot.h"
 
 #include "SkDrawFilter.h"
+#include "SkPaint.h"
+#include "SkTLazy.h"
 #include <vector>
 
 namespace android {

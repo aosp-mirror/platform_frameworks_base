@@ -194,15 +194,13 @@ private:
 
 void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
     SkCanvas* newCanvas = new SkCanvas(bitmap);
-    SkASSERT(newCanvas);
 
     if (!bitmap.isNull()) {
         // Copy the canvas matrix & clip state.
         newCanvas->setMatrix(mCanvas->getTotalMatrix());
-        if (NULL != mCanvas->getDevice() && NULL != newCanvas->getDevice()) {
-            ClipCopier copier(newCanvas);
-            mCanvas->replayClips(&copier);
-        }
+
+        ClipCopier copier(newCanvas);
+        mCanvas->replayClips(&copier);
     }
 
     // unrefs the existing canvas
@@ -217,15 +215,15 @@ void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
 // ----------------------------------------------------------------------------
 
 bool SkiaCanvas::isOpaque() {
-    return mCanvas->getDevice()->accessBitmap(false).isOpaque();
+    return mCanvas->imageInfo().isOpaque();
 }
 
 int SkiaCanvas::width() {
-    return mCanvas->getBaseLayerSize().width();
+    return mCanvas->imageInfo().width();
 }
 
 int SkiaCanvas::height() {
-    return mCanvas->getBaseLayerSize().height();
+    return mCanvas->imageInfo().height();
 }
 
 // ----------------------------------------------------------------------------
@@ -581,7 +579,7 @@ void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
                             float dstRight, float dstBottom, const SkPaint* paint) {
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    mCanvas->drawBitmapRectToRect(bitmap, &srcRect, dstRect, paint);
+    mCanvas->drawBitmapRect(bitmap, srcRect, dstRect, paint);
 }
 
 void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
