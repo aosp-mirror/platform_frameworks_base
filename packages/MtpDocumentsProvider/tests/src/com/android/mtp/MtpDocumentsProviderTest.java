@@ -19,12 +19,14 @@ package com.android.mtp;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.IOException;
+import java.util.Date;
 
 @SmallTest
 public class MtpDocumentsProviderTest extends AndroidTestCase {
@@ -165,6 +167,50 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals("1:1:0", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
+    }
+
+    public void testQueryDocument() throws IOException {
+        mMtpManager.setDocument(0, 2, new MtpDocument(
+                2 /* object handle */,
+                0x3801 /* JPEG */,
+                "image.jpg" /* display name */,
+                new Date(1422716400000L) /* modified date */,
+                1024 * 1024 * 5 /* file size */,
+                1024 * 50 /* thumbnail size */));
+        final Cursor cursor = mProvider.queryDocument("0:1:2", null);
+        assertEquals(1, cursor.getCount());
+
+        cursor.moveToNext();
+        assertEquals("0:1:2", cursor.getString(0));
+        assertEquals("image/jpeg", cursor.getString(1));
+        assertEquals("image.jpg", cursor.getString(2));
+        assertEquals(1422716400000L, cursor.getLong(3));
+        assertEquals(
+                DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
+                DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL,
+                cursor.getInt(4));
+        assertEquals(1024 * 1024 * 5, cursor.getInt(5));
+    }
+
+    public void testQueryDocument_forRoot() throws IOException {
+        mMtpManager.setRoots(0, new MtpRoot[] {
+                new MtpRoot(
+                        1 /* storageId */,
+                        "Storage A" /* volume description */,
+                        1024 /* free space */,
+                        4096 /* total space */,
+                        "" /* no volume identifier */)
+        });
+        final Cursor cursor = mProvider.queryDocument("0:1:0", null);
+        assertEquals(1, cursor.getCount());
+
+        cursor.moveToNext();
+        assertEquals("0:1:0", cursor.getString(0));
+        assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
+        assertEquals("Storage A", cursor.getString(2));
+        assertTrue(cursor.isNull(3));
+        assertEquals(0, cursor.getInt(4));
+        assertEquals(3072, cursor.getInt(5));
     }
 
     private static class ContentResolver extends MockContentResolver {

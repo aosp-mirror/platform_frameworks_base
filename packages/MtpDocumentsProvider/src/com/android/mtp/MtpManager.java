@@ -98,6 +98,11 @@ class MtpManager {
         return results;
     }
 
+    synchronized MtpDocument getDocument(int deviceId, int objectHandle) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        return new MtpDocument(device.getObjectInfo(objectHandle));
+    }
+
     private MtpDevice getDevice(int deviceId) throws IOException {
         final MtpDevice device = mDevices.get(deviceId);
         if (device == null) {

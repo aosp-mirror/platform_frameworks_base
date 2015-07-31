@@ -21,14 +21,14 @@ import android.mtp.MtpStorageInfo;
 import com.android.internal.annotations.VisibleForTesting;
 
 class MtpRoot {
-    final long mStorageId;
+    final int mStorageId;
     final String mDescription;
     final long mFreeSpace;
     final long mMaxCapacity;
     final String mVolumeIdentifier;
 
     @VisibleForTesting
-    MtpRoot(long storageId,
+    MtpRoot(int storageId,
             String description,
             long freeSpace,
             long maxCapacity,
