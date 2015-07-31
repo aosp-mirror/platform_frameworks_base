@@ -112,7 +112,7 @@ public class DevicePolicyManager {
      *
      * In version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this intent must contain the
      * extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
-     * As of {@link android.os.Build.VERSION_CODES#MNC}, it should contain the extra
+     * As of {@link android.os.Build.VERSION_CODES#M}, it should contain the extra
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead, although specifying only
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported.
      *
@@ -417,7 +417,7 @@ public class DevicePolicyManager {
      *
      * <p><strong>Note:</strong> for devices running {@link android.os.Build.VERSION_CODES#LOLLIPOP}
      * and {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} only SHA-1 hash is supported.
-     * Starting from {@link android.os.Build.VERSION_CODES#MNC}, this parameter accepts SHA-256 in
+     * Starting from {@link android.os.Build.VERSION_CODES#M}, this parameter accepts SHA-256 in
      * addition to SHA-1. Support for SHA-1 is likely to be removed in future OS releases.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM
@@ -590,7 +590,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li></ul>
      *
      * <p>
-     * As of {@link android.os.Build.VERSION_CODES#MNC}, the properties should contain
+     * As of {@link android.os.Build.VERSION_CODES#M}, the properties should contain
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead of
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}, (although specifying only
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported).
@@ -603,7 +603,7 @@ public class DevicePolicyManager {
      * @hide
      * This MIME type is used for starting the Device Owner provisioning that requires
      * new provisioning features introduced in API version
-     * {@link android.os.Build.VERSION_CODES#MNC} in addition to those supported in earlier
+     * {@link android.os.Build.VERSION_CODES#M} in addition to those supported in earlier
      * versions.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
@@ -2415,7 +2415,7 @@ public class DevicePolicyManager {
      * <p>The calling device admin must be a device or profile owner. If it is not, a
      * security exception will be thrown.
      *
-     * <p>From version {@link android.os.Build.VERSION_CODES#MNC} disabling screen capture also
+     * <p>From version {@link android.os.Build.VERSION_CODES#M} disabling screen capture also
      * blocks assist requests for all activities of the relevant user.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -2499,9 +2499,9 @@ public class DevicePolicyManager {
      * this method; if it has not, a security exception will be thrown.
      *
      * <p>Calling this from a managed profile before version
-     * {@link android.os.Build.VERSION_CODES#MNC} will throw a security exception.
+     * {@link android.os.Build.VERSION_CODES#M} will throw a security exception.
      *
-     * <p>From version {@link android.os.Build.VERSION_CODES#MNC} a profile owner can set:
+     * <p>From version {@link android.os.Build.VERSION_CODES#M} a profile owner can set:
      * <ul>
      * <li>{@link #KEYGUARD_DISABLE_TRUST_AGENTS}, {@link #KEYGUARD_DISABLE_FINGERPRINT}
      *      these will affect the profile's parent user.
@@ -3623,7 +3623,7 @@ public class DevicePolicyManager {
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
      *
-     * @deprecated From {@link android.os.Build.VERSION_CODES#MNC}
+     * @deprecated From {@link android.os.Build.VERSION_CODES#M}
      */
     @Deprecated
     public UserHandle createUser(@NonNull ComponentName admin, String name) {
@@ -3660,7 +3660,7 @@ public class DevicePolicyManager {
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
      *
-     * @deprecated From {@link android.os.Build.VERSION_CODES#MNC}
+     * @deprecated From {@link android.os.Build.VERSION_CODES#M}
      */
     @Deprecated
     public UserHandle createAndInitializeUser(@NonNull ComponentName admin, String name,
@@ -3914,7 +3914,7 @@ public class DevicePolicyManager {
      * <p>Any packages that shares uid with an allowed package will also be allowed
      * to activate lock task.
      *
-     * From {@link android.os.Build.VERSION_CODES#MNC} removing packages from the lock task
+     * From {@link android.os.Build.VERSION_CODES#M} removing packages from the lock task
      * package list results in locked tasks belonging to those packages to be finished.
      *
      * This function can only be called by the device owner.
@@ -3982,14 +3982,14 @@ public class DevicePolicyManager {
      * <li>{@link Settings.Global#USB_MASS_STORAGE_ENABLED}</li>
      * <li>{@link Settings.Global#WIFI_SLEEP_POLICY}</li>
      * <li>{@link Settings.Global#STAY_ON_WHILE_PLUGGED_IN}
-     *   This setting is only available from {@link android.os.Build.VERSION_CODES#MNC} onwards
+     *   This setting is only available from {@link android.os.Build.VERSION_CODES#M} onwards
      *   and can only be set if {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
      * <li>{@link Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li>
-     *   This setting is only available from {@link android.os.Build.VERSION_CODES#MNC} onwards.
+     *   This setting is only available from {@link android.os.Build.VERSION_CODES#M} onwards.
      *   </li>
      * </ul>
      * <p>Changing the following settings has no effect as of
-     * {@link android.os.Build.VERSION_CODES#MNC}:
+     * {@link android.os.Build.VERSION_CODES#M}:
      * <ul>
      * <li>{@link Settings.Global#BLUETOOTH_ON}.
      *   Use {@link android.bluetooth.BluetoothAdapter#enable()} and
@@ -4344,7 +4344,7 @@ public class DevicePolicyManager {
      * the permission grant state via {@link #setPermissionGrantState}.
      *
      * <p/>As this policy only acts on runtime permission requests, it only applies to applications
-     * built with a {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#MNC} or later.
+     * built with a {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#M} or later.
      *
      * @param admin Which profile or device owner this request is associated with.
      * @param policy One of the policy constants {@link #PERMISSION_POLICY_PROMPT},
@@ -4388,7 +4388,7 @@ public class DevicePolicyManager {
      * revoke the permission. It retains the previous grant, if any.
      *
      * <p/>Permissions can be granted or revoked only for applications built with a
-     * {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#MNC} or later.
+     * {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#M} or later.
      *
      * @param admin Which profile or device owner this request is associated with.
      * @param packageName The application to grant or revoke a permission to.
