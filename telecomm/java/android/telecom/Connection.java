@@ -253,20 +253,33 @@ public abstract class Connection extends Conferenceable {
     //**********************************************************************************************
 
     /**
-     * Call extras key to pack/unpack call history info.
-     * The value for this key should be an ArrayList of Strings.
+     * TODO: Remove this -- retained so the build won't break.  However, future work will remove it.
      * @hide
      */
     public static final String EXTRA_CALL_HISTORY_INFO = "android.telecom.EXTRA_CALL_HISTORY_INFO";
 
     /**
-     * Connection {@link #mExtras} key used to store a child number associated with the current
-     * connection.  Used to communicate to the user interface that the connection was received via
-     * a child address (in telephony phone number) associated with the {@link PhoneAccount}'s
-     * primary address.
-     * @hide
+     * Connection extra key used to store the last forwarded number associated with the current
+     * connection.  Used to communicate to the user interface that the connection was forwarded via
+     * the specified number.
      */
-    public static final String EXTRA_CHILD_ADDRESS = "android.telecom.EXTRA_CHILD_ADDRESS";
+    public static final String EXTRA_LAST_FORWARDED_NUMBER =
+            "android.telecom.extra.LAST_FORWARDED_NUMBER";
+
+    /**
+     * Connection extra key used to store a child number associated with the current connection.
+     * Used to communicate to the user interface that the connection was received via
+     * a child address (i.e. phone number) associated with the {@link PhoneAccount}'s primary
+     * address.
+     */
+    public static final String EXTRA_CHILD_ADDRESS = "android.telecom.extra.CHILD_ADDRESS";
+
+    /**
+     * Connection extra key used to store the subject for an incoming call.  The user interface can
+     * query this extra and display its contents for incoming calls.  Will only be used if the
+     * {@link PhoneAccount} supports the capability {@link PhoneAccount#CAPABILITY_CALL_SUBJECT}.
+     */
+    public static final String EXTRA_CALL_SUBJECT = "android.telecom.extra.CALL_SUBJECT";
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
