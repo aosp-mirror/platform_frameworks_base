@@ -1525,6 +1525,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         //
                         // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
                         // become canceled shortly by NoMan, but we can't assume that.
+                        HeadsUpManager.setIsClickedNotification(row, true);
                         mHeadsUpManager.releaseImmediately(notificationKey);
                     }
                     new Thread() {
