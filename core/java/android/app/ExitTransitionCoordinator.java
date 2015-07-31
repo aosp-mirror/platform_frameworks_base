@@ -240,7 +240,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
             }
             final boolean targetsM = decorView == null || decorView.getContext()
-                    .getApplicationInfo().targetSdkVersion >= VERSION_CODES.MNC;
+                    .getApplicationInfo().targetSdkVersion >= VERSION_CODES.M;
             ArrayList<String> sharedElementNames = targetsM ? mSharedElementNames :
                     mAllSharedElementNames;
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mActivity, this,
