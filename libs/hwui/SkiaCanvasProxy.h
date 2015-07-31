@@ -63,7 +63,7 @@ protected:
     virtual void onDrawBitmap(const SkBitmap&, SkScalar left, SkScalar top,
                               const SkPaint*) override;
     virtual void onDrawBitmapRect(const SkBitmap&, const SkRect* src, const SkRect& dst,
-                                  const SkPaint* paint, DrawBitmapRectFlags flags) override;
+                                  const SkPaint* paint, SrcRectConstraint) override;
     virtual void onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& center,
                                   const SkRect& dst, const SkPaint*) override;
     virtual void onDrawSprite(const SkBitmap&, int left, int top,
