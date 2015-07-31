@@ -220,11 +220,12 @@ final class SystemServiceRegistry {
         SYSTEM_SERVICE_NAMES.put(android.text.ClipboardManager.class, Context.CLIPBOARD_SERVICE);
 
         registerService(Context.CONNECTIVITY_SERVICE, ConnectivityManager.class,
-                new StaticServiceFetcher<ConnectivityManager>() {
+                new StaticOuterContextServiceFetcher<ConnectivityManager>() {
             @Override
-            public ConnectivityManager createService() {
+            public ConnectivityManager createService(Context context) {
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                return new ConnectivityManager(IConnectivityManager.Stub.asInterface(b));
+                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+                return new ConnectivityManager(context, service);
             }});
 
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,
@@ -793,4 +794,30 @@ final class SystemServiceRegistry {
 
         public abstract T createService();
     }
+
+    /**
+     * Like StaticServiceFetcher, creates only one instance of the service per process, but when
+     * creating the service for the first time, passes it the outer context of the creating
+     * component.
+     *
+     * TODO: Is this safe in the case where multiple applications share the same process?
+     * TODO: Delete this once its only user (ConnectivityManager) is known to work well in the
+     * case where multiple application components each have their own ConnectivityManager object.
+     */
+    static abstract class StaticOuterContextServiceFetcher<T> implements ServiceFetcher<T> {
+        private T mCachedInstance;
+
+        @Override
+        public final T getService(ContextImpl ctx) {
+            synchronized (StaticOuterContextServiceFetcher.this) {
+                if (mCachedInstance == null) {
+                    mCachedInstance = createService(ctx.getOuterContext());
+                }
+                return mCachedInstance;
+            }
+        }
+
+        public abstract T createService(Context applicationContext);
+    }
+
 }
