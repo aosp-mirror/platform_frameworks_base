@@ -1277,11 +1277,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 && !hasUserSetupCompleted(userId);
 
         if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
-            if (ownsDevice || (userId == UserHandle.USER_OWNER && ownsInitialization)) {
+            if ((userId == UserHandle.USER_OWNER && (ownsDevice || ownsInitialization))
+                    || (ownsDevice && ownsProfile)) {
                 return true;
             }
         } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
-            if (ownsDevice || ownsProfile || ownsInitialization) {
+            if ((userId == UserHandle.USER_OWNER && ownsDevice) || ownsProfile
+                    || ownsInitialization) {
                 return true;
             }
         } else {
@@ -4243,6 +4245,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 initializer.getPackageName(), mContext.getPackageManager())) {
             throw new IllegalArgumentException("Invalid component name " + initializer
                     + " for device initializer");
+        }
+        boolean isInitializerSystemApp;
+        try {
+            isInitializerSystemApp = isSystemApp(AppGlobals.getPackageManager(),
+                    initializer.getPackageName(), Binder.getCallingUserHandle().getIdentifier());
+        } catch (RemoteException | IllegalArgumentException e) {
+            isInitializerSystemApp = false;
+            Slog.e(LOG_TAG, "Fail to check if device initialzer is system app.", e);
+        }
+        if (!isInitializerSystemApp) {
+            throw new IllegalArgumentException("Only system app can be set as device initializer.");
         }
         synchronized (this) {
             enforceCanSetDeviceInitializer(who);
