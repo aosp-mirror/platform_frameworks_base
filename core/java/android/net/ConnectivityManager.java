@@ -22,6 +22,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
@@ -33,6 +34,7 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -490,6 +492,8 @@ public class ConnectivityManager {
      */
     private static ConnectivityManager sInstance;
 
+    private final Context mContext;
+
     private INetworkManagementService mNMService;
 
     /**
@@ -892,8 +896,11 @@ public class ConnectivityManager {
      *
      * @deprecated Deprecated in favor of the cleaner
      *             {@link #requestNetwork(NetworkRequest, NetworkCallback)} API.
+     *             In {@link VERSION_CODES#MNC}, and above, this method is unsupported and will
+     *             throw {@code UnsupportedOperationException} if called.
      */
     public int startUsingNetworkFeature(int networkType, String feature) {
+        checkLegacyRoutingApiAccess();
         NetworkCapabilities netCap = networkCapabilitiesForFeature(networkType, feature);
         if (netCap == null) {
             Log.d(TAG, "Can't satisfy startUsingNetworkFeature for " + networkType + ", " +
@@ -939,8 +946,11 @@ public class ConnectivityManager {
      * always indicates failure.
      *
      * @deprecated Deprecated in favor of the cleaner {@link #unregisterNetworkCallback} API.
+     *             In {@link VERSION_CODES#MNC}, and above, this method is unsupported and will
+     *             throw {@code UnsupportedOperationException} if called.
      */
     public int stopUsingNetworkFeature(int networkType, String feature) {
+        checkLegacyRoutingApiAccess();
         NetworkCapabilities netCap = networkCapabilitiesForFeature(networkType, feature);
         if (netCap == null) {
             Log.d(TAG, "Can't satisfy stopUsingNetworkFeature for " + networkType + ", " +
@@ -1354,6 +1364,8 @@ public class ConnectivityManager {
      * @deprecated Deprecated in favor of the
      *             {@link #requestNetwork(NetworkRequest, NetworkCallback)},
      *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} API.
+     *             In {@link VERSION_CODES#MNC}, and above, this method is unsupported and will
+     *             throw {@code UnsupportedOperationException} if called.
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
         return requestRouteToHostAddress(networkType, NetworkUtils.intToInetAddress(hostAddress));
@@ -1374,6 +1386,7 @@ public class ConnectivityManager {
      *             {@link #bindProcessToNetwork} API.
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
+        checkLegacyRoutingApiAccess();
         try {
             return mService.requestRouteToHostAddress(networkType, hostAddress.getAddress());
         } catch (RemoteException e) {
@@ -1552,7 +1565,8 @@ public class ConnectivityManager {
     /**
      * {@hide}
      */
-    public ConnectivityManager(IConnectivityManager service) {
+    public ConnectivityManager(Context context, IConnectivityManager service) {
+        mContext = checkNotNull(context, "missing context");
         mService = checkNotNull(service, "missing IConnectivityManager");
         sInstance = this;
     }
@@ -2837,6 +2851,34 @@ public class ConnectivityManager {
         int netId = NetworkUtils.getBoundNetworkForProcess();
         if (netId == NETID_UNSET) return null;
         return new Network(netId);
+    }
+
+    private void unsupportedStartingFrom(int version) {
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            // The getApplicationInfo() call we make below is not supported in system context, and
+            // we want to allow the system to use these APIs anyway.
+            return;
+        }
+
+        if (mContext.getApplicationInfo().targetSdkVersion >= version) {
+            throw new UnsupportedOperationException(
+                    "This method is not supported in target SDK version " + version + " and above");
+        }
+    }
+
+    // Checks whether the calling app can use the legacy routing API (startUsingNetworkFeature,
+    // stopUsingNetworkFeature, requestRouteToHost), and if not throw UnsupportedOperationException.
+    // TODO: convert the existing system users (Tethering, GpsLocationProvider) to the new APIs and
+    // remove these exemptions. Note that this check is not secure, and apps can still access these
+    // functions by accessing ConnectivityService directly. However, it should be clear that doing
+    // so is unsupported and may break in the future. http://b/22728205
+    private void checkLegacyRoutingApiAccess() {
+        if (mContext.checkCallingOrSelfPermission("com.android.permission.INJECT_OMADM_SETTINGS")
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        unsupportedStartingFrom(VERSION_CODES.MNC);
     }
 
     /**
