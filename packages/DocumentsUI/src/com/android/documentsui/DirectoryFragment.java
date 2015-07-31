@@ -286,6 +286,11 @@ public class DirectoryFragment extends Fragment {
                     public boolean onSingleTapUp(MotionEvent e) {
                         return DirectoryFragment.this.onSingleTapUp(e);
                     }
+                    @Override
+                    public boolean onDoubleTap(MotionEvent e) {
+                        Log.d(TAG, "Handling double tap.");
+                        return DirectoryFragment.this.onDoubleTap(e);
+                    }
                 };
 
         mSelectionManager = new MultiSelectManager(mRecView, listener);
@@ -425,20 +430,37 @@ public class DirectoryFragment extends Fragment {
     }
 
     private boolean onSingleTapUp(MotionEvent e) {
-        int position = getEventAdapterPosition(e);
-
-        if (position != RecyclerView.NO_POSITION) {
-            final Cursor cursor = mAdapter.getItem(position);
-            checkNotNull(cursor, "Cursor cannot be null.");
-            final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-            final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-            if (isDocumentEnabled(docMimeType, docFlags)) {
-                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-                ((BaseActivity) getActivity()).onDocumentPicked(doc);
-                return true;
+        if (!Events.isMouseEvent(e)) {
+            int position = getEventAdapterPosition(e);
+            if (position != RecyclerView.NO_POSITION) {
+                return handleViewItem(position);
             }
         }
+        return false;
+    }
 
+    protected boolean onDoubleTap(MotionEvent e) {
+        if (Events.isMouseEvent(e)) {
+            Log.d(TAG, "Handling double tap from mouse.");
+            int position = getEventAdapterPosition(e);
+            if (position != RecyclerView.NO_POSITION) {
+                return handleViewItem(position);
+            }
+        }
+        return false;
+    }
+
+    private boolean handleViewItem(int position) {
+        final Cursor cursor = mAdapter.getItem(position);
+        checkNotNull(cursor, "Cursor cannot be null.");
+        final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+        final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+        if (isDocumentEnabled(docMimeType, docFlags)) {
+            final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
+            ((BaseActivity) getActivity()).onDocumentPicked(doc);
+            mSelectionManager.clearSelection();
+            return true;
+        }
         return false;
     }
 

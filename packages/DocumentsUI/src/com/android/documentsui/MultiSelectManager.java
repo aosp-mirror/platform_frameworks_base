@@ -26,12 +26,10 @@ import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.GestureDetector;
+import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-
-import com.android.internal.util.Preconditions;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -51,7 +49,7 @@ public final class MultiSelectManager {
     // Only created when selection is cleared.
     private Selection mIntermediateSelection;
 
-    private Ranger mRanger;
+    private Range mRanger;
     private final List<MultiSelectManager.Callback> mCallbacks = new ArrayList<>(1);
 
     private Adapter<?> mAdapter;
@@ -60,8 +58,11 @@ public final class MultiSelectManager {
     /**
      * @param recyclerView
      * @param gestureDelegate Option delage gesture listener.
+     * @template A gestureDelegate that implements both {@link OnGestureListener}
+     *     and {@link OnDoubleTapListener}
      */
-    public MultiSelectManager(final RecyclerView recyclerView, OnGestureListener gestureDelegate) {
+    public <L extends OnGestureListener & OnDoubleTapListener> MultiSelectManager(
+            final RecyclerView recyclerView, L gestureDelegate) {
         this(
                 recyclerView.getAdapter(),
                 new RecyclerViewHelper() {
@@ -86,11 +87,15 @@ public final class MultiSelectManager {
                     }
                 };
 
+        CompositeOnGestureListener<? extends Object> compositeListener =
+                new CompositeOnGestureListener<>(listener, gestureDelegate);
         final GestureDetector detector = new GestureDetector(
                 recyclerView.getContext(),
                 gestureDelegate == null
                         ? listener
-                        : new CompositeOnGestureListener(listener, gestureDelegate));
+                        : compositeListener);
+
+        detector.setOnDoubleTapListener(compositeListener);
 
         recyclerView.addOnItemTouchListener(
                 new RecyclerView.OnItemTouchListener() {
@@ -236,52 +241,6 @@ public final class MultiSelectManager {
         }
     }
 
-    /**
-     * @param e
-     * @return true if the event was consumed.
-     */
-    private boolean onSingleTapUp(MotionEvent e) {
-        if (DEBUG) Log.d(TAG, "Handling tap event.");
-        if (mSelection.isEmpty()) {
-            return false;
-        }
-
-        return onSingleTapUp(mHelper.findEventPosition(e), e.getMetaState());
-    }
-
-    /**
-     * TODO: Roll this into {@link #onSingleTapUp(MotionEvent)} once MotionEvent
-     * can be mocked.
-     *
-     * @param position
-     * @param metaState as returned from {@link MotionEvent#getMetaState()}.
-     * @return true if the event was consumed.
-     * @hide
-     */
-    @VisibleForTesting
-    boolean onSingleTapUp(int position, int metaState) {
-        if (mSelection.isEmpty()) {
-            return false;
-        }
-
-        if (position == RecyclerView.NO_POSITION) {
-            if (DEBUG) Log.d(TAG, "View is null. Canceling selection.");
-            clearSelection();
-            return true;
-        }
-
-        if (isShiftPressed(metaState) && mRanger != null) {
-            mRanger.snapSelection(position);
-        } else {
-            toggleSelection(position);
-        }
-        return true;
-    }
-
-    private static boolean isShiftPressed(int metaState) {
-        return (metaState & KeyEvent.META_SHIFT_ON) != 0;
-    }
-
     private void onLongPress(MotionEvent e) {
         if (DEBUG) Log.d(TAG, "Handling long press event.");
 
@@ -310,6 +269,50 @@ public final class MultiSelectManager {
     }
 
     /**
+     * @param e
+     * @return true if the event was consumed.
+     */
+    private boolean onSingleTapUp(MotionEvent e) {
+        if (DEBUG) Log.d(TAG, "Handling tap event.");
+        return onSingleTapUp(mHelper.findEventPosition(e), e.getMetaState(), e.getToolType(0));
+    }
+
+    /**
+     * TODO: Roll this into {@link #onSingleTapUp(MotionEvent)} once MotionEvent
+     * can be mocked.
+     *
+     * @param position
+     * @param metaState as returned from {@link MotionEvent#getMetaState()}.
+     * @param toolType
+     * @return true if the event was consumed.
+     * @hide
+     */
+    @VisibleForTesting
+    boolean onSingleTapUp(int position, int metaState, int toolType) {
+        if (mSelection.isEmpty()) {
+            // if this is a mouse click on an item, start selection mode.
+            if (position != RecyclerView.NO_POSITION && Events.isMouseType(toolType)) {
+                toggleSelection(position);
+            }
+            return false;
+        }
+
+        if (position == RecyclerView.NO_POSITION) {
+            if (DEBUG) Log.d(TAG, "View is null. Canceling selection.");
+            clearSelection();
+            return false;
+        }
+
+        if (Events.hasShiftBit(metaState) && mRanger != null) {
+            mRanger.snapSelection(position);
+        } else {
+            toggleSelection(position);
+        }
+
+        return false;
+    }
+
+    /**
      * Toggles the selection state at position. If an item does end up selected
      * a new Ranger (range selection manager) at that point is created.
      *
@@ -334,10 +337,23 @@ public final class MultiSelectManager {
             // By recreating Ranger at this point, we allow the user to create
             // multiple separate contiguous ranges with SHIFT+Click & Click.
             if (selected) {
-                mRanger = new Ranger(position);
+                setSelectionFocusBegin(position);
             }
             return selected;
         }
+    }
+
+    /**
+     * Sets the magic location at which a selection range begins. This
+     * value is consulted when determining how to extend, and modify
+     * selection ranges.
+     *
+     * @throws IllegalStateException if {@code position} is not already be selected
+     * @param position
+     */
+    void setSelectionFocusBegin(int position) {
+        checkState(mSelection.contains(position));
+        mRanger = new Range(position);
     }
 
     /**
@@ -420,18 +436,18 @@ public final class MultiSelectManager {
     /**
      * Class providing support for managing range selections.
      */
-    private final class Ranger {
+    private final class Range {
         private static final int UNDEFINED = -1;
 
         final int mBegin;
         int mEnd = UNDEFINED;
 
-        public Ranger(int begin) {
+        public Range(int begin) {
             if (DEBUG) Log.d(TAG, String.format("New Ranger(%d) created.", begin));
             mBegin = begin;
         }
 
-        void snapSelection(int position) {
+        private void snapSelection(int position) {
             checkState(mRanger != null);
             checkArgument(position != RecyclerView.NO_POSITION);
 
@@ -720,12 +736,17 @@ public final class MultiSelectManager {
     /**
      * A composite {@code OnGestureDetector} that allows us to delegate unhandled
      * events to an outside party (presumably DirectoryFragment).
+     * @template A gestureDelegate that implements both {@link OnGestureListener}
+     *     and {@link OnDoubleTapListener}
      */
-    private static final class CompositeOnGestureListener implements OnGestureListener {
+    private static final class
+            CompositeOnGestureListener<L extends OnGestureListener & OnDoubleTapListener>
+            implements OnGestureListener, OnDoubleTapListener {
 
-        private OnGestureListener[] mListeners;
+        private L[] mListeners;
 
-        public CompositeOnGestureListener(OnGestureListener... listeners) {
+        @SafeVarargs
+        public CompositeOnGestureListener(L... listeners) {
             mListeners = listeners;
         }
 
@@ -777,6 +798,36 @@ public final class MultiSelectManager {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             for (int i = 0; i < mListeners.length; i++) {
                 if (mListeners[i].onFling(e1, e2, velocityX, velocityY)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            for (int i = 0; i < mListeners.length; i++) {
+                if (mListeners[i].onSingleTapConfirmed(e)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            for (int i = 0; i < mListeners.length; i++) {
+                if (mListeners[i].onDoubleTap(e)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) {
+            for (int i = 0; i < mListeners.length; i++) {
+                if (mListeners[i].onDoubleTapEvent(e)) {
                     return true;
                 }
             }
