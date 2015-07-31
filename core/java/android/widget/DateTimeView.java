@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -259,7 +260,7 @@ public class DateTimeView extends TextView {
 
         static final Context getApplicationContextIfAvailable(Context context) {
             final Context ac = context.getApplicationContext();
-            return ac != null ? ac : context;
+            return ac != null ? ac : ActivityThread.currentApplication().getApplicationContext();
         }
 
         void register(Context context) {
