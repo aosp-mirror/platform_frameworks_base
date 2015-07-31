@@ -1198,15 +1198,20 @@ public final class MediaCodecInfo {
                             (double) mFrameRateRange.getUpper()));
         }
 
+        private int getBlockCount(int width, int height) {
+            return Utils.divUp(width, mBlockWidth) * Utils.divUp(height, mBlockHeight);
+        }
+
         @NonNull
         private Size findClosestSize(int width, int height) {
-            int targetPixels = width * height;
+            int targetBlockCount = getBlockCount(width, height);
             Size closestSize = null;
-            int mimPixelsDiff = Integer.MAX_VALUE;
+            int minDiff = Integer.MAX_VALUE;
             for (Size size : mMeasuredFrameRates.keySet()) {
-                int pixelsDiff = Math.abs(targetPixels - size.getWidth() * size.getHeight());
-                if (pixelsDiff < mimPixelsDiff) {
-                    mimPixelsDiff = pixelsDiff;
+                int diff = Math.abs(targetBlockCount -
+                        getBlockCount(size.getWidth(), size.getHeight()));
+                if (diff < minDiff) {
+                    minDiff = diff;
                     closestSize = size;
                 }
             }
