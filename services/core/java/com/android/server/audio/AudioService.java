@@ -1260,7 +1260,11 @@ public class AudioService extends IAudioService.Stub {
                 }
                 for (int stream = 0; stream < mStreamStates.length; stream++) {
                     if (streamTypeAlias == mStreamVolumeAlias[stream]) {
-                        mStreamStates[stream].mute(state);
+                        if (!(readCameraSoundForced()
+                                    && (mStreamStates[stream].getStreamType()
+                                        == AudioSystem.STREAM_SYSTEM_ENFORCED))) {
+                            mStreamStates[stream].mute(state);
+                        }
                     }
                 }
             } else if ((direction == AudioManager.ADJUST_RAISE) &&
