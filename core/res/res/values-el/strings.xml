@@ -713,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Προστέθηκε κελί"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Προστέθηκε το κελί <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Το μοτίβο ολοκληρώθηκε"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Περιοχή μοτίβου."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Γραφικό στοιχείο %2$d από %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Προσθήκη γραφικού στοιχείου"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Κενή"</string>
@@ -897,8 +898,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Δυστυχώς, η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> έχει σταματήσει."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Δυστυχώς, η διαδικασία <xliff:g id="PROCESS">%1$s</xliff:g> έχει σταματήσει."</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"Η σίγαση διακόπτεται από <xliff:g id="PROCESS">%1$s</xliff:g> μέχρι την επανεκκίνηση."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"Η εφαρμογή <xliff:g id="APPLICATION">%2$s</xliff:g> δεν ανταποκρίνεται.\n\nΘέλετε να την κλείσετε;"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Η δραστηριότητα <xliff:g id="ACTIVITY">%1$s</xliff:g> δεν ανταποκρίνεται.\n\nΘέλετε να την κλείσετε;"</string>

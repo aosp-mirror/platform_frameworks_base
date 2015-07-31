@@ -713,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kwengezwe"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Iseli <xliff:g id="CELL_INDEX">%1$s</xliff:g> lingeziwe"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Iphethini isiphelile"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Indawo yephethini."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. iwijethi %2$d ye-%3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Engeza iwijethi."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Akunalutho"</string>
@@ -897,8 +898,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Ngeshwa, <xliff:g id="APPLICATION">%1$s</xliff:g> kumile."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Ngeshwa, uhlelo  <xliff:g id="PROCESS">%1$s</xliff:g> luvele lwama."</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"Ukuphahlazeka okuthulile kusukela ku-<xliff:g id="PROCESS">%1$s</xliff:g> kuze kuqalise."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ayiphenduli.\n\nIngabe ufuna ukuyivala?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Uhlelo <xliff:g id="ACTIVITY">%1$s</xliff:g> aluphenduli.\n\nIngabe ufuna ukuluvala?"</string>

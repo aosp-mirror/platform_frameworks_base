@@ -434,8 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
-    <skip />
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon for fingeravtrykk"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lar appen lese synkroniseringsinnstillingene for en konto. For eksempel kan den finne ut om Personer-appen er synkronisert med en konto."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"slå synkronisering av og på"</string>
@@ -714,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Celle er lagt til"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Celle <xliff:g id="CELL_INDEX">%1$s</xliff:g> er lagt til"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Mønsteret er fullført"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Mønsterområde."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Modul %2$d av %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Legg til modul."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tom"</string>
@@ -898,8 +898,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"<xliff:g id="APPLICATION">%1$s</xliff:g> har dessverre stoppet."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Prosessen <xliff:g id="PROCESS">%1$s</xliff:g> har dessverre stoppet."</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"«Silence» kræsjer som følge av <xliff:g id="PROCESS">%1$s</xliff:g>, frem til den starter på nytt."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> svarer ikke.\n\nVil du lukke appen?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Aktiviteten <xliff:g id="ACTIVITY">%1$s</xliff:g> svarer ikke.\n\nVil du lukke den?"</string>

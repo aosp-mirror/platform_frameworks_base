@@ -434,8 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>. parmak"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
-    <skip />
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Parmak izi simgesi"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını okuma"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Uygulamaya bir hesaba ait senkronizasyon ayarlarını okuma izni verir. Örneğin, bu izne sahip bir uygulama Kişiler uygulamasının bir hesapla senkronize olup olmadığını belirleyebilir."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"senkronizasyonu açma/kapatma"</string>
@@ -714,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Hücre eklendi"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g>. hücre eklendi"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Desen tamamlandı"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Desen alanı."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d / %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Widget ekleyin."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Boş"</string>
@@ -898,8 +898,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Maalesef <xliff:g id="APPLICATION">%1$s</xliff:g> durdu."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Maalesef <xliff:g id="PROCESS">%1$s</xliff:g> işlemi durdu."</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"Yeniden başlatılana kadar <xliff:g id="PROCESS">%1$s</xliff:g> kilitlenmelerini yoksay."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> yanıt vermiyor.\n\nKapatmak ister misiniz?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> yanıt vermiyor.\n\nKapatmak ister misiniz?"</string>
