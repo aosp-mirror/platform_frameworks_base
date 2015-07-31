@@ -222,6 +222,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int[] mTempInt2 = new int[2];
     private boolean mGenerateChildOrderChangedEvent;
     private HashSet<Runnable> mAnimationFinishedRunnables = new HashSet<>();
+    private HashSet<View> mClearOverlayViewsWhenFinished = new HashSet<>();
     private HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
             = new HashSet<>();
     private HeadsUpManager mHeadsUpManager;
@@ -1656,6 +1657,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             mAddedHeadsUpChildren.remove(child);
             return false;
         }
+        if (isClickedHeadsUp(child)) {
+            // An animation is already running, add it to the Overlay
+            mClearOverlayViewsWhenFinished.add(child);
+            return true;
+        }
         if (mIsExpanded && mAnimationsEnabled && !isChildInInvisibleGroup(child)) {
             if (!mChildrenToAddAnimated.contains(child)) {
                 // Generate Animations
@@ -1669,6 +1675,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
         return false;
+    }
+
+    private boolean isClickedHeadsUp(View child) {
+        return HeadsUpManager.isClickedHeadsUpNotification(child);
     }
 
     /**
@@ -2327,6 +2337,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onChildAnimationFinished() {
         requestChildrenUpdate();
         runAnimationFinishedRunnables();
+        clearViewOverlays();
+    }
+
+    private void clearViewOverlays() {
+        for (View view : mClearOverlayViewsWhenFinished) {
+            getOverlay().remove(view);
+        }
     }
 
     private void runAnimationFinishedRunnables() {
