@@ -2018,7 +2018,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity Action:  Start this activity to request system shutdown.
      * The optional boolean extra field {@link #EXTRA_KEY_CONFIRM} can be set to true
-     * to request confirmation from the user before shutting down.
+     * to request confirmation from the user before shutting down. The optional boolean
+     * extra field {@link #EXTRA_USER_REQUESTED_SHUTDOWN} can be set to true to
+     * indicate that the shutdown is requested by the user.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -3227,6 +3229,15 @@ public class Intent implements Parcelable, Cloneable {
      * {@hide}
      */
     public static final String EXTRA_KEY_CONFIRM = "android.intent.extra.KEY_CONFIRM";
+
+    /**
+     * Set to true in {@link #ACTION_REQUEST_SHUTDOWN} to indicate that the shutdown is
+     * requested by the user.
+     *
+     * {@hide}
+     */
+    public static final String EXTRA_USER_REQUESTED_SHUTDOWN =
+            "android.intent.extra.USER_REQUESTED_SHUTDOWN";
 
     /**
      * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED} or

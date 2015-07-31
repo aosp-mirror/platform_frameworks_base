@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IPowerManager;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
@@ -30,6 +31,7 @@ public class ShutdownActivity extends Activity {
     private static final String TAG = "ShutdownActivity";
     private boolean mReboot;
     private boolean mConfirm;
+    private boolean mUserRequested;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class ShutdownActivity extends Activity {
         Intent intent = getIntent();
         mReboot = Intent.ACTION_REBOOT.equals(intent.getAction());
         mConfirm = intent.getBooleanExtra(Intent.EXTRA_KEY_CONFIRM, false);
+        mUserRequested = intent.getBooleanExtra(Intent.EXTRA_USER_REQUESTED_SHUTDOWN, false);
         Slog.i(TAG, "onCreate(): confirm=" + mConfirm);
 
         Thread thr = new Thread("ShutdownActivity") {
@@ -49,7 +52,9 @@ public class ShutdownActivity extends Activity {
                     if (mReboot) {
                         pm.reboot(mConfirm, null, false);
                     } else {
-                        pm.shutdown(mConfirm, false);
+                        pm.shutdown(mConfirm,
+                                    mUserRequested ? PowerManager.SHUTDOWN_USER_REQUESTED : null,
+                                    false);
                     }
                 } catch (RemoteException e) {
                 }
