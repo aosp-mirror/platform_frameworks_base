@@ -161,6 +161,16 @@ public class KeyguardUpdateMonitorCallback {
     public void onFinishedGoingToSleep(int why) { }
 
     /**
+     * Called when the screen has been turned on.
+     */
+    public void onScreenTurnedOn() { }
+
+    /**
+     * Called when the screen has been turned off.
+     */
+    public void onScreenTurnedOff() { }
+
+    /**
      * Called when trust changes for a user.
      */
     public void onTrustChanged(int userId) { }
