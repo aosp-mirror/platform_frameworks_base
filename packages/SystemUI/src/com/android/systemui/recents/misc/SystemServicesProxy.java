@@ -48,6 +48,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -85,6 +87,15 @@ public class SystemServicesProxy {
     final static String TAG = "SystemServicesProxy";
 
     final static BitmapFactory.Options sBitmapOptions;
+    final static HandlerThread sBgThread;
+
+    static {
+        sBgThread = new HandlerThread("Recents-SystemServicesProxy",
+                android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        sBgThread.start();
+        sBitmapOptions = new BitmapFactory.Options();
+        sBitmapOptions.inMutable = true;
+    }
 
     AccessibilityManager mAccm;
     ActivityManager mAm;
@@ -98,16 +109,13 @@ public class SystemServicesProxy {
     String mRecentsPackage;
     ComponentName mAssistComponent;
 
+    Handler mBgThreadHandler;
+
     Bitmap mDummyIcon;
     int mDummyThumbnailWidth;
     int mDummyThumbnailHeight;
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
-
-    static {
-        sBitmapOptions = new BitmapFactory.Options();
-        sBitmapOptions.inMutable = true;
-    }
 
     /** Private constructor */
     public SystemServicesProxy(Context context) {
@@ -121,6 +129,7 @@ public class SystemServicesProxy {
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
+        mBgThreadHandler = new Handler(sBgThread.getLooper());
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -383,12 +392,17 @@ public class SystemServicesProxy {
     }
 
     /** Removes the task */
-    public void removeTask(int taskId) {
+    public void removeTask(final int taskId) {
         if (mAm == null) return;
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
 
         // Remove the task.
-        mAm.removeTask(taskId);
+        mBgThreadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAm.removeTask(taskId);
+            }
+        });
     }
 
     /**
@@ -654,22 +668,6 @@ public class SystemServicesProxy {
         mWm.getDefaultDisplay().getRealSize(p);
         windowRect.set(0, 0, p.x, p.y);
         return windowRect;
-    }
-
-    /**
-     * Takes a screenshot of the current surface.
-     */
-    public Bitmap takeScreenshot() {
-        DisplayInfo di = new DisplayInfo();
-        mDisplay.getDisplayInfo(di);
-        return SurfaceControl.screenshot(di.getNaturalWidth(), di.getNaturalHeight());
-    }
-
-    /**
-     * Takes a screenshot of the current app.
-     */
-    public Bitmap takeAppScreenshot() {
-        return takeScreenshot();
     }
 
     /** Starts an activity from recents. */
