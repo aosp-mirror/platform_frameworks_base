@@ -316,7 +316,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                                     overscrollRange);
                     // Invalidate to kick off computeScroll
                     mSv.invalidate();
-                } else if (mScroller.isScrollOutOfBounds()) {
+                } else if (mIsScrolling && mScroller.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     mScroller.animateBoundScroll();
                 } else if (mActiveTaskView == null) {
