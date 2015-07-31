@@ -463,7 +463,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mService = new WrappedConnectivityService(
                 mServiceContext, mNetManager, mStatsService, mPolicyService);
         mService.systemReady();
-        mCm = new ConnectivityManager(mService);
+        mCm = new ConnectivityManager(getContext(), mService);
     }
 
     private int transportToLegacyType(int transport) {
