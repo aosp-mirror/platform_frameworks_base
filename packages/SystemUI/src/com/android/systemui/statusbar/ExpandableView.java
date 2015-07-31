@@ -374,7 +374,11 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     private void updateClipping() {
-        mClipRect.set(0, mClipTopOptimization, getWidth(), getActualHeight());
+        int top = mClipTopOptimization;
+        if (top >= getActualHeight()) {
+            top = getActualHeight() - 1;
+        }
+        mClipRect.set(0, top, getWidth(), getActualHeight());
         setClipBounds(mClipRect);
     }
 
