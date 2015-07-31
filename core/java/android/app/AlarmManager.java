@@ -720,7 +720,7 @@ public class AlarmManager {
         }
 
         // Reject this timezone if it isn't an Olson zone we recognize.
-        if (mTargetSdkVersion >= Build.VERSION_CODES.MNC) {
+        if (mTargetSdkVersion >= Build.VERSION_CODES.M) {
             boolean hasTimeZone = false;
             try {
                 hasTimeZone = ZoneInfoDB.getInstance().hasTimeZone(timeZone);
