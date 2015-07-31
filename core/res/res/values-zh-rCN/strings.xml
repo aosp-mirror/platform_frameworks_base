@@ -713,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已添加单元格"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"已添加圆点 <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"图案绘制完成"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"图案区域。"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的小部件%2$d。"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"添加小部件。"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"空白"</string>
@@ -897,8 +898,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"很抱歉，“<xliff:g id="APPLICATION">%1$s</xliff:g>”已停止运行。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"抱歉，进程“<xliff:g id="PROCESS">%1$s</xliff:g>”已停止运行。"</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"关闭“<xliff:g id="PROCESS">%1$s</xliff:g>”的崩溃提醒，直到重新启动该应用。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>无响应。\n\n要将其关闭吗？"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g>活动无响应。\n\n要将其关闭吗？"</string>

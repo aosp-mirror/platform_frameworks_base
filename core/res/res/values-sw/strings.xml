@@ -715,6 +715,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kiini kimeongezwa"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Kisanduku <xliff:g id="CELL_INDEX">%1$s</xliff:g> kimeongezwa"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Ruwaza imekamilika"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Eneo la ruwaza."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Wijeti %2$d ya %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ongeza wijeti."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tupu"</string>
@@ -899,8 +900,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Kwa bahati mbaya, <xliff:g id="APPLICATION">%1$s</xliff:g> imeacha kufanya kazi."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Kwa bahati mbaya, mchakato wa <xliff:g id="PROCESS">%1$s</xliff:g> umekoma."</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"Programu imekoma kufanya kazi kuanzia <xliff:g id="PROCESS">%1$s</xliff:g> mpaka iwashwe tena."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> haifanyi kazi.\n\nUnataka kuifunga?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli ya <xliff:g id="ACTIVITY">%1$s</xliff:g> haifanyi kazi.\n\nJe, ungependa kuifunga?"</string>

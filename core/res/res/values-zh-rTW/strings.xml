@@ -713,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已加入 1 格"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"已加入圓點 <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"已畫出解鎖圖形"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"圖形區域。"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。第 %2$d 個小工具，共 %3$d 個。"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"新增小工具。"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"空白"</string>
@@ -897,8 +898,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"很抱歉，<xliff:g id="APPLICATION">%1$s</xliff:g>已停止運作。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"很抱歉，處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已停止。"</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"Silence 執行<xliff:g id="PROCESS">%1$s</xliff:g>時發生當機問題，必須重新啟動。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> 沒有回應。\n\n您要結束嗎？"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 活動沒有回應。\n\n您要結束嗎？"</string>

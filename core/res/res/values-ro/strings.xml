@@ -435,8 +435,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Degetul <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
-    <skip />
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Pictograma amprentă"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"citire setări sincronizare"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite aplicației să citească setările de sincronizare ale unui cont. De exemplu, cu această permisiune aplicația poate determina dacă aplicația Persoane este sincronizată cu un anumit cont."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activează/dezactivează sincronizarea"</string>
@@ -715,6 +714,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Celulă adăugată"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Celula <xliff:g id="CELL_INDEX">%1$s</xliff:g> a fost adăugată"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Modelul a fost desenat"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Zonă model."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d din %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Adăugaţi un widget."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Gol"</string>
@@ -903,8 +903,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Din păcate, <xliff:g id="APPLICATION">%1$s</xliff:g> s-a oprit."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Din păcate, procesul <xliff:g id="PROCESS">%1$s</xliff:g> s-a oprit."</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"Silence se blochează din cauza procesului <xliff:g id="PROCESS">%1$s</xliff:g> până la repornire."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"Aplicaţia <xliff:g id="APPLICATION">%2$s</xliff:g> nu răspunde.\n\nDoriţi să o închideţi?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Activitatea <xliff:g id="ACTIVITY">%1$s</xliff:g> nu răspunde.\n\nDoriţi să o închideţi?"</string>
@@ -1224,7 +1223,7 @@
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certificatul este valid."</string>
     <string name="issued_to" msgid="454239480274921032">"Emis către:"</string>
     <string name="common_name" msgid="2233209299434172646">"Nume comun:"</string>
-    <string name="org_name" msgid="6973561190762085236">"Organizaţie:"</string>
+    <string name="org_name" msgid="6973561190762085236">"Organizație:"</string>
     <string name="org_unit" msgid="7265981890422070383">"Unitate organizatorică:"</string>
     <string name="issued_by" msgid="2647584988057481566">"Emis de:"</string>
     <string name="validity_period" msgid="8818886137545983110">"Validitate:"</string>

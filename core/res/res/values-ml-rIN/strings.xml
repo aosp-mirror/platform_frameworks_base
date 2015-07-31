@@ -713,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"സെൽ ചേർത്തു"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"കളം <xliff:g id="CELL_INDEX">%1$s</xliff:g> ചേർത്തു"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"പാറ്റേൺ പൂർത്തിയാക്കി"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"പാറ്റേൺ ഏരിയ."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. വിജറ്റ് %2$d / %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"വിജറ്റ് ചേർക്കുക."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"ശൂന്യം"</string>
@@ -897,8 +898,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"നിർഭാഗ്യവശാൽ, <xliff:g id="APPLICATION">%1$s</xliff:g> പ്രവർത്തനം നിർത്തി."</string>
     <string name="aerr_process" msgid="4507058997035697579">"നിർഭാഗ്യവശാൽ, <xliff:g id="PROCESS">%1$s</xliff:g> എന്ന പ്രോസസ്സ് നിർത്തി."</string>
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_process_silence" msgid="4226685530196000222">"റീബൂട്ട് വരെ <xliff:g id="PROCESS">%1$s</xliff:g> എന്നതിൽ നിന്നുള്ള ക്രാഷ് സന്ദേശങ്ങൾ തടയുക."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>, പ്രതികരിക്കുന്നില്ല.\n\nനിങ്ങൾക്കത് അടയ്‌ക്കണോ?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> പ്രവർത്തനം പ്രതികരിക്കുന്നില്ല.\n\nനിങ്ങൾക്കത് അടയ്‌ക്കണോ?"</string>
