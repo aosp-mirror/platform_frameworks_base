@@ -713,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Xana əlavə edildi"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Xana <xliff:g id="CELL_INDEX">%1$s</xliff:g> əlavə edildi"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Model tamamlandı"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Model sahəsi."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d of %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Widget əlavə edin."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Boş"</string>

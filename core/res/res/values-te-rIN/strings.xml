@@ -713,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"గడి జోడించబడింది"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g>వ సెల్‌ను జోడించారు"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"నమూనా పూర్తయింది"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"నమూనా ప్రాంతం."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$dలో విడ్జెట్ %2$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"విడ్జెట్‌ను జోడించండి."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"ఖాళీ"</string>
