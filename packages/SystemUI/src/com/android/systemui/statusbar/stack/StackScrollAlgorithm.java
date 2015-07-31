@@ -413,7 +413,9 @@ public class StackScrollAlgorithm {
         ExpandableNotificationRow topHeadsUpEntry = ambientState.getTopHeadsUpEntry();
 
         int childCount = algorithmState.visibleChildren.size();
-        int numberOfElementsCompletelyIn = (int) algorithmState.itemsInTopStack;
+        int numberOfElementsCompletelyIn = algorithmState.partialInTop == 1.0f
+                ? algorithmState.lastTopStackIndex
+                : (int) algorithmState.itemsInTopStack;
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             StackViewState childViewState = resultState.getViewStateForView(child);
