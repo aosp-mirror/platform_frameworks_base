@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.CheckBox;
 
 public class VoiceInteractionMain extends Activity {
 
@@ -30,6 +32,7 @@ public class VoiceInteractionMain extends Activity {
 
         setContentView(R.layout.main);
         findViewById(R.id.start).setOnClickListener(mStartListener);
+        findViewById(R.id.secure).setOnClickListener(mSecureListener);
     }
 
     @Override
@@ -50,6 +53,16 @@ public class VoiceInteractionMain extends Activity {
     View.OnClickListener mStartListener = new View.OnClickListener() {
         public void onClick(View v) {
             showAssist(null);
+        }
+    };
+
+    View.OnClickListener mSecureListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            if (((CheckBox)v).isChecked()) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            } else {
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            }
         }
     };
 }
