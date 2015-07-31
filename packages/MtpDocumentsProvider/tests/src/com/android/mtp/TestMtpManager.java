@@ -25,12 +25,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class MtpManagerMock extends MtpManager {
+public class TestMtpManager extends MtpManager {
     private final Set<Integer> mValidDevices = new HashSet<Integer>();
     private final Set<Integer> mOpenedDevices = new TreeSet<Integer>();
     private final Map<Integer, MtpRoot[]> mRoots = new HashMap<Integer, MtpRoot[]>();
 
-    MtpManagerMock(Context context) {
+    TestMtpManager(Context context) {
         super(context);
     }
 
