@@ -4434,7 +4434,7 @@ public final class Settings {
          *
          * @deprecated Use {@link android.app.KeyguardManager} to determine the state and security
          *             level of the keyguard. Accessing this setting from an app that is targeting
-         *             {@link VERSION_CODES#MNC} or later throws a {@code SecurityException}.
+         *             {@link VERSION_CODES#M} or later throws a {@code SecurityException}.
          */
         @Deprecated
         public static final String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
@@ -4443,7 +4443,7 @@ public final class Settings {
          * Whether lock pattern is visible as user enters (0 = false, 1 = true)
          *
          * @deprecated Accessing this setting from an app that is targeting
-         *             {@link VERSION_CODES#MNC} or later throws a {@code SecurityException}.
+         *             {@link VERSION_CODES#M} or later throws a {@code SecurityException}.
          */
         @Deprecated
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
@@ -4456,7 +4456,7 @@ public final class Settings {
          *             lockscreen uses
          *             {@link Settings.System#HAPTIC_FEEDBACK_ENABLED}.
          *             Accessing this setting from an app that is targeting
-         *             {@link VERSION_CODES#MNC} or later throws a {@code SecurityException}.
+         *             {@link VERSION_CODES#M} or later throws a {@code SecurityException}.
          */
         @Deprecated
         public static final String
