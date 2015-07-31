@@ -49,5 +49,6 @@
 
     <!-- For notification icons for which targetSdk < L, this caches whether the icon is grayscale -->
     <item type="id" name="icon_is_grayscale" />
+    <item type="id" name="is_clicked_heads_up_tag" />
 </resources>
 
