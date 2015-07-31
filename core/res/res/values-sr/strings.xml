@@ -435,6 +435,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Прст <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Икона отиска прста"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читање подешавања синхронизације"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Дозвољава апликацији да чита подешавања синхронизације за налог. На пример, овако може да се утврди да ли је апликација Људи синхронизована са налогом."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"укључивање и искључивање синхронизације"</string>
@@ -713,6 +714,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ћелија је додата"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Ћелија <xliff:g id="CELL_INDEX">%1$s</xliff:g> је додата"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Образац је довршен"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Област шаблона."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виџет %2$d од %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Додај виџет."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Празно"</string>

@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> hatza"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Hatz-markaren ikonoa"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Irakurri sinkronizazio-ezarpenak"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Kontu baten sinkronizazio-ezarpenak irakurtzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa konturen batekin sinkronizatuta dagoen zehatz dezake."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinkronizazioa aktibatzea eta desaktibatzea"</string>
@@ -712,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Gelaxka gehitu da"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Gehitu da <xliff:g id="CELL_INDEX">%1$s</xliff:g> puntua"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Eredua osatu da"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Eredua marrazteko eremua."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d/%3$d widgeta."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Gehitu widgeta."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Hutsik"</string>
