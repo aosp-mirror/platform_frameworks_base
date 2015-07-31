@@ -93,7 +93,7 @@ public class PowerCommand extends Svc.Command {
                 } else if ("shutdown".equals(args[1])) {
                     try {
                         // no confirm, wait till device is off
-                        pm.shutdown(false, true);
+                        pm.shutdown(false, null, true);
                     } catch (RemoteException e) {
                         System.err.println("Failed to shutdown.");
                     }

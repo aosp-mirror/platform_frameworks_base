@@ -367,7 +367,13 @@ public final class PowerManager {
      * @hide
      */
     public static final String REBOOT_RECOVERY = "recovery";
-    
+
+    /**
+     * The value to pass as the 'reason' argument to android_reboot().
+     * @hide
+     */
+    public static final String SHUTDOWN_USER_REQUESTED = "userrequested";
+
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;
@@ -838,13 +844,14 @@ public final class PowerManager {
      * Turn off the device.
      *
      * @param confirm If true, shows a shutdown confirmation dialog.
+     * @param reason code to pass to android_reboot() (e.g. "userrequested"), or null.
      * @param wait If true, this call waits for the shutdown to complete and does not return.
      *
      * @hide
      */
-    public void shutdown(boolean confirm, boolean wait) {
+    public void shutdown(boolean confirm, String reason, boolean wait) {
         try {
-            mService.shutdown(confirm, wait);
+            mService.shutdown(confirm, reason, wait);
         } catch (RemoteException e) {
         }
     }

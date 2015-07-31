@@ -45,7 +45,7 @@ interface IPowerManager
     boolean setPowerSaveMode(boolean mode);
 
     void reboot(boolean confirm, String reason, boolean wait);
-    void shutdown(boolean confirm, boolean wait);
+    void shutdown(boolean confirm, String reason, boolean wait);
     void crash(String message);
 
     void setStayOnSetting(int val);

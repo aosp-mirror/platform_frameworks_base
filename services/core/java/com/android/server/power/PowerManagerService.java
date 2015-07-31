@@ -2180,7 +2180,7 @@ public final class PowerManagerService extends SystemService
             public void run() {
                 synchronized (this) {
                     if (shutdown) {
-                        ShutdownThread.shutdown(mContext, confirm);
+                        ShutdownThread.shutdown(mContext, reason, confirm);
                     } else {
                         ShutdownThread.reboot(mContext, reason, confirm);
                     }
@@ -2349,9 +2349,14 @@ public final class PowerManagerService extends SystemService
     /**
      * Low-level function turn the device off immediately, without trying
      * to be clean.  Most people should use {@link ShutdownThread} for a clean shutdown.
+     *
+     * @param reason code to pass to android_reboot() (e.g. "userrequested"), or null.
      */
-    public static void lowLevelShutdown() {
-        SystemProperties.set("sys.powerctl", "shutdown");
+    public static void lowLevelShutdown(String reason) {
+        if (reason == null) {
+            reason = "";
+        }
+        SystemProperties.set("sys.powerctl", "shutdown," + reason);
     }
 
     /**
@@ -3056,12 +3061,12 @@ public final class PowerManagerService extends SystemService
          * @param wait If true, this call waits for the shutdown to complete and does not return.
          */
         @Override // Binder call
-        public void shutdown(boolean confirm, boolean wait) {
+        public void shutdown(boolean confirm, String reason, boolean wait) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                shutdownOrRebootInternal(true, confirm, null, wait);
+                shutdownOrRebootInternal(true, confirm, reason, wait);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
