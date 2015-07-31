@@ -9599,6 +9599,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 killApplication(packageName, UserHandle.getUid(userId, pkgSetting.appId),
                         "hiding pkg");
                 sendApplicationHiddenForUser(packageName, pkgSetting, userId);
+                return true;
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
