@@ -1009,9 +1009,11 @@ public abstract class PanelView extends FrameLayout {
 
     protected void notifyBarPanelExpansionChanged() {
         mBar.panelExpansionChanged(this, mExpandedFraction, mExpandedFraction > 0f || mPeekPending
-                || mPeekAnimator != null || mInstantExpanding || mHeadsUpManager.hasPinnedHeadsUp()
+                || mPeekAnimator != null || mInstantExpanding || isPanelVisibleBecauseOfHeadsUp()
                 || mTracking || mHeightAnimator != null);
     }
+
+    protected abstract boolean isPanelVisibleBecauseOfHeadsUp();
 
     /**
      * Gets called when the user performs a click anywhere in the empty area of the panel.
