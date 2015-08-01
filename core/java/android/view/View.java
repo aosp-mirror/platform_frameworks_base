@@ -18779,22 +18779,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         long key = (long) widthMeasureSpec << 32 | (long) heightMeasureSpec & 0xffffffffL;
         if (mMeasureCache == null) mMeasureCache = new LongSparseLongArray(2);
 
-        final boolean forceLayout = (mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT;
-        final boolean isExactly = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY &&
-                MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY;
-        final boolean matchingSize = isExactly &&
-                getMeasuredWidth() == MeasureSpec.getSize(widthMeasureSpec) &&
-                getMeasuredHeight() == MeasureSpec.getSize(heightMeasureSpec);
-        if (forceLayout || !matchingSize &&
-                (widthMeasureSpec != mOldWidthMeasureSpec ||
-                        heightMeasureSpec != mOldHeightMeasureSpec)) {
+        if ((mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ||
+                widthMeasureSpec != mOldWidthMeasureSpec ||
+                heightMeasureSpec != mOldHeightMeasureSpec) {
 
             // first clears the measured dimension flag
             mPrivateFlags &= ~PFLAG_MEASURED_DIMENSION_SET;
 
             resolveRtlPropertiesIfNeeded();
 
-            int cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
+            int cacheIndex = (mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ? -1 :
+                    mMeasureCache.indexOfKey(key);
             if (cacheIndex < 0 || sIgnoreMeasureCache) {
                 // measure ourselves, this should set the measured dimension flag back
                 onMeasure(widthMeasureSpec, heightMeasureSpec);
