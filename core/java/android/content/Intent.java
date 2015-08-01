@@ -1021,7 +1021,7 @@ public class Intent implements Parcelable, Cloneable {
      * numbers.  Applications can <strong>dial</strong> emergency numbers using
      * {@link #ACTION_DIAL}, however.
      *
-     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#MNC MNC}
+     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#M M}
      * and above and declares as using the {@link android.Manifest.permission#CALL_PHONE}
      * permission which is not granted, then attempting to use this action will
      * result in a {@link java.lang.SecurityException}.
