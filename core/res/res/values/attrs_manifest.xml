@@ -219,7 +219,7 @@
         <flag name="appop" value="0x40" />
         <!-- Additional flag from base permission type: this permission can be automatically
              granted to apps that target API levels below
-             {@link android.os.Build.VERSION_CODES#MNC} (before runtime permissions
+             {@link android.os.Build.VERSION_CODES#M} (before runtime permissions
              were introduced). -->
         <flag name="pre23" value="0x80" />
         <!-- Additional flag from base permission type: this permission can be automatically
@@ -1059,7 +1059,7 @@
          at the same time.
 
          <p>The default value is <code>false</code> for applications with
-         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#MNC} and
+         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#M} and
          <code>true</code> otherwise.
 
          <p>NOTE: A task's root activity value is applied to all additional activities launched in

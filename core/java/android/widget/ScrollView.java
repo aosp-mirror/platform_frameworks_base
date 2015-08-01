@@ -356,7 +356,7 @@ public class ScrollView extends FrameLayout {
                 final int heightPadding;
                 final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
                 final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-                if (targetSdkVersion >= VERSION_CODES.MNC) {
+                if (targetSdkVersion >= VERSION_CODES.M) {
                     widthPadding = mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin;
                     heightPadding = mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin;
                 } else {

@@ -54,7 +54,7 @@ import java.util.Arrays;
  * can be played on a device operating at a sample rate of 48000Hz; the sample rate conversion is
  * automatically handled by the platform, it will not play at 6x speed.
  *
- * <p>As of API {@link android.os.Build.VERSION_CODES#MNC},
+ * <p>As of API {@link android.os.Build.VERSION_CODES#M},
  * sample rates up to 192kHz are supported
  * for <code>AudioRecord</code> and <code>AudioTrack</code>, with sample rate conversion
  * performed as needed.
@@ -99,7 +99,7 @@ import java.util.Arrays;
  * Floats are efficiently manipulated by modern CPUs,
  * have greater precision than 24 bit signed integers,
  * and have greater dynamic range than 32 bit signed integers.
- * <code>AudioRecord</code> as of API {@link android.os.Build.VERSION_CODES#MNC} and
+ * <code>AudioRecord</code> as of API {@link android.os.Build.VERSION_CODES#M} and
  * <code>AudioTrack</code> as of API {@link android.os.Build.VERSION_CODES#LOLLIPOP}
  * support <code>ENCODING_PCM_FLOAT</code>.
  * </li>
@@ -123,7 +123,7 @@ import java.util.Arrays;
  * the samples and their arrangement in the audio frame. They are also used in the endpoint (e.g.
  * a USB audio interface, a DAC connected to headphones) to specify allowable configurations of a
  * particular device.
- * <br>As of API {@link android.os.Build.VERSION_CODES#MNC}, there are two types of channel masks:
+ * <br>As of API {@link android.os.Build.VERSION_CODES#M}, there are two types of channel masks:
  * channel position masks and channel index masks.
  *
  * <h5 id="channelPositionMask">Channel position masks</h5>
@@ -152,7 +152,7 @@ import java.util.Arrays;
  * {@link #CHANNEL_OUT_FRONT_RIGHT}.
  *
  * <h5 id="channelIndexMask">Channel index masks</h5>
- * Channel index masks are introduced in API {@link android.os.Build.VERSION_CODES#MNC}. They allow
+ * Channel index masks are introduced in API {@link android.os.Build.VERSION_CODES#M}. They allow
  * the selection of a particular channel from the source or sink endpoint by number, i.e. the first
  * channel, the second channel, and so forth. This avoids problems with artificially assigning
  * positions to channels of an endpoint, or figuring what the i<sup>th</sup> position bit is within

@@ -415,7 +415,7 @@ public class BackupTransport {
      * if this method returns TRANSPORT_OK.  To avoid storing such payloads the transport
      * must recognize this case and return TRANSPORT_PACKAGE_REJECTED.
      *
-     * Added in MNC (API 23).
+     * Added in {@link android.os.Build.VERSION_CODES#M}.
      *
      * @param size The estimated size of the full-data payload for this app.  This includes
      *         manifest and archive format overhead, but is not guaranteed to be precise.

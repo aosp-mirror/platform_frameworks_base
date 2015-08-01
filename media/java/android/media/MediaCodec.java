@@ -21,12 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
-import android.media.Image;
-import android.media.MediaCodecInfo;
 import android.media.MediaCodecInfo.CodecCapabilities;
-import android.media.MediaCodecList;
-import android.media.MediaCrypto;
-import android.media.MediaFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -510,11 +505,11 @@ import java.util.Map;
  #releaseOutputBuffer(int, long) releaseOutputBuffer(bufferId, timestamp)}.</li>
  </ul>
  <p>
- Since {@link android.os.Build.VERSION_CODES#MNC}, the default timestamp is the {@linkplain
+ Since {@link android.os.Build.VERSION_CODES#M}, the default timestamp is the {@linkplain
  BufferInfo#presentationTimeUs presentation timestamp} of the buffer (converted to nanoseconds).
  It was not defined prior to that.
  <p>
- Also since {@link android.os.Build.VERSION_CODES#MNC}, you can change the output Surface
+ Also since {@link android.os.Build.VERSION_CODES#M}, you can change the output Surface
  dynamically using {@link #setOutputSurface setOutputSurface}.
 
  <h4>Using an Input Surface</h4>

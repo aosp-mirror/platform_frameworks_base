@@ -19,7 +19,6 @@ package android.hardware;
 import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -1632,7 +1631,7 @@ public abstract class SensorManager {
         if (values == null) {
             throw new IllegalArgumentException("sensor data cannot be null");
         }
-        int expectedNumValues = Sensor.getMaxLengthValuesArray(sensor, Build.VERSION_CODES.MNC);
+        int expectedNumValues = Sensor.getMaxLengthValuesArray(sensor, Build.VERSION_CODES.M);
         if (values.length != expectedNumValues) {
             throw new  IllegalArgumentException ("Wrong number of values for sensor " +
                     sensor.getName() + " actual=" + values.length + " expected=" +
