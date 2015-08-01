@@ -1106,7 +1106,7 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setAssistBlocked(boolean state) {
             mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_ASSIST_BLOCKED)
-                    | (state ? 0 : ViewNode.FLAGS_ASSIST_BLOCKED);
+                    | (state ? ViewNode.FLAGS_ASSIST_BLOCKED : 0);
         }
 
         @Override
@@ -1411,6 +1411,9 @@ public class AssistStructure implements Parcelable {
         Bundle extras = node.getExtras();
         if (extras != null) {
             Log.i(TAG, prefix + "  Extras: " + extras);
+        }
+        if (node.isAssistBlocked()) {
+            Log.i(TAG, prefix + "  BLOCKED");
         }
         final int NCHILDREN = node.getChildCount();
         if (NCHILDREN > 0) {
