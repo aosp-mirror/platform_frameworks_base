@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -28,7 +29,6 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
-import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -8898,7 +8898,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "createStackOnDisplay()");
         synchronized (this) {
             final int stackId = mStackSupervisor.getNextStackId();
-            final ActivityStack stack = mStackSupervisor.createStackOnDisplay(stackId, displayId);
+            final ActivityStack stack =
+                    mStackSupervisor.createStackOnDisplay(stackId, displayId, true /*onTop*/);
             if (stack == null) {
                 return null;
             }
@@ -8948,6 +8949,28 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void positionTaskInStack(int taskId, int stackId, int position) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "positionTaskInStack()");
+        if (stackId == HOME_STACK_ID) {
+            Slog.e(TAG, "positionTaskInStack: Attempt to change the position of task "
+                    + taskId + " in/to home stack",
+                    new RuntimeException("here").fillInStackTrace());
+        }
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                if (DEBUG_STACK) Slog.d(TAG_STACK,
+                        "positionTaskInStack: positioning task=" + taskId
+                        + " in stackId=" + stackId + " at position=" + position);
+                mStackSupervisor.positionTaskInStackLocked(taskId, stackId, position);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 

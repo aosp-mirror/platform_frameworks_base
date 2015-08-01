@@ -5140,8 +5140,10 @@ public class WindowManagerService extends IWindowManager.Stub
      * Create a new TaskStack and place it on a DisplayContent.
      * @param stackId The unique identifier of the new stack.
      * @param displayId The unique identifier of the DisplayContent.
+     * @param onTop If true the stack will be place at the top of the display,
+     *              else at the bottom
      */
-    public void attachStack(int stackId, int displayId) {
+    public void attachStack(int stackId, int displayId, boolean onTop) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
@@ -5154,7 +5156,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mStackIdToStack.put(stackId, stack);
                     }
                     stack.attachDisplayContent(displayContent);
-                    displayContent.attachStack(stack);
+                    displayContent.attachStack(stack, onTop);
                     moveStackWindowsLocked(displayContent);
                     final WindowList windows = displayContent.getWindowList();
                     for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
@@ -5274,6 +5276,29 @@ public class WindowManagerService extends IWindowManager.Stub
                 performLayoutAndPlaceSurfacesLocked();
             }
             return stack.isFullscreen();
+        }
+    }
+
+    public void positionTaskInStack(int taskId, int stackId, int position) {
+        synchronized (mWindowMap) {
+            if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: positioning taskId=" + taskId
+                    + " in stackId=" + stackId + " at " + position);
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                if (DEBUG_STACK) Slog.i(TAG,
+                        "positionTaskInStack: could not find taskId=" + taskId);
+                return;
+            }
+            TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack == null) {
+                if (DEBUG_STACK) Slog.i(TAG,
+                        "positionTaskInStack: could not find stackId=" + stackId);
+                return;
+            }
+            task.positionTaskInStack(stack, position);
+            final DisplayContent displayContent = stack.getDisplayContent();
+            displayContent.layoutNeeded = true;
+            performLayoutAndPlaceSurfacesLocked();
         }
     }
 

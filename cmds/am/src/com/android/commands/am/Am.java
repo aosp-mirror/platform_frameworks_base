@@ -139,6 +139,7 @@ public class Am extends BaseCommand {
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack split <STACK_ID> <v|h> [INTENT]\n" +
+                "       am stack positiontask <TASK_ID> <STACK_ID> <POSITION>\n" +
                 "       am stack list\n" +
                 "       am stack info <STACK_ID>\n" +
                 "       am task lock <TASK_ID>\n" +
@@ -279,6 +280,8 @@ public class Am extends BaseCommand {
                 "   specified and the current stack has more than one task, then the top task\n" +
                 "   of the current task will be moved to the new stack. Command will also force\n" +
                 "   all current tasks in both stacks to be resizeable.\n" +
+                "\n" +
+                "am stack positiontask: place <TASK_ID> in <STACK_ID> at <POSITION>" +
                 "\n" +
                 "am stack list: list all of the activity stacks and their sizes.\n" +
                 "\n" +
@@ -1921,6 +1924,8 @@ public class Am extends BaseCommand {
             runStackMoveTask();
         } else if (op.equals("resize")) {
             runStackResize();
+        } else if (op.equals("positiontask")) {
+            runStackPositionTask();
         } else if (op.equals("list")) {
             runStackList();
         } else if (op.equals("info")) {
@@ -1980,6 +1985,20 @@ public class Am extends BaseCommand {
 
         try {
             mAm.resizeStack(stackId, bounds);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackPositionTask() throws Exception {
+        String taskIdStr = nextArgRequired();
+        int taskId = Integer.valueOf(taskIdStr);
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.valueOf(stackIdStr);
+        String positionStr = nextArgRequired();
+        int position = Integer.valueOf(positionStr);
+
+        try {
+            mAm.positionTaskInStack(taskId, stackId, position);
         } catch (RemoteException e) {
         }
     }

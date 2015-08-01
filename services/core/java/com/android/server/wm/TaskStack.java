@@ -183,34 +183,75 @@ public class TaskStack implements DimLayer.DimLayerUser {
      * @param showForAllUsers Whether to show the task regardless of the current user.
      */
     void addTask(Task task, boolean toTop, boolean showForAllUsers) {
-        int stackNdx;
-        if (!toTop) {
-            stackNdx = 0;
+        positionTask(task, toTop ? mTasks.size() : 0, showForAllUsers);
+    }
+
+    void positionTask(Task task, int position, boolean showForAllUsers) {
+        final boolean canShowTask =
+                showForAllUsers || mService.isCurrentProfileLocked(task.mUserId);
+        mTasks.remove(task);
+        int stackSize = mTasks.size();
+        int minPosition = 0;
+        int maxPosition = stackSize;
+
+        if (canShowTask) {
+            minPosition = computeMinPosition(minPosition, stackSize);
         } else {
-            stackNdx = mTasks.size();
-            if (!showForAllUsers && !mService.isCurrentProfileLocked(task.mUserId)) {
-                // Place the task below all current user tasks.
-                while (--stackNdx >= 0) {
-                    final Task tmpTask = mTasks.get(stackNdx);
-                    if (!tmpTask.showForAllUsers()
-                            || !mService.isCurrentProfileLocked(tmpTask.mUserId)) {
-                        break;
-                    }
-                }
-                // Put it above first non-current user task.
-                ++stackNdx;
-            }
+            maxPosition = computeMaxPosition(maxPosition);
         }
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "addTask: task=" + task + " toTop=" + toTop
-                + " pos=" + stackNdx);
-        mTasks.add(stackNdx, task);
+        // Reset position based on minimum/maximum possible positions.
+        position = Math.min(Math.max(position, minPosition), maxPosition);
+
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG,
+                "positionTask: task=" + task + " position=" + position);
+        mTasks.add(position, task);
 
         task.mStack = this;
         task.updateDisplayInfo(mDisplayContent);
+        boolean toTop = position == mTasks.size() - 1;
         if (toTop) {
             mDisplayContent.moveStack(this, true);
         }
-        EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, task.mTaskId, toTop ? 1 : 0, stackNdx);
+        EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, task.mTaskId, toTop ? 1 : 0, position);
+    }
+
+    /** Calculate the minimum possible position for a task that can be shown to the user.
+     *  The minimum position will be above all other tasks that can't be shown.
+     *  @param minPosition The minimum position the caller is suggesting.
+     *                  We will start adjusting up from here.
+     *  @param size The size of the current task list.
+     */
+    private int computeMinPosition(int minPosition, int size) {
+        while (minPosition < size) {
+            final Task tmpTask = mTasks.get(minPosition);
+            final boolean canShowTmpTask =
+                    tmpTask.showForAllUsers()
+                            || mService.isCurrentProfileLocked(tmpTask.mUserId);
+            if (canShowTmpTask) {
+                break;
+            }
+            minPosition++;
+        }
+        return minPosition;
+    }
+
+    /** Calculate the maximum possible position for a task that can't be shown to the user.
+     *  The maximum position will be below all other tasks that can be shown.
+     *  @param maxPosition The maximum position the caller is suggesting.
+     *                  We will start adjusting down from here.
+     */
+    private int computeMaxPosition(int maxPosition) {
+        while (maxPosition > 0) {
+            final Task tmpTask = mTasks.get(maxPosition - 1);
+            final boolean canShowTmpTask =
+                    tmpTask.showForAllUsers()
+                            || mService.isCurrentProfileLocked(tmpTask.mUserId);
+            if (!canShowTmpTask) {
+                break;
+            }
+            maxPosition--;
+        }
+        return maxPosition;
     }
 
     void moveTaskToTop(Task task) {

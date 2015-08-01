@@ -752,6 +752,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case POSITION_TASK_IN_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int taskId = data.readInt();
+            int stackId = data.readInt();
+            int position = data.readInt();
+            positionTaskInStack(taskId, stackId, position);
+            reply.writeNoException();
+            return true;
+        }
+
         case GET_ALL_STACK_INFOS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             List<StackInfo> list = getAllStackInfos();
@@ -3464,6 +3474,20 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(stackBoxId);
         r.writeToParcel(data, 0);
         mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    @Override
+    public void positionTaskInStack(int taskId, int stackId, int position) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(taskId);
+        data.writeInt(stackId);
+        data.writeInt(position);
+        mRemote.transact(POSITION_TASK_IN_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

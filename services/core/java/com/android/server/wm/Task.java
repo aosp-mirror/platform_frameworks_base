@@ -131,6 +131,16 @@ class Task implements DimLayer.DimLayerUser {
         stack.addTask(this, toTop);
     }
 
+    void positionTaskInStack(TaskStack stack, int position) {
+        if (mStack != null && stack != mStack) {
+            if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
+                    + " from stack=" + mStack);
+            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
+            mStack.removeTask(this);
+        }
+        stack.positionTask(this, position, showForAllUsers());
+    }
+
     boolean removeAppToken(AppWindowToken wtoken) {
         boolean removed = mAppTokens.remove(wtoken);
         if (mAppTokens.size() == 0) {

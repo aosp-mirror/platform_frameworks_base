@@ -17,6 +17,12 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
+import static android.app.ActivityManager.FIRST_DYNAMIC_STACK_ID;
+import static android.app.ActivityManager.FIRST_STATIC_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.HOME_STACK_ID;
+import static android.app.ActivityManager.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
@@ -146,8 +152,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
     private static final String TAG_VISIBLE_BEHIND = TAG + POSTFIX_VISIBLE_BEHIND;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
 
-    public static final int HOME_STACK_ID = 0;
-
     /** How long we wait until giving up on the last activity telling us it is idle. */
     static final int IDLE_TIMEOUT = 10 * 1000;
 
@@ -214,8 +218,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
 
-    /** Identifier counter for all ActivityStacks */
-    private int mLastStackId = HOME_STACK_ID;
+    /** Counter for next free stack ID to use for dynamic activity stacks. */
+    private int mNextFreeStackId = FIRST_DYNAMIC_STACK_ID;
 
     /** Task identifier that activities are currently being started in.  Incremented each time a
      * new task is created. */
@@ -402,7 +406,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mActivityDisplays.put(displayId, activityDisplay);
             }
 
-            createStackOnDisplay(HOME_STACK_ID, Display.DEFAULT_DISPLAY);
+            createStackOnDisplay(HOME_STACK_ID, Display.DEFAULT_DISPLAY, true);
             mHomeStack = mFocusedStack = mLastFocusedStack = getStack(HOME_STACK_ID);
 
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
@@ -1794,8 +1798,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
 
-            // Need to create an app stack for this user.
-            stack = createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY);
+            // TODO (multi-window): Change to select task id based on if the task should on in
+            // fullscreen, freefrom, or sid-by-side stack.
+            stack = getStack(
+                    FULLSCREEN_WORKSPACE_STACK_ID,
+                    true /*createStaticStackIfNeeded*/,
+                    true /*createOnTop*/);
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
                     + r + " stackId=" + stack.mStackId);
             return stack;
@@ -2782,11 +2790,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityStack getStack(int stackId) {
+        return getStack(stackId, false /*createStaticStackIfNeeded*/, false /*createOnTop*/);
+    }
+
+    ActivityStack getStack(int stackId, boolean createStaticStackIfNeeded, boolean createOnTop) {
         ActivityContainer activityContainer = mActivityContainers.get(stackId);
         if (activityContainer != null) {
             return activityContainer.mStack;
         }
-        return null;
+        if (!createStaticStackIfNeeded
+                || (stackId < FIRST_STATIC_STACK_ID || stackId > LAST_STATIC_STACK_ID)) {
+            return null;
+        }
+        return createStackOnDisplay(stackId, Display.DEFAULT_DISPLAY, createOnTop);
     }
 
     ArrayList<ActivityStack> getStacks() {
@@ -2931,7 +2947,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    ActivityStack createStackOnDisplay(int stackId, int displayId) {
+    ActivityStack createStackOnDisplay(int stackId, int displayId, boolean onTop) {
         ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
         if (activityDisplay == null) {
             return null;
@@ -2939,50 +2955,29 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ActivityContainer activityContainer = new ActivityContainer(stackId);
         mActivityContainers.put(stackId, activityContainer);
-        activityContainer.attachToDisplayLocked(activityDisplay);
+        activityContainer.attachToDisplayLocked(activityDisplay, onTop);
         return activityContainer.mStack;
     }
 
     int getNextStackId() {
         while (true) {
-            if (++mLastStackId <= HOME_STACK_ID) {
-                mLastStackId = HOME_STACK_ID + 1;
-            }
-            if (getStack(mLastStackId) == null) {
+            if (mNextFreeStackId >= FIRST_DYNAMIC_STACK_ID
+                    && getStack(mNextFreeStackId) == null) {
                 break;
             }
+            mNextFreeStackId++;
         }
-        return mLastStackId;
+        return mNextFreeStackId;
     }
 
     private boolean restoreRecentTaskLocked(TaskRecord task) {
-        ActivityStack stack = null;
-        // Determine stack to restore task to.
-        if (mLeanbackOnlyDevice) {
-            // There is only one stack for lean back devices.
-            stack = mHomeStack;
-        } else {
-            // Look for the top stack on the home display that isn't the home stack.
-            final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
-            for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack tmpStack = homeDisplayStacks.get(stackNdx);
-                if (!tmpStack.isHomeStack()) {
-                    stack = tmpStack;
-                    break;
-                }
-            }
-        }
-
-        if (stack == null) {
-            // We couldn't find a stack to restore the task to. Possible if are restoring recents
-            // before an application stack is created...Go ahead and create one on the default
-            // display.
-            stack = createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY);
-            // Restore home stack to top.
-            moveHomeStack(true, "restoreRecentTask");
-            if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
-                    "Created stack=" + stack + " for recents restoration.");
-        }
+        // TODO (multi-window): Change to select task id based on if the task should on in
+        // fullscreen, freefrom, or sid-by-side stack.
+        // Always put task for lean back device in home stack since they only have one stack,
+        // else use the preferred stack ID to get the stack we should use if it already exists.
+        ActivityStack stack = mLeanbackOnlyDevice ? mHomeStack :
+                getStack(FULLSCREEN_WORKSPACE_STACK_ID,
+                        true /*createStaticStackIfNeeded*/, false /*createOnTop*/);
 
         if (stack == null) {
             // What does this mean??? Not sure how we would get here...
@@ -3012,16 +3007,33 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
             return;
         }
-        final ActivityStack stack = getStack(stackId);
-        if (stack == null) {
-            Slog.w(TAG, "moveTaskToStack: no stack for id=" + stackId);
-            return;
-        }
+        ActivityStack stack =
+                getStack(stackId, true /*createStaticStackIfNeeded*/, toTop /*createOnTop*/);
         mWindowManager.moveTaskToStack(taskId, stackId, toTop);
         if (task.stack != null) {
             task.stack.removeTask(task, "moveTaskToStack", false /* notMoving */);
         }
         stack.addTask(task, toTop, true);
+        // The task might have already been running and its visibility needs to be synchronized with
+        // the visibility of the stack / windows.
+        stack.ensureActivitiesVisibleLocked(null, 0);
+        resumeTopActivitiesLocked();
+    }
+
+    void positionTaskInStackLocked(int taskId, int stackId, int position) {
+        final TaskRecord task = anyTaskForIdLocked(taskId);
+        if (task == null) {
+            Slog.w(TAG, "positionTaskInStackLocked: no task for id=" + taskId);
+            return;
+        }
+        ActivityStack stack =
+                getStack(stackId, true /*createStaticStackIfNeeded*/, false /*createOnTop*/);
+        mWindowManager.positionTaskInStack(taskId, stackId, position);
+        final boolean stackChanged = task.stack != null && task.stack != stack;
+        if (stackChanged) {
+            task.stack.removeTask(task, "moveTaskToStack", false /* notMoving */);
+        }
+        stack.positionTask(task, position, stackChanged);
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
         stack.ensureActivitiesVisibleLocked(null, 0);
@@ -4204,15 +4216,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
-        void attachToDisplayLocked(ActivityDisplay activityDisplay) {
+        void attachToDisplayLocked(ActivityDisplay activityDisplay, boolean onTop) {
             if (DEBUG_STACK) Slog.d(TAG_STACK, "attachToDisplayLocked: " + this
-                    + " to display=" + activityDisplay);
+                    + " to display=" + activityDisplay + " onTop=" + onTop);
             mActivityDisplay = activityDisplay;
             mStack.mDisplayId = activityDisplay.mDisplayId;
             mStack.mStacks = activityDisplay.mStacks;
 
-            activityDisplay.attachActivities(mStack);
-            mWindowManager.attachStack(mStackId, activityDisplay.mDisplayId);
+            activityDisplay.attachActivities(mStack, onTop);
+            mWindowManager.attachStack(mStackId, activityDisplay.mDisplayId, onTop);
         }
 
         @Override
@@ -4222,7 +4234,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 if (activityDisplay == null) {
                     return;
                 }
-                attachToDisplayLocked(activityDisplay);
+                attachToDisplayLocked(activityDisplay, true);
             }
         }
 
@@ -4435,7 +4447,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         new VirtualActivityDisplay(width, height, density);
                 mActivityDisplay = virtualActivityDisplay;
                 mActivityDisplays.put(virtualActivityDisplay.mDisplayId, virtualActivityDisplay);
-                attachToDisplayLocked(virtualActivityDisplay);
+                attachToDisplayLocked(virtualActivityDisplay, true);
             }
 
             if (mSurface != null) {
@@ -4521,10 +4533,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mDisplay.getDisplayInfo(mDisplayInfo);
         }
 
-        void attachActivities(ActivityStack stack) {
+        void attachActivities(ActivityStack stack, boolean onTop) {
             if (DEBUG_STACK) Slog.v(TAG_STACK,
-                    "attachActivities: attaching " + stack + " to displayId=" + mDisplayId);
-            mStacks.add(stack);
+                    "attachActivities: attaching " + stack + " to displayId=" + mDisplayId
+                    + " onTop=" + onTop);
+            if (onTop) {
+                mStacks.add(stack);
+            } else {
+                mStacks.add(0, stack);
+            }
         }
 
         void detachActivitiesLocked(ActivityStack stack) {
