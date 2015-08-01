@@ -346,8 +346,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Да бисте избрисали апликације и податке, уклоните госта"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"УКЛОНИ ГОСТА"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Одјављивање корисника"</string>
-    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
-    <skip />
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"Одјавите актуелног корисника"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ОДЈАВИ КОРИСНИКА"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Додајете новог корисника?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Када додате новог корисника, та особа треба да подеси сопствени простор.\n\nСваки корисник може да ажурира апликације за све остале кориснике."</string>
@@ -431,6 +430,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"Честитамо! Тјунер за кориснички интерфејс система је додат у Подешавања"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Уклони из Подешавања"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Желите ли да уклоните Тјунер за кориснички интерфејс система из Подешавања и да престанете да користите све његове функције?"</string>
-    <!-- no translation found for activity_not_found (348423244327799974) -->
-    <skip />
+    <string name="activity_not_found" msgid="348423244327799974">"Апликација није инсталирана на уређају"</string>
 </resources>

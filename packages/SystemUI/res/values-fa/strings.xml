@@ -55,7 +55,7 @@
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"‏به برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهد تا به وسیله جانبی USB دسترسی داشته باشد؟"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"‏وقتی این دستگاه USB وصل است، <xliff:g id="ACTIVITY">%1$s</xliff:g> باز شود؟"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"‏وقتی این وسیله جانبی USB وصل است، <xliff:g id="ACTIVITY">%1$s</xliff:g> باز شود؟"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"‏هیچ برنامهٔ کاربردی نصب شده‌ای با این وسیله جانبی USB کار نمی‌کند. در <xliff:g id="URL">%1$s</xliff:g> دربارهٔ این وسیله جانبی اطلاعات بیشتری کسب کنید"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"‏هیچ برنامه نصب شده‌ای با این وسیله جانبی USB کار نمی‌کند. در <xliff:g id="URL">%1$s</xliff:g> دربارهٔ این وسیله جانبی اطلاعات بیشتری کسب کنید"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"‏لوازم جانبی USB"</string>
     <string name="label_view" msgid="6304565553218192990">"مشاهده"</string>
     <string name="always_use_device" msgid="1450287437017315906">"‏استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
@@ -345,8 +345,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"برای حذف برنامه‌ها و داده‌ها، کاربر مهمان را حذف کنید"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"حذف مهمان"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"خروج کاربر از سیستم"</string>
-    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
-    <skip />
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"خروج کاربر فعلی از سیستم"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"خروج کاربر از سیستم"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"کاربر جدیدی اضافه می‌کنید؟"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"وقتی کاربر جدیدی را اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
@@ -430,6 +429,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"تبریک می‌گوییم! «تنظیم‌کننده واسط کاربری سیستم» به «تنظیمات» اضافه شد"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"حذف از تنظیمات"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"«تنظیم‌کننده واسط کاربری سیستم» از تنظیمات حذف شود و همه ویژگی‌های آن متوقف شوند؟"</string>
-    <!-- no translation found for activity_not_found (348423244327799974) -->
-    <skip />
+    <string name="activity_not_found" msgid="348423244327799974">"برنامه در دستگاه شما نصب نیست"</string>
 </resources>

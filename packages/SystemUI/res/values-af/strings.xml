@@ -345,8 +345,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Verwyder gasgebruiker om programme en data uit te vee"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"VERWYDER GAS"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Meld gebruiker af"</string>
-    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
-    <skip />
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"Meld huidige gebruiker af"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"MELD GEBRUIKER AF"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Voeg nuwe gebruiker by?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
@@ -430,6 +429,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"Geluk! Stelsel-UI-ontvanger is by Instellings gevoeg"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Verwyder uit Instellings"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Verwyder Stelsel-UI-ontvanger uit Instellings en staak die gebruik van al sy kenmerke?"</string>
-    <!-- no translation found for activity_not_found (348423244327799974) -->
-    <skip />
+    <string name="activity_not_found" msgid="348423244327799974">"Program is nie op jou toestel geïnstalleer nie"</string>
 </resources>

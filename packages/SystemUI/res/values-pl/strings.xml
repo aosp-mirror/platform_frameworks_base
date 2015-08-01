@@ -347,8 +347,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Usuń gościa, by usunąć aplikacje i dane"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"USUŃ GOŚCIA"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Wyloguj użytkownika"</string>
-    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
-    <skip />
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"Wyloguj bieżącego użytkownika"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"WYLOGUJ UŻYTKOWNIKA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Dodać nowego użytkownika?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Gdy dodasz nowego użytkownika, musi on skonfigurować swój profil.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
@@ -432,6 +431,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"Gratulujemy, Kalibrator System UI został dodany do Ustawień"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Usuń z Ustawień"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Usunąć Kalibrator System UI z Ustawień i przestać używać wszystkich jego funkcji?"</string>
-    <!-- no translation found for activity_not_found (348423244327799974) -->
-    <skip />
+    <string name="activity_not_found" msgid="348423244327799974">"Aplikacja nie jest zainstalowana na urządzeniu"</string>
 </resources>
