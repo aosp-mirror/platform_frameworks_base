@@ -1449,8 +1449,9 @@ public class ConnectivityManager {
             context.enforceCallingOrSelfPermission(
                     android.Manifest.permission.CONNECTIVITY_INTERNAL, "ConnectivityService");
         } else {
-            context.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.CHANGE_NETWORK_STATE, "ConnectivityService");
+            int uid = Binder.getCallingUid();
+            Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
+                    .getPackageNameForUid(context, uid), true);
         }
     }
 
