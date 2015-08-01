@@ -896,7 +896,7 @@ public class ConnectivityManager {
      *
      * @deprecated Deprecated in favor of the cleaner
      *             {@link #requestNetwork(NetworkRequest, NetworkCallback)} API.
-     *             In {@link VERSION_CODES#MNC}, and above, this method is unsupported and will
+     *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
      */
     public int startUsingNetworkFeature(int networkType, String feature) {
@@ -946,7 +946,7 @@ public class ConnectivityManager {
      * always indicates failure.
      *
      * @deprecated Deprecated in favor of the cleaner {@link #unregisterNetworkCallback} API.
-     *             In {@link VERSION_CODES#MNC}, and above, this method is unsupported and will
+     *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
      */
     public int stopUsingNetworkFeature(int networkType, String feature) {
@@ -1364,7 +1364,7 @@ public class ConnectivityManager {
      * @deprecated Deprecated in favor of the
      *             {@link #requestNetwork(NetworkRequest, NetworkCallback)},
      *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} API.
-     *             In {@link VERSION_CODES#MNC}, and above, this method is unsupported and will
+     *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
@@ -2878,7 +2878,7 @@ public class ConnectivityManager {
             return;
         }
 
-        unsupportedStartingFrom(VERSION_CODES.MNC);
+        unsupportedStartingFrom(VERSION_CODES.M);
     }
 
     /**
