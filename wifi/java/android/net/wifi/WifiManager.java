@@ -669,6 +669,7 @@ public class WifiManager {
         try {
             return mService.getConfiguredNetworks();
         } catch (RemoteException e) {
+            Log.w(TAG, "Caught RemoteException trying to get configured networks: " + e);
             return null;
         }
     }
@@ -1589,6 +1590,7 @@ public class WifiManager {
         try {
             return mService.buildWifiConfig(uriString, mimeType, data);
         } catch (RemoteException e) {
+            Log.w(TAG, "Caught RemoteException trying to build wifi config: " + e);
             return null;
         }
     }
