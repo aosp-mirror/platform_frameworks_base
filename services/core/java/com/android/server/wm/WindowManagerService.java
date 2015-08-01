@@ -2657,6 +2657,16 @@ public class WindowManagerService extends IWindowManager.Stub
         return disabled;
     }
 
+    boolean isSecureLocked(WindowState w) {
+        if ((w.mAttrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+            return true;
+        }
+        if (isScreenCaptureDisabledLocked(UserHandle.getUserId(w.mOwnerUid))) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Set mScreenCaptureDisabled for specific user
      */
@@ -3168,6 +3178,9 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean wallpaperMayMove = win.mViewVisibility != viewVisibility
                     && (win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
             wallpaperMayMove |= (flagChanges & FLAG_SHOW_WALLPAPER) != 0;
+            if ((flagChanges & FLAG_SECURE) != 0 && winAnimator.mSurfaceControl != null) {
+                winAnimator.mSurfaceControl.setSecure(isSecureLocked(win));
+            }
 
             win.mRelayoutCalled = true;
             final int oldVisibility = win.mViewVisibility;
