@@ -5488,7 +5488,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setAnimationCacheEnabled(boolean)
      * @see View#setDrawingCacheEnabled(boolean)
      *
-     * @deprecated As of {@link android.os.Build.VERSION_CODES#MNC}, this property is ignored.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Caching behavior of children may be controlled through {@link View#setLayerType(int, Paint)}.
      */
     public boolean isAnimationCacheEnabled() {
@@ -5506,7 +5506,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #isAnimationCacheEnabled()
      * @see View#setDrawingCacheEnabled(boolean)
      *
-     * @deprecated As of {@link android.os.Build.VERSION_CODES#MNC}, this property is ignored.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Caching behavior of children may be controlled through {@link View#setLayerType(int, Paint)}.
      */
     public void setAnimationCacheEnabled(boolean enabled) {
@@ -5523,7 +5523,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setChildrenDrawnWithCacheEnabled(boolean)
      * @see View#setDrawingCacheEnabled(boolean)
      *
-     * @deprecated As of {@link android.os.Build.VERSION_CODES#MNC}, this property is ignored.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Child views may no longer have their caching behavior disabled by parents.
      */
     public boolean isAlwaysDrawnWithCacheEnabled() {
@@ -5547,7 +5547,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see View#setDrawingCacheEnabled(boolean)
      * @see View#setDrawingCacheQuality(int)
      *
-     * @deprecated As of {@link android.os.Build.VERSION_CODES#MNC}, this property is ignored.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Child views may no longer have their caching behavior disabled by parents.
      */
     public void setAlwaysDrawnWithCacheEnabled(boolean always) {
@@ -5563,7 +5563,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setAlwaysDrawnWithCacheEnabled(boolean)
      * @see #setChildrenDrawnWithCacheEnabled(boolean)
      *
-     * @deprecated As of {@link android.os.Build.VERSION_CODES#MNC}, this property is ignored.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Child views may no longer be forced to cache their rendering state by their parents.
      * Use {@link View#setLayerType(int, Paint)} on individual Views instead.
      */
@@ -5584,7 +5584,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setAlwaysDrawnWithCacheEnabled(boolean)
      * @see #isChildrenDrawnWithCacheEnabled()
      *
-     * @deprecated As of {@link android.os.Build.VERSION_CODES#MNC}, this property is ignored.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Child views may no longer be forced to cache their rendering state by their parents.
      * Use {@link View#setLayerType(int, Paint)} on individual Views instead.
      */

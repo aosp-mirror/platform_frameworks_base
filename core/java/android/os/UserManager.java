@@ -181,7 +181,7 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring VPN.
      * The default value is <code>false</code>.
      * This restriction has an effect in a managed profile only from
-     * {@link android.os.Build.VERSION_CODES#MNC}
+     * {@link android.os.Build.VERSION_CODES#M}
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean

@@ -56,7 +56,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
@@ -3809,14 +3808,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // of whether a layout was requested on that View.
             sIgnoreMeasureCache = targetSdkVersion < KITKAT;
 
-            Canvas.sCompatibilityRestore = targetSdkVersion < MNC;
+            Canvas.sCompatibilityRestore = targetSdkVersion < M;
 
-            // In MNC and newer, our widgets can pass a "hint" value in the size
+            // In M and newer, our widgets can pass a "hint" value in the size
             // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
             // know what the expected parent size is going to be, so e.g. list items can size
             // themselves at 1/3 the size of their container. It breaks older apps though,
             // specifically apps that use some popular open source libraries.
-            sUseZeroUnspecifiedMeasureSpec = targetSdkVersion < MNC;
+            sUseZeroUnspecifiedMeasureSpec = targetSdkVersion < M;
 
             sCompatibilityDone = true;
         }
@@ -4284,27 +4283,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             PROVIDER_BACKGROUND));
                     break;
                 case R.styleable.View_foreground:
-                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
                         setForeground(a.getDrawable(attr));
                     }
                     break;
                 case R.styleable.View_foregroundGravity:
-                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
                         setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
                     }
                     break;
                 case R.styleable.View_foregroundTintMode:
-                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
                         setForegroundTintMode(Drawable.parseTintMode(a.getInt(attr, -1), null));
                     }
                     break;
                 case R.styleable.View_foregroundTint:
-                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
                         setForegroundTintList(a.getColorStateList(attr));
                     }
                     break;
                 case R.styleable.View_foregroundInsidePadding:
-                    if (targetSdkVersion >= VERSION_CODES.MNC || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
                         if (mForegroundInfo == null) {
                             mForegroundInfo = new ForegroundInfo();
                         }
@@ -11424,10 +11423,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * strongly recommended for performance reasons to either override
      * {@link #hasOverlappingRendering()} to return <code>false</code> if appropriate, or setting a
      * {@link #setLayerType(int, android.graphics.Paint) layer type} on the view for the duration
-     * of the animation. On versions {@link android.os.Build.VERSION_CODES#MNC} and below,
+     * of the animation. On versions {@link android.os.Build.VERSION_CODES#M} and below,
      * the default path for rendering an unlayered View with alpha could add multiple milliseconds
      * of rendering cost, even for simple or small views. Starting with
-     * {@link android.os.Build.VERSION_CODES#MNC}, {@link #LAYER_TYPE_HARDWARE} is automatically
+     * {@link android.os.Build.VERSION_CODES#M}, {@link #LAYER_TYPE_HARDWARE} is automatically
      * applied to the view at the rendering level.</p>
      *
      * <p>If this view overrides {@link #onSetAlpha(int)} to return true, then this view is
@@ -11438,7 +11437,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * associated with a {@link #setLayerPaint(android.graphics.Paint) layer paint}, setting an
      * alpha value less than 1.0 will supersede the alpha of the layer paint.</p>
      *
-     * <p>Starting with {@link android.os.Build.VERSION_CODES#MNC}, setting a translucent alpha
+     * <p>Starting with {@link android.os.Build.VERSION_CODES#M}, setting a translucent alpha
      * value will clip a View to its bounds, unless the View returns <code>false</code> from
      * {@link #hasOverlappingRendering}.</p>
      *
