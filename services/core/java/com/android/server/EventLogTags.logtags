@@ -158,7 +158,7 @@ option java_package com.android.server
 # Task removed with source explanation.
 31003 wm_task_removed (TaskId|1|5),(Reason|3)
 # Stack created.
-31004 wm_stack_created (StackId|1|5),(RelativeBoxId|1|5),(Position|1),(Weight|1|6)
+31004 wm_stack_created (StackId|1|5)
 # Home stack moved to top (1) or bottom (0).
 31005 wm_home_stack_moved (ToTop|1)
 # Stack removed.

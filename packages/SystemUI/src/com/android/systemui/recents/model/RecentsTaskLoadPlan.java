@@ -172,19 +172,13 @@ public class RecentsTaskLoadPlan {
         }
 
         // Initialize the stacks
-        SparseArray<ActivityManager.StackInfo> stackInfos = mSystemServicesProxy.getAllStackInfos();
         mStacks.clear();
         int stackCount = stacksTasks.size();
         for (int i = 0; i < stackCount; i++) {
             int stackId = stacksTasks.keyAt(i);
-            ActivityManager.StackInfo info = stackInfos.get(stackId);
             ArrayList<Task> stackTasks = stacksTasks.valueAt(i);
             TaskStack stack = new TaskStack(stackId);
-            if (Constants.DebugFlags.App.EnableMultiStackToSingleStack) {
-                stack.setBounds(displayBounds, displayBounds);
-            } else {
-                stack.setBounds(info.bounds, displayBounds);
-            }
+            stack.setBounds(displayBounds, displayBounds);
             stack.setTasks(stackTasks);
             stack.createAffiliatedGroupings(mConfig);
             mStacks.put(stackId, stack);

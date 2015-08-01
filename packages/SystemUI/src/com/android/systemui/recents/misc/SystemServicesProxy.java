@@ -70,6 +70,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsAppWidgetHost;
+import com.android.systemui.recents.RecentsConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -255,12 +256,16 @@ public class SystemServicesProxy {
         return false;
     }
 
-    /** Get the bounds of a stack / task. */
-    public Rect getTaskBounds(int stackId) {
-        ActivityManager.StackInfo info = getAllStackInfos().get(stackId);
-        if (info != null)
-          return info.bounds;
-        return new Rect();
+    /** Get the bounds of a task. */
+    public Rect getTaskBounds(int taskId) {
+        if (mIam == null) return null;
+
+        try {
+            return mIam.getTaskBounds(taskId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /** Resize a given task. */
@@ -268,29 +273,14 @@ public class SystemServicesProxy {
         if (mIam == null) return;
 
         try {
+            if (RecentsConfiguration.getInstance().multiStackEnabled) {
+                // In debug mode, we force all task to be resizeable regardless of the
+                // current app configuration.
+                mIam.setTaskResizeable(taskId, true);
+            }
             mIam.resizeTask(taskId, bounds);
         } catch (RemoteException e) {
             e.printStackTrace();
-        }
-    }
-
-    /** Returns the stack info for all stacks. */
-    public SparseArray<ActivityManager.StackInfo> getAllStackInfos() {
-        if (mIam == null) return new SparseArray<ActivityManager.StackInfo>();
-
-        try {
-            SparseArray<ActivityManager.StackInfo> stacks =
-                    new SparseArray<ActivityManager.StackInfo>();
-            List<ActivityManager.StackInfo> infos = mIam.getAllStackInfos();
-            int stackCount = infos.size();
-            for (int i = 0; i < stackCount; i++) {
-                ActivityManager.StackInfo info = infos.get(i);
-                stacks.put(info.stackId, info);
-            }
-            return stacks;
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            return new SparseArray<ActivityManager.StackInfo>();
         }
     }
 

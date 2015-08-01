@@ -709,7 +709,7 @@ public class WindowAnimator {
                 mService.scheduleAnimationLocked();
             }
 
-            mService.setFocusedStackLayer();
+            mService.setFocusedTaskLayer();
 
             if (mService.mWatermark != null) {
                 mService.mWatermark.drawIfNeeded();

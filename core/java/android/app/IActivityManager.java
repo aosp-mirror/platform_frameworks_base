@@ -144,6 +144,7 @@ public interface IActivityManager extends IInterface {
     public boolean isInHomeStack(int taskId) throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getFocusedStackId() throws RemoteException;
+    public void setFocusedTask(int taskId) throws RemoteException;
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
@@ -486,6 +487,7 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     public void setTaskResizeable(int taskId, boolean resizeable) throws RemoteException;
     public void resizeTask(int taskId, Rect bounds) throws RemoteException;
+    public Rect getTaskBounds(int taskId) throws RemoteException;
     public Bitmap getTaskDescriptionIcon(String filename) throws RemoteException;
 
     public void startInPlaceAnimationOnFrontMostApplication(ActivityOptions opts)
@@ -752,7 +754,7 @@ public interface IActivityManager extends IInterface {
     int GET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+127;
     int SET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+128;
     int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+129;
-    int ___AVAILABLE_1___ = IBinder.FIRST_CALL_TRANSACTION+130;
+    int SET_FOCUSED_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+130;
     int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+131;
     int REGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+132;
     int UNREGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+133;
@@ -804,7 +806,7 @@ public interface IActivityManager extends IInterface {
     int RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+180;
     int GET_PERSISTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+181;
     int APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+182;
-    // Available
+    int GET_TASK_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+183;
     int GET_ACTIVITY_DISPLAY_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
     int SET_PROCESS_MEMORY_TRIM_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+186;

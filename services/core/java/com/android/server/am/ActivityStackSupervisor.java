@@ -99,6 +99,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -1283,7 +1284,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             app.forceProcessStateUpTo(mService.mTopProcessState);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),
-                    new Configuration(stack.mOverrideConfig), r.compat, r.launchedFromPackage,
+                    new Configuration(task.mOverrideConfig), r.compat, r.launchedFromPackage,
                     task.voiceInteractor, app.repProcState, r.icicle, r.persistentState, results,
                     newIntents, !andResume, mService.isNextTransitionForward(), profilerInfo);
 
@@ -2871,9 +2872,54 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        final Configuration overrideConfig = mWindowManager.resizeStack(stackId, bounds);
-        if (stack.updateOverrideConfiguration(overrideConfig)) {
+        final IntArray changedTaskIds = new IntArray(stack.numTasks());
+        final List<Configuration> newTaskConfigs = new ArrayList<>(stack.numTasks());
+        stack.mFullscreen =
+                mWindowManager.resizeStack(stackId, bounds, changedTaskIds, newTaskConfigs);
+        for (int i = changedTaskIds.size() - 1; i >= 0; i--) {
+            final TaskRecord task = anyTaskForIdLocked(changedTaskIds.get(i), false);
+            if (task == null) {
+                Slog.wtf(TAG, "Task in WindowManager, but not in ActivityManager???");
+                continue;
+            }
+            task.updateOverrideConfiguration(newTaskConfigs.get(i));
+        }
+
+        if (r != null) {
+            final boolean updated = stack.ensureActivityConfigurationLocked(r, 0);
+            // And we need to make sure at this point that all other activities
+            // are made visible with the correct configuration.
+            ensureActivitiesVisibleLocked(r, 0);
+            if (!updated) {
+                resumeTopActivitiesLocked(stack, null, null);
+            }
+        }
+    }
+
+    void resizeTaskLocked(TaskRecord task, Rect bounds) {
+        if (!task.mResizeable) {
+            Slog.w(TAG, "resizeTask: task " + task + " not resizeable.");
+            return;
+        }
+
+        if (task.mBounds != null && task.mBounds.equals(bounds)) {
+            // Nothing to do here...
+            return;
+        }
+
+        task.mBounds = new Rect(bounds);
+
+        if (!mWindowManager.isValidTaskId(task.taskId)) {
+            // Task doesn't exist in window manager yet (e.g. was restored from recents).
+            // No need to do anything else until we add the task to window manager.
+            return;
+        }
+
+        final Configuration overrideConfig = mWindowManager.resizeTask(task.taskId, bounds);
+        if (task.updateOverrideConfiguration(overrideConfig)) {
+            ActivityRecord r = task.topRunningActivityLocked(null);
             if (r != null) {
+                final ActivityStack stack = task.stack;
                 final boolean updated = stack.ensureActivityConfigurationLocked(r, 0);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
@@ -2883,48 +2929,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
         }
-    }
-
-    /** Makes sure the input task is in a stack with the specified bounds by either resizing the
-     * current task stack if it only has one entry, moving the task to a stack that matches the
-     * bounds, or creating a new stack with the required bounds. Also, makes the task resizeable.*/
-    void resizeTaskLocked(TaskRecord task, Rect bounds) {
-        task.mResizeable = true;
-        final ActivityStack currentStack = task.stack;
-        if (currentStack.isHomeStack()) {
-            // Can't move task off the home stack. Sorry!
-            return;
-        }
-
-        final int matchingStackId = mWindowManager.getStackIdWithBounds(bounds);
-        if (matchingStackId != -1) {
-            // There is already a stack with the right bounds!
-            if (currentStack != null && currentStack.mStackId == matchingStackId) {
-                // Nothing to do here. Already in the right stack...
-                return;
-            }
-            // Move task to stack with matching bounds.
-            moveTaskToStackLocked(task.taskId, matchingStackId, true);
-            return;
-        }
-
-        if (currentStack != null && currentStack.numTasks() == 1) {
-            // Just resize the current stack since this is the task in it.
-            resizeStackLocked(currentStack.mStackId, bounds);
-            return;
-        }
-
-        // Create new stack and move the task to it.
-        final int displayId = (currentStack != null && currentStack.mDisplayId != -1)
-                ? currentStack.mDisplayId : Display.DEFAULT_DISPLAY;
-        ActivityStack newStack = createStackOnDisplay(getNextStackId(), displayId);
-
-        if (newStack == null) {
-            Slog.e(TAG, "resizeTaskLocked: Can't create stack for task=" + task);
-            return;
-        }
-        moveTaskToStackLocked(task.taskId, newStack.mStackId, true);
-        resizeStackLocked(newStack.mStackId, bounds);
     }
 
     ActivityStack createStackOnDisplay(int stackId, int displayId) {
@@ -2962,7 +2966,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
             for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack tmpStack = homeDisplayStacks.get(stackNdx);
-                if (!tmpStack.isHomeStack() && tmpStack.mFullscreen) {
+                if (!tmpStack.isHomeStack()) {
                     stack = tmpStack;
                     break;
                 }
@@ -3789,6 +3793,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final int numTasks = tasks.size();
         int[] taskIds = new int[numTasks];
         String[] taskNames = new String[numTasks];
+        Rect[] taskBounds = new Rect[numTasks];
         for (int i = 0; i < numTasks; ++i) {
             final TaskRecord task = tasks.get(i);
             taskIds[i] = task.taskId;
@@ -3796,6 +3801,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     : task.realActivity != null ? task.realActivity.flattenToString()
                     : task.getTopActivity() != null ? task.getTopActivity().packageName
                     : "unknown";
+            taskBounds[i] = new Rect();
+            mWindowManager.getTaskBounds(task.taskId, taskBounds[i]);
         }
         info.taskIds = taskIds;
         info.taskNames = taskNames;
@@ -3811,7 +3818,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ArrayList<StackInfo> getAllStackInfosLocked() {
-        ArrayList<StackInfo> list = new ArrayList<StackInfo>();
+        ArrayList<StackInfo> list = new ArrayList<>();
         for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int ndx = stacks.size() - 1; ndx >= 0; --ndx) {

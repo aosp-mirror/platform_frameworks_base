@@ -113,11 +113,11 @@ final class ActivityStack {
     // How long we wait for the activity to tell us it has stopped before
     // giving up.  This is a good amount of time because we really need this
     // from the application in order to get its saved state.
-    static final int STOP_TIMEOUT = 10*1000;
+    static final int STOP_TIMEOUT = 10 * 1000;
 
     // How long we wait until giving up on an activity telling us it has
     // finished destroying itself.
-    static final int DESTROY_TIMEOUT = 10*1000;
+    static final int DESTROY_TIMEOUT = 10 * 1000;
 
     // How long until we reset a task when the user returns to it.  Currently
     // disabled.
@@ -125,7 +125,7 @@ final class ActivityStack {
 
     // How long between activity launches that we consider safe to not warn
     // the user about an unexpected activity being launched on top.
-    static final long START_WARN_TIME = 5*1000;
+    static final long START_WARN_TIME = 5 * 1000;
 
     // Set to false to disable the preview that is shown while a new activity
     // is being started.
@@ -214,8 +214,7 @@ final class ActivityStack {
     // Activity.onTranslucentConversionComplete(false). If a timeout occurs prior to the last
     // background activity being drawn then the same call will be made with a true value.
     ActivityRecord mTranslucentActivityWaiting = null;
-    private ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent =
-            new ArrayList<ActivityRecord>();
+    private ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent = new ArrayList<>();
 
     /**
      * Set when we know we are going to be calling updateConfiguration()
@@ -223,7 +222,7 @@ final class ActivityStack {
      */
     boolean mConfigWillChange;
 
-    // Whether or not this stack covers the entire screen; by default stacks are full screen
+    // Whether or not this stack covers the entire screen; by default stacks are fullscreen
     boolean mFullscreen = true;
 
     long mLaunchStartTime = 0;
@@ -240,11 +239,6 @@ final class ActivityStack {
 
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
-
-    Configuration mOverrideConfig;
-    /** True if the stack was forced to full screen because {@link TaskRecord#mResizeable} is false
-     * and the stack was previously resized. */
-    private boolean mForcedFullscreen = false;
 
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
@@ -361,7 +355,6 @@ final class ActivityStack {
         mStackId = activityContainer.mStackId;
         mCurrentUser = mService.mCurrentUserId;
         mRecentTasks = recentTasks;
-        mOverrideConfig = Configuration.EMPTY;
     }
 
     boolean okToShowLocked(ActivityRecord r) {
@@ -1165,16 +1158,18 @@ final class ActivityStack {
 
         final int numStacks = mStacks.size();
         while (stackNdx < numStacks) {
-            ActivityStack historyStack = mStacks.get(stackNdx);
+            final ActivityStack historyStack = mStacks.get(stackNdx);
             tasks = historyStack.mTaskHistory;
             final int numTasks = tasks.size();
             while (taskNdx < numTasks) {
-                activities = tasks.get(taskNdx).mActivities;
+                final TaskRecord currentTask = tasks.get(taskNdx);
+                activities = currentTask.mActivities;
                 final int numActivities = activities.size();
                 while (activityNdx < numActivities) {
                     final ActivityRecord activity = activities.get(activityNdx);
                     if (!activity.finishing) {
-                        return historyStack.mFullscreen && activity.fullscreen ? null : activity;
+                        return historyStack.mFullscreen
+                                && currentTask.mFullscreen && activity.fullscreen ? null : activity;
                     }
                     ++activityNdx;
                 }
@@ -1222,16 +1217,18 @@ final class ActivityStack {
          * wallpaper to be shown behind it.
          */
         for (int i = mStacks.indexOf(this) + 1; i < mStacks.size(); i++) {
-            ActivityStack stack = mStacks.get(i);
-            // stack above isn't full screen, so, we assume we're still visible. at some point
-            // we should look at the stack bounds to see if we're occluded even if the stack
-            // isn't fullscreen
+            final ActivityStack stack = mStacks.get(i);
+            // stack above isn't fullscreen, so, we assume we're still visible.
             if (!stack.mFullscreen) {
                 continue;
             }
             final ArrayList<TaskRecord> tasks = stack.getAllTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = tasks.get(taskNdx);
+                // task above isn't fullscreen, so, we assume we're still visible.
+                if (!task.mFullscreen) {
+                    continue;
+                }
                 final ArrayList<ActivityRecord> activities = task.mActivities;
                 for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                     final ActivityRecord r = activities.get(activityNdx);
@@ -1285,6 +1282,10 @@ final class ActivityStack {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
+            // Set to true if an activity in this task is fullscreen thereby hiding other
+            // activities in the same task. Initialized to the same value as behindFullscreen
+            // which represent if the entire task/stack is behind another fullscreen task/stack.
+            boolean behindFullscreenActivity = behindFullscreen;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.finishing) {
@@ -1296,7 +1297,7 @@ final class ActivityStack {
                 aboveTop = false;
                 // mLaunchingBehind: Activities launching behind are at the back of the task stack
                 // but must be drawn initially for the animation as though they were visible.
-                if (!behindFullscreen || r.mLaunchTaskBehind) {
+                if (!behindFullscreenActivity || r.mLaunchTaskBehind) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                             "Make visible? " + r + " finishing=" + r.finishing
                             + " state=" + r.state);
@@ -1379,17 +1380,22 @@ final class ActivityStack {
                     configChanges |= r.configChangeFlags;
 
                     if (r.fullscreen) {
-                        // At this point, nothing else needs to be shown
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r);
-                        behindFullscreen = true;
+                        // At this point, nothing else needs to be shown in this task.
+                        behindFullscreenActivity = true;
+                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
+                                + " behindFullscreen=" + behindFullscreen
+                                + " behindFullscreenActivity=" + behindFullscreenActivity);
                     } else if (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()) {
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Showing home: at " + r);
-                        behindFullscreen = true;
+                        behindFullscreenActivity = true;
+                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Showing home: at " + r
+                                + " behindFullscreen=" + behindFullscreen
+                                + " behindFullscreenActivity=" + behindFullscreenActivity);
                     }
                 } else {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                        "Make invisible? " + r + " finishing=" + r.finishing
-                        + " state=" + r.state + " behindFullscreen=" + behindFullscreen);
+                            "Make invisible? " + r + " finishing=" + r.finishing
+                            + " state=" + r.state + " behindFullscreen=" + behindFullscreen
+                            + " behindFullscreenActivity=" + behindFullscreenActivity);
                     // Now for any activities that aren't visible to the user, make
                     // sure they no longer are keeping the screen frozen.
                     if (r.visible) {
@@ -1436,6 +1442,9 @@ final class ActivityStack {
                     }
                 }
             }
+            // Factoring if the previous task is fullscreen there by affecting the visibility of
+            // task behind it.
+            behindFullscreen |= task.mFullscreen;
         }
 
         if (mTranslucentActivityWaiting != null &&
@@ -3818,29 +3827,12 @@ final class ActivityStack {
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                 "Ensuring correct configuration: " + r);
 
-        // Make sure the current stack override configuration is supported by the top task
-        // before continuing.
-        final TaskRecord topTask = topTask();
-        if (topTask != null && ((topTask.mResizeable && mForcedFullscreen)
-                    || (!topTask.mResizeable && !mFullscreen))) {
-            final boolean prevFullscreen = mFullscreen;
-            final Configuration newOverrideConfig =
-                    mWindowManager.forceStackToFullscreen(mStackId, !topTask.mResizeable);
-            updateOverrideConfiguration(newOverrideConfig);
-            mForcedFullscreen = !prevFullscreen && mFullscreen;
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Updated stack config to support task=" + topTask
-                            + " resizeable=" + topTask.mResizeable
-                            + " mForcedFullscreen=" + mForcedFullscreen
-                            + " prevFullscreen=" + prevFullscreen
-                            + " mFullscreen=" + mFullscreen);
-        }
-
         // Short circuit: if the two configurations are the exact same
         // object (the common case), then there is nothing to do.
-        Configuration newConfig = mService.mConfiguration;
+        final Configuration newConfig = mService.mConfiguration;
+        final Configuration taskConfig = r.task.mOverrideConfig;
         if (r.configuration == newConfig
-                && r.stackConfigOverride == mOverrideConfig
+                && r.taskConfigOverride == taskConfig
                 && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration unchanged in " + r);
@@ -3858,30 +3850,30 @@ final class ActivityStack {
         // Okay we now are going to make this activity have the new config.
         // But then we need to figure out how it needs to deal with that.
         final Configuration oldConfig = r.configuration;
-        final Configuration oldStackOverride = r.stackConfigOverride;
+        final Configuration oldTaskOverride = r.taskConfigOverride;
         r.configuration = newConfig;
-        r.stackConfigOverride = mOverrideConfig;
+        r.taskConfigOverride = taskConfig;
 
         // Determine what has changed.  May be nothing, if this is a config
         // that has come back from the app after going idle.  In that case
         // we just want to leave the official config object now in the
         // activity and do nothing else.
-        int stackChanges = oldStackOverride.diff(mOverrideConfig);
-        if (stackChanges == 0) {
+        int taskChanges = oldTaskOverride.diff(taskConfig);
+        if (taskChanges == 0) {
             // {@link Configuration#diff} doesn't catch changes from unset values.
             // Check for changes we care about.
-            if (oldStackOverride.orientation != mOverrideConfig.orientation) {
-                stackChanges |= ActivityInfo.CONFIG_ORIENTATION;
+            if (oldTaskOverride.orientation != taskConfig.orientation) {
+                taskChanges |= ActivityInfo.CONFIG_ORIENTATION;
             }
-            if (oldStackOverride.screenHeightDp != mOverrideConfig.screenHeightDp
-                    || oldStackOverride.screenWidthDp != mOverrideConfig.screenWidthDp) {
-                stackChanges |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            if (oldTaskOverride.screenHeightDp != taskConfig.screenHeightDp
+                    || oldTaskOverride.screenWidthDp != taskConfig.screenWidthDp) {
+                taskChanges |= ActivityInfo.CONFIG_SCREEN_SIZE;
             }
-            if (oldStackOverride.smallestScreenWidthDp != mOverrideConfig.smallestScreenWidthDp) {
-                stackChanges |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+            if (oldTaskOverride.smallestScreenWidthDp != taskConfig.smallestScreenWidthDp) {
+                taskChanges |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
             }
         }
-        final int changes = oldConfig.diff(newConfig) | stackChanges;
+        final int changes = oldConfig.diff(newConfig) | taskChanges;
         if (changes == 0 && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration no differences in " + r);
@@ -3943,14 +3935,14 @@ final class ActivityStack {
         }
 
         // Default case: the activity can handle this new configuration, so hand it over.
-        // NOTE: We only forward the stack override configuration as the system level configuration
+        // NOTE: We only forward the task override configuration as the system level configuration
         // changes is always sent to all processes when they happen so it can just use whatever
         // system level configuration it last got.
         if (r.app != null && r.app.thread != null) {
             try {
                 if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending new config to " + r);
                 r.app.thread.scheduleActivityConfigurationChanged(
-                        r.appToken, new Configuration(mOverrideConfig));
+                        r.appToken, new Configuration(taskConfig));
             } catch (RemoteException e) {
                 // If process died, whatever.
             }
@@ -3984,7 +3976,7 @@ final class ActivityStack {
             r.forceNewConfig = false;
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
                     !andResume, new Configuration(mService.mConfiguration),
-                    new Configuration(mOverrideConfig));
+                    new Configuration(r.task.mOverrideConfig));
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.
@@ -4379,16 +4371,6 @@ final class ActivityStack {
     public String toString() {
         return "ActivityStack{" + Integer.toHexString(System.identityHashCode(this))
                 + " stackId=" + mStackId + ", " + mTaskHistory.size() + " tasks}";
-    }
-
-    boolean updateOverrideConfiguration(Configuration newConfig) {
-        Configuration oldConfig = mOverrideConfig;
-        mOverrideConfig = (newConfig == null) ? Configuration.EMPTY : newConfig;
-        // We override the configuration only when the stack's dimensions are different from
-        // the display. In this manner, we know that if the override configuration is empty,
-        // the stack is necessarily full screen.
-        mFullscreen = Configuration.EMPTY.equals(mOverrideConfig);
-        return !mOverrideConfig.equals(oldConfig);
     }
 
     void onLockTaskPackagesUpdatedLocked() {

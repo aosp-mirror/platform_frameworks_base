@@ -29,9 +29,6 @@ public class DimLayer {
     private static final String TAG = "DimLayer";
     private static final boolean DEBUG = false;
 
-    /** Reference to the owner of this object. */
-    final DisplayContent mDisplayContent;
-
     /** Actual surface that dims */
     SurfaceControl mDimSurface;
 
@@ -62,13 +59,18 @@ public class DimLayer {
     /** Time in milliseconds to take to transition from mStartAlpha to mTargetAlpha */
     long mDuration;
 
-    /** Owning stack */
-    final TaskStack mStack;
+    /** Interface implemented by users of the dim layer */
+    interface DimLayerUser {
+        /** Returns true if the user of the dim layer is fullscreen. */
+        boolean isFullscreen();
+        /** Returns the display info. of the dim layer user. */
+        DisplayInfo getDisplayInfo();
+    }
+    /** The user of this dim layer. */
+    final DimLayerUser mUser;
 
-    DimLayer(WindowManagerService service, TaskStack stack, DisplayContent displayContent) {
-        mStack = stack;
-        mDisplayContent = displayContent;
-        final int displayId = mDisplayContent.getDisplayId();
+    DimLayer(WindowManagerService service, DimLayerUser user, int displayId) {
+        mUser = user;
         if (DEBUG) Slog.v(TAG, "Ctor: displayId=" + displayId);
         SurfaceControl.openTransaction();
         try {
@@ -145,14 +147,14 @@ public class DimLayer {
     private void adjustBounds() {
         final int dw, dh;
         final float xPos, yPos;
-        if (!mStack.isFullscreen()) {
+        if (!mUser.isFullscreen()) {
             dw = mBounds.width();
             dh = mBounds.height();
             xPos = mBounds.left;
             yPos = mBounds.top;
         } else {
             // Set surface size to screen size.
-            final DisplayInfo info = mDisplayContent.getDisplayInfo();
+            final DisplayInfo info = mUser.getDisplayInfo();
             // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose
             // a corner.
             dw = (int) (info.logicalWidth * 1.5);
