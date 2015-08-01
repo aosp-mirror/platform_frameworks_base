@@ -42,7 +42,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"سیم کارت را وارد کنید."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"سیم کارت موجود نیست یا قابل خواندن نیست. یک سیم کارت وارد کنید."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"سیم کارت غیرقابل استفاده است."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"‏سیم کارت شما به طور دائم غیر فعال شده است. \nبرای داشتن سیم کارت دیگر با ارائه‎دهنده سرویس بی‎سیم خود تماس بگیرید."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"‏سیم کارت شما به‌طور دائم غیر فعال شده است. \nبرای داشتن سیم کارت دیگر با ارائه‎دهنده سرویس بی‎سیم خود تماس بگیرید."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"سیم کارت قفل شد."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"‏سیم کارت با PUK قفل شده است."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"درحال بازگشایی قفل سیم کارت..."</string>
