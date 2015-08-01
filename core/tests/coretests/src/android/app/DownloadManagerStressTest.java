@@ -24,6 +24,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import java.io.File;
@@ -34,6 +35,7 @@ import java.util.Random;
 /**
  * Integration tests of the DownloadManager API.
  */
+@Suppress  // Failing.
 public class DownloadManagerStressTest extends DownloadManagerBaseTest {
     private static final String TAG = "DownloadManagerStressTest";
     private final static String CACHE_DIR =

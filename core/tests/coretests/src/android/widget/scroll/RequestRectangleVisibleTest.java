@@ -16,6 +16,7 @@
 
 package android.widget.scroll;
 
+import android.test.suitebuilder.annotation.Suppress;
 import android.widget.scroll.RequestRectangleVisible;
 import com.android.frameworks.coretests.R;
 
@@ -33,6 +34,7 @@ import android.view.KeyEvent;
  * {@link RequestRectangleVisible} is set up to exercise the cases of moving a
  * rectangle that is either off screen or not entirely on the screen onto the screen.
  */
+@Suppress // Flaky.
 public class RequestRectangleVisibleTest extends ActivityInstrumentationTestCase<RequestRectangleVisible> {
 
     private ScrollView mScrollView;

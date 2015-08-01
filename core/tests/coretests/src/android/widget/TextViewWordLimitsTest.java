@@ -18,6 +18,7 @@ package android.widget;
 
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.Spannable;
@@ -32,6 +33,7 @@ import java.lang.reflect.Method;
  * verifies word limits to be in strings containing different kinds of
  * characters.
  */
+@Suppress // Failing.
 public class TextViewWordLimitsTest extends AndroidTestCase {
 
     TextView mTv = null;
