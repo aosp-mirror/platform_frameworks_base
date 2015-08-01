@@ -46,6 +46,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.printspooler.R;
@@ -493,6 +494,7 @@ public final class PrintSpoolerService extends Service {
                     Slog.i(LOG_TAG, "[STATE CHANGED] " + printJob);
                 }
 
+                MetricsLogger.histogram(this, "print_job_state", state);
                 switch (state) {
                     case PrintJobInfo.STATE_COMPLETED:
                     case PrintJobInfo.STATE_CANCELED:
