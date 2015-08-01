@@ -142,6 +142,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 328;
     private static final int MSG_AIRPLANE_MODE_CHANGED = 329;
     private static final int MSG_SERVICE_STATE_CHANGE = 330;
+    private static final int MSG_SCREEN_TURNED_ON = 331;
+    private static final int MSG_SCREEN_TURNED_OFF = 332;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -247,6 +249,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_SERVICE_STATE_CHANGE:
                     handleServiceStateChange(msg.arg1, (ServiceState) msg.obj);
+                    break;
+                case MSG_SCREEN_TURNED_ON:
+                    handleScreenTurnedOn();
+                    break;
+                case MSG_SCREEN_TURNED_OFF:
+                    handleScreenTurnedOff();
                     break;
             }
         }
@@ -804,6 +812,26 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
         updateFingerprintListeningState();
+    }
+
+    private void handleScreenTurnedOn() {
+        final int count = mCallbacks.size();
+        for (int i = 0; i < count; i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onScreenTurnedOn();
+            }
+        }
+    }
+
+    private void handleScreenTurnedOff() {
+        final int count = mCallbacks.size();
+        for (int i = 0; i < count; i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onScreenTurnedOff();
+            }
+        }
     }
 
     /**
@@ -1486,12 +1514,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         synchronized (this) {
             mScreenOn = true;
         }
+        mHandler.sendEmptyMessage(MSG_SCREEN_TURNED_ON);
     }
 
     public void dispatchScreenTurnedOff() {
         synchronized(this) {
             mScreenOn = false;
         }
+        mHandler.sendEmptyMessage(MSG_SCREEN_TURNED_OFF);
     }
 
     public boolean isDeviceInteractive() {
