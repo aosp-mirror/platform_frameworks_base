@@ -1234,6 +1234,14 @@ public class AppOpsManager {
     }
 
     /** @hide */
+    public void setUidMode(int code, int uid, int mode) {
+        try {
+            mService.setUidMode(code, uid, mode);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /** @hide */
     public void setMode(int code, int uid, String packageName, int mode) {
         try {
             mService.setMode(code, uid, packageName, mode);
