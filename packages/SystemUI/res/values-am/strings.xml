@@ -345,8 +345,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"መተግበሪያዎችና ውሂብ ለመሰረዝ እንግዳ ተጣቀሚን ያስወግዱ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"እንግዳን አስወግድ"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"ተጠቃሚን አስወጣ"</string>
-    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
-    <skip />
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"አሁን ያለውን ተጠቃሚ አስወጣ"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ተጠቃሚን አስወጣ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"አዲስ ተጠቃሚ ይታከል?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"እርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምን ይችላል።"</string>
@@ -430,6 +429,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"እንኳን ደስ ያለዎት! የስርዓት በይነገጽ መቃኛ ወደ ቅንብሮች ታክሏል"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ከቅንብሮች አስወግድ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ከቅንብሮች ላይ የስርዓት በይነገጽ መቃኛ ተወግዶ ሁሉም ባህሪዎቹን መጠቀም ይቁም?"</string>
-    <!-- no translation found for activity_not_found (348423244327799974) -->
-    <skip />
+    <string name="activity_not_found" msgid="348423244327799974">"መተግበሪያ በእርስዎ መሣሪያ ላይ አልተጫነም"</string>
 </resources>

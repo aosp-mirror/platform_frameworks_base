@@ -345,8 +345,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"अ‍ॅप्स आणि डेटा हटविण्‍यासाठी, अतिथी वापरकर्ता काढा"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"अतिथी काढा"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"वापरकर्त्यास लॉगआउट करा"</string>
-    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
-    <skip />
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"वर्तमान वापरकर्ता लॉगआउट करा"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"वापरकर्त्यास लॉगआउट करा"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नवीन वापरकर्ता जोडायचा?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"आपण एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अॅप्स अद्यतनित करू शकतो."</string>
@@ -430,6 +429,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"अभिनंदन! सिस्टीम UI ट्यूनर सेटिंग्जमध्‍ये जोडले गेले आहे"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"सेटिंग्ज मधून काढा"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"सेटिंग्ज मधून सिस्टीम UI ट्यूनर काढून त्याची सर्व वैशिष्ट्‍ये वापरणे थांबवायचे?"</string>
-    <!-- no translation found for activity_not_found (348423244327799974) -->
-    <skip />
+    <string name="activity_not_found" msgid="348423244327799974">"अनुप्रयोग आपल्या डिव्हाइसवर स्थापित केलेला नाही"</string>
 </resources>

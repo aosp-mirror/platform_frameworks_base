@@ -345,8 +345,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Aplikazioak eta datuak ezabatzeko, kendu gonbidatua"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"KENDU GONBIDATUA"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Amaitu erabiltzailearen saioa"</string>
-    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
-    <skip />
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"Amaitu uneko erabiltzailearen saioa"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"AMAITU ERABILTZAILEAREN SAIOA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Beste erabiltzaile bat gehitu?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Erabiltzaile bat gehitzen duzunean, horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
@@ -430,6 +429,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"Zorionak! Sistemako erabiltzaile-interfazearen konfiguratzailea Ezarpenak atalean gehitu da"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Kendu Ezarpenak ataletik"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Sistemako erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren eginbide guztiak erabiltzeari utzi nahi diozu?"</string>
-    <!-- no translation found for activity_not_found (348423244327799974) -->
-    <skip />
+    <string name="activity_not_found" msgid="348423244327799974">"Aplikazioa ez dago gailuan instalatuta"</string>
 </resources>

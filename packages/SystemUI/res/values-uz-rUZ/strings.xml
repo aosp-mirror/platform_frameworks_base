@@ -344,10 +344,9 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Mehmon foydalanuvchi"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Ilova va ma’l-ni o‘chirish u-n mehmon hisobini o‘chiring"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"MEHMON HISOBINI O‘CHIRISH"</string>
-    <string name="user_logout_notification_title" msgid="1453960926437240727">"Foydalanuvchini tizimdan chiqaring"</string>
-    <!-- no translation found for user_logout_notification_text (3350262809611876284) -->
-    <skip />
-    <string name="user_logout_notification_action" msgid="1195428991423425062">"TIZIMDAN CHIQARISH"</string>
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Foydalanuvchi nomidan chiqish"</string>
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"Joriy foydalanuvchini tizimdan chiqarish"</string>
+    <string name="user_logout_notification_action" msgid="1195428991423425062">"FOYDALANUVCHI NOMIDAN CHIQISH"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Yangi foyd-chi qo‘shilsinmi?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yangi foydalanuvchi qo‘shilgach, o‘sha shaxs o‘z hududini sozlashi lozim bo‘ladi.\n\nHar qanday foydalanuvchi ilovalarni barcha foydalanuvchilar uchun yangilashi mumkin."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Quvvat tejash rejimi yoqildi"</string>
@@ -430,6 +429,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"Tabriklaymiz! System UI Tuner Sozlamalarga qo‘shildi."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Sozlamalardan olib tashlash"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner Sozlamalardan olib tashlanib, uning barcha funksiyalaridan foydalanish to‘xtatilsinmi?"</string>
-    <!-- no translation found for activity_not_found (348423244327799974) -->
-    <skip />
+    <string name="activity_not_found" msgid="348423244327799974">"Ilova qurilmangizga o‘rnatilmagan"</string>
 </resources>
