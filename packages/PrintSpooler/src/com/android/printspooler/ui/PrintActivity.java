@@ -72,6 +72,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.printspooler.R;
 import com.android.printspooler.model.MutexFileProvider;
 import com.android.printspooler.model.PrintSpoolerProvider;
@@ -325,6 +326,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (mState != STATE_INITIALIZING && mCurrentPrinter != null) {
             mPrinterRegistry.setTrackedPrinter(mCurrentPrinter.getId());
         }
+        MetricsLogger.count(this, "print_preview", 1);
     }
 
     @Override
@@ -1073,6 +1075,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private void confirmPrint() {
         setState(STATE_PRINT_CONFIRMED);
+
+        MetricsLogger.count(this, "print_confirmed", 1);
 
         updateOptionsUi();
         addCurrentPrinterToHistory();
