@@ -32,6 +32,7 @@ import android.os.Vibrator;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Slog;
 
 /**
@@ -152,13 +153,25 @@ class GestureLauncherService extends SystemService {
 
         private void handleCameraLaunchGesture() {
             if (DBG) Slog.d(TAG, "Received a camera launch event.");
+            boolean userSetupComplete = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
+            if (!userSetupComplete) {
+                if (DBG) Slog.d(TAG, String.format(
+                        "userSetupComplete = %s, ignoring camera launch gesture.",
+                        userSetupComplete));
+                return;
+            }
+            if (DBG) Slog.d(TAG, String.format(
+                    "userSetupComplete = %s, performing camera launch gesture.",
+                    userSetupComplete));
             boolean locked = mKeyGuard != null && mKeyGuard.inKeyguardRestrictedInputMode();
             String action = locked
                     ? MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
                     : MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA;
             Intent intent = new Intent(action);
             PackageManager pm = mContext.getPackageManager();
-            ResolveInfo componentInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+            ResolveInfo componentInfo = pm.resolveActivity(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
             if (componentInfo == null) {
                 if (DBG) Slog.d(TAG, "Couldn't find an app to process the camera intent.");
                 return;
@@ -167,7 +180,6 @@ class GestureLauncherService extends SystemService {
             if (mVibrator != null && mVibrator.hasVibrator()) {
                 mVibrator.vibrate(1000L);
             }
-
             // Turn on the screen before the camera launches.
             mWakeLock.acquire(500L);
             intent.setComponent(new ComponentName(componentInfo.activityInfo.packageName,
