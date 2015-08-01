@@ -343,11 +343,14 @@ public class RecentsTaskLoader {
         if (infoHandle.info != null) {
             label = ssp.getActivityLabel(infoHandle.info);
             mActivityLabelCache.put(taskKey, label);
+            return label;
         } else {
             Log.w(TAG, "Missing ActivityInfo for " + taskKey.baseIntent.getComponent()
                     + " u=" + taskKey.userId);
         }
-        return label;
+        // If the activity info does not exist or fails to load, return an empty label for now,
+        // but do not cache it
+        return "";
     }
 
     /** Returns the content description using as many cached values as we can. */
@@ -358,14 +361,22 @@ public class RecentsTaskLoader {
         if (label != null) {
             return label;
         }
+        // If the given activity label is empty, don't compute or cache the content description
+        if (activityLabel.isEmpty()) {
+            return "";
+        }
+
         label = ssp.getContentDescription(taskKey.baseIntent, taskKey.userId, activityLabel, res);
         if (label != null) {
             mContentDescriptionCache.put(taskKey, label);
+            return label;
         } else {
             Log.w(TAG, "Missing content description for " + taskKey.baseIntent.getComponent()
                     + " u=" + taskKey.userId);
         }
-        return label;
+        // If the content description does not exist, return an empty label for now, but do not
+        // cache it
+        return "";
     }
 
     /** Returns the activity icon using as many cached values as we can. */
