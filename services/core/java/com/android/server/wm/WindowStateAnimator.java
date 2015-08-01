@@ -788,11 +788,7 @@ class WindowStateAnimator {
             int flags = SurfaceControl.HIDDEN;
             final WindowManager.LayoutParams attrs = w.mAttrs;
 
-            if ((attrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
-                flags |= SurfaceControl.SECURE;
-            }
-
-            if (mService.isScreenCaptureDisabledLocked(UserHandle.getUserId(mWin.mOwnerUid))) {
+            if (mService.isSecureLocked(w)) {
                 flags |= SurfaceControl.SECURE;
             }
 
