@@ -80,10 +80,37 @@ interface IWindowManager
     void setEventDispatching(boolean enabled);
     void addWindowToken(IBinder token, int type);
     void removeWindowToken(IBinder token);
-    void addAppToken(int addPos, IApplicationToken token, int groupId, int stackId,
+    /**
+     * Adds an application token to the specified task Id.
+     * @param addPos The position to add the token to in the task.
+     * @param token The token to add.
+     * @param taskId The Id of the task we are adding the token to.
+     * @param stackId Stack Id to create a new Task with the input task Id on
+     *                if the task doesn't exist yet.
+     * @param requestedOrientation Orientation to use.
+     * @param fullscreen True if the application token is fullscreen.
+     * @param showWhenLocked True if the application token should be shown when locked.
+     * @param userId Id of user to associate the token with.
+     * @param configChanges Input configuration changes.
+     * @param voiceInteraction True if the token is in voice interaction mode.
+     * @param launchTaskBehind True if the token is been launched from behind.
+     * @param taskBounds Bounds to use when creating a new Task with the input task Id if
+     *                   the task doesn't exist yet.
+     * @return The configuration of the task if it was newly created. null otherwise.
+     */
+    Configuration addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
-            int configChanges, boolean voiceInteraction, boolean launchTaskBehind);
-    void setAppTask(IBinder token, int taskId);
+            int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
+            in Rect taskBounds);
+    /**
+     *
+     * @param token The token we are adding to the input task Id.
+     * @param taskId The Id of the task we are adding the token to.
+     * @param taskBounds Bounds to use when creating a new Task with the input task Id if
+     *                   the task doesn't exist yet.
+     * @return The configuration of the task if it was newly created. null otherwise.
+     */
+    Configuration setAppTask(IBinder token, int taskId, in Rect taskBounds);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);

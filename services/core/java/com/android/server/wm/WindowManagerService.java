@@ -3687,24 +3687,26 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
-    private Task createTaskLocked(int taskId, int stackId, int userId, AppWindowToken atoken) {
+    private Task createTaskLocked(
+            int taskId, int stackId, int userId, AppWindowToken atoken, Rect bounds) {
         if (DEBUG_STACK) Slog.i(TAG, "createTaskLocked: taskId=" + taskId + " stackId=" + stackId
-                + " atoken=" + atoken);
+                + " atoken=" + atoken + " bounds=" + bounds);
         final TaskStack stack = mStackIdToStack.get(stackId);
         if (stack == null) {
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
         }
         EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
-        Task task = new Task(taskId, stack, userId, this);
+        Task task = new Task(taskId, stack, userId, this, bounds);
         mTaskIdToTask.put(taskId, task);
         stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showForAllUsers);
         return task;
     }
 
     @Override
-    public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
+    public Configuration addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
-            int configChanges, boolean voiceInteraction, boolean launchTaskBehind) {
+            int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
+            Rect taskBounds) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3728,7 +3730,7 @@ public class WindowManagerService extends IWindowManager.Stub
             AppWindowToken atoken = findAppWindowToken(token.asBinder());
             if (atoken != null) {
                 Slog.w(TAG, "Attempted to add existing app token: " + token);
-                return;
+                return null;
             }
             atoken = new AppWindowToken(this, token, voiceInteraction);
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
@@ -3742,8 +3744,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
 
             Task task = mTaskIdToTask.get(taskId);
+            Configuration outConfig = null;
             if (task == null) {
-                task = createTaskLocked(taskId, stackId, userId, atoken);
+                task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds);
+                outConfig = task.mOverrideConfig;
             }
             task.addAppToken(addPos, atoken);
 
@@ -3753,12 +3757,12 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.hidden = true;
             atoken.hiddenRequested = true;
 
-            //dump();
+            return outConfig;
         }
     }
 
     @Override
-    public void setAppTask(IBinder token, int taskId) {
+    public Configuration setAppTask(IBinder token, int taskId, Rect taskBounds) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3768,17 +3772,20 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken atoken = findAppWindowToken(token);
             if (atoken == null) {
                 Slog.w(TAG, "Attempted to set task id of non-existing app token: " + token);
-                return;
+                return null;
             }
             final Task oldTask = atoken.mTask;
             oldTask.removeAppToken(atoken);
 
             Task newTask = mTaskIdToTask.get(taskId);
+            Configuration outConfig = null;
             if (newTask == null) {
-                newTask =
-                        createTaskLocked(taskId, oldTask.mStack.mStackId, oldTask.mUserId, atoken);
+                newTask = createTaskLocked(
+                        taskId, oldTask.mStack.mStackId, oldTask.mUserId, atoken, taskBounds);
+                outConfig = newTask.mOverrideConfig;
             }
             newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken);
+            return outConfig;
         }
     }
 

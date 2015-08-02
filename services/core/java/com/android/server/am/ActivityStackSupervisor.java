@@ -1789,20 +1789,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return mFocusedStack;
             }
 
+            // We first try to put the task in the first dynamic stack.
             final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
             for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 stack = homeDisplayStacks.get(stackNdx);
-                if (!stack.isHomeStack()) {
+                final boolean isDynamicStack = stack.mStackId >= FIRST_DYNAMIC_STACK_ID;
+                if (isDynamicStack) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                             "computeStackFocus: Setting focused stack=" + stack);
                     return stack;
                 }
             }
 
-            // TODO (multi-window): Change to select task id based on if the task should on in
-            // fullscreen, freefrom, or sid-by-side stack.
+            // If there is no suitable dynamic stack then we figure out which static stack to use.
             stack = getStack(
-                    FULLSCREEN_WORKSPACE_STACK_ID,
+                    task != null
+                            ? task.getLaunchStackId(mFocusedStack) : FULLSCREEN_WORKSPACE_STACK_ID,
                     true /*createStaticStackIfNeeded*/,
                     true /*createOnTop*/);
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
@@ -2899,7 +2901,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Slog.wtf(TAG, "Task in WindowManager, but not in ActivityManager???");
                 continue;
             }
-            task.updateOverrideConfiguration(newTaskConfigs.get(i));
+            task.updateOverrideConfiguration(newTaskConfigs.get(i), bounds);
         }
 
         if (r != null) {
@@ -2924,16 +2926,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        task.mBounds = new Rect(bounds);
-
         if (!mWindowManager.isValidTaskId(task.taskId)) {
             // Task doesn't exist in window manager yet (e.g. was restored from recents).
-            // No need to do anything else until we add the task to window manager.
+            // All we can do for now is update the bounds so it can be used when the task is
+            // added to window manager.
+            task.mBounds = task.mLastNonFullscreenBounds = new Rect(bounds);
+            if (task.stack != null && task.stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
+                // re-restore the task so it can have the proper stack association.
+                restoreRecentTaskLocked(task);
+            }
             return;
         }
 
         final Configuration overrideConfig = mWindowManager.resizeTask(task.taskId, bounds);
-        if (task.updateOverrideConfiguration(overrideConfig)) {
+        if (task.updateOverrideConfiguration(overrideConfig, bounds)) {
             ActivityRecord r = task.topRunningActivityLocked(null);
             if (r != null) {
                 final ActivityStack stack = task.stack;
@@ -2972,13 +2978,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     private boolean restoreRecentTaskLocked(TaskRecord task) {
-        // TODO (multi-window): Change to select task id based on if the task should on in
-        // fullscreen, freefrom, or sid-by-side stack.
-        // Always put task for lean back device in home stack since they only have one stack,
-        // else use the preferred stack ID to get the stack we should use if it already exists.
-        ActivityStack stack = mLeanbackOnlyDevice ? mHomeStack :
-                getStack(FULLSCREEN_WORKSPACE_STACK_ID,
-                        true /*createStaticStackIfNeeded*/, false /*createOnTop*/);
+        final int stackId =
+                mLeanbackOnlyDevice ? mHomeStack.mStackId : task.getLaunchStackId(mFocusedStack);
+        if (task.stack != null) {
+            // Task has already been restored once. See if we need to do anything more
+            if (task.stack.mStackId == stackId) {
+                // Nothing else to do since it is already restored in the right stack.
+                return true;
+            }
+            // Remove current stack association, so we can re-associate the task with the
+            // right stack below.
+            task.stack.removeTask(task, "restoreRecentTaskLocked", false /*notMoving*/);
+        }
+
+        ActivityStack stack =
+                getStack(stackId, true /*createStaticStackIfNeeded*/, false /*createOnTop*/);
 
         if (stack == null) {
             // What does this mean??? Not sure how we would get here...
@@ -2992,12 +3006,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
         for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ActivityRecord r = activities.get(activityNdx);
-            mWindowManager.addAppToken(0, r.appToken, task.taskId, stack.mStackId,
-                    r.info.screenOrientation, r.fullscreen,
-                    (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0,
-                    r.userId, r.info.configChanges, task.voiceSession != null,
-                    r.mLaunchTaskBehind);
+            stack.addAppToken(activities.get(activityNdx), task);
         }
         return true;
     }

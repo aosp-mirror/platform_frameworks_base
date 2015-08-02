@@ -93,7 +93,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
         
         try {
-            mWm.addAppToken(0, null, 0, 0, 0, false, false, 0, 0, false, false);
+            mWm.addAppToken(0, null, 0, 0, 0, false, false, 0, 0, false, false, null);
             fail("IWindowManager.addAppToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -103,7 +103,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
         
         try {
-            mWm.setAppTask(null, 0);
+            mWm.setAppTask(null, 0, null);
             fail("IWindowManager.setAppGroupId did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
