@@ -721,29 +721,29 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     public void onContentChanged() {
     }
-    
+
     public void onWindowFocusChanged(boolean hasFocus) {
     }
 
     public void onAttachedToWindow() {
     }
-    
+
     public void onDetachedFromWindow() {
     }
 
     /** @hide */
     @Override
-    public void onWindowDismissed() {
+    public void onWindowDismissed(boolean finishTask) {
         dismiss();
     }
-    
+
     /**
-     * Called to process key events.  You can override this to intercept all 
-     * key events before they are dispatched to the window.  Be sure to call 
+     * Called to process key events.  You can override this to intercept all
+     * key events before they are dispatched to the window.  Be sure to call
      * this implementation for key events that should be handled normally.
-     * 
+     *
      * @param event The key event.
-     * 
+     *
      * @return boolean Return true if this event was consumed.
      */
     public boolean dispatchKeyEvent(KeyEvent event) {

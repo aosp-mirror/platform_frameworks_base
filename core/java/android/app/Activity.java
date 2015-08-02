@@ -683,6 +683,13 @@ public class Activity extends ContextThemeWrapper
     /** Start of user-defined activity results. */
     public static final int RESULT_FIRST_USER   = 1;
 
+    /** @hide Task isn't finished when activity is finished */
+    public static final int DONT_FINISH_TASK_WITH_ACTIVITY = 0;
+    /** @hide Task is finished if the finishing activity is the root of the task */
+    public static final int FINISH_TASK_WITH_ROOT_ACTIVITY = 1;
+    /** @hide Task is finished along with the finishing activity*/
+    public static final int FINISH_TASK_WITH_ACTIVITY = 2;
+
     static final String FRAGMENTS_TAG = "android:fragments";
 
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
@@ -2689,8 +2696,8 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @Override
-    public void onWindowDismissed() {
-        finish();
+    public void onWindowDismissed(boolean finishTask) {
+        finish(finishTask ? FINISH_TASK_WITH_ACTIVITY : DONT_FINISH_TASK_WITH_ACTIVITY);
     }
 
     /**
@@ -4838,7 +4845,7 @@ public class Activity extends ContextThemeWrapper
      * Finishes the current activity and specifies whether to remove the task associated with this
      * activity.
      */
-    private void finish(boolean finishTask) {
+    private void finish(int finishTask) {
         if (mParent == null) {
             int resultCode;
             Intent resultData;
@@ -4869,7 +4876,7 @@ public class Activity extends ContextThemeWrapper
      * onActivityResult().
      */
     public void finish() {
-        finish(false);
+        finish(DONT_FINISH_TASK_WITH_ACTIVITY);
     }
 
     /**
@@ -4969,10 +4976,10 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Call this when your activity is done and should be closed and the task should be completely
-     * removed as a part of finishing the Activity.
+     * removed as a part of finishing the root activity of the task.
      */
     public void finishAndRemoveTask() {
-        finish(true);
+        finish(FINISH_TASK_WITH_ROOT_ACTIVITY);
     }
 
     /**

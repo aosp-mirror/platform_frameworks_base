@@ -471,8 +471,9 @@ public abstract class Window {
         /**
          * Called when a window is dismissed. This informs the callback that the
          * window is gone, and it should finish itself.
+         * @param finishTask True if the task should also be finished.
          */
-        public void onWindowDismissed();
+        void onWindowDismissed(boolean finishTask);
     }
 
     public Window(Context context) {
@@ -659,7 +660,7 @@ public abstract class Window {
     /** @hide */
     public final void dispatchOnWindowDismissed() {
         if (mOnWindowDismissedCallback != null) {
-            mOnWindowDismissedCallback.onWindowDismissed();
+            mOnWindowDismissedCallback.onWindowDismissed(false);
         }
     }
 

@@ -4252,14 +4252,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param token The Binder token referencing the Activity we want to finish.
      * @param resultCode Result code, if any, from this Activity.
      * @param resultData Result data (Intent), if any, from this Activity.
-     * @param finishTask Whether to finish the task associated with this Activity.  Only applies to
-     *            the root Activity in the task.
+     * @param finishTask Whether to finish the task associated with this Activity.
      *
      * @return Returns true if the activity successfully finished, or false if it is still running.
      */
     @Override
     public final boolean finishActivity(IBinder token, int resultCode, Intent resultData,
-            boolean finishTask) {
+            int finishTask) {
         // Refuse possible leaked file descriptors
         if (resultData != null && resultData.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -4306,7 +4305,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             try {
                 boolean res;
-                if (finishTask && r == rootR) {
+                if (finishTask == Activity.FINISH_TASK_WITH_ACTIVITY
+                        || (finishTask == Activity.FINISH_TASK_WITH_ROOT_ACTIVITY && r == rootR)) {
                     // If requested, remove the task that is associated to this activity only if it
                     // was the root activity in the task. The result code and data is ignored
                     // because we don't support returning them across task boundaries.

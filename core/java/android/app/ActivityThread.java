@@ -2555,7 +2555,8 @@ public final class ActivityThread {
             // manager to stop us.
             try {
                 ActivityManagerNative.getDefault()
-                    .finishActivity(r.token, Activity.RESULT_CANCELED, null, false);
+                    .finishActivity(r.token, Activity.RESULT_CANCELED, null,
+                            Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
             } catch (RemoteException ex) {
                 // Ignore
             }
@@ -3280,7 +3281,8 @@ public final class ActivityThread {
             // just end this activity.
             try {
                 ActivityManagerNative.getDefault()
-                    .finishActivity(token, Activity.RESULT_CANCELED, null, false);
+                    .finishActivity(token, Activity.RESULT_CANCELED, null,
+                            Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
             } catch (RemoteException ex) {
             }
         }
