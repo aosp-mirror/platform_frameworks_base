@@ -17,15 +17,7 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
-import static android.app.ActivityManager.FIRST_DYNAMIC_STACK_ID;
-import static android.app.ActivityManager.FIRST_STATIC_STACK_ID;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.HOME_STACK_ID;
-import static android.app.ActivityManager.LAST_STATIC_STACK_ID;
-import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
-import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
+import static android.app.ActivityManager.*;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -3024,6 +3016,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
             task.stack.removeTask(task, "moveTaskToStack", false /* notMoving */);
         }
         stack.addTask(task, toTop, true);
+
+        // Make sure the task has the appropriate bounds/size for the stack it is in.
+        if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
+            resizeTaskLocked(task, null);
+        } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
+                && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
+            resizeTaskLocked(task, task.mLastNonFullscreenBounds);
+        }
+
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
         stack.ensureActivitiesVisibleLocked(null, 0);
@@ -3828,6 +3829,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         info.taskIds = taskIds;
         info.taskNames = taskNames;
+        info.taskBounds = taskBounds;
         return info;
     }
 

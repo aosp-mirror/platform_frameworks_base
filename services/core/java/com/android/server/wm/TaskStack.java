@@ -148,8 +148,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
     void updateDisplayInfo() {
         if (mDisplayContent != null) {
-            mDisplayContent.getLogicalDisplayRect(mTmpRect);
-            mAnimationBackgroundSurface.setBounds(mTmpRect);
+            setBounds(mFullscreen ? null : mBounds);
             for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
             }

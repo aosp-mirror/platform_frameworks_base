@@ -8930,6 +8930,35 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public int getActivityStackId(IBinder token) throws RemoteException {
+        synchronized (this) {
+            ActivityStack stack = ActivityRecord.getStackLocked(token);
+            if (stack == null) {
+                throw new IllegalArgumentException(
+                        "getActivityStackId: No stack for token=" + token);
+            }
+            return stack.mStackId;
+        }
+    }
+
+    @Override
+    public void moveActivityToStack(IBinder token, int stackId) throws RemoteException {
+        synchronized(this) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                if (r == null) {
+                    throw new IllegalArgumentException(
+                            "moveActivityToStack: No activity record matching token=" + token);
+                }
+                moveTaskToStack(r.task.taskId, stackId, true /*toTop*/);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    @Override
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "moveTaskToStack()");

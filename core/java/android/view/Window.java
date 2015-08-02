@@ -34,6 +34,7 @@ import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.transition.Scene;
 import android.transition.Transition;
@@ -474,6 +475,21 @@ public abstract class Window {
          * @param finishTask True if the task should also be finished.
          */
         void onWindowDismissed(boolean finishTask);
+    }
+
+    /** @hide */
+    public interface WindowStackCallback {
+        /** Called to move the window and its activity/task to a different stack container.
+         * For example, a window can move between
+         * {@link android.app.ActivityManager#FULLSCREEN_WORKSPACE_STACK_ID} stack and
+         * {@link android.app.ActivityManager#FREEFORM_WORKSPACE_STACK_ID} stack.
+         *
+         * @param stackId stack Id to change to.
+         */
+        void changeWindowStack(int stackId) throws RemoteException;
+
+        /** Returns the current stack Id for the window. */
+        int getWindowStackId() throws RemoteException;
     }
 
     public Window(Context context) {

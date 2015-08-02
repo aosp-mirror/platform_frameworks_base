@@ -31,6 +31,7 @@ import android.transition.Scene;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
+import android.view.Window.WindowStackCallback;
 import android.widget.Toolbar;
 
 import com.android.internal.app.IVoiceInteractor;
@@ -672,7 +673,7 @@ public class Activity extends ContextThemeWrapper
         implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
-        Window.OnWindowDismissedCallback {
+        Window.OnWindowDismissedCallback, WindowStackCallback {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -2698,6 +2699,28 @@ public class Activity extends ContextThemeWrapper
     @Override
     public void onWindowDismissed(boolean finishTask) {
         finish(finishTask ? FINISH_TASK_WITH_ACTIVITY : DONT_FINISH_TASK_WITH_ACTIVITY);
+    }
+
+
+    /** Called to move the window and its activity/task to a different stack container.
+     * For example, a window can move between
+     * {@link android.app.ActivityManager#FULLSCREEN_WORKSPACE_STACK_ID} stack and
+     * {@link android.app.ActivityManager#FREEFORM_WORKSPACE_STACK_ID} stack.
+     *
+     * @param stackId stack Id to change to.
+     * @hide
+     */
+    @Override
+    public void changeWindowStack(int stackId) throws RemoteException {
+        ActivityManagerNative.getDefault().moveActivityToStack(mToken, stackId);
+    }
+
+    /** Returns the current stack Id for the window.
+     * @hide
+     */
+    @Override
+    public int getWindowStackId() throws RemoteException {
+        return ActivityManagerNative.getDefault().getActivityStackId(mToken);
     }
 
     /**
