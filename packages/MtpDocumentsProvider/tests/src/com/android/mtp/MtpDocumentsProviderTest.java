@@ -70,7 +70,6 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
     public void testCloseAllDevices() throws IOException {
         mMtpManager.addValidDevice(0);
-        mProvider.onCreateForTesting(mMtpManager, mResolver);
 
         mProvider.closeAllDevices();
         assertEquals(0, mResolver.changeCount);
@@ -101,7 +100,6 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                         4096 /* total space */,
                         "Identifier B" /* no volume identifier */)
         });
-        mProvider.onCreateForTesting(mMtpManager, mResolver);
         assertEquals(0, mProvider.queryRoots(null).getCount());
 
         {
@@ -109,12 +107,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
-            assertEquals("0:1", cursor.getString(0));
+            assertEquals("0_1", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
             assertEquals("Storage A", cursor.getString(3));
-            assertEquals("0:1:0", cursor.getString(4));
+            assertEquals("0_1_0", cursor.getString(4));
             assertEquals(1024, cursor.getInt(5));
         }
 
@@ -124,12 +122,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
             cursor.moveToNext();
-            assertEquals("1:1", cursor.getString(0));
+            assertEquals("1_1", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
             assertEquals("Storage B", cursor.getString(3));
-            assertEquals("1:1:0", cursor.getString(4));
+            assertEquals("1_1_0", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
 
@@ -152,19 +150,18 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                         4096 /* total space */,
                         "Identifier B" /* no volume identifier */)
         });
-        mProvider.onCreateForTesting(mMtpManager, mResolver);
         {
             mProvider.openDevice(0);
             mProvider.openDevice(1);
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
-            assertEquals("1:1", cursor.getString(0));
+            assertEquals("1_1", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
             assertEquals("Storage B", cursor.getString(3));
-            assertEquals("1:1:0", cursor.getString(4));
+            assertEquals("1_1_0", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
     }
@@ -177,11 +174,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new Date(1422716400000L) /* modified date */,
                 1024 * 1024 * 5 /* file size */,
                 1024 * 50 /* thumbnail size */));
-        final Cursor cursor = mProvider.queryDocument("0:1:2", null);
+        final Cursor cursor = mProvider.queryDocument("0_1_2", null);
         assertEquals(1, cursor.getCount());
 
         cursor.moveToNext();
-        assertEquals("0:1:2", cursor.getString(0));
+        assertEquals("0_1_2", cursor.getString(0));
         assertEquals("image/jpeg", cursor.getString(1));
         assertEquals("image.jpg", cursor.getString(2));
         assertEquals(1422716400000L, cursor.getLong(3));
@@ -201,11 +198,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                         4096 /* total space */,
                         "" /* no volume identifier */)
         });
-        final Cursor cursor = mProvider.queryDocument("0:1:0", null);
+        final Cursor cursor = mProvider.queryDocument("0_1_0", null);
         assertEquals(1, cursor.getCount());
 
         cursor.moveToNext();
-        assertEquals("0:1:0", cursor.getString(0));
+        assertEquals("0_1_0", cursor.getString(0));
         assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
         assertEquals("Storage A", cursor.getString(2));
         assertTrue(cursor.isNull(3));
