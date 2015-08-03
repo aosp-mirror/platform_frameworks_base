@@ -66,6 +66,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
@@ -163,6 +164,7 @@ import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IMountService;
@@ -1134,16 +1136,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // need to do anything. The pending install
                     // will be processed later on.
                     if (!mBound) {
-                        // If this is the only one pending we might
-                        // have to bind to the service again.
-                        if (!connectToService()) {
-                            Slog.e(TAG, "Failed to bind to media container service");
-                            params.serviceError();
-                            return;
-                        } else {
-                            // Once we bind to the service, the first
-                            // pending request will be processed.
-                            mPendingInstalls.add(idx, params);
+                        try {
+                            Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "bindMCS",
+                                    System.identityHashCode(params));
+                            // If this is the only one pending we might
+                            // have to bind to the service again.
+                            if (!connectToService()) {
+                                Slog.e(TAG, "Failed to bind to media container service");
+                                params.serviceError();
+                                return;
+                            } else {
+                                // Once we bind to the service, the first
+                                // pending request will be processed.
+                                mPendingInstalls.add(idx, params);
+                            }
+                        } finally {
+                            Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "bindMCS",
+                                    System.identityHashCode(params));
                         }
                     } else {
                         mPendingInstalls.add(idx, params);
@@ -1168,6 +1177,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             for (HandlerParams params : mPendingInstalls) {
                                 // Indicate service bind error
                                 params.serviceError();
+                                Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                                        System.identityHashCode(params));
                             }
                             mPendingInstalls.clear();
                         } else {
@@ -1205,6 +1216,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 }
                             }
                         }
+                        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                                System.identityHashCode(params));
                     } else {
                         // Should never happen ideally.
                         Slog.w(TAG, "Empty queue");
@@ -1222,6 +1235,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             for (HandlerParams params : mPendingInstalls) {
                                 // Indicate service bind error
                                 params.serviceError();
+                                Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                                        System.identityHashCode(params));
                             }
                             mPendingInstalls.clear();
                         }
@@ -1249,7 +1264,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 case MCS_GIVE_UP: {
                     if (DEBUG_INSTALL) Slog.i(TAG, "mcs_giveup too many retries");
-                    mPendingInstalls.remove(0);
+                    HandlerParams params = mPendingInstalls.remove(0);
+                    Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                            System.identityHashCode(params));
                     break;
                 }
                 case SEND_PENDING_BROADCAST: {
@@ -1444,6 +1461,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } else {
                         Slog.e(TAG, "Bogus post-install token " + msg.arg1);
                     }
+
+                    Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
                 } break;
                 case UPDATED_MEDIA_STATUS: {
                     if (DEBUG_SD_INSTALL) Log.i(TAG, "Got message UPDATED_MEDIA_STATUS");
@@ -1525,6 +1544,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         processPendingInstall(args, ret);
                         mHandler.sendEmptyMessage(MCS_UNBIND);
                     }
+                    Trace.asyncTraceEnd(
+                            TRACE_TAG_PACKAGE_MANAGER, "pendingVerification", verificationId);
                     break;
                 }
                 case PACKAGE_VERIFIED: {
@@ -2207,7 +2228,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mSettings.enableSystemPackageLPw(packageName);
 
                         try {
-                            scanPackageLI(scanFile, reparseFlags, scanFlags, 0, null);
+                            scanPackageTracedLI(scanFile, reparseFlags, scanFlags, 0, null);
                         } catch (PackageManagerException e) {
                             Slog.e(TAG, "Failed to parse original system package: "
                                     + e.getMessage());
@@ -5577,7 +5598,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 continue;
             }
             try {
-                scanPackageLI(file, parseFlags | PackageParser.PARSE_MUST_BE_APK,
+                scanPackageTracedLI(file, parseFlags | PackageParser.PARSE_MUST_BE_APK,
                         scanFlags, currentTime, null);
             } catch (PackageManagerException e) {
                 Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage());
@@ -5664,9 +5685,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    /*
-     *  Scan a package and return the newly parsed package.
-     *  Returns null in case of errors and the error code is stored in mLastScanError
+    /**
+     *  Traces a package scan.
+     *  @see #scanPackageLI(File, int, int, long, UserHandle)
+     */
+    private PackageParser.Package scanPackageTracedLI(File scanFile, int parseFlags, int scanFlags,
+            long currentTime, UserHandle user) throws PackageManagerException {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
+        try {
+            return scanPackageLI(scanFile, parseFlags, scanFlags, currentTime, user);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    /**
+     *  Scans a package and returns the newly parsed package.
+     *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
      */
     private PackageParser.Package scanPackageLI(File scanFile, int parseFlags, int scanFlags,
             long currentTime, UserHandle user) throws PackageManagerException {
@@ -6437,6 +6472,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         return cpuAbiOverride;
     }
 
+    private PackageParser.Package scanPackageTracedLI(PackageParser.Package pkg, int parseFlags,
+            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
+        try {
+            return scanPackageLI(pkg, parseFlags, scanFlags, currentTime, user);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg, int parseFlags,
             int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
         boolean success = false;
@@ -6984,13 +7029,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             // this symlink for 64 bit libraries.
             if (pkg.applicationInfo.primaryCpuAbi != null &&
                     !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
-                final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
-                for (int userId : userIds) {
-                    if (mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
-                            nativeLibPath, userId) < 0) {
-                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                                "Failed linking native library dir (user=" + userId + ")");
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "linkNativeLib");
+                try {
+                    final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
+                    for (int userId : userIds) {
+                        if (mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
+                                nativeLibPath, userId) < 0) {
+                            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                                    "Failed linking native library dir (user=" + userId + ")");
+                        }
                     }
+                } finally {
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
             }
         }
@@ -7051,8 +7101,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if ((scanFlags & SCAN_NO_DEX) == 0) {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+
             int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instruction sets */,
                     forceDex, (scanFlags & SCAN_DEFER_DEX) != 0, false /* inclDependencies */);
+
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                 throw new PackageManagerException(INSTALL_FAILED_DEXOPT, "scanPackageLI");
             }
@@ -7141,8 +7195,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
         if ((scanFlags & SCAN_REPLACING) != 0) {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "killApplication");
+
             killApplication(pkg.applicationInfo.packageName,
                         pkg.applicationInfo.uid, "replace pkg");
+
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
         // Also need to kill any apps that are dependent on the library.
@@ -7159,6 +7217,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         ksms.assertScannedPackageValid(pkg);
 
         // writer
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
+
+        boolean createIdmapFailed = false;
         synchronized (mPackages) {
             // We don't expect installation to fail beyond this point
 
@@ -7501,8 +7562,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     map.put(pkg.packageName, pkg);
                     PackageParser.Package orig = mPackages.get(pkg.mOverlayTarget);
                     if (orig != null && !createIdmapForPackagePairLI(orig, pkg)) {
-                        throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                                "scanPackageLI failed to createIdmap");
+                        createIdmapFailed = true;
                     }
                 }
             } else if (mOverlays.containsKey(pkg.packageName) &&
@@ -7512,6 +7572,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+
+        if (createIdmapFailed) {
+            throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                    "scanPackageLI failed to createIdmap");
+        }
         return pkg;
     }
 
@@ -8310,6 +8376,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "grantPermissions");
+
         PermissionsState permissionsState = ps.getPermissionsState();
         PermissionsState origPermissions = permissionsState;
 
@@ -8536,6 +8604,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         for (int userId : changedRuntimePermissionUserIds) {
             mSettings.writeRuntimePermissionsForUserLPr(userId, false);
         }
+
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {
@@ -9528,6 +9598,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         msg.obj = new InstallParams(origin, null, observer, params.installFlags,
                 installerPackageName, params.volumeUuid, verifParams, user, params.abiOverride,
                 params.grantedRuntimePermissions);
+
+        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                System.identityHashCode(msg.obj));
+
         mHandler.sendMessage(msg);
     }
 
@@ -10103,7 +10177,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                     args.doPreInstall(res.returnCode);
                     synchronized (mInstallLock) {
-                        installPackageLI(args, res);
+                        installPackageTracedLI(args, res);
                     }
                     args.doPostInstall(res.returnCode, res.uid);
                 }
@@ -10123,8 +10197,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (mNextInstallToken < 0) mNextInstallToken = 1;
                 token = mNextInstallToken++;
 
-                PostInstallData data = new PostInstallData(args, res);
-                mRunningInstalls.put(token, data);
                 if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
 
                 if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && doRestore) {
@@ -10137,6 +10209,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (bm != null) {
                         if (DEBUG_INSTALL) Log.v(TAG, "token " + token
                                 + " to BM for possible restore");
+                        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
                         try {
                             if (bm.isBackupServiceActive(UserHandle.USER_OWNER)) {
                                 bm.restoreAtInstall(res.pkg.applicationInfo.packageName, token);
@@ -10148,6 +10221,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         } catch (Exception e) {
                             Slog.e(TAG, "Exception trying to enqueue restore", e);
                             doRestore = false;
+                        } finally {
+                            Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
                         }
                     } else {
                         Slog.e(TAG, "Backup Manager not found!");
@@ -10159,6 +10234,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // No restore possible, or the Backup Manager was mysteriously not
                     // available -- just fire the post-install work request directly.
                     if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);
+
+                    Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "postInstall", token);
+
+                    PostInstallData data = new PostInstallData(args, res);
+                    mRunningInstalls.put(token, data);
                     Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
                     mHandler.sendMessage(msg);
                 }
@@ -10522,7 +10602,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final boolean onSd = (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
             final boolean onInt = (installFlags & PackageManager.INSTALL_INTERNAL) != 0;
-
             PackageInfoLite pkgLite = null;
 
             if (onInt && onSd) {
@@ -10718,6 +10797,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             mRequiredVerifierPackage, receivers);
                     if (ret == PackageManager.INSTALL_SUCCEEDED
                             && mRequiredVerifierPackage != null) {
+                        Trace.asyncTraceBegin(
+                                TRACE_TAG_PACKAGE_MANAGER, "pendingVerification", verificationId);
                         /*
                          * Send the intent to the required verification agent,
                          * but only start the verification timeout after the
@@ -10984,6 +11065,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyApk");
+            try {
+                return doCopyApk(imcs, temp);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
+        }
+
+        private int doCopyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (origin.staged) {
                 if (DEBUG_INSTALL) Slog.d(TAG, origin.file + " already staged; skipping copy");
                 codeFile = origin.file;
@@ -11693,12 +11783,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void installNewPackageLI(PackageParser.Package pkg, int parseFlags, int scanFlags,
             UserHandle user, String installerPackageName, String volumeUuid,
             PackageInstalledInfo res) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installNewPackage");
+
         // Remember this for later, in case we need to rollback this install
         String pkgName = pkg.packageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installNewPackageLI: " + pkg);
         final boolean dataDirExists = Environment
                 .getDataUserPackageDirectory(volumeUuid, UserHandle.USER_OWNER, pkgName).exists();
+
         synchronized(mPackages) {
             if (mSettings.mRenamedPackages.containsKey(pkgName)) {
                 // A package with the same name is already installed, though
@@ -11719,7 +11812,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         try {
-            PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanFlags,
+            PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags, scanFlags,
                     System.currentTimeMillis(), user);
 
             updateSettingsLI(newPackage, installerPackageName, volumeUuid, null, null, res, user);
@@ -11738,6 +11831,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         } catch (PackageManagerException e) {
             res.setError("Package couldn't be installed in " + pkg.codePath, e);
         }
+
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
     private boolean shouldCheckUpgradeKeySetLP(PackageSetting oldPs, int scanFlags) {
@@ -11864,7 +11959,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             deleteCodeCacheDirsLI(pkg.volumeUuid, pkgName);
             try {
-                final PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags,
+                final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
                 updateSettingsLI(newPackage, installerPackageName, volumeUuid, allUsers,
                         perUserInstalled, res, user);
@@ -11898,7 +11993,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         (oldExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
                 int oldScanFlags = SCAN_UPDATE_SIGNATURE | SCAN_UPDATE_TIME;
                 try {
-                    scanPackageLI(restoreFile, oldParseFlags, oldScanFlags, origUpdateTime, null);
+                    scanPackageTracedLI(restoreFile, oldParseFlags, oldScanFlags, origUpdateTime, null);
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Failed to restore package : " + pkgName + " after failed upgrade: "
                             + e.getMessage());
@@ -11980,7 +12075,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         PackageParser.Package newPackage = null;
         try {
-            newPackage = scanPackageLI(pkg, parseFlags, scanFlags, 0, user);
+            newPackage = scanPackageTracedLI(pkg, parseFlags, scanFlags, 0, user);
             if (newPackage.mExtras != null) {
                 final PackageSetting newPkgSetting = (PackageSetting) newPackage.mExtras;
                 newPkgSetting.firstInstallTime = oldPkgSetting.firstInstallTime;
@@ -12013,7 +12108,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // Add back the old system package
             try {
-                scanPackageLI(oldPkg, parseFlags, SCAN_UPDATE_SIGNATURE, 0, user);
+                scanPackageTracedLI(oldPkg, parseFlags, SCAN_UPDATE_SIGNATURE, 0, user);
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Failed to restore original package: " + e.getMessage());
             }
@@ -12034,6 +12129,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
             String volumeUuid, int[] allUsers, boolean[] perUserInstalled, PackageInstalledInfo res,
             UserHandle user) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
+
         String pkgName = newPackage.packageName;
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
@@ -12044,7 +12141,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + newPackage.codePath);
-
         synchronized (mPackages) {
             updatePermissionsLPw(newPackage.packageName, newPackage,
                     UPDATE_PERMISSIONS_REPLACE_PKG | (newPackage.permissions.size() > 0
@@ -12095,6 +12191,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             //to update install status
             mSettings.writeLPr();
         }
+
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+    }
+
+    private void installPackageTracedLI(InstallArgs args, PackageInstalledInfo res) {
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackage");
+            installPackageLI(args, res);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
     }
 
     private void installPackageLI(InstallArgs args, PackageInstalledInfo res) {
@@ -12115,6 +12222,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installPackageLI: path=" + tmpPackageFile);
+
         // Retrieve PackageSettings and parse package
         final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                 | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
@@ -12123,12 +12231,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setDisplayMetrics(mMetrics);
 
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final PackageParser.Package pkg;
         try {
             pkg = pp.parsePackage(tmpPackageFile, parseFlags);
         } catch (PackageParserException e) {
             res.setError("Failed parse during installPackageLI", e);
             return;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
         // Mark that we have an install time CPU ABI override.
@@ -12142,12 +12253,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
         try {
             pp.collectCertificates(pkg, parseFlags);
             pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
             res.setError("Failed collect during installPackageLI", e);
             return;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
         /* If the installer passed in a manifest digest, compare it now. */
@@ -12929,7 +13043,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final PackageParser.Package newPkg;
         try {
-            newPkg = scanPackageLI(disabledPs.codePath, parseFlags, SCAN_NO_PATHS, 0, null);
+            newPkg = scanPackageTracedLI(disabledPs.codePath, parseFlags, SCAN_NO_PATHS, 0, null);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + newPs.name + ": " + e.getMessage());
             return false;
@@ -15444,7 +15558,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 synchronized (mInstallLock) {
                     PackageParser.Package pkg = null;
                     try {
-                        pkg = scanPackageLI(new File(codePath), parseFlags, 0, 0, null);
+                        pkg = scanPackageTracedLI(new File(codePath), parseFlags, 0, 0, null);
                     } catch (PackageManagerException e) {
                         Slog.w(TAG, "Failed to scan " + codePath + ": " + e.getMessage());
                     }
@@ -15590,7 +15704,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (PackageSetting ps : packages) {
                 final PackageParser.Package pkg;
                 try {
-                    pkg = scanPackageLI(ps.codePath, parseFlags, SCAN_INITIAL, 0L, null);
+                    pkg = scanPackageTracedLI(ps.codePath, parseFlags, SCAN_INITIAL, 0L, null);
                     loaded.add(pkg.applicationInfo);
                 } catch (PackageManagerException e) {
                     Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
