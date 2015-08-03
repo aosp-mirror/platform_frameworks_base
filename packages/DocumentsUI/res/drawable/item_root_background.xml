@@ -21,5 +21,4 @@
     <item android:state_focused="false" android:state_activated="true">
         <color android:color="@color/material_grey_300" />
     </item>
-    <item android:drawable="@android:color/transparent" />
 </selector>
