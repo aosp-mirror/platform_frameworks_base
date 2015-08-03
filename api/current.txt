@@ -25355,6 +25355,7 @@ package android.provider {
     field public static final java.lang.String JOB_DESCRIPTION = "data6";
     field public static final java.lang.String OFFICE_LOCATION = "data9";
     field public static final java.lang.String PHONETIC_NAME = "data8";
+    field public static final java.lang.String PHONETIC_NAME_STYLE = "data10";
     field public static final java.lang.String SYMBOL = "data7";
     field public static final java.lang.String TITLE = "data4";
     field public static final int TYPE_OTHER = 2; // 0x2
@@ -25456,6 +25457,7 @@ package android.provider {
     field public static final java.lang.String PHONETIC_FAMILY_NAME = "data9";
     field public static final java.lang.String PHONETIC_GIVEN_NAME = "data7";
     field public static final java.lang.String PHONETIC_MIDDLE_NAME = "data8";
+    field public static final java.lang.String PHONETIC_NAME_STYLE = "data11";
     field public static final java.lang.String PREFIX = "data4";
     field public static final java.lang.String SUFFIX = "data6";
   }
