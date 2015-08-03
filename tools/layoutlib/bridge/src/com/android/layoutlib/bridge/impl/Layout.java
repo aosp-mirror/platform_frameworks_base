@@ -329,9 +329,12 @@ class Layout extends RelativeLayout {
             mWindowIsFloating = getBooleanThemeValue(mResources, ATTR_WINDOW_FLOATING, true, true);
             
             findBackground();
-            findStatusBar();
-            findActionBar();
-            findNavBar();
+
+            if (!mParams.isForceNoDecor()) {
+                findStatusBar();
+                findActionBar();
+                findNavBar();
+            }
         }
 
         private void findBackground() {
