@@ -696,7 +696,7 @@ final class DefaultPermissionGrantPolicy {
         List<PackageParser.Package> syncAdapterPackages = new ArrayList<>();
 
         Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
         for (String syncAdapterPackageName : syncAdapterPackageNames) {
             homeIntent.setPackage(syncAdapterPackageName);
