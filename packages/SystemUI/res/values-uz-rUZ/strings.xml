@@ -345,7 +345,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Ilova va ma’l-ni o‘chirish u-n mehmon hisobini o‘chiring"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"MEHMON HISOBINI O‘CHIRISH"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Foydalanuvchi nomidan chiqish"</string>
-    <string name="user_logout_notification_text" msgid="3350262809611876284">"Joriy foydalanuvchini tizimdan chiqarish"</string>
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"Joriy foydalanuvchini tizimdan chiqaring"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"FOYDALANUVCHI NOMIDAN CHIQISH"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Yangi foyd-chi qo‘shilsinmi?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yangi foydalanuvchi qo‘shilgach, o‘sha shaxs o‘z hududini sozlashi lozim bo‘ladi.\n\nHar qanday foydalanuvchi ilovalarni barcha foydalanuvchilar uchun yangilashi mumkin."</string>

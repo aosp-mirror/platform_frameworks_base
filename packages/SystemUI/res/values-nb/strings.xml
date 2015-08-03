@@ -345,7 +345,7 @@
     <string name="guest_notification_text" msgid="335747957734796689">"Fjern gjesten for å slette appene og dataene"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"FJERN GJEST"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Logg ut bruker"</string>
-    <string name="user_logout_notification_text" msgid="3350262809611876284">"Logg ut nåværende bruker"</string>
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"Logg av nåværende bruker"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGG UT BRUKER"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vil du legge til en ny bruker?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Når du legger til en ny bruker, må vedkommende konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
