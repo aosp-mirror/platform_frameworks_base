@@ -67,8 +67,8 @@ please see themes_device_defaults.xml.
         <item name="textColorHintInverse">@color/hint_foreground_material_light</item>
         <item name="textColorHighlight">@color/highlighted_text_material</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
-        <item name="textColorLink">@color/link_text_material_dark</item>
-        <item name="textColorLinkInverse">@color/link_text_material_light</item>
+        <item name="textColorLink">?attr/colorAccent</item>
+        <item name="textColorLinkInverse">?attr/colorAccent</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_dark</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_dark</item>
 
@@ -422,8 +422,8 @@ please see themes_device_defaults.xml.
         <item name="textColorHintInverse">@color/hint_foreground_material_dark</item>
         <item name="textColorHighlight">@color/highlighted_text_material</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
-        <item name="textColorLink">@color/link_text_material_light</item>
-        <item name="textColorLinkInverse">@color/link_text_material_dark</item>
+        <item name="textColorLink">?attr/colorAccent</item>
+        <item name="textColorLinkInverse">?attr/colorAccent</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_light</item>
 
@@ -793,8 +793,6 @@ please see themes_device_defaults.xml.
         <item name="textColorHintInverse">@color/hint_foreground_material_dark</item>
         <item name="textColorHighlight">@color/highlighted_text_material</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
-        <item name="textColorLink">@color/link_text_material_light</item>
-        <item name="textColorLinkInverse">@color/link_text_material_dark</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_light</item>
 
@@ -827,8 +825,6 @@ please see themes_device_defaults.xml.
         <item name="textColorHintInverse">@color/hint_foreground_material_light</item>
         <item name="textColorHighlight">@color/highlighted_text_material</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
-        <item name="textColorLink">@color/link_text_material_dark</item>
-        <item name="textColorLinkInverse">@color/link_text_material_light</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_dark</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_dark</item>
 
