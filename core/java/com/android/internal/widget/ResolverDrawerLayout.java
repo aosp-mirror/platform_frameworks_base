@@ -34,6 +34,7 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.OverScroller;
@@ -609,19 +610,37 @@ public class ResolverDrawerLayout extends ViewGroup {
     }
 
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
+    public CharSequence getAccessibilityClassName() {
+        // Since we support scrolling, make this ViewGroup look like a
+        // ScrollView. This is kind of a hack until we have support for
+        // specifying auto-scroll behavior.
+        return android.widget.ScrollView.class.getName();
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+
         if (isEnabled()) {
             if (mCollapseOffset != 0) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
                 info.setScrollable(true);
             }
         }
+
+        // This view should never get accessibility focus, but it's interactive
+        // via nested scrolling, so we can't hide it completely.
+        info.removeAction(AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
     }
 
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (super.performAccessibilityAction(action, arguments)) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (action == AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS.getId()) {
+            // This view should never get accessibility focus.
+            return false;
+        }
+
+        if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
 
@@ -629,6 +648,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             smoothScrollTo(0, 0);
             return true;
         }
+
         return false;
     }
 
