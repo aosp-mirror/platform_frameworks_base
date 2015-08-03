@@ -83,7 +83,7 @@ class Layout extends RelativeLayout {
     // Theme attributes used for configuring appearance of the system decor.
     private static final String ATTR_WINDOW_FLOATING = "windowIsFloating";
     private static final String ATTR_WINDOW_BACKGROUND = "windowBackground";
-    private static final String ATTR_WINDOW_FULL_SCREEN = "windowFullScreen";
+    private static final String ATTR_WINDOW_FULL_SCREEN = "windowFullscreen";
     private static final String ATTR_NAV_BAR_HEIGHT = "navigation_bar_height";
     private static final String ATTR_NAV_BAR_WIDTH = "navigation_bar_width";
     private static final String ATTR_STATUS_BAR_HEIGHT = "status_bar_height";
