@@ -173,6 +173,28 @@ public abstract class CameraMetadata<TKey> {
             }
         }
 
+        ArrayList<TKey> vendorKeys = CameraMetadataNative.getAllVendorKeys(keyClass);
+
+        if (vendorKeys != null) {
+            for (TKey k : vendorKeys) {
+                String keyName;
+                if (k instanceof CaptureRequest.Key<?>) {
+                    keyName = ((CaptureRequest.Key<?>) k).getName();
+                } else if (k instanceof CaptureResult.Key<?>) {
+                    keyName = ((CaptureResult.Key<?>) k).getName();
+                } else if (k instanceof CameraCharacteristics.Key<?>) {
+                    keyName = ((CameraCharacteristics.Key<?>) k).getName();
+                } else {
+                    continue;
+                }
+
+                if (filterTags == null || Arrays.binarySearch(filterTags,
+                        CameraMetadataNative.getTag(keyName)) >= 0) {
+                    keyList.add(k);
+                }
+            }
+        }
+
         return keyList;
     }
 
