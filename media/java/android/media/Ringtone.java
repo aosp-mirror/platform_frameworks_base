@@ -52,7 +52,8 @@ public class Ringtone {
         MediaStore.Audio.Media.TITLE
     };
     /** Selection that limits query results to just audio files */
-    private static final String MEDIA_SELECTION = MediaColumns.MIME_TYPE + " LIKE 'audio/%'";
+    private static final String MEDIA_SELECTION = MediaColumns.MIME_TYPE + " LIKE 'audio/%' OR "
+            + MediaColumns.MIME_TYPE + " IN ('application/ogg', 'application/x-flac')";
 
     // keep references on active Ringtones until stopped or completion listener called.
     private static final ArrayList<Ringtone> sActiveRingtones = new ArrayList<Ringtone>();
