@@ -3541,6 +3541,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private void enforceCanManageInstalledKeys(ComponentName who) {
+        if (who == null) {
+            if (!isCallerDelegatedCertInstaller()) {
+                throw new SecurityException("who == null, but caller is not cert installer");
+            }
+        } else {
+            synchronized (this) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            }
+        }
+    }
+
     private boolean isCallerDelegatedCertInstaller() {
         final int callingUid = mInjector.binderGetCallingUid();
         final int userHandle = UserHandle.getUserId(callingUid);
@@ -3630,32 +3642,50 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias) {
-        if (who == null) {
-            if (!isCallerDelegatedCertInstaller()) {
-                throw new SecurityException("who == null, but caller is not cert installer");
-            }
-        } else {
-            synchronized (this) {
-                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            }
-        }
+        enforceCanManageInstalledKeys(who);
+
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
         final long id = mInjector.binderClearCallingIdentity();
         try {
-          final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
-          try {
-              IKeyChainService keyChain = keyChainConnection.getService();
-              return keyChain.installKeyPair(privKey, cert, alias);
-          } catch (RemoteException e) {
-              Log.e(LOG_TAG, "Installing certificate", e);
-          } finally {
-              keyChainConnection.close();
-          }
+            final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
+            try {
+                IKeyChainService keyChain = keyChainConnection.getService();
+                return keyChain.installKeyPair(privKey, cert, alias);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Installing certificate", e);
+            } finally {
+                keyChainConnection.close();
+            }
         } catch (InterruptedException e) {
             Log.w(LOG_TAG, "Interrupted while installing certificate", e);
             Thread.currentThread().interrupt();
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeKeyPair(ComponentName who, String alias) {
+        enforceCanManageInstalledKeys(who);
+
+        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+        final long id = Binder.clearCallingIdentity();
+        try {
+            final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
+            try {
+                IKeyChainService keyChain = keyChainConnection.getService();
+                return keyChain.removeKeyPair(alias);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Removing keypair", e);
+            } finally {
+                keyChainConnection.close();
+            }
+        } catch (InterruptedException e) {
+            Log.w(LOG_TAG, "Interrupted while removing keypair", e);
+            Thread.currentThread().interrupt();
+        } finally {
+            Binder.restoreCallingIdentity(id);
         }
         return false;
     }

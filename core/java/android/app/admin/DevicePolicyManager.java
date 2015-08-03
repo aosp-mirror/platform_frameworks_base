@@ -2325,8 +2325,8 @@ public class DevicePolicyManager {
      * with that alias already exists, it will be overwritten.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      */
-    public boolean installKeyPair(@Nullable ComponentName admin, PrivateKey privKey, Certificate cert,
-            String alias) {
+    public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
+            @NonNull Certificate cert, @NonNull String alias) {
         try {
             final byte[] pemCert = Credentials.convertToPem(cert);
             final byte[] pkcs8Key = KeyFactory.getInstance(privKey.getAlgorithm())
@@ -2338,6 +2338,24 @@ public class DevicePolicyManager {
             Log.w(TAG, "Failed to obtain private key material", e);
         } catch (CertificateException | IOException e) {
             Log.w(TAG, "Could not pem-encode certificate", e);
+        }
+        return false;
+    }
+
+    /**
+     * Called by a device or profile owner to remove all user credentials installed under a given
+     * alias.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *            {@code null} if calling from a delegated certificate installer.
+     * @param alias The private key alias under which the certificate is installed.
+     * @return {@code true} if the keys were both removed, {@code false} otherwise.
+     */
+    public boolean removeKeyPair(@Nullable ComponentName admin, @NonNull String alias) {
+        try {
+            return mService.removeKeyPair(admin, alias);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed talking with device policy service", e);
         }
         return false;
     }

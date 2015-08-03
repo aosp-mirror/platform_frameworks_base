@@ -33,6 +33,7 @@ interface IKeyChainService {
 
     // APIs used by DevicePolicyManager
     boolean installKeyPair(in byte[] privateKey, in byte[] userCert, String alias);
+    boolean removeKeyPair(String alias);
 
     // APIs used by Settings
     boolean deleteCaCertificate(String alias);
