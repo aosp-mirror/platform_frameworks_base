@@ -2318,4 +2318,6 @@
   <java-symbol type="array" name="config_cell_retries_per_error_code" />
   <java-symbol type="drawable" name="ic_more_items" />
 
+  <java-symbol type="drawable" name="platlogo_m" />
+
 </resources>
