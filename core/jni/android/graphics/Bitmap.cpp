@@ -218,7 +218,6 @@ int Bitmap::getAshmemFd() const {
 }
 
 const SkImageInfo& Bitmap::info() const {
-    assertValid();
     return mPixelRef->info();
 }
 
