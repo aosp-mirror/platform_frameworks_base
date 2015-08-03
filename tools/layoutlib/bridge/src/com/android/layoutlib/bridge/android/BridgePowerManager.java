@@ -86,7 +86,7 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void shutdown(boolean confirm, boolean wait) {
+    public void shutdown(boolean confirm, String reason, boolean wait) {
         // pass for now.
     }
 
