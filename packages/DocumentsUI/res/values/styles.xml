@@ -34,6 +34,7 @@
         <item name="android:windowNoTitle">true</item>
 
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+        <item name="android:alertDialogTheme">@android:style/Theme.Material.Light.Dialog.Alert</item>
     </style>
 
     <style name="DocumentsNonDialogTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
@@ -58,6 +59,10 @@
         <item name="android:background">@color/material_grey_600</item>
     </style>
 
+    <style name="AlertDialogTheme" parent="@android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">@color/material_blue_700</item>
+    </style>
+
     <style name="StandaloneTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
         <item name="android:actionBarWidgetTheme">@null</item>
 
@@ -73,6 +78,7 @@
         <item name="android:windowNoTitle">true</item>
 
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+        <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
     </style>
 
 </resources>

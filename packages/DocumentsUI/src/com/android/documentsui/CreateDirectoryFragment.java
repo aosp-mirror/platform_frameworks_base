@@ -60,11 +60,7 @@ public class CreateDirectoryFragment extends DialogFragment {
         final Context context = getActivity();
         final ContentResolver resolver = context.getContentResolver();
 
-        // We need to specify android.R.style.Theme_DeviceDefault_Dialog explicitly,
-        // because the application theme 'DialogWhenReallyLarge' has
-        // fixed window size properties for large screen devices.
-        final AlertDialog.Builder builder = new AlertDialog.Builder(
-                context, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         final LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
 
         final View view = dialogInflater.inflate(R.layout.dialog_create_dir, null, false);
