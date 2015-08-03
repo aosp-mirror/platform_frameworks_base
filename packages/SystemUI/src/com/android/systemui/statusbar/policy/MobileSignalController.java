@@ -51,7 +51,7 @@ public class MobileSignalController extends SignalController<
     @VisibleForTesting
     final PhoneStateListener mPhoneStateListener;
     // Save entire info for logging, we only use the id.
-    private final SubscriptionInfo mSubscriptionInfo;
+    final SubscriptionInfo mSubscriptionInfo;
 
     // @VisibleForDemoMode
     final SparseArray<MobileIconGroup> mNetworkToIconLookup;
