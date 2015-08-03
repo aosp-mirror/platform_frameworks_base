@@ -1718,11 +1718,15 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private static String[] getPackagesForUid(int uid) {
+        String[] packageNames = null;
         try {
-            return AppGlobals.getPackageManager().getPackagesForUid(uid);
+            packageNames= AppGlobals.getPackageManager().getPackagesForUid(uid);
         } catch (RemoteException e) {
             /* ignore - local call */
         }
-        return EmptyArray.STRING;
+        if (packageNames == null) {
+            return EmptyArray.STRING;
+        }
+        return packageNames;
     }
 }
