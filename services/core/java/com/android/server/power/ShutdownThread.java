@@ -88,7 +88,7 @@ public final class ShutdownThread extends Thread {
     private static boolean mReboot;
     private static boolean mRebootSafeMode;
     private static boolean mRebootUpdate;
-    private static String mRebootReason;
+    private static String mReason;
 
     // Provides shutdown assurance in case the system_server is killed
     public static final String SHUTDOWN_ACTION_PROPERTY = "sys.shutdown.requested";
@@ -124,11 +124,13 @@ public final class ShutdownThread extends Thread {
      * is shown.
      *
      * @param context Context used to display the shutdown progress dialog.
+     * @param reason code to pass to android_reboot() (e.g. "userrequested"), or null.
      * @param confirm true if user confirmation is needed before shutting down.
      */
-    public static void shutdown(final Context context, boolean confirm) {
+    public static void shutdown(final Context context, String reason, boolean confirm) {
         mReboot = false;
         mRebootSafeMode = false;
+        mReason = reason;
         shutdownInner(context, confirm);
     }
 
@@ -212,7 +214,7 @@ public final class ShutdownThread extends Thread {
         mReboot = true;
         mRebootSafeMode = false;
         mRebootUpdate = false;
-        mRebootReason = reason;
+        mReason = reason;
         shutdownInner(context, confirm);
     }
 
@@ -232,7 +234,7 @@ public final class ShutdownThread extends Thread {
         mReboot = true;
         mRebootSafeMode = true;
         mRebootUpdate = false;
-        mRebootReason = null;
+        mReason = null;
         shutdownInner(context, confirm);
     }
 
@@ -249,18 +251,18 @@ public final class ShutdownThread extends Thread {
         ProgressDialog pd = new ProgressDialog(context);
 
         // Path 1: Reboot to recovery and install the update
-        //   Condition: mRebootReason == REBOOT_RECOVERY and mRebootUpdate == True
+        //   Condition: mReason == REBOOT_RECOVERY and mRebootUpdate == True
         //   (mRebootUpdate is set by checking if /cache/recovery/uncrypt_file exists.)
         //   UI: progress bar
         //
         // Path 2: Reboot to recovery for factory reset
-        //   Condition: mRebootReason == REBOOT_RECOVERY
+        //   Condition: mReason == REBOOT_RECOVERY
         //   UI: spinning circle only (no progress bar)
         //
         // Path 3: Regular reboot / shutdown
         //   Condition: Otherwise
         //   UI: spinning circle only (no progress bar)
-        if (PowerManager.REBOOT_RECOVERY.equals(mRebootReason)) {
+        if (PowerManager.REBOOT_RECOVERY.equals(mReason)) {
             mRebootUpdate = new File(UNCRYPT_PACKAGE_FILE).exists();
             if (mRebootUpdate) {
                 pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_update_title));
@@ -349,7 +351,7 @@ public final class ShutdownThread extends Thread {
          * the beginning of the SystemServer startup.
          */
         {
-            String reason = (mReboot ? "1" : "0") + (mRebootReason != null ? mRebootReason : "");
+            String reason = (mReboot ? "1" : "0") + (mReason != null ? mReason : "");
             SystemProperties.set(SHUTDOWN_ACTION_PROPERTY, reason);
         }
 
@@ -473,7 +475,7 @@ public final class ShutdownThread extends Thread {
             uncrypt();
         }
 
-        rebootOrShutdown(mContext, mReboot, mRebootReason);
+        rebootOrShutdown(mContext, mReboot, mReason);
     }
 
     private void setRebootProgress(final int progress, final CharSequence message) {
@@ -616,13 +618,14 @@ public final class ShutdownThread extends Thread {
      *
      * @param context Context used to vibrate or null without vibration
      * @param reboot true to reboot or false to shutdown
-     * @param reason reason for reboot
+     * @param reason reason for reboot/shutdown
      */
     public static void rebootOrShutdown(final Context context, boolean reboot, String reason) {
         if (reboot) {
             Log.i(TAG, "Rebooting, reason: " + reason);
             PowerManagerService.lowLevelReboot(reason);
             Log.e(TAG, "Reboot failed, will attempt shutdown instead");
+            reason = null;
         } else if (SHUTDOWN_VIBRATE_MS > 0 && context != null) {
             // vibrate before shutting down
             Vibrator vibrator = new SystemVibrator(context);
@@ -642,7 +645,7 @@ public final class ShutdownThread extends Thread {
 
         // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
-        PowerManagerService.lowLevelShutdown();
+        PowerManagerService.lowLevelShutdown(reason);
     }
 
     private void uncrypt() {
