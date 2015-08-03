@@ -8342,9 +8342,9 @@ public final class Settings {
                 return true;
             case AppOpsManager.MODE_DEFAULT:
                 // this is the default operating mode after an app's installation
-                if (!throwException) {
-                    return context.checkCallingOrSelfPermission(permissionName) ==
-                        PackageManager.PERMISSION_GRANTED;
+                if(context.checkCallingOrSelfPermission(permissionName) == PackageManager
+                        .PERMISSION_GRANTED) {
+                    return true;
                 }
             default:
                 // this is for all other cases trickled down here...
