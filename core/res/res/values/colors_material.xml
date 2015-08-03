@@ -41,9 +41,6 @@
     <color name="switch_thumb_disabled_material_dark">#ff616161</color>
     <color name="switch_thumb_disabled_material_light">#ffbdbdbd</color>
 
-    <color name="link_text_material_light">@color/material_deep_teal_500</color>
-    <color name="link_text_material_dark">@color/material_deep_teal_200</color>
-
     <!-- Text & foreground colors -->
     <eat-comment />
 
