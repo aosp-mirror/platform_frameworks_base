@@ -607,9 +607,6 @@ abstract class BaseActivity extends Activity {
             onCurrentDirectoryChanged(ANIM_NONE);
 
             onStackRestored(mRestoredStack, mExternal);
-
-            getDisplayState().restored = true;
-            onCurrentDirectoryChanged(ANIM_NONE);
         }
     }
 
