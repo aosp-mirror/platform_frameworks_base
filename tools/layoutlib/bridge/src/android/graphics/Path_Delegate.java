@@ -36,7 +36,6 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
 
 /**
  * Delegate implementing the native methods of android.graphics.Path
@@ -504,13 +503,13 @@ public final class Path_Delegate {
             switch (type) {
                 case PathIterator.SEG_MOVETO:
                 case PathIterator.SEG_LINETO:
-                    store(coords, tmp, 1, isFirstPoint);
+                    store(tmp, coords, 1, isFirstPoint);
                     break;
                 case PathIterator.SEG_QUADTO:
-                    store(coords, tmp, 2, isFirstPoint);
+                    store(tmp, coords, 2, isFirstPoint);
                     break;
                 case PathIterator.SEG_CUBICTO:
-                    store(coords, tmp, 3, isFirstPoint);
+                    store(tmp, coords, 3, isFirstPoint);
                     break;
                 case PathIterator.SEG_CLOSE:
                     // No points returned.
@@ -528,14 +527,14 @@ public final class Path_Delegate {
 
     private static void store(float[] src, float[] dst, int count, boolean isFirst) {
         if (isFirst) {
-            dst[0] = 0;
-            dst[1] = src[0];
-            dst[2] = src[1];
+            dst[0] = 0;       // fraction
+            dst[1] = src[0];  // abscissa
+            dst[2] = src[1];  // ordinate
         }
         if (count > 1 || !isFirst) {
             dst[3] = 1;
-            dst[4] = src[2 * count];
-            dst[5] = src[2 * count + 1];
+            dst[4] = src[2 * count - 2];
+            dst[5] = src[2 * count - 1];
         }
     }
 
