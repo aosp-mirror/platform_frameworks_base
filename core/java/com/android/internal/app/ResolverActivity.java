@@ -932,6 +932,11 @@ public class ResolverActivity extends Activity {
         }
 
         @Override
+        public CharSequence getBadgeContentDescription() {
+            return null;
+        }
+
+        @Override
         public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
             return new DisplayResolveInfo(this, fillInIntent, flags);
         }
@@ -1070,6 +1075,11 @@ public class ResolverActivity extends Activity {
          * @return The (small) icon to badge the target with
          */
         public Drawable getBadgeIcon();
+
+        /**
+         * @return The content description for the badge icon
+         */
+        public CharSequence getBadgeContentDescription();
 
         /**
          * Clone this target with the given fill-in information.
@@ -1542,6 +1552,7 @@ public class ResolverActivity extends Activity {
                 final Drawable badge = info.getBadgeIcon();
                 if (badge != null) {
                     holder.badge.setImageDrawable(badge);
+                    holder.badge.setContentDescription(info.getBadgeContentDescription());
                     holder.badge.setVisibility(View.VISIBLE);
                 } else {
                     holder.badge.setVisibility(View.GONE);
