@@ -517,6 +517,7 @@ public class ChooserActivity extends ResolverActivity {
         private final ResolveInfo mBackupResolveInfo;
         private final ChooserTarget mChooserTarget;
         private Drawable mBadgeIcon = null;
+        private CharSequence mBadgeContentDescription;
         private Drawable mDisplayIcon;
         private final Intent mFillInIntent;
         private final int mFillInFlags;
@@ -532,7 +533,9 @@ public class ChooserActivity extends ResolverActivity {
                 if (ri != null) {
                     final ActivityInfo ai = ri.activityInfo;
                     if (ai != null && ai.applicationInfo != null) {
-                        mBadgeIcon = getPackageManager().getApplicationIcon(ai.applicationInfo);
+                        final PackageManager pm = getPackageManager();
+                        mBadgeIcon = pm.getApplicationIcon(ai.applicationInfo);
+                        mBadgeContentDescription = pm.getApplicationLabel(ai.applicationInfo);
                     }
                 }
             }
@@ -555,6 +558,7 @@ public class ChooserActivity extends ResolverActivity {
             mBackupResolveInfo = other.mBackupResolveInfo;
             mChooserTarget = other.mChooserTarget;
             mBadgeIcon = other.mBadgeIcon;
+            mBadgeContentDescription = other.mBadgeContentDescription;
             mDisplayIcon = other.mDisplayIcon;
             mFillInIntent = fillInIntent;
             mFillInFlags = flags;
@@ -644,6 +648,11 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public Drawable getBadgeIcon() {
             return mBadgeIcon;
+        }
+
+        @Override
+        public CharSequence getBadgeContentDescription() {
+            return mBadgeContentDescription;
         }
 
         @Override
