@@ -66,6 +66,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
     // additional diagnostics, but not logspew
     static final boolean CHATTY =  Log.isLoggable(TAG + "Chat", Log.DEBUG);
 
+    private static final int EMERGENCY_NO_CONTROLLERS = 0;
+    private static final int EMERGENCY_FIRST_CONTROLLER = 100;
+    private static final int EMERGENCY_VOICE_CONTROLLER = 200;
+    private static final int EMERGENCY_NO_SUB = 300;
+
     private final Context mContext;
     private final TelephonyManager mPhone;
     private final WifiManager mWifiManager;
@@ -117,6 +122,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final Handler mReceiverHandler;
     // Handler that all callbacks are made on.
     private final CallbackHandler mCallbackHandler;
+
+    private int mEmergencySource;
+    private boolean mIsEmergency;
 
     @VisibleForTesting
     ServiceState mLastServiceState;
@@ -267,6 +275,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (mMobileSignalControllers.size() == 0) {
             // When there are no active subscriptions, determine emengency state from last
             // broadcast.
+            mEmergencySource = EMERGENCY_NO_CONTROLLERS;
             return mLastServiceState != null && mLastServiceState.isEmergencyOnly();
         }
         int voiceSubId = mSubDefaults.getDefaultVoiceSubId();
@@ -274,16 +283,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
             for (MobileSignalController mobileSignalController :
                                             mMobileSignalControllers.values()) {
                 if (!mobileSignalController.getState().isEmergency) {
+                    mEmergencySource = EMERGENCY_FIRST_CONTROLLER
+                            + mobileSignalController.mSubscriptionInfo.getSubscriptionId();
                     if (DEBUG) Log.d(TAG, "Found emergency " + mobileSignalController.mTag);
                     return false;
                 }
             }
         }
         if (mMobileSignalControllers.containsKey(voiceSubId)) {
+            mEmergencySource = EMERGENCY_VOICE_CONTROLLER + voiceSubId;
             if (DEBUG) Log.d(TAG, "Getting emergency from " + voiceSubId);
             return mMobileSignalControllers.get(voiceSubId).getState().isEmergency;
         }
         if (DEBUG) Log.e(TAG, "Cannot find controller for voice sub: " + voiceSubId);
+        mEmergencySource = EMERGENCY_NO_SUB + voiceSubId;
         // Something is wrong, better assume we can't make calls...
         return true;
     }
@@ -293,7 +306,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
      * so we should recheck and send out the state to listeners.
      */
     void recalculateEmergency() {
-        mCallbackHandler.setEmergencyCallsOnly(isEmergencyOnly());
+        mIsEmergency = isEmergencyOnly();
+        mCallbackHandler.setEmergencyCallsOnly(mIsEmergency);
     }
 
     public void addSignalCallback(SignalCallback cb) {
@@ -606,6 +620,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.println(mLocale);
         pw.print("  mLastServiceState=");
         pw.println(mLastServiceState);
+        pw.print("  mIsEmergency=");
+        pw.println(mIsEmergency);
+        pw.print("  mEmergencySource=");
+        pw.println(emergencyToString(mEmergencySource));
 
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.dump(pw);
@@ -615,6 +633,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mEthernetSignalController.dump(pw);
 
         mAccessPoints.dump(pw);
+    }
+
+    private static final String emergencyToString(int emergencySource) {
+        if (emergencySource > EMERGENCY_NO_SUB) {
+            return "NO_SUB(" + (emergencySource - EMERGENCY_NO_SUB) + ")";
+        } else if (emergencySource > EMERGENCY_VOICE_CONTROLLER) {
+            return "VOICE_CONTROLLER(" + (emergencySource - EMERGENCY_VOICE_CONTROLLER) + ")";
+        } else if (emergencySource > EMERGENCY_FIRST_CONTROLLER) {
+            return "FIRST_CONTROLLER(" + (emergencySource - EMERGENCY_FIRST_CONTROLLER) + ")";
+        } else if (emergencySource == EMERGENCY_NO_CONTROLLERS) {
+            return "NO_CONTROLLERS";
+        }
+        return "UNKNOWN_SOURCE";
     }
 
     private boolean mDemoMode;
