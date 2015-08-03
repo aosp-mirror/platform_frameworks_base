@@ -15813,16 +15813,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                         "Cannot move system application");
             }
 
-            if (Objects.equals(ps.volumeUuid, volumeUuid)) {
-                throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
-                        "Package already moved to " + volumeUuid);
+            if (pkg.applicationInfo.isExternalAsec()) {
+                currentAsec = true;
+                currentVolumeUuid = StorageManager.UUID_PRIMARY_PHYSICAL;
+            } else if (pkg.applicationInfo.isForwardLocked()) {
+                currentAsec = true;
+                currentVolumeUuid = "forward_locked";
+            } else {
+                currentAsec = false;
+                currentVolumeUuid = ps.volumeUuid;
+
+                final File probe = new File(pkg.codePath);
+                final File probeOat = new File(probe, "oat");
+                if (!probe.isDirectory() || !probeOat.isDirectory()) {
+                    throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                            "Move only supported for modern cluster style installs");
+                }
             }
 
-            final File probe = new File(pkg.codePath);
-            final File probeOat = new File(probe, "oat");
-            if (!probe.isDirectory() || !probeOat.isDirectory()) {
+            if (Objects.equals(currentVolumeUuid, volumeUuid)) {
                 throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
-                        "Move only supported for modern cluster style installs");
+                        "Package already moved to " + volumeUuid);
             }
 
             if (ps.frozen) {
@@ -15831,9 +15842,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             ps.frozen = true;
 
-            currentAsec = pkg.applicationInfo.isForwardLocked()
-                    || pkg.applicationInfo.isExternalAsec();
-            currentVolumeUuid = ps.volumeUuid;
             codeFile = new File(pkg.codePath);
             installerPackageName = ps.installerPackageName;
             packageAbiOverride = ps.cpuAbiOverrideString;
