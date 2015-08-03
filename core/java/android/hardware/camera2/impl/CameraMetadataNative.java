@@ -1078,6 +1078,7 @@ public class CameraMetadataNative implements Parcelable {
     private native synchronized void nativeWriteValues(int tag, byte[] src);
     private native synchronized void nativeDump() throws IOException; // dump to ALOGD
 
+    private static native ArrayList nativeGetAllVendorKeys(Class keyClass);
     private static native int nativeGetTagFromKey(String keyName)
             throws IllegalArgumentException;
     private static native int nativeGetTypeFromTag(int tag)
@@ -1111,6 +1112,19 @@ public class CameraMetadataNative implements Parcelable {
      */
     public boolean isEmpty() {
         return nativeIsEmpty();
+    }
+
+
+    /**
+     * Return a list containing keys of the given key class for all defined vendor tags.
+     *
+     * @hide
+     */
+    public static <K> ArrayList<K> getAllVendorKeys(Class<K> keyClass) {
+        if (keyClass == null) {
+            throw new NullPointerException();
+        }
+        return (ArrayList<K>) nativeGetAllVendorKeys(keyClass);
     }
 
     /**
