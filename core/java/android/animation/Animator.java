@@ -27,6 +27,11 @@ import java.util.ArrayList;
 public abstract class Animator implements Cloneable {
 
     /**
+     * The value used to indicate infinite duration (e.g. when Animators repeat infinitely).
+     * @hide
+     */
+    public static final long DURATION_INFINITE = -1;
+    /**
      * The set of listeners to be sent events through the life of an animation.
      */
     ArrayList<AnimatorListener> mListeners = null;
@@ -182,6 +187,16 @@ public abstract class Animator implements Cloneable {
      * @return The length of the animation, in milliseconds.
      */
     public abstract long getDuration();
+
+    /**
+     * Gets the total duration of the animation, accounting for animation sequences, start delay,
+     * and repeating. Return {@link #DURATION_INFINITE} if the duration is infinite.
+     * @hide
+     * TODO: Unhide
+     */
+    public long getTotalDuration() {
+        return getStartDelay() + getDuration();
+    }
 
     /**
      * The time interpolator used in calculating the elapsed fraction of the

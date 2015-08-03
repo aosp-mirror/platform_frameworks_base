@@ -575,6 +575,18 @@ public class ValueAnimator extends Animator {
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public long getTotalDuration() {
+        if (mRepeatCount == INFINITE) {
+            return DURATION_INFINITE;
+        } else {
+            return mUnscaledStartDelay + (mUnscaledDuration * (mRepeatCount + 1));
+        }
+    }
+
+    /**
      * Sets the position of the animation to the specified point in time. This time should
      * be between 0 and the total duration of the animation, including any repetition. If
      * the animation has not yet been started, then it will not advance forward after it is
