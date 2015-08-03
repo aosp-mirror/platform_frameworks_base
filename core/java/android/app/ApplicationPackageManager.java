@@ -777,7 +777,9 @@ final class ApplicationPackageManager extends PackageManager {
     public List<ProviderInfo> queryContentProviders(String processName,
                                                     int uid, int flags) {
         try {
-            return mPM.queryContentProviders(processName, uid, flags);
+            ParceledListSlice<ProviderInfo> slice
+                    = mPM.queryContentProviders(processName, uid, flags);
+            return slice != null ? slice.getList() : null;
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }

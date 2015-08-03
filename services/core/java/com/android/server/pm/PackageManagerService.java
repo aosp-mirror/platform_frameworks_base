@@ -5435,7 +5435,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<ProviderInfo> queryContentProviders(String processName,
+    public ParceledListSlice<ProviderInfo> queryContentProviders(String processName,
             int uid, int flags) {
         ArrayList<ProviderInfo> finalList = null;
         // reader
@@ -5467,9 +5467,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (finalList != null) {
             Collections.sort(finalList, mProviderInitOrderSorter);
+            return new ParceledListSlice<ProviderInfo>(finalList);
         }
 
-        return finalList;
+        return null;
     }
 
     @Override
