@@ -28,7 +28,8 @@
     <FrameLayout
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="@dimen/root_icon_margin"
+        android:layout_marginEnd="@dimen/root_icon_margin"
         android:duplicateParentState="true">
 
         <ImageView
