@@ -91,6 +91,7 @@ public:
      * a matching call to endIteration with the same cookie.
      */
     bool startIteration(void** cookie);
+    bool startIteration(void** cookie, const char* prefix, const char* suffix);
 
     /**
      * Return the next entry in iteration order, or NULL if there are no more

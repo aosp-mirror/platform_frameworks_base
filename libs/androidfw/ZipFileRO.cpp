@@ -127,9 +127,17 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
 
 bool ZipFileRO::startIteration(void** cookie)
 {
+  return startIteration(cookie, NULL, NULL);
+}
+
+bool ZipFileRO::startIteration(void** cookie, const char* prefix, const char* suffix)
+{
     _ZipEntryRO* ze = new _ZipEntryRO;
+    ZipString pe(prefix ? prefix : "");
+    ZipString se(suffix ? suffix : "");
     int32_t error = StartIteration(mHandle, &(ze->cookie),
-                                   NULL /* prefix */, NULL /* suffix */);
+                                   prefix ? &pe : NULL,
+                                   suffix ? &se : NULL);
     if (error) {
         ALOGW("Could not start iteration over %s: %s", mFileName, ErrorCodeString(error));
         delete ze;
