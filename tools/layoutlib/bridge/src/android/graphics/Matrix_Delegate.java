@@ -673,7 +673,7 @@ public final class Matrix_Delegate {
             return;
         }
 
-        System.arraycopy(d.mValues, 0, d.mValues, 0, MATRIX_SIZE);
+        System.arraycopy(d.mValues, 0, values, 0, MATRIX_SIZE);
     }
 
     @LayoutlibDelegate
