@@ -1075,6 +1075,12 @@ public final class AnimatorSet extends Animator {
                 if (mChildNodes != null) {
                     node.mChildNodes = new ArrayList<>(mChildNodes);
                 }
+                if (mSiblings != null) {
+                    node.mSiblings = new ArrayList<>(mSiblings);
+                }
+                if (mParents != null) {
+                    node.mParents = new ArrayList<>(mParents);
+                }
                 node.mEnded = false;
                 return node;
             } catch (CloneNotSupportedException e) {
