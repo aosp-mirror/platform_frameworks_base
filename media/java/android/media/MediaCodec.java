@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo.CodecCapabilities;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ReadOnlyBufferException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -228,8 +230,9 @@ import java.util.Map;
  data and submit it as a single codec-config buffer.
  <p>
  Android uses the following codec-specific data buffers. These are also required to be set in
- the track format for proper {@link MediaMuxer} track configuration. Each parameter set and
- codec-specific-data must start with a start code of {@code "\x00\x00\x00\x01"}.
+ the track format for proper {@link MediaMuxer} track configuration. Each parameter set and the
+ codec-specific-data sections marked with (<sup>*</sup>) must start with a start code of
+ {@code "\x00\x00\x00\x01"}.
  <p>
  <style>td.NA { background: #ccc; } .mid > tr > td { vertical-align: middle; }</style>
  <table>
@@ -237,28 +240,48 @@ import java.util.Map;
    <th>Format</th>
    <th>CSD buffer #0</th>
    <th>CSD buffer #1</th>
+   <th>CSD buffer #2</th>
   </thead>
   <tbody class=mid>
    <tr>
     <td>AAC</td>
-    <td>Decoder-specific information from ESDS</td>
+    <td>Decoder-specific information from ESDS<sup>*</sup></td>
+    <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>
    </tr>
    <tr>
+    <td>VORBIS</td>
+    <td>Identification header</td>
+    <td>Setup header</td>
+    <td class=NA>Not Used</td>
+   </tr>
+   <tr>
+    <td>OPUS</td>
+    <td>Identification header</td>
+    <td>Pre-skip in nanosecs<br>
+        (unsigned 64-bit {@linkplain ByteOrder#nativeOrder native-order} integer.)<br>
+        This overrides the pre-skip value in the identification header.</td>
+    <td>Seek Pre-roll in nanosecs<br>
+        (unsigned 64-bit {@linkplain ByteOrder#nativeOrder native-order} integer.)</td>
+   </tr>
+   <tr>
     <td>MPEG-4</td>
-    <td>Decoder-specific information from ESDS</td>
+    <td>Decoder-specific information from ESDS<sup>*</sup></td>
+    <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>
    </tr>
    <tr>
     <td>H.264 AVC</td>
-    <td>SPS (Sequence Parameter Sets)</td>
-    <td>PPS (Picture Parameter Sets)</td>
+    <td>SPS (Sequence Parameter Sets<sup>*</sup>)</td>
+    <td>PPS (Picture Parameter Sets<sup>*</sup>)</td>
+    <td class=NA>Not Used</td>
    </tr>
    <tr>
     <td>H.265 HEVC</td>
-    <td>VPS (Video Parameter Sets) +<br>
-     SPS (Sequence Parameter Sets) +<br>
-     PPS (Picture Parameter Sets)</td>
+    <td>VPS (Video Parameter Sets<sup>*</sup>) +<br>
+     SPS (Sequence Parameter Sets<sup>*</sup>) +<br>
+     PPS (Picture Parameter Sets<sup>*</sup>)</td>
+    <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>
    </tr>
   </tbody>
@@ -297,10 +320,10 @@ import java.util.Map;
  releaseOutputBuffer} methods to return the buffer to the codec.
  <p>
  While you are not required to resubmit/release buffers immediately to the codec, holding onto
- input and/or output buffers may stall the codec, and this behavior is device dependent. E.g. it
- is possible that a codec may hold off on generating output buffers until all outstanding buffers
- have been released/resubmitted. Therefore, try to hold onto to available buffers as little as
- possible.
+ input and/or output buffers may stall the codec, and this behavior is device dependent.
+ <strong>Specifically, it is possible that a codec may hold off on generating output buffers until
+ <em>all</em> outstanding buffers have been released/resubmitted.</strong> Therefore, try to
+ hold onto to available buffers as little as possible.
  <p>
  Depending on the API version, you can process data in three ways:
  <table>
@@ -346,7 +369,7 @@ import java.util.Map;
  <p>
  MediaCodec is typically used like this in asynchronous mode:
  <pre class=prettyprint>
- MediaCodec codec = MediaCodec.createCodecByName(name);
+ MediaCodec codec = MediaCodec.createByCodecName(name);
  MediaFormat mOutputFormat; // member variable
  codec.setCallback(new MediaCodec.Callback() {
    {@literal @Override}
@@ -403,7 +426,7 @@ import java.util.Map;
  <p>
  MediaCodec is typically used like this in synchronous mode:
  <pre>
- MediaCodec codec = MediaCodec.createCodecByName(name);
+ MediaCodec codec = MediaCodec.createByCodecName(name);
  codec.configure(format, &hellip;);
  MediaFormat outputFormat = codec.getOutputFormat(); // option B
  codec.start();
@@ -442,7 +465,7 @@ import java.util.Map;
  between the size of the arrays and the number of input and output buffers used by the system,
  although the array size provides an upper bound.
  <pre>
- MediaCodec codec = MediaCodec.createCodecByName(name);
+ MediaCodec codec = MediaCodec.createByCodecName(name);
  codec.configure(format, &hellip;);
  codec.start();
  ByteBuffer[] inputBuffers = codec.getInputBuffers();
@@ -643,10 +666,10 @@ import java.util.Map;
  class. For API version numbers, see {@link android.os.Build.VERSION_CODES}.
 
  <style>
- .api > tr > th, td { text-align: center; padding: 4px 4px; }
+ .api > tr > th, .api > tr > td { text-align: center; padding: 4px 4px; }
  .api > tr > th     { vertical-align: bottom; }
  .api > tr > td     { vertical-align: middle; }
- .sml > tr > th, td { text-align: center; padding: 2px 4px; }
+ .sml > tr > th, .sml > tr > td { text-align: center; padding: 2px 4px; }
  .fn { text-align: left; }
  .fn > code > a { font: 14px/19px Roboto Condensed, sans-serif; }
  .deg45 {
@@ -1561,7 +1584,7 @@ final public class MediaCodec {
     private boolean mHasSurface = false;
 
     /**
-     * Instantiate a decoder supporting input data of the given mime type.
+     * Instantiate the preferred decoder supporting input data of the given mime type.
      *
      * The following is a partial list of defined mime types and their semantics:
      * <ul>
@@ -1580,6 +1603,10 @@ final public class MediaCodec {
      * <li>"audio/g711-mlaw" - G.711 ulaw audio
      * </ul>
      *
+     * <strong>Note:</strong> It is preferred to use {@link MediaCodecList#findDecoderForFormat}
+     * and {@link #createByCodecName} to ensure that the resulting codec can handle a
+     * given format.
+     *
      * @param type The mime type of the input data.
      * @throws IOException if the codec cannot be created.
      * @throws IllegalArgumentException if type is not a valid mime type.
@@ -1592,7 +1619,12 @@ final public class MediaCodec {
     }
 
     /**
-     * Instantiate an encoder supporting output data of the given mime type.
+     * Instantiate the preferred encoder supporting output data of the given mime type.
+     *
+     * <strong>Note:</strong> It is preferred to use {@link MediaCodecList#findEncoderForFormat}
+     * and {@link #createByCodecName} to ensure that the resulting codec can handle a
+     * given format.
+     *
      * @param type The desired mime type of the output data.
      * @throws IOException if the codec cannot be created.
      * @throws IllegalArgumentException if type is not a valid mime type.
@@ -1661,6 +1693,8 @@ final public class MediaCodec {
     private native final void native_reset();
 
     /**
+     * Free up resources used by the codec instance.
+     *
      * Make sure you call this when you're done to free up any opened
      * component instance instead of relying on the garbage collector
      * to do this for you at some point in the future.
@@ -1881,17 +1915,25 @@ final public class MediaCodec {
     private native final void native_stop();
 
     /**
-     * Flush both input and output ports of the component, all indices
-     * previously returned in calls to {@link #dequeueInputBuffer} and
-     * {@link #dequeueOutputBuffer} become invalid.
+     * Flush both input and output ports of the component.
      * <p>
-     * If codec is configured in asynchronous mode, call {@link #start}
-     * after {@code flush} has returned to resume codec operations. The
-     * codec will not request input buffers until this has happened.
+     * Upon return, all indices previously returned in calls to {@link #dequeueInputBuffer
+     * dequeueInputBuffer} and {@link #dequeueOutputBuffer dequeueOutputBuffer} &mdash; or obtained
+     * via {@link Callback#onInputBufferAvailable onInputBufferAvailable} or
+     * {@link Callback#onOutputBufferAvailable onOutputBufferAvailable} callbacks &mdash; become
+     * invalid, and all buffers are owned by the codec.
      * <p>
-     * If codec is configured in synchronous mode, codec will resume
-     * automatically if an input surface was created.  Otherwise, it
-     * will resume when {@link #dequeueInputBuffer} is called.
+     * If the codec is configured in asynchronous mode, call {@link #start}
+     * after {@code flush} has returned to resume codec operations. The codec
+     * will not request input buffers until this has happened.
+     * <strong>Note, however, that there may still be outstanding {@code onOutputBufferAvailable}
+     * callbacks that were not handled prior to calling {@code flush}.
+     * The indices returned via these callbacks also become invalid upon calling {@code flush} and
+     * should be discarded.</strong>
+     * <p>
+     * If the codec is configured in synchronous mode, codec will resume
+     * automatically if it is configured with an input surface.  Otherwise, it
+     * will resume when {@link #dequeueInputBuffer dequeueInputBuffer} is called.
      *
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
@@ -2082,6 +2124,15 @@ final public class MediaCodec {
      * To indicate that this is the final piece of input data (or rather that
      * no more input data follows unless the decoder is subsequently flushed)
      * specify the flag {@link #BUFFER_FLAG_END_OF_STREAM}.
+     * <p class=note>
+     * <strong>Note:</strong> Prior to {@link android.os.Build.VERSION_CODES#M},
+     * {@code presentationTimeUs} was not propagated to the frame timestamp of (rendered)
+     * Surface output buffers, and the resulting frame timestamp was undefined.
+     * Use {@link #releaseOutputBuffer(int, long)} to ensure a specific frame timestamp is set.
+     * Similarly, since frame timestamps can be used by the destination surface for rendering
+     * synchronization, <strong>care must be taken to normalize presentationTimeUs so as to not be
+     * mistaken for a system time. (See {@linkplain #releaseOutputBuffer(int, long)
+     * SurfaceView specifics}).</strong>
      *
      * @param index The index of a client-owned input buffer previously returned
      *              in a call to {@link #dequeueInputBuffer}.
@@ -2089,7 +2140,10 @@ final public class MediaCodec {
      * @param size The number of bytes of valid input data.
      * @param presentationTimeUs The presentation timestamp in microseconds for this
      *                           buffer. This is normally the media time at which this
-     *                           buffer should be presented (rendered).
+     *                           buffer should be presented (rendered). When using an output
+     *                           surface, this will be propagated as the {@link
+     *                           SurfaceTexture#getTimestamp timestamp} for the frame (after
+     *                           conversion to nanoseconds).
      * @param flags A bitmask of flags
      *              {@link #BUFFER_FLAG_CODEC_CONFIG} and {@link #BUFFER_FLAG_END_OF_STREAM}.
      *              While not prohibited, most codecs do not use the
@@ -2202,8 +2256,10 @@ final public class MediaCodec {
     };
 
     /**
-     * Similar to {@link #queueInputBuffer} but submits a buffer that is
+     * Similar to {@link #queueInputBuffer queueInputBuffer} but submits a buffer that is
      * potentially encrypted.
+     * <strong>Check out further notes at {@link #queueInputBuffer queueInputBuffer}.</strong>
+     *
      * @param index The index of a client-owned input buffer previously returned
      *              in a call to {@link #dequeueInputBuffer}.
      * @param offset The byte offset into the input buffer at which the data starts.
@@ -2310,7 +2366,7 @@ final public class MediaCodec {
     /**
      * Dequeue an output buffer, block at most "timeoutUs" microseconds.
      * Returns the index of an output buffer that has been successfully
-     * decoded or one of the INFO_* constants below.
+     * decoded or one of the INFO_* constants.
      * @param info Will be filled with buffer meta data.
      * @param timeoutUs The timeout in microseconds, a negative timeout indicates "infinite".
      * @throws IllegalStateException if not in the Executing state,
@@ -2338,9 +2394,11 @@ final public class MediaCodec {
             @NonNull BufferInfo info, long timeoutUs);
 
     /**
-     * If you are done with a buffer, use this call to return the buffer to
-     * the codec. If you previously specified a surface when configuring this
-     * video decoder you can optionally render the buffer.
+     * If you are done with a buffer, use this call to return the buffer to the codec
+     * or to render it on the output surface. If you configured the codec with an
+     * output surface, setting {@code render} to {@code true} will first send the buffer
+     * to that output surface. The surface will release the buffer back to the codec once
+     * it is no longer used/displayed.
      *
      * Once an output buffer is released to the codec, it MUST NOT
      * be used until it is later retrieved by {@link #getOutputBuffer} in response
@@ -2674,6 +2732,8 @@ final public class MediaCodec {
      * <b>Note:</b> As of API 21, dequeued input buffers are
      * automatically {@link java.nio.Buffer#clear cleared}.
      *
+     * <em>Do not use this method if using an input surface.</em>
+     *
      * @throws IllegalStateException if not in the Executing state,
      *         or codec is configured in asynchronous mode.
      * @throws MediaCodec.CodecException upon codec error.
@@ -2702,6 +2762,8 @@ final public class MediaCodec {
      * <b>Note:</b> As of API 21, the position and limit of output
      * buffers that are dequeued will be set to the valid data
      * range.
+     *
+     * <em>Do not use this method if using an output surface.</em>
      *
      * @throws IllegalStateException if not in the Executing state,
      *         or codec is configured in asynchronous mode.
@@ -2988,6 +3050,10 @@ final public class MediaCodec {
 
         /**
          * Called when an output frame has rendered on the output surface.
+         * <p>
+         * <strong>Note:</strong> This callback is for informational purposes only: to get precise
+         * render timing samples, and can be significantly delayed and batched. Some frames may have
+         * been rendered even if there was no callback generated.
          *
          * @param codec the MediaCodec instance
          * @param presentationTimeUs the presentation time (media time) of the frame rendered.
@@ -3004,10 +3070,14 @@ final public class MediaCodec {
     }
 
     /**
-     * Register a callback to be invoked when an output frame is rendered on the output surface.
+     * Registers a callback to be invoked when an output frame is rendered on the output surface.
      * <p>
      * This method can be called in any codec state, but will only have an effect in the
      * Executing state for codecs that render buffers to the output surface.
+     * <p>
+     * <strong>Note:</strong> This callback is for informational purposes only: to get precise
+     * render timing samples, and can be significantly delayed and batched. Some frames may have
+     * been rendered even if there was no callback generated.
      *
      * @param listener the callback that will be run
      * @param handler the callback will be run on the handler's thread. If {@code null},
