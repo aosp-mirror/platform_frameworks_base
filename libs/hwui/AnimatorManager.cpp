@@ -124,8 +124,6 @@ uint32_t AnimatorManager::animate(TreeInfo& info) {
 }
 
 void AnimatorManager::animateNoDamage(TreeInfo& info) {
-    if (!mAnimators.size()) return;
-
     animateCommon(info);
 }
 
@@ -169,7 +167,7 @@ private:
 };
 
 void AnimatorManager::endAllActiveAnimators() {
-    ALOGD("endAllStagingAnimators on %p (%s) with handle %p",
+    ALOGD("endAllActiveAnimators on %p (%s) with handle %p",
             &mParent, mParent.getName(), mAnimationHandle);
     EndActiveAnimatorsFunctor functor(mAnimationHandle->context());
     for_each(mAnimators.begin(), mAnimators.end(), functor);
