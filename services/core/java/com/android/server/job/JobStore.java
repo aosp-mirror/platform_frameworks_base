@@ -457,7 +457,7 @@ public class JobStore {
             while (eventType != XmlPullParser.START_TAG &&
                     eventType != XmlPullParser.END_DOCUMENT) {
                 eventType = parser.next();
-                Slog.d(TAG, parser.getName());
+                Slog.d(TAG, "Start tag: " + parser.getName());
             }
             if (eventType == XmlPullParser.END_DOCUMENT) {
                 if (DEBUG) {
