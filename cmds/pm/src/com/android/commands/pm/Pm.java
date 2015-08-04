@@ -335,7 +335,7 @@ public final class Pm {
         boolean listDisabled = false, listEnabled = false;
         boolean listSystem = false, listThirdParty = false;
         boolean listInstaller = false;
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
         try {
             String opt;
             while ((opt=nextOption()) != null) {
@@ -846,7 +846,7 @@ public final class Pm {
 
     // pm set-app-link [--user USER_ID] PACKAGE {always|ask|never|undefined}
     private int runSetAppLink() {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
 
         String opt;
         while ((opt = nextOption()) != null) {
@@ -929,7 +929,7 @@ public final class Pm {
 
     // pm get-app-link [--user USER_ID] PACKAGE
     private int runGetAppLink() {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
 
         String opt;
         while ((opt = nextOption()) != null) {
@@ -1090,7 +1090,7 @@ public final class Pm {
         }
 
         if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_OWNER;
+            userId = UserHandle.USER_SYSTEM;
             installFlags |= PackageManager.INSTALL_ALL_USERS;
         }
 
@@ -1216,7 +1216,7 @@ public final class Pm {
         }
 
         if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_OWNER;
+            userId = UserHandle.USER_SYSTEM;
             params.installFlags |= PackageManager.INSTALL_ALL_USERS;
         }
 
@@ -1547,7 +1547,7 @@ public final class Pm {
         }
 
         if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_OWNER;
+            userId = UserHandle.USER_SYSTEM;
             flags |= PackageManager.DELETE_ALL_USERS;
         } else {
             PackageInfo info;
@@ -1758,7 +1758,7 @@ public final class Pm {
     }
 
     private int runGrantRevokePermission(boolean grant) {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
 
         String opt = null;
         while ((opt = nextOption()) != null) {
