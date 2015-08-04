@@ -526,10 +526,10 @@ public class SystemServicesProxy {
     /**
      * Returns whether the foreground user is the owner.
      */
-    public boolean isForegroundUserOwner() {
+    public boolean isForegroundUserSystem() {
         if (mAm == null) return false;
 
-        return mAm.getCurrentUser() == UserHandle.USER_OWNER;
+        return mAm.getCurrentUser() == UserHandle.USER_SYSTEM;
     }
 
     /**

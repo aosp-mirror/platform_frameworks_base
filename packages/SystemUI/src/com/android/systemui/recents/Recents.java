@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -62,15 +61,15 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import java.util.ArrayList;
 
 /**
- * Annotation for a method that is only called from the primary user's SystemUI process and will be
+ * Annotation for a method that is only called from the system user's SystemUI process and will be
  * proxied to the current user.
  */
-@interface ProxyFromPrimaryToCurrentUser {}
+@interface ProxyFromSystemToCurrentUser {}
 /**
  * Annotation for a method that may be called from any user's SystemUI process and will be proxied
- * to the primary user.
+ * to the system user.
  */
-@interface ProxyFromAnyToPrimaryUser {}
+@interface ProxyFromAnyToSystemUser {}
 
 /** A proxy implementation for the recents component */
 public class Recents extends SystemUI
@@ -225,7 +224,7 @@ public class Recents extends SystemUI
     }
 
     /** Initializes the Recents. */
-    @ProxyFromPrimaryToCurrentUser
+    @ProxyFromSystemToCurrentUser
     @Override
     public void start() {
         if (sInstance == null) {
@@ -245,7 +244,7 @@ public class Recents extends SystemUI
         // Only the owner has the callback to update the SysUI visibility flags, so all non-owner
         // instances of AlternateRecentsComponent needs to notify the owner when the visibility
         // changes.
-        if (mSystemServicesProxy.isForegroundUserOwner()) {
+        if (mSystemServicesProxy.isForegroundUserSystem()) {
             mProxyBroadcastReceiver = new RecentsOwnerEventProxyReceiver();
             IntentFilter filter = new IntentFilter();
             filter.addAction(Recents.ACTION_PROXY_NOTIFY_RECENTS_VISIBLITY_TO_OWNER);
@@ -278,10 +277,10 @@ public class Recents extends SystemUI
     }
 
     /** Shows the Recents. */
-    @ProxyFromPrimaryToCurrentUser
+    @ProxyFromSystemToCurrentUser
     @Override
     public void showRecents(boolean triggeredFromAltTab, View statusBarView) {
-        if (mSystemServicesProxy.isForegroundUserOwner()) {
+        if (mSystemServicesProxy.isForegroundUserSystem()) {
             showRecentsInternal(triggeredFromAltTab);
         } else {
             Intent intent = createLocalBroadcastIntent(mContext,
@@ -302,10 +301,10 @@ public class Recents extends SystemUI
     }
 
     /** Hides the Recents. */
-    @ProxyFromPrimaryToCurrentUser
+    @ProxyFromSystemToCurrentUser
     @Override
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
-        if (mSystemServicesProxy.isForegroundUserOwner()) {
+        if (mSystemServicesProxy.isForegroundUserSystem()) {
             hideRecentsInternal(triggeredFromAltTab, triggeredFromHomeKey);
         } else {
             Intent intent = createLocalBroadcastIntent(mContext,
@@ -328,10 +327,10 @@ public class Recents extends SystemUI
     }
 
     /** Toggles the Recents activity. */
-    @ProxyFromPrimaryToCurrentUser
+    @ProxyFromSystemToCurrentUser
     @Override
     public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
-        if (mSystemServicesProxy.isForegroundUserOwner()) {
+        if (mSystemServicesProxy.isForegroundUserSystem()) {
             toggleRecentsInternal();
         } else {
             Intent intent = createLocalBroadcastIntent(mContext,
@@ -351,10 +350,10 @@ public class Recents extends SystemUI
     }
 
     /** Preloads info for the Recents activity. */
-    @ProxyFromPrimaryToCurrentUser
+    @ProxyFromSystemToCurrentUser
     @Override
     public void preloadRecents() {
-        if (mSystemServicesProxy.isForegroundUserOwner()) {
+        if (mSystemServicesProxy.isForegroundUserSystem()) {
             preloadRecentsInternal();
         } else {
             Intent intent = createLocalBroadcastIntent(mContext,
@@ -483,9 +482,9 @@ public class Recents extends SystemUI
     }
 
     /** Updates on configuration change. */
-    @ProxyFromPrimaryToCurrentUser
+    @ProxyFromSystemToCurrentUser
     public void onConfigurationChanged(Configuration newConfig) {
-        if (mSystemServicesProxy.isForegroundUserOwner()) {
+        if (mSystemServicesProxy.isForegroundUserSystem()) {
             configurationChanged();
         } else {
             Intent intent = createLocalBroadcastIntent(mContext,
@@ -849,16 +848,16 @@ public class Recents extends SystemUI
     }
 
     /** Notifies the callbacks that the visibility of Recents has changed. */
-    @ProxyFromAnyToPrimaryUser
+    @ProxyFromAnyToSystemUser
     public static void notifyVisibilityChanged(Context context, SystemServicesProxy ssp,
             boolean visible) {
-        if (ssp.isForegroundUserOwner()) {
+        if (ssp.isForegroundUserSystem()) {
             visibilityChanged(visible);
         } else {
             Intent intent = createLocalBroadcastIntent(context,
                     ACTION_PROXY_NOTIFY_RECENTS_VISIBLITY_TO_OWNER);
             intent.putExtra(EXTRA_RECENTS_VISIBILITY, visible);
-            context.sendBroadcastAsUser(intent, UserHandle.OWNER);
+            context.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
         }
     }
     static void visibilityChanged(boolean visible) {
@@ -868,14 +867,14 @@ public class Recents extends SystemUI
     }
 
     /** Notifies the status bar to trigger screen pinning. */
-    @ProxyFromAnyToPrimaryUser
+    @ProxyFromAnyToSystemUser
     public static void startScreenPinning(Context context, SystemServicesProxy ssp) {
-        if (ssp.isForegroundUserOwner()) {
+        if (ssp.isForegroundUserSystem()) {
             onStartScreenPinning(context);
         } else {
             Intent intent = createLocalBroadcastIntent(context,
                     ACTION_PROXY_SCREEN_PINNING_REQUEST_TO_OWNER);
-            context.sendBroadcastAsUser(intent, UserHandle.OWNER);
+            context.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
         }
     }
     static void onStartScreenPinning(Context context) {
