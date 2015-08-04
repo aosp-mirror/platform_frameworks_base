@@ -520,21 +520,6 @@ public class UsbManager {
     }
 
     /**
-     * Returns {@code true} iff access to sensitive USB data is currently allowed when
-     * in device mode.
-     *
-     * {@hide}
-     */
-    public boolean isUsbDataUnlocked() {
-        try {
-            return mService.isUsbDataUnlocked();
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in isUsbDataUnlocked", e);
-        }
-        return false;
-    }
-
-    /**
      * Returns a list of physical USB ports on the device.
      * <p>
      * This list is guaranteed to contain all dual-role USB Type C ports but it might
