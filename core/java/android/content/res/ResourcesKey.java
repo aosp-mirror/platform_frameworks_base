@@ -16,6 +16,8 @@
 
 package android.content.res;
 
+import android.annotation.NonNull;
+
 import java.util.Objects;
 
 /** @hide */
@@ -25,27 +27,27 @@ public final class ResourcesKey {
     private final int mHash;
 
     public final int mDisplayId;
+    @NonNull
     public final Configuration mOverrideConfiguration;
 
     public ResourcesKey(String resDir, int displayId, Configuration overrideConfiguration,
             float scale) {
         mResDir = resDir;
         mDisplayId = displayId;
-        mOverrideConfiguration = overrideConfiguration;
+        mOverrideConfiguration = overrideConfiguration != null
+                ? overrideConfiguration : Configuration.EMPTY;
         mScale = scale;
 
         int hash = 17;
         hash = 31 * hash + (mResDir == null ? 0 : mResDir.hashCode());
         hash = 31 * hash + mDisplayId;
-        hash = 31 * hash + (mOverrideConfiguration != null
-                ? mOverrideConfiguration.hashCode() : 0);
+        hash = 31 * hash + mOverrideConfiguration.hashCode();
         hash = 31 * hash + Float.floatToIntBits(mScale);
         mHash = hash;
     }
 
     public boolean hasOverrideConfiguration() {
-        return mOverrideConfiguration != null
-                && !Configuration.EMPTY.equals(mOverrideConfiguration);
+        return !Configuration.EMPTY.equals(mOverrideConfiguration);
     }
 
     @Override
@@ -66,13 +68,8 @@ public final class ResourcesKey {
         if (mDisplayId != peer.mDisplayId) {
             return false;
         }
-        if (mOverrideConfiguration != peer.mOverrideConfiguration) {
-            if (mOverrideConfiguration == null || peer.mOverrideConfiguration == null) {
-                return false;
-            }
-            if (!mOverrideConfiguration.equals(peer.mOverrideConfiguration)) {
-                return false;
-            }
+        if (!mOverrideConfiguration.equals(peer.mOverrideConfiguration)) {
+            return false;
         }
         if (mScale != peer.mScale) {
             return false;
