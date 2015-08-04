@@ -613,6 +613,7 @@ final class Settings {
                 p.sharedUser = origPackage.sharedUser;
                 p.appId = origPackage.appId;
                 p.origPackage = origPackage;
+                p.getPermissionsState().copyFrom(origPackage.getPermissionsState());
                 mRenamedPackages.put(name, origPackage.name);
                 name = origPackage.name;
                 // Update new package state.
@@ -812,6 +813,20 @@ final class Settings {
             p.sharedUser = sharedUser;
             p.appId = sharedUser.userId;
         }
+
+        // If the we know about this user id, we have to update it as it
+        // has to point to the same PackageSetting instance as the package.
+        Object userIdPs = getUserIdLPr(p.appId);
+        if (sharedUser == null) {
+            if (userIdPs != null && userIdPs != p) {
+                replaceUserIdLPw(p.appId, p);
+            }
+        } else {
+            if (userIdPs != null && userIdPs != sharedUser) {
+                replaceUserIdLPw(p.appId, sharedUser);
+            }
+        }
+
         IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.get(name);
         if (ivi != null) {
             if (DEBUG_DOMAIN_VERIFICATION) {
