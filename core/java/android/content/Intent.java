@@ -1791,14 +1791,6 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_ALARM_CHANGED = "android.intent.action.ALARM_CHANGED";
     /**
-     * Sync State Changed Action: This is broadcast when the sync starts or stops or when one has
-     * been failing for a long time.  It is used by the SyncManager and the StatusBar service.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_SYNC_STATE_CHANGED
-            = "android.intent.action.SYNC_STATE_CHANGED";
-    /**
      * Broadcast Action: This is broadcast once, after the system has finished
      * booting.  It can be used to perform application-specific initialization,
      * such as installing alarms.  You must hold the
