@@ -17,6 +17,7 @@
 <resources>
     <dimen name="icon_size">40dp</dimen>
     <dimen name="root_icon_size">24dp</dimen>
+    <dimen name="root_icon_margin">0dp</dimen>
 
     <dimen name="grid_width">152dp</dimen>
     <dimen name="grid_height">176dp</dimen>
