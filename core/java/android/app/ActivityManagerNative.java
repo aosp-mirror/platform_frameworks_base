@@ -2610,6 +2610,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case IS_ROOT_VOICE_INTERACTION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            boolean res = isRootVoiceInteraction(token);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
         case START_BINDER_TRACKING_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             boolean res = startBinderTracking();
@@ -6071,6 +6080,20 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(userId);
         data.writeInt(level);
         mRemote.transact(SET_PROCESS_MEMORY_TRIM_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res != 0;
+    }
+
+    @Override
+    public boolean isRootVoiceInteraction(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(IS_ROOT_VOICE_INTERACTION_TRANSACTION, data, reply, 0);
         reply.readException();
         int res = reply.readInt();
         data.recycle();

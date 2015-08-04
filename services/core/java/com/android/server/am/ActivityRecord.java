@@ -107,6 +107,7 @@ final class ActivityRecord {
     boolean fullscreen; // covers the full screen?
     final boolean noDisplay;  // activity is not displayed?
     final boolean componentSpecified;  // did caller specifiy an explicit component?
+    final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
 
     static final int APPLICATION_ACTIVITY_TYPE = 0;
     static final int HOME_ACTIVITY_TYPE = 1;
@@ -207,6 +208,9 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
                 pw.print(" mActivityType="); pw.println(mActivityType);
+        if (rootVoiceInteraction) {
+            pw.print(prefix); pw.print("rootVoiceInteraction="); pw.println(rootVoiceInteraction);
+        }
         pw.print(prefix); pw.print("compat="); pw.print(compat);
                 pw.print(" labelRes=0x"); pw.print(Integer.toHexString(labelRes));
                 pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
@@ -432,7 +436,8 @@ final class ActivityRecord {
             int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
-            boolean _componentSpecified, ActivityStackSupervisor supervisor,
+            boolean _componentSpecified, boolean _rootVoiceInteraction,
+            ActivityStackSupervisor supervisor,
             ActivityContainer container, Bundle options) {
         service = _service;
         appToken = new Token(this, service);
@@ -444,6 +449,7 @@ final class ActivityRecord {
         shortComponentName = _intent.getComponent().flattenToShortString();
         resolvedType = _resolvedType;
         componentSpecified = _componentSpecified;
+        rootVoiceInteraction = _rootVoiceInteraction;
         configuration = _configuration;
         taskConfigOverride = Configuration.EMPTY;
         resultTo = _resultTo;
@@ -1256,7 +1262,7 @@ final class ActivityRecord {
         }
         final ActivityRecord r = new ActivityRecord(service, /*caller*/null, launchedFromUid,
                 launchedFromPackage, intent, resolvedType, aInfo, service.getConfiguration(),
-                null, null, 0, componentSpecified, stackSupervisor, null, null);
+                null, null, 0, componentSpecified, false, stackSupervisor, null, null);
 
         r.persistentState = persistentState;
         r.taskDescription = taskDescription;

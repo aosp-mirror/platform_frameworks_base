@@ -518,6 +518,8 @@ public interface IActivityManager extends IInterface {
     public boolean setProcessMemoryTrimLevel(String process, int uid, int level)
             throws RemoteException;
 
+    public boolean isRootVoiceInteraction(IBinder token) throws RemoteException;
+
     // Start Binder transaction tracking for all applications.
     public boolean startBinderTracking() throws RemoteException;
 
@@ -871,6 +873,7 @@ public interface IActivityManager extends IInterface {
     int IS_SCREEN_CAPTURE_ALLOWED_ON_CURRENT_ACTIVITY_TRANSACTION
             = IBinder.FIRST_CALL_TRANSACTION+299;
     int SHOW_ASSIST_FROM_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+300;
+    int IS_ROOT_VOICE_INTERACTION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+301;
 
     // Start of N transactions
     int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 340;

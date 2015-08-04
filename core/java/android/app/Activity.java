@@ -1230,6 +1230,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Like {@link #isVoiceInteraction}, but only returns true if this is also the root
+     * of a voice interaction.  That is, returns true if this activity was directly
+     * started by the voice interaction service as the initiation of a voice interaction.
+     * Otherwise, for example if it was started by another activity while under voice
+     * interaction, returns false.
+     */
+    public boolean isVoiceInteractionRoot() {
+        try {
+            return mVoiceInteractor != null
+                    && ActivityManagerNative.getDefault().isRootVoiceInteraction(mToken);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
      * Retrieve the active {@link VoiceInteractor} that the user is going through to
      * interact with this activity.
      */
