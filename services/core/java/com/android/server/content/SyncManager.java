@@ -297,7 +297,6 @@ public class SyncManager {
     private final UserManager mUserManager;
 
     private static final long SYNC_ALARM_TIMEOUT_MIN = 30 * 1000; // 30 seconds
-    private static final long SYNC_ALARM_TIMEOUT_MAX = 2 * 60 * 60 * 1000; // two hours
 
     private List<UserInfo> getAllUsers() {
         return mUserManager.getUsers();
@@ -1478,9 +1477,9 @@ public class SyncManager {
         final long now = SystemClock.elapsedRealtime();
         pw.print("now: "); pw.print(now);
         pw.println(" (" + formatTime(System.currentTimeMillis()) + ")");
-        pw.print("offset: "); pw.print(DateUtils.formatElapsedTime(mSyncRandomOffsetMillis/1000));
+        pw.print("offset: "); pw.print(DateUtils.formatElapsedTime(mSyncRandomOffsetMillis / 1000));
         pw.println(" (HH:MM:SS)");
-        pw.print("uptime: "); pw.print(DateUtils.formatElapsedTime(now/1000));
+        pw.print("uptime: "); pw.print(DateUtils.formatElapsedTime(now / 1000));
                 pw.println(" (HH:MM:SS)");
         pw.print("time spent syncing: ");
                 pw.print(DateUtils.formatElapsedTime(
@@ -1497,11 +1496,6 @@ public class SyncManager {
             pw.println("no alarm is scheduled (there had better not be any pending syncs)");
         }
 
-        pw.print("notification info: ");
-        final StringBuilder sb = new StringBuilder();
-        mSyncHandler.mSyncNotificationInfo.toString(sb);
-        pw.println(sb.toString());
-
         pw.println();
         pw.println("Active Syncs: " + mActiveSyncContexts.size());
         final PackageManager pm = mContext.getPackageManager();
@@ -1514,8 +1508,8 @@ public class SyncManager {
             pw.println();
         }
 
+        final StringBuilder sb = new StringBuilder();
         synchronized (mSyncQueue) {
-            sb.setLength(0);
             mSyncQueue.dump(sb);
             // Dump Pending Operations.
             getSyncStorageEngine().dumpPendingOperations(sb);
@@ -2349,7 +2343,6 @@ public class SyncManager {
 
                 }
             } finally {
-                manageSyncNotificationLocked();
                 manageSyncAlarmLocked(earliestFuturePollTime, nextPendingSyncTime);
                 mSyncTimeTracker.update();
                 mSyncManagerWakeLock.release();
@@ -3169,67 +3162,6 @@ public class SyncManager {
             throw new IllegalStateException("we are not in an error state, " + syncResult);
         }
 
-        private void manageSyncNotificationLocked() {
-            boolean shouldCancel;
-            boolean shouldInstall;
-
-            if (mActiveSyncContexts.isEmpty()) {
-                mSyncNotificationInfo.startTime = null;
-
-                // we aren't syncing. if the notification is active then remember that we need
-                // to cancel it and then clear out the info
-                shouldCancel = mSyncNotificationInfo.isActive;
-                shouldInstall = false;
-            } else {
-                // we are syncing
-                final long now = SystemClock.elapsedRealtime();
-                if (mSyncNotificationInfo.startTime == null) {
-                    mSyncNotificationInfo.startTime = now;
-                }
-
-                // there are three cases:
-                // - the notification is up: do nothing
-                // - the notification is not up but it isn't time yet: don't install
-                // - the notification is not up and it is time: need to install
-
-                if (mSyncNotificationInfo.isActive) {
-                    shouldInstall = shouldCancel = false;
-                } else {
-                    // it isn't currently up, so there is nothing to cancel
-                    shouldCancel = false;
-
-                    final boolean timeToShowNotification =
-                            now > mSyncNotificationInfo.startTime + SYNC_NOTIFICATION_DELAY;
-                    if (timeToShowNotification) {
-                        shouldInstall = true;
-                    } else {
-                        // show the notification immediately if this is a manual sync
-                        shouldInstall = false;
-                        for (ActiveSyncContext activeSyncContext : mActiveSyncContexts) {
-                            final boolean manualSync = activeSyncContext.mSyncOperation.extras
-                                    .getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
-                            if (manualSync) {
-                                shouldInstall = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (shouldCancel && !shouldInstall) {
-                mNeedSyncActiveNotification = false;
-                sendSyncStateIntent();
-                mSyncNotificationInfo.isActive = false;
-            }
-
-            if (shouldInstall) {
-                mNeedSyncActiveNotification = true;
-                sendSyncStateIntent();
-                mSyncNotificationInfo.isActive = true;
-            }
-        }
-
         private void manageSyncAlarmLocked(long nextPeriodicEventElapsedTime,
                 long nextPendingEventElapsedTime) {
             // in each of these cases the sync loop will be kicked, which will cause this
@@ -3237,13 +3169,6 @@ public class SyncManager {
             if (!mDataConnectionIsConnected) return;
             if (mStorageIsLow) return;
             if (mDeviceIsIdle) return;
-
-            // When the status bar notification should be raised
-            final long notificationTime =
-                    (!mSyncHandler.mSyncNotificationInfo.isActive
-                            && mSyncHandler.mSyncNotificationInfo.startTime != null)
-                            ? mSyncHandler.mSyncNotificationInfo.startTime + SYNC_NOTIFICATION_DELAY
-                            : Long.MAX_VALUE;
 
             // When we should consider canceling an active sync
             long earliestTimeoutTime = Long.MAX_VALUE;
@@ -3260,24 +3185,14 @@ public class SyncManager {
             }
 
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "manageSyncAlarm: notificationTime is " + notificationTime);
-            }
-
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "manageSyncAlarm: earliestTimeoutTime is " + earliestTimeoutTime);
-            }
-
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "manageSyncAlarm: nextPeriodicEventElapsedTime is "
                         + nextPeriodicEventElapsedTime);
-            }
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "manageSyncAlarm: nextPendingEventElapsedTime is "
                         + nextPendingEventElapsedTime);
             }
 
-            long alarmTime = Math.min(notificationTime, earliestTimeoutTime);
-            alarmTime = Math.min(alarmTime, nextPeriodicEventElapsedTime);
+            long alarmTime = Math.min(earliestTimeoutTime, nextPeriodicEventElapsedTime);
             alarmTime = Math.min(alarmTime, nextPendingEventElapsedTime);
 
             // Bound the alarm time.
@@ -3288,24 +3203,16 @@ public class SyncManager {
                             + alarmTime + ", setting to " + (now + SYNC_ALARM_TIMEOUT_MIN));
                 }
                 alarmTime = now + SYNC_ALARM_TIMEOUT_MIN;
-            } else if (alarmTime > now + SYNC_ALARM_TIMEOUT_MAX) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "manageSyncAlarm: the alarmTime is too large, "
-                            + alarmTime + ", setting to " + (now + SYNC_ALARM_TIMEOUT_MIN));
-                }
-                alarmTime = now + SYNC_ALARM_TIMEOUT_MAX;
             }
 
-            // determine if we need to set or cancel the alarm
+            // Determine if we need to set or cancel the alarm
             boolean shouldSet = false;
             boolean shouldCancel = false;
             final boolean alarmIsActive = (mAlarmScheduleTime != null) && (now < mAlarmScheduleTime);
-            final boolean needAlarm = alarmTime != Long.MAX_VALUE;
-            if (needAlarm) {
-                // Need the alarm if
-                //  - it's currently not set
-                //  - if the alarm is set in the past.
-                if (!alarmIsActive || alarmTime < mAlarmScheduleTime) {
+
+            if (alarmTime != Long.MAX_VALUE) {
+                // Need the alarm if it isn't set or has changed.
+                if (!alarmIsActive || alarmTime != mAlarmScheduleTime) {
                     shouldSet = true;
                 }
             } else {
@@ -3327,14 +3234,6 @@ public class SyncManager {
                 mAlarmScheduleTime = null;
                 mAlarmService.cancel(mSyncAlarmIntent);
             }
-        }
-
-        private void sendSyncStateIntent() {
-            Intent syncStateIntent = new Intent(Intent.ACTION_SYNC_STATE_CHANGED);
-            syncStateIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            syncStateIntent.putExtra("active", mNeedSyncActiveNotification);
-            syncStateIntent.putExtra("failing", false);
-            mContext.sendBroadcastAsUser(syncStateIntent, UserHandle.OWNER);
         }
 
         private void installHandleTooManyDeletesNotification(Account account, String authority,
