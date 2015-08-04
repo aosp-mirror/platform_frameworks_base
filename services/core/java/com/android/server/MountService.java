@@ -559,6 +559,7 @@ class MountService extends IMountService.Stub
     private static final int H_FSTRIM = 4;
     private static final int H_VOLUME_MOUNT = 5;
     private static final int H_VOLUME_BROADCAST = 6;
+    private static final int H_INTERNAL_BROADCAST = 7;
 
     class MountServiceHandler extends Handler {
         public MountServiceHandler(Looper looper) {
@@ -654,6 +655,13 @@ class MountService extends IMountService.Stub
                         mContext.sendBroadcastAsUser(intent, userVol.getOwner());
                     }
                     break;
+                }
+                case H_INTERNAL_BROADCAST: {
+                    // Internal broadcasts aimed at system components, not for
+                    // third-party apps.
+                    final Intent intent = (Intent) msg.obj;
+                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                            android.Manifest.permission.WRITE_MEDIA_STORAGE);
                 }
             }
         }
@@ -1126,8 +1134,7 @@ class MountService extends IMountService.Stub
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.id);
         intent.putExtra(DiskInfo.EXTRA_VOLUME_COUNT, volumeCount);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                android.Manifest.permission.WRITE_MEDIA_STORAGE);
+        mHandler.obtainMessage(H_INTERNAL_BROADCAST, intent).sendToTarget();
 
         final CountDownLatch latch = mDiskScanLatches.remove(disk.id);
         if (latch != null) {
@@ -1239,8 +1246,7 @@ class MountService extends IMountService.Stub
             intent.putExtra(VolumeInfo.EXTRA_VOLUME_STATE, newState);
             intent.putExtra(VolumeRecord.EXTRA_FS_UUID, vol.fsUuid);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                    android.Manifest.permission.WRITE_MEDIA_STORAGE);
+            mHandler.obtainMessage(H_INTERNAL_BROADCAST, intent).sendToTarget();
         }
 
         final String oldStateEnv = VolumeInfo.getEnvironmentForState(oldState);
