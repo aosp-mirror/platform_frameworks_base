@@ -203,7 +203,7 @@ interface IPackageManager {
     void querySyncProviders(inout List<String> outNames,
             inout List<ProviderInfo> outInfo);
 
-    List<ProviderInfo> queryContentProviders(
+    ParceledListSlice queryContentProviders(
             String processName, int uid, int flags);
 
     InstrumentationInfo getInstrumentationInfo(
