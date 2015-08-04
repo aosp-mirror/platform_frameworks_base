@@ -393,6 +393,16 @@ android_mtp_MtpDevice_import_file(JNIEnv *env, jobject thiz, jint object_id, jst
     return JNI_FALSE;
 }
 
+static jboolean
+android_mtp_MtpDevice_import_file_to_fd(JNIEnv *env, jobject thiz, jint object_id, jint fd)
+{
+    MtpDevice* device = get_device_from_object(env, thiz);
+    if (device)
+        return device->readObject(object_id, fd);
+    else
+        return JNI_FALSE;
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -413,8 +423,9 @@ static JNINativeMethod gMethods[] = {
     {"native_delete_object",    "(I)Z", (void *)android_mtp_MtpDevice_delete_object},
     {"native_get_parent",       "(I)J", (void *)android_mtp_MtpDevice_get_parent},
     {"native_get_storage_id",   "(I)J", (void *)android_mtp_MtpDevice_get_storage_id},
-    {"native_import_file",     "(ILjava/lang/String;)Z",
+    {"native_import_file",      "(ILjava/lang/String;)Z",
                                         (void *)android_mtp_MtpDevice_import_file},
+    {"native_import_file",      "(II)Z", (void *)android_mtp_MtpDevice_import_file_to_fd}
 };
 
 int register_android_mtp_MtpDevice(JNIEnv *env)
