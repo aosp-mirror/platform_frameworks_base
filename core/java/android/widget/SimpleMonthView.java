@@ -26,6 +26,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.text.TextPaint;
 import android.text.format.DateFormat;
@@ -43,7 +44,6 @@ import com.android.internal.R;
 import com.android.internal.widget.ExploreByTouchHelper;
 
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
