@@ -20,19 +20,19 @@ package com.android.mtp;
  * Static utilities for ID.
  */
 class Identifier {
-    int mDeviceId;
-    int mStorageId;
-    int mObjectHandle;
+    final int mDeviceId;
+    final int mStorageId;
+    final int mObjectHandle;
 
     static Identifier createFromRootId(String rootId) {
-        final String[] components = rootId.split(":");
+        final String[] components = rootId.split("_");
         return new Identifier(
                 Integer.parseInt(components[0]),
                 Integer.parseInt(components[1]));
     }
 
     static Identifier createFromDocumentId(String documentId) {
-        final String[] components = documentId.split(":");
+        final String[] components = documentId.split("_");
         return new Identifier(
                 Integer.parseInt(components[0]),
                 Integer.parseInt(components[1]),
@@ -52,11 +52,25 @@ class Identifier {
 
     // TODO: Make the ID persistent.
     String toRootId() {
-        return String.format("%d:%d", mDeviceId, mStorageId);
+        return String.format("%d_%d", mDeviceId, mStorageId);
     }
 
     // TODO: Make the ID persistent.
     String toDocumentId() {
-        return String.format("%d:%d:%d", mDeviceId, mStorageId, mObjectHandle);
+        return String.format("%d_%d_%d", mDeviceId, mStorageId, mObjectHandle);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Identifier))
+            return false;
+        final Identifier other = (Identifier)obj;
+        return mDeviceId == other.mDeviceId && mStorageId == other.mStorageId &&
+                mObjectHandle == other.mObjectHandle;
+    }
+
+    @Override
+    public int hashCode() {
+        return (mDeviceId << 16) ^ (mStorageId << 8) ^ mObjectHandle;
     }
 }
