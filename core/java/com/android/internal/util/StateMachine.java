@@ -43,38 +43,38 @@ import java.util.Vector;
  * The enter/exit methods are equivalent to the construction and destruction
  * in Object Oriented programming and are used to perform initialization and
  * cleanup of the state respectively. The <code>getName</code> method returns the
- * name of the state the default implementation returns the class name it may be
- * desirable to have this return the name of the state instance name instead.
- * In particular if a particular state class has multiple instances.</p>
+ * name of the state; the default implementation returns the class name. It may be
+ * desirable to have <code>getName</code> return the the state instance name instead,
+ * in particular if a particular state class has multiple instances.</p>
  *
- * <p>When a state machine is created <code>addState</code> is used to build the
+ * <p>When a state machine is created, <code>addState</code> is used to build the
  * hierarchy and <code>setInitialState</code> is used to identify which of these
  * is the initial state. After construction the programmer calls <code>start</code>
  * which initializes and starts the state machine. The first action the StateMachine
  * is to the invoke <code>enter</code> for all of the initial state's hierarchy,
  * starting at its eldest parent. The calls to enter will be done in the context
- * of the StateMachines Handler not in the context of the call to start and they
+ * of the StateMachine's Handler, not in the context of the call to start, and they
  * will be invoked before any messages are processed. For example, given the simple
- * state machine below mP1.enter will be invoked and then mS1.enter. Finally,
- * messages sent to the state machine will be processed by the current state,
+ * state machine below, mP1.enter will be invoked and then mS1.enter. Finally,
+ * messages sent to the state machine will be processed by the current state;
  * in our simple state machine below that would initially be mS1.processMessage.</p>
-<code>
+<pre>
         mP1
        /   \
-      mS2   mS1 ----> initial state
-</code>
+      mS2   mS1 ----&gt; initial state
+</pre>
  * <p>After the state machine is created and started, messages are sent to a state
  * machine using <code>sendMessage</code> and the messages are created using
  * <code>obtainMessage</code>. When the state machine receives a message the
  * current state's <code>processMessage</code> is invoked. In the above example
  * mS1.processMessage will be invoked first. The state may use <code>transitionTo</code>
- * to change the current state to a new state</p>
+ * to change the current state to a new state.</p>
  *
- * <p>Each state in the state machine may have a zero or one parent states and if
+ * <p>Each state in the state machine may have a zero or one parent states. If
  * a child state is unable to handle a message it may have the message processed
- * by its parent by returning false or NOT_HANDLED. If a message is never processed
- * <code>unhandledMessage</code> will be invoked to give one last chance for the state machine
- * to process the message.</p>
+ * by its parent by returning false or NOT_HANDLED. If a message is not handled by
+ * a child state or any of its ancestors, <code>unhandledMessage</code> will be invoked
+ * to give one last chance for the state machine to process the message.</p>
  *
  * <p>When all processing is completed a state machine may choose to call
  * <code>transitionToHaltingState</code>. When the current <code>processingMessage</code>
@@ -84,10 +84,10 @@ import java.util.Vector;
  *
  * <p>If it is desirable to completely stop the state machine call <code>quit</code> or
  * <code>quitNow</code>. These will call <code>exit</code> of the current state and its parents,
- * call <code>onQuiting</code> and then exit Thread/Loopers.</p>
+ * call <code>onQuitting</code> and then exit Thread/Loopers.</p>
  *
  * <p>In addition to <code>processMessage</code> each <code>State</code> has
- * an <code>enter</code> method and <code>exit</exit> method which may be overridden.</p>
+ * an <code>enter</code> method and <code>exit</code> method which may be overridden.</p>
  *
  * <p>Since the states are arranged in a hierarchy transitioning to a new state
  * causes current states to be exited and new states to be entered. To determine
@@ -110,15 +110,15 @@ import java.util.Vector;
  *
  * <p>To illustrate some of these properties we'll use state machine with an 8
  * state hierarchy:</p>
-<code>
+<pre>
           mP0
          /   \
         mP1   mS0
        /   \
       mS2   mS1
      /  \    \
-    mS3  mS4  mS5  ---> initial state
-</code>
+    mS3  mS4  mS5  ---&gt; initial state
+</pre>
  * <p>After starting mS5 the list of active states is mP0, mP1, mS1 and mS5.
  * So the order of calling processMessage when a message is received is mS5,
  * mS1, mP1, mP0 assuming each processMessage indicates it can't handle this
@@ -134,7 +134,7 @@ import java.util.Vector;
  *
  * <p>Now for some concrete examples, here is the canonical HelloWorld as a state machine.
  * It responds with "Hello World" being printed to the log for every message.</p>
-<code>
+<pre>
 class HelloWorld extends StateMachine {
     HelloWorld(String name) {
         super(name);
@@ -161,16 +161,16 @@ void testHelloWorld() {
     HelloWorld hw = makeHelloWorld();
     hw.sendMessage(hw.obtainMessage());
 }
-</code>
+</pre>
  * <p>A more interesting state machine is one with four states
  * with two independent parent states.</p>
-<code>
+<pre>
         mP1      mP2
        /   \
       mS2   mS1
-</code>
+</pre>
  * <p>Here is a description of this state machine using pseudo code.</p>
- <code>
+ <pre>
 state mP1 {
      enter { log("mP1.enter"); }
      exit { log("mP1.exit");  }
@@ -178,7 +178,7 @@ state mP1 {
          CMD_2 {
              send(CMD_3);
              defer(msg);
-             transitonTo(mS2);
+             transitionTo(mS2);
              return HANDLED;
          }
          return NOT_HANDLED;
@@ -230,9 +230,9 @@ state mP2 {
          return NOT_HANDLED;
      }
 }
-</code>
+</pre>
  * <p>The implementation is below and also in StateMachineTest:</p>
-<code>
+<pre>
 class Hsm1 extends StateMachine {
     public static final int CMD_1 = 1;
     public static final int CMD_2 = 2;
@@ -374,10 +374,10 @@ class Hsm1 extends StateMachine {
     S2 mS2 = new S2();
     P2 mP2 = new P2();
 }
-</code>
+</pre>
  * <p>If this is executed by sending two messages CMD_1 and CMD_2
  * (Note the synchronize is only needed because we use hsm.wait())</p>
-<code>
+<pre>
 Hsm1 hsm = makeHsm1();
 synchronize(hsm) {
      hsm.sendMessage(obtainMessage(hsm.CMD_1));
@@ -389,9 +389,9 @@ synchronize(hsm) {
           loge("exception while waiting " + e.getMessage());
      }
 }
-</code>
+</pre>
  * <p>The output is:</p>
-<code>
+<pre>
 D/hsm1    ( 1999): makeHsm1 E
 D/hsm1    ( 1999): ctor E
 D/hsm1    ( 1999): ctor X
@@ -415,7 +415,7 @@ D/hsm1    ( 1999): mP2.processMessage what=4
 D/hsm1    ( 1999): mP2.processMessage what=5
 D/hsm1    ( 1999): mP2.exit
 D/hsm1    ( 1999): halting
-</code>
+</pre>
  */
 public class StateMachine {
     // Name of the state machine and used as logging tag
