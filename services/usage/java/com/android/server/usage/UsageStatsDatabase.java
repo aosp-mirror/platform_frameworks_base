@@ -350,23 +350,6 @@ class UsageStatsDatabase {
     }
 
     /**
-     * Get the time at which the latest stats begin for this interval type.
-     */
-    public long getLatestUsageStatsBeginTime(int intervalType) {
-        synchronized (mLock) {
-            if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
-                throw new IllegalArgumentException("Bad interval type " + intervalType);
-            }
-
-            final int statsFileCount = mSortedStatFiles[intervalType].size();
-            if (statsFileCount > 0) {
-                return mSortedStatFiles[intervalType].keyAt(statsFileCount - 1);
-            }
-            return -1;
-        }
-    }
-
-    /**
      * Figures out what to extract from the given IntervalStats object.
      */
     interface StatCombiner<T> {
