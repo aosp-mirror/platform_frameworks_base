@@ -49,10 +49,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -316,6 +314,9 @@ public class UsbDeviceManager {
                 // Restore default functions.
                 mCurrentFunctions = SystemProperties.get(USB_CONFIG_PROPERTY,
                         UsbManager.USB_FUNCTION_NONE);
+                if (UsbManager.USB_FUNCTION_NONE.equals(mCurrentFunctions)) {
+                    mCurrentFunctions = UsbManager.USB_FUNCTION_MTP;
+                }
                 mCurrentFunctionsApplied = mCurrentFunctions.equals(
                         SystemProperties.get(USB_STATE_PROPERTY));
                 mAdbEnabled = UsbManager.containsFunction(getDefaultFunctions(),
@@ -400,6 +401,14 @@ public class UsbDeviceManager {
             return waitForState(config);
         }
 
+        private void setUsbDataUnlocked(boolean enable) {
+            if (DEBUG) Slog.d(TAG, "setUsbDataUnlocked: " + enable);
+            mUsbDataUnlocked = enable;
+            updateUsbNotification();
+            updateUsbStateBroadcast();
+            setEnabledFunctions(mCurrentFunctions, true);
+        }
+
         private void setAdbEnabled(boolean enable) {
             if (DEBUG) Slog.d(TAG, "setAdbEnabled: " + enable);
             if (enable != mAdbEnabled) {
@@ -471,7 +480,6 @@ public class UsbDeviceManager {
             }
             functions = applyAdbFunction(functions);
             functions = applyOemOverrideFunction(functions);
-            functions = applyUserRestrictions(functions);
 
             if (!mCurrentFunctions.equals(functions) || !mCurrentFunctionsApplied
                     || forceRestart) {
@@ -502,13 +510,9 @@ public class UsbDeviceManager {
             return functions;
         }
 
-        private String applyUserRestrictions(String functions) {
+        private boolean isUsbTransferAllowed() {
             UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
-                functions = UsbManager.removeFunction(functions, UsbManager.USB_FUNCTION_MTP);
-                functions = UsbManager.removeFunction(functions, UsbManager.USB_FUNCTION_PTP);
-            }
-           return functions;
+            return !userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER);
         }
 
         private void updateCurrentAccessory() {
@@ -555,7 +559,7 @@ public class UsbDeviceManager {
                     | Intent.FLAG_RECEIVER_FOREGROUND);
             intent.putExtra(UsbManager.USB_CONNECTED, mConnected);
             intent.putExtra(UsbManager.USB_CONFIGURED, mConfigured);
-            intent.putExtra(UsbManager.USB_DATA_UNLOCKED, mUsbDataUnlocked);
+            intent.putExtra(UsbManager.USB_DATA_UNLOCKED, isUsbTransferAllowed() && mUsbDataUnlocked);
 
             if (mCurrentFunctions != null) {
                 String[] functions = mCurrentFunctions.split(",");
@@ -659,10 +663,7 @@ public class UsbDeviceManager {
                     setEnabledFunctions(mCurrentFunctions, false);
                     break;
                 case MSG_SET_USB_DATA_UNLOCKED:
-                    mUsbDataUnlocked = (msg.arg1 == 1);
-                    updateUsbNotification();
-                    updateUsbStateBroadcast();
-                    setEnabledFunctions(mCurrentFunctions, true);
+                    setUsbDataUnlocked(msg.arg1 == 1);
                     break;
                 case MSG_SYSTEM_READY:
                     updateUsbNotification();
@@ -807,8 +808,12 @@ public class UsbDeviceManager {
         }
 
         private String getDefaultFunctions() {
-            return SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY,
-                    UsbManager.USB_FUNCTION_ADB);
+            String func = SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY,
+                    UsbManager.USB_FUNCTION_NONE);
+            if (UsbManager.USB_FUNCTION_NONE.equals(func)) {
+                func = UsbManager.USB_FUNCTION_MTP;
+            }
+            return func;
         }
 
         public void dump(IndentingPrintWriter pw) {
@@ -817,6 +822,7 @@ public class UsbDeviceManager {
             pw.println("  mCurrentFunctionsApplied: " + mCurrentFunctionsApplied);
             pw.println("  mConnected: " + mConnected);
             pw.println("  mConfigured: " + mConfigured);
+            pw.println("  mUsbDataUnlocked: " + mUsbDataUnlocked);
             pw.println("  mCurrentAccessory: " + mCurrentAccessory);
             try {
                 pw.println("  Kernel state: "
@@ -862,11 +868,6 @@ public class UsbDeviceManager {
     public void setUsbDataUnlocked(boolean unlocked) {
         if (DEBUG) Slog.d(TAG, "setUsbDataUnlocked(" + unlocked + ")");
         mHandler.sendMessage(MSG_SET_USB_DATA_UNLOCKED, unlocked);
-    }
-
-    public boolean isUsbDataUnlocked() {
-        if (DEBUG) Slog.d(TAG, "isUsbDataUnlocked() -> " + mHandler.mUsbDataUnlocked);
-        return mHandler.mUsbDataUnlocked;
     }
 
     private void readOemUsbOverrideConfig() {
