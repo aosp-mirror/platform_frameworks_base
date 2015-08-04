@@ -21,6 +21,7 @@
     <string name="tree">Tree</string>
     <string name="text">Text</string>
     <string name="asyncStructure">(Async structure goes here)</string>
+    <string name="launchAirplane">Launch airplane mode</string>
     <string name="confirm">Confirm</string>
     <string name="abort">Abort</string>
     <string name="complete">Complete</string>

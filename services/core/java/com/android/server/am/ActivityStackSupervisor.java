@@ -1506,6 +1506,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0
                     && sourceRecord.info.applicationInfo.uid != aInfo.applicationInfo.uid) {
                 try {
+                    intent.addCategory(Intent.CATEGORY_VOICE);
                     if (!AppGlobals.getPackageManager().activitySupportsIntent(
                             intent.getComponent(), intent, resolvedType)) {
                         err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
@@ -1626,7 +1627,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
                 intent, resolvedType, aInfo, mService.mConfiguration, resultRecord, resultWho,
-                requestCode, componentSpecified, this, container, options);
+                requestCode, componentSpecified, voiceSession != null, this, container, options);
         if (outActivity != null) {
             outActivity[0] = r;
         }
@@ -3721,19 +3722,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     @Override
     public void onDisplayAdded(int displayId) {
-        Slog.v(TAG, "Display added displayId=" + displayId);
+        if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_ADDED, displayId, 0));
     }
 
     @Override
     public void onDisplayRemoved(int displayId) {
-        Slog.v(TAG, "Display removed displayId=" + displayId);
+        if (DEBUG_STACK) Slog.v(TAG, "Display removed displayId=" + displayId);
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_REMOVED, displayId, 0));
     }
 
     @Override
     public void onDisplayChanged(int displayId) {
-        Slog.v(TAG, "Display changed displayId=" + displayId);
+        if (DEBUG_STACK) Slog.v(TAG, "Display changed displayId=" + displayId);
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_CHANGED, displayId, 0));
     }
 
