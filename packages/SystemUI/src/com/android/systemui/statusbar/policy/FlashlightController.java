@@ -93,6 +93,10 @@ public class FlashlightController {
         }
     }
 
+    public synchronized boolean isEnabled() {
+        return mFlashlightEnabled;
+    }
+
     public synchronized boolean isAvailable() {
         return mTorchAvailable;
     }
