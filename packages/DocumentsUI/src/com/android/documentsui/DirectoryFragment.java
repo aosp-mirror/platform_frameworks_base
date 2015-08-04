@@ -89,6 +89,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.documentsui.BaseActivity.DocumentContext;
 import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.MultiSelectManager.Selection;
 import com.android.documentsui.ProviderExecutor.Preemptable;
@@ -457,7 +458,7 @@ public class DirectoryFragment extends Fragment {
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
         if (isDocumentEnabled(docMimeType, docFlags)) {
             final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-            ((BaseActivity) getActivity()).onDocumentPicked(doc);
+            ((BaseActivity) getActivity()).onDocumentPicked(doc, mAdapter);
             mSelectionManager.clearSelection();
             return true;
         }
@@ -949,7 +950,8 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder> {
+    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder>
+            implements DocumentContext {
 
         private final Context mContext;
         private final LayoutInflater mInflater;
@@ -1211,6 +1213,14 @@ public class DirectoryFragment extends Fragment {
             if (DEBUG_ENABLE_DND) {
                 setupDragAndDropOnDocumentView(itemView, cursor);
             }
+        }
+
+        @Override
+        public Cursor getCursor() {
+            if (Looper.myLooper() != Looper.getMainLooper()) {
+                throw new IllegalStateException("Can't call getCursor from non-main thread.");
+            }
+            return mCursor;
         }
 
         private Cursor getItem(int position) {

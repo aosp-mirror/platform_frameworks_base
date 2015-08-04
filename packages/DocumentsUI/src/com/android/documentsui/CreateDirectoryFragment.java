@@ -146,7 +146,7 @@ public class CreateDirectoryFragment extends DialogFragment {
         protected void onPostExecute(DocumentInfo result) {
             if (result != null) {
                 // Navigate into newly created child
-                mActivity.onDocumentPicked(result);
+                mActivity.onDirectoryCreated(result);
             } else {
                 Toast.makeText(mActivity, R.string.create_error, Toast.LENGTH_SHORT).show();
             }

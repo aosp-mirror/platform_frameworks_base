@@ -25,7 +25,6 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -61,6 +60,7 @@ import java.util.List;
 public class StandaloneActivity extends BaseActivity {
 
     public static final String TAG = "StandaloneFileManagement";
+    static final boolean DEBUG = false;
 
     private Toolbar mToolbar;
     private Spinner mToolbarStack;
@@ -284,29 +284,39 @@ public class StandaloneActivity extends BaseActivity {
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc) {
-        if (doc.isDirectory()) {
-            openFolder(doc);
-        } else {
-            openDocument(doc);
-        }
+    public void onDocumentsPicked(List<DocumentInfo> docs) {
+        throw new UnsupportedOperationException();
     }
 
-    private void openFolder(DocumentInfo doc) {
-        mState.stack.push(doc);
-        mState.stackTouched = true;
-        onCurrentDirectoryChanged(ANIM_DOWN);
+    @Override
+    public void onDocumentPicked(DocumentInfo doc, @Nullable DocumentContext siblings) {
+        if (doc.isDirectory()) {
+            openDirectory(doc);
+        } else {
+            openDocument(doc, siblings);
+        }
     }
 
     /**
      * Launches an intent to view the specified document.
      */
-    private void openDocument(DocumentInfo doc) {
-        Intent intent = getQuickViewIntent(doc);
+    private void openDocument(DocumentInfo doc, @Nullable DocumentContext siblings) {
+        Intent intent = null;
+        if (siblings != null) {
+            QuickViewIntentBuilder builder =
+                    new QuickViewIntentBuilder(getPackageManager(), doc, siblings);
+            intent = builder.build();
+        }
+
+        // fallback to traditional VIEW action...
         if (intent == null) {
             intent = new Intent(Intent.ACTION_VIEW);
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setData(doc.derivedUri);
+        }
+
+        if (DEBUG && intent.getClipData() != null) {
+            Log.d(TAG, "Starting intent w/ clip data: " + intent.getClipData());
         }
 
         try {
@@ -314,24 +324,6 @@ public class StandaloneActivity extends BaseActivity {
         } catch (ActivityNotFoundException ex2) {
             Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private @Nullable Intent getQuickViewIntent(DocumentInfo doc) {
-        Intent intent = new Intent(Intent.ACTION_QUICK_VIEW);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.setData(doc.derivedUri);
-
-        ComponentName handler = intent.resolveActivity(getPackageManager());
-        if (handler != null) {
-            return intent;
-        }
-
-        return null;
-    }
-
-    @Override
-    public void onDocumentsPicked(List<DocumentInfo> docs) {
-        // TODO
     }
 
     @Override
