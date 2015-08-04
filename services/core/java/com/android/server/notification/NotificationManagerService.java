@@ -1842,7 +1842,7 @@ public class NotificationManagerService extends SystemService {
         }
         pw.println(':');
         int N;
-        final boolean zenOnly = filter != null && filter.zen;
+        final boolean zenOnly = filter.filtered && filter.zen;
 
         if (!zenOnly) {
             synchronized (mToastQueue) {
@@ -1864,13 +1864,13 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  Notification List:");
                     for (int i=0; i<N; i++) {
                         final NotificationRecord nr = mNotificationList.get(i);
-                        if (filter != null && !filter.matches(nr.sbn)) continue;
+                        if (filter.filtered && !filter.matches(nr.sbn)) continue;
                         nr.dump(pw, "    ", getContext(), filter.redact);
                     }
                     pw.println("  ");
                 }
 
-                if (filter == null) {
+                if (!filter.filtered) {
                     N = mLights.size();
                     if (N > 0) {
                         pw.println("  Lights List:");
@@ -1911,7 +1911,7 @@ public class NotificationManagerService extends SystemService {
                 mUsageStats.dump(pw, "    ", filter);
             }
 
-            if (filter == null || zenOnly) {
+            if (!filter.filtered || zenOnly) {
                 pw.println("\n  Zen Mode:");
                 pw.print("    mInterruptionFilter="); pw.println(mInterruptionFilter);
                 mZenModeHelper.dump(pw, "    ");
