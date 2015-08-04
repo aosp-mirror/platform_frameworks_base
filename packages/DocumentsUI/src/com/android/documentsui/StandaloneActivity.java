@@ -20,10 +20,12 @@ import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -57,6 +59,7 @@ import java.util.List;
  * Standalone file management activity.
  */
 public class StandaloneActivity extends BaseActivity {
+
     public static final String TAG = "StandaloneFileManagement";
 
     private Toolbar mToolbar;
@@ -283,21 +286,47 @@ public class StandaloneActivity extends BaseActivity {
     @Override
     public void onDocumentPicked(DocumentInfo doc) {
         if (doc.isDirectory()) {
-            mState.stack.push(doc);
-            mState.stackTouched = true;
-            onCurrentDirectoryChanged(ANIM_DOWN);
+            openFolder(doc);
         } else {
-            // Fall back to viewing
-            final Intent view = new Intent(Intent.ACTION_VIEW);
-            view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            view.setData(doc.derivedUri);
-
-            try {
-                startActivity(view);
-            } catch (ActivityNotFoundException ex2) {
-                Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
-            }
+            openDocument(doc);
         }
+    }
+
+    private void openFolder(DocumentInfo doc) {
+        mState.stack.push(doc);
+        mState.stackTouched = true;
+        onCurrentDirectoryChanged(ANIM_DOWN);
+    }
+
+    /**
+     * Launches an intent to view the specified document.
+     */
+    private void openDocument(DocumentInfo doc) {
+        Intent intent = getQuickViewIntent(doc);
+        if (intent == null) {
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setData(doc.derivedUri);
+        }
+
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException ex2) {
+            Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private @Nullable Intent getQuickViewIntent(DocumentInfo doc) {
+        Intent intent = new Intent(Intent.ACTION_QUICK_VIEW);
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setData(doc.derivedUri);
+
+        ComponentName handler = intent.resolveActivity(getPackageManager());
+        if (handler != null) {
+            return intent;
+        }
+
+        return null;
     }
 
     @Override

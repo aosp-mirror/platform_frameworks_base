@@ -658,6 +658,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_DEFAULT = ACTION_VIEW;
 
     /**
+     * Activity Action: Quick view the data.
+     * <p>Input: {@link #getData} is URI from which to retrieve data.
+     * <p>Output: nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
+
+    /**
      * Used to indicate that some piece of data should be attached to some other
      * place.  For example, image data could be attached to a contact.  It is up
      * to the recipient to decide where the data should be attached; the intent
