@@ -604,6 +604,10 @@ public class AudioSystem
     public static final int SYNC_EVENT_NONE = 0;
     public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1;
 
+    /**
+     * @return command completion status, one of {@link #AUDIO_STATUS_OK},
+     *     {@link #AUDIO_STATUS_ERROR} or {@link #AUDIO_STATUS_SERVER_DIED}
+     */
     public static native int setDeviceConnectionState(int device, int state,
                                                       String device_address, String device_name);
     public static native int getDeviceConnectionState(int device, String device_address);
