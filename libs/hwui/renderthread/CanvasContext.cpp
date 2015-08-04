@@ -229,10 +229,11 @@ void CanvasContext::draw() {
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
-    if (dirty.isEmpty() && Properties::skipEmptyFrames) {
-        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
-        return;
-    }
+    // TODO: Re-enable after figuring out cause of b/22592975
+//    if (dirty.isEmpty() && Properties::skipEmptyFrames) {
+//        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+//        return;
+//    }
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
