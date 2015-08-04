@@ -6541,6 +6541,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public boolean isRootVoiceInteraction(IBinder token) {
+        synchronized(this) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return false;
+            }
+            return r.rootVoiceInteraction;
+        }
+    }
+
+    @Override
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes,
