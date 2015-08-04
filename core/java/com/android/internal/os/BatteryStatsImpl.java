@@ -7915,6 +7915,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
+        // Record whether we've seen a non-zero time (for debugging b/22716723).
+        boolean seenNonZeroTime = false;
         for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
             String name = ent.getKey();
             KernelWakelockStats.Entry kws = ent.getValue();
@@ -7928,16 +7930,30 @@ public final class BatteryStatsImpl extends BatteryStats {
             kwlt.updateCurrentReportedCount(kws.mCount);
             kwlt.updateCurrentReportedTotalTime(kws.mTotalTime);
             kwlt.setUpdateVersion(kws.mVersion);
+
+            if (kws.mVersion != wakelockStats.kernelWakelockVersion)
+            seenNonZeroTime |= kws.mTotalTime > 0;
         }
 
+        int numWakelocksSetStale = 0;
         if (wakelockStats.size() != mKernelWakelockStats.size()) {
             // Set timers to stale if they didn't appear in /proc/wakelocks this time.
             for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
                 SamplingTimer st = ent.getValue();
                 if (st.getUpdateVersion() != wakelockStats.kernelWakelockVersion) {
                     st.setStale();
+                    numWakelocksSetStale++;
                 }
             }
+        }
+
+        if (!seenNonZeroTime) {
+            Slog.wtf(TAG, "All kernel wakelocks had time of zero");
+        }
+
+        if (numWakelocksSetStale == mKernelWakelockStats.size()) {
+            Slog.wtf(TAG, "All kernel wakelocks were set stale. new version=" +
+                    wakelockStats.kernelWakelockVersion);
         }
     }
 
