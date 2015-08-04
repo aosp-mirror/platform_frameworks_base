@@ -42,6 +42,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemProperties;
@@ -204,9 +207,6 @@ public class SettingsProvider extends ContentProvider {
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
 
-    // We have to call in the app ops manager with no lock held,
-    private volatile AppOpsManager mAppOpsManager;
-
     // We have to call in the package manager with no lock held,
     private volatile PackageManager mPackageManager;
 
@@ -214,7 +214,6 @@ public class SettingsProvider extends ContentProvider {
     public boolean onCreate() {
         synchronized (mLock) {
             mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
-            mAppOpsManager = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
             mPackageManager = getContext().getPackageManager();
             mSettingsRegistry = new SettingsRegistry();
         }
@@ -532,7 +531,7 @@ public class SettingsProvider extends ContentProvider {
         } while (cursor.moveToNext());
     }
 
-    private static final String toDumpString(String s) {
+    private static String toDumpString(String s) {
         if (s != null) {
             return s;
         }
@@ -1158,18 +1157,6 @@ public class SettingsProvider extends ContentProvider {
                 getCallingPackage());
     }
 
-    private void sendNotify(Uri uri, int userId) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            getContext().getContentResolver().notifyChange(uri, null, true, userId);
-            if (DEBUG) {
-                Slog.v(LOG_TAG, "Notifying for " + userId + ": " + uri);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
     private static void warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(
             int targetSdkVersion, String name) {
         // If the app targets Lollipop MR1 or older SDK we warn, otherwise crash.
@@ -1390,8 +1377,11 @@ public class SettingsProvider extends ContentProvider {
 
         private final BackupManager mBackupManager;
 
+        private final Handler mHandler;
+
         public SettingsRegistry() {
             mBackupManager = new BackupManager(getContext());
+            mHandler = new MyHandler(getContext().getMainLooper());
             migrateAllLegacySettingsIfNeeded();
         }
 
@@ -1733,7 +1723,7 @@ public class SettingsProvider extends ContentProvider {
 
             // Inform the backup manager about a data change
             if (backedUpDataChanged) {
-                mBackupManager.dataChanged();
+                mHandler.obtainMessage(MyHandler.MSG_NOTIFY_DATA_CHANGED).sendToTarget();
             }
 
             // Now send the notification through the content framework.
@@ -1741,7 +1731,9 @@ public class SettingsProvider extends ContentProvider {
             final int userId = getUserIdFromKey(key);
             Uri uri = getNotificationUriFor(key, name);
 
-            sendNotify(uri, userId);
+            mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
+                    userId, 0, uri).sendToTarget();
+
             if (isSecureSettingsKey(key)) {
                 maybeNotifyProfiles(userId, uri, name, sSecureCloneToManagedSettings);
             } else if (isSystemSettingsKey(key)) {
@@ -1758,7 +1750,8 @@ public class SettingsProvider extends ContentProvider {
                     UserInfo profile = profiles.get(i);
                     // the notification for userId has already been sent.
                     if (profile.id != userId) {
-                        sendNotify(uri, profile.id);
+                        mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
+                                profile.id, 0, uri).sendToTarget();
                     }
                 }
             }
@@ -1830,6 +1823,33 @@ public class SettingsProvider extends ContentProvider {
 
                 default: {
                     return SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED;
+                }
+            }
+        }
+
+        private final class MyHandler extends Handler {
+            private static final int MSG_NOTIFY_URI_CHANGED = 1;
+            private static final int MSG_NOTIFY_DATA_CHANGED = 2;
+
+            public MyHandler(Looper looper) {
+                super(looper);
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_NOTIFY_URI_CHANGED: {
+                        final int userId = msg.arg1;
+                        Uri uri = (Uri) msg.obj;
+                        getContext().getContentResolver().notifyChange(uri, null, true, userId);
+                        if (DEBUG) {
+                            Slog.v(LOG_TAG, "Notifying for " + userId + ": " + uri);
+                        }
+                    } break;
+
+                    case MSG_NOTIFY_DATA_CHANGED: {
+                        mBackupManager.dataChanged();
+                    } break;
                 }
             }
         }
@@ -1963,9 +1983,11 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 120;
                 }
 
-                // Before 121, we used a different string encoding logic.  We just bump the version
-                // here; SettingsState knows how to handle pre-version 120 files.
-                currentVersion = 121;
+                if (currentVersion == 120) {
+                    // Before 121, we used a different string encoding logic.  We just bump the
+                    // version here; SettingsState knows how to handle pre-version 120 files.
+                    currentVersion = 121;
+                }
 
                 if (currentVersion == 121) {
                     // Version 122: allow OEMs to set a default payment component in resources.
