@@ -1506,6 +1506,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                 //Unbind
                                 mContext.unbindService(mConnection);
                             }
+                            mBluetoothGatt = null;
                         }
                         SystemClock.sleep(100);
 
@@ -1811,6 +1812,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 //Unbind
                 mContext.unbindService(mConnection);
             }
+            mBluetoothGatt = null;
         }
 
         mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
