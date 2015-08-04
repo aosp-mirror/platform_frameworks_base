@@ -97,9 +97,6 @@ interface IUsbManager
      */
     void setUsbDataUnlocked(boolean unlock);
 
-    /* Returns true iff sensitive user data is exposed on the USB connection. */
-    boolean isUsbDataUnlocked();
-
     /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
      * the public key to list of host keys that the user has approved.
      */
