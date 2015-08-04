@@ -333,7 +333,7 @@ public class AccountManager {
         try {
             return mService.getPassword(account);
         } catch (RemoteException e) {
-            // won't ever happen
+            // will never happen
             throw new RuntimeException(e);
         }
     }
@@ -362,7 +362,7 @@ public class AccountManager {
         try {
             return mService.getUserData(account, key);
         } catch (RemoteException e) {
-            // won't ever happen
+            // will never happen
             throw new RuntimeException(e);
         }
     }
@@ -415,10 +415,8 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>Clients of this method that have not been granted the
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission,
-     * will only see those accounts managed by AbstractAccountAuthenticators whose
-     * signature matches the client.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
      *
      * @return An array of {@link Account}, one for each account.  Empty
      *     (never null) if no accounts have been added.
@@ -440,10 +438,8 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>Clients of this method that have not been granted the
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission,
-     * will only see those accounts managed by AbstractAccountAuthenticators whose
-     * signature matches the client.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
      *
      * @return An array of {@link Account}, one for each account.  Empty
      *     (never null) if no accounts have been added.
@@ -470,7 +466,7 @@ public class AccountManager {
         try {
             return mService.getAccountsForPackage(packageName, uid);
         } catch (RemoteException re) {
-            // won't ever happen
+            // possible security exception
             throw new RuntimeException(re);
         }
     }
@@ -487,7 +483,7 @@ public class AccountManager {
         try {
             return mService.getAccountsByTypeForPackage(type, packageName);
         } catch (RemoteException re) {
-            // won't ever happen
+            // possible security exception
             throw new RuntimeException(re);
         }
     }
@@ -501,10 +497,9 @@ public class AccountManager {
      *
      * <p>It is safe to call this method from the main thread.
      *
-     * <p>Clients of this method that have not been granted the
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission,
-     * will only see those accounts managed by AbstractAccountAuthenticators whose
-     * signature matches the client.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS} or share a uid with the
+     * authenticator that owns the account type.
      *
      * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
      * GET_ACCOUNTS permission is needed for those platforms, irrespective of uid
@@ -590,8 +585,7 @@ public class AccountManager {
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
      * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#GET_ACCOUNTS} or be a signature
-     * match with the AbstractAccountAuthenticator that manages the account.
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
      *
      * @param account The {@link Account} to test
      * @param features An array of the account features to check
@@ -634,10 +628,9 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
-     * <p>Clients of this method that have not been granted the
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission,
-     * will only see those accounts managed by AbstractAccountAuthenticators whose
-     * signature matches the client.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS} or share a uid with the
+     * authenticator that owns the account type.
      *
      * @param type The type of accounts to return, must not be null
      * @param features An array of the account features to require,
@@ -708,7 +701,7 @@ public class AccountManager {
         try {
             return mService.addAccountExplicitly(account, password, userdata);
         } catch (RemoteException e) {
-            // Can happen if there was a SecurityException was thrown.
+            // won't ever happen
             throw new RuntimeException(e);
         }
     }
@@ -973,7 +966,7 @@ public class AccountManager {
         try {
             return mService.removeAccountExplicitly(account);
         } catch (RemoteException e) {
-            // May happen if the caller doesn't match the signature of the authenticator.
+            // won't ever happen
             throw new RuntimeException(e);
         }
     }
@@ -1121,7 +1114,7 @@ public class AccountManager {
         try {
             mService.setUserData(account, key, value);
         } catch (RemoteException e) {
-            // Will happen if there is not signature match.
+            // won't ever happen
             throw new RuntimeException(e);
         }
     }
@@ -1740,7 +1733,7 @@ public class AccountManager {
      *     with these fields if an activity was supplied and the account
      *     credentials were successfully updated:
      * <ul>
-     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account created
      * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
      * </ul>
      *
@@ -2508,12 +2501,10 @@ public class AccountManager {
      * listeners are added in an Activity or Service's {@link Activity#onCreate}
      * and removed in {@link Activity#onDestroy}.
      *
-     * <p>The listener will only be informed of accounts that would be returned
-     * to the caller via {@link #getAccounts()}. Typically this means that to
-     * get any accounts, the caller will need to be grated the GET_ACCOUNTS
-     * permission.
-     *
      * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
      *
      * @param listener The listener to send notifications to
      * @param handler {@link Handler} identifying the thread to use
