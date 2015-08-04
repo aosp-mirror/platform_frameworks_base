@@ -3341,6 +3341,7 @@ package android.app {
     method public boolean isImmersive();
     method public boolean isTaskRoot();
     method public boolean isVoiceInteraction();
+    method public boolean isVoiceInteractionRoot();
     method public final deprecated android.database.Cursor managedQuery(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
     method public boolean moveTaskToBack(boolean);
     method public boolean navigateUpTo(android.content.Intent);

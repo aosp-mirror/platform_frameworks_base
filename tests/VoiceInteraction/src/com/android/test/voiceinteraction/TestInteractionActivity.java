@@ -21,6 +21,7 @@ import android.app.VoiceInteractor;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 import android.view.View;
@@ -39,6 +40,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
     VoiceInteractor mInteractor;
     VoiceInteractor.Request mCurrentRequest = null;
     TextView mLog;
+    Button mAirplaneButton;
     Button mAbortButton;
     Button mCompleteButton;
     Button mCommandButton;
@@ -65,6 +67,8 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
 
         setContentView(R.layout.test_interaction);
         mLog = (TextView)findViewById(R.id.log);
+        mAirplaneButton = (Button)findViewById(R.id.airplane);
+        mAirplaneButton.setOnClickListener(this);
         mAbortButton = (Button)findViewById(R.id.abort);
         mAbortButton.setOnClickListener(this);
         mCompleteButton = (Button)findViewById(R.id.complete);
@@ -122,7 +126,12 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        if (v == mAbortButton) {
+        if (v == mAirplaneButton) {
+            Intent intent = new Intent(Settings.ACTION_VOICE_CONTROL_AIRPLANE_MODE);
+            intent.addCategory(Intent.CATEGORY_VOICE);
+            intent.putExtra(Settings.EXTRA_AIRPLANE_MODE_ENABLED, true);
+            startActivity(intent);
+        } else if (v == mAbortButton) {
             VoiceInteractor.AbortVoiceRequest req = new TestAbortVoice();
             mInteractor.submitRequest(req, REQUEST_ABORT);
         } else if (v == mCompleteButton) {
