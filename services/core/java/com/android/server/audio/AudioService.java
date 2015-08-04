@@ -4730,13 +4730,19 @@ public class AudioService extends IAudioService.Stub {
                 Slog.i(TAG, "deviceSpec:" + deviceSpec + " is(already)Connected:" + isConnected);
             }
             if (connect && !isConnected) {
-                AudioSystem.setDeviceConnectionState(device, AudioSystem.DEVICE_STATE_AVAILABLE,
-                        address, deviceName);
+                final int res = AudioSystem.setDeviceConnectionState(device,
+                        AudioSystem.DEVICE_STATE_AVAILABLE, address, deviceName);
+                if (res != AudioSystem.AUDIO_STATUS_OK) {
+                    Slog.e(TAG, "not connecting device 0x" + Integer.toHexString(device) +
+                            " due to command error " + res );
+                    return false;
+                }
                 mConnectedDevices.put(deviceKey, new DeviceListSpec(device, deviceName, address));
                 return true;
             } else if (!connect && isConnected) {
-                AudioSystem.setDeviceConnectionState(device, AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                        address, deviceName);
+                AudioSystem.setDeviceConnectionState(device,
+                        AudioSystem.DEVICE_STATE_UNAVAILABLE, address, deviceName);
+                // always remove even if disconnection failed
                 mConnectedDevices.remove(deviceKey);
                 return true;
             }
@@ -4869,7 +4875,10 @@ public class AudioService extends IAudioService.Stub {
             boolean isUsb = ((device & ~AudioSystem.DEVICE_OUT_ALL_USB) == 0) ||
                             (((device & AudioSystem.DEVICE_BIT_IN) != 0) &&
                              ((device & ~AudioSystem.DEVICE_IN_ALL_USB) == 0));
-            handleDeviceConnection(state == 1, device, address, deviceName);
+            if (!handleDeviceConnection(state == 1, device, address, deviceName)) {
+                // change of connection state failed, bailout
+                return;
+            }
             if (state != 0) {
                 if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
                     (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
