@@ -478,7 +478,15 @@ final class ActivityStack {
                 mActivityContainer.mActivityDisplay.mDisplayId == Display.DEFAULT_DISPLAY;
     }
 
-    final void moveToFront(String reason) {
+    void moveToFront(String reason) {
+        moveToFront(reason, null);
+    }
+
+    /**
+     * @param reason The reason for moving the stack to the front.
+     * @param task If non-null, the task will be moved to the top of the stack.
+     * */
+    void moveToFront(String reason, TaskRecord task) {
         if (isAttached()) {
             final boolean homeStack = isHomeStack()
                     || (mActivityContainer.mParentActivity != null
@@ -496,7 +504,11 @@ final class ActivityStack {
             if (isOnHomeDisplay()) {
                 mStackSupervisor.moveHomeStack(homeStack, reason, lastFocusStack);
             }
-            final TaskRecord task = topTask();
+            if (task != null) {
+                insertTaskAtTop(task, null);
+            } else {
+                task = topTask();
+            }
             if (task != null) {
                 mWindowManager.moveTaskToTop(task.taskId);
             }

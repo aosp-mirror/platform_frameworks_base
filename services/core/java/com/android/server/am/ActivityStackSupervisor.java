@@ -1822,7 +1822,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "Can't set focus stack for r=" + r + " task=" + task);
             return false;
         }
-        task.stack.moveToFront(reason);
+        task.stack.moveToFront(reason, task);
         return true;
     }
 
