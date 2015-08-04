@@ -106,7 +106,7 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     private void onUserRemoved(int userId) {
-        if (userId != UserHandle.USER_OWNER) {
+        if (userId != UserHandle.USER_NULL) {
             synchronized (mSearchables) {
                 mSearchables.remove(userId);
             }
@@ -133,7 +133,7 @@ public class SearchManagerService extends ISearchManager.Stub {
     private final class UserReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onUserRemoved(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_OWNER));
+            onUserRemoved(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL));
         }
     }
 

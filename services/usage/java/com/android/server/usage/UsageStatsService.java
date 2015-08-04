@@ -451,7 +451,7 @@ public class UsageStatsService extends SystemService implements
     }
 
     private File getScreenOnTimeFile() {
-        return new File(mUsageStatsDir, UserHandle.USER_OWNER + "/screen_on_time");
+        return new File(mUsageStatsDir, UserHandle.USER_SYSTEM + "/screen_on_time");
     }
 
     private long readScreenOnTimeLocked() {
