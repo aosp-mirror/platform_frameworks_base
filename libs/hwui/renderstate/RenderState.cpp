@@ -124,9 +124,15 @@ void RenderState::bindFramebuffer(GLuint fbo) {
 }
 
 void RenderState::invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info) {
-    interruptForFunctorInvoke();
-    (*functor)(mode, info);
-    resumeFromFunctorInvoke();
+    if (mode == DrawGlInfo::kModeProcessNoContext) {
+        // If there's no context we don't need to interrupt as there's
+        // no gl state to save/restore
+        (*functor)(mode, info);
+    } else {
+        interruptForFunctorInvoke();
+        (*functor)(mode, info);
+        resumeFromFunctorInvoke();
+    }
 }
 
 void RenderState::interruptForFunctorInvoke() {
