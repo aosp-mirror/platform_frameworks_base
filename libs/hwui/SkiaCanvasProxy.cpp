@@ -18,7 +18,11 @@
 
 #include <cutils/log.h>
 #include <SkPatchUtils.h>
+#include <SkPaint.h>
+#include <SkPath.h>
 #include <SkPixelRef.h>
+#include <SkRect.h>
+#include <SkRRect.h>
 
 namespace android {
 namespace uirenderer {
