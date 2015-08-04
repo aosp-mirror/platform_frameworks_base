@@ -10198,6 +10198,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (mNextInstallToken < 0) mNextInstallToken = 1;
                 token = mNextInstallToken++;
 
+                PostInstallData data = new PostInstallData(args, res);
+                mRunningInstalls.put(token, data);
                 if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
 
                 if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && doRestore) {
@@ -10238,8 +10240,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "postInstall", token);
 
-                    PostInstallData data = new PostInstallData(args, res);
-                    mRunningInstalls.put(token, data);
                     Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
                     mHandler.sendMessage(msg);
                 }
