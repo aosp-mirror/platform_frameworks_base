@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import dalvik.system.VMRuntime;
 
@@ -33,6 +34,8 @@ import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 public final class Bitmap implements Parcelable {
+    private static final String TAG = "Bitmap";
+
     /**
      * Indicates that the bitmap was created for an unknown pixel density.
      *
@@ -159,6 +162,9 @@ public final class Bitmap implements Parcelable {
      * @see #DENSITY_NONE
      */
     public int getDensity() {
+        if (mRecycled) {
+            Log.w(TAG, "Called getDensity() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return mDensity;
     }
 
@@ -348,7 +354,9 @@ public final class Bitmap implements Parcelable {
      * @return The current generation ID for this bitmap.
      */
     public int getGenerationId() {
-        if (mRecycled) return 0;
+        if (mRecycled) {
+            Log.w(TAG, "Called getGenerationId() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return nativeGenerationId(mFinalizer.mNativeBitmap);
     }
 
@@ -1075,7 +1083,9 @@ public final class Bitmap implements Parcelable {
      * @see BitmapFactory.Options#inPremultiplied
      */
     public final boolean isPremultiplied() {
-        if (mRecycled) return false;
+        if (mRecycled) {
+            Log.w(TAG, "Called isPremultiplied() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return nativeIsPremultiplied(mFinalizer.mNativeBitmap);
     }
 
@@ -1107,11 +1117,17 @@ public final class Bitmap implements Parcelable {
 
     /** Returns the bitmap's width */
     public final int getWidth() {
+        if (mRecycled) {
+            Log.w(TAG, "Called getWidth() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return mWidth;
     }
 
     /** Returns the bitmap's height */
     public final int getHeight() {
+        if (mRecycled) {
+            Log.w(TAG, "Called getHeight() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return mHeight;
     }
 
@@ -1194,7 +1210,9 @@ public final class Bitmap implements Parcelable {
      * @return number of bytes between rows of the native bitmap pixels.
      */
     public final int getRowBytes() {
-        if (mRecycled) return 0;
+        if (mRecycled) {
+            Log.w(TAG, "Called getRowBytes() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return nativeRowBytes(mFinalizer.mNativeBitmap);
     }
 
@@ -1238,7 +1256,9 @@ public final class Bitmap implements Parcelable {
      * that config, otherwise return null.
      */
     public final Config getConfig() {
-        if (mRecycled) return Config.ARGB_8888;
+        if (mRecycled) {
+            Log.w(TAG, "Called getConfig() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return Config.nativeToConfig(nativeConfig(mFinalizer.mNativeBitmap));
     }
 
@@ -1251,7 +1271,9 @@ public final class Bitmap implements Parcelable {
      * it will return true by default.
      */
     public final boolean hasAlpha() {
-        if (mRecycled) return false;
+        if (mRecycled) {
+            Log.w(TAG, "Called hasAlpha() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return nativeHasAlpha(mFinalizer.mNativeBitmap);
     }
 
@@ -1288,7 +1310,9 @@ public final class Bitmap implements Parcelable {
      * @see #setHasMipMap(boolean)
      */
     public final boolean hasMipMap() {
-        if (mRecycled) return false;
+        if (mRecycled) {
+            Log.w(TAG, "Called hasMipMap() on a recycle()'d bitmap! This is undefined behavior!");
+        }
         return nativeHasMipMap(mFinalizer.mNativeBitmap);
     }
 
