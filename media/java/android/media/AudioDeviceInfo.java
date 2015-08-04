@@ -19,6 +19,8 @@ package android.media;
 import android.annotation.NonNull;
 import android.util.SparseIntArray;
 
+import java.util.TreeSet;
+
 /**
  * Class to provide information about the audio devices.
  */
@@ -185,13 +187,24 @@ public final class AudioDeviceInfo {
      * can be configured.
      */
     public @NonNull int[] getChannelCounts() {
-        int[] masks = getChannelMasks();
-        int[] counts = new int[masks.length];
-        // TODO: consider channel index masks
-        for (int mask_index = 0; mask_index < masks.length; mask_index++) {
-            counts[mask_index] = isSink()
-                    ? AudioFormat.channelCountFromOutChannelMask(masks[mask_index])
-                    : AudioFormat.channelCountFromInChannelMask(masks[mask_index]);
+        TreeSet<Integer> countSet = new TreeSet<Integer>();
+
+        // Channel Masks
+        for (int mask : getChannelMasks()) {
+            countSet.add(isSink() ?
+                    AudioFormat.channelCountFromOutChannelMask(mask)
+                    : AudioFormat.channelCountFromInChannelMask(mask));
+        }
+
+        // Index Masks
+        for (int index_mask : getChannelIndexMasks()) {
+            countSet.add(Integer.bitCount(index_mask));
+        }
+
+        int[] counts = new int[countSet.size()];
+        int index = 0;
+        for (int count : countSet) {
+            counts[index++] = count; 
         }
         return counts;
     }
