@@ -61,6 +61,7 @@ Extensions::Extensions(): Singleton<Extensions>() {
     mHasTiledRendering = hasGlExtension("GL_QCOM_tiled_rendering");
     mHas1BitStencil = hasGlExtension("GL_OES_stencil1");
     mHas4BitStencil = hasGlExtension("GL_OES_stencil4");
+    mHasUnpackSubImage = hasGlExtension("GL_EXT_unpack_subimage");
 
     // Query EGL extensions
     findExtensions(eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS), mEglExtensionList);
