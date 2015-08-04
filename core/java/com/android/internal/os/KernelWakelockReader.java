@@ -75,6 +75,8 @@ public class KernelWakelockReader {
                     is = new FileInputStream(sWakeupSourceFile);
                     wakeup_sources = true;
                 } catch (java.io.FileNotFoundException e2) {
+                    Slog.wtf(TAG, "neither " + sWakelockFile + " nor " +
+                            sWakeupSourceFile + " exists");
                     return null;
                 }
             }
@@ -82,6 +84,7 @@ public class KernelWakelockReader {
             len = is.read(buffer);
             is.close();
         } catch (java.io.IOException e) {
+            Slog.wtf(TAG, "failed to read kernel wakelocks", e);
             return null;
         }
 
@@ -170,6 +173,13 @@ public class KernelWakelockReader {
                             kwlStats.mVersion = sKernelWakelockUpdateVersion;
                             numUpdatedWlNames++;
                         }
+                    }
+                } else if (!parsed) {
+                    try {
+                        Slog.wtf(TAG, "Failed to parse proc line: " +
+                                new String(wlBuffer, startIndex, endIndex - startIndex));
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, "Failed to parse proc line!");
                     }
                 }
                 startIndex = endIndex;
