@@ -421,7 +421,7 @@ public class CallLog {
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
             return addCall(ci, context, number, presentation, callType, features, accountHandle,
-                    start, duration, dataUsage, false);
+                    start, duration, dataUsage, false, false);
         }
 
 
@@ -450,8 +450,41 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
+                                  int presentation, int callType, int features, PhoneAccountHandle accountHandle,
+                                  long start, int duration, Long dataUsage, boolean addForAllUsers) {
+            return addCall(ci, context, number, presentation, callType, features, accountHandle,
+                    start, duration, dataUsage, addForAllUsers, false);
+        }
+
+        /**
+         * Adds a call to the call log.
+         *
+         * @param ci the CallerInfo object to get the target contact from.  Can be null
+         * if the contact is unknown.
+         * @param context the context used to get the ContentResolver
+         * @param number the phone number to be added to the calls db
+         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         *        is set by the network and denotes the number presenting rules for
+         *        "allowed", "payphone", "restricted" or "unknown"
+         * @param callType enumerated values for "incoming", "outgoing", or "missed"
+         * @param features features of the call (e.g. Video).
+         * @param accountHandle The accountHandle object identifying the provider of the call
+         * @param start time stamp for the call in milliseconds
+         * @param duration call duration in seconds
+         * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+         *                  the call.
+         * @param addForAllUsers If true, the call is added to the call log of all currently
+         *        running users. The caller must have the MANAGE_USERS permission if this is true.
+         * @param is_read Flag to show if the missed call log has been read by the user or not.
+         *                Used for call log restore of missed calls.
+         *
+         * @result The URI of the call log entry belonging to the user that made or received this
+         *        call.
+         * {@hide}
+         */
+        public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
-                long start, int duration, Long dataUsage, boolean addForAllUsers) {
+                long start, int duration, Long dataUsage, boolean addForAllUsers, boolean is_read) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
 
@@ -516,7 +549,7 @@ public class CallLog {
             values.put(NEW, Integer.valueOf(1));
 
             if (callType == MISSED_TYPE) {
-                values.put(IS_READ, Integer.valueOf(0));
+                values.put(IS_READ, Integer.valueOf(is_read ? 1 : 0));
             }
 
             if ((ci != null) && (ci.contactIdOrZero > 0)) {
