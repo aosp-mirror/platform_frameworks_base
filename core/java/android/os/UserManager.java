@@ -595,14 +595,24 @@ public class UserManager {
     public boolean isSystemUser() {
         return UserHandle.myUserId() == UserHandle.USER_SYSTEM;
     }
+
     /**
      * @hide
      * Returns whether the caller is running as an admin user. There can be more than one admin
      * user.
      */
     public boolean isAdminUser() {
-        UserInfo user = getUserInfo(UserHandle.myUserId());
-        return user != null ? user.isAdmin() : false;
+        return isUserAdmin(UserHandle.myUserId());
+    }
+
+    /**
+     * @hide
+     * Returns whether the provided user is an admin user. There can be more than one admin
+     * user.
+     */
+    public boolean isUserAdmin(int userId) {
+        UserInfo user = getUserInfo(userId);
+        return user != null && user.isAdmin();
     }
 
     /**
@@ -1070,7 +1080,7 @@ public class UserManager {
      */
     public List<UserHandle> getUserProfiles() {
         ArrayList<UserHandle> profiles = new ArrayList<UserHandle>();
-        List<UserInfo> users = new ArrayList<UserInfo>();
+        List<UserInfo> users;
         try {
             users = mService.getProfiles(UserHandle.myUserId(), true /* enabledOnly */);
         } catch (RemoteException re) {

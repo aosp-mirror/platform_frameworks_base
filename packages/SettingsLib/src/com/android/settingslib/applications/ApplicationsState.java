@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -88,7 +89,7 @@ public class ApplicationsState {
     final PackageManager mPm;
     final IPackageManager mIpm;
     final UserManager mUm;
-    final int mOwnerRetrieveFlags;
+    final int mAdminRetrieveFlags;
     final int mRetrieveFlags;
     PackageIntentReceiver mPackageIntentReceiver;
 
@@ -131,7 +132,7 @@ public class ApplicationsState {
         mBackgroundHandler = new BackgroundHandler(mThread.getLooper());
 
         // Only the owner can see all apps.
-        mOwnerRetrieveFlags = PackageManager.GET_UNINSTALLED_PACKAGES |
+        mAdminRetrieveFlags = PackageManager.GET_UNINSTALLED_PACKAGES |
                 PackageManager.GET_DISABLED_COMPONENTS |
                 PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS;
         mRetrieveFlags = PackageManager.GET_DISABLED_COMPONENTS |
@@ -181,17 +182,17 @@ public class ApplicationsState {
             mPackageIntentReceiver.registerReceiver();
         }
         mApplications = new ArrayList<ApplicationInfo>();
-        for (UserHandle user : mUm.getUserProfiles()) {
+        for (UserInfo user : mUm.getProfiles(UserHandle.myUserId())) {
             try {
                 // If this user is new, it needs a map created.
-                if (mEntriesMap.indexOfKey(user.getIdentifier()) < 0) {
-                    mEntriesMap.put(user.getIdentifier(), new HashMap<String, AppEntry>());
+                if (mEntriesMap.indexOfKey(user.id) < 0) {
+                    mEntriesMap.put(user.id, new HashMap<String, AppEntry>());
                 }
                 @SuppressWarnings("unchecked")
                 ParceledListSlice<ApplicationInfo> list =
                         mIpm.getInstalledApplications(
-                                user.isOwner() ? mOwnerRetrieveFlags : mRetrieveFlags,
-                                user.getIdentifier());
+                                user.isAdmin() ? mAdminRetrieveFlags : mRetrieveFlags,
+                                user.id);
                 mApplications.addAll(list.getList());
             } catch (RemoteException e) {
             }
@@ -363,7 +364,7 @@ public class ApplicationsState {
                     return;
                 }
                 ApplicationInfo info = mIpm.getApplicationInfo(pkgName,
-                        userId == UserHandle.USER_OWNER ? mOwnerRetrieveFlags : mRetrieveFlags,
+                        mUm.isUserAdmin(userId) ? mAdminRetrieveFlags : mRetrieveFlags,
                         userId);
                 if (info == null) {
                     return;

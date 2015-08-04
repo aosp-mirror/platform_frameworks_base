@@ -23,7 +23,7 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.SystemProperties;
-import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 
 public class TetherUtil {
@@ -99,8 +99,9 @@ public class TetherUtil {
     public static boolean isTetheringSupported(Context context) {
         final ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        final boolean isSecondaryUser = ActivityManager.getCurrentUser() != UserHandle.USER_OWNER;
-        return !isSecondaryUser && cm.isTetheringSupported();
+        final boolean isAdminUser =
+                UserManager.get(context).isUserAdmin(ActivityManager.getCurrentUser());
+        return isAdminUser && cm.isTetheringSupported();
     }
 
 }
