@@ -25,8 +25,11 @@ import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @SmallTest
 public class MtpDocumentsProviderTest extends AndroidTestCase {
@@ -43,14 +46,16 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testOpenAndCloseDevice() throws Exception {
+        final Uri uri = DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
+
         mMtpManager.addValidDevice(0);
-        assertEquals(0, mResolver.changeCount);
+        assertEquals(0, mResolver.getChangeCount(uri));
 
         mProvider.openDevice(0);
-        assertEquals(1, mResolver.changeCount);
+        assertEquals(1, mResolver.getChangeCount(uri));
 
         mProvider.closeDevice(0);
-        assertEquals(2, mResolver.changeCount);
+        assertEquals(2, mResolver.getChangeCount(uri));
 
         int exceptionCounter = 0;
         try {
@@ -58,27 +63,29 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         } catch (IOException error) {
             exceptionCounter++;
         }
-        assertEquals(2, mResolver.changeCount);
+        assertEquals(2, mResolver.getChangeCount(uri));
         try {
             mProvider.closeDevice(1);
         } catch (IOException error) {
             exceptionCounter++;
         }
-        assertEquals(2, mResolver.changeCount);
+        assertEquals(2, mResolver.getChangeCount(uri));
         assertEquals(2, exceptionCounter);
     }
 
     public void testCloseAllDevices() throws IOException {
+        final Uri uri = DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
+
         mMtpManager.addValidDevice(0);
 
         mProvider.closeAllDevices();
-        assertEquals(0, mResolver.changeCount);
+        assertEquals(0, mResolver.getChangeCount(uri));
 
         mProvider.openDevice(0);
-        assertEquals(1, mResolver.changeCount);
+        assertEquals(1, mResolver.getChangeCount(uri));
 
         mProvider.closeAllDevices();
-        assertEquals(2, mResolver.changeCount);
+        assertEquals(2, mResolver.getChangeCount(uri));
     }
 
     public void testQueryRoots() throws Exception {
@@ -210,12 +217,48 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(3072, cursor.getInt(5));
     }
 
+    public void testDeleteDocument() throws FileNotFoundException {
+        mMtpManager.setDocument(0, 1, new MtpDocument(
+                1 /* object handle */,
+                0x3801 /* JPEG */,
+                "image.jpg" /* display name */,
+                new Date(1422716400000L) /* modified date */,
+                1024 * 1024 * 5 /* file size */,
+                1024 * 50 /* thumbnail size */));
+        mMtpManager.setParent(0, 1, 2);
+        mProvider.deleteDocument("0_0_1");
+        assertEquals(1, mResolver.getChangeCount(
+                DocumentsContract.buildChildDocumentsUri(
+                        MtpDocumentsProvider.AUTHORITY, "0_0_2")));
+    }
+
+    public void testDeleteDocument_error() throws FileNotFoundException {
+        mMtpManager.setParent(0, 1, 2);
+        try {
+            mProvider.deleteDocument("0_0_1");
+            fail();
+        } catch (Throwable e) {
+            assertTrue(e instanceof IOException);
+        }
+        assertEquals(0, mResolver.getChangeCount(
+                DocumentsContract.buildChildDocumentsUri(
+                        MtpDocumentsProvider.AUTHORITY, "0_0_2")));
+    }
+
     private static class ContentResolver extends MockContentResolver {
-        int changeCount = 0;
+        final Map<Uri, Integer> mChangeCounts = new HashMap<Uri, Integer>();
 
         @Override
         public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
-            changeCount++;
+            mChangeCounts.put(uri, getChangeCount(uri) + 1);
+        }
+
+        int getChangeCount(Uri uri) {
+            if (mChangeCounts.containsKey(uri)) {
+                return mChangeCounts.get(uri);
+            } else {
+                return 0;
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ import android.hardware.usb.UsbManager;
 import android.mtp.MtpDevice;
 import android.util.SparseArray;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -107,6 +108,22 @@ class MtpManager {
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
         return device.getObject(objectHandle, expectedSize);
+    }
+
+    synchronized void deleteDocument(int deviceId, int objectHandle) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        if (!device.deleteObject(objectHandle)) {
+            throw new IOException("Failed to delete document");
+        }
+    }
+
+    synchronized int getParent(int deviceId, int objectHandle) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        final int result = (int) device.getParent(objectHandle);
+        if (result < 0) {
+            throw new FileNotFoundException("Not found parent object");
+        }
+        return result;
     }
 
     private MtpDevice getDevice(int deviceId) throws IOException {

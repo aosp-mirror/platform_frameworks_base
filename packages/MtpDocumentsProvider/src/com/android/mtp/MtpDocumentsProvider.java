@@ -201,6 +201,20 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
     }
 
+    @Override
+    public void deleteDocument(String documentId) throws FileNotFoundException {
+        try {
+            final Identifier identifier = Identifier.createFromDocumentId(documentId);
+            final int parentHandle =
+                    mMtpManager.getParent(identifier.mDeviceId, identifier.mObjectHandle);
+            mMtpManager.deleteDocument(identifier.mDeviceId, identifier.mObjectHandle);
+            notifyChildDocumentsChange(new Identifier(
+                    identifier.mDeviceId, identifier.mStorageId, parentHandle).toDocumentId());
+        } catch (IOException error) {
+            throw new FileNotFoundException(error.getMessage());
+        }
+    }
+
     boolean hasOpenedDevices() {
         return mMtpManager.getOpenedDeviceIds().length != 0;
     }
@@ -208,5 +222,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private void notifyRootsChange() {
         mResolver.notifyChange(
                 DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY), null, false);
+    }
+
+    private void notifyChildDocumentsChange(String parentDocumentId) {
+        mResolver.notifyChange(
+                DocumentsContract.buildChildDocumentsUri(AUTHORITY, parentDocumentId),
+                null,
+                false);
     }
 }

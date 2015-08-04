@@ -36,6 +36,7 @@ public class TestMtpManager extends MtpManager {
     private final Map<Integer, MtpRoot[]> mRoots = new HashMap<Integer, MtpRoot[]>();
     private final Map<String, MtpDocument> mDocuments = new HashMap<String, MtpDocument>();
     private final Map<String, byte[]> mObjectBytes = new HashMap<String, byte[]>();
+    private final Map<String, Integer> mParents = new HashMap<String, Integer>();
 
     TestMtpManager(Context context) {
         super(context);
@@ -55,6 +56,10 @@ public class TestMtpManager extends MtpManager {
 
     void setObjectBytes(int deviceId, int objectHandle, int expectedSize, byte[] bytes) {
         mObjectBytes.put(pack(deviceId, objectHandle, expectedSize), bytes);
+    }
+
+    void setParent(int deviceId, int objectHandle, int parentObjectHandle) {
+        mParents.put(pack(deviceId, objectHandle), parentObjectHandle);
     }
 
     @Override
@@ -94,6 +99,26 @@ public class TestMtpManager extends MtpManager {
             return mObjectBytes.get(key);
         } else {
             throw new IOException("getObject error: " + key);
+        }
+    }
+
+    @Override
+    void deleteDocument(int deviceId, int objectHandle) throws IOException {
+        final String key = pack(deviceId, objectHandle);
+        if (mDocuments.containsKey(key)) {
+            mDocuments.remove(key);
+        } else {
+            throw new IOException();
+        }
+    }
+
+    @Override
+    synchronized int getParent(int deviceId, int objectHandle) throws IOException {
+        final String key = pack(deviceId, objectHandle);
+        if (mParents.containsKey(key)) {
+            return mParents.get(key);
+        } else {
+            throw new IOException();
         }
     }
 
