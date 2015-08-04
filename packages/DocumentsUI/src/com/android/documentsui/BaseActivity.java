@@ -16,10 +16,13 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
+import static com.android.internal.util.Preconditions.checkArgument;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -79,8 +82,9 @@ abstract class BaseActivity extends Activity {
     private final String mTag;
 
     public abstract State getDisplayState();
-    public abstract void onDocumentPicked(DocumentInfo doc);
+    public abstract void onDocumentPicked(DocumentInfo doc, @Nullable DocumentContext siblings);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
+
     abstract void onTaskFinished(Uri... uris);
     abstract void onDirectoryChanged(int anim);
     abstract void updateActionBar();
@@ -256,6 +260,17 @@ abstract class BaseActivity extends Activity {
                 && cwd.isCreateSupported()
                 && !mSearchManager.isSearching()
                 && !root.isDownloads();
+    }
+
+    void onDirectoryCreated(DocumentInfo doc) {
+        checkArgument(doc.isDirectory());
+        openDirectory(doc);
+    }
+
+    void openDirectory(DocumentInfo doc) {
+        getDisplayState().stack.push(doc);
+        getDisplayState().stackTouched = true;
+        onCurrentDirectoryChanged(ANIM_DOWN);
     }
 
     /**
@@ -605,7 +620,6 @@ abstract class BaseActivity extends Activity {
             if (isDestroyed()) return;
             getDisplayState().restored = true;
             onCurrentDirectoryChanged(ANIM_NONE);
-
             onStackRestored(mRestoredStack, mExternal);
         }
     }
@@ -842,5 +856,18 @@ abstract class BaseActivity extends Activity {
         public void onActionViewCollapsed() {
             updateActionBar();
         }
+    }
+
+    /**
+     * Interface providing access to current view of documents
+     * even when all documents are not homed to the same parent.
+     */
+    interface DocumentContext {
+        /**
+         * Returns the cursor for the selected document. The cursor can be used to retrieve
+         * details about a document and its siblings.
+         * @return
+         */
+        Cursor getCursor();
     }
 }

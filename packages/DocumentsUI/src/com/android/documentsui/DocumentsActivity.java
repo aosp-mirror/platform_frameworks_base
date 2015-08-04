@@ -26,12 +26,8 @@ import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
+import static com.android.internal.util.Preconditions.checkArgument;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -608,12 +604,10 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc) {
+    public void onDocumentPicked(DocumentInfo doc, DocumentContext context) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isDirectory()) {
-            mState.stack.push(doc);
-            mState.stackTouched = true;
-            onCurrentDirectoryChanged(ANIM_DOWN);
+            openDirectory(doc);
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             // Explicit file picked, return
             new ExistingFinishTask(doc.derivedUri).executeOnExecutor(getCurrentExecutor());

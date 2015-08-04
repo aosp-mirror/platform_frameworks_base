@@ -3815,6 +3815,9 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_SIM_ACTIVATION_RESPONSE =
             "android.intent.extra.SIM_ACTIVATION_RESPONSE";
 
+    /** {@hide} */
+    public static final String EXTRA_INDEX = "android.intent.extra.INDEX";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).
