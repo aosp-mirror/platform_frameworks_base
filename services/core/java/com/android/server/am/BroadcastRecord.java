@@ -240,8 +240,12 @@ final class BroadcastRecord extends Binder {
                 }
                 didSomething = true;
                 receivers.remove(i);
+                if (i < nextReceiver) {
+                    nextReceiver--;
+                }
             }
         }
+        nextReceiver = Math.min(nextReceiver, receivers.size());
 
         return didSomething;
     }
