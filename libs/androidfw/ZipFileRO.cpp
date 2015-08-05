@@ -132,6 +132,11 @@ bool ZipFileRO::startIteration(void** cookie) {
 
 bool ZipFileRO::startIteration(void** cookie, const char* prefix, const char* suffix)
 {
+  return startIteration(cookie, NULL, NULL);
+}
+
+bool ZipFileRO::startIteration(void** cookie, const char* prefix, const char* suffix)
+{
     _ZipEntryRO* ze = new _ZipEntryRO;
     ZipString pe(prefix ? prefix : "");
     ZipString se(suffix ? suffix : "");
