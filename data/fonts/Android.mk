@@ -17,9 +17,12 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# Use full Noto Sans Japanese font on non-smaller footprints
+# Use full Noto Sans Japanese font on the normal footprints, but
+# exclude it from SMALLER and use a subset on the CONSTRAINED ones.
 ifneq ($(SMALLER_FONT_FOOTPRINT),true)
+ifneq ($(CONSTRAINED_FONT_FOOTPRINT),true)
 FONT_NOTOSANS_JP_FULL := true
+endif
 endif
 
 ##########################################
@@ -82,19 +85,32 @@ include $(BUILD_PREBUILT)
 extra_font_files :=
 
 ################################
-# Include the DroidSansFallback subset on SMALLER_FONT_FOOTPRINT build
+# Include the DroidSansFallback subset on SMALLER_FONT_FOOTPRINT builds,
+# and the full font on CONSTRAINED_FONT_FOOTPRINT ones.
 ifeq ($(SMALLER_FONT_FOOTPRINT),true)
+droidsans_fallback_src := DroidSansFallback.ttf
+build_droidsans_fallback := true
+endif  # SMALLER_FONT_FOOTPRINT
+
+ifeq ($(CONSTRAINED_FONT_FOOTPRINT),true)
+droidsans_fallback_src := DroidSansFallbackFull.ttf
+build_droidsans_fallback := true
+endif  # CONSTRAINED_FONT_FOOTPRINT
+
+ifeq ($(build_droidsans_fallback),true)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := DroidSansFallback.ttf
-LOCAL_SRC_FILES := $(LOCAL_MODULE)
+LOCAL_SRC_FILES := $(droidsans_fallback_src)
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
 include $(BUILD_PREBUILT)
 droidsans_fallback_src :=
 
-endif  # SMALLER_FONT_FOOTPRINT
+endif  # build_droidsans_fallback
+
+build_droidsans_fallback :=
 
 ################################
 # Build the rest of font files as prebuilt.
