@@ -21,10 +21,12 @@ import android.test.FlakyTest;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.TouchUtils;
+import android.test.suitebuilder.annotation.Suppress;
 import android.view.View;
 import android.view.KeyEvent;
 import com.android.frameworks.coretests.R;
 
+@Suppress // Flaky
 public class GlobalFocusChangeTest extends ActivityInstrumentationTestCase<GlobalFocusChange> {
     private GlobalFocusChange mActivity;
     private View mLeft;

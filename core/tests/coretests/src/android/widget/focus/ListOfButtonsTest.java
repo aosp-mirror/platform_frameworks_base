@@ -16,6 +16,7 @@
 
 package android.widget.focus;
 
+import android.test.suitebuilder.annotation.Suppress;
 import android.widget.focus.ListOfButtons;
 import com.android.frameworks.coretests.R;
 
@@ -31,6 +32,7 @@ import android.view.View;
  * Tests that focus works as expected when navigating into and out of
  * a {@link ListView} that has buttons in it.
  */
+@Suppress // Flaky
 public class ListOfButtonsTest extends ActivityInstrumentationTestCase2<ListOfButtons> {
 
     private ListAdapter mListAdapter;
