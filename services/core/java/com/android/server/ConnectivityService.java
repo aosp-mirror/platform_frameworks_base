@@ -4024,6 +4024,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (!Objects.equals(nai.networkCapabilities, networkCapabilities)) {
             final int oldScore = nai.getCurrentScore();
+            if (nai.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) !=
+                    networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)) {
+                try {
+                    mNetd.setNetworkPermission(nai.network.netId,
+                            networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) ?
+                                    null : NetworkManagementService.PERMISSION_SYSTEM);
+                } catch (RemoteException e) {
+                    loge("Exception in setNetworkPermission: " + e);
+                }
+            }
             synchronized (nai) {
                 nai.networkCapabilities = networkCapabilities;
             }
@@ -4491,7 +4501,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             (networkAgent.networkMisc == null ||
                                 !networkAgent.networkMisc.allowBypass));
                 } else {
-                    mNetd.createPhysicalNetwork(networkAgent.network.netId);
+                    mNetd.createPhysicalNetwork(networkAgent.network.netId,
+                            networkAgent.networkCapabilities.hasCapability(
+                                    NET_CAPABILITY_NOT_RESTRICTED) ?
+                                    null : NetworkManagementService.PERMISSION_SYSTEM);
                 }
             } catch (Exception e) {
                 loge("Error creating network " + networkAgent.network.netId + ": "
