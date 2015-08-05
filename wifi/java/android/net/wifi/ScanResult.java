@@ -363,11 +363,10 @@ public class ScanResult implements Parcelable {
     }
 
     /** {@hide} */
-    public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
+    public ScanResult(String Ssid, String BSSID, String caps, int level, int frequency,
             long tsf, int distCm, int distSdCm, int channelWidth, int centerFreq0, int centerFreq1,
             boolean is80211McRTTResponder) {
-        this.wifiSsid = wifiSsid;
-        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
+        this.SSID = Ssid;
         this.BSSID = BSSID;
         this.capabilities = caps;
         this.level = level;
@@ -383,6 +382,15 @@ public class ScanResult implements Parcelable {
         } else {
             this.flags = 0;
         }
+    }
+
+    /** {@hide} */
+    public ScanResult(WifiSsid wifiSsid, String Ssid, String BSSID, String caps, int level,
+                  int frequency, long tsf, int distCm, int distSdCm, int channelWidth,
+                  int centerFreq0, int centerFreq1, boolean is80211McRTTResponder) {
+        this(Ssid, BSSID, caps,level, frequency, tsf, distCm, distSdCm, channelWidth, centerFreq0,
+                centerFreq1, is80211McRTTResponder);
+        this.wifiSsid = wifiSsid;
     }
 
     /** copy constructor {@hide} */
@@ -469,6 +477,7 @@ public class ScanResult implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeString(SSID);
         dest.writeString(BSSID);
         dest.writeString(capabilities);
         dest.writeInt(level);
@@ -512,6 +521,7 @@ public class ScanResult implements Parcelable {
                 }
                 ScanResult sr = new ScanResult(
                     wifiSsid,
+                    in.readString(),                    /* SSID  */
                     in.readString(),                    /* BSSID */
                     in.readString(),                    /* capabilities */
                     in.readInt(),                       /* level */
