@@ -431,5 +431,5 @@
     <string name="tuner_toast" msgid="603429811084428439">"Félicitations! System UI Tuner a bien été ajouté aux paramètres."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Supprimer des paramètres"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Supprimer « System UI Tuner » des paramètres et arrêter d\'utiliser toutes ses fonctionnalités?"</string>
-    <string name="activity_not_found" msgid="348423244327799974">"L\'application est pas installée sur votre appareil"</string>
+    <string name="activity_not_found" msgid="348423244327799974">"L\'application n\'est pas installée sur votre appareil"</string>
 </resources>
