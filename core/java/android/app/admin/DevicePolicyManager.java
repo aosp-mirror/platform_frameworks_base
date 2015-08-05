@@ -165,13 +165,19 @@ public class DevicePolicyManager {
 
     /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
-     * allows a mobile device management application which starts managed provisioning to pass data
-     * to itself.
+     * allows a mobile device management application or NFC programmer application which starts
+     * managed provisioning to pass data to the management application instance after provisioning.
      * <p>
      * If used with {@link #ACTION_PROVISION_MANAGED_PROFILE} it can be used by the application that
      * sends the intent to pass data to itself on the newly created profile.
      * If used with {@link #ACTION_PROVISION_MANAGED_DEVICE} it allows passing data to the same
      * instance of the app on the primary user.
+     * Starting from {@link android.os.Build.VERSION_CODES#M}, if used with
+     * {@link #MIME_TYPE_PROVISIONING_NFC} as part of NFC managed device provisioning, the NFC
+     * message should contain a stringified {@link java.util.Properties} instance, whose string
+     * properties will be converted into a {@link android.os.PersistableBundle} and passed to the
+     * management application after provisioning.
+     *
      * <p>
      * In both cases the application receives the data in
      * {@link DeviceAdminReceiver#onProfileProvisioningComplete} via an intent with the action
@@ -587,7 +593,9 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_HOST}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_PORT} (convert to String), optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li></ul>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional, supported from
+     * {@link android.os.Build.VERSION_CODES#M} </li></ul>
      *
      * <p>
      * As of {@link android.os.Build.VERSION_CODES#M}, the properties should contain
