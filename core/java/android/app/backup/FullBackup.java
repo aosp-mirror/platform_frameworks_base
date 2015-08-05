@@ -401,7 +401,19 @@ public class FullBackup {
                             activeSet.add(canonicalJournalPath);
                             if (Log.isLoggable(TAG_XML_PARSER, Log.VERBOSE)) {
                                 Log.v(TAG_XML_PARSER, "...automatically generated "
-                                        + canonicalJournalPath + ". Ignore if nonexistant.");
+                                        + canonicalJournalPath + ". Ignore if nonexistent.");
+                            }
+                        }
+
+                        // Special case for sharedpref files (not dirs) also add ".xml" suffix file.
+                        if ("sharedpref".equals(domainFromXml) && !canonicalFile.isDirectory() &&
+                            !canonicalFile.getCanonicalPath().endsWith(".xml")) {
+                            final String canonicalXmlPath =
+                                    canonicalFile.getCanonicalPath() + ".xml";
+                            activeSet.add(canonicalXmlPath);
+                            if (Log.isLoggable(TAG_XML_PARSER, Log.VERBOSE)) {
+                                Log.v(TAG_XML_PARSER, "...automatically generated "
+                                        + canonicalXmlPath + ". Ignore if nonexistent.");
                             }
                         }
                 }
