@@ -2220,7 +2220,7 @@ public class Am extends BaseCommand {
     }
 
     private void runSetInactive() throws Exception {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_CURRENT;
 
         String opt;
         while ((opt=nextOption()) != null) {
@@ -2240,7 +2240,7 @@ public class Am extends BaseCommand {
     }
 
     private void runGetInactive() throws Exception {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_CURRENT;
 
         String opt;
         while ((opt=nextOption()) != null) {
