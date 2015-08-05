@@ -127,9 +127,7 @@ public final class MediaProjectionManagerService extends SystemService
         IBinder.DeathRecipient deathRecipient = new IBinder.DeathRecipient() {
             @Override
             public void binderDied() {
-                synchronized (mLock) {
-                    removeCallback(callback);
-                }
+                removeCallback(callback);
             }
         };
         synchronized (mLock) {
@@ -344,6 +342,7 @@ public final class MediaProjectionManagerService extends SystemService
         public final String packageName;
         public final UserHandle userHandle;
 
+        private IMediaProjectionCallback mCallback;
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private int mType;
@@ -406,7 +405,8 @@ public final class MediaProjectionManagerService extends SystemService
                     throw new IllegalStateException(
                             "Cannot start already started MediaProjection");
                 }
-                registerCallback(callback);
+                mCallback = callback;
+                registerCallback(mCallback);
                 try {
                     mToken = callback.asBinder();
                     mDeathEater = new IBinder.DeathRecipient() {
@@ -435,8 +435,11 @@ public final class MediaProjectionManagerService extends SystemService
                             + "pid=" + Binder.getCallingPid() + ")");
                     return;
                 }
-                mToken.unlinkToDeath(mDeathEater, 0);
                 stopProjectionLocked(this);
+                mToken.unlinkToDeath(mDeathEater, 0);
+                mToken = null;
+                unregisterCallback(mCallback);
+                mCallback = null;
             }
         }
 
