@@ -1588,7 +1588,7 @@ public abstract class Connection extends Conferenceable {
         return mUnmodifiableConferenceables;
     }
 
-    /*
+    /**
      * @hide
      */
     public final void setConnectionService(ConnectionService connectionService) {
