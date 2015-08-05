@@ -505,16 +505,16 @@
     <bool translatable="false" name="config_wifi_ssid_white_list_enable">true</bool>
 
     <!-- Idle Receive current for wifi radio. 0 by default-->
-    <integer translatable="false" name="config_wifi_idle_receive_cur_ma">1</integer>
+    <integer translatable="false" name="config_wifi_idle_receive_cur_ma">0</integer>
 
     <!-- Rx current for wifi radio. 0 by default-->
-    <integer translatable="false" name="config_wifi_active_rx_cur_ma">2</integer>
+    <integer translatable="false" name="config_wifi_active_rx_cur_ma">0</integer>
 
     <!-- Tx current for wifi radio. 0 by default-->
-    <integer translatable="false" name="config_wifi_tx_cur_ma">3</integer>
+    <integer translatable="false" name="config_wifi_tx_cur_ma">0</integer>
 
     <!-- Operating volatage for wifi radio. 0 by default-->
-    <integer translatable="false" name="config_wifi_operating_voltage_mv">4</integer>
+    <integer translatable="false" name="config_wifi_operating_voltage_mv">0</integer>
 
     <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
