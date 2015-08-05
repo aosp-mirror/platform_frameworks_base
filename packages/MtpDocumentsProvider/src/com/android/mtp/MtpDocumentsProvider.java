@@ -17,8 +17,10 @@
 package com.android.mtp;
 
 import android.content.ContentResolver;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.graphics.Point;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
@@ -176,6 +178,36 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
     }
 
+    @Override
+    public AssetFileDescriptor openDocumentThumbnail(
+            String documentId,
+            Point sizeHint,
+            CancellationSignal signal) throws FileNotFoundException {
+        final Identifier identifier = Identifier.createFromDocumentId(documentId);
+        try {
+            return new AssetFileDescriptor(
+                    mPipeManager.readThumbnail(mMtpManager, identifier),
+                    0,
+                    AssetFileDescriptor.UNKNOWN_LENGTH);
+        } catch (IOException error) {
+            throw new FileNotFoundException(error.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteDocument(String documentId) throws FileNotFoundException {
+        try {
+            final Identifier identifier = Identifier.createFromDocumentId(documentId);
+            final int parentHandle =
+                    mMtpManager.getParent(identifier.mDeviceId, identifier.mObjectHandle);
+            mMtpManager.deleteDocument(identifier.mDeviceId, identifier.mObjectHandle);
+            notifyChildDocumentsChange(new Identifier(
+                    identifier.mDeviceId, identifier.mStorageId, parentHandle).toDocumentId());
+        } catch (IOException error) {
+            throw new FileNotFoundException(error.getMessage());
+        }
+    }
+
     void openDevice(int deviceId) throws IOException {
         mMtpManager.openDevice(deviceId);
         notifyRootsChange();
@@ -198,20 +230,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
         if (closed) {
             notifyRootsChange();
-        }
-    }
-
-    @Override
-    public void deleteDocument(String documentId) throws FileNotFoundException {
-        try {
-            final Identifier identifier = Identifier.createFromDocumentId(documentId);
-            final int parentHandle =
-                    mMtpManager.getParent(identifier.mDeviceId, identifier.mObjectHandle);
-            mMtpManager.deleteDocument(identifier.mDeviceId, identifier.mObjectHandle);
-            notifyChildDocumentsChange(new Identifier(
-                    identifier.mDeviceId, identifier.mStorageId, parentHandle).toDocumentId());
-        } catch (IOException error) {
-            throw new FileNotFoundException(error.getMessage());
         }
     }
 

@@ -34,10 +34,14 @@ class PipeManager {
         this.mExecutor = executor;
     }
 
-    ParcelFileDescriptor readDocument(
-            final MtpManager model,
-            final Identifier identifier) throws IOException {
+    ParcelFileDescriptor readDocument(MtpManager model, Identifier identifier) throws IOException {
         final Task task = new ImportFileTask(model, identifier);
+        mExecutor.execute(task);
+        return task.getReadingFileDescriptor();
+    }
+
+    ParcelFileDescriptor readThumbnail(MtpManager model, Identifier identifier) throws IOException {
+        final Task task = new GetThumbnailTask(model, identifier);
         mExecutor.execute(task);
         return task.getReadingFileDescriptor();
     }
@@ -66,7 +70,8 @@ class PipeManager {
         @Override
         public void run() {
             try {
-                mModel.importFile(mIdentifier.mDeviceId, mIdentifier.mObjectHandle, mDescriptors[1]);
+                mModel.importFile(
+                        mIdentifier.mDeviceId, mIdentifier.mObjectHandle, mDescriptors[1]);
                 mDescriptors[1].close();
             } catch (IOException error) {
                 try {
@@ -74,6 +79,29 @@ class PipeManager {
                 } catch (IOException closeError) {
                     Log.w(MtpDocumentsProvider.TAG, closeError.getMessage());
                 }
+            }
+        }
+    }
+
+    private static class GetThumbnailTask extends Task {
+        GetThumbnailTask(MtpManager model, Identifier identifier) throws IOException {
+            super(model, identifier);
+        }
+
+        @Override
+        public void run() {
+            try {
+                try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
+                        new ParcelFileDescriptor.AutoCloseOutputStream(mDescriptors[1])) {
+                    try {
+                        stream.write(mModel.getThumbnail(
+                                mIdentifier.mDeviceId, mIdentifier.mObjectHandle));
+                    } catch (IOException error) {
+                        mDescriptors[1].closeWithError("Failed to stream a thumbnail.");
+                    }
+                }
+            } catch (IOException closeError) {
+                Log.w(MtpDocumentsProvider.TAG, closeError.getMessage());
             }
         }
     }

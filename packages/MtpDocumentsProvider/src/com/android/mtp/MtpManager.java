@@ -111,6 +111,11 @@ class MtpManager {
         return device.getObject(objectHandle, expectedSize);
     }
 
+    synchronized byte[] getThumbnail(int deviceId, int objectHandle) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        return device.getThumbnail(objectHandle);
+    }
+
     synchronized void deleteDocument(int deviceId, int objectHandle) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         if (!device.deleteObject(objectHandle)) {

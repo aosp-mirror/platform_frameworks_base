@@ -36,6 +36,7 @@ public class TestMtpManager extends MtpManager {
     private final Set<Integer> mOpenedDevices = new TreeSet<Integer>();
     private final Map<Integer, MtpRoot[]> mRoots = new HashMap<Integer, MtpRoot[]>();
     private final Map<String, MtpDocument> mDocuments = new HashMap<String, MtpDocument>();
+    private final Map<String, byte[]> mThumbnailBytes = new HashMap<String, byte[]>();
     private final Map<String, Integer> mParents = new HashMap<String, Integer>();
     private final Map<String, byte[]> mImportFileBytes = new HashMap<String, byte[]>();
 
@@ -57,6 +58,10 @@ public class TestMtpManager extends MtpManager {
 
     void setImportFileBytes(int deviceId, int objectHandle, byte[] bytes) {
         mImportFileBytes.put(pack(deviceId, objectHandle), bytes);
+    }
+
+    void setThumbnail(int deviceId, int objectHandle, byte[] bytes) {
+        mThumbnailBytes.put(pack(deviceId, objectHandle), bytes);
     }
 
     void setParent(int deviceId, int objectHandle, int parentObjectHandle) {
@@ -103,6 +108,16 @@ public class TestMtpManager extends MtpManager {
             }
         } else {
             throw new IOException("importFile error: " + key);
+        }
+    }
+
+    @Override
+    byte[] getThumbnail(int deviceId, int objectHandle) throws IOException {
+        final String key = pack(deviceId, objectHandle);
+        if (mThumbnailBytes.containsKey(key)) {
+            return mThumbnailBytes.get(key);
+        } else {
+            throw new IOException("getThumbnail error: " + key);
         }
     }
 
