@@ -1026,7 +1026,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver máis opcións."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar a depuración de erros de USB."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca aquí para desactivala"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Seleccionar teclados"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostra método de entrada"</string>
