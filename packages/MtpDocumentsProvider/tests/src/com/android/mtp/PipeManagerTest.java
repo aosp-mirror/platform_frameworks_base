@@ -30,16 +30,16 @@ public class PipeManagerTest extends AndroidTestCase {
     public void testReadDocument_basic() throws Exception {
         final TestMtpManager mtpManager = new TestMtpManager(getContext());
         final byte[] expectedBytes = new byte[] { 'h', 'e', 'l', 'l', 'o' };
-        mtpManager.setObjectBytes(0, 1, 5, expectedBytes);
+        mtpManager.setImportFileBytes(0, 1, expectedBytes);
         final ExecutorService executor = Executors.newSingleThreadExecutor();
         final PipeManager pipeManager = new PipeManager(executor);
         final ParcelFileDescriptor descriptor = pipeManager.readDocument(
-                mtpManager, new Identifier(0, 0, 1), 5);
+                mtpManager, new Identifier(0, 0, 1));
         try (final ParcelFileDescriptor.AutoCloseInputStream stream =
                 new ParcelFileDescriptor.AutoCloseInputStream(descriptor)) {
             final byte[] results = new byte[100];
-            assertEquals(5, stream.read(results));
-            for (int i = 0; i < 5; i++) {
+            assertEquals(expectedBytes.length, stream.read(results));
+            for (int i = 0; i < expectedBytes.length; i++) {
                 assertEquals(expectedBytes[i], results[i]);
             }
         }
@@ -50,7 +50,7 @@ public class PipeManagerTest extends AndroidTestCase {
         final ExecutorService executor = Executors.newSingleThreadExecutor();
         final PipeManager pipeManager = new PipeManager(executor);
         final ParcelFileDescriptor descriptor =
-                pipeManager.readDocument(mtpManager, new Identifier(0, 0, 1), 5);
+                pipeManager.readDocument(mtpManager, new Identifier(0, 0, 1));
         executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
         try {
             descriptor.checkError();

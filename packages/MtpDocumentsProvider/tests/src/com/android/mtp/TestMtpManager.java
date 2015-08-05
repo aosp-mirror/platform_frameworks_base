@@ -17,6 +17,7 @@
 package com.android.mtp;
 
 import android.content.Context;
+import android.os.ParcelFileDescriptor;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -35,8 +36,8 @@ public class TestMtpManager extends MtpManager {
     private final Set<Integer> mOpenedDevices = new TreeSet<Integer>();
     private final Map<Integer, MtpRoot[]> mRoots = new HashMap<Integer, MtpRoot[]>();
     private final Map<String, MtpDocument> mDocuments = new HashMap<String, MtpDocument>();
-    private final Map<String, byte[]> mObjectBytes = new HashMap<String, byte[]>();
     private final Map<String, Integer> mParents = new HashMap<String, Integer>();
+    private final Map<String, byte[]> mImportFileBytes = new HashMap<String, byte[]>();
 
     TestMtpManager(Context context) {
         super(context);
@@ -54,8 +55,8 @@ public class TestMtpManager extends MtpManager {
         mDocuments.put(pack(deviceId, objectHandle), document);
     }
 
-    void setObjectBytes(int deviceId, int objectHandle, int expectedSize, byte[] bytes) {
-        mObjectBytes.put(pack(deviceId, objectHandle, expectedSize), bytes);
+    void setImportFileBytes(int deviceId, int objectHandle, byte[] bytes) {
+        mImportFileBytes.put(pack(deviceId, objectHandle), bytes);
     }
 
     void setParent(int deviceId, int objectHandle, int parentObjectHandle) {
@@ -93,12 +94,15 @@ public class TestMtpManager extends MtpManager {
     }
 
     @Override
-    byte[] getObject(int deviceId, int storageId, int expectedSize) throws IOException {
-        final String key = pack(deviceId, storageId, expectedSize);
-        if (mObjectBytes.containsKey(key)) {
-            return mObjectBytes.get(key);
+    void importFile(int deviceId, int storageId, ParcelFileDescriptor target) throws IOException {
+        final String key = pack(deviceId, storageId);
+        if (mImportFileBytes.containsKey(key)) {
+            try (final ParcelFileDescriptor.AutoCloseOutputStream outputStream =
+                    new ParcelFileDescriptor.AutoCloseOutputStream(target)) {
+                outputStream.write(mImportFileBytes.get(key));
+            }
         } else {
-            throw new IOException("getObject error: " + key);
+            throw new IOException("importFile error: " + key);
         }
     }
 
