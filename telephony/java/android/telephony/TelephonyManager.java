@@ -2060,6 +2060,8 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *   OR
+     *   {@link android.Manifest.permission#READ_SMS}
      * <p>
      * The default SMS app can also use this.
      */
@@ -2073,6 +2075,8 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *   OR
+     *   {@link android.Manifest.permission#READ_SMS}
      * <p>
      * The default SMS app can also use this.
      *
