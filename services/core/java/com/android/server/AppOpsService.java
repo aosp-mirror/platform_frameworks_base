@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -509,6 +510,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
+        String[] uidPackageNames = getPackagesForUid(uid);
         ArrayMap<Callback, ArraySet<String>> callbackSpecs = null;
 
         ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
@@ -516,12 +518,13 @@ public class AppOpsService extends IAppOpsService.Stub {
             final int callbackCount = callbacks.size();
             for (int i = 0; i < callbackCount; i++) {
                 Callback callback = callbacks.get(i);
+                ArraySet<String> changedPackages = new ArraySet<>();
+                Collections.addAll(changedPackages, uidPackageNames);
                 callbackSpecs = new ArrayMap<>();
-                callbackSpecs.put(callback, null);
+                callbackSpecs.put(callback, changedPackages);
             }
         }
 
-        String[] uidPackageNames = getPackagesForUid(uid);
         for (String uidPackageName : uidPackageNames) {
             callbacks = mPackageModeWatchers.get(uidPackageName);
             if (callbacks != null) {
@@ -931,7 +934,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         return noteOperationUnchecked(code, proxiedUid, proxiedPackageName,
                 Binder.getCallingUid(), proxyPackageName);
-
     }
 
     @Override
@@ -1266,7 +1268,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         String tagName = parser.getName();
                         if (tagName.equals("pkg")) {
                             readPackage(parser);
-                        } if (tagName.equals("uid")) {
+                        } else if (tagName.equals("uid")) {
                             readUidOps(parser);
                         } else {
                             Slog.w(TAG, "Unknown element under <app-ops>: "
