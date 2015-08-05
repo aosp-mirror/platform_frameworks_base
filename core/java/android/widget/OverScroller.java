@@ -678,7 +678,7 @@ public class OverScroller {
         void startScroll(int start, int distance, int duration) {
             mFinished = false;
 
-            mStart = start;
+            mCurrentPosition = mStart = start;
             mFinal = start + distance;
 
             mStartTime = AnimationUtils.currentAnimationTimeMillis();
@@ -712,7 +712,7 @@ public class OverScroller {
         boolean springback(int start, int min, int max) {
             mFinished = true;
 
-            mStart = mFinal = start;
+            mCurrentPosition = mStart = mFinal = start;
             mVelocity = 0;
 
             mStartTime = AnimationUtils.currentAnimationTimeMillis();
@@ -804,7 +804,7 @@ public class OverScroller {
             final float totalDuration = (float) Math.sqrt(
                     2.0 * (distanceToApex + distanceToEdge) / Math.abs(mDeceleration));
             mStartTime -= (int) (1000.0f * (totalDuration - durationToApex));
-            mStart = end;
+            mCurrentPosition = mStart = end;
             mVelocity = (int) (- mDeceleration * totalDuration);
         }
 
@@ -873,7 +873,7 @@ public class OverScroller {
                     // Duration from start to null velocity
                     if (mDuration < mSplineDuration) {
                         // If the animation was clamped, we reached the edge
-                        mStart = mFinal;
+                        mCurrentPosition = mStart = mFinal;
                         // TODO Better compute speed when edge was reached
                         mVelocity = (int) mCurrVelocity;
                         mDeceleration = getDeceleration(mVelocity);
