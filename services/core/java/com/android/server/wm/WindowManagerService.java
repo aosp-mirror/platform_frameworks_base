@@ -250,11 +250,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int LAYER_OFFSET_DIM = 1;
 
     /**
-     * FocusedTaskFrame layer is immediately above focused window.
-     */
-    static final int LAYER_OFFSET_FOCUSED_TASK = 1;
-
-    /**
      * Animation thumbnail is as far as possible below the window above
      * the thumbnail (or in other words as far as possible above the window
      * below it).
@@ -445,9 +440,6 @@ public class WindowManagerService extends IWindowManager.Stub
     StrictModeFlash mStrictModeFlash;
     CircularDisplayMask mCircularDisplayMask;
     EmulatorDisplayOverlay mEmulatorDisplayOverlay;
-    FocusedTaskFrame mFocusedTaskFrame;
-
-    int mFocusedTaskLayer;
 
     final float[] mTmpFloats = new float[9];
     final Rect mTmpContentRect = new Rect();
@@ -990,8 +982,6 @@ public class WindowManagerService extends IWindowManager.Stub
         SurfaceControl.openTransaction();
         try {
             createWatermarkInTransaction();
-            mFocusedTaskFrame = new FocusedTaskFrame(
-                    getDefaultDisplayContentLocked().getDisplay(), mFxSession);
         } finally {
             SurfaceControl.closeTransaction();
         }
@@ -4074,34 +4064,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /** Call while in a Surface transaction. */
-    void setFocusedTaskLayer() {
-        mFocusedTaskLayer = 0;
+    void setFocusTaskRegion() {
         if (mFocusedApp != null) {
-            final WindowList windows = mFocusedApp.allAppWindows;
-            for (int i = windows.size() - 1; i >= 0; --i) {
-                final WindowState win = windows.get(i);
-                final int animLayer = win.mWinAnimator.mAnimLayer;
-                if (win.mAttachedWindow == null && win.isVisibleLw() &&
-                        animLayer > mFocusedTaskLayer) {
-                    mFocusedTaskLayer = animLayer + LAYER_OFFSET_FOCUSED_TASK;
-                }
-            }
-        }
-        if (DEBUG_LAYERS) Slog.v(TAG, "Setting FocusedTaskFrame to layer=" + mFocusedTaskLayer);
-        mFocusedTaskFrame.setLayer(mFocusedTaskLayer);
-    }
-
-    void setFocusedTaskFrame() {
-        Task task = null;
-        if (mFocusedApp != null) {
-            task = mFocusedApp.mTask;
+            final Task task = mFocusedApp.mTask;
             final DisplayContent displayContent = task.getDisplayContent();
             if (displayContent != null) {
                 displayContent.setTouchExcludeRegion(task);
             }
         }
-        mFocusedTaskFrame.setVisibility(task);
     }
 
     @Override
@@ -4129,15 +4099,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (changed) {
                 mFocusedApp = newFocus;
                 mInputMonitor.setFocusedAppLw(newFocus);
-                setFocusedTaskFrame();
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setFocusedApp");
-                SurfaceControl.openTransaction();
-                try {
-                    setFocusedTaskLayer();
-                } finally {
-                    SurfaceControl.closeTransaction();
-                    if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
-                }
+                setFocusTaskRegion();
             }
 
             if (moveFocusNow && changed) {
@@ -10409,7 +10371,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (updateInputWindowsNeeded) {
             mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
-        setFocusedTaskFrame();
+        setFocusTaskRegion();
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
