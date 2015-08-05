@@ -216,6 +216,20 @@ public final class NetworkCapabilities implements Parcelable {
             (1 << NET_CAPABILITY_NOT_VPN);
 
     /**
+     * Capabilities that suggest that a network is restricted.
+     * {@see #maybeMarkCapabilitiesRestricted}.
+     */
+    private static final long RESTRICTED_CAPABILITIES =
+            (1 << NET_CAPABILITY_CBS) |
+            (1 << NET_CAPABILITY_DUN) |
+            (1 << NET_CAPABILITY_EIMS) |
+            (1 << NET_CAPABILITY_FOTA) |
+            (1 << NET_CAPABILITY_IA) |
+            (1 << NET_CAPABILITY_IMS) |
+            (1 << NET_CAPABILITY_RCS) |
+            (1 << NET_CAPABILITY_XCAP);
+
+    /**
      * Adds the given capability to this {@code NetworkCapability} instance.
      * Multiple capabilities may be applied sequentially.  Note that when searching
      * for a network to satisfy a request, all capabilities requested must be satisfied.
@@ -323,6 +337,22 @@ public final class NetworkCapabilities implements Parcelable {
     private boolean equalsNetCapabilitiesImmutable(NetworkCapabilities that) {
         return ((this.mNetworkCapabilities & ~MUTABLE_CAPABILITIES) ==
                 (that.mNetworkCapabilities & ~MUTABLE_CAPABILITIES));
+    }
+
+    /**
+     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if all the capabilities it provides are
+     * typically provided by restricted networks.
+     *
+     * TODO: consider:
+     * - Renaming it to guessRestrictedCapability and make it set the
+     *   restricted capability bit in addition to clearing it.
+     * @hide
+     */
+    public void maybeMarkCapabilitiesRestricted() {
+        // If all the capabilities are typically provided by restricted networks, conclude that this
+        // network is restricted.
+        if ((mNetworkCapabilities & ~(DEFAULT_CAPABILITIES | RESTRICTED_CAPABILITIES)) == 0)
+            removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
     }
 
     /**
