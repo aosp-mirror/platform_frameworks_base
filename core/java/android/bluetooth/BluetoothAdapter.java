@@ -1002,6 +1002,25 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Factory reset bluetooth settings.
+     *
+     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}
+     * permission
+     *
+     * @return true to indicate that the config file was successfully cleared
+     *
+     * @hide
+     */
+    public boolean factoryReset() {
+        try {
+            if (mService != null) {
+                return mService.factoryReset();
+            }
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
      * Get the UUIDs supported by the local Bluetooth adapter.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
