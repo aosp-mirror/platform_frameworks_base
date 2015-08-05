@@ -24,7 +24,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class is the public application interface to the MIDI service.
@@ -61,8 +61,8 @@ public final class MidiManager {
     private final IMidiManager mService;
     private final IBinder mToken = new Binder();
 
-    private HashMap<DeviceCallback,DeviceListener> mDeviceListeners =
-        new HashMap<DeviceCallback,DeviceListener>();
+    private ConcurrentHashMap<DeviceCallback,DeviceListener> mDeviceListeners =
+        new ConcurrentHashMap<DeviceCallback,DeviceListener>();
 
     // Binder stub for receiving device notifications from MidiService
     private class DeviceListener extends IMidiDeviceListener.Stub {
