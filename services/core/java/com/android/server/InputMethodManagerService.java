@@ -3555,7 +3555,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     ? new File(Environment.getDataDirectory(), SYSTEM_PATH)
                     : Environment.getUserSystemDirectory(userId);
             final File inputMethodDir = new File(systemDir, INPUT_METHOD_PATH);
-            if (!inputMethodDir.mkdirs()) {
+            if (!inputMethodDir.exists() && !inputMethodDir.mkdirs()) {
                 Slog.w(TAG, "Couldn't create dir.: " + inputMethodDir.getAbsolutePath());
             }
             final File subtypeFile = new File(inputMethodDir, ADDITIONAL_SUBTYPES_FILE_NAME);
