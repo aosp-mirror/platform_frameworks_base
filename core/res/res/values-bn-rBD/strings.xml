@@ -628,7 +628,7 @@
     <string name="relationTypeFather" msgid="5228034687082050725">"পিতা"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"বন্ধু"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"ম্যানেজার"</string>
-    <string name="relationTypeMother" msgid="4578571352962758304">"মাতা"</string>
+    <string name="relationTypeMother" msgid="4578571352962758304">"মা"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"পিতা ও মাতা"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"অংশীদার"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"এর দ্বারা নির্দেশ করা"</string>
