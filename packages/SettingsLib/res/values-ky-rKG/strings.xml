@@ -72,10 +72,8 @@
     <skip />
     <!-- no translation found for bluetooth_hid_profile_summary_connected (3381760054215168689) -->
     <skip />
-    <!-- no translation found for bluetooth_pan_user_profile_summary_connected (4602294638909590612) -->
-    <skip />
-    <!-- no translation found for bluetooth_pan_nap_profile_summary_connected (1561383706411975199) -->
-    <skip />
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Интернетке мүмкүнчүлүк алуу үчүн түзмөккө туташты"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Жергиликтүү Интернет туташуусу түзмөк менен бөлүшүлүүдө"</string>
     <!-- no translation found for bluetooth_pan_profile_summary_use_for (5664884523822068653) -->
     <skip />
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"MAP үчүн колдонуу"</string>
