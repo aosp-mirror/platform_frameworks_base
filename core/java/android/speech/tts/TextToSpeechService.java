@@ -40,6 +40,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -247,7 +248,7 @@ public abstract class TextToSpeechService extends Service {
      * @return A list of features supported for the given language.
      */
     protected Set<String> onGetFeaturesForLanguage(String lang, String country, String variant) {
-        return null;
+        return new HashSet<String>();
     }
 
     private int getExpectedLanguageAvailableStatus(Locale locale) {
