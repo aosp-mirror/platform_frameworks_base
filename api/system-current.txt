@@ -3516,6 +3516,7 @@ package android.app {
     method public boolean onSearchRequested(android.view.SearchEvent);
     method public boolean onSearchRequested();
     method protected void onStart();
+    method public void onStateNotSaved();
     method protected void onStop();
     method protected void onTitleChanged(java.lang.CharSequence, int);
     method public boolean onTouchEvent(android.view.MotionEvent);
