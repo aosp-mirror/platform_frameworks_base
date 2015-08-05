@@ -255,9 +255,7 @@ public class WifiScanner {
             mResults = new ScanResult[s.mResults.length];
             for (int i = 0; i < s.mResults.length; i++) {
                 ScanResult result = s.mResults[i];
-                WifiSsid wifiSsid = WifiSsid.createFromAsciiEncoded(result.SSID);
                 ScanResult newResult = new ScanResult(result);
-                newResult.wifiSsid = wifiSsid;
                 mResults[i] = newResult;
             }
         }
