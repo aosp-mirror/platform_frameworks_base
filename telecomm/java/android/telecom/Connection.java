@@ -253,12 +253,6 @@ public abstract class Connection extends Conferenceable {
     //**********************************************************************************************
 
     /**
-     * TODO: Remove this -- retained so the build won't break.  However, future work will remove it.
-     * @hide
-     */
-    public static final String EXTRA_CALL_HISTORY_INFO = "android.telecom.EXTRA_CALL_HISTORY_INFO";
-
-    /**
      * Connection extra key used to store the last forwarded number associated with the current
      * connection.  Used to communicate to the user interface that the connection was forwarded via
      * the specified number.
