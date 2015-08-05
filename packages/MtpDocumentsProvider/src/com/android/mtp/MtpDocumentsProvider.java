@@ -53,6 +53,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     private MtpManager mMtpManager;
     private ContentResolver mResolver;
+    private PipeManager mPipeManager;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -66,6 +67,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         sSingleton = this;
         mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
+        mPipeManager = new PipeManager();
+
         return true;
     }
 
@@ -156,9 +159,21 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     @Override
-    public ParcelFileDescriptor openDocument(String documentId, String mode,
-            CancellationSignal signal) throws FileNotFoundException {
-        throw new FileNotFoundException();
+    public ParcelFileDescriptor openDocument(
+            String documentId, String mode, CancellationSignal signal)
+                    throws FileNotFoundException {
+        if (!"r".equals(mode) && !"w".equals(mode)) {
+            // TODO: Support seekable file.
+            throw new UnsupportedOperationException("The provider does not support seekable file.");
+        }
+        final Identifier identifier = Identifier.createFromDocumentId(documentId);
+        try {
+            final MtpDocument document =
+                    mMtpManager.getDocument(identifier.mDeviceId, identifier.mObjectHandle);
+            return mPipeManager.readDocument(mMtpManager, identifier, document.getSize());
+        } catch (IOException error) {
+            throw new FileNotFoundException(error.getMessage());
+        }
     }
 
     void openDevice(int deviceId) throws IOException {
@@ -192,8 +207,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     private void notifyRootsChange() {
         mResolver.notifyChange(
-                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY),
-                null,
-                false);
+                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY), null, false);
     }
 }
