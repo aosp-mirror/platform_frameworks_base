@@ -2276,6 +2276,9 @@ public final class ViewRootImpl implements ViewParent,
      */
     void outputDisplayList(View view) {
         view.mRenderNode.output();
+        if (mAttachInfo.mHardwareRenderer != null) {
+            ((ThreadedRenderer)mAttachInfo.mHardwareRenderer).serializeDisplayListTree();
+        }
     }
 
     /**

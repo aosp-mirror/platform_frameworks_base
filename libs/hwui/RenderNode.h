@@ -57,6 +57,10 @@ class RestoreToCountOp;
 class DrawRenderNodeOp;
 class TreeInfo;
 
+namespace proto {
+class RenderNode;
+}
+
 /**
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
  *
@@ -96,7 +100,6 @@ public:
         kReplayFlag_ClipChildren = 0x1
     };
 
-    static void outputLogBuffer(int fd);
     void debugDumpLayers(const char* prefix);
 
     ANDROID_API void setStagingDisplayList(DisplayListData* newData);
@@ -108,6 +111,7 @@ public:
 
     ANDROID_API void output(uint32_t level = 1);
     ANDROID_API int getDebugSize();
+    void copyTo(proto::RenderNode* node);
 
     bool isRenderable() const {
         return mDisplayListData && !mDisplayListData->isEmpty();

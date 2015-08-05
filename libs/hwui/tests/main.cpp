@@ -26,6 +26,8 @@
 
 #include "TestContext.h"
 
+#include "protos/hwui.pb.h"
+
 #include <stdio.h>
 #include <unistd.h>
 

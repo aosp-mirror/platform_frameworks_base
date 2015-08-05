@@ -75,7 +75,8 @@ hwui_src_files := \
     TessellationCache.cpp \
     TextDropShadowCache.cpp \
     Texture.cpp \
-    TextureCache.cpp
+    TextureCache.cpp \
+    protos/hwui.proto
 
 hwui_cflags := \
     -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES \
@@ -92,6 +93,12 @@ ifdef HWUI_COMPILE_FOR_PERF
     hwui_cflags += -fno-omit-frame-pointer -marm -mapcs
 endif
 
+# This has to be lazy-resolved because it depends on the LOCAL_MODULE_CLASS
+# which varies depending on what is being built
+define hwui_proto_include
+$(call local-generated-sources-dir)/proto/$(LOCAL_PATH)
+endef
+
 hwui_c_includes += \
     external/skia/src/core
 
@@ -104,6 +111,7 @@ hwui_shared_libraries := \
     libskia \
     libui \
     libgui \
+    libprotobuf-cpp-lite \
 
 ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
     hwui_cflags += -DANDROID_ENABLE_RENDERSCRIPT
@@ -126,7 +134,8 @@ LOCAL_MODULE := libhwui_static
 LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_CFLAGS := $(hwui_cflags)
 LOCAL_SRC_FILES := $(hwui_src_files)
-LOCAL_C_INCLUDES := $(hwui_c_includes)
+LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(hwui_c_includes) $(call hwui_proto_include)
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -153,7 +162,6 @@ LOCAL_MODULE := hwui_unit_tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_STATIC_LIBRARIES := libhwui_static
-LOCAL_C_INCLUDES := $(hwui_c_includes)
 LOCAL_CFLAGS := $(hwui_cflags)
 
 LOCAL_SRC_FILES += \
@@ -172,16 +180,20 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/local/tmp
 LOCAL_MODULE:= hwuitest
 LOCAL_MODULE_TAGS := tests
+LOCAL_MODULE_CLASS := EXECUTABLES
 LOCAL_MULTILIB := both
 LOCAL_MODULE_STEM_32 := hwuitest
 LOCAL_MODULE_STEM_64 := hwuitest64
 LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_CFLAGS := $(hwui_cflags)
-LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 HWUI_NULL_GPU := false
 
 ifeq (true, $(HWUI_NULL_GPU))
+    # Only need to specify the includes if we are not linking against
+    # libhwui_static as libhwui_static exports the appropriate includes
+    LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
+
     LOCAL_SRC_FILES := \
         $(hwui_src_files) \
         tests/nullegl.cpp \

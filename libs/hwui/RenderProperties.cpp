@@ -70,23 +70,6 @@ LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
     return *this;
 }
 
-RenderProperties::PrimitiveFields::PrimitiveFields()
-        : mClippingFlags(CLIP_TO_BOUNDS)
-        , mProjectBackwards(false)
-        , mProjectionReceiver(false)
-        , mAlpha(1)
-        , mHasOverlappingRendering(true)
-        , mElevation(0)
-        , mTranslationX(0), mTranslationY(0), mTranslationZ(0)
-        , mRotation(0), mRotationX(0), mRotationY(0)
-        , mScaleX(1), mScaleY(1)
-        , mPivotX(0), mPivotY(0)
-        , mLeft(0), mTop(0), mRight(0), mBottom(0)
-        , mWidth(0), mHeight(0)
-        , mPivotExplicitlySet(false)
-        , mMatrixOrPivotDirty(false) {
-}
-
 RenderProperties::ComputedFields::ComputedFields()
         : mTransformMatrix(nullptr) {
 }

@@ -111,6 +111,8 @@ public:
     void setName(const std::string&& name) { mName = name; }
     const std::string& name() { return mName; }
 
+    void serializeDisplayListTree();
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object

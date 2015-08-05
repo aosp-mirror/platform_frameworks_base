@@ -417,7 +417,7 @@ public:
         return false;
     }
 
-    float getLeft() const {
+    int getLeft() const {
         return mPrimitiveFields.mLeft;
     }
 
@@ -432,7 +432,7 @@ public:
         return false;
     }
 
-    float getTop() const {
+    int getTop() const {
         return mPrimitiveFields.mTop;
     }
 
@@ -447,7 +447,7 @@ public:
         return false;
     }
 
-    float getRight() const {
+    int getRight() const {
         return mPrimitiveFields.mRight;
     }
 
@@ -462,7 +462,7 @@ public:
         return false;
     }
 
-    float getBottom() const {
+    int getBottom() const {
         return mPrimitiveFields.mBottom;
     }
 
@@ -539,6 +539,10 @@ public:
 
     bool getClipToBounds() const {
         return mPrimitiveFields.mClippingFlags & CLIP_TO_BOUNDS;
+    }
+
+    const Rect& getClipBounds() const {
+        return mPrimitiveFields.mClipBounds;
     }
 
     void getClippingRectForFlags(uint32_t flags, Rect* outRect) const {
@@ -621,25 +625,23 @@ public:
 private:
     // Rendering properties
     struct PrimitiveFields {
-        PrimitiveFields();
-
+        int mLeft = 0, mTop = 0, mRight = 0, mBottom = 0;
+        int mWidth = 0, mHeight = 0;
+        int mClippingFlags = CLIP_TO_BOUNDS;
+        float mAlpha = 1;
+        float mTranslationX = 0, mTranslationY = 0, mTranslationZ = 0;
+        float mElevation = 0;
+        float mRotation = 0, mRotationX = 0, mRotationY = 0;
+        float mScaleX = 1, mScaleY = 1;
+        float mPivotX = 0, mPivotY = 0;
+        bool mHasOverlappingRendering = false;
+        bool mPivotExplicitlySet = false;
+        bool mMatrixOrPivotDirty = false;
+        bool mProjectBackwards = false;
+        bool mProjectionReceiver = false;
+        Rect mClipBounds;
         Outline mOutline;
         RevealClip mRevealClip;
-        int mClippingFlags;
-        bool mProjectBackwards;
-        bool mProjectionReceiver;
-        float mAlpha;
-        bool mHasOverlappingRendering;
-        float mElevation;
-        float mTranslationX, mTranslationY, mTranslationZ;
-        float mRotation, mRotationX, mRotationY;
-        float mScaleX, mScaleY;
-        float mPivotX, mPivotY;
-        int mLeft, mTop, mRight, mBottom;
-        int mWidth, mHeight;
-        bool mPivotExplicitlySet;
-        bool mMatrixOrPivotDirty;
-        Rect mClipBounds;
     } mPrimitiveFields;
 
     SkMatrix* mStaticMatrix;
