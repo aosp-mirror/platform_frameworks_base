@@ -149,7 +149,7 @@
     <string name="httpErrorAuth" msgid="1435065629438044534">"Nu s-a realizat autentificarea."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Autentificarea prin intermediul serverului proxy nu a reuşit."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"Nu s-a putut stabili conexiunea cu serverul."</string>
-    <string name="httpErrorIO" msgid="2340558197489302188">"Nu s-a putut efectua comunicarea cu serverul. Încercaţi din nou mai târziu."</string>
+    <string name="httpErrorIO" msgid="2340558197489302188">"Nu s-a putut efectua comunicarea cu serverul. Încercați din nou mai târziu."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Conexiunea la server a expirat."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Pagina conţine prea multe redirecţionări de server."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protocolul nu este acceptat."</string>
@@ -157,7 +157,7 @@
     <string name="httpErrorBadUrl" msgid="3636929722728881972">"Pagina nu a putut fi deschisă, deoarece adresa URL nu este validă."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Fişierul nu a putut fi accesat."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Nu s-a putut găsi fişierul solicitat."</string>
-    <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Există prea multe solicitări în curs de procesare. Încercaţi din nou mai târziu."</string>
+    <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Există prea multe solicitări în curs de procesare. Încercați din nou mai târziu."</string>
     <string name="notification_title" msgid="8967710025036163822">"Eroare de conectare pentru <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Sincronizare"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronizare"</string>
@@ -182,7 +182,7 @@
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opţiuni telefon"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Mod Silenţios"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Activați funcţia wireless"</string>
-    <string name="turn_off_radio" msgid="8198784949987062346">"Dezactivaţi funcţia wireless"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"Dezactivați funcţia wireless"</string>
     <string name="screen_lock" msgid="799094655496098153">"Blocați ecranul"</string>
     <string name="power_off" msgid="4266614107412865048">"Opriți alimentarea"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Sonerie dezactivată"</string>
@@ -659,8 +659,8 @@
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Urgență"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Reveniţi la apel"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Corect!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Încercaţi din nou"</string>
-    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Încercaţi din nou"</string>
+    <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Încercați din nou"</string>
+    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Încercați din nou"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"S-a depăşit numărul maxim de încercări pentru Deblocare facială"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Niciun card SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nu există card SIM în computerul tablet PC."</string>
@@ -683,19 +683,19 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consultaţi Ghidul de utilizare sau contactaţi Serviciul de relaţii cu clienţii."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Cardul SIM este blocat."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Se deblochează cardul SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. \n\nÎncercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Aţi introdus incorect parola de <xliff:g id="NUMBER_0">%d</xliff:g> ori. \n\nÎncercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Aţi introdus incorect codul PIN de <xliff:g id="NUMBER_0">%d</xliff:g> ori.\n\nÎncercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul datelor de conectare la Google.\n\n Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Aţi introdus incorect parola de <xliff:g id="NUMBER_0">%d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Aţi introdus incorect codul PIN de <xliff:g id="NUMBER_0">%d</xliff:g> ori.\n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul datelor de conectare la Google.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereușite, vi se va solicita să deblocați televizorul cu ajutorul datelor de conectare la Google.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul datelor de conectare la Google.\n\n Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul datelor de conectare la Google.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Aţi efectuat <xliff:g id="NUMBER_0">%d</xliff:g> încercări incorecte de deblocare a tabletei. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, aceasta va fi resetată la setările prestabilite din fabrică, iar toate datele de utilizator vor fi pierdute."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Ați efectuat <xliff:g id="NUMBER_0">%d</xliff:g> încercări incorecte de deblocare a televizorului. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereușite, televizorul va reveni la setările prestabilite din fabrică, iar toate datele de utilizator se vor pierde."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Aţi efectuat <xliff:g id="NUMBER_0">%d</xliff:g> încercări incorecte de deblocare a telefonului. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, acesta va fi resetat la setările prestabilite din fabrică, iar toate datele de utilizator vor fi pierdute."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Aţi efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a tabletei. Tableta va fi acum resetată la setările prestabilite din fabrică."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a televizorului. Televizorul va reveni acum la setările prestabilite din fabrică."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Aţi efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a telefonului. Acesta va fi acum resetat la setările prestabilite din fabrică."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Încercaţi din nou peste <xliff:g id="NUMBER">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Încercați din nou peste <xliff:g id="NUMBER">%d</xliff:g> (de) secunde."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Aţi uitat modelul?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Deblocare cont"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Prea multe încercări de desenare a modelului"</string>
@@ -805,7 +805,7 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Ștergeţi interogarea"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Trimiteţi interogarea"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Căutare vocală"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Activaţi Exploraţi prin atingere?"</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Activați Exploraţi prin atingere?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> doreşte să activeze funcţia Exploraţi prin atingere. Când această funcţie este activată, puteţi auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteţi efectua gesturi pentru a interacţiona cu tableta."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> doreşte să activeze funcţia Exploraţi prin atingere. Când această funcţie este activată, puteţi auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteţi efectua gesturi pentru a interacţiona cu telefonul."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"cu 1 lună în urmă"</string>
@@ -903,7 +903,7 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Din păcate, <xliff:g id="APPLICATION">%1$s</xliff:g> s-a oprit."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Din păcate, procesul <xliff:g id="PROCESS">%1$s</xliff:g> s-a oprit."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"Silence se blochează din cauza procesului <xliff:g id="PROCESS">%1$s</xliff:g> până la repornire."</string>
+    <string name="aerr_process_silence" msgid="4226685530196000222">"Nu mai afișa blocările aplicației <xliff:g id="PROCESS">%1$s</xliff:g> până la repornire."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"Aplicaţia <xliff:g id="APPLICATION">%2$s</xliff:g> nu răspunde.\n\nDoriţi să o închideţi?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Activitatea <xliff:g id="ACTIVITY">%1$s</xliff:g> nu răspunde.\n\nDoriţi să o închideţi?"</string>
@@ -1272,7 +1272,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Model greşit"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Parolă greşită"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Cod PIN greşit"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Încercaţi din nou peste <xliff:g id="NUMBER">%1$d</xliff:g> (de) secunde."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Încercați din nou peste <xliff:g id="NUMBER">%1$d</xliff:g> (de) secunde."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Desenaţi modelul"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Introduceţi codul PIN al cardului SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Introduceţi codul PIN"</string>
@@ -1294,18 +1294,18 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nume de utilizator sau parolă nevalide."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Aţi uitat numele de utilizator sau parola?\nAccesaţi "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Se verifică contul…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Aţi introdus incorect codul PIN de <xliff:g id="NUMBER_0">%d</xliff:g> ori.\n\nÎncercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Aţi introdus incorect parola de <xliff:g id="NUMBER_0">%d</xliff:g> ori. \n\nÎncercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. \n\nÎncercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Aţi introdus incorect codul PIN de <xliff:g id="NUMBER_0">%d</xliff:g> ori.\n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Aţi introdus incorect parola de <xliff:g id="NUMBER_0">%d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Aţi efectuat <xliff:g id="NUMBER_0">%d</xliff:g> încercări incorecte de deblocare a tabletei. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, aceasta va fi resetată la setările prestabilite din fabrică, iar toate datele de utilizator se vor pierde."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Ați efectuat <xliff:g id="NUMBER_0">%d</xliff:g> încercări incorecte de deblocare a televizorului. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereușite, televizorul va reveni la setările prestabilite din fabrică, iar toate datele de utilizator se vor pierde."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Aţi efectuat <xliff:g id="NUMBER_0">%d</xliff:g> încercări incorecte de deblocare a telefonului. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, acesta va fi resetat la setările prestabilite din fabrică, iar toate datele de utilizator se vor pierde."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Aţi efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a tabletei. Tableta va fi acum resetată la setările prestabilite din fabrică."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a televizorului. Televizorul va reveni acum la setările prestabilite din fabrică."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Aţi efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a telefonului. Telefonul va fi acum resetat la setările prestabilite din fabrică."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul unui cont de e-mail.\n\n Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereușite, vi se va solicita să deblocați televizorul cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail.\n\n Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminaţi"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ridicați volumul mai sus de nivelul recomandat?\n\nAscultarea la volum ridicat pe perioade lungi de timp vă poate afecta auzul."</string>
