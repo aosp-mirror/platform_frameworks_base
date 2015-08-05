@@ -131,6 +131,7 @@ class Layout extends RelativeLayout {
         HardwareConfig hwConfig = getParams().getHardwareConfig();
         Density density = hwConfig.getDensity();
         boolean isRtl = Bridge.isLocaleRtl(getParams().getLocale());
+        setLayoutDirection(isRtl? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR);
 
         NavigationBar navBar = null;
         if (mBuilder.hasNavBar()) {
