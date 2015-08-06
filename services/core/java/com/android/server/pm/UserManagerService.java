@@ -135,6 +135,11 @@ public class UserManagerService extends IUserManager.Stub {
     // without first making sure that the rest of the framework is prepared for it.
     private static final int MAX_MANAGED_PROFILES = 1;
 
+    /**
+     * Flag indicating whether device credentials are shared among same-user profiles.
+     */
+    private static final boolean CONFIG_PROFILES_SHARE_CREDENTIAL = true;
+
     // Set of user restrictions, which can only be enforced by the system
     private static final Set<String> SYSTEM_CONTROLLED_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_RECORD_AUDIO);
@@ -314,6 +319,21 @@ public class UserManagerService extends IUserManager.Stub {
             users.add(profile);
         }
         return users;
+    }
+
+    @Override
+    public int getCredentialOwnerProfile(int userHandle) {
+        checkManageUsersPermission("get the credential owner");
+        if (CONFIG_PROFILES_SHARE_CREDENTIAL) {
+            synchronized (mPackagesLock) {
+                UserInfo profileParent = getProfileParentLocked(userHandle);
+                if (profileParent != null) {
+                    return profileParent.id;
+                }
+            }
+        }
+
+        return userHandle;
     }
 
     @Override
@@ -943,7 +963,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void writeRestrictionsLocked(XmlSerializer serializer, Bundle restrictions) 
+    private void writeRestrictionsLocked(XmlSerializer serializer, Bundle restrictions)
             throws IOException {
         serializer.startTag(null, TAG_RESTRICTIONS);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_WIFI);
