@@ -105,7 +105,10 @@ public class PopupWindow {
     /** View that handles event dispatch and content transitions. */
     private PopupDecorView mDecorView;
 
-    /** The contents of the popup. */
+    /** View that holds the background and may animate during a transition. */
+    private View mBackgroundView;
+
+    /** The contents of the popup. May be identical to the background view. */
     private View mContentView;
 
     private boolean mFocusable;
@@ -1111,18 +1114,18 @@ public class PopupWindow {
         if (aboveAnchor != mAboveAnchor) {
             mAboveAnchor = aboveAnchor;
 
-            if (mBackground != null) {
-                // If the background drawable provided was a StateListDrawable with above-anchor
-                // and below-anchor states, use those. Otherwise rely on refreshDrawableState to
-                // do the job.
+            if (mBackground != null && mBackgroundView != null) {
+                // If the background drawable provided was a StateListDrawable
+                // with above-anchor and below-anchor states, use those.
+                // Otherwise, rely on refreshDrawableState to do the job.
                 if (mAboveAnchorBackgroundDrawable != null) {
                     if (mAboveAnchor) {
-                        mDecorView.setBackground(mAboveAnchorBackgroundDrawable);
+                        mBackgroundView.setBackground(mAboveAnchorBackgroundDrawable);
                     } else {
-                        mDecorView.setBackground(mBelowAnchorBackgroundDrawable);
+                        mBackgroundView.setBackground(mBelowAnchorBackgroundDrawable);
                     }
                 } else {
-                    mDecorView.refreshDrawableState();
+                    mBackgroundView.refreshDrawableState();
                 }
             }
         }
@@ -1164,22 +1167,21 @@ public class PopupWindow {
 
         // When a background is available, we embed the content view within
         // another view that owns the background drawable.
-        final View backgroundView;
         if (mBackground != null) {
-            backgroundView = createBackgroundView(mContentView);
-            backgroundView.setBackground(mBackground);
+            mBackgroundView = createBackgroundView(mContentView);
+            mBackgroundView.setBackground(mBackground);
         } else {
-            backgroundView = mContentView;
+            mBackgroundView = mContentView;
         }
 
-        mDecorView = createDecorView(backgroundView);
+        mDecorView = createDecorView(mBackgroundView);
 
         // The background owner should be elevated so that it casts a shadow.
-        backgroundView.setElevation(mElevation);
+        mBackgroundView.setElevation(mElevation);
 
         // We may wrap that in another view, so we'll need to manually specify
         // the surface insets.
-        final int surfaceInset = (int) Math.ceil(backgroundView.getZ() * 2);
+        final int surfaceInset = (int) Math.ceil(mBackgroundView.getZ() * 2);
         p.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
         p.hasManualSurfaceInsets = true;
 
@@ -1650,6 +1652,7 @@ public class PopupWindow {
         // This needs to stay until after all transitions have ended since we
         // need the reference to cancel transitions in preparePopup().
         mDecorView = null;
+        mBackgroundView = null;
         mIsTransitioningToDismiss = false;
     }
 
