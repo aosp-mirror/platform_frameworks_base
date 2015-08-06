@@ -165,7 +165,7 @@ public class ServiceWatcher implements ServiceConnection {
             intent.setPackage(justCheckThisPackage);
         }
         List<ResolveInfo> rInfos = mPm.queryIntentServicesAsUser(intent,
-                PackageManager.GET_META_DATA, UserHandle.USER_OWNER);
+                PackageManager.GET_META_DATA, UserHandle.USER_SYSTEM);
         int bestVersion = Integer.MIN_VALUE;
         String bestPackage = null;
         boolean bestIsMultiuser = false;
@@ -242,7 +242,7 @@ public class ServiceWatcher implements ServiceConnection {
         if (D) Log.d(mTag, "binding " + packageName + " (version " + version + ") ("
                 + (isMultiuser ? "multi" : "single") + "-user)");
         mContext.bindServiceAsUser(intent, this, Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                | Context.BIND_NOT_VISIBLE, mIsMultiuser ? UserHandle.OWNER : UserHandle.CURRENT);
+                | Context.BIND_NOT_VISIBLE, mIsMultiuser ? UserHandle.SYSTEM : UserHandle.CURRENT);
     }
 
     public static boolean isSignatureMatch(Signature[] signatures,
