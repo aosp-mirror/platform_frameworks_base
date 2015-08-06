@@ -419,8 +419,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         updateRecentsTasks();
 
         // If this is a new instance from a configuration change, then we have to manually trigger
-        // the enter animation state
-        if (mConfig.launchedHasConfigurationChanged) {
+        // the enter animation state, or if recents was relaunched by AM, without going through
+        // the normal mechanisms
+        boolean wasLaunchedByAm = !mConfig.launchedFromHome && !mConfig.launchedFromAppWithThumbnail;
+        if (mConfig.launchedHasConfigurationChanged || wasLaunchedByAm) {
             onEnterAnimationTriggered();
         }
 
@@ -454,6 +456,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Unregister any broadcast receivers for the task loader
         loader.unregisterReceivers();
+
+        // Workaround for b/22542869, if the RecentsActivity is started again, but without going
+        // through SystemUI, we need to reset the config launch flags to ensure that we do not
+        // wait on the system to send a signal that was never queued.
+        mConfig.launchedFromHome = false;
+        mConfig.launchedFromSearchHome = false;
+        mConfig.launchedFromAppWithThumbnail = false;
+        mConfig.launchedToTaskId = -1;
+        mConfig.launchedWithAltTab = false;
+        mConfig.launchedHasConfigurationChanged = false;
     }
 
     @Override
