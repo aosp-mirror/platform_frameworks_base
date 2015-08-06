@@ -298,11 +298,11 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
 
     String8 storageSource;
     if (mount_mode == MOUNT_EXTERNAL_DEFAULT) {
-        storageSource = "/mnt/runtime_default";
+        storageSource = "/mnt/runtime/default";
     } else if (mount_mode == MOUNT_EXTERNAL_READ) {
-        storageSource = "/mnt/runtime_read";
+        storageSource = "/mnt/runtime/read";
     } else if (mount_mode == MOUNT_EXTERNAL_WRITE) {
-        storageSource = "/mnt/runtime_write";
+        storageSource = "/mnt/runtime/write";
     } else {
         // Sane default of no storage visible
         return true;
