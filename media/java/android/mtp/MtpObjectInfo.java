@@ -43,7 +43,7 @@ public final class MtpObjectInfo {
     private long mDateModified;
     private String mKeywords;
 
-    // only instantiated via JNI
+    // only instantiated via JNI or via a builder
     private MtpObjectInfo() {
     }
 
@@ -251,5 +251,155 @@ public final class MtpObjectInfo {
      */
     public final String getKeywords() {
         return mKeywords;
+    }
+
+    /**
+     * Builds a new object info instance.
+     */
+    public class Builder {
+        private MtpObjectInfo mObjectInfo;
+
+        public Builder() {
+            mObjectInfo = new MtpObjectInfo();
+            mObjectInfo.mHandle = -1;
+        }
+
+        /**
+         * Creates a builder on a copy of an existing object info.
+         * All fields, except the object handle will be copied.
+         *
+         * @param objectInfo object info of an existing entry
+         */
+        public Builder(MtpObjectInfo objectInfo) {
+            mObjectInfo = new MtpObjectInfo();
+            mObjectInfo.mHandle = -1;
+            mObjectInfo.mAssociationDesc = mObjectInfo.mAssociationDesc;
+            mObjectInfo.mAssociationType = mObjectInfo.mAssociationType;
+            mObjectInfo.mCompressedSize = mObjectInfo.mCompressedSize;
+            mObjectInfo.mDateCreated = mObjectInfo.mDateCreated;
+            mObjectInfo.mDateModified = mObjectInfo.mDateModified;
+            mObjectInfo.mFormat = mObjectInfo.mFormat;
+            mObjectInfo.mImagePixDepth = mObjectInfo.mImagePixDepth;
+            mObjectInfo.mImagePixHeight = mObjectInfo.mImagePixHeight;
+            mObjectInfo.mImagePixWidth = mObjectInfo.mImagePixWidth;
+            mObjectInfo.mKeywords = mObjectInfo.mKeywords;
+            mObjectInfo.mName = mObjectInfo.mName;
+            mObjectInfo.mParent = mObjectInfo.mParent;
+            mObjectInfo.mProtectionStatus = mObjectInfo.mProtectionStatus;
+            mObjectInfo.mSequenceNumber = mObjectInfo.mSequenceNumber;
+            mObjectInfo.mStorageId = mObjectInfo.mStorageId;
+            mObjectInfo.mThumbCompressedSize = mObjectInfo.mThumbCompressedSize;
+            mObjectInfo.mThumbFormat = mObjectInfo.mThumbFormat;
+            mObjectInfo.mThumbPixHeight = mObjectInfo.mThumbPixHeight;
+            mObjectInfo.mThumbPixWidth = mObjectInfo.mThumbPixWidth;
+        }
+
+        public Builder setAssociationDesc(int value) {
+            mObjectInfo.mAssociationDesc = value;
+            return this;
+        }
+
+        public Builder setAssociationType(int value) {
+            mObjectInfo.mAssociationType = value;
+            return this;
+        }
+
+        public Builder setCompressedSize(int value) {
+            mObjectInfo.mCompressedSize = value;
+            return this;
+        }
+
+        public Builder setDateCreated(long value) {
+            mObjectInfo.mDateCreated = value;
+            return this;
+        }
+
+        public Builder setDateModified(long value) {
+            mObjectInfo.mDateModified = value;
+            return this;
+        }
+
+        public Builder setFormat(int value) {
+            mObjectInfo.mFormat = value;
+            return this;
+        }
+
+        public Builder setImagePixDepth(int value) {
+            mObjectInfo.mImagePixDepth = value;
+            return this;
+        }
+
+        public Builder setImagePixHeight(int value) {
+            mObjectInfo.mImagePixHeight = value;
+            return this;
+        }
+
+        public Builder setImagePixWidth(int value) {
+            mObjectInfo.mImagePixWidth = value;
+            return this;
+        }
+
+        public Builder setKeywords(String value) {
+            mObjectInfo.mKeywords = value;
+            return this;
+        }
+
+        public Builder setName(String value) {
+            mObjectInfo.mName = value;
+            return this;
+        }
+
+        public Builder setParent(int value) {
+            mObjectInfo.mParent = value;
+            return this;
+        }
+
+        public Builder setProtectionStatus(int value) {
+            mObjectInfo.mProtectionStatus = value;
+            return this;
+        }
+
+        public Builder setSequenceNumber(int value) {
+            mObjectInfo.mSequenceNumber = value;
+            return this;
+        }
+
+        public Builder setStorageId(int value) {
+            mObjectInfo.mStorageId = value;
+            return this;
+        }
+
+        public Builder setThumbCompressedSize(int value) {
+            mObjectInfo.mThumbCompressedSize = value;
+            return this;
+        }
+
+        public Builder setThumbFormat(int value) {
+            mObjectInfo.mThumbFormat = value;
+            return this;
+        }
+
+        public Builder setThumbPixHeight(int value) {
+            mObjectInfo.mThumbPixHeight = value;
+            return this;
+        }
+
+        public Builder setThumbPixWidth(int value) {
+            mObjectInfo.mThumbPixWidth = value;
+            return this;
+        }
+
+        /**
+         * Builds the object info instance. Once called, methods of the builder
+         * must not be called anymore.
+         *
+         * @return the object info of the newly created file, or NULL in case
+         *         of an error.
+         */
+        public MtpObjectInfo build() {
+            MtpObjectInfo result = mObjectInfo;
+            mObjectInfo = null;
+            return result;
+        }
     }
 }

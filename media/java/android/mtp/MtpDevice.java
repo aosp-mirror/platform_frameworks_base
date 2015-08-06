@@ -250,6 +250,33 @@ public final class MtpDevice {
         return native_import_file(objectHandle, descriptor.getFd());
     }
 
+    /**
+     * Copies the data for an object from a file descriptor.
+     * This call may block for an arbitrary amount of time depending on the size
+     * of the data and speed of the devices. The file descriptor is not closed
+     * on completion, and must be done by the caller.
+     *
+     * @param objectHandle handle of the target file
+     * @param descriptor file descriptor to read the data from.
+     * @return true if the file transfer succeeds
+     */
+    public boolean sendObject(int objectHandle, ParcelFileDescriptor descriptor) {
+        return native_send_object(objectHandle, descriptor.getFd());
+    }
+
+    /**
+     * Uploads an object metadata for a new entry. The {@link MtpObjectInfo} can be
+     * created with the {@link MtpObjectInfo.Builder} class.
+     *
+     * The returned {@link MtpObjectInfo} has the new object handle field filled in.
+     *
+     * @param info metadata of the entry
+     * @return object info of the created entry
+     */
+    public MtpObjectInfo sendObjectInfo(MtpObjectInfo info) {
+        return native_send_object_info(info);
+    }
+
     // used by the JNI code
     private long mNativeContext;
 
@@ -267,4 +294,6 @@ public final class MtpDevice {
     private native long native_get_storage_id(int objectHandle);
     private native boolean native_import_file(int objectHandle, String destPath);
     private native boolean native_import_file(int objectHandle, int fd);
+    private native boolean native_send_object(int objectHandle, int fd);
+    private native MtpObjectInfo native_send_object_info(MtpObjectInfo info);
 }
