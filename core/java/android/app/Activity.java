@@ -1172,6 +1172,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Called when an {@link #onResume} is coming up, prior to other pre-resume callbacks
+     * such as {@link #onNewIntent} and {@link #onActivityResult}.  This is primarily intended
+     * to give the activity a hint that its state is no longer saved -- it will generally
+     * be called after {@link #onSaveInstanceState} and prior to the activity being
+     * resumed/started again.
+     */
+    public void onStateNotSaved() {
+    }
+
+    /**
      * Called after {@link #onRestoreInstanceState}, {@link #onRestart}, or
      * {@link #onPause}, for your activity to start interacting with the user.
      * This is a good place to begin animations, open exclusive-access devices
