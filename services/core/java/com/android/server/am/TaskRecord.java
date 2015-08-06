@@ -806,7 +806,8 @@ final class TaskRecord {
     }
 
     boolean isLockTaskWhitelistedLocked() {
-        if (mCallingPackage == null) {
+        String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
+        if (pkg == null) {
             return false;
         }
         String[] packages = mService.mLockTaskPackages.get(userId);
@@ -814,7 +815,7 @@ final class TaskRecord {
             return false;
         }
         for (int i = packages.length - 1; i >= 0; --i) {
-            if (mCallingPackage.equals(packages[i])) {
+            if (pkg.equals(packages[i])) {
                 return true;
             }
         }
