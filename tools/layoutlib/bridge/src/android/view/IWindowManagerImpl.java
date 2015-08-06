@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Point;
+import android.graphics.Rect;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -72,11 +73,11 @@ public class IWindowManagerImpl implements IWindowManager {
     // ---- unused implementation of IWindowManager ----
 
     @Override
-    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
-            boolean arg5, boolean arg6, int arg7, int arg8, boolean arg9, boolean arg10)
-            throws RemoteException {
+    public Configuration addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
+            boolean arg5, boolean arg6, int arg7, int arg8, boolean arg9, boolean arg10,
+            Rect arg11) throws RemoteException {
         // TODO Auto-generated method stub
-
+        return Configuration.EMPTY;
     }
 
     @Override
@@ -307,9 +308,9 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void setAppTask(IBinder arg0, int arg1) throws RemoteException {
+    public Configuration setAppTask(IBinder arg0, int arg1, Rect arg2) throws RemoteException {
         // TODO Auto-generated method stub
-
+        return Configuration.EMPTY;
     }
 
     @Override
