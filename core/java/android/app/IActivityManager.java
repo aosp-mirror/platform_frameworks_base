@@ -93,7 +93,7 @@ public interface IActivityManager extends IInterface {
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent, Bundle options) throws RemoteException;
     public int startActivityFromRecents(int taskId, Bundle options) throws RemoteException;
-    public boolean finishActivity(IBinder token, int code, Intent data, boolean finishTask)
+    public boolean finishActivity(IBinder token, int code, Intent data, int finishTask)
             throws RemoteException;
     public void finishSubActivity(IBinder token, String resultWho, int requestCode) throws RemoteException;
     public boolean finishActivityAffinity(IBinder token) throws RemoteException;
@@ -527,6 +527,9 @@ public interface IActivityManager extends IInterface {
     // descriptor.
     public boolean stopBinderTrackingAndDump(ParcelFileDescriptor fd) throws RemoteException;
 
+    public int getActivityStackId(IBinder token) throws RemoteException;
+    public void moveActivityToStack(IBinder token, int stackId) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -879,4 +882,6 @@ public interface IActivityManager extends IInterface {
     int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 340;
     int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 341;
     int POSITION_TASK_IN_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 342;
+    int GET_ACTIVITY_STACK_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 343;
+    int MOVE_ACTIVITY_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 344;
 }

@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
@@ -94,7 +97,7 @@ final class TaskRecord {
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
     private static final String ATTR_RESIZEABLE = "resizeable";
     private static final String ATTR_PRIVILEGED = "privileged";
-    private static final String ATTR_BOUNDS = "bounds";
+    private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
@@ -207,6 +210,10 @@ final class TaskRecord {
 
     // Bounds of the Task. null for fullscreen tasks.
     Rect mBounds = null;
+    // Last non-fullscreen bounds the task was launched in or resized to.
+    // The information is persisted and used to determine the appropriate stack to launch the
+    // task into on restore.
+    Rect mLastNonFullscreenBounds = null;
 
     Configuration mOverrideConfig = Configuration.EMPTY;
 
@@ -301,7 +308,7 @@ final class TaskRecord {
         mCallingPackage = callingPackage;
         mResizeable = resizeable;
         mPrivileged = privileged;
-        mBounds = bounds;
+        mBounds = mLastNonFullscreenBounds = bounds;
     }
 
     void touchActiveTime() {
@@ -963,8 +970,9 @@ final class TaskRecord {
         out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
         out.attribute(null, ATTR_RESIZEABLE, String.valueOf(mResizeable));
         out.attribute(null, ATTR_PRIVILEGED, String.valueOf(mPrivileged));
-        if (mBounds != null) {
-            out.attribute(null, ATTR_BOUNDS, mBounds.flattenToString());
+        if (mLastNonFullscreenBounds != null) {
+            out.attribute(
+                    null, ATTR_NON_FULLSCREEN_BOUNDS, mLastNonFullscreenBounds.flattenToString());
         }
 
         if (affinityIntent != null) {
@@ -1084,7 +1092,7 @@ final class TaskRecord {
                 resizeable = Boolean.valueOf(attrValue);
             } else if (ATTR_PRIVILEGED.equals(attrName)) {
                 privileged = Boolean.valueOf(attrValue);
-            } else if (ATTR_BOUNDS.equals(attrName)) {
+            } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
                 bounds = Rect.unflattenFromString(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
@@ -1155,14 +1163,51 @@ final class TaskRecord {
         return task;
     }
 
-    boolean updateOverrideConfiguration(Configuration newConfig) {
+    boolean updateOverrideConfiguration(Configuration newConfig, Rect bounds) {
         Configuration oldConfig = mOverrideConfig;
         mOverrideConfig = (newConfig == null) ? Configuration.EMPTY : newConfig;
         // We override the configuration only when the task's dimensions are different from the
         // display. In this manner, we know that if the override configuration is empty, the task
         // is necessarily fullscreen.
         mFullscreen = Configuration.EMPTY.equals(mOverrideConfig);
+        if (mFullscreen) {
+            if (mBounds != null) {
+                mLastNonFullscreenBounds = mBounds;
+            }
+            mBounds = null;
+        } else {
+            mBounds = mLastNonFullscreenBounds = new Rect(bounds);
+        }
         return !mOverrideConfig.equals(oldConfig);
+    }
+
+    /** Returns the stack that should be used to launch this task. */
+    int getLaunchStackId(ActivityStack focusStack) {
+        if (stack != null) {
+            // We are already in a stack silly...
+            return stack.mStackId;
+        }
+        if (isHomeTask()) {
+            return HOME_STACK_ID;
+        }
+        if (focusStack != null && focusStack.mStackId != HOME_STACK_ID) {
+            // Like it or not you are going in the focused stack!
+            return focusStack.mStackId;
+        }
+        if (mBounds != null || mLastNonFullscreenBounds != null) {
+            return FREEFORM_WORKSPACE_STACK_ID;
+        }
+        return FULLSCREEN_WORKSPACE_STACK_ID;
+    }
+
+    /** Returns the bounds that should be used to launch this task. */
+    Rect getLaunchBounds() {
+        if (stack == null
+                || stack.mStackId == HOME_STACK_ID
+                || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+            return null;
+        }
+        return mLastNonFullscreenBounds;
     }
 
     void dump(PrintWriter pw, String prefix) {

@@ -346,7 +346,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             if (data.readInt() != 0) {
                 resultData = Intent.CREATOR.createFromParcel(data);
             }
-            boolean finishTask = (data.readInt() != 0);
+            int finishTask = data.readInt();
             boolean res = finishActivity(token, resultCode, resultData, finishTask);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
@@ -2636,6 +2636,22 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(res ? 1 : 0);
             return true;
         }
+        case GET_ACTIVITY_STACK_ID_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            int stackId = getActivityStackId(token);
+            reply.writeNoException();
+            reply.writeInt(stackId);
+            return true;
+        }
+        case MOVE_ACTIVITY_TO_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            int stackId = data.readInt();
+            moveActivityToStack(token, stackId);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -2949,7 +2965,7 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return result;
     }
-    public boolean finishActivity(IBinder token, int resultCode, Intent resultData, boolean finishTask)
+    public boolean finishActivity(IBinder token, int resultCode, Intent resultData, int finishTask)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2962,7 +2978,7 @@ class ActivityManagerProxy implements IActivityManager
         } else {
             data.writeInt(0);
         }
-        data.writeInt(finishTask ? 1 : 0);
+        data.writeInt(finishTask);
         mRemote.transact(FINISH_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
@@ -6099,6 +6115,33 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res != 0;
+    }
+
+    @Override
+    public void moveActivityToStack(IBinder token, int stackId) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        data.writeInt(stackId);
+        mRemote.transact(MOVE_ACTIVITY_TO_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public int getActivityStackId(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(GET_ACTIVITY_STACK_ID_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int stackId = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return stackId;
     }
 
     private IBinder mRemote;

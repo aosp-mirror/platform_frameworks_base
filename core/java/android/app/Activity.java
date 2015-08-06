@@ -31,6 +31,7 @@ import android.transition.Scene;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
+import android.view.Window.WindowStackCallback;
 import android.widget.Toolbar;
 
 import com.android.internal.app.IVoiceInteractor;
@@ -672,7 +673,7 @@ public class Activity extends ContextThemeWrapper
         implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
-        Window.OnWindowDismissedCallback {
+        Window.OnWindowDismissedCallback, WindowStackCallback {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -682,6 +683,13 @@ public class Activity extends ContextThemeWrapper
     public static final int RESULT_OK           = -1;
     /** Start of user-defined activity results. */
     public static final int RESULT_FIRST_USER   = 1;
+
+    /** @hide Task isn't finished when activity is finished */
+    public static final int DONT_FINISH_TASK_WITH_ACTIVITY = 0;
+    /** @hide Task is finished if the finishing activity is the root of the task */
+    public static final int FINISH_TASK_WITH_ROOT_ACTIVITY = 1;
+    /** @hide Task is finished along with the finishing activity*/
+    public static final int FINISH_TASK_WITH_ACTIVITY = 2;
 
     static final String FRAGMENTS_TAG = "android:fragments";
 
@@ -2699,8 +2707,30 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @Override
-    public void onWindowDismissed() {
-        finish();
+    public void onWindowDismissed(boolean finishTask) {
+        finish(finishTask ? FINISH_TASK_WITH_ACTIVITY : DONT_FINISH_TASK_WITH_ACTIVITY);
+    }
+
+
+    /** Called to move the window and its activity/task to a different stack container.
+     * For example, a window can move between
+     * {@link android.app.ActivityManager#FULLSCREEN_WORKSPACE_STACK_ID} stack and
+     * {@link android.app.ActivityManager#FREEFORM_WORKSPACE_STACK_ID} stack.
+     *
+     * @param stackId stack Id to change to.
+     * @hide
+     */
+    @Override
+    public void changeWindowStack(int stackId) throws RemoteException {
+        ActivityManagerNative.getDefault().moveActivityToStack(mToken, stackId);
+    }
+
+    /** Returns the current stack Id for the window.
+     * @hide
+     */
+    @Override
+    public int getWindowStackId() throws RemoteException {
+        return ActivityManagerNative.getDefault().getActivityStackId(mToken);
     }
 
     /**
@@ -4848,7 +4878,7 @@ public class Activity extends ContextThemeWrapper
      * Finishes the current activity and specifies whether to remove the task associated with this
      * activity.
      */
-    private void finish(boolean finishTask) {
+    private void finish(int finishTask) {
         if (mParent == null) {
             int resultCode;
             Intent resultData;
@@ -4879,7 +4909,7 @@ public class Activity extends ContextThemeWrapper
      * onActivityResult().
      */
     public void finish() {
-        finish(false);
+        finish(DONT_FINISH_TASK_WITH_ACTIVITY);
     }
 
     /**
@@ -4979,10 +5009,10 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Call this when your activity is done and should be closed and the task should be completely
-     * removed as a part of finishing the Activity.
+     * removed as a part of finishing the root activity of the task.
      */
     public void finishAndRemoveTask() {
-        finish(true);
+        finish(FINISH_TASK_WITH_ROOT_ACTIVITY);
     }
 
     /**

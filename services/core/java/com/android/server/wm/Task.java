@@ -76,12 +76,13 @@ class Task implements DimLayer.DimLayerUser {
     // of creating a new object per fullscreen task on a display.
     private static final SparseArray<DimLayer> sSharedFullscreenDimLayers = new SparseArray<>();
 
-    Task(int taskId, TaskStack stack, int userId, WindowManagerService service) {
+    Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
         mOverrideConfig = Configuration.EMPTY;
+        setBounds(bounds);
     }
 
     DisplayContent getDisplayContent() {

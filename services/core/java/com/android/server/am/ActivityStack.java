@@ -25,7 +25,9 @@ import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 
+import android.graphics.Rect;
 import android.util.ArraySet;
+import android.view.IApplicationToken;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BatteryStatsImpl;
@@ -2157,11 +2159,7 @@ final class ActivityStack {
                                 + task, new RuntimeException("here").fillInStackTrace());
                         task.addActivityToTop(r);
                         r.putInHistory();
-                        mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
-                                r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                                (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0,
-                                r.userId, r.info.configChanges, task.voiceSession != null,
-                                r.mLaunchTaskBehind);
+                        addAppToken(r, task);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
                         }
@@ -2221,10 +2219,7 @@ final class ActivityStack {
                         : AppTransition.TRANSIT_ACTIVITY_OPEN, keepCurTransition);
                 mNoAnimActivities.remove(r);
             }
-            mWindowManager.addAppToken(task.mActivities.indexOf(r),
-                    r.appToken, r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                    (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
-                    r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind);
+            addAppToken(r, task);
             boolean doShow = true;
             if (newTask) {
                 // Even though this activity is starting fresh, we still need
@@ -2273,10 +2268,7 @@ final class ActivityStack {
         } else {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
-            mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
-                    r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                    (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
-                    r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind);
+            addAppToken(r, task);
             ActivityOptions.abort(options);
             options = null;
         }
@@ -2390,8 +2382,7 @@ final class ActivityStack {
                             + " out to new task " + target.task);
                 }
 
-                final int targetTaskId = targetTask.taskId;
-                mWindowManager.setAppTask(target.appToken, targetTaskId);
+                setAppTask(target, targetTask);
 
                 boolean noOptions = canMoveOptions;
                 final int start = replyChainEnd < 0 ? i : replyChainEnd;
@@ -2416,10 +2407,10 @@ final class ActivityStack {
                     p.setTask(targetTask, null);
                     targetTask.addActivityAtBottom(p);
 
-                    mWindowManager.setAppTask(p.appToken, targetTaskId);
+                    setAppTask(p, targetTask);
                 }
 
-                mWindowManager.moveTaskToBottom(targetTaskId);
+                mWindowManager.moveTaskToBottom(targetTask.taskId);
                 if (VALIDATE_TOKENS) {
                     validateAppTokensLocked();
                 }
@@ -2558,7 +2549,7 @@ final class ActivityStack {
                                 + " callers=" + Debug.getCallers(3));
                         if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Pulling activity " + p
                                 + " from " + srcPos + " in to resetting task " + task);
-                        mWindowManager.setAppTask(p.appToken, taskId);
+                        setAppTask(p, task);
                     }
                     mWindowManager.moveTaskToTop(taskId);
                     if (VALIDATE_TOKENS) {
@@ -4418,6 +4409,30 @@ final class ActivityStack {
             } catch (RemoteException e) {
             }
         }
+    }
+
+    void addAppToken(ActivityRecord r, TaskRecord task) {
+        final Rect bounds = task.getLaunchBounds();
+        final Configuration config =
+                mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
+                        r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
+                        (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
+                        r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind,
+                        bounds);
+        if (config != null) {
+            task.updateOverrideConfiguration(config, bounds);
+        }
+        r.taskConfigOverride = task.mOverrideConfig;
+    }
+
+    private void setAppTask(ActivityRecord r, TaskRecord task) {
+        final Rect bounds = task.getLaunchBounds();
+        final Configuration config =
+                mWindowManager.setAppTask(r.appToken, task.taskId, task.getLaunchBounds());
+        if (config != null) {
+            task.updateOverrideConfiguration(config, bounds);
+        }
+        r.taskConfigOverride = task.mOverrideConfig;
     }
 
     public int getStackId() {
