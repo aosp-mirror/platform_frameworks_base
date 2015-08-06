@@ -556,6 +556,10 @@ final class ActivityStack {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": mismatch root " + r);
                 continue;
             }
+            if (r.mActivityType != target.mActivityType) {
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": mismatch activity type");
+                continue;
+            }
 
             final Intent taskIntent = task.intent;
             final Intent affinityIntent = task.affinityIntent;
