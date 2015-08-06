@@ -120,6 +120,11 @@ public final class CreateInfo implements ICreateInfo {
     }
 
     @Override
+    public String[] getPromotedFields() {
+        return PROMOTED_FIELDS;
+    }
+
+    @Override
     public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
         return INJECTED_METHODS;
     }
@@ -185,6 +190,8 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.RenderNode#nSetElevation",
         "android.view.RenderNode#nGetElevation",
         "android.view.ViewGroup#drawChild",
+        "android.widget.SimpleMonthView#getTitle",
+        "android.widget.SimpleMonthView#getDayOfWeekLabel",
         "android.widget.TimePickerClockDelegate#getAmOrPmKeyCode",
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
@@ -288,6 +295,12 @@ public final class CreateInfo implements ICreateInfo {
             "android.preference.PreferenceActivity",
             "org.kxml2.io.KXmlParser"
         };
+
+    private final static String[] PROMOTED_FIELDS = new String[] {
+        "android.widget.SimpleMonthView#mTitle",
+        "android.widget.SimpleMonthView#mCalendar",
+        "android.widget.SimpleMonthView#mDayOfWeekLabelCalendar"
+    };
 
     /**
      * List of classes for which the methods returning them should be deleted.
