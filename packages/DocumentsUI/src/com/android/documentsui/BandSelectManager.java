@@ -18,7 +18,6 @@ package com.android.documentsui;
 
 import static com.android.documentsui.Events.isMouseEvent;
 import static com.android.internal.util.Preconditions.checkState;
-import static java.lang.String.format;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -38,6 +37,7 @@ import android.view.View;
 public class BandSelectManager extends RecyclerView.SimpleOnItemTouchListener {
 
     private static final int NOT_SELECTED = -1;
+    private static final int NOT_SET = -1;
 
     // For debugging purposes.
     private static final String TAG = "BandSelectManager";
@@ -50,13 +50,136 @@ public class BandSelectManager extends RecyclerView.SimpleOnItemTouchListener {
 
     private boolean mIsBandSelectActive = false;
     private Point mOrigin;
+    private Point mPointer;
     private Rect mBounds;
-    // Maintain the last selection made by band, so if bounds shink back, we can unselect
-    // the respective items.
 
-    // Track information
+    // Maintain the last selection made by band, so if bounds shrink back, we can deselect
+    // the respective items.
     private int mCursorDeltaY = 0;
     private int mFirstSelected = NOT_SELECTED;
+
+    // The time at which the current band selection-induced scroll began. If no scroll is in
+    // progress, the value is NOT_SET.
+    private long mScrollStartTime = NOT_SET;
+    private final Runnable mScrollRunnable = new Runnable() {
+        /**
+         * The number of milliseconds of scrolling at which scroll speed continues to increase. At
+         * first, the scroll starts slowly; then, the rate of scrolling increases until it reaches
+         * its maximum value at after this many milliseconds.
+         */
+        private static final long SCROLL_ACCELERATION_LIMIT_TIME_MS = 2000;
+
+        @Override
+        public void run() {
+            // Compute the number of pixels the pointer's y-coordinate is past the view. Negative
+            // values mean the pointer is at or before the top of the view, and positive values mean
+            // that the pointer is at or after the bottom of the view. Note that one additional
+            // pixel is added here so that the view still scrolls when the pointer is exactly at the
+            // top or bottom.
+            int pixelsPastView = 0;
+            if (mPointer.y <= 0) {
+                pixelsPastView = mPointer.y - 1;
+            } else if (mPointer.y >= mRecyclerView.getHeight() - 1) {
+                pixelsPastView = mPointer.y - mRecyclerView.getHeight() + 1;
+            }
+
+            if (!mIsBandSelectActive || pixelsPastView == 0) {
+                // If band selection is inactive, or if it is active but not at the edge of the
+                // view, no scrolling is necessary.
+                mScrollStartTime = NOT_SET;
+                return;
+            }
+
+            if (mScrollStartTime == NOT_SET) {
+                // If the pointer was previously not at the edge of the view but now is, set the
+                // start time for the scroll.
+                mScrollStartTime = System.currentTimeMillis();
+            }
+
+            // Compute the number of pixels to scroll, and scroll that many pixels.
+            final int numPixels = computeNumPixelsToScroll(
+                    pixelsPastView, System.currentTimeMillis() - mScrollStartTime);
+            mRecyclerView.scrollBy(0, numPixels);
+
+            // Adjust the y-coordinate of the origin the opposite number of pixels so that the
+            // origin remains in the same place relative to the view's items.
+            mOrigin.y -= numPixels;
+            resizeBandSelectRectangle();
+
+            mRecyclerView.removeCallbacks(mScrollRunnable);
+            mRecyclerView.postOnAnimation(this);
+        }
+
+        /**
+         * Computes the number of pixels to scroll based on how far the pointer is past the end of
+         * the view and how long it has been there. Roughly based on ItemTouchHelper's algorithm for
+         * computing the number of pixels to scroll when an item is dragged to the end of a
+         * {@link RecyclerView}.
+         * @param pixelsPastView
+         * @param scrollDuration
+         * @return
+         */
+        private int computeNumPixelsToScroll(int pixelsPastView, long scrollDuration) {
+            final int maxScrollStep = computeMaxScrollStep(mRecyclerView);
+            final int direction = (int) Math.signum(pixelsPastView);
+            final int absPastView = Math.abs(pixelsPastView);
+
+            // Calculate the ratio of how far out of the view the pointer currently resides to the
+            // entire height of the view.
+            final float outOfBoundsRatio = Math.min(
+                    1.0f, (float) absPastView / mRecyclerView.getHeight());
+            // Interpolate this ratio and use it to compute the maximum scroll that should be
+            // possible for this step.
+            final float cappedScrollStep =
+                    direction * maxScrollStep * smoothOutOfBoundsRatio(outOfBoundsRatio);
+
+            // Likewise, calculate the ratio of the time spent in the scroll to the limit.
+            final float timeRatio = Math.min(
+                    1.0f, (float) scrollDuration / SCROLL_ACCELERATION_LIMIT_TIME_MS);
+            // Interpolate this ratio and use it to compute the final number of pixels to scroll.
+            final int numPixels = (int) (cappedScrollStep * smoothTimeRatio(timeRatio));
+
+            // If the final number of pixels to scroll ends up being 0, the view should still scroll
+            // at least one pixel.
+            return numPixels != 0 ? numPixels : direction;
+        }
+
+        /**
+         * Computes the maximum scroll allowed for a given animation frame. Currently, this
+         * defaults to the height of the view, but this could be tweaked if this results in scrolls
+         * that are too fast or too slow.
+         * @param rv
+         * @return
+         */
+        private int computeMaxScrollStep(RecyclerView rv) {
+            return rv.getHeight();
+        }
+
+        /**
+         * Interpolates the given out of bounds ratio on a curve which starts at (0,0) and ends at
+         * (1,1) and quickly approaches 1 near the start of that interval. This ensures that drags
+         * that are at the edge or barely past the edge of the view still cause sufficient
+         * scrolling. The equation y=(x-1)^5+1 is used, but this could also be tweaked if needed.
+         * @param ratio A ratio which is in the range [0, 1].
+         * @return A "smoothed" value, also in the range [0, 1].
+         */
+        private float smoothOutOfBoundsRatio(float ratio) {
+            return (float) Math.pow(ratio - 1.0f, 5) + 1.0f;
+        }
+
+        /**
+         * Interpolates the given time ratio on a curve which starts at (0,0) and ends at (1,1) and
+         * stays close to 0 for most input values except those very close to 1. This ensures that
+         * scrolls start out very slowly but speed up drastically after the scroll has been in
+         * progress close to SCROLL_ACCELERATION_LIMIT_TIME_MS. The equation y=x^5 is used, but this
+         * could also be tweaked if needed.
+         * @param ratio A ratio which is in the range [0, 1].
+         * @return A "smoothed" value, also in the range [0, 1].
+         */
+        private float smoothTimeRatio(float ratio) {
+            return (float) Math.pow(ratio, 5);
+        }
+    };
 
     /**
      * @param recyclerView
@@ -95,41 +218,48 @@ public class BandSelectManager extends RecyclerView.SimpleOnItemTouchListener {
             return;
         }
 
-        Point point = new Point((int) e.getX(), (int) e.getY());
+        mPointer = new Point((int) e.getX(), (int) e.getY());
         if (!mIsBandSelectActive) {
-            startBandSelect(point);
+            startBandSelect();
         }
 
-        resizeBandSelectRectangle(point);
+        scrollViewIfNecessary();
+        resizeBandSelectRectangle();
         selectChildrenCoveredBySelection();
     }
 
     /**
      * Starts band select by adding the drawable to the RecyclerView's overlay.
-     * @param origin The starting point of the selection.
      */
-    private void startBandSelect(Point origin) {
-        if (DEBUG) Log.d(TAG, "Starting band select from (" + origin.x + "," + origin.y + ").");
+    private void startBandSelect() {
+        if (DEBUG) Log.d(TAG, "Starting band select from (" + mPointer.x + "," + mPointer.y + ").");
         mIsBandSelectActive = true;
-        mOrigin = origin;
+        mOrigin = mPointer;
         mRecyclerView.getOverlay().add(mRegionSelectorDrawable);
+    }
+
+    /**
+     * Scrolls the view if necessary.
+     */
+    private void scrollViewIfNecessary() {
+        mRecyclerView.removeCallbacks(mScrollRunnable);
+        mScrollRunnable.run();
+        mRecyclerView.invalidate();
     }
 
     /**
      * Resizes the band select rectangle by using the origin and the current pointer positoin as
      * two opposite corners of the selection.
-     * @param pointerPosition
      */
-    private void resizeBandSelectRectangle(Point pointerPosition) {
-
+    private void resizeBandSelectRectangle() {
         if (mBounds != null) {
-            mCursorDeltaY = pointerPosition.y - mBounds.bottom;
+            mCursorDeltaY = mPointer.y - mBounds.bottom;
         }
 
-        mBounds = new Rect(Math.min(mOrigin.x, pointerPosition.x),
-                Math.min(mOrigin.y, pointerPosition.y),
-                Math.max(mOrigin.x, pointerPosition.x),
-                Math.max(mOrigin.y, pointerPosition.y));
+        mBounds = new Rect(Math.min(mOrigin.x, mPointer.x),
+                Math.min(mOrigin.y, mPointer.y),
+                Math.max(mOrigin.x, mPointer.x),
+                Math.max(mOrigin.y, mPointer.y));
 
         mRegionSelectorDrawable.setBounds(mBounds);
     }
