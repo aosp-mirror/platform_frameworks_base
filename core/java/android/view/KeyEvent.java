@@ -747,22 +747,32 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_TV_TIMER_PROGRAMMING = 258;
     /** Key code constant: Help key. */
     public static final int KEYCODE_HELP = 259;
-    /** Key code constant: Navigate to previous key. 
+    /** Key code constant: Navigate to previous key.
      * Goes backward by one item in an ordered collection of items. */
     public static final int KEYCODE_NAVIGATE_PREVIOUS = 260;
-    /** Key code constant: Navigate to next key. 
+    /** Key code constant: Navigate to next key.
      * Advances to the next item in an ordered collection of items. */
     public static final int KEYCODE_NAVIGATE_NEXT   = 261;
     /** Key code constant: Navigate in key.
-     * Activates the item that currently has focus or expands to the next level of a navigation 
+     * Activates the item that currently has focus or expands to the next level of a navigation
      * hierarchy. */
     public static final int KEYCODE_NAVIGATE_IN     = 262;
     /** Key code constant: Navigate out key.
-     * Backs out one level of a navigation hierarchy or collapses the item that currently has 
+     * Backs out one level of a navigation hierarchy or collapses the item that currently has
      * focus. */
     public static final int KEYCODE_NAVIGATE_OUT    = 263;
+    /** Key code constant: Skip forward media key. */
+    public static final int KEYCODE_MEDIA_SKIP_FORWARD = 272;
+    /** Key code constant: Skip backward media key. */
+    public static final int KEYCODE_MEDIA_SKIP_BACKWARD = 273;
+    /** Key code constant: Step forward media key.
+     * Steps media forward, one frame at a time. */
+    public static final int KEYCODE_MEDIA_STEP_FORWARD = 274;
+    /** Key code constant: Step backward media key.
+     * Steps media backward, one frame at a time. */
+    public static final int KEYCODE_MEDIA_STEP_BACKWARD = 275;
 
-    private static final int LAST_KEYCODE = KEYCODE_NAVIGATE_OUT;
+    private static final int LAST_KEYCODE = KEYCODE_MEDIA_STEP_BACKWARD;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
