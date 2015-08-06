@@ -281,6 +281,19 @@ public class WifiTracker {
         return mScanResultCache.values();
     }
 
+    private WifiConfiguration getWifiConfigurationForNetworkId(int networkId) {
+        final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
+        if (configs != null) {
+            for (WifiConfiguration config : configs) {
+                if (mLastInfo != null && networkId == config.networkId &&
+                        !(config.selfAdded && config.numAssociation == 0)) {
+                    return config;
+                }
+            }
+        }
+        return null;
+    }
+
     private void updateAccessPoints() {
         // Swap the current access points into a cached list.
         List<AccessPoint> cachedAccessPoints = getAccessPoints();
@@ -295,21 +308,21 @@ public class WifiTracker {
          * correct SSID.  Maps SSID -> List of AccessPoints with the given SSID.  */
         Multimap<String, AccessPoint> apMap = new Multimap<String, AccessPoint>();
         WifiConfiguration connectionConfig = null;
+        if (mLastInfo != null) {
+            connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId());
+        }
 
         final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
         if (configs != null) {
             mSavedNetworksExist = configs.size() != 0;
             for (WifiConfiguration config : configs) {
-                if (mLastInfo != null && mLastInfo.getNetworkId() == config.networkId) {
-                    connectionConfig = config;
-                }
                 if (config.selfAdded && config.numAssociation == 0) {
                     continue;
                 }
                 AccessPoint accessPoint = getCachedOrCreate(config, cachedAccessPoints);
                 if (mLastInfo != null && mLastNetworkInfo != null) {
                     if (config.isPasspoint() == false) {
-                        accessPoint.update(mLastInfo, mLastNetworkInfo);
+                        accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                     }
                 }
                 if (mIncludeSaved) {
@@ -346,7 +359,7 @@ public class WifiTracker {
                 if (!found && mIncludeScans) {
                     AccessPoint accessPoint = getCachedOrCreate(result, cachedAccessPoints);
                     if (mLastInfo != null && mLastNetworkInfo != null) {
-                        accessPoint.update(mLastInfo, mLastNetworkInfo);
+                        accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                     }
 
                     if (result.isPasspointNetwork()) {
@@ -437,9 +450,14 @@ public class WifiTracker {
             mLastNetworkInfo = networkInfo;
         }
 
+        WifiConfiguration connectionConfig = null;
+        if (mLastInfo != null) {
+            connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId());
+        }
+
         boolean reorder = false;
         for (int i = mAccessPoints.size() - 1; i >= 0; --i) {
-            if (mAccessPoints.get(i).update(mLastInfo, mLastNetworkInfo)) {
+            if (mAccessPoints.get(i).update(connectionConfig, mLastInfo, mLastNetworkInfo)) {
                 reorder = true;
             }
         }
