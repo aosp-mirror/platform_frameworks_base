@@ -19,16 +19,20 @@ package com.android.systemui.statusbar.phone;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.LauncherActivityInfo;
-import android.content.pm.LauncherApps;
-import android.os.UserHandle;
+import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
+import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Data model and controller for app icons appearing in the navigation bar. The data is stored on
@@ -48,7 +52,7 @@ class NavigationBarAppsModel {
     private final static String VERSION_PREF = "version";
 
     // Current version number for preferences.
-    private final static int CURRENT_VERSION = 1;
+    private final static int CURRENT_VERSION = 2;
 
     // Preference name for the number of app icons.
     private final static String APP_COUNT_PREF = "app_count";
@@ -59,40 +63,97 @@ class NavigationBarAppsModel {
     // User serial number prefix for each app's info. The actual pref has an integer appended to it.
     private final static String APP_USER_PREFIX = "app_user_";
 
-    private final LauncherApps mLauncherApps;
+    // Character separating current user serial number from the user-specific part of a pref.
+    // Example "22|app_user_2" - when logged as user with serial 22, we'll use this pref for the
+    // user serial of the third app of the logged-in user.
+    private final static char USER_SEPARATOR = '|';
+
+    final Context mContext;
     private final SharedPreferences mPrefs;
 
     // Apps are represented as an ordered list of app infos.
     private final List<AppInfo> mApps = new ArrayList<AppInfo>();
 
-    public NavigationBarAppsModel(Context context) {
-        mLauncherApps = (LauncherApps) context.getSystemService("launcherapps");
-        mPrefs = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-    }
+    // Serial number of the current user.
+    private long mCurrentUserSerialNumber = AppInfo.USER_UNSPECIFIED;
 
-    @VisibleForTesting
-    NavigationBarAppsModel(LauncherApps launcherApps, SharedPreferences prefs) {
-        mLauncherApps = launcherApps;
-        mPrefs = prefs;
+    public NavigationBarAppsModel(Context context) {
+        mContext = context;
+        mPrefs = mContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        int version = mPrefs.getInt(VERSION_PREF, -1);
+        if (version != CURRENT_VERSION) {
+            // Since the data format changed, clean everything.
+            SharedPreferences.Editor edit = mPrefs.edit();
+            edit.clear();
+            edit.putInt(VERSION_PREF, CURRENT_VERSION);
+            edit.apply();
+        }
     }
 
     /**
-     * Initializes the model with a list of apps, either by loading it off disk or by supplying
-     * a default list.
+     * Reinitializes the model for a new user.
      */
-    public void initialize() {
-        if (mApps.size() > 0) {
-            Slog.e(TAG, "Model already initialized");
-            return;
-        }
+    public void setCurrentUser(long userSerialNumber) {
+        mCurrentUserSerialNumber = userSerialNumber;
 
-        // Check for an existing list of apps.
-        int version = mPrefs.getInt(VERSION_PREF, -1);
-        if (version == CURRENT_VERSION) {
+        mApps.clear();
+
+        int appCount = mPrefs.getInt(userPrefixed(APP_COUNT_PREF), -1);
+        if (appCount >= 0) {
             loadAppsFromPrefs();
         } else {
+            // We switched to this user for the first time ever. This is a good opportunity to clean
+            // prefs for users deleted in the past.
+            removePrefsForDeletedUsers();
+
             addDefaultApps();
         }
+    }
+
+    /**
+     * Removes prefs for users that don't exist on the device.
+     */
+    private void removePrefsForDeletedUsers() {
+        UserManager userManager =
+                (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+
+        // Build a set of string representations of serial numbers of the device users.
+        final List<UserInfo> users = userManager.getUsers();
+        final int userCount = users.size();
+
+        final Set<String> userSerials = new HashSet<String> ();
+
+        for (int i = 0; i < userCount; ++i) {
+            userSerials.add(Long.toString(users.get(i).serialNumber));
+        }
+
+        // Walk though all prefs and delete ones which user is not in the string set.
+        final Map<String, ?> allPrefs = mPrefs.getAll();
+        final SharedPreferences.Editor edit = mPrefs.edit();
+
+        for (Map.Entry<String, ?> pref : allPrefs.entrySet()) {
+            final String key = pref.getKey();
+            if (key.equals(VERSION_PREF)) continue;
+
+            final int userSeparatorPos = key.indexOf(USER_SEPARATOR);
+
+            if (userSeparatorPos < 0) {
+                // Removing anomalous pref with no user.
+                edit.remove(key);
+                continue;
+            }
+
+            final String prefUserSerial = key.substring(0, userSeparatorPos);
+
+            if (!userSerials.contains(prefUserSerial)) {
+                // Removes pref for a not existing user.
+                edit.remove(key);
+                continue;
+            }
+        }
+
+        edit.apply();
     }
 
     /** Returns the number of apps. */
@@ -123,11 +184,8 @@ class NavigationBarAppsModel {
     /** Saves the current model to disk. */
     public void savePrefs() {
         SharedPreferences.Editor edit = mPrefs.edit();
-        // The user might have removed icons, so clear all the old prefs.
-        edit.clear();
-        edit.putInt(VERSION_PREF, CURRENT_VERSION);
         int appCount = mApps.size();
-        edit.putInt(APP_COUNT_PREF, appCount);
+        edit.putInt(userPrefixed(APP_COUNT_PREF), appCount);
         for (int i = 0; i < appCount; i++) {
             final AppInfo appInfo = mApps.get(i);
             String componentNameString = appInfo.getComponentName().flattenToString();
@@ -140,7 +198,7 @@ class NavigationBarAppsModel {
 
     /** Loads the list of apps from SharedPreferences. */
     private void loadAppsFromPrefs() {
-        int appCount = mPrefs.getInt(APP_COUNT_PREF, -1);
+        int appCount = mPrefs.getInt(userPrefixed(APP_COUNT_PREF), -1);
         for (int i = 0; i < appCount; i++) {
             String prefValue = mPrefs.getString(prefNameForApp(i), null);
             if (prefValue == null) {
@@ -154,27 +212,48 @@ class NavigationBarAppsModel {
         }
     }
 
+    @VisibleForTesting
+    protected int getCurrentUser() {
+        return ActivityManager.getCurrentUser();
+    }
+
     /** Adds the first few apps from the owner profile. Used for demo purposes. */
     private void addDefaultApps() {
         // Get a list of all app activities.
-        List<LauncherActivityInfo> apps =
-                mLauncherApps.getActivityList(
-                        null /* packageName */, new UserHandle(ActivityManager.getCurrentUser()));
-        int appCount = apps.size();
+        final Intent queryIntent = new Intent(Intent.ACTION_MAIN, null);
+        queryIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        final int currentUser = getCurrentUser();
+
+        final List<ResolveInfo> apps = mContext.getPackageManager().queryIntentActivitiesAsUser(
+                queryIntent, 0 /* flags */, currentUser);
+        final int appCount = apps.size();
         for (int i = 0; i < NUM_INITIAL_APPS && i < appCount; i++) {
-            LauncherActivityInfo activityInfo = apps.get(i);
-            mApps.add(new AppInfo(activityInfo.getComponentName(), AppInfo.USER_UNSPECIFIED));
+            ResolveInfo ri = apps.get(i);
+            ComponentName componentName = new ComponentName(
+                    ri.activityInfo.packageName, ri.activityInfo.name);
+            mApps.add(new AppInfo(componentName, AppInfo.USER_UNSPECIFIED));
         }
+
+        savePrefs();
+    }
+
+    /** Returns a pref prefixed with the serial number of the current user. */
+    private String userPrefixed(String pref) {
+        if (mCurrentUserSerialNumber == AppInfo.USER_UNSPECIFIED) {
+            throw new RuntimeException("Current user is not yet set");
+        }
+
+        return Long.toString(mCurrentUserSerialNumber) + USER_SEPARATOR + pref;
     }
 
     /** Returns the pref name for the app at a given index. */
-    private static String prefNameForApp(int index) {
-        return APP_PREF_PREFIX + Integer.toString(index);
+    private String prefNameForApp(int index) {
+        return userPrefixed(APP_PREF_PREFIX + Integer.toString(index));
     }
 
     /** Returns the pref name for the app's user at a given index. */
-    private static String prefUserForApp(int index) {
-        return APP_USER_PREFIX + Integer.toString(index);
+    private String prefUserForApp(int index) {
+        return userPrefixed(APP_USER_PREFIX + Integer.toString(index));
     }
 
 }

@@ -18,24 +18,35 @@ package com.android.systemui.statusbar.phone;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.LauncherActivityInfo;
-import android.content.pm.LauncherApps;
-import android.os.UserHandle;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
+import android.os.UserManager;
 import android.test.AndroidTestCase;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** Tests for the data model for the navigation bar app icons. */
 public class NavigationBarAppsModelTest extends AndroidTestCase {
-    private LauncherApps mMockLauncherApps;
+    private PackageManager mMockPackageManager;
     private SharedPreferences mMockPrefs;
+    private SharedPreferences.Editor mMockEdit;
+    private UserManager mMockUserManager;
 
     private NavigationBarAppsModel mModel;
 
@@ -47,26 +58,44 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 
-        mMockLauncherApps = mock(LauncherApps.class);
+        final Context context = mock(Context.class);
+        mMockPackageManager = mock(PackageManager.class);
         mMockPrefs = mock(SharedPreferences.class);
-        mModel = new NavigationBarAppsModel(mMockLauncherApps, mMockPrefs);
+        mMockEdit = mock(SharedPreferences.Editor.class);
+        mMockUserManager = mock(UserManager.class);
+
+        when (context.getSharedPreferences(
+                "com.android.systemui.navbarapps", Context.MODE_PRIVATE)).thenReturn(mMockPrefs);
+        when(context.getSystemService(Context.USER_SERVICE)).thenReturn(mMockUserManager);
+        when(context.getPackageManager()).thenReturn(mMockPackageManager);
+
+        setContext(context);
+
+        when(mMockUserManager.getUsers()).thenReturn(new ArrayList<UserInfo>());
+        // Assume the version pref is present and equal to the current version.
+        when(mMockPrefs.getInt("version", -1)).thenReturn(2);
+        when(mMockPrefs.edit()).thenReturn(mMockEdit);
+
+        mModel = new NavigationBarAppsModel(context) {
+            @Override
+            protected int getCurrentUser() {
+                return 0;
+            }
+        };
     }
 
     /** Initializes the model from SharedPreferences for a few app activites. */
     private void initializeModelFromPrefs() {
-        // Assume the version pref is present.
-        when(mMockPrefs.getInt("version", -1)).thenReturn(1);
-
         // Assume several apps are stored.
-        when(mMockPrefs.getInt("app_count", -1)).thenReturn(3);
-        when(mMockPrefs.getString("app_0", null)).thenReturn("package0/class0");
-        when(mMockPrefs.getLong("app_user_0", -1)).thenReturn(-1L);
-        when(mMockPrefs.getString("app_1", null)).thenReturn("package1/class1");
-        when(mMockPrefs.getLong("app_user_1", -1)).thenReturn(45L);
-        when(mMockPrefs.getString("app_2", null)).thenReturn("package2/class2");
-        when(mMockPrefs.getLong("app_user_2", -1)).thenReturn(239L);
+        when(mMockPrefs.getInt("22|app_count", -1)).thenReturn(3);
+        when(mMockPrefs.getString("22|app_0", null)).thenReturn("package0/class0");
+        when(mMockPrefs.getLong("22|app_user_0", -1)).thenReturn(-1L);
+        when(mMockPrefs.getString("22|app_1", null)).thenReturn("package1/class1");
+        when(mMockPrefs.getLong("22|app_user_1", -1)).thenReturn(45L);
+        when(mMockPrefs.getString("22|app_2", null)).thenReturn("package2/class2");
+        when(mMockPrefs.getLong("22|app_user_2", -1)).thenReturn(239L);
 
-        mModel.initialize();
+        mModel.setCurrentUser(22L);
     }
 
     /** Tests initializing the model from SharedPreferences. */
@@ -83,22 +112,26 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
 
     /** Tests initializing the model when the SharedPreferences aren't available. */
     public void testInitializeDefaultApps() {
-        // Assume the version pref isn't available.
-        when(mMockPrefs.getInt("version", -1)).thenReturn(-1);
+        // Assume the user's app count pref isn't available.
+        when(mMockPrefs.getInt("0|app_count", -1)).thenReturn(-1);
 
         // Assume some installed activities.
-        LauncherActivityInfo activity1 = mock(LauncherActivityInfo.class);
-        when(activity1.getComponentName()).thenReturn(new ComponentName("package1", "class1"));
-        LauncherActivityInfo activity2 = mock(LauncherActivityInfo.class);
-        when(activity2.getComponentName()).thenReturn(new ComponentName("package2", "class2"));
-        List<LauncherActivityInfo> apps = new ArrayList<LauncherActivityInfo>();
-        apps.add(activity1);
-        apps.add(activity2);
-        when(mMockLauncherApps.getActivityList(anyString(), any(UserHandle.class)))
-                .thenReturn(apps);
+        ActivityInfo ai1 = new ActivityInfo();
+        ai1.packageName = "package1";
+        ai1.name = "class1";
+        ActivityInfo ai2 = new ActivityInfo();
+        ai2.packageName = "package2";
+        ai2.name = "class2";
+        ResolveInfo ri1 = new ResolveInfo();
+        ri1.activityInfo = ai1;
+        ResolveInfo ri2 = new ResolveInfo();
+        ri2.activityInfo = ai2;
+        when(mMockPackageManager
+                .queryIntentActivitiesAsUser(any(Intent.class), eq(0), eq(0)))
+                .thenReturn(Arrays.asList(ri1, ri2));
 
-        // Initializing the model should load the installed activities.
-        mModel.initialize();
+        // Setting the user should load the installed activities.
+        mModel.setCurrentUser(0L);
         assertEquals(2, mModel.getAppCount());
         assertEquals("package1/class1", mModel.getApp(0).getComponentName().flattenToString());
         assertEquals(-1L, mModel.getApp(0).getUserSerialNumber());
@@ -108,19 +141,16 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
 
     /** Tests initializing the model if one of the prefs is missing. */
     public void testInitializeWithMissingPref() {
-        // Assume the version pref is present.
-        when(mMockPrefs.getInt("version", -1)).thenReturn(1);
-
         // Assume two apps are nominally stored.
-        when(mMockPrefs.getInt("app_count", -1)).thenReturn(2);
-        when(mMockPrefs.getString("app_0", null)).thenReturn("package0/class0");
-        when(mMockPrefs.getLong("app_user_0", -1)).thenReturn(239L);
+        when(mMockPrefs.getInt("22|app_count", -1)).thenReturn(2);
+        when(mMockPrefs.getString("22|app_0", null)).thenReturn("package0/class0");
+        when(mMockPrefs.getLong("22|app_user_0", -1)).thenReturn(239L);
 
         // But assume one pref is missing.
-        when(mMockPrefs.getString("app_1", null)).thenReturn(null);
+        when(mMockPrefs.getString("22|app_1", null)).thenReturn(null);
 
         // Initializing the model should load from prefs and skip the missing one.
-        mModel.initialize();
+        mModel.setCurrentUser(22L);
         assertEquals(1, mModel.getAppCount());
         assertEquals("package0/class0", mModel.getApp(0).getComponentName().flattenToString());
         assertEquals(239L, mModel.getApp(0).getUserSerialNumber());
@@ -130,15 +160,64 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
     public void testSavePrefs() {
         initializeModelFromPrefs();
 
-        SharedPreferences.Editor mockEdit = mock(SharedPreferences.Editor.class);
-        when(mMockPrefs.edit()).thenReturn(mockEdit);
-
         mModel.savePrefs();
-        verify(mockEdit).clear();  // Old prefs were removed.
-        verify(mockEdit).putInt("version", 1);
-        verify(mockEdit).putInt("app_count", 3);
-        verify(mockEdit).putString("app_0", "package0/class0");
-        verify(mockEdit).putString("app_1", "package1/class1");
-        verify(mockEdit).putString("app_2", "package2/class2");
+        verify(mMockEdit).putInt("22|app_count", 3);
+        verify(mMockEdit).putString("22|app_0", "package0/class0");
+        verify(mMockEdit).putLong("22|app_user_0", -1L);
+        verify(mMockEdit).putString("22|app_1", "package1/class1");
+        verify(mMockEdit).putLong("22|app_user_1", 45L);
+        verify(mMockEdit).putString("22|app_2", "package2/class2");
+        verify(mMockEdit).putLong("22|app_user_2", 239L);
+        verify(mMockEdit).apply();
+        verifyNoMoreInteractions(mMockEdit);
+    }
+
+    /** Tests cleaning all prefs on a version change. */
+    public void testVersionChange() {
+        // Assume the version pref changed.
+        when(mMockPrefs.getInt("version", -1)).thenReturn(1);
+
+        new NavigationBarAppsModel(getContext());
+        verify(mMockEdit).clear();
+        verify(mMockEdit).putInt("version", 2);
+        verify(mMockEdit).apply();
+        verifyNoMoreInteractions(mMockEdit);
+    }
+
+    /** Tests cleaning prefs for deleted users. */
+    public void testCleaningDeletedUsers() {
+        // Users on the device.
+        final UserInfo user1 = new UserInfo(11, "", 0);
+        user1.serialNumber = 1111;
+        final UserInfo user2 = new UserInfo(13, "", 0);
+        user2.serialNumber = 1313;
+
+        when(mMockUserManager.getUsers()).thenReturn(Arrays.asList(user1, user2));
+
+        when(mMockPrefs.edit()).
+                thenReturn(mMockEdit).
+                thenReturn(mock(SharedPreferences.Editor.class));
+
+        // Assume the user's app count pref isn't available. This will trigger clearing deleted
+        // users' prefs.
+        when(mMockPrefs.getInt("0|app_count", -1)).thenReturn(-1);
+
+        final Map allPrefs = new HashMap<String, Object>();
+        allPrefs.put("version", null);
+        allPrefs.put("some_strange_pref", null);
+        allPrefs.put("", null);
+        allPrefs.put("|", null);
+        allPrefs.put("1313|app_count", null);
+        allPrefs.put("1212|app_count", null);
+        when(mMockPrefs.getAll()).thenReturn(allPrefs);
+
+        // Setting the user should remove prefs for deleted users.
+        mModel.setCurrentUser(0L);
+        verify(mMockEdit).remove("some_strange_pref");
+        verify(mMockEdit).remove("");
+        verify(mMockEdit).remove("|");
+        verify(mMockEdit).remove("1212|app_count");
+        verify(mMockEdit).apply();
+        verifyNoMoreInteractions(mMockEdit);
     }
 }
