@@ -575,6 +575,8 @@ public class MidiService extends IMidiManager.Stub {
         Client client = getClient(token);
         if (client == null) return;
         client.addListener(listener);
+        // Let listener know whether any ports are already busy.
+        updateStickyDeviceStatus(client.mUid, listener);
     }
 
     @Override
@@ -582,6 +584,25 @@ public class MidiService extends IMidiManager.Stub {
         Client client = getClient(token);
         if (client == null) return;
         client.removeListener(listener);
+    }
+
+    // Inform listener of the status of all known devices.
+    private void updateStickyDeviceStatus(int uid, IMidiDeviceListener listener) {
+        synchronized (mDevicesByInfo) {
+            for (Device device : mDevicesByInfo.values()) {
+                // ignore private devices that our client cannot access
+                if (device.isUidAllowed(uid)) {
+                    try {
+                        MidiDeviceStatus status = device.getDeviceStatus();
+                        if (status != null) {
+                            listener.onDeviceStatusChanged(status);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "remote exception", e);
+                    }
+                }
+            }
+        }
     }
 
     private static final MidiDeviceInfo[] EMPTY_DEVICE_INFO_ARRAY = new MidiDeviceInfo[0];
