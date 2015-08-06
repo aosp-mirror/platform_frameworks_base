@@ -132,7 +132,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
-    // Maximum number of managed profiles permitted is 1. This cannot be increased
+    // Maximum number of managed profiles permitted per user is 1. This cannot be increased
     // without first making sure that the rest of the framework is prepared for it.
     private static final int MAX_MANAGED_PROFILES = 1;
 
@@ -625,7 +625,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean canAddMoreManagedProfiles() {
+    public boolean canAddMoreManagedProfiles(int userId) {
         checkManageUsersPermission("check if more managed profiles can be added.");
         if (ActivityManager.isLowRamDeviceStatic()) {
             return false;
@@ -634,10 +634,14 @@ public class UserManagerService extends IUserManager.Stub {
                 PackageManager.FEATURE_MANAGED_USERS)) {
             return false;
         }
+        // Limit number of managed profiles that can be created
+        int managedProfilesCount = getProfiles(userId, true).size() - 1;
+        if (managedProfilesCount >= MAX_MANAGED_PROFILES) {
+            return false;
+        }
         synchronized(mPackagesLock) {
-            // Limit number of managed profiles that can be created
-            if (numberOfUsersOfTypeLocked(UserInfo.FLAG_MANAGED_PROFILE, true)
-                    >= MAX_MANAGED_PROFILES) {
+            UserInfo userInfo = getUserInfoLocked(userId);
+            if (!userInfo.canHaveProfile()) {
                 return false;
             }
             int usersCount = getAliveUsersExcludingGuestsCountLocked();
@@ -1236,10 +1240,6 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public UserInfo createProfileForUser(String name, int flags, int userId) {
         checkManageUsersPermission("Only the system can create users");
-        if (userId != UserHandle.USER_OWNER) {
-            Slog.w(LOG_TAG, "Only user owner can have profiles");
-            return null;
-        }
         return createUserInternal(name, flags, userId);
     }
 
@@ -1271,7 +1271,8 @@ public class UserManagerService extends IUserManager.Stub {
                         parent = getUserInfoLocked(parentId);
                         if (parent == null) return null;
                     }
-                    if (isManagedProfile && !canAddMoreManagedProfiles()) {
+                    if (isManagedProfile && !canAddMoreManagedProfiles(parentId)) {
+                        Log.e(LOG_TAG, "Cannot add more managed profiles for user " + parentId);
                         return null;
                     }
                     if (!isGuest && !isManagedProfile && isUserLimitReachedLocked()) {

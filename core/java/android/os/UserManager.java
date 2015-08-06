@@ -1024,9 +1024,9 @@ public class UserManager {
      * @return true if more managed profiles can be added, false if limit has been reached.
      * @hide
      */
-    public boolean canAddMoreManagedProfiles() {
+    public boolean canAddMoreManagedProfiles(int userId) {
         try {
-            return mService.canAddMoreManagedProfiles();
+            return mService.canAddMoreManagedProfiles(userId);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not check if we can add more managed profiles", re);
             return false;
