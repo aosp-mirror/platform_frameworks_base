@@ -88,7 +88,6 @@ public class ZenModeHelper {
     private int mUser = UserHandle.USER_OWNER;
     private ZenModeConfig mConfig;
     private AudioManagerInternal mAudioManager;
-    private int mPreviousRingerMode = -1;
     private boolean mEffectsSuppressed;
 
     public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders) {
@@ -236,7 +235,6 @@ public class ZenModeHelper {
         }
         pw.print(prefix); pw.print("mUser="); pw.println(mUser);
         dump(pw, prefix, "mConfig", mConfig);
-        pw.print(prefix); pw.print("mPreviousRingerMode="); pw.println(mPreviousRingerMode);
         pw.print(prefix); pw.print("mEffectsSuppressed="); pw.println(mEffectsSuppressed);
         mFiltering.dump(pw, prefix);
         mConditions.dump(pw, prefix);
@@ -357,6 +355,17 @@ public class ZenModeHelper {
         Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zen);
     }
 
+    private int getPreviousRingerModeSetting() {
+        return Global.getInt(mContext.getContentResolver(),
+                Global.ZEN_MODE_RINGER_LEVEL, AudioManager.RINGER_MODE_NORMAL);
+    }
+
+    private void setPreviousRingerModeSetting(Integer previousRingerLevel) {
+        Global.putString(
+                mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
+                previousRingerLevel == null ? null : Integer.toString(previousRingerLevel));
+    }
+
     private boolean evaluateZenMode(String reason, boolean setRingerMode) {
         if (DEBUG) Log.d(TAG, "evaluateZenMode");
         final ArraySet<ZenRule> automaticRules = new ArraySet<ZenRule>();
@@ -430,16 +439,15 @@ public class ZenModeHelper {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
             case Global.ZEN_MODE_ALARMS:
                 if (ringerModeInternal != AudioManager.RINGER_MODE_SILENT) {
-                    mPreviousRingerMode = ringerModeInternal;
+                    setPreviousRingerModeSetting(ringerModeInternal);
                     newRingerModeInternal = AudioManager.RINGER_MODE_SILENT;
                 }
                 break;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
             case Global.ZEN_MODE_OFF:
                 if (ringerModeInternal == AudioManager.RINGER_MODE_SILENT) {
-                    newRingerModeInternal = mPreviousRingerMode != -1 ? mPreviousRingerMode
-                            : AudioManager.RINGER_MODE_NORMAL;
-                    mPreviousRingerMode = -1;
+                    newRingerModeInternal = getPreviousRingerModeSetting();
+                    setPreviousRingerModeSetting(null);
                 }
                 break;
         }
@@ -593,7 +601,7 @@ public class ZenModeHelper {
                                 && mZenMode != Global.ZEN_MODE_ALARMS) {
                             newZen = Global.ZEN_MODE_ALARMS;
                         }
-                        mPreviousRingerMode = ringerModeOld;
+                        setPreviousRingerModeSetting(ringerModeOld);
                     }
                     break;
                 case AudioManager.RINGER_MODE_VIBRATE:
