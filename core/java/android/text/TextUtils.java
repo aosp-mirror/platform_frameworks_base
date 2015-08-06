@@ -18,6 +18,7 @@ package android.text;
 
 import android.annotation.Nullable;
 import android.content.res.Resources;
+import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
@@ -1754,45 +1755,12 @@ public class TextUtils {
      * Be careful: this code will need to be updated when vertical scripts will be supported
      */
     public static int getLayoutDirectionFromLocale(Locale locale) {
-        if (locale != null && !locale.equals(Locale.ROOT)) {
-            final String scriptSubtag = ICU.addLikelySubtags(locale).getScript();
-            if (scriptSubtag == null) return getLayoutDirectionFromFirstChar(locale);
-
-            if (scriptSubtag.equalsIgnoreCase(ARAB_SCRIPT_SUBTAG) ||
-                    scriptSubtag.equalsIgnoreCase(HEBR_SCRIPT_SUBTAG)) {
-                return View.LAYOUT_DIRECTION_RTL;
-            }
-        }
-        // If forcing into RTL layout mode, return RTL as default, else LTR
-        return SystemProperties.getBoolean(Settings.Global.DEVELOPMENT_FORCE_RTL, false)
-                ? View.LAYOUT_DIRECTION_RTL
-                : View.LAYOUT_DIRECTION_LTR;
-    }
-
-    /**
-     * Fallback algorithm to detect the locale direction. Rely on the fist char of the
-     * localized locale name. This will not work if the localized locale name is in English
-     * (this is the case for ICU 4.4 and "Urdu" script)
-     *
-     * @param locale
-     * @return the layout direction. This may be one of:
-     * {@link View#LAYOUT_DIRECTION_LTR} or
-     * {@link View#LAYOUT_DIRECTION_RTL}.
-     *
-     * Be careful: this code will need to be updated when vertical scripts will be supported
-     *
-     * @hide
-     */
-    private static int getLayoutDirectionFromFirstChar(Locale locale) {
-        switch(Character.getDirectionality(locale.getDisplayName(locale).charAt(0))) {
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
-                return View.LAYOUT_DIRECTION_RTL;
-
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
-            default:
-                return View.LAYOUT_DIRECTION_LTR;
-        }
+        return ((locale != null && !locale.equals(Locale.ROOT)
+                        && ULocale.forLocale(locale).isRightToLeft())
+                // If forcing into RTL layout mode, return RTL as default
+                || SystemProperties.getBoolean(Settings.Global.DEVELOPMENT_FORCE_RTL, false))
+            ? View.LAYOUT_DIRECTION_RTL
+            : View.LAYOUT_DIRECTION_LTR;
     }
 
     /**
@@ -1811,7 +1779,4 @@ public class TextUtils {
     private static String[] EMPTY_STRING_ARRAY = new String[]{};
 
     private static final char ZWNBS_CHAR = '\uFEFF';
-
-    private static String ARAB_SCRIPT_SUBTAG = "Arab";
-    private static String HEBR_SCRIPT_SUBTAG = "Hebr";
 }
