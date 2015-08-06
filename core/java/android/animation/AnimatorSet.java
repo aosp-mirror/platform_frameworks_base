@@ -228,7 +228,9 @@ public final class AnimatorSet extends Animator {
         int size = mNodes.size();
         for (int i = 0; i < size; i++) {
             Node node = mNodes.get(i);
-            childList.add(node.mAnimation);
+            if (node != mRootNode) {
+                childList.add(node.mAnimation);
+            }
         }
         return childList;
     }
