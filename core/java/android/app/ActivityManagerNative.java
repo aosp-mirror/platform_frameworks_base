@@ -2245,9 +2245,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case KILL_UID_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            int uid = data.readInt();
+            int appId = data.readInt();
+            int userId = data.readInt();
             String reason = data.readString();
-            killUid(uid, reason);
+            killUid(appId, userId, reason);
             reply.writeNoException();
             return true;
         }
@@ -5479,11 +5480,12 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public void killUid(int uid, String reason) throws RemoteException {
+    public void killUid(int appId, int userId, String reason) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(uid);
+        data.writeInt(appId);
+        data.writeInt(userId);
         data.writeString(reason);
         mRemote.transact(KILL_UID_TRANSACTION, data, reply, 0);
         reply.readException();
