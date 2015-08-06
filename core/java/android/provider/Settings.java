@@ -7567,6 +7567,13 @@ public final class Settings {
         }
 
         /**
+         * Value of the ringer before entering zen mode.
+         *
+         * @hide
+         */
+        public static final String ZEN_MODE_RINGER_LEVEL = "zen_mode_ringer_level";
+
+        /**
          * Opaque value, changes when persisted zen mode configuration changes.
          *
          * @hide
