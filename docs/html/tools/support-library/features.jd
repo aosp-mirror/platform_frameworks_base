@@ -17,13 +17,19 @@ page.title=Support Library Features
           <li><a href="#v7-mediarouter">v7 mediarouter library</a></li>
           <li><a href="#v7-palette">v7 palette library</a></li>
           <li><a href="#v7-recyclerview">v7 recyclerview library</a></li>
+          <li><a href="#v7-preference">v7 preference library</a></li>
         </ol>
       </li>
       <li><a href="#v8">v8 Support Library</a></li>
       <li><a href="#v13">v13 Support Library</a></li>
+      <li><a href="#v14-preference">v14 Preference Support Library</a></li>
       <li><a href="#v17-leanback">v17 Leanback Library</a></li>
+      <li><a href="#v17-preference">v17 Preference Library for TV</a></li>
       <li><a href="#annotations">Annotations Support Library</a></li>
       <li><a href="#design">Design Support Library</a></li>
+      <li><a href="#custom-tabs">Custom Tabs Support Library</a></li>
+      <li><a href="#percent">Percent Support Library</a></li>
+      <li><a href="#recommendation">Recommendation Support Library for TV</a></li>
     </ol>
 
     <h2>See also</h2>
@@ -344,7 +350,7 @@ com.android.support:palette-v7:21.0.0
 
 <p>The recyclerview library adds the {@link android.support.v7.widget.RecyclerView}
 class. This class provides support for the
-<a href="{@docRoot}training/material/lists-cards.jd#RecyclerView">RecyclerView
+<a href="{@docRoot}training/material/lists-cards#RecyclerView">RecyclerView
 widget</a>, a view for efficiently displaying large data sets by providing a
 limited window of data items.</p>
 
@@ -359,6 +365,40 @@ libraries with resources</a>.</p>
 <pre>
 com.android.support:recyclerview-v7:21.0.0
 </pre>
+
+
+<h3 id="v7-preference">v7 Preference Support Library</h3>
+
+<p>The
+<a href="{@docRoot}reference/android/support/v7/preference/package-summary.html">preference</a>
+package provides APIs to support adding preference objects, such as
+{@link android.support.v7.preference.CheckBoxPreference} and
+{@link android.support.v7.preference.ListPreference}, for
+users to modify UI settings. </p>
+
+<p>The v7 Preference library adds support for interfaces, such as
+{@link android.support.v7.preference.Preference.OnPreferenceChangeListener} and
+{@link android.support.v7.preference.Preference.OnPreferenceClickListener}, and classes,
+such as {@link android.support.v7.preference.CheckBoxPreference} and
+{@link android.support.v7.preference.ListPreference}.  </p>
+
+
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v7/preference} directory. For more information
+on how to set up your project, follow the instructions in <a
+href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
+with resources</a>. </p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:preference-v7:23.0.0
+</pre>
+
+
+
+
+
 
 
 
@@ -382,7 +422,7 @@ com.android.support:recyclerview-v7:21.0.0
 <p class="note">
   <strong>Note:</strong> Use of RenderScript with the support library is supported with Android
   Studio and Gradle-based builds, as well as the Eclipse plugin and Ant build tools. The
-  renderscript library is located in the <code>build-tools/$VERSION/renderscript/</code> folder. 
+  renderscript library is located in the <code>build-tools/$VERSION/renderscript/</code> folder.
 </p>
 
 <p>The following example shows the Gradle build script properties for this library:</p>
@@ -418,6 +458,69 @@ resources</a>.</p>
 <pre>
 com.android.support:support-v13:18.0.0
 </pre>
+
+
+
+
+
+<h2 id="v14-preference">v14 Preference Support Library</h2>
+
+
+<p>The {@link android.support.v14.preference} package provides APIs to add support
+for preference interfaces such as
+{@link android.support.v14.preference.PreferenceFragment.OnPreferenceStartFragmentCallback}
+  and
+{@link android.support.v14.preference.PreferenceFragment.OnPreferenceStartScreenCallback},
+  along with classes, such as
+{@link android.support.v14.preference.MultiSelectListPreference} and
+{@link android.support.v14.preference.PreferenceFragment}. For detailed
+  information about the v14 Preference Support Library APIs, see the
+  <a href="{@docRoot}reference/android/support/v14/preference/package-summary.html">preference</a>
+  package in the API reference.
+</p>
+
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v14/} directory. The library does not contain user
+interface resources. To include it in your application project, follow the instructions for
+<a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
+resources</a>.</p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:preference-v14:23.0.0
+</pre>
+
+
+
+
+<h2 id="v17-preference">v17 Preference Support Library for TV</h2>
+
+
+<p>The {@link android.support.v17.preference} package provides APIs for providing preference
+  interfaces on TV devices, including support for the
+{@link android.support.v17.preference.LeanbackListPreferenceDialogFragment.ViewHolder.OnItemClickListener}
+interface and classes, such as
+{@link android.support.v17.preference.BaseLeanbackPreferenceFragment} and
+{@link android.support.v17.preference.LeanbackPreferenceFragment}. For detailed
+  information about the v17 Preference Support Library APIs, see the
+  <a href="{@docRoot}reference/android/support/v17/preference/package-summary.html">preference</a>
+  package in the API reference.
+</p>
+
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/v17/} directory. The library does not contain user
+interface resources. To include it in your application project, follow the instructions for
+<a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
+resources</a>.</p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:preference-v17:23.0.0
+</pre>
+
+
 
 
 
@@ -506,3 +609,90 @@ com.android.support:design:22.2.0
 </pre>
 
 
+
+<h2 id="custom-tabs">Custom Tabs Support Library</h2>
+
+<p>The
+<a href="{@docRoot}reference/android/support/customtabs/package-summary.html">Custom Tabs</a>
+package provides APIs to support adding and managing custom tabs in your apps. </p>
+
+<p>The Custom Tabs Support library adds support for various classes, such as
+<a href="{@docRoot}reference/android/support/customtabs/CustomTabsService.html">Custom Tabs
+Service</a>
+and
+<a href="{@docRoot}reference/android/support/customtabs/CustomTabsSCallback.html">Custom Tabs
+Callback</a>.  </p>
+
+
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+on how to set up your project, follow the instructions in <a
+href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
+with resources</a>. </p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:customtabs:23.0.0
+</pre>
+
+
+
+
+<h2 id="percent">Percent Support Library</h2>
+
+<p>The
+<a href="{@docRoot}reference/android/support/percent/package-summary.html">Percent</a>
+package provides APIs to support adding and managing percentage based dimensions in your app. </p>
+
+<p>The Percent Support library adds support for the
+<a href="{@docRoot}reference/android/support/percent/PercentLayoutHelper.PercentLayoutParams.html">
+PercentLayoutHelper.PercentLayoutParams</a> interface
+and various classes, such as
+<a href="{@docRoot}reference/android/support/percent/PercentFrameLayout.html">PercentFrameLayout</a>
+and
+<a href="{@docRoot}reference/android/support/percent/PercentRelativeLayout.html">
+PercentRelativeLayout</a>.  </p>
+
+
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+on how to set up your project, follow the instructions in <a
+href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
+with resources</a>. </p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:percent:23.0.0
+</pre>
+
+
+
+<h2 id="recommendation">App Recommendation Support Library for TV</h2>
+
+<p>The
+<a href="{@docRoot}reference/android/support/app/recommendation/package-summary.html">App
+Recommendation</a>
+package provides APIs to support adding content recommendations in your app running on TV devices. </p>
+
+<p>The App  library adds support for annotations, such as
+<a href="{@docRoot}reference/android/support/app/recommendation/ContentRecommendation.ContentMaturity.html">
+ContentRecommendation.ContentMaturity</a> and various classes, such as
+<a href="{@docRoot}reference/android/support/app/recommendation/ContentRecommendation.html">ContentRecommendation</a>
+and
+<a href="{@docRoot}reference/android/support/app/recommendation/RecommendationExtender.html">
+RecommendationExtender</a>.  </p>
+
+
+<p>After you download the Android Support Libraries, this library is located in the
+{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+on how to set up your project, follow the instructions in <a
+href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
+with resources</a>. </p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:app.recommendation-app:23.0.0
+</pre>
