@@ -93,18 +93,22 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
             }
         });
 
-        // Case 3: java.util.Locale.adjustLanguageCode() or java.util.Locale.forLanguageTag()
+        // Case 3: java.util.Locale.adjustLanguageCode() or java.util.Locale.forLanguageTag() or
+        // java.util.Locale.getDefault()
         METHOD_REPLACERS.add(new MethodReplacer() {
 
             private final String STRING_TO_STRING = Type.getMethodDescriptor(STRING, STRING);
             private final String STRING_TO_LOCALE = Type.getMethodDescriptor(
                     Type.getType(Locale.class), STRING);
+            private final String VOID_TO_LOCALE =
+                    Type.getMethodDescriptor(Type.getType(Locale.class));
 
             @Override
             public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
                 return JAVA_LOCALE_CLASS.equals(owner) &&
                         ("adjustLanguageCode".equals(name) && desc.equals(STRING_TO_STRING) ||
-                        "forLanguageTag".equals(name) && desc.equals(STRING_TO_LOCALE));
+                        "forLanguageTag".equals(name) && desc.equals(STRING_TO_LOCALE) ||
+                        "getDefault".equals(name) && desc.equals(VOID_TO_LOCALE));
             }
 
             @Override
