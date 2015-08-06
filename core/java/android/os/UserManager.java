@@ -1068,6 +1068,22 @@ public class UserManager {
     }
 
     /**
+     * Returns the device credential owner id of the profile from
+     * which this method is called, or userHandle if called from a user that
+     * is not a profile.
+     *
+     * @hide
+     */
+    public int getCredentialOwnerProfile(int userHandle) {
+        try {
+            return mService.getCredentialOwnerProfile(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get credential owner", re);
+            return -1;
+        }
+    }
+
+    /**
      * Returns the parent of the profile which this method is called from
      * or null if called from a user that is not a profile.
      *
