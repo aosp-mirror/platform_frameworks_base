@@ -770,8 +770,16 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_STEM_2 = 266;
     /** Key code constant: Generic stem key 3 for Wear */
     public static final int KEYCODE_STEM_3 = 267;
+    /** Key code constant: Directional Pad Up-Left */
+    public static final int KEYCODE_DPAD_UP_LEFT    = 268;
+    /** Key code constant: Directional Pad Down-Left */
+    public static final int KEYCODE_DPAD_DOWN_LEFT  = 269;
+    /** Key code constant: Directional Pad Up-Right */
+    public static final int KEYCODE_DPAD_UP_RIGHT   = 270;
+    /** Key code constant: Directional Pad Down-Right */
+    public static final int KEYCODE_DPAD_DOWN_RIGHT = 271;
 
-    private static final int LAST_KEYCODE = KEYCODE_STEM_3;
+    private static final int LAST_KEYCODE = KEYCODE_DPAD_DOWN_RIGHT;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()

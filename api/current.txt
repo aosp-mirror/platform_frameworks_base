@@ -35102,9 +35102,13 @@ package android.view {
     field public static final int KEYCODE_DEL = 67; // 0x43
     field public static final int KEYCODE_DPAD_CENTER = 23; // 0x17
     field public static final int KEYCODE_DPAD_DOWN = 20; // 0x14
+    field public static final int KEYCODE_DPAD_DOWN_LEFT = 269; // 0x10d
+    field public static final int KEYCODE_DPAD_DOWN_RIGHT = 271; // 0x10f
     field public static final int KEYCODE_DPAD_LEFT = 21; // 0x15
     field public static final int KEYCODE_DPAD_RIGHT = 22; // 0x16
     field public static final int KEYCODE_DPAD_UP = 19; // 0x13
+    field public static final int KEYCODE_DPAD_UP_LEFT = 268; // 0x10c
+    field public static final int KEYCODE_DPAD_UP_RIGHT = 270; // 0x10e
     field public static final int KEYCODE_DVR = 173; // 0xad
     field public static final int KEYCODE_E = 33; // 0x21
     field public static final int KEYCODE_EISU = 212; // 0xd4
