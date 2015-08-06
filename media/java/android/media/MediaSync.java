@@ -55,7 +55,7 @@ import java.util.List;
  *     }
  * }, null);
  * // This needs to be done since sync is paused on creation.
- * sync.setPlaybackRate(1.0f, MediaSync.PLAYBACK_RATE_AUDIO_MODE_RESAMPLE);
+ * sync.setPlaybackParams(new PlaybackParams().setSpeed(1.f));
  *
  * for (;;) {
  *   ...
@@ -69,7 +69,7 @@ import java.util.List;
  *   ...
  *     ...
  * }
- * sync.setPlaybackRate(0.0f, MediaSync.PLAYBACK_RATE_AUDIO_MODE_RESAMPLE);
+ * sync.setPlaybackParams(new PlaybackParams().setSpeed(0.f));
  * sync.release();
  * sync = null;
  *
