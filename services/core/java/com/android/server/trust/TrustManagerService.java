@@ -579,8 +579,14 @@ public class TrustManagerService extends SystemService {
     private void clearUserHasAuthenticated(int userId) {
         if (userId == UserHandle.USER_ALL) {
             mUserHasAuthenticated.clear();
+            synchronized (mUserHasAuthenticatedSinceBoot) {
+                mUserHasAuthenticatedSinceBoot.clear();
+            }
         } else {
             mUserHasAuthenticated.put(userId, false);
+            synchronized (mUserHasAuthenticatedSinceBoot) {
+                mUserHasAuthenticatedSinceBoot.put(userId, false);
+            }
         }
     }
 
