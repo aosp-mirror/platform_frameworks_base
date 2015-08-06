@@ -859,12 +859,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     Task getTask() {
         AppWindowToken wtoken = mAppToken == null ? mService.mFocusedApp : mAppToken;
         if (wtoken == null) {
-            Slog.e(TAG, "getTask: " + this + " null wtoken " + " Callers=" + Debug.getCallers(5));
             return null;
         }
         final Task task = wtoken.mTask;
-        if (task == null) Slog.e(TAG, "getStack: " + this + " couldn't find task for " + wtoken
-                    + " Callers=" + Debug.getCallers(5));
         return task;
     }
 
@@ -874,7 +871,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (task.mStack != null) {
                 return task.mStack;
             }
-            Slog.e(TAG, "getStack: mStack null for task=" + task);
         }
         return mDisplayContent.getHomeStack();
     }
