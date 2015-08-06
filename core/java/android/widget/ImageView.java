@@ -384,6 +384,10 @@ public class ImageView extends View {
         assigned.
     */
     public Drawable getDrawable() {
+        if (mDrawable == mRecycleableBitmapDrawable) {
+            // Consider our cached version dirty since app code now has a reference to it
+            mRecycleableBitmapDrawable = null;
+        }
         return mDrawable;
     }
 
