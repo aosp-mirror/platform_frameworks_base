@@ -27,6 +27,12 @@ import android.os.ParcelFileDescriptor;
  *  {@hide}
  */
 interface IUserManager {
+
+    /*
+     * DO NOT MOVE - UserManager.h depends on the ordering of this function.
+     */
+    int getCredentialOwnerProfile(int userHandle);
+
     UserInfo createUser(in String name, int flags);
     UserInfo createProfileForUser(in String name, int flags, int userHandle);
     void setUserEnabled(int userHandle);
