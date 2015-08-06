@@ -34,6 +34,7 @@ import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Telephony.Sms.Intents;
+import android.security.Credentials;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -296,6 +297,15 @@ final class DefaultPermissionGrantPolicy {
                     "com.android.externalstorage.documents", userId);
             if (storagePackage != null) {
                 grantRuntimePermissionsLPw(storagePackage, STORAGE_PERMISSIONS, userId);
+            }
+
+            // CertInstaller
+            Intent certInstallerIntent = new Intent(Credentials.INSTALL_ACTION);
+            PackageParser.Package certInstallerPackage = getDefaultSystemHandlerActivityPackageLPr(
+                    certInstallerIntent, userId);
+            if (certInstallerPackage != null
+                    && doesPackageSupportRuntimePermissions(certInstallerPackage)) {
+                grantRuntimePermissionsLPw(certInstallerPackage, STORAGE_PERMISSIONS, true, userId);
             }
 
             // Dialer
