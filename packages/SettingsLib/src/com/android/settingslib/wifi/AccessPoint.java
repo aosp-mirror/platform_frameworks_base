@@ -151,7 +151,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mScanResultCache.put(result.BSSID, result);
             }
         }
-        update(mInfo, mNetworkInfo);
+        update(mConfig, mInfo, mNetworkInfo);
         mRssi = getRssi();
         mSeen = getSeen();
     }
@@ -629,11 +629,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mConfig != null && mConfig.isPasspoint();
     }
 
-    /** Return whether the given {@link WifiInfo} is for this access point. */
-    private boolean isInfoForThisAccessPoint(WifiInfo info) {
+    /**
+     * Return whether the given {@link WifiInfo} is for this access point.
+     * If the current AP does not have a network Id then the config is used to
+     * match based on SSID and security.
+     */
+    private boolean isInfoForThisAccessPoint(WifiConfiguration config, WifiInfo info) {
         if (isPasspoint() == false && networkId != WifiConfiguration.INVALID_NETWORK_ID) {
             return networkId == info.getNetworkId();
-        } else {
+        } else if (config != null) {
+            return matches(config);
+        }
+        else {
             // Might be an ephemeral connection with no WifiConfiguration. Try matching on SSID.
             // (Note that we only do this if the WifiConfiguration explicitly equals INVALID).
             // TODO: Handle hex string SSIDs.
@@ -705,7 +712,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     boolean update(ScanResult result) {
-        if (ssid.equals(result.SSID) && security == getSecurity(result)) {
+        if (matches(result)) {
             /* Update the LRU timestamp, if BSSID exists */
             mScanResultCache.get(result.BSSID);
 
@@ -735,9 +742,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return false;
     }
 
-    boolean update(WifiInfo info, NetworkInfo networkInfo) {
+    boolean update(WifiConfiguration config, WifiInfo info, NetworkInfo networkInfo) {
         boolean reorder = false;
-        if (info != null && isInfoForThisAccessPoint(info)) {
+        if (info != null && isInfoForThisAccessPoint(config, info)) {
             reorder = (mInfo == null);
             mRssi = info.getRssi();
             mInfo = info;
