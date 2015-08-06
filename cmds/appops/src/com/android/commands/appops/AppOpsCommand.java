@@ -284,8 +284,8 @@ public class AppOpsCommand extends BaseCommand {
                     userId = UserHandle.USER_ALL;
                 } else if ("current".equals(userStr)) {
                     userId = UserHandle.USER_CURRENT;
-                } else if ("owner".equals(userStr)) {
-                    userId = UserHandle.USER_OWNER;
+                } else if ("owner".equals(userStr) || "system".equals(userStr)) {
+                    userId = UserHandle.USER_SYSTEM;
                 } else {
                     userId = Integer.parseInt(nextArgRequired());
                 }

@@ -43,7 +43,7 @@ public final class Dpm extends BaseCommand {
     private static final String COMMAND_SET_PROFILE_OWNER = "set-profile-owner";
 
     private IDevicePolicyManager mDevicePolicyManager;
-    private int mUserId = UserHandle.USER_OWNER;
+    private int mUserId = UserHandle.USER_SYSTEM;
     private ComponentName mComponent = null;
 
     @Override

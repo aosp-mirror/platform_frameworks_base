@@ -130,7 +130,7 @@ public final class SettingsCmd {
 
         if (valid) {
             if (mUser < 0) {
-                mUser = UserHandle.USER_OWNER;
+                mUser = UserHandle.USER_SYSTEM;
             }
 
             try {
@@ -139,7 +139,7 @@ public final class SettingsCmd {
                 IBinder token = new Binder();
                 try {
                     ContentProviderHolder holder = activityManager.getContentProviderExternal(
-                            "settings", UserHandle.USER_OWNER, token);
+                            "settings", UserHandle.USER_SYSTEM, token);
                     if (holder == null) {
                         throw new IllegalStateException("Could not find settings provider");
                     }
@@ -291,7 +291,8 @@ public final class SettingsCmd {
         System.err.println("        settings [--user NUM] delete namespace key");
         System.err.println("        settings [--user NUM] list namespace");
         System.err.println("\n'namespace' is one of {system, secure, global}, case-insensitive");
-        System.err.println("If '--user NUM' is not given, the operations are performed on the owner user.");
+        System.err.println("If '--user NUM' is not given, the operations are performed on the"
+                + "system user.");
     }
 
     public static String resolveCallingPackage() {
