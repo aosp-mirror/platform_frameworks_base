@@ -170,7 +170,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         try {
             final MtpDocument document =
                     mMtpManager.getDocument(identifier.mDeviceId, identifier.mObjectHandle);
-            return mPipeManager.readDocument(mMtpManager, identifier, document.getSize());
+            return mPipeManager.readDocument(mMtpManager, identifier);
         } catch (IOException error) {
             throw new FileNotFoundException(error.getMessage());
         }

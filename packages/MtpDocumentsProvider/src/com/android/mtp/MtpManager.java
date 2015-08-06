@@ -21,6 +21,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.mtp.MtpDevice;
+import android.os.ParcelFileDescriptor;
 import android.util.SparseArray;
 
 import java.io.FileNotFoundException;
@@ -124,6 +125,11 @@ class MtpManager {
             throw new FileNotFoundException("Not found parent object");
         }
         return result;
+    }
+
+    synchronized void importFile(int deviceId, int objectHandle, ParcelFileDescriptor target)
+            throws IOException {
+        throw new UnsupportedOperationException("Importing files is not supported.");
     }
 
     private MtpDevice getDevice(int deviceId) throws IOException {

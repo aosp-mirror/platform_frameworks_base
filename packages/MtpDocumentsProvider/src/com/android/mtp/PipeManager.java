@@ -36,47 +36,45 @@ class PipeManager {
 
     ParcelFileDescriptor readDocument(
             final MtpManager model,
-            final Identifier identifier,
-            final int expectedSize) throws IOException {
-        final Task task = new Task() {
-            @Override
-            byte[] getBytes() throws IOException {
-                // TODO: Use importFile to ParcelFileDescripter after implementing this.
-                return model.getObject(
-                        identifier.mDeviceId, identifier.mObjectHandle, expectedSize);
-            }
-        };
+            final Identifier identifier) throws IOException {
+        final Task task = new ImportFileTask(model, identifier);
         mExecutor.execute(task);
         return task.getReadingFileDescriptor();
     }
 
     private static abstract class Task implements Runnable {
-        private final ParcelFileDescriptor[] mDescriptors;
+        protected final MtpManager mModel;
+        protected final Identifier mIdentifier;
+        protected final ParcelFileDescriptor[] mDescriptors;
 
-        Task() throws IOException {
+        Task(MtpManager model, Identifier identifier) throws IOException {
+            mModel = model;
+            mIdentifier = identifier;
             mDescriptors = ParcelFileDescriptor.createReliablePipe();
-        }
-
-        abstract byte[] getBytes() throws IOException;
-
-        @Override
-        public void run() {
-            try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
-                    new ParcelFileDescriptor.AutoCloseOutputStream(mDescriptors[1])) {
-                try {
-                    final byte[] bytes = getBytes();
-                    stream.write(bytes);
-                } catch (IOException error) {
-                    mDescriptors[1].closeWithError("Failed to load bytes.");
-                    return;
-                }
-            } catch (IOException closeError) {
-                Log.d(MtpDocumentsProvider.TAG, closeError.getMessage());
-            }
         }
 
         ParcelFileDescriptor getReadingFileDescriptor() {
             return mDescriptors[0];
+        }
+    }
+
+    private static class ImportFileTask extends Task {
+        ImportFileTask(MtpManager model, Identifier identifier) throws IOException {
+            super(model, identifier);
+        }
+
+        @Override
+        public void run() {
+            try {
+                mModel.importFile(mIdentifier.mDeviceId, mIdentifier.mObjectHandle, mDescriptors[1]);
+                mDescriptors[1].close();
+            } catch (IOException error) {
+                try {
+                    mDescriptors[1].closeWithError("Failed to stream a file.");
+                } catch (IOException closeError) {
+                    Log.w(MtpDocumentsProvider.TAG, closeError.getMessage());
+                }
+            }
         }
     }
 
