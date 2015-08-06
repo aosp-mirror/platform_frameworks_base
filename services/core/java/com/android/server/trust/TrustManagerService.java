@@ -122,7 +122,7 @@ public class TrustManagerService extends SystemService {
     private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
 
     private boolean mTrustAgentsCanRun = false;
-    private int mCurrentUser = UserHandle.USER_OWNER;
+    private int mCurrentUser = UserHandle.USER_SYSTEM;
 
     public TrustManagerService(Context context) {
         super(context);
@@ -150,7 +150,7 @@ public class TrustManagerService extends SystemService {
             mTrustAgentsCanRun = true;
             refreshAgentList(UserHandle.USER_ALL);
         } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
-            maybeEnableFactoryTrustAgents(mLockPatternUtils, UserHandle.USER_OWNER);
+            maybeEnableFactoryTrustAgents(mLockPatternUtils, UserHandle.USER_SYSTEM);
         }
     }
 
@@ -205,7 +205,7 @@ public class TrustManagerService extends SystemService {
         if (!mTrustAgentsCanRun) {
             return;
         }
-        if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_OWNER) {
+        if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_SYSTEM) {
             Log.e(TAG, "refreshAgentList(userId=" + userId + "): Invalid user handle,"
                     + " must be USER_ALL or a specific user.", new Throwable("here"));
             userId = UserHandle.USER_ALL;
@@ -296,7 +296,7 @@ public class TrustManagerService extends SystemService {
     }
 
     private void refreshDeviceLockedForUser(int userId) {
-        if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_OWNER) {
+        if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_SYSTEM) {
             Log.e(TAG, "refreshDeviceLockedForUser(userId=" + userId + "): Invalid user handle,"
                     + " must be USER_ALL or a specific user.", new Throwable("here"));
             userId = UserHandle.USER_ALL;
@@ -689,7 +689,7 @@ public class TrustManagerService extends SystemService {
         @Override
         public void reportRequireCredentialEntry(int userId) throws RemoteException {
             enforceReportPermission();
-            if (userId == UserHandle.USER_ALL || userId >= UserHandle.USER_OWNER) {
+            if (userId == UserHandle.USER_ALL || userId >= UserHandle.USER_SYSTEM) {
                 mHandler.obtainMessage(MSG_REQUIRE_CREDENTIAL_ENTRY, userId, 0).sendToTarget();
             } else {
                 throw new IllegalArgumentException(
