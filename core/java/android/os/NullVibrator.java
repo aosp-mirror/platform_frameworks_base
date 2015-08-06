@@ -43,7 +43,6 @@ public class NullVibrator extends Vibrator {
      */
     @Override
     public void vibrate(int uid, String opPkg, long milliseconds, AudioAttributes attributes) {
-        vibrate(milliseconds);
     }
 
     /**
