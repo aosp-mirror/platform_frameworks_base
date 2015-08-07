@@ -9101,4 +9101,71 @@ public final class ContactsContract {
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
     }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    protected interface MetadataSyncStateColumns {
+
+        /**
+         * A reference to the name of the account to which this state belongs
+         * <P>Type: STRING</P>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
+
+        /**
+         * A reference to the type of the account to which this state belongs
+         * <P>Type: STRING</P>
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * A reference to the data set within the account to which this state belongs
+         * <P>Type: STRING</P>
+         */
+        public static final String DATA_SET = "data_set";
+
+        /**
+         * The sync state associated with this account.
+         * <P>Type: Blob</P>
+         */
+        public static final String STATE = "state";
+    }
+
+    /**
+     * Constants for the metadata_sync_state table. This table is used to store the metadata
+     * sync state for a set of accounts.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class MetadataSyncState implements BaseColumns, MetadataSyncStateColumns {
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private MetadataSyncState() {
+        }
+
+        /**
+         * The content:// style URI for this table.
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(MetadataSync.METADATA_AUTHORITY_URI, "metadata_sync_state");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of contact metadata sync
+         * states.
+         */
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/contact_metadata_sync_state";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single contact metadata sync
+         * state.
+         */
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/contact_metadata_sync_state";
+    }
 }
