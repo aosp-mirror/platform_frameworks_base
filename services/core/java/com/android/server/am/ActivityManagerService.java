@@ -4141,7 +4141,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final Intent intent;
         final int userId;
         synchronized (this) {
-            task = mRecentTasks.taskForIdLocked(taskId);
+            task = mStackSupervisor.anyTaskForIdLocked(taskId);
             if (task == null) {
                 throw new IllegalArgumentException("Task " + taskId + " not found.");
             }
@@ -8839,7 +8839,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             try {
                 int taskId = ActivityRecord.getTaskForActivityLocked(token, !nonRoot);
-                final TaskRecord task = mRecentTasks.taskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
                 if (task != null) {
                     if (mStackSupervisor.isLockedTask(task)) {
                         mStackSupervisor.showLockTaskToast();
@@ -20807,7 +20807,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 long origId = Binder.clearCallingIdentity();
                 try {
-                    TaskRecord tr = mRecentTasks.taskForIdLocked(mTaskId);
+                    TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(mTaskId);
                     if (tr == null) {
                         throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                     }
@@ -20834,7 +20834,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             TaskRecord tr;
             IApplicationThread appThread;
             synchronized (ActivityManagerService.this) {
-                tr = mRecentTasks.taskForIdLocked(mTaskId);
+                tr = mStackSupervisor.anyTaskForIdLocked(mTaskId);
                 if (tr == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
@@ -20855,7 +20855,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 long origId = Binder.clearCallingIdentity();
                 try {
-                    TaskRecord tr = mRecentTasks.taskForIdLocked(mTaskId);
+                    TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(mTaskId);
                     if (tr == null) {
                         throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                     }
