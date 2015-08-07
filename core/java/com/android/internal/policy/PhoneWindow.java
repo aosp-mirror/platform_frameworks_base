@@ -16,6 +16,8 @@
 
 package com.android.internal.policy;
 
+import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -162,6 +164,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
+
+    // This is the non client decor view for the window, containing the caption and window control
+    // buttons. The visibility of this decor depends on the workspace and the window type.
+    // If the window type does not require such a view, this member might be null.
+    NonClientDecorView mNonClientDecorView;
+    // The non client decor needs to adapt to the used workspace. Since querying and changing the
+    // workspace is expensive, this is the workspace value the window is currently set up for.
+    int mWorkspaceId;
 
     // This is the view in which the window contents are placed. It is either
     // mDecor itself, or a child of mDecor where the contents go.
@@ -655,6 +665,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // the proper layout
                     clearMenuViews(st);
                 }
+            }
+        }
+        if (mNonClientDecorView != null) {
+            int workspaceId = getWorkspaceId();
+            if (mWorkspaceId != workspaceId) {
+                mWorkspaceId = workspaceId;
+                // We might have to change the kind of surface before we do anything else.
+                mNonClientDecorView.phoneWindowUpdated(hasNonClientDecor(mWorkspaceId),
+                        nonClientDecorHasShadow(mWorkspaceId));
+                mDecor.enableNonClientDecor(hasNonClientDecor(workspaceId));
             }
         }
     }
@@ -3499,24 +3519,34 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 .addOnPreDrawListener(mFloatingToolbarPreDrawListener);
         }
 
-        // Set when the window is free floating and a non client decor frame was added.
-        void enableNonClientDecor(boolean enable) {
-            if (mHasNonClientDecor != enable) {
-                mHasNonClientDecor = enable;
+        /**
+         * Informs the decor if a non client decor is attached and visible.
+         * @param attachedAndVisible true when the decor is visible.
+         * Note that this will even be called if there is no non client decor.
+         **/
+        void enableNonClientDecor(boolean attachedAndVisible) {
+            if (mHasNonClientDecor != attachedAndVisible) {
+                mHasNonClientDecor = attachedAndVisible;
                 if (getForeground() != null) {
                     drawableChanged();
                 }
             }
         }
 
-        // Returns true if the window has a non client decor.
+        /**
+         * Returns true if the window has a non client decor.
+         * @return If there is a non client decor - even if it is not visible.
+         **/
         private boolean windowHasNonClientDecor() {
             return mHasNonClientDecor;
         }
 
-        // Returns true if the Window is free floating and has a shadow. Note that non overlapping
-        // windows do not have a shadow since it could not be seen anyways (a small screen / tablet
-        // "tiles" the windows side by side but does not overlap them).
+        /**
+         * Returns true if the Window is free floating and has a shadow. Note that non overlapping
+         * windows do not have a shadow since it could not be seen anyways (a small screen / tablet
+         * "tiles" the windows side by side but does not overlap them).
+         * @return Returns true when the window has a shadow created by the non client decor.
+         **/
         private boolean windowHasShadow() {
             return windowHasNonClientDecor() && getElevation() > 0;
         }
@@ -3910,12 +3940,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         mDecor.startChanging();
 
-        NonClientDecorView nonClientDecorView = createNonClientDecorView();
+        mNonClientDecorView = createNonClientDecorView();
         View in = mLayoutInflater.inflate(layoutResource, null);
-        if (nonClientDecorView != null) {
-            decor.addView(nonClientDecorView,
+        if (mNonClientDecorView != null) {
+            decor.addView(mNonClientDecorView,
                     new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-            nonClientDecorView.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+            mNonClientDecorView.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         } else {
             decor.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         }
@@ -3976,32 +4006,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     // Free floating overlapping windows require a non client decor with a caption and shadow..
     private NonClientDecorView createNonClientDecorView() {
-        boolean needsDecor = true;
         NonClientDecorView nonClientDecorView = null;
-
         final WindowManager.LayoutParams attrs = getAttributes();
-        // TODO(skuhne): Use the associated stack to figure out if the window is on the free style
-        // desktop, the side by side desktop or the full screen desktop. With that informations the
-        // choice is fairly easy to decide.
-        // => This is only a kludge for now to suppress fullscreen windows, recents, launcher, etc..
-        boolean isFullscreen =
-                0 != ((mDecor.getWindowSystemUiVisibility() | mDecor.getSystemUiVisibility()) &
-                        (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION));
-        boolean isApplication = attrs.type != TYPE_BASE_APPLICATION &&
-                attrs.type != TYPE_APPLICATION;
-
-        // We do not show the non client decor if...
-        // - this is a floating dialog (which is not a real window, e.g. it cannot be maximized).
-        // - it is not an application (special windows have special functions, e.g text selector).
-        // - the application is full screen, drawing everything (since the decor would be out of the
-        //   screen in that case and could not be seen).
-        if (isFloating() || isFullscreen || isApplication) {
-            needsDecor = false;
-        }
-
-        if (needsDecor) {
-            // TODO(skuhne): If running in side by side mode on a device - turn off the shadow.
-            boolean windowHasShadow = true;
+        boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
+                attrs.type == TYPE_APPLICATION;
+        mWorkspaceId = getWorkspaceId();
+        // Only a non floating application window can get a non client decor.
+        if (!isFloating() && isApplication) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             TypedValue value = new TypedValue();
@@ -4013,11 +4024,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
                         R.layout.non_client_decor_light, null);
             }
-            nonClientDecorView.setPhoneWindow(this, windowHasShadow);
+            nonClientDecorView.setPhoneWindow(this, hasNonClientDecor(mWorkspaceId),
+                    nonClientDecorHasShadow(mWorkspaceId));
         }
-
-        // Tell the Decor if it has a non client decor.
-        mDecor.enableNonClientDecor(needsDecor);
+        // Tell the decor if it has a visible non client decor.
+        mDecor.enableNonClientDecor(nonClientDecorView != null &&
+                hasNonClientDecor(mWorkspaceId));
 
         return nonClientDecorView;
     }
@@ -5161,5 +5173,43 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     public void setIsStartingWindow(boolean isStartingWindow) {
         mIsStartingWindow = isStartingWindow;
+    }
+
+    /**
+     * Returns the Id of the workspace which contains this window.
+     * Note that if no workspace can be determined - which usually means that it was not
+     * created for an activity - the fullscreen workspace ID will be returned.
+     * @return Returns the workspace stack id which contains this window.
+     **/
+    private int getWorkspaceId() {
+        int workspaceId = FULLSCREEN_WORKSPACE_STACK_ID;
+        WindowStackCallback callback = getWindowStackCallback();
+        if (callback != null) {
+            try {
+                workspaceId = callback.getWindowStackId();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to get the workspace ID of a PhoneWindow.");
+            }
+        }
+        return workspaceId;
+    }
+
+    /**
+     * Determines if the window should show a non client decor for the workspace it is in.
+     * @param workspaceId The Id of the workspace which contains this window.
+     * @Return Returns true if the window should show a non client decor.
+     **/
+    private boolean hasNonClientDecor(int workspaceId) {
+        return workspaceId == FREEFORM_WORKSPACE_STACK_ID;
+    }
+
+    /**
+     * Determines if the window should show a shadow or not, dependent on the workspace.
+     * @param workspaceId The Id of the workspace which contains this window.
+     * @Return Returns true if the window should show a shadow.
+     **/
+    private boolean nonClientDecorHasShadow(int workspaceId) {
+        // TODO(skuhne): Add side by side mode here to add a decor.
+        return workspaceId == FREEFORM_WORKSPACE_STACK_ID;
     }
 }
