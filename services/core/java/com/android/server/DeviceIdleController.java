@@ -113,6 +113,7 @@ public class DeviceIdleController extends SystemService
     private Display mCurDisplay;
     private AnyMotionDetector mAnyMotionDetector;
     private boolean mEnabled;
+    private boolean mForceIdle;
     private boolean mScreenOn;
     private boolean mCharging;
     private boolean mSigMotionActive;
@@ -151,7 +152,14 @@ public class DeviceIdleController extends SystemService
     public final AtomicFile mConfigFile;
 
     /**
-     * Package names the system has white-listed to opt out of power save restrictions.
+     * Package names the system has white-listed to opt out of power save restrictions,
+     * except for device idle mode.
+     */
+    private final ArrayMap<String, Integer> mPowerSaveWhitelistAppsExceptIdle = new ArrayMap<>();
+
+    /**
+     * Package names the system has white-listed to opt out of power save restrictions for
+     * all modes.
      */
     private final ArrayMap<String, Integer> mPowerSaveWhitelistApps = new ArrayMap<>();
 
@@ -161,9 +169,28 @@ public class DeviceIdleController extends SystemService
     private final ArrayMap<String, Integer> mPowerSaveWhitelistUserApps = new ArrayMap<>();
 
     /**
+     * App IDs of built-in system apps that have been white-listed except for idle modes.
+     */
+    private final SparseBooleanArray mPowerSaveWhitelistSystemAppIdsExceptIdle
+            = new SparseBooleanArray();
+
+    /**
      * App IDs of built-in system apps that have been white-listed.
      */
     private final SparseBooleanArray mPowerSaveWhitelistSystemAppIds = new SparseBooleanArray();
+
+    /**
+     * App IDs that have been white-listed to opt out of power save restrictions, except
+     * for device idle modes.
+     */
+    private final SparseBooleanArray mPowerSaveWhitelistExceptIdleAppIds = new SparseBooleanArray();
+
+    /**
+     * Current app IDs that are in the complete power save white list, but shouldn't be
+     * excluded from idle modes.  This array can be shared with others because it will not be
+     * modified once set.
+     */
+    private int[] mPowerSaveWhitelistExceptIdleAppIdArray = new int[0];
 
     /**
      * App IDs that have been white-listed to opt out of power save restrictions.
@@ -583,12 +610,24 @@ public class DeviceIdleController extends SystemService
             removePowerSaveWhitelistAppInternal(name);
         }
 
+        @Override public String[] getSystemPowerWhitelistExceptIdle() {
+            return getSystemPowerWhitelistExceptIdleInternal();
+        }
+
         @Override public String[] getSystemPowerWhitelist() {
             return getSystemPowerWhitelistInternal();
         }
 
+        @Override public String[] getFullPowerWhitelistExceptIdle() {
+            return getFullPowerWhitelistExceptIdleInternal();
+        }
+
         @Override public String[] getFullPowerWhitelist() {
             return getFullPowerWhitelistInternal();
+        }
+
+        @Override public int[] getAppIdWhitelistExceptIdle() {
+            return getAppIdWhitelistExceptIdleInternal();
         }
 
         @Override public int[] getAppIdWhitelist() {
@@ -597,6 +636,10 @@ public class DeviceIdleController extends SystemService
 
         @Override public int[] getAppIdTempWhitelist() {
             return getAppIdTempWhitelistInternal();
+        }
+
+        @Override public boolean isPowerSaveWhitelistExceptIdleApp(String name) {
+            return isPowerSaveWhitelistExceptIdleAppInternal(name);
         }
 
         @Override public boolean isPowerSaveWhitelistApp(String name) {
@@ -679,6 +722,19 @@ public class DeviceIdleController extends SystemService
             mEnabled = getContext().getResources().getBoolean(
                     com.android.internal.R.bool.config_enableAutoPowerModes);
             SystemConfig sysConfig = SystemConfig.getInstance();
+            ArraySet<String> allowPowerExceptIdle = sysConfig.getAllowInPowerSaveExceptIdle();
+            for (int i=0; i<allowPowerExceptIdle.size(); i++) {
+                String pkg = allowPowerExceptIdle.valueAt(i);
+                try {
+                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+                    if ((ai.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        int appid = UserHandle.getAppId(ai.uid);
+                        mPowerSaveWhitelistAppsExceptIdle.put(ai.packageName, appid);
+                        mPowerSaveWhitelistSystemAppIdsExceptIdle.put(appid, true);
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                }
+            }
             ArraySet<String> allowPower = sysConfig.getAllowInPowerSave();
             for (int i=0; i<allowPower.size(); i++) {
                 String pkg = allowPower.valueAt(i);
@@ -686,6 +742,10 @@ public class DeviceIdleController extends SystemService
                     ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
                     if ((ai.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
                         int appid = UserHandle.getAppId(ai.uid);
+                        // These apps are on both the whitelist-except-idle as well
+                        // as the full whitelist, so they apply in all cases.
+                        mPowerSaveWhitelistAppsExceptIdle.put(ai.packageName, appid);
+                        mPowerSaveWhitelistSystemAppIdsExceptIdle.put(appid, true);
                         mPowerSaveWhitelistApps.put(ai.packageName, appid);
                         mPowerSaveWhitelistSystemAppIds.put(appid, true);
                     }
@@ -783,12 +843,40 @@ public class DeviceIdleController extends SystemService
         return false;
     }
 
+    public String[] getSystemPowerWhitelistExceptIdleInternal() {
+        synchronized (this) {
+            int size = mPowerSaveWhitelistAppsExceptIdle.size();
+            String[] apps = new String[size];
+            for (int i = 0; i < size; i++) {
+                apps[i] = mPowerSaveWhitelistAppsExceptIdle.keyAt(i);
+            }
+            return apps;
+        }
+    }
+
     public String[] getSystemPowerWhitelistInternal() {
         synchronized (this) {
             int size = mPowerSaveWhitelistApps.size();
             String[] apps = new String[size];
-            for (int i = 0; i < mPowerSaveWhitelistApps.size(); i++) {
+            for (int i = 0; i < size; i++) {
                 apps[i] = mPowerSaveWhitelistApps.keyAt(i);
+            }
+            return apps;
+        }
+    }
+
+    public String[] getFullPowerWhitelistExceptIdleInternal() {
+        synchronized (this) {
+            int size = mPowerSaveWhitelistAppsExceptIdle.size() + mPowerSaveWhitelistUserApps.size();
+            String[] apps = new String[size];
+            int cur = 0;
+            for (int i = 0; i < mPowerSaveWhitelistAppsExceptIdle.size(); i++) {
+                apps[cur] = mPowerSaveWhitelistAppsExceptIdle.keyAt(i);
+                cur++;
+            }
+            for (int i = 0; i < mPowerSaveWhitelistUserApps.size(); i++) {
+                apps[cur] = mPowerSaveWhitelistUserApps.keyAt(i);
+                cur++;
             }
             return apps;
         }
@@ -811,10 +899,23 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    public boolean isPowerSaveWhitelistExceptIdleAppInternal(String packageName) {
+        synchronized (this) {
+            return mPowerSaveWhitelistAppsExceptIdle.containsKey(packageName)
+                    || mPowerSaveWhitelistUserApps.containsKey(packageName);
+        }
+    }
+
     public boolean isPowerSaveWhitelistAppInternal(String packageName) {
         synchronized (this) {
             return mPowerSaveWhitelistApps.containsKey(packageName)
                     || mPowerSaveWhitelistUserApps.containsKey(packageName);
+        }
+    }
+
+    public int[] getAppIdWhitelistExceptIdleInternal() {
+        synchronized (this) {
+            return mPowerSaveWhitelistExceptIdleAppIdArray;
         }
     }
 
@@ -921,6 +1022,9 @@ public class DeviceIdleController extends SystemService
                     Slog.d(TAG, "Removing UID " + uid + " from temp whitelist");
                 }
                 updateTempWhitelistAppIdsLocked();
+                if (mNetworkPolicyTempWhitelistCallback != null) {
+                    mHandler.post(mNetworkPolicyTempWhitelistCallback);
+                }
                 reportTempWhitelistChangedLocked();
                 try {
                     mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_TEMP_WHITELIST_FINISH,
@@ -949,10 +1053,14 @@ public class DeviceIdleController extends SystemService
         if (DEBUG) Slog.d(TAG, "updateDisplayLocked: screenOn=" + screenOn);
         if (!screenOn && mScreenOn) {
             mScreenOn = false;
-            becomeInactiveIfAppropriateLocked();
+            if (!mForceIdle) {
+                becomeInactiveIfAppropriateLocked();
+            }
         } else if (screenOn) {
             mScreenOn = true;
-            becomeActiveLocked("screen", Process.myUid());
+            if (!mForceIdle) {
+                becomeActiveLocked("screen", Process.myUid());
+            }
         }
     }
 
@@ -960,10 +1068,14 @@ public class DeviceIdleController extends SystemService
         if (DEBUG) Slog.i(TAG, "updateChargingLocked: charging=" + charging);
         if (!charging && mCharging) {
             mCharging = false;
-            becomeInactiveIfAppropriateLocked();
+            if (!mForceIdle) {
+                becomeInactiveIfAppropriateLocked();
+            }
         } else if (charging) {
             mCharging = charging;
-            becomeActiveLocked("charging", Process.myUid());
+            if (!mForceIdle) {
+                becomeActiveLocked("charging", Process.myUid());
+            }
         }
     }
 
@@ -989,7 +1101,7 @@ public class DeviceIdleController extends SystemService
 
     void becomeInactiveIfAppropriateLocked() {
         if (DEBUG) Slog.d(TAG, "becomeInactiveIfAppropriateLocked()");
-        if (!mScreenOn && !mCharging && mEnabled && mState == STATE_ACTIVE) {
+        if (((!mScreenOn && !mCharging) || mForceIdle) && mEnabled && mState == STATE_ACTIVE) {
             // Screen has turned off; we are now going to become inactive and start
             // waiting to see if we will ultimately go idle.
             mState = STATE_INACTIVE;
@@ -1008,6 +1120,15 @@ public class DeviceIdleController extends SystemService
     void enterInactiveStateLocked() {
         mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
         becomeInactiveIfAppropriateLocked();
+    }
+
+    void exitForceIdleLocked() {
+        if (mForceIdle) {
+            mForceIdle = false;
+            if (mScreenOn || mCharging) {
+                becomeActiveLocked("exit-force-idle", Process.myUid());
+            }
+        }
     }
 
     void stepIdleStateLocked() {
@@ -1138,20 +1259,28 @@ public class DeviceIdleController extends SystemService
           mNextAlarmTime, mSensingAlarmIntent);
     }
 
-    private void updateWhitelistAppIdsLocked() {
-        mPowerSaveWhitelistAllAppIds.clear();
-        for (int i=0; i<mPowerSaveWhitelistApps.size(); i++) {
-            mPowerSaveWhitelistAllAppIds.put(mPowerSaveWhitelistApps.valueAt(i), true);
+    private static int[] buildAppIdArray(ArrayMap<String, Integer> systemApps,
+            ArrayMap<String, Integer> userApps, SparseBooleanArray outAppIds) {
+        outAppIds.clear();
+        for (int i=0; i<systemApps.size(); i++) {
+            outAppIds.put(systemApps.valueAt(i), true);
         }
-        for (int i=0; i<mPowerSaveWhitelistUserApps.size(); i++) {
-            mPowerSaveWhitelistAllAppIds.put(mPowerSaveWhitelistUserApps.valueAt(i), true);
+        for (int i=0; i<userApps.size(); i++) {
+            outAppIds.put(userApps.valueAt(i), true);
         }
-        int size = mPowerSaveWhitelistAllAppIds.size();
+        int size = outAppIds.size();
         int[] appids = new int[size];
         for (int i = 0; i < size; i++) {
-            appids[i] = mPowerSaveWhitelistAllAppIds.keyAt(i);
+            appids[i] = outAppIds.keyAt(i);
         }
-        mPowerSaveWhitelistAllAppIdArray = appids;
+        return appids;
+    }
+
+    private void updateWhitelistAppIdsLocked() {
+        mPowerSaveWhitelistExceptIdleAppIdArray = buildAppIdArray(mPowerSaveWhitelistAppsExceptIdle,
+                mPowerSaveWhitelistUserApps, mPowerSaveWhitelistExceptIdleAppIds);
+        mPowerSaveWhitelistAllAppIdArray = buildAppIdArray(mPowerSaveWhitelistApps,
+                mPowerSaveWhitelistUserApps, mPowerSaveWhitelistAllAppIds);
         if (mLocalPowerManager != null) {
             if (DEBUG) {
                 Slog.d(TAG, "Setting wakelock whitelist to "
@@ -1320,6 +1449,9 @@ public class DeviceIdleController extends SystemService
         pw.println("Commands:");
         pw.println("  step");
         pw.println("    Immediately step to next state, without waiting for alarm.");
+        pw.println("  force-idle");
+        pw.println("    Force directly into idle mode, regardless of other device state.");
+        pw.println("    Use \"step\" to get out.");
         pw.println("  disable");
         pw.println("    Completely disable device idle mode.");
         pw.println("  enable");
@@ -1362,8 +1494,36 @@ public class DeviceIdleController extends SystemService
                     synchronized (this) {
                         long token = Binder.clearCallingIdentity();
                         try {
+                            exitForceIdleLocked();
                             stepIdleStateLocked();
                             pw.print("Stepped to: "); pw.println(stateToString(mState));
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
+                    return;
+                } else if ("force-idle".equals(arg)) {
+                    synchronized (this) {
+                        long token = Binder.clearCallingIdentity();
+                        try {
+                            if (!mEnabled) {
+                                pw.println("Unable to go idle; not enabled");
+                                return;
+                            }
+                            mForceIdle = true;
+                            becomeInactiveIfAppropriateLocked();
+                            int curState = mState;
+                            while (curState != STATE_IDLE) {
+                                stepIdleStateLocked();
+                                if (curState == mState) {
+                                    pw.print("Unable to go idle; stopped at ");
+                                    pw.println(stateToString(mState));
+                                    exitForceIdleLocked();
+                                    return;
+                                }
+                                curState = mState;
+                            }
+                            pw.println("Now forced in to idle mode");
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
@@ -1387,6 +1547,7 @@ public class DeviceIdleController extends SystemService
                     synchronized (this) {
                         long token = Binder.clearCallingIdentity();
                         try {
+                            exitForceIdleLocked();
                             if (!mEnabled) {
                                 mEnabled = true;
                                 becomeInactiveIfAppropriateLocked();
@@ -1431,6 +1592,12 @@ public class DeviceIdleController extends SystemService
                             }
                         } else {
                             synchronized (this) {
+                                for (int j=0; j<mPowerSaveWhitelistAppsExceptIdle.size(); j++) {
+                                    pw.print("system-excidle,");
+                                    pw.print(mPowerSaveWhitelistAppsExceptIdle.keyAt(j));
+                                    pw.print(",");
+                                    pw.println(mPowerSaveWhitelistAppsExceptIdle.valueAt(j));
+                                }
                                 for (int j=0; j<mPowerSaveWhitelistApps.size(); j++) {
                                     pw.print("system,");
                                     pw.print(mPowerSaveWhitelistApps.keyAt(j));
@@ -1481,7 +1648,15 @@ public class DeviceIdleController extends SystemService
         synchronized (this) {
             mConstants.dump(pw);
 
-            int size = mPowerSaveWhitelistApps.size();
+            int size = mPowerSaveWhitelistAppsExceptIdle.size();
+            if (size > 0) {
+                pw.println("  Whitelist (except idle) system apps:");
+                for (int i = 0; i < size; i++) {
+                    pw.print("    ");
+                    pw.println(mPowerSaveWhitelistAppsExceptIdle.keyAt(i));
+                }
+            }
+            size = mPowerSaveWhitelistApps.size();
             if (size > 0) {
                 pw.println("  Whitelist system apps:");
                 for (int i = 0; i < size; i++) {
@@ -1495,6 +1670,15 @@ public class DeviceIdleController extends SystemService
                 for (int i = 0; i < size; i++) {
                     pw.print("    ");
                     pw.println(mPowerSaveWhitelistUserApps.keyAt(i));
+                }
+            }
+            size = mPowerSaveWhitelistExceptIdleAppIds.size();
+            if (size > 0) {
+                pw.println("  Whitelist (except idle) all app ids:");
+                for (int i = 0; i < size; i++) {
+                    pw.print("    ");
+                    pw.print(mPowerSaveWhitelistExceptIdleAppIds.keyAt(i));
+                    pw.println();
                 }
             }
             size = mPowerSaveWhitelistAllAppIds.size();
@@ -1531,6 +1715,7 @@ public class DeviceIdleController extends SystemService
             }
 
             pw.print("  mEnabled="); pw.println(mEnabled);
+            pw.print("  mForceIdle="); pw.println(mForceIdle);
             pw.print("  mSigMotionSensor="); pw.println(mSigMotionSensor);
             pw.print("  mCurDisplay="); pw.println(mCurDisplay);
             pw.print("  mScreenOn="); pw.println(mScreenOn);
