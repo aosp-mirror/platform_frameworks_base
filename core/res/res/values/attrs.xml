@@ -1806,6 +1806,10 @@ i
         <enum name="KEYCODE_NAVIGATE_NEXT" value="261" />
         <enum name="KEYCODE_NAVIGATE_IN" value="262" />
         <enum name="KEYCODE_NAVIGATE_OUT" value="263" />
+        <enum name="KEYCODE_MEDIA_SKIP_FORWARD" value="272" />
+        <enum name="KEYCODE_MEDIA_SKIP_BACKWARD" value="273" />
+        <enum name="KEYCODE_MEDIA_STEP_FORWARD" value="274" />
+        <enum name="KEYCODE_MEDIA_STEP_BACKWARD" value="275" />
     </attr>
 
     <!-- ***************************************************************** -->
