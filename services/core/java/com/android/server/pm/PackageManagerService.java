@@ -12942,6 +12942,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
 
+            // Propagate the permissions state as we do not want to drop on the floor
+            // runtime permissions. The update permissions method below will take
+            // care of removing obsolete permissions and grant install permissions.
+            ps.getPermissionsState().copyFrom(newPs.getPermissionsState());
             updatePermissionsLPw(newPkg.packageName, newPkg,
                     UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
 
