@@ -1026,9 +1026,9 @@ public class Switch extends CompoundButton {
 
         if (newState != oldState) {
             playSoundEffect(SoundEffectConstants.CLICK);
-            setChecked(newState);
         }
-
+        // Always call setChecked so that the thumb is moved back to the correct edge
+        setChecked(newState);
         cancelSuperTouch(ev);
     }
 
