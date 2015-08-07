@@ -57,16 +57,19 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
 
     public void testGetAllValidScorers() throws Exception {
         // Package 1 - Valid scorer.
-        Pair<ResolveInfo, ResolveInfo> package1 = buildResolveInfo("package1", true, true, false);
+        Pair<ResolveInfo, ResolveInfo> package1 = buildResolveInfo("package1", 1, true, true,
+                false);
 
         // Package 2 - Receiver does not have BROADCAST_NETWORK_PRIVILEGED permission.
-        Pair<ResolveInfo, ResolveInfo> package2 = buildResolveInfo("package2", false, true, false);
+        Pair<ResolveInfo, ResolveInfo> package2 = buildResolveInfo("package2", 2, false, true,
+                false);
 
         // Package 3 - App does not have SCORE_NETWORKS permission.
-        Pair<ResolveInfo, ResolveInfo> package3 = buildResolveInfo("package3", true, false, false);
+        Pair<ResolveInfo, ResolveInfo> package3 = buildResolveInfo("package3", 3, true, false,
+                false);
 
         // Package 4 - Valid scorer w/ optional config activity.
-        Pair<ResolveInfo, ResolveInfo> package4 = buildResolveInfo("package4", true, true, true);
+        Pair<ResolveInfo, ResolveInfo> package4 = buildResolveInfo("package4", 4, true, true, true);
 
         List<Pair<ResolveInfo, ResolveInfo>> scorers = new ArrayList<>();
         scorers.add(package1);
@@ -81,11 +84,13 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         assertTrue(result.hasNext());
         NetworkScorerAppData next = result.next();
         assertEquals("package1", next.mPackageName);
+        assertEquals(1, next.mPackageUid);
         assertNull(next.mConfigurationActivityClassName);
 
         assertTrue(result.hasNext());
         next = result.next();
         assertEquals("package4", next.mPackageName);
+        assertEquals(4, next.mPackageUid);
         assertEquals(".ConfigActivity", next.mConfigurationActivityClassName);
 
         assertFalse(result.hasNext());
@@ -122,7 +127,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
                 .thenReturn(receivers);
     }
 
-    private Pair<ResolveInfo, ResolveInfo> buildResolveInfo(String packageName,
+    private Pair<ResolveInfo, ResolveInfo> buildResolveInfo(String packageName, int packageUid,
             boolean hasReceiverPermission, boolean hasScorePermission, boolean hasConfigActivity)
             throws Exception {
         Mockito.when(mMockPm.checkPermission(permission.SCORE_NETWORKS, packageName))
@@ -133,6 +138,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         resolveInfo.activityInfo = new ActivityInfo();
         resolveInfo.activityInfo.packageName = packageName;
         resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
+        resolveInfo.activityInfo.applicationInfo.uid = packageUid;
         if (hasReceiverPermission) {
             resolveInfo.activityInfo.permission = permission.BROADCAST_NETWORK_PRIVILEGED;
         }
