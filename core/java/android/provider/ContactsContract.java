@@ -5653,7 +5653,6 @@ public final class ContactsContract {
             /**
              * The alphabet used for capturing the phonetic name.
              * See ContactsContract.PhoneticNameStyle.
-             * @hide
              */
             public static final String PHONETIC_NAME_STYLE = DATA11;
         }
@@ -6693,7 +6692,6 @@ public final class ContactsContract {
             /**
              * The alphabet used for capturing the phonetic name.
              * See {@link ContactsContract.PhoneticNameStyle}.
-             * @hide
              */
             public static final String PHONETIC_NAME_STYLE = DATA10;
 
