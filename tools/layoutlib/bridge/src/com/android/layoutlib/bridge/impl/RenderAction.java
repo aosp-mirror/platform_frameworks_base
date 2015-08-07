@@ -37,6 +37,7 @@ import android.view.ViewConfiguration_Accessor;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodManager_Accessor;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -397,6 +398,8 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             // preview releases of API 15.
             // TODO: Remove the try catch around Oct 2015.
         }
+        String locale = getParams().getLocale();
+        if (locale != null && !locale.isEmpty()) config.locale = new Locale(locale);
 
         // TODO: fill in more config info.
 
