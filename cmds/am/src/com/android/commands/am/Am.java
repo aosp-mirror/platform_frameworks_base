@@ -77,6 +77,15 @@ public class Am extends BaseCommand {
 
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
 
+    // Is the object moving in a positive direction?
+    private static final boolean MOVING_FORWARD = true;
+    // Is the object moving in the horizontal plan?
+    private static final boolean MOVING_HORIZONTALLY = true;
+    // Is the object current point great then its target point?
+    private static final boolean GREATER_THAN_TARGET = true;
+    // Amount we reduce the stack size by when testing a task re-size.
+    private static final int STACK_BOUNDS_INSET = 10;
+
     private IActivityManager mAm;
 
     private int mStartFlags = 0;
@@ -146,6 +155,8 @@ public class Am extends BaseCommand {
                 "       am task lock stop\n" +
                 "       am task resizeable <TASK_ID> [true|false]\n" +
                 "       am task resize <TASK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am task drag-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS] \n" +
+                "       am task size-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS] \n" +
                 "       am get-config\n" +
                 "       am set-inactive [--user <USER_ID>] <PACKAGE> true|false\n" +
                 "       am get-inactive [--user <USER_ID>] <PACKAGE>\n" +
@@ -296,6 +307,14 @@ public class Am extends BaseCommand {
                 "am task resize: makes sure <TASK_ID> is in a stack with the specified bounds.\n" +
                 "   Forces the task to be resizeable and creates a stack if no existing stack\n" +
                 "   has the specified bounds.\n" +
+                "\n" +
+                "am task drag-task-test: test command for dragging/moving <TASK_ID> by\n" +
+                "   <STEP_SIZE> increments around the screen applying the optional [DELAY_MS]\n" +
+                "   between each step.\n" +
+                "\n" +
+                "am task size-task-test: test command for sizing <TASK_ID> by <STEP_SIZE>" +
+                "   increments within the screen applying the optional [DELAY_MS] between\n" +
+                "   each step.\n" +
                 "\n" +
                 "am get-config: retrieve the configuration and any recent configurations\n" +
                 "  of the device.\n" +
@@ -2089,6 +2108,10 @@ public class Am extends BaseCommand {
             runTaskResizeable();
         } else if (op.equals("resize")) {
             runTaskResize();
+        } else if (op.equals("drag-task-test")) {
+            runTaskDragTaskTest();
+        } else if (op.equals("size-task-test")) {
+            runTaskSizeTaskTest();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -2130,10 +2153,258 @@ public class Am extends BaseCommand {
             System.err.println("Error: invalid input bounds");
             return;
         }
+        taskResize(taskId, bounds, 0);
+    }
+
+    private void taskResize(int taskId, Rect bounds, int delay_ms) {
         try {
             mAm.resizeTask(taskId, bounds);
+            Thread.sleep(delay_ms);
         } catch (RemoteException e) {
+            System.err.println("Error changing task bounds: " + e);
+        } catch (InterruptedException e) {
         }
+    }
+
+    private void runTaskDragTaskTest() {
+        final int taskId = Integer.valueOf(nextArgRequired());
+        final int stepSize = Integer.valueOf(nextArgRequired());
+        final String delayStr = nextArg();
+        final int delay_ms = (delayStr != null) ? Integer.valueOf(delayStr) : 0;
+        final StackInfo stackInfo;
+        Rect taskBounds;
+        try {
+            stackInfo = mAm.getStackInfo(mAm.getFocusedStackId());
+            taskBounds = mAm.getTaskBounds(taskId);
+        } catch (RemoteException e) {
+            System.err.println("Error getting focus stack info or task bounds: " + e);
+            return;
+        }
+        final Rect stackBounds = stackInfo.bounds;
+        int travelRight = stackBounds.width() - taskBounds.width();
+        int travelLeft = -travelRight;
+        int travelDown = stackBounds.height() - taskBounds.height();
+        int travelUp = -travelDown;
+        int passes = 0;
+
+        // We do 2 passes to get back to the original location of the task.
+        while (passes < 2) {
+            // Move right
+            System.out.println("Moving right...");
+            travelRight = moveTask(taskId, taskBounds, stackBounds, stepSize,
+                    travelRight, MOVING_FORWARD, MOVING_HORIZONTALLY, delay_ms);
+            System.out.println("Still need to travel right by " + travelRight);
+
+            // Move down
+            System.out.println("Moving down...");
+            travelDown = moveTask(taskId, taskBounds, stackBounds, stepSize,
+                    travelDown, MOVING_FORWARD, !MOVING_HORIZONTALLY, delay_ms);
+            System.out.println("Still need to travel down by " + travelDown);
+
+            // Move left
+            System.out.println("Moving left...");
+            travelLeft = moveTask(taskId, taskBounds, stackBounds, stepSize,
+                    travelLeft, !MOVING_FORWARD, MOVING_HORIZONTALLY, delay_ms);
+            System.out.println("Still need to travel left by " + travelLeft);
+
+            // Move up
+            System.out.println("Moving up...");
+            travelUp = moveTask(taskId, taskBounds, stackBounds, stepSize,
+                    travelUp, !MOVING_FORWARD, !MOVING_HORIZONTALLY, delay_ms);
+            System.out.println("Still need to travel up by " + travelUp);
+
+            try {
+                taskBounds = mAm.getTaskBounds(taskId);
+            } catch (RemoteException e) {
+                System.err.println("Error getting task bounds: " + e);
+                return;
+            }
+            passes++;
+        }
+    }
+
+    private int moveTask(int taskId, Rect taskRect, Rect stackRect, int stepSize,
+            int maxToTravel, boolean movingForward, boolean horizontal, int delay_ms) {
+        int maxMove;
+        if (movingForward) {
+            while (maxToTravel > 0
+                    && ((horizontal && taskRect.right < stackRect.right)
+                        ||(!horizontal && taskRect.bottom < stackRect.bottom))) {
+                if (horizontal) {
+                    maxMove = Math.min(stepSize, stackRect.right - taskRect.right);
+                    maxToTravel -= maxMove;
+                    taskRect.right += maxMove;
+                    taskRect.left += maxMove;
+                } else {
+                    maxMove = Math.min(stepSize, stackRect.bottom - taskRect.bottom);
+                    maxToTravel -= maxMove;
+                    taskRect.top += maxMove;
+                    taskRect.bottom += maxMove;
+                }
+                taskResize(taskId, taskRect, delay_ms);
+            }
+        } else {
+            while (maxToTravel < 0
+                    && ((horizontal && taskRect.left > stackRect.left)
+                    ||(!horizontal && taskRect.top > stackRect.top))) {
+                if (horizontal) {
+                    maxMove = Math.min(stepSize, taskRect.left - stackRect.left);
+                    maxToTravel -= maxMove;
+                    taskRect.right -= maxMove;
+                    taskRect.left -= maxMove;
+                } else {
+                    maxMove = Math.min(stepSize, taskRect.top - stackRect.top);
+                    maxToTravel -= maxMove;
+                    taskRect.top -= maxMove;
+                    taskRect.bottom -= maxMove;
+                }
+                taskResize(taskId, taskRect, delay_ms);
+            }
+        }
+        // Return the remaining distance we didn't travel because we reached the target location.
+        return maxToTravel;
+    }
+
+    private void runTaskSizeTaskTest() {
+        final int taskId = Integer.valueOf(nextArgRequired());
+        final int stepSize = Integer.valueOf(nextArgRequired());
+        final String delayStr = nextArg();
+        final int delay_ms = (delayStr != null) ? Integer.valueOf(delayStr) : 0;
+        final StackInfo stackInfo;
+        final Rect initialTaskBounds;
+        try {
+            stackInfo = mAm.getStackInfo(mAm.getFocusedStackId());
+            initialTaskBounds = mAm.getTaskBounds(taskId);
+        } catch (RemoteException e) {
+            System.err.println("Error getting focus stack info or task bounds: " + e);
+            return;
+        }
+        final Rect stackBounds = stackInfo.bounds;
+        stackBounds.inset(STACK_BOUNDS_INSET, STACK_BOUNDS_INSET);
+        final Rect currentTaskBounds = new Rect(initialTaskBounds);
+
+        // Size by top-left
+        System.out.println("Growing top-left");
+        do {
+            currentTaskBounds.top -= getStepSize(
+                    currentTaskBounds.top, stackBounds.top, stepSize, GREATER_THAN_TARGET);
+
+            currentTaskBounds.left -= getStepSize(
+                    currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms);
+        } while (stackBounds.top < currentTaskBounds.top
+                || stackBounds.left < currentTaskBounds.left);
+
+        // Back to original size
+        System.out.println("Shrinking top-left");
+        do {
+            currentTaskBounds.top += getStepSize(
+                    currentTaskBounds.top, initialTaskBounds.top, stepSize, !GREATER_THAN_TARGET);
+
+            currentTaskBounds.left += getStepSize(
+                    currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms);
+        } while (initialTaskBounds.top > currentTaskBounds.top
+                || initialTaskBounds.left > currentTaskBounds.left);
+
+        // Size by top-right
+        System.out.println("Growing top-right");
+        do {
+            currentTaskBounds.top -= getStepSize(
+                    currentTaskBounds.top, stackBounds.top, stepSize, GREATER_THAN_TARGET);
+
+            currentTaskBounds.right += getStepSize(
+                    currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms);
+        } while (stackBounds.top < currentTaskBounds.top
+                || stackBounds.right > currentTaskBounds.right);
+
+        // Back to original size
+        System.out.println("Shrinking top-right");
+        do {
+            currentTaskBounds.top += getStepSize(
+                    currentTaskBounds.top, initialTaskBounds.top, stepSize, !GREATER_THAN_TARGET);
+
+            currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
+                    stepSize, GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms);
+        } while (initialTaskBounds.top > currentTaskBounds.top
+                || initialTaskBounds.right < currentTaskBounds.right);
+
+        // Size by bottom-left
+        System.out.println("Growing bottom-left");
+        do {
+            currentTaskBounds.bottom += getStepSize(
+                    currentTaskBounds.bottom, stackBounds.bottom, stepSize, !GREATER_THAN_TARGET);
+
+            currentTaskBounds.left -= getStepSize(
+                    currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms);
+        } while (stackBounds.bottom > currentTaskBounds.bottom
+                || stackBounds.left < currentTaskBounds.left);
+
+        // Back to original size
+        System.out.println("Shrinking bottom-left");
+        do {
+            currentTaskBounds.bottom -= getStepSize(currentTaskBounds.bottom,
+                    initialTaskBounds.bottom, stepSize, GREATER_THAN_TARGET);
+
+            currentTaskBounds.left += getStepSize(
+                    currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms);
+        } while (initialTaskBounds.bottom < currentTaskBounds.bottom
+                || initialTaskBounds.left > currentTaskBounds.left);
+
+        // Size by bottom-right
+        System.out.println("Growing bottom-right");
+        do {
+            currentTaskBounds.bottom += getStepSize(
+                    currentTaskBounds.bottom, stackBounds.bottom, stepSize, !GREATER_THAN_TARGET);
+
+            currentTaskBounds.right += getStepSize(
+                    currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms);
+        } while (stackBounds.bottom > currentTaskBounds.bottom
+                || stackBounds.right > currentTaskBounds.right);
+
+        // Back to original size
+        System.out.println("Shrinking bottom-right");
+        do {
+            currentTaskBounds.bottom -= getStepSize(currentTaskBounds.bottom,
+                    initialTaskBounds.bottom, stepSize, GREATER_THAN_TARGET);
+
+            currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
+                    stepSize, GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms);
+        } while (initialTaskBounds.bottom < currentTaskBounds.bottom
+                || initialTaskBounds.right < currentTaskBounds.right);
+    }
+
+    private int getStepSize(int current, int target, int inStepSize, boolean greaterThanTarget) {
+        int stepSize = 0;
+        if (greaterThanTarget && target < current) {
+            current -= inStepSize;
+            stepSize = inStepSize;
+            if (target > current) {
+                stepSize -= (target - current);
+            }
+        }
+        if (!greaterThanTarget && target > current) {
+            current += inStepSize;
+            stepSize = inStepSize;
+            if (target < current) {
+                stepSize += (current - target);
+            }
+        }
+        return stepSize;
     }
 
     private List<Configuration> getRecentConfigurations(int days) {
