@@ -23,6 +23,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
@@ -54,6 +55,9 @@ public final class NetworkScorerAppManager {
         /** Package name of this scorer app. */
         public final String mPackageName;
 
+        /** UID of the scorer app. */
+        public final int mPackageUid;
+
         /** Name of this scorer app for display. */
         public final CharSequence mScorerName;
 
@@ -64,10 +68,11 @@ public final class NetworkScorerAppManager {
          */
         public final String mConfigurationActivityClassName;
 
-        public NetworkScorerAppData(String packageName, CharSequence scorerName,
+        public NetworkScorerAppData(String packageName, int packageUid, CharSequence scorerName,
                 @Nullable String configurationActivityClassName) {
             mScorerName = scorerName;
             mPackageName = packageName;
+            mPackageUid = packageUid;
             mConfigurationActivityClassName = configurationActivityClassName;
         }
     }
@@ -125,7 +130,8 @@ public final class NetworkScorerAppManager {
             // NOTE: loadLabel will attempt to load the receiver's label and fall back to the app
             // label if none is present.
             scorers.add(new NetworkScorerAppData(receiverInfo.packageName,
-                    receiverInfo.loadLabel(pm), configurationActivityClassName));
+                    receiverInfo.applicationInfo.uid, receiverInfo.loadLabel(pm),
+                    configurationActivityClassName));
         }
 
         return scorers;
@@ -187,13 +193,9 @@ public final class NetworkScorerAppManager {
         if (defaultApp == null) {
             return false;
         }
-        AppOpsManager appOpsMgr = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        try {
-            appOpsMgr.checkPackage(callingUid, defaultApp.mPackageName);
-        } catch (SecurityException e) {
+        if (callingUid != defaultApp.mPackageUid) {
             return false;
         }
-
         // To be extra safe, ensure the caller holds the SCORE_NETWORKS permission. It always
         // should, since it couldn't become the active scorer otherwise, but this can't hurt.
         return context.checkCallingPermission(Manifest.permission.SCORE_NETWORKS) ==
