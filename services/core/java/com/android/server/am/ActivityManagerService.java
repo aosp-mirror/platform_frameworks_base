@@ -5527,7 +5527,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // If no package is specified, we call all processes under the
                 // give user id.
                 if (packageName == null) {
-                    if (app.userId != userId) {
+                    if (userId != UserHandle.USER_ALL && app.userId != userId) {
                         continue;
                     }
                     if (appId >= 0 && UserHandle.getAppId(app.uid) != appId) {
@@ -11325,13 +11325,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void killUid(int uid, String reason) {
+    public void killUid(int appId, int userId, String reason) {
         enforceCallingPermission(Manifest.permission.KILL_UID, "killUid");
         synchronized (this) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                killPackageProcessesLocked(null, UserHandle.getAppId(uid),
-                        UserHandle.getUserId(uid),
+                killPackageProcessesLocked(null, appId, userId,
                         ProcessList.PERSISTENT_PROC_ADJ, false, true, true, true,
                         reason != null ? reason : "kill uid");
             } finally {

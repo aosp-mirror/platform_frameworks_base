@@ -449,7 +449,7 @@ public interface IActivityManager extends IInterface {
 
     public boolean showAssistFromActivity(IBinder token, Bundle args) throws RemoteException;
 
-    public void killUid(int uid, String reason) throws RemoteException;
+    public void killUid(int appId, int userId, String reason) throws RemoteException;
 
     public void hang(IBinder who, boolean allowRestart) throws RemoteException;
 

@@ -2506,11 +2506,11 @@ public class ActivityManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.KILL_UID)
     public void killUid(int uid, String reason) {
         try {
-            ActivityManagerNative.getDefault().killUid(uid, reason);
+            ActivityManagerNative.getDefault().killUid(UserHandle.getAppId(uid),
+                    UserHandle.getUserId(uid), reason);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't kill uid:" + uid, e);
         }
