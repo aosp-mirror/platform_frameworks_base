@@ -74,6 +74,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
@@ -1603,14 +1604,17 @@ final class ApplicationPackageManager extends PackageManager {
         final List<VolumeInfo> vols = storage.getVolumes();
         final List<VolumeInfo> candidates = new ArrayList<>();
         for (VolumeInfo vol : vols) {
-            if (Objects.equals(vol, currentVol) || isPackageCandidateVolume(app, vol)) {
+            if (Objects.equals(vol, currentVol) || isPackageCandidateVolume(mContext, app, vol)) {
                 candidates.add(vol);
             }
         }
         return candidates;
     }
 
-    private static boolean isPackageCandidateVolume(ApplicationInfo app, VolumeInfo vol) {
+    private static boolean isPackageCandidateVolume(
+            ContextImpl context, ApplicationInfo app, VolumeInfo vol) {
+        final boolean forceAllowOnExternal = Settings.Global.getInt(
+                context.getContentResolver(), Settings.Global.FORCE_ALLOW_ON_EXTERNAL, 0) != 0;
         // Private internal is always an option
         if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.getId())) {
             return true;
@@ -1618,8 +1622,11 @@ final class ApplicationPackageManager extends PackageManager {
 
         // System apps and apps demanding internal storage can't be moved
         // anywhere else
-        if (app.isSystemApp()
-                || app.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+        if (app.isSystemApp()) {
+            return false;
+        }
+        if (!forceAllowOnExternal
+                && app.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
             return false;
         }
 
