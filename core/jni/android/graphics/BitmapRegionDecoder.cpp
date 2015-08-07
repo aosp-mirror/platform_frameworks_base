@@ -16,28 +16,25 @@
 
 #define LOG_TAG "BitmapRegionDecoder"
 
+#include "AutoDecodeCancel.h"
+#include "BitmapFactory.h"
+#include "CreateJavaOutputStreamAdaptor.h"
 #include "SkBitmap.h"
 #include "SkData.h"
-#include "SkImageEncoder.h"
 #include "GraphicsJNI.h"
+#include "SkImageEncoder.h"
 #include "SkUtils.h"
-#include "SkTemplates.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
-#include "BitmapFactory.h"
-#include "AutoDecodeCancel.h"
-#include "CreateJavaOutputStreamAdaptor.h"
 #include "Utils.h"
-#include "JNIHelp.h"
-
-#include "core_jni_helpers.h"
-#include "android_util_Binder.h"
 #include "android_nio_utils.h"
-#include "CreateJavaOutputStreamAdaptor.h"
+#include "android_util_Binder.h"
+#include "core_jni_helpers.h"
 
+#include <JNIHelp.h>
+#include <androidfw/Asset.h>
 #include <binder/Parcel.h>
 #include <jni.h>
-#include <androidfw/Asset.h>
 #include <sys/stat.h>
 
 using namespace android;

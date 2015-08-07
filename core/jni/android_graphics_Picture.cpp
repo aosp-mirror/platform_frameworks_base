@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-#include "jni.h"
+#include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
-#include "core_jni_helpers.h"
-
 #include "Picture.h"
-
 #include "SkCanvas.h"
 #include "SkStream.h"
-#include "SkTemplates.h"
-#include "CreateJavaOutputStreamAdaptor.h"
+#include "core_jni_helpers.h"
+
+#include <jni.h>
 
 namespace android {
 

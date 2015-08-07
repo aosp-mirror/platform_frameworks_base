@@ -16,34 +16,27 @@
 
 #define LOG_TAG "SurfaceControl"
 
-#include <stdio.h>
-
-#include "jni.h"
-#include "JNIHelp.h"
-
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 #include "android/graphics/Bitmap.h"
 #include "android/graphics/GraphicsJNI.h"
 #include "android/graphics/Region.h"
-
 #include "core_jni_helpers.h"
+
+#include <JNIHelp.h>
+#include <ScopedUtfChars.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
-
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
-
+#include <jni.h>
+#include <memory>
+#include <stdio.h>
 #include <ui/DisplayInfo.h>
 #include <ui/FrameStats.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
-
 #include <utils/Log.h>
-
-#include <ScopedUtfChars.h>
-
-#include "SkTemplates.h"
 
 // ----------------------------------------------------------------------------
 
@@ -131,7 +124,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     int bottom = env->GetIntField(sourceCropObj, gRectClassInfo.bottom);
     Rect sourceCrop(left, top, right, bottom);
 
-    SkAutoTDelete<ScreenshotClient> screenshot(new ScreenshotClient());
+    std::unique_ptr<ScreenshotClient> screenshot(new ScreenshotClient());
     status_t res;
     if (allLayers) {
         minLayer = 0;
@@ -179,7 +172,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     Bitmap* bitmap = new Bitmap(
             (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
             screenshotInfo, rowBytes, nullptr);
-    screenshot.detach();
+    screenshot.release();
     bitmap->peekAtPixelRef()->setImmutable();
 
     return GraphicsJNI::createBitmap(env, bitmap,

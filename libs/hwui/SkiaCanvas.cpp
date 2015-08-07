@@ -26,6 +26,8 @@
 #include <SkTArray.h>
 #include <SkTemplates.h>
 
+#include <memory>
+
 namespace android {
 
 // Holds an SkCanvas reference plus additional native data.
@@ -151,7 +153,7 @@ private:
     void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
 
     SkAutoTUnref<SkCanvas> mCanvas;
-    SkAutoTDelete<SkDeque> mSaveStack; // lazily allocated, tracks partial saves.
+    std::unique_ptr<SkDeque> mSaveStack; // lazily allocated, tracks partial saves.
 };
 
 Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {

@@ -1,24 +1,24 @@
 #define LOG_TAG "BitmapFactory"
 
+#include "AutoDecodeCancel.h"
 #include "BitmapFactory.h"
+#include "CreateJavaOutputStreamAdaptor.h"
+#include "GraphicsJNI.h"
 #include "NinePatchPeeker.h"
 #include "SkFrontBufferedStream.h"
 #include "SkImageDecoder.h"
 #include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
-#include "SkTemplates.h"
 #include "SkUtils.h"
-#include "CreateJavaOutputStreamAdaptor.h"
-#include "AutoDecodeCancel.h"
 #include "Utils.h"
-#include "JNIHelp.h"
-#include "GraphicsJNI.h"
-
 #include "core_jni_helpers.h"
+
+#include <JNIHelp.h>
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <cutils/compiler.h>
+#include <memory>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/mman.h>
@@ -291,7 +291,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     // Only setup the decoder to be deleted after its stack-based, refcounted
     // components (allocators, peekers, etc) are declared. This prevents RefCnt
     // asserts from firing due to the order objects are deleted from the stack.
-    SkAutoTDelete<SkImageDecoder> add(decoder);
+    std::unique_ptr<SkImageDecoder> add(decoder);
 
     AutoDecoderCancel adc(options, decoder);
 
@@ -453,13 +453,13 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
         jobject padding, jobject options) {
 
     jobject bitmap = NULL;
-    SkAutoTDelete<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage));
+    std::unique_ptr<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage));
 
     if (stream.get()) {
-        SkAutoTDelete<SkStreamRewindable> bufferedStream(
-                SkFrontBufferedStream::Create(stream.detach(), BYTES_TO_BUFFER));
+        std::unique_ptr<SkStreamRewindable> bufferedStream(
+                SkFrontBufferedStream::Create(stream.release(), BYTES_TO_BUFFER));
         SkASSERT(bufferedStream.get() != NULL);
-        bitmap = doDecode(env, bufferedStream, padding, options);
+        bitmap = doDecode(env, bufferedStream.get(), padding, options);
     }
     return bitmap;
 }
@@ -496,16 +496,16 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
         return nullObjectReturn("Could not open file");
     }
 
-    SkAutoTDelete<SkFILEStream> fileStream(new SkFILEStream(file,
+    std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file,
             SkFILEStream::kCallerPasses_Ownership));
 
     // Use a buffered stream. Although an SkFILEStream can be rewound, this
     // ensures that SkImageDecoder::Factory never rewinds beyond the
     // current position of the file descriptor.
-    SkAutoTDelete<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream.detach(),
+    std::unique_ptr<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream.release(),
             BYTES_TO_BUFFER));
 
-    return doDecode(env, stream, padding, bitmapFactoryOptions);
+    return doDecode(env, stream.get(), padding, bitmapFactoryOptions);
 }
 
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
@@ -514,16 +514,16 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     // since we know we'll be done with the asset when we return, we can
     // just use a simple wrapper
-    SkAutoTDelete<SkStreamRewindable> stream(new AssetStreamAdaptor(asset));
-    return doDecode(env, stream, padding, options);
+    AssetStreamAdaptor stream(asset);
+    return doDecode(env, &stream, padding, options);
 }
 
 static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
         jint offset, jint length, jobject options) {
 
     AutoJavaByteArray ar(env, byteArray);
-    SkAutoTDelete<SkMemoryStream> stream(new SkMemoryStream(ar.ptr() + offset, length, false));
-    return doDecode(env, stream, NULL, options);
+    SkMemoryStream stream(ar.ptr() + offset, length, false);
+    return doDecode(env, &stream, NULL, options);
 }
 
 static void nativeRequestCancel(JNIEnv*, jobject joptions) {
@@ -536,7 +536,7 @@ static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
 }
 
 jobject decodeBitmap(JNIEnv* env, void* data, size_t size) {
-    SkMemoryStream  stream(data, size);
+    SkMemoryStream stream(data, size);
     return doDecode(env, &stream, NULL, NULL);
 }
 

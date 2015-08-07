@@ -1,9 +1,8 @@
-#include "jni.h"
-#include "core_jni_helpers.h"
-
 #include "GraphicsJNI.h"
 #include "SkInterpolator.h"
-#include "SkTemplates.h"
+#include "core_jni_helpers.h"
+
+#include <jni.h>
 
 static jlong Interpolator_constructor(JNIEnv* env, jobject clazz, jint valueCount, jint frameCount)
 {
