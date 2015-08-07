@@ -49,7 +49,6 @@ LOCAL_SRC_FILES:= \
     android_database_SQLiteConnection.cpp \
     android_database_SQLiteGlobal.cpp \
     android_database_SQLiteDebug.cpp \
-    android_emoji_EmojiFactory.cpp \
     android_view_DisplayEventReceiver.cpp \
     android_view_DisplayListCanvas.cpp \
     android_view_GraphicBuffer.cpp \
@@ -201,7 +200,6 @@ LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
     external/jpeg \
     external/harfbuzz_ng/src \
-    frameworks/opt/emoji \
     libcore/include \
     $(call include-path-for, audio-utils) \
     frameworks/minikin/include \
