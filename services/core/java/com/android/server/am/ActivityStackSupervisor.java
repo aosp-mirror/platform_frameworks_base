@@ -168,9 +168,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
     static final int SHOW_LOCK_TASK_ESCAPE_MESSAGE_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
 
-    private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
+    private static final String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
     private static final String LOCK_TASK_TAG = "Lock-to-App";
+
+    // Used to indicate if an object (e.g. stack) that we are trying to get
+    // should be created if it doesn't exist already.
+    private static final boolean CREATE_IF_NEEDED = true;
+
+    // Used to indicate if an object (e.g. task) should be moved/created
+    // at the top of its container (e.g. stack).
+    private static final boolean ON_TOP = true;
+
+    // Used to indicate that an objects (e.g. task) removal from its container
+    // (e.g. stack) is due to it moving to another container.
+    static final boolean MOVING = true;
 
     // Activity actions an app cannot start if it uses a permission which is not granted.
     private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
@@ -1797,8 +1809,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             stack = getStack(
                     task != null
                             ? task.getLaunchStackId(mFocusedStack) : FULLSCREEN_WORKSPACE_STACK_ID,
-                    true /*createStaticStackIfNeeded*/,
-                    true /*createOnTop*/);
+                    CREATE_IF_NEEDED, ON_TOP);
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
                     + r + " stackId=" + stack.mStackId);
             return stack;
@@ -2785,7 +2796,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityStack getStack(int stackId) {
-        return getStack(stackId, false /*createStaticStackIfNeeded*/, false /*createOnTop*/);
+        return getStack(stackId, !CREATE_IF_NEEDED, !ON_TOP);
     }
 
     ActivityStack getStack(int stackId, boolean createStaticStackIfNeeded, boolean createOnTop) {
@@ -2930,6 +2941,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
+        // The stack of a task is determined by its size (fullscreen vs non-fullscreen).
+        // Place the task in the right stack if it isn't there already based on the requested
+        // bounds.
+        int stackId = task.stack.mStackId;
+        if (bounds == null && stackId != FULLSCREEN_WORKSPACE_STACK_ID) {
+            stackId = FULLSCREEN_WORKSPACE_STACK_ID;
+        } else if (bounds != null && task.stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
+            stackId = FREEFORM_WORKSPACE_STACK_ID;
+        }
+        if (stackId != task.stack.mStackId) {
+            moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, "resizeTask");
+        }
+
         final Configuration overrideConfig = mWindowManager.resizeTask(task.taskId, bounds);
         if (task.updateOverrideConfiguration(overrideConfig, bounds)) {
             ActivityRecord r = task.topRunningActivityLocked(null);
@@ -2980,11 +3004,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             // Remove current stack association, so we can re-associate the task with the
             // right stack below.
-            task.stack.removeTask(task, "restoreRecentTaskLocked", false /*notMoving*/);
+            task.stack.removeTask(task, "restoreRecentTaskLocked", MOVING);
         }
 
         ActivityStack stack =
-                getStack(stackId, true /*createStaticStackIfNeeded*/, false /*createOnTop*/);
+                getStack(stackId, CREATE_IF_NEEDED, !ON_TOP);
 
         if (stack == null) {
             // What does this mean??? Not sure how we would get here...
@@ -3003,6 +3027,30 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return true;
     }
 
+    /**
+     * Moves the specified task record to the input stack id.
+     * WARNING: This method performs an unchecked/raw move of the task and
+     * can leave the system in an unstable state if used incorrectly.
+     * Use {@link #moveTaskToStackLocked} to perform safe task movement
+     * to a stack.
+     * @param task Task to move.
+     * @param stackId Id of stack to move task to.
+     * @param toTop True if the task should be placed at the top of the stack.
+     * @param reason Reason the task is been moved.
+     * @return The stack the task was moved to.
+     */
+    private ActivityStack moveTaskToStackUncheckedLocked(
+            TaskRecord task, int stackId, boolean toTop, String reason) {
+        final ActivityStack stack =
+                getStack(stackId, CREATE_IF_NEEDED, toTop);
+        mWindowManager.moveTaskToStack(task.taskId, stack.mStackId, toTop);
+        if (task.stack != null) {
+            task.stack.removeTask(task, reason, MOVING);
+        }
+        stack.addTask(task, toTop, MOVING);
+        return stack;
+    }
+
     void moveTaskToStackLocked(int taskId, int stackId, boolean toTop) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
@@ -3010,12 +3058,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
         ActivityStack stack =
-                getStack(stackId, true /*createStaticStackIfNeeded*/, toTop /*createOnTop*/);
-        mWindowManager.moveTaskToStack(taskId, stackId, toTop);
-        if (task.stack != null) {
-            task.stack.removeTask(task, "moveTaskToStack", false /* notMoving */);
-        }
-        stack.addTask(task, toTop, true);
+                moveTaskToStackUncheckedLocked(task, stackId, toTop, "moveTaskToStack");
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
@@ -3038,11 +3081,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
         ActivityStack stack =
-                getStack(stackId, true /*createStaticStackIfNeeded*/, false /*createOnTop*/);
+                getStack(stackId, CREATE_IF_NEEDED, !ON_TOP);
         mWindowManager.positionTaskInStack(taskId, stackId, position);
         final boolean stackChanged = task.stack != null && task.stack != stack;
         if (stackChanged) {
-            task.stack.removeTask(task, "moveTaskToStack", false /* notMoving */);
+            task.stack.removeTask(task, "moveTaskToStack", MOVING);
         }
         stack.positionTask(task, position, stackChanged);
         // The task might have already been running and its visibility needs to be synchronized with

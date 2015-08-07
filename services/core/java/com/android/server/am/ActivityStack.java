@@ -25,6 +25,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 
+import static com.android.server.am.ActivityStackSupervisor.MOVING;
+
 import android.graphics.Rect;
 import android.util.ArraySet;
 import android.view.IApplicationToken;
@@ -4306,18 +4308,18 @@ final class ActivityStack {
     }
 
     void removeTask(TaskRecord task, String reason) {
-        removeTask(task, reason, true /* notMoving */);
+        removeTask(task, reason, !MOVING);
     }
 
     /**
      * Removes the input task from this stack.
      * @param task to remove.
      * @param reason for removal.
-     * @param notMoving task to another stack. In the case we are moving we don't want to perform
-     *                  some operations on the task like removing it from window manager or recents.
+     * @param moving task to another stack. In the case we are moving we don't want to perform
+     *               some operations on the task like removing it from window manager or recents.
      */
-    void removeTask(TaskRecord task, String reason, boolean notMoving) {
-        if (notMoving) {
+    void removeTask(TaskRecord task, String reason, boolean moving) {
+        if (!moving) {
             mStackSupervisor.removeLockedTaskLocked(task);
             mWindowManager.removeTask(task.taskId);
         }
@@ -4338,7 +4340,7 @@ final class ActivityStack {
         mTaskHistory.remove(task);
         updateTaskMovement(task, true);
 
-        if (notMoving && task.mActivities.isEmpty()) {
+        if (!moving && task.mActivities.isEmpty()) {
             final boolean isVoiceSession = task.voiceSession != null;
             if (isVoiceSession) {
                 try {
