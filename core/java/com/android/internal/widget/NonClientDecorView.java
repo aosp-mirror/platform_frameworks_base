@@ -16,9 +16,6 @@
 
 package com.android.internal.widget;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.AttributeSet;
@@ -29,10 +26,9 @@ import android.util.TypedValue;
 
 import android.view.ViewOutlineProvider;
 import android.view.WindowInsets;
+import android.view.Window;
 import com.android.internal.R;
 import com.android.internal.policy.PhoneWindow;
-
-import java.util.List;
 
 /**
  * This class represents the special screen elements to control a window on free form
@@ -106,20 +102,9 @@ public class NonClientDecorView extends ViewGroup implements View.OnClickListene
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.maximize_window) {
-            // TODO(skuhne): Add code to maximize window.
+            maximizeWindow();
         } else if (view.getId() == R.id.close_window) {
-            // TODO(skuhne): This is not the right way to kill an app and we should add a high level
-            // function for it.
-            final ActivityManager m =
-                    (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
-            List<RunningTaskInfo> runningTaskInfoList =  m.getRunningTasks(1);
-            if (!runningTaskInfoList.isEmpty()) {
-                try {
-                    ActivityManagerNative.getDefault().removeTask(runningTaskInfoList.get(0).id);
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "Couldn't close task with the close button.");
-                }
-            }
+            mOwner.dispatchOnWindowDismissed(true /*finishTask*/);
         }
     }
 
@@ -215,5 +200,18 @@ public class NonClientDecorView extends ViewGroup implements View.OnClickListene
     private float dipToPx(float dip) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip,
                 getResources().getDisplayMetrics());
+    }
+
+    // Maximize the window by moving it to the maximize stack.
+    private void maximizeWindow() {
+        Window.WindowStackCallback callback = mOwner.getWindowStackCallback();
+        if (callback != null) {
+            try {
+                callback.changeWindowStack(
+                        android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Cannot change task workspace.");
+            }
+        }
     }
 }

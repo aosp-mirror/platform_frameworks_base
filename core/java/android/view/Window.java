@@ -674,9 +674,9 @@ public abstract class Window {
     }
 
     /** @hide */
-    public final void dispatchOnWindowDismissed() {
+    public final void dispatchOnWindowDismissed(boolean finishTask) {
         if (mOnWindowDismissedCallback != null) {
-            mOnWindowDismissedCallback.onWindowDismissed(false);
+            mOnWindowDismissedCallback.onWindowDismissed(finishTask);
         }
     }
 
