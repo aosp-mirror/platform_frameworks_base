@@ -21,7 +21,6 @@ import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.IUserSwitchObserver;
 import android.app.StatusBarManager;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +40,8 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.BluetoothController.Callback;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -51,7 +52,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
  * bar at boot time.  It goes through the normal API for icons, even though it probably
  * strictly doesn't need to.
  */
-public class PhoneStatusBarPolicy {
+public class PhoneStatusBarPolicy implements Callback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -82,12 +83,11 @@ public class PhoneStatusBarPolicy {
 
     private int mZen;
 
-    private boolean mBluetoothEnabled = false;
-
     private boolean mManagedProfileFocused = false;
     private boolean mManagedProfileIconVisible = true;
 
     private boolean mKeyguardVisible = true;
+    private BluetoothController mBluetooth;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -95,10 +95,6 @@ public class PhoneStatusBarPolicy {
             String action = intent.getAction();
             if (action.equals(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED)) {
                 updateAlarm();
-            }
-            else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
-                    action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-                updateBluetooth();
             }
             else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
                     action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
@@ -114,10 +110,12 @@ public class PhoneStatusBarPolicy {
     };
 
     public PhoneStatusBarPolicy(Context context, CastController cast, HotspotController hotspot,
-            UserInfoController userInfoController) {
+            UserInfoController userInfoController, BluetoothController bluetooth) {
         mContext = context;
         mCast = cast;
         mHotspot = hotspot;
+        mBluetooth = bluetooth;
+        mBluetooth.addStateChangedCallback(this);
         mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mUserInfoController = userInfoController;
@@ -127,8 +125,6 @@ public class PhoneStatusBarPolicy {
         filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
@@ -275,23 +271,31 @@ public class PhoneStatusBarPolicy {
         updateAlarm();
     }
 
+    @Override
+    public void onBluetoothDevicesChanged() {
+        updateBluetooth();
+    }
+
+    @Override
+    public void onBluetoothStateChange(boolean enabled) {
+        updateBluetooth();
+    }
+
     private final void updateBluetooth() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         int iconId = R.drawable.stat_sys_data_bluetooth;
         String contentDescription =
                 mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
-        if (adapter != null) {
-            mBluetoothEnabled = (adapter.getState() == BluetoothAdapter.STATE_ON);
-            if (adapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED) {
+        boolean bluetoothEnabled = false;
+        if (mBluetooth != null) {
+            bluetoothEnabled = mBluetooth.isBluetoothEnabled();
+            if (mBluetooth.isBluetoothConnected()) {
                 iconId = R.drawable.stat_sys_data_bluetooth_connected;
                 contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
             }
-        } else {
-            mBluetoothEnabled = false;
         }
 
         mService.setIcon(SLOT_BLUETOOTH, iconId, 0, contentDescription);
-        mService.setIconVisibility(SLOT_BLUETOOTH, mBluetoothEnabled);
+        mService.setIconVisibility(SLOT_BLUETOOTH, bluetoothEnabled);
     }
 
     private final void updateTTY(Intent intent) {
