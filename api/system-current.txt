@@ -115,7 +115,6 @@ package android {
     field public static final java.lang.String INTERNET = "android.permission.INTERNET";
     field public static final java.lang.String INVOKE_CARRIER_SETUP = "android.permission.INVOKE_CARRIER_SETUP";
     field public static final java.lang.String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
-    field public static final java.lang.String KILL_UID = "android.permission.KILL_UID";
     field public static final java.lang.String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";
     field public static final java.lang.String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final java.lang.String LOOP_RADIO = "android.permission.LOOP_RADIO";
@@ -3654,7 +3653,6 @@ package android.app {
     method public static boolean isRunningInTestHarness();
     method public static boolean isUserAMonkey();
     method public void killBackgroundProcesses(java.lang.String);
-    method public void killUid(int, java.lang.String);
     method public void moveTaskToFront(int, int);
     method public void moveTaskToFront(int, int, android.os.Bundle);
     method public deprecated void restartPackage(java.lang.String);

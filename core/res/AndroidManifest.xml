@@ -2575,7 +2575,7 @@
     <permission android:name="android.permission.QUERY_DO_NOT_ASK_CREDENTIALS_ON_BOOT"
                 android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows applications to kill UIDs.
+    <!-- Allows applications to kill UIDs.
         <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.KILL_UID"
