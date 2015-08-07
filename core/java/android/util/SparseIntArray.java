@@ -184,6 +184,14 @@ public class SparseIntArray implements Cloneable {
     }
 
     /**
+     * Directly set the value at a particular index.
+     * @hide
+     */
+    public void setValueAt(int index, int value) {
+        mValues[index] = value;
+    }
+
+    /**
      * Returns the index for which {@link #keyAt} would return the
      * specified key, or a negative number if the specified
      * key is not mapped.
