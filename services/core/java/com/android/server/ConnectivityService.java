@@ -359,6 +359,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private static final int EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT = 31;
 
+    /** Handler thread used for both of the handlers below. */
+    @VisibleForTesting
+    protected final HandlerThread mHandlerThread;
     /** Handler used for internal events. */
     final private InternalHandler mHandler;
     /** Handler used for incoming {@link NetworkStateTracker} events. */
@@ -614,6 +617,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
     private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
 
+    @VisibleForTesting
+    protected HandlerThread createHandlerThread() {
+        return new HandlerThread("ConnectivityServiceThread");
+    }
+
     public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         if (DBG) log("ConnectivityService starting up");
@@ -627,10 +635,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDefaultMobileDataRequest = createInternetRequestForTransport(
                 NetworkCapabilities.TRANSPORT_CELLULAR);
 
-        HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
-        handlerThread.start();
-        mHandler = new InternalHandler(handlerThread.getLooper());
-        mTrackerHandler = new NetworkStateTrackerHandler(handlerThread.getLooper());
+        mHandlerThread = createHandlerThread();
+        mHandlerThread.start();
+        mHandler = new InternalHandler(mHandlerThread.getLooper());
+        mTrackerHandler = new NetworkStateTrackerHandler(mHandlerThread.getLooper());
 
         // setup our unique device name
         if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {

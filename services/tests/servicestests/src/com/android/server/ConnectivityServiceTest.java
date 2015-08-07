@@ -48,8 +48,10 @@ import android.net.RouteInfo;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.INetworkManagementService;
+import android.os.Looper;
+import android.os.MessageQueue;
+import android.os.MessageQueue.IdleHandler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
@@ -101,11 +103,87 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
+    /**
+     * A subclass of HandlerThread that allows callers to wait for it to become idle. waitForIdle
+     * will return immediately if the handler is already idle.
+     */
+    private class IdleableHandlerThread extends HandlerThread {
+        private IdleHandler mIdleHandler;
+
+        public IdleableHandlerThread(String name) {
+            super(name);
+        }
+
+        public void waitForIdle(int timeoutMs) {
+            final ConditionVariable cv = new ConditionVariable();
+            final MessageQueue queue = getLooper().getQueue();
+
+            synchronized (queue) {
+                if (queue.isIdle()) {
+                    return;
+                }
+
+                assertNull("BUG: only one idle handler allowed", mIdleHandler);
+                mIdleHandler = new IdleHandler() {
+                    public boolean queueIdle() {
+                        cv.open();
+                        mIdleHandler = null;
+                        return false;  // Remove the handler.
+                    }
+                };
+                queue.addIdleHandler(mIdleHandler);
+            }
+
+            if (!cv.block(timeoutMs)) {
+                fail("HandlerThread " + getName() +
+                        " did not become idle after " + timeoutMs + " ms");
+                queue.removeIdleHandler(mIdleHandler);
+            }
+        }
+    }
+
+    // Tests that IdleableHandlerThread works as expected.
+    public void testIdleableHandlerThread() {
+        final int attempts = 50;  // Causes the test to take about 200ms on bullhead-eng.
+
+        // Tests that waitForIdle returns immediately if the service is already idle.
+        for (int i = 0; i < attempts; i++) {
+            mService.waitForIdle();
+        }
+
+        // Bring up a network that we can use to send messages to ConnectivityService.
+        ConditionVariable cv = waitForConnectivityBroadcasts(1);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        waitFor(cv);
+        Network n = mWiFiNetworkAgent.getNetwork();
+        assertNotNull(n);
+
+        // Tests that calling waitForIdle waits for messages to be processed.
+        for (int i = 0; i < attempts; i++) {
+            mWiFiNetworkAgent.setSignalStrength(i);
+            mService.waitForIdle();
+            assertEquals(i, mCm.getNetworkCapabilities(n).getSignalStrength());
+        }
+
+        // Ensure that not calling waitForIdle causes a race condition.
+        for (int i = 0; i < attempts; i++) {
+            mWiFiNetworkAgent.setSignalStrength(i);
+            if (i != mCm.getNetworkCapabilities(n).getSignalStrength()) {
+                // We hit a race condition, as expected. Pass the test.
+                return;
+            }
+        }
+
+        // No race? There is a bug in this test.
+        fail("expected race condition at least once in " + attempts + " attempts");
+    }
+
     private class MockNetworkAgent {
         private final WrappedNetworkMonitor mWrappedNetworkMonitor;
         private final NetworkInfo mNetworkInfo;
         private final NetworkCapabilities mNetworkCapabilities;
-        private final Thread mThread;
+        private final IdleableHandlerThread mHandlerThread;
         private final ConditionVariable mDisconnected = new ConditionVariable();
         private int mScore;
         private NetworkAgent mNetworkAgent;
@@ -126,24 +204,25 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 default:
                     throw new UnsupportedOperationException("unimplemented network type");
             }
-            final ConditionVariable initComplete = new ConditionVariable();
-            final ConditionVariable networkMonitorAvailable = mService.getNetworkMonitorCreatedCV();
-            mThread = new Thread() {
-                public void run() {
-                    Looper.prepare();
-                    mNetworkAgent = new NetworkAgent(Looper.myLooper(), mServiceContext,
-                            "Mock" + typeName, mNetworkInfo, mNetworkCapabilities,
-                            new LinkProperties(), mScore, new NetworkMisc()) {
-                        public void unwanted() { mDisconnected.open(); }
-                    };
-                    initComplete.open();
-                    Looper.loop();
-                }
+            mHandlerThread = new IdleableHandlerThread("Mock-" + typeName);
+            mHandlerThread.start();
+            mNetworkAgent = new NetworkAgent(mHandlerThread.getLooper(), mServiceContext,
+                    "Mock-" + typeName, mNetworkInfo, mNetworkCapabilities,
+                    new LinkProperties(), mScore, new NetworkMisc()) {
+                public void unwanted() { mDisconnected.open(); }
             };
-            mThread.start();
-            waitFor(initComplete);
-            waitFor(networkMonitorAvailable);
+            // Waits for the NetworkAgent to be registered, which includes the creation of the
+            // NetworkMonitor.
+            mService.waitForIdle();
             mWrappedNetworkMonitor = mService.getLastCreatedWrappedNetworkMonitor();
+        }
+
+        public void waitForIdle(int timeoutMs) {
+            mHandlerThread.waitForIdle(timeoutMs);
+        }
+
+        public void waitForIdle() {
+            waitForIdle(TIMEOUT_MS);
         }
 
         public void adjustScore(int change) {
@@ -153,6 +232,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         public void addCapability(int capability) {
             mNetworkCapabilities.addCapability(capability);
+            mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+        }
+
+        public void setSignalStrength(int signalStrength) {
+            mNetworkCapabilities.setSignalStrength(signalStrength);
             mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
         }
 
@@ -309,12 +393,16 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private class WrappedConnectivityService extends ConnectivityService {
-        private final ConditionVariable mNetworkMonitorCreated = new ConditionVariable();
         private WrappedNetworkMonitor mLastCreatedNetworkMonitor;
 
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
                 INetworkStatsService statsService, INetworkPolicyManager policyManager) {
             super(context, netManager, statsService, policyManager);
+        }
+
+        @Override
+        protected HandlerThread createHandlerThread() {
+            return new IdleableHandlerThread("WrappedConnectivityService");
         }
 
         @Override
@@ -350,7 +438,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             final WrappedNetworkMonitor monitor = new WrappedNetworkMonitor(context, handler, nai,
                     defaultRequest);
             mLastCreatedNetworkMonitor = monitor;
-            mNetworkMonitorCreated.open();
             return monitor;
         }
 
@@ -358,10 +445,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             return mLastCreatedNetworkMonitor;
         }
 
-        public ConditionVariable getNetworkMonitorCreatedCV() {
-            mNetworkMonitorCreated.close();
-            return mNetworkMonitorCreated;
+        public void waitForIdle(int timeoutMs) {
+            ((IdleableHandlerThread) mHandlerThread).waitForIdle(timeoutMs);
         }
+
+        public void waitForIdle() {
+            waitForIdle(500);
+        }
+
     }
 
     private interface Criteria {
@@ -389,18 +480,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
      */
     static private void waitFor(ConditionVariable conditionVariable) {
         assertTrue(conditionVariable.block(500));
-    }
-
-    /**
-     * This should only be used to verify that nothing happens, in other words that no unexpected
-     * changes occur.  It should never be used to wait for a specific positive signal to occur.
-     */
-    private void shortSleep() {
-        // TODO: Instead of sleeping, instead wait for all message loops to idle.
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-        }
     }
 
     @Override
@@ -534,11 +613,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Test bringing up unvalidated cellular
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         mCellNetworkAgent.connect(false);
-        shortSleep();
+        mService.waitForIdle();
         verifyActiveNetwork(TRANSPORT_WIFI);
         // Test cellular disconnect.
         mCellNetworkAgent.disconnect();
-        shortSleep();
+        mService.waitForIdle();
         verifyActiveNetwork(TRANSPORT_WIFI);
         // Test bringing up validated cellular
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
@@ -809,7 +888,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // This should not trigger spurious onAvailable() callbacks, b/21762680.
         mCellNetworkAgent.adjustScore(-1);
-        shortSleep();
+        mService.waitForIdle();
         wifiNetworkCallback.assertNoCallback();
         cellNetworkCallback.assertNoCallback();
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
@@ -843,7 +922,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // This should not trigger spurious onAvailable() callbacks, b/21762680.
         mCellNetworkAgent.adjustScore(-1);
-        shortSleep();
+        mService.waitForIdle();
         wifiNetworkCallback.assertNoCallback();
         cellNetworkCallback.assertNoCallback();
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
