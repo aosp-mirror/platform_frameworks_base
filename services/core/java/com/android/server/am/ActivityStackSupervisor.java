@@ -1518,9 +1518,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     intent.addCategory(Intent.CATEGORY_VOICE);
                     if (!AppGlobals.getPackageManager().activitySupportsIntent(
                             intent.getComponent(), intent, resolvedType)) {
+                        Slog.w(TAG,
+                                "Activity being started in current voice task does not support voice: "
+                                + intent);
                         err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
                     }
                 } catch (RemoteException e) {
+                    Slog.w(TAG, "Failure checking voice capabilities", e);
                     err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
                 }
             }
@@ -1532,9 +1536,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             try {
                 if (!AppGlobals.getPackageManager().activitySupportsIntent(intent.getComponent(),
                         intent, resolvedType)) {
+                    Slog.w(TAG,
+                            "Activity being started in new voice task does not support: "
+                            + intent);
                     err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
                 }
             } catch (RemoteException e) {
+                Slog.w(TAG, "Failure checking voice capabilities", e);
                 err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
             }
         }
