@@ -5363,6 +5363,12 @@ public class WindowManagerService extends IWindowManager.Stub
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
+        // If this isn't coming from the system then don't allow disabling the lockscreen
+        // to bypass security.
+        if (Binder.getCallingUid() != Process.SYSTEM_UID && isKeyguardSecure()) {
+            Log.d(TAG, "current mode is SecurityMode, ignore hide keyguard");
+            return;
+        }
 
         if (token == null) {
             throw new IllegalArgumentException("token == null");
