@@ -13037,7 +13037,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // they have set the special DELETE_SYSTEM_APP which requests different
                 // semantics than normal for uninstalling system apps.
                 if (DEBUG_REMOVE) Slog.d(TAG, "Only deleting for single user");
-                ps.setUserState(user.getIdentifier(),
+                final int userId = user.getIdentifier();
+                ps.setUserState(userId,
                         COMPONENT_ENABLED_STATE_DEFAULT,
                         false, //installed
                         true,  //stopped
@@ -13045,7 +13046,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         false, //hidden
                         null, null, null,
                         false, // blockUninstall
-                        INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
+                        ps.readUserState(userId).domainVerificationStatus, 0);
                 if (!isSystemApp(ps)) {
                     if (ps.isAnyInstalled(sUserManager.getUserIds())) {
                         // Other user still have this package installed, so all
