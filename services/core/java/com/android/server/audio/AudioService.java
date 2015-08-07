@@ -5150,7 +5150,9 @@ public class AudioService extends IAudioService.Stub {
                 continue;
             }
             try {
-                ActivityManagerNative.getDefault().killUid(pkg.applicationInfo.uid,
+                final int uid = pkg.applicationInfo.uid;
+                ActivityManagerNative.getDefault().killUid(UserHandle.getAppId(uid),
+                        UserHandle.getUserId(uid),
                         "killBackgroundUserProcessesWithAudioRecordPermission");
             } catch (RemoteException e) {
                 Log.w(TAG, "Error calling killUid", e);
