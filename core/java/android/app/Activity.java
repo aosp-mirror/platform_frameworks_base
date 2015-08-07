@@ -6211,6 +6211,7 @@ public class Activity extends ContextThemeWrapper
         mFragments.attachHost(null /*parent*/);
 
         mWindow = new PhoneWindow(this);
+        mWindow.setWindowStackCallback(this);
         mWindow.setCallback(this);
         mWindow.setOnWindowDismissedCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
