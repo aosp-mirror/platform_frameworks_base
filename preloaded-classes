@@ -742,7 +742,6 @@ android.ddm.DdmHandleProfiling
 android.ddm.DdmHandleThread
 android.ddm.DdmHandleViewDebug
 android.ddm.DdmRegister
-android.emoji.EmojiFactory
 android.graphics.AvoidXfermode
 android.graphics.Bitmap
 android.graphics.Bitmap$1

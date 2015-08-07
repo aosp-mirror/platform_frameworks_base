@@ -1308,7 +1308,7 @@ public class StaticLayout extends Layout {
         private static final int INITIAL_SIZE = 16;
         public int[] breaks = new int[INITIAL_SIZE];
         public float[] widths = new float[INITIAL_SIZE];
-        public int[] flags = new int[INITIAL_SIZE]; // hasTabOrEmoji
+        public int[] flags = new int[INITIAL_SIZE]; // hasTab
         // breaks, widths, and flags should all have the same length
     }
 
