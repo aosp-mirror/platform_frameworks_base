@@ -246,7 +246,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 for (int i = 0; i < partials.size(); i++) {
                     UserInfo ui = partials.get(i);
-                    Slog.w(LOG_TAG, "Removing partially created user #" + i
+                    Slog.w(LOG_TAG, "Removing partially created user " + ui.id
                             + " (name=" + ui.name + ")");
                     removeUserStateLocked(ui.id);
                 }
