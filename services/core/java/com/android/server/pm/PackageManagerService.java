@@ -3469,10 +3469,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 case PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
+                    final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            killSettingPackagesForUser(sb, userId, KILL_APP_REASON_GIDS_CHANGED);
+                            killUid(appId, userId, KILL_APP_REASON_GIDS_CHANGED);
                         }
                     });
                 } break;
@@ -3516,7 +3517,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "revokeRuntimePermission");
 
-        final SettingBase sb;
+        final int appId;
 
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
@@ -3531,7 +3532,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             enforceDeclaredAsUsedAndRuntimePermission(pkg, bp);
 
-            sb = (SettingBase) pkg.mExtras;
+            SettingBase sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
@@ -3553,9 +3554,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Critical, after this call app should never have the permission.
             mSettings.writeRuntimePermissionsForUserLPr(userId, true);
+
+            appId = UserHandle.getAppId(pkg.applicationInfo.uid);
         }
 
-        killSettingPackagesForUser(sb, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
+        killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
     }
 
     @Override
@@ -3859,43 +3862,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void killSettingPackagesForUser(SettingBase sb, int userId, String reason) {
+    private void killUid(int appId, int userId, String reason) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            if (sb instanceof SharedUserSetting) {
-                SharedUserSetting sus = (SharedUserSetting) sb;
-                final int packageCount = sus.packages.size();
-                for (int i = 0; i < packageCount; i++) {
-                    PackageSetting susPs = sus.packages.valueAt(i);
-                    if (userId == UserHandle.USER_ALL) {
-                        killApplication(susPs.pkg.packageName, susPs.appId, reason);
-                    } else {
-                        final int uid = UserHandle.getUid(userId, susPs.appId);
-                        killUid(uid, reason);
-                    }
-                }
-            } else if (sb instanceof PackageSetting) {
-                PackageSetting ps = (PackageSetting) sb;
-                if (userId == UserHandle.USER_ALL) {
-                    killApplication(ps.pkg.packageName, ps.appId, reason);
-                } else {
-                    final int uid = UserHandle.getUid(userId, ps.appId);
-                    killUid(uid, reason);
+            IActivityManager am = ActivityManagerNative.getDefault();
+            if (am != null) {
+                try {
+                    am.killUid(appId, userId, reason);
+                } catch (RemoteException e) {
+                    /* ignore - same process */
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    private static void killUid(int uid, String reason) {
-        IActivityManager am = ActivityManagerNative.getDefault();
-        if (am != null) {
-            try {
-                am.killUid(uid, reason);
-            } catch (RemoteException e) {
-                /* ignore - same process */
-            }
         }
     }
 
@@ -12821,7 +12800,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     @Override
                                     public void run() {
                                         // This has to happen with no lock held.
-                                        killSettingPackagesForUser(deletedPs, userIdToKill,
+                                        killApplication(deletedPs.name, deletedPs.appId,
                                                 KILL_APP_REASON_GIDS_CHANGED);
                                     }
                                 });
@@ -13407,13 +13386,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     case PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
                         writeRuntimePermissions = true;
-                        // If gids changed for this user, kill all affected packages.
+                        final int appId = ps.appId;
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                // This has to happen with no lock held.
-                                killSettingPackagesForUser(ps, userId,
-                                        KILL_APP_REASON_GIDS_CHANGED);
+                                killUid(appId, userId, KILL_APP_REASON_GIDS_CHANGED);
                             }
                         });
                     } break;
