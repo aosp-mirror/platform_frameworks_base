@@ -22,10 +22,14 @@ import android.os.UserHandle;
 interface IDeviceIdleController {
     void addPowerSaveWhitelistApp(String name);
     void removePowerSaveWhitelistApp(String name);
+    String[] getSystemPowerWhitelistExceptIdle();
     String[] getSystemPowerWhitelist();
+    String[] getFullPowerWhitelistExceptIdle();
     String[] getFullPowerWhitelist();
+    int[] getAppIdWhitelistExceptIdle();
     int[] getAppIdWhitelist();
     int[] getAppIdTempWhitelist();
+    boolean isPowerSaveWhitelistExceptIdleApp(String name);
     boolean isPowerSaveWhitelistApp(String name);
     void addPowerSaveTempWhitelistApp(String name, long duration, int userId, String reason);
     long addPowerSaveTempWhitelistAppForMms(String name, int userId, String reason);
