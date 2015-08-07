@@ -84,6 +84,11 @@ public class SystemConfig {
     final ArrayMap<String, PermissionEntry> mPermissions = new ArrayMap<>();
 
     // These are the packages that are white-listed to be able to run in the
+    // background while in power save mode (but not whitelisted from device idle modes),
+    // as read from the configuration files.
+    final ArraySet<String> mAllowInPowerSaveExceptIdle = new ArraySet<>();
+
+    // These are the packages that are white-listed to be able to run in the
     // background while in power save mode, as read from the configuration files.
     final ArraySet<String> mAllowInPowerSave = new ArraySet<>();
 
@@ -121,6 +126,10 @@ public class SystemConfig {
 
     public ArrayMap<String, PermissionEntry> getPermissions() {
         return mPermissions;
+    }
+
+    public ArraySet<String> getAllowInPowerSaveExceptIdle() {
+        return mAllowInPowerSaveExceptIdle;
     }
 
     public ArraySet<String> getAllowInPowerSave() {
@@ -325,6 +334,17 @@ public class SystemConfig {
                                 + parser.getPositionDescription());
                     } else {
                         mUnavailableFeatures.add(fname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+
+                } else if ("allow-in-power-save-except-idle".equals(name) && !onlyFeatures) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<allow-in-power-save-except-idle> without package in "
+                                + permFile + " at " + parser.getPositionDescription());
+                    } else {
+                        mAllowInPowerSaveExceptIdle.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
