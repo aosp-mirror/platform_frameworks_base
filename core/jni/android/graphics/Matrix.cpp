@@ -15,16 +15,13 @@
 ** limitations under the License.
 */
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include <core_jni_helpers.h>
-
-#include "SkMatrix.h"
-#include "SkTemplates.h"
-
 #include "Matrix.h"
+#include "SkMatrix.h"
+#include "core_jni_helpers.h"
 
 #include <Caches.h>
+#include <jni.h>
 
 namespace android {
 

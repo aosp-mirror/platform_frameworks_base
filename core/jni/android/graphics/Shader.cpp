@@ -1,15 +1,12 @@
-#include <jni.h>
 #include "GraphicsJNI.h"
-
-#include "SkShader.h"
-#include "SkGradientShader.h"
 #include "SkComposeShader.h"
-#include "SkTemplates.h"
+#include "SkGradientShader.h"
+#include "SkShader.h"
 #include "SkXfermode.h"
+#include "core_jni_helpers.h"
 
 #include <Caches.h>
-
-#include "core_jni_helpers.h"
+#include <jni.h>
 
 using namespace android::uirenderer;
 

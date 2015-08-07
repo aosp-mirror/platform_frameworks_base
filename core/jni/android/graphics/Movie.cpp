@@ -1,20 +1,19 @@
 #include "Canvas.h"
+#include "CreateJavaOutputStreamAdaptor.h"
+#include "GraphicsJNI.h"
+#include "Paint.h"
 #include "ScopedLocalRef.h"
 #include "SkFrontBufferedStream.h"
 #include "SkMovie.h"
 #include "SkStream.h"
-#include "GraphicsJNI.h"
-#include "SkTemplates.h"
 #include "SkUtils.h"
 #include "Utils.h"
-#include "CreateJavaOutputStreamAdaptor.h"
-#include "Paint.h"
+#include "core_jni_helpers.h"
 
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
+#include <jni.h>
 #include <netinet/in.h>
-
-#include "core_jni_helpers.h"
 
 static jclass       gMovie_class;
 static jmethodID    gMovie_constructorMethodID;
@@ -84,8 +83,8 @@ static void movie_draw(JNIEnv* env, jobject movie, jlong canvasHandle,
 static jobject movie_decodeAsset(JNIEnv* env, jobject clazz, jlong native_asset) {
     android::Asset* asset = reinterpret_cast<android::Asset*>(native_asset);
     if (asset == NULL) return NULL;
-    SkAutoTDelete<SkStreamRewindable> stream(new android::AssetStreamAdaptor(asset));
-    SkMovie* moov = SkMovie::DecodeStream(stream.get());
+    android::AssetStreamAdaptor stream(asset);
+    SkMovie* moov = SkMovie::DecodeStream(&stream);
     return create_jmovie(env, moov);
 }
 
@@ -105,10 +104,10 @@ static jobject movie_decodeStream(JNIEnv* env, jobject clazz, jobject istream) {
     // will only read 6.
     // FIXME: Get this number from SkImageDecoder
     // bufferedStream takes ownership of strm
-    SkAutoTDelete<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
+    std::unique_ptr<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
     SkASSERT(bufferedStream.get() != NULL);
 
-    SkMovie* moov = SkMovie::DecodeStream(bufferedStream);
+    SkMovie* moov = SkMovie::DecodeStream(bufferedStream.get());
     return create_jmovie(env, moov);
 }
 

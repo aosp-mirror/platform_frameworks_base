@@ -1,14 +1,12 @@
-#include <jni.h>
 #include "GraphicsJNI.h"
-
-#include "core_jni_helpers.h"
-
-#include "SkPathEffect.h"
+#include "Sk1DPathEffect.h"
 #include "SkCornerPathEffect.h"
 #include "SkDashPathEffect.h"
 #include "SkDiscretePathEffect.h"
-#include "Sk1DPathEffect.h"
-#include "SkTemplates.h"
+#include "SkPathEffect.h"
+#include "core_jni_helpers.h"
+
+#include <jni.h>
 
 class SkPathEffectGlue {
 public:
