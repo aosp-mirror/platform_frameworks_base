@@ -183,6 +183,7 @@ public abstract class Window {
     private TypedArray mWindowStyle;
     private Callback mCallback;
     private OnWindowDismissedCallback mOnWindowDismissedCallback;
+    private WindowStackCallback mWindowStackCallback;
     private WindowManager mWindowManager;
     private IBinder mAppToken;
     private String mAppName;
@@ -678,6 +679,16 @@ public abstract class Window {
         if (mOnWindowDismissedCallback != null) {
             mOnWindowDismissedCallback.onWindowDismissed(false);
         }
+    }
+
+    /** @hide */
+    public final void setWindowStackCallback(WindowStackCallback wscb) {
+        mWindowStackCallback = wscb;
+    }
+
+    /** @hide */
+    public final WindowStackCallback getWindowStackCallback() {
+        return mWindowStackCallback;
     }
 
     /**
