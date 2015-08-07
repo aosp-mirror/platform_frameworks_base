@@ -967,12 +967,8 @@ please see styles_device_defaults.xml.
         <item name="borderRight">?attr/preferenceFragmentPaddingSide</item>
     </style>
 
-    <style name="Widget.Material.MediaRouteButton">
-        <item name="background">@drawable/control_background_40dp_material</item>
+    <style name="Widget.Material.MediaRouteButton" parent ="Widget.Material.ActionButton">
         <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_material</item>
-        <item name="minWidth">56dp</item>
-        <item name="minHeight">48dp</item>
-        <item name="focusable">true</item>
         <item name="contentDescription">@string/media_route_button_content_description</item>
     </style>
 
