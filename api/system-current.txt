@@ -37434,6 +37434,10 @@ package android.view {
     field public static final int KEYCODE_MEDIA_PREVIOUS = 88; // 0x58
     field public static final int KEYCODE_MEDIA_RECORD = 130; // 0x82
     field public static final int KEYCODE_MEDIA_REWIND = 89; // 0x59
+    field public static final int KEYCODE_MEDIA_SKIP_BACKWARD = 273; // 0x111
+    field public static final int KEYCODE_MEDIA_SKIP_FORWARD = 272; // 0x110
+    field public static final int KEYCODE_MEDIA_STEP_BACKWARD = 275; // 0x113
+    field public static final int KEYCODE_MEDIA_STEP_FORWARD = 274; // 0x112
     field public static final int KEYCODE_MEDIA_STOP = 86; // 0x56
     field public static final int KEYCODE_MEDIA_TOP_MENU = 226; // 0xe2
     field public static final int KEYCODE_MENU = 82; // 0x52
