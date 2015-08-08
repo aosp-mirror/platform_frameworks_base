@@ -599,7 +599,6 @@
     -->
     <permission android:name="android.permission.ACCESS_IMS_CALL_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
-        android:permissionFlags="hide"
         android:label="@string/permlab_accessImsCallService"
         android:description="@string/permdesc_accessImsCallService"
         android:protectionLevel="signature|system" />
@@ -760,32 +759,32 @@
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.READ_PROFILE"
         android:protectionLevel="normal"
-        android:permissionFlags="hide"/>
+        android:permissionFlags="hidden"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_PROFILE"
         android:protectionLevel="normal"
-        android:permissionFlags="hide"/>
+        android:permissionFlags="hidden"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.READ_SOCIAL_STREAM"
         android:protectionLevel="normal"
-        android:permissionFlags="hide"/>
+        android:permissionFlags="hidden"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_SOCIAL_STREAM"
         android:protectionLevel="normal"
-        android:permissionFlags="hide"/>
+        android:permissionFlags="hidden"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.READ_USER_DICTIONARY"
         android:protectionLevel="normal"
-        android:permissionFlags="hide"/>
+        android:permissionFlags="hidden"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_USER_DICTIONARY"
         android:protectionLevel="normal"
-        android:permissionFlags="hide"/>
+        android:permissionFlags="hidden"/>
 
     <!-- ====================================================================== -->
     <!-- INSTALL PERMISSIONS                                                    -->
