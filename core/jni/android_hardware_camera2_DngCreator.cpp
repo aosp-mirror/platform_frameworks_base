@@ -20,6 +20,7 @@
 #include <string.h>
 #include <algorithm>
 #include <memory>
+#include <vector>
 
 #include <utils/Log.h>
 #include <utils/Errors.h>
@@ -1659,8 +1660,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             lsmHeight = static_cast<uint32_t>(entry1.data.i32[1]);
         }
 
-        camera_metadata_entry entry2 =
-                results.find(ANDROID_STATISTICS_LENS_SHADING_MAP);
+        camera_metadata_entry entry2 = results.find(ANDROID_STATISTICS_LENS_SHADING_MAP);
 
         camera_metadata_entry entry =
                 characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
@@ -1684,6 +1684,45 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 return nullptr;
             }
         }
+
+
+        // Set up bad pixel correction list
+        camera_metadata_entry entry3 = characteristics.find(ANDROID_STATISTICS_HOT_PIXEL_MAP);
+
+        if ((entry3.count % 2) != 0) {
+            ALOGE("%s: Hot pixel map contains odd number of values, cannot map to pairs!",
+                    __FUNCTION__);
+            jniThrowRuntimeException(env, "failed to add hotpixel map.");
+            return nullptr;
+        }
+
+        // Adjust the bad pixel coordinates to be relative to the origin of the active area DNG tag
+        std::vector<uint32_t> v;
+        for (size_t i = 0; i < entry3.count; i+=2) {
+            int32_t x = entry3.data.i32[i];
+            int32_t y = entry3.data.i32[i + 1];
+            x -= static_cast<int32_t>(xmin);
+            y -= static_cast<int32_t>(ymin);
+            if (x < 0 || y < 0 || static_cast<uint32_t>(x) >= width ||
+                    static_cast<uint32_t>(y) >= width) {
+                continue;
+            }
+            v.push_back(x);
+            v.push_back(y);
+        }
+        const uint32_t* badPixels = &v[0];
+        uint32_t badPixelCount = v.size();
+
+        if (badPixelCount > 0) {
+            err = builder.addBadPixelListForMetadata(badPixels, badPixelCount, opcodeCfaLayout);
+
+            if (err != OK) {
+                ALOGE("%s: Could not add hotpixel map.", __FUNCTION__);
+                jniThrowRuntimeException(env, "failed to add hotpixel map.");
+                return nullptr;
+            }
+        }
+
 
         size_t listSize = builder.getSize();
         uint8_t opcodeListBuf[listSize];
