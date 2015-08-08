@@ -178,7 +178,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     // Used to indicate if an object (e.g. task) should be moved/created
     // at the top of its container (e.g. stack).
-    private static final boolean ON_TOP = true;
+    static final boolean ON_TOP = true;
 
     // Used to indicate that an objects (e.g. task) removal from its container
     // (e.g. stack) is due to it moving to another container.
@@ -2953,13 +2953,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Place the task in the right stack if it isn't there already based on the requested
         // bounds.
         int stackId = task.stack.mStackId;
+        final boolean wasFrontStack = isFrontStack(task.stack);
         if (bounds == null && stackId != FULLSCREEN_WORKSPACE_STACK_ID) {
             stackId = FULLSCREEN_WORKSPACE_STACK_ID;
         } else if (bounds != null && task.stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
             stackId = FREEFORM_WORKSPACE_STACK_ID;
         }
         if (stackId != task.stack.mStackId) {
-            moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, "resizeTask");
+            final String reason = "resizeTask";
+            final ActivityStack stack =
+                    moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, reason);
+            if (wasFrontStack) {
+                // Since the stack was previously in front,
+                // move the stack in which we are placing the task to the front.
+                stack.moveToFront(reason);
+            }
         }
 
         final Configuration overrideConfig = mWindowManager.resizeTask(task.taskId, bounds);
