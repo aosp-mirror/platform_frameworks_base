@@ -1495,6 +1495,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Plus d\'options"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Fermer la barre d\'outils en superposition"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Agrandir"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Fermer"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> élément sélectionné</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> éléments sélectionnés</item>

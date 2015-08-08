@@ -1529,6 +1529,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Периферійний USB-порт"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Більше опцій"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Закрити розширені інструменти"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Розгорнути"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Закрити"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="few">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>

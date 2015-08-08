@@ -1495,6 +1495,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB-port för kringutrustning"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Fler alternativ"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Dölj utökat verktygsfält"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Maximera"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Stäng"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> har valts</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> har valts</item>

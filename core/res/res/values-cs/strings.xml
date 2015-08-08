@@ -545,7 +545,7 @@
     <item msgid="2374913952870110618">"Vlastní"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Domů"</item>
+    <item msgid="6880257626740047286">"Domov"</item>
     <item msgid="5629153956045109251">"Práce"</item>
     <item msgid="4966604264500343469">"Ostatní"</item>
     <item msgid="4932682847595299369">"Vlastní"</item>
@@ -602,7 +602,7 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"Jiné"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Vlastní"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Domů"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Domov"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Práce"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Jiné"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Vlastní"</string>
@@ -1529,6 +1529,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB pro periferní zařízení"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Další možnosti"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zavřít rozbalovací nabídku"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Maximalizovat"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Zavřít"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> položky</item>
       <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> položky</item>
