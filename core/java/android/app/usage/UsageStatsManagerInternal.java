@@ -77,6 +77,13 @@ public abstract class UsageStatsManagerInternal {
     public abstract boolean isAppIdle(String packageName, int userId);
 
     /**
+     * Returns all of the uids for a given user where all packages associating with that uid
+     * are in the app idle state -- there are no associated apps that are not idle.  This means
+     * all of the returned uids can be safely considered app idle.
+     */
+    public abstract int[] getIdleUidsForUser(int userId);
+
+    /**
      * @return True if currently app idle parole mode is on.  This means all idle apps are allow to
      * run for a short period of time.
      */
