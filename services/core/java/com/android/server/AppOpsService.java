@@ -1245,6 +1245,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return;
                 }
                 boolean success = false;
+                mUidStates.clear();
                 try {
                     XmlPullParser parser = Xml.newPullParser();
                     parser.setInput(stream, StandardCharsets.UTF_8.name());
@@ -1448,7 +1449,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 XmlSerializer out = new FastXmlSerializer();
                 out.setOutput(stream, StandardCharsets.UTF_8.name());
                 out.startDocument(null, true);
-                out.startTag(null, "app");
+                out.startTag(null, "app-ops");
 
                 final int uidStateCount = mUidStates.size();
                 for (int i = 0; i < uidStateCount; i++) {
@@ -1541,6 +1542,17 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    private void dumpHelp(PrintWriter pw) {
+        pw.println("AppOps service (appops) dump options:");
+        pw.println("  [-h] [CMD]");
+        pw.println("  -h: print this help text.");
+        pw.println("Commands:");
+        pw.println("  write-settings");
+        pw.println("    Immediately write pending changes to storage.");
+        pw.println("  read-settings");
+        pw.println("    Read the last written settings, replacing current state in RAM.");
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -1549,6 +1561,43 @@ public class AppOpsService extends IAppOpsService.Stub {
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid());
             return;
+        }
+
+        if (args != null) {
+            for (int i=0; i<args.length; i++) {
+                String arg = args[i];
+                if ("-h".equals(arg)) {
+                    dumpHelp(pw);
+                    return;
+                } else if ("write-settings".equals(arg)) {
+                    long token = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (this) {
+                            mHandler.removeCallbacks(mWriteRunner);
+                        }
+                        writeState();
+                        pw.println("Current settings written.");
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                    return;
+                } else if ("read-settings".equals(arg)) {
+                    long token = Binder.clearCallingIdentity();
+                    try {
+                        readState();
+                        pw.println("Last settings read.");
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                    return;
+                } else if (arg.length() > 0 && arg.charAt(0) == '-'){
+                    pw.println("Unknown option: " + arg);
+                    return;
+                } else {
+                    pw.println("Unknown command: " + arg);
+                    return;
+                }
+            }
         }
 
         synchronized (this) {
