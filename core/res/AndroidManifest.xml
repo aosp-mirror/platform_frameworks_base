@@ -1670,7 +1670,7 @@
     <permission android:name="android.permission.CHANGE_NETWORK_STATE"
         android:description="@string/permdesc_changeNetworkState"
         android:label="@string/permlab_changeNetworkState"
-        android:protectionLevel="normal" />
+        android:protectionLevel="signature|preinstalled|appop|pre23" />
 
     <!-- Allows an application to clear the caches of all installed
          applications on the device.
