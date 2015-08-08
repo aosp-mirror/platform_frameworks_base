@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    NOTE: this is the newer (L) version of the system font configuration,
-    supporting richer weight selection. Some apps will expect the older
-    version, so please keep system_fonts.xml and fallback_fonts.xml in sync
-    with any changes, even though framework will only read this file.
-
-    All fonts withohut names are added to the default list. Fonts are chosen
+    All fonts without names are added to the default list. Fonts are chosen
     based on a match: full BCP-47 language tag including script, then just
     language, and finally order (the first font containing the glyph).
 
