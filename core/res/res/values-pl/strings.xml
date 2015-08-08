@@ -1529,6 +1529,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port peryferyjny USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Więcej opcji"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zamknij rozszerzony pasek"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Maksymalizuj"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Zamknij"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="few">Wybrano <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="many">Wybrano <xliff:g id="COUNT_1">%1$d</xliff:g></item>

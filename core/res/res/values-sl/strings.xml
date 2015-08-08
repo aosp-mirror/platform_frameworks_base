@@ -1529,6 +1529,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Vrata USB za dodatno opremo"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Več možnosti"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zapri presežni element"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Maksimiziraj"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Zapri"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> izbran</item>
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> izbrana</item>

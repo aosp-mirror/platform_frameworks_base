@@ -702,7 +702,7 @@
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Pentru a debloca, conectaţi-vă folosind Contul Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nume de utilizator (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Parolă"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Conectaţi-vă"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Conectați-vă"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nume de utilizator sau parolă nevalide."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Aţi uitat numele de utilizator sau parola?\nAccesaţi "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Se verifică..."</string>
@@ -970,7 +970,7 @@
       <item quantity="other">Rețele Wi-Fi deschise disponibile</item>
       <item quantity="one">Rețea Wi-Fi deschisă disponibilă</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Conectaţi-vă la reţeaua Wi-Fi"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Conectați-vă la reţeaua Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Conectați-vă la rețea"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
@@ -1290,7 +1290,7 @@
     <string name="kg_login_instructions" msgid="1100551261265506448">"Pentru a debloca, conectaţi-vă cu Contul dvs. Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nume de utilizator (e-mail)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Parolă"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Conectaţi-vă"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Conectați-vă"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nume de utilizator sau parolă nevalide."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Aţi uitat numele de utilizator sau parola?\nAccesaţi "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Se verifică contul…"</string>
@@ -1512,6 +1512,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB periferic"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Mai multe opțiuni"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Închideți meniul suplimentar"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Maximizați"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Închideți"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>

@@ -1495,6 +1495,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ဘေးရှိပို့တ်"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"နောက်ထပ် ရွေးစရာများ"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ကိရိယာဘားအပိုအား ပိတ်ရန်"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"အများဆုံး လုပ်ပေးရန်"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"ပိတ်ရန်"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ရွေးချယ်ပြီးပါပြီ</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ရွေးချယ်ပြီးပါပြီ</item>

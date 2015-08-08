@@ -1512,6 +1512,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB perifērijas ports"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Citas opcijas"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Aizvērt pārpildes izvēlni"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Maksimizēt"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Aizvērt"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="zero"><xliff:g id="COUNT_1">%1$d</xliff:g> atlasīti</item>
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> atlasīts</item>

@@ -755,7 +755,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"ماندن در این صفحه"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nمطمئنید می‌خواهید این صفحه را ترک کنید؟"</string>
     <string name="save_password_label" msgid="6860261758665825069">"تأیید"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگنمایی و کوچکنمایی، دو بار ضربه بزنید."</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگ‌نمایی و کوچکنمایی، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"تکمیل خودکار"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"راه‌اندازی تکمیل خودکار"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
@@ -1079,7 +1079,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"به برنامه اجازه می‌دهد جلسات نصب را بخواند. این کار به برنامه اجازه می‌دهد جزئیات نصب‌های بسته فعال را ببیند."</string>
     <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"درخواست نصب بسته‌بندی"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"به برنامه اجازه می‌دهد درخواست نصب بسته‌بندی کند."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"دوبار لمس کنید تا بزرگنمایی کنترل شود"</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"دوبار لمس کنید تا بزرگ‌نمایی کنترل شود"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"افزودن ابزارک انجام نشد."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"برو"</string>
     <string name="ime_action_search" msgid="658110271822807811">"جستجو"</string>
@@ -1257,7 +1257,7 @@
     <string name="media_route_status_in_use" msgid="4533786031090198063">"در حال استفاده"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"صفحه نمایش از خود"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"‏صفحه HDMI"</string>
-    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"همپوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"هم‌پوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"، امن"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"الگو را فراموش کرده‌اید"</string>
@@ -1495,6 +1495,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏درگاه جانبی USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"گزینه‌های بیشتر"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"بستن منوی سرریز"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"بزرگ کردن"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"بستن"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
       <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>

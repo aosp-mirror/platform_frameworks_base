@@ -1495,6 +1495,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Cổng ngoại vi USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Tùy chọn khác"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Đóng tràn"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"Tối đa hóa"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"Đóng"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other">Đã chọn <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Đã chọn <xliff:g id="COUNT_0">%1$d</xliff:g></item>

@@ -1495,6 +1495,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB 外设端口"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"更多选项"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"关闭工具栏溢出"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"最大化"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"关闭"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other">已选择 <xliff:g id="COUNT_1">%1$d</xliff:g> 项</item>
       <item quantity="one">已选择 <xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
