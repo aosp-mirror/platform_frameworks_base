@@ -545,7 +545,7 @@
     <item msgid="2374913952870110618">"Vlastní"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Domů"</item>
+    <item msgid="6880257626740047286">"Domov"</item>
     <item msgid="5629153956045109251">"Práce"</item>
     <item msgid="4966604264500343469">"Ostatní"</item>
     <item msgid="4932682847595299369">"Vlastní"</item>
@@ -602,7 +602,7 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"Jiné"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Vlastní"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Domů"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Domov"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Práce"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Jiné"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Vlastní"</string>
