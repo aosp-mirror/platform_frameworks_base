@@ -605,6 +605,13 @@ public abstract class BackupAgent extends ContextWrapper {
     public void onRestoreFile(ParcelFileDescriptor data, long size,
             File destination, int type, long mode, long mtime)
             throws IOException {
+
+        final boolean accept = isFileEligibleForRestore(destination);
+        // If we don't accept the file, consume the bytes from the pipe anyway.
+        FullBackup.restoreFile(data, size, type, mode, mtime, accept ? destination : null);
+    }
+
+    private boolean isFileEligibleForRestore(File destination) throws IOException {
         FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this);
         if (!bs.isFullBackupContentEnabled()) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
@@ -612,8 +619,9 @@ public abstract class BackupAgent extends ContextWrapper {
                         "onRestoreFile \"" + destination.getCanonicalPath()
                                 + "\" : fullBackupContent not enabled for " + getPackageName());
             }
-            return;
+            return false;
         }
+
         Map<String, Set<String>> includes = null;
         ArraySet<String> excludes = null;
         final String destinationCanonicalPath = destination.getCanonicalPath();
@@ -627,7 +635,7 @@ public abstract class BackupAgent extends ContextWrapper {
                                 + "\" : Exception trying to parse fullBackupContent xml file!"
                                 + " Aborting onRestoreFile.", e);
             }
-            return;
+            return false;
         }
 
         if (excludes != null &&
@@ -637,7 +645,7 @@ public abstract class BackupAgent extends ContextWrapper {
                         "onRestoreFile: \"" + destinationCanonicalPath + "\": listed in"
                                 + " excludes; skipping.");
             }
-            return;
+            return false;
         }
 
         if (includes != null && !includes.isEmpty()) {
@@ -657,10 +665,10 @@ public abstract class BackupAgent extends ContextWrapper {
                                     + destinationCanonicalPath + "\" but it isn't specified"
                                     + " in the included files; skipping.");
                 }
-                return;
+                return false;
             }
         }
-        FullBackup.restoreFile(data, size, type, mode, mtime, destination);
+        return true;
     }
 
     /**
