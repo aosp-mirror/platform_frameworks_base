@@ -1440,9 +1440,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceChangePermission() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE,
-                "ConnectivityService");
+        int uid = Binder.getCallingUid();
+        Settings.checkAndNoteChangeNetworkStateOperation(mContext, uid, Settings
+                .getPackageNameForUid(mContext, uid), true);
+
     }
 
     private void enforceTetherAccessPermission() {

@@ -1408,6 +1408,25 @@ public final class Settings {
     }
 
     /**
+     * An app can use this method to check if it is currently allowed to change the network
+     * state. In order to be allowed to do so, an app must first declare either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} or
+     * {@link android.Manifest.permission#WRITE_SETTINGS} permission in its manifest. If it
+     * is currently disallowed, it can prompt the user to grant it this capability through a
+     * management UI by sending an Intent with action
+     * {@link android.provider.Settings#ACTION_MANAGE_WRITE_SETTINGS}.
+     *
+     * @param context A context
+     * @return true if the calling app can change the state of network, false otherwise.
+     * @hide
+     */
+    public static boolean canChangeNetworkState(Context context) {
+        int uid = Binder.getCallingUid();
+        return Settings.isCallingPackageAllowedToChangeNetworkState(context, uid, Settings
+                .getPackageNameForUid(context, uid), false);
+    }
+
+    /**
      * System settings, containing miscellaneous system preferences.  This
      * table holds simple name/value pairs.  There are convenience
      * functions for accessing individual settings entries.
@@ -8261,6 +8280,17 @@ public final class Settings {
         return "android-" + Long.toHexString(androidId);
     }
 
+    private static final String[] PM_WRITE_SETTINGS = {
+        android.Manifest.permission.WRITE_SETTINGS
+    };
+    private static final String[] PM_CHANGE_NETWORK_STATE = {
+        android.Manifest.permission.CHANGE_NETWORK_STATE,
+        android.Manifest.permission.WRITE_SETTINGS
+    };
+    private static final String[] PM_SYSTEM_ALERT_WINDOW = {
+        android.Manifest.permission.SYSTEM_ALERT_WINDOW
+    };
+
     /**
      * Performs a strict and comprehensive check of whether a calling package is allowed to
      * write/modify system settings, as the condition differs for pre-M, M+, and
@@ -8272,14 +8302,15 @@ public final class Settings {
             String callingPackage, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
                 callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
-                android.Manifest.permission.WRITE_SETTINGS, false);
+                PM_WRITE_SETTINGS, false);
     }
 
     /**
      * Performs a strict and comprehensive check of whether a calling package is allowed to
      * write/modify system settings, as the condition differs for pre-M, M+, and
      * privileged/preinstalled apps. If the provided uid does not match the
-     * callingPackage, a negative result will be returned.
+     * callingPackage, a negative result will be returned. The caller is expected to have
+     * either WRITE_SETTINGS or CHANGE_NETWORK_STATE permission declared.
      *
      * Note: if the check is successful, the operation of this app will be updated to the
      * current time.
@@ -8289,7 +8320,40 @@ public final class Settings {
             String callingPackage, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
                 callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
-                android.Manifest.permission.WRITE_SETTINGS, true);
+                PM_WRITE_SETTINGS, true);
+    }
+
+    /**
+     * Performs a strict and comprehensive check of whether a calling package is allowed to
+     * change the state of network, as the condition differs for pre-M, M+, and
+     * privileged/preinstalled apps. If the provided uid does not match the
+     * callingPackage, a negative result will be returned. The caller is expected to have
+     * either of CHANGE_NETWORK_STATE or WRITE_SETTINGS permission declared.
+     * @hide
+     */
+    public static boolean isCallingPackageAllowedToChangeNetworkState(Context context, int uid,
+            String callingPackage, boolean throwException) {
+        return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
+                callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
+                PM_CHANGE_NETWORK_STATE, false);
+    }
+
+    /**
+     * Performs a strict and comprehensive check of whether a calling package is allowed to
+     * change the state of network, as the condition differs for pre-M, M+, and
+     * privileged/preinstalled apps. If the provided uid does not match the
+     * callingPackage, a negative result will be returned. The caller is expected to have
+     * either CHANGE_NETWORK_STATE or WRITE_SETTINGS permission declared.
+     *
+     * Note: if the check is successful, the operation of this app will be updated to the
+     * current time.
+     * @hide
+     */
+    public static boolean checkAndNoteChangeNetworkStateOperation(Context context, int uid,
+            String callingPackage, boolean throwException) {
+        return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
+                callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
+                PM_CHANGE_NETWORK_STATE, true);
     }
 
     /**
@@ -8303,7 +8367,7 @@ public final class Settings {
             String callingPackage, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
                 callingPackage, throwException, AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                android.Manifest.permission.SYSTEM_ALERT_WINDOW, false);
+                PM_SYSTEM_ALERT_WINDOW, false);
     }
 
     /**
@@ -8320,7 +8384,7 @@ public final class Settings {
             callingPackage, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
                 callingPackage, throwException, AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                android.Manifest.permission.SYSTEM_ALERT_WINDOW, true);
+                PM_SYSTEM_ALERT_WINDOW, true);
     }
 
     /**
@@ -8330,8 +8394,8 @@ public final class Settings {
      * @hide
      */
     public static boolean isCallingPackageAllowedToPerformAppOpsProtectedOperation(Context context,
-            int uid, String callingPackage, boolean throwException, int appOpsOpCode, String
-            permissionName, boolean makeNote) {
+            int uid, String callingPackage, boolean throwException, int appOpsOpCode, String[]
+            permissions, boolean makeNote) {
         if (callingPackage == null) {
             return false;
         }
@@ -8347,20 +8411,41 @@ public final class Settings {
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
                 return true;
+
             case AppOpsManager.MODE_DEFAULT:
                 // this is the default operating mode after an app's installation
-                if(context.checkCallingOrSelfPermission(permissionName) == PackageManager
-                        .PERMISSION_GRANTED) {
-                    return true;
+                // In this case we will check all associated static permission to see
+                // if it is granted during install time.
+                for (String permission : permissions) {
+                    if (context.checkCallingOrSelfPermission(permission) == PackageManager
+                            .PERMISSION_GRANTED) {
+                        // if either of the permissions are granted, we will allow it
+                        return true;
+                    }
                 }
+
             default:
                 // this is for all other cases trickled down here...
                 if (!throwException) {
                     return false;
                 }
         }
-        throw new SecurityException(callingPackage + " was not granted "
-                + permissionName + " permission");
+
+        // prepare string to throw SecurityException
+        StringBuilder exceptionMessage = new StringBuilder();
+        exceptionMessage.append(callingPackage);
+        exceptionMessage.append(" was not granted ");
+        if (permissions.length > 1) {
+            exceptionMessage.append(" either of these permissions: ");
+        } else {
+            exceptionMessage.append(" this permission: ");
+        }
+        for (int i = 0; i < permissions.length; i++) {
+            exceptionMessage.append(permissions[i]);
+            exceptionMessage.append((i == permissions.length - 1) ? "." : ", ");
+        }
+
+        throw new SecurityException(exceptionMessage.toString());
     }
 
     /**
