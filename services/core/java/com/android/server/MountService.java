@@ -766,6 +766,15 @@ class MountService extends IMountService.Stub
         }
     }
 
+    private void addInternalVolume() {
+        // Create a stub volume that represents internal storage
+        final VolumeInfo internal = new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL,
+                VolumeInfo.TYPE_PRIVATE, null, null);
+        internal.state = VolumeInfo.STATE_MOUNTED;
+        internal.path = Environment.getDataDirectory().getAbsolutePath();
+        mVolumes.put(internal.id, internal);
+    }
+
     private void resetIfReadyAndConnectedLocked() {
         Slog.d(TAG, "Thinking about reset, mSystemReady=" + mSystemReady
                 + ", mDaemonConnected=" + mDaemonConnected);
@@ -775,12 +784,7 @@ class MountService extends IMountService.Stub
             mDisks.clear();
             mVolumes.clear();
 
-            // Create a stub volume that represents internal storage
-            final VolumeInfo internal = new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL,
-                    VolumeInfo.TYPE_PRIVATE, null, null);
-            internal.state = VolumeInfo.STATE_MOUNTED;
-            internal.path = Environment.getDataDirectory().getAbsolutePath();
-            mVolumes.put(internal.id, internal);
+            addInternalVolume();
 
             try {
                 mConnector.execute("volume", "reset");
@@ -1411,6 +1415,8 @@ class MountService extends IMountService.Stub
         userFilter.addAction(Intent.ACTION_USER_ADDED);
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
+
+        addInternalVolume();
 
         // Add ourself to the Watchdog monitors if enabled.
         if (WATCHDOG_ENABLE) {
