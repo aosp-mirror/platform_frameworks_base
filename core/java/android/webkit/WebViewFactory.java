@@ -314,8 +314,7 @@ public final class WebViewFactory {
                     if (path.contains("!/")) {
                         String[] split = TextUtils.split(path, "!/");
                         if (split.length == 2) {
-                            try {
-                                ZipFile z = new ZipFile(split[0]);
+                            try (ZipFile z = new ZipFile(split[0])) {
                                 ZipEntry e = z.getEntry(split[1]);
                                 if (e != null && e.getMethod() == ZipEntry.STORED) {
                                     newVmSize = Math.max(newVmSize, e.getSize());
@@ -355,8 +354,7 @@ public final class WebViewFactory {
                                              String[] abiList,
                                              String nativeLibFileName) {
         // Search the APK for a native library conforming to a listed ABI.
-        try {
-            ZipFile z = new ZipFile(apkPath);
+        try (ZipFile z = new ZipFile(apkPath)) {
             for (String abi : abiList) {
                 final String entry = "lib/" + abi + "/" + nativeLibFileName;
                 ZipEntry e = z.getEntry(entry);
