@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net;
+package android.net.ip;
 
 import com.android.internal.annotations.GuardedBy;
 
