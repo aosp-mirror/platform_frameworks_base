@@ -88,8 +88,10 @@ public class MobileSignalController extends SignalController<
 
         mapIconSets();
 
-        mLastState.networkName = mCurrentState.networkName = mNetworkNameDefault;
-        mLastState.networkNameData = mCurrentState.networkNameData = mNetworkNameDefault;
+        String networkName = info.getCarrierName() != null ? info.getCarrierName().toString()
+                : mNetworkNameDefault;
+        mLastState.networkName = mCurrentState.networkName = networkName;
+        mLastState.networkNameData = mCurrentState.networkNameData = networkName;
         mLastState.enabled = mCurrentState.enabled = hasMobileData;
         mLastState.iconGroup = mCurrentState.iconGroup = mDefaultIcons;
         // Get initial data sim state.
