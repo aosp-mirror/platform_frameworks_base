@@ -3374,9 +3374,6 @@
     <!-- Title for a dialog showing possible activities for sharing in ShareActionProvider [CHAR LIMIT=25] -->
     <string name="share_action_provider_share_with">Share with</string>
 
-    <!-- Delimeter used between each item in a textual list; for example "Alpha, Beta". [CHAR LIMIT=3] -->
-    <string name="list_delimeter">", "</string>
-
     <!-- STK sending DTMF, SMS, USSD, SS -->
     <string name="sending">Sending\u2026</string>
 

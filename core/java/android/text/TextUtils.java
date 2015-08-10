@@ -18,7 +18,9 @@ package android.text;
 
 import android.annotation.Nullable;
 import android.content.res.Resources;
+import android.icu.impl.ICUResourceBundle;
 import android.icu.util.ULocale;
+import android.icu.util.UResourceBundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
@@ -284,13 +286,23 @@ public class TextUtils {
     }
 
     /**
-     * Returns list of multiple {@link CharSequence} joined into a single
-     * {@link CharSequence} separated by localized delimiter such as ", ".
+     * @deprecated use {@link android.icu.text.ListFormatter} instead.
      *
      * @hide
      */
+    @Deprecated
     public static CharSequence join(Iterable<CharSequence> list) {
-        final CharSequence delimiter = Resources.getSystem().getText(R.string.list_delimeter);
+        final ICUResourceBundle icuBundle = (ICUResourceBundle) UResourceBundle.
+                getBundleInstance(ICUResourceBundle.ICU_BASE_NAME);
+        final String listMiddlePattern =
+                icuBundle.getStringWithFallback("listPattern/standard/middle");
+        // The returned pattern is something like "{0}, {1}", from which we want
+        // to extract the ", " part.
+        final int firstClosingBrace = listMiddlePattern.indexOf('}');
+        final int lastOpeningBrace = listMiddlePattern.lastIndexOf('{');
+        final CharSequence delimiter = listMiddlePattern.substring(
+                firstClosingBrace+1, lastOpeningBrace);
+
         return join(delimiter, list);
     }
 
