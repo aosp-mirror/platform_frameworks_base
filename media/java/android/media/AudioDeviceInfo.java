@@ -111,14 +111,6 @@ public final class AudioDeviceInfo {
      * A device type connected over IP.
      */
     public static final int TYPE_IP               = 20;
-    /**
-     * @hide
-     * A remote-submix device.
-     * We need this for CTS, but it is not part of the external API.
-     * FIXME It has been suggested that CTS should only be testing public APIs.
-     *   Consider this for a public API.
-     */
-    public static final int TYPE_REMOTE_SUBMIX    = 0x7FFF;
 
     private final AudioDevicePort mPort;
 
@@ -286,7 +278,6 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_FM, TYPE_FM);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_AUX_LINE, TYPE_AUX_LINE);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_IP, TYPE_IP);
-        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX, TYPE_REMOTE_SUBMIX);
 
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUILTIN_MIC, TYPE_BUILTIN_MIC);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET, TYPE_BLUETOOTH_SCO);
@@ -304,7 +295,10 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_SPDIF, TYPE_LINE_DIGITAL);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, TYPE_BLUETOOTH_A2DP);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_IP, TYPE_IP);
-        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_REMOTE_SUBMIX, TYPE_REMOTE_SUBMIX);
+
+        // not covered here, legacy
+        //AudioSystem.DEVICE_OUT_REMOTE_SUBMIX
+        //AudioSystem.DEVICE_IN_REMOTE_SUBMIX
 
         // privileges mapping to output device
         EXT_TO_INT_DEVICE_MAPPING = new SparseIntArray();
