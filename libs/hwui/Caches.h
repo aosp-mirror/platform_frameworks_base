@@ -124,10 +124,6 @@ public:
      */
     void deleteLayerDeferred(Layer* layer);
 
-
-    void startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard);
-    void endTiling();
-
     /**
      * Returns the mesh used to draw regions. Calling this method will
      * bind a VBO of type GL_ELEMENT_ARRAY_BUFFER that contains the
@@ -140,10 +136,6 @@ public:
      */
     void dumpMemoryUsage();
     void dumpMemoryUsage(String8& log);
-
-    bool hasRegisteredFunctors();
-    void registerFunctors(uint32_t functorCount);
-    void unregisterFunctors(uint32_t functorCount);
 
     // Misc
     GLint maxTextureSize;
@@ -205,8 +197,6 @@ private:
     std::vector<Layer*> mLayerGarbage;
 
     bool mInitialized;
-
-    uint32_t mFunctorsCount;
 
     // TODO: move below to RenderState
     PixelBufferState* mPixelBufferState = nullptr;

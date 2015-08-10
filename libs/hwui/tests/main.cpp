@@ -283,6 +283,69 @@ private:
     }
 };
 
+class PartialInvalTest : public TreeContentAnimation {
+public:
+    std::vector< sp<RenderNode> > cards;
+    void createContent(int width, int height, DisplayListCanvas* renderer) override {
+        static SkColor COLORS[] = {
+                0xFFF44336,
+                0xFF9C27B0,
+                0xFF2196F3,
+                0xFF4CAF50,
+        };
+
+        renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+
+        for (int x = dp(16); x < (width - dp(116)); x += dp(116)) {
+            for (int y = dp(16); y < (height - dp(116)); y += dp(116)) {
+                sp<RenderNode> card = createCard(x, y, dp(100), dp(100),
+                        COLORS[static_cast<int>((y / dp(116))) % 4]);
+                renderer->drawRenderNode(card.get());
+                cards.push_back(card);
+            }
+        }
+    }
+    void doFrame(int frameNr) override {
+        int curFrame = frameNr % 150;
+        cards[0]->mutateStagingProperties().setTranslationX(curFrame);
+        cards[0]->mutateStagingProperties().setTranslationY(curFrame);
+        cards[0]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+
+        DisplayListCanvas* renderer = startRecording(cards[0].get());
+        renderer->drawColor(interpolateColor(curFrame / 150.0f, 0xFFF44336, 0xFFF8BBD0),
+                SkXfermode::kSrcOver_Mode);
+        endRecording(renderer, cards[0].get());
+    }
+
+    static SkColor interpolateColor(float fraction, SkColor start, SkColor end) {
+        int startA = (start >> 24) & 0xff;
+        int startR = (start >> 16) & 0xff;
+        int startG = (start >> 8) & 0xff;
+        int startB = start & 0xff;
+
+        int endA = (end >> 24) & 0xff;
+        int endR = (end >> 16) & 0xff;
+        int endG = (end >> 8) & 0xff;
+        int endB = end & 0xff;
+
+        return (int)((startA + (int)(fraction * (endA - startA))) << 24) |
+                (int)((startR + (int)(fraction * (endR - startR))) << 16) |
+                (int)((startG + (int)(fraction * (endG - startG))) << 8) |
+                (int)((startB + (int)(fraction * (endB - startB))));
+    }
+private:
+    sp<RenderNode> createCard(int x, int y, int width, int height, SkColor color) {
+        sp<RenderNode> node = new RenderNode();
+        node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
+        node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+
+        DisplayListCanvas* renderer = startRecording(node.get());
+        renderer->drawColor(color, SkXfermode::kSrcOver_Mode);
+        endRecording(renderer, node.get());
+        return node;
+    }
+};
+
 struct cstr_cmp {
     bool operator()(const char *a, const char *b) const {
         return std::strcmp(a, b) < 0;
@@ -296,6 +359,7 @@ std::map<const char*, testProc, cstr_cmp> gTestMap {
     {"shadowgrid2", TreeContentAnimation::run<ShadowGrid2Animation>},
     {"rectgrid", TreeContentAnimation::run<RectGridAnimation> },
     {"oval", TreeContentAnimation::run<OvalAnimation> },
+    {"partialinval", TreeContentAnimation::run<PartialInvalTest> },
 };
 
 int main(int argc, char* argv[]) {

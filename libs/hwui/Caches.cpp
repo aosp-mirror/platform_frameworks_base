@@ -68,8 +68,6 @@ bool Caches::init() {
     mRegionMesh = nullptr;
     mProgram = nullptr;
 
-    mFunctorsCount = 0;
-
     patchCache.init();
 
     mInitialized = true;
@@ -273,38 +271,6 @@ void Caches::flush(FlushMode mode) {
     // Errors during cleanup should be considered non-fatal, dump them and
     // and move on. TODO: All errors or just errors like bad surface?
     GLUtils::dumpGLErrors();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Tiling
-///////////////////////////////////////////////////////////////////////////////
-
-void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard) {
-    if (mExtensions.hasTiledRendering() && !Properties::debugOverdraw) {
-        glStartTilingQCOM(x, y, width, height, (discard ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM));
-    }
-}
-
-void Caches::endTiling() {
-    if (mExtensions.hasTiledRendering() && !Properties::debugOverdraw) {
-        glEndTilingQCOM(GL_COLOR_BUFFER_BIT0_QCOM);
-    }
-}
-
-bool Caches::hasRegisteredFunctors() {
-    return mFunctorsCount > 0;
-}
-
-void Caches::registerFunctors(uint32_t functorCount) {
-    mFunctorsCount += functorCount;
-}
-
-void Caches::unregisterFunctors(uint32_t functorCount) {
-    if (functorCount > mFunctorsCount) {
-        mFunctorsCount = 0;
-    } else {
-        mFunctorsCount -= functorCount;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

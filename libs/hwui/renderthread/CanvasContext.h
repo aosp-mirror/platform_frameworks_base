@@ -25,7 +25,6 @@
 #include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
-#include "renderthread/DirtyHistory.h"
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
@@ -119,7 +118,6 @@ private:
     friend class android::uirenderer::RenderState;
 
     void setSurface(ANativeWindow* window);
-    void swapBuffers(const SkRect& dirty, EGLint width, EGLint height);
     void requireSurface();
 
     void freePrefetechedLayers();
@@ -130,6 +128,7 @@ private:
     EGLSurface mEglSurface = EGL_NO_SURFACE;
     bool mBufferPreserved = false;
     SwapBehavior mSwapBehavior = kSwap_default;
+    RingBuffer<SkRect, 3> mDamageHistory;
 
     bool mOpaque;
     OpenGLRenderer* mCanvas = nullptr;
@@ -147,8 +146,6 @@ private:
     FrameInfoVisualizer mProfiler;
 
     std::set<RenderNode*> mPrefetechedLayers;
-
-    DirtyHistory mDirtyHistory;
 };
 
 } /* namespace renderthread */

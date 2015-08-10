@@ -25,7 +25,8 @@
 #include <cutils/properties.h>
 #include <EGL/eglext.h>
 
-#define PROPERTY_RENDER_DIRTY_REGIONS "debug.hwui.render_dirty_regions"
+#include <string>
+
 #define GLES_VERSION 2
 
 #define WAIT_FOR_GPU_COMPLETION 0
@@ -63,10 +64,27 @@ static const char* egl_error_str() {
     return egl_error_str(eglGetError());
 }
 
-static bool load_dirty_regions_property() {
-    char buf[PROPERTY_VALUE_MAX];
-    int len = property_get(PROPERTY_RENDER_DIRTY_REGIONS, buf, "true");
-    return !strncasecmp("true", buf, len);
+static struct {
+    bool bufferAge = false;
+    bool setDamage = false;
+} EglExtensions;
+
+void Frame::map(const SkRect& in, EGLint* out) const {
+    /* The rectangles are specified relative to the bottom-left of the surface
+     * and the x and y components of each rectangle specify the bottom-left
+     * position of that rectangle.
+     *
+     * HWUI does everything with 0,0 being top-left, so need to map
+     * the rect
+     */
+    SkIRect idirty;
+    in.roundOut(&idirty);
+    EGLint y = mHeight - (idirty.y() + idirty.height());
+    // layout: {x, y, width, height}
+    out[0] = idirty.x();
+    out[1] = y;
+    out[2] = idirty.width();
+    out[3] = idirty.height();
 }
 
 EglManager::EglManager(RenderThread& thread)
@@ -75,13 +93,9 @@ EglManager::EglManager(RenderThread& thread)
         , mEglConfig(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
-        , mAllowPreserveBuffer(load_dirty_regions_property())
-        , mHasBufferAgeExt(false)
         , mCurrentSurface(EGL_NO_SURFACE)
         , mAtlasMap(nullptr)
         , mAtlasMapSize(0) {
-    mCanSetPreserveBuffer = mAllowPreserveBuffer;
-    ALOGD("Use EGL_SWAP_BEHAVIOR_PRESERVED: %s", mAllowPreserveBuffer ? "true" : "false");
 }
 
 void EglManager::initialize() {
@@ -99,10 +113,18 @@ void EglManager::initialize() {
 
     ALOGI("Initialized EGL, version %d.%d", (int)major, (int)minor);
 
-    findExtensions(eglQueryString(mEglDisplay, EGL_EXTENSIONS), mEglExtensionList);
-    mHasBufferAgeExt = hasEglExtension("EGL_EXT_buffer_age");
+    initExtensions();
 
-    loadConfig(mHasBufferAgeExt);
+    // Now that extensions are loaded, pick a swap behavior
+    if (Properties::enablePartialUpdates) {
+        if (Properties::useBufferAge && EglExtensions.bufferAge) {
+            mSwapBehavior = SwapBehavior::BufferAge;
+        } else {
+            mSwapBehavior = SwapBehavior::Preserved;
+        }
+    }
+
+    loadConfig();
     createContext();
     createPBufferSurface();
     makeCurrent(mPBufferSurface);
@@ -110,17 +132,23 @@ void EglManager::initialize() {
     initAtlas();
 }
 
+void EglManager::initExtensions() {
+    std::string extensions(eglQueryString(mEglDisplay, EGL_EXTENSIONS));
+    auto has = [&](const char* ext) {
+        return extensions.find(ext) != std::string::npos;
+    };
+    EglExtensions.bufferAge = has("EGL_EXT_buffer_age");
+    EglExtensions.setDamage = has("EGL_KHR_partial_update");
+}
+
 bool EglManager::hasEglContext() {
     return mEglDisplay != EGL_NO_DISPLAY;
 }
 
-bool EglManager::hasEglExtension(const char* extension) const {
-   const std::string s(extension);
-   return mEglExtensionList.find(s) != mEglExtensionList.end();
-}
-
-void EglManager::loadConfig(bool useBufferAgeExt) {
-    EGLint swapBehavior = (!useBufferAgeExt && mCanSetPreserveBuffer) ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
+void EglManager::loadConfig() {
+    ALOGD("Swap behavior %d", static_cast<int>(mSwapBehavior));
+    EGLint swapBehavior = (mSwapBehavior == SwapBehavior::Preserved)
+            ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
     EGLint attribs[] = {
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
             EGL_RED_SIZE, 8,
@@ -137,13 +165,13 @@ void EglManager::loadConfig(bool useBufferAgeExt) {
     EGLint num_configs = 1;
     if (!eglChooseConfig(mEglDisplay, attribs, &mEglConfig, num_configs, &num_configs)
             || num_configs != 1) {
-        // Failed to get a valid config
-        if (mCanSetPreserveBuffer) {
-            ALOGW("Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...");
+        if (mSwapBehavior == SwapBehavior::Preserved) {
             // Try again without dirty regions enabled
-            mCanSetPreserveBuffer = false;
-            loadConfig(useBufferAgeExt);
+            ALOGW("Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...");
+            mSwapBehavior = SwapBehavior::Discard;
+            loadConfig();
         } else {
+            // Failed to get a valid config
             LOG_ALWAYS_FATAL("Failed to choose config, error = %s", egl_error_str());
         }
     }
@@ -247,24 +275,47 @@ bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
     return true;
 }
 
-void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height, EGLint* framebufferAge) {
+EGLint EglManager::queryBufferAge(EGLSurface surface) {
+    switch (mSwapBehavior) {
+    case SwapBehavior::Discard:
+        return 0;
+    case SwapBehavior::Preserved:
+        return 1;
+    case SwapBehavior::BufferAge:
+        EGLint bufferAge;
+        eglQuerySurface(mEglDisplay, surface, EGL_BUFFER_AGE_EXT, &bufferAge);
+        return bufferAge;
+    }
+    return 0;
+}
+
+Frame EglManager::beginFrame(EGLSurface surface) {
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
             "Tried to beginFrame on EGL_NO_SURFACE!");
     makeCurrent(surface);
-    if (width) {
-        eglQuerySurface(mEglDisplay, surface, EGL_WIDTH, width);
-    }
-    if (height) {
-        eglQuerySurface(mEglDisplay, surface, EGL_HEIGHT, height);
-    }
-    if (useBufferAgeExt()) {
-        eglQuerySurface(mEglDisplay, surface, EGL_BUFFER_AGE_EXT, framebufferAge);
-    }
+    Frame frame;
+    frame.mSurface = surface;
+    eglQuerySurface(mEglDisplay, surface, EGL_WIDTH, &frame.mWidth);
+    eglQuerySurface(mEglDisplay, surface, EGL_HEIGHT, &frame.mHeight);
+    frame.mBufferAge = queryBufferAge(surface);
     eglBeginFrame(mEglDisplay, surface);
+    return frame;
 }
 
-bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
-        EGLint width, EGLint height) {
+void EglManager::damageFrame(const Frame& frame, const SkRect& dirty) {
+#ifdef EGL_KHR_partial_update
+    if (EglExtensions.setDamage && mSwapBehavior == SwapBehavior::BufferAge) {
+        EGLint rects[4];
+        frame.map(dirty, rects);
+        if (!eglSetDamageRegionKHR(mEglDisplay, frame.mSurface, rects, 1)) {
+            LOG_ALWAYS_FATAL("Failed to set damage region on surface %p, error=%s",
+                    (void*)frame.mSurface, egl_error_str());
+        }
+    }
+#endif
+}
+
+bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
 
 #if WAIT_FOR_GPU_COMPLETION
     {
@@ -275,28 +326,15 @@ bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
 
 #ifdef EGL_KHR_swap_buffers_with_damage
     if (CC_LIKELY(Properties::swapBuffersWithDamage)) {
-        SkIRect idirty;
-        dirty.roundOut(&idirty);
-        /*
-         * EGL_KHR_swap_buffers_with_damage spec states:
-         *
-         * The rectangles are specified relative to the bottom-left of the surface
-         * and the x and y components of each rectangle specify the bottom-left
-         * position of that rectangle.
-         *
-         * HWUI does everything with 0,0 being top-left, so need to map
-         * the rect
-         */
-        EGLint y = height - (idirty.y() + idirty.height());
-        // layout: {x, y, width, height}
-        EGLint rects[4] = { idirty.x(), y, idirty.width(), idirty.height() };
-        EGLint numrects = dirty.isEmpty() ? 0 : 1;
-        eglSwapBuffersWithDamageKHR(mEglDisplay, surface, rects, numrects);
+        EGLint rects[4];
+        frame.map(screenDirty, rects);
+        eglSwapBuffersWithDamageKHR(mEglDisplay, frame.mSurface, rects,
+                screenDirty.isEmpty() ? 0 : 1);
     } else {
-        eglSwapBuffers(mEglDisplay, surface);
+        eglSwapBuffers(mEglDisplay, frame.mSurface);
     }
 #else
-    eglSwapBuffers(mEglDisplay, surface);
+    eglSwapBuffers(mEglDisplay, frame.mSurface);
 #endif
 
     EGLint err = eglGetError();
@@ -307,17 +345,14 @@ bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
         // For some reason our surface was destroyed out from under us
         // This really shouldn't happen, but if it does we can recover easily
         // by just not trying to use the surface anymore
-        ALOGW("swapBuffers encountered EGL_BAD_SURFACE on %p, halting rendering...", surface);
+        ALOGW("swapBuffers encountered EGL_BAD_SURFACE on %p, halting rendering...",
+                frame.mSurface);
         return false;
     }
     LOG_ALWAYS_FATAL("Encountered EGL error %d %s during rendering",
             err, egl_error_str(err));
     // Impossible to hit this, but the compiler doesn't know that
     return false;
-}
-
-bool EglManager::useBufferAgeExt() {
-    return mAllowPreserveBuffer && mHasBufferAgeExt;
 }
 
 void EglManager::fence() {
@@ -328,21 +363,13 @@ void EglManager::fence() {
 }
 
 bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
-    if (CC_UNLIKELY(!mAllowPreserveBuffer)) return false;
+    if (mSwapBehavior != SwapBehavior::Preserved) return false;
 
-    // Use EGL_EXT_buffer_age instead if supported
-    if (mHasBufferAgeExt) return true;
-
-    bool preserved = false;
-    if (mCanSetPreserveBuffer) {
-        preserved = eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR,
-                preserve ? EGL_BUFFER_PRESERVED : EGL_BUFFER_DESTROYED);
-        if (CC_UNLIKELY(!preserved)) {
-            ALOGW("Failed to set EGL_SWAP_BEHAVIOR on surface %p, error=%s",
-                    (void*) surface, egl_error_str());
-        }
-    }
-    if (CC_UNLIKELY(!preserved)) {
+    bool preserved = eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR,
+            preserve ? EGL_BUFFER_PRESERVED : EGL_BUFFER_DESTROYED);
+    if (!preserved) {
+        ALOGW("Failed to set EGL_SWAP_BEHAVIOR on surface %p, error=%s",
+                (void*) surface, egl_error_str());
         // Maybe it's already set?
         EGLint swapBehavior;
         if (eglQuerySurface(mEglDisplay, surface, EGL_SWAP_BEHAVIOR, &swapBehavior)) {
@@ -354,19 +381,6 @@ bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
     }
 
     return preserved;
-}
-
-void EglManager::findExtensions(const char* extensions, std::set<std::string>& list) const {
-    const char* current = extensions;
-    const char* head = current;
-    do {
-        head = strchr(current, ' ');
-        std::string s(current, head ? head - current : strlen(current));
-        if (s.length()) {
-            list.insert(s);
-        }
-        current = head + 1;
-    } while (head);
 }
 
 } /* namespace renderthread */
