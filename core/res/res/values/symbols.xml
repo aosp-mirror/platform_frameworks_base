@@ -2321,4 +2321,6 @@
   <!-- Gesture -->
   <java-symbol type="integer" name="config_cameraLaunchGestureSensorType" />
   <java-symbol type="string" name="config_cameraLaunchGestureSensorStringType" />
+
+  <java-symbol type="string" name="config_networkPolicyNotificationComponent" />
 </resources>
