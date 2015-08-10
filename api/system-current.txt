@@ -27766,6 +27766,19 @@ package android.provider {
     field public static final java.lang.String RAW_CONTACT_BACKUP_ID = "raw_contact_backup_id";
   }
 
+  public static final class ContactsContract.MetadataSyncState implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncStateColumns {
+    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata_sync_state";
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata_sync_state";
+    field public static final android.net.Uri CONTENT_URI;
+  }
+
+  protected static abstract interface ContactsContract.MetadataSyncStateColumns {
+    field public static final java.lang.String ACCOUNT_NAME = "account_name";
+    field public static final java.lang.String ACCOUNT_TYPE = "account_type";
+    field public static final java.lang.String DATA_SET = "data_set";
+    field public static final java.lang.String STATE = "state";
+  }
+
   public static final class ContactsContract.PhoneLookup implements android.provider.BaseColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.PhoneLookupColumns {
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
