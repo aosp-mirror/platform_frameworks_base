@@ -528,7 +528,7 @@ bool AndroidRuntime::parseCompilerRuntimeOption(const char* property,
  *
  * Returns 0 on success.
  */
-int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
+int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
 {
     int result = -1;
     JavaVMInitArgs initArgs;
@@ -733,9 +733,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         }
     }
 
-    /* enable debugging; set suspend=y to pause during VM init */
-    /* use android ADB transport */
-    addOption("-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y");
+    /*
+     * Enable debugging only for apps forked from zygote.
+     * Set suspend=y to pause during VM init and use android ADB transport.
+     */
+    if (zygote) {
+      addOption("-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y");
+    }
 
     parseRuntimeOption("dalvik.vm.lockprof.threshold",
                        lockProfThresholdBuf,
@@ -948,7 +952,7 @@ jstring AndroidRuntime::NewStringLatin1(JNIEnv* env, const char* bytes) {
  * Passes the main function two arguments, the class name and the specified
  * options string.
  */
-void AndroidRuntime::start(const char* className, const Vector<String8>& options)
+void AndroidRuntime::start(const char* className, const Vector<String8>& options, bool zygote)
 {
     ALOGD(">>>>>> START %s uid %d <<<<<<\n",
             className != NULL ? className : "(unknown)", getuid());
@@ -984,7 +988,7 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
     JniInvocation jni_invocation;
     jni_invocation.Init(NULL);
     JNIEnv* env;
-    if (startVm(&mJavaVM, &env) != 0) {
+    if (startVm(&mJavaVM, &env, zygote) != 0) {
         return;
     }
     onVmCreated(env);
