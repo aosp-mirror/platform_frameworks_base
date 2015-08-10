@@ -3757,6 +3757,12 @@ public class AudioManager {
                port.role() == AudioPort.ROLE_SOURCE && (flags & GET_DEVICES_INPUTS) != 0;
     }
 
+    private static boolean checkTypes(AudioDevicePort port) {
+        return AudioDeviceInfo.convertInternalDeviceToDeviceType(port.type()) !=
+                    AudioDeviceInfo.TYPE_UNKNOWN &&
+                port.type() != AudioSystem.DEVICE_IN_BACK_MIC;
+    }
+
     /**
      * Returns an array of {@link AudioDeviceInfo} objects corresponding to the audio devices
      * currently connected to the system and meeting the criteria specified in the
@@ -3779,7 +3785,7 @@ public class AudioManager {
         // figure out how many AudioDeviceInfo we need space for...
         int numRecs = 0;
         for (AudioDevicePort port : ports) {
-            if (checkFlags(port, flags)) {
+            if (checkTypes(port) && checkFlags(port, flags)) {
                 numRecs++;
             }
         }
@@ -3788,7 +3794,7 @@ public class AudioManager {
         AudioDeviceInfo[] deviceList = new AudioDeviceInfo[numRecs];
         int slot = 0;
         for (AudioDevicePort port : ports) {
-            if (checkFlags(port, flags)) {
+            if (checkTypes(port) && checkFlags(port, flags)) {
                 deviceList[slot++] = new AudioDeviceInfo(port);
             }
         }
