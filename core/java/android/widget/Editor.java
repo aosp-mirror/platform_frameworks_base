@@ -3023,7 +3023,7 @@ public class Editor {
                 return;
             }
 
-            final String originalText = editable.toString().substring(spanStart, spanEnd);
+            final String originalText = TextUtils.substring(editable, spanStart, spanEnd);
 
             if (suggestionInfo.suggestionIndex == ADD_TO_DICTIONARY) {
                 Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
