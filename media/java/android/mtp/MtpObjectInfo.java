@@ -256,7 +256,7 @@ public final class MtpObjectInfo {
     /**
      * Builds a new object info instance.
      */
-    public class Builder {
+    public static class Builder {
         private MtpObjectInfo mObjectInfo;
 
         public Builder() {

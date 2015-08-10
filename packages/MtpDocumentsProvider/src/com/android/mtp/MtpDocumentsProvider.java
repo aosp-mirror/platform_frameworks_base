@@ -96,7 +96,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final Identifier rootIdentifier = new Identifier(root.mDeviceId, root.mStorageId);
             final MatrixCursor.RowBuilder builder = cursor.newRow();
             builder.add(Root.COLUMN_ROOT_ID, rootIdentifier.toRootId());
-            builder.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD);
+            builder.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
             builder.add(Root.COLUMN_TITLE, root.mDescription);
             builder.add(
                     Root.COLUMN_DOCUMENT_ID,
@@ -212,6 +212,24 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     @Override
     public void onTrimMemory(int level) {
         mDocumentLoader.clearCache();
+    }
+
+    @Override
+    public String createDocument(String parentDocumentId, String mimeType, String displayName)
+            throws FileNotFoundException {
+        try {
+            final Identifier parentId = Identifier.createFromDocumentId(parentDocumentId);
+            final int objectHandle = mMtpManager.createDocument(
+                    parentId.mDeviceId, parentId.mStorageId, parentId.mObjectHandle, mimeType,
+                    displayName);
+            final String documentId =  new Identifier(parentId.mDeviceId, parentId.mStorageId,
+                   objectHandle).toDocumentId();
+            notifyChildDocumentsChange(parentDocumentId);
+            return documentId;
+        } catch (IOException error) {
+            Log.e(TAG, error.getMessage());
+            throw new FileNotFoundException(error.getMessage());
+        }
     }
 
     void openDevice(int deviceId) throws IOException {

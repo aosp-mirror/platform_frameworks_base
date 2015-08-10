@@ -32,6 +32,7 @@ class MtpDocument {
     private final Date mDateModified;
     private final int mSize;
     private final int mThumbSize;
+    private final boolean mReadOnly;
 
     /**
      * Constructor for root document.
@@ -40,9 +41,10 @@ class MtpDocument {
         this(DUMMY_HANDLE_FOR_ROOT,
              0x3001,  // Directory.
              root.mDescription,
-             null,  // Unknown,
+             null,    // Unknown name.
              (int) Math.min(root.mMaxCapacity - root.mFreeSpace, Integer.MAX_VALUE),
-             0);
+             0,       // Total size.
+             true);   // Writable.
     }
 
     MtpDocument(MtpObjectInfo objectInfo) {
@@ -51,7 +53,8 @@ class MtpDocument {
              objectInfo.getName(),
              objectInfo.getDateModified() != 0 ? new Date(objectInfo.getDateModified()) : null,
              objectInfo.getCompressedSize(),
-             objectInfo.getThumbCompressedSize());
+             objectInfo.getThumbCompressedSize(),
+             objectInfo.getProtectionStatus() != 0);
     }
 
     MtpDocument(int objectHandle,
@@ -59,13 +62,15 @@ class MtpDocument {
                 String name,
                 Date dateModified,
                 int size,
-                int thumbSize) {
+                int thumbSize,
+                boolean readOnly) {
         this.mObjectHandle = objectHandle;
         this.mFormat = format;
         this.mName = name;
         this.mDateModified = dateModified;
         this.mSize = size;
         this.mThumbSize = thumbSize;
+        this.mReadOnly = readOnly;
     }
 
     void addToCursor(Identifier rootIdentifier, MatrixCursor.RowBuilder builder) {
@@ -82,7 +87,7 @@ class MtpDocument {
 
         builder.add(Document.COLUMN_DOCUMENT_ID, identifier.toDocumentId());
         builder.add(Document.COLUMN_DISPLAY_NAME, mName);
-        builder.add(Document.COLUMN_MIME_TYPE, getMimeType());
+        builder.add(Document.COLUMN_MIME_TYPE, formatTypeToMimeType(mFormat));
         builder.add(
                 Document.COLUMN_LAST_MODIFIED,
                 mDateModified != null ? mDateModified.getTime() : null);
@@ -90,9 +95,9 @@ class MtpDocument {
         builder.add(Document.COLUMN_SIZE, mSize);
     }
 
-    private String getMimeType() {
+    static String formatTypeToMimeType(int format) {
         // TODO: Add complete list of mime types.
-        switch (mFormat) {
+        switch (format) {
             case 0x3001:
                 return DocumentsContract.Document.MIME_TYPE_DIR;
             case 0x3009:
@@ -100,7 +105,21 @@ class MtpDocument {
             case 0x3801:
                 return "image/jpeg";
             default:
-                return "";
+                return "application/octet-stream";
+        }
+    }
+
+    static int mimeTypeToFormatType(String mimeType) {
+        // TODO: Add complete list of mime types.
+        switch (mimeType.toLowerCase()) {
+            case Document.MIME_TYPE_DIR:
+                return 0x3001;
+            case "audio/mp3":
+                return 0x3009;
+            case "image/jpeg":
+                return 0x3801;
+            default:
+                return 0x3000;  // Undefined object.
         }
     }
 }
