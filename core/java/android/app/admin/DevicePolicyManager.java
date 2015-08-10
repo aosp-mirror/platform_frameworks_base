@@ -3176,8 +3176,13 @@ public class DevicePolicyManager {
      * Called by a profile or device owner to set the application restrictions for a given target
      * application running in the profile.
      *
-     * <p>The provided {@link Bundle} consists of key-value pairs, where the types of values may be
-     * boolean, int, String, or String[].
+     * <p>The provided {@link Bundle} consists of key-value pairs, where the types of values may be:
+     * <ul>
+     * <li>{@code boolean}
+     * <li>{@code int}
+     * <li>{@code String} or {@code String[]}
+     * <li>From {@link android.os.Build.VERSION_CODES#M}, {@code Bundle} or {@code Bundle[]}
+     * </ul>
      *
      * <p>The application restrictions are only made visible to the target application and the
      * profile or device owner.
