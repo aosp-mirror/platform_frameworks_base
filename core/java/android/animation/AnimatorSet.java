@@ -450,6 +450,9 @@ public final class AnimatorSet extends Animator {
             mReversible = false;
         }
         long delta = startDelay - mStartDelay;
+        if (delta == 0) {
+            return;
+        }
         mStartDelay = startDelay;
         if (!mDependencyDirty) {
             // Dependency graph already constructed, update all the nodes' start/end time
@@ -463,8 +466,11 @@ public final class AnimatorSet extends Animator {
                             DURATION_INFINITE : node.mStartTime + delta;
                     node.mEndTime = node.mEndTime == DURATION_INFINITE ?
                             DURATION_INFINITE : node.mEndTime + delta;
-
                 }
+            }
+            // Update total duration, if necessary.
+            if (mTotalDuration != DURATION_INFINITE) {
+                mTotalDuration += delta;
             }
         }
     }
@@ -857,12 +863,19 @@ public final class AnimatorSet extends Animator {
 
     private void createDependencyGraph() {
         if (!mDependencyDirty) {
-            return;
+            // Check whether any duration of the child animations has changed
+            boolean durationChanged = false;
+            for (int i = 0; i < mNodes.size(); i++) {
+                Animator anim = mNodes.get(i).mAnimation;
+                if (mNodes.get(i).mTotalDuration != anim.getTotalDuration()) {
+                    durationChanged = true;
+                    break;
+                }
+            }
+            if (!durationChanged) {
+                return;
+            }
         }
-
-        // TODO: In addition to checking the dirty flag, we should also cache the duration for
-        // each animator, so that when the animator's duration is changed, we can detect that and
-        // update the dependency graph.
 
         mDependencyDirty = false;
         // Traverse all the siblings and make sure they have all the parents
@@ -916,6 +929,7 @@ public final class AnimatorSet extends Animator {
         long maxEndTime = 0;
         for (int i = 0; i < size; i++) {
             Node node = mNodes.get(i);
+            node.mTotalDuration = node.mAnimation.getTotalDuration();
             if (node.mEndTime == DURATION_INFINITE) {
                 maxEndTime = DURATION_INFINITE;
                 break;
@@ -933,6 +947,16 @@ public final class AnimatorSet extends Animator {
      */
     private void updatePlayTime(Node parent,  ArrayList<Node> visited) {
         if (parent.mChildNodes == null) {
+            if (parent == mRootNode) {
+                // All the animators are in a cycle
+                for (int i = 0; i < mNodes.size(); i++) {
+                    Node node = mNodes.get(i);
+                    if (node != mRootNode) {
+                        node.mStartTime = DURATION_INFINITE;
+                        node.mEndTime = DURATION_INFINITE;
+                    }
+                }
+            }
             return;
         }
 
@@ -943,7 +967,7 @@ public final class AnimatorSet extends Animator {
             int index = visited.indexOf(child);
             if (index >= 0) {
                 // Child has been visited, cycle found. Mark all the nodes in the cycle.
-                for (int j = index; j < visited.size(); i++) {
+                for (int j = index; j < visited.size(); j++) {
                     visited.get(j).mLatestParent = null;
                     visited.get(j).mStartTime = DURATION_INFINITE;
                     visited.get(j).mEndTime = DURATION_INFINITE;
@@ -1057,6 +1081,7 @@ public final class AnimatorSet extends Animator {
         boolean mParentsAdded = false;
         long mStartTime = 0;
         long mEndTime = 0;
+        long mTotalDuration = 0;
 
         /**
          * Constructs the Node with the animation that it encapsulates. A Node has no
