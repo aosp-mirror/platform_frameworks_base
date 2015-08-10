@@ -29,6 +29,7 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -8943,17 +8944,29 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void moveActivityToStack(IBinder token, int stackId) throws RemoteException {
-        synchronized(this) {
-            final long origId = Binder.clearCallingIdentity();
+        if (stackId == HOME_STACK_ID) {
+            throw new IllegalArgumentException(
+                    "moveTaskToStack: Attempt to move token " + token + " to home stack");
+        }
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
             try {
                 final ActivityRecord r = ActivityRecord.forTokenLocked(token);
                 if (r == null) {
                     throw new IllegalArgumentException(
                             "moveActivityToStack: No activity record matching token=" + token);
                 }
-                moveTaskToStack(r.task.taskId, stackId, true /*toTop*/);
+                if (DEBUG_STACK) Slog.d(TAG_STACK, "moveActivityToStack: moving r=" + r
+                        + " to stackId=" + stackId);
+                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP);
+                if (mFocusedActivity != r) {
+                    setFocusedActivityLocked(r, "moveActivityToStack");
+                } else {
+                    mStackSupervisor.setFocusedStack(r, "moveActivityToStack");
+                }
+                mStackSupervisor.resumeTopActivitiesLocked(r.task.stack, null, null);
             } finally {
-                Binder.restoreCallingIdentity(origId);
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }
@@ -8963,8 +8976,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "moveTaskToStack()");
         if (stackId == HOME_STACK_ID) {
-            Slog.e(TAG, "moveTaskToStack: Attempt to move task " + taskId + " to home stack",
-                    new RuntimeException("here").fillInStackTrace());
+            throw new IllegalArgumentException(
+                    "moveTaskToStack: Attempt to move task " + taskId + " to home stack");
         }
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
