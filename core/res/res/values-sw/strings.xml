@@ -229,7 +229,7 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Binafsi"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Kazini"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Anwani"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"fikia anwani zako"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ifikie anwani zako"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Mahali"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"fikia mahali kilipo kifaa hiki"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenda"</string>
