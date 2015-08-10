@@ -271,7 +271,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     private AccessibilityEvent createEventForHost(int eventType) {
         final AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
-        onInitializeAccessibilityEvent(mView, event);
+        mView.onInitializeAccessibilityEvent(event);
         return event;
     }
 
@@ -333,7 +333,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     private AccessibilityNodeInfo createNodeForHost() {
         final AccessibilityNodeInfo node = AccessibilityNodeInfo.obtain(mView);
-        onInitializeAccessibilityNodeInfo(mView, node);
+        mView.onInitializeAccessibilityNodeInfo(node);
 
         // Add the virtual descendants.
         if (mTempArray == null) {
@@ -465,7 +465,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
     }
 
     private boolean performActionForHost(int action, Bundle arguments) {
-        return performAccessibilityAction(mView, action, arguments);
+        return mView.performAccessibilityAction(action, arguments);
     }
 
     private boolean performActionForChild(int virtualViewId, int action, Bundle arguments) {
