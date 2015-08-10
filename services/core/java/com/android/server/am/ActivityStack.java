@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
@@ -2671,21 +2672,28 @@ final class ActivityStack {
             ActivityRecord next = topRunningActivityLocked(null);
             final String myReason = reason + " adjustFocus";
             if (next != r) {
-                final TaskRecord task = r.task;
-                if (r.frontOfTask && task == topTask() && task.isOverHomeStack()) {
-                    // For non-fullscreen stack, we want to move the focus to the next visible
-                    // stack to prevent the home screen from moving to the top and obscuring
-                    // other visible stacks.
-                    if (!mFullscreen
-                            && adjustFocusToNextVisibleStackLocked(null, myReason)) {
-                        return;
-                    }
-                    // Move the home stack to the top if this stack is fullscreen or there is no
-                    // other visible stack.
-                    if (mStackSupervisor.moveHomeStackTaskToTop(
-                            task.getTaskToReturnTo(), myReason)) {
-                        // Activity focus was already adjusted. Nothing else to do...
-                        return;
+                if (next != null && mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                    // For freeform stack we always keep the focus within the stack as long as
+                    // there is a running activity in the stack that we can adjust focus to.
+                    mService.setFocusedActivityLocked(next, myReason);
+                    return;
+                } else {
+                    final TaskRecord task = r.task;
+                    if (r.frontOfTask && task == topTask() && task.isOverHomeStack()) {
+                        // For non-fullscreen stack, we want to move the focus to the next visible
+                        // stack to prevent the home screen from moving to the top and obscuring
+                        // other visible stacks.
+                        if (!mFullscreen
+                                && adjustFocusToNextVisibleStackLocked(null, myReason)) {
+                            return;
+                        }
+                        // Move the home stack to the top if this stack is fullscreen or there is no
+                        // other visible stack.
+                        if (mStackSupervisor.moveHomeStackTaskToTop(
+                                task.getTaskToReturnTo(), myReason)) {
+                            // Activity focus was already adjusted. Nothing else to do...
+                            return;
+                        }
                     }
                 }
             }
