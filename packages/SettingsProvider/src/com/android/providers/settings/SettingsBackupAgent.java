@@ -148,7 +148,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private WifiManager mWfm;
     private static String mWifiConfigFile;
 
+    // Chain of asynchronous operations used when rewriting the wifi supplicant config file
+    WifiDisableRunnable mWifiDisable = null;
     WifiRestoreRunnable mWifiRestore = null;
+    int mRetainedWifiState; // used only during config file rewrite
 
     // Class for capturing a network definition from the wifi supplicant config file
     static class Network {
@@ -407,9 +410,47 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         writeNewChecksums(stateChecksums, newState);
     }
 
+    class WifiDisableRunnable implements Runnable {
+        final WifiRestoreRunnable mNextPhase;
+
+        public WifiDisableRunnable(WifiRestoreRunnable next) {
+            mNextPhase = next;
+        }
+
+        @Override
+        public void run() {
+            if (DEBUG_BACKUP) {
+                Log.v(TAG, "Disabling wifi during restore");
+            }
+            final ContentResolver cr = getContentResolver();
+            final int scanAlways = Settings.Global.getInt(cr,
+                    Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
+            final int retainedWifiState = enableWifi(false);
+            if (scanAlways != 0) {
+                Settings.Global.putInt(cr,
+                        Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
+            }
+
+            // Tell the final stage how to clean up after itself
+            mNextPhase.setPriorState(retainedWifiState, scanAlways);
+
+            // And run it after a modest pause to give broadcasts and content
+            // observers time an opportunity to run on this looper thread, so
+            // that the wifi stack actually goes all the way down.
+            new Handler(getMainLooper()).postDelayed(mNextPhase, 2500);
+        }
+    }
+
     class WifiRestoreRunnable implements Runnable {
         private byte[] restoredSupplicantData;
         private byte[] restoredWifiConfigFile;
+        private int retainedWifiState;  // provided by disable stage
+        private int scanAlways; // provided by disable stage
+
+        void setPriorState(int retainedState, int always) {
+            retainedWifiState = retainedState;
+            scanAlways = always;
+        }
 
         void incorporateWifiSupplicant(BackupDataInput data) {
             restoredSupplicantData = new byte[data.getDataSize()];
@@ -437,20 +478,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         public void run() {
             if (restoredSupplicantData != null || restoredWifiConfigFile != null) {
                 if (DEBUG_BACKUP) {
-                    Log.v(TAG, "Starting deferred restore of wifi data");
+                    Log.v(TAG, "Applying restored wifi data");
                 }
-                final ContentResolver cr = getContentResolver();
-                final int scanAlways = Settings.Global.getInt(cr,
-                        Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
-                final int retainedWifiState = enableWifi(false);
-                if (scanAlways != 0) {
-                    Settings.Global.putInt(cr,
-                            Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
-                }
-                // !!! Give the wifi stack a moment to quiesce.  We've observed the
-                // response to disabling WIFI_SCAN_ALWAYS_AVAILABLE taking more
-                // than 1500ms, so we wait a generous 2500 here before proceeding.
-                try { Thread.sleep(2500); } catch (InterruptedException e) {}
                 if (restoredSupplicantData != null) {
                     restoreWifiSupplicant(FILE_WIFI_SUPPLICANT,
                             restoredSupplicantData, restoredSupplicantData.length);
@@ -465,7 +494,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
                 // restore the previous WIFI state.
                 if (scanAlways != 0) {
-                    Settings.Global.putInt(cr,
+                    Settings.Global.putInt(getContentResolver(),
                             Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, scanAlways);
                 }
                 enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
@@ -479,6 +508,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     void initWifiRestoreIfNecessary() {
         if (mWifiRestore == null) {
             mWifiRestore = new WifiRestoreRunnable();
+            mWifiDisable = new WifiDisableRunnable(mWifiRestore);
         }
     }
 
@@ -518,13 +548,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
 
         // If we have wifi data to restore, post a runnable to perform the
-        // bounce-and-update operation a little ways in the future.
+        // bounce-and-update operation a little ways in the future.  The
+        // 'disable' runnable brings down the stack and remembers its state,
+        // and in turn schedules the 'restore' runnable to do the rewrite
+        // and cleanup operations.
         if (mWifiRestore != null) {
             long wifiBounceDelayMillis = Settings.Global.getLong(
                     getContentResolver(),
                     Settings.Global.WIFI_BOUNCE_DELAY_OVERRIDE_MS,
                     WIFI_BOUNCE_DELAY_MILLIS);
-            new Handler(getMainLooper()).postDelayed(mWifiRestore, wifiBounceDelayMillis);
+            new Handler(getMainLooper()).postDelayed(mWifiDisable, wifiBounceDelayMillis);
         }
     }
 
