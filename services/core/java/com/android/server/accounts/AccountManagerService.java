@@ -2604,7 +2604,8 @@ public class AccountManagerService
             // Prune the list down to just the requested type.
             visibleAccountTypes = new ArrayList<>();
             visibleAccountTypes.add(type);
-        } // else aggregate all the visible accounts (it won't matter if the list is empty).
+        } // else aggregate all the visible accounts (it won't matter if the
+          // list is empty).
 
         long identityToken = clearCallingIdentity();
         try {
@@ -3788,8 +3789,15 @@ public class AccountManagerService
     private List<String> getTypesForCaller(
             int callingUid, int userId, boolean isOtherwisePermitted) {
         List<String> managedAccountTypes = new ArrayList<>();
+        long identityToken = Binder.clearCallingIdentity();
+        Collection<RegisteredServicesCache.ServiceInfo<AuthenticatorDescription>> serviceInfos;
+        try {
+            serviceInfos = mAuthenticatorCache.getAllServices(userId);
+        } finally {
+            Binder.restoreCallingIdentity(identityToken);
+        }
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
-                mAuthenticatorCache.getAllServices(userId)) {
+                serviceInfos) {
             final int sigChk = mPackageManager.checkSignatures(serviceInfo.uid, callingUid);
             if (isOtherwisePermitted || sigChk == PackageManager.SIGNATURE_MATCH) {
                 managedAccountTypes.add(serviceInfo.type.type);
