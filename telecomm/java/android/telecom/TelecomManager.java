@@ -393,6 +393,22 @@ public class TelecomManager {
             "android.telecom.extra.NOTIFICATION_PHONE_NUMBER";
 
     /**
+     * The intent to clear missed calls.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT =
+            "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
+
+    /**
+     * The intent to call back a missed call.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_CALL_BACK_INTENT =
+            "android.telecom.extra.CALL_BACK_INTENT";
+
+    /**
      * The following 4 constants define how properties such as phone numbers and names are
      * displayed to the user.
      */
