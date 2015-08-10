@@ -196,17 +196,13 @@ public final class BidiFormatter {
             return this;
         }
 
-        private static BidiFormatter getDefaultInstanceFromContext(boolean isRtlContext) {
-            return isRtlContext ? DEFAULT_RTL_INSTANCE : DEFAULT_LTR_INSTANCE;
-        }
-
         /**
          * @return A BidiFormatter with the specified options.
          */
         public BidiFormatter build() {
             if (mFlags == DEFAULT_FLAGS &&
                     mTextDirectionHeuristic == DEFAULT_TEXT_DIRECTION_HEURISTIC) {
-                return getDefaultInstanceFromContext(mIsRtlContext);
+                return BidiFormatter.getDefaultInstanceFromContext(mIsRtlContext);
             }
             return new BidiFormatter(mIsRtlContext, mFlags, mTextDirectionHeuristic);
         }
@@ -233,27 +229,33 @@ public final class BidiFormatter {
     /**
      * Factory for creating an instance of BidiFormatter for the default locale directionality.
      *
+     * This does not create any new objects, and returns already existing static instances.
+     *
      */
     public static BidiFormatter getInstance() {
-        return new Builder().build();
+        return getDefaultInstanceFromContext(isRtlLocale(Locale.getDefault()));
     }
 
     /**
      * Factory for creating an instance of BidiFormatter given the context directionality.
      *
+     * This does not create any new objects, and returns already existing static instances.
+     *
      * @param rtlContext Whether the context directionality is RTL.
      */
     public static BidiFormatter getInstance(boolean rtlContext) {
-        return new Builder(rtlContext).build();
+        return getDefaultInstanceFromContext(rtlContext);
     }
 
     /**
      * Factory for creating an instance of BidiFormatter given the context locale.
      *
+     * This does not create any new objects, and returns already existing static instances.
+     *
      * @param locale The context locale.
      */
     public static BidiFormatter getInstance(Locale locale) {
-        return new Builder(locale).build();
+        return getDefaultInstanceFromContext(isRtlLocale(locale));
     }
 
     /**
@@ -438,6 +440,10 @@ public final class BidiFormatter {
      */
     public String unicodeWrap(String str) {
         return unicodeWrap(str, mDefaultTextDirectionHeuristic, true /* isolate */);
+    }
+
+    private static BidiFormatter getDefaultInstanceFromContext(boolean isRtlContext) {
+        return isRtlContext ? DEFAULT_RTL_INSTANCE : DEFAULT_LTR_INSTANCE;
     }
 
     /**
