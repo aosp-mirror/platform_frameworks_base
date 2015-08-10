@@ -6494,6 +6494,22 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
+            int[] verticalSizeConfigurations) {
+        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Report configuration: " + token + " "
+                + horizontalSizeConfiguration + " " + verticalSizeConfigurations);
+        synchronized (this) {
+            ActivityRecord record = ActivityRecord.isInStackLocked(token);
+            if (record == null) {
+                throw new IllegalArgumentException("reportSizeConfigurations: ActivityRecord not "
+                        + "found for: " + token);
+            }
+            record.setSizeConfigurations(horizontalSizeConfiguration,
+                    verticalSizeConfigurations);
+        }
+    }
+
+    @Override
     public final void backgroundResourcesReleased(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {

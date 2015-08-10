@@ -121,6 +121,8 @@ public interface IActivityManager extends IInterface {
             PersistableBundle persistentState, CharSequence description) throws RemoteException;
     public void activitySlept(IBinder token) throws RemoteException;
     public void activityDestroyed(IBinder token) throws RemoteException;
+    public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
+            int[] verticalSizeConfigurations) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
     public List<IAppTask> getAppTasks(String callingPackage) throws RemoteException;
@@ -884,4 +886,5 @@ public interface IActivityManager extends IInterface {
     int POSITION_TASK_IN_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 342;
     int GET_ACTIVITY_STACK_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 343;
     int MOVE_ACTIVITY_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 344;
+    int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
 }

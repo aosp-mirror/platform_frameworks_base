@@ -82,6 +82,15 @@ static struct sparsearray_offsets_t
     jmethodID put;
 } gSparseArrayOffsets;
 
+static struct configuration_offsets_t
+{
+    jclass classObject;
+    jmethodID constructor;
+    jfieldID mSmallestScreenWidthDpOffset;
+    jfieldID mScreenWidthDpOffset;
+    jfieldID mScreenHeightDpOffset;
+} gConfigurationOffsets;
+
 jclass g_stringClass = NULL;
 
 // ----------------------------------------------------------------------------
@@ -591,6 +600,56 @@ static jobjectArray android_content_AssetManager_getLocales(JNIEnv* env, jobject
     }
 
     return result;
+}
+
+static jobject constructConfigurationObject(JNIEnv* env, const ResTable_config& config) {
+    jobject result = env->NewObject(gConfigurationOffsets.classObject,
+            gConfigurationOffsets.constructor);
+    if (result == NULL) {
+        return NULL;
+    }
+
+    env->SetIntField(result, gConfigurationOffsets.mSmallestScreenWidthDpOffset,
+            config.smallestScreenWidthDp);
+    env->SetIntField(result, gConfigurationOffsets.mScreenWidthDpOffset, config.screenWidthDp);
+    env->SetIntField(result, gConfigurationOffsets.mScreenHeightDpOffset, config.screenHeightDp);
+
+    return result;
+}
+
+static jobjectArray getSizeConfigurationsInternal(JNIEnv* env,
+        const Vector<ResTable_config>& configs) {
+    const int N = configs.size();
+    jobjectArray result = env->NewObjectArray(N, gConfigurationOffsets.classObject, NULL);
+    if (result == NULL) {
+        return NULL;
+    }
+
+    for (int i=0; i<N; i++) {
+        jobject config = constructConfigurationObject(env, configs[i]);
+        if (config == NULL) {
+            env->DeleteLocalRef(result);
+            return NULL;
+        }
+
+        env->SetObjectArrayElement(result, i, config);
+        env->DeleteLocalRef(config);
+    }
+
+    return result;
+}
+
+static jobjectArray android_content_AssetManager_getSizeConfigurations(JNIEnv* env, jobject clazz) {
+    AssetManager* am = assetManagerForJavaObject(env, clazz);
+    if (am == NULL) {
+        return NULL;
+    }
+
+    const ResTable& res(am->getResources());
+    Vector<ResTable_config> configs;
+    res.getConfigurations(&configs, false /* ignoreMipmap */, true /* ignoreAndroidPackage */);
+
+    return getSizeConfigurationsInternal(env, configs);
 }
 
 static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject clazz,
@@ -2091,6 +2150,8 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_setLocale },
     { "getLocales",      "()[Ljava/lang/String;",
         (void*) android_content_AssetManager_getLocales },
+    { "getSizeConfigurations", "()[Landroid/content/res/Configuration;",
+        (void*) android_content_AssetManager_getSizeConfigurations },
     { "setConfiguration", "(IILjava/lang/String;IIIIIIIIIIIIII)V",
         (void*) android_content_AssetManager_setConfiguration },
     { "getResourceIdentifier","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
@@ -2202,6 +2263,17 @@ int register_android_content_AssetManager(JNIEnv* env)
                                                        "<init>", "()V");
     gSparseArrayOffsets.put = GetMethodIDOrDie(env, gSparseArrayOffsets.classObject, "put",
                                                "(ILjava/lang/Object;)V");
+
+    jclass configurationClass = FindClassOrDie(env, "android/content/res/Configuration");
+    gConfigurationOffsets.classObject = MakeGlobalRefOrDie(env, configurationClass);
+    gConfigurationOffsets.constructor = GetMethodIDOrDie(env, configurationClass,
+            "<init>", "()V");
+    gConfigurationOffsets.mSmallestScreenWidthDpOffset = GetFieldIDOrDie(env, configurationClass,
+            "smallestScreenWidthDp", "I");
+    gConfigurationOffsets.mScreenWidthDpOffset = GetFieldIDOrDie(env, configurationClass,
+            "screenWidthDp", "I");
+    gConfigurationOffsets.mScreenHeightDpOffset = GetFieldIDOrDie(env, configurationClass,
+            "screenHeightDp", "I");
 
     return RegisterMethodsOrDie(env, "android/content/res/AssetManager", gAssetManagerMethods,
                                 NELEM(gAssetManagerMethods));

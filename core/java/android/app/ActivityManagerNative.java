@@ -107,8 +107,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int userId) {
         try {
             getDefault().broadcastIntent(
-                null, intent, null, null, Activity.RESULT_OK, null, null,
-                null /*permission*/, appOp, null, false, true, userId);
+                    null, intent, null, null, Activity.RESULT_OK, null, null,
+                    null /*permission*/, appOp, null, false, true, userId);
         } catch (RemoteException ex) {
         }
     }
@@ -2651,6 +2651,24 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int stackId = data.readInt();
             moveActivityToStack(token, stackId);
             reply.writeNoException();
+            return true;
+        }
+        case REPORT_SIZE_CONFIGURATIONS: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            int horizontalSize = data.readInt();
+            int[] horizontal = null;
+            if (horizontalSize > 0) {
+                horizontal = new int[horizontalSize];
+                data.readIntArray(horizontal);
+            }
+            int[] vertical = null;
+            int verticalSize = data.readInt();
+            if (verticalSize > 0) {
+                vertical = new int[verticalSize];
+                data.readIntArray(vertical);
+            }
+            reportSizeConfigurations(token, horizontal, vertical);
             return true;
         }
         }
@@ -6144,6 +6162,31 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return stackId;
+    }
+
+    @Override
+    public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
+            int[] verticalSizeConfigurations) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        if (horizontalSizeConfiguration == null) {
+            data.writeInt(0);
+        } else {
+            data.writeInt(horizontalSizeConfiguration.length);
+            data.writeIntArray(horizontalSizeConfiguration);
+        }
+        if (verticalSizeConfigurations == null) {
+            data.writeInt(0);
+        } else {
+            data.writeInt(verticalSizeConfigurations.length);
+            data.writeIntArray(verticalSizeConfigurations);
+        }
+        mRemote.transact(REPORT_SIZE_CONFIGURATIONS, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     private IBinder mRemote;

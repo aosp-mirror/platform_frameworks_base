@@ -82,6 +82,7 @@ import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Pair;
@@ -2504,6 +2505,7 @@ public final class ActivityThread {
 
         if (a != null) {
             r.createdConfig = new Configuration(mConfiguration);
+            reportSizeConfigurations(r);
             Bundle oldState = r.state;
             handleResumeActivity(r.token, false, r.isForward,
                     !r.activity.mFinished && !r.startsNotResumed);
@@ -2561,6 +2563,42 @@ public final class ActivityThread {
                 // Ignore
             }
         }
+    }
+
+    private void reportSizeConfigurations(ActivityClientRecord r) {
+        Configuration[] configurations = r.activity.getResources().getSizeConfigurations();
+        if (configurations == null) {
+            return;
+        }
+        IntArray horizontal = new IntArray();
+        IntArray vertical = new IntArray();
+        for (int i = configurations.length - 1; i >= 0; i--) {
+            Configuration config = configurations[i];
+            if (config.screenHeightDp != Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+                vertical.add(config.screenHeightDp);
+            }
+            if (config.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+                horizontal.add(config.screenWidthDp);
+            }
+            if (config.smallestScreenWidthDp != Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
+                vertical.add(config.smallestScreenWidthDp);
+                horizontal.add(config.smallestScreenWidthDp);
+            }
+        }
+        int[] horizontalArray = null;
+        if (horizontal.size() > 0) {
+            horizontalArray = horizontal.toArray();
+        }
+        int[] verticalArray = null;
+        if (vertical.size() > 0) {
+            verticalArray = vertical.toArray();
+        }
+        try {
+            ActivityManagerNative.getDefault().reportSizeConfigurations(r.token, horizontalArray,
+                    verticalArray);
+        } catch (RemoteException ex) {
+        }
+
     }
 
     private void deliverNewIntents(ActivityClientRecord r, List<ReferrerIntent> intents) {

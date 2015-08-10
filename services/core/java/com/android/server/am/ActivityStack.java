@@ -3905,25 +3905,7 @@ final class ActivityStack {
         r.configuration = newConfig;
         r.taskConfigOverride = taskConfig;
 
-        // Determine what has changed.  May be nothing, if this is a config
-        // that has come back from the app after going idle.  In that case
-        // we just want to leave the official config object now in the
-        // activity and do nothing else.
-        int taskChanges = oldTaskOverride.diff(taskConfig);
-        if (taskChanges == 0) {
-            // {@link Configuration#diff} doesn't catch changes from unset values.
-            // Check for changes we care about.
-            if (oldTaskOverride.orientation != taskConfig.orientation) {
-                taskChanges |= ActivityInfo.CONFIG_ORIENTATION;
-            }
-            if (oldTaskOverride.screenHeightDp != taskConfig.screenHeightDp
-                    || oldTaskOverride.screenWidthDp != taskConfig.screenWidthDp) {
-                taskChanges |= ActivityInfo.CONFIG_SCREEN_SIZE;
-            }
-            if (oldTaskOverride.smallestScreenWidthDp != taskConfig.smallestScreenWidthDp) {
-                taskChanges |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
-            }
-        }
+        int taskChanges = getTaskConfigurationChanges(r, taskConfig, oldTaskOverride);
         final int changes = oldConfig.diff(newConfig) | taskChanges;
         if (changes == 0 && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
@@ -4001,6 +3983,72 @@ final class ActivityStack {
         r.stopFreezingScreenLocked(false);
 
         return true;
+    }
+
+    private int getTaskConfigurationChanges(ActivityRecord record, Configuration taskConfig,
+            Configuration oldTaskOverride) {
+        // Determine what has changed.  May be nothing, if this is a config
+        // that has come back from the app after going idle.  In that case
+        // we just want to leave the official config object now in the
+        // activity and do nothing else.
+        int taskChanges = oldTaskOverride.diff(taskConfig);
+        // We don't want to use size changes if they don't cross boundaries that are important to
+        // the app.
+        if ((taskChanges & ActivityInfo.CONFIG_SCREEN_SIZE) != 0) {
+            final boolean crosses = record.crossesHorizontalSizeThreshold(
+                    oldTaskOverride.screenWidthDp, taskConfig.screenWidthDp)
+                    || record.crossesVerticalSizeThreshold(
+                    oldTaskOverride.screenHeightDp, taskConfig.screenHeightDp);
+            if (!crosses) {
+                taskChanges &= ~ActivityInfo.CONFIG_SCREEN_SIZE;
+            }
+        }
+        if ((taskChanges & ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
+            final int oldSmallest = oldTaskOverride.smallestScreenWidthDp;
+            final int newSmallest = taskConfig.smallestScreenWidthDp;
+            final boolean crosses = record.crossesHorizontalSizeThreshold(oldSmallest, newSmallest)
+                    || record.crossesVerticalSizeThreshold(oldSmallest, newSmallest);
+            if (!crosses) {
+                taskChanges &= ~ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+            }
+        }
+        return catchConfigChangesFromUnset(taskConfig, oldTaskOverride, taskChanges);
+    }
+
+    private static int catchConfigChangesFromUnset(Configuration taskConfig,
+            Configuration oldTaskOverride, int taskChanges) {
+        if (taskChanges == 0) {
+            // {@link Configuration#diff} doesn't catch changes from unset values.
+            // Check for changes we care about.
+            if (oldTaskOverride.orientation != taskConfig.orientation) {
+                taskChanges |= ActivityInfo.CONFIG_ORIENTATION;
+            }
+            // We want to explicitly track situations where the size configuration goes from
+            // undefined to defined. We don't care about crossing the threshold in that case,
+            // because there is no threshold.
+            final int oldHeight = oldTaskOverride.screenHeightDp;
+            final int newHeight = taskConfig.screenHeightDp;
+            final int undefinedHeight = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+            if ((oldHeight == undefinedHeight && newHeight != undefinedHeight)
+                    || (oldHeight != undefinedHeight && newHeight == undefinedHeight)) {
+                taskChanges |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            }
+            final int oldWidth = oldTaskOverride.screenWidthDp;
+            final int newWidth = taskConfig.screenWidthDp;
+            final int undefinedWidth = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+            if ((oldWidth == undefinedWidth && newWidth != undefinedWidth)
+                    || (oldWidth != undefinedWidth && newWidth == undefinedWidth)) {
+                taskChanges |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            }
+            final int oldSmallest = oldTaskOverride.smallestScreenWidthDp;
+            final int newSmallest = taskConfig.smallestScreenWidthDp;
+            final int undefinedSmallest = Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+            if ((oldSmallest == undefinedSmallest && newSmallest != undefinedSmallest)
+                    || (oldSmallest != undefinedSmallest && newSmallest == undefinedSmallest)) {
+                taskChanges |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+            }
+        }
+        return taskChanges;
     }
 
     private boolean relaunchActivityLocked(ActivityRecord r, int changes, boolean andResume) {

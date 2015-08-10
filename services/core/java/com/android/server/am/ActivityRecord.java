@@ -184,6 +184,12 @@ final class ActivityRecord {
     boolean mLaunchTaskBehind; // this activity is actively being launched with
         // ActivityOptions.setLaunchTaskBehind, will be cleared once launch is completed.
 
+    // These configurations are collected from application's resources based on size-sensitive
+    // qualifiers. For example, layout-w800dp will be added to mHorizontalSizeConfigurations as 800
+    // and drawable-sw400dp will be added to both as 400.
+    private int[] mVerticalSizeConfigurations;
+    private int[] mHorizontalSizeConfigurations;
+
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
@@ -325,6 +331,49 @@ final class ActivityRecord {
         if (connections != null) {
             pw.print(prefix); pw.print("connections="); pw.println(connections);
         }
+    }
+
+    public boolean crossesHorizontalSizeThreshold(int firstDp, int secondDp) {
+        return crossesSizeThreshold(mHorizontalSizeConfigurations, firstDp, secondDp);
+    }
+
+    public boolean crossesVerticalSizeThreshold(int firstDp, int secondDp) {
+        return crossesSizeThreshold(mVerticalSizeConfigurations, firstDp, secondDp);
+    }
+
+    /**
+     * The purpose of this method is to decide whether the activity needs to be relaunched upon
+     * changing its size. In most cases the activities don't need to be relaunched, if the resize
+     * is small, all the activity content has to do is relayout itself within new bounds. There are
+     * cases however, where the activity's content would be completely changed in the new size and
+     * the full relaunch is required.
+     *
+     * The activity will report to us vertical and horizontal thresholds after which a relaunch is
+     * required. These thresholds are collected from the application resource qualifiers. For
+     * example, if application has layout-w600dp resource directory, then it needs a relaunch when
+     * we resize from width of 650dp to 550dp, as it crosses the 600dp threshold. However, if
+     * it resizes width from 620dp to 700dp, it won't be relaunched as it stays on the same side
+     * of the threshold.
+     */
+    private static boolean crossesSizeThreshold(int[] thresholds, int firstDp,
+            int secondDp) {
+        if (thresholds == null) {
+            return false;
+        }
+        for (int i = thresholds.length - 1; i >= 0; i--) {
+            final int threshold = thresholds[i];
+            if ((firstDp < threshold && secondDp >= threshold)
+                    || (firstDp >= threshold && secondDp < threshold)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setSizeConfigurations(int[] horizontalSizeConfiguration,
+            int[] verticalSizeConfigurations) {
+        mHorizontalSizeConfigurations = horizontalSizeConfiguration;
+        mVerticalSizeConfigurations = verticalSizeConfigurations;
     }
 
     static class Token extends IApplicationToken.Stub {
