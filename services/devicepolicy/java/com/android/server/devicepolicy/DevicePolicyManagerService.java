@@ -4523,12 +4523,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
             try {
                 mUserManager.setUserEnabled(userId);
+                UserInfo parent = mUserManager.getProfileParent(userId);
                 Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
                 intent.putExtra(Intent.EXTRA_USER, new UserHandle(userHandle));
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
                         Intent.FLAG_RECEIVER_FOREGROUND);
-                // TODO This should send to parent of profile (which is always owner at the moment).
-                mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+                mContext.sendBroadcastAsUser(intent, new UserHandle(parent.id));
             } finally {
                 restoreCallingIdentity(id);
             }
