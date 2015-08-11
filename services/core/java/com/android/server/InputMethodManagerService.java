@@ -32,7 +32,6 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
-import com.android.server.pm.UserManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.wm.WindowManagerService;
 
@@ -134,7 +133,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 

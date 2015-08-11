@@ -26,7 +26,6 @@ import com.android.internal.view.InputBindResult;
 
 import android.annotation.RequiresPermission;
 import android.content.Context;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
