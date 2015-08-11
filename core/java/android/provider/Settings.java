@@ -616,7 +616,33 @@ public final class Settings {
     /**
      * Activity Action: Show screen for controlling which apps can ignore battery optimizations.
      * <p>
-     * Input: Optionally, the Intent's data URI specifies the application package name
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * <p>
+     * You can use {@link android.os.PowerManager#isIgnoringBatteryOptimizations
+     * PowerManager.isIgnoringBatteryOptimizations()} to determine if an application is
+     * already ignoring optimizations.  You can use
+     * {@link #ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS} to ask the user to put you
+     * on this list.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS =
+            "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS";
+
+    /**
+     * Activity Action: Ask the user to allow an to ignore battery optimizations (that is,
+     * put them on the whitelist of apps shown by
+     * {@link #ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}).  For an app to use this, it also
+     * must hold the {@link android.Manifest.permission#REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}
+     * permission.
+     * <p><b>Note:</b> most applications should <em>not</em> use this; there are many facilities
+     * provided by the platform for applications to operate correctly in the various power
+     * saving mode.  This is only for unusual applications that need to deeply control their own
+     * execution, at the potential expense of the user's battery life.  Note that these applications
+     * greatly run the risk of showing to the user has how power consumers on their device.</p>
+     * <p>
+     * Input: The Intent's data URI must specify the application package name
      * to be shown, with the "package" scheme.  That is "package:com.my.app".
      * <p>
      * Output: Nothing.
@@ -626,8 +652,8 @@ public final class Settings {
      * already ignoring optimizations.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS =
-            "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS";
+    public static final String ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS =
+            "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
 
     /**
      * @hide
