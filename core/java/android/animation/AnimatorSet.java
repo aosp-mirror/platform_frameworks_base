@@ -415,7 +415,8 @@ public final class AnimatorSet extends Animator {
     public boolean isRunning() {
         int size = mNodes.size();
         for (int i = 0; i < size; i++) {
-            if (mNodes.get(i).mAnimation.isRunning()) {
+            Node node = mNodes.get(i);
+            if (node != mRootNode && node.mAnimation.isRunning()) {
                 return true;
             }
         }
@@ -512,7 +513,9 @@ public final class AnimatorSet extends Animator {
         int size = mNodes.size();
         for (int i = 0; i < size; i++) {
             Node node = mNodes.get(i);
-            node.mAnimation.setupStartValues();
+            if (node != mRootNode) {
+                node.mAnimation.setupStartValues();
+            }
         }
     }
 
@@ -521,7 +524,9 @@ public final class AnimatorSet extends Animator {
         int size = mNodes.size();
         for (int i = 0; i < size; i++) {
             Node node = mNodes.get(i);
-            node.mAnimation.setupEndValues();
+            if (node != mRootNode) {
+                node.mAnimation.setupEndValues();
+            }
         }
     }
 
@@ -536,7 +541,9 @@ public final class AnimatorSet extends Animator {
                 int size = mNodes.size();
                 for (int i = 0; i < size; i++) {
                     Node node = mNodes.get(i);
-                    node.mAnimation.pause();
+                    if (node != mRootNode) {
+                        node.mAnimation.pause();
+                    }
                 }
             }
         }
@@ -553,7 +560,9 @@ public final class AnimatorSet extends Animator {
                 int size = mNodes.size();
                 for (int i = 0; i < size; i++) {
                     Node node = mNodes.get(i);
-                    node.mAnimation.resume();
+                    if (node != mRootNode) {
+                        node.mAnimation.resume();
+                    }
                 }
             }
         }
