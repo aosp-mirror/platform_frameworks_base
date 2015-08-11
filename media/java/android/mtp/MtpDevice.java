@@ -18,6 +18,7 @@ package android.mtp;
 
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
+import android.os.ParcelFileDescriptor;
 
 /**
  * This class represents an MTP or PTP device connected on the USB host bus. An application can
@@ -235,6 +236,20 @@ public final class MtpDevice {
         return native_import_file(objectHandle, destPath);
     }
 
+    /**
+     * Copies the data for an object to a file descriptor.
+     * This call may block for an arbitrary amount of time depending on the size
+     * of the data and speed of the devices. The file descriptor is not closed
+     * on completion, and must be done by the caller.
+     *
+     * @param objectHandle handle of the object to read
+     * @param descriptor file descriptor to write the data to for the file transfer.
+     * @return true if the file transfer succeeds
+     */
+    public boolean importFile(int objectHandle, ParcelFileDescriptor descriptor) {
+        return native_import_file(objectHandle, descriptor.getFd());
+    }
+
     // used by the JNI code
     private long mNativeContext;
 
@@ -251,4 +266,5 @@ public final class MtpDevice {
     private native long native_get_parent(int objectHandle);
     private native long native_get_storage_id(int objectHandle);
     private native boolean native_import_file(int objectHandle, String destPath);
+    private native boolean native_import_file(int objectHandle, int fd);
 }
