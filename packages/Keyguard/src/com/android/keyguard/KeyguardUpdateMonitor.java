@@ -118,7 +118,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Mode in which we wake up the device, but play the normal dismiss animation. Active when we
      * acquire a fingerprint pulsing in doze mode.
      * */
-    private static final int FP_WAKE_WAKE_TO_BOUNCER = 2;
+    private static final int FP_WAKE_TO_BOUNCER = 2;
+
+    /**
+     * Mode in which we only wake up the device, and keyguard was not showing when we acquired a
+     * fingerprint.
+     * */
+    private static final int FP_ONLY_WAKE = 3;
 
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
@@ -401,14 +407,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             mWakeLock = mPowerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, FINGERPRINT_WAKE_LOCK_NAME);
             mWakeLock.acquire();
-            mFpWakeMode = FP_WAKE_DIRECT_UNLOCK;
+            mFpWakeMode = mKeyguardIsVisible ? FP_WAKE_DIRECT_UNLOCK : FP_ONLY_WAKE;
             if (DEBUG_FP_WAKELOCK) {
                 Log.i(TAG, "fingerprint acquired, grabbing fp wakelock");
             }
             mHandler.postDelayed(mReleaseFingerprintWakeLockRunnable,
                     FINGERPRINT_WAKELOCK_TIMEOUT_MS);
         } else if (!mDeviceInteractive) {
-            mFpWakeMode = FP_WAKE_WAKE_TO_BOUNCER;
+            mFpWakeMode = FP_WAKE_TO_BOUNCER;
         } else {
             mFpWakeMode = FP_WAKE_NONE;
         }
@@ -436,7 +442,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintAuthenticated() {
-        if (mFpWakeMode == FP_WAKE_WAKE_TO_BOUNCER || mFpWakeMode == FP_WAKE_DIRECT_UNLOCK) {
+        if (mFpWakeMode == FP_WAKE_TO_BOUNCER || mFpWakeMode == FP_WAKE_DIRECT_UNLOCK
+                || mFpWakeMode == FP_ONLY_WAKE) {
             if (DEBUG_FP_WAKELOCK) {
                 Log.i(TAG, "fp wakelock: Authenticated, waking up...");
             }
@@ -942,9 +949,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return mKeyguardIsVisible && !mSwitchingUser &&
-                mTrustManager.hasUserAuthenticatedSinceBoot(
-                        ActivityManager.getCurrentUser());
+        return (mKeyguardIsVisible || !mDeviceInteractive) && !mSwitchingUser;
     }
 
     private void startListeningForFingerprint() {
