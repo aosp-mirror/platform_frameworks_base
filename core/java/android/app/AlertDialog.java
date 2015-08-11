@@ -1082,7 +1082,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * create and display the dialog.
          */
         public AlertDialog create() {
-            final AlertDialog dialog = new AlertDialog(P.mContext);
+            // Context has already been wrapped with the appropriate theme.
+            final AlertDialog dialog = new AlertDialog(P.mContext, 0, false);
             P.apply(dialog.mAlert);
             dialog.setCancelable(P.mCancelable);
             if (P.mCancelable) {
