@@ -197,10 +197,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
-    final ArrayList<InputMethodInfo> mMethodList = new ArrayList<InputMethodInfo>();
-    final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<String, InputMethodInfo>();
+    final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
+    final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<>();
     private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
-            new LruCache<SuggestionSpan, InputMethodInfo>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
+            new LruCache<>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
     private final InputMethodSubtypeSwitchingController mSwitchingController;
 
     // Used to bring IME service up to visible adjustment while it is being shown.
@@ -277,8 +277,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    final HashMap<IBinder, ClientState> mClients
-            = new HashMap<IBinder, ClientState>();
+    final HashMap<IBinder, ClientState> mClients = new HashMap<>();
 
     /**
      * Set once the system is ready to run third party code.
@@ -329,8 +328,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // This list contains the pairs of InputMethodInfo and InputMethodSubtype.
     private final HashMap<InputMethodInfo, ArrayList<InputMethodSubtype>>
-            mShortcutInputMethodsAndSubtypes =
-                new HashMap<InputMethodInfo, ArrayList<InputMethodSubtype>>();
+            mShortcutInputMethodsAndSubtypes = new HashMap<>();
 
     // Was the keyguard locked when this client became current?
     private boolean mCurClientInKeyguard;
@@ -540,7 +538,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final String imeId = entry.getKey();
             ArraySet<String> prevSubtypes = prevMap.get(imeId);
             if (prevSubtypes == null) {
-                prevSubtypes = new ArraySet<String>(2);
+                prevSubtypes = new ArraySet<>(2);
                 prevMap.put(imeId, prevSubtypes);
             }
             prevSubtypes.addAll(entry.getValue());
@@ -559,16 +557,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static String buildInputMethodsAndSubtypesString(ArrayMap<String, ArraySet<String>> map) {
         // we want to use the canonical InputMethodSettings implementation,
         // so we convert data structures first.
-        List<Pair<String, ArrayList<String>>> imeMap =
-                new ArrayList<Pair<String, ArrayList<String>>>(4);
+        List<Pair<String, ArrayList<String>>> imeMap = new ArrayList<>(4);
         for (ArrayMap.Entry<String, ArraySet<String>> entry : map.entrySet()) {
             final String imeName = entry.getKey();
             final ArraySet<String> subtypeSet = entry.getValue();
-            final ArrayList<String> subtypes = new ArrayList<String>(2);
+            final ArrayList<String> subtypes = new ArrayList<>(2);
             if (subtypeSet != null) {
                 subtypes.addAll(subtypeSet);
             }
-            imeMap.add(new Pair<String, ArrayList<String>>(imeName, subtypes));
+            imeMap.add(new Pair<>(imeName, subtypes));
         }
         return InputMethodSettings.buildInputMethodsSettingString(imeMap);
     }
@@ -576,8 +573,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // TODO: Move this method to InputMethodUtils with adding unit tests.
     static ArrayMap<String, ArraySet<String>> parseInputMethodsAndSubtypesString(
             final String inputMethodsAndSubtypesString) {
-        final ArrayMap<String, ArraySet<String>> imeMap =
-                new ArrayMap<String, ArraySet<String>>();
+        final ArrayMap<String, ArraySet<String>> imeMap = new ArrayMap<>();
         if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
             return imeMap;
         }
@@ -591,7 +587,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         typeSplitter,
                         subtypeSplitter);
         for (Pair<String, ArrayList<String>> ime : allImeSettings) {
-            ArraySet<String> subtypes = new ArraySet<String>();
+            ArraySet<String> subtypes = new ArraySet<>();
             if (ime.second != null) {
                 subtypes.addAll(ime.second);
             }
@@ -1166,7 +1162,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return Collections.emptyList();
         }
         synchronized (mMethodMap) {
-            return new ArrayList<InputMethodInfo>(mMethodList);
+            return new ArrayList<>(mMethodList);
         }
     }
 
@@ -1190,7 +1186,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             boolean allowsImplicitlySelectedSubtypes) {
         // TODO: Make this work even for non-current users?
         if (!calledFromValidUser()) {
-            return Collections.<InputMethodSubtype>emptyList();
+            return Collections.emptyList();
         }
         synchronized (mMethodMap) {
             final InputMethodInfo imi;
@@ -1200,7 +1196,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 imi = mMethodMap.get(imiId);
             }
             if (imi == null) {
-                return Collections.<InputMethodSubtype>emptyList();
+                return Collections.emptyList();
             }
             return mSettings.getEnabledInputMethodSubtypeListLocked(
                     mContext, imi, allowsImplicitlySelectedSubtypes);
@@ -3408,8 +3404,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         if (mostApplicableIMI != null) {
-            return new Pair<InputMethodInfo, InputMethodSubtype> (mostApplicableIMI,
-                    mostApplicableSubtype);
+            return new Pair<> (mostApplicableIMI, mostApplicableSubtype);
         } else {
             return null;
         }
@@ -3473,7 +3468,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mShortcutInputMethodsAndSubtypes.containsKey(imi)) {
             mShortcutInputMethodsAndSubtypes.get(imi).add(subtype);
         } else {
-            ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(subtype);
             mShortcutInputMethodsAndSubtypes.put(imi, subtypes);
         }
@@ -3484,7 +3479,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public List getShortcutInputMethodsAndSubtypes() {
         synchronized (mMethodMap) {
-            ArrayList<Object> ret = new ArrayList<Object>();
+            ArrayList<Object> ret = new ArrayList<>();
             if (mShortcutInputMethodsAndSubtypes.size() == 0) {
                 // If there are no selected shortcut subtypes, the framework will try to find
                 // the most applicable subtype from all subtypes whose mode is
@@ -3545,7 +3540,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private final AtomicFile mAdditionalInputMethodSubtypeFile;
         private final HashMap<String, InputMethodInfo> mMethodMap;
         private final HashMap<String, List<InputMethodSubtype>> mAdditionalSubtypesMap =
-                new HashMap<String, List<InputMethodSubtype>>();
+                new HashMap<>();
         public InputMethodFileManager(HashMap<String, InputMethodInfo> methodMap, int userId) {
             if (methodMap == null) {
                 throw new NullPointerException("methodMap is null");
@@ -3581,7 +3576,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void addInputMethodSubtypes(
                 InputMethodInfo imi, InputMethodSubtype[] additionalSubtypes) {
             synchronized (mMethodMap) {
-                final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+                final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
                 final int N = additionalSubtypes.length;
                 for (int i = 0; i < N; ++i) {
                     final InputMethodSubtype subtype = additionalSubtypes[i];
@@ -3682,7 +3677,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             Slog.w(TAG, "Invalid imi id found in subtypes.xml");
                             continue;
                         }
-                        tempSubtypesArray = new ArrayList<InputMethodSubtype>();
+                        tempSubtypesArray = new ArrayList<>();
                         allSubtypes.put(currentImiId, tempSubtypesArray);
                     } else if (NODE_SUBTYPE.equals(nodeName)) {
                         if (TextUtils.isEmpty(currentImiId) || tempSubtypesArray == null) {

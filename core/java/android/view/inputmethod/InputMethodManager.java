@@ -377,8 +377,8 @@ public final class InputMethodManager {
      */
     private int mRequestUpdateCursorAnchorInfoMonitorMode = REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
-    final Pool<PendingEvent> mPendingEventPool = new SimplePool<PendingEvent>(20);
-    final SparseArray<PendingEvent> mPendingEvents = new SparseArray<PendingEvent>(20);
+    final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
+    final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
 
     // -----------------------------------------------------------
     
@@ -2033,8 +2033,7 @@ public final class InputMethodManager {
      */
     public Map<InputMethodInfo, List<InputMethodSubtype>> getShortcutInputMethodsAndSubtypes() {
         synchronized (mH) {
-            HashMap<InputMethodInfo, List<InputMethodSubtype>> ret =
-                    new HashMap<InputMethodInfo, List<InputMethodSubtype>>();
+            HashMap<InputMethodInfo, List<InputMethodSubtype>> ret = new HashMap<>();
             try {
                 // TODO: We should change the return type from List<Object> to List<Parcelable>
                 List<Object> info = mService.getShortcutInputMethodsAndSubtypes();
@@ -2049,7 +2048,7 @@ public final class InputMethodManager {
                                 Log.e(TAG, "IMI list already contains the same InputMethod.");
                                 break;
                             }
-                            subtypes = new ArrayList<InputMethodSubtype>();
+                            subtypes = new ArrayList<>();
                             ret.put((InputMethodInfo)o, subtypes);
                         } else if (subtypes != null && o instanceof InputMethodSubtype) {
                             subtypes.add((InputMethodSubtype)o);
