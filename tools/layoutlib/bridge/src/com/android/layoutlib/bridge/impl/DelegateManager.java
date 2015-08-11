@@ -97,13 +97,13 @@ public final class DelegateManager<T> {
      * @return the delegate or null if not found.
      */
     @Nullable
-    public T getDelegate(long native_object) {
+    public synchronized T getDelegate(long native_object) {
         if (native_object > 0) {
-            T delegate =  mDelegates.get(native_object);
+            T delegate = mDelegates.get(native_object);
 
             if (Debug.DEBUG) {
                 if (delegate == null) {
-                    System.out.println("Unknown " + mClass.getSimpleName() + " with int " +
+                    System.err.println("Unknown " + mClass.getSimpleName() + " with int " +
                             native_object);
                 }
             }
@@ -119,14 +119,18 @@ public final class DelegateManager<T> {
      * @param newDelegate the delegate to add
      * @return a unique native int to identify the delegate
      */
-    public long addNewDelegate(T newDelegate) {
+    public synchronized long addNewDelegate(T newDelegate) {
         long native_object = ++mDelegateCounter;
+
         mDelegates.put(native_object, newDelegate);
         assert !mJavaReferences.contains(newDelegate);
         mJavaReferences.add(newDelegate);
 
         if (Debug.DEBUG) {
-            System.out.println("New " + mClass.getSimpleName() + " with int " + native_object);
+            System.out.println(
+                    "New " + mClass.getSimpleName() + " " +
+                            "with int " +
+                            native_object);
         }
 
         return native_object;
@@ -136,7 +140,7 @@ public final class DelegateManager<T> {
      * Removes the main reference on the given delegate.
      * @param native_object the native integer representing the delegate.
      */
-    public void removeJavaReferenceFor(long native_object) {
+    public synchronized void removeJavaReferenceFor(long native_object) {
         T delegate = getDelegate(native_object);
 
         if (Debug.DEBUG) {
