@@ -220,7 +220,7 @@ public class ChooserActivity extends ResolverActivity {
                 result.putExtras(replExtras);
             }
         }
-        if (aInfo.name.equals(IntentForwarderActivity.FORWARD_INTENT_TO_USER_OWNER)
+        if (aInfo.name.equals(IntentForwarderActivity.FORWARD_INTENT_TO_PARENT)
                 || aInfo.name.equals(IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE)) {
             result = Intent.createChooser(result,
                     getIntent().getCharSequenceExtra(Intent.EXTRA_TITLE));

@@ -2658,7 +2658,7 @@
                 android:exported="true"
                 >
         </activity>
-        <activity-alias android:name="com.android.internal.app.ForwardIntentToUserOwner"
+        <activity-alias android:name="com.android.internal.app.ForwardIntentToParent"
                 android:targetActivity="com.android.internal.app.IntentForwarderActivity"
                 android:exported="true"
                 android:label="@string/user_owner_label">

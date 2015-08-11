@@ -4963,13 +4963,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             IPackageManager pm = AppGlobals.getPackageManager();
             long id = Binder.clearCallingIdentity();
             try {
+                UserInfo parent = mUserManager.getProfileParent(callingUserId);
+                if (parent == null) {
+                    Slog.e(LOG_TAG, "Cannot call addCrossProfileIntentFilter if there is no "
+                            + "parent");
+                    return;
+                }
                 if ((flags & DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED) != 0) {
                     pm.addCrossProfileIntentFilter(filter, who.getPackageName(), callingUserId,
-                            UserHandle.USER_OWNER, 0);
+                            parent.id, 0);
                 }
                 if ((flags & DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT) != 0) {
                     pm.addCrossProfileIntentFilter(filter, who.getPackageName(),
-                            UserHandle.USER_OWNER, callingUserId, 0);
+                            parent.id, callingUserId, 0);
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen

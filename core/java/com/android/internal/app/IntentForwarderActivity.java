@@ -45,8 +45,8 @@ public class IntentForwarderActivity extends Activity  {
 
     public static String TAG = "IntentForwarderActivity";
 
-    public static String FORWARD_INTENT_TO_USER_OWNER
-            = "com.android.internal.app.ForwardIntentToUserOwner";
+    public static String FORWARD_INTENT_TO_PARENT
+            = "com.android.internal.app.ForwardIntentToParent";
 
     public static String FORWARD_INTENT_TO_MANAGED_PROFILE
             = "com.android.internal.app.ForwardIntentToManagedProfile";
@@ -60,9 +60,9 @@ public class IntentForwarderActivity extends Activity  {
         final int targetUserId;
         final int userMessageId;
 
-        if (className.equals(FORWARD_INTENT_TO_USER_OWNER)) {
+        if (className.equals(FORWARD_INTENT_TO_PARENT)) {
             userMessageId = com.android.internal.R.string.forward_intent_to_owner;
-            targetUserId = UserHandle.USER_OWNER;
+            targetUserId = getProfileParent();
         } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
             userMessageId = com.android.internal.R.string.forward_intent_to_work;
             targetUserId = getManagedProfile();
@@ -72,7 +72,7 @@ public class IntentForwarderActivity extends Activity  {
             targetUserId = UserHandle.USER_NULL;
         }
         if (targetUserId == UserHandle.USER_NULL) {
-            // This covers the case where there is no managed profile.
+            // This covers the case where there is no parent / managed profile.
             finish();
             return;
         }
@@ -168,12 +168,27 @@ public class IntentForwarderActivity extends Activity  {
      */
     private int getManagedProfile() {
         UserManager userManager = (UserManager) getSystemService(Context.USER_SERVICE);
-        List<UserInfo> relatedUsers = userManager.getProfiles(UserHandle.USER_OWNER);
+        List<UserInfo> relatedUsers = userManager.getProfiles(UserHandle.myUserId());
         for (UserInfo userInfo : relatedUsers) {
             if (userInfo.isManagedProfile()) return userInfo.id;
         }
         Slog.wtf(TAG, FORWARD_INTENT_TO_MANAGED_PROFILE
                 + " has been called, but there is no managed profile");
         return UserHandle.USER_NULL;
+    }
+
+    /**
+     * Returns the userId of the profile parent or UserHandle.USER_NULL if there is
+     * no parent.
+     */
+    private int getProfileParent() {
+        UserManager userManager = (UserManager) getSystemService(Context.USER_SERVICE);
+        UserInfo parent = userManager.getProfileParent(UserHandle.myUserId());
+        if (parent == null) {
+            Slog.wtf(TAG, FORWARD_INTENT_TO_PARENT
+                    + " has been called, but there is no parent");
+            return UserHandle.USER_NULL;
+        }
+        return parent.id;
     }
 }

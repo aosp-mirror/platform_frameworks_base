@@ -71,7 +71,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
-import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_USER_OWNER;
+import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.internal.util.ArrayUtils.appendInt;
@@ -4949,18 +4949,25 @@ public class PackageManagerService extends IPackageManager.Stub {
     private ResolveInfo createForwardingResolveInfo(IntentFilter filter,
             int sourceUserId, int targetUserId) {
         ResolveInfo forwardingResolveInfo = new ResolveInfo();
+        long ident = Binder.clearCallingIdentity();
+        boolean targetIsProfile;
+        try {
+            targetIsProfile = sUserManager.getUserInfo(targetUserId).isManagedProfile();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         String className;
-        if (targetUserId == UserHandle.USER_OWNER) {
-            className = FORWARD_INTENT_TO_USER_OWNER;
-        } else {
+        if (targetIsProfile) {
             className = FORWARD_INTENT_TO_MANAGED_PROFILE;
+        } else {
+            className = FORWARD_INTENT_TO_PARENT;
         }
         ComponentName forwardingActivityComponentName = new ComponentName(
                 mAndroidApplication.packageName, className);
         ActivityInfo forwardingActivityInfo = getActivityInfo(forwardingActivityComponentName, 0,
                 sourceUserId);
-        if (targetUserId == UserHandle.USER_OWNER) {
-            forwardingActivityInfo.showUserIcon = UserHandle.USER_OWNER;
+        if (!targetIsProfile) {
+            forwardingActivityInfo.showUserIcon = targetUserId;
             forwardingResolveInfo.noResourceId = true;
         }
         forwardingResolveInfo.activityInfo = forwardingActivityInfo;
