@@ -1121,9 +1121,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mViewPool.returnViewToPool(tv);
         }
 
-        // Notify the callback that we've removed the task and it can clean up after it
-        mCb.onTaskViewDismissed(removedTask);
-
         // Get the stack scroll of the task to anchor to (since we are removing something, the front
         // most task will be our anchor task)
         Task anchorTask = null;
@@ -1172,6 +1169,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Fade the dismiss button back in
             showDismissAllButton();
         }
+
+        // Notify the callback that we've removed the task and it can clean up after it. Note, we
+        // do this after onAllTaskViewsDismissed() is called, to allow the home activity to be
+        // started before the call to remove the task.
+        mCb.onTaskViewDismissed(removedTask);
     }
 
     @Override
