@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 import android.view.InputEvent;
@@ -843,6 +844,62 @@ public final class UiAutomation {
             Log.e(LOG_TAG, "Error getting window animation frame stats!", re);
         }
         return null;
+    }
+
+    /**
+     * Grants a runtime permission to a package for a user.
+     * @param packageName The package to which to grant.
+     * @param permission The permission to grant.
+     * @return Whether granting succeeded.
+     *
+     * @hide
+     */
+    public boolean grantRuntimePermission(String packageName, String permission,
+            UserHandle userHandle) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Granting runtime permission");
+            }
+            // Calling out without a lock held.
+            mUiAutomationConnection.grantRuntimePermission(packageName,
+                    permission, userHandle.getIdentifier());
+            // TODO: The package manager API should return boolean.
+            return true;
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error granting runtime permission", re);
+        }
+        return false;
+    }
+
+    /**
+     * Revokes a runtime permission from a package for a user.
+     * @param packageName The package from which to revoke.
+     * @param permission The permission to revoke.
+     * @return Whether revoking succeeded.
+     *
+     * @hide
+     */
+    public boolean revokeRuntimePermission(String packageName, String permission,
+            UserHandle userHandle) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Revoking runtime permission");
+            }
+            // Calling out without a lock held.
+            mUiAutomationConnection.revokeRuntimePermission(packageName,
+                    permission, userHandle.getIdentifier());
+            // TODO: The package manager API should return boolean.
+            return true;
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error revoking runtime permission", re);
+        }
+        return false;
     }
 
     /**

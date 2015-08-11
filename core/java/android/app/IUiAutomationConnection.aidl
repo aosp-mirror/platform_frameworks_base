@@ -43,6 +43,8 @@ interface IUiAutomationConnection {
     void clearWindowAnimationFrameStats();
     WindowAnimationFrameStats getWindowAnimationFrameStats();
     void executeShellCommand(String command, in ParcelFileDescriptor fd);
+    void grantRuntimePermission(String packageName, String permission, int userId);
+    void revokeRuntimePermission(String packageName, String permission, int userId);
 
     // Called from the system process.
     oneway void shutdown();
