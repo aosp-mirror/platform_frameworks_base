@@ -2923,10 +2923,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (DEBUG) {
                     Slog.d(TAG, "Found an input method " + p);
                 }
-
-            } catch (XmlPullParserException e) {
-                Slog.w(TAG, "Unable to load input method " + compName, e);
-            } catch (IOException e) {
+            } catch (XmlPullParserException | IOException e) {
                 Slog.w(TAG, "Unable to load input method " + compName, e);
             }
         }
@@ -3635,9 +3632,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 HashMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile) {
             if (allSubtypes == null || subtypesFile == null) return;
             allSubtypes.clear();
-            FileInputStream fis = null;
-            try {
-                fis = subtypesFile.openRead();
+            try (final FileInputStream fis = subtypesFile.openRead()) {
                 final XmlPullParser parser = Xml.newPullParser();
                 parser.setInput(fis, StandardCharsets.UTF_8.name());
                 int type = parser.getEventType();
@@ -3692,23 +3687,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         tempSubtypesArray.add(subtype);
                     }
                 }
-            } catch (XmlPullParserException e) {
-                Slog.w(TAG, "Error reading subtypes: " + e);
+            } catch (XmlPullParserException | IOException | NumberFormatException e) {
+                Slog.w(TAG, "Error reading subtypes", e);
                 return;
-            } catch (java.io.IOException e) {
-                Slog.w(TAG, "Error reading subtypes: " + e);
-                return;
-            } catch (NumberFormatException e) {
-                Slog.w(TAG, "Error reading subtypes: " + e);
-                return;
-            } finally {
-                if (fis != null) {
-                    try {
-                        fis.close();
-                    } catch (java.io.IOException e1) {
-                        Slog.w(TAG, "Failed to close.");
-                    }
-                }
             }
         }
     }
