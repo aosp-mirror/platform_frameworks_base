@@ -465,9 +465,12 @@ public class ActivityTestMain extends Activity {
         menu.add("Ignore battery optimizations").setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
-                Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                Intent intent;
                 if (!mPower.isIgnoringBatteryOptimizations(getPackageName())) {
+                    intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                     intent.setData(Uri.fromParts("package", getPackageName(), null));
+                } else {
+                    intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
                 }
                 startActivity(intent);
                 return true;
