@@ -3,6 +3,7 @@ package android.animation;
 import com.android.frameworks.coretests.R;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.UiThreadTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.View;
 
@@ -16,6 +17,32 @@ public class AnimatorSetActivityTest extends ActivityInstrumentationTestCase2<An
 
     public AnimatorSetActivityTest() {
         super(AnimatorSetActivity.class);
+    }
+
+    static class MyListener implements Animator.AnimatorListener {
+        boolean startIsCalled = false;
+        boolean endIsCalled = false;
+        boolean cancelIsCalled = false;
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            startIsCalled = true;
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            endIsCalled = true;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            cancelIsCalled = true;
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
+        }
     }
 
     @Override
@@ -86,12 +113,7 @@ public class AnimatorSetActivityTest extends ActivityInstrumentationTestCase2<An
 
     @SmallTest
     public void testTotalDuration() {
-        ArrayList<Animator> list = new ArrayList<>(5);
-        list.add(a1);
-        list.add(a2);
-        list.add(a3);
-        list.add(a4);
-        list.add(a5);
+        ArrayList<Animator> list = getAnimatorList();
 
         // Run animations sequentially and test the total duration against sum of durations.
         AnimatorSet s1 = new AnimatorSet();
@@ -150,6 +172,330 @@ public class AnimatorSetActivityTest extends ActivityInstrumentationTestCase2<An
         a3.setRepeatCount(ValueAnimator.INFINITE);
         assertEquals(AnimatorSet.DURATION_INFINITE, s5.getTotalDuration());
 
+    }
+
+    @SmallTest
+    public void testGetDuration() {
+        AnimatorSet s = new AnimatorSet();
+        assertTrue(s.getDuration() < 0);
+        s.play(a1).before(a2).before(a3).after(a4).after(a5);
+        assertTrue(s.getDuration() < 0);
+
+        long duration = 200;
+        s.setDuration(duration);
+        assertEquals(duration, s.getDuration());
+
+    }
+
+    @SmallTest
+    @UiThreadTest
+    public void testSetDuration() {
+        AnimatorSet s = getSequentialSet();
+        assertTrue(s.getDuration() < 0);
+
+        long duration = 300;
+        s.setDuration(duration);
+        assertEquals(duration, s.getDuration());
+
+        s.start();
+        assertEquals(duration, s.getDuration());
+        assertEquals(duration, a1.getDuration());
+        assertEquals(duration, a2.getDuration());
+        assertEquals(duration, a3.getDuration());
+        assertEquals(duration, a4.getDuration());
+        assertEquals(duration, a5.getDuration());
+    }
+
+    @SmallTest
+    public void testAddListener() throws InterruptedException {
+        // Verify that the listener is added to the list of listeners in the AnimatorSet
+        // and that newly added listener gets callback for lifecycle events of the animator
+        final AnimatorSet s = new AnimatorSet();
+        s.play(a1).before(a2).before(a3).after(a4).after(a5);
+        final MyListener listener = new MyListener();
+        if (s.getListeners() != null) {
+            assertFalse(s.getListeners().contains(listener));
+        }
+        s.addListener(listener);
+        assertTrue(s.getListeners().contains(listener));
+
+        assertFalse(listener.startIsCalled);
+        assertFalse(listener.endIsCalled);
+
+        try {
+            runTestOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    s.start();
+                    assertTrue(listener.startIsCalled);
+                    assertFalse(listener.endIsCalled);
+                }
+            });
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+        Thread.sleep(s.getTotalDuration() + 200);
+        assertTrue(listener.startIsCalled);
+        assertTrue(listener.endIsCalled);
+    }
+
+    @SmallTest
+    public void testRemoveListener() throws Throwable {
+        final AnimatorSet s = new AnimatorSet();
+        s.playTogether(a1, a2, a3, a4);
+        MyListener listener = new MyListener();
+        s.addListener(listener);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                s.start();
+            }
+        });
+
+        Thread.sleep(s.getTotalDuration() + 100);
+        assertTrue(listener.startIsCalled);
+        assertTrue(listener.endIsCalled);
+
+        s.removeListener(listener);
+        if (s.getListeners() != null) {
+            assertFalse(s.getListeners().contains(listener));
+        }
+        listener.startIsCalled = false;
+        listener.endIsCalled = false;
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                s.start();
+            }
+        });
+        Thread.sleep(s.getTotalDuration() + 100);
+        assertFalse(listener.startIsCalled);
+        assertFalse(listener.endIsCalled);
+    }
+
+    @SmallTest
+    public void testEnd() throws Throwable {
+        // End animator set
+        final AnimatorSet s = new AnimatorSet();
+        s.play(a1).before(a2).after(a3).with(a4);
+        final MyListener listener = new MyListener();
+        s.addListener(listener);
+        assertFalse(listener.endIsCalled);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                s.start();
+                assertTrue(s.isStarted());
+                assertTrue(listener.startIsCalled);
+                assertFalse(listener.endIsCalled);
+            }
+        });
+
+        Thread.sleep(a2.getTotalDuration());
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                s.end();
+                assertTrue(listener.startIsCalled);
+                assertTrue(listener.endIsCalled);
+                assertFalse(s.isRunning());
+                assertFalse(s.isStarted());
+
+                assertFalse(a1.isStarted());
+                assertFalse(a2.isStarted());
+                assertFalse(a3.isStarted());
+                assertFalse(a4.isStarted());
+            }
+        });
+
+    }
+
+    @SmallTest
+    public void testStart() throws Throwable {
+        final AnimatorSet s = new AnimatorSet();
+        ArrayList<Animator> animators = getAnimatorList();
+
+        s.playSequentially(animators);
+        final MyListener l = new MyListener();
+        s.addListener(l);
+
+        ArrayList<MyListener> listeners = new ArrayList<>(animators.size());
+        for (int i = 0; i < animators.size(); i++) {
+            MyListener listener = new MyListener();
+            listeners.add(listener);
+            animators.get(i).addListener(listener);
+        }
+
+        // Check the state before calling start()
+        assertFalse(l.startIsCalled);
+        assertFalse(l.endIsCalled);
+        for (int i = 0; i < listeners.size(); i++) {
+            assertFalse(l.startIsCalled);
+            assertFalse(l.endIsCalled);
+        }
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                s.start();
+                assertTrue(l.startIsCalled);
+            }
+        });
+
+        long timeout = s.getTotalDuration() * 2;
+        long wait = 0;
+
+        while (wait < timeout) {
+            if (l.endIsCalled) {
+                break;
+            }
+            Thread.sleep(200);
+            wait += 200;
+        }
+
+        // Now the set should finished
+        assertTrue(l.startIsCalled);
+        assertTrue(l.endIsCalled);
+        for (int i = 0; i < listeners.size(); i++) {
+            assertTrue(listeners.get(i).startIsCalled);
+            assertTrue(listeners.get(i).endIsCalled);
+        }
+    }
+
+    @SmallTest
+    public void testCancel() throws Throwable {
+        // Check whether cancel would trigger onAnimationCanceled and cancel all the unfinished
+        // animations
+        final AnimatorSet s = new AnimatorSet();
+        final ArrayList<Animator> animators = getAnimatorList();
+
+        s.playTogether(animators);
+        final MyListener l = new MyListener();
+        s.addListener(l);
+
+        final ArrayList<MyListener> listeners = new ArrayList<>(5);
+        for (int i = 0; i < animators.size(); i++) {
+            MyListener listener = new MyListener();
+            listeners.add(listener);
+            animators.get(i).addListener(listener);
+        }
+
+        // Check the state before calling start()
+        assertFalse(l.startIsCalled);
+        assertFalse(l.cancelIsCalled);
+        assertFalse(l.endIsCalled);
+        for (int i = 0; i < listeners.size(); i++) {
+            assertFalse(l.startIsCalled);
+            assertFalse(l.cancelIsCalled);
+            assertFalse(l.endIsCalled);
+        }
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                s.start();
+            }
+        });
+
+        Thread.sleep(a1.getTotalDuration());
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(s.isStarted());
+                ArrayList<Integer> runningAnimIds = new ArrayList<Integer>();
+                for (int i = 0; i < animators.size(); i++) {
+                    if (animators.get(i).isStarted()) {
+                        runningAnimIds.add(i);
+                    }
+                }
+                s.cancel();
+                assertTrue(l.startIsCalled);
+                assertTrue(l.cancelIsCalled);
+                assertTrue(l.endIsCalled);
+
+                for (int i = 0; i < listeners.size(); i++) {
+                    assertTrue(listeners.get(i).startIsCalled);
+                    if (runningAnimIds.contains(i)) {
+                        assertTrue(listeners.get(i).cancelIsCalled);
+                    }
+                    assertTrue(listeners.get(i).endIsCalled);
+                }
+            }
+        });
+
+    }
+
+    @SmallTest
+    public void testIsRunning() throws Throwable {
+        final AnimatorSet s = new AnimatorSet();
+        final long startDelay = 500;
+        s.play(a1).before(a2).after(a3).with(a4);
+        s.play(a3).after(a5);
+        s.setStartDelay(startDelay);
+        MyListener listener = new MyListener();
+        s.addListener(listener);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                s.start();
+            }
+        });
+
+        while (!listener.endIsCalled) {
+            boolean passedStartDelay = a1.isStarted() || a2.isStarted() || a3.isStarted() ||
+                    a4.isStarted() || a5.isStarted();
+            assertEquals(passedStartDelay, s.isRunning());
+            Thread.sleep(50);
+        }
+        assertFalse(s.isRunning());
+    }
+
+    @SmallTest
+    public void testPauseAndResume() throws Throwable {
+        final AnimatorSet set = getSequentialSet();
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Calling pause before start should have no effect, per documentation
+                set.pause();
+                set.start();
+                assertFalse(set.isPaused());
+            }
+        });
+
+        while (!a2.isStarted()) {
+            Thread.sleep(50);
+        }
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(set.isPaused());
+                set.pause();
+                assertTrue(set.isPaused());
+                set.resume();
+                assertFalse(set.isPaused());
+            }
+        });
+    }
+
+    // Create an AnimatorSet with all the animators running sequentially
+    private AnimatorSet getSequentialSet() {
+        AnimatorSet set = new AnimatorSet();
+        set.playSequentially(a1, a2, a3, a4, a5);
+        return set;
+    }
+
+    private ArrayList<Animator> getAnimatorList() {
+        ArrayList<Animator> list = new ArrayList<>();
+        list.add(a1);
+        list.add(a2);
+        list.add(a3);
+        list.add(a4);
+        list.add(a5);
+        return list;
     }
 
 }
