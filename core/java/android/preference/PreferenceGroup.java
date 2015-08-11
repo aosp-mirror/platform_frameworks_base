@@ -187,7 +187,11 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
     private boolean removePreferenceInt(Preference preference) {
         synchronized(this) {
             preference.onPrepareForRemoval();
-            return mPreferenceList.remove(preference);
+            boolean success = mPreferenceList.remove(preference);
+            if (mAttachedToActivity) {
+                preference.onDetachedFromActivity();
+            }
+            return success;
         }
     }
     
@@ -263,7 +267,7 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
     protected boolean isOnSameScreenAsChildren() {
         return true;
     }
-    
+
     @Override
     protected void onAttachedToActivity() {
         super.onAttachedToActivity();
@@ -280,11 +284,17 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
     }
 
     @Override
-    protected void onPrepareForRemoval() {
-        super.onPrepareForRemoval();
-        
+    protected void onDetachedFromActivity() {
+        super.onDetachedFromActivity();
+
         // We won't be attached to the activity anymore
         mAttachedToActivity = false;
+
+        // Dispatch to all contained preferences
+        final int preferenceCount = getPreferenceCount();
+        for (int i = 0; i < preferenceCount; i++) {
+            getPreference(i).onDetachedFromActivity();
+        }
     }
 
     @Override
