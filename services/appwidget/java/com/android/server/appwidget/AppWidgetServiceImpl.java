@@ -2905,9 +2905,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             }
                             // Now that we've told the host, push out an update.
                             sendUpdateIntentLocked(provider, appWidgetIds);
-                            providersUpdated = true;
                         }
                     }
+                    providersUpdated = true;
                 }
             }
         }
