@@ -234,6 +234,12 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         }
     }
 
+    @Override
+    public void showMessage(String message, int color) {
+        mSecurityMessageDisplay.setNextMessageColor(color);
+        mSecurityMessageDisplay.setMessage(message, true /* important */);
+    }
+
     protected abstract int getPromtReasonStringRes(int reason);
 
     // Cause a VIRTUAL_KEY vibration
