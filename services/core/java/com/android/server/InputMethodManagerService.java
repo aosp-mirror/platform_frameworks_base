@@ -2892,8 +2892,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Use for queryIntentServicesAsUser
         final PackageManager pm = mContext.getPackageManager();
-        String disabledSysImes = mSettings.getDisabledSystemInputMethods();
-        if (disabledSysImes == null) disabledSysImes = "";
 
         final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                 new Intent(InputMethod.SERVICE_INTERFACE),
@@ -3459,17 +3457,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return mCurrentSubtype;
-    }
-
-    private void addShortcutInputMethodAndSubtypes(InputMethodInfo imi,
-            InputMethodSubtype subtype) {
-        if (mShortcutInputMethodsAndSubtypes.containsKey(imi)) {
-            mShortcutInputMethodsAndSubtypes.get(imi).add(subtype);
-        } else {
-            ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(subtype);
-            mShortcutInputMethodsAndSubtypes.put(imi, subtypes);
-        }
     }
 
     // TODO: We should change the return type from List to List<Parcelable>

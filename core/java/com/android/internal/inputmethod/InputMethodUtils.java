@@ -878,12 +878,6 @@ public class InputMethodUtils {
                     getEnabledInputMethodsAndSubtypeListLocked());
         }
 
-        public List<Pair<InputMethodInfo, ArrayList<String>>>
-                getEnabledInputMethodAndSubtypeHashCodeListLocked() {
-            return createEnabledInputMethodAndSubtypeHashCodeListLocked(
-                    getEnabledInputMethodsAndSubtypeListLocked());
-        }
-
         public List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
                 Context context, InputMethodInfo imi, boolean allowsImplicitlySelectedSubtypes) {
             List<InputMethodSubtype> enabledSubtypes =
@@ -993,19 +987,6 @@ public class InputMethodUtils {
                 InputMethodInfo info = mMethodMap.get(ims.first);
                 if (info != null) {
                     res.add(info);
-                }
-            }
-            return res;
-        }
-
-        private List<Pair<InputMethodInfo, ArrayList<String>>>
-                createEnabledInputMethodAndSubtypeHashCodeListLocked(
-                        List<Pair<String, ArrayList<String>>> imsList) {
-            final ArrayList<Pair<InputMethodInfo, ArrayList<String>>> res = new ArrayList<>();
-            for (Pair<String, ArrayList<String>> ims : imsList) {
-                InputMethodInfo info = mMethodMap.get(ims.first);
-                if (info != null) {
-                    res.add(new Pair<>(info, ims.second));
                 }
             }
             return res;
@@ -1223,11 +1204,6 @@ public class InputMethodUtils {
             }
             Settings.Secure.putIntForUser(mResolver, Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
                     subtypeId, mCurrentUserId);
-        }
-
-        public String getDisabledSystemInputMethods() {
-            return Settings.Secure.getStringForUser(
-                    mResolver, Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS, mCurrentUserId);
         }
 
         public String getSelectedInputMethod() {
