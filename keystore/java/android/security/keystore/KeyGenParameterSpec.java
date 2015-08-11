@@ -38,27 +38,35 @@ import javax.security.auth.x500.X500Principal;
 /**
  * {@link AlgorithmParameterSpec} for initializing a {@link KeyPairGenerator} or a
  * {@link KeyGenerator} of the <a href="{@docRoot}training/articles/keystore.html">Android Keystore
- * system</a>. The spec determines whether user authentication is required for using the key, what
- * uses the key is authorized for (e.g., only for signing -- decryption not permitted), the key's
- * validity start and end dates.
+ * system</a>. The spec determines authorized uses of the key, such as whether user authentication
+ * is required for using the key, what operations are authorized (e.g., signing, but not
+ * decryption) and with what parameters (e.g., only with a particular padding scheme or digest), the
+ * key's validity start and end dates. Key use authorizations expressed in the spec apply only to
+ * secret keys and private keys -- public keys can be used for any supported operations.
  *
  * <p>To generate an asymmetric key pair or a symmetric key, create an instance of this class using
  * the {@link Builder}, initialize a {@code KeyPairGenerator} or a {@code KeyGenerator} of the
  * desired key type (e.g., {@code EC} or {@code AES} -- see
  * {@link KeyProperties}.{@code KEY_ALGORITHM} constants) from the {@code AndroidKeyStore} provider
- * with the {@code KeyPairGeneratorSpec} instance, and then generate a key or key pair using
- * {@link KeyPairGenerator#generateKeyPair()}.
+ * with the {@code KeyGenParameterSpec} instance, and then generate a key or key pair using
+ * {@link KeyGenerator#generateKey()} or {@link KeyPairGenerator#generateKeyPair()}.
  *
  * <p>The generated key pair or key will be returned by the generator and also stored in the Android
- * Keystore system under the alias specified in this spec. To obtain the secret or private key from
- * the Android KeyStore use {@link java.security.KeyStore#getKey(String, char[]) KeyStore.getKey(String, null)}
+ * Keystore under the alias specified in this spec. To obtain the secret or private key from the
+ * Android Keystore use {@link java.security.KeyStore#getKey(String, char[]) KeyStore.getKey(String, null)}
  * or {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter) KeyStore.getEntry(String, null)}.
- * To obtain the public key from the Android Keystore system use
+ * To obtain the public key from the Android Keystore use
  * {@link java.security.KeyStore#getCertificate(String)} and then
  * {@link Certificate#getPublicKey()}.
  *
+ * <p>To help obtain algorithm-specific public parameters of key pairs stored in the Android
+ * Keystore, generated private keys implement {@link java.security.interfaces.ECKey} or
+ * {@link java.security.interfaces.RSAKey} interfaces whereas public keys implement
+ * {@link java.security.interfaces.ECPublicKey} or {@link java.security.interfaces.RSAPublicKey}
+ * interfaces.
+ *
  * <p>For asymmetric key pairs, a self-signed X.509 certificate will be also generated and stored in
- * the Android KeyStore. This is because the {@link java.security.KeyStore} abstraction does not
+ * the Android Keystore. This is because the {@link java.security.KeyStore} abstraction does not
  * support storing key pairs without a certificate. The subject, serial number, and validity dates
  * of the certificate can be customized in this spec. The self-signed certificate may be replaced at
  * a later time by a certificate signed by a Certificate Authority (CA).
@@ -82,27 +90,33 @@ import javax.security.auth.x500.X500Principal;
  *
  * <p>Instances of this class are immutable.
  *
- * <p><h3>Example: Asymmetric key pair</h3>
- * The following example illustrates how to generate an EC key pair in the Android KeyStore system
- * under alias {@code key1} authorized to be used only for signing using SHA-256, SHA-384,
- * or SHA-512 digest and only if the user has been authenticated within the last five minutes.
+ * <p><h3>Example: NIST P-256 EC key pair for signing/verification using ECDSA</h3>
+ * This example illustrates how to generate a NIST P-256 (aka secp256r1 aka prime256v1) EC key pair
+ * in the Android KeyStore system under alias {@code key1} where the private key is authorized to be
+ * used only for signing using SHA-256, SHA-384, or SHA-512 digest and only if the user has been
+ * authenticated within the last five minutes. The use of public key is unrestricted, thus
+ * permitting signature verification using any padding schemes and digests, and without user
+ * authentication.
  * <pre> {@code
  * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
- *         KeyProperties.KEY_ALGORITHM_EC,
- *         "AndroidKeyStore");
+ *         KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
  * keyPairGenerator.initialize(
  *         new KeyGenParameterSpec.Builder(
  *                 "key1",
- *                 KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
+ *                 KeyProperties.PURPOSE_SIGN)
+ *                 .setAlgorithmParameterSpec(new ECGenParameterSpec("secp256r1"))
  *                 .setDigests(KeyProperties.DIGEST_SHA256,
  *                         KeyProperties.DIGEST_SHA384,
  *                         KeyProperties.DIGEST_SHA512)
- *                 // Only permit this key to be used if the user authenticated
+ *                 // Only permit the private key to be used if the user authenticated
  *                 // within the last five minutes.
  *                 .setUserAuthenticationRequired(true)
  *                 .setUserAuthenticationValidityDurationSeconds(5 * 60)
  *                 .build());
  * KeyPair keyPair = keyPairGenerator.generateKeyPair();
+ * Signature signature = Signature.getInstance("SHA256withECDSA");
+ * signature.initSign(keyPair.getPrivate());
+ * ...
  *
  * // The key pair can also be obtained from the Android Keystore any time as follows:
  * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
@@ -111,14 +125,67 @@ import javax.security.auth.x500.X500Principal;
  * PublicKey publicKey = keyStore.getCertificate("key1").getPublicKey();
  * }</pre>
  *
- * <p><h3>Example: Symmetric key</h3>
+ * <p><h3>Example: RSA key pair for signing/verification using RSA-PSS</h3>
+ * This example illustrates how to generate an RSA key pair in the Android KeyStore system under
+ * alias {@code key1} authorized to be used only for signing using the RSA-PSS signature padding
+ * scheme with SHA-256 or SHA-512 digests. The use of public key is unrestricted, thus permitting
+ * signature verification using any padding schemes and digests.
+ * <pre> {@code
+ * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
+ *         KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+ * keyPairGenerator.initialize(
+ *         new KeyGenParameterSpec.Builder(
+ *                 "key1",
+ *                 KeyProperties.PURPOSE_SIGN)
+ *                 .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+ *                 .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PSS)
+ *                 .build());
+ * KeyPair keyPair = keyPairGenerator.generateKeyPair();
+ * Signature signature = Signature.getInstance("SHA256withRSA/PSS");
+ * signature.initSign(keyPair.getPrivate());
+ * ...
+ *
+ * // The key pair can also be obtained from the Android Keystore any time as follows:
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * PrivateKey privateKey = (PrivateKey) keyStore.getKey("key1", null);
+ * PublicKey publicKey = keyStore.getCertificate("key1").getPublicKey();
+ * }</pre>
+ *
+ * <p><h3>Example: RSA key pair for encryption/decryption using RSA OAEP</h3>
+ * This example illustrates how to generate an RSA key pair in the Android KeyStore system under
+ * alias {@code key1} where the private key is authorized to be used only for decryption using RSA
+ * OAEP encryption padding scheme with SHA-256 or SHA-512 digests. The use of public key is
+ * unrestricted, thus permitting encryption using any padding schemes and digests.
+ * <pre> {@code
+ * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
+ *         KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+ * keyPairGenerator.initialize(
+ *         new KeyGenParameterSpec.Builder(
+ *                 "key1",
+ *                 KeyProperties.PURPOSE_DECRYPT)
+ *                 .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+ *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
+ *                 .build());
+ * KeyPair keyPair = keyPairGenerator.generateKeyPair();
+ * Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+ * cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+ * ...
+ *
+ * // The key pair can also be obtained from the Android Keystore any time as follows:
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * PrivateKey privateKey = (PrivateKey) keyStore.getKey("key1", null);
+ * PublicKey publicKey = keyStore.getCertificate("key1").getPublicKey();
+ * }</pre>
+ *
+ * <p><h3>Example: AES key for encryption/decryption in GCM mode</h3>
  * The following example illustrates how to generate an AES key in the Android KeyStore system under
  * alias {@code key2} authorized to be used only for encryption/decryption in GCM mode with no
  * padding.
  * <pre> {@code
  * KeyGenerator keyGenerator = KeyGenerator.getInstance(
- *         KeyProperties.KEY_ALGORITHM_AES,
- *         "AndroidKeyStore");
+ *         KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
  * keyGenerator.initialize(
  *         new KeyGenParameterSpec.Builder("key2",
  *                 KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
@@ -126,6 +193,29 @@ import javax.security.auth.x500.X500Principal;
  *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
  *                 .build());
  * SecretKey key = keyGenerator.generateKey();
+ *
+ * Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+ * cipher.init(Cipher.ENCRYPT_MODE, key);
+ * ...
+ *
+ * // The key can also be obtained from the Android Keystore any time as follows:
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * key = (SecretKey) keyStore.getKey("key2", null);
+ * }</pre>
+ *
+ * <p><h3>Example: HMAC key for generating a MAC using SHA-256</h3>
+ * This example illustrates how to generate an HMAC key in the Android KeyStore system under alias
+ * {@code key2} authorized to be used only for generating an HMAC using SHA-256.
+ * <pre> {@code
+ * KeyGenerator keyGenerator = KeyGenerator.getInstance(
+ *         KeyProperties.KEY_ALGORITHM_HMAC_SHA256, "AndroidKeyStore");
+ * keyGenerator.initialize(
+ *         new KeyGenParameterSpec.Builder("key2", KeyProperties.PURPOSE_SIGN).build());
+ * SecretKey key = keyGenerator.generateKey();
+ * Mac mac = Mac.getInstance("HmacSHA256");
+ * mac.init(key);
+ * ...
  *
  * // The key can also be obtained from the Android Keystore any time as follows:
  * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
