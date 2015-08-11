@@ -515,6 +515,13 @@ public class MediaRecorder implements AudioRouting,
 
         /** Opus data in a Ogg container */
         public static final int OGG = 11;
+
+        /** @hide QCP file format */
+        public static final int QCP = 20;
+
+        /** @hide WAVE media file format*/
+        public static final int WAVE = 21;
+
     };
 
     /**
@@ -541,6 +548,12 @@ public class MediaRecorder implements AudioRouting,
         public static final int VORBIS = 6;
         /** Opus audio codec */
         public static final int OPUS = 7;
+        /** @hide EVRC audio codec */
+        public static final int EVRC = 10;
+        /** @hide QCELP audio codec */
+        public static final int QCELP = 11;
+        /** @hide Linear PCM audio codec */
+        public static final int LPCM = 12;
     }
 
     /**
