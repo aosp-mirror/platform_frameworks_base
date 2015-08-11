@@ -647,6 +647,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public void onFingerprintRunningStateChanged(boolean running) {
             mLockIcon.update();
         }
+
+        @Override
+        public void onStrongAuthTimeoutExpiredChanged(int userId) {
+            mLockIcon.update();
+        }
     };
 
     public void setKeyguardIndicationController(
