@@ -428,7 +428,7 @@ public class InputMethodUtils {
     }
 
     public static ArrayList<InputMethodSubtype> getSubtypes(InputMethodInfo imi) {
-        ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+        ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
         final int subtypeCount = imi.getSubtypeCount();
         for (int i = 0; i < subtypeCount; ++i) {
             subtypes.add(imi.getSubtypeAt(i));
@@ -438,7 +438,7 @@ public class InputMethodUtils {
 
     public static ArrayList<InputMethodSubtype> getOverridingImplicitlyEnabledSubtypes(
             InputMethodInfo imi, String mode) {
-        ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+        ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
         final int subtypeCount = imi.getSubtypeCount();
         for (int i = 0; i < subtypeCount; ++i) {
             final InputMethodSubtype subtype = imi.getSubtypeAt(i);
@@ -496,10 +496,9 @@ public class InputMethodUtils {
             Resources res, InputMethodInfo imi) {
         final List<InputMethodSubtype> subtypes = InputMethodUtils.getSubtypes(imi);
         final String systemLocale = res.getConfiguration().locale.toString();
-        if (TextUtils.isEmpty(systemLocale)) return new ArrayList<InputMethodSubtype>();
+        if (TextUtils.isEmpty(systemLocale)) return new ArrayList<>();
         final String systemLanguage = res.getConfiguration().locale.getLanguage();
-        final HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap =
-                new HashMap<String, InputMethodSubtype>();
+        final HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap = new HashMap<>();
         final int N = subtypes.size();
         for (int i = 0; i < N; ++i) {
             // scan overriding implicitly enabled subtypes.
@@ -512,7 +511,7 @@ public class InputMethodUtils {
             }
         }
         if (applicableModeAndSubtypesMap.size() > 0) {
-            return new ArrayList<InputMethodSubtype>(applicableModeAndSubtypesMap.values());
+            return new ArrayList<>(applicableModeAndSubtypesMap.values());
         }
         for (int i = 0; i < N; ++i) {
             final InputMethodSubtype subtype = subtypes.get(i);
@@ -545,7 +544,7 @@ public class InputMethodUtils {
         }
         final InputMethodSubtype keyboardSubtype
                 = applicableModeAndSubtypesMap.get(SUBTYPE_MODE_KEYBOARD);
-        final ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<InputMethodSubtype>(
+        final ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<>(
                 applicableModeAndSubtypesMap.values());
         if (keyboardSubtype != null && !keyboardSubtype.containsExtraValueKey(TAG_ASCII_CAPABLE)) {
             for (int i = 0; i < N; ++i) {
@@ -818,8 +817,7 @@ public class InputMethodUtils {
                 String enabledInputMethodsStr,
                 TextUtils.SimpleStringSplitter inputMethodSplitter,
                 TextUtils.SimpleStringSplitter subtypeSplitter) {
-            ArrayList<Pair<String, ArrayList<String>>> imsList =
-                    new ArrayList<Pair<String, ArrayList<String>>>();
+            ArrayList<Pair<String, ArrayList<String>>> imsList = new ArrayList<>();
             if (TextUtils.isEmpty(enabledInputMethodsStr)) {
                 return imsList;
             }
@@ -828,13 +826,13 @@ public class InputMethodUtils {
                 String nextImsStr = inputMethodSplitter.next();
                 subtypeSplitter.setString(nextImsStr);
                 if (subtypeSplitter.hasNext()) {
-                    ArrayList<String> subtypeHashes = new ArrayList<String>();
+                    ArrayList<String> subtypeHashes = new ArrayList<>();
                     // The first element is ime id.
                     String imeId = subtypeSplitter.next();
                     while (subtypeSplitter.hasNext()) {
                         subtypeHashes.add(subtypeSplitter.next());
                     }
-                    imsList.add(new Pair<String, ArrayList<String>>(imeId, subtypeHashes));
+                    imsList.add(new Pair<>(imeId, subtypeHashes));
                 }
             }
             return imsList;
@@ -901,8 +899,7 @@ public class InputMethodUtils {
                 InputMethodInfo imi) {
             List<Pair<String, ArrayList<String>>> imsList =
                     getEnabledInputMethodsAndSubtypeListLocked();
-            ArrayList<InputMethodSubtype> enabledSubtypes =
-                    new ArrayList<InputMethodSubtype>();
+            ArrayList<InputMethodSubtype> enabledSubtypes = new ArrayList<>();
             if (imi != null) {
                 for (Pair<String, ArrayList<String>> imsPair : imsList) {
                     InputMethodInfo info = mMethodMap.get(imsPair.first);
@@ -991,7 +988,7 @@ public class InputMethodUtils {
 
         private List<InputMethodInfo> createEnabledInputMethodListLocked(
                 List<Pair<String, ArrayList<String>>> imsList) {
-            final ArrayList<InputMethodInfo> res = new ArrayList<InputMethodInfo>();
+            final ArrayList<InputMethodInfo> res = new ArrayList<>();
             for (Pair<String, ArrayList<String>> ims: imsList) {
                 InputMethodInfo info = mMethodMap.get(ims.first);
                 if (info != null) {
@@ -1004,12 +1001,11 @@ public class InputMethodUtils {
         private List<Pair<InputMethodInfo, ArrayList<String>>>
                 createEnabledInputMethodAndSubtypeHashCodeListLocked(
                         List<Pair<String, ArrayList<String>>> imsList) {
-            final ArrayList<Pair<InputMethodInfo, ArrayList<String>>> res
-                    = new ArrayList<Pair<InputMethodInfo, ArrayList<String>>>();
+            final ArrayList<Pair<InputMethodInfo, ArrayList<String>>> res = new ArrayList<>();
             for (Pair<String, ArrayList<String>> ims : imsList) {
                 InputMethodInfo info = mMethodMap.get(ims.first);
                 if (info != null) {
-                    res.add(new Pair<InputMethodInfo, ArrayList<String>>(info, ims.second));
+                    res.add(new Pair<>(info, ims.second));
                 }
             }
             return res;
@@ -1118,7 +1114,7 @@ public class InputMethodUtils {
                         if (DEBUG) {
                             Slog.d(TAG, "Enabled subtype found in the history: " + subtypeHashCode);
                         }
-                        return new Pair<String, String>(imeInTheHistory, subtypeHashCode);
+                        return new Pair<>(imeInTheHistory, subtypeHashCode);
                     }
                 }
             }
@@ -1179,7 +1175,7 @@ public class InputMethodUtils {
         }
 
         private List<Pair<String, String>> loadInputMethodAndSubtypeHistoryLocked() {
-            ArrayList<Pair<String, String>> imsList = new ArrayList<Pair<String, String>>();
+            ArrayList<Pair<String, String>> imsList = new ArrayList<>();
             final String subtypeHistoryStr = getSubtypeHistoryStr();
             if (TextUtils.isEmpty(subtypeHistoryStr)) {
                 return imsList;
@@ -1196,7 +1192,7 @@ public class InputMethodUtils {
                         subtypeId = mSubtypeSplitter.next();
                         break;
                     }
-                    imsList.add(new Pair<String, String>(imeId, subtypeId));
+                    imsList.add(new Pair<>(imeId, subtypeId));
                 }
             }
             return imsList;
@@ -1294,7 +1290,7 @@ public class InputMethodUtils {
         public HashMap<InputMethodInfo, List<InputMethodSubtype>>
                 getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(Context context) {
             HashMap<InputMethodInfo, List<InputMethodSubtype>> enabledInputMethodAndSubtypes =
-                    new HashMap<InputMethodInfo, List<InputMethodSubtype>>();
+                    new HashMap<>();
             for (InputMethodInfo imi: getEnabledInputMethodListLocked()) {
                 enabledInputMethodAndSubtypes.put(
                         imi, getEnabledInputMethodSubtypeListLocked(context, imi, true));
