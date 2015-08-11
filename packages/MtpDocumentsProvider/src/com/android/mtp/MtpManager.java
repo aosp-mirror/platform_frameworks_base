@@ -35,7 +35,7 @@ class MtpManager {
 
     private final UsbManager mManager;
     // TODO: Save and restore the set of opened device.
-    private final SparseArray<MtpDevice> mDevices = new SparseArray<MtpDevice>();
+    private final SparseArray<MtpDevice> mDevices = new SparseArray<>();
 
     MtpManager(Context context) {
         mManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
@@ -142,7 +142,8 @@ class MtpManager {
 
     synchronized void importFile(int deviceId, int objectHandle, ParcelFileDescriptor target)
             throws IOException {
-        throw new UnsupportedOperationException("Importing files is not supported.");
+        final MtpDevice device = getDevice(deviceId);
+        device.importFile(objectHandle, target);
     }
 
     private MtpDevice getDevice(int deviceId) throws IOException {
