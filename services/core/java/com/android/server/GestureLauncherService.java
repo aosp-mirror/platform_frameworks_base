@@ -16,21 +16,26 @@
 
 package com.android.server;
 
+import android.app.ActivityManager;
 import android.app.KeyguardManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Handler;
 import android.os.PowerManager;
-import android.os.Vibrator;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Slog;
@@ -56,6 +61,8 @@ class GestureLauncherService extends SystemService {
 
     /** The wake lock held when a gesture is detected. */
     private WakeLock mWakeLock;
+    private boolean mRegistered;
+    private int mUserId;
 
     public GestureLauncherService(Context context) {
         super(context);
@@ -81,9 +88,35 @@ class GestureLauncherService extends SystemService {
             mWakeLock = powerManager.newWakeLock(
                     PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
                     "GestureLauncherService");
-            if (isCameraLaunchEnabled(resources)) {
-                registerCameraLaunchGesture(resources);
-            }
+            updateCameraRegistered();
+
+            mUserId = ActivityManager.getCurrentUser();
+            mContext.registerReceiver(mUserReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
+            registerContentObserver();
+        }
+    }
+
+    private void registerContentObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.CAMERA_GESTURE_DISABLED),
+                false, mSettingObserver, mUserId);
+    }
+
+    private void updateCameraRegistered() {
+        Resources resources = mContext.getResources();
+        if (isCameraLaunchSettingEnabled(mContext, mUserId)) {
+            registerCameraLaunchGesture(resources);
+        } else {
+            unregisterCameraLaunchGesture();
+        }
+    }
+
+    private void unregisterCameraLaunchGesture() {
+        if (mRegistered) {
+            mRegistered = false;
+            SensorManager sensorManager = (SensorManager) mContext.getSystemService(
+                    Context.SENSOR_SERVICE);
+            sensorManager.unregisterListener(mGestureListener);
         }
     }
 
@@ -91,12 +124,15 @@ class GestureLauncherService extends SystemService {
      * Registers for the camera launch gesture.
      */
     private void registerCameraLaunchGesture(Resources resources) {
+        if (mRegistered) {
+            return;
+        }
         SensorManager sensorManager = (SensorManager) mContext.getSystemService(
                 Context.SENSOR_SERVICE);
         int cameraLaunchGestureId = resources.getInteger(
                 com.android.internal.R.integer.config_cameraLaunchGestureSensorType);
         if (cameraLaunchGestureId != -1) {
-            boolean registered = false;
+            mRegistered = false;
             String sensorName = resources.getString(
                 com.android.internal.R.string.config_cameraLaunchGestureSensorStringType);
             mCameraLaunchSensor = sensorManager.getDefaultSensor(
@@ -108,7 +144,7 @@ class GestureLauncherService extends SystemService {
             // makes the code more robust.
             if (mCameraLaunchSensor != null) {
                 if (sensorName.equals(mCameraLaunchSensor.getStringType())) {
-                    registered = sensorManager.registerListener(mGestureListener,
+                    mRegistered = sensorManager.registerListener(mGestureListener,
                             mCameraLaunchSensor, 0);
                 } else {
                     String message = String.format("Wrong configuration. Sensor type and sensor "
@@ -117,10 +153,16 @@ class GestureLauncherService extends SystemService {
                     throw new RuntimeException(message);
                 }
             }
-            if (DBG) Slog.d(TAG, "Camera launch sensor registered: " + registered);
+            if (DBG) Slog.d(TAG, "Camera launch sensor registered: " + mRegistered);
         } else {
             if (DBG) Slog.d(TAG, "Camera launch sensor is not specified.");
         }
+    }
+
+    public static boolean isCameraLaunchSettingEnabled(Context context, int userId) {
+        return isCameraLaunchEnabled(context.getResources())
+                && (Settings.Secure.getIntForUser(context.getContentResolver(),
+                        Settings.Secure.CAMERA_GESTURE_DISABLED, 0, userId) == 0);
     }
 
     /**
@@ -141,6 +183,26 @@ class GestureLauncherService extends SystemService {
         // service equals to isCameraLaunchEnabled();
         return isCameraLaunchEnabled(resources);
     }
+
+    private final BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                mUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                mContext.getContentResolver().unregisterContentObserver(mSettingObserver);
+                registerContentObserver();
+                updateCameraRegistered();
+            }
+        }
+    };
+
+    private final ContentObserver mSettingObserver = new ContentObserver(new Handler()) {
+        public void onChange(boolean selfChange, android.net.Uri uri, int userId) {
+            if (userId == mUserId) {
+                updateCameraRegistered();
+            }
+        }
+    };
 
     private final class GestureEventListener implements SensorEventListener {
         @Override
