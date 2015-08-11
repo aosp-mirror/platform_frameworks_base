@@ -602,6 +602,46 @@ public class TelephonyManager {
     public static final String EXTRA_DATA_FAILURE_CAUSE = PhoneConstants.DATA_FAILURE_CAUSE_KEY;
 
     /**
+     * Broadcast intent action for letting custom component know to show voicemail notification.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_SHOW_VOICEMAIL_NOTIFICATION =
+            "android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION";
+
+    /**
+     * The number of voice messages associated with the notification.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_NOTIFICATION_COUNT =
+            "android.telephony.extra.NOTIFICATION_COUNT";
+
+    /**
+     * The voicemail number.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_VOICEMAIL_NUMBER =
+            "android.telephony.extra.VOICEMAIL_NUMBER";
+
+    /**
+     * The intent to call voicemail.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_CALL_VOICEMAIL_INTENT =
+            "android.telephony.extra.CALL_VOICEMAIL_INTENT";
+
+    /**
+     * The intent to launch voicemail settings.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT =
+            "android.telephony.extra.LAUNCH_VOICEMAIL_SETTINGS_INTENT";
+
+    /**
      * Response codes for sim activation. Activation completed successfully.
      * @hide
      */
