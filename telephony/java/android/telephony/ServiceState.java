@@ -220,6 +220,8 @@ public class ServiceState implements Parcelable {
     private int mCdmaEriIconIndex;
     private int mCdmaEriIconMode;
 
+    private boolean mIsDataRoamingFromRegistration;
+
     /**
      * get String description of roaming type
      * @hide
@@ -297,6 +299,7 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconIndex = s.mCdmaEriIconIndex;
         mCdmaEriIconMode = s.mCdmaEriIconMode;
         mIsEmergencyOnly = s.mIsEmergencyOnly;
+        mIsDataRoamingFromRegistration = s.mIsDataRoamingFromRegistration;
     }
 
     /**
@@ -324,6 +327,7 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconIndex = in.readInt();
         mCdmaEriIconMode = in.readInt();
         mIsEmergencyOnly = in.readInt() != 0;
+        mIsDataRoamingFromRegistration = in.readInt() != 0;
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -348,6 +352,7 @@ public class ServiceState implements Parcelable {
         out.writeInt(mCdmaEriIconIndex);
         out.writeInt(mCdmaEriIconMode);
         out.writeInt(mIsEmergencyOnly ? 1 : 0);
+        out.writeInt(mIsDataRoamingFromRegistration ? 1 : 0);
     }
 
     public int describeContents() {
@@ -436,6 +441,26 @@ public class ServiceState implements Parcelable {
      */
     public boolean getDataRoaming() {
         return mDataRoamingType != ROAMING_TYPE_NOT_ROAMING;
+    }
+
+    /**
+     * Set whether data network registration state is roaming
+     *
+     * This should only be set to the roaming value received
+     * once the data registration phase has completed.
+     * @hide
+     */
+    public void setDataRoamingFromRegistration(boolean dataRoaming) {
+        mIsDataRoamingFromRegistration = dataRoaming;
+    }
+
+    /**
+     * Get whether data network registration state is roaming
+     * @return true if registration indicates roaming, false otherwise
+     * @hide
+     */
+    public boolean getDataRoamingFromRegistration() {
+        return mIsDataRoamingFromRegistration;
     }
 
     /**
@@ -599,7 +624,8 @@ public class ServiceState implements Parcelable {
                 + ((null == mDataOperatorNumeric) ? 0 : mDataOperatorNumeric.hashCode())
                 + mCdmaRoamingIndicator
                 + mCdmaDefaultRoamingIndicator
-                + (mIsEmergencyOnly ? 1 : 0));
+                + (mIsEmergencyOnly ? 1 : 0)
+                + (mIsDataRoamingFromRegistration ? 1 : 0));
     }
 
     @Override
@@ -635,7 +661,8 @@ public class ServiceState implements Parcelable {
                 && equalsHandlesNulls(mCdmaRoamingIndicator, s.mCdmaRoamingIndicator)
                 && equalsHandlesNulls(mCdmaDefaultRoamingIndicator,
                         s.mCdmaDefaultRoamingIndicator)
-                && mIsEmergencyOnly == s.mIsEmergencyOnly);
+                && mIsEmergencyOnly == s.mIsEmergencyOnly
+                && mIsDataRoamingFromRegistration == s.mIsDataRoamingFromRegistration);
     }
 
     /**
@@ -736,7 +763,8 @@ public class ServiceState implements Parcelable {
                 + " " + mSystemId
                 + " RoamInd=" + mCdmaRoamingIndicator
                 + " DefRoamInd=" + mCdmaDefaultRoamingIndicator
-                + " EmergOnly=" + mIsEmergencyOnly);
+                + " EmergOnly=" + mIsEmergencyOnly
+                + " IsDataRoamingFromRegistration=" + mIsDataRoamingFromRegistration);
     }
 
     private void setNullState(int state) {
@@ -762,6 +790,7 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconIndex = -1;
         mCdmaEriIconMode = -1;
         mIsEmergencyOnly = false;
+        mIsDataRoamingFromRegistration = false;
     }
 
     public void setStateOutOfService() {
@@ -934,6 +963,7 @@ public class ServiceState implements Parcelable {
         mCdmaRoamingIndicator = m.getInt("cdmaRoamingIndicator");
         mCdmaDefaultRoamingIndicator = m.getInt("cdmaDefaultRoamingIndicator");
         mIsEmergencyOnly = m.getBoolean("emergencyOnly");
+        mIsDataRoamingFromRegistration = m.getBoolean("isDataRoamingFromRegistration");
     }
 
     /**
@@ -962,6 +992,7 @@ public class ServiceState implements Parcelable {
         m.putInt("cdmaRoamingIndicator", mCdmaRoamingIndicator);
         m.putInt("cdmaDefaultRoamingIndicator", mCdmaDefaultRoamingIndicator);
         m.putBoolean("emergencyOnly", Boolean.valueOf(mIsEmergencyOnly));
+        m.putBoolean("isDataRoamingFromRegistration", Boolean.valueOf(mIsDataRoamingFromRegistration));
     }
 
     /** @hide */
