@@ -1430,8 +1430,9 @@ public class TextUtils {
      */
     public static boolean isGraphic(CharSequence str) {
         final int len = str.length();
-        for (int i=0; i<len; i++) {
-            int gc = Character.getType(str.charAt(i));
+        for (int cp, i=0; i<len; i+=Character.charCount(cp)) {
+            cp = str.codePointAt(i);
+            int gc = Character.getType(cp);
             if (gc != Character.CONTROL
                     && gc != Character.FORMAT
                     && gc != Character.SURROGATE
@@ -1447,7 +1448,12 @@ public class TextUtils {
 
     /**
      * Returns whether this character is a printable character.
+     *
+     * This does not support non-BMP characters and should not be used.
+     *
+     * @deprecated Use {@link #isGraphic(CharSequence)} instead.
      */
+    @Deprecated
     public static boolean isGraphic(char c) {
         int gc = Character.getType(c);
         return     gc != Character.CONTROL
