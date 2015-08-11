@@ -32483,7 +32483,7 @@ package android.text {
     method public static boolean isDigitsOnly(java.lang.CharSequence);
     method public static boolean isEmpty(java.lang.CharSequence);
     method public static boolean isGraphic(java.lang.CharSequence);
-    method public static boolean isGraphic(char);
+    method public static deprecated boolean isGraphic(char);
     method public static java.lang.String join(java.lang.CharSequence, java.lang.Object[]);
     method public static java.lang.String join(java.lang.CharSequence, java.lang.Iterable);
     method public static int lastIndexOf(java.lang.CharSequence, char);
