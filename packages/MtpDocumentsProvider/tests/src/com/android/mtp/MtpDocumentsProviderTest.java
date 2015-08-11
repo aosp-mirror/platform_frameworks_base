@@ -217,6 +217,53 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(3072, cursor.getInt(5));
     }
 
+    public void testQueryChildDocuments() throws Exception {
+        mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
+
+        mMtpManager.setDocument(0, 1, new MtpDocument(
+                1 /* object handle */,
+                0x3801 /* JPEG */,
+                "image.jpg" /* display name */,
+                new Date(0) /* modified date */,
+                1024 * 1024 * 5 /* file size */,
+                1024 * 50 /* thumbnail size */));
+
+        final Cursor cursor = mProvider.queryChildDocuments("0_0_0", null, null);
+        assertEquals(1, cursor.getCount());
+
+        assertTrue(cursor.moveToNext());
+        assertEquals("0_0_1", cursor.getString(0));
+        assertEquals("image/jpeg", cursor.getString(1));
+        assertEquals("image.jpg", cursor.getString(2));
+        assertEquals(0, cursor.getLong(3));
+        assertEquals(
+                DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
+                DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL,
+                cursor.getInt(4));
+        assertEquals(1024 * 1024 * 5, cursor.getInt(5));
+
+        assertFalse(cursor.moveToNext());
+    }
+
+    public void testQueryChildDocuments_cursorError() throws Exception {
+        try {
+            mProvider.queryChildDocuments("0_0_0", null, null);
+            fail();
+        } catch (Throwable error) {
+            assertTrue(error instanceof FileNotFoundException);
+        }
+    }
+
+    public void testQueryChildDocuments_documentError() throws Exception {
+        mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
+        try {
+            mProvider.queryChildDocuments("0_0_0", null, null);
+            fail();
+        } catch (Throwable error) {
+            assertTrue(error instanceof FileNotFoundException);
+        }
+    }
+
     public void testDeleteDocument() throws FileNotFoundException {
         mMtpManager.setDocument(0, 1, new MtpDocument(
                 1 /* object handle */,
@@ -232,7 +279,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                         MtpDocumentsProvider.AUTHORITY, "0_0_2")));
     }
 
-    public void testDeleteDocument_error() throws FileNotFoundException {
+    public void testDeleteDocument_error() {
         mMtpManager.setParent(0, 1, 2);
         try {
             mProvider.deleteDocument("0_0_1");

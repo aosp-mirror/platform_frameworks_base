@@ -16,6 +16,7 @@
 
 package com.android.mtp;
 
+import android.database.MatrixCursor;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -67,11 +68,29 @@ class MtpDocument {
         this.mThumbSize = thumbSize;
     }
 
-    int getSize() {
-        return mSize;
+    void addToCursor(Identifier rootIdentifier, MatrixCursor.RowBuilder builder) {
+        final Identifier identifier = new Identifier(
+                rootIdentifier.mDeviceId, rootIdentifier.mStorageId, mObjectHandle);
+
+        int flag = 0;
+        if (mObjectHandle != DUMMY_HANDLE_FOR_ROOT) {
+            flag |= DocumentsContract.Document.FLAG_SUPPORTS_DELETE;
+            if (mThumbSize > 0) {
+                flag |= DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL;
+            }
+        }
+
+        builder.add(Document.COLUMN_DOCUMENT_ID, identifier.toDocumentId());
+        builder.add(Document.COLUMN_DISPLAY_NAME, mName);
+        builder.add(Document.COLUMN_MIME_TYPE, getMimeType());
+        builder.add(
+                Document.COLUMN_LAST_MODIFIED,
+                mDateModified != null ? mDateModified.getTime() : null);
+        builder.add(Document.COLUMN_FLAGS, flag);
+        builder.add(Document.COLUMN_SIZE, mSize);
     }
 
-    String getMimeType() {
+    private String getMimeType() {
         // TODO: Add complete list of mime types.
         switch (mFormat) {
             case 0x3001:
@@ -83,36 +102,5 @@ class MtpDocument {
             default:
                 return "";
         }
-    }
-
-    Object[] getRow(Identifier rootIdentifier, String[] columnNames) {
-        final Object[] rows = new Object[columnNames.length];
-        for (int i = 0; i < columnNames.length; i++) {
-            if (Document.COLUMN_DOCUMENT_ID.equals(columnNames[i])) {
-                final Identifier identifier = new Identifier(
-                        rootIdentifier.mDeviceId, rootIdentifier.mStorageId, mObjectHandle);
-                rows[i] = identifier.toDocumentId();
-            } else if (Document.COLUMN_DISPLAY_NAME.equals(columnNames[i])) {
-                rows[i] = mName;
-            } else if (Document.COLUMN_MIME_TYPE.equals(columnNames[i])) {
-                rows[i] = getMimeType();
-            } else if (Document.COLUMN_LAST_MODIFIED.equals(columnNames[i])) {
-                rows[i] = mDateModified != null ? mDateModified.getTime() : null;
-            } else if (Document.COLUMN_FLAGS.equals(columnNames[i])) {
-                int flag = 0;
-                if (mObjectHandle != DUMMY_HANDLE_FOR_ROOT) {
-                    flag |= DocumentsContract.Document.FLAG_SUPPORTS_DELETE;
-                    if (mThumbSize > 0) {
-                        flag |= DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL;
-                    }
-                }
-                rows[i] = flag;
-            } else if (Document.COLUMN_SIZE.equals(columnNames[i])) {
-                rows[i] = mSize;
-            } else {
-                rows[i] = null;
-            }
-        }
-        return rows;
     }
 }
