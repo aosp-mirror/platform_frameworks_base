@@ -2257,6 +2257,13 @@
     <permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"
         android:protectionLevel="system|signature" />
 
+    <!-- Permission an application must hold in order to use
+         {@link android.provider.Settings#ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}.
+         This is a normal permission: an app requesting it will always be granted the
+         permission, without the user needing to approve or see it. -->
+    <permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+        android:protectionLevel="normal" />
+
     <!-- @SystemApi Allows an application to collect battery statistics -->
     <permission android:name="android.permission.BATTERY_STATS"
         android:protectionLevel="signature|privileged|development" />
