@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <inttypes.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 
 #include "idmap.h"
@@ -35,8 +36,21 @@ namespace {
 
     bool writePackagesList(const char *filename, const SortedVector<Overlay>& overlayVector)
     {
-        FILE* fout = fopen(filename, "w");
+        // the file is opened for appending so that it doesn't get truncated
+        // before we can guarantee mutual exclusion via the flock
+        FILE* fout = fopen(filename, "a");
         if (fout == NULL) {
+            return false;
+        }
+
+        if (TEMP_FAILURE_RETRY(flock(fileno(fout), LOCK_EX)) != 0) {
+            fclose(fout);
+            return false;
+        }
+
+        if (TEMP_FAILURE_RETRY(ftruncate(fileno(fout), 0)) != 0) {
+            TEMP_FAILURE_RETRY(flock(fileno(fout), LOCK_UN));
+            fclose(fout);
             return false;
         }
 
@@ -45,6 +59,8 @@ namespace {
             fprintf(fout, "%s %s\n", overlay.apk_path.string(), overlay.idmap_path.string());
         }
 
+        TEMP_FAILURE_RETRY(fflush(fout));
+        TEMP_FAILURE_RETRY(flock(fileno(fout), LOCK_UN));
         fclose(fout);
 
         // Make file world readable since Zygote (running as root) will read
@@ -171,9 +187,6 @@ int idmap_scan(const char *target_package_name, const char *target_apk_path,
 {
     String8 filename = String8(idmap_dir);
     filename.appendPath("overlays.list");
-    if (unlink(filename.string()) != 0 && errno != ENOENT) {
-        return EXIT_FAILURE;
-    }
 
     SortedVector<Overlay> overlayVector;
     const size_t N = overlay_dirs->size();
