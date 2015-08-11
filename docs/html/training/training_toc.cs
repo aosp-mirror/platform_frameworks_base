@@ -1441,6 +1441,9 @@ results."
           <li><a href="<?cs var:toroot ?>training/appbar/up-action.html"
             >Adding an Up Action</a>
           </li>
+          <li><a href="<?cs var:toroot ?>training/appbar/action-views.html"
+            >Action Views and Action Providers</a>
+          </li>
         </ul>
       </li>
 
