@@ -4437,7 +4437,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private final View mHostView;
         private final String mMethodName;
 
-        private Method mMethod;
+        private Method mResolvedMethod;
+        private Context mResolvedContext;
 
         public DeclaredOnClickListener(@NonNull View hostView, @NonNull String methodName) {
             mHostView = hostView;
@@ -4446,12 +4447,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         @Override
         public void onClick(@NonNull View v) {
-            if (mMethod == null) {
-                mMethod = resolveMethod(mHostView.getContext(), mMethodName);
+            if (mResolvedMethod == null) {
+                resolveMethod(mHostView.getContext(), mMethodName);
             }
 
             try {
-                mMethod.invoke(mHostView.getContext(), v);
+                mResolvedMethod.invoke(mResolvedContext, v);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException(
                         "Could not execute non-public method for android:onClick", e);
@@ -4462,11 +4463,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         @NonNull
-        private Method resolveMethod(@Nullable Context context, @NonNull String name) {
+        private void resolveMethod(@Nullable Context context, @NonNull String name) {
             while (context != null) {
                 try {
                     if (!context.isRestricted()) {
-                        return context.getClass().getMethod(mMethodName, View.class);
+                        final Method method = context.getClass().getMethod(mMethodName, View.class);
+                        if (method != null) {
+                            mResolvedMethod = method;
+                            mResolvedContext = context;
+                            return;
+                        }
                     }
                 } catch (NoSuchMethodException e) {
                     // Failed to find method, keep searching up the hierarchy.
