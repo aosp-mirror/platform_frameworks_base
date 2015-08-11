@@ -1431,7 +1431,7 @@ public class TextUtils {
     public static boolean isGraphic(CharSequence str) {
         final int len = str.length();
         for (int cp, i=0; i<len; i+=Character.charCount(cp)) {
-            cp = str.codePointAt(i);
+            cp = Character.codePointAt(str, i);
             int gc = Character.getType(cp);
             if (gc != Character.CONTROL
                     && gc != Character.FORMAT
