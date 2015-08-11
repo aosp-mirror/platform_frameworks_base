@@ -213,7 +213,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         try {
             return new AssetFileDescriptor(
                     mPipeManager.readThumbnail(mMtpManager, identifier),
-                    0,
+                    0,  // Start offset.
                     AssetFileDescriptor.UNKNOWN_LENGTH);
         } catch (IOException error) {
             throw new FileNotFoundException(error.getMessage());
