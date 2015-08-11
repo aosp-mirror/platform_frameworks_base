@@ -147,17 +147,45 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
 
         final MatrixCursor cursor = new MatrixCursor(projection);
-        cursor.addRow(document.getRow(
-                new Identifier(identifier.mDeviceId, identifier.mStorageId),
-                projection));
+        document.addToCursor(
+                new Identifier(identifier.mDeviceId, identifier.mStorageId), cursor.newRow());
         return cursor;
     }
 
+    // TODO: Support background loading for large number of files.
     @Override
-    public Cursor queryChildDocuments(
-            String parentDocumentId, String[] projection, String sortOrder)
-                    throws FileNotFoundException {
-        throw new FileNotFoundException();
+    public Cursor queryChildDocuments(String parentDocumentId,
+            String[] projection, String sortOrder) throws FileNotFoundException {
+        if (projection == null) {
+            projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
+        }
+        final Identifier parentIdentifier = Identifier.createFromDocumentId(parentDocumentId);
+        int parentHandle = parentIdentifier.mObjectHandle;
+        // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
+        // getObjectHandles if we would like to obtain children under the root.
+        if (parentHandle == MtpDocument.DUMMY_HANDLE_FOR_ROOT) {
+            parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
+        }
+        try {
+            final MatrixCursor cursor = new MatrixCursor(projection);
+            final Identifier rootIdentifier = new Identifier(
+                    parentIdentifier.mDeviceId, parentIdentifier.mStorageId);
+            final int[] objectHandles = mMtpManager.getObjectHandles(
+                    parentIdentifier.mDeviceId, parentIdentifier.mStorageId, parentHandle);
+            for (int i = 0; i < objectHandles.length; i++) {
+                try {
+                    final MtpDocument document = mMtpManager.getDocument(
+                            parentIdentifier.mDeviceId,  objectHandles[i]);
+                    document.addToCursor(rootIdentifier, cursor.newRow());
+                } catch (IOException error) {
+                    cursor.close();
+                    throw new FileNotFoundException(error.getMessage());
+                }
+            }
+            return cursor;
+        } catch (IOException exception) {
+            throw new FileNotFoundException(exception.getMessage());
+        }
     }
 
     @Override
@@ -170,8 +198,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
         final Identifier identifier = Identifier.createFromDocumentId(documentId);
         try {
-            final MtpDocument document =
-                    mMtpManager.getDocument(identifier.mDeviceId, identifier.mObjectHandle);
             return mPipeManager.readDocument(mMtpManager, identifier);
         } catch (IOException error) {
             throw new FileNotFoundException(error.getMessage());

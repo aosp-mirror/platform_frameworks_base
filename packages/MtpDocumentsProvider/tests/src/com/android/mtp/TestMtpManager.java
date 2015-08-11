@@ -32,13 +32,14 @@ public class TestMtpManager extends MtpManager {
         return Arrays.toString(args);
     }
 
-    private final Set<Integer> mValidDevices = new HashSet<Integer>();
-    private final Set<Integer> mOpenedDevices = new TreeSet<Integer>();
-    private final Map<Integer, MtpRoot[]> mRoots = new HashMap<Integer, MtpRoot[]>();
-    private final Map<String, MtpDocument> mDocuments = new HashMap<String, MtpDocument>();
-    private final Map<String, byte[]> mThumbnailBytes = new HashMap<String, byte[]>();
-    private final Map<String, Integer> mParents = new HashMap<String, Integer>();
-    private final Map<String, byte[]> mImportFileBytes = new HashMap<String, byte[]>();
+    private final Set<Integer> mValidDevices = new HashSet<>();
+    private final Set<Integer> mOpenedDevices = new TreeSet<>();
+    private final Map<Integer, MtpRoot[]> mRoots = new HashMap<>();
+    private final Map<String, MtpDocument> mDocuments = new HashMap<>();
+    private final Map<String, int[]> mObjectHandles = new HashMap<>();
+    private final Map<String, byte[]> mThumbnailBytes = new HashMap<>();
+    private final Map<String, Integer> mParents = new HashMap<>();
+    private final Map<String, byte[]> mImportFileBytes = new HashMap<>();
 
     TestMtpManager(Context context) {
         super(context);
@@ -46,6 +47,10 @@ public class TestMtpManager extends MtpManager {
 
     void addValidDevice(int deviceId) {
         mValidDevices.add(deviceId);
+    }
+
+    void setObjectHandles(int deviceId, int storageId, int objectHandle, int[] documents) {
+        mObjectHandles.put(pack(deviceId, storageId, objectHandle), documents);
     }
 
     void setRoots(int deviceId, MtpRoot[] roots) {
@@ -94,8 +99,23 @@ public class TestMtpManager extends MtpManager {
     }
 
     @Override
-    MtpDocument getDocument(int deviceId, int objectHandle) {
-        return mDocuments.get(pack(deviceId, objectHandle));
+    MtpDocument getDocument(int deviceId, int objectHandle) throws IOException {
+        final String key = pack(deviceId, objectHandle);
+        if (mDocuments.containsKey(key)) {
+            return mDocuments.get(key);
+        } else {
+            throw new IOException("getDocument error: " + key);
+        }
+    }
+
+    @Override
+    int[] getObjectHandles(int deviceId, int storageId, int parentObjectHandle) throws IOException {
+        final String key = pack(deviceId, storageId, parentObjectHandle);
+        if (mObjectHandles.containsKey(key)) {
+            return mObjectHandles.get(key);
+        } else {
+            throw new IOException("getObjectHandles error: " + key);
+        }
     }
 
     @Override

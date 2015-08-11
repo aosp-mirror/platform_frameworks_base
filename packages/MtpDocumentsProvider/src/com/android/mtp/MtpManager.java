@@ -31,6 +31,8 @@ import java.io.IOException;
  * The model wrapping android.mtp API.
  */
 class MtpManager {
+    final static int OBJECT_HANDLE_ROOT_CHILDREN = -1;
+
     private final UsbManager mManager;
     // TODO: Save and restore the set of opened device.
     private final SparseArray<MtpDevice> mDevices = new SparseArray<MtpDevice>();
@@ -103,6 +105,12 @@ class MtpManager {
     synchronized MtpDocument getDocument(int deviceId, int objectHandle) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         return new MtpDocument(device.getObjectInfo(objectHandle));
+    }
+
+    synchronized int[] getObjectHandles(int deviceId, int storageId, int parentObjectHandle)
+            throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        return device.getObjectHandles(storageId, 0 /* all format */, parentObjectHandle);
     }
 
     synchronized byte[] getObject(int deviceId, int objectHandle, int expectedSize)
