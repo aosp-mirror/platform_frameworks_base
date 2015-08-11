@@ -131,7 +131,10 @@ public final class Formatter {
         // floating point errors.
         final int roundFactor;
         final String roundFormat;
-        if (result < 1) {
+        if (mult == 1 || result >= 100) {
+            roundFactor = 1;
+            roundFormat = "%.0f";
+        } else if (result < 1) {
             roundFactor = 100;
             roundFormat = "%.2f";
         } else if (result < 10) {
@@ -142,7 +145,7 @@ public final class Formatter {
                 roundFactor = 100;
                 roundFormat = "%.2f";
             }
-        } else if (result < 100) {
+        } else { // 10 <= result < 100
             if ((flags & FLAG_SHORTER) != 0) {
                 roundFactor = 1;
                 roundFormat = "%.0f";
@@ -150,9 +153,6 @@ public final class Formatter {
                 roundFactor = 100;
                 roundFormat = "%.2f";
             }
-        } else {
-            roundFactor = 1;
-            roundFormat = "%.0f";
         }
         final String roundedString = String.format(roundFormat, result);
 
