@@ -2275,4 +2275,8 @@
     <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
          must match the value of config_cameraLaunchGestureSensorType in OEM's HAL -->
     <string translatable="false" name="config_cameraLaunchGestureSensorStringType"></string>
+
+    <!-- Name of the component to handle network policy notifications. If present,
+         disables NetworkPolicyManagerService's presentation of data-usage notifications. -->
+    <string translatable="false" name="config_networkPolicyNotificationComponent"></string>
 </resources>
