@@ -32512,7 +32512,7 @@ package android.text {
     method public static int getLayoutDirectionFromLocale(java.util.Locale);
     method public static int getOffsetAfter(java.lang.CharSequence, int);
     method public static int getOffsetBefore(java.lang.CharSequence, int);
-    method public static java.lang.CharSequence getReverse(java.lang.CharSequence, int, int);
+    method public static deprecated java.lang.CharSequence getReverse(java.lang.CharSequence, int, int);
     method public static int getTrimmedLength(java.lang.CharSequence);
     method public static java.lang.String htmlEncode(java.lang.String);
     method public static int indexOf(java.lang.CharSequence, char);

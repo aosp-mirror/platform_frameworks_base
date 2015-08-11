@@ -462,7 +462,7 @@ public class TextUtils {
 
     /**
      * Returns the length that the specified CharSequence would have if
-     * spaces and control characters were trimmed from the start and end,
+     * spaces and ASCII control characters were trimmed from the start and end,
      * as by {@link String#trim}.
      */
     public static int getTrimmedLength(CharSequence s) {
@@ -505,7 +505,13 @@ public class TextUtils {
         return false;
     }
 
-    // XXX currently this only reverses chars, not spans
+    /*
+     * @deprecated
+     * Do not use. This function only reverses individual {@code char}s and not their associated
+     * spans. It doesn't support surrogate pairs (that correspond to non-BMP code points),
+     * combining sequences or conjuncts either.
+     */
+    @Deprecated
     public static CharSequence getReverse(CharSequence source,
                                           int start, int end) {
         return new Reverser(source, start, end);
@@ -1470,8 +1476,9 @@ public class TextUtils {
      */
     public static boolean isDigitsOnly(CharSequence str) {
         final int len = str.length();
-        for (int i = 0; i < len; i++) {
-            if (!Character.isDigit(str.charAt(i))) {
+        for (int cp, i = 0; i < len; i += Character.charCount(cp)) {
+            cp = Character.codePointAt(str, i);
+            if (!Character.isDigit(cp)) {
                 return false;
             }
         }
