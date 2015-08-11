@@ -16,8 +16,10 @@
 
 package com.android.internal.policy;
 
-import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.FIRST_DYNAMIC_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -4011,8 +4013,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
                 attrs.type == TYPE_APPLICATION;
         mWorkspaceId = getWorkspaceId();
-        // Only a non floating application window can get a non client decor.
-        if (!isFloating() && isApplication) {
+        // Only a non floating application window on one of the allowed worksapces can get a non
+        // client decor.
+        if (!isFloating() && isApplication && mWorkspaceId != HOME_STACK_ID &&
+                mWorkspaceId < FIRST_DYNAMIC_STACK_ID) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             TypedValue value = new TypedValue();
