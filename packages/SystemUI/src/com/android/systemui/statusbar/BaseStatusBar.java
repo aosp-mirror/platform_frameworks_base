@@ -42,6 +42,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -1816,10 +1817,16 @@ public abstract class BaseStatusBar extends SystemUI implements
                 sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), n);
         iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
+        final Icon smallIcon = n.getSmallIcon();
+        if (smallIcon == null) {
+            handleNotificationError(sbn,
+                    "No small icon in notification from " + sbn.getPackageName());
+            return null;
+        }
         final StatusBarIcon ic = new StatusBarIcon(
                 sbn.getUser(),
                 sbn.getPackageName(),
-                n.getSmallIcon(),
+                smallIcon,
                 n.iconLevel,
                 n.number,
                 n.tickerText);
