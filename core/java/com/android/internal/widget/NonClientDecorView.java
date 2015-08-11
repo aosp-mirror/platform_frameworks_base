@@ -17,6 +17,7 @@
 package com.android.internal.widget;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.view.View;
@@ -243,13 +244,49 @@ public class NonClientDecorView extends ViewGroup implements View.OnClickListene
      * Maximize the window by moving it to the maximized workspace stack.
      **/
     private void maximizeWindow() {
-        Window.WindowStackCallback callback = mOwner.getWindowStackCallback();
+        Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
         if (callback != null) {
             try {
                 callback.changeWindowStack(
                         android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Cannot change task workspace.");
+            }
+        }
+    }
+
+    /**
+     * Returns the bounds of this activity.
+     * @return Returns bounds of the activity. It will return null if either the window is
+     *     fullscreen or the bounds could not be retrieved.
+     */
+    private Rect getActivityBounds() {
+        Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
+        if (callback != null) {
+            try {
+                return callback.getActivityBounds();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to get the activity bounds.");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sets the bounds of this Activity on the stack.
+     * @param newBounds The bounds of the activity. Passing null is not allowed.
+     */
+    private void setActivityBounds(Rect newBounds) {
+        if (newBounds == null) {
+            Log.e(TAG, "Failed to set null bounds to the activity.");
+            return;
+        }
+        Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
+        if (callback != null) {
+            try {
+                callback.setActivityBounds(newBounds);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to set the activity bounds.");
             }
         }
     }

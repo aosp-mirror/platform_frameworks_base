@@ -5187,7 +5187,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      **/
     private int getWorkspaceId() {
         int workspaceId = FULLSCREEN_WORKSPACE_STACK_ID;
-        WindowStackCallback callback = getWindowStackCallback();
+        WindowControllerCallback callback = getWindowControllerCallback();
         if (callback != null) {
             try {
                 workspaceId = callback.getWindowStackId();

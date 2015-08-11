@@ -28,8 +28,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
@@ -183,7 +184,7 @@ public abstract class Window {
     private TypedArray mWindowStyle;
     private Callback mCallback;
     private OnWindowDismissedCallback mOnWindowDismissedCallback;
-    private WindowStackCallback mWindowStackCallback;
+    private WindowControllerCallback mWindowControllerCallback;
     private WindowManager mWindowManager;
     private IBinder mAppToken;
     private String mAppName;
@@ -479,8 +480,9 @@ public abstract class Window {
     }
 
     /** @hide */
-    public interface WindowStackCallback {
-        /** Called to move the window and its activity/task to a different stack container.
+    public interface WindowControllerCallback {
+        /**
+         * Called to move the window and its activity/task to a different stack container.
          * For example, a window can move between
          * {@link android.app.ActivityManager#FULLSCREEN_WORKSPACE_STACK_ID} stack and
          * {@link android.app.ActivityManager#FREEFORM_WORKSPACE_STACK_ID} stack.
@@ -491,6 +493,23 @@ public abstract class Window {
 
         /** Returns the current stack Id for the window. */
         int getWindowStackId() throws RemoteException;
+
+        /**
+         * Returns the bounds of the task that contains this activity.
+         *
+         * @return Rect The bounds that contains the activity.
+         */
+        Rect getActivityBounds() throws RemoteException;
+
+        /**
+         * Sets the bounds (size and position) of the task or stack that contains this
+         * activity.
+         * NOTE: The requested bounds might not the fully honored by the system depending
+         * on the window placement policy.
+         *
+         * @param newBounds The new target bounds of the activity in task or stack.
+         */
+        void setActivityBounds(Rect newBounds) throws RemoteException;
     }
 
     public Window(Context context) {
@@ -682,13 +701,13 @@ public abstract class Window {
     }
 
     /** @hide */
-    public final void setWindowStackCallback(WindowStackCallback wscb) {
-        mWindowStackCallback = wscb;
+    public final void setWindowControllerCallback(WindowControllerCallback wccb) {
+        mWindowControllerCallback = wccb;
     }
 
     /** @hide */
-    public final WindowStackCallback getWindowStackCallback() {
-        return mWindowStackCallback;
+    public final WindowControllerCallback getWindowControllerCallback() {
+        return mWindowControllerCallback;
     }
 
     /**

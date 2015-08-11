@@ -8639,6 +8639,54 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void setActivityBounds(IBinder token, Rect bounds) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null) {
+                    Slog.w(TAG, "setActivityBounds: token=" + token + " not found");
+                    return;
+                }
+                final TaskRecord task = r.task;
+                if (task == null) {
+                    Slog.e(TAG, "setActivityBounds: No TaskRecord for the ActivityRecord r=" + r);
+                    return;
+                }
+                mStackSupervisor.resizeTaskLocked(task, bounds);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public Rect getActivityBounds(IBinder token) {
+        long ident = Binder.clearCallingIdentity();
+        Rect rect = null;
+        try {
+            synchronized (this) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null) {
+                    Slog.w(TAG, "getActivityBounds: token=" + token + " not found");
+                    return rect;
+                }
+                final TaskRecord task = r.task;
+                if (task == null) {
+                    Slog.e(TAG, "getActivityBounds: No TaskRecord for the ActivityRecord r=" + r);
+                    return rect;
+                }
+                if (task.mBounds != null) {
+                    rect = new Rect(task.mBounds);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return rect;
+    }
+
+    @Override
     public Bitmap getTaskDescriptionIcon(String filename) {
         if (!FileUtils.isValidExtFilename(filename)
                 || !filename.contains(ActivityRecord.ACTIVITY_ICON_SUFFIX)) {
