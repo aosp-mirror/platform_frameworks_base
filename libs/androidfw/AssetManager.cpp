@@ -34,7 +34,7 @@
 #include <utils/String8.h>
 #include <utils/threads.h>
 #include <utils/Timers.h>
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
 #include <cutils/trace.h>
 #endif
 
@@ -54,7 +54,7 @@
     _rc; })
 #endif
 
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
 #define MY_TRACE_BEGIN(x) ATRACE_BEGIN(x)
 #define MY_TRACE_END() ATRACE_END()
 #else
@@ -229,7 +229,7 @@ bool AssetManager::addAssetPath(const String8& path, int32_t* cookie)
         *cookie = static_cast<int32_t>(mAssetPaths.size());
     }
 
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
     // Load overlays, if any
     asset_path oap;
     for (size_t idx = 0; mZipSet.getOverlay(ap.path, idx, &oap); idx++) {
@@ -657,7 +657,7 @@ bool AssetManager::appendPathToResTable(const asset_path& ap) const {
                 ALOGV("Creating shared resources for %s", ap.path.string());
                 sharedRes = new ResTable();
                 sharedRes->add(ass, idmap, nextEntryIdx + 1, false);
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
                 const char* data = getenv("ANDROID_DATA");
                 LOG_ALWAYS_FATAL_IF(data == NULL, "ANDROID_DATA not set");
                 String8 overlaysListPath(data);
