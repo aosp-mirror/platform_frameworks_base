@@ -491,4 +491,8 @@ public class StatusBarKeyguardViewManager {
             mPhoneStatusBar.getNavigationBarView().setWakeAndUnlocking(true);
         }
     }
+
+    public void showBouncerMessage(String message, int color) {
+        mBouncer.showMessage(message, color);
+    }
 }
