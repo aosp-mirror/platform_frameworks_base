@@ -77,6 +77,14 @@ public interface KeyguardSecurityView {
     void showPromptReason(int reason);
 
     /**
+     * Show a message on the security view with a specified color
+     *
+     * @param message the message to show
+     * @param color the color to use
+     */
+    void showMessage(String message, int color);
+
+    /**
      * Instruct the view to show usability hints, if any.
      *
      */
