@@ -33,28 +33,36 @@ import javax.crypto.Mac;
 
 /**
  * Specification of how a key or key pair is secured when imported into the
- * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore facility</a>. This class
- * specifies parameters such as whether user authentication is required for using the key, what uses
- * the key is authorized for (e.g., only in {@code GCM} mode, or only for signing -- decryption not
- * permitted), the key's and validity start and end dates.
+ * <a href="{@docRoot}training/articles/keystore.html">Android Keystore system</a>. This class
+ * specifies authorized uses of the imported key, such as whether user authentication is required
+ * for using the key, what operations the key is authorized for (e.g., decryption, but not signing)
+ * and with what parameters (e.g., only with a particular padding scheme or digest), the key's and
+ * validity start and end dates. Key use authorizations expressed in this class apply only to secret
+ * keys and private keys -- public keys can be used for any supported operations.
  *
- * <p>To import a key or key pair into the Android KeyStore, create an instance of this class using
+ * <p>To import a key or key pair into the Android Keystore, create an instance of this class using
  * the {@link Builder} and pass the instance into {@link java.security.KeyStore#setEntry(String, java.security.KeyStore.Entry, ProtectionParameter) KeyStore.setEntry}
  * with the key or key pair being imported.
  *
- * <p>To obtain the secret/symmetric or private key from the Android KeyStore use
+ * <p>To obtain the secret/symmetric or private key from the Android Keystore use
  * {@link java.security.KeyStore#getKey(String, char[]) KeyStore.getKey(String, null)} or
  * {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter) KeyStore.getEntry(String, null)}.
- * To obtain the public key from the Android KeyStore use
+ * To obtain the public key from the Android Keystore use
  * {@link java.security.KeyStore#getCertificate(String)} and then
  * {@link Certificate#getPublicKey()}.
  *
- * <p>NOTE: The key material of keys stored in the Android KeyStore is not accessible.
+ * <p>To help obtain algorithm-specific public parameters of key pairs stored in the Android
+ * Keystore, its private keys implement {@link java.security.interfaces.ECKey} or
+ * {@link java.security.interfaces.RSAKey} interfaces whereas its public keys implement
+ * {@link java.security.interfaces.ECPublicKey} or {@link java.security.interfaces.RSAPublicKey}
+ * interfaces.
+ *
+ * <p>NOTE: The key material of keys stored in the Android Keystore is not accessible.
  *
  * <p>Instances of this class are immutable.
  *
- * <p><h3>Example: Symmetric Key</h3>
- * The following example illustrates how to import an AES key into the Android KeyStore under alias
+ * <p><h3>Example: AES key for encryption/decryption in GCM mode</h3>
+ * This example illustrates how to import an AES key into the Android KeyStore under alias
  * {@code key1} authorized to be used only for encryption/decryption in GCM mode with no padding.
  * The key must export its key material via {@link Key#getEncoded()} in {@code RAW} format.
  * <pre> {@code
@@ -71,15 +79,41 @@ import javax.crypto.Mac;
  *                 .build());
  * // Key imported, obtain a reference to it.
  * SecretKey keyStoreKey = (SecretKey) keyStore.getKey("key1", null);
- * // The original key can now be thrown away.
+ * // The original key can now be discarded.
+ *
+ * Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+ * cipher.init(Cipher.ENCRYPT_MODE, keyStoreKey);
+ * ...
  * }</pre>
  *
- * <p><h3>Example: Asymmetric Key Pair</h3>
- * The following example illustrates how to import an EC key pair into the Android KeyStore under
- * alias {@code key2} authorized to be used only for signing with SHA-256 digest and only if
- * the user has been authenticated within the last ten minutes. Both the private and the public key
- * must export their key material via {@link Key#getEncoded()} in {@code PKCS#8} and {@code X.509}
- * format respectively.
+ * <p><h3>Example: HMAC key for generating MACs using SHA-512</h3>
+ * This example illustrates how to import an HMAC key into the Android KeyStore under alias
+ * {@code key1} authorized to be used only for generating MACs using SHA-512 digest. The key must
+ * export its key material via {@link Key#getEncoded()} in {@code RAW} format.
+ * <pre> {@code
+ * SecretKey key = ...; // HMAC key of algorithm "HmacSHA512".
+ *
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * keyStore.setEntry(
+ *         "key1",
+ *         new KeyStore.SecretKeyEntry(key),
+ *         new KeyProtection.Builder(KeyProperties.PURPOSE_SIGN).build());
+ * // Key imported, obtain a reference to it.
+ * SecretKey keyStoreKey = (SecretKey) keyStore.getKey("key1", null);
+ * // The original key can now be discarded.
+ *
+ * Mac mac = Mac.getInstance("HmacSHA512");
+ * mac.init(keyStoreKey);
+ * ...
+ * }</pre>
+ *
+ * <p><h3>Example: EC key pair for signing/verification using ECDSA</h3>
+ * This example illustrates how to import an EC key pair into the Android KeyStore under alias
+ * {@code key2} with the private key authorized to be used only for signing with SHA-256 or SHA-512
+ * digests. The use of public key is unrestricted, thus permitting signature verification using any
+ * digests. Both the private and the public key must export their key material via
+ * {@link Key#getEncoded()} in {@code PKCS#8} and {@code X.509} format respectively.
  * <pre> {@code
  * PrivateKey privateKey = ...;   // EC private key
  * Certificate[] certChain = ...; // Certificate chain with the first certificate
@@ -91,7 +125,39 @@ import javax.crypto.Mac;
  *         "key2",
  *         new KeyStore.PrivateKeyEntry(privateKey, certChain),
  *         new KeyProtection.Builder(KeyProperties.PURPOSE_SIGN)
+ *                 .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+ *                 .build());
+ * // Key pair imported, obtain a reference to it.
+ * PrivateKey keyStorePrivateKey = (PrivateKey) keyStore.getKey("key2", null);
+ * PublicKey publicKey = keyStore.getCertificate("key2").getPublicKey();
+ * // The original private key can now be discarded.
+ *
+ * Signature signature = Signature.getInstance("SHA256withECDSA");
+ * signature.initSign(keyStorePrivateKey);
+ * ...
+ * }</pre>
+ *
+ * <p><h3>Example: RSA key pair for signing/verification using PKCS#1 padding</h3>
+ * This example illustrates how to import an RSA key pair into the Android KeyStore under alias
+ * {@code key2} with the private key authorized to be used only for signing using the PKCS#1
+ * signature padding scheme with SHA-256 digest and only if the user has been authenticated within
+ * the last ten minutes. The use of public key is unrestricted, thus permitting signature
+ * verification using any padding schemes and digests, and without user authentication. Both the
+ * private and the public key must export their key material via {@link Key#getEncoded()} in
+ * {@code PKCS#8} and {@code X.509} format respectively.
+ * <pre> {@code
+ * PrivateKey privateKey = ...;   // RSA private key
+ * Certificate[] certChain = ...; // Certificate chain with the first certificate
+ *                                // containing the corresponding RSA public key.
+ *
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * keyStore.setEntry(
+ *         "key2",
+ *         new KeyStore.PrivateKeyEntry(privateKey, certChain),
+ *         new KeyProtection.Builder(KeyProperties.PURPOSE_SIGN)
  *                 .setDigests(KeyProperties.DIGEST_SHA256)
+ *                 .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
  *                 // Only permit this key to be used if the user
  *                 // authenticated within the last ten minutes.
  *                 .setUserAuthenticationRequired(true)
@@ -100,7 +166,40 @@ import javax.crypto.Mac;
  * // Key pair imported, obtain a reference to it.
  * PrivateKey keyStorePrivateKey = (PrivateKey) keyStore.getKey("key2", null);
  * PublicKey publicKey = keyStore.getCertificate("key2").getPublicKey();
- * // The original private key can now be thrown away.
+ * // The original private key can now be discarded.
+ *
+ * Signature signature = Signature.getInstance("SHA256withRSA");
+ * signature.initSign(keyStorePrivateKey);
+ * ...
+ * }</pre>
+ *
+ * <p><h3>Example: RSA key pair for encryption/decryption using PKCS#1 padding</h3>
+ * This example illustrates how to import an RSA key pair into the Android KeyStore under alias
+ * {@code key2} with the private key authorized to be used only for decryption using the PKCS#1
+ * encryption padding scheme. The use of public key is unrestricted, thus permitting encryption
+ * using any padding schemes and digests. Both the private and the public key must export their key
+ * material via {@link Key#getEncoded()} in {@code PKCS#8} and {@code X.509} format respectively.
+ * <pre> {@code
+ * PrivateKey privateKey = ...;   // RSA private key
+ * Certificate[] certChain = ...; // Certificate chain with the first certificate
+ *                                // containing the corresponding RSA public key.
+ *
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * keyStore.setEntry(
+ *         "key2",
+ *         new KeyStore.PrivateKeyEntry(privateKey, certChain),
+ *         new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
+ *                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
+ *                 .build());
+ * // Key pair imported, obtain a reference to it.
+ * PrivateKey keyStorePrivateKey = (PrivateKey) keyStore.getKey("key2", null);
+ * PublicKey publicKey = keyStore.getCertificate("key2").getPublicKey();
+ * // The original private key can now be discarded.
+ *
+ * Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+ * cipher.init(Cipher.DECRYPT_MODE, keyStorePrivateKey);
+ * ...
  * }</pre>
  */
 public final class KeyProtection implements ProtectionParameter {
