@@ -3800,7 +3800,12 @@ final class ActivityStack {
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task=" + taskId);
 
         boolean prevIsHome = false;
-        if (tr.isOverHomeStack()) {
+
+        // If true, we should resume the home activity next if the task we are moving to the
+        // back is over the home stack. We force to false if the task we are moving to back
+        // is the home task and we don't want it resumed after moving to the back.
+        final boolean canGoHome = !tr.isHomeTask() && tr.isOverHomeStack();
+        if (canGoHome) {
             final TaskRecord nextTask = getNextTask(tr);
             if (nextTask != null) {
                 nextTask.setTaskToReturnTo(tr.getTaskToReturnTo());
@@ -3834,8 +3839,7 @@ final class ActivityStack {
         }
 
         final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
-        if (prevIsHome || task == tr && tr.isOverHomeStack()
-                || numTasks <= 1 && isOnHomeDisplay()) {
+        if (prevIsHome || (task == tr && canGoHome) || (numTasks <= 1 && isOnHomeDisplay())) {
             if (!mService.mBooting && !mService.mBooted) {
                 // Not ready yet!
                 return false;
