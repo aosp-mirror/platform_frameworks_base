@@ -37,9 +37,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * MultiSelectManager adds traditional multi-item selection support to RecyclerView.
+ * MultiSelectManager provides support traditional multi-item selection support to RecyclerView.
+ * Additionally it can be configured to restrict selection to a single element, @see
+ * #setSelectMode.
  */
 public final class MultiSelectManager {
+
+    /** Selection mode for multiple select. **/
+    public static final int MODE_MULTIPLE = 0;
+
+    /** Selection mode for multiple select. **/
+    public static final int MODE_SINGLE = 1;
 
     private static final String TAG = "MultiSelectManager";
     private static final boolean DEBUG = false;
@@ -54,15 +62,18 @@ public final class MultiSelectManager {
 
     private Adapter<?> mAdapter;
     private RecyclerViewHelper mHelper;
+    private boolean mSingleSelect;
 
     /**
      * @param recyclerView
      * @param gestureDelegate Option delage gesture listener.
+     * @param mode Selection mode
      * @template A gestureDelegate that implements both {@link OnGestureListener}
      *     and {@link OnDoubleTapListener}
      */
     public <L extends OnGestureListener & OnDoubleTapListener> MultiSelectManager(
-            final RecyclerView recyclerView, L gestureDelegate) {
+            final RecyclerView recyclerView, L gestureDelegate, int mode) {
+
         this(
                 recyclerView.getAdapter(),
                 new RecyclerViewHelper() {
@@ -73,7 +84,8 @@ public final class MultiSelectManager {
                                 ? recyclerView.getChildAdapterPosition(view)
                                 : RecyclerView.NO_POSITION;
                     }
-                });
+                },
+                mode);
 
         GestureDetector.SimpleOnGestureListener listener =
                 new GestureDetector.SimpleOnGestureListener() {
@@ -110,14 +122,14 @@ public final class MultiSelectManager {
 
     /**
      * Constructs a new instance with {@code adapter} and {@code helper}.
-     * @param adapter
-     * @param helper
      * @hide
      */
     @VisibleForTesting
-    MultiSelectManager(Adapter<?> adapter, RecyclerViewHelper helper) {
+    MultiSelectManager(Adapter<?> adapter, RecyclerViewHelper helper, int mode) {
         checkNotNull(adapter, "'adapter' cannot be null.");
         checkNotNull(helper, "'helper' cannot be null.");
+
+        mSingleSelect = mode == MODE_SINGLE;
 
         mHelper = helper;
         mAdapter = adapter;
@@ -196,34 +208,44 @@ public final class MultiSelectManager {
      * @return True if the selection state of the item changed.
      */
     public boolean setItemSelected(int position, boolean selected) {
-        boolean changed = (selected)
-                ? mSelection.add(position)
-                : mSelection.remove(position);
-
-        if (changed) {
-            notifyItemStateChanged(position, true);
+        if (mSingleSelect && !mSelection.isEmpty()) {
+            clearSelectionQuietly();
         }
-        return changed;
+        return setItemsSelected(position, 1, selected);
     }
 
     /**
-     * @param position
-     * @param length
-     * @param selected
+     * Sets the selected state of the specified items. Note that the callback will NOT
+     * be consulted to see if an item can be selected.
+     *
      * @return True if the selection state of any of the items changed.
      */
     public boolean setItemsSelected(int position, int length, boolean selected) {
         boolean changed = false;
         for (int i = position; i < position + length; i++) {
-            changed |= setItemSelected(i, selected);
+            boolean itemChanged = selected ? mSelection.add(i) : mSelection.remove(i);
+            if (itemChanged) {
+                notifyItemStateChanged(i, selected);
+            }
+            changed |= itemChanged;
         }
+
+        notifySelectionChanged();
         return changed;
     }
 
     /**
-     * Clears the selection.
+     * Clears the selection and notifies (even if nothing changes).
      */
     public void clearSelection() {
+        clearSelectionQuietly();
+        notifySelectionChanged();
+    }
+
+    /**
+     * Clears the selection, without notifying anyone.
+     */
+    private void clearSelectionQuietly() {
         mRanger = null;
 
         if (mSelection.isEmpty()) {
@@ -265,7 +287,9 @@ public final class MultiSelectManager {
             if (DEBUG) Log.i(TAG, "View is null. Cannot handle tap event.");
         }
 
-        toggleSelection(position);
+        if (toggleSelection(position)) {
+            notifySelectionChanged();
+        }
     }
 
     /**
@@ -309,6 +333,10 @@ public final class MultiSelectManager {
             toggleSelection(position);
         }
 
+        // We're being lazy here notifying even when something might not have changed.
+        // To make this more correct, we'd need to update the Ranger class to return
+        // information about what has changed.
+        notifySelectionChanged();
         return false;
     }
 
@@ -327,20 +355,29 @@ public final class MultiSelectManager {
             return false;
         }
 
+        boolean changed = false;
         if (mSelection.contains(position)) {
-            return attemptDeselect(position);
+            changed = attemptDeselect(position);
         } else {
-            boolean selected = attemptSelect(position);
+            boolean canSelect = notifyBeforeItemStateChange(position, true);
+            if (!canSelect) {
+                return false;
+            }
+            if (mSingleSelect && !mSelection.isEmpty()) {
+                clearSelectionQuietly();
+            }
+
             // Here we're already in selection mode. In that case
             // When a simple click/tap (without SHIFT) creates causes
             // an item to be selected.
             // By recreating Ranger at this point, we allow the user to create
             // multiple separate contiguous ranges with SHIFT+Click & Click.
-            if (selected) {
-                setSelectionFocusBegin(position);
-            }
-            return selected;
+            selectAndNotify(position);
+            setSelectionFocusBegin(position);
+            changed = true;
         }
+
+        return changed;
     }
 
     /**
@@ -367,10 +404,15 @@ public final class MultiSelectManager {
      */
     private void updateRange(int begin, int end, boolean selected) {
         checkState(end >= begin);
-        if (DEBUG) Log.i(TAG, String.format("Updating range begin=%d, end=%d, selected=%b.", begin, end, selected));
         for (int i = begin; i <= end; i++) {
             if (selected) {
-                attemptSelect(i);
+                boolean canSelect = notifyBeforeItemStateChange(i, true);
+                if (canSelect) {
+                    if (mSingleSelect && !mSelection.isEmpty()) {
+                        clearSelectionQuietly();
+                    }
+                    selectAndNotify(i);
+                }
             } else {
                 attemptDeselect(i);
             }
@@ -381,16 +423,12 @@ public final class MultiSelectManager {
      * @param position
      * @return True if the update was applied.
      */
-    private boolean attemptSelect(int position) {
-        if (notifyBeforeItemStateChange(position, true)) {
-            mSelection.add(position);
+    private boolean selectAndNotify(int position) {
+        boolean changed = mSelection.add(position);
+        if (changed) {
             notifyItemStateChanged(position, true);
-            if (DEBUG) Log.d(TAG, "Selection after select: " + mSelection);
-            return true;
-        } else {
-            if (DEBUG) Log.d(TAG, "Select cancelled by listener.");
-            return false;
         }
+        return changed;
     }
 
     /**
@@ -420,10 +458,8 @@ public final class MultiSelectManager {
     }
 
     /**
-     * Notifies registered listeners when a selection changes.
-     *
-     * @param position
-     * @param selected
+     * Notifies registered listeners when the selection status of a single item
+     * (identified by {@code position}) changes.
      */
     private void notifyItemStateChanged(int position, boolean selected) {
         int lastListener = mCallbacks.size() - 1;
@@ -431,6 +467,19 @@ public final class MultiSelectManager {
             mCallbacks.get(i).onItemStateChanged(position, selected);
         }
         mAdapter.notifyItemChanged(position);
+    }
+
+    /**
+     * Notifies registered listeners when the selection has changed. This
+     * notification should be sent only once a full series of changes
+     * is complete, e.g. clearingSelection, or updating the single
+     * selection from one item to another.
+     */
+    private void notifySelectionChanged() {
+        int lastListener = mCallbacks.size() - 1;
+        for (int i = lastListener; i > -1; i--) {
+            mCallbacks.get(i).onSelectionChanged();
+        }
     }
 
     /**
@@ -443,7 +492,7 @@ public final class MultiSelectManager {
         int mEnd = UNDEFINED;
 
         public Range(int begin) {
-            if (DEBUG) Log.d(TAG, String.format("New Ranger(%d) created.", begin));
+            if (DEBUG) Log.d(TAG, "New Ranger created beginning @ " + begin);
             mBegin = begin;
         }
 
@@ -680,8 +729,10 @@ public final class MultiSelectManager {
             }
 
             StringBuilder buffer = new StringBuilder(mSelection.size() * 28);
-            buffer.append(String.format("{size=%d, ", mSelection.size()));
-            buffer.append("items=[");
+            buffer.append("{size=")
+                    .append(mSelection.size())
+                    .append(", ")
+                    .append("items=[");
             for (int i=0; i < mSelection.size(); i++) {
                 if (i > 0) {
                     buffer.append(", ");
@@ -726,11 +777,19 @@ public final class MultiSelectManager {
         public void onItemStateChanged(int position, boolean selected);
 
         /**
-         * @param position
-         * @param selected
-         * @return false to cancel the change.
+         * Called prior to an item changing state. Callbacks can cancel
+         * the change at {@code position} by returning {@code false}.
+         *
+         * @param position Adapter position of the item that was checked or unchecked
+         * @param selected <code>true</code> if the item is to be selected, <code>false</code>
+         *                if the item is to be unselected.
          */
         public boolean onBeforeItemStateChange(int position, boolean selected);
+
+        /**
+         * Called immediately after completion of any set of changes.
+         */
+        public void onSelectionChanged();
     }
 
     /**

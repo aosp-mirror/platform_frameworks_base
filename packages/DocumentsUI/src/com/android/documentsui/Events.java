@@ -28,7 +28,14 @@ final class Events {
      * Returns true if event was triggered by a mouse.
      */
     static boolean isMouseEvent(MotionEvent e) {
-        return e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
+        return isMouseType(e.getToolType(0));
+    }
+
+    /**
+     * Returns true if event was triggered by a finger or stylus touch.
+     */
+    static boolean isTouchEvent(MotionEvent e) {
+        return isTouchType(e.getToolType(0));
     }
 
     /**
@@ -36,6 +43,14 @@ final class Events {
      */
     static boolean isMouseType(int toolType) {
         return toolType == MotionEvent.TOOL_TYPE_MOUSE;
+    }
+
+    /**
+     * Returns true if event was triggered by a finger or stylus touch.
+     */
+    static boolean isTouchType(int toolType) {
+        return toolType == MotionEvent.TOOL_TYPE_FINGER
+                || toolType == MotionEvent.TOOL_TYPE_STYLUS;
     }
 
     /**
