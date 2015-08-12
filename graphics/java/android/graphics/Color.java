@@ -54,7 +54,6 @@ public class Color {
      * Return the alpha component of a color int. This is the same as saying
      * color >>> 24
      */
-    @ColorInt
     public static int alpha(int color) {
         return color >>> 24;
     }
@@ -63,7 +62,6 @@ public class Color {
      * Return the red component of a color int. This is the same as saying
      * (color >> 16) & 0xFF
      */
-    @ColorInt
     public static int red(int color) {
         return (color >> 16) & 0xFF;
     }
@@ -72,7 +70,6 @@ public class Color {
      * Return the green component of a color int. This is the same as saying
      * (color >> 8) & 0xFF
      */
-    @ColorInt
     public static int green(int color) {
         return (color >> 8) & 0xFF;
     }
@@ -81,7 +78,6 @@ public class Color {
      * Return the blue component of a color int. This is the same as saying
      * color & 0xFF
      */
-    @ColorInt
     public static int blue(int color) {
         return color & 0xFF;
     }
