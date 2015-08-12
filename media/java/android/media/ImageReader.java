@@ -679,17 +679,31 @@ public class ImageReader implements AutoCloseable {
         @Override
         public int getWidth() {
             throwISEIfImageIsInvalid();
-            mWidth = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getWidth() :
-                    nativeGetWidth(mFormat);
-            return mWidth;
+            int width;
+            switch(getFormat()) {
+                case ImageFormat.JPEG:
+                case ImageFormat.DEPTH_POINT_CLOUD:
+                    width = ImageReader.this.getWidth();
+                    break;
+                default:
+                    width = nativeGetWidth(mFormat);
+            }
+            return width;
         }
 
         @Override
         public int getHeight() {
             throwISEIfImageIsInvalid();
-            mHeight = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getHeight() :
-                    nativeGetHeight(mFormat);
-            return mHeight;
+            int height;
+            switch(getFormat()) {
+                case ImageFormat.JPEG:
+                case ImageFormat.DEPTH_POINT_CLOUD:
+                    height = ImageReader.this.getHeight();
+                    break;
+                default:
+                    height = nativeGetHeight(mFormat);
+            }
+            return height;
         }
 
         @Override
@@ -826,8 +840,6 @@ public class ImageReader implements AutoCloseable {
         private long mTimestamp;
 
         private SurfacePlane[] mPlanes;
-        private int mHeight = -1;
-        private int mWidth = -1;
         private int mFormat = ImageFormat.UNKNOWN;
         // If this image is detached from the ImageReader.
         private AtomicBoolean mIsDetached = new AtomicBoolean(false);
