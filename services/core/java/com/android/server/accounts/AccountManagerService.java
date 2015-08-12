@@ -283,7 +283,22 @@ public class AccountManagerService
                 // Don't delete accounts when updating a authenticator's
                 // package.
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                    purgeOldGrantsAll();
+                    /* Purging data requires file io, don't block the main thread. This is probably
+                     * less than ideal because we are introducing a race condition where old grants
+                     * could be exercised until they are purged. But that race condition existed
+                     * anyway with the broadcast receiver.
+                     *
+                     * Ideally, we would completely clear the cache, purge data from the database,
+                     * and then rebuild the cache. All under the cache lock. But that change is too
+                     * large at this point.
+                     */
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            purgeOldGrantsAll();
+                        }
+                    };
+                    new Thread(r).start();
                 }
             }
         }, intentFilter);
@@ -327,52 +342,6 @@ public class AccountManagerService
             mUserManager = UserManager.get(mContext);
         }
         return mUserManager;
-    }
-
-    /* Caller should lock mUsers */
-    private UserAccounts initUserLocked(int userId) {
-        UserAccounts accounts = mUsers.get(userId);
-        if (accounts == null) {
-            accounts = new UserAccounts(mContext, userId);
-            initializeDebugDbSizeAndCompileSqlStatementForLogging(
-                    accounts.openHelper.getWritableDatabase(), accounts);
-            mUsers.append(userId, accounts);
-            purgeOldGrants(accounts);
-            validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
-        }
-        return accounts;
-    }
-
-    private void purgeOldGrantsAll() {
-        synchronized (mUsers) {
-            for (int i = 0; i < mUsers.size(); i++) {
-                purgeOldGrants(mUsers.valueAt(i));
-            }
-        }
-    }
-
-    private void purgeOldGrants(UserAccounts accounts) {
-        synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
-            final Cursor cursor = db.query(TABLE_GRANTS,
-                    new String[]{GRANTS_GRANTEE_UID},
-                    null, null, GRANTS_GRANTEE_UID, null, null);
-            try {
-                while (cursor.moveToNext()) {
-                    final int uid = cursor.getInt(0);
-                    final boolean packageExists = mPackageManager.getPackagesForUid(uid) != null;
-                    if (packageExists) {
-                        continue;
-                    }
-                    Log.d(TAG, "deleting grants for UID " + uid
-                            + " because its package is no longer installed");
-                    db.delete(TABLE_GRANTS, GRANTS_GRANTEE_UID + "=?",
-                            new String[]{Integer.toString(uid)});
-                }
-            } finally {
-                cursor.close();
-            }
-        }
     }
 
     /**
@@ -469,10 +438,46 @@ public class AccountManagerService
         synchronized (mUsers) {
             UserAccounts accounts = mUsers.get(userId);
             if (accounts == null) {
-                accounts = initUserLocked(userId);
+                accounts = new UserAccounts(mContext, userId);
+                initializeDebugDbSizeAndCompileSqlStatementForLogging(
+                        accounts.openHelper.getWritableDatabase(), accounts);
                 mUsers.append(userId, accounts);
+                purgeOldGrants(accounts);
+                validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
             }
             return accounts;
+        }
+    }
+
+    private void purgeOldGrantsAll() {
+        synchronized (mUsers) {
+            for (int i = 0; i < mUsers.size(); i++) {
+                purgeOldGrants(mUsers.valueAt(i));
+            }
+        }
+    }
+
+    private void purgeOldGrants(UserAccounts accounts) {
+        synchronized (accounts.cacheLock) {
+            final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+            final Cursor cursor = db.query(TABLE_GRANTS,
+                    new String[]{GRANTS_GRANTEE_UID},
+                    null, null, GRANTS_GRANTEE_UID, null, null);
+            try {
+                while (cursor.moveToNext()) {
+                    final int uid = cursor.getInt(0);
+                    final boolean packageExists = mPackageManager.getPackagesForUid(uid) != null;
+                    if (packageExists) {
+                        continue;
+                    }
+                    Log.d(TAG, "deleting grants for UID " + uid
+                            + " because its package is no longer installed");
+                    db.delete(TABLE_GRANTS, GRANTS_GRANTEE_UID + "=?",
+                            new String[]{Integer.toString(uid)});
+                }
+            } finally {
+                cursor.close();
+            }
         }
     }
 
@@ -2510,8 +2515,9 @@ public class AccountManagerService
         }
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             return getAccountsInternal(
-                    userId,
+                    accounts,
                     callingUid,
                     null,  // packageName
                     visibleAccountTypes);
@@ -2609,8 +2615,9 @@ public class AccountManagerService
 
         long identityToken = clearCallingIdentity();
         try {
+            UserAccounts accounts = getUserAccounts(userId);
             return getAccountsInternal(
-                    userId,
+                    accounts,
                     callingUid,
                     callingPackage,
                     visibleAccountTypes);
@@ -2620,13 +2627,11 @@ public class AccountManagerService
     }
 
     private Account[] getAccountsInternal(
-            int userId,
+            UserAccounts userAccounts,
             int callingUid,
             String callingPackage,
             List<String> visibleAccountTypes) {
-        UserAccounts accounts = getUserAccounts(userId);
-        synchronized (accounts.cacheLock) {
-            UserAccounts userAccounts = getUserAccounts(userId);
+        synchronized (userAccounts.cacheLock) {
             ArrayList<Account> visibleAccounts = new ArrayList<>();
             for (String visibleType : visibleAccountTypes) {
                 Account[] accountsForType = getAccountsFromCacheLocked(
