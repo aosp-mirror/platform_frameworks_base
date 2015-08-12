@@ -34,8 +34,10 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 
 import libcore.io.IoUtils;
 
@@ -345,6 +347,8 @@ public class PackageHelper {
      */
     public static String resolveInstallVolume(Context context, String packageName,
             int installLocation, long sizeBytes) throws IOException {
+        final boolean forceAllowOnExternal = Settings.Global.getInt(
+                context.getContentResolver(), Settings.Global.FORCE_ALLOW_ON_EXTERNAL, 0) != 0;
         // TODO: handle existing apps installed in ASEC; currently assumes
         // they'll end up back on internal storage
         ApplicationInfo existingInfo = null;
@@ -379,7 +383,8 @@ public class PackageHelper {
         }
 
         // If app expresses strong desire for internal space, honor it
-        if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+        if (!forceAllowOnExternal
+                && installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
             if (fitsOnInternal) {
                 return null;
             } else {

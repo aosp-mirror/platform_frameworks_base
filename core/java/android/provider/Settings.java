@@ -6260,6 +6260,14 @@ public final class Settings {
        public static final String MDC_INITIAL_MAX_RETRY = "mdc_initial_max_retry";
 
        /**
+        * Whether any package can be on external storage. When this is true, any
+        * package, regardless of manifest values, is a candidate for installing
+        * or moving onto external storage. (0 = false, 1 = true)
+        * @hide
+        */
+       public static final String FORCE_ALLOW_ON_EXTERNAL = "force_allow_on_external";
+
+       /**
         * Whether user has enabled development settings.
         */
        public static final String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
