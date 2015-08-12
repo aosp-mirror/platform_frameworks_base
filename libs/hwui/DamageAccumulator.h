@@ -24,6 +24,11 @@
 
 #include "utils/Macros.h"
 
+// Smaller than INT_MIN/INT_MAX because we offset these values
+// and thus don't want to be adding offsets to INT_MAX, that's bad
+#define DIRTY_MIN (-0x7ffffff-1)
+#define DIRTY_MAX (0x7ffffff)
+
 namespace android {
 namespace uirenderer {
 

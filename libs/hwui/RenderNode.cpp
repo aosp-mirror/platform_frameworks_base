@@ -134,7 +134,7 @@ void RenderNode::damageSelf(TreeInfo& info) {
         } else {
             // Hope this is big enough?
             // TODO: Get this from the display list ops or something
-            info.damageAccumulator->dirty(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+            info.damageAccumulator->dirty(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
         }
     }
 }
