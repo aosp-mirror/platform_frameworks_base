@@ -2793,6 +2793,8 @@ public class Editor {
             // The suggestions are sorted according to their types (easy correction first, then
             // misspelled) and to the length of the text that they cover (shorter first).
             Arrays.sort(suggestionSpans, mSuggestionSpanComparator);
+            mSpansLengths.clear();
+
             return suggestionSpans;
         }
 
