@@ -43,6 +43,9 @@
 #include <dirent.h>
 #include <assert.h>
 
+#include <string>
+#include <vector>
+
 
 using namespace android;
 
@@ -357,38 +360,66 @@ static bool hasFile(const char* file) {
     return false;
 }
 
+// Convenience wrapper over the property API that returns an
+// std::string.
+std::string getProperty(const char* key, const char* defaultValue) {
+    std::vector<char> temp(PROPERTY_VALUE_MAX);
+    const int len = property_get(key, &temp[0], defaultValue);
+    if (len < 0) {
+        return "";
+    }
+    return std::string(&temp[0], len);
+}
+
 /*
- * Read the persistent locale. Attempts to read to persist.sys.locale
- * and falls back to the default locale (ro.product.locale) if
- * persist.sys.locale is empty.
+ * Read the persistent locale. Inspects the following system properties
+ * (in order) and returns the first non-empty property in the list :
+ *
+ * (1) persist.sys.locale
+ * (2) persist.sys.language/country/localevar (country and localevar are
+ * inspected iff. language is non-empty.
+ * (3) ro.product.locale
+ * (4) ro.product.locale.language/region
+ *
+ * Note that we need to inspect persist.sys.language/country/localevar to
+ * preserve language settings for devices that are upgrading from Lollipop
+ * to M. The same goes for ro.product.locale.language/region as well.
  */
-static void readLocale(char* locale)
+const std::string readLocale()
 {
-    // Allocate 4 extra bytes because we might read a property into
-    // this array at offset 4.
-    char propLocale[PROPERTY_VALUE_MAX + 4];
-
-    property_get("persist.sys.locale", propLocale, "");
-    if (propLocale[0] == 0) {
-        property_get("ro.product.locale", propLocale, "");
-
-        if (propLocale[0] == 0) {
-            // If persist.sys.locale and ro.product.locale are missing,
-            // construct a locale value from the individual locale components.
-            property_get("ro.product.locale.language", propLocale, "en");
-
-            // The language code is either two or three chars in length. If it
-            // isn't 2 chars long, assume three. Anything else is an error
-            // anyway.
-            const int offset = (propLocale[2] == 0) ? 2 : 3;
-            propLocale[offset] = '-';
-
-            property_get("ro.product.locale.region", propLocale + offset + 1, "US");
-        }
+    const std::string locale = getProperty("persist.sys.locale", "");
+    if (!locale.empty()) {
+        return locale;
     }
 
-    strncat(locale, propLocale, PROPERTY_VALUE_MAX);
-    // ALOGD("[DEBUG] locale=%s", locale);
+    const std::string language = getProperty("persist.sys.language", "");
+    if (!language.empty()) {
+        const std::string country = getProperty("persist.sys.country", "");
+        const std::string variant = getProperty("persist.sys.localevar", "");
+
+        std::string out = language;
+        if (!country.empty()) {
+            out = out + "-" + country;
+        }
+
+        if (!variant.empty()) {
+            out = out + "-" + variant;
+        }
+
+        return out;
+    }
+
+    const std::string productLocale = getProperty("ro.product.locale", "");
+    if (!productLocale.empty()) {
+        return productLocale;
+    }
+
+    // If persist.sys.locale and ro.product.locale are missing,
+    // construct a locale value from the individual locale components.
+    const std::string productLanguage = getProperty("ro.product.locale.language", "en");
+    const std::string productRegion = getProperty("ro.product.locale.region", "US");
+
+    return productLanguage + "-" + productRegion;
 }
 
 void AndroidRuntime::addOption(const char* optionString, void* extraInfo)
@@ -793,7 +824,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     /* Set the properties for locale */
     {
         strcpy(localeOption, "-Duser.locale=");
-        readLocale(localeOption);
+        const std::string locale = readLocale();
+        strncat(localeOption, locale.c_str(), PROPERTY_VALUE_MAX);
         addOption(localeOption);
     }
 
