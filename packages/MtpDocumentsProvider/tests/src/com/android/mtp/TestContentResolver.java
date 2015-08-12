@@ -25,17 +25,22 @@ import junit.framework.Assert;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 class TestContentResolver extends MockContentResolver {
-    final private Map<Uri, Phaser> mPhasers = new HashMap<>();
+    private static final int TIMEOUT_PERIOD_MS = 3000;
+    private final Map<Uri, Phaser> mPhasers = new HashMap<>();
 
     @Override
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
         getPhaser(uri).arrive();
     }
 
-    void waitForNotification(Uri uri, int count) {
-        Assert.assertEquals(count, getPhaser(uri).awaitAdvance(count - 1));
+
+    void waitForNotification(Uri uri, int count) throws InterruptedException, TimeoutException {
+        Assert.assertEquals(count, getPhaser(uri).awaitAdvanceInterruptibly(
+                count - 1, TIMEOUT_PERIOD_MS, TimeUnit.MILLISECONDS));
     }
 
     int getChangeCount(Uri uri) {

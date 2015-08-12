@@ -21,6 +21,7 @@ import android.mtp.MtpStorageInfo;
 import com.android.internal.annotations.VisibleForTesting;
 
 class MtpRoot {
+    final int mDeviceId;
     final int mStorageId;
     final String mDescription;
     final long mFreeSpace;
@@ -28,27 +29,45 @@ class MtpRoot {
     final String mVolumeIdentifier;
 
     @VisibleForTesting
-    MtpRoot(int storageId,
+    MtpRoot(int deviceId,
+            int storageId,
             String description,
             long freeSpace,
             long maxCapacity,
             String volumeIdentifier) {
-        this.mStorageId = storageId;
-        this.mDescription = description;
-        this.mFreeSpace = freeSpace;
-        this.mMaxCapacity = maxCapacity;
-        this.mVolumeIdentifier = volumeIdentifier;
+        mDeviceId = deviceId;
+        mStorageId = storageId;
+        mDescription = description;
+        mFreeSpace = freeSpace;
+        mMaxCapacity = maxCapacity;
+        mVolumeIdentifier = volumeIdentifier;
     }
 
-    MtpRoot(MtpStorageInfo storageInfo) {
+    MtpRoot(int deviceId, MtpStorageInfo storageInfo) {
+        mDeviceId = deviceId;
         mStorageId = storageInfo.getStorageId();
         mDescription = storageInfo.getDescription();
         mFreeSpace = storageInfo.getFreeSpace();
         mMaxCapacity = storageInfo.getMaxCapacity();
-        if (!storageInfo.getVolumeIdentifier().equals("")) {
-            mVolumeIdentifier = storageInfo.getVolumeIdentifier();
-        } else {
-            mVolumeIdentifier = null;
-        }
+        mVolumeIdentifier = storageInfo.getVolumeIdentifier();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof MtpRoot))
+            return false;
+        final MtpRoot other = (MtpRoot) object;
+        return mDeviceId == other.mDeviceId &&
+                mStorageId == other.mStorageId &&
+                mDescription.equals(other.mDescription) &&
+                mFreeSpace == other.mFreeSpace &&
+                mMaxCapacity == other.mMaxCapacity &&
+                mVolumeIdentifier.equals(other.mVolumeIdentifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return mDeviceId ^ mStorageId ^ mDescription.hashCode() ^ ((int) mFreeSpace) ^
+                ((int) mMaxCapacity) ^ mVolumeIdentifier.hashCode();
     }
 }

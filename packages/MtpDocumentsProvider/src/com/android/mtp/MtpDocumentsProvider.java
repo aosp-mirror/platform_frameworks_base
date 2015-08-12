@@ -57,6 +57,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private ContentResolver mResolver;
     private PipeManager mPipeManager;
     private DocumentLoader mDocumentLoader;
+    private RootScanner mRootScanner;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -72,6 +73,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mResolver = getContext().getContentResolver();
         mPipeManager = new PipeManager();
         mDocumentLoader = new DocumentLoader(mMtpManager, mResolver);
+        mRootScanner = new RootScanner(mResolver, mMtpManager);
         return true;
     }
 
@@ -80,6 +82,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mMtpManager = mtpManager;
         mResolver = resolver;
         mDocumentLoader = new DocumentLoader(mMtpManager, mResolver);
+        mRootScanner = new RootScanner(mResolver, mMtpManager);
     }
 
     @Override
@@ -88,25 +91,17 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             projection = MtpDocumentsProvider.DEFAULT_ROOT_PROJECTION;
         }
         final MatrixCursor cursor = new MatrixCursor(projection);
-        for (final int deviceId : mMtpManager.getOpenedDeviceIds()) {
-            try {
-                final MtpRoot[] roots = mMtpManager.getRoots(deviceId);
-                // TODO: Add retry logic here.
-
-                for (final MtpRoot root : roots) {
-                    final Identifier rootIdentifier = new Identifier(deviceId, root.mStorageId);
-                    final MatrixCursor.RowBuilder builder = cursor.newRow();
-                    builder.add(Root.COLUMN_ROOT_ID, rootIdentifier.toRootId());
-                    builder.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD);
-                    builder.add(Root.COLUMN_TITLE, root.mDescription);
-                    builder.add(
-                            Root.COLUMN_DOCUMENT_ID,
-                            rootIdentifier.toDocumentId());
-                    builder.add(Root.COLUMN_AVAILABLE_BYTES , root.mFreeSpace);
-                }
-            } catch (IOException error) {
-                Log.d(TAG, error.getMessage());
-            }
+        final MtpRoot[] roots = mRootScanner.getRoots();
+        for (final MtpRoot root : roots) {
+            final Identifier rootIdentifier = new Identifier(root.mDeviceId, root.mStorageId);
+            final MatrixCursor.RowBuilder builder = cursor.newRow();
+            builder.add(Root.COLUMN_ROOT_ID, rootIdentifier.toRootId());
+            builder.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD);
+            builder.add(Root.COLUMN_TITLE, root.mDescription);
+            builder.add(
+                    Root.COLUMN_DOCUMENT_ID,
+                    rootIdentifier.toDocumentId());
+            builder.add(Root.COLUMN_AVAILABLE_BYTES , root.mFreeSpace);
         }
         cursor.setNotificationUri(
                 mResolver, DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY));
@@ -221,13 +216,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     void openDevice(int deviceId) throws IOException {
         mMtpManager.openDevice(deviceId);
-        notifyRootsChange();
+        mRootScanner.scanNow();
     }
 
     void closeDevice(int deviceId) throws IOException {
         mMtpManager.closeDevice(deviceId);
         mDocumentLoader.clearCache(deviceId);
-        notifyRootsChange();
+        mRootScanner.scanNow();
     }
 
     void closeAllDevices() {
@@ -242,17 +237,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             }
         }
         if (closed) {
-            notifyRootsChange();
+            mRootScanner.scanNow();
         }
     }
 
     boolean hasOpenedDevices() {
         return mMtpManager.getOpenedDeviceIds().length != 0;
-    }
-
-    private void notifyRootsChange() {
-        mResolver.notifyChange(
-                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY), null, false);
     }
 
     private void notifyChildDocumentsChange(String parentDocumentId) {

@@ -43,7 +43,7 @@ public class DocumentLoaderTest extends AndroidTestCase {
         mLoader = new DocumentLoader(mManager, mResolver);
     }
 
-    public void testBasic() throws IOException, InterruptedException {
+    public void testBasic() throws Exception {
         final Uri uri = DocumentsContract.buildChildDocumentsUri(
                 MtpDocumentsProvider.AUTHORITY, mParentIdentifier.toDocumentId());
         setUpDocument(mManager, 40);

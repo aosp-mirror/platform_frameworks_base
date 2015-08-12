@@ -29,6 +29,8 @@ import java.util.Date;
 
 @SmallTest
 public class MtpDocumentsProviderTest extends AndroidTestCase {
+    private final static Uri ROOTS_URI =
+            DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
     private TestContentResolver mResolver;
     private MtpDocumentsProvider mProvider;
     private TestMtpManager mMtpManager;
@@ -42,46 +44,71 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testOpenAndCloseDevice() throws Exception {
-        final Uri uri = DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
-
         mMtpManager.addValidDevice(0);
-        assertEquals(0, mResolver.getChangeCount(uri));
+        mMtpManager.setRoots(0, new MtpRoot[] {
+                new MtpRoot(
+                        0 /* deviceId */,
+                        1 /* storageId */,
+                        "Storage A" /* volume description */,
+                        1024 /* free space */,
+                        2048 /* total space */,
+                        "" /* no volume identifier */)
+        });
 
         mProvider.openDevice(0);
-        assertEquals(1, mResolver.getChangeCount(uri));
+        mResolver.waitForNotification(ROOTS_URI, 1);
 
         mProvider.closeDevice(0);
-        assertEquals(2, mResolver.getChangeCount(uri));
-
-        int exceptionCounter = 0;
-        try {
-            mProvider.openDevice(1);
-        } catch (IOException error) {
-            exceptionCounter++;
-        }
-        assertEquals(2, mResolver.getChangeCount(uri));
-        try {
-            mProvider.closeDevice(1);
-        } catch (IOException error) {
-            exceptionCounter++;
-        }
-        assertEquals(2, mResolver.getChangeCount(uri));
-        assertEquals(2, exceptionCounter);
+        mResolver.waitForNotification(ROOTS_URI, 2);
     }
 
-    public void testCloseAllDevices() throws IOException {
-        final Uri uri = DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
+    public void testOpenAndCloseErrorDevice() throws Exception {
+        try {
+            mProvider.openDevice(1);
+            fail();
+        } catch (Throwable error) {
+            assertTrue(error instanceof IOException);
+        }
 
+        try {
+            mProvider.closeDevice(1);
+            fail();
+        } catch (Throwable error) {
+            assertTrue(error instanceof IOException);
+        }
+
+        // Check if the following notification is the first one or not.
         mMtpManager.addValidDevice(0);
-
-        mProvider.closeAllDevices();
-        assertEquals(0, mResolver.getChangeCount(uri));
-
+        mMtpManager.setRoots(0, new MtpRoot[] {
+                new MtpRoot(
+                        0 /* deviceId */,
+                        1 /* storageId */,
+                        "Storage A" /* volume description */,
+                        1024 /* free space */,
+                        2048 /* total space */,
+                        "" /* no volume identifier */)
+        });
         mProvider.openDevice(0);
-        assertEquals(1, mResolver.getChangeCount(uri));
+        mResolver.waitForNotification(ROOTS_URI, 1);
+    }
+
+    public void testCloseAllDevices() throws Exception {
+        mMtpManager.addValidDevice(0);
+        mMtpManager.setRoots(0, new MtpRoot[] {
+                new MtpRoot(
+                        0 /* deviceId */,
+                        1 /* storageId */,
+                        "Storage A" /* volume description */,
+                        1024 /* free space */,
+                        2048 /* total space */,
+                        "" /* no volume identifier */)
+        });
+        mProvider.closeAllDevices();
+        mProvider.openDevice(0);
+        mResolver.waitForNotification(ROOTS_URI, 1);
 
         mProvider.closeAllDevices();
-        assertEquals(2, mResolver.getChangeCount(uri));
+        mResolver.waitForNotification(ROOTS_URI, 2);
     }
 
     public void testQueryRoots() throws Exception {
@@ -89,6 +116,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mMtpManager.addValidDevice(1);
         mMtpManager.setRoots(0, new MtpRoot[] {
                 new MtpRoot(
+                        0 /* deviceId */,
                         1 /* storageId */,
                         "Storage A" /* volume description */,
                         1024 /* free space */,
@@ -97,16 +125,17 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         });
         mMtpManager.setRoots(1, new MtpRoot[] {
                 new MtpRoot(
+                        1 /* deviceId */,
                         1 /* storageId */,
                         "Storage B" /* volume description */,
                         2048 /* free space */,
                         4096 /* total space */,
                         "Identifier B" /* no volume identifier */)
         });
-        assertEquals(0, mProvider.queryRoots(null).getCount());
 
         {
             mProvider.openDevice(0);
+            mResolver.waitForNotification(ROOTS_URI, 1);
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
@@ -121,6 +150,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
         {
             mProvider.openDevice(1);
+            mResolver.waitForNotification(ROOTS_URI, 2);
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
@@ -136,17 +166,19 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
         {
             mProvider.closeAllDevices();
+            mResolver.waitForNotification(ROOTS_URI, 3);
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(0, cursor.getCount());
         }
     }
 
-    public void testQueryRoots_error() throws IOException {
+    public void testQueryRoots_error() throws Exception {
         mMtpManager.addValidDevice(0);
         mMtpManager.addValidDevice(1);
         // Not set roots for device 0 so that MtpManagerMock#getRoots throws IOException.
         mMtpManager.setRoots(1, new MtpRoot[] {
                 new MtpRoot(
+                        1 /* deviceId */,
                         1 /* storageId */,
                         "Storage B" /* volume description */,
                         2048 /* free space */,
@@ -156,6 +188,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         {
             mProvider.openDevice(0);
             mProvider.openDevice(1);
+            mResolver.waitForNotification(ROOTS_URI, 1);
+
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
@@ -195,6 +229,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testQueryDocument_forRoot() throws IOException {
         mMtpManager.setRoots(0, new MtpRoot[] {
                 new MtpRoot(
+                        0 /* deviceId */,
                         1 /* storageId */,
                         "Storage A" /* volume description */,
                         1024 /* free space */,
