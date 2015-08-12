@@ -3308,7 +3308,7 @@ public class Editor {
                 mSelectionBounds.set(
                         primaryHorizontal,
                         layout.getLineTop(line),
-                        primaryHorizontal + 1,
+                        primaryHorizontal,
                         layout.getLineTop(line + 1) + mHandleHeight);
             }
             // Take TextView's padding and scroll into account.
