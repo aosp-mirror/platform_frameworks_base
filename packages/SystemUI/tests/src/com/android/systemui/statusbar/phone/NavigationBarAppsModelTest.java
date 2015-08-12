@@ -16,21 +16,26 @@
 
 package com.android.systemui.statusbar.phone;
 
+import org.mockito.InOrder;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
@@ -45,6 +50,7 @@ import java.util.Map;
 /** Tests for the data model for the navigation bar app icons. */
 public class NavigationBarAppsModelTest extends AndroidTestCase {
     private PackageManager mMockPackageManager;
+    private IPackageManager mMockIPackageManager;
     private SharedPreferences mMockPrefs;
     private SharedPreferences.Editor mMockEdit;
     private UserManager mMockUserManager;
@@ -61,6 +67,7 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
 
         final Context context = mock(Context.class);
         mMockPackageManager = mock(PackageManager.class);
+        mMockIPackageManager = mock(IPackageManager.class);
         mMockPrefs = mock(SharedPreferences.class);
         mMockEdit = mock(SharedPreferences.Editor.class);
         mMockUserManager = mock(UserManager.class);
@@ -78,8 +85,71 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         when(mMockPrefs.edit()).thenReturn(mMockEdit);
 
         when(mMockUserManager.getSerialNumberForUser(new UserHandle(2))).thenReturn(22L);
+        when(mMockUserManager.getUserForSerialNumber(45L)).thenReturn(new UserHandle(4));
+        when(mMockUserManager.getUserForSerialNumber(239L)).thenReturn(new UserHandle(5));
 
-        mModel = new NavigationBarAppsModel(context);
+        mModel = new NavigationBarAppsModel(context) {
+            @Override
+            protected IPackageManager getPackageManager() {
+                return mMockIPackageManager;
+            }
+        };
+    }
+
+    /** Tests buildAppLaunchIntent(). */
+    public void testBuildAppLaunchIntent() {
+        ActivityInfo mockNonExportedActivityInfo = new ActivityInfo();
+        mockNonExportedActivityInfo.exported = false;
+        ActivityInfo mockExportedActivityInfo = new ActivityInfo();
+        mockExportedActivityInfo.exported = true;
+        try {
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package1", "class1"), 0, 4)).
+                    thenReturn(mockNonExportedActivityInfo);
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package2", "class2"), 0, 5)).
+                    thenThrow(new RemoteException());
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package3", "class3"), 0, 6)).
+                    thenReturn(mockExportedActivityInfo);
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package4", "class4"), 0, 7)).
+                    thenReturn(mockExportedActivityInfo);
+        } catch (RemoteException e) {
+            fail("RemoteException can't happen in the test, but it happened.");
+        }
+
+        // Assume some installed activities.
+        ActivityInfo ai0 = new ActivityInfo();
+        ai0.packageName = "package0";
+        ai0.name = "class0";
+        ActivityInfo ai1 = new ActivityInfo();
+        ai1.packageName = "package4";
+        ai1.name = "class4";
+        ResolveInfo ri0 = new ResolveInfo();
+        ri0.activityInfo = ai0;
+        ResolveInfo ri1 = new ResolveInfo();
+        ri1.activityInfo = ai1;
+        when(mMockPackageManager
+                .queryIntentActivitiesAsUser(any(Intent.class), eq(0), any(int.class)))
+                .thenReturn(Arrays.asList(ri0, ri1));
+
+        // Unlauncheable (for various reasons) apps.
+        assertEquals(null, mModel.buildAppLaunchIntent(
+                new ComponentName("package0", "class0"), new UserHandle(3)));
+        assertEquals(null, mModel.buildAppLaunchIntent(
+                new ComponentName("package1", "class1"), new UserHandle(4)));
+        assertEquals(null, mModel.buildAppLaunchIntent(
+                new ComponentName("package2", "class2"), new UserHandle(5)));
+        assertEquals(null, mModel.buildAppLaunchIntent(
+                new ComponentName("package3", "class3"), new UserHandle(6)));
+
+        // A launcheable app.
+        Intent intent = mModel.buildAppLaunchIntent(
+                new ComponentName("package4", "class4"), new UserHandle(7));
+        assertNotNull(intent);
+        assertEquals(new ComponentName("package4", "class4"), intent.getComponent());
+        assertEquals("package4", intent.getPackage());
     }
 
     /** Initializes the model from SharedPreferences for a few app activites. */
@@ -92,6 +162,39 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         when(mMockPrefs.getLong("22|app_user_1", -1)).thenReturn(45L);
         when(mMockPrefs.getString("22|app_2", null)).thenReturn("package2/class2");
         when(mMockPrefs.getLong("22|app_user_2", -1)).thenReturn(239L);
+
+        ActivityInfo mockActivityInfo = new ActivityInfo();
+        mockActivityInfo.exported = true;
+        try {
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package0", "class0"), 0, 5)).thenReturn(mockActivityInfo);
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package1", "class1"), 0, 4)).thenReturn(mockActivityInfo);
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package2", "class2"), 0, 5)).thenReturn(mockActivityInfo);
+        } catch (RemoteException e) {
+            fail("RemoteException can't happen in the test, but it happened.");
+        }
+
+        // Assume some installed activities.
+        ActivityInfo ai0 = new ActivityInfo();
+        ai0.packageName = "package0";
+        ai0.name = "class0";
+        ActivityInfo ai1 = new ActivityInfo();
+        ai1.packageName = "package1";
+        ai1.name = "class1";
+        ActivityInfo ai2 = new ActivityInfo();
+        ai2.packageName = "package2";
+        ai2.name = "class2";
+        ResolveInfo ri0 = new ResolveInfo();
+        ri0.activityInfo = ai0;
+        ResolveInfo ri1 = new ResolveInfo();
+        ri1.activityInfo = ai1;
+        ResolveInfo ri2 = new ResolveInfo();
+        ri2.activityInfo = ai2;
+        when(mMockPackageManager
+                .queryIntentActivitiesAsUser(any(Intent.class), eq(0), any(int.class)))
+                .thenReturn(Arrays.asList(ri0, ri1, ri2));
 
         mModel.setCurrentUser(2);
     }
@@ -133,6 +236,15 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         assertEquals(22L, mModel.getApp(0).getUserSerialNumber());
         assertEquals("package2/class2", mModel.getApp(1).getComponentName().flattenToString());
         assertEquals(22L, mModel.getApp(1).getUserSerialNumber());
+        InOrder order = inOrder(mMockEdit);
+        order.verify(mMockEdit).apply();
+        order.verify(mMockEdit).putInt("22|app_count", 2);
+        order.verify(mMockEdit).putString("22|app_0", "package1/class1");
+        order.verify(mMockEdit).putLong("22|app_user_0", 22L);
+        order.verify(mMockEdit).putString("22|app_1", "package2/class2");
+        order.verify(mMockEdit).putLong("22|app_user_1", 22L);
+        order.verify(mMockEdit).apply();
+        verifyNoMoreInteractions(mMockEdit);
     }
 
     /** Tests initializing the model if one of the prefs is missing. */
@@ -145,11 +257,72 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         // But assume one pref is missing.
         when(mMockPrefs.getString("22|app_1", null)).thenReturn(null);
 
+        ActivityInfo mockActivityInfo = new ActivityInfo();
+        mockActivityInfo.exported = true;
+        try {
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package0", "class0"), 0, 5)).thenReturn(mockActivityInfo);
+        } catch (RemoteException e) {
+            fail("RemoteException can't happen in the test, but it happened.");
+        }
+
+        ActivityInfo ai0 = new ActivityInfo();
+        ai0.packageName = "package0";
+        ai0.name = "class0";
+        ResolveInfo ri0 = new ResolveInfo();
+        ri0.activityInfo = ai0;
+        when(mMockPackageManager
+                .queryIntentActivitiesAsUser(any(Intent.class), eq(0), any(int.class)))
+                .thenReturn(Arrays.asList(ri0));
+
         // Initializing the model should load from prefs and skip the missing one.
         mModel.setCurrentUser(2);
         assertEquals(1, mModel.getAppCount());
         assertEquals("package0/class0", mModel.getApp(0).getComponentName().flattenToString());
         assertEquals(239L, mModel.getApp(0).getUserSerialNumber());
+        verifyNoMoreInteractions(mMockEdit);
+    }
+
+    /** Tests initializing the model if one of the apps is unlauncheable. */
+    public void testInitializeWithUnlauncheableApp() {
+        // Assume two apps are nominally stored.
+        when(mMockPrefs.getInt("22|app_count", -1)).thenReturn(2);
+        when(mMockPrefs.getString("22|app_0", null)).thenReturn("package0/class0");
+        when(mMockPrefs.getLong("22|app_user_0", -1)).thenReturn(239L);
+        when(mMockPrefs.getString("22|app_1", null)).thenReturn("package1/class1");
+        when(mMockPrefs.getLong("22|app_user_1", -1)).thenReturn(45L);
+
+        ActivityInfo mockActivityInfo = new ActivityInfo();
+        mockActivityInfo.exported = true;
+        try {
+            when(mMockIPackageManager.getActivityInfo(
+                    new ComponentName("package0", "class0"), 0, 5)).thenReturn(mockActivityInfo);
+        } catch (RemoteException e) {
+            fail("RemoteException can't happen in the test, but it happened.");
+        }
+
+        ActivityInfo ai0 = new ActivityInfo();
+        ai0.packageName = "package0";
+        ai0.name = "class0";
+        ResolveInfo ri0 = new ResolveInfo();
+        ri0.activityInfo = ai0;
+        when(mMockPackageManager
+                .queryIntentActivitiesAsUser(any(Intent.class), eq(0), any(int.class)))
+                .thenReturn(Arrays.asList(ri0));
+
+        // Initializing the model should load from prefs and skip the unlauncheable one.
+        mModel.setCurrentUser(2);
+        assertEquals(1, mModel.getAppCount());
+        assertEquals("package0/class0", mModel.getApp(0).getComponentName().flattenToString());
+        assertEquals(239L, mModel.getApp(0).getUserSerialNumber());
+
+        // Once an unlauncheable app is detected, the model should save all apps excluding the
+        // unlauncheable one.
+        verify(mMockEdit).putInt("22|app_count", 1);
+        verify(mMockEdit).putString("22|app_0", "package0/class0");
+        verify(mMockEdit).putLong("22|app_user_0", 239L);
+        verify(mMockEdit).apply();
+        verifyNoMoreInteractions(mMockEdit);
     }
 
     /** Tests saving the model to SharedPreferences. */

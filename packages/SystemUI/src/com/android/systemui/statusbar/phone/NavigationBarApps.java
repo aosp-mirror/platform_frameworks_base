@@ -20,7 +20,6 @@ import android.animation.LayoutTransition;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -29,13 +28,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
@@ -49,6 +45,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -75,6 +72,8 @@ class NavigationBarApps extends LinearLayout {
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
     private final LayoutInflater mLayoutInflater;
+    private final AppPackageMonitor mAppPackageMonitor;
+
 
     // This view has two roles:
     // 1) If the drag started outside the pinned apps list, it is a placeholder icon with a null
@@ -106,6 +105,7 @@ class NavigationBarApps extends LinearLayout {
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mLayoutInflater = LayoutInflater.from(context);
+        mAppPackageMonitor = new AppPackageMonitor();
 
         // Dragging an icon removes and adds back the dragged icon. Use the layout transitions to
         // trigger animation. By default all transitions animate, so turn off the unneeded ones.
@@ -119,6 +119,76 @@ class NavigationBarApps extends LinearLayout {
         transition.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
         transition.setStagger(LayoutTransition.CHANGE_DISAPPEARING, 0);
         setLayoutTransition(transition);
+    }
+
+    // Monitor that catches events like "app uninstalled".
+    private class AppPackageMonitor extends PackageMonitor {
+        @Override
+        public void onPackageRemoved(String packageName, int uid) {
+            postRemoveIfUnlauncheable(packageName, new UserHandle(getChangingUserId()));
+            super.onPackageRemoved(packageName, uid);
+        }
+
+        @Override
+        public void onPackageModified(String packageName) {
+            postRemoveIfUnlauncheable(packageName, new UserHandle(getChangingUserId()));
+            super.onPackageModified(packageName);
+        }
+
+        @Override
+        public void onPackagesAvailable(String[] packages) {
+            if (isReplacing()) {
+                UserHandle user = new UserHandle(getChangingUserId());
+
+                for (String packageName : packages) {
+                    postRemoveIfUnlauncheable(packageName, user);
+                }
+            }
+            super.onPackagesAvailable(packages);
+        }
+
+        @Override
+        public void onPackagesUnavailable(String[] packages) {
+            if (!isReplacing()) {
+                UserHandle user = new UserHandle(getChangingUserId());
+
+                for (String packageName : packages) {
+                    postRemoveIfUnlauncheable(packageName, user);
+                }
+            }
+            super.onPackagesUnavailable(packages);
+        }
+    }
+
+    private void postRemoveIfUnlauncheable(final String packageName, final UserHandle user) {
+        // This method doesn't necessarily get called in the main thread. Redirect the call into
+        // the main thread.
+        post(new Runnable() {
+            @Override
+            public void run() {
+                if (!isAttachedToWindow()) return;
+                removeIfUnlauncheable(packageName, user);
+            }
+        });
+    }
+
+    private void removeIfUnlauncheable(String packageName, UserHandle user) {
+        long appUserSerialNumber = mUserManager.getSerialNumberForUser(user);
+
+        // Remove icons for all apps that match a package that perhaps became unlauncheable.
+        for(int i = sAppsModel.getAppCount() - 1; i >= 0; --i) {
+            AppInfo appInfo = sAppsModel.getApp(i);
+            if (appInfo.getUserSerialNumber() != appUserSerialNumber) continue;
+
+            ComponentName appComponentName = appInfo.getComponentName();
+            if (!appComponentName.getPackageName().equals(packageName)) continue;
+
+            if (sAppsModel.buildAppLaunchIntent(appComponentName, user) != null) continue;
+
+            removeViewAt(i);
+            sAppsModel.removeApp(i);
+            sAppsModel.savePrefs();
+        }
     }
 
     @Override
@@ -145,12 +215,15 @@ class NavigationBarApps extends LinearLayout {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
+
+        mAppPackageMonitor.register(mContext, null, UserHandle.ALL, true);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mContext.unregisterReceiver(mBroadcastReceiver);
+        mAppPackageMonitor.unregister();
     }
 
     /**
@@ -470,7 +543,6 @@ class NavigationBarApps extends LinearLayout {
             ComponentName component = appInfo.getComponentName();
 
             long appUserSerialNumber = appInfo.getUserSerialNumber();
-
             UserHandle appUser = mUserManager.getUserForSerialNumber(appUserSerialNumber);
             if (appUser == null) {
                 Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
@@ -478,7 +550,12 @@ class NavigationBarApps extends LinearLayout {
                         " because its user doesn't exist.");
                 return;
             }
-            int appUserId = appUser.getIdentifier();
+
+            Intent launchIntent = sAppsModel.buildAppLaunchIntent(component, appUser);
+            if (launchIntent == null) {
+                Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             // Play a scale-up animation while launching the activity.
             // TODO: Consider playing a different animation, or no animation, if the activity is
@@ -489,54 +566,9 @@ class NavigationBarApps extends LinearLayout {
             ActivityOptions opts =
                     ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getWidth(), v.getHeight());
             Bundle optsBundle = opts.toBundle();
-
-            // Launch the activity. This code is based on LauncherAppsService.startActivityAsUser code.
-            Intent launchIntent = new Intent(Intent.ACTION_MAIN);
-            launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             launchIntent.setSourceBounds(sourceBounds);
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            launchIntent.setPackage(component.getPackageName());
 
-            IPackageManager pm = AppGlobals.getPackageManager();
-            try {
-                ActivityInfo info = pm.getActivityInfo(component, 0, appUserId);
-                if (info == null) {
-                    Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Can't start activity " + component + " because it's not installed.");
-                    return;
-                }
-
-                if (!info.exported) {
-                    Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Can't start activity " + component + " because it doesn't have 'exported' attribute.");
-                    return;
-                }
-            } catch (RemoteException e) {
-                Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Failed to get activity info for " + component, e);
-                return;
-            }
-
-            // Check that the component actually has Intent.CATEGORY_LAUCNCHER
-            // as calling startActivityAsUser ignores the category and just
-            // resolves based on the component if present.
-            List<ResolveInfo> apps = getContext().getPackageManager().queryIntentActivitiesAsUser(launchIntent,
-                    0 /* flags */, appUserId);
-            final int size = apps.size();
-            for (int i = 0; i < size; ++i) {
-                ActivityInfo activityInfo = apps.get(i).activityInfo;
-                if (activityInfo.packageName.equals(component.getPackageName()) &&
-                        activityInfo.name.equals(component.getClassName())) {
-                    // Found an activity with category launcher that matches
-                    // this component so ok to launch.
-                    launchIntent.setComponent(component);
-                    mContext.startActivityAsUser(launchIntent, optsBundle, appUser);
-                    return;
-                }
-            }
-
-            Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Attempt to launch activity without category Intent.CATEGORY_LAUNCHER " + component);
+            mContext.startActivityAsUser(launchIntent, optsBundle, appUser);
         }
     }
 
