@@ -1271,7 +1271,7 @@
 
          If this string is empty or the specified package does not exist, then
          the platform will search for an SMS app and use that (if there is one)-->
-    <string name="default_sms_application" translatable="false"></string>
+    <string name="default_sms_application" translatable="false">com.android.messaging</string>
 
     <!-- Default web browser.  This is the package name of the application that will
          be the default browser when the device first boots.  Afterwards the user
