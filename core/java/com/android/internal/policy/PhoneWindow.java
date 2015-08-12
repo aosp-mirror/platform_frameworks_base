@@ -4021,7 +4021,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // dark or the light button frame.
             TypedValue value = new TypedValue();
             getContext().getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
-            if (Color.brightness(value.data) < 0.5) {
+            if (Color.luminance(value.data) < 0.5) {
                 nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
                         R.layout.non_client_decor_dark, null);
             } else {

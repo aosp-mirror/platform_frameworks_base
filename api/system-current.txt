@@ -11613,6 +11613,7 @@ package android.graphics {
     method public static int blue(int);
     method public static void colorToHSV(int, float[]);
     method public static int green(int);
+    method public static float luminance(int);
     method public static int parseColor(java.lang.String);
     method public static int red(int);
     method public static int rgb(int, int, int);
