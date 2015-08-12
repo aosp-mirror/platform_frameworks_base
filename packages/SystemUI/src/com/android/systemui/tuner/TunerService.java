@@ -16,7 +16,6 @@
 package com.android.systemui.tuner;
 
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -25,10 +24,12 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 
@@ -169,6 +170,7 @@ public class TunerService extends SystemUI {
 
     public static final void showResetRequest(final Context context, final Runnable onDisabled) {
         SystemUIDialog dialog = new SystemUIDialog(context);
+        dialog.setShowForAllUsers(true);
         dialog.setMessage(R.string.remove_from_settings_prompt);
         dialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel),
                 (OnClickListener) null);
@@ -192,7 +194,7 @@ public class TunerService extends SystemUI {
     }
 
     public static final void setTunerEnabled(Context context, boolean enabled) {
-        context.getPackageManager().setComponentEnabledSetting(
+        userContext(context).getPackageManager().setComponentEnabledSetting(
                 new ComponentName(context, TunerActivity.class),
                 enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                         : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
@@ -200,9 +202,18 @@ public class TunerService extends SystemUI {
     }
 
     public static final boolean isTunerEnabled(Context context) {
-        return context.getPackageManager().getComponentEnabledSetting(
+        return userContext(context).getPackageManager().getComponentEnabledSetting(
                 new ComponentName(context, TunerActivity.class))
                 == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+    }
+
+    private static Context userContext(Context context) {
+        try {
+            return context.createPackageContextAsUser(context.getPackageName(), 0,
+                    new UserHandle(ActivityManager.getCurrentUser()));
+        } catch (NameNotFoundException e) {
+            return context;
+        }
     }
 
     private class Observer extends ContentObserver {
