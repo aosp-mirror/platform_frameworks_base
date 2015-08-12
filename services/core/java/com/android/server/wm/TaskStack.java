@@ -318,8 +318,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
 
         close();
-
-        mDisplayContent = null;
     }
 
     void resetAnimationBackgroundAnimator() {
@@ -358,6 +356,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             mTasks.get(taskNdx).close();
         }
+        mDisplayContent = null;
     }
 
     public void dump(String prefix, PrintWriter pw) {
