@@ -215,7 +215,7 @@ int doList(Bundle* bundle)
             goto bail;
         }
 
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
         static const bool kHaveAndroidOs = true;
 #else
         static const bool kHaveAndroidOs = false;
@@ -633,7 +633,7 @@ int doDump(Bundle* bundle)
     Asset* asset = NULL;
 
     if (strcmp("resources", option) == 0) {
-#ifndef HAVE_ANDROID_OS
+#ifndef __ANDROID__
         res.print(bundle->getValues());
 #endif
 
