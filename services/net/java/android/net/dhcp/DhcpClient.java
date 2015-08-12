@@ -603,7 +603,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
         @Override
         public void exit() {
             cancelOneshotTimeout();
-            mReceiveThread.halt();  // Also closes sockets.
+            if (mReceiveThread != null) {
+                mReceiveThread.halt();  // Also closes sockets.
+                mReceiveThread = null;
+            }
             clearDhcpState();
         }
 
