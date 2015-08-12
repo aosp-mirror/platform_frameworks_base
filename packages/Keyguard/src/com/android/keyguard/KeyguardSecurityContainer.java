@@ -518,6 +518,13 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
     }
 
+
+    public void showMessage(String message, int color) {
+        if (mCurrentSecuritySelection != SecurityMode.None) {
+            getSecurityView(mCurrentSecuritySelection).showMessage(message, color);
+        }
+    }
+
     @Override
     public void showUsabilityHint() {
         mSecurityViewFlipper.showUsabilityHint();
