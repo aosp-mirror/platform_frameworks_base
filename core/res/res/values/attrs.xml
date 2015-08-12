@@ -4481,6 +4481,8 @@ i
             <enum name="wrap_content" value="-2" />
         </attr>
         <attr name="inputType" />
+        <!-- Theme to use for the completion popup window. -->
+        <attr name="popupTheme" />
     </declare-styleable>
     <declare-styleable name="PopupWindow">
         <!-- The background to use for the popup window. -->
