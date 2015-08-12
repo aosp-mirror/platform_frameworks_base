@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.view.ViewGroup;
@@ -63,18 +64,31 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
     private final int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
     // The height of a window which has not in DIP.
     private final int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
-
     private PhoneWindow mOwner = null;
-    boolean mWindowHasShadow = false;
-    boolean mShowDecor = false;
+    private boolean mWindowHasShadow = false;
+    private boolean mShowDecor = false;
+
+    // True if the window is being dragged.
+    private boolean mDragging = false;
+
+    // The bounds of the window and the absolute mouse pointer coordinates from before we started to
+    // drag the window. They will be used to determine the next window position.
+    private final Rect mWindowOriginalBounds = new Rect();
+    private float mStartDragX;
+    private float mStartDragY;
+    // True when the left mouse button got released while dragging.
+    private boolean mLeftMouseButtonReleased;
+
+    // Avoiding re-creation of Rect's by keeping a temporary window drag bound.
+    private final Rect mWindowDragBounds = new Rect();
 
     // The current focus state of the window for updating the window elevation.
-    boolean mWindowHasFocus = true;
+    private boolean mWindowHasFocus = true;
 
     // Cludge to address b/22668382: Set the shadow size to the maximum so that the layer
     // size calculation takes the shadow size into account. We set the elevation currently
     // to max until the first layout command has been executed.
-    boolean mAllowUpdateElevation = false;
+    private boolean mAllowUpdateElevation = false;
 
     public NonClientDecorView(Context context) {
         super(context);
@@ -101,6 +115,62 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
         mOwner.getDecorView().setOutlineProvider(ViewOutlineProvider.BOUNDS);
         findViewById(R.id.maximize_window).setOnClickListener(this);
         findViewById(R.id.close_window).setOnClickListener(this);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+        // Note: There are no mixed events. When a new device gets used (e.g. 1. Mouse, 2. touch)
+        // the old input device events get cancelled first. So no need to remember the kind of
+        // input device we are listening to.
+        switch (e.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                // A drag action is started if we aren't dragging already and the starting event is
+                // either a left mouse button or any other input device.
+                if (!mDragging &&
+                        (e.getToolType(e.getActionIndex()) != MotionEvent.TOOL_TYPE_MOUSE ||
+                                (e.getButtonState() & MotionEvent.BUTTON_PRIMARY) != 0)) {
+                    mDragging = true;
+                    mWindowOriginalBounds.set(getActivityBounds());
+                    mLeftMouseButtonReleased = false;
+                    mStartDragX = e.getRawX();
+                    mStartDragY = e.getRawY();
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (mDragging && !mLeftMouseButtonReleased) {
+                    if (e.getToolType(e.getActionIndex()) == MotionEvent.TOOL_TYPE_MOUSE &&
+                            (e.getButtonState() & MotionEvent.BUTTON_PRIMARY) == 0) {
+                        // There is no separate mouse button up call and if the user mixes mouse
+                        // button drag actions, we stop dragging once he releases the button.
+                        mLeftMouseButtonReleased = true;
+                        break;
+                    }
+                    mWindowDragBounds.set(mWindowOriginalBounds);
+                    mWindowDragBounds.offset(Math.round(e.getRawX() - mStartDragX),
+                            Math.round(e.getRawY() - mStartDragY));
+                    setActivityBounds(mWindowDragBounds);
+                }
+                break;
+
+            case MotionEvent.ACTION_UP:
+                if (mDragging) {
+                    // Since the window is already where it should be we don't have to do anything
+                    // special at this time.
+                    mDragging = false;
+                    return true;
+                }
+                break;
+
+            case MotionEvent.ACTION_CANCEL:
+                if (mDragging) {
+                    mDragging = false;
+                    setActivityBounds(mWindowOriginalBounds);
+                    return true;
+                }
+                break;
+        }
+        return mDragging;
     }
 
     /**

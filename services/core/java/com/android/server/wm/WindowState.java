@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
@@ -38,6 +39,7 @@ import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.SystemClock;
 import android.os.WorkSource;
+import android.util.DisplayMetrics;
 import android.util.TimeUtils;
 import android.view.Display;
 import android.view.IWindowFocusObserver;
@@ -77,6 +79,10 @@ class WindowList extends ArrayList<WindowState> {
  */
 final class WindowState implements WindowManagerPolicy.WindowState {
     static final String TAG = "WindowState";
+
+    // The minimal size of a window within the usable area of the freeform stack.
+    static final int MINIMUM_VISIBLE_WIDTH_IN_DP = 48;
+    static final int MINIMUM_VISIBLE_HEIGHT_IN_DP = 32;
 
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
@@ -536,6 +542,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHaveFrame = true;
 
         final Task task = mAppToken != null ? getTask() : null;
+        final boolean isFreeFormWorkspace = task != null && task.mStack != null &&
+                task.mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
         final boolean nonFullscreenTask = task != null && !task.isFullscreen();
         if (nonFullscreenTask) {
             task.getBounds(mContainingFrame);
@@ -545,10 +553,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 // IME is up and obscuring this window. Adjust the window position so it is visible.
                 mContainingFrame.top -= mContainingFrame.bottom - cf.bottom;
             }
-            // Make sure the containing frame is within the content frame so we don't layout
-            // resized window under screen decorations.
-            if (!mContainingFrame.intersect(cf)) {
-                mContainingFrame.set(cf);
+
+            if (isFreeFormWorkspace) {
+                // In free form mode we have only to set the rectangle if it wasn't set already. No
+                // need to intersect it with the (visible) "content frame" since it is allowed to
+                // be outside the visible desktop.
+                if (mContainingFrame.isEmpty()) {
+                    mContainingFrame.set(cf);
+                }
+            } else {
+                // Make sure the containing frame is within the content frame so we don't layout
+                // resized window under screen decorations.
+                if (!mContainingFrame.intersect(cf)) {
+                    mContainingFrame.set(cf);
+                }
             }
             mDisplayFrame.set(mContainingFrame);
         } else {
@@ -652,20 +670,38 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         // Make sure the content and visible frames are inside of the
         // final window frame.
-        mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
-                Math.max(mContentFrame.top, mFrame.top),
-                Math.min(mContentFrame.right, mFrame.right),
-                Math.min(mContentFrame.bottom, mFrame.bottom));
+        if (isFreeFormWorkspace && !mFrame.isEmpty()) {
+            // Keep the frame out of the blocked system area, limit it in size to the content area
+            // and make sure that there is always a minimum visible so that the user can drag it
+            // into a usable area..
+            final int height = Math.min(mFrame.height(), mContentFrame.height());
+            final int width = Math.min(mContentFrame.width(), mFrame.width());
+            final int minVisibleHeight = calculatePixelFromDp(MINIMUM_VISIBLE_HEIGHT_IN_DP);
+            final int minVisibleWidth = calculatePixelFromDp(MINIMUM_VISIBLE_WIDTH_IN_DP);
+            final int top = Math.max(mContentFrame.top,
+                    Math.min(mFrame.top, mContentFrame.bottom - minVisibleHeight));
+            final int left = Math.max(mContentFrame.left + minVisibleWidth - width,
+                    Math.min(mFrame.left, mContentFrame.right - minVisibleWidth));
+            mFrame.set(left, top, left + width, top + height);
+            mContentFrame.set(mFrame);
+            mVisibleFrame.set(mContentFrame);
+            mStableFrame.set(mContentFrame);
+        } else {
+            mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
+                    Math.max(mContentFrame.top, mFrame.top),
+                    Math.min(mContentFrame.right, mFrame.right),
+                    Math.min(mContentFrame.bottom, mFrame.bottom));
 
-        mVisibleFrame.set(Math.max(mVisibleFrame.left, mFrame.left),
-                Math.max(mVisibleFrame.top, mFrame.top),
-                Math.min(mVisibleFrame.right, mFrame.right),
-                Math.min(mVisibleFrame.bottom, mFrame.bottom));
+            mVisibleFrame.set(Math.max(mVisibleFrame.left, mFrame.left),
+                    Math.max(mVisibleFrame.top, mFrame.top),
+                    Math.min(mVisibleFrame.right, mFrame.right),
+                    Math.min(mVisibleFrame.bottom, mFrame.bottom));
 
-        mStableFrame.set(Math.max(mStableFrame.left, mFrame.left),
-                Math.max(mStableFrame.top, mFrame.top),
-                Math.min(mStableFrame.right, mFrame.right),
-                Math.min(mStableFrame.bottom, mFrame.bottom));
+            mStableFrame.set(Math.max(mStableFrame.left, mFrame.left),
+                    Math.max(mStableFrame.top, mFrame.top),
+                    Math.min(mStableFrame.right, mFrame.right),
+                    Math.min(mStableFrame.bottom, mFrame.bottom));
+        }
 
         mOverscanInsets.set(Math.max(mOverscanFrame.left - mFrame.left, 0),
                 Math.max(mOverscanFrame.top - mFrame.top, 0),
@@ -1575,6 +1611,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         synchronized(mService.mWindowMap) {
             return mService.mCurrentFocus == this;
         }
+    }
+
+    private int calculatePixelFromDp(int dp) {
+        final Configuration serviceConfig = mService.mCurConfiguration;
+        // TODO(multidisplay): Update Dp to that of display stack is on.
+        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        return (int)(dp * density);
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
