@@ -3617,7 +3617,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // We currently want to hide the navigation UI.
                         mNavigationBarController.setBarShowingLw(false);
                     }
-                    if (navVisible && !navTranslucent && !mNavigationBar.isAnimatingLw()
+                    if (navVisible && !navTranslucent && !navAllowedHidden
+                            && !mNavigationBar.isAnimatingLw()
                             && !mNavigationBarController.wasRecentlyTranslucent()) {
                         // If the nav bar is currently requested to be visible,
                         // and not in the process of animating on or off, then
