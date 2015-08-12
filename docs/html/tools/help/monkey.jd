@@ -130,7 +130,7 @@ movements, and an up event.)</td>
 <td><code>--pct-majornav &lt;percent&gt;</code></td>
 <td>Adjust percentage of "major" navigation events.
 (These are navigation events that will typically cause actions within your UI, such as
-the center button in a 5-way pad, the back key, or the menu key.)</td>
+the center button in a 5-way pad or the menu key.)</td>
 </tr>
 
 <tr>
