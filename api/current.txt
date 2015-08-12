@@ -23885,6 +23885,7 @@ package android.preference {
     method protected void onClick();
     method protected android.view.View onCreateView(android.view.ViewGroup);
     method public void onDependencyChanged(android.preference.Preference, boolean);
+    method protected void onDetachedFromActivity();
     method protected java.lang.Object onGetDefaultValue(android.content.res.TypedArray, int);
     method public void onParentChanged(android.preference.Preference, boolean);
     method protected void onPrepareForRemoval();

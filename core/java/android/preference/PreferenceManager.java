@@ -396,6 +396,9 @@ public class PreferenceManager {
      */
     boolean setPreferences(PreferenceScreen preferenceScreen) {
         if (preferenceScreen != mPreferenceScreen) {
+            if (mPreferenceScreen != null) {
+                mPreferenceScreen.onDetachedFromActivity();
+            }
             mPreferenceScreen = preferenceScreen;
             return true;
         }
@@ -704,7 +707,11 @@ public class PreferenceManager {
      */
     void dispatchActivityDestroy() {
         List<OnActivityDestroyListener> list = null;
-        
+
+        if (mPreferenceScreen != null) {
+            mPreferenceScreen.onDetachedFromActivity();
+            mPreferenceScreen = null;
+        }
         synchronized (this) {
             if (mActivityDestroyListeners != null) {
                 list = new ArrayList<OnActivityDestroyListener>(mActivityDestroyListeners);
