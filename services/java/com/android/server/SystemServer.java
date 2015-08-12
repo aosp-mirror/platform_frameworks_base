@@ -96,6 +96,7 @@ import com.android.server.wm.WindowManagerService;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -181,6 +182,23 @@ public final class SystemServer {
         if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
             Slog.w(TAG, "System clock is before 1970; setting to 1970.");
             SystemClock.setCurrentTimeMillis(EARLIEST_SUPPORTED_TIME);
+        }
+
+        // If the system has "persist.sys.language" and friends set, replace them with
+        // "persist.sys.locale". Note that the default locale at this point is calculated
+        // using the "-Duser.locale" command line flag. That flag is usually populated by
+        // AndroidRuntime using the same set of system properties, but only the system_server
+        // and system apps are allowed to set them.
+        //
+        // NOTE: Most changes made here will need an equivalent change to
+        // core/jni/AndroidRuntime.cpp
+        if (!SystemProperties.get("persist.sys.language").isEmpty()) {
+            final String languageTag = Locale.getDefault().toLanguageTag();
+
+            SystemProperties.set("persist.sys.locale", languageTag);
+            SystemProperties.set("persist.sys.language", "");
+            SystemProperties.set("persist.sys.country", "");
+            SystemProperties.set("persist.sys.localevar", "");
         }
 
         // Here we go!
