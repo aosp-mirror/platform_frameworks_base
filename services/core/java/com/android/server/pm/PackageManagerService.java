@@ -481,11 +481,20 @@ public class PackageManagerService extends IPackageManager.Stub {
         new ArrayMap<String, ArrayMap<String, PackageParser.Package>>();
 
     /**
-     * Tracks new system packages [receiving in an OTA] that we expect to
+     * Tracks new system packages [received in an OTA] that we expect to
      * find updated user-installed versions. Keys are package name, values
      * are package location.
      */
     final private ArrayMap<String, File> mExpectingBetter = new ArrayMap<>();
+
+    /**
+     * Tracks existing system packages prior to receiving an OTA. Keys are package name.
+     */
+    final private ArraySet<String> mExistingSystemPackages = new ArraySet<>();
+    /**
+     * Whether or not system app permissions should be promoted from install to runtime.
+     */
+    boolean mPromoteSystemApps;
 
     final Settings mSettings;
     boolean mRestoredSettings;
@@ -2028,6 +2037,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
+            final VersionInfo ver = mSettings.getInternalVersion();
+            mIsUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+            // when upgrading from pre-M, promote system app permissions from install to runtime
+            mPromoteSystemApps =
+                    mIsUpgrade && ver.sdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1;
+
+            // save off the names of pre-existing system packages prior to scanning; we don't
+            // want to automatically grant runtime permissions for new system apps
+            if (mPromoteSystemApps) {
+                Iterator<PackageSetting> pkgSettingIter = mSettings.mPackages.values().iterator();
+                while (pkgSettingIter.hasNext()) {
+                    PackageSetting ps = pkgSettingIter.next();
+                    if (isSystemApp(ps)) {
+                        mExistingSystemPackages.add(ps.name);
+                    }
+                }
+            }
+
             // Collect vendor overlay packages.
             // (Do this before scanning any apps.)
             // For security and version matching reason, only consider
@@ -2247,8 +2274,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             // cases get permissions that the user didn't initially explicitly
             // allow...  it would be nice to have some better way to handle
             // this situation.
-            final VersionInfo ver = mSettings.getInternalVersion();
-
             int updateFlags = UPDATE_PERMISSIONS_ALL;
             if (ver.sdkVersion != mSdkVersion) {
                 Slog.i(TAG, "Platform changed from " + ver.sdkVersion + " to "
@@ -2257,6 +2282,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             updatePermissionsLPw(null, null, updateFlags);
             ver.sdkVersion = mSdkVersion;
+            // clear only after permissions have been updated
+            mExistingSystemPackages.clear();
+            mPromoteSystemApps = false;
 
             // If this is the first boot, and it is a normal boot, then
             // we need to initialize the default preferred apps.
@@ -2268,7 +2296,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
-            mIsUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
             if (mIsUpgrade && !onlyCore) {
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
                 for (int i = 0; i < mSettings.mPackages.size(); i++) {
@@ -8355,6 +8382,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                         grant = GRANT_INSTALL_LEGACY;
                     } else if (origPermissions.hasInstallPermission(bp.name)) {
                         // For legacy apps that became modern, install becomes runtime.
+                        grant = GRANT_UPGRADE;
+                    } else if (mPromoteSystemApps
+                            && isSystemApp(ps)
+                            && mExistingSystemPackages.contains(ps.name)) {
+                        // For legacy system apps, install becomes runtime.
+                        // We cannot check hasInstallPermission() for system apps since those
+                        // permissions were granted implicitly and not persisted pre-M.
                         grant = GRANT_UPGRADE;
                     } else {
                         // For modern apps keep runtime permissions unchanged.
