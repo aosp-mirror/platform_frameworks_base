@@ -98,9 +98,19 @@ public final class StreamConfigurationMap {
             HighSpeedVideoConfiguration[] highSpeedVideoConfigurations,
             ReprocessFormatsMap inputOutputFormatsMap,
             boolean listHighResolution) {
-        mConfigurations = checkArrayElementsNotNull(configurations, "configurations");
-        mMinFrameDurations = checkArrayElementsNotNull(minFrameDurations, "minFrameDurations");
-        mStallDurations = checkArrayElementsNotNull(stallDurations, "stallDurations");
+
+        if (configurations == null) {
+            // If no color configurations exist, ensure depth ones do
+            checkArrayElementsNotNull(depthConfigurations, "depthConfigurations");
+            mConfigurations = new StreamConfiguration[0];
+            mMinFrameDurations = new StreamConfigurationDuration[0];
+            mStallDurations = new StreamConfigurationDuration[0];
+        } else {
+            mConfigurations = checkArrayElementsNotNull(configurations, "configurations");
+            mMinFrameDurations = checkArrayElementsNotNull(minFrameDurations, "minFrameDurations");
+            mStallDurations = checkArrayElementsNotNull(stallDurations, "stallDurations");
+        }
+
         mListHighResolution = listHighResolution;
 
         if (depthConfigurations == null) {
@@ -124,7 +134,7 @@ public final class StreamConfigurationMap {
         }
 
         // For each format, track how many sizes there are available to configure
-        for (StreamConfiguration config : configurations) {
+        for (StreamConfiguration config : mConfigurations) {
             int fmt = config.getFormat();
             SparseIntArray map = null;
             if (config.isOutput()) {
@@ -159,7 +169,8 @@ public final class StreamConfigurationMap {
                     mDepthOutputFormats.get(config.getFormat()) + 1);
         }
 
-        if (mOutputFormats.indexOfKey(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) < 0) {
+        if (configurations != null &&
+                mOutputFormats.indexOfKey(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) < 0) {
             throw new AssertionError(
                     "At least one stream configuration for IMPLEMENTATION_DEFINED must exist");
         }
