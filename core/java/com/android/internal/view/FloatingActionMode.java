@@ -194,8 +194,16 @@ public class FloatingActionMode extends ActionMode {
             mContext.getResources().getDisplayMetrics().widthPixels,
             mContext.getResources().getDisplayMetrics().heightPixels);
 
-        return Rect.intersects(mContentRectOnScreen, mScreenRect)
-            && Rect.intersects(mContentRectOnScreen, mViewRectOnScreen);
+        return intersectsClosed(mContentRectOnScreen, mScreenRect)
+            && intersectsClosed(mContentRectOnScreen, mViewRectOnScreen);
+    }
+
+    /*
+     * Same as Rect.intersects, but includes cases where the rectangles touch.
+    */
+    private static boolean intersectsClosed(Rect a, Rect b) {
+         return a.left <= b.right && b.left <= a.right
+                 && a.top <= b.bottom && b.top <= a.bottom;
     }
 
     @Override
