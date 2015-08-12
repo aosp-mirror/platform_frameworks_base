@@ -16,17 +16,15 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,7 +50,7 @@ class NavigationBarAppsModel {
     private final static String VERSION_PREF = "version";
 
     // Current version number for preferences.
-    private final static int CURRENT_VERSION = 2;
+    private final static int CURRENT_VERSION = 3;
 
     // Preference name for the number of app icons.
     private final static String APP_COUNT_PREF = "app_count";
@@ -68,18 +66,23 @@ class NavigationBarAppsModel {
     // user serial of the third app of the logged-in user.
     private final static char USER_SEPARATOR = '|';
 
-    final Context mContext;
+    private final Context mContext;
+    private final UserManager mUserManager;
     private final SharedPreferences mPrefs;
 
     // Apps are represented as an ordered list of app infos.
     private final List<AppInfo> mApps = new ArrayList<AppInfo>();
 
+    // Id of the current user.
+    private int mCurrentUserId = -1;
+
     // Serial number of the current user.
-    private long mCurrentUserSerialNumber = AppInfo.USER_UNSPECIFIED;
+    private long mCurrentUserSerialNumber = -1;
 
     public NavigationBarAppsModel(Context context) {
         mContext = context;
         mPrefs = mContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
         int version = mPrefs.getInt(VERSION_PREF, -1);
         if (version != CURRENT_VERSION) {
@@ -94,8 +97,9 @@ class NavigationBarAppsModel {
     /**
      * Reinitializes the model for a new user.
      */
-    public void setCurrentUser(long userSerialNumber) {
-        mCurrentUserSerialNumber = userSerialNumber;
+    public void setCurrentUser(int userId) {
+        mCurrentUserId = userId;
+        mCurrentUserSerialNumber = mUserManager.getSerialNumberForUser(new UserHandle(userId));
 
         mApps.clear();
 
@@ -115,11 +119,8 @@ class NavigationBarAppsModel {
      * Removes prefs for users that don't exist on the device.
      */
     private void removePrefsForDeletedUsers() {
-        UserManager userManager =
-                (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-
         // Build a set of string representations of serial numbers of the device users.
-        final List<UserInfo> users = userManager.getUsers();
+        final List<UserInfo> users = mUserManager.getUsers();
         final int userCount = users.size();
 
         final Set<String> userSerials = new HashSet<String> ();
@@ -207,14 +208,14 @@ class NavigationBarAppsModel {
                 continue;
             }
             ComponentName componentName = ComponentName.unflattenFromString(prefValue);
-            long userSerialNumber = mPrefs.getLong(prefUserForApp(i), AppInfo.USER_UNSPECIFIED);
+            long userSerialNumber = mPrefs.getLong(prefUserForApp(i), -1);
+            if (userSerialNumber == -1) {
+                Slog.w(TAG, "Couldn't find pref " + prefUserForApp(i));
+                // Couldn't find the saved state. Just skip this item.
+                continue;
+            }
             mApps.add(new AppInfo(componentName, userSerialNumber));
         }
-    }
-
-    @VisibleForTesting
-    protected int getCurrentUser() {
-        return ActivityManager.getCurrentUser();
     }
 
     /** Adds the first few apps from the owner profile. Used for demo purposes. */
@@ -222,16 +223,15 @@ class NavigationBarAppsModel {
         // Get a list of all app activities.
         final Intent queryIntent = new Intent(Intent.ACTION_MAIN, null);
         queryIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        final int currentUser = getCurrentUser();
 
         final List<ResolveInfo> apps = mContext.getPackageManager().queryIntentActivitiesAsUser(
-                queryIntent, 0 /* flags */, currentUser);
+                queryIntent, 0 /* flags */, mCurrentUserId);
         final int appCount = apps.size();
         for (int i = 0; i < NUM_INITIAL_APPS && i < appCount; i++) {
             ResolveInfo ri = apps.get(i);
             ComponentName componentName = new ComponentName(
                     ri.activityInfo.packageName, ri.activityInfo.name);
-            mApps.add(new AppInfo(componentName, AppInfo.USER_UNSPECIFIED));
+            mApps.add(new AppInfo(componentName, mCurrentUserSerialNumber));
         }
 
         savePrefs();
@@ -239,10 +239,6 @@ class NavigationBarAppsModel {
 
     /** Returns a pref prefixed with the serial number of the current user. */
     private String userPrefixed(String pref) {
-        if (mCurrentUserSerialNumber == AppInfo.USER_UNSPECIFIED) {
-            throw new RuntimeException("Current user is not yet set");
-        }
-
         return Long.toString(mCurrentUserSerialNumber) + USER_SEPARATOR + pref;
     }
 

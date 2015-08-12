@@ -22,11 +22,6 @@ import android.content.ComponentName;
  * Navigation bar app information.
  */
 class AppInfo {
-    /**
-     * Unspecified serial number for the app's user.
-     */
-    public static final long USER_UNSPECIFIED = -1;
-
     private final ComponentName mComponentName;
     private final long mUserSerialNumber;
 
