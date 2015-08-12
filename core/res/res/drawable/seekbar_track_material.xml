@@ -18,7 +18,7 @@
     <item android:id="@id/background"
           android:gravity="center_vertical|fill_horizontal">
         <shape android:shape="rectangle"
-               android:tint="?attr/colorControlNormal">
+               android:tint="@color/control_nodisable_material">
             <size android:height="@dimen/seekbar_track_background_height_material" />
             <solid android:color="@color/white_disabled_material" />
         </shape>

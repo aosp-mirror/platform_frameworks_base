@@ -25,7 +25,7 @@
             android:opticalInsetLeft="3dp"
             android:opticalInsetRight="3dp">
             <solid
-                android:color="#ff000000" />
+                android:color="@color/white" />
             <size
                 android:width="18dp"
                 android:height="18dp" />
