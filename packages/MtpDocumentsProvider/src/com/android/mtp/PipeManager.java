@@ -47,12 +47,12 @@ class PipeManager {
     }
 
     private static abstract class Task implements Runnable {
-        protected final MtpManager mModel;
+        protected final MtpManager mManager;
         protected final Identifier mIdentifier;
         protected final ParcelFileDescriptor[] mDescriptors;
 
-        Task(MtpManager model, Identifier identifier) throws IOException {
-            mModel = model;
+        Task(MtpManager manager, Identifier identifier) throws IOException {
+            mManager = manager;
             mIdentifier = identifier;
             mDescriptors = ParcelFileDescriptor.createReliablePipe();
         }
@@ -70,7 +70,7 @@ class PipeManager {
         @Override
         public void run() {
             try {
-                mModel.importFile(
+                mManager.importFile(
                         mIdentifier.mDeviceId, mIdentifier.mObjectHandle, mDescriptors[1]);
                 mDescriptors[1].close();
             } catch (IOException error) {
@@ -94,7 +94,7 @@ class PipeManager {
                 try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
                         new ParcelFileDescriptor.AutoCloseOutputStream(mDescriptors[1])) {
                     try {
-                        stream.write(mModel.getThumbnail(
+                        stream.write(mManager.getThumbnail(
                                 mIdentifier.mDeviceId, mIdentifier.mObjectHandle));
                     } catch (IOException error) {
                         mDescriptors[1].closeWithError("Failed to stream a thumbnail.");
