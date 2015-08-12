@@ -121,7 +121,14 @@ void DamageAccumulator::popTransform() {
 static inline void mapRect(const Matrix4* matrix, const SkRect& in, SkRect* out) {
     if (in.isEmpty()) return;
     Rect temp(in);
-    matrix->mapRect(temp);
+    if (CC_LIKELY(!matrix->isPerspective())) {
+        matrix->mapRect(temp);
+    } else {
+        // Don't attempt to calculate damage for a perspective transform
+        // as the numbers this works with can break the perspective
+        // calculations. Just give up and expand to DIRTY_MIN/DIRTY_MAX
+        temp.set(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
+    }
     out->join(RECT_ARGS(temp));
 }
 
@@ -134,7 +141,14 @@ static inline void mapRect(const RenderProperties& props, const SkRect& in, SkRe
     const SkMatrix* transform = props.getTransformMatrix();
     SkRect temp(in);
     if (transform && !transform->isIdentity()) {
-        transform->mapRect(&temp);
+        if (CC_LIKELY(!transform->hasPerspective())) {
+            transform->mapRect(&temp);
+        } else {
+            // Don't attempt to calculate damage for a perspective transform
+            // as the numbers this works with can break the perspective
+            // calculations. Just give up and expand to DIRTY_MIN/DIRTY_MAX
+            temp.set(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
+        }
     }
     temp.offset(props.getLeft(), props.getTop());
     out->join(temp);
