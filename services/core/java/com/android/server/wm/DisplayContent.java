@@ -203,7 +203,9 @@ class DisplayContent {
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
-        mStacks.remove(stack);
+        if (!mStacks.remove(stack)) {
+            Slog.wtf(TAG, "moving stack that was not added: " + stack, new Throwable());
+        }
         mStacks.add(toTop ? mStacks.size() : 0, stack);
     }
 
