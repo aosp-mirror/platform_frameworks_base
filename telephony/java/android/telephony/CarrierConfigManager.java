@@ -342,6 +342,14 @@ public class CarrierConfigManager {
             "ci_action_on_sys_update_extra_val_string";
 
     /**
+     * Specifies the amount of gap to be added in millis between DTMF tones. When a non-zero value
+     * is specified, the UE shall wait for the specified amount of time before it sends out
+     * successive DTMF tones on the network.
+     * @hide
+     */
+    public static final String KEY_IMS_DTMF_TONE_DELAY_INT = "ims_dtmf_tone_delay_int";
+
+    /**
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
      * prevent manual operator selection. If false, this SIM setting will be ignored and manual
      * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
@@ -439,6 +447,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_FORCE_HOME_NETWORK_BOOL, false);
+        sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
