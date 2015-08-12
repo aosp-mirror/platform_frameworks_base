@@ -1228,7 +1228,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Sjá allt"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Veldu aðgerð"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Deila með"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Sendir…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Opna vafra?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Samþykkja símtal?"</string>

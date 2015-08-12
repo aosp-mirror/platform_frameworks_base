@@ -1228,7 +1228,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ಚಟುವಟಿಕೆಯನ್ನು ಆರಿಸಿ"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ಬ್ರೌಸರ್ ಪ್ರಾರಂಭಿಸುವುದೇ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"ಕರೆ ಸ್ವೀಕರಿಸುವುದೇ?"</string>

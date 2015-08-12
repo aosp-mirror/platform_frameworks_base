@@ -1228,7 +1228,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"সবগুলো দেখুন"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"কার্যকলাপ চয়ন করুন"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"এর সাথে ভাগ করুন"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"পাঠানো হচ্ছে..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ব্রাউজার লঞ্চ করতে চান?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"কল গ্রহণ করবেন?"</string>

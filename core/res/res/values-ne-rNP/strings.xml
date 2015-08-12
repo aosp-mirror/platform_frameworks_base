@@ -1234,7 +1234,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"सबै हेर्नुहोस्"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"गतिविधि छनौट गर्नुहोस्"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"साझेदारी गर्नुहोस्..."</string>
-    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"पठाउँदै..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ब्राउजर सुरु गर्ने हो?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"कल स्वीकार गर्नुहुन्छ?"</string>
@@ -1501,7 +1500,7 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB पेरिफेरल पोर्ट"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"थप विकल्पहरू"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ओभरफ्लो बन्द गर्नुहोस्"</string>
-    <string name="maximize_button_text" msgid="7543285286182446254">"अधिकतम गर्नुहोस्"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"ठूलो बनाउनुहोस्"</string>
     <string name="close_button_text" msgid="3937902162644062866">"बन्द गर्नुहोस्"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयन गरियो</item>
