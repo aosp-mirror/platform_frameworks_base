@@ -16,30 +16,26 @@
 
 package com.android.mtp;
 
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.test.AndroidTestCase;
-import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @SmallTest
 public class MtpDocumentsProviderTest extends AndroidTestCase {
-    private ContentResolver mResolver;
+    private TestContentResolver mResolver;
     private MtpDocumentsProvider mProvider;
     private TestMtpManager mMtpManager;
 
     @Override
     public void setUp() {
-        mResolver = new ContentResolver();
+        mResolver = new TestContentResolver();
         mMtpManager = new TestMtpManager(getContext());
         mProvider = new MtpDocumentsProvider();
         mProvider.onCreateForTesting(mMtpManager, mResolver);
@@ -290,22 +286,5 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(0, mResolver.getChangeCount(
                 DocumentsContract.buildChildDocumentsUri(
                         MtpDocumentsProvider.AUTHORITY, "0_0_2")));
-    }
-
-    private static class ContentResolver extends MockContentResolver {
-        final Map<Uri, Integer> mChangeCounts = new HashMap<Uri, Integer>();
-
-        @Override
-        public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
-            mChangeCounts.put(uri, getChangeCount(uri) + 1);
-        }
-
-        int getChangeCount(Uri uri) {
-            if (mChangeCounts.containsKey(uri)) {
-                return mChangeCounts.get(uri);
-            } else {
-                return 0;
-            }
-        }
     }
 }
