@@ -785,7 +785,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardBottomArea.setAssistManager(mAssistManager);
         mKeyguardIndicationController = new KeyguardIndicationController(mContext,
                 (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
-                        R.id.keyguard_indication_text));
+                        R.id.keyguard_indication_text),
+                mKeyguardBottomArea.getLockIcon());
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
 
         // set the inital view visibility
@@ -1031,6 +1032,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 mStatusBarWindow, mStatusBarWindowManager, mScrimController);
+        mKeyguardIndicationController.setStatusBarKeyguardViewManager(
+                mStatusBarKeyguardViewManager);
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
     }
 
