@@ -629,7 +629,7 @@
     <string name="relationTypeFriend" msgid="7313106762483391262">"Amigo"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Supervisor"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Madre"</string>
-    <string name="relationTypeParent" msgid="4755635567562925226">"Padre"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Padre/madre"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Socio"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Recomendado por"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Pariente"</string>
