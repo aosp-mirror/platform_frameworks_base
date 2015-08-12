@@ -170,6 +170,10 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mSecurityContainer.showPromptReason(reason);
     }
 
+    public void showMessage(String message, int color) {
+        mSecurityContainer.showMessage(message, color);
+    }
+
     /**
      *  Dismisses the keyguard by going to the next screen or making it gone.
      *

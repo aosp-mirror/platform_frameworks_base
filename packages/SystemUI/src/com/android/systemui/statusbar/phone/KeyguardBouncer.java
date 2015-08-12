@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -101,6 +100,10 @@ public class KeyguardBouncer {
      */
     public void showPromptReason(int reason) {
         mKeyguardView.showPromptReason(reason);
+    }
+
+    public void showMessage(String message, int color) {
+        mKeyguardView.showMessage(message, color);
     }
 
     private void cancelShowRunnable() {
