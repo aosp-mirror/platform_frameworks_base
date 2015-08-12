@@ -152,13 +152,8 @@ public class CheckedTextView extends TextView implements Checkable {
             return;
         }
 
-        mCheckMarkResource = resId;
-
-        Drawable d = null;
-        if (mCheckMarkResource != 0) {
-            d = getContext().getDrawable(mCheckMarkResource);
-        }
-        setCheckMarkDrawable(d);
+        final Drawable d = resId != 0 ? getContext().getDrawable(resId) : null;
+        setCheckMarkDrawableInternal(d, resId);
     }
 
     /**
@@ -172,12 +167,18 @@ public class CheckedTextView extends TextView implements Checkable {
      * @see #setCheckMarkDrawable(int)
      * @see #getCheckMarkDrawable()
      */
-    public void setCheckMarkDrawable(Drawable d) {
+    public void setCheckMarkDrawable(@Nullable Drawable d) {
+        setCheckMarkDrawableInternal(d, 0);
+    }
+
+    private void setCheckMarkDrawableInternal(@Nullable Drawable d, @DrawableRes int resId) {
         if (mCheckMarkDrawable != null) {
             mCheckMarkDrawable.setCallback(null);
             unscheduleDrawable(mCheckMarkDrawable);
         }
+
         mNeedRequestlayout = (d != mCheckMarkDrawable);
+
         if (d != null) {
             d.setCallback(this);
             d.setVisible(getVisibility() == VISIBLE, false);
@@ -190,7 +191,9 @@ public class CheckedTextView extends TextView implements Checkable {
         } else {
             mCheckMarkWidth = 0;
         }
+
         mCheckMarkDrawable = d;
+        mCheckMarkResource = resId;
 
         // Do padding resolution. This will call internalSetPadding() and do a
         // requestLayout() if needed.
