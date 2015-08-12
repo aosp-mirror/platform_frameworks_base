@@ -465,6 +465,9 @@ public abstract class WindowOrientationListener {
             pw.println(prefix + "mLastFilteredX=" + mLastFilteredX);
             pw.println(prefix + "mLastFilteredY=" + mLastFilteredY);
             pw.println(prefix + "mLastFilteredZ=" + mLastFilteredZ);
+            final long delta = SystemClock.elapsedRealtimeNanos() - mLastFilteredTimestampNanos;
+            pw.println(prefix + "mLastFilteredTimestampNanos=" + mLastFilteredTimestampNanos
+                    + " (" + (delta * 0.000001f) + "ms ago)");
             pw.println(prefix + "mTiltHistory={last: " + getLastTiltLocked() + "}");
             pw.println(prefix + "mFlat=" + mFlat);
             pw.println(prefix + "mSwinging=" + mSwinging);
