@@ -1228,7 +1228,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"전체 보기"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"작업 선택"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"공유 대상"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"전송 중..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"브라우저를 실행하시겠습니까?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"통화를 수락하시겠습니까?"</string>

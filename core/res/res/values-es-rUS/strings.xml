@@ -629,7 +629,7 @@
     <string name="relationTypeFriend" msgid="7313106762483391262">"Amigo"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Supervisor"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Madre"</string>
-    <string name="relationTypeParent" msgid="4755635567562925226">"Padre"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Padre/madre"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Socio"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Recomendado por"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Pariente"</string>
@@ -1228,7 +1228,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Ver todas"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Elige actividad"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Compartir con"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Enviando..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"¿Deseas iniciar el navegador?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"¿Aceptar la llamada?"</string>

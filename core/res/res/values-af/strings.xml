@@ -1228,7 +1228,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Sien alle"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Kies aktiwiteit"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Deel met"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Stuur tans…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin webblaaier?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Aanvaar oproep?"</string>

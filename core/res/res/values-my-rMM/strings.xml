@@ -1228,7 +1228,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"အားလုံးကို ကြည့်ရန်"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"လှုပ်ရှားမှုကို ရွေးရန်"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"...နှင့် မျှဝေရန်"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"ပေးပို့နေစဉ်…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ဘရောက်ဇာ ဖွင့်မည်လား။"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"ဖုန်းခေါ်ဆိုမှုကို လက်ခံမလား?"</string>
