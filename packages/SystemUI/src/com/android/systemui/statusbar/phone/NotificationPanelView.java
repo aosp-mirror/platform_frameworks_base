@@ -918,7 +918,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private int getFalsingThreshold() {
-        float factor = mStatusBar.isScreenOnComingFromTouch() ? 1.5f : 1.0f;
+        float factor = mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
         return (int) (mQsFalsingThreshold * factor);
     }
 
@@ -2075,7 +2075,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public float getAffordanceFalsingFactor() {
-        return mStatusBar.isScreenOnComingFromTouch() ? 1.5f : 1.0f;
+        return mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
     }
 
     @Override
