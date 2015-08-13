@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.os;
+package android.view.inputmethod;
 
+import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
 import java.util.Objects;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.os;
+package com.android.internal.inputmethod;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
