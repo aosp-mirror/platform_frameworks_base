@@ -363,6 +363,14 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(cbrPackage, SMS_PERMISSIONS, false, userId);
             }
 
+            // Carrier Provisioning Service
+            Intent carrierProvIntent = new Intent(Intents.SMS_CARRIER_PROVISION_ACTION);
+            PackageParser.Package carrierProvPackage =
+                    getDefaultSystemHandlerServicePackageLPr(carrierProvIntent, userId);
+            if (carrierProvPackage != null && doesPackageSupportRuntimePermissions(carrierProvPackage)) {
+                grantRuntimePermissionsLPw(carrierProvPackage, SMS_PERMISSIONS, false, userId);
+            }
+
             // Calendar
             Intent calendarIntent = new Intent(Intent.ACTION_MAIN);
             calendarIntent.addCategory(Intent.CATEGORY_APP_CALENDAR);
