@@ -3448,8 +3448,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean applyAnimationLocked(AppWindowToken atoken,
-            WindowManager.LayoutParams lp, int transit, boolean enter, boolean isVoiceInteraction) {
+    private boolean applyAnimationLocked(AppWindowToken atoken, WindowManager.LayoutParams lp,
+            int transit, boolean enter, boolean isVoiceInteraction) {
         // Only apply an animation if the display isn't frozen.  If it is
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
@@ -3466,24 +3466,36 @@ public class WindowManagerService extends IWindowManager.Stub
             Rect containingFrame = new Rect(0, 0, width, height);
             Rect contentInsets = new Rect();
             Rect appFrame = new Rect(0, 0, width, height);
-            if (win != null && win.isFullscreen(width, height)) {
-                // For fullscreen windows use the window frames and insets to set the thumbnail
-                // clip. For none-fullscreen windows we use the app display region so the clip
-                // isn't affected by the window insets.
+            Rect surfaceInsets = null;
+            final boolean fullscreen = win != null && win.isFullscreen(width, height);
+            // Dialog activities have windows with containing frame being very large, but not
+            // exactly fullscreen and much smaller mFrame. We use this distinction to identify
+            // dialog activities.
+            final boolean dialogWindow = win != null && !win.mContainingFrame.equals(win.mFrame);
+            if (win != null) {
                 containingFrame.set(win.mContainingFrame);
-                contentInsets.set(win.mContentInsets);
-                appFrame.set(win.mFrame);
+                surfaceInsets = win.getAttrs().surfaceInsets;
+                if (fullscreen) {
+                    // For fullscreen windows use the window frames and insets to set the thumbnail
+                    // clip. For none-fullscreen windows we use the app display region so the clip
+                    // isn't affected by the window insets.
+                    contentInsets.set(win.mContentInsets);
+                    appFrame.set(win.mFrame);
+                }
             }
 
+            final int containingWidth = containingFrame.width();
+            final int containingHeight = containingFrame.height();
             if (atoken.mLaunchTaskBehind) {
                 // Differentiate the two animations. This one which is briefly on the screen
                 // gets the !enter animation, and the other activity which remains on the
                 // screen gets the enter animation. Both appear in the mOpeningApps set.
                 enter = false;
             }
-            Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height,
-                    mCurConfiguration.orientation, containingFrame, contentInsets, appFrame,
-                    isVoiceInteraction);
+            final boolean resizedWindow = !fullscreen && !dialogWindow;
+            Animation a = mAppTransition.loadAnimation(lp, transit, enter, containingWidth,
+                    containingHeight, mCurConfiguration.orientation, containingFrame, contentInsets,
+                    surfaceInsets, appFrame, isVoiceInteraction, resizedWindow);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
@@ -3493,7 +3505,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     Slog.v(TAG, "Loaded animation " + a + " for " + atoken, e);
                 }
-                atoken.mAppAnimator.setAnimation(a, width, height,
+                atoken.mAppAnimator.setAnimation(a, containingWidth, containingHeight,
                         mAppTransition.canSkipFirstFrame());
             }
         } else {
@@ -9533,7 +9545,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // open/close animation (only on the way down)
                         anim = mAppTransition.createThumbnailAspectScaleAnimationLocked(
                                 displayInfo.appWidth, displayInfo.appHeight,
-                                displayInfo.logicalWidth, transit);
+                                displayInfo.logicalWidth);
                         openingAppAnimator.thumbnailForceAboveLayer = Math.max(topOpeningLayer,
                                 topClosingLayer);
                         openingAppAnimator.deferThumbnailDestruction =
