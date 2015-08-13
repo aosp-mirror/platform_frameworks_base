@@ -473,7 +473,7 @@ public class KeyguardViewMediator extends SystemUI {
                     mWakeAndUnlocking = true;
                     mStatusBarKeyguardViewManager.setWakeAndUnlocking();
                     keyguardDone(true);
-                } else if (mShowing && mDeviceInteractive) {
+                } else if (mShowing) {
                     if (wakeAndUnlocking) {
                         mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
                     }
