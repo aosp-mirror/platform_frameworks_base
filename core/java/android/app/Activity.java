@@ -31,7 +31,7 @@ import android.transition.Scene;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
-import android.view.Window.WindowStackCallback;
+import android.view.Window.WindowControllerCallback;
 import android.widget.Toolbar;
 
 import com.android.internal.app.IVoiceInteractor;
@@ -60,6 +60,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -673,7 +674,7 @@ public class Activity extends ContextThemeWrapper
         implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
-        Window.OnWindowDismissedCallback, WindowStackCallback {
+        Window.OnWindowDismissedCallback, WindowControllerCallback {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -2712,7 +2713,8 @@ public class Activity extends ContextThemeWrapper
     }
 
 
-    /** Called to move the window and its activity/task to a different stack container.
+    /**
+     * Called to move the window and its activity/task to a different stack container.
      * For example, a window can move between
      * {@link android.app.ActivityManager#FULLSCREEN_WORKSPACE_STACK_ID} stack and
      * {@link android.app.ActivityManager#FREEFORM_WORKSPACE_STACK_ID} stack.
@@ -2731,6 +2733,31 @@ public class Activity extends ContextThemeWrapper
     @Override
     public int getWindowStackId() throws RemoteException {
         return ActivityManagerNative.getDefault().getActivityStackId(mToken);
+    }
+
+    /**
+     * Returns the bounds of the task that contains this activity.
+     *
+     * @return Rect The bounds that contains the activity.
+     * @hide
+     */
+    @Override
+    public Rect getActivityBounds() throws RemoteException {
+        return ActivityManagerNative.getDefault().getActivityBounds(mToken);
+    }
+
+    /**
+     * Sets the bounds (size and position) of the task or stack that contains this
+     * activity.
+     * NOTE: The requested bounds might not the fully honored by the system depending
+     * on the window placement policy.
+     *
+     * @param newBounds The new target bounds of the activity in task or stack.
+     * @hide
+     */
+    @Override
+    public void setActivityBounds(Rect newBounds) throws RemoteException {
+        ActivityManagerNative.getDefault().setActivityBounds(mToken, newBounds);
     }
 
     /**
@@ -6211,7 +6238,7 @@ public class Activity extends ContextThemeWrapper
         mFragments.attachHost(null /*parent*/);
 
         mWindow = new PhoneWindow(this);
-        mWindow.setWindowStackCallback(this);
+        mWindow.setWindowControllerCallback(this);
         mWindow.setCallback(this);
         mWindow.setOnWindowDismissedCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
