@@ -363,8 +363,7 @@ final class ActivityStack {
     }
 
     boolean okToShowLocked(ActivityRecord r) {
-        return mStackSupervisor.isCurrentProfileLocked(r.userId)
-                || (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0;
+        return mStackSupervisor.okToShowLocked(r);
     }
 
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
@@ -688,6 +687,13 @@ final class ActivityStack {
         setLaunchTime(r);
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE,
                 "Launch completed; removing icicle of " + r.icicle);
+    }
+
+    private void addRecentActivityLocked(ActivityRecord r) {
+        if (r != null) {
+            mRecentTasks.addLocked(r.task);
+            r.task.touchActiveTime();
+        }
     }
 
     private void startLaunchTraces(String packageName) {
@@ -2285,6 +2291,8 @@ final class ActivityStack {
 
         if (doResume) {
             mStackSupervisor.resumeTopActivitiesLocked(this, r, options);
+        } else {
+            addRecentActivityLocked(r);
         }
     }
 
@@ -3729,6 +3737,14 @@ final class ActivityStack {
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
         insertTaskAtTop(tr, null);
+
+        // Don't refocus if invisible to current user
+        ActivityRecord top = tr.getTopActivity();
+        if (!okToShowLocked(top)) {
+            addRecentActivityLocked(top);
+            ActivityOptions.abort(options);
+            return;
+        }
 
         // Set focus to the top running activity of this stack.
         ActivityRecord r = topRunningActivityLocked(null);

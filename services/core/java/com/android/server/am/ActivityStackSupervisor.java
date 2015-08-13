@@ -1499,13 +1499,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             err = ActivityManager.START_CLASS_NOT_FOUND;
         }
 
-        if (err == ActivityManager.START_SUCCESS
-                && !isCurrentProfileLocked(userId)
-                && (aInfo.flags & FLAG_SHOW_FOR_ALL_USERS) == 0) {
-            // Trying to launch a background activity that doesn't show for all users.
-            err = ActivityManager.START_NOT_CURRENT_USER_ACTIVITY;
-        }
-
         if (err == ActivityManager.START_SUCCESS && sourceRecord != null
                 && sourceRecord.task.voiceSession != null) {
             // If this activity is being launched as part of a voice session, we need
@@ -1922,8 +1915,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // If the caller has asked not to resume at this point, we make note
         // of this in the record so that we can skip it when trying to find
         // the top running activity.
-        if (!doResume) {
+        if (!doResume || !okToShowLocked(r)) {
             r.delayedResume = true;
+            doResume = false;
         }
 
         ActivityRecord notTop =
@@ -2128,7 +2122,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             options = null;
                         }
                     }
-                    if (!movedToFront) {
+                    if (!movedToFront && doResume) {
                         if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Bring to front target: " + targetStack
                                 + " from " + intentActivity);
                         targetStack.moveToFront("intentActivityFound");
@@ -2155,6 +2149,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         } else {
                             ActivityOptions.abort(options);
                         }
+                        updateUserStackLocked(r.userId, targetStack);
                         return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                     }
                     if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
@@ -2257,6 +2252,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         } else {
                             ActivityOptions.abort(options);
                         }
+                        updateUserStackLocked(r.userId, targetStack);
                         return ActivityManager.START_TASK_TO_FRONT;
                     }
                 }
@@ -2322,7 +2318,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             newTask = true;
             targetStack = computeStackFocus(r, newTask);
-            targetStack.moveToFront("startingNewTask");
+            if (doResume) {
+                targetStack.moveToFront("startingNewTask");
+            }
 
             if (reuseTask == null) {
                 r.setTask(targetStack.createTaskRecord(getNextTaskId(),
@@ -2355,7 +2353,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             targetStack = sourceTask.stack;
-            targetStack.moveToFront("sourceStackToFront");
+            if (doResume) {
+                targetStack.moveToFront("sourceStackToFront");
+            }
             final TaskRecord topTask = targetStack.topTask();
             if (topTask != sourceTask) {
                 targetStack.moveTaskToFrontLocked(sourceTask, noAnimation, options,
@@ -2450,7 +2450,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
             targetStack = computeStackFocus(r, newTask);
-            targetStack.moveToFront("addingToTopTask");
+            if (doResume) {
+                targetStack.moveToFront("addingToTopTask");
+            }
             ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task : targetStack.createTaskRecord(getNextTaskId(),
                             r.info, intent, null, null, true), null);
@@ -2471,10 +2473,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityStack.logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
         targetStack.mLastPausedActivity = null;
         targetStack.startActivityLocked(r, newTask, doResume, keepCurTransition, options);
-        if (!launchTaskBehind) {
-            // Don't set focus on an activity that's going to the back.
+        if (!launchTaskBehind && doResume) {
             mService.setFocusedActivityLocked(r, "startedActivity");
         }
+        updateUserStackLocked(r.userId, targetStack);
         return ActivityManager.START_SUCCESS;
     }
 
@@ -2673,6 +2675,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void removeUserLocked(int userId) {
         mUserStackInFront.delete(userId);
+    }
+
+    /**
+     * Update the last used stack id for non-current user (current user's last
+     * used stack is the focused stack)
+     */
+    void updateUserStackLocked(int userId, ActivityStack stack) {
+        if (userId != mCurrentUser) {
+            mUserStackInFront.put(userId, stack != null ? stack.getStackId() : HOME_STACK_ID);
+        }
     }
 
     /**
@@ -3509,6 +3521,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (mService.mCurrentProfileIds[i] == userId) return true;
         }
         return false;
+    }
+
+    /** Checks whether the activity should be shown for current user. */
+    boolean okToShowLocked(ActivityRecord r) {
+        return r != null && (isCurrentProfileLocked(r.userId)
+                || (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
     }
 
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(boolean remove) {

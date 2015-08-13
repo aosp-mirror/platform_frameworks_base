@@ -1809,21 +1809,12 @@ public class Instrumentation {
             case ActivityManager.START_NOT_VOICE_COMPATIBLE:
                 throw new SecurityException(
                         "Starting under voice control not allowed for: " + intent);
-            case ActivityManager.START_NOT_CURRENT_USER_ACTIVITY:
-                // Fail silently for this case so we don't break current apps.
-                // TODO(b/22929608): Instead of failing silently or throwing an exception,
-                // we should properly position the activity in the stack (i.e. behind all current
-                // user activity/task) and not change the positioning of stacks.
-                Log.e(TAG,
-                        "Not allowed to start background user activity that shouldn't be displayed"
-                        + " for all users. Failing silently...");
-                break;
             default:
                 throw new AndroidRuntimeException("Unknown error code "
                         + res + " when starting " + intent);
         }
     }
-    
+
     private final void validateNotAppThread() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException(
