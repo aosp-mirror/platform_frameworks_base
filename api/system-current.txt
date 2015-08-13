@@ -24638,12 +24638,14 @@ package android.os {
 
   public static class Build.VERSION {
     ctor public Build.VERSION();
+    field public static final java.lang.String BASE_OS;
     field public static final java.lang.String CODENAME;
     field public static final java.lang.String INCREMENTAL;
     field public static final int PREVIEW_SDK_INT;
     field public static final java.lang.String RELEASE;
     field public static final deprecated java.lang.String SDK;
     field public static final int SDK_INT;
+    field public static final java.lang.String SECURITY_PATCH;
   }
 
   public static class Build.VERSION_CODES {
