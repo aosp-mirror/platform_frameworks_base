@@ -36,7 +36,7 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
     private static final String TAG = "SELinuxPolicyInstallReceiver";
 
     private static final String sepolicyPath = "sepolicy";
-    private static final String fileContextsPath = "file_contexts";
+    private static final String fileContextsPath = "file_contexts.bin";
     private static final String propertyContextsPath = "property_contexts";
     private static final String seappContextsPath = "seapp_contexts";
     private static final String versionPath = "selinux_version";
