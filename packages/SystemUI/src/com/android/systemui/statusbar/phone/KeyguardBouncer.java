@@ -26,6 +26,8 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardSecurityView;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
@@ -47,6 +49,13 @@ public class KeyguardBouncer {
     private ViewGroup mRoot;
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
+    private KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onStrongAuthTimeoutExpiredChanged(int userId) {
+                    mBouncerPromptReason = mCallback.getBouncerPromptReason();
+                }
+            };
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, StatusBarWindowManager windowManager,
@@ -56,6 +65,7 @@ public class KeyguardBouncer {
         mLockPatternUtils = lockPatternUtils;
         mContainer = container;
         mWindowManager = windowManager;
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -247,8 +257,8 @@ public class KeyguardBouncer {
         return mKeyguardView.interceptMediaKey(event);
     }
 
-    public void notifyKeyguardAuthenticated() {
+    public void notifyKeyguardAuthenticated(boolean strongAuth) {
         ensureView();
-        mKeyguardView.finish();
+        mKeyguardView.finish(strongAuth);
     }
 }
