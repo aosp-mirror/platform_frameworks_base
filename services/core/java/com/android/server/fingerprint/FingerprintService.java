@@ -589,10 +589,14 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 result = true; // client not listening
 	    }
 	    if (fpId == 0) {
-                FingerprintUtils.vibrateFingerprintError(getContext());
+                if (receiver != null) {
+                    FingerprintUtils.vibrateFingerprintError(getContext());
+                }
                 result |= handleFailedAttempt(this);
             } else {
-                FingerprintUtils.vibrateFingerprintSuccess(getContext());
+                if (receiver != null) {
+                    FingerprintUtils.vibrateFingerprintSuccess(getContext());
+                }
                 result |= true; // we have a valid fingerprint
                 mLockoutReset.run();
             }
