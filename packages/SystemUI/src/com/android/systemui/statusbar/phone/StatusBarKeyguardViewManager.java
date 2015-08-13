@@ -480,8 +480,8 @@ public class StatusBarKeyguardViewManager {
      * Notifies that the user has authenticated by other means than using the bouncer, for example,
      * fingerprint.
      */
-    public void notifyKeyguardAuthenticated() {
-        mBouncer.notifyKeyguardAuthenticated();
+    public void notifyKeyguardAuthenticated(boolean strongAuth) {
+        mBouncer.notifyKeyguardAuthenticated(strongAuth);
     }
 
     public void setWakeAndUnlocking() {

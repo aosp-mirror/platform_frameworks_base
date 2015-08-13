@@ -163,8 +163,9 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      * Show a string explaining why the security view needs to be solved.
      *
      * @param reason a flag indicating which string should be shown, see
-     *               {@link KeyguardSecurityView#PROMPT_REASON_NONE}
-     *               and {@link KeyguardSecurityView#PROMPT_REASON_RESTART}
+     *               {@link KeyguardSecurityView#PROMPT_REASON_NONE},
+     *               {@link KeyguardSecurityView#PROMPT_REASON_RESTART} and
+     *               {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}.
      */
     public void showPromptReason(int reason) {
         mSecurityContainer.showPromptReason(reason);
@@ -213,9 +214,12 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     /**
      * Authentication has happened and it's time to dismiss keyguard. This function
      * should clean up and inform KeyguardViewMediator.
+     *
+     * @param strongAuth whether the user has authenticated with strong authentication like
+     *                   pattern, password or PIN but not by trust agents or fingerprint
      */
     @Override
-    public void finish() {
+    public void finish(boolean strongAuth) {
         // If there's a pending runnable because the user interacted with a widget
         // and we're leaving keyguard, then run it.
         boolean deferKeyguardDone = false;
@@ -226,9 +230,9 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         }
         if (mViewMediatorCallback != null) {
             if (deferKeyguardDone) {
-                mViewMediatorCallback.keyguardDonePending();
+                mViewMediatorCallback.keyguardDonePending(strongAuth);
             } else {
-                mViewMediatorCallback.keyguardDone(true);
+                mViewMediatorCallback.keyguardDone(strongAuth);
             }
         }
     }
@@ -281,32 +285,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     public void startDisappearAnimation(Runnable finishRunnable) {
         if (!mSecurityContainer.startDisappearAnimation(finishRunnable) && finishRunnable != null) {
             finishRunnable.run();
-        }
-    }
-
-    /**
-     * Verify that the user can get past the keyguard securely.  This is called,
-     * for example, when the phone disables the keyguard but then wants to launch
-     * something else that requires secure access.
-     *
-     * The result will be propogated back via {@link KeyguardViewCallback#keyguardDone(boolean)}
-     */
-    public void verifyUnlock() {
-        SecurityMode securityMode = mSecurityContainer.getSecurityMode();
-        if (securityMode == KeyguardSecurityModel.SecurityMode.None) {
-            if (mViewMediatorCallback != null) {
-                mViewMediatorCallback.keyguardDone(true);
-            }
-        } else if (securityMode != KeyguardSecurityModel.SecurityMode.Pattern
-                && securityMode != KeyguardSecurityModel.SecurityMode.PIN
-                && securityMode != KeyguardSecurityModel.SecurityMode.Password) {
-            // can only verify unlock when in pattern/password mode
-            if (mViewMediatorCallback != null) {
-                mViewMediatorCallback.keyguardDone(false);
-            }
-        } else {
-            // otherwise, go to the unlock screen, see if they can verify it
-            mSecurityContainer.verifyUnlock();
         }
     }
 
