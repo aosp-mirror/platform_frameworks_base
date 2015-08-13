@@ -2226,7 +2226,7 @@ public class NotificationPanelView extends PanelView implements
         }
     };
 
-    public void onScreenTurnedOn() {
+    public void onScreenTurningOn() {
         mKeyguardStatusView.refreshTime();
     }
 
