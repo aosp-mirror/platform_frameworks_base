@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.Window;
@@ -56,7 +57,7 @@ import com.android.internal.policy.PhoneWindow;
  * </ul>
  * This will be mitigated once b/22527834 will be addressed.
  */
-public class NonClientDecorView extends ViewGroup implements View.OnClickListener {
+public class NonClientDecorView extends LinearLayout implements View.OnClickListener {
     private final static String TAG = "NonClientDecorView";
     // The height of a window which has focus in DIP.
     private final int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
@@ -91,6 +92,7 @@ public class NonClientDecorView extends ViewGroup implements View.OnClickListene
         mOwner = owner;
         mWindowHasShadow = windowHasShadow;
         mShowDecor = showDecor;
+        updateCaptionVisibility();
         if (mWindowHasShadow) {
             initializeElevation();
         }
@@ -108,6 +110,7 @@ public class NonClientDecorView extends ViewGroup implements View.OnClickListene
      **/
     public void phoneWindowUpdated(boolean showDecor, boolean windowHasShadow) {
         mShowDecor = showDecor;
+        updateCaptionVisibility();
         if (windowHasShadow != mWindowHasShadow) {
             mWindowHasShadow = windowHasShadow;
             initializeElevation();
@@ -131,48 +134,17 @@ public class NonClientDecorView extends ViewGroup implements View.OnClickListene
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        measureChildren(widthMeasureSpec, heightMeasureSpec);
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        final int height = MeasureSpec.getSize(heightMeasureSpec);
-        setMeasuredDimension(width, height);
-    }
-
-    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        // The system inset needs only to be applied to the caption. The client area of
-        // the window will automatically be adjusted by the the DecorView.
-        WindowInsets insets = getRootWindowInsets();
-        int systemMargin = insets.getSystemWindowInsetTop();
-
-        final int leftPos = getPaddingLeft();
-        final int rightPos = right - left - getPaddingRight();
-        final int topPos = getPaddingTop();
-        final int bottomPos = bottom - top - getPaddingBottom();
-
-        // On top we have the caption which has to fill left to right with a fixed height.
-        final int width = rightPos - leftPos;
-        final View caption = getChildAt(0);
-
         // If the application changed its SystemUI metrics, we might also have to adapt
         // our shadow elevation.
         updateElevation();
         mAllowUpdateElevation = true;
 
-        // Don't show the decor if the window has e.g. entered full screen.
-        final int captionHeight =
-                (isFillingScreen() || !mShowDecor) ? 0 : caption.getMeasuredHeight();
-        caption.layout(leftPos, topPos + systemMargin, leftPos + width,
-                topPos + systemMargin + captionHeight);
-
-        // Note: We should never have more then 1 additional item in here.
-        if (getChildCount() > 1) {
-            getChildAt(1).layout(leftPos, topPos + captionHeight, leftPos + width, bottomPos);
-        }
+        super.onLayout(changed, left, top, right, bottom);
     }
 
     @Override
-    public void addView(View child, int index, LayoutParams params) {
+    public void addView(View child, int index, ViewGroup.LayoutParams params) {
         // Make sure that we never get more then one client area in our view.
         if (index >= 2 || getChildCount() >= 2) {
             throw new IllegalStateException("NonClientDecorView can only handle 1 client view");
@@ -188,6 +160,16 @@ public class NonClientDecorView extends ViewGroup implements View.OnClickListene
         return (0 != ((getWindowSystemUiVisibility() | getSystemUiVisibility()) &
                 (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
                         View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LOW_PROFILE)));
+    }
+
+    /**
+     * Updates the visibility of the caption.
+     **/
+    private void updateCaptionVisibility() {
+        // Don't show the decor if the window has e.g. entered full screen.
+        boolean invisible = isFillingScreen() || !mShowDecor;
+        View caption = getChildAt(0);
+        caption.setVisibility(invisible ? GONE : VISIBLE);
     }
 
     /**
