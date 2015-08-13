@@ -40,12 +40,12 @@ import java.io.IOException;
 public class MtpDocumentsProvider extends DocumentsProvider {
     static final String AUTHORITY = "com.android.mtp.documents";
     static final String TAG = "MtpDocumentsProvider";
-    private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
+    static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_ICON,
             Root.COLUMN_TITLE, Root.COLUMN_DOCUMENT_ID,
             Root.COLUMN_AVAILABLE_BYTES,
     };
-    private static final String[] DEFAULT_DOCUMENT_PROJECTION = new String[] {
+    static final String[] DEFAULT_DOCUMENT_PROJECTION = new String[] {
             Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE,
             Document.COLUMN_DISPLAY_NAME, Document.COLUMN_LAST_MODIFIED,
             Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
@@ -56,6 +56,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private MtpManager mMtpManager;
     private ContentResolver mResolver;
     private PipeManager mPipeManager;
+    private DocumentLoader mDocumentLoader;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -70,14 +71,15 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
         mPipeManager = new PipeManager();
-
+        mDocumentLoader = new DocumentLoader(mMtpManager, mResolver);
         return true;
     }
 
     @VisibleForTesting
     void onCreateForTesting(MtpManager mtpManager, ContentResolver resolver) {
-        this.mMtpManager = mtpManager;
-        this.mResolver = resolver;
+        mMtpManager = mtpManager;
+        mResolver = resolver;
+        mDocumentLoader = new DocumentLoader(mMtpManager, mResolver);
     }
 
     @Override
@@ -152,7 +154,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         return cursor;
     }
 
-    // TODO: Support background loading for large number of files.
     @Override
     public Cursor queryChildDocuments(String parentDocumentId,
             String[] projection, String sortOrder) throws FileNotFoundException {
@@ -160,29 +161,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
         }
         final Identifier parentIdentifier = Identifier.createFromDocumentId(parentDocumentId);
-        int parentHandle = parentIdentifier.mObjectHandle;
-        // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
-        // getObjectHandles if we would like to obtain children under the root.
-        if (parentHandle == MtpDocument.DUMMY_HANDLE_FOR_ROOT) {
-            parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
-        }
         try {
-            final MatrixCursor cursor = new MatrixCursor(projection);
-            final Identifier rootIdentifier = new Identifier(
-                    parentIdentifier.mDeviceId, parentIdentifier.mStorageId);
-            final int[] objectHandles = mMtpManager.getObjectHandles(
-                    parentIdentifier.mDeviceId, parentIdentifier.mStorageId, parentHandle);
-            for (int i = 0; i < objectHandles.length; i++) {
-                try {
-                    final MtpDocument document = mMtpManager.getDocument(
-                            parentIdentifier.mDeviceId,  objectHandles[i]);
-                    document.addToCursor(rootIdentifier, cursor.newRow());
-                } catch (IOException error) {
-                    cursor.close();
-                    throw new FileNotFoundException(error.getMessage());
-                }
-            }
-            return cursor;
+            return mDocumentLoader.queryChildDocuments(projection, parentIdentifier);
         } catch (IOException exception) {
             throw new FileNotFoundException(exception.getMessage());
         }
@@ -234,6 +214,11 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
     }
 
+    @Override
+    public void onTrimMemory(int level) {
+        mDocumentLoader.clearCache();
+    }
+
     void openDevice(int deviceId) throws IOException {
         mMtpManager.openDevice(deviceId);
         notifyRootsChange();
@@ -241,6 +226,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     void closeDevice(int deviceId) throws IOException {
         mMtpManager.closeDevice(deviceId);
+        mDocumentLoader.clearCache(deviceId);
         notifyRootsChange();
     }
 
@@ -249,6 +235,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         for (int deviceId : mMtpManager.getOpenedDeviceIds()) {
             try {
                 mMtpManager.closeDevice(deviceId);
+                mDocumentLoader.clearCache(deviceId);
                 closed = true;
             } catch (IOException d) {
                 Log.d(TAG, "Failed to close the MTP device: " + deviceId);

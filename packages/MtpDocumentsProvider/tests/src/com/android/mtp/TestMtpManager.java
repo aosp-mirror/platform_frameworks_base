@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class TestMtpManager extends MtpManager {
-    private static String pack(int... args) {
+    protected static String pack(int... args) {
         return Arrays.toString(args);
     }
 
