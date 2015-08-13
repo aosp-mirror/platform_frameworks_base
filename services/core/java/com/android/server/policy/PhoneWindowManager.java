@@ -5522,10 +5522,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // may happen in a future call to goToSleep.
         synchronized (mLock) {
             mAwake = true;
-            if (mKeyguardDelegate != null) {
-                mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
-                mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT, 1000);
-            }
 
             updateWakeGestureListenerLp();
             updateOrientationListenerLp();
@@ -5615,6 +5611,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenOnListener = screenOnListener;
 
             if (mKeyguardDelegate != null) {
+                mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
+                mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT, 1000);
                 mKeyguardDelegate.onScreenTurningOn(mKeyguardDrawnCallback);
             } else {
                 if (DEBUG_WAKEUP) Slog.d(TAG,
