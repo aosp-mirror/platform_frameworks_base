@@ -54,6 +54,7 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.view.Display;
 
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
+import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
 import java.io.File;
@@ -255,6 +256,9 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             Slog.v(TAG, "Reset fingerprint lockout");
         }
         mFailedAttempts = 0;
+        // If we're asked to reset failed attempts externally (i.e. from Keyguard), the runnable
+        // may still be in the queue; remove it.
+        mHandler.removeCallbacks(mLockoutReset);
     }
 
     private boolean handleFailedAttempt(ClientMonitor clientMonitor) {
@@ -877,6 +881,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+        @Override // Binder call
+        public void resetTimeout(byte [] token) {
+            checkPermission(RESET_FINGERPRINT_LOCKOUT);
+            // TODO: confirm security token when we move timeout management into the HAL layer.
+            mLockoutReset.run();
         }
     }
 
