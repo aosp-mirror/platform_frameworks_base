@@ -53,20 +53,9 @@ Extensions::Extensions() {
     mHasFramebufferFetch = hasGlExtension("GL_NV_shader_framebuffer_fetch");
     mHasDiscardFramebuffer = hasGlExtension("GL_EXT_discard_framebuffer");
     mHasDebugMarker = hasGlExtension("GL_EXT_debug_marker");
-    mHasTiledRendering = hasGlExtension("GL_QCOM_tiled_rendering");
     mHas1BitStencil = hasGlExtension("GL_OES_stencil1");
     mHas4BitStencil = hasGlExtension("GL_OES_stencil4");
     mHasUnpackSubImage = hasGlExtension("GL_EXT_unpack_subimage");
-
-    // Query EGL extensions
-    findExtensions(eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS), mEglExtensionList);
-
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG_NV_PROFILING, property, nullptr) > 0) {
-        mHasNvSystemTime = !strcmp(property, "true") && hasEglExtension("EGL_NV_system_time");
-    } else {
-        mHasNvSystemTime = false;
-    }
 
     const char* version = (const char*) glGetString(GL_VERSION);
 

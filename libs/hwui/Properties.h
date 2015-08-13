@@ -84,12 +84,6 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_OVERDRAW "debug.hwui.overdraw"
 
 /**
- * Used to enable/disable PerfHUD ES profiling. The accepted values
- * are "true" and "false". The default value is "false".
- */
-#define PROPERTY_DEBUG_NV_PROFILING "debug.hwui.nv_profiling"
-
-/**
  *  System property used to enable or disable hardware rendering profiling.
  * The default value of this property is assumed to be false.
  *
@@ -150,8 +144,24 @@ enum DebugLevel {
 /**
  * Setting this property will enable or disable usage of EGL_KHR_swap_buffers_with_damage
  * See: https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_swap_buffers_with_damage.txt
+ * Default is "true"
  */
 #define PROPERTY_SWAP_WITH_DAMAGE "debug.hwui.swap_with_damage"
+
+/**
+ * Controls whether or not HWUI will use the EGL_EXT_buffer_age extension
+ * to do partial invalidates. Setting this to "false" will fall back to
+ * using BUFFER_PRESERVED instead
+ * Default is "true"
+ */
+#define PROPERTY_USE_BUFFER_AGE "debug.hwui.use_buffer_age"
+
+/**
+ * Setting this to "false" will force HWUI to always do full-redraws of the surface.
+ * This will disable the use of EGL_EXT_buffer_age and BUFFER_PRESERVED.
+ * Default is "true"
+ */
+#define PROPERTY_ENABLE_PARTIAL_UPDATES "debug.hwui.enable_partial_updates"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
@@ -287,6 +297,8 @@ public:
     static bool skipEmptyFrames;
     // TODO: Remove after stabilization period
     static bool swapBuffersWithDamage;
+    static bool useBufferAge;
+    static bool enablePartialUpdates;
 
     static DebugLevel debugLevel;
     static OverdrawColorSet overdrawColorSet;

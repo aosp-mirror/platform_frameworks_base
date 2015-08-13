@@ -35,6 +35,14 @@
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
 
+#define LOG_FRAMETIME_MMA 0
+
+#if LOG_FRAMETIME_MMA
+static float sBenchMma = 0;
+static int sFrameCount = 0;
+static const float NANOS_PER_MILLIS_F = 1000000.0f;
+#endif
+
 namespace android {
 namespace uirenderer {
 namespace renderthread {
@@ -90,16 +98,6 @@ void CanvasContext::setSurface(ANativeWindow* window) {
         makeCurrent();
     } else {
         mRenderThread.removeFrameCallback(this);
-    }
-}
-
-void CanvasContext::swapBuffers(const SkRect& dirty, EGLint width, EGLint height) {
-    if (CC_UNLIKELY(!mEglManager.swapBuffers(mEglSurface, dirty, width, height))) {
-        setSurface(nullptr);
-    }
-    mHaveNewSurface = false;
-    if (mEglManager.useBufferAgeExt()) {
-        mDirtyHistory.prepend(Rect(dirty));
     }
 }
 
@@ -230,8 +228,6 @@ void CanvasContext::draw() {
             "drawRenderNode called on a context with no canvas or surface!");
 
     SkRect dirty;
-    bool useBufferAgeExt = mEglManager.useBufferAgeExt();
-    Rect patchedDirty;
     mDamageAccumulator.finish(&dirty);
 
     // TODO: Re-enable after figuring out cause of b/22592975
@@ -242,39 +238,58 @@ void CanvasContext::draw() {
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
-    EGLint width, height, framebufferAge;
-    mEglManager.beginFrame(mEglSurface, &width, &height, &framebufferAge);
-
-    if (useBufferAgeExt && mHaveNewSurface) {
-        mDirtyHistory.clear();
-    }
-
-    if (width != mCanvas->getViewportWidth() || height != mCanvas->getViewportHeight()) {
-        mCanvas->setViewport(width, height);
+    Frame frame = mEglManager.beginFrame(mEglSurface);
+    if (frame.width() != mCanvas->getViewportWidth()
+            || frame.height() != mCanvas->getViewportHeight()) {
+        mCanvas->setViewport(frame.width(), frame.height());
         dirty.setEmpty();
-    } else if (!mBufferPreserved || mHaveNewSurface) {
-        mDirtyHistory.clear();
+    } else if (mHaveNewSurface || frame.bufferAge() == 0) {
+        // New surface needs a full draw
         dirty.setEmpty();
     } else {
-        if (!dirty.isEmpty() && !dirty.intersect(0, 0, width, height)) {
+        if (!dirty.isEmpty() && !dirty.intersect(0, 0, frame.width(), frame.height())) {
             ALOGW("Dirty " RECT_STRING " doesn't intersect with 0 0 %d %d ?",
-                    SK_RECT_ARGS(dirty), width, height);
+                    SK_RECT_ARGS(dirty), frame.width(), frame.height());
             dirty.setEmpty();
         }
         profiler().unionDirty(&dirty);
     }
 
-    patchedDirty = dirty;
-    if (useBufferAgeExt && !dirty.isEmpty()) {
-        patchedDirty = mDirtyHistory.unionWith(Rect(dirty), framebufferAge-1);
+    if (dirty.isEmpty()) {
+        dirty.set(0, 0, frame.width(), frame.height());
     }
 
-    if (!patchedDirty.isEmpty()) {
-        mCanvas->prepareDirty(patchedDirty.left, patchedDirty.top,
-                patchedDirty.right, patchedDirty.bottom, mOpaque);
-    } else {
-        mCanvas->prepare(mOpaque);
+    // At this point dirty is the area of the screen to update. However,
+    // the area of the frame we need to repaint is potentially different, so
+    // stash the screen area for later
+    SkRect screenDirty(dirty);
+
+    // If the buffer age is 0 we do a full-screen repaint (handled above)
+    // If the buffer age is 1 the buffer contents are the same as they were
+    // last frame so there's nothing to union() against
+    // Therefore we only care about the > 1 case.
+    if (frame.bufferAge() > 1) {
+        if (frame.bufferAge() > (int) mDamageHistory.size()) {
+            // We don't have enough history to handle this old of a buffer
+            // Just do a full-draw
+            dirty.set(0, 0, frame.width(), frame.height());
+        } else {
+            // At this point we haven't yet added the latest frame
+            // to the damage history (happens below)
+            // So we need to damage
+            for (int i = mDamageHistory.size() - 1;
+                    i > ((int) mDamageHistory.size()) - frame.bufferAge(); i--) {
+                dirty.join(mDamageHistory[i]);
+            }
+        }
     }
+
+    // Add the screen damage to the ring buffer.
+    mDamageHistory.next() = screenDirty;
+
+    mEglManager.damageFrame(frame, dirty);
+    mCanvas->prepareDirty(dirty.fLeft, dirty.fTop,
+            dirty.fRight, dirty.fBottom, mOpaque);
 
     Rect outBounds;
     mCanvas->drawRenderNode(mRootRenderNode.get(), outBounds);
@@ -288,11 +303,30 @@ void CanvasContext::draw() {
     mCurrentFrameInfo->markSwapBuffers();
 
     if (drew) {
-        swapBuffers(dirty, width, height);
+        if (CC_UNLIKELY(!mEglManager.swapBuffers(frame, screenDirty))) {
+            setSurface(nullptr);
+        }
+        mHaveNewSurface = false;
     }
 
     // TODO: Use a fence for real completion?
     mCurrentFrameInfo->markFrameCompleted();
+
+#if LOG_FRAMETIME_MMA
+    float thisFrame = mCurrentFrameInfo->duration(
+            FrameInfoIndex::IssueDrawCommandsStart,
+            FrameInfoIndex::FrameCompleted) / NANOS_PER_MILLIS_F;
+    if (sFrameCount) {
+        sBenchMma = ((9 * sBenchMma) + thisFrame) / 10;
+    } else {
+        sBenchMma = thisFrame;
+    }
+    if (++sFrameCount == 10) {
+        sFrameCount = 1;
+        ALOGD("Average frame time: %.4f", sBenchMma);
+    }
+#endif
+
     mJankTracker.addFrame(*mCurrentFrameInfo);
     mRenderThread.jankTracker().addFrame(*mCurrentFrameInfo);
 }

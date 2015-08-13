@@ -70,8 +70,6 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
         , mRenderState(renderState)
         , mFrameStarted(false)
         , mScissorOptimizationDisabled(false)
-        , mSuppressTiling(false)
-        , mFirstFrameAfterResize(true)
         , mDirty(false)
         , mLightCenter((Vector3){FLT_MIN, FLT_MIN, FLT_MIN})
         , mLightRadius(FLT_MIN)
@@ -113,7 +111,6 @@ void OpenGLRenderer::setLightCenter(const Vector3& lightCenter) {
 void OpenGLRenderer::onViewportInitialized() {
     glDisable(GL_DITHER);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    mFirstFrameAfterResize = true;
 }
 
 void OpenGLRenderer::setupFrameState(float left, float top,
@@ -133,15 +130,6 @@ void OpenGLRenderer::startFrame() {
     discardFramebuffer(mTilingClip.left, mTilingClip.top, mTilingClip.right, mTilingClip.bottom);
 
     mRenderState.setViewport(mState.getWidth(), mState.getHeight());
-
-    // Functors break the tiling extension in pretty spectacular ways
-    // This ensures we don't use tiling when a functor is going to be
-    // invoked during the frame
-    mSuppressTiling = mCaches.hasRegisteredFunctors()
-            || mFirstFrameAfterResize;
-    mFirstFrameAfterResize = false;
-
-    startTilingCurrentClip(true);
 
     debugOverdraw(true, true);
 
@@ -192,46 +180,8 @@ void OpenGLRenderer::clear(float left, float top, float right, float bottom, boo
     mRenderState.scissor().reset();
 }
 
-void OpenGLRenderer::startTilingCurrentClip(bool opaque, bool expand) {
-    if (!mSuppressTiling) {
-        const Snapshot* snapshot = currentSnapshot();
-
-        const Rect* clip = &mTilingClip;
-        if (snapshot->flags & Snapshot::kFlagFboTarget) {
-            clip = &(snapshot->layer->clipRect);
-        }
-
-        startTiling(*clip, getViewportHeight(), opaque, expand);
-    }
-}
-
-void OpenGLRenderer::startTiling(const Rect& clip, int windowHeight, bool opaque, bool expand) {
-    if (!mSuppressTiling) {
-        if(expand) {
-            // Expand the startTiling region by 1
-            int leftNotZero = (clip.left > 0) ? 1 : 0;
-            int topNotZero = (windowHeight - clip.bottom > 0) ? 1 : 0;
-
-            mCaches.startTiling(
-                clip.left - leftNotZero,
-                windowHeight - clip.bottom - topNotZero,
-                clip.right - clip.left + leftNotZero + 1,
-                clip.bottom - clip.top + topNotZero + 1,
-                opaque);
-        } else {
-            mCaches.startTiling(clip.left, windowHeight - clip.bottom,
-                clip.right - clip.left, clip.bottom - clip.top, opaque);
-        }
-    }
-}
-
-void OpenGLRenderer::endTiling() {
-    if (!mSuppressTiling) mCaches.endTiling();
-}
-
 bool OpenGLRenderer::finish() {
     renderOverdraw();
-    endTiling();
     mTempPaths.clear();
 
     // When finish() is invoked on FBO 0 we've reached the end
@@ -381,7 +331,6 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
             && layer->renderNode.get() && layer->renderNode->isRenderable()) {
 
         if (inFrame) {
-            endTiling();
             debugOverdraw(false, false);
         }
 
@@ -393,7 +342,6 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
 
         if (inFrame) {
             resumeAfterLayer();
-            startTilingCurrentClip();
         }
 
         layer->debugDrawUpdate = Properties::debugLayersUpdates;
@@ -736,7 +684,6 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     writableSnapshot()->initializeViewport(bounds.getWidth(), bounds.getHeight());
     writableSnapshot()->roundRectClipState = nullptr;
 
-    endTiling();
     debugOverdraw(false, false);
     // Bind texture to FBO
     mRenderState.bindFramebuffer(layer->getFbo());
@@ -750,9 +697,6 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTextureId(), 0);
-
-    // Expand the startTiling region by 1
-    startTilingCurrentClip(true, true);
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
     mRenderState.scissor().setEnabled(true);
@@ -786,8 +730,6 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     mRenderState.scissor().setEnabled(mScissorOptimizationDisabled || clipRequired);
 
     if (fboLayer) {
-        endTiling();
-
         // Detach the texture from the FBO
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
 
@@ -796,8 +738,6 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
         // Unbind current FBO and restore previous one
         mRenderState.bindFramebuffer(restored.fbo);
         debugOverdraw(true, false);
-
-        startTilingCurrentClip();
     }
 
     if (!fboLayer && layer->getAlpha() < 255) {
@@ -1267,17 +1207,10 @@ void OpenGLRenderer::ensureStencilBuffer() {
 void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
     // The layer's FBO is already bound when we reach this stage
     if (!layer->getStencilRenderBuffer()) {
-        // GL_QCOM_tiled_rendering doesn't like it if a renderbuffer
-        // is attached after we initiated tiling. We must turn it off,
-        // attach the new render buffer then turn tiling back on
-        endTiling();
-
         RenderBuffer* buffer = mCaches.renderBufferCache.get(
                 Stencil::getLayerStencilFormat(),
                 layer->getWidth(), layer->getHeight());
         layer->setStencilRenderBuffer(buffer);
-
-        startTiling(layer->clipRect, layer->layer.getHeight());
     }
 }
 

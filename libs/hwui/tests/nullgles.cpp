@@ -261,8 +261,6 @@ void glInsertEventMarkerEXT(GLsizei length, const GLchar *marker) {}
 void glPushGroupMarkerEXT(GLsizei length, const GLchar *marker) {}
 void glPopGroupMarkerEXT(void) {}
 void glDiscardFramebufferEXT(GLenum target, GLsizei numAttachments, const GLenum *attachments) {}
-void glStartTilingQCOM(GLuint x, GLuint y, GLuint width, GLuint height, GLbitfield preserveMask) {}
-void glEndTilingQCOM(GLbitfield preserveMask) {}
 void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image) {}
 
 // GLES3

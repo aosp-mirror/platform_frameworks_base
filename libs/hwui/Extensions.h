@@ -40,10 +40,8 @@ public:
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
     inline bool hasDebugMarker() const { return mHasDebugMarker; }
-    inline bool hasTiledRendering() const { return mHasTiledRendering; }
     inline bool has1BitStencil() const { return mHas1BitStencil; }
     inline bool has4BitStencil() const { return mHas4BitStencil; }
-    inline bool hasNvSystemTime() const { return mHasNvSystemTime; }
     inline bool hasUnpackRowLength() const { return mVersionMajor >= 3 || mHasUnpackSubImage; }
     inline bool hasPixelBufferObjects() const { return mVersionMajor >= 3; }
     inline bool hasOcclusionQueries() const { return mVersionMajor >= 3; }
@@ -67,10 +65,8 @@ private:
     bool mHasFramebufferFetch;
     bool mHasDiscardFramebuffer;
     bool mHasDebugMarker;
-    bool mHasTiledRendering;
     bool mHas1BitStencil;
     bool mHas4BitStencil;
-    bool mHasNvSystemTime;
     bool mHasUnpackSubImage;
 
     int mVersionMajor;

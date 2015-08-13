@@ -555,27 +555,6 @@ private:
     void discardFramebuffer(float left, float top, float right, float bottom);
 
     /**
-     * Tells the GPU what part of the screen is about to be redrawn.
-     * This method will use the current layer space clip rect.
-     * This method needs to be invoked every time getTargetFbo() is
-     * bound again.
-     */
-    void startTilingCurrentClip(bool opaque = false, bool expand = false);
-
-    /**
-     * Tells the GPU what part of the screen is about to be redrawn.
-     * This method needs to be invoked every time getTargetFbo() is
-     * bound again.
-     */
-    void startTiling(const Rect& clip, int windowHeight, bool opaque = false, bool expand = false);
-
-    /**
-     * Tells the GPU that we are done drawing the frame or that we
-     * are switching to another render target.
-     */
-    void endTiling();
-
-    /**
      * Sets the clipping rectangle using glScissor. The clip is defined by
      * the current snapshot's clipRect member.
      */
@@ -861,10 +840,6 @@ private:
     // See PROPERTY_DISABLE_SCISSOR_OPTIMIZATION in
     // Properties.h
     bool mScissorOptimizationDisabled;
-
-    // No-ops start/endTiling when set
-    bool mSuppressTiling;
-    bool mFirstFrameAfterResize;
 
     bool mSkipOutlineClip;
 
