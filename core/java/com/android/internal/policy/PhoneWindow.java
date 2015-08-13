@@ -2004,35 +2004,40 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     static private final String PANELS_TAG = "android:Panels";
     static private final String ACTION_BAR_TAG = "android:ActionBar";
 
+    /** {@inheritDoc} */
     @Override
     public Bundle saveHierarchyState() {
-        final Bundle outState = new Bundle();
+        Bundle outState = new Bundle();
         if (mContentParent == null) {
             return outState;
         }
 
-        final SparseArray<Parcelable> states = new SparseArray<>();
+        SparseArray<Parcelable> states = new SparseArray<Parcelable>();
         mContentParent.saveHierarchyState(states);
         outState.putSparseParcelableArray(VIEWS_TAG, states);
 
-        // Save the focused view ID.
-        final View focusedView = mContentParent.findFocus();
-        if (focusedView != null && focusedView.getId() != View.NO_ID) {
-            outState.putInt(FOCUSED_ID_TAG, focusedView.getId());
-        }
+        // save the focused view id
+        View focusedView = mContentParent.findFocus();
+        if (focusedView != null) {
+            if (focusedView.getId() != View.NO_ID) {
+                outState.putInt(FOCUSED_ID_TAG, focusedView.getId());
+            } else {
+                if (false) {
+                    Log.d(TAG, "couldn't save which view has focus because the focused view "
+                            + focusedView + " has no id.");
+                }
             }
         }
 
-        // Save the panel states, if any.
-        final SparseArray<Parcelable> panelStates = new SparseArray<>();
+        // save the panels
+        SparseArray<Parcelable> panelStates = new SparseArray<Parcelable>();
         savePanelState(panelStates);
         if (panelStates.size() > 0) {
             outState.putSparseParcelableArray(PANELS_TAG, panelStates);
         }
 
-        // Save the action bar states, if any.
         if (mDecorContentParent != null) {
-            final SparseArray<Parcelable> actionBarStates = new SparseArray<>();
+            SparseArray<Parcelable> actionBarStates = new SparseArray<Parcelable>();
             mDecorContentParent.saveToolbarHierarchyState(actionBarStates);
             outState.putSparseParcelableArray(ACTION_BAR_TAG, actionBarStates);
         }
@@ -2040,31 +2045,33 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return outState;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void restoreHierarchyState(Bundle savedInstanceState) {
         if (mContentParent == null) {
             return;
         }
 
-        final SparseArray<Parcelable> savedStates =
-                savedInstanceState.getSparseParcelableArray(VIEWS_TAG);
+        SparseArray<Parcelable> savedStates
+                = savedInstanceState.getSparseParcelableArray(VIEWS_TAG);
         if (savedStates != null) {
             mContentParent.restoreHierarchyState(savedStates);
         }
 
-        // Restore the focused view.
-        final int focusedViewId = savedInstanceState.getInt(FOCUSED_ID_TAG, View.NO_ID);
+        // restore the focused view
+        int focusedViewId = savedInstanceState.getInt(FOCUSED_ID_TAG, View.NO_ID);
         if (focusedViewId != View.NO_ID) {
-            final View needsFocus = mContentParent.findViewById(focusedViewId);
+            View needsFocus = mContentParent.findViewById(focusedViewId);
             if (needsFocus != null) {
                 needsFocus.requestFocus();
             } else {
-                Log.w(TAG, "Previously focused view reported id " + focusedViewId
-                        + " during save, but can't be found during restore.");
+                Log.w(TAG,
+                        "Previously focused view reported id " + focusedViewId
+                                + " during save, but can't be found during restore.");
             }
         }
 
-        // Restore the panels.
+        // restore the panels
         SparseArray<Parcelable> panelStates = savedInstanceState.getSparseParcelableArray(PANELS_TAG);
         if (panelStates != null) {
             restorePanelState(panelStates);
