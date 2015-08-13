@@ -520,14 +520,12 @@ void RenderNode::computeOrdering() {
     if (mDisplayListData == nullptr) return;
     for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
         DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
-        childOp->mRenderNode->computeOrderingImpl(childOp,
-                properties().getOutline().getPath(), &mProjectedNodes, &mat4::identity());
+        childOp->mRenderNode->computeOrderingImpl(childOp, &mProjectedNodes, &mat4::identity());
     }
 }
 
 void RenderNode::computeOrderingImpl(
         DrawRenderNodeOp* opState,
-        const SkPath* outlineOfProjectionSurface,
         std::vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
     mProjectedNodes.clear();
@@ -555,7 +553,6 @@ void RenderNode::computeOrderingImpl(
             DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
             RenderNode* child = childOp->mRenderNode;
 
-            const SkPath* projectionOutline = nullptr;
             std::vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
             const mat4* projectionTransform = nullptr;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
@@ -564,7 +561,6 @@ void RenderNode::computeOrderingImpl(
                 // Note that if a direct descendant is projecting backwards, we pass its
                 // grandparent projection collection, since it shouldn't project onto its
                 // parent, where it will already be drawing.
-                projectionOutline = properties().getOutline().getPath();
                 projectionChildren = &mProjectedNodes;
                 projectionTransform = &mat4::identity();
             } else {
@@ -572,12 +568,10 @@ void RenderNode::computeOrderingImpl(
                     applyViewPropertyTransforms(localTransformFromProjectionSurface);
                     haveAppliedPropertiesToProjection = true;
                 }
-                projectionOutline = outlineOfProjectionSurface;
                 projectionChildren = compositedChildrenOfProjectionSurface;
                 projectionTransform = &localTransformFromProjectionSurface;
             }
-            child->computeOrderingImpl(childOp,
-                    projectionOutline, projectionChildren, projectionTransform);
+            child->computeOrderingImpl(childOp, projectionChildren, projectionTransform);
         }
     }
 }

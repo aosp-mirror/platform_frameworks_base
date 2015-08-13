@@ -190,7 +190,6 @@ private:
     };
 
     void computeOrderingImpl(DrawRenderNodeOp* opState,
-            const SkPath* outlineOfProjectionSurface,
             std::vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
 
