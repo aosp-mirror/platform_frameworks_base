@@ -80,7 +80,8 @@ public class KeyguardService extends Service {
         @Override // Binder interface
         public void keyguardDone(boolean authenticated, boolean wakeup) {
             checkPermission();
-            mKeyguardViewMediator.keyguardDone(authenticated, wakeup);
+            // TODO: Remove wakeup
+            mKeyguardViewMediator.keyguardDone(authenticated);
         }
 
         @Override // Binder interface

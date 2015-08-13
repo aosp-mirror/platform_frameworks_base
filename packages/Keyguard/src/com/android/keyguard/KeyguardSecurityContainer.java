@@ -54,7 +54,12 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         public boolean dismiss(boolean authenticated);
         public void userActivity();
         public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput);
-        public void finish();
+
+        /**
+         * @param strongAuth wheher the user has authenticated with strong authentication like
+         *                   pattern, password or PIN but not by trust agents or fingerprint
+         */
+        public void finish(boolean strongAuth);
         public void reset();
     }
 
@@ -282,7 +287,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 showWipeDialog(failedAttempts, userType);
             }
         }
-        monitor.reportFailedUnlockAttempt();
+        monitor.reportFailedStrongAuthUnlockAttempt();
         mLockPatternUtils.reportFailedPasswordAttempt(KeyguardUpdateMonitor.getCurrentUser());
         if (timeoutMs > 0) {
             showTimeoutDialog(timeoutMs);
@@ -308,6 +313,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     boolean showNextSecurityScreenOrFinish(boolean authenticated) {
         if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
         boolean finish = false;
+        boolean strongAuth = false;
         if (mUpdateMonitor.getUserCanSkipBouncer(
                 KeyguardUpdateMonitor.getCurrentUser())) {
             finish = true;
@@ -323,6 +329,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 case Pattern:
                 case Password:
                 case PIN:
+                    strongAuth = true;
                     finish = true;
                     break;
 
@@ -346,7 +353,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             }
         }
         if (finish) {
-            mSecurityCallback.finish();
+            mSecurityCallback.finish(strongAuth);
         }
         return finish;
     }
