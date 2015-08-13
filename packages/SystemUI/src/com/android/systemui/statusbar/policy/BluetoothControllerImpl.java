@@ -164,10 +164,17 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             // Our current device is still valid.
             return;
         }
+        mLastDevice = null;
         for (CachedBluetoothDevice device : getDevices()) {
             if (device.isConnected()) {
                 mLastDevice = device;
             }
+        }
+        if (mLastDevice == null && mConnectionState == BluetoothAdapter.STATE_CONNECTED) {
+            // If somehow we think we are connected, but have no connected devices, we aren't
+            // connected.
+            mConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
+            mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
         }
     }
 
