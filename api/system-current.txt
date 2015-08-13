@@ -42361,6 +42361,7 @@ package android.widget {
     ctor public AutoCompleteTextView(android.content.Context, android.util.AttributeSet);
     ctor public AutoCompleteTextView(android.content.Context, android.util.AttributeSet, int);
     ctor public AutoCompleteTextView(android.content.Context, android.util.AttributeSet, int, int);
+    ctor public AutoCompleteTextView(android.content.Context, android.util.AttributeSet, int, int, android.content.res.Resources.Theme);
     method public void clearListSelection();
     method protected java.lang.CharSequence convertSelectionToString(java.lang.Object);
     method public void dismissDropDown();
