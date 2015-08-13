@@ -1699,8 +1699,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      *         navigation bar and touch exploration is not enabled
      */
     private boolean canHideNavigationBar() {
-        return mHasNavigationBar
-                && !mAccessibilityManager.isTouchExplorationEnabled();
+        return mHasNavigationBar;
     }
 
     @Override
@@ -6779,8 +6778,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * R.boolean.config_enableTranslucentDecor is false.
      */
     private boolean areTranslucentBarsAllowed() {
-        return mTranslucentDecorEnabled
-                && !mAccessibilityManager.isTouchExplorationEnabled();
+        return mTranslucentDecorEnabled;
     }
 
     // Use this instead of checking config_showNavigationBar so that it can be consistently
