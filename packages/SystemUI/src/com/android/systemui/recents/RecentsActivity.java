@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.ViewStub;
 import android.widget.Toast;
 
-import com.android.internal.logging.MetricsConstants;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;

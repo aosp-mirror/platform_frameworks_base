@@ -22,7 +22,16 @@ public interface KeyguardSecurityView {
     static public final int VIEW_REVEALED = 2;
 
     int PROMPT_REASON_NONE = 0;
+
+    /**
+     * Strong auth is required because the device has just booted.
+     */
     int PROMPT_REASON_RESTART = 1;
+
+    /**
+     * Strong auth is required because the user hasn't used strong auth since a while.
+     */
+    int PROMPT_REASON_TIMEOUT = 2;
 
     /**
      * Interface back to keyguard to tell it when security
