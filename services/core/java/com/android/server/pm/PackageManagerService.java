@@ -56,6 +56,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
@@ -4701,6 +4702,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         ArrayList<ResolveInfo> result = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> alwaysList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> undefinedList = new ArrayList<ResolveInfo>();
+        ArrayList<ResolveInfo> alwaysAskList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> neverList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> matchAllList = new ArrayList<ResolveInfo>();
 
@@ -4737,6 +4739,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                             Slog.i(TAG, "  + never: " + info.activityInfo.packageName);
                         }
                         neverList.add(info);
+                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
+                        if (DEBUG_DOMAIN_VERIFICATION) {
+                            Slog.i(TAG, "  + always-ask: " + info.activityInfo.packageName);
+                        }
+                        alwaysAskList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED ||
                             status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK) {
                         if (DEBUG_DOMAIN_VERIFICATION) {
@@ -4746,6 +4753,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
+
+            // We'll want to include browser possibilities in a few cases
+            boolean includeBrowser = false;
+
             // First try to add the "always" resolution(s) for the current user, if any
             if (alwaysList.size() > 0) {
                 result.addAll(alwaysList);
@@ -4754,7 +4765,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
                 result.add(xpDomainInfo.resolveInfo);
             } else {
-                // Add all undefined Apps as we want them to appear in the Disambiguation dialog.
+                // Add all undefined apps as we want them to appear in the disambiguation dialog.
                 result.addAll(undefinedList);
                 if (xpDomainInfo != null && (
                         xpDomainInfo.bestDomainVerificationStatus
@@ -4763,7 +4774,25 @@ public class PackageManagerService extends IPackageManager.Stub {
                         == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK)) {
                     result.add(xpDomainInfo.resolveInfo);
                 }
-                // Also add Browsers (all of them or only the default one)
+                includeBrowser = true;
+            }
+
+            // The presence of any 'always ask' alternatives means we'll also offer browsers.
+            // If there were 'always' entries their preferred order has been set, so we also
+            // back that off to make the alternatives equivalent
+            if (alwaysAskList.size() > 0) {
+                for (ResolveInfo i : result) {
+                    i.preferredOrder = 0;
+                }
+                result.addAll(alwaysAskList);
+                includeBrowser = true;
+            }
+
+            if (includeBrowser) {
+                // Also add browsers (all of them or only the default one)
+                if (DEBUG_DOMAIN_VERIFICATION) {
+                    Slog.v(TAG, "   ...including browsers in candidate set");
+                }
                 if ((matchFlags & MATCH_ALL) != 0) {
                     result.addAll(matchAllList);
                 } else {
