@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.Nullable;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
@@ -814,8 +815,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * a list of all the spans regardless of type.
      */
     @SuppressWarnings("unchecked")
-    public <T> T[] getSpans(int queryStart, int queryEnd, Class<T> kind) {
-        if (kind == null || mSpanCount == 0) return ArrayUtils.emptyArray(kind);
+    public <T> T[] getSpans(int queryStart, int queryEnd, @Nullable Class<T> kind) {
+        if (kind == null) return (T[]) ArrayUtils.emptyArray(Object.class);
+        if (mSpanCount == 0) return ArrayUtils.emptyArray(kind);
         int count = countSpans(queryStart, queryEnd, kind, treeRoot());
         if (count == 0) {
             return ArrayUtils.emptyArray(kind);
