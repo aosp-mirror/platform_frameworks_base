@@ -1774,7 +1774,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         maybeRefreshTrustedTime();
         synchronized (mRulesLock) {
             mRestrictBackground = restrictBackground;
-            updateRulesForGlobalChangeLocked(false);
+            updateRulesForGlobalChangeLocked(true);
             updateNotificationsLocked();
             writePolicyLocked();
         }
