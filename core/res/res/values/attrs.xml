@@ -1814,6 +1814,10 @@ i
         <enum name="KEYCODE_DPAD_DOWN_LEFT" value="269" />
         <enum name="KEYCODE_DPAD_UP_RIGHT" value="270" />
         <enum name="KEYCODE_DPAD_DOWN_RIGHT" value="271" />
+        <enum name="KEYCODE_MEDIA_SKIP_FORWARD" value="272" />
+        <enum name="KEYCODE_MEDIA_SKIP_BACKWARD" value="273" />
+        <enum name="KEYCODE_MEDIA_STEP_FORWARD" value="274" />
+        <enum name="KEYCODE_MEDIA_STEP_BACKWARD" value="275" />
     </attr>
 
     <!-- ***************************************************************** -->
