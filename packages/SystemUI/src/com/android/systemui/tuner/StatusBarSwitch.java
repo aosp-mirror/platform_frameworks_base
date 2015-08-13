@@ -38,6 +38,18 @@ public class StatusBarSwitch extends SwitchPreference implements Tunable {
     }
 
     @Override
+    protected void onAttachedToActivity() {
+        super.onAttachedToActivity();
+        TunerService.get(getContext()).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+    }
+
+    @Override
+    protected void onDetachedFromActivity() {
+        TunerService.get(getContext()).removeTunable(this);
+        super.onDetachedFromActivity();
+    }
+
+    @Override
     public void onTuningChanged(String key, String newValue) {
         if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             return;
