@@ -1040,6 +1040,12 @@ public final class SystemServer {
         w.getDefaultDisplay().getMetrics(metrics);
         context.getResources().updateConfiguration(config, metrics);
 
+        // The system context's theme may be configuration-dependent.
+        final Theme systemTheme = context.getTheme();
+        if (systemTheme.getChangingConfigurations() != 0) {
+            systemTheme.rebase();
+        }
+
         try {
             // TODO: use boot phase
             mPowerManagerService.systemReady(mActivityManagerService.getAppOpsService());
