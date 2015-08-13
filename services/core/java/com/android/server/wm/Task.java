@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -176,10 +177,12 @@ class Task implements DimLayer.DimLayerUser {
                 bounds = mTmpRect;
                 mFullscreen = true;
             } else {
-                // ensure bounds are entirely within the display rect
-                if (!bounds.intersect(mTmpRect)) {
-                    // Can't set bounds outside the containing display...Sorry!
-                    return false;
+                if (mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID || bounds.isEmpty()) {
+                    // ensure bounds are entirely within the display rect
+                    if (!bounds.intersect(mTmpRect)) {
+                        // Can't set bounds outside the containing display...Sorry!
+                        return false;
+                    }
                 }
                 mFullscreen = mTmpRect.equals(bounds);
             }
