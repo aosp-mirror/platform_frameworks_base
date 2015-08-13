@@ -217,4 +217,10 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the fingerprint running state changed.
      */
     public void onFingerprintRunningStateChanged(boolean running) { }
+
+    /**
+     * Called when the state that the user hasn't used strong authentication since quite some time
+     * has changed.
+     */
+    public void onStrongAuthTimeoutExpiredChanged(int userId) { }
 }

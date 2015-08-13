@@ -143,6 +143,11 @@ public class UnlockMethodCache {
         public void onFaceUnlockStateChanged(boolean running, int userId) {
             update(false /* updateAlways */);
         }
+
+        @Override
+        public void onStrongAuthTimeoutExpiredChanged(int userId) {
+            update(false /* updateAlways */);
+        }
     };
 
     public boolean isTrustManaged() {
