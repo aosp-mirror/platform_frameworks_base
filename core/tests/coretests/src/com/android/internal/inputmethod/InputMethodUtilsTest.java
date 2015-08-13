@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package android.os;
+package com.android.internal.inputmethod;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
-import com.android.internal.inputmethod.InputMethodUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class InputMethodTest extends InstrumentationTestCase {
+public class InputMethodUtilsTest extends InstrumentationTestCase {
     private static final boolean IS_AUX = true;
     private static final boolean IS_DEFAULT = true;
     private static final boolean IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE = true;

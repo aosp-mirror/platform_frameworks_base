@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.os;
+package android.view.inputmethod;
 
 import android.graphics.Matrix;
 import android.graphics.RectF;
+import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.TextUtils;
-import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.CursorAnchorInfo.Builder;
 
 import java.util.Objects;

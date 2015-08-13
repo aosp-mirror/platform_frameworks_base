@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.os;
+package android.view.inputmethod;
 
 import android.graphics.RectF;
+import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.view.inputmethod.SparseRectFArray;
 import android.view.inputmethod.SparseRectFArray.SparseRectFArrayBuilder;
 
 import java.util.Objects;
