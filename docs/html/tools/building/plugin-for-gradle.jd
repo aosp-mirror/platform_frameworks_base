@@ -112,7 +112,7 @@ several kinds of modules:</p>
 configuration options common to all application modules in the project. Each application module
 also has its own build.gradle file for build settings specific to that module.</p>
 
-<h3>Project Build File</h3>
+<h3 id="projectBuildFile">Project Build File</h3>
 <p>By default, the project-level Gradle file uses <em>buildscript</em> to define the Gradle
 <em>repositories</em> and <em>dependencies</em>. This allows different projects to use different
 Gradle versions. Supported repositories include JCenter, Maven Central, or Ivy. This example
@@ -144,7 +144,7 @@ allprojects {
 the <em>local.properties</em> file in the <code>sdk.dir<sdk location></code> setting or through an
 <code>ANDROID_HOME</code> environment variable.</p>
 
-<h3>Module Build File</h3>
+<h3 id="moduleBuildFile">Module Build File</h3>
 <p>The application module Gradle build file allows you to configure module build settings,
 including overriding the <code>src/main</code> manifest settings and setting custom packaging
 options. </p>
@@ -378,7 +378,7 @@ and two <em>dimensions</em> of product flavors, one for app type (demo or full) 
 CPU/ABI (x86, ARM, or MIPS). </p>
 
 
-<h3>Source directories</h3>
+<h3 id="sourceDirectories">Source directories</h3>
 
 <p>To build each version of your app, the build system combines source code and
 resources from:</p>
