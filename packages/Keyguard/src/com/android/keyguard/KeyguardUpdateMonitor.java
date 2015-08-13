@@ -64,6 +64,7 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -103,6 +104,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             = "com.android.facelock.FACE_UNLOCK_STOPPED";
     private static final String FINGERPRINT_WAKE_LOCK_NAME = "wake-and-unlock wakelock";
 
+    private static final String ACTION_STRONG_AUTH_TIMEOUT =
+            "com.android.systemui.ACTION_STRONG_AUTH_TIMEOUT";
+    private static final String USER_ID = "com.android.systemui.USER_ID";
+
+    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+
     /**
      * Mode in which we don't need to wake up the device when we get a fingerprint.
      */
@@ -125,6 +132,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * fingerprint.
      * */
     private static final int FP_ONLY_WAKE = 3;
+
+    /**
+     * Milliseconds after unlocking with fingerprint times out, i.e. the user has to use a
+     * strong auth method like password, PIN or pattern.
+     */
+    private static final long FINGERPRINT_UNLOCK_TIMEOUT_MS = 72 * 60 * 60 * 1000;
 
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
@@ -173,7 +186,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     // Password attempts
     private SparseIntArray mFailedAttempts = new SparseIntArray();
 
-    private boolean mClockVisible;
+    /** Tracks whether strong authentication hasn't been used since quite some time per user. */
+    private ArraySet<Integer> mStrongAuthTimedOut = new ArraySet<>();
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
@@ -184,6 +198,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mDeviceInteractive;
     private boolean mScreenOn;
     private SubscriptionManager mSubscriptionManager;
+    private AlarmManager mAlarmManager;
     private List<SubscriptionInfo> mSubscriptionInfo;
     private boolean mFingerprintDetectionRunning;
     private TrustManager mTrustManager;
@@ -549,7 +564,39 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public boolean isUnlockingWithFingerprintAllowed() {
-        return mUserHasAuthenticatedSinceBoot;
+        return mUserHasAuthenticatedSinceBoot && !hasFingerprintUnlockTimedOut(sCurrentUser);
+    }
+
+    /**
+     * @return true if the user hasn't use strong authentication (pattern, PIN, password) since a
+     *         while and thus can't unlock with fingerprint, false otherwise
+     */
+    public boolean hasFingerprintUnlockTimedOut(int userId) {
+        return mStrongAuthTimedOut.contains(userId);
+    }
+
+    public void reportSuccessfulStrongAuthUnlockAttempt() {
+        mStrongAuthTimedOut.remove(sCurrentUser);
+        scheduleStrongAuthTimeout();
+    }
+
+    private void scheduleStrongAuthTimeout() {
+        long when = SystemClock.elapsedRealtime() + FINGERPRINT_UNLOCK_TIMEOUT_MS;
+        Intent intent = new Intent(ACTION_STRONG_AUTH_TIMEOUT);
+        intent.putExtra(USER_ID, sCurrentUser);
+        PendingIntent sender = PendingIntent.getBroadcast(mContext,
+                sCurrentUser, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, when, sender);
+        notifyStrongAuthTimedOutChanged(sCurrentUser);
+    }
+
+    private void notifyStrongAuthTimedOutChanged(int userId) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onStrongAuthTimeoutExpiredChanged(userId);
+            }
+        }
     }
 
     static class DisplayClientState {
@@ -635,6 +682,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                     .equals(action)) {
                 mHandler.sendEmptyMessage(MSG_DPM_STATE_CHANGED);
+            }
+        }
+    };
+
+    private final BroadcastReceiver mStrongAuthTimeoutReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_STRONG_AUTH_TIMEOUT.equals(intent.getAction())) {
+                int userId = intent.getIntExtra(USER_ID, -1);
+                mStrongAuthTimedOut.add(userId);
+                notifyStrongAuthTimedOutChanged(userId);
             }
         }
     };
@@ -871,7 +929,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mPowerManager = context.getSystemService(PowerManager.class);
+        mAlarmManager = context.getSystemService(AlarmManager.class);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
+
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
         if (!mDeviceProvisioned) {
@@ -932,6 +992,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             e.printStackTrace();
         }
 
+        IntentFilter strongAuthTimeoutFilter = new IntentFilter();
+        strongAuthTimeoutFilter.addAction(ACTION_STRONG_AUTH_TIMEOUT);
+        context.registerReceiver(mStrongAuthTimeoutReceiver, strongAuthTimeoutFilter,
+                PERMISSION_SELF, null /* handler */);
         mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
         mTrustManager.registerTrustListener(this);
 
@@ -955,7 +1019,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private void startListeningForFingerprint() {
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
         int userId = ActivityManager.getCurrentUser();
-        if (isUnlockWithFingerPrintPossible(userId)) {
+        if (isUnlockWithFingerprintPossible(userId)) {
             mUserHasAuthenticatedSinceBoot = mTrustManager.hasUserAuthenticatedSinceBoot(
                     ActivityManager.getCurrentUser());
             if (mFingerprintCancelSignal != null) {
@@ -967,7 +1031,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    public boolean isUnlockWithFingerPrintPossible(int userId) {
+    public boolean isUnlockWithFingerprintPossible(int userId) {
         return mFpm != null && mFpm.isHardwareDetected() && !isFingerprintDisabled(userId)
                 && mFpm.getEnrolledFingerprints(userId).size() > 0;
     }
@@ -1433,7 +1497,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return mFailedAttempts.get(sCurrentUser, 0);
     }
 
-    public void reportFailedUnlockAttempt() {
+    public void reportFailedStrongAuthUnlockAttempt() {
         mFailedAttempts.put(sCurrentUser, getFailedUnlockAttempts() + 1);
     }
 
