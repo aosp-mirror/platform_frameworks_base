@@ -24,6 +24,7 @@ import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.IntArray;
 import android.util.Log;
 
 import dalvik.system.CloseGuard;
@@ -353,7 +354,25 @@ public final class NetworkStats implements AutoCloseable {
      * @throws RemoteException
      */
     void startUserUidEnumeration() throws RemoteException {
-        setUidEnumeration(mSession.getRelevantUids());
+        // TODO: getRelevantUids should be sensitive to time interval. When that's done,
+        //       the filtering logic below can be removed.
+        int[] uids = mSession.getRelevantUids();
+        // Filtering of uids with empty history.
+        IntArray filteredUids = new IntArray(uids.length);
+        for (int uid : uids) {
+            try {
+                NetworkStatsHistory history = mSession.getHistoryIntervalForUid(mTemplate, uid,
+                        android.net.NetworkStats.SET_ALL, android.net.NetworkStats.TAG_NONE,
+                        NetworkStatsHistory.FIELD_ALL, mStartTimeStamp, mEndTimeStamp);
+                if (history != null && history.size() > 0) {
+                    filteredUids.add(uid);
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error while getting history of uid " + uid, e);
+            }
+        }
+        mUids = filteredUids.toArray();
+        mUidOrUidIndex = -1;
         stepHistory();
     }
 
@@ -466,11 +485,6 @@ public final class NetworkStats implements AutoCloseable {
 
     private void setSingleUid(int uid) {
         mUidOrUidIndex = uid;
-    }
-
-    private void setUidEnumeration(int[] uids) {
-        mUids = uids;
-        mUidOrUidIndex = -1;
     }
 
     private void stepUid() {
