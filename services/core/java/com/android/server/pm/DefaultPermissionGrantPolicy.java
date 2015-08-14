@@ -296,7 +296,7 @@ final class DefaultPermissionGrantPolicy {
             PackageParser.Package storagePackage = getDefaultProviderAuthorityPackageLPr(
                     "com.android.externalstorage.documents", userId);
             if (storagePackage != null) {
-                grantRuntimePermissionsLPw(storagePackage, STORAGE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(storagePackage, STORAGE_PERMISSIONS, true, userId);
             }
 
             // CertInstaller
@@ -360,7 +360,7 @@ final class DefaultPermissionGrantPolicy {
             PackageParser.Package cbrPackage =
                     getDefaultSystemHandlerActivityPackageLPr(cbrIntent, userId);
             if (cbrPackage != null && doesPackageSupportRuntimePermissions(cbrPackage)) {
-                grantRuntimePermissionsLPw(cbrPackage, SMS_PERMISSIONS, false, userId);
+                grantRuntimePermissionsLPw(cbrPackage, SMS_PERMISSIONS, userId);
             }
 
             // Calendar
