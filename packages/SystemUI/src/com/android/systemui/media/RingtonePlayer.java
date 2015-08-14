@@ -159,7 +159,9 @@ public class RingtonePlayer extends SystemUI {
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Async playback only available from system UID.");
             }
-
+            if (UserHandle.ALL.equals(user)) {
+                user = UserHandle.OWNER;
+            }
             mAsyncPlayer.play(getContextForUser(user), uri, looping, aa);
         }
 
