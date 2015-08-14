@@ -1090,7 +1090,6 @@ class WindowStateAnimator {
             if (selfTransformation) {
                 tmpMatrix.postConcat(mTransformation.getMatrix());
             }
-            tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
             if (attachedTransformation != null) {
                 tmpMatrix.postConcat(attachedTransformation.getMatrix());
             }
@@ -1100,6 +1099,10 @@ class WindowStateAnimator {
             if (screenAnimation) {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
+            // The translation that applies the position of the window needs to be applied at the
+            // end in case that other translations include scaling. Otherwise the scaling will
+            // affect this translation.
+            tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
 
             //TODO (multidisplay): Magnification is supported only for the default display.
             if (mService.mAccessibilityController != null && displayId == Display.DEFAULT_DISPLAY) {
