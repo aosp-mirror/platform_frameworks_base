@@ -213,7 +213,12 @@ public class NinePatchDrawable extends Drawable {
         }
     }
 
-    private void setNinePatch(NinePatch ninePatch) {
+    /**
+     * Sets the nine patch used by this drawable.
+     *
+     * @param ninePatch the nine patch for this drawable
+     */
+    public void setNinePatch(NinePatch ninePatch) {
         if (mNinePatch != ninePatch) {
             mNinePatch = ninePatch;
             if (ninePatch != null) {
@@ -224,6 +229,13 @@ public class NinePatchDrawable extends Drawable {
             }
             invalidateSelf();
         }
+    }
+
+    /**
+     * @return the nine patch used by this drawable
+     */
+    public NinePatch getNinePatch() {
+        return mNinePatch;
     }
 
     @Override
