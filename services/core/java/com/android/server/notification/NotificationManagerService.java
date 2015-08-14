@@ -3615,22 +3615,28 @@ public class NotificationManagerService extends SystemService {
 
         public ArraySet<String> getGrantedPackages() {
             final ArraySet<String> pkgs = new ArraySet<>();
-            final String setting = Settings.Secure.getStringForUser(
-                    getContext().getContentResolver(),
-                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                    ActivityManager.getCurrentUser());
-            if (setting != null) {
-                final String[] tokens = setting.split(SEPARATOR);
-                for (int i = 0; i < tokens.length; i++) {
-                    String token = tokens[i];
-                    if (token != null) {
-                        token.trim();
+
+            long identity = Binder.clearCallingIdentity();
+            try {
+                final String setting = Settings.Secure.getStringForUser(
+                        getContext().getContentResolver(),
+                        Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                        ActivityManager.getCurrentUser());
+                if (setting != null) {
+                    final String[] tokens = setting.split(SEPARATOR);
+                    for (int i = 0; i < tokens.length; i++) {
+                        String token = tokens[i];
+                        if (token != null) {
+                            token.trim();
+                        }
+                        if (TextUtils.isEmpty(token)) {
+                            continue;
+                        }
+                        pkgs.add(token);
                     }
-                    if (TextUtils.isEmpty(token)) {
-                        continue;
-                    }
-                    pkgs.add(token);
                 }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
             return pkgs;
         }
