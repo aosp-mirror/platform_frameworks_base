@@ -157,7 +157,7 @@ public final class ContentService extends IContentService.Stub {
         mFactoryTest = factoryTest;
 
         // Let the package manager query for the sync adapters for a given authority
-        // as we grant default permissions to sync adapters for specifix authorities.
+        // as we grant default permissions to sync adapters for specific authorities.
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
         packageManagerInternal.setSyncAdapterPackagesprovider(
