@@ -3949,7 +3949,7 @@ final class Settings {
 
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
             ArraySet<String> permissionNames, PackageSetting ps, SimpleDateFormat sdf,
-            Date date, List<UserInfo> users) {
+            Date date, List<UserInfo> users, boolean dumpAll) {
         if (checkinTag != null) {
             pw.print(checkinTag);
             pw.print(",");
@@ -4160,7 +4160,21 @@ final class Settings {
             }
         }
 
-        if (ps.sharedUser == null || permissionNames != null) {
+        if ((permissionNames != null || dumpAll) && ps.pkg.requestedPermissions != null
+                && ps.pkg.requestedPermissions.size() > 0) {
+            final ArrayList<String> perms = ps.pkg.requestedPermissions;
+            pw.print(prefix); pw.println("  requested permissions:");
+            for (int i=0; i<perms.size(); i++) {
+                String perm = perms.get(i);
+                if (permissionNames != null
+                        && !permissionNames.contains(perm)) {
+                    continue;
+                }
+                pw.print(prefix); pw.print("    "); pw.println(perm);
+            }
+        }
+
+        if (ps.sharedUser == null || permissionNames != null || dumpAll) {
             PermissionsState permissionsState = ps.getPermissionsState();
             dumpInstallPermissionsLPr(pw, prefix + "  ", permissionNames, permissionsState);
         }
@@ -4187,7 +4201,7 @@ final class Settings {
                 PermissionsState permissionsState = ps.getPermissionsState();
                 dumpGidsLPr(pw, prefix + "    ", permissionsState.computeGids(user.id));
                 dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionNames, permissionsState
-                        .getRuntimePermissionStates(user.id));
+                        .getRuntimePermissionStates(user.id), dumpAll);
             }
 
             if (permissionNames == null) {
@@ -4235,11 +4249,12 @@ final class Settings {
                 pw.println("Packages:");
                 printedSomething = true;
             }
-            dumpPackageLPr(pw, "  ", checkin ? "pkg" : null, permissionNames, ps, sdf, date, users);
+            dumpPackageLPr(pw, "  ", checkin ? "pkg" : null, permissionNames, ps, sdf, date, users,
+                    packageName != null);
         }
 
         printedSomething = false;
-        if (!checkin && mRenamedPackages.size() > 0 && permissionNames == null) {
+        if (mRenamedPackages.size() > 0 && permissionNames == null) {
             for (final Map.Entry<String, String> e : mRenamedPackages.entrySet()) {
                 if (packageName != null && !packageName.equals(e.getKey())
                         && !packageName.equals(e.getValue())) {
@@ -4276,7 +4291,7 @@ final class Settings {
                     printedSomething = true;
                 }
                 dumpPackageLPr(pw, "  ", checkin ? "dis" : null, permissionNames, ps, sdf, date,
-                        users);
+                        users, packageName != null);
             }
         }
     }
@@ -4361,7 +4376,8 @@ final class Settings {
                     if (!ArrayUtils.isEmpty(gids) || !permissions.isEmpty()) {
                         pw.print(prefix); pw.print("User "); pw.print(userId); pw.println(": ");
                         dumpGidsLPr(pw, prefix + "  ", gids);
-                        dumpRuntimePermissionsLPr(pw, prefix + "  ", permissionNames, permissions);
+                        dumpRuntimePermissionsLPr(pw, prefix + "  ", permissionNames, permissions,
+                                packageName != null);
                     }
                 }
             } else {
@@ -4407,8 +4423,8 @@ final class Settings {
     }
 
     void dumpRuntimePermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
-            List<PermissionState> permissionStates) {
-        if (!permissionStates.isEmpty()) {
+            List<PermissionState> permissionStates, boolean dumpAll) {
+        if (!permissionStates.isEmpty() || dumpAll) {
             pw.print(prefix); pw.println("runtime permissions:");
             for (PermissionState permissionState : permissionStates) {
                 if (permissionNames != null
