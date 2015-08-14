@@ -1555,9 +1555,10 @@ public class AccountManager {
     }
 
     /**
-     * Copies an account from the primary user to another user.
+     * Copies an account from one user to another user.
      * @param account the account to copy
-     * @param user the target user
+     * @param fromUser the user to copy the account from
+     * @param toUser the target user
      * @param callback Callback to invoke when the request completes,
      *     null for no callback
      * @param handler {@link Handler} identifying the callback thread,
@@ -1567,16 +1568,18 @@ public class AccountManager {
      * @hide
      */
     public AccountManagerFuture<Boolean> copyAccountToUser(
-            final Account account, final UserHandle user,
+            final Account account, final UserHandle fromUser, final UserHandle toUser,
             AccountManagerCallback<Boolean> callback, Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
-        if (user == null) throw new IllegalArgumentException("user is null");
+        if (toUser == null || fromUser == null) {
+            throw new IllegalArgumentException("fromUser and toUser cannot be null");
+        }
 
         return new Future2Task<Boolean>(handler, callback) {
             @Override
             public void doWork() throws RemoteException {
                 mService.copyAccountToUser(
-                        mResponse, account, UserHandle.USER_OWNER, user.getIdentifier());
+                        mResponse, account, fromUser.getIdentifier(), toUser.getIdentifier());
             }
             @Override
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
