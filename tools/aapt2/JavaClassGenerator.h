@@ -20,28 +20,27 @@
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 
+#include "util/StringPiece.h"
+
 #include <ostream>
 #include <string>
 
 namespace aapt {
 
+struct JavaClassGeneratorOptions {
+    /*
+     * Specifies whether to use the 'final' modifier
+     * on resource entries. Default is true.
+     */
+    bool useFinal = true;
+};
+
 /*
  * Generates the R.java file for a resource table.
  */
-class JavaClassGenerator : ConstValueVisitor {
+class JavaClassGenerator {
 public:
-    /*
-     * A set of options for this JavaClassGenerator.
-     */
-    struct Options {
-        /*
-         * Specifies whether to use the 'final' modifier
-         * on resource entries. Default is true.
-         */
-        bool useFinal = true;
-    };
-
-    JavaClassGenerator(const std::shared_ptr<const ResourceTable>& table, Options options);
+    JavaClassGenerator(ResourceTable* table, JavaClassGeneratorOptions options);
 
     /*
      * Writes the R.java file to `out`. Only symbols belonging to `package` are written.
@@ -50,21 +49,23 @@ public:
      * We need to generate these symbols in a separate file.
      * Returns true on success.
      */
-    bool generate(const std::u16string& package, std::ostream& out);
-
-    /*
-     * ConstValueVisitor implementation.
-     */
-    void visit(const Styleable& styleable, ValueVisitorArgs& args);
+    bool generate(const StringPiece16& package, std::ostream* out);
 
     const std::string& getError() const;
 
 private:
-    bool generateType(const std::u16string& package, size_t packageId,
-                      const ResourceTableType& type, std::ostream& out);
+    bool generateType(const StringPiece16& packageNameToGenerate,
+                      const ResourceTablePackage* package,
+                      const ResourceTableType* type,
+                      std::ostream* out);
 
-    std::shared_ptr<const ResourceTable> mTable;
-    Options mOptions;
+    void generateStyleable(const StringPiece16& packageNameToGenerate,
+                           const std::u16string& entryName,
+                           const Styleable* styleable,
+                           std::ostream* out);
+
+    ResourceTable* mTable;
+    JavaClassGeneratorOptions mOptions;
     std::string mError;
 };
 

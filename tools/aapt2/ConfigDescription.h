@@ -17,7 +17,7 @@
 #ifndef AAPT_CONFIG_DESCRIPTION_H
 #define AAPT_CONFIG_DESCRIPTION_H
 
-#include "StringPiece.h"
+#include "util/StringPiece.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <ostream>

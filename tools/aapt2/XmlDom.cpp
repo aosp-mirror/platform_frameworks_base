@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include "Logger.h"
-#include "Util.h"
+#include "util/Util.h"
 #include "XmlDom.h"
 #include "XmlPullParser.h"
 
@@ -65,7 +64,7 @@ static void addToStack(Stack* stack, XML_Parser parser, std::unique_ptr<Node> no
         stack->root = std::move(node);
     }
 
-    if (thisNode->type != NodeType::kText) {
+    if (!nodeCast<Text>(thisNode)) {
         stack->nodeStack.push(thisNode);
     }
 }
@@ -143,8 +142,7 @@ static void XMLCALL characterDataHandler(void* userData, const char* s, int len)
         Node* currentParent = stack->nodeStack.top();
         if (!currentParent->children.empty()) {
             Node* lastChild = currentParent->children.back().get();
-            if (lastChild->type == NodeType::kText) {
-                Text* text = static_cast<Text*>(lastChild);
+            if (Text* text = nodeCast<Text>(lastChild)) {
                 text->text += util::utf8ToUtf16(StringPiece(s, len));
                 return;
             }
@@ -166,7 +164,7 @@ static void XMLCALL commentDataHandler(void* userData, const char* comment) {
     stack->pendingComment += util::utf8ToUtf16(comment);
 }
 
-std::unique_ptr<Node> inflate(std::istream* in, SourceLogger* logger) {
+std::unique_ptr<XmlResource> inflate(std::istream* in, IDiagnostics* diag, const Source& source) {
     Stack stack;
 
     XML_Parser parser = XML_ParserCreateNS(nullptr, kXmlNamespaceSep);
@@ -182,20 +180,23 @@ std::unique_ptr<Node> inflate(std::istream* in, SourceLogger* logger) {
         in->read(buffer, sizeof(buffer) / sizeof(buffer[0]));
         if (in->bad() && !in->eof()) {
             stack.root = {};
-            logger->error() << strerror(errno) << std::endl;
+            diag->error(DiagMessage(source) << strerror(errno));
             break;
         }
 
         if (XML_Parse(parser, buffer, in->gcount(), in->eof()) == XML_STATUS_ERROR) {
             stack.root = {};
-            logger->error(XML_GetCurrentLineNumber(parser))
-                    << XML_ErrorString(XML_GetErrorCode(parser)) << std::endl;
+            diag->error(DiagMessage(source.withLine(XML_GetCurrentLineNumber(parser)))
+                        << XML_ErrorString(XML_GetErrorCode(parser)));
             break;
         }
     }
 
     XML_ParserFree(parser);
-    return std::move(stack.root);
+    if (stack.root) {
+        return util::make_unique<XmlResource>(ResourceFile{}, std::move(stack.root));
+    }
+    return {};
 }
 
 static void copyAttributes(Element* el, android::ResXMLParser* parser) {
@@ -224,7 +225,8 @@ static void copyAttributes(Element* el, android::ResXMLParser* parser) {
     }
 }
 
-std::unique_ptr<Node> inflate(const void* data, size_t dataLen, SourceLogger* logger) {
+std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnostics* diag,
+                                     const Source& source) {
     std::unique_ptr<Node> root;
     std::stack<Node*> nodeStack;
 
@@ -307,53 +309,17 @@ std::unique_ptr<Node> inflate(const void* data, size_t dataLen, SourceLogger* lo
                 nodeStack.top()->addChild(std::move(newNode));
             }
 
-            if (thisNode->type != NodeType::kText) {
+            if (!nodeCast<Text>(thisNode)) {
                 nodeStack.push(thisNode);
             }
         }
     }
-    return root;
-}
-
-Node::Node(NodeType type) : type(type), parent(nullptr), lineNumber(0), columnNumber(0) {
+    return util::make_unique<XmlResource>(ResourceFile{}, std::move(root));
 }
 
 void Node::addChild(std::unique_ptr<Node> child) {
     child->parent = this;
     children.push_back(std::move(child));
-}
-
-Namespace::Namespace() : BaseNode(NodeType::kNamespace) {
-}
-
-std::unique_ptr<Node> Namespace::clone() const {
-    Namespace* ns = new Namespace();
-    ns->lineNumber = lineNumber;
-    ns->columnNumber = columnNumber;
-    ns->comment = comment;
-    ns->namespacePrefix = namespacePrefix;
-    ns->namespaceUri = namespaceUri;
-    for (auto& child : children) {
-        ns->addChild(child->clone());
-    }
-    return std::unique_ptr<Node>(ns);
-}
-
-Element::Element() : BaseNode(NodeType::kElement) {
-}
-
-std::unique_ptr<Node> Element::clone() const {
-    Element* el = new Element();
-    el->lineNumber = lineNumber;
-    el->columnNumber = columnNumber;
-    el->comment = comment;
-    el->namespaceUri = namespaceUri;
-    el->name = name;
-    el->attributes = attributes;
-    for (auto& child : children) {
-        el->addChild(child->clone());
-    }
-    return std::unique_ptr<Node>(el);
 }
 
 Attribute* Element::findAttribute(const StringPiece16& ns, const StringPiece16& name) {
@@ -366,29 +332,29 @@ Attribute* Element::findAttribute(const StringPiece16& ns, const StringPiece16& 
 }
 
 Element* Element::findChild(const StringPiece16& ns, const StringPiece16& name) {
-    return findChildWithAttribute(ns, name, nullptr);
+    return findChildWithAttribute(ns, name, {}, {}, {});
 }
 
 Element* Element::findChildWithAttribute(const StringPiece16& ns, const StringPiece16& name,
-                                         const Attribute* reqAttr) {
+                                         const StringPiece16& attrNs, const StringPiece16& attrName,
+                                         const StringPiece16& attrValue) {
     for (auto& childNode : children) {
         Node* child = childNode.get();
-        while (child->type == NodeType::kNamespace) {
+        while (nodeCast<Namespace>(child)) {
             if (child->children.empty()) {
                 break;
             }
             child = child->children[0].get();
         }
 
-        if (child->type == NodeType::kElement) {
-            Element* el = static_cast<Element*>(child);
+        if (Element* el = nodeCast<Element>(child)) {
             if (ns == el->namespaceUri && name == el->name) {
-                if (!reqAttr) {
+                if (attrNs.empty() && attrName.empty()) {
                     return el;
                 }
 
-                Attribute* attrName = el->findAttribute(reqAttr->namespaceUri, reqAttr->name);
-                if (attrName && attrName->value == reqAttr->value) {
+                Attribute* attr = el->findAttribute(attrNs, attrName);
+                if (attr && attrValue == attr->value) {
                     return el;
                 }
             }
@@ -401,30 +367,18 @@ std::vector<Element*> Element::getChildElements() {
     std::vector<Element*> elements;
     for (auto& childNode : children) {
         Node* child = childNode.get();
-        while (child->type == NodeType::kNamespace) {
+        while (nodeCast<Namespace>(child)) {
             if (child->children.empty()) {
                 break;
             }
             child = child->children[0].get();
         }
 
-        if (child->type == NodeType::kElement) {
-            elements.push_back(static_cast<Element*>(child));
+        if (Element* el = nodeCast<Element>(child)) {
+            elements.push_back(el);
         }
     }
     return elements;
-}
-
-Text::Text() : BaseNode(NodeType::kText) {
-}
-
-std::unique_ptr<Node> Text::clone() const {
-    Text* el = new Text();
-    el->lineNumber = lineNumber;
-    el->columnNumber = columnNumber;
-    el->comment = comment;
-    el->text = text;
-    return std::unique_ptr<Node>(el);
 }
 
 } // namespace xml

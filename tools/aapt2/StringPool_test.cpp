@@ -15,7 +15,7 @@
  */
 
 #include "StringPool.h"
-#include "Util.h"
+#include "util/Util.h"
 
 #include <gtest/gtest.h>
 #include <string>
@@ -67,15 +67,23 @@ TEST(StringPoolTest, MaintainInsertionOrderIndex) {
 TEST(StringPoolTest, PruneStringsWithNoReferences) {
     StringPool pool;
 
+    StringPool::Ref refA = pool.makeRef(u"foo");
     {
         StringPool::Ref ref = pool.makeRef(u"wut");
         EXPECT_EQ(*ref, u"wut");
-        EXPECT_EQ(1u, pool.size());
+        EXPECT_EQ(2u, pool.size());
     }
+    StringPool::Ref refB = pool.makeRef(u"bar");
 
-    EXPECT_EQ(1u, pool.size());
+    EXPECT_EQ(3u, pool.size());
     pool.prune();
-    EXPECT_EQ(0u, pool.size());
+    EXPECT_EQ(2u, pool.size());
+    StringPool::const_iterator iter = begin(pool);
+    EXPECT_EQ((*iter)->value, u"foo");
+    EXPECT_LT((*iter)->index, 2u);
+    ++iter;
+    EXPECT_EQ((*iter)->value, u"bar");
+    EXPECT_LT((*iter)->index, 2u);
 }
 
 TEST(StringPoolTest, SortAndMaintainIndexesInReferences) {

@@ -15,7 +15,7 @@
  */
 
 #include "Locale.h"
-#include "Util.h"
+#include "util/Util.h"
 
 #include <gtest/gtest.h>
 #include <string>

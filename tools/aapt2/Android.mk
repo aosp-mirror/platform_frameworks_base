@@ -25,62 +25,71 @@ LOCAL_PATH:= $(call my-dir)
 
 main := Main.cpp
 sources := \
-	BigBuffer.cpp \
-	BinaryResourceParser.cpp \
-	BindingXmlPullParser.cpp \
+	compile/IdAssigner.cpp \
+	compile/Png.cpp \
+	compile/XmlIdCollector.cpp \
+	flatten/Archive.cpp \
+	flatten/TableFlattener.cpp \
+	flatten/XmlFlattener.cpp \
+	link/AutoVersioner.cpp \
+	link/PrivateAttributeMover.cpp \
+	link/ReferenceLinker.cpp \
+	link/TableMerger.cpp \
+	link/XmlReferenceLinker.cpp \
+	process/SymbolTable.cpp \
+	unflatten/BinaryResourceParser.cpp \
+	unflatten/ResChunkPullParser.cpp \
+	util/BigBuffer.cpp \
+	util/Files.cpp \
+	util/Util.cpp \
 	ConfigDescription.cpp \
 	Debug.cpp \
-	Files.cpp \
-	Flag.cpp \
+	Flags.cpp \
 	JavaClassGenerator.cpp \
-	Linker.cpp \
 	Locale.cpp \
-	Logger.cpp \
-	ManifestMerger.cpp \
-	ManifestParser.cpp \
-	ManifestValidator.cpp \
-	Png.cpp \
 	ProguardRules.cpp \
-	ResChunkPullParser.cpp \
 	Resource.cpp \
 	ResourceParser.cpp \
 	ResourceTable.cpp \
-	ResourceTableResolver.cpp \
+	ResourceUtils.cpp \
 	ResourceValues.cpp \
 	SdkConstants.cpp \
 	StringPool.cpp \
-	TableFlattener.cpp \
-	Util.cpp \
-	ScopedXmlPullParser.cpp \
-	SourceXmlPullParser.cpp \
-	XliffXmlPullParser.cpp \
 	XmlDom.cpp \
-	XmlFlattener.cpp \
-	ZipEntry.cpp \
-	ZipFile.cpp
+	XmlPullParser.cpp
 
 testSources := \
-	BigBuffer_test.cpp \
-	BindingXmlPullParser_test.cpp \
-	Compat_test.cpp \
+	compile/IdAssigner_test.cpp \
+	compile/XmlIdCollector_test.cpp \
+	flatten/FileExportWriter_test.cpp \
+	flatten/TableFlattener_test.cpp \
+	flatten/XmlFlattener_test.cpp \
+	link/AutoVersioner_test.cpp \
+	link/PrivateAttributeMover_test.cpp \
+	link/ReferenceLinker_test.cpp \
+	link/TableMerger_test.cpp \
+	link/XmlReferenceLinker_test.cpp \
+	process/SymbolTable_test.cpp \
+	unflatten/FileExportHeaderReader_test.cpp \
+	util/BigBuffer_test.cpp \
+	util/Maybe_test.cpp \
+	util/StringPiece_test.cpp \
+	util/Util_test.cpp \
 	ConfigDescription_test.cpp \
 	JavaClassGenerator_test.cpp \
-	Linker_test.cpp \
 	Locale_test.cpp \
-	ManifestMerger_test.cpp \
-	ManifestParser_test.cpp \
-	Maybe_test.cpp \
-	NameMangler_test.cpp \
-	ResourceParser_test.cpp \
 	Resource_test.cpp \
+	ResourceParser_test.cpp \
 	ResourceTable_test.cpp \
-	ScopedXmlPullParser_test.cpp \
-	StringPiece_test.cpp \
+	ResourceUtils_test.cpp \
 	StringPool_test.cpp \
-	Util_test.cpp \
-	XliffXmlPullParser_test.cpp \
+	ValueVisitor_test.cpp \
 	XmlDom_test.cpp \
-	XmlFlattener_test.cpp
+	XmlPullParser_test.cpp
+
+toolSources := \
+	compile/Compile.cpp \
+	link/Link.cpp
 
 hostLdLibs :=
 
@@ -101,7 +110,7 @@ else
 endif
 
 cFlags := -Wall -Werror -Wno-unused-parameter -UNDEBUG
-cppFlags := -std=c++11 -Wno-missing-field-initializers -Wno-unused-private-field
+cppFlags := -std=c++11 -Wno-missing-field-initializers -fno-exceptions
 
 # ==========================================================
 # Build the host static library: libaapt2
@@ -139,7 +148,7 @@ include $(BUILD_HOST_NATIVE_TEST)
 include $(CLEAR_VARS)
 LOCAL_MODULE := aapt2
 
-LOCAL_SRC_FILES := $(main)
+LOCAL_SRC_FILES := $(main) $(toolSources)
 
 LOCAL_STATIC_LIBRARIES += libaapt2 $(hostStaticLibs)
 LOCAL_LDLIBS += $(hostLdLibs)

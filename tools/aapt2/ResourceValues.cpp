@@ -15,14 +15,25 @@
  */
 
 #include "Resource.h"
-#include "ResourceTypeExtensions.h"
+#include "flatten/ResourceTypeExtensions.h"
 #include "ResourceValues.h"
-#include "Util.h"
+#include "util/Util.h"
+#include "ValueVisitor.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <limits>
 
 namespace aapt {
+
+template <typename Derived>
+void BaseValue<Derived>::accept(RawValueVisitor* visitor) {
+    visitor->visit(static_cast<Derived*>(this));
+}
+
+template <typename Derived>
+void BaseItem<Derived>::accept(RawValueVisitor* visitor) {
+    visitor->visit(static_cast<Derived*>(this));
+}
 
 bool Value::isItem() const {
     return false;
@@ -43,14 +54,14 @@ RawString* RawString::clone(StringPool* newPool) const {
     return new RawString(newPool->makeRef(*value));
 }
 
-bool RawString::flatten(android::Res_value& outValue) const {
-    outValue.dataType = ExtendedTypes::TYPE_RAW_STRING;
-    outValue.data = static_cast<uint32_t>(value.getIndex());
+bool RawString::flatten(android::Res_value* outValue) const {
+    outValue->dataType = ExtendedTypes::TYPE_RAW_STRING;
+    outValue->data = util::hostToDevice32(static_cast<uint32_t>(value.getIndex()));
     return true;
 }
 
-void RawString::print(std::ostream& out) const {
-    out << "(raw string) " << *value;
+void RawString::print(std::ostream* out) const {
+    *out << "(raw string) " << *value;
 }
 
 Reference::Reference() : referenceType(Reference::Type::kResource) {
@@ -63,11 +74,11 @@ Reference::Reference(const ResourceNameRef& n, Type t) :
 Reference::Reference(const ResourceId& i, Type type) : id(i), referenceType(type) {
 }
 
-bool Reference::flatten(android::Res_value& outValue) const {
-    outValue.dataType = (referenceType == Reference::Type::kResource)
+bool Reference::flatten(android::Res_value* outValue) const {
+    outValue->dataType = (referenceType == Reference::Type::kResource)
         ? android::Res_value::TYPE_REFERENCE
         : android::Res_value::TYPE_ATTRIBUTE;
-    outValue.data = id.id;
+    outValue->data = util::hostToDevice32(id ? id.value().id : 0);
     return true;
 }
 
@@ -79,20 +90,20 @@ Reference* Reference::clone(StringPool* /*newPool*/) const {
     return ref;
 }
 
-void Reference::print(std::ostream& out) const {
-    out << "(reference) ";
+void Reference::print(std::ostream* out) const {
+    *out << "(reference) ";
     if (referenceType == Reference::Type::kResource) {
-        out << "@";
+        *out << "@";
     } else {
-        out << "?";
+        *out << "?";
     }
 
-    if (name.isValid()) {
-        out << name;
+    if (name) {
+        *out << name.value();
     }
 
-    if (id.isValid() || Res_INTERNALID(id.id)) {
-        out << " " << id;
+    if (id && !Res_INTERNALID(id.value().id)) {
+        *out << " " << id.value();
     }
 }
 
@@ -100,9 +111,9 @@ bool Id::isWeak() const {
     return true;
 }
 
-bool Id::flatten(android::Res_value& out) const {
-    out.dataType = android::Res_value::TYPE_INT_BOOLEAN;
-    out.data = 0;
+bool Id::flatten(android::Res_value* out) const {
+    out->dataType = android::Res_value::TYPE_INT_BOOLEAN;
+    out->data = util::hostToDevice32(0);
     return true;
 }
 
@@ -110,21 +121,21 @@ Id* Id::clone(StringPool* /*newPool*/) const {
     return new Id();
 }
 
-void Id::print(std::ostream& out) const {
-    out << "(id)";
+void Id::print(std::ostream* out) const {
+    *out << "(id)";
 }
 
 String::String(const StringPool::Ref& ref) : value(ref) {
 }
 
-bool String::flatten(android::Res_value& outValue) const {
-    // Verify that our StringPool index is within encodeable limits.
+bool String::flatten(android::Res_value* outValue) const {
+    // Verify that our StringPool index is within encode-able limits.
     if (value.getIndex() > std::numeric_limits<uint32_t>::max()) {
         return false;
     }
 
-    outValue.dataType = android::Res_value::TYPE_STRING;
-    outValue.data = static_cast<uint32_t>(value.getIndex());
+    outValue->dataType = android::Res_value::TYPE_STRING;
+    outValue->data = util::hostToDevice32(static_cast<uint32_t>(value.getIndex()));
     return true;
 }
 
@@ -132,20 +143,20 @@ String* String::clone(StringPool* newPool) const {
     return new String(newPool->makeRef(*value));
 }
 
-void String::print(std::ostream& out) const {
-    out << "(string) \"" << *value << "\"";
+void String::print(std::ostream* out) const {
+    *out << "(string) \"" << *value << "\"";
 }
 
 StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref) {
 }
 
-bool StyledString::flatten(android::Res_value& outValue) const {
+bool StyledString::flatten(android::Res_value* outValue) const {
     if (value.getIndex() > std::numeric_limits<uint32_t>::max()) {
         return false;
     }
 
-    outValue.dataType = android::Res_value::TYPE_STRING;
-    outValue.data = static_cast<uint32_t>(value.getIndex());
+    outValue->dataType = android::Res_value::TYPE_STRING;
+    outValue->data = util::hostToDevice32(static_cast<uint32_t>(value.getIndex()));
     return true;
 }
 
@@ -153,20 +164,20 @@ StyledString* StyledString::clone(StringPool* newPool) const {
     return new StyledString(newPool->makeRef(value));
 }
 
-void StyledString::print(std::ostream& out) const {
-    out << "(styled string) \"" << *value->str << "\"";
+void StyledString::print(std::ostream* out) const {
+    *out << "(styled string) \"" << *value->str << "\"";
 }
 
 FileReference::FileReference(const StringPool::Ref& _path) : path(_path) {
 }
 
-bool FileReference::flatten(android::Res_value& outValue) const {
+bool FileReference::flatten(android::Res_value* outValue) const {
     if (path.getIndex() > std::numeric_limits<uint32_t>::max()) {
         return false;
     }
 
-    outValue.dataType = android::Res_value::TYPE_STRING;
-    outValue.data = static_cast<uint32_t>(path.getIndex());
+    outValue->dataType = android::Res_value::TYPE_STRING;
+    outValue->data = util::hostToDevice32(static_cast<uint32_t>(path.getIndex()));
     return true;
 }
 
@@ -174,15 +185,21 @@ FileReference* FileReference::clone(StringPool* newPool) const {
     return new FileReference(newPool->makeRef(*path));
 }
 
-void FileReference::print(std::ostream& out) const {
-    out << "(file) " << *path;
+void FileReference::print(std::ostream* out) const {
+    *out << "(file) " << *path;
 }
 
 BinaryPrimitive::BinaryPrimitive(const android::Res_value& val) : value(val) {
 }
 
-bool BinaryPrimitive::flatten(android::Res_value& outValue) const {
-    outValue = value;
+BinaryPrimitive::BinaryPrimitive(uint8_t dataType, uint32_t data) {
+    value.dataType = dataType;
+    value.data = data;
+}
+
+bool BinaryPrimitive::flatten(android::Res_value* outValue) const {
+    outValue->dataType = value.dataType;
+    outValue->data = util::hostToDevice32(value.data);
     return true;
 }
 
@@ -190,29 +207,29 @@ BinaryPrimitive* BinaryPrimitive::clone(StringPool* /*newPool*/) const {
     return new BinaryPrimitive(value);
 }
 
-void BinaryPrimitive::print(std::ostream& out) const {
+void BinaryPrimitive::print(std::ostream* out) const {
     switch (value.dataType) {
         case android::Res_value::TYPE_NULL:
-            out << "(null)";
+            *out << "(null)";
             break;
         case android::Res_value::TYPE_INT_DEC:
-            out << "(integer) " << value.data;
+            *out << "(integer) " << value.data;
             break;
         case android::Res_value::TYPE_INT_HEX:
-            out << "(integer) " << std::hex << value.data << std::dec;
+            *out << "(integer) " << std::hex << value.data << std::dec;
             break;
         case android::Res_value::TYPE_INT_BOOLEAN:
-            out << "(boolean) " << (value.data != 0 ? "true" : "false");
+            *out << "(boolean) " << (value.data != 0 ? "true" : "false");
             break;
         case android::Res_value::TYPE_INT_COLOR_ARGB8:
         case android::Res_value::TYPE_INT_COLOR_RGB8:
         case android::Res_value::TYPE_INT_COLOR_ARGB4:
         case android::Res_value::TYPE_INT_COLOR_RGB4:
-            out << "(color) #" << std::hex << value.data << std::dec;
+            *out << "(color) #" << std::hex << value.data << std::dec;
             break;
         default:
-            out << "(unknown 0x" << std::hex << (int) value.dataType << ") 0x"
-                << std::hex << value.data << std::dec;
+            *out << "(unknown 0x" << std::hex << (int) value.dataType << ") 0x"
+                 << std::hex << value.data << std::dec;
             break;
     }
 }
@@ -231,9 +248,9 @@ Attribute* Attribute::clone(StringPool* /*newPool*/) const {
     return attr;
 }
 
-void Attribute::printMask(std::ostream& out) const {
+void Attribute::printMask(std::ostream* out) const {
     if (typeMask == android::ResTable_map::TYPE_ANY) {
-        out << "any";
+        *out << "any";
         return;
     }
 
@@ -242,103 +259,105 @@ void Attribute::printMask(std::ostream& out) const {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "reference";
+        *out << "reference";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_STRING) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "string";
+        *out << "string";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_INTEGER) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "integer";
+        *out << "integer";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_BOOLEAN) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "boolean";
+        *out << "boolean";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_COLOR) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "color";
+        *out << "color";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_FLOAT) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "float";
+        *out << "float";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_DIMENSION) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "dimension";
+        *out << "dimension";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_FRACTION) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "fraction";
+        *out << "fraction";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_ENUM) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "enum";
+        *out << "enum";
     }
 
     if ((typeMask & android::ResTable_map::TYPE_FLAGS) != 0) {
         if (!set) {
             set = true;
         } else {
-            out << "|";
+            *out << "|";
         }
-        out << "flags";
+        *out << "flags";
     }
 }
 
-void Attribute::print(std::ostream& out) const {
-    out << "(attr) ";
+void Attribute::print(std::ostream* out) const {
+    *out << "(attr) ";
     printMask(out);
 
-    out << " ["
-        << util::joiner(symbols.begin(), symbols.end(), ", ")
-        << "]";
+    if (!symbols.empty()) {
+        *out << " ["
+            << util::joiner(symbols.begin(), symbols.end(), ", ")
+            << "]";
+    }
 
     if (weak) {
-        out << " [weak]";
+        *out << " [weak]";
     }
 }
 
@@ -355,19 +374,24 @@ Style* Style::clone(StringPool* newPool) const {
     return style;
 }
 
-void Style::print(std::ostream& out) const {
-    out << "(style) ";
-    if (!parent.name.entry.empty()) {
-        out << parent.name;
+void Style::print(std::ostream* out) const {
+    *out << "(style) ";
+    if (parent && parent.value().name) {
+        *out << parent.value().name.value();
     }
-    out << " ["
+    *out << " ["
         << util::joiner(entries.begin(), entries.end(), ", ")
         << "]";
 }
 
 static ::std::ostream& operator<<(::std::ostream& out, const Style::Entry& value) {
-    out << value.key.name << " = ";
-    value.value->print(out);
+    if (value.key.name) {
+        out << value.key.name.value();
+    } else {
+        out << "???";
+    }
+    out << " = ";
+    value.value->print(&out);
     return out;
 }
 
@@ -379,8 +403,8 @@ Array* Array::clone(StringPool* newPool) const {
     return array;
 }
 
-void Array::print(std::ostream& out) const {
-    out << "(array) ["
+void Array::print(std::ostream* out) const {
+    *out << "(array) ["
         << util::joiner(items.begin(), items.end(), ", ")
         << "]";
 }
@@ -396,8 +420,8 @@ Plural* Plural::clone(StringPool* newPool) const {
     return p;
 }
 
-void Plural::print(std::ostream& out) const {
-    out << "(plural)";
+void Plural::print(std::ostream* out) const {
+    *out << "(plural)";
 }
 
 static ::std::ostream& operator<<(::std::ostream& out, const std::unique_ptr<Item>& item) {
@@ -410,8 +434,8 @@ Styleable* Styleable::clone(StringPool* /*newPool*/) const {
     return styleable;
 }
 
-void Styleable::print(std::ostream& out) const {
-    out << "(styleable) " << " ["
+void Styleable::print(std::ostream* out) const {
+    *out << "(styleable) " << " ["
         << util::joiner(entries.begin(), entries.end(), ", ")
         << "]";
 }

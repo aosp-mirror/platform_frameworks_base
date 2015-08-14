@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "BigBuffer.h"
-#include "StringPiece.h"
+#include "util/BigBuffer.h"
+#include "util/StringPiece.h"
 #include "StringPool.h"
-#include "Util.h"
+#include "util/Util.h"
 
 #include <algorithm>
 #include <androidfw/ResourceTypes.h>
@@ -219,7 +219,7 @@ void StringPool::prune() {
     auto indexIter = std::begin(mIndexedStrings);
     while (indexIter != iterEnd) {
         if (indexIter->second->ref <= 0) {
-            mIndexedStrings.erase(indexIter++);
+            indexIter = mIndexedStrings.erase(indexIter);
         } else {
             ++indexIter;
         }
@@ -241,6 +241,12 @@ void StringPool::prune() {
     // a deleted string from the StyleEntry.
     mStrings.erase(endIter2, std::end(mStrings));
     mStyles.erase(endIter3, std::end(mStyles));
+
+    // Reassign the indices.
+    const size_t len = mStrings.size();
+    for (size_t index = 0; index < len; index++) {
+        mStrings[index]->index = index;
+    }
 }
 
 void StringPool::sort(const std::function<bool(const Entry&, const Entry&)>& cmp) {

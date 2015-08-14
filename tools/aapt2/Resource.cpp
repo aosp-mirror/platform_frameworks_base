@@ -15,7 +15,7 @@
  */
 
 #include "Resource.h"
-#include "StringPiece.h"
+#include "util/StringPiece.h"
 
 #include <map>
 #include <string>
@@ -28,7 +28,7 @@ StringPiece16 toString(ResourceType type) {
         case ResourceType::kAnimator:      return u"animator";
         case ResourceType::kArray:         return u"array";
         case ResourceType::kAttr:          return u"attr";
-        case ResourceType::kAttrPrivate:   return u"attr";
+        case ResourceType::kAttrPrivate:   return u"^attr-private";
         case ResourceType::kBool:          return u"bool";
         case ResourceType::kColor:         return u"color";
         case ResourceType::kDimen:         return u"dimen";

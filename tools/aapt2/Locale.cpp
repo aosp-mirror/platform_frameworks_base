@@ -15,7 +15,7 @@
  */
 
 #include "Locale.h"
-#include "Util.h"
+#include "util/Util.h"
 
 #include <algorithm>
 #include <ctype.h>

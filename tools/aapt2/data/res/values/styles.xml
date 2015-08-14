@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:lib="http://schemas.android.com/apk/res/android.appcompat">
-    <style name="App" parent="android.appcompat:Platform.AppCompat">
+    <style name="App">
         <item name="android:background">@color/primary</item>
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
@@ -8,8 +8,8 @@
     </style>
     <attr name="custom" format="reference" />
     <style name="Pop">
-        <item name="custom">@drawable/image</item>
-        <item name="android:focusable">@lib:bool/allow</item>
+        <item name="custom">@android:drawable/btn_default</item>
+        <item name="android:focusable">true</item>
     </style>
     <string name="yo">@string/wow</string>
 

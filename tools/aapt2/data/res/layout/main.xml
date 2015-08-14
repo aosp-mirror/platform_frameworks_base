@@ -14,8 +14,8 @@
         android:layout_width="1dp"
         android:onClick="doClick"
         android:text="@{user.name}"
+        android:background="#ffffff"
         android:layout_height="match_parent"
-        app:layout_width="@support:bool/allow"
         app:flags="complex|weak"
         android:colorAccent="#ffffff"/>
 </LinearLayout>

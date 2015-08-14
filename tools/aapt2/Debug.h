@@ -20,13 +20,11 @@
 #include "Resource.h"
 #include "ResourceTable.h"
 
-#include <memory>
-
 namespace aapt {
 
 struct Debug {
-    static void printTable(const std::shared_ptr<ResourceTable>& table);
-    static void printStyleGraph(const std::shared_ptr<ResourceTable>& table,
+    static void printTable(ResourceTable* table);
+    static void printStyleGraph(ResourceTable* table,
                                 const ResourceName& targetStyle);
 };
 

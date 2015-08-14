@@ -36,12 +36,13 @@ TEST(XmlDomTest, Inflate) {
         </Layout>
     )EOF";
 
-    SourceLogger logger(Source{ "/test/path" });
-    std::unique_ptr<xml::Node> root = xml::inflate(&in, &logger);
-    ASSERT_NE(root, nullptr);
+    const Source source = { "test.xml" };
+    StdErrDiagnostics diag;
+    std::unique_ptr<XmlResource> doc = xml::inflate(&in, &diag, source);
+    ASSERT_NE(doc, nullptr);
 
-    EXPECT_EQ(root->type, xml::NodeType::kNamespace);
-    xml::Namespace* ns = static_cast<xml::Namespace*>(root.get());
+    xml::Namespace* ns = xml::nodeCast<xml::Namespace>(doc->root.get());
+    ASSERT_NE(ns, nullptr);
     EXPECT_EQ(ns->namespaceUri, u"http://schemas.android.com/apk/res/android");
     EXPECT_EQ(ns->namespacePrefix, u"android");
 }

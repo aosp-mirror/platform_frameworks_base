@@ -18,9 +18,9 @@
 #define AAPT_MANIFEST_VALIDATOR_H
 
 #include "Logger.h"
-#include "Maybe.h"
+#include "util/Maybe.h"
 #include "Source.h"
-#include "StringPiece.h"
+#include "util/StringPiece.h"
 
 #include <androidfw/ResourceTypes.h>
 

@@ -19,7 +19,8 @@
 
 #include "Resource.h"
 #include "Source.h"
-#include "XmlDom.h"
+
+#include "process/IResourceTableConsumer.h"
 
 #include <map>
 #include <ostream>
@@ -31,24 +32,23 @@ namespace proguard {
 
 class KeepSet {
 public:
-    inline void addClass(const SourceLine& source, const std::u16string& className) {
+    inline void addClass(const Source& source, const std::u16string& className) {
         mKeepSet[className].insert(source);
     }
 
-    inline void addMethod(const SourceLine& source, const std::u16string& methodName) {
+    inline void addMethod(const Source& source, const std::u16string& methodName) {
         mKeepMethodSet[methodName].insert(source);
     }
 
 private:
     friend bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
 
-    std::map<std::u16string, std::set<SourceLine>> mKeepSet;
-    std::map<std::u16string, std::set<SourceLine>> mKeepMethodSet;
+    std::map<std::u16string, std::set<Source>> mKeepSet;
+    std::map<std::u16string, std::set<Source>> mKeepMethodSet;
 };
 
-bool collectProguardRulesForManifest(const Source& source, xml::Node* node, KeepSet* keepSet);
-bool collectProguardRules(ResourceType type, const Source& source, xml::Node* node,
-                          KeepSet* keepSet);
+bool collectProguardRulesForManifest(const Source& source, XmlResource* res, KeepSet* keepSet);
+bool collectProguardRules(const Source& source, XmlResource* res, KeepSet* keepSet);
 
 bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
 

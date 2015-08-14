@@ -17,12 +17,16 @@
 #ifndef AAPT_RESOURCE_H
 #define AAPT_RESOURCE_H
 
-#include "StringPiece.h"
+#include "ConfigDescription.h"
+#include "Source.h"
+
+#include "util/StringPiece.h"
 
 #include <iomanip>
 #include <limits>
 #include <string>
 #include <tuple>
+#include <vector>
 
 namespace aapt {
 
@@ -78,6 +82,7 @@ struct ResourceName {
     bool operator<(const ResourceName& rhs) const;
     bool operator==(const ResourceName& rhs) const;
     bool operator!=(const ResourceName& rhs) const;
+    std::u16string toString() const;
 };
 
 /**
@@ -125,7 +130,7 @@ struct ResourceId {
     ResourceId();
     ResourceId(const ResourceId& rhs);
     ResourceId(uint32_t resId);
-    ResourceId(size_t p, size_t t, size_t e);
+    ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
     bool isValid() const;
     uint8_t packageId() const;
@@ -133,6 +138,29 @@ struct ResourceId {
     uint16_t entryId() const;
     bool operator<(const ResourceId& rhs) const;
     bool operator==(const ResourceId& rhs) const;
+};
+
+struct SourcedResourceName {
+    ResourceName name;
+    size_t line;
+
+    inline bool operator==(const SourcedResourceName& rhs) const {
+        return name == rhs.name && line == rhs.line;
+    }
+};
+
+struct ResourceFile {
+    // Name
+    ResourceName name;
+
+    // Configuration
+    ConfigDescription config;
+
+    // Source
+    Source source;
+
+    // Exported symbols
+    std::vector<SourcedResourceName> exportedSymbols;
 };
 
 //
@@ -148,17 +176,7 @@ inline ResourceId::ResourceId(const ResourceId& rhs) : id(rhs.id) {
 inline ResourceId::ResourceId(uint32_t resId) : id(resId) {
 }
 
-inline ResourceId::ResourceId(size_t p, size_t t, size_t e) : id(0) {
-    if (p > std::numeric_limits<uint8_t>::max() ||
-            t > std::numeric_limits<uint8_t>::max() ||
-            e > std::numeric_limits<uint16_t>::max()) {
-        // This will leave the ResourceId in an invalid state.
-        return;
-    }
-
-    id = (static_cast<uint8_t>(p) << 24) |
-         (static_cast<uint8_t>(t) << 16) |
-         static_cast<uint16_t>(e);
+inline ResourceId::ResourceId(uint8_t p, uint8_t t, uint16_t e) : id((p << 24) | (t << 16) | e) {
 }
 
 inline bool ResourceId::isValid() const {
@@ -217,6 +235,10 @@ inline bool ResourceName::operator<(const ResourceName& rhs) const {
             < std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
+inline bool operator<(const ResourceName& lhs, const ResourceNameRef& b) {
+    return ResourceNameRef(lhs) < b;
+}
+
 inline bool ResourceName::operator==(const ResourceName& rhs) const {
     return std::tie(package, type, entry)
             == std::tie(rhs.package, rhs.type, rhs.entry);
@@ -225,6 +247,18 @@ inline bool ResourceName::operator==(const ResourceName& rhs) const {
 inline bool ResourceName::operator!=(const ResourceName& rhs) const {
     return std::tie(package, type, entry)
             != std::tie(rhs.package, rhs.type, rhs.entry);
+}
+
+inline bool operator!=(const ResourceName& lhs, const ResourceNameRef& rhs) {
+    return ResourceNameRef(lhs) != rhs;
+}
+
+inline std::u16string ResourceName::toString() const {
+    std::u16string result;
+    if (!package.empty()) {
+        result = package + u":";
+    }
+    return result + aapt::toString(type).toString() + u"/" + entry;
 }
 
 inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name) {
