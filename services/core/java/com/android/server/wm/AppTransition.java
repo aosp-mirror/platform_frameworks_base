@@ -651,15 +651,15 @@ public class AppTransition implements Dump {
      * This animation runs for the thumbnail that gets cross faded with the enter/exit activity
      * when a thumbnail is specified with the activity options.
      */
-    Animation createThumbnailAspectScaleAnimationLocked(int appWidth, int appHeight,
-            int deviceWidth) {
+    Animation createThumbnailAspectScaleAnimationLocked(Rect appRect) {
         Animation a;
         final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = mNextAppTransitionThumbnail.getHeight();
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
+        final int appWidth = appRect.width();
 
-        float scaleW = deviceWidth / thumbWidth;
+        float scaleW = appWidth / thumbWidth;
         float unscaledHeight = thumbHeight * scaleW;
         float unscaledStartY = mNextAppTransitionStartY - (unscaledHeight - thumbHeight) / 2f;
         if (mNextAppTransitionScaleUp) {
@@ -672,8 +672,10 @@ public class AppTransition implements Dump {
             Animation alpha = new AlphaAnimation(1, 0);
             alpha.setInterpolator(mThumbnailFadeOutInterpolator);
             alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
-            Animation translate = new TranslateAnimation(0, 0, 0, -unscaledStartY +
-                    mNextAppTransitionInsets.top);
+            final float toX = appRect.left + appRect.width() / 2 -
+                    (mNextAppTransitionStartX + thumbWidth / 2);
+            final float toY = appRect.top + mNextAppTransitionInsets.top + -unscaledStartY;
+            Animation translate = new TranslateAnimation(0, toX, 0, toY);
             translate.setInterpolator(mTouchResponseInterpolator);
             translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
@@ -706,7 +708,7 @@ public class AppTransition implements Dump {
             a = set;
 
         }
-        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight, 0,
+        return prepareThumbnailAnimationWithDuration(a, appWidth, appRect.height(), 0,
                 mTouchResponseInterpolator);
     }
 

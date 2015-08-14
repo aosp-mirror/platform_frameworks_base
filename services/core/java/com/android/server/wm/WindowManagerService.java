@@ -9539,13 +9539,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Get the thumbnail animation
                     Animation anim;
                     if (mAppTransition.isNextThumbnailTransitionAspectScaled()) {
+                        // If this is a multi-window scenario, we use the windows frame as
+                        // destination of the thumbnail header animation. If this is a full screen
+                        // window scenario, we use the whole display as the target.
+                        WindowState win = topOpeningApp.findMainWindow();
+                        Rect appRect = win != null ? win.getContentFrameLw() :
+                                new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
                         // For the new aspect-scaled transition, we want it to always show
                         // above the animating opening/closing window, and we want to
                         // synchronize its thumbnail surface with the surface for the
                         // open/close animation (only on the way down)
-                        anim = mAppTransition.createThumbnailAspectScaleAnimationLocked(
-                                displayInfo.appWidth, displayInfo.appHeight,
-                                displayInfo.logicalWidth);
+                        anim = mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect);
                         openingAppAnimator.thumbnailForceAboveLayer = Math.max(topOpeningLayer,
                                 topClosingLayer);
                         openingAppAnimator.deferThumbnailDestruction =
