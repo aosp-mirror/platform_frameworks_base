@@ -16,16 +16,23 @@
 
 package com.android.internal.app;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
@@ -73,19 +80,54 @@ public class PlatLogoActivity extends Activity {
         im.setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
-                final int pad = (int) (8*dp);
-                outline.setOval(pad, pad, view.getWidth()-pad, view.getHeight()-pad);
+                final int pad = (int) (8 * dp);
+                outline.setOval(pad, pad, view.getWidth() - pad, view.getHeight() - pad);
             }
         });
-        final Drawable platlogo = getDrawable(com.android.internal.R.drawable.platlogo);
+        final float hue = (float) Math.random();
+        final Paint bgPaint = new Paint();
+        bgPaint.setColor(Color.HSBtoColor(hue, 0.4f, 1f));
+        final Paint fgPaint = new Paint();
+        fgPaint.setColor(Color.HSBtoColor(hue, 0.5f, 1f));
+        final Drawable M = getDrawable(com.android.internal.R.drawable.platlogo_m);
+        final Drawable platlogo = new Drawable() {
+            @Override
+            public void setAlpha(int alpha) { }
+
+            @Override
+            public void setColorFilter(@Nullable ColorFilter colorFilter) { }
+
+            @Override
+            public int getOpacity() {
+                return PixelFormat.TRANSLUCENT;
+            }
+
+            @Override
+            public void draw(Canvas c) {
+                final float r = c.getWidth() / 2f;
+                c.drawCircle(r, r, r, bgPaint);
+                c.drawArc(0, 0, 2 * r, 2 * r, 135, 180, false, fgPaint);
+                M.setBounds(0, 0, c.getWidth(), c.getHeight());
+                M.draw(c);
+            }
+        };
         im.setBackground(new RippleDrawable(
                 ColorStateList.valueOf(0xFFFFFFFF),
                 platlogo,
                 null));
+        im.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setOval(0, 0, view.getWidth(), view.getHeight());
+            }
+        });
         im.setClickable(true);
         im.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mTapCount == 0) {
+                    showMarshmallow(im);
+                }
                 im.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
@@ -132,6 +174,9 @@ public class PlatLogoActivity extends Activity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode != KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (mKeyCount == 0) {
+                        showMarshmallow(im);
+                    }
                     ++mKeyCount;
                     if (mKeyCount > 2) {
                         if (mTapCount > 5) {
@@ -155,4 +200,17 @@ public class PlatLogoActivity extends Activity {
                 .setStartDelay(800)
                 .start();
     }
+
+    public void showMarshmallow(View im) {
+        final Drawable fg = getDrawable(com.android.internal.R.drawable.platlogo);
+        fg.setBounds(0, 0, im.getWidth(), im.getHeight());
+        fg.setAlpha(0);
+        im.getOverlay().add(fg);
+
+        final Animator fadeIn = ObjectAnimator.ofInt(fg, "alpha", 255);
+        fadeIn.setInterpolator(mInterpolator);
+        fadeIn.setDuration(300);
+        fadeIn.start();
+    }
+
 }
