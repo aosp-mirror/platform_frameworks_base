@@ -609,6 +609,23 @@ public class ClipData implements Parcelable {
                 b.append("NULL");
             }
         }
+
+        /** @hide */
+        public void toShortSummaryString(StringBuilder b) {
+            if (mHtmlText != null) {
+                b.append("HTML");
+            } else if (mText != null) {
+                b.append("TEXT");
+            } else if (mUri != null) {
+                b.append("U:");
+                b.append(mUri);
+            } else if (mIntent != null) {
+                b.append("I:");
+                mIntent.toShortString(b, true, true, true, true);
+            } else {
+                b.append("NULL");
+            }
+        }
     }
 
     /**
@@ -881,6 +898,19 @@ public class ClipData implements Parcelable {
             b.append('{');
             mItems.get(i).toShortString(b);
             b.append('}');
+        }
+    }
+
+    /** @hide */
+    public void toShortStringShortItems(StringBuilder b, boolean first) {
+        if (mItems.size() > 0) {
+            if (!first) {
+                b.append(' ');
+            }
+            mItems.get(0).toShortString(b);
+            if (mItems.size() > 1) {
+                b.append(" ...");
+            }
         }
     }
 
