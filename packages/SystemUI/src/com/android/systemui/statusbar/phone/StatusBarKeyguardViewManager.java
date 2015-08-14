@@ -172,6 +172,10 @@ public class StatusBarKeyguardViewManager {
         mPhoneStatusBar.onScreenTurnedOn();
     }
 
+    public void onScreenTurningOn() {
+        mPhoneStatusBar.onScreenTurningOn();
+    }
+
     public void onScreenTurnedOn() {
         mScreenTurnedOn = true;
         mWakeAndUnlocking = false;
