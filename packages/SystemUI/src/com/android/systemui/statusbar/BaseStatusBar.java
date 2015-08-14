@@ -171,13 +171,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     // on-screen navigation buttons
     protected NavigationBarView mNavigationBarView = null;
 
-    protected Boolean mScreenOn;
-
-    // The second field is a bit different from the first one because it only listens to screen on/
-    // screen of events from Keyguard. We need this so we don't have a race condition with the
-    // broadcast. In the future, we should remove the first field altogether and rename the second
-    // field.
-    protected boolean mScreenOnFromKeyguard;
+    protected boolean mDeviceInteractive;
 
     protected boolean mVisible;
 
@@ -1722,7 +1716,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void updateVisibleToUser() {
         boolean oldVisibleToUser = mVisibleToUser;
-        mVisibleToUser = mVisible && mScreenOnFromKeyguard;
+        mVisibleToUser = mVisible && mDeviceInteractive;
 
         if (oldVisibleToUser != mVisibleToUser) {
             handleVisibleToUserChanged(mVisibleToUser);

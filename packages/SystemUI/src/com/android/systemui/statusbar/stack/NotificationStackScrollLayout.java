@@ -653,7 +653,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public float getFalsingThresholdFactor() {
-        return mPhoneStatusBar.isScreenOnComingFromTouch() ? 1.5f : 1.0f;
+        return mPhoneStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
     }
 
     public View getChildAtPosition(MotionEvent ev) {

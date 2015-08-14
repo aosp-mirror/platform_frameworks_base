@@ -282,8 +282,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private StatusBarWindowManager mStatusBarWindowManager;
     private UnlockMethodCache mUnlockMethodCache;
     private DozeServiceHost mDozeServiceHost;
-    private boolean mScreenOnComingFromTouch;
-    private PointF mScreenOnTouchLocation;
+    private boolean mWakeUpComingFromTouch;
+    private PointF mWakeUpTouchLocation;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -1933,8 +1933,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mNotificationPanel.isQsExpanded();
     }
 
-    public boolean isScreenOnComingFromTouch() {
-        return mScreenOnComingFromTouch;
+    public boolean isWakeUpComingFromTouch() {
+        return mWakeUpComingFromTouch;
     }
 
     public boolean isFalsingThresholdNeeded() {
@@ -2494,7 +2494,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void checkBarMode(int mode, int windowState, BarTransitions transitions,
             boolean noAnimation) {
         final boolean powerSave = mBatteryController.isPowerSave();
-        final boolean anim = !noAnimation && (mScreenOn == null || mScreenOn)
+        final boolean anim = !noAnimation && mDeviceInteractive
                 && windowState != WINDOW_STATE_HIDDEN && !powerSave;
         if (powerSave && getBarState() == StatusBarState.SHADE) {
             mode = MODE_WARNING;
@@ -2902,14 +2902,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mScreenOn = false;
                 notifyNavigationBarScreenOn(false);
                 notifyHeadsUpScreenOff();
                 finishBarAnimations();
                 resetUserExpandedStates();
             }
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                mScreenOn = true;
                 notifyNavigationBarScreenOn(true);
             }
         }
@@ -3363,7 +3361,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         setBarState(StatusBarState.KEYGUARD);
         updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
-        if (!mScreenOnFromKeyguard) {
+        if (!mDeviceInteractive) {
 
             // If the screen is off already, we need to disable touch events because these might
             // collapse the panel after we expanded it, and thus we would end up with a blank
@@ -3583,7 +3581,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void updateDozingState() {
         boolean animate = !mDozing && mDozeScrimController.isPulsing();
         mNotificationPanel.setDozing(mDozing, animate);
-        mStackScroller.setDark(mDozing, animate, mScreenOnTouchLocation);
+        mStackScroller.setDark(mDozing, animate, mWakeUpTouchLocation);
         mScrimController.setDozing(mDozing);
         mDozeScrimController.setDozing(mDozing, animate);
     }
@@ -3636,7 +3634,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public boolean onSpacePressed() {
-        if (mScreenOn != null && mScreenOn
+        if (mDeviceInteractive
                 && (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
             animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
@@ -3846,16 +3844,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
     }
 
-    public void onScreenTurnedOff() {
-        mScreenOnFromKeyguard = false;
-        mScreenOnComingFromTouch = false;
-        mScreenOnTouchLocation = null;
+    public void onFinishedGoingToSleep() {
+        mDeviceInteractive = false;
+        mWakeUpComingFromTouch = false;
+        mWakeUpTouchLocation = null;
         mStackScroller.setAnimationsEnabled(false);
         updateVisibleToUser();
     }
 
-    public void onScreenTurnedOn() {
-        mScreenOnFromKeyguard = true;
+    public void onStartedWakingUp() {
+        mDeviceInteractive = true;
         mStackScroller.setAnimationsEnabled(true);
         mNotificationPanel.setTouchDisabled(false);
         updateVisibleToUser();
@@ -3863,6 +3861,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onScreenTurningOn() {
         mNotificationPanel.onScreenTurningOn();
+    }
+
+    public void onScreenTurnedOn() {
+        mDozeScrimController.onScreenTurnedOn();
     }
 
     /**
@@ -3979,8 +3981,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mDozing && mDozeScrimController.isPulsing()) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time, "com.android.systemui:NODOZE");
-            mScreenOnComingFromTouch = true;
-            mScreenOnTouchLocation = new PointF(event.getX(), event.getY());
+            mWakeUpComingFromTouch = true;
+            mWakeUpTouchLocation = new PointF(event.getX(), event.getY());
             mNotificationPanel.setTouchDisabled(false);
             mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
         }
