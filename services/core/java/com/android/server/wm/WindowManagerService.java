@@ -5123,8 +5123,9 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param displayId The unique identifier of the DisplayContent.
      * @param onTop If true the stack will be place at the top of the display,
      *              else at the bottom
+     * @return The initial bounds the stack was created with. null means fullscreen.
      */
-    public void attachStack(int stackId, int displayId, boolean onTop) {
+    public Rect attachStack(int stackId, int displayId, boolean onTop) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
@@ -5138,16 +5139,24 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     stack.attachDisplayContent(displayContent);
                     displayContent.attachStack(stack, onTop);
+
                     moveStackWindowsLocked(displayContent);
                     final WindowList windows = displayContent.getWindowList();
                     for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                         windows.get(winNdx).reportResized();
                     }
+                    if (stack.isFullscreen()) {
+                        return null;
+                    }
+                    Rect bounds = new Rect();
+                    stack.getBounds(bounds);
+                    return bounds;
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+        return null;
     }
 
     void detachStackLocked(DisplayContent displayContent, TaskStack stack) {
@@ -5239,19 +5248,20 @@ public class WindowManagerService extends IWindowManager.Stub
      * Re-sizes a stack and its containing tasks.
      * @param stackId Id of stack to resize.
      * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
+     * @param resizeTasks If true, the tasks within the stack will also be resized.
      * @param changedTaskIds Output list of Ids of tasks that changed in bounds due to resize.
      * @param newTaskConfigs Output list of new Configuation of the tasks that changed.
      * @return True if the stack is now fullscreen.
      * */
-    public boolean resizeStack(
-            int stackId, Rect bounds, IntArray changedTaskIds, List<Configuration> newTaskConfigs) {
+    public boolean resizeStack(int stackId, Rect bounds, boolean resizeTasks,
+            IntArray changedTaskIds, List<Configuration> newTaskConfigs) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack == null) {
                 throw new IllegalArgumentException("resizeStack: stackId " + stackId
                         + " not found.");
             }
-            if (stack.setBounds(bounds, changedTaskIds, newTaskConfigs)) {
+            if (stack.setBounds(bounds, resizeTasks, changedTaskIds, newTaskConfigs)) {
                 stack.resizeWindows();
                 stack.getDisplayContent().layoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();

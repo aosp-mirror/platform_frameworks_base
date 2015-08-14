@@ -16,12 +16,14 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.*;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.RemoteException;
 import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Slog;
@@ -34,6 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskStack implements DimLayer.DimLayerUser {
+
+    // If the stack should be resized to fullscreen.
+    private static final boolean FULLSCREEN = true;
+
     /** Unique identifier */
     final int mStackId;
 
@@ -91,20 +97,34 @@ public class TaskStack implements DimLayer.DimLayerUser {
     /**
      * Set the bounds of the stack and its containing tasks.
      * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
+     * @param resizeTasks If true, the tasks within the stack will also be resized.
      * @param changedTaskIds Output list of Ids of tasks that changed in bounds.
      * @param newTaskConfigs Output list of new Configuation of the tasks that changed.
      * @return True if the stack bounds was changed.
      * */
-    boolean setBounds(Rect bounds, IntArray changedTaskIds, List<Configuration> newTaskConfigs) {
+    boolean setBounds(Rect bounds, boolean resizeTasks, IntArray changedTaskIds,
+            List<Configuration> newTaskConfigs) {
         if (!setBounds(bounds)) {
             return false;
+        }
+
+        if (!resizeTasks) {
+            return true;
         }
 
         // Update bounds of containing tasks.
         final Rect newBounds = mFullscreen ? null : mBounds;
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = mTasks.get(taskNdx);
-            if (task.setBounds(newBounds)) {
+            if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                // For freeform stack we don't adjust the size of the tasks to match that of the
+                // stack, but we do try to make sure the tasks are still contained with the
+                // bounds of the stack.
+                if (task.fitWithinBounds(newBounds)) {
+                    changedTaskIds.add(task.mTaskId);
+                    newTaskConfigs.add(task.mOverrideConfig);
+                }
+            } else if (task.setBounds(newBounds)) {
                 changedTaskIds.add(task.mTaskId);
                 newTaskConfigs.add(task.mOverrideConfig);
             }
@@ -146,9 +166,13 @@ public class TaskStack implements DimLayer.DimLayerUser {
         out.set(mBounds);
     }
 
-    void updateDisplayInfo() {
+    void updateDisplayInfo(Rect bounds) {
         if (mDisplayContent != null) {
-            setBounds(mFullscreen ? null : mBounds);
+            if (bounds != null) {
+                setBounds(bounds);
+            } else {
+                setBounds(mFullscreen ? null : mBounds);
+            }
             for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
             }
@@ -296,7 +320,82 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
         mDisplayContent = displayContent;
         mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId());
-        updateDisplayInfo();
+
+        Rect bounds = null;
+        final boolean dockedStackExists = mService.mStackIdToStack.get(DOCKED_STACK_ID) != null;
+        if (mStackId == DOCKED_STACK_ID || (dockedStackExists
+                && mStackId >= FIRST_STATIC_STACK_ID && mStackId <= LAST_STATIC_STACK_ID)) {
+            // The existence of a docked stack affects the size of any static stack created since
+            // the docked stack occupies a dedicated region on screen.
+            bounds = new Rect();
+            displayContent.getLogicalDisplayRect(mTmpRect);
+            getInitialDockedStackBounds(mTmpRect, bounds, mStackId);
+        }
+
+        updateDisplayInfo(bounds);
+
+        if (mStackId == DOCKED_STACK_ID) {
+            // Attaching a docked stack to the display affects the size of all other static
+            // stacks since the docked stack occupies a dedicated region on screen.
+            // Resize existing static stacks so they are pushed to the side of the docked stack.
+            resizeNonDockedStacks(!FULLSCREEN);
+        }
+    }
+
+    /**
+     * Outputs the initial bounds a stack should be given the presence of a docked stack on the
+     * display.
+     * @param displayRect The bounds of the display the docked stack is on.
+     * @param outBounds Output bounds that should be used for the stack.
+     * @param stackId Id of stack we are calculating the bounds for.
+     */
+    private static void getInitialDockedStackBounds(
+            Rect displayRect, Rect outBounds, int stackId) {
+        // Docked stack start off occupying half the screen space.
+        // TODO(multi-window): Need to support the selecting which half of the screen the
+        // docked stack uses for snapping windows to the edge of the screen.
+        final boolean splitHorizontally = displayRect.width() > displayRect.height();
+        outBounds.set(displayRect);
+        if (stackId == DOCKED_STACK_ID) {
+            if (splitHorizontally) {
+                outBounds.right = displayRect.centerX();
+            } else {
+                outBounds.bottom = displayRect.centerY();
+            }
+        } else {
+            if (splitHorizontally) {
+                outBounds.left = displayRect.centerX();
+            } else {
+                outBounds.top = displayRect.centerY();
+            }
+        }
+    }
+
+    /** Resizes all non-docked stacks in the system to either fullscreen or the appropriate size
+     * based on the presence of a docked stack.
+     * @param fullscreen If true the stacks will be resized to fullscreen, else they will be
+     *                   resized to the appropriate size based on the presence of a docked stack.
+     */
+    private void resizeNonDockedStacks(boolean fullscreen) {
+        mDisplayContent.getLogicalDisplayRect(mTmpRect);
+        if (!fullscreen) {
+            getInitialDockedStackBounds(mTmpRect, mTmpRect, FULLSCREEN_WORKSPACE_STACK_ID);
+        }
+
+        final int count = mService.mStackIdToStack.size();
+        for (int i = 0; i < count; i++) {
+            final TaskStack otherStack = mService.mStackIdToStack.valueAt(i);
+            final int otherStackId = otherStack.mStackId;
+            if (otherStackId != DOCKED_STACK_ID
+                    && otherStackId >= FIRST_STATIC_STACK_ID
+                    && otherStackId <= LAST_STATIC_STACK_ID) {
+                try {
+                    mService.mActivityManager.resizeStack(otherStackId, mTmpRect);
+                } catch (RemoteException e) {
+                    // This will not happen since we are in the same process.
+                }
+            }
+        }
     }
 
     void detachDisplay() {
@@ -315,6 +414,12 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
         if (doAnotherLayoutPass) {
             mService.requestTraversalLocked();
+        }
+
+        if (mStackId == DOCKED_STACK_ID) {
+            // Docked stack was detached from the display, so we no longer need to restrict the
+            // region of the screen other static stacks occupy. Go ahead and make them fullscreen.
+            resizeNonDockedStacks(FULLSCREEN);
         }
 
         close();

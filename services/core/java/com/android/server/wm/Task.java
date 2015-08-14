@@ -41,6 +41,13 @@ class Task implements DimLayer.DimLayerUser {
      * when no window animation is driving it. */
     private static final int DEFAULT_DIM_DURATION = 200;
 
+    // The amount we divide the height/width of the bounds we are trying to fit the task within
+    // when using the method {@link #fitWithinBounds}.
+    // We always want the task to to be visible in the bounds without affecting its size when
+    // fitting. To make sure this is the case, we don't adjust the task left or top side pass
+    // the input bounds right or bottom side minus the width or height divided by this value.
+    private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
+
     TaskStack mStack;
     final AppTokenList mAppTokens = new AppTokenList();
     final int mTaskId;
@@ -163,6 +170,41 @@ class Task implements DimLayer.DimLayerUser {
         for (int appTokenNdx = 0; appTokenNdx < mAppTokens.size(); appTokenNdx++) {
             mAppTokens.get(appTokenNdx).sendingToBottom = toBottom;
         }
+    }
+
+    /** Fits the tasks within the input bounds adjusting the task bounds as needed.
+     *  @param bounds Bounds to fit the task within. Nothing is done if null.
+     *  @return Returns true if the task bounds was adjusted in any way.
+     *  */
+    boolean fitWithinBounds(Rect bounds) {
+        if (bounds == null || bounds.contains(mBounds)) {
+            return false;
+        }
+        mTmpRect2.set(mBounds);
+
+        if (mBounds.left < bounds.left || mBounds.right > bounds.right) {
+            final int maxRight = bounds.right - (bounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int horizontalDiff = bounds.left - mBounds.left;
+            if ((horizontalDiff < 0 && mBounds.left >= maxRight)
+                    || (mBounds.left + horizontalDiff >= maxRight)) {
+                horizontalDiff = maxRight - mBounds.left;
+            }
+            mTmpRect2.left += horizontalDiff;
+            mTmpRect2.right += horizontalDiff;
+        }
+
+        if (mBounds.top < bounds.top || mBounds.bottom > bounds.bottom) {
+            final int maxBottom = bounds.bottom - (bounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int verticalDiff = bounds.top - mBounds.top;
+            if ((verticalDiff < 0 && mBounds.top >= maxBottom)
+                    || (mBounds.top + verticalDiff >= maxBottom)) {
+                verticalDiff = maxBottom - mBounds.top;
+            }
+            mTmpRect2.top += verticalDiff;
+            mTmpRect2.bottom += verticalDiff;
+        }
+
+        return setBounds(mTmpRect2);
     }
 
     /** Set the task bounds. Passing in null sets the bounds to fullscreen. */

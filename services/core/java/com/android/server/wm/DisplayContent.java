@@ -173,7 +173,7 @@ class DisplayContent {
     void updateDisplayInfo() {
         mDisplay.getDisplayInfo(mDisplayInfo);
         for (int i = mStacks.size() - 1; i >= 0; --i) {
-            mStacks.get(i).updateDisplayInfo();
+            mStacks.get(i).updateDisplayInfo(null);
         }
     }
 

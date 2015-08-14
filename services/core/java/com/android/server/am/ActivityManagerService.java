@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -29,6 +30,7 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
@@ -8653,7 +8655,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.e(TAG, "setActivityBounds: No TaskRecord for the ActivityRecord r=" + r);
                     return;
                 }
-                mStackSupervisor.resizeTaskLocked(task, bounds);
+                if (task.stack != null && task.stack.mStackId == DOCKED_STACK_ID) {
+                    mStackSupervisor.resizeStackLocked(task.stack.mStackId, bounds);
+                } else {
+                    mStackSupervisor.resizeTaskLocked(task, bounds);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -9010,7 +9016,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void moveActivityToStack(IBinder token, int stackId) throws RemoteException {
         if (stackId == HOME_STACK_ID) {
             throw new IllegalArgumentException(
-                    "moveTaskToStack: Attempt to move token " + token + " to home stack");
+                    "moveActivityToStack: Attempt to move token " + token + " to home stack");
         }
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
@@ -9022,13 +9028,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveActivityToStack: moving r=" + r
                         + " to stackId=" + stackId);
-                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP);
-                if (mFocusedActivity != r) {
-                    setFocusedActivityLocked(r, "moveActivityToStack");
-                } else {
-                    mStackSupervisor.setFocusedStack(r, "moveActivityToStack");
-                }
-                mStackSupervisor.resumeTopActivitiesLocked(r.task.stack, null, null);
+                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP, FORCE_FOCUS);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9048,7 +9048,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToStack: moving task=" + taskId
                         + " to stackId=" + stackId + " toTop=" + toTop);
-                mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop);
+                mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop, !FORCE_FOCUS);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9074,9 +9074,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "positionTaskInStack()");
         if (stackId == HOME_STACK_ID) {
-            Slog.e(TAG, "positionTaskInStack: Attempt to change the position of task "
-                    + taskId + " in/to home stack",
-                    new RuntimeException("here").fillInStackTrace());
+            throw new IllegalArgumentException(
+                    "positionTaskInStack: Attempt to change the position of task "
+                    + taskId + " in/to home stack");
         }
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();

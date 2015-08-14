@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
@@ -1172,12 +1173,15 @@ final class TaskRecord {
         // is necessarily fullscreen.
         mFullscreen = Configuration.EMPTY.equals(mOverrideConfig);
         if (mFullscreen) {
-            if (mBounds != null) {
+            if (mBounds != null && stack.mStackId != DOCKED_STACK_ID) {
                 mLastNonFullscreenBounds = mBounds;
             }
             mBounds = null;
         } else {
-            mBounds = mLastNonFullscreenBounds = new Rect(bounds);
+            mBounds = new Rect(bounds);
+            if (stack.mStackId != DOCKED_STACK_ID) {
+                mLastNonFullscreenBounds = mBounds;
+            }
         }
         return !mOverrideConfig.equals(oldConfig);
     }
@@ -1207,6 +1211,8 @@ final class TaskRecord {
                 || stack.mStackId == HOME_STACK_ID
                 || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
             return null;
+        } else if (stack.mStackId == DOCKED_STACK_ID) {
+            return stack.mBounds;
         }
         return mLastNonFullscreenBounds;
     }
