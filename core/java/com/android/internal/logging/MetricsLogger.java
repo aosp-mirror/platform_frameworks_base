@@ -29,6 +29,21 @@ public class MetricsLogger implements MetricsConstants {
     // Temporary constants go here, to await migration to MetricsConstants.
     // next value is 239;
     public static final int ACTION_ASSIST_LONG_PRESS = 239;
+    public static final int FINGERPRINT_ENROLLING = 240;
+    public static final int FINGERPRINT_FIND_SENSOR = 241;
+    public static final int FINGERPRINT_ENROLL_FINISH = 242;
+    public static final int FINGERPRINT_ENROLL_INTRO = 243;
+    public static final int FINGERPRINT_ENROLL_ONBOARD = 244;
+    public static final int FINGERPRINT_ENROLL_SIDECAR = 245;
+    public static final int FINGERPRINT_ENROLLING_SETUP = 246;
+    public static final int FINGERPRINT_FIND_SENSOR_SETUP = 247;
+    public static final int FINGERPRINT_ENROLL_FINISH_SETUP = 248;
+    public static final int FINGERPRINT_ENROLL_INTRO_SETUP = 249;
+    public static final int FINGERPRINT_ENROLL_ONBOARD_SETUP = 250;
+    public static final int ACTION_FINGERPRINT_ENROLL = 251;
+    public static final int ACTION_FINGERPRINT_AUTH = 252;
+    public static final int ACTION_FINGERPRINT_DELETE = 253;
+    public static final int ACTION_FINGERPRINT_RENAME = 254;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
