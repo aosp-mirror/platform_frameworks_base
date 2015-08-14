@@ -3451,14 +3451,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static void enforceDeclaredAsUsedAndRuntimePermission(PackageParser.Package pkg,
+    private static void enforceDeclaredAsUsedAndRuntimeOrDevelopmentPermission(PackageParser.Package pkg,
             BasePermission bp) {
         int index = pkg.requestedPermissions.indexOf(bp.name);
         if (index == -1) {
             throw new SecurityException("Package " + pkg.packageName
                     + " has not requested permission " + bp.name);
         }
-        if (!bp.isRuntime()) {
+        if (!bp.isRuntime() && !bp.isDevelopment()) {
             throw new SecurityException("Permission " + bp.name
                     + " is not a changeable permission type");
         }
@@ -3492,7 +3492,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new IllegalArgumentException("Unknown permission: " + name);
             }
 
-            enforceDeclaredAsUsedAndRuntimePermission(pkg, bp);
+            enforceDeclaredAsUsedAndRuntimeOrDevelopmentPermission(pkg, bp);
 
             uid = UserHandle.getUid(userId, pkg.applicationInfo.uid);
             sb = (SettingBase) pkg.mExtras;
@@ -3506,6 +3506,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
                 throw new SecurityException("Cannot grant system fixed permission: "
                         + name + " for package: " + packageName);
+            }
+
+            if (bp.isDevelopment()) {
+                // Development permissions must be handled specially, since they are not
+                // normal runtime permissions.  For now they apply to all users.
+                if (permissionsState.grantInstallPermission(bp) !=
+                        PermissionsState.PERMISSION_OPERATION_FAILURE) {
+                    scheduleWriteSettingsLocked();
+                }
+                return;
             }
 
             final int result = permissionsState.grantRuntimePermission(bp, userId);
@@ -3576,7 +3586,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new IllegalArgumentException("Unknown permission: " + name);
             }
 
-            enforceDeclaredAsUsedAndRuntimePermission(pkg, bp);
+            enforceDeclaredAsUsedAndRuntimeOrDevelopmentPermission(pkg, bp);
 
             SettingBase sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
@@ -3589,6 +3599,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
                 throw new SecurityException("Cannot revoke system fixed permission: "
                         + name + " for package: " + packageName);
+            }
+
+            if (bp.isDevelopment()) {
+                // Development permissions must be handled specially, since they are not
+                // normal runtime permissions.  For now they apply to all users.
+                if (permissionsState.revokeInstallPermission(bp) !=
+                        PermissionsState.PERMISSION_OPERATION_FAILURE) {
+                    scheduleWriteSettingsLocked();
+                }
+                return;
             }
 
             if (permissionsState.revokeRuntimePermission(bp, userId) ==
@@ -3816,21 +3836,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
-    }
-
-    void grantInstallPermissionLPw(String permission, PackageParser.Package pkg) {
-        BasePermission bp = mSettings.mPermissions.get(permission);
-        if (bp == null) {
-            throw new SecurityException("Missing " + permission + " permission");
-        }
-
-        SettingBase sb = (SettingBase) pkg.mExtras;
-        PermissionsState permissionsState = sb.getPermissionsState();
-
-        if (permissionsState.grantInstallPermission(bp) !=
-                PermissionsState.PERMISSION_OPERATION_FAILURE) {
-            scheduleWriteSettingsLocked();
-        }
     }
 
     @Override
@@ -14876,6 +14881,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    version: print database version info");
                 pw.println("    write: write current settings now");
                 pw.println("    installs: details about install sessions");
+                pw.println("    check-permission <permission> <package> [<user>]: does pkg hold perm?");
                 pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
@@ -14897,6 +14903,31 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // When dumping a single package, we always dump all of its
                 // filter information since the amount of data will be reasonable.
                 dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
+            } else if ("check-permission".equals(cmd)) {
+                if (opti >= args.length) {
+                    pw.println("Error: check-permission missing permission argument");
+                    return;
+                }
+                String perm = args[opti];
+                opti++;
+                if (opti >= args.length) {
+                    pw.println("Error: check-permission missing package argument");
+                    return;
+                }
+                String pkg = args[opti];
+                opti++;
+                int user = UserHandle.getUserId(Binder.getCallingUid());
+                if (opti < args.length) {
+                    try {
+                        user = Integer.parseInt(args[opti]);
+                    } catch (NumberFormatException e) {
+                        pw.println("Error: check-permission user argument is not a number: "
+                                + args[opti]);
+                        return;
+                    }
+                }
+                pw.println(checkPermission(perm, pkg, user));
+                return;
             } else if ("l".equals(cmd) || "libraries".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_LIBS);
             } else if ("f".equals(cmd) || "features".equals(cmd)) {
