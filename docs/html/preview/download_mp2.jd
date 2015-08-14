@@ -164,7 +164,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#sdk">Developer Preview 3 SDK</a></li>
+        <li><a href="#sdk">Developer Preview 2 SDK</a></li>
         <li><a href="#docs">Developer Documentation</a></li>
         <li><a href="#images">Hardware System Images</a></li>
       </ol>
@@ -178,13 +178,13 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
 
 <p>
-  The Android M Preview SDK includes development tools, Android system images, and library files to
+  The Android M Preview SDK includes development tools, Android system files, and library files to
   help you test your app and the new APIs coming in the next release of the platform. This document
   describes how to get the downloadable components of the preview for testing your app.
 </p>
 
 
-<h2 id="sdk">Developer Preview 3 SDK</h2>
+<h2 id="sdk">Developer Preview 2 SDK</h2>
 
 <p>
   The Preview SDK is available for download through the <a href=
@@ -197,10 +197,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <h2 id="docs">Developer Documentation</h2>
 
 <p>
-	The developer documentation download package provides detailed API reference information and
-	an API difference report for the preview. Note that <a href="{@docRoot}reference/packages.html">API
-	level 23 reference</a> and <a href="{@docRoot}sdk/api_diff/23/changes.html">diffs</a> are now
-	also available online. 
+  The developer documentation download package provides detailed API reference information and an API difference report for the preview.
 </p>
 
 <table>
@@ -209,11 +206,11 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
     <th scope="col">Download / Checksums</th>
   </tr>
   <tr id="docs-dl">
-    <td>Android M Preview 3<br>Developer Docs</td>
+    <td>Android M Preview 2<br>Developer Docs</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-3-developer-docs.zip</a><br>
-      MD5: -<br>
-      SHA-1: -
+      >m-preview-2-developer-docs.zip</a><br>
+      MD5: 1db6fff9c722b0339757e1cdf43663a8<br>
+      SHA-1: 5a4ae88d644e63824d21b0e18f8e3977a7665157
     </td>
   </tr>
 <table>
