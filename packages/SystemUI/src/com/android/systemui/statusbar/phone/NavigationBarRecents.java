@@ -88,8 +88,7 @@ class NavigationBarRecents extends LinearLayout {
                 MAX_RECENTS,
                 ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                ActivityManager.RECENT_INCLUDE_PROFILES |
-                ActivityManager.RECENT_WITH_EXCLUDED,
+                ActivityManager.RECENT_INCLUDE_PROFILES,
                 UserHandle.USER_CURRENT);
         if (DEBUG) Slog.d(TAG, "Got recents " + recentTasks.size());
         removeMissingRecents(recentTasks);
