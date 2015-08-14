@@ -98,6 +98,15 @@
       zh-cn-lang="自动备份应用"
       zh-tw-lang="針對應用程式進行自動備份">
           Auto Backup for Apps</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/power-mgmt.html"
+      es-lang="Optimizaciones de ahorro de energía"
+      ja-lang="省電力の最適化"
+      ko-lang="절전 최적화"
+      pt-br-lang="Otimizações de economia de energia"
+      ru-lang="Оптимизация экономии энергии"
+      zh-cn-lang="节能优化"
+      zh-tw-lang="省電最佳化">
+      Power-Saving Optimizations</a></li>
       </ul>
   </li>
 

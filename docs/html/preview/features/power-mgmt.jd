@@ -1,0 +1,121 @@
+page.title=Power-Saving Optimizations
+page.keywords=preview,sdk,compatibility
+sdk.platform.apiLevel=MNC
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol  class="hide-nested">
+    <li><a href="#behavior-doze">Doze</a></li>
+    <li><a href="#behavior-app-standby">App Standby</a></li>
+</ol>
+
+<h2>API Differences</h2>
+<ol>
+<li><a href="{@docRoot}preview/download.html">API level 22 to M Preview &raquo;</a> </li>
+</ol>
+
+
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}preview/api-overview.html">M Developer Preview API Overview</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>Android M Preview helps prolong battery life by introducing new power-saving optimizations:
+<em>Doze</em> mode improves the sleep efficiency of idle devices. <em>App Standby</em> prevents apps
+from eating up power while idle.</p>
+
+<h2 id="behavior-doze">Doze</h2>
+<p>If a user leaves a device unplugged and stationary for a period of time, with the screen off,
+the device enters Doze mode. Doze attempts to keep the system in a sleep state as long as the
+device remains undisturbed. In this mode, devices periodically resume normal operations for brief periods of time so that the system can perform app syncing and any other pending operations.</p>
+
+<p>The following restrictions apply to your apps while in Doze:</p>
+<ul>
+<li>Network access is disabled, unless your app receives a high-priority
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+Google Cloud Messaging</a> tickle.</li>
+<li>The system ignores <a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">
+Wake locks</a>.</li>
+<li>Alarms scheduled using the {@link android.app.AlarmManager} class are deferred, unless you have
+exempted them using the
+{@link android.app.AlarmManager#setAndAllowWhileIdle setAndAllowWhileIdle()} method.</li>
+<li>The system does not perform Wi-Fi scans.</li>
+<li>The system does not permit syncs or jobs for your sync adapters.</li>
+<li>The system does not allow {@link android.app.job.JobScheduler} to run.</li>
+</ul>
+</p>
+<p>When the device exits Doze mode, it executes any jobs and syncs that are pending.</p>
+
+<h3>Testing apps with Doze</h3>
+
+<p>You can test Doze mode by connecting your development host to a device running the M Preview,
+and calling the following commands:
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+<p class="note"><strong>Note</strong>: As of M Preview 3 release,
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+Google Cloud Messaging</a> (GCM) lets you designate
+<a href="https://developers.google.com/cloud-messaging/downstream#setting-the-priority-of-a-message">
+high-priority messages</a>. If your app receives a high-priority GCM message</a>, the system grants
+brief network access even when the device is dozing.
+</p>
+
+<p>See the
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> for tips on how
+to test Doze in your apps. </p>
+
+<h2 id="behavior-app-standby">App Standby</h2>
+<p>App Standby allows the system to determine that an app is idle when the user is not actively
+using it. The system makes this determination when the user does not touch the app for a certain
+period of time, and none of the following conditions applies:</p>
+
+<ul>
+<li>The user explicitly launches the app.</li>
+<li>The app has a process currently in the foreground (either as an activity or foreground service,
+or in use by another activity or foreground service).</li>
+<li>The app generates a notification that users see on the lock screen or in the
+notification tray.</li>
+<li>The user explicitly asks for the app to be exempt from optimizations,
+via the Settings app.</li>
+</ul>
+
+<p>When the user plugs the device into a power supply, the system releases apps from the standby
+state, allowing them to freely access the network and to execute any pending jobs and syncs. If the
+device is idle for long periods of time, the system allows idle apps network access around once a
+day.</p>
+
+<h3>Testing apps with App Standby</h3>
+<p>You can test App Standby by connecting your development host to a device running the M Preview,
+and calling the following commands:
+</p>
+<pre class="no-prettyprint">
+$ adb shell dumpsys battery unplug
+$ adb shell am set-idle &lt;packageName&gt; true
+$ adb shell am set-idle &lt;packageName&gt; false
+$ adb shell am get-idle &lt;packageName&gt;
+</pre>
+
+<p class="note"><strong>Note</strong>:
+As of M Preview 3 release,
+<a href="https://developers.google.com/cloud-messaging/" class="external-link">
+Google Cloud Messaging</a> (GCM) lets you
+designate
+<a href="https://developers.google.com/cloud-messaging/downstream#setting-the-priority-of-a-message">
+high-priority messages</a>. If your app receives high-priority GCM messages, the system grants
+brief network access even when the app is idle.
+</p>
+
+<p>See the
+<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> for tips on how
+to test App Standby in your apps. </p>
