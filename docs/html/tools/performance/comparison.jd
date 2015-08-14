@@ -111,7 +111,7 @@ page.article=true
     <h2 id="AllocationTracker">Allocation Tracker</h2>
 
   <div class="figure" style="">
-    <img src="{@docRoot}images/tools/performance/compare_AllocationTracker.png"
+    <img src="{@docRoot}images/tools/studio-allocation-tracker.png"
          alt=""ge
          height="" />
     <p class="img-caption">
