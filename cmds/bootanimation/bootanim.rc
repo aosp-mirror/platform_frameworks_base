@@ -1,0 +1,6 @@
+service bootanim /system/bin/bootanimation
+    class core
+    user graphics
+    group graphics audio
+    disabled
+    oneshot
