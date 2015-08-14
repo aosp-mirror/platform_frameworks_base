@@ -18,6 +18,7 @@ footer.hide=1
       <div class="col-7of16 col-pull-9of16">
         <h1 class="dac-hero-title">Android M Developer Preview</h1>
         <p class="dac-hero-description">
+          <strong>Final SDK is now available!</strong> 
           Get ready for the next version of Android. Test your apps on Nexus 5, 6, 9, and
           Player. Explore what's new &mdash; <strong>runtime permissions</strong>,
           <strong>Doze</strong> and <strong>App Standby</strong> power-saving features, new
@@ -30,7 +31,7 @@ footer.hide=1
         </a><br>
         <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Update to Developer Preview 2
+          Update to Developer Preview 3 (final SDK)
         </a><br>
       </div>
     </div>
