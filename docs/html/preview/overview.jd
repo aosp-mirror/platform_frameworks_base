@@ -6,20 +6,21 @@ page.tags="preview", "developer", "android"
 @jd:body
 
 <div class="cols" style=
-"background-color:#ffebc3; padding: 5px 0;margin-bottom:1em; text-align:center;">
+"background-color:#f2daf5; padding: 5px 0;margin-bottom:1em; text-align:center;">
 <h3>
-    Developer Preview 2 is now available
+    Developer Preview 3 is now available
   </h3>
-
+  <p>Includes final SDK and near-final system images</p>
+   <div style="margin:auto 1em">
  <ul class="dac-section-links">
     <li class="dac-section-link">
-      <a href="{@docRoot}preview/support.html#preview2-notes">
+      <a href="{@docRoot}preview/support.html#preview3-notes">
       <span class="dac-sprite dac-auto-chevron"></span>
       Read the Notes</a>
     </li>
 
     <li class="dac-section-link">
-      <a href="{@docRoot}preview/support.html#preview2-get">
+      <a href="{@docRoot}preview/support.html#preview3-get">
       <span class="dac-sprite dac-auto-chevron"></span>
       Get the Update</a>
     </li>
@@ -30,6 +31,7 @@ page.tags="preview", "developer", "android"
       Report Issues</a>
     </li>
   </ul>
+  </div>
 </div>
 
 <p>
@@ -143,14 +145,13 @@ page.tags="preview", "developer", "android"
 <img src="{@docRoot}preview/images/m-preview-timeline-crop.png" alt=
 "Preview program timeline" id="timeline">
 <p>
-  The M Developer Preview runs from May 28 until the final Android M SDK, which
-  we’ll release shortly before the public release during Q3
+  The M Developer Preview runs from May 28 until the final Android M public release planned for Q3
   2015.
 </p>
 
 <p>
   At key development milestones, we’ll deliver updates for your test devices.
-  The tentative milestones are
+  The milestones are
 </p>
 
 <ul>
@@ -163,12 +164,12 @@ page.tags="preview", "developer", "android"
   </li>
 
   <li>
-    <strong>Preview&nbsp;3</strong> (near final, late July).
+    <strong>Preview&nbsp;3</strong> (final APIs and SDK, now available).
   </li>
 </ul>
 
 <p>
-  These updates culminate in the <strong>final SDK</strong> (later in Q3),
+  These updates culminate in the <strong>final SDK</strong> (available now),
   which delivers the official APIs for the new version of Android, as well
   as the final system behaviors and features.
 </p>
@@ -181,8 +182,10 @@ page.tags="preview", "developer", "android"
   providing system images that you can download and flash manually.
 </p>
 <p class="note">
-  <strong>Note:</strong> The final SDK and system images can not be delivered
-  by OTA, but will instead need to be <strong>flashed manually</strong> to
+  <strong>Note:</strong> Developer Preview 3 includes final APIs and near-final
+  system images available by both download and OTA. At the full public release of
+  Android M later in Q3, final system images will be available by download only,
+  so you'll need to <strong>flash manually</strong> to
   your test devices.</strong>
 </p>
 
@@ -316,40 +319,29 @@ page.tags="preview", "developer", "android"
 
 
 <h2 id="preview_apis_and_publishing">
-  Targeting, preview APIs, and publishing
+  Final SDK, targeting, and publishing
 </h2>
 
 <p>
-  The Android M Developer Preview is a development-only release and
-  <strong>does not have a standard API level</strong>. If you want to opt out
+   <p>With Developer Preview 3, the platform APIs are now official (API level 23) and the
+   <strong>final SDK is now available</strong>.  We recommend updating your environment
+   right away through Android Studio. Once you've updated your environment, you can target
+   the new API level, compile against the new platform, and publish at your convenience
+   to Google Play (including alpha, beta, or release channels).
+
+  <p>If you want to opt out
   of compatibility behaviors to test your app (which is strongly recommended),
   you can target the M Developer Preview by setting your app's <code><a href=
   "/guide/topics/manifest/uses-sdk-element.html">targetSdkVersion</a></code>
   to <code>“MNC”</code>.
 </p>
 
-<p>
-  The Android M Developer Preview delivers <strong>preview APIs</strong>
-  &mdash; the APIs will not be official until the final SDK is released,
-  currently planned for the third quarter of 2015. This means that you can
-  <strong>expect minor API changes</strong> over time, especially during
-  initial weeks of the program. We’ll provide a summary of changes to you with
-  each update of the Android M Developer Preview.
-</p>
-
-<p class="note">
-  Note that although preview APIs may change, underlying system behaviors such
-  as runtime permissions and power-saving features are stable and ready for
-  testing right away.
-</p>
-
-<p>
-  In terms of publishing, Google Play <strong>prevents publishing of apps
-  targeting the M Developer Preview</strong>. When the Android M final SDK is
-  available, you’ll be able to target the official Android M API level and
-  publish your app to Google Play. Meanwhile, if you want to distribute an app
-  targeting Android M to testers, you can do so via email or by direct download
-  from your site.
+  <p>Before releasing your app targeting Android M, we strongly recommend distributing it
+  to a group of testers through the new <a
+  href="http://android-developers.blogspot.com/2015/07/iterate-faster-on-google-play-with.html"> 
+  beta testing features available in the Google Play Developer Console. See the
+  <a href="https://support.google.com/googleplay/android-developer/answer/3131213">Help
+  Center article</a> for more information. 
 </p>
 
 <h2 id="get_started">
@@ -357,7 +349,7 @@ page.tags="preview", "developer", "android"
 </h2>
 
 <p>
-  To get started testing your app:
+  To get started testing your app with Android M:
 </p>
 
 <ol>
@@ -379,7 +371,7 @@ page.tags="preview", "developer", "android"
     Preview updates will be delivered through over-the-air (OTA) updates.</a>
   </li>
 
-  <li>Download the <a href="{@docRoot}preview/download.html#docs">M Preview API
+  <li>Review the <a href="{@docRoot}reference/packages.html">API
   Reference</a> and <a href="{@docRoot}preview/samples.html">M Preview
   samples</a> to gain more insight into new API features and how to use them in
   your app.
