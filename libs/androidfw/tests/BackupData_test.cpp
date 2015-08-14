@@ -108,7 +108,7 @@ TEST_F(BackupDataTest, WriteAndReadSingle) {
     EXPECT_EQ(DATA1[i], dataBytes[i])
              << "data character " << i << " should be equal";
   }
-  delete dataBytes;
+  delete[] dataBytes;
   delete writer;
   delete reader;
 }
