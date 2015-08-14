@@ -4151,7 +4151,7 @@ final class Settings {
                     pw.print(", COSTS_MONEY");
                 }
                 if ((perm.info.flags&PermissionInfo.FLAG_HIDDEN) != 0) {
-                    pw.print(", COSTS_HIDDEN");
+                    pw.print(", HIDDEN");
                 }
                 if ((perm.info.flags&PermissionInfo.FLAG_INSTALLED) != 0) {
                     pw.print(", INSTALLED");
