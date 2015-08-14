@@ -138,6 +138,48 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      */
     public abstract void prepare(@NonNull Surface surface) throws CameraAccessException;
 
+    /**
+     * <p>Pre-allocate at most maxCount buffers for an output Surface.</p>
+     *
+     * <p>Like the {@link #prepare(Surface)} method, this method can be used to allocate output
+     * buffers for a given Surface.  However, while the {@link #prepare(Surface)} method allocates
+     * the maximum possible buffer count, this method allocates at most maxCount buffers.</p>
+     *
+     * <p>If maxCount is greater than the possible maximum count (which is the sum of the buffer
+     * count requested by the creator of the Surface and the count requested by the camera device),
+     * only the possible maximum count is allocated, in which case the function acts exactly like
+     * {@link #prepare(Surface)}.</p>
+     *
+     * <p>The restrictions on when this method can be called are the same as for
+     * {@link #prepare(Surface)}.</p>
+     *
+     * <p>Repeated calls to this method are allowed, and a mix of {@link #prepare(Surface)} and
+     * this method is also allowed. Note that after the first call to {@link #prepare(Surface)},
+     * subsequent calls to either prepare method are effectively no-ops.  In addition, this method
+     * is not additive in terms of buffer count.  This means calling it twice with maxCount = 2
+     * will only allocate 2 buffers, not 4 (assuming the possible maximum is at least 2); to
+     * allocate two buffers on the first call and two on the second, the application needs to call
+     * prepare with prepare(surface, 2) and prepare(surface, 4).</p>
+     *
+     * @param maxCount the buffer count to try to allocate. If this is greater than the possible
+     *                 maximum for this output, the possible maximum is allocated instead. If
+     *                 maxCount buffers are already allocated, then prepare will do nothing.
+     * @param surface the output Surface for which buffers should be pre-allocated.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error.
+     * @throws IllegalStateException if this session is no longer active, either because the
+     *                               session was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     * @throws IllegalArgumentException if the Surface is invalid, not part of this Session,
+     *                                  or has already been used as a target of a CaptureRequest in
+     *                                  this session or immediately prior sessions without an
+     *                                  intervening tearDown call.
+     *
+     * @hide
+     */
+    public abstract void prepare(int maxCount, @NonNull Surface surface)
+            throws CameraAccessException;
 
     /**
      * <p>Free all buffers allocated for an output Surface.</p>

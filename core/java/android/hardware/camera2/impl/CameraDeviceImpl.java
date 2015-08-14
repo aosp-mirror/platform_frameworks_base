@@ -679,6 +679,33 @@ public class CameraDeviceImpl extends CameraDevice {
         }
     }
 
+    public void prepare(int maxCount, Surface surface) throws CameraAccessException {
+        if (surface == null) throw new IllegalArgumentException("Surface is null");
+        if (maxCount <= 0) throw new IllegalArgumentException("Invalid maxCount given: " +
+                maxCount);
+
+        synchronized(mInterfaceLock) {
+            int streamId = -1;
+            for (int i = 0; i < mConfiguredOutputs.size(); i++) {
+                if (surface == mConfiguredOutputs.valueAt(i).getSurface()) {
+                    streamId = mConfiguredOutputs.keyAt(i);
+                    break;
+                }
+            }
+            if (streamId == -1) {
+                throw new IllegalArgumentException("Surface is not part of this session");
+            }
+            try {
+                mRemoteDevice.prepare2(maxCount, streamId);
+            } catch (CameraRuntimeException e) {
+                throw e.asChecked();
+            } catch (RemoteException e) {
+                // impossible
+                return;
+            }
+        }
+    }
+
     public void tearDown(Surface surface) throws CameraAccessException {
         if (surface == null) throw new IllegalArgumentException("Surface is null");
 
