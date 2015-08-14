@@ -57,7 +57,7 @@ page.image=images/cards/card-support_16-9_2x.png
     <div class="col-9of16">
       <p>
         <em>Date: August 2015<br>
-        Builds: XXXXXX (Nexus 5, 6, 9), MPZ79N (Nexus Player)<br>
+        Builds: XXXXXX (Nexus 5, 6, 9), XXXXXX (Nexus Player)<br>
         Hardware support: Nexus 5, 6, 9, Player<br>
         Emulator support: x86 &amp; ARM 32/64-bit<br>
         Google Play services: 7.8</em>
@@ -110,9 +110,9 @@ page.image=images/cards/card-support_16-9_2x.png
 
   <li>
     <strong>Updated documentation</strong>. The <a href=
-    "/preview/behavior-changes.html">Behavior Changes</a>, <a href=
-    "/preview/api-overview.html">API Overview</a>, and <a href=
-    "/preview/features/runtime-permissions.html">Permissions</a> documents have
+    "{@docRoot}preview/behavior-changes.html">Behavior Changes</a>, <a href=
+    "{@docRoot}preview/api-overview.html">API Overview</a>, and <a href=
+    "{@docRoot}preview/features/runtime-permissions.html">Permissions</a> documents have
     been updated to reflect the latest changes in the platform. An updated
     <a href="/preview/download.html">Developer Documentation download
     package</a> is available, including full reference docs and API diff
@@ -126,7 +126,7 @@ page.image=images/cards/card-support_16-9_2x.png
     Developer Preview 3 (coming soon).
   </li>
 
-  <li>The <a href="/preview/samples.html">Android M code samples</a> are also
+  <li>The <a href="{@docRoot}preview/samples.html">Android M code samples</a> are also
   updated to account for API and behavior changes:
     <ul>
       <li>
@@ -169,12 +169,9 @@ page.image=images/cards/card-support_16-9_2x.png
 </ul>
 
 <p>
-  For a complete list of changes, including renamed and removed APIs, please
-  refer to the API Diff reports below:</p>
-  <ul>
-  <li><a href="@docRoot"sdk/api_diff/mnc-preview-3/changes.html">API Differences: Preview 2 to Preview 3 (API level 23)</a></li>
-  <li><a href="@docRoot"sdk/api_diff/23/changes.html">API Differences: API level 22 to API level 23</a></li>
-  </ul>
+  For a complete list of changes, including renamed and removed APIs, see the API Diff report for
+  <a href="{@docRoot}sdk/api_diff/23/changes.html">API level 22 to 23</a>.
+</p>
 
 <h3 id="ki">
   Known issues
@@ -202,7 +199,7 @@ page.image=images/cards/card-support_16-9_2x.png
 
 <p>
   You can download the Developer Preview 3 final SDK platform and
-  emulator images from the SDK Manager. 
+  emulator images from the SDK Manager.
 </p>
 
 <p>
@@ -215,7 +212,7 @@ page.image=images/cards/card-support_16-9_2x.png
 
 <p>
   If you are just getting started with Android M Developer Preview and want
-  to receive Developer Preview 3 via OTA, download the 
+  to receive Developer Preview 3 via OTA, download the
   Developer Preview 2 <a href="{@docRoot}preview/download_mp2.html#images">
   system image</a>, and flash it to your device. Then,
   leave the device powered on for several hours. It registers with the
@@ -225,12 +222,12 @@ page.image=images/cards/card-support_16-9_2x.png
 <p>
   For instructions on how to download and flash your device to the Developer
   Preview, see the links and instructions on the <a href=
-  "/preview/download.html">Downloads</a> page.
+  "{@docRoot}preview/download.html">Downloads</a> page.
 </p>
 
 <p>
   For instructions on how to start developing and testing with Android M, read
-  <a href="/preview/setup-sdk.html">Setting up the SDK</a>.
+  <a href="{@docRoot}preview/setup-sdk.html">Setting up the SDK</a>.
 </p>
 
 <h2 id="preview2-notes">
@@ -265,7 +262,7 @@ page.image=images/cards/card-support_16-9_2x.png
   possible. This ensures that you are building with the latest platform APIs
   and testing against the latest behaviors. If you are just getting started
   with the Android M Developer Preview SDK, follow the instructions in <a href=
-  "/preview/setup-sdk.html">Set up the Preview SDK</a>, then update your
+  "{@docRoot}preview/setup-sdk.html">Set up the Preview SDK</a>, then update your
   environment for Developer Preview 2.
 </p>
 
@@ -289,11 +286,11 @@ page.image=images/cards/card-support_16-9_2x.png
 
   <li>
     <strong>Updated documentation</strong>. The <a href=
-    "/preview/behavior-changes.html">Behavior Changes</a>, <a href=
-    "/preview/api-overview.html">API Overview</a>, and <a href=
-    "/preview/features/runtime-permissions.html">Permissions</a> documents have
+    "{@docRoot}preview/behavior-changes.html">Behavior Changes</a>, <a href=
+    "{@docRoot}preview/api-overview.html">API Overview</a>, and <a href=
+    "{@docRoot}preview/features/runtime-permissions.html">Permissions</a> documents have
     been updated to reflect the latest changes in the platform. An updated
-    <a href="/preview/download.html">Developer Documentation download
+    <a href="{@docRoot}preview/download.html">Developer Documentation download
     package</a> is available, including full reference docs and API diff
     reports.
   </li>
@@ -305,7 +302,7 @@ page.image=images/cards/card-support_16-9_2x.png
     Developer Preview 2 (coming soon).
   </li>
 
-  <li>The <a href="/preview/samples.html">Android M code samples</a> are also
+  <li>The <a href="{@docRoot}preview/samples.html">Android M code samples</a> are also
   updated to account for API and behavior changes:
     <ul>
       <li>
@@ -389,7 +386,7 @@ page.image=images/cards/card-support_16-9_2x.png
       lets your app see whether users have previously rejected a permission
       request. This lets you know that your app should explain the the user why
       it needs that permission. For more information see the <a href=
-      "/preview/features/runtime-permissions.html#explain-need">Permissions</a>
+      "{@docRoot}preview/features/runtime-permissions.html#explain-need">Permissions</a>
       developer guide.
       </li>
     </ul>
@@ -415,7 +412,7 @@ page.image=images/cards/card-support_16-9_2x.png
 <p>
   For a complete list of changes, including renamed and removed APIs, please
   refer to the API Diff Reports included in the <a href=
-  "/preview/download.html#docs">Developer Documentation download package</a>.
+  "{@docRoot}preview/download.html#docs">Developer Documentation download package</a>.
 </p>
 
 <h3 id="ki">
@@ -492,12 +489,12 @@ page.image=images/cards/card-support_16-9_2x.png
 <p>
   For instructions on how to download and flash your device to the Developer
   Preview, see the links and instructions on the <a href=
-  "/preview/download.html">Downloads</a> page.
+  "{@docRoot}preview/download.html">Downloads</a> page.
 </p>
 
 <p>
   For instructions on how to start developing and testing with Android M, read
-  <a href="/preview/setup-sdk.html">Setting up the SDK</a>.
+  <a href="{@docRoot}preview/setup-sdk.html">Setting up the SDK</a>.
 </p>
 
 <h2 id="preview1-notes">
