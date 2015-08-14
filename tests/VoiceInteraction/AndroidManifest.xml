@@ -2,6 +2,7 @@
         package="com.android.test.voiceinteraction">
 
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
 
     <application>
         <activity android:name="VoiceInteractionMain" android:label="Voice Interaction"

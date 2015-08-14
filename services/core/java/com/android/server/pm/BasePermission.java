@@ -88,4 +88,10 @@ final class BasePermission {
         return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
                 == PermissionInfo.PROTECTION_DANGEROUS;
     }
+
+    public boolean isDevelopment() {
+        return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                == PermissionInfo.PROTECTION_SIGNATURE
+                && (protectionLevel & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0;
+    }
 }
