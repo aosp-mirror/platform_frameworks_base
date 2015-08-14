@@ -77,50 +77,6 @@
        <item>@drawable/btn_default_disabled_focused_holo_dark</item>
        <item>@drawable/btn_default_holo_dark</item>
        <item>@drawable/btn_default_holo_light</item>
-       <item>@drawable/btn_star_off_normal_holo_light</item>
-       <item>@drawable/btn_star_on_normal_holo_light</item>
-       <item>@drawable/btn_star_on_disabled_holo_light</item>
-       <item>@drawable/btn_star_off_disabled_holo_light</item>
-       <item>@drawable/btn_star_on_pressed_holo_light</item>
-       <item>@drawable/btn_star_off_pressed_holo_light</item>
-       <item>@drawable/btn_star_on_focused_holo_light</item>
-       <item>@drawable/btn_star_off_focused_holo_light</item>
-       <item>@drawable/btn_star_on_disabled_focused_holo_light</item>
-       <item>@drawable/btn_star_off_disabled_focused_holo_light</item>
-       <item>@drawable/btn_star_holo_light</item>
-       <item>@drawable/btn_star_off_normal_holo_dark</item>
-       <item>@drawable/btn_star_on_normal_holo_dark</item>
-       <item>@drawable/btn_star_on_disabled_holo_dark</item>
-       <item>@drawable/btn_star_off_disabled_holo_dark</item>
-       <item>@drawable/btn_star_on_pressed_holo_dark</item>
-       <item>@drawable/btn_star_off_pressed_holo_dark</item>
-       <item>@drawable/btn_star_on_focused_holo_dark</item>
-       <item>@drawable/btn_star_off_focused_holo_dark</item>
-       <item>@drawable/btn_star_on_disabled_focused_holo_dark</item>
-       <item>@drawable/btn_star_off_disabled_focused_holo_dark</item>
-       <item>@drawable/btn_star_holo_dark</item>
-       <item>@drawable/btn_toggle_on_pressed_holo_light</item>
-       <item>@drawable/btn_toggle_on_pressed_holo_dark</item>
-       <item>@drawable/btn_toggle_on_normal_holo_light</item>
-       <item>@drawable/btn_toggle_on_normal_holo_dark</item>
-       <item>@drawable/btn_toggle_on_focused_holo_light</item>
-       <item>@drawable/btn_toggle_on_focused_holo_dark</item>
-       <item>@drawable/btn_toggle_on_disabled_holo_light</item>
-       <item>@drawable/btn_toggle_on_disabled_holo_dark</item>
-       <item>@drawable/btn_toggle_on_disabled_focused_holo_light</item>
-       <item>@drawable/btn_toggle_on_disabled_focused_holo_dark</item>
-       <item>@drawable/btn_toggle_off_pressed_holo_light</item>
-       <item>@drawable/btn_toggle_off_pressed_holo_dark</item>
-       <item>@drawable/btn_toggle_off_normal_holo_light</item>
-       <item>@drawable/btn_toggle_off_normal_holo_dark</item>
-       <item>@drawable/btn_toggle_off_focused_holo_light</item>
-       <item>@drawable/btn_toggle_off_focused_holo_dark</item>
-       <item>@drawable/btn_toggle_off_disabled_holo_light</item>
-       <item>@drawable/btn_toggle_off_disabled_holo_dark</item>
-       <item>@drawable/btn_toggle_off_disabled_focused_holo_light</item>
-       <item>@drawable/btn_toggle_off_disabled_focused_holo_dark</item>
-       <item>@drawable/btn_toggle_holo_light</item>
-       <item>@drawable/btn_toggle_holo_dark</item>
        <item>@drawable/edit_text_holo_light</item>
        <item>@drawable/edit_text_holo_dark</item>
        <item>@drawable/text_cursor_holo_light</item>
@@ -136,26 +92,18 @@
        <item>@drawable/list_selector_holo_light</item>
        <item>@drawable/list_section_divider_holo_light</item>
        <item>@drawable/list_section_divider_holo_dark</item>
-       <item>@drawable/menu_hardkey_panel_holo_dark</item>
-       <item>@drawable/menu_hardkey_panel_holo_light</item>
-       <item>@drawable/menu_submenu_background</item>
        <item>@drawable/menu_dropdown_panel_holo_light</item>
        <item>@drawable/menu_dropdown_panel_holo_dark</item>
-       <item>@drawable/menu_popup_panel_holo_light</item>
-       <item>@drawable/menu_popup_panel_holo_dark</item>
        <item>@drawable/menu_panel_holo_light</item>
        <item>@drawable/menu_panel_holo_dark</item>
        <item>@drawable/spinner_16_outer_holo</item>
        <item>@drawable/spinner_16_inner_holo</item>
        <item>@drawable/spinner_48_outer_holo</item>
        <item>@drawable/spinner_48_inner_holo</item>
-       <item>@drawable/spinner_76_outer_holo</item>
-       <item>@drawable/spinner_76_inner_holo</item>
        <item>@drawable/progress_bg_holo_dark</item>
        <item>@drawable/progress_bg_holo_light</item>
        <item>@drawable/progress_horizontal_holo_dark</item>
        <item>@drawable/progress_horizontal_holo_light</item>
-       <item>@drawable/progress_indeterminate_horizontal_holo</item>
        <item>@drawable/progress_large_holo</item>
        <item>@drawable/progress_medium_holo</item>
        <item>@drawable/progress_primary_holo_dark</item>
