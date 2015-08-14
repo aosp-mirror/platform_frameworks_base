@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -231,7 +232,11 @@ class NavigationBarRecents extends LinearLayout {
             }
 
             if (DEBUG) Slog.d(TAG, "Start drag with " + intent);
-            NavigationBarApps.startAppDrag(icon, new AppInfo (intent.getComponent(), AppInfo.USER_UNSPECIFIED));
+
+            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            long userSerialNumber = userManager.getSerialNumberForUser(new UserHandle(task.userId));
+            NavigationBarApps.startAppDrag(
+                    icon, new AppInfo(intent.getComponent(), userSerialNumber));
             return true;
         }
     }

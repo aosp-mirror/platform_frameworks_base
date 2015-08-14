@@ -136,9 +136,10 @@ class NavigationBarApps extends LinearLayout {
         transition.enableTransitionType(LayoutTransition.CHANGING);
         parent.setLayoutTransition(transition);
 
+        int currentUserId = ActivityManager.getCurrentUser();
         mCurrentUserSerialNumber = mUserManager.getSerialNumberForUser(
-                new UserHandle(ActivityManager.getCurrentUser()));
-        sAppsModel.setCurrentUser(mCurrentUserSerialNumber);
+                new UserHandle(currentUserId));
+        sAppsModel.setCurrentUser(currentUserId);
         recreateAppButtons();
 
         IntentFilter filter = new IntentFilter();
@@ -222,10 +223,7 @@ class NavigationBarApps extends LinearLayout {
     static void startAppDrag(ImageView icon, AppInfo appInfo) {
         // The drag data is an Intent to launch the activity.
         Intent mainIntent = Intent.makeMainActivity(appInfo.getComponentName());
-        long userSerialNumber = appInfo.getUserSerialNumber();
-        if (userSerialNumber != AppInfo.USER_UNSPECIFIED) {
-            mainIntent.putExtra(EXTRA_PROFILE, userSerialNumber);
-        }
+        mainIntent.putExtra(EXTRA_PROFILE, appInfo.getUserSerialNumber());
         ClipData dragData = ClipData.newIntent("", mainIntent);
         // Use the ImageView to create the shadow.
         View.DragShadowBuilder shadow = new AppIconDragShadowBuilder(icon);
@@ -396,7 +394,14 @@ class NavigationBarApps extends LinearLayout {
             return null;
         }
 
-        long userSerialNumber = intent.getLongExtra(EXTRA_PROFILE, AppInfo.USER_UNSPECIFIED);
+        long userSerialNumber = intent.getLongExtra(EXTRA_PROFILE, -1);
+
+        // Validate the received user serial number.
+        UserHandle appUser = mUserManager.getUserForSerialNumber(userSerialNumber);
+        if (appUser == null) {
+            userSerialNumber = mCurrentUserSerialNumber;
+        }
+
         return new AppInfo(intent.getComponent(), userSerialNumber);
     }
 
@@ -466,18 +471,14 @@ class NavigationBarApps extends LinearLayout {
 
             long appUserSerialNumber = appInfo.getUserSerialNumber();
 
-            UserHandle appUser = null;
-            if (appUserSerialNumber != AppInfo.USER_UNSPECIFIED) {
-                appUser = mUserManager.getUserForSerialNumber(appUserSerialNumber);
+            UserHandle appUser = mUserManager.getUserForSerialNumber(appUserSerialNumber);
+            if (appUser == null) {
+                Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Can't start activity " + component +
+                        " because its user doesn't exist.");
+                return;
             }
-
-            int appUserId;
-            if (appUser != null) {
-                appUserId = appUser.getIdentifier();
-            } else {
-                appUserId = ActivityManager.getCurrentUser();
-                appUser = new UserHandle(appUserId);
-            }
+            int appUserId = appUser.getIdentifier();
 
             // Play a scale-up animation while launching the activity.
             // TODO: Consider playing a different animation, or no animation, if the activity is
@@ -545,7 +546,7 @@ class NavigationBarApps extends LinearLayout {
 
         if (newUserSerialNumber != mCurrentUserSerialNumber) {
             mCurrentUserSerialNumber = newUserSerialNumber;
-            sAppsModel.setCurrentUser(newUserSerialNumber);
+            sAppsModel.setCurrentUser(currentUserId);
             recreateAppButtons();
         }
     }
