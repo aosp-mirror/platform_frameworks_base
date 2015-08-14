@@ -411,6 +411,14 @@ page.image=images/permissions_check.png
   {@link android.os.Build.VERSION#CODENAME CODENAME} is <code>"MNC"</code>.
 </p>
 
+<p>
+  Alternatively, you can use the new methods introduced with revision 23 of the
+  v4 and v13 support libraries. The support library methods behave
+  appropriately whether or not the app is running on the M Developer Preview.
+  For more information, see <a href="#support-lib">Support library methods for
+  handling permissions</a>.
+</p>
+
 <h4 id="check-for-permission">Check if the app has the needed permission</h4>
 
 <p>When the user tries to do something that requires a permission, the app
@@ -469,10 +477,7 @@ page.image=images/permissions_check.png
           <code>android.permission.WRITE_CONTACTS</code>
         </li>
         <li>
-          <code>android.permission.READ_PROFILE</code>
-        </li>
-        <li>
-          <code>android.permission.WRITE_PROFILE</code>
+          <code>android.permission.GET_ACCOUNTS</code>
         </li>
       </ul>
     </td>
@@ -538,11 +543,6 @@ page.image=images/permissions_check.png
       <ul>
         <li>
           <code>android.permission.BODY_SENSORS</code>
-        </li>
-      </ul>
-      <ul>
-        <li>
-          <code>android.permission.USE_FINGERPRINT</code>
         </li>
       </ul>
     </td>
@@ -615,12 +615,13 @@ page.image=images/permissions_check.png
 </p>
 
 <p>
-  If the user turned down the permission request in the
-  past and chose the <em>Don't ask again</em> option in the permission request system
-  dialog, this method returns <code>false</code>. The method also returns
-  <code>false</code> if the device policy prohibits the app from having that
-  permission.
+  If the user turned down the permission request in the past and chose the
+  <em>Don't ask again</em> option in the permission request system dialog, this
+  method returns <code>false</code>. The method also returns <code>false</code>
+  if the device policy prohibits the app from having that permission.
 </p>
+
+
 
 <h4 id="request-permissions">Request permissions if necessary</h4>
 
@@ -655,6 +656,16 @@ if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
     return;
 }
 </pre>
+
+<p class="note">
+  <strong>Note:</strong> When your app calls the framework's
+  <code>requestPermissions()</code> method, the system shows a standard dialog
+  box to the user. Your app <em>cannot</em> configure or alter that dialog box.
+  If you need to provide any information or explanation to the user, you should
+  do that <em>before</em> you call <code>requestPermissions()</code>, as
+  described in <a href="#explain-need">Explain why the app needs
+  permissions</a>.
+</p>
 
 <h4 id="handle-response">Handle the permissions request response</h4>
 
@@ -875,7 +886,105 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
   app's normal operation.
 </p>
 
-<h3 id="normal">Normal Permissions</h3>
+<h3 id="support-lib">Support library methods for handling permissions</h3>
+
+<p>
+  Revision 23 of the v4 and v13 support libraries provide several new methods
+  for managing permissions. The support library methods work properly on any
+  device that can use those libraries. Thus, if you use the support library
+  methods, you do not need to check whether your app is running on a device
+  with the M Developer Preview. If an app is installed on a device running the
+  M Preview, the support library methods behave the same as their framework
+  equivalents. If the device is running an earlier version of Android, the
+  methods behave appropriately, as described below.
+</p>
+
+<p>
+  The v4 support library provides the following permissions methods:
+</p>
+
+<dl>
+  <dt>
+    <code>ContextCompat.checkSelfPermission()</code>
+  </dt>
+
+  <dd>
+    Returns <code>true</code> if the app has the specified permission, whether
+    or not the device is using the M Preview.
+  </dd>
+
+  <dt>
+    <code>ActivityCompat.requestPermissions()</code>
+  </dt>
+
+  <dd>
+    If the device is not running the M Preview, invokes the callback
+    method in <code>ActivityCompat.OnRequestPermissionsResultCallback</code>.
+    Passes {@link android.content.pm.PackageManager#PERMISSION_GRANTED
+    PERMISSION_GRANTED} if the app already has the specified permission, or
+    {@link android.content.pm.PackageManager#PERMISSION_DENIED
+    PERMISSION_DENIED} if it does not.
+  </dd>
+
+  <dt>
+    <code>ActivityCompat.shouldShowRequestPermissionRationale()</code>
+  </dt>
+
+  <dd>
+    If the device is not running the M Preview, always returns
+    <code>false</code>.
+  </dd>
+</dl>
+
+<p>
+  The v4 support library also contains the <code>PermissionChecker</code>
+  class, which provides several static utility methods for apps that use IPC to
+  provide services for other apps. For example,
+  <code>PermissionChecker.checkCallingPermission()</code> checks whether an IPC
+  made by a particular package has a specified permission.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> If your app acts on behalf of third-party apps to call
+  platform methods that require runtime permissions on behalf of a third-party
+  app, you should use the appropriate <code>PermissionChecker</code> methods to
+  ensure that the other app is allowed to perform the operation. The platform
+  has a compatibility mode that allows users to revoke a legacy app's access to
+  permission-protected methods. If the user revokes access in compatibility
+  mode the app's permissions are not actually revoked; instead, access to the
+  APIs is restricted. The <code>PermissionChecker</code> methods verify app
+  permissions in both normal and legacy modes.
+</p>
+
+<p>
+  The v13 support library provides the following permissions methods:
+</p>
+
+<dl>
+  <dt>
+    <code>FragmentCompat.requestPermissions()</code>
+  </dt>
+
+  <dd>
+    If the device is not running the M Preview, invokes the callback
+    method in <code>FragmentCompat.OnRequestPermissionsResultCallback</code>.
+    Passes {@link android.content.pm.PackageManager#PERMISSION_GRANTED
+    PERMISSION_GRANTED} if the app already has the specified permission, or
+    {@link android.content.pm.PackageManager#PERMISSION_DENIED
+    PERMISSION_DENIED} if it does not.
+  </dd>
+
+  <dt>
+    <code>FragmentCompat.shouldShowRequestPermissionRationale()</code>
+  </dt>
+
+  <dd>
+    If the device is not running the M Preview, always returns
+    <code>false</code>.
+  </dd>
+</dl>
+
+<h3 id="normal">Normal permissions</h3>
 
 <p>
   Many permissions are designated as {@link
@@ -911,6 +1020,7 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
 <ul>
   <li><code>android.permission.ACCESS_LOCATION_EXTRA_COMMANDS</code></li>
   <li><code>android.permission.ACCESS_NETWORK_STATE</code></li>
+  <li><code>android.permission.ACCESS_NOTIFICATION_POLICY</code></li>
   <li><code>android.permission.ACCESS_WIFI_STATE</code></li>
   <li><code>android.permission.ACCESS_WIMAX_STATE</code></li>
   <li><code>android.permission.BLUETOOTH</code></li>
@@ -919,6 +1029,7 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
   <li><code>android.permission.CHANGE_NETWORK_STATE</code></li>
   <li><code>android.permission.CHANGE_WIFI_MULTICAST_STATE</code></li>
   <li><code>android.permission.CHANGE_WIFI_STATE</code></li>
+  <li><code>android.permission.CHANGE_WIMAX_STATE</code></li>
   <li><code>android.permission.DISABLE_KEYGUARD</code></li>
   <li><code>android.permission.EXPAND_STATUS_BAR</code></li>
   <li><code>android.permission.FLASHLIGHT</code></li>
@@ -928,22 +1039,21 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
   <li><code>android.permission.KILL_BACKGROUND_PROCESSES</code></li>
   <li><code>android.permission.MODIFY_AUDIO_SETTINGS</code></li>
   <li><code>android.permission.NFC</code></li>
-  <li><code>android.permission.PERSISTENT_ACTIVITY</code></li>
   <li><code>android.permission.READ_SYNC_SETTINGS</code></li>
   <li><code>android.permission.READ_SYNC_STATS</code></li>
-  <li><code>android.permission.READ_USER_DICTIONARY</code></li>
   <li><code>android.permission.RECEIVE_BOOT_COMPLETED</code></li>
   <li><code>android.permission.REORDER_TASKS</code></li>
+  <li><code>android.permission.REQUEST_INSTALL_PACKAGES</code></li>
   <li><code>android.permission.SET_TIME_ZONE</code></li>
   <li><code>android.permission.SET_WALLPAPER</code></li>
   <li><code>android.permission.SET_WALLPAPER_HINTS</code></li>
   <li><code>android.permission.SUBSCRIBED_FEEDS_READ</code></li>
   <li><code>android.permission.TRANSMIT_IR</code></li>
+  <li><code>android.permission.USE_FINGERPRINT</code></li>
   <li><code>android.permission.VIBRATE</code></li>
   <li><code>android.permission.WAKE_LOCK</code></li>
-  <li><code>android.permission.WRITE_SETTINGS</code></li>
   <li><code>android.permission.WRITE_SYNC_SETTINGS</code></li>
-  <li><code>android.permission.WRITE_USER_DICTIONARY</code></li>
   <li><code>com.android.alarm.permission.SET_ALARM</code></li>
   <li><code>com.android.launcher.permission.INSTALL_SHORTCUT</code></li>
+  <li><code>com.android.launcher.permission.UNINSTALL_SHORTCUT</code></li>
 </ul>
