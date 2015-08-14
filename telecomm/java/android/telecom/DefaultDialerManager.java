@@ -97,7 +97,7 @@ public class DefaultDialerManager {
      * @hide
      * */
     public static String getDefaultDialerApplication(Context context) {
-        return getDefaultDialerApplication(context, ActivityManager.getCurrentUser());
+        return getDefaultDialerApplication(context, context.getUserId());
     }
 
     /**
