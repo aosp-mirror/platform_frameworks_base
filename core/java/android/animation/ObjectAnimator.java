@@ -25,6 +25,7 @@ import android.util.Log;
 import android.util.Property;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * This subclass of {@link ValueAnimator} provides support for animating properties on target objects.
@@ -809,37 +810,7 @@ public final class ObjectAnimator extends ValueAnimator {
 
     @Override
     public void start() {
-        // See if any of the current active/pending animators need to be canceled
-        AnimationHandler handler = sAnimationHandler.get();
-        if (handler != null) {
-            int numAnims = handler.mAnimations.size();
-            for (int i = numAnims - 1; i >= 0; i--) {
-                if (handler.mAnimations.get(i) instanceof ObjectAnimator) {
-                    ObjectAnimator anim = (ObjectAnimator) handler.mAnimations.get(i);
-                    if (anim.mAutoCancel && hasSameTargetAndProperties(anim)) {
-                        anim.cancel();
-                    }
-                }
-            }
-            numAnims = handler.mPendingAnimations.size();
-            for (int i = numAnims - 1; i >= 0; i--) {
-                if (handler.mPendingAnimations.get(i) instanceof ObjectAnimator) {
-                    ObjectAnimator anim = (ObjectAnimator) handler.mPendingAnimations.get(i);
-                    if (anim.mAutoCancel && hasSameTargetAndProperties(anim)) {
-                        anim.cancel();
-                    }
-                }
-            }
-            numAnims = handler.mDelayedAnims.size();
-            for (int i = numAnims - 1; i >= 0; i--) {
-                if (handler.mDelayedAnims.get(i) instanceof ObjectAnimator) {
-                    ObjectAnimator anim = (ObjectAnimator) handler.mDelayedAnims.get(i);
-                    if (anim.mAutoCancel && hasSameTargetAndProperties(anim)) {
-                        anim.cancel();
-                    }
-                }
-            }
-        }
+        AnimationHandler.getInstance().autoCancelBasedOn(this);
         if (DBG) {
             Log.d(LOG_TAG, "Anim target, duration: " + getTarget() + ", " + getDuration());
             for (int i = 0; i < mValues.length; ++i) {
@@ -850,6 +821,20 @@ public final class ObjectAnimator extends ValueAnimator {
             }
         }
         super.start();
+    }
+
+    boolean shouldAutoCancel(AnimationHandler.AnimationFrameCallback anim) {
+        if (anim == null) {
+            return false;
+        }
+
+        if (anim instanceof ObjectAnimator) {
+            ObjectAnimator objAnim = (ObjectAnimator) anim;
+            if (objAnim.mAutoCancel && hasSameTargetAndProperties(objAnim)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
