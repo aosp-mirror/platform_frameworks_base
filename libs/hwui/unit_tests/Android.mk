@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 
-local_target_dir := $(TARGET_OUT_DATA)/local/tmp
 LOCAL_PATH:= $(call my-dir)/..
 
 include $(CLEAR_VARS)
@@ -28,8 +27,7 @@ include $(LOCAL_PATH)/Android.common.mk
 LOCAL_SRC_FILES += \
     unit_tests/ClipAreaTests.cpp \
     unit_tests/DamageAccumulatorTests.cpp \
-    unit_tests/LinearAllocatorTests.cpp \
-    unit_tests/main.cpp
+    unit_tests/LinearAllocatorTests.cpp
 
 
 include $(BUILD_NATIVE_TEST)
