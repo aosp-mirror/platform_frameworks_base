@@ -312,7 +312,7 @@ std::unique_ptr<Node> inflate(const void* data, size_t dataLen, SourceLogger* lo
             }
         }
     }
-    return std::move(root);
+    return root;
 }
 
 Node::Node(NodeType type) : type(type), parent(nullptr), lineNumber(0), columnNumber(0) {
