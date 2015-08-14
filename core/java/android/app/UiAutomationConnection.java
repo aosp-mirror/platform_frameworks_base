@@ -19,6 +19,7 @@ package android.app;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
 import android.hardware.input.InputManager;
 import android.os.Binder;
@@ -59,6 +60,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     private final IAccessibilityManager mAccessibilityManager = IAccessibilityManager.Stub
             .asInterface(ServiceManager.getService(Service.ACCESSIBILITY_SERVICE));
+
+    private final IPackageManager mPackageManager = IPackageManager.Stub
+            .asInterface(ServiceManager.getService("package"));
 
     private final Object mLock = new Object();
 
@@ -221,6 +225,38 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             WindowAnimationFrameStats stats = new WindowAnimationFrameStats();
             SurfaceControl.getAnimationFrameStats(stats);
             return stats;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void grantRuntimePermission(String packageName, String permission, int userId)
+            throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mPackageManager.grantRuntimePermission(packageName, permission, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void revokeRuntimePermission(String packageName, String permission, int userId)
+            throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mPackageManager.revokeRuntimePermission(packageName, permission, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
