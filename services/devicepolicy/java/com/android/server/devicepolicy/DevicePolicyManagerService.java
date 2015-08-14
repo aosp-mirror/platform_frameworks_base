@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.TEXT;
@@ -44,6 +45,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -2957,7 +2959,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {
-                utils.requireCredentialEntry(UserHandle.USER_ALL);
+                utils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW,
+                        UserHandle.USER_ALL);
             }
             synchronized (this) {
                 int newOwner = requireEntry ? callingUid : -1;
@@ -3089,7 +3092,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mPowerManager.goToSleep(SystemClock.uptimeMillis(),
                     PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
             // Ensure the device is locked
-            new LockPatternUtils(mContext).requireCredentialEntry(UserHandle.USER_ALL);
+            new LockPatternUtils(mContext).requireStrongAuth(
+                    STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW, UserHandle.USER_ALL);
             getWindowManager().lockNow(null);
         } catch (RemoteException e) {
         } finally {
