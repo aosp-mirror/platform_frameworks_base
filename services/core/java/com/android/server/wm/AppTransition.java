@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -651,7 +652,7 @@ public class AppTransition implements Dump {
      * when a thumbnail is specified with the activity options.
      */
     Animation createThumbnailAspectScaleAnimationLocked(int appWidth, int appHeight,
-            int deviceWidth, int transit) {
+            int deviceWidth) {
         Animation a;
         final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -659,7 +660,6 @@ public class AppTransition implements Dump {
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
 
         float scaleW = deviceWidth / thumbWidth;
-        float unscaledWidth = deviceWidth;
         float unscaledHeight = thumbHeight * scaleW;
         float unscaledStartY = mNextAppTransitionStartY - (unscaledHeight - thumbHeight) / 2f;
         if (mNextAppTransitionScaleUp) {
@@ -716,7 +716,7 @@ public class AppTransition implements Dump {
      */
     Animation createAspectScaledThumbnailEnterExitAnimationLocked(int thumbTransitState,
             int appWidth, int appHeight, int orientation, int transit, Rect containingFrame,
-            Rect contentInsets) {
+            Rect contentInsets, @Nullable Rect surfaceInsets, boolean resizedWindow) {
         Animation a;
         final int thumbWidthI = mNextAppTransitionStartWidth;
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -729,40 +729,45 @@ public class AppTransition implements Dump {
 
         switch (thumbTransitState) {
             case THUMBNAIL_TRANSITION_ENTER_SCALE_UP: {
-                // App window scaling up to become full screen
-                if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    // In portrait, we scale the width and clip to the top/left square
-                    scale = thumbWidth / appWidth;
-                    scaledTopDecor = (int) (scale * contentInsets.top);
-                    int unscaledThumbHeight = (int) (thumbHeight / scale);
-                    mTmpFromClipRect.set(containingFrame);
-                    mTmpFromClipRect.bottom = (mTmpFromClipRect.top + unscaledThumbHeight);
-                    mTmpToClipRect.set(containingFrame);
+                if (resizedWindow) {
+                    a = createAspectScaledThumbnailEnterNonFullscreenAnimationLocked(
+                            containingFrame, surfaceInsets);
                 } else {
-                    // In landscape, we scale the height and clip to the top/left square
-                    scale = thumbHeight / (appHeight - contentInsets.top);
-                    scaledTopDecor = (int) (scale * contentInsets.top);
-                    int unscaledThumbWidth = (int) (thumbWidth / scale);
-                    mTmpFromClipRect.set(containingFrame);
-                    mTmpFromClipRect.right = (mTmpFromClipRect.left + unscaledThumbWidth);
-                    mTmpToClipRect.set(containingFrame);
+                    // App window scaling up to become full screen
+                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        // In portrait, we scale the width and clip to the top/left square
+                        scale = thumbWidth / appWidth;
+                        scaledTopDecor = (int) (scale * contentInsets.top);
+                        int unscaledThumbHeight = (int) (thumbHeight / scale);
+                        mTmpFromClipRect.set(containingFrame);
+                        mTmpFromClipRect.bottom = (mTmpFromClipRect.top + unscaledThumbHeight);
+                        mTmpToClipRect.set(containingFrame);
+                    } else {
+                        // In landscape, we scale the height and clip to the top/left square
+                        scale = thumbHeight / (appHeight - contentInsets.top);
+                        scaledTopDecor = (int) (scale * contentInsets.top);
+                        int unscaledThumbWidth = (int) (thumbWidth / scale);
+                        mTmpFromClipRect.set(containingFrame);
+                        mTmpFromClipRect.right = (mTmpFromClipRect.left + unscaledThumbWidth);
+                        mTmpToClipRect.set(containingFrame);
+                    }
+                    // exclude top screen decor (status bar) region from the source clip.
+                    mTmpFromClipRect.top = contentInsets.top;
+
+                    mNextAppTransitionInsets.set(contentInsets);
+
+                    Animation scaleAnim = new ScaleAnimation(scale, 1, scale, 1,
+                            computePivot(mNextAppTransitionStartX, scale),
+                            computePivot(mNextAppTransitionStartY, scale));
+                    Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+                    Animation translateAnim = new TranslateAnimation(0, 0, -scaledTopDecor, 0);
+
+                    AnimationSet set = new AnimationSet(true);
+                    set.addAnimation(clipAnim);
+                    set.addAnimation(scaleAnim);
+                    set.addAnimation(translateAnim);
+                    a = set;
                 }
-                // exclude top screen decor (status bar) region from the source clip.
-                mTmpFromClipRect.top = contentInsets.top;
-
-                mNextAppTransitionInsets.set(contentInsets);
-
-                Animation scaleAnim = new ScaleAnimation(scale, 1, scale, 1,
-                        computePivot(mNextAppTransitionStartX, scale),
-                        computePivot(mNextAppTransitionStartY, scale));
-                Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-                Animation translateAnim = new TranslateAnimation(0, 0, -scaledTopDecor, 0);
-
-                AnimationSet set = new AnimationSet(true);
-                set.addAnimation(clipAnim);
-                set.addAnimation(scaleAnim);
-                set.addAnimation(translateAnim);
-                a = set;
                 break;
             }
             case THUMBNAIL_TRANSITION_EXIT_SCALE_UP: {
@@ -836,6 +841,31 @@ public class AppTransition implements Dump {
                 mTouchResponseInterpolator);
     }
 
+    private Animation createAspectScaledThumbnailEnterNonFullscreenAnimationLocked(
+            Rect containingFrame, @Nullable Rect surfaceInsets) {
+        float width = containingFrame.width();
+        float height = containingFrame.height();
+        float scaleWidth = mNextAppTransitionStartWidth / width;
+        float scaleHeight = mNextAppTransitionStartHeight / height;
+        AnimationSet set = new AnimationSet(true);
+        int surfaceInsetsHorizontal = surfaceInsets == null
+                ? 0 : surfaceInsets.left + surfaceInsets.right;
+        int surfaceInsetsVertical = surfaceInsets == null
+                ? 0 : surfaceInsets.top + surfaceInsets.bottom;
+        // We want the scaling to happen from the center of the surface. In order to achieve that,
+        // we need to account for surface insets that will be used to enlarge the surface.
+        ScaleAnimation scale = new ScaleAnimation(scaleWidth, 1, scaleHeight, 1,
+                (width + surfaceInsetsHorizontal) / 2, (height + surfaceInsetsVertical) / 2);
+        int fromX = mNextAppTransitionStartX + mNextAppTransitionStartWidth / 2
+                - (containingFrame.left + containingFrame.width() / 2);
+        int fromY = mNextAppTransitionStartY + mNextAppTransitionStartHeight / 2
+                - (containingFrame.top + containingFrame.height() / 2);
+        TranslateAnimation translation = new TranslateAnimation(fromX, 0, fromY, 0);
+        set.addAnimation(scale);
+        set.addAnimation(translation);
+        return set;
+    }
+
     /**
      * This animation runs for the thumbnail that gets cross faded with the enter/exit activity
      * when a thumbnail is specified with the activity options.
@@ -881,7 +911,7 @@ public class AppTransition implements Dump {
      * leaving, and the activity that is entering.
      */
     Animation createThumbnailEnterExitAnimationLocked(int thumbTransitState, int appWidth,
-                                                    int appHeight, int transit) {
+            int appHeight, int transit) {
         Animation a;
         final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -954,7 +984,8 @@ public class AppTransition implements Dump {
 
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
             int appWidth, int appHeight, int orientation, Rect containingFrame, Rect contentInsets,
-            Rect appFrame, boolean isVoiceInteraction) {
+            @Nullable Rect surfaceInsets, Rect appFrame, boolean isVoiceInteraction,
+            boolean resizedWindow) {
         Animation a;
         if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_OPEN
                 || transit == TRANSIT_TASK_OPEN
@@ -1023,8 +1054,8 @@ public class AppTransition implements Dump {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP);
             a = createAspectScaledThumbnailEnterExitAnimationLocked(
-                    getThumbnailTransitionState(enter), appWidth, appHeight, orientation,
-                    transit, containingFrame, contentInsets);
+                    getThumbnailTransitionState(enter), appWidth, appHeight, orientation, transit,
+                    containingFrame, contentInsets, surfaceInsets, resizedWindow);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 String animName = mNextAppTransitionScaleUp ?
                         "ANIM_THUMBNAIL_ASPECT_SCALE_UP" : "ANIM_THUMBNAIL_ASPECT_SCALE_DOWN";
