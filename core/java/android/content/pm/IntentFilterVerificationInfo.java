@@ -19,6 +19,7 @@ package android.content.pm;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 
 import android.os.Parcel;
@@ -197,6 +198,10 @@ public final class IntentFilterVerificationInfo implements Parcelable {
 
             case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER:
                 sb.append("never");
+                break;
+
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK:
+                sb.append("always-ask");
                 break;
 
             case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
