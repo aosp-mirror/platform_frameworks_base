@@ -1073,6 +1073,18 @@ public abstract class PackageManager {
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER = 3;
 
     /**
+     * Used as the {@code status} argument for {@link PackageManager#updateIntentVerificationStatus}
+     * to indicate that this app should always be considered as an ambiguous candidate for
+     * handling the matching Intent even if there are other candidate apps in the "always"
+     * state.  Put another way: if there are any 'always ask' apps in a set of more than
+     * one candidate app, then a disambiguation is *always* presented even if there is
+     * another candidate app with the 'always' state.
+     *
+     * @hide
+     */
+    public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK = 4;
+
+    /**
      * Can be used as the {@code millisecondsToDelay} argument for
      * {@link PackageManager#extendVerificationTimeout}. This is the
      * maximum time {@code PackageManager} waits for the verification

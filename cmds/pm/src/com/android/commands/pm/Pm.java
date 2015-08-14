@@ -19,6 +19,7 @@ package com.android.commands.pm;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 
 import android.app.ActivityManager;
@@ -844,7 +845,7 @@ public final class Pm {
         return Integer.toString(result);
     }
 
-    // pm set-app-link [--user USER_ID] PACKAGE {always|ask|never|undefined}
+    // pm set-app-link [--user USER_ID] PACKAGE {always|ask|always-ask|never|undefined}
     private int runSetAppLink() {
         int userId = UserHandle.USER_SYSTEM;
 
@@ -891,6 +892,10 @@ public final class Pm {
 
             case "ask":
                 newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+                break;
+
+            case "always-ask":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
                 break;
 
             case "never":
