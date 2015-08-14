@@ -44087,6 +44087,8 @@ package android.widget {
     method public void dispatchDraw(android.graphics.Canvas);
     method public void focusCurrentTab(int);
     method public android.view.View getChildTabViewAt(int);
+    method public android.graphics.drawable.Drawable getLeftStripDrawable();
+    method public android.graphics.drawable.Drawable getRightStripDrawable();
     method public int getTabCount();
     method public boolean isStripEnabled();
     method public void onFocusChange(android.view.View, boolean);

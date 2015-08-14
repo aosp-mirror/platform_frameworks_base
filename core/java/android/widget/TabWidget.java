@@ -256,6 +256,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * indicators.
      *
      * @param drawable the left strip drawable
+     * @see #getLeftStripDrawable()
      * @attr ref android.R.styleable#TabWidget_tabStripLeft
      */
     public void setLeftStripDrawable(@Nullable Drawable drawable) {
@@ -270,6 +271,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      *
      * @param resId the resource identifier of the drawable to use as the left
      *              strip drawable
+     * @see #getLeftStripDrawable()
      * @attr ref android.R.styleable#TabWidget_tabStripLeft
      */
     public void setLeftStripDrawable(@DrawableRes int resId) {
@@ -277,10 +279,23 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     }
 
     /**
+     * @return the drawable used as the left part of the strip below the tab
+     *         indicators, may be {@code null}
+     * @see #setLeftStripDrawable(int)
+     * @see #setLeftStripDrawable(Drawable)
+     * @attr ref android.R.styleable#TabWidget_tabStripLeft
+     */
+    @Nullable
+    public Drawable getLeftStripDrawable() {
+        return mLeftStrip;
+    }
+
+    /**
      * Sets the drawable to use as the right part of the strip below the tab
      * indicators.
      *
      * @param drawable the right strip drawable
+     * @see #getRightStripDrawable()
      * @attr ref android.R.styleable#TabWidget_tabStripRight
      */
     public void setRightStripDrawable(@Nullable Drawable drawable) {
@@ -295,10 +310,23 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      *
      * @param resId the resource identifier of the drawable to use as the right
      *              strip drawable
+     * @see #getRightStripDrawable()
      * @attr ref android.R.styleable#TabWidget_tabStripRight
      */
     public void setRightStripDrawable(@DrawableRes int resId) {
         setRightStripDrawable(mContext.getDrawable(resId));
+    }
+
+    /**
+     * @return the drawable used as the right part of the strip below the tab
+     *         indicators, may be {@code null}
+     * @see #setRightStripDrawable(int)
+     * @see #setRightStripDrawable(Drawable)
+     * @attr ref android.R.styleable#TabWidget_tabStripRight
+     */
+    @Nullable
+    public Drawable getRightStripDrawable() {
+        return mRightStrip;
     }
 
     /**
