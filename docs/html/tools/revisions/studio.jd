@@ -30,7 +30,7 @@ everything you need to begin developing Android apps:</p>
 <a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.</p>
 
 <p>Periodic updates are pushed to Android Studio without requiring you to update your Android
-project. To manually check for updates, select <strong>Help > Check for updates</strong> (on Mac,
+project. To manually check for updates, select <strong>Help > Check for update</strong> (on Mac,
 select <strong>Android Studio > Check for updates</strong>).</p>
 
 
@@ -39,10 +39,66 @@ select <strong>Android Studio > Check for updates</strong>).</p>
 <p>The sections below provide notes about successive releases of
 Android Studio, as denoted by revision number. </p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.3.0</a> <em>(July 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+      <li>Added options to enable
+        <a href="{@docRoot}tools/studio/studio-features.html#dev-services">developer services</a>,
+        such as <a href="https://developers.google.com/admob/">AdMob</a> and
+        <a href="{@docRoot}distribute/analyze/start.html">Analytics</a>, in your app from within
+        Android Studio. </li>
+      <li>Added additional <a href="{@docRoot}tools/debugging/annotations.html">annotations</a>,
+        such as <code>@RequiresPermission</code>, <code>@CheckResults</code>, and
+        <code>@MainThread</code>. </li>
+      <li>Added the capability to generate Java heap dumps and analyze thread allocations from the
+        <a href="{@docRoot}tools/studio/index.html#mem-cpu">Memory Monitor</a>. You can also
+        convert Android-specific HPROF binary format files to standard HPROF format from within
+        Android Studio. </li>
+      <li>Integrated the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
+        into Android Studio to simplify package and tools access and provide update notifications.
+        <p class="note"><strong>Note:</strong> The standalone SDK Manager is still available from
+        the command line, but is recommended for use with only Eclipse ADT and standalone SDK
+        installations. </p> </li>
+      <li>Added the <code>finger</code> command in the emulator console to simulate
+        <a href="{@docRoot}tools/studio/studio-features.html#finger-print">fingerprint</a>
+        authentication.  </li>
+      <li>Added a <code>&lt;public&gt;</code> resource declaration to designate library
+         resources as
+         <a href="{@docRoot}tools/studio/studio-features.html#private-res">public and private</a>
+         resources.
+         <p class="note"><strong>Note:</strong> Requires
+         <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin for Gradle</a>
+         version 1.3 or higher. </p> </li>
+      <li>Added <a href="{@docRoot}tools/data-binding/guide.html">data binding</a> support to
+        create declarative layouts that bind your application logic to layout elements. </li>
+      <li>Added support for a separate
+        <a href="{@docRoot}tools/studio/studio-features.html#test-module">test APK module</a> 
+        to build test APKs in Android Studio.  </li>
+      <li>Updated the <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a> with HAXM
+        optimizations and improved notifications. </li>
+      <li>Added 64-bit ARM and MIPS emulator support for
+        <a class="external-link" href="http://wiki.qemu.org/Main_Page">QEMU</a> 2.1. </li>
+      <li>Simplified the resolution of <a href="{@docRoot}tools/help/lint.html">lint</a> warnings
+        by adding quick fixes, such as the automatic generation of
+        <a href="{@docRoot}reference/android/os/Parcelable.html">Parcelable</a>
+        implementation.</li>
+      <li>Added <a href="{@docRoot}sdk/installing/studio-tips.html#live-templates">live template</a>
+        support for quick insertion of code snippets. </li>
+    </ul>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.2.2</a> <em>(June 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
