@@ -50,8 +50,6 @@ public class DozeParameters {
         pw.print("    getPulseDuration(pickup=true): "); pw.println(getPulseDuration(true));
         pw.print("    getPulseInDuration(pickup=false): "); pw.println(getPulseInDuration(false));
         pw.print("    getPulseInDuration(pickup=true): "); pw.println(getPulseInDuration(true));
-        pw.print("    getPulseInDelay(pickup=false): "); pw.println(getPulseInDelay(false));
-        pw.print("    getPulseInDelay(pickup=true): "); pw.println(getPulseInDelay(true));
         pw.print("    getPulseInVisibleDuration(): "); pw.println(getPulseVisibleDuration());
         pw.print("    getPulseOutDuration(): "); pw.println(getPulseOutDuration());
         pw.print("    getPulseOnSigMotion(): "); pw.println(getPulseOnSigMotion());
@@ -78,12 +76,6 @@ public class DozeParameters {
         return pickup
                 ? getInt("doze.pulse.duration.in.pickup", R.integer.doze_pulse_duration_in_pickup)
                 : getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
-    }
-
-    public int getPulseInDelay(boolean pickup) {
-        return pickup
-                ? getInt("doze.pulse.delay.in.pickup", R.integer.doze_pulse_delay_in_pickup)
-                : getInt("doze.pulse.delay.in", R.integer.doze_pulse_delay_in);
     }
 
     public int getPulseVisibleDuration() {

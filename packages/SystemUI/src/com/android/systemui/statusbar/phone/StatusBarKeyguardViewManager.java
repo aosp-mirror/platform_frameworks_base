@@ -162,14 +162,14 @@ public class StatusBarKeyguardViewManager {
 
     public void onFinishedGoingToSleep() {
         mDeviceInteractive = false;
-        mPhoneStatusBar.onScreenTurnedOff();
+        mPhoneStatusBar.onFinishedGoingToSleep();
         mBouncer.onScreenTurnedOff();
     }
 
     public void onStartedWakingUp() {
         mDeviceInteractive = true;
         mDeviceWillWakeUp = false;
-        mPhoneStatusBar.onScreenTurnedOn();
+        mPhoneStatusBar.onStartedWakingUp();
     }
 
     public void onScreenTurningOn() {
@@ -184,6 +184,7 @@ public class StatusBarKeyguardViewManager {
             animateScrimControllerKeyguardFadingOut(0, 200);
             updateStates();
         }
+        mPhoneStatusBar.onScreenTurnedOn();
     }
 
     public void onScreenTurnedOff() {
