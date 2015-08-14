@@ -60,7 +60,7 @@ public class MultiSelectManagerTest {
         mAdapter = new TestAdapter(items);
         mCallback = new TestCallback();
         mEventHelper = new EventHelper();
-        mManager = new MultiSelectManager(mAdapter, mEventHelper);
+        mManager = new MultiSelectManager(mAdapter, mEventHelper, MultiSelectManager.MODE_MULTIPLE);
         mManager.addCallback(mCallback);
     }
 
@@ -188,6 +188,24 @@ public class MultiSelectManagerTest {
         assertRangeSelection(0, 7);
     }
 
+    @Test
+    public void singleSelectMode() {
+        mManager = new MultiSelectManager(mAdapter, mEventHelper, MultiSelectManager.MODE_SINGLE);
+        mManager.addCallback(mCallback);
+        tap(20);
+        tap(13);
+        assertSelection(13);
+    }
+
+    @Test
+    public void singleSelectMode_ShiftTap() {
+        mManager = new MultiSelectManager(mAdapter, mEventHelper, MultiSelectManager.MODE_SINGLE);
+        mManager.addCallback(mCallback);
+        tap(13);
+        shiftTap(20);
+        assertSelection(20);
+    }
+
     private void tap(int position) {
         mManager.onSingleTapUp(position, 0, MotionEvent.TOOL_TYPE_MOUSE);
     }
@@ -257,6 +275,9 @@ public class MultiSelectManagerTest {
         public boolean onBeforeItemStateChange(int position, boolean selected) {
             return !ignored.contains(position);
         }
+
+        @Override
+        public void onSelectionChanged() {}
     }
 
     private static final class TestHolder extends RecyclerView.ViewHolder {

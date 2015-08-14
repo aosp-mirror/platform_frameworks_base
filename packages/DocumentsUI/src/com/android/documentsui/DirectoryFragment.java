@@ -85,7 +85,6 @@ import android.view.View;
 import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -153,7 +152,6 @@ public class DirectoryFragment extends Fragment {
     // These are lazily initialized.
     private LinearLayoutManager mListLayout;
     private GridLayoutManager mGridLayout;
-    private OnLayoutChangeListener mRecyclerLayoutListener;
     private int mColumnCount = 1;  // This will get updated when layout changes.
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
@@ -294,7 +292,13 @@ public class DirectoryFragment extends Fragment {
                     }
                 };
 
-        mSelectionManager = new MultiSelectManager(mRecView, listener);
+        mSelectionManager = new MultiSelectManager(
+                mRecView,
+                listener,
+                state.allowMultiple
+                    ? MultiSelectManager.MODE_MULTIPLE
+                    : MultiSelectManager.MODE_SINGLE);
+
         mSelectionManager.addCallback(new SelectionModeListener());
 
         mType = getArguments().getInt(EXTRA_TYPE);
@@ -431,7 +435,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     private boolean onSingleTapUp(MotionEvent e) {
-        if (!Events.isMouseEvent(e)) {
+        if (Events.isTouchEvent(e) && mSelectionManager.getSelection().isEmpty()) {
             int position = getEventAdapterPosition(e);
             if (position != RecyclerView.NO_POSITION) {
                 return handleViewItem(position);
@@ -531,13 +535,6 @@ public class DirectoryFragment extends Fragment {
 
         updateLayout(state.derivedMode);
 
-        final int choiceMode;
-        if (state.allowMultiple) {
-            choiceMode = ListView.CHOICE_MODE_MULTIPLE_MODAL;
-        } else {
-            choiceMode = ListView.CHOICE_MODE_NONE;
-        }
-
         final int thumbSize = getResources().getDimensionPixelSize(R.dimen.icon_size);
         mThumbSize = new Point(thumbSize, thumbSize);
         mRecView.setAdapter(mAdapter);
@@ -622,7 +619,10 @@ public class DirectoryFragment extends Fragment {
             if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
                 mNoDeleteCount += selected ? 1 : -1;
             }
+        }
 
+        @Override
+        public void onSelectionChanged() {
             mSelectionManager.getSelection(mSelected);
             if (mSelected.size() > 0) {
                 if (DEBUG) Log.d(TAG, "Maybe starting action mode.");
