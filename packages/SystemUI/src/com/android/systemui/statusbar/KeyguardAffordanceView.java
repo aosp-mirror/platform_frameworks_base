@@ -36,6 +36,7 @@ import android.view.ViewAnimationUtils;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardAffordanceHelper;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -79,6 +80,7 @@ public class KeyguardAffordanceView extends ImageView {
     private float mRestingAlpha = KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT;
     private boolean mSupportHardware;
     private boolean mFinishing;
+    private boolean mLaunchingAffordance;
 
     private CanvasProperty<Float> mHwCircleRadius;
     private CanvasProperty<Float> mHwCenterX;
@@ -152,7 +154,7 @@ public class KeyguardAffordanceView extends ImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        mSupportHardware = canvas.isHardwareAccelerated();
+        mSupportHardware = false;//canvas.isHardwareAccelerated();
         drawBackgroundCircle(canvas);
         canvas.save();
         canvas.scale(mImageScale, mImageScale, getWidth() / 2, getHeight() / 2);
@@ -161,9 +163,11 @@ public class KeyguardAffordanceView extends ImageView {
     }
 
     public void setPreviewView(View v) {
+        View oldPreviewView = mPreviewView;
         mPreviewView = v;
         if (mPreviewView != null) {
-            mPreviewView.setVisibility(INVISIBLE);
+            mPreviewView.setVisibility(mLaunchingAffordance
+                    ? oldPreviewView.getVisibility() : INVISIBLE);
         }
     }
 
@@ -176,7 +180,7 @@ public class KeyguardAffordanceView extends ImageView {
     }
 
     private void drawBackgroundCircle(Canvas canvas) {
-        if (mCircleRadius > 0) {
+        if (mCircleRadius > 0 || mFinishing) {
             if (mFinishing && mSupportHardware) {
                 DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
                 displayListCanvas.drawCircle(mHwCenterX, mHwCenterY, mHwCircleRadius,
@@ -207,11 +211,12 @@ public class KeyguardAffordanceView extends ImageView {
         cancelAnimator(mPreviewClipper);
         mFinishing = true;
         mCircleStartRadius = mCircleRadius;
-        float maxCircleSize = getMaxCircleSize();
+        final float maxCircleSize = getMaxCircleSize();
         Animator animatorToRadius;
         if (mSupportHardware) {
             initHwProperties();
             animatorToRadius = getRtAnimatorToRadius(maxCircleSize);
+            startRtAlphaFadeIn();
         } else {
             animatorToRadius = getAnimatorToRadius(maxCircleSize);
         }
@@ -222,6 +227,8 @@ public class KeyguardAffordanceView extends ImageView {
             public void onAnimationEnd(Animator animation) {
                 mAnimationEndRunnable.run();
                 mFinishing = false;
+                mCircleRadius = maxCircleSize;
+                invalidate();
             }
         });
         animatorToRadius.start();
@@ -239,6 +246,36 @@ public class KeyguardAffordanceView extends ImageView {
                 startRtCircleFadeOut(animatorToRadius.getDuration());
             }
         }
+    }
+
+    /**
+     * Fades in the Circle on the RenderThread. It's used when finishing the circle when it had
+     * alpha 0 in the beginning.
+     */
+    private void startRtAlphaFadeIn() {
+        if (mCircleRadius == 0 && mPreviewView == null) {
+            Paint modifiedPaint = new Paint(mCirclePaint);
+            modifiedPaint.setColor(mCircleColor);
+            modifiedPaint.setAlpha(0);
+            mHwCirclePaint = CanvasProperty.createPaint(modifiedPaint);
+            RenderNodeAnimator animator = new RenderNodeAnimator(mHwCirclePaint,
+                    RenderNodeAnimator.PAINT_ALPHA, 255);
+            animator.setTarget(this);
+            animator.setInterpolator(PhoneStatusBar.ALPHA_IN);
+            animator.setDuration(250);
+            animator.start();
+        }
+    }
+
+    public void instantFinishAnimation() {
+        cancelAnimator(mPreviewClipper);
+        if (mPreviewView != null) {
+            mPreviewView.setClipBounds(null);
+            mPreviewView.setVisibility(View.VISIBLE);
+        }
+        mCircleRadius = getMaxCircleSize();
+        setImageAlpha(0, false);
+        invalidate();
     }
 
     private void startRtCircleFadeOut(long duration) {
@@ -443,6 +480,7 @@ public class KeyguardAffordanceView extends ImageView {
     public void setImageAlpha(float alpha, boolean animate, long duration,
             Interpolator interpolator, Runnable runnable) {
         cancelAnimator(mAlphaAnimator);
+        alpha = mLaunchingAffordance ? 0 : alpha;
         int endAlpha = (int) (alpha * 255);
         final Drawable background = getBackground();
         if (!animate) {
@@ -508,5 +546,9 @@ public class KeyguardAffordanceView extends ImageView {
         } else {
             return false;
         }
+    }
+
+    public void setLaunchingAffordance(boolean launchingAffordance) {
+        mLaunchingAffordance = launchingAffordance;
     }
 }

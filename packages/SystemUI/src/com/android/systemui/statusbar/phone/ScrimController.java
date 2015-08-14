@@ -87,6 +87,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private View mDraggedHeadsUpView;
     private boolean mForceHideScrims;
     private boolean mSkipFirstFrame;
+    private boolean mDontAnimateBouncerChanges;
 
     public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
             boolean scrimSrcEnabled) {
@@ -125,7 +126,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void setBouncerShowing(boolean showing) {
         mBouncerShowing = showing;
-        mAnimateChange = !mExpanding;
+        mAnimateChange = !mExpanding && !mDontAnimateBouncerChanges;
         scheduleUpdate();
     }
 
@@ -360,6 +361,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public boolean onPreDraw() {
         mScrimBehind.getViewTreeObserver().removeOnPreDrawListener(this);
         mUpdatePending = false;
+        if (mDontAnimateBouncerChanges) {
+            mDontAnimateBouncerChanges = false;
+        }
         updateScrims();
         mDurationOverride = -1;
         mAnimationDelay = 0;
@@ -495,5 +499,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mForceHideScrims = hide;
         mAnimateChange = false;
         scheduleUpdate();
+    }
+
+    public void dontAnimateBouncerChangesUntilNextFrame() {
+        mDontAnimateBouncerChanges = true;
     }
 }

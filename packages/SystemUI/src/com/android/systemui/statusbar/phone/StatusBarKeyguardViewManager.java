@@ -179,6 +179,10 @@ public class StatusBarKeyguardViewManager {
         mPhoneStatusBar.onScreenTurningOn();
     }
 
+    public boolean isScreenTurnedOn() {
+        return mScreenTurnedOn;
+    }
+
     public void onScreenTurnedOn() {
         mScreenTurnedOn = true;
         if (mDeferScrimFadeOut) {
@@ -385,6 +389,7 @@ public class StatusBarKeyguardViewManager {
      */
     public boolean onBackPressed() {
         if (mBouncer.isShowing()) {
+            mPhoneStatusBar.endAffordanceLaunch();
             reset();
             return true;
         }
