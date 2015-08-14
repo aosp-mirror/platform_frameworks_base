@@ -29,6 +29,14 @@ startpage=true
 </div>
 </div>
 
+<a class="notice-developers-video wide"
+href="https://www.youtube.com/watch?v=S8sugXgUVEI">
+<div>
+    <h3>Video</h3>
+    <p>Activity Recognition</p>
+  </div>
+  </a>
+
 <p>
   One of the unique features of mobile applications is location awareness.
   Mobile users take their devices with them everywhere, and adding location
