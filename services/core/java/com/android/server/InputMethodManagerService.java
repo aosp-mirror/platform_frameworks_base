@@ -145,9 +145,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final boolean DEBUG_RESTORE = DEBUG || false;
     static final String TAG = "InputMethodManagerService";
 
-    private static final char INPUT_METHOD_SEPARATOR = ':';
-    private static final char INPUT_METHOD_SUBTYPE_SEPARATOR = ';';
-
     static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
     static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 2;
     static final int MSG_SHOW_IM_CONFIG = 3;
@@ -528,8 +525,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.i(TAG, " new=" + newValue);
         }
         // 'new' is the just-restored state, 'prev' is what was in settings prior to the restore
-        ArrayMap<String, ArraySet<String>> prevMap = parseInputMethodsAndSubtypesString(prevValue);
-        ArrayMap<String, ArraySet<String>> newMap = parseInputMethodsAndSubtypesString(newValue);
+        ArrayMap<String, ArraySet<String>> prevMap =
+                InputMethodUtils.parseInputMethodsAndSubtypesString(prevValue);
+        ArrayMap<String, ArraySet<String>> newMap =
+                InputMethodUtils.parseInputMethodsAndSubtypesString(newValue);
 
         // Merge the restored ime+subtype enabled states into the live state
         for (ArrayMap.Entry<String, ArraySet<String>> entry : newMap.entrySet()) {
@@ -566,32 +565,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             imeMap.add(new Pair<>(imeName, subtypes));
         }
         return InputMethodSettings.buildInputMethodsSettingString(imeMap);
-    }
-
-    // TODO: Move this method to InputMethodUtils with adding unit tests.
-    static ArrayMap<String, ArraySet<String>> parseInputMethodsAndSubtypesString(
-            final String inputMethodsAndSubtypesString) {
-        final ArrayMap<String, ArraySet<String>> imeMap = new ArrayMap<>();
-        if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
-            return imeMap;
-        }
-
-        final SimpleStringSplitter typeSplitter =
-                new SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
-        final SimpleStringSplitter subtypeSplitter =
-                new SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
-        List<Pair<String, ArrayList<String>>> allImeSettings =
-                InputMethodSettings.buildInputMethodsAndSubtypeList(inputMethodsAndSubtypesString,
-                        typeSplitter,
-                        subtypeSplitter);
-        for (Pair<String, ArrayList<String>> ime : allImeSettings) {
-            ArraySet<String> subtypes = new ArraySet<>();
-            if (ime.second != null) {
-                subtypes.addAll(ime.second);
-            }
-            imeMap.put(ime.first, subtypes);
-        }
-        return imeMap;
     }
 
     class MyPackageMonitor extends PackageMonitor {

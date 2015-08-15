@@ -29,6 +29,9 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.text.TextUtils.SimpleStringSplitter;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
@@ -61,6 +64,8 @@ public class InputMethodUtils {
     private static final String TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE =
             "EnabledWhenDefaultIsNotAsciiCapable";
     private static final String TAG_ASCII_CAPABLE = "AsciiCapable";
+    private static final char INPUT_METHOD_SEPARATOR = ':';
+    private static final char INPUT_METHOD_SUBTYPE_SEPARATOR = ';';
     /**
      * Used in {@link #getFallbackLocaleForDefaultIme(ArrayList, Context)} to find the fallback IMEs
      * that are mainly used until the system becomes ready. Note that {@link Locale} in this array
@@ -763,6 +768,40 @@ public class InputMethodUtils {
         } catch (SecurityException e) {
             return false;
         }
+    }
+
+    /**
+     * Parses the setting stored input methods and subtypes string value.
+     *
+     * @param inputMethodsAndSubtypesString The input method subtypes value stored in settings.
+     * @return Map from input method ID to set of input method subtypes IDs.
+     */
+    @VisibleForTesting
+    public static ArrayMap<String, ArraySet<String>> parseInputMethodsAndSubtypesString(
+            @Nullable final String inputMethodsAndSubtypesString) {
+
+        final ArrayMap<String, ArraySet<String>> imeMap = new ArrayMap<String, ArraySet<String>>();
+        if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
+            return imeMap;
+        }
+
+        final SimpleStringSplitter typeSplitter =
+                new SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
+        final SimpleStringSplitter subtypeSplitter =
+                new SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
+
+        List<Pair<String, ArrayList<String>>> allImeSettings =
+                InputMethodSettings.buildInputMethodsAndSubtypeList(inputMethodsAndSubtypesString,
+                        typeSplitter,
+                        subtypeSplitter);
+        for (Pair<String, ArrayList<String>> ime : allImeSettings) {
+            ArraySet<String> subtypes = new ArraySet<String>();
+            if (ime.second != null) {
+                subtypes.addAll(ime.second);
+            }
+            imeMap.put(ime.first, subtypes);
+        }
+        return imeMap;
     }
 
     /**

@@ -23,9 +23,11 @@ import android.content.pm.ServiceInfo;
 import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
+import android.view.inputmethod.InputMethodSubtype;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -945,6 +947,131 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             assertEquals(LOCALE_EN_US, locales.get(2));
             assertEquals(LOCALE_EN_GB, locales.get(3));
             assertEquals(Locale.ENGLISH, locales.get(4));
+        }
+    }
+
+    public void testParseInputMethodsAndSubtypesString() {
+        // Trivial cases.
+        {
+            assertTrue(InputMethodUtils.parseInputMethodsAndSubtypesString("").isEmpty());
+            assertTrue(InputMethodUtils.parseInputMethodsAndSubtypesString(null).isEmpty());
+        }
+
+        // No subtype cases.
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString("ime0");
+            assertEquals(1, r.size());
+            assertTrue(r.containsKey("ime0"));
+            assertTrue(r.get("ime0").isEmpty());
+        }
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString("ime0:ime1");
+            assertEquals(2, r.size());
+            assertTrue(r.containsKey("ime0"));
+            assertTrue(r.get("ime0").isEmpty());
+            assertTrue(r.containsKey("ime1"));
+            assertTrue(r.get("ime1").isEmpty());
+        }
+
+        // Input metho IDs and their subtypes.
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString("ime0;subtype0");
+            assertEquals(1, r.size());
+            assertTrue(r.containsKey("ime0"));
+            ArraySet<String> subtypes = r.get("ime0");
+            assertEquals(1, subtypes.size());
+            assertTrue(subtypes.contains("subtype0"));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString("ime0;subtype0;subtype0");
+            assertEquals(1, r.size());
+            assertTrue(r.containsKey("ime0"));
+            ArraySet<String> subtypes = r.get("ime0");
+            assertEquals(1, subtypes.size());
+            assertTrue(subtypes.contains("subtype0"));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString("ime0;subtype0;subtype1");
+            assertEquals(1, r.size());
+            assertTrue(r.containsKey("ime0"));
+            ArraySet<String> subtypes = r.get("ime0");
+            assertEquals(2, subtypes.size());
+            assertTrue(subtypes.contains("subtype0"));
+            assertTrue(subtypes.contains("subtype1"));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString(
+                            "ime0;subtype0:ime1;subtype1");
+            assertEquals(2, r.size());
+            assertTrue(r.containsKey("ime0"));
+            assertTrue(r.containsKey("ime1"));
+            ArraySet<String> subtypes0 = r.get("ime0");
+            assertEquals(1, subtypes0.size());
+            assertTrue(subtypes0.contains("subtype0"));
+
+            ArraySet<String> subtypes1 = r.get("ime1");
+            assertEquals(1, subtypes1.size());
+            assertTrue(subtypes1.contains("subtype1"));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString(
+                            "ime0;subtype0;subtype1:ime1;subtype2");
+            assertEquals(2, r.size());
+            assertTrue(r.containsKey("ime0"));
+            assertTrue(r.containsKey("ime1"));
+            ArraySet<String> subtypes0 = r.get("ime0");
+            assertEquals(2, subtypes0.size());
+            assertTrue(subtypes0.contains("subtype0"));
+            assertTrue(subtypes0.contains("subtype1"));
+
+            ArraySet<String> subtypes1 = r.get("ime1");
+            assertEquals(1, subtypes1.size());
+            assertTrue(subtypes1.contains("subtype2"));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString(
+                            "ime0;subtype0;subtype1:ime1;subtype1;subtype2");
+            assertEquals(2, r.size());
+            assertTrue(r.containsKey("ime0"));
+            assertTrue(r.containsKey("ime1"));
+            ArraySet<String> subtypes0 = r.get("ime0");
+            assertEquals(2, subtypes0.size());
+            assertTrue(subtypes0.contains("subtype0"));
+            assertTrue(subtypes0.contains("subtype1"));
+
+            ArraySet<String> subtypes1 = r.get("ime1");
+            assertEquals(2, subtypes1.size());
+            assertTrue(subtypes0.contains("subtype1"));
+            assertTrue(subtypes1.contains("subtype2"));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> r =
+                    InputMethodUtils.parseInputMethodsAndSubtypesString(
+                            "ime0;subtype0;subtype1:ime1;subtype1;subtype2:ime2");
+            assertEquals(3, r.size());
+            assertTrue(r.containsKey("ime0"));
+            assertTrue(r.containsKey("ime1"));
+            assertTrue(r.containsKey("ime2"));
+            ArraySet<String> subtypes0 = r.get("ime0");
+            assertEquals(2, subtypes0.size());
+            assertTrue(subtypes0.contains("subtype0"));
+            assertTrue(subtypes0.contains("subtype1"));
+
+            ArraySet<String> subtypes1 = r.get("ime1");
+            assertEquals(2, subtypes1.size());
+            assertTrue(subtypes0.contains("subtype1"));
+            assertTrue(subtypes1.contains("subtype2"));
+
+            ArraySet<String> subtypes2 = r.get("ime2");
+            assertTrue(subtypes2.isEmpty());
         }
     }
 }
