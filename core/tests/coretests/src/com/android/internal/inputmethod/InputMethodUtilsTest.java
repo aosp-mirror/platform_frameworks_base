@@ -1075,4 +1075,120 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             assertTrue(subtypes2.isEmpty());
         }
     }
+
+    @SmallTest
+    public void testbuildInputMethodsAndSubtypesString() {
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            assertEquals("", InputMethodUtils.buildInputMethodsAndSubtypesString(map));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            map.put("ime0", new ArraySet<String>());
+            assertEquals("ime0", InputMethodUtils.buildInputMethodsAndSubtypesString(map));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            ArraySet<String> subtypes1 = new ArraySet<>();
+            subtypes1.add("subtype0");
+            map.put("ime0", subtypes1);
+            assertEquals("ime0;subtype0", InputMethodUtils.buildInputMethodsAndSubtypesString(map));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            ArraySet<String> subtypes1 = new ArraySet<>();
+            subtypes1.add("subtype0");
+            subtypes1.add("subtype1");
+            map.put("ime0", subtypes1);
+
+            // We do not expect what order will be used to concatenate items in
+            // InputMethodUtils.buildInputMethodsAndSubtypesString() hence enumerate all possible
+            // permutations here.
+            ArraySet<String> validSequences = new ArraySet<>();
+            validSequences.add("ime0;subtype0;subtype1");
+            validSequences.add("ime0;subtype1;subtype0");
+            assertTrue(validSequences.contains(
+                    InputMethodUtils.buildInputMethodsAndSubtypesString(map)));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            map.put("ime0", new ArraySet<String>());
+            map.put("ime1", new ArraySet<String>());
+
+            ArraySet<String> validSequences = new ArraySet<>();
+            validSequences.add("ime0:ime1");
+            validSequences.add("ime1:ime0");
+            assertTrue(validSequences.contains(
+                    InputMethodUtils.buildInputMethodsAndSubtypesString(map)));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            ArraySet<String> subtypes1 = new ArraySet<>();
+            subtypes1.add("subtype0");
+            map.put("ime0", subtypes1);
+            map.put("ime1", new ArraySet<String>());
+
+            ArraySet<String> validSequences = new ArraySet<>();
+            validSequences.add("ime0;subtype0:ime1");
+            validSequences.add("ime1;ime0;subtype0");
+            assertTrue(validSequences.contains(
+                    InputMethodUtils.buildInputMethodsAndSubtypesString(map)));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            ArraySet<String> subtypes1 = new ArraySet<>();
+            subtypes1.add("subtype0");
+            subtypes1.add("subtype1");
+            map.put("ime0", subtypes1);
+            map.put("ime1", new ArraySet<String>());
+
+            ArraySet<String> validSequences = new ArraySet<>();
+            validSequences.add("ime0;subtype0;subtype1:ime1");
+            validSequences.add("ime0;subtype1;subtype0:ime1");
+            validSequences.add("ime1:ime0;subtype0;subtype1");
+            validSequences.add("ime1:ime0;subtype1;subtype0");
+            assertTrue(validSequences.contains(
+                    InputMethodUtils.buildInputMethodsAndSubtypesString(map)));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            ArraySet<String> subtypes1 = new ArraySet<>();
+            subtypes1.add("subtype0");
+            map.put("ime0", subtypes1);
+
+            ArraySet<String> subtypes2 = new ArraySet<>();
+            subtypes2.add("subtype1");
+            map.put("ime1", subtypes2);
+
+            ArraySet<String> validSequences = new ArraySet<>();
+            validSequences.add("ime0;subtype0:ime1;subtype1");
+            validSequences.add("ime1;subtype1:ime0;subtype0");
+            assertTrue(validSequences.contains(
+                    InputMethodUtils.buildInputMethodsAndSubtypesString(map)));
+        }
+        {
+            ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
+            ArraySet<String> subtypes1 = new ArraySet<>();
+            subtypes1.add("subtype0");
+            subtypes1.add("subtype1");
+            map.put("ime0", subtypes1);
+
+            ArraySet<String> subtypes2 = new ArraySet<>();
+            subtypes2.add("subtype2");
+            subtypes2.add("subtype3");
+            map.put("ime1", subtypes2);
+
+            ArraySet<String> validSequences = new ArraySet<>();
+            validSequences.add("ime0;subtype0;subtype1:ime1;subtype2;subtype3");
+            validSequences.add("ime0;subtype1;subtype0:ime1;subtype2;subtype3");
+            validSequences.add("ime0;subtype0;subtype1:ime1;subtype3;subtype2");
+            validSequences.add("ime0;subtype1;subtype0:ime1;subtype3;subtype2");
+            validSequences.add("ime1;subtype2;subtype3:ime0;subtype0;subtype1");
+            validSequences.add("ime2;subtype3;subtype2:ime0;subtype0;subtype1");
+            validSequences.add("ime3;subtype2;subtype3:ime0;subtype1;subtype0");
+            validSequences.add("ime4;subtype3;subtype2:ime0;subtype1;subtype0");
+            assertTrue(validSequences.contains(
+                    InputMethodUtils.buildInputMethodsAndSubtypesString(map)));
+        }
+    }
 }
