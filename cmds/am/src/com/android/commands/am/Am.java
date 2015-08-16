@@ -18,6 +18,8 @@
 
 package com.android.commands.am;
 
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
@@ -147,6 +149,7 @@ public class Am extends BaseCommand {
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am stack size-docked-stack-test: <STEP_SIZE> <l|t|r|b> [DELAY_MS]\n" +
                 "       am stack split <STACK_ID> <v|h> [INTENT]\n" +
                 "       am stack positiontask <TASK_ID> <STACK_ID> <POSITION>\n" +
                 "       am stack list\n" +
@@ -283,8 +286,11 @@ public class Am extends BaseCommand {
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
                 "   bottom (false) of <STACK_ID>.\n" +
                 "\n" +
-                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>" +
-                ".\n" +
+                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>." +
+                "\n" +
+                "am stack size-docked-stack-test: test command for sizing docked stack by\n" +
+                "   <STEP_SIZE> increments from the side <l>eft, <t>op, <r>ight, or <b>ottom\n" +
+                "   applying the optional [DELAY_MS] between each step.\n" +
                 "\n" +
                 "am stack split: split <STACK_ID> into 2 stacks <v>ertically or <h>orizontally\n" +
                 "   starting the new stack with [INTENT] if specified. If [INTENT] isn't\n" +
@@ -1951,6 +1957,8 @@ public class Am extends BaseCommand {
             runStackInfo();
         } else if (op.equals("split")) {
             runStackSplit();
+        } else if (op.equals("size-docked-stack-test")) {
+            runStackSizeDockedStackTest();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -2001,10 +2009,21 @@ public class Am extends BaseCommand {
             System.err.println("Error: invalid input bounds");
             return;
         }
+        resizeStack(stackId, bounds, 0);
+    }
+
+    private void resizeStack(int stackId, Rect bounds, int delayMs) throws Exception {
+        if (bounds == null) {
+            showError("Error: invalid input bounds");
+            return;
+        }
 
         try {
             mAm.resizeStack(stackId, bounds);
+            Thread.sleep(delayMs);
         } catch (RemoteException e) {
+            showError("Error: resizing stack " + e);
+        } catch (InterruptedException e) {
         }
     }
 
@@ -2097,6 +2116,100 @@ public class Am extends BaseCommand {
             mAm.resizeStack(currentStackInfo.stackId, currentStackBounds);
             mAm.resizeStack(newStackInfo.stackId, newStackBounds);
         } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackSizeDockedStackTest() throws Exception {
+        final int stepSize = Integer.valueOf(nextArgRequired());
+        final String side = nextArgRequired();
+        final String delayStr = nextArg();
+        final int delayMs = (delayStr != null) ? Integer.valueOf(delayStr) : 0;
+
+        Rect bounds;
+        try {
+            StackInfo info = mAm.getStackInfo(DOCKED_STACK_ID);
+            if (info == null) {
+                showError("Docked stack doesn't exist");
+                return;
+            }
+            if (info.bounds == null) {
+                showError("Docked stack doesn't have a bounds");
+                return;
+            }
+            bounds = info.bounds;
+        } catch (RemoteException e) {
+            showError("Unable to get docked stack info:" + e);
+            return;
+        }
+
+        final boolean horizontalGrowth = "l".equals(side) || "r".equals(side);
+        final int changeSize = (horizontalGrowth ? bounds.width() : bounds.height()) / 2;
+        int currentPoint;
+        switch (side) {
+            case "l":
+                currentPoint = bounds.left;
+                break;
+            case "r":
+                currentPoint = bounds.right;
+                break;
+            case "t":
+                currentPoint = bounds.top;
+                break;
+            case "b":
+                currentPoint = bounds.bottom;
+                break;
+            default:
+                showError("Unknown growth side: " + side);
+                return;
+        }
+
+        final int startPoint = currentPoint;
+        final int minPoint = currentPoint - changeSize;
+        final int maxPoint = currentPoint + changeSize;
+
+        int maxChange;
+        System.out.println("Shrinking docked stack side=" + side);
+        while (currentPoint > minPoint) {
+            maxChange = Math.min(stepSize, currentPoint - minPoint);
+            currentPoint -= maxChange;
+            setBoundsSide(bounds, side, currentPoint);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+        }
+
+        System.out.println("Growing docked stack side=" + side);
+        while (currentPoint < maxPoint) {
+            maxChange = Math.min(stepSize, maxPoint - currentPoint);
+            currentPoint += maxChange;
+            setBoundsSide(bounds, side, currentPoint);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+        }
+
+        System.out.println("Back to Original size side=" + side);
+        while (currentPoint > startPoint) {
+            maxChange = Math.min(stepSize, currentPoint - startPoint);
+            currentPoint -= maxChange;
+            setBoundsSide(bounds, side, currentPoint);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+        }
+    }
+
+    private void setBoundsSide(Rect bounds, String side, int value) {
+        switch (side) {
+            case "l":
+                bounds.left = value;
+                break;
+            case "r":
+                bounds.right = value;
+                break;
+            case "t":
+                bounds.top = value;
+                break;
+            case "b":
+                bounds.bottom = value;
+                break;
+            default:
+                showError("Unknown set side: " + side);
+                break;
         }
     }
 
