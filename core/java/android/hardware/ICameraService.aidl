@@ -35,7 +35,7 @@ interface ICameraService
     /**
      * Keep up-to-date with frameworks/av/include/camera/ICameraService.h
      */
-    int getNumberOfCameras();
+    int getNumberOfCameras(int type);
 
     // rest of 'int' return values in this file are actually status_t
 
