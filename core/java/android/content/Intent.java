@@ -7556,14 +7556,19 @@ public class Intent implements Parcelable, Cloneable {
             if (!first) {
                 b.append(' ');
             }
-            first = false;
+            b.append("clip={");
             if (clip) {
-                b.append("clip={");
                 mClipData.toShortString(b);
-                b.append('}');
             } else {
-                b.append("(has clip)");
+                if (mClipData.getDescription() != null) {
+                    first = !mClipData.getDescription().toShortStringTypesOnly(b);
+                } else {
+                    first = true;
+                }
+                mClipData.toShortStringShortItems(b, first);
             }
+            first = false;
+            b.append('}');
         }
         if (extras && mExtras != null) {
             if (!first) {
