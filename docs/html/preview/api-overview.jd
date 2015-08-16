@@ -103,8 +103,9 @@ the <a href="{@docRoot}training/articles/keystore.html">Android Keystore system<
 <h3 id="fingerprint-authentication">Fingerprint Authentication</h3>
 
 <p>To authenticate users via fingerprint scan, get an instance of the new
-{@code android.hardware.fingerprint.FingerprintManager} class and call the
-{@code FingerprintManager.authenticate()} method. Your app must be running on a compatible
+{@link android.hardware.fingerprint.FingerprintManager} class and call the
+{@link android.hardware.fingerprint.FingerprintManager#authenticate(android.hardware.fingerprint.FingerprintManager.CryptoObject, android.os.CancellationSignal, int, android.hardware.fingerprint.FingerprintManager.AuthenticationCallback, android.os.Handler) authenticate()}
+method. Your app must be running on a compatible
 device with a fingerprint sensor. You must implement the user interface for the fingerprint
 authentication flow on your app, and use the standard Android fingerprint icon in your UI.
 The Android fingerprint icon ({@code c_fp_40px.png}) is included in the
@@ -113,8 +114,8 @@ class="external-link">sample app</a>. If you are developing multiple apps that u
 authentication, note that each app must authenticate the user’s fingerprint independently.
 </p>
 
-<p>To use this feature in your app, first add the {@code USE_FINGERPRINT} permission in your
-manifest.</p>
+<p>To use this feature in your app, first add the
+  {@link android.Manifest.permission#USE_FINGERPRINT} permission in your manifest.</p>
 
 <pre>
 &lt;uses-permission
@@ -156,7 +157,7 @@ conjunction with a public or secret key implementation for user authentication.<
 
 <p>To set the timeout duration for which the same key can be re-used after a user is successfully
 authenticated, call the new
-{@code android.security.keystore.KeyGenParameterSpec.Builder.setUserAuthenticationValidityDurationSeconds()}
+{@link android.security.keystore.KeyGenParameterSpec.Builder#setUserAuthenticationValidityDurationSeconds(int) setUserAuthenticationValidityDurationSeconds()}
 method when you set up a {@link javax.crypto.KeyGenerator} or
 {@link java.security.KeyPairGenerator}.</p>
 
@@ -184,13 +185,13 @@ launch an activity in another social network app, which lets the user share cont
 specific friend or community in that app.</p>
 
 <p>To enable direct share targets you must define a class that extends the
-{@code android.service.} <br>
-{@code chooser.ChooserTargetService} class. Declare your
-{@code ChooserTargetService} in the manifest. Within that declaration, specify the
-{@code BIND_CHOOSER_TARGET_SERVICE} permission and an intent filter with the
-{@code SERVICE_INTERFACE} action.</p>
-<p>The following example shows how you might declare the {@code ChooserTargetService} in your
-manifest.</p>
+{@link android.service.chooser.ChooserTargetService} class. Declare your
+service in the manifest. Within that declaration, specify the
+{@link android.Manifest.permission#BIND_CHOOSER_TARGET_SERVICE} permission and an
+intent filter using the
+{@link android.service.chooser.ChooserTargetService#SERVICE_INTERFACE SERVICE_INTERFACE} action.</p>
+<p>The following example shows how you might declare the
+{@link android.service.chooser.ChooserTargetService} in your manifest.</p>
 <pre>
 &lt;service android:name=".ChooserTargetService"
         android:label="&#64;string/service_name"
@@ -201,7 +202,8 @@ manifest.</p>
 &lt;/service&gt;
 </pre>
 
-<p>For each activity that you want to expose to the {@code ChooserTargetService}, add a
+<p>For each activity that you want to expose to
+{@link android.service.chooser.ChooserTargetService}, add a
 {@code &lt;meta-data&gt;} element with the name
 {@code "android.service.chooser.chooser_target_service"} in your app manifest.
 </p>
@@ -223,10 +225,20 @@ manifest.</p>
 This preview provides a new voice interaction API which, together with
 <a href="https://developers.google.com/voice-actions/" class="external-link">Voice Actions</a>,
 allows you to build conversational voice experiences into your apps. Call the
-{@code android.app.Activity.isVoiceInteraction()} method to determine if your activity was
-started in response to a voice action. If so, your app can use the
-{@code android.app.VoiceInteractor} class to request a voice confirmation from the user, select
-from a list of options, and more. To learn more about implementing voice actions, see the
+{@link android.app.Activity#isVoiceInteraction()} method to determine if a voice action triggered
+your activity. If so, your app can use the
+{@link android.app.VoiceInteractor} class to request a voice confirmation from the user, select
+from a list of options, and more.</p>
+
+<p>Most voice interactions originate from a user voice action. A voice interaction activity can
+also, however, start without user input. For example, another app launched through a voice
+interaction can also send an intent to launch a voice interaction. To determine if your activity
+launched from a user voice query or from another voice interaction app, call the
+{@link android.app.Activity#isVoiceInteractionRoot()} method. If another app launched your
+activity, the method returns {@code false}. Your app may then prompt the user to confirm that
+they intended this action.</p>
+
+<p>To learn more about implementing voice actions, see the
 <a href="https://developers.google.com/voice-actions/interaction/"
 class="external-link">Voice Actions developer site</a>.
 </p>
@@ -239,7 +251,7 @@ can summon the assistant within any app, by long-pressing on the <strong>Home</s
 <p>Your app can elect to not share the current context with the assistant by setting the
 {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} flag. In addition to the
 standard set of information that the platform passes to the assistant, your app can share
-additional information by using the new {@code android.app.assist.AssistContent} class.</p>
+additional information by using the new {@link android.app.assist.AssistContent} class.</p>
 
 <p>To provide the assistant with additional context from your app, follow these steps:</p>
 
@@ -249,25 +261,32 @@ additional information by using the new {@code android.app.assist.AssistContent}
 {@link android.app.Application#registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener) registerOnProvideAssistDataListener()}.</li>
 <li>In order to provide activity-specific contextual information, override the
 {@link android.app.Activity#onProvideAssistData(android.os.Bundle) onProvideAssistData()}
-callback and, optionally, the new {@code Activity.onProvideAssistContent()} callback.
+callback and, optionally, the new
+{@link android.app.Activity#onProvideAssistContent(android.app.assist.AssistContent) onProvideAssistContent()}
+callback.
 </ol>
 
 <h2 id="notifications">Notifications</h2>
 <p>This preview adds the following API changes for notifications:</p>
 <ul>
-  <li>New {@code NotificationListenerService.INTERRUPTION_FILTER_ALARMS} filter level that
+  <li>New {@link android.app.NotificationManager#INTERRUPTION_FILTER_ALARMS} filter level that
     corresponds to the new <em>Alarms only</em> do not disturb mode.</li>
-  <li>New {@code Notification.CATEGORY_REMINDER} category value that is used to distinguish
-  user-scheduled reminders from other events
+  <li>New {@link android.app.Notification#CATEGORY_REMINDER} category value that is used to
+  distinguish user-scheduled reminders from other events
   ({@link android.app.Notification#CATEGORY_EVENT}) and alarms
   ({@link android.app.Notification#CATEGORY_ALARM}).</li>
-  <li>New {@code android.graphics.drawable.Icon} class which can be attached to your notifications
-    via the {@code Notification.Builder.setSmallIcon(Icon)} and
-    {@code Notification.Builder.setLargeIcon(Icon)} methods.</li>
-  <li>New {@code NotificationManager.getActiveNotifications()} method that allows your apps to
-    find out which of their notifications are currently alive. To see an app implementation that
-    uses this feature, see the <a href="https://github.com/googlesamples/android-ActiveNotifications"
-    class="external-link">Active Notifications sample</a>.</li>
+  <li>New {@link android.graphics.drawable.Icon} class that you can attach to your notifications
+  via the
+  {@link android.app.Notification.Builder#setSmallIcon(android.graphics.drawable.Icon) setSmallIcon()}
+  and {@link android.app.Notification.Builder#setLargeIcon(android.graphics.drawable.Icon) setLargeIcon()}
+  methods. Similarly, the
+  {@link android.app.Notification.Builder#addAction(int, java.lang.CharSequence, android.app.PendingIntent)
+  addAction()} method now accepts an {@link android.graphics.drawable.Icon} object instead of a
+  drawable resource ID.</li>
+  <li>New {@link android.app.NotificationManager#getActiveNotifications()} method that allows your
+  apps to find out which of their notifications are currently alive. To see an app implementation
+  that uses this feature, see the <a href="https://github.com/googlesamples/android-ActiveNotifications"
+  class="external-link">Active Notifications sample</a>.</li>
 </ul>
 
 <h2 id="bluetooth-stylus">Bluetooth Stylus Support</h2>
@@ -275,9 +294,9 @@ callback and, optionally, the new {@code Activity.onProvideAssistContent()} call
 and connect a compatible Bluetooth stylus with their phone or tablet.  While connected, position
 information from the touch screen is fused with pressure and button information from the stylus to
 provide a greater range of expression than with the touch screen alone. Your app can listen for
-stylus button presses and perform secondary actions, by registering the new
-{@code View.onContextClickListener} and {@code GestureDetector.onContextClickListener}
-callbacks in your activity.</p>
+stylus button presses and perform secondary actions, by registering
+{@link android.view.View.OnContextClickListener} and
+{@link android.view.GestureDetector.OnContextClickListener} objects in your activity.</p>
 
 <p>Use the {@link android.view.MotionEvent} methods and constants to detect stylus button
 interactions:</p>
@@ -287,11 +306,11 @@ interactions:</p>
 {@link android.view.MotionEvent#TOOL_TYPE_STYLUS}.</li>
 <li>For apps targeting M Preview, the
 {@link android.view.MotionEvent#getButtonState() getButtonState()}
-method returns {@code MotionEvent.BUTTON_STYLUS_PRIMARY} when the user
+method returns {@link android.view.MotionEvent#BUTTON_STYLUS_PRIMARY} when the user
 presses the primary stylus button. If the stylus has a second button, the same method returns
-{@code MotionEvent.BUTTON_STYLUS_SECONDARY} when the user presses it. If the user presses
+{@link android.view.MotionEvent#BUTTON_STYLUS_SECONDARY} when the user presses it. If the user presses
 both buttons simultaneously, the method returns both values OR'ed together
-({@code BUTTON_STYLUS_PRIMARY|BUTTON_STYLUS_SECONDARY}).</li>
+({@link android.view.MotionEvent#BUTTON_STYLUS_PRIMARY}|{@link android.view.MotionEvent#BUTTON_STYLUS_SECONDARY}).</li>
 <li>
 For apps targeting a lower platform version, the
 {@link android.view.MotionEvent#getButtonState() getButtonState()} method returns
@@ -302,89 +321,95 @@ For apps targeting a lower platform version, the
 
 <h2 id="ble-scanning">Improved Bluetooth Low Energy Scanning</h2>
 <p>
-If your app performs performs Bluetooth Low Energy scans, you can use the new
-{@code android.bluetooth.le.ScanSettings.Builder.setCallbackType()} method to specify that
-you want callbacks to only be notified when an advertisement packet matching the set
-{@link android.bluetooth.le.ScanFilter} is first found, and when it is not seen for a period of
-time. This approach to scanning is more power-efficient than what’s provided in the previous
-platform version.
+If your app performs performs Bluetooth Low Energy scans, use the new
+{@link android.bluetooth.le.ScanSettings.Builder#setCallbackType(int) setCallbackType()}
+method to specify that you want the system to notify callbacks when it first finds, or sees after a
+long time, an advertisement packet matching the set {@link android.bluetooth.le.ScanFilter}. This
+approach to scanning is more power-efficient than what’s provided in the previous platform version.
 </p>
 
 <h2 id="hotspot">Hotspot 2.0 Release 1 Support</h2>
 <p>
 This preview adds support for the Hotspot 2.0 Release 1 spec on Nexus 6 and Nexus 9 devices. To
 provision Hotspot 2.0 credentials in your app, use the new methods of the
-{@link android.net.wifi.WifiEnterpriseConfig} class, such as {@code setPlmn()} and
-{@code setRealm()}. In the {@link android.net.wifi.WifiConfiguration} object, you can set the
-{@link android.net.wifi.WifiConfiguration#FQDN} and the {@code providerFriendlyName} fields.
-The new {@code ScanResult.isPasspointNetwork()} method indicates if a detected
+{@link android.net.wifi.WifiEnterpriseConfig} class, such as
+{@link android.net.wifi.WifiEnterpriseConfig#setPlmn(java.lang.String) setPlmn()} and
+{@link android.net.wifi.WifiEnterpriseConfig#setRealm(java.lang.String) setRealm()}. In the
+{@link android.net.wifi.WifiConfiguration} object, you can set the
+{@link android.net.wifi.WifiConfiguration#FQDN} and the
+{@link android.net.wifi.WifiConfiguration#providerFriendlyName} fields.
+The new {@link android.net.wifi.ScanResult#isPasspointNetwork()} method indicates if a detected
 network represents a Hotspot 2.0 access point.
 </p>
 
 <h2 id="4K-display">4K Display Mode</h2>
 <p>The platform now allows apps to request that the display resolution be upgraded to 4K rendering
 on compatible hardware. To query the current physical resolution, use the new
-{@code android.view.Display.Mode} APIs. If the UI is drawn at a lower logical resolution and is
+{@link android.view.Display.Mode} APIs. If the UI is drawn at a lower logical resolution and is
 upscaled to a larger physical resolution, be aware that the physical resolution the
-{@code Display.Mode.getPhysicalWidth()} method returns may differ from the logical
+{@link android.view.Display.Mode#getPhysicalWidth()} method returns may differ from the logical
 resolution reported by {@link android.view.Display#getSize(android.graphics.Point) getSize()}.</p>
 
 <p>You can request the system to change the physical resolution in your app as it runs, by setting
-the {@code WindowManager.LayoutParams.preferredDisplayModeId} property of your app’s window.  This
-feature is useful if you want to switch to 4K display resolution. While in 4K display mode, the
-UI continues to be rendered at the original resolution (such as 1080p) and is upscaled to 4K, but
-{@link android.view.SurfaceView} objects may show content at the native resolution.</p>
+the {@link android.view.WindowManager.LayoutParams#preferredDisplayModeId} property of your app’s
+window.  This feature is useful if you want to switch to 4K display resolution. While in 4K display
+mode, the UI continues to be rendered at the original resolution (such as 1080p) and is upscaled to
+4K, but {@link android.view.SurfaceView} objects may show content at the native resolution.</p>
 
 <h2 id="behavior-themeable-colorstatelists">Themeable ColorStateLists</h2>
 <p>Theme attributes are now supported in
 {@link android.content.res.ColorStateList} for devices running the M Preview. The
 {@link android.content.res.Resources#getColorStateList(int) getColorStateList()} and
 {@link android.content.res.Resources#getColor(int) getColor()} methods have been deprecated. If
-you are calling these APIs, call the new {@code Context.getColorStateList()} or
-{@code Context.getColor()} methods instead. These methods are also available in the
-v4 appcompat library via {@link android.support.v4.content.ContextCompat}.</p>
+you are calling these APIs, call the new
+{@link android.content.Context#getColorStateList(int) getColorStateList()} or
+{@link android.content.Context#getColor(int) getColor()} methods instead. These methods are also
+available in the v4 appcompat library via {@link android.support.v4.content.ContextCompat}.</p>
 
 <h2 id="audio">Audio Features</h2>
 
 <p>This preview adds enhancements to audio processing on Android, including: </p>
 <ul>
   <li>Support for the <a href="http://en.wikipedia.org/wiki/MIDI" class="external-link">MIDI</a>
-protocol, with the new {@code android.media.midi} APIs. Use these APIs to send and receive MIDI
+protocol, with the new {@link android.media.midi} APIs. Use these APIs to send and receive MIDI
 events.</li>
-  <li>New {@code android.media.AudioRecord.Builder} and {@code android.media.AudioTrack.Builder}
+  <li>New {@link android.media.AudioRecord.Builder} and {@link android.media.AudioTrack.Builder}
 classes to create digital audio capture and playback objects respectively, and configure audio
 source and sink properties to override the system defaults.</li>
   <li>API hooks for associating audio and input devices. This is particularly useful if your app
 allows users to start a voice search from a game controller or remote control connected to Android
-TV. The system invokes the new {@code android.app.Activity.onSearchRequested()} callback when the
-user starts a search. To determine if the user's input device has a built-in microphone, retrieve
-the {@link android.view.InputDevice} object from that callback, then call the new
-{@code InputDevice.hasMicrophone()} method.</li>
-  <li>New {@code AudioManager.getDevices() method which lets you retrieve a list of all
-    audio devices currently connected to the system. You can also register an
-{@code android.media.AudioDeviceCallback} object if you want your app to be notified
-when an audio device is connected or disconnected.</li>
+TV. The system invokes the new
+{@link android.app.Activity#onSearchRequested(android.view.SearchEvent) onSearchRequested()}
+callback when the user starts a search. To determine if the user's input device has a built-in
+microphone, retrieve the {@link android.view.InputDevice} object from that callback, then call the
+new {@link android.view.InputDevice#hasMicrophone()} method.</li>
+  <li>New {@link android.media.AudioManager#getDevices(int) getDevices()} method which lets you
+retrieve a list of all audio devices currently connected to the system. You can also register an
+{@link android.media.AudioDeviceCallback} object if you want the system to notify your app
+when an audio device connects or disconnects.</li>
 </ul>
 
 <h2 id="video">Video Features</h2>
 <p>This preview adds new capabilities to the video processing APIs, including:</p>
 <ul>
-<li>New {@code android.media.MediaSync} class which helps applications to synchronously render
+<li>New {@link android.media.MediaSync} class which helps applications to synchronously render
 audio and video streams. The audio buffers are submitted in non-blocking fashion and are
 returned via a callback. It also supports dynamic playback rate.
 </li>
-<li>New {@code MediaDrm.EVENT_SESSION_RECLAIMED} event, which indicates that a session opened by
-the app has been reclaimed by the resource manager. If your app uses DRM sessions, you should
-handle this event and make sure not to use a reclaimed session.
+<li>New {@link android.media.MediaDrm#EVENT_SESSION_RECLAIMED} event, which indicates that a
+session opened by the app has been reclaimed by the resource manager. If your app uses DRM sessions,
+you should handle this event and make sure not to use a reclaimed session.
 </li>
-<li>New {@code MediaCodec.CodecException.ERROR_RECLAIMED} error code, which indicates that the
-resource manager reclaimed the media resource used by the codec. With this exception, the codec
-must be released, as it has moved to terminal state.
+<li>New {@link android.media.MediaCodec.CodecException#ERROR_RECLAIMED} error code, which indicates
+that the resource manager reclaimed the media resource used by the codec. With this exception, the
+codec must be released, as it has moved to terminal state.
 </li>
-<li>New {@code MediaCodecInfo.CodecCapabilities.getMaxSupportedInstances()} interface to get a
-hint for the max number of the supported concurrent codec instances.
+<li>New {@link android.media.MediaCodecInfo.CodecCapabilities#getMaxSupportedInstances()
+getMaxSupportedInstances()} interface to get a hint for the max number of the supported
+concurrent codec instances.
 </li>
-<li>New {@code MediaPlayer.setPlaybackParams()} method to set the media playback rate for fast or
+<li>New {@link android.media.MediaPlayer#setPlaybackParams(android.media.PlaybackParams)
+setPlaybackParams()} method to set the media playback rate for fast or
 slow motion playback. It also stretches or speeds up the audio playback automatically in
 conjunction with the video.</li>
 </ul>
@@ -394,48 +419,55 @@ conjunction with the video.</li>
 camera reprocessing of images:</p>
 
 <h3 id="flashlight">Flashlight API</h3>
-<p>If a camera device has a flash unit, you can call the {@code CameraManager.setTorchMode()}
+<p>If a camera device has a flash unit, you can call the
+{@link android.hardware.camera2.CameraManager#setTorchMode(java.lang.String, boolean) setTorchMode()}
 method to switch the flash unit’s torch mode on or off without opening the camera device. The app
 does not have exclusive ownership of the flash unit or the camera device. The torch mode is turned
 off and becomes unavailable whenever the camera device becomes unavailable, or when other camera
-resources keeping the torch on become unavailable. Other apps can also call {@code setTorchMode()}
+resources keeping the torch on become unavailable. Other apps can also call
+{@link android.hardware.camera2.CameraManager#setTorchMode(java.lang.String, boolean) setTorchMode()}
 to turn off the torch mode. When the last app that turned on the torch mode is closed, the torch
 mode is turned off.</p>
 
 <p>You can register a callback to be notified about torch mode status by calling the
-{@code CameraManager.registerTorchCallback()} method. The first time the callback is registered,
-it is immediately called with the torch mode status of all currently known camera devices with a
-flash unit. If the torch mode is turned on or off successfully, the
-{@code CameraManager.TorchCallback.onTorchModeChanged()} method is invoked.</p>
+{@link android.hardware.camera2.CameraManager#registerTorchCallback(android.hardware.camera2.CameraManager.TorchCallback, android.os.Handler) registerTorchCallback()}
+method. The first time the callback is registered, it is immediately called with the torch mode
+status of all currently known camera devices with a flash unit. If the torch mode is turned on or
+off successfully, the
+{@link android.hardware.camera2.CameraManager.TorchCallback#onTorchModeChanged(java.lang.String, boolean) onTorchModeChanged()}
+method is invoked.</p>
 
 <h3 id="reprocessing">Reprocessing API</h3>
 <p>The {@link android.hardware.camera2 Camera2} API is extended to support YUV and private
 opaque format image reprocessing. To determine if these reprocessing capabilities are available,
 call {@link android.hardware.camera2.CameraManager#getCameraCharacteristics(java.lang.String)
-getCameraCharacteristics()} and check for the {@code REPROCESS_MAX_CAPTURE_STALL} key. If a
+getCameraCharacteristics()} and check for the
+{@link android.hardware.camera2.CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL} key. If a
 device supports reprocessing, you can create a reprocessable camera capture session by calling
-{@code CameraDevice.createReprocessableCaptureSession()}, and create requests for input
-buffer reprocessing.</p>
+<a href="/reference/android/hardware/camera2/CameraDevice.html#createReprocessableCaptureSession(android.hardware.camera2.params.InputConfiguration, java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler)"><code>createReprocessableCaptureSession()</code></a>,
+and create requests for input buffer reprocessing.</p>
 
-<p>Use the {@code android.media.ImageWriter} class to connect the input buffer flow to the camera
+<p>Use the {@link android.media.ImageWriter} class to connect the input buffer flow to the camera
 reprocessing input. To get an empty buffer, follow this programming model:</p>
 
 <ol>
-<li>Call the {@code ImageWriter.dequeueInputImage()} method.</li>
+<li>Call the {@link android.media.ImageWriter#dequeueInputImage()} method.</li>
 <li>Fill the data into the input buffer.</li>
-<li>Send the buffer to the  camera by calling the {@code ImageWriter.queueInputImage()} method.</li>
+<li>Send the buffer to the  camera by calling the
+{@link android.media.ImageWriter#queueInputImage(android.media.Image) queueInputImage()} method.</li>
 </ol>
 
-<p>If you are using a {@code ImageWriter} object together with an
-{@code android.graphics.ImageFormat.PRIVATE} image, your app cannot access the image
-data directly. Instead, pass the {@code ImageFormat.PRIVATE} image directly to the
-{@code ImageWriter} by calling the {@code ImageWriter.queueInputImage()} method without any
-buffer copy.</p>
+<p>If you are using a {@link android.media.ImageWriter} object together with an
+{@link android.graphics.ImageFormat#PRIVATE} image, your app cannot access the image
+data directly. Instead, pass the {@link android.graphics.ImageFormat#PRIVATE} image directly to the
+{@link android.media.ImageWriter} by calling the
+{@link android.media.ImageWriter#queueInputImage(android.media.Image) queueInputImage()} method
+without any buffer copy.</p>
 
 <p>The {@link android.media.ImageReader} class now supports
-{@code android.graphics.ImageFormat.PRIVATE} format image streams. This support allows your app to
+{@link android.graphics.ImageFormat#PRIVATE} format image streams. This support allows your app to
 maintain a circular image queue of {@link android.media.ImageReader} output images, select one or
-more images, and send them to the {@code ImageWriter} for camera reprocessing.</p>
+more images, and send them to the {@link android.media.ImageWriter} for camera reprocessing.</p>
 
 <h2 id="afw">Android for Work Features</h2>
 <p>This preview includes the following new APIs for Android for Work:</p>
@@ -445,14 +477,16 @@ can now control the following settings to improve management of
 Corporate-Owned, Single-Use (COSU) devices:
   <ul>
     <li>Disable or re-enable the keyguard with the
-{@code DevicePolicyManager.setKeyguardDisabled()} method.</li>
+{@link android.app.admin.DevicePolicyManager#setKeyguardDisabled(android.content.ComponentName, boolean)
+setKeyguardDisabled()} method.</li>
     <li>Disable or re-enable the status bar (including quick settings, notifications, and the
 navigation swipe-up gesture that launches Google Now) with the
-{@code DevicePolicyManager.setStatusBarDisabled()} method.</li>
+{@link android.app.admin.DevicePolicyManager#setStatusBarDisabled(android.content.ComponentName, boolean) setStatusBarDisabled()}
+method.</li>
     <li>Disable or re-enable safe boot with the {@link android.os.UserManager} constant
-{@code DISALLOW_SAFE_BOOT}.</li>
+{@link android.os.UserManager#DISALLOW_SAFE_BOOT}.</li>
     <li>Prevent the screen from turning off while plugged in with the
-  {@link android.provider.Settings.Global} constant {@code STAY_ON_WHILE_PLUGGED_IN}.</li>
+  {@link android.provider.Settings.Global#STAY_ON_WHILE_PLUGGED_IN} constant.</li>
   </ul>
   </li>
   <li><strong>Silent install and uninstall of apps by Device Owner:</strong> A Device Owner can now
@@ -463,11 +497,12 @@ provisioning of kiosks or other such devices without activating a Google account
 <li><strong>Silent enterprise certificate access: </strong> When an app calls
 {@link android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity,android.security.KeyChainAliasCallback,java.lang.String[],java.security.Principal[],java.lang.String,int,java.lang.String) choosePrivateKeyAlias()},
 prior to the user being prompted to select a certificate, the Profile or Device Owner can now call
-the {@code DeviceAdminReceiver.onChoosePrivateKeyAlias()} method to provide the alias silently to
-the requesting application. This feature lets you grant managed apps access to certificates
-without user interaction.</li>
+the {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias(android.content.Context, android.content.Intent, int, android.net.Uri, java.lang.String) onChoosePrivateKeyAlias()}
+method to provide the alias silently to the requesting application. This feature lets you grant
+managed apps access to certificates without user interaction.</li>
 <li><strong>Auto-acceptance of system updates.</strong> By setting a system update policy with
-{@code DevicePolicyManager.setSystemUpdatePolicy()}, a Device Owner can now auto-accept a system
+{@link android.app.admin.DevicePolicyManager#setSystemUpdatePolicy(android.content.ComponentName, android.app.admin.SystemUpdatePolicy) setSystemUpdatePolicy()},
+a Device Owner can now auto-accept a system
 update, for instance in the case of a kiosk device, or postpone the update and prevent it being
 taken by the user for up to 30 days. Furthermore, an administrator can set a daily time window in
 which an update must be taken, for example during the hours when a kiosk device is not in use. When
@@ -498,16 +533,17 @@ srcset="{@docRoot}preview/images/work-profile-screen.png 1x, {@docRoot}preview/i
 style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 <li><strong>Data usage tracking.</strong> A Profile or Device Owner can now query for the
 data usage statistics visible in <strong>Settings > Data</strong> usage by using the new
-{@code android.app.usage.NetworkStatsManager} methods. Profile Owners are automatically granted
+{@link android.app.usage.NetworkStatsManager} methods. Profile Owners are automatically granted
 permission to query data on the profile they manage, while Device Owners get access to usage data
 of the managed primary user.</li>
 <li><strong>Runtime permission management:</strong>
 <p>A Profile or Device Owner can set a permission policy
 for all runtime requests of all applications using
-{@code DevicePolicyManager.setPermissionPolicy()}, to either prompt the user to grant the
-permission as normal or automatically grant or deny the permission silently. If the latter policy
-is set, the user cannot modify the selection made by the Profile or Device Owner within the
-app’s permissions screen in <strong>Settings</strong>.</p></li>
+{@link android.app.admin.DevicePolicyManager#setPermissionPolicy(android.content.ComponentName, int)
+setPermissionPolicy()}, to either prompt the user to grant the permission or automatically grant or
+deny the permission silently. If the latter policy is set, the user cannot
+modify the selection made by the Profile or Device Owner within the app’s permissions screen in
+<strong>Settings</strong>.</p></li>
 <li><strong>VPN in Settings:</strong> VPN apps are now visible in
     <strong>Settings > More > VPN</strong>.
 Additionally, the notifications that accompany VPN usage are now specific to how that VPN is
