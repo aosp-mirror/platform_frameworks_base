@@ -99,6 +99,15 @@ public:
     class Package;
     class Type;
     class Entry;
+    class ConfigList;
+
+    /**
+     * Exposed for testing. Determines whether a versioned resource should be generated
+     * based on the other available configurations for that resource.
+     */
+    static bool shouldGenerateVersionedResource(const sp<ConfigList>& configList,
+                                                const ConfigDescription& sourceConfig,
+                                                const int sdkVersionToGenerate);
 
     ResourceTable(Bundle* bundle, const String16& assetsPackage, PackageType type);
 
