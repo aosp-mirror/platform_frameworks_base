@@ -42,6 +42,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -86,9 +87,9 @@ public class PlatLogoActivity extends Activity {
         });
         final float hue = (float) Math.random();
         final Paint bgPaint = new Paint();
-        bgPaint.setColor(Color.HSBtoColor(hue, 0.4f, 1f));
+        bgPaint.setColor(HSBtoColor(hue, 0.4f, 1f));
         final Paint fgPaint = new Paint();
-        fgPaint.setColor(Color.HSBtoColor(hue, 0.5f, 1f));
+        fgPaint.setColor(HSBtoColor(hue, 0.5f, 1f));
         final Drawable M = getDrawable(com.android.internal.R.drawable.platlogo_m);
         final Drawable platlogo = new Drawable() {
             @Override
@@ -211,6 +212,70 @@ public class PlatLogoActivity extends Activity {
         fadeIn.setInterpolator(mInterpolator);
         fadeIn.setDuration(300);
         fadeIn.start();
+    }
+
+    /**
+     * Convert HSB components to an ARGB color. Alpha set to 0xFF.
+     *     hsv[0] is Hue [0 .. 1)
+     *     hsv[1] is Saturation [0...1]
+     *     hsv[2] is Value [0...1]
+     * If hsv values are out of range, they are pinned.
+     * @param h Hue component
+     * @param s Saturation component
+     * @param b Brightness component
+     * @return the resulting argb color
+     */
+    private static int HSBtoColor(float h, float s, float b) {
+        h = MathUtils.constrain(h, 0.0f, 1.0f);
+        s = MathUtils.constrain(s, 0.0f, 1.0f);
+        b = MathUtils.constrain(b, 0.0f, 1.0f);
+
+        float red = 0.0f;
+        float green = 0.0f;
+        float blue = 0.0f;
+
+        final float hf = (h - (int) h) * 6.0f;
+        final int ihf = (int) hf;
+        final float f = hf - ihf;
+        final float pv = b * (1.0f - s);
+        final float qv = b * (1.0f - s * f);
+        final float tv = b * (1.0f - s * (1.0f - f));
+
+        switch (ihf) {
+            case 0:         // Red is the dominant color
+                red = b;
+                green = tv;
+                blue = pv;
+                break;
+            case 1:         // Green is the dominant color
+                red = qv;
+                green = b;
+                blue = pv;
+                break;
+            case 2:
+                red = pv;
+                green = b;
+                blue = tv;
+                break;
+            case 3:         // Blue is the dominant color
+                red = pv;
+                green = qv;
+                blue = b;
+                break;
+            case 4:
+                red = tv;
+                green = pv;
+                blue = b;
+                break;
+            case 5:         // Red is the dominant color
+                red = b;
+                green = pv;
+                blue = qv;
+                break;
+        }
+
+        return 0xFF000000 | (((int) (red * 255.0f)) << 16) |
+                (((int) (green * 255.0f)) << 8) | ((int) (blue * 255.0f));
     }
 
 }
