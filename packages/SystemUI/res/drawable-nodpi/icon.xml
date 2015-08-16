@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2014 The Android Open Source Project
+Copyright (C) 2015 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ Copyright (C) 2014 The Android Open Source Project
         android:viewportHeight="48.0">
     <path
         android:pathData="M24.0,2.0C11.8,2.0 2.0,11.8 2.0,24.0c0.0,6.1 2.5,11.6 6.4,15.6L39.6,8.4C35.6,4.5 30.1,2.0 24.0,2.0z"
-        android:fillColor="#F57C00"/>
+        android:fillColor="#E91E63"/>
     <path
         android:pathData="M39.6,8.4L8.4,39.6c4.0,4.0 9.5,6.4 15.6,6.4c12.2,0.0 22.0,-9.8 22.0,-22.0C46.0,17.9 43.5,12.4 39.6,8.4z"
-        android:fillColor="#FF9800"/>
+        android:fillColor="#F06292"/>
     <path
         android:pathData="M45.9,25.9L34.0,14.0L14.0,34.0l11.9,11.9C36.5,45.0 45.0,36.5 45.9,25.9z"
         android:fillAlpha="0.33"
-        android:fillColor="#F57C00"/>
+        android:fillColor="#E91E63"/>
     <path
         android:pathData="M24.0,24.0c0.0,0.0 0.0,2.2 0.0,5.0s0.0,5.0 0.0,5.0l10.0,-10.0L34.0,14.0L24.0,24.0z"
         android:fillColor="#FFFFFF"/>

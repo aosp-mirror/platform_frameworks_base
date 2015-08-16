@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2015 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+        >
+    <com.android.systemui.egg.MLand
+            android:id="@+id/world"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+    </com.android.systemui.egg.MLand>
+    <FrameLayout
+            android:id="@+id/welcome"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:background="#a0000000"
+            android:clickable="true"
+            >
+        <FrameLayout
+            android:id="@+id/play_button"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:background="@drawable/ripplebg"
+            android:focusable="true"
+            android:onClick="startButtonPressed"
+            >
+            <ImageView
+                android:id="@+id/play_button_image"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:scaleType="fitCenter"
+                android:layout_gravity="center"
+                android:tint="#000000"
+                android:src="@drawable/play"
+                />
+            <TextView
+                android:id="@+id/play_button_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:alpha="0"
+                android:textSize="40dp"
+                android:textColor="#000000"
+                />
+        </FrameLayout>
+    </FrameLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:id="@+id/player_setup"
+        >
+        <ImageButton
+            style="@android:style/Widget.Material.Button.Borderless"
+            android:id="@+id/player_minus_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:onClick="playerMinus"
+            android:src="@drawable/minus"
+            />
+        <LinearLayout
+            android:id="@+id/scores"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:padding="12dp"
+            android:orientation="horizontal"
+            android:clipToPadding="false"
+            >
+        </LinearLayout>
+        <ImageButton
+            style="@android:style/Widget.Material.Button.Borderless"
+            android:id="@+id/player_plus_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:onClick="playerPlus"
+            android:src="@drawable/plus"
+            />
+    </LinearLayout>
+</FrameLayout>
