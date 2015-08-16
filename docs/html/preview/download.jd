@@ -184,13 +184,13 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </p>
 
 
-<h2 id="sdk">Developer Preview 3 SDK</h2>
+<h2 id="sdk">Android 6.0 SDK</h2>
 
 <p>
-  The Preview SDK is available for download through the <a href=
+  With Developer Preview 3, the official Android 6.0 SDK is now available for download through the <a href=
   "{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>. For more information on
-  downloading and configuring the Preview SDK, see <a href=
-  "{@docRoot}preview/setup-sdk.html#downloadSdk">Set Up the Preview SDK</a>.
+  downloading and configuring the SDK, see <a href=
+  "{@docRoot}preview/setup-sdk.html#downloadSdk">Set Up the SDK</a>.
 </p>
 
 
