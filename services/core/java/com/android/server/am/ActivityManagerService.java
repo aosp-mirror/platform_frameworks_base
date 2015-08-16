@@ -12852,6 +12852,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("    i[ntents] [PACKAGE_NAME]: pending intent state");
                 pw.println("    p[rocesses] [PACKAGE_NAME]: process state");
                 pw.println("    o[om]: out of memory management");
+                pw.println("    perm[issions]: URI permission grant state");
                 pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
                 pw.println("    provider [COMP_SPEC]: provider client-side state");
                 pw.println("    s[ervices] [COMP_SPEC ...]: service state");
@@ -12941,6 +12942,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else if ("oom".equals(cmd) || "o".equals(cmd)) {
                 synchronized (this) {
                     dumpOomLocked(fd, pw, args, opti, true);
+                }
+            } else if ("permissions".equals(cmd) || "perm".equals(cmd)) {
+                synchronized (this) {
+                    dumpPermissionsLocked(fd, pw, args, opti, true, null);
                 }
             } else if ("provider".equals(cmd)) {
                 String[] newArgs;
@@ -13053,6 +13058,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpPermissionsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
@@ -14085,6 +14095,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                         pw.println(r);
             }
         }
+
+        if (!printedAnything) {
+            pw.println("  (nothing)");
+        }
+    }
+
+    void dumpPermissionsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, String dumpPackage) {
+        boolean needSep = false;
+        boolean printedAnything = false;
+
+        pw.println("ACTIVITY MANAGER URI PERMISSIONS (dumpsys activity permissions)");
 
         if (mGrantedUriPermissions.size() > 0) {
             boolean printed = false;
