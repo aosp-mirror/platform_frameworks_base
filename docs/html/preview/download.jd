@@ -197,10 +197,11 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <h2 id="docs">Developer Documentation</h2>
 
 <p>
-	The developer documentation download package provides detailed API reference information and
-	an API difference report for the preview. Note that <a href="{@docRoot}reference/packages.html">API
-	level 23 reference</a> and <a href="{@docRoot}sdk/api_diff/23/changes.html">diffs</a> are now
-	also available online. 
+  The developer documentation for Developer Preview 3 is released as Android 6.0 (API level 23) and
+  is available online, including the <a href="{@docRoot}reference/packages.html">API level 23
+  reference</a> and <a href="{@docRoot}sdk/api_diff/23/changes.html">diff report</a>. The following
+  developer documentation download package provides additional, incremental difference reports
+  between the preview releases.
 </p>
 
 <table>
@@ -212,8 +213,8 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
     <td>Android M Preview 3<br>Developer Docs</td>
     <td><a href="#top" onclick="onDownload(this)"
       >m-preview-3-developer-docs.zip</a><br>
-      MD5: -<br>
-      SHA-1: -
+      MD5: d99b14b0c06d31c8dfecb25072654ca3<br>
+      SHA-1: 9cefeeda07676130da606a1796e1c00fffc667c1
     </td>
   </tr>
 <table>
@@ -246,34 +247,34 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="hammerhead">
     <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPZ79M-preview-b1f4bde4.tgz</a><br>
-      MD5: 2ca9f18bf47a061b339bab52647ceb0d<br>
-      SHA-1: b1f4bde447eccbf8ce5d9b8b8ba954e3eac8e939
+      >hammerhead-MPA44G-preview-3fff4cf7.tgz</a><br>
+      MD5: ce86cb083174fab9f52483fa0828b23f<br>
+      SHA-1: 3fff4cf707c2ce5a5efbb7238982a41d36bd7dcc
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPZ79M-preview-e1024040.tgz</a><br>
-      MD5: 24a2118da340b9afedfbdfc026f6ff81<br>
-      SHA-1: e10240408859d5188c4aae140e1c539130ba614b
+      >shamu-MPA44G-preview-6ad5fb56.tgz</a><br>
+      MD5: d1ec118d4b7dc564f048542576885985<br>
+      SHA-1: 6ad5fb561e3ccc7fd8c12f8513984a64a0a265da
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPZ79M-preview-9f305342.tgz</a><br>
-      MD5: 9edabf0a4c61b247f1cbb9dfdc0a899e<br>
-      SHA-1: 9f30534216f10899a6a75495fc7e92408ea333a7
+      >volantis-MPA44G-preview-7ff8343a.tgz</a><br>
+      MD5: 2f764a8d0b2c176ab723ed7e26907075<br>
+      SHA-1: 7ff8343a0545a142e6a84023940b75ab328b6ae8
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-MPZ79N-preview-fb63af98.tgz</a><br>
-      MD5: e8d081137a20b66df595ee69523314b5<br>
-      SHA-1: fb63af98302dd97be8de9313734d389ccdcce250
+      >fugu-MPA44G-preview-f9cc2862.tgz</a><br>
+      MD5: 876fdc064836fa7ddf33d34e04fbd772<br>
+      SHA-1: f9cc2862fa5314393ec5780a6a9e08f9a9aacf4d
     </td>
   </tr>
 
