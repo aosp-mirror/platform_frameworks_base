@@ -56,6 +56,9 @@ public class CameraBinderTest extends AndroidTestCase {
     private static final int API_VERSION_1 = 1;
     private static final int API_VERSION_2 = 2;
 
+    private static final int CAMERA_TYPE_BACKWARD_COMPATIBLE = 0;
+    private static final int CAMERA_TYPE_ALL = 1;
+
     protected CameraBinderTestUtils mUtils;
 
     public CameraBinderTest() {
@@ -71,7 +74,7 @@ public class CameraBinderTest extends AndroidTestCase {
     @SmallTest
     public void testNumberOfCameras() throws Exception {
 
-        int numCameras = mUtils.getCameraService().getNumberOfCameras();
+        int numCameras = mUtils.getCameraService().getNumberOfCameras(CAMERA_TYPE_ALL);
         assertTrue("At least this many cameras: " + mUtils.getGuessedNumCameras(),
                 numCameras >= mUtils.getGuessedNumCameras());
         Log.v(TAG, "Number of cameras " + numCameras);
