@@ -10,20 +10,17 @@ sdk.platform.apiLevel=MNC
 
 <ol id="toc44" class="hide-nested">
     <li><a href="#behavior-runtime-permissions">Runtime Permissions</a></li>
-    <li><a href="#behavior-power">Power-Saving Optimizations</a>
-        <ol>
-            <li><a href="#behavior-doze">Doze</a></li>
-            <li><a href="#behavior-app-standby">App Standby</a></li>
-        </ol>
-    </li>
+    <li><a href="#behavior-power">Power-Saving Optimizations</a></li>
     <li><a href="#behavior-adoptable-storage">Adoptable Storage Devices</a></li>
     <li><a href="#behavior-apache-http-client">Apache HTTP Client Removal</a></li>
     <li><a href="#behavior-audiomanager-Changes">AudioManager Changes</a></li>
+    <li><a href="#behavior-notifications">Notifications</a></li>
     <li><a href="#behavior-test-selection">Text Selection</a></li>
     <li><a href="#behavior-keystore">Android Keystore Changes</a></li>
     <li><a href="#behavior-network">Wi-Fi and Networking Changes</a></li>
     <li><a href="#behavior-camera">Camera Service Changes</a></li>
     <li><a href="#behavior-runtime">Runtime</a></li>
+    <li><a href="#behavior-hardware-id">Access to Hardware Identifier</a></li>
     <li><a href="#behavior-apk-validation">APK Validation</a></li>
     <li><a href="#behavior-usb">USB Connection</a></li>
     <li><a href="#behavior-afw">Android for Work Changes</a></li>
@@ -58,9 +55,11 @@ Users can grant or revoke permissions individually for installed apps. </p>
 
 <p>On your apps that target the M Preview release or higher, make sure to check for and request
 permissions at runtime. To determine if your app has been granted a permission, call the
-new {@code Context.checkSelfPermission()} method. To request a permission, call the new
-{@code Activity.requestPermission()} method. Even if your app is not targeting the M Preview
-release, you should test your app under the new permissions model.</p>
+new {@link android.content.Context#checkSelfPermission(java.lang.String) checkSelfPermission()}
+method. To request a permission, call the new
+{@link android.app.Activity#requestPermissions(java.lang.String[], int) requestPermissions()}
+method. Even if your app is not targeting the M Preview release, you should test your app under
+the new permissions model.</p>
 
 <p>For details on supporting the new permissions model in your app, see the
 <a href="{@docRoot}preview/features/runtime-permissions.html">
@@ -69,86 +68,19 @@ see the <a href="{@docRoot}preview/testing/guide.html#runtime-permissions">Testi
 
 <h2 id="behavior-power">Power-Saving Optimizations</h2>
 <p>This preview introduces new power-saving optimizations for idle devices and apps.</p>
-
-<h3 id="behavior-doze">Doze</h3>
-<p>If a device is unplugged and left stationary with the screen off for a period of time, it
-goes into <em>Doze</em> mode where it attempts to keep the system in a sleep state. In this mode,
-devices periodically resume normal operations for brief periods of time so that app syncing can
-occur and the system can perform any pending operations.</p>
-
-<p>The following restrictions apply to your apps while in Doze:</p>
 <ul>
-<li>Network access is disabled, unless your app receives a high priority Google Cloud Messaging
-tickle.</li>
-<li><a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">Wake locks</a> are ignored.</li>
-<li>Alarms scheduled with the {@link android.app.AlarmManager} class are disabled, except for
-alarms that you've set with the {@link android.app.AlarmManager#setAlarmClock setAlarmClock()}
-method and {@code AlarmManager.setAndAllowWhileIdle()}.</li>
-<li>WiFi scans are not performed.</li>
-<li>Syncs and jobs for your sync adapters and {@link android.app.job.JobScheduler} are not
-permitted to run.</li>
-</ul>
-</p>
-<p>When the device exits doze, it executes any jobs and syncs that are pending.</p>
-<p>You can test this feature by connecting a device running the M Preview to your development
-machine and calling the following commands:
-</p>
-<pre class="no-prettyprint">
-$ adb shell dumpsys battery unplug
-$ adb shell dumpsys deviceidle step
-$ adb shell dumpsys deviceidle -h
-</pre>
-<p class="note"><strong>Note</strong>: The upcoming
-<a href="https://developers.google.com/cloud-messaging/" class="external-link">
-Google Cloud Messaging</a> release lets you designate
-high-priority messages. If your app receives high-priority GCM messages, it’s granted
-brief network access even when the device is in doze.
-</p>
-
-<p>See the
-<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> for tips on how
-to test Doze in your apps. </p>
-
-<h3 id="behavior-app-standby">App standby</h3>
-<p>With this preview, the system may determine that apps are idle when they are not in active
-use. Your app is considered idle after a period of time, unless the system detects
-any of these signals:</p>
-
-<ul>
-<li>The app is explicitly launched by the user.</li>
-<li>The app has a process currently in the foreground (either as an activity or foreground service,
-or in use by another activity or foreground service).</li>
-<li>The app generates a notification that users see on the lock screen or in the
-notification tray.</li>
-<li>The user explicitly asks for the app to be exempt from optimizations,
-via <strong>Settings</strong>.</li>
+<li><strong>Doze</strong>: If a user unplugs a device and leaves it stationary, with its screen off,
+for a period of time, the device goes into <em>Doze</em> mode, where it attempts to keep the system
+in a sleep state. In this mode, devices periodically resume normal operations for brief periods of
+time so that app syncing can occur and the system can perform any pending operations.
+<li><strong>App Standby</strong>: App Standby allows the system to determine that an app is idle
+when the user is not actively using it. The system makes this determination when the user does not
+touch the app for a certain period of time. If the device is unplugged, the system disables network
+access and suspends syncs and jobs for the apps it deems idle.</li>
 </ul>
 
-<p>If the device is unplugged, apps deemed idle will have their network access disabled
-and their syncs and jobs suspended. When the device is plugged into a power supply, these apps are
-allowed network access and can execute any jobs and syncs that are pending. If the
-device is idle for long periods of time, idle apps are allowed network access around once a day.</p>
-
-<p>You can test this feature by connecting a device running the M Preview to your development
-machine and calling the following commands:
-</p>
-<pre class="no-prettyprint">
-$ adb shell dumpsys battery unplug
-$ adb shell am set-idle &lt;packageName&gt; true
-$ adb shell am set-idle &lt;packageName&gt; false
-$ adb shell am get-idle &lt;packageName&gt;
-</pre>
-
-<p class="note"><strong>Note</strong>: The upcoming
-<a href="https://developers.google.com/cloud-messaging/" class="external-link">
-Google Cloud Messaging</a> (GCM) release lets you
-designate high-priority messages. If your app receives high-priority GCM messages, it’s granted
-brief network access even when the app is idle.
-</p>
-
-<p>See the
-<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> for tips on how
-to test App Standby in your apps. </p>
+<p>To learn more about these power-saving changes, see
+<a href="{@docRoot}preview/power-mgmt.html">Power-Saving Optimizations</a>.</p>
 
 <h2 id="behavior-adoptable-storage">Adoptable Storage Devices</h2>
 <p>
@@ -222,10 +154,25 @@ cryptography library of your choice.</p>
 <p>Setting the volume directly or muting specific streams via the {@link android.media.AudioManager}
 class is no longer supported. The {@link android.media.AudioManager#setStreamSolo(int,boolean)
 setStreamSolo()} method is deprecated, and you should call the
-{@code AudioManager.requestAudioFocus()} method instead. Similarly, the
+{@link android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int) requestAudioFocus()}
+method instead. Similarly, the
 {@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()} method is
-deprecated; instead, call the {@code AudioManager.adjustStreamVolume()} method
-and pass in the direction value {@code ADJUST_MUTE} or {@code ADJUST_UNMUTE}.</p>
+deprecated; instead, call the {@link android.media.AudioManager#adjustStreamVolume(int, int, int)
+adjustStreamVolume()} method and pass in the direction value
+{@link android.media.AudioManager#ADJUST_MUTE} or
+{@link android.media.AudioManager#ADJUST_UNMUTE}.</p>
+
+<h2 id="behavior-notifications">Notifications</h2>
+<p>
+This release removes the {@code Notification.setLatestEventInfo()} method. Use the
+{@link android.app.Notification.Builder} class instead to construct notifications. To update a
+notification repeatedly, reuse the {@link android.app.Notification.Builder} instance. Call the
+{@link android.app.Notification.Builder#build()} method to get
+updated {@link android.app.Notification} instances.
+</p>
+<p>The {@code adb shell dumpsys notification} command no longer prints out your notification text.
+Use the {@code adb shell dumpsys notification --noredact} command instead to print out the text
+in a notification object.</p>
 
 <h2 id="behavior-test-selection">Text Selection</h2>
 
@@ -247,11 +194,13 @@ apps:</p>
 {@link android.view.ActionMode} calls from
 {@code startActionMode(Callback)} to {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)}.</li>
 <li>Take your existing implementation of {@code ActionMode.Callback} and make it extend
-{@code ActionMode.Callback2} instead.</li>
-<li>Override the {@code Callback2.onGetContentRect()} method to provide the coordinates of the
-content {@link android.graphics.Rect} object (such as a text selection rectangle) in the view.</li>
+{@link android.view.ActionMode.Callback2} instead.</li>
+<li>Override the
+{@link android.view.ActionMode.Callback2#onGetContentRect(android.view.ActionMode, android.view.View, android.graphics.Rect) onGetContentRect()}
+method to provide the coordinates of the content {@link android.graphics.Rect} object
+(such as a text selection rectangle) in the view.</li>
 <li>If the rectangle positioning is no longer valid, and this is the only element to be invalidated,
-call the {@code ActionMode.invalidateContentRect()} method.</li>
+call the {@link android.view.ActionMode#invalidateContentRect() invalidateContentRect()} method.</li>
 </ol>
 
 <p>If you are using <a href="{@docRoot}tools/support-library/index.html">
@@ -260,8 +209,9 @@ backward-compatible and appcompat takes control over {@link android.view.ActionM
 default. This prevents floating toolbars from being displayed. To enable
 {@link android.view.ActionMode} support in an
 {@link android.support.v7.app.AppCompatActivity}, call
-{@code android.support.v7.app.AppCompatActivity.getDelegate()}, then call
-{@code android.support.v7.app.AppCompatDelegate.setHandleNativeActionModesEnabled()} on the returned
+{@link android.support.v7.app.AppCompatActivity#getDelegate()}, then call
+{@link android.support.v7.app.AppCompatDelegate#setHandleNativeActionModesEnabled(boolean)
+setHandleNativeActionModesEnabled()} on the returned
 {@link android.support.v7.app.AppCompatDelegate} object and set the input
 parameter to {@code false}. This call returns control of {@link android.view.ActionMode} objects to
 the framework. In devices running the M Preview, that allows the framework to support
@@ -295,8 +245,8 @@ Wi-Fi network. If your app’s {@code targetSdkVersion} is {@code “21”} or h
 multinetwork APIs (such as
 {@link android.net.Network#openConnection(java.net.URL) openConnection()},
 {@link android.net.Network#bindSocket(java.net.Socket) bindSocket()}, and the new
-{@code ConnectivityManager.bindProcessToNetwork()} method) to ensure that its network traffic is
-sent on the selected network.</li>
+{@link android.net.ConnectivityManager#bindProcessToNetwork(android.net.Network)
+bindProcessToNetwork()} method) to ensure that its network traffic is sent on the selected network.</li>
 </ul>
 
 <h2 id="behavior-camera">Camera Service Changes</h2>
@@ -358,6 +308,32 @@ implemented. Apps which previously worked that have bad {@code DT_NEEDED} entrie
 {@code dlopen(3)} (as opposed to being referenced by {@code DT_NEEDED} entries).</p>
 </p>
 
+<h2 id="behavior-hardware-id">Access to Hardware Identifier</h2>
+<p>To provide users with greater data protection, starting in this release, Android
+removes programmatic access to the device’s local hardware identifier for
+apps using the Wi-Fi and Bluetooth APIs. The
+{@link android.net.wifi.WifiInfo#getMacAddress() WifiInfo.getMacAddress()} and the
+{@link android.bluetooth.BluetoothAdapter#getAddress() BluetoothAdapter.getAddress()} methods
+now return a constant value of {@code 02:00:00:00:00:00}.</p>
+
+<p>To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans,
+your app must now have the following permissions:</p>
+<ul>
+<li>{@link android.net.wifi.WifiManager#getScanResults() WifiManager.getScanResults()}:
+Your app must have {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
+<li>{@link android.bluetooth.BluetoothDevice#ACTION_FOUND BluetoothDevice.ACTION_FOUND}:
+Your app must have {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
+<li>{@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback)
+BluetoothLeScanner.startScan()}: Your app must have
+{@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
+</ul>
+
+<p class="note"><strong>Note</strong>: When a device running M Developer Preview initiates a
+background Wi-Fi or Bluetooth scan, the operation is visible to external devices as
+originating from a randomized MAC address.</p>
+
 <h2 id="behavior-apk-validation">APK Validation</h2>
 <p>The platform now performs stricter validation of APKs. An APK is considered corrupt if a file is
 declared in the manifest but not present in the APK itself. An APK must be re-signed if any of the
@@ -379,19 +355,19 @@ Setting
 {@link android.app.admin.DevicePolicyManager#setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean) setCrossProfileCallerIdDisabled()}
 to {@code true} hides the work profile contacts in the Google Dialer Call Log. Work contacts can be
 displayed along with personal contacts to devices over Bluetooth only if
-you set {@code DevicePolicyManager.setBluetoothContactSharingDisabled()} to {@code false}. By
-default, it is set to {@code true}.
+you set {@link android.app.admin.DevicePolicyManager#setBluetoothContactSharingDisabled(android.content.ComponentName, boolean)
+setBluetoothContactSharingDisabled()} to {@code false}. By default, it is set to {@code true}.
   </li>
-  <li><strong>WiFi configuration removal:</strong> WiFi configurations added by a Profile Owner
+  <li><strong>Wi-Fi configuration removal:</strong> Wi-Fi configurations added by a Profile Owner
 (for example, through calls to the
 {@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
 addNetwork()} method) are now removed if that work profile is deleted.
   </li>
-  <li><strong>WiFi configuration lockdown:</strong> Any WiFi configuration created by
+  <li><strong>Wi-Fi configuration lockdown:</strong> Any Wi-Fi configuration created by
   an active Device Owner can no longer be modified or deleted by the user if
-  <code>Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN</code> is non-zero.
-  The user can still create and modify their own WiFi configurations. Active Device
-  Owners have the privilege of editing/removing any WiFi configurations, including
+  {@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN} is non-zero.
+  The user can still create and modify their own Wi-Fi configurations. Active Device
+  Owners have the privilege of editing or removing any Wi-Fi configurations, including
   those not created by them.
   </li>
 <li><strong>Download Work Policy Controller via Google account addition:</strong> When a Google
@@ -399,11 +375,12 @@ account that requires management via a Work Policy Controller (WPC) app is added
 outside of a managed context, the add account flow now prompts the user to install the
 appropriate WPC. This behavior also applies to accounts added via
 <strong>Settings > Accounts</strong> and in the initial device setup wizard.</li>
-<li><strong>Changes to specific DevicePolicyManager API behaviors:</strong>
+<li><strong>Changes to specific {@link android.app.admin.DevicePolicyManager} API behaviors:</strong>
   <ul>
-  <li>Calling the {@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()}
+  <li>Calling the
+{@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()}
 method affects the camera for the calling user only; calling it from the managed profile doesn’t
-affect camera apps running on the primary user. </li>
+affect camera apps running on the primary user.</li>
   <li>In addition, the
 {@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()}
     method is now available for Profile Owners, as well as to Device Owners. </li>
@@ -417,16 +394,31 @@ affect camera apps running on the primary user. </li>
     </ul>
   </li>
   <li>The {@link android.app.admin.DevicePolicyManager#createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle) createAndInitializeUser()} and {@link android.app.admin.DevicePolicyManager#createUser(android.content.ComponentName, java.lang.String) createUser()} methods have been deprecated.</li>
-  <li>The {@link android.app.admin.DevicePolicyManager#setScreenCaptureDisabled(android.content.ComponentName, boolean) setScreenCaptureDisabled()} method now also blocks the assist structure when an app of the given user is in the foreground. </li>
-  <li><code>EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM</code> now defaults to SHA-256. SHA-1 is still supported for backwards compatibility but will be removed in future. <code>EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM</code> now only accepts SHA-256.</li>
-  <li>Device initializer APIs which existed in the MNC preview are now removed. They will not appear in the final M release.</li>
-    <li><code>EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS</code> is removed so NFC bump provisioning cannot programmatically unlock a factory reset protected device.</li>
-    <li>Android for Work APIs are optimized for M runtime permissions, including Work profiles, assist layer, and others. New <code>DevicePolicyManager</code> permission APIs don't affect pre-M apps.</li>
+  <li>The {@link android.app.admin.DevicePolicyManager#setScreenCaptureDisabled(android.content.ComponentName, boolean) setScreenCaptureDisabled()}
+method now also blocks the assist structure when an app of the given user is in the foreground. </li>
+  <li>{@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM}
+now defaults to SHA-256. SHA-1 is still supported for backwards compatibility but will be removed
+in future.
+{@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM}
+now only accepts SHA-256.</li>
+  <li>Device initializer APIs which existed in the M Developer Preview are now removed.</li>
+    <li><code>EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS</code> is removed so NFC bump
+provisioning cannot programmatically unlock a factory reset protected device.</li>
+<li>You can now use the {@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}
+extra to pass data to the device owner app during NFC provisioning of the managed device.</li>
+    <li>Android for Work APIs are optimized for M runtime permissions, including Work profiles,
+assist layer, and others. New {@link android.app.admin.DevicePolicyManager} permission APIs don't
+affect pre-M apps.</li>
+<li>When users back out of the synchronous part of the setup flow initiated through an
+{@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} or
+{@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_DEVICE} intent, the system
+now returns a {@link android.app.Activity#RESULT_CANCELED} result code.</li>
     </ul></li>
 
 <li><strong>Changes to other APIs</strong>:
 <ul>
-    <li>Data Usage: The {@code android.app.usage.NetworkUsageStats} class has been renamed {@code android.app.usage.NetworkStats}.</li>
+    <li>Data Usage: The {@code android.app.usage.NetworkUsageStats} class has been renamed
+{@link android.app.usage.NetworkStats}.</li>
 </ul>
     </li>
 
@@ -438,12 +430,12 @@ affect camera apps running on the primary user. </li>
     <li><code>DEVELOPMENT_SETTINGS_ENABLED</code></li>
     <li><code>MODE_RINGER</code></li>
     <li><code>NETWORK_PREFERENCE</code></li>
-    <li><code>WIFI_ON</code></li> 
+    <li><code>WIFI_ON</code></li>
 </ul>
     </li>
-    <li>These global settings can now be set via <code><a href="/reference/android/app/admin/DevicePolicyManager.html#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String)">setGlobalSettings()</a></code>:
+    <li>These global settings can now be set via {@link android.app.admin.DevicePolicyManager#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String) setGlobalSettings()}:
     <ul>
-    <li><code>WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN</code></li>
+    <li>{@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li>
     </ul>
     </li>
     </ul>
