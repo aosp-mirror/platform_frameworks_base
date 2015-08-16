@@ -497,6 +497,12 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
     jint cameraId, jobject info_obj)
 {
     CameraInfo cameraInfo;
+    if (cameraId >= Camera::getNumberOfCameras() || cameraId < 0) {
+        ALOGE("%s: Unknown camera ID %d", __FUNCTION__, cameraId);
+        jniThrowRuntimeException(env, "Unknown camera ID");
+        return;
+    }
+
     status_t rc = Camera::getCameraInfo(cameraId, &cameraInfo);
     if (rc != NO_ERROR) {
         jniThrowRuntimeException(env, "Fail to get camera info");
