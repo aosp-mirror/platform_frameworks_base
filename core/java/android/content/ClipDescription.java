@@ -201,14 +201,7 @@ public class ClipDescription implements Parcelable {
 
     /** @hide */
     public boolean toShortString(StringBuilder b) {
-        boolean first = true;
-        for (int i=0; i<mMimeTypes.length; i++) {
-            if (!first) {
-                b.append(' ');
-            }
-            first = false;
-            b.append(mMimeTypes[i]);
-        }
+        boolean first = !toShortStringTypesOnly(b);
         if (mLabel != null) {
             if (!first) {
                 b.append(' ');
@@ -217,6 +210,19 @@ public class ClipDescription implements Parcelable {
             b.append('"');
             b.append(mLabel);
             b.append('"');
+        }
+        return !first;
+    }
+
+    /** @hide */
+    public boolean toShortStringTypesOnly(StringBuilder b) {
+        boolean first = true;
+        for (int i=0; i<mMimeTypes.length; i++) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append(mMimeTypes[i]);
         }
         return !first;
     }
