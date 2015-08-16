@@ -73,6 +73,7 @@ import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1098,8 +1099,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return true;
         }
-        Slog.w(TAG, "--- IPC called from background users. Ignore. \n"
-                + InputMethodUtils.getStackTrace());
+        Slog.w(TAG, "--- IPC called from background users. Ignore. callers="
+                + Debug.getCallers(10));
         return false;
     }
 
@@ -2858,7 +2859,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             HashMap<String, InputMethodInfo> map, boolean resetDefaultEnabledIme) {
         if (DEBUG) {
             Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
-                    + " \n ------ \n" + InputMethodUtils.getStackTrace());
+                    + " \n ------ caller=" + Debug.getCallers(10));
         }
         list.clear();
         map.clear();
