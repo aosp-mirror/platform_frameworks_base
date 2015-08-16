@@ -160,18 +160,18 @@ page.tags="preview", "developer", "android"
   </li>
 
   <li>
-    <strong><a href="{@docRoot}preview/download.html">Preview&nbsp;2</a></strong> (available).
+    <strong><a href="{@docRoot}preview/download_mp2.html">Preview&nbsp;2</a></strong> (available).
   </li>
 
   <li>
-    <strong>Preview&nbsp;3</strong> (final APIs and SDK, now available).
+    <strong><a href="{@docRoot}preview/download.html">Preview&nbsp;3</strong> (final APIs and official Android 6.0 SDK, available).
   </li>
 </ul>
 
 <p>
-  These updates culminate in the <strong>final SDK</strong> (available now),
-  which delivers the official APIs for the new version of Android, as well
-  as the final system behaviors and features.
+  These updates culminate in the <strong>official Android 6.0 SDK</strong> (now available),
+  which lets you build with the final APIs for the new version of Android, as well as
+  near-final system images to let you test system behaviors and features.
 </p>
 
 <p>
@@ -216,7 +216,7 @@ page.tags="preview", "developer", "android"
 </p>
 
 <ul>
-  <li>M Developer Preview <strong>SDK tools</strong>
+  <li><strong>Official Android 6.0 SDK and tools</strong>
   </li>
 
   <li>M Developer Preview <strong>emulator system image</strong> (32-bit &amp;
@@ -324,20 +324,20 @@ page.tags="preview", "developer", "android"
 
 <p>
    <p>With Developer Preview 3, the platform APIs are now official (API level 23) and the
-   <strong>final SDK is now available</strong>.  We recommend updating your environment
+   <strong>official Android 6.0 SDK is now available</strong>.  We recommend updating your environment
    right away through Android Studio. Once you've updated your environment, you can target
    the new API level, compile against the new platform, and publish at your convenience
    to Google Play (including alpha, beta, or release channels).
 
   <p>If you want to opt out
-  of compatibility behaviors to test your app (which is strongly recommended),
-  you can target the M Developer Preview by setting your app's <code><a href=
+  of compatibility behaviors (which is strongly recommended),
+  you can target the Android 6.0 platform by setting your app's <code><a href=
   "/guide/topics/manifest/uses-sdk-element.html">targetSdkVersion</a></code>
-  to <code>“MNC”</code>.
+  to <code>“23”</code>.
 </p>
 
-  <p>Before releasing your app targeting Android M, we strongly recommend distributing it
-  to a group of testers through the new <a
+  <p>Before releasing your app targeting API level 23, we strongly
+  recommend distributing it to a group of testers through the new <a
   href="http://android-developers.blogspot.com/2015/07/iterate-faster-on-google-play-with.html"> 
   beta testing features available in the Google Play Developer Console. See the
   <a href="https://support.google.com/googleplay/android-developer/answer/3131213">Help
