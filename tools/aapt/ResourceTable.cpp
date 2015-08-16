@@ -4466,9 +4466,10 @@ static int getMinSdkVersion(const Bundle* bundle) {
     return 0;
 }
 
-static bool shouldGenerateVersionedResource(const sp<ResourceTable::ConfigList>& configList,
-                                            const ConfigDescription& sourceConfig,
-                                            const int sdkVersionToGenerate) {
+bool ResourceTable::shouldGenerateVersionedResource(
+        const sp<ResourceTable::ConfigList>& configList,
+        const ConfigDescription& sourceConfig,
+        const int sdkVersionToGenerate) {
     assert(sdkVersionToGenerate > sourceConfig.sdkVersion);
     const DefaultKeyedVector<ConfigDescription, sp<ResourceTable::Entry>>& entries
             = configList->getEntries();
@@ -4477,24 +4478,24 @@ static bool shouldGenerateVersionedResource(const sp<ResourceTable::ConfigList>&
     // The source config came from this list, so it should be here.
     assert(idx >= 0);
 
-    idx += 1;
-    if (static_cast<size_t>(idx) >= entries.size()) {
-        // This is the last configuration, so we should generate a versioned resource.
-        return true;
-    }
+    // The next configuration either only varies in sdkVersion, or it is completely different
+    // and therefore incompatible. If it is incompatible, we must generate the versioned resource.
 
-    const ConfigDescription& nextConfig = entries.keyAt(idx);
-
-    // Build a configuration that is the same as the source config,
-    // but with the SDK level of the next config. If they are the same,
-    // then they only differ in SDK level. If the next configs SDK level is
-    // higher than the one we want to generate, we must generate it.
+    // NOTE: The ordering of configurations takes sdkVersion as higher precedence than other
+    // qualifiers, so we need to iterate through the entire list to be sure there
+    // are no higher sdk level versions of this resource.
     ConfigDescription tempConfig(sourceConfig);
-    tempConfig.sdkVersion = nextConfig.sdkVersion;
-    if (nextConfig == tempConfig) {
-        return sdkVersionToGenerate < nextConfig.sdkVersion;
+    for (size_t i = static_cast<size_t>(idx) + 1; i < entries.size(); i++) {
+        const ConfigDescription& nextConfig = entries.keyAt(i);
+        tempConfig.sdkVersion = nextConfig.sdkVersion;
+        if (tempConfig == nextConfig) {
+            // The two configs are the same, check the sdk version.
+            return sdkVersionToGenerate < nextConfig.sdkVersion;
+        }
     }
-    return false;
+
+    // No match was found, so we should generate the versioned resource.
+    return true;
 }
 
 /**

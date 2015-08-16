@@ -51,7 +51,8 @@ aaptTests := \
     tests/AaptConfig_test.cpp \
     tests/AaptGroupEntry_test.cpp \
     tests/Pseudolocales_test.cpp \
-    tests/ResourceFilter_test.cpp
+    tests/ResourceFilter_test.cpp \
+    tests/ResourceTable_test.cpp
 
 aaptCIncludes := \
     system/core/base/include \
