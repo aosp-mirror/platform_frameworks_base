@@ -317,24 +317,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".egg.LLandActivity"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+        <activity android:name=".egg.MLandActivity"
+                  android:theme="@android:style/Theme.Material.NoActionBar"
                   android:exported="true"
-                  android:label="@string/lland"
+                  android:icon="@drawable/icon"
+                  android:label="@string/mland"
                   android:hardwareAccelerated="true"
-                  android:launchMode="singleInstance"
-                  android:screenOrientation="locked"
-                  android:process=":sweetsweetdesserts"
-                  android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".egg.ShruggyActivity"
-                  android:theme="@android:style/Theme.NoDisplay"
-                  android:exported="true"
                   android:launchMode="singleInstance"
                   android:screenOrientation="locked"
                   android:process=":sweetsweetdesserts"
