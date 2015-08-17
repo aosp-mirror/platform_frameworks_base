@@ -54,19 +54,40 @@ most recent release and restart the SDK Manager. If you do not, the latest Andro
 packages may not be available for download.</p>
 
 
-<h2 id="5.1">Android 5.1</h2>
+<h2 id="6.0">Android 6.0</h2>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 1</a> <em>(August 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Initial release for Android 6.0 (API level 23). For more information, see the
+    <a href="{@docRoot}preview/api-overview.html">M Preview API Overview</a>.</p>
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r23 or higher is required.</li>
+      <li>Android SDK Tools 24.3.4 or higher is required.</li>
+    </ul>
+  </div>
+
+</div>
+
+
+<h2 id="5.1">Android 5.1</h2>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(March 2015)</em>
   </p>
 
   <div class="toggle-content-toggleme">
 
-    <p>Initial release for Android 5.1 (API level 22).</p>
-    <p>Also see the
-    <a href="{@docRoot}about/versions/android-5.1.html">Android 5.1 APIs overview</a>.</p>
+    <p>Initial release for Android 5.1 (API level 22). For more information, see the
+    <a href="{@docRoot}about/versions/android-5.1.html">Android 5.1 API Overview</a>.</p>
     <p>Dependencies:</p>
     <ul>
       <li>Android SDK Platform-tools r22 or higher is required.</li>
@@ -75,7 +96,6 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(March 2015)</em>
   </div>
 
 </div>
-
 
 
 <h2 id="5.0">Android 5.0</h2>
@@ -104,9 +124,8 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
 
   <div class="toggle-content-toggleme">
 
-    <p>Initial release for Android 5.0 (API level 21).</p>
-    <p>Also see the
-    <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 APIs overview</a>.</p>
+    <p>Initial release for Android 5.0 (API level 21). For more information, see the
+    <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API Overview</a>.</p>
     <p>Dependencies:</p>
     <ul>
       <li>Android SDK Platform-tools r21 or higher is required.</li>
@@ -137,7 +156,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(October 2014)</em>
 
   <div class="toggle-content-toggleme">
 
-    <p>Updated the rendering library.  </p>
+    <p>Updated the rendering library.</p>
 
     <p>Dependencies:</p>
     <ul>
@@ -183,9 +202,8 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
 
   <div class="toggle-content-toggleme">
 
-    <p>Maintenance release. The system version is 4.4.2.</p>
-    <p>Also see the
-    <a href="{@docRoot}about/versions/android-4.4.html">Android 4.4 APIs overview</a>.</p>
+    <p>Maintenance release. The system version is 4.4.2. For more information, see the
+    <a href="{@docRoot}about/versions/android-4.4.html">Android 4.4 API Overview</a>.</p>
     <dl>
       <dt>Dependencies:</dt>
       <dd>Android SDK Platform-tools r19 or higher is required.</dd>
@@ -203,9 +221,8 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
 
   <div class="toggle-content-toggleme">
 
-    <p>Initial release. The system version is 4.4.</p>
-    <p>Also see the
-    <a href="{@docRoot}about/versions/android-4.4.html">Android 4.4 APIs overview</a>.</p>
+    <p>Initial release. The system version is 4.4. For more information, see the
+    <a href="{@docRoot}about/versions/android-4.4.html">Android 4.4 API Overview</a>.</p>
     <dl>
       <dt>Dependencies:</dt>
       <dd>Android SDK Platform-tools r19 or higher is required.</dd>
