@@ -14,6 +14,7 @@ page.tags=studio, features
       <li><a href="#project-settings">Android Studio and Project Settings</a></li>
       <li><a href="#finger-print">Fingerprint Support</a></li>
       <li><a href="#dev-services">Developer Services</a></li>
+      <li><a href="#private-res">Public and Private Resources</a></li>
       <li><a href="#support-apis">Editor Support for the Latest Android APIs</a></li>
       <li><a href="#test-module">Test APK Module</a></li>
     </ol>
@@ -43,7 +44,8 @@ and
 <h2 id="trans-editor">Translations Editor</h2>
 <p>Multi-language support is enhanced with the Translations Editor plugin so you can easily add
 a variety of locales to the app's translation file. With
-<a href="https://tools.ietf.org/html/bcp47">BCP 47</a> support, the editor combines language and
+<a class="external-link" href="https://tools.ietf.org/html/bcp47">BCP 47</a> support, the editor
+combines language and
 region codes into a single selection for targeted localizations. Color codes indicate whether a
 locale is complete or still missing string translations. </p>
 
@@ -167,6 +169,61 @@ detail about starting the services, refer to each service's specific activation 
 
 
 
+<h2 id="private-res">Public and Private Resources</h2>
+<p>By default, Android Studio treats all library resources as public: A public library resource is
+available to library clients for use outside the library, and appears in code completion suggestions
+and other resource references. Android Studio also, however, supports the use of private library
+resources. A private library resource can only be used within the source library, and does not
+appear in code completion lists and other resource references. </p>
+
+<p>You cannot explicitly declare a library resource as private. Instead, if you declare any library
+resources as public, Android Studio assumes all the other library resources are private. </p>
+
+<p>An app treats all Android library resources as public unless you explicitly declare at least one
+resource in the library as public. Declaring one public resource causes your app to treat all other,
+undeclared resources in the library as private. </p>
+
+<p class="note"><strong>Note:</strong> Declaring public and private resources requires the
+<a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin for Gradle</a> version
+1.3 or higher. </p>
+
+
+<p>To declare a resource as public and set other undeclared resources as private, add a
+<code>&lt;public&gt;</code> declaration with the resource name and type in the resource file.
+This example shows the public declaration for the <code>mylib_app_name</code> string resource. </p>
+
+<pre>
+&lt;resources&gt;
+    &lt;public name="mylib_app_name" type="string"/&gt;
+&lt;/resources&gt;
+</pre>
+
+<p>For large numbers of declarations, we recommended that you place the public marker declarations
+in a separate file named <code>public.xml</code>. </p>
+
+<p>To help enforce private resource access, a <a href="{@docRoot}tools/help/lint.html">lint</a>
+warning appears when a client of a library references a private resource. Many Android libraries,
+such as the
+<a href="{@docRoot}tools/support-library/features.html#design">Design Support Library</a> and the
+<a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7 appcompat Library</a>,
+declare public resources to display only resources that developers can directly reference.
+</p>
+
+<p class="note"><strong>Note:</strong> If your app requires a private resource, copy the
+private resource from the library to the location in your app where it is needed. </p>
+
+<p>When the build system builds an Android Archive (AAR) file, it extracts the
+<code>&lt;public&gt;</code> resource declarations into a <code>public.txt</code> file, which is
+packaged inside the AAR file next to the <code>R.txt</code> file. The <code>public.txt</code> file
+contains a simple list of the declared public resources, describing their names and types. </p>
+
+<p>For a complete list of the available Android resource types, see
+<a href="http://developer.android.com/guide/topics/resources/available-resources.html">Resource
+Types</a></li> and
+<a href="http://developer.android.com/guide/topics/resources/more-resources.html">More Resource
+Types</a></li>. </p>
+
+
 
 <h2 id="support-apis">Editor Support for the Latest Android APIs</h2>
 <p>Android Studio supports the
@@ -275,6 +332,5 @@ properties for the project path and target build type variant. </p>
 <code>debug</code> build type. You can configure additional build types using the
 <code>testBuildType</code> property in the <code>defaultConfig</code> block in the main
 app's <code>build.gradle</code> file. </p>
-
 
 
