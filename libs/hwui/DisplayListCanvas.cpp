@@ -320,14 +320,13 @@ void DisplayListCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, in
            vertices, colors, paint));
 }
 
-void DisplayListCanvas::drawNinePatch(const SkBitmap& bitmap, const Res_png_9patch& patch,
-        float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
+void DisplayListCanvas::drawPatch(const SkBitmap& bitmap, const Res_png_9patch* patch,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
     const SkBitmap* bitmapPtr = refBitmap(bitmap);
-    const Res_png_9patch* patchPtr = refPatch(&patch);
+    patch = refPatch(patch);
     paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawPatchOp(bitmapPtr, patchPtr,
-            dstLeft, dstTop, dstRight, dstBottom, paint));
+    addDrawOp(new (alloc()) DrawPatchOp(bitmapPtr, patch, left, top, right, bottom, paint));
 }
 
 void DisplayListCanvas::drawColor(int color, SkXfermode::Mode mode) {

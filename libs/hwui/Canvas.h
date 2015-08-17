@@ -19,8 +19,6 @@
 
 #include <cutils/compiler.h>
 
-#include "utils/NinePatch.h"
-
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
@@ -146,9 +144,6 @@ public:
             float dstRight, float dstBottom, const SkPaint* paint) = 0;
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) = 0;
-    virtual void drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
-            float dstLeft, float dstTop, float dstRight, float dstBottom,
-            const SkPaint* paint) = 0;
 
     // Text
     /**

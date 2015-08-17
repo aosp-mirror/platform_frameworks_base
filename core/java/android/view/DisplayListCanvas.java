@@ -221,6 +221,29 @@ public class DisplayListCanvas extends Canvas {
     // Drawing
     ///////////////////////////////////////////////////////////////////////////
 
+    // TODO: move to Canvas.java
+    @Override
+    public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
+        Bitmap bitmap = patch.getBitmap();
+        throwIfCannotDraw(bitmap);
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
+        nDrawPatch(mNativeCanvasWrapper, bitmap, patch.mNativeChunk,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
+    }
+
+    // TODO: move to Canvas.java
+    @Override
+    public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
+        Bitmap bitmap = patch.getBitmap();
+        throwIfCannotDraw(bitmap);
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
+        nDrawPatch(mNativeCanvasWrapper, bitmap, patch.mNativeChunk,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
+    }
+
+    private static native void nDrawPatch(long renderer, Bitmap bitmap, long chunk,
+            float left, float top, float right, float bottom, long paint);
+
     public void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint) {
         nDrawCircle(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),

@@ -18,8 +18,6 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
-#include <androidfw/ResourceTypes.h>
-
 #include <Canvas.h>
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
@@ -330,41 +328,6 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawVertices(mode, vertexCount, verts, texs, colors,
                                            indices, indexCount, *paint);
-}
-
-static void drawNinePatch(JNIEnv* env, jlong canvasHandle, jobject jbitmap, jlong chunkHandle,
-        jfloat left, jfloat top, jfloat right, jfloat bottom,
-        jlong paintHandle, jint dstDensity, jint srcDensity) {
-
-    Canvas* canvas = get_canvas(canvasHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
-    const android::Res_png_9patch* chunk = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
-    const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-
-    if (CC_LIKELY(dstDensity == srcDensity || dstDensity == 0 || srcDensity == 0)) {
-        ALOGV("Drawing unscaled 9-patch: (%g,%g)-(%g,%g)", left, top, right, bottom);
-        canvas->drawNinePatch(bitmap, *chunk, left, top, right, bottom, paint);
-    } else {
-        canvas->save(SkCanvas::kMatrixClip_SaveFlag);
-
-        SkScalar scale = dstDensity / (float)srcDensity;
-        canvas->translate(left, top);
-        canvas->scale(scale, scale);
-
-        Paint filteredPaint;
-        if (paint) {
-            filteredPaint = *paint;
-        }
-        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
-
-        ALOGV("Drawing scaled 9-patch: (0,0)-(%g,%g) srcDensity=%d destDensity=%d",
-                (right-left)/scale, (bottom-top)/scale, srcDensity, dstDensity);
-        canvas->drawNinePatch(bitmap, *chunk, 0, 0, (right-left)/scale, (bottom-top)/scale,
-                &filteredPaint);
-
-        canvas->restore();
-    }
 }
 
 static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject jbitmap,
@@ -788,7 +751,6 @@ static JNINativeMethod gMethods[] = {
     {"native_drawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
     {"native_drawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
     {"nativeDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
-    {"native_drawNinePatch", "(JLandroid/graphics/Bitmap;JFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
     {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
     {"nativeDrawBitmapMatrix", "(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
     {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
