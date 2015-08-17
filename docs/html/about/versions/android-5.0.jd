@@ -103,7 +103,6 @@ sdk.platform.apiLevel=21
 <h2>API Differences</h2>
 <ol>
 <li><a href="{@docRoot}sdk/api_diff/21/changes.html">API level 20 to 21 &raquo;</a> </li>
-<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">L Developer Preview to 21 &raquo;</a> </li>
 </ol>
 
 <h2>See Also</h2>
