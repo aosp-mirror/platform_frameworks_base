@@ -131,9 +131,40 @@ a class, method, or field from a library for which you do not have source file a
    build and run code prototypes. Together with Android Studio coding assistance, scratch
    files allow you to quickly run and debug code updates with the support of all file operations.
    By embedding code created with scripting languages, you can run your code from within the
-   scratch file.</p> 
+   scratch file.</p>
   </li>
 </ul>
+
+
+<h3 id="live-template">Live templates</h3>
+<p>Live templates allow you to enter code snippets for fast insertion and completion of small chunks
+of code. To insert a live template, type the template abbreviations and press the
+Tab key. Android Studio inserts the code snippet associated with the template into
+your code. </p>
+
+<p>For example, entering the <code>newInstance</code> abbreviation followed by the
+Tab key inserts the code for a new fragment instance with argument placeholders. </p>
+
+<pre>
+public static $fragment$ newInstance($args$) {
+    $nullChecks$
+    Bundle args = new Bundle();
+    $addArgs$
+    $fragment$ fragment = new $fragment$();
+    fragment.setArguments(args);
+    return fragment;
+}
+</pre>
+
+<p>Similarly, the <code>fbc</code> abbreviation inserts a <code>findViewById</code> call along
+with cast and resource id syntax. </p>
+
+<pre>
+() findViewById(R.id.); 
+</pre>
+
+<p>Use the <strong>File &gt; Settings &gt; Editor &gt; Live Templates</strong> menu option to
+display the full list of supported live templates and customize the inserted code.  </p>
 
 
 
