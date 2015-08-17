@@ -2279,18 +2279,14 @@ public class ListView extends AbsListView {
                 break;
 
             case KeyEvent.KEYCODE_TAB:
-                // XXX Sometimes it is useful to be able to TAB through the items in
-                //     a ListView sequentially.  Unfortunately this can create an
-                //     asymmetry in TAB navigation order unless the list selection
-                //     always reverts to the top or bottom when receiving TAB focus from
-                //     another widget.  Leaving this behavior disabled for now but
-                //     perhaps it should be configurable (and more comprehensive).
-                if (false) {
-                    if (event.hasNoModifiers()) {
-                        handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_DOWN);
-                    } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                        handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_UP);
-                    }
+                // This creates an asymmetry in TAB navigation order. At some
+                // point in the future we may decide that it's preferable to
+                // force the list selection to the top or bottom when receiving
+                // TAB focus from another widget, but for now this is adequate.
+                if (event.hasNoModifiers()) {
+                    handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_DOWN);
+                } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                    handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_UP);
                 }
                 break;
             }
