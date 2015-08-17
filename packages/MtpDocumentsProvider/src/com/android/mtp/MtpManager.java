@@ -95,6 +95,9 @@ class MtpManager {
     synchronized MtpRoot[] getRoots(int deviceId) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         final int[] storageIds = device.getStorageIds();
+        if (storageIds == null) {
+            throw new IOException("Failed to obtain storage IDs.");
+        }
         final MtpRoot[] results = new MtpRoot[storageIds.length];
         for (int i = 0; i < storageIds.length; i++) {
             results[i] = new MtpRoot(deviceId, device.getStorageInfo(storageIds[i]));
