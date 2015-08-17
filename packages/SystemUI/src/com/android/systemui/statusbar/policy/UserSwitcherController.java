@@ -286,7 +286,7 @@ public class UserSwitcherController {
             return overrideUseFullscreenUserSwitcher != 0;
         }
         // Otherwise default to the build setting.
-        return mContext.getResources().getBoolean(R.bool.enable_fullscreen_user_switcher);
+        return mContext.getResources().getBoolean(R.bool.config_enableFullscreenUserSwitcher);
     }
 
     public void removeUserId(int userId) {

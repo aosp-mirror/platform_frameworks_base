@@ -295,7 +295,7 @@
     <bool name="config_enableAppShelf">false</bool>
 
     <!-- Whether to show the full screen user switcher. -->
-    <bool name="enable_fullscreen_user_switcher">false</bool>
+    <bool name="config_enableFullscreenUserSwitcher">false</bool>
 
 </resources>
 
