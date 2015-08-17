@@ -300,7 +300,33 @@ allocations that need to be done for that behavior, what thread they are on, and
 from. This is extremely valuable for tightening up these paths to reduce the work they need and
 improve the overall smoothness of the UI.</p>
 
-<p>To use Allocation Tracker:</p>
+<p>To use the Allocation Tracker, open the Memory Monitor in Android Studio and click the 
+<a href="{@docRoot}tools/studio/index.html#alloc-tracker" style="vertical-align:bottom;margin:0;height:21px">
+Allocation Tracker</a> icon. You can also track allocations in the Android Device Monitor:</p>
+
+
+<h3>Android Studio </h3>
+<p>To use the <a href="{@docRoot}tools/studio/index.html#alloc-tracker">Allocation Tracker</a> in
+Android Studio: </p>
+
+<ol>
+  <li>Start your app on a connected device or emulator</li>
+  <li>Open the Android run-tme window, and view the free and allocated memory in the Memory
+    Monitor. </li>
+  <li>Click the Allocation Tracker icon
+    (<img src="{@docRoot}images/tools/studio-allocation-tracker-icon.png" style="vertical-align:bottom;margin:0;height:21px"/>) in the Memory Monitor tool bar to start and stop memory
+    allocations. 
+    <p>Android Studio creates the allocation file with the filename
+    <code>Allocations-yyyy.mm.dd-hh.mm.ss.alloc</code> in the <em>Captures</em> tab. </p> 
+     </li>
+  <li>Double-click the allocation file to open the Allocation viewer.  </li>
+  <li>Identify which actions in your app are likely causing too much allocation and determine where
+   in your app you should try to reduce allocations and release resources.
+</ol>
+
+
+
+<h3>Device Monitor</h3>
 <ol>
 <li>Open the Device Monitor.
 <p>From your <code>&lt;sdk>/tools/</code> directory, launch the <code>monitor</code> tool.</p>
@@ -641,7 +667,7 @@ hprof-conv heap-original.hprof heap-converted.hprof
 </pre>
 
 <p class="note"><strong>Note:</strong> If you're using the version of DDMS that's integrated into
-Eclipse, you do not need to perform the HPROF conversion—DDMS performs the conversion by
+Eclipse, you do not need to perform the HPROF conversation—it performs the conversion by
 default.</p>
 
 <p>You can now load the converted file in MAT or another heap analysis tool that understands
