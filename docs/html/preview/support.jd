@@ -149,8 +149,16 @@ page.image=images/cards/card-support_16-9_2x.png
 <h3 id="changes">
   Key changes
 </h3>
-
 <ul>
+  <li>General
+  <ul>
+  <li>Final Permissions user interface &mdash; the permissions user interface is updated
+  and some of the permissions behaviors are enhanced. </li>
+  <li>Updates to the Fingerprint API &mdash; updated API that enables better error reporting,
+  better fingerprint enrollment experience, plus enumeration support for greater
+  reliability.</li>
+  </ul>
+  </li>
   <li>Permission changes
     <ul>
       <li>The {@link android.Manifest.permission#GET_ACCOUNTS} permission is now a member of the
@@ -180,7 +188,7 @@ page.image=images/cards/card-support_16-9_2x.png
 <ul>
   <li>General issues:
     <ul>
-      <li>On LTE devices, including volantis, GPS is not functioning properly, which may
+      <li>On LTE devices, including Nexus 9, GPS is not functioning properly, which may
         interfere with navigation services.
       </li>
       <li>During Hangouts calls, users may experience distorted or low audio on some devices.
