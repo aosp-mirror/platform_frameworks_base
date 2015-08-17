@@ -45,7 +45,7 @@ page.image=images/cards/card-api-overview_16-9_2x.png
 
 <h2>API Differences</h2>
 <ol>
-<li><a href="{@docRoot}preview/download.html">API level 22 to M Preview &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/23/changes.html">API level 22 to 23 (Preview 3) &raquo;</a> </li>
 </ol>
 
 </div>
@@ -55,21 +55,27 @@ page.image=images/cards/card-api-overview_16-9_2x.png
 for the Android platform, which offers new features for users and app
 developers. This document provides an introduction to the most notable APIs.</p>
 
-<p>The M Developer Preview is intended for <strong>developer early
-adopters</strong> and <strong>testers</strong>. If you are interested in
-influencing the direction of the Android framework,
-<a href="{@docRoot}preview/setup-sdk.html">give the M Developer Preview a
-try</a> and send us your feedback!</p>
+<p>
+  The M Developer Preview 3 release includes the <strong>final APIs for Android 6.0 (API level
+  23)</strong>. If you are preparing an app for use on Android 6.0,
+  <a href="{@docRoot}preview/setup-sdk.html">download the latest SDK</a> and to complete your
+  final updates and release testing. You can review the final APIs in the
+  <a href="{@docRoot}reference/packages.html">API Reference</a> and see the API differences in
+  the <a href="{@docRoot}sdk/api_diff/23/changes.html">Android API Differences Report</a>.
+</p>
 
-<p class="caution"><strong>Caution:</strong> Do not publish apps
-that use the M Developer Preview to the Google Play store.</p>
+</p>
 
-<p class="note"><strong>Note:</strong> This document often refers to classes and
-methods that do not yet have reference material available on <a
-href="{@docRoot}">developer.android.com</a>. These API elements are
-formatted in {@code code style} in this document (without hyperlinks). For the
-preliminary API documentation for these elements, download the <a
-href="{@docRoot}preview/download.html#docs"> preview reference</a>.</p>
+<p class="caution"><strong>Important:</strong>
+  You may now publish apps that target Android 6.0 (API level 23) to the Google Play store.
+</p>
+
+<p class="note"><strong>Note:</strong>
+  If you have been working with previous preview releases and want to see the differences
+  between the final API and previous preview versions, download the additional difference
+  reports included in the <a href="{@docRoot}preview/download.html#docs">preview docs
+  reference</a>.
+</p>
 
 <h3>Important behavior changes</h3>
 
