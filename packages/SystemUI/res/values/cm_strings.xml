@@ -59,4 +59,7 @@
     <string name="accessibility_quick_settings_sync_on">Sync on.</string>
     <string name="accessibility_quick_settings_sync_changed_off">Sync turned off.</string>
     <string name="accessibility_quick_settings_sync_changed_on">Sync turned on.</string>
+
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Volume panel</string>
 </resources>
