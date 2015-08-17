@@ -117,11 +117,6 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         a.recycle();
 
         setChildrenDrawingOrderEnabled(true);
-
-        // Deal with focus, as we don't want the focus to go by default
-        // to a tab other than the current tab
-        setFocusable(true);
-        setOnFocusChangeListener(this);
     }
 
     @Override
@@ -434,24 +429,6 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         mSelectedTab = index;
         getChildTabViewAt(mSelectedTab).setSelected(true);
         mStripMoved = true;
-
-        if (isShown()) {
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-        }
-    }
-
-    /** @hide */
-    @Override
-    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
-        onPopulateAccessibilityEvent(event);
-        // Dispatch only to the selected tab.
-        if (mSelectedTab != -1) {
-            View tabView = getChildTabViewAt(mSelectedTab);
-            if (tabView != null && tabView.getVisibility() == VISIBLE) {
-                return tabView.dispatchPopulateAccessibilityEvent(event);
-            }
-        }
-        return false;
     }
 
     @Override
@@ -465,18 +442,6 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         super.onInitializeAccessibilityEventInternal(event);
         event.setItemCount(getTabCount());
         event.setCurrentItemIndex(mSelectedTab);
-    }
-
-
-    /** @hide */
-    @Override
-    public void sendAccessibilityEventUncheckedInternal(AccessibilityEvent event) {
-        // this class fires events only when tabs are focused or selected
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && isFocused()) {
-            event.recycle();
-            return;
-        }
-        super.sendAccessibilityEventUncheckedInternal(event);
     }
 
     /**
@@ -534,7 +499,6 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         // TODO: detect this via geometry with a tabwidget listener rather
         // than potentially interfere with the view's listener
         child.setOnClickListener(new TabClickListener(getTabCount() - 1));
-        child.setOnFocusChangeListener(this);
     }
 
     @Override
@@ -551,28 +515,9 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         mSelectionChangedListener = listener;
     }
 
+    @Override
     public void onFocusChange(View v, boolean hasFocus) {
-        if (v == this && hasFocus && getTabCount() > 0) {
-            getChildTabViewAt(mSelectedTab).requestFocus();
-            return;
-        }
-
-        if (hasFocus) {
-            int i = 0;
-            int numTabs = getTabCount();
-            while (i < numTabs) {
-                if (getChildTabViewAt(i) == v) {
-                    setCurrentTab(i);
-                    mSelectionChangedListener.onTabSelectionChanged(i, false);
-                    if (isShown()) {
-                        // a tab is focused so send an event to announce the tab widget state
-                        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
-                    }
-                    break;
-                }
-                i++;
-            }
-        }
+        // No-op. Tab selection is separate from keyboard focus.
     }
 
     // registered with each tab indicator so we can notify tab host
