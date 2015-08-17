@@ -98,7 +98,7 @@ sdk.platform.apiLevel=22
 <h2 id="http">Deprecated HTTP Classes</h2>
 
 <p>
-  The {@code org.apache.http} classes and the {@link android.net.http.AndroidHttpClient} class
+  The {@code org.apache.http} classes and the {@code android.net.http.AndroidHttpClient} class
   have been deprecated in Android 5.1. These classes are no longer being maintained and you should
   migrate any app code using these APIs to the {@link java.net.URLConnection} classes as soon as
   possible.
