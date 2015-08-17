@@ -1,0 +1,124 @@
+page.title=Android 5.1 APIs
+excludeFromSuggestions=true
+sdk.platform.version=5.1
+sdk.platform.apiLevel=22
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document
+    <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">show more</span>
+        <span class="less" style="display:none">show less</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#ApiLevel">Update your target API level</a></li>
+
+  <li><a href="#multisim">Multiple SIM Card Support</a></li>
+  <li><a href="#http">Deprecated HTTP Classes</a></li>
+  <li><a href="#carrier">Carrier Services</a></li>
+</ol>
+
+<h2>API Differences</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/22/changes.html">API level 21 to 22 &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}about/versions/lollipop.html">Android Lollipop Highlights</a> </li>
+</ol>
+
+
+</div>
+</div>
+
+<p>API Level: {@sdkPlatformApiLevel}</p>
+
+<p>
+  Android 5.1
+  (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#LOLLIPOP_MR1">LOLLIPOP_MR1</a>)
+  is an update to the Lollipop release that offers new features for users and app developers.
+  This document provides an introduction to the most notable new APIs.
+</p>
+
+<p>
+  For a high-level look at the new platform features, see the <a href=
+  "{@docRoot}about/versions/lollipop.html">Android Lollipop highlights</a>.
+</p>
+
+
+<h3 id="ApiLevel">Update your target API level</h3>
+
+<p>
+  To start building apps for Android 5.1, use the
+  <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> to download the Android 5.1 SDK
+  Platform and System Images. Then set your app development project to use a
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+  of <code>"{@sdkPlatformApiLevel}"</code>. Install your app on an Android {@sdkPlatformVersion}
+  system image, test it, then publish the updated app with this change.
+</p>
+
+<p>
+  You can use Android {@sdkPlatformVersion} APIs while also supporting older versions by adding
+  conditions to your code that check for the system API level before executing APIs not supported
+  by your <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+  minSdkVersion}</a>. To learn more about maintaining backward compatibility, read <a href=
+  "{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different Platform
+  Versions</a>.
+</p>
+
+<p>
+  For more information about how API levels work, read <a href=
+  "{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API Level?</a>
+</p>
+
+<h2 id="multisim">Multiple SIM Card Support</h2>
+
+<p>
+  Android 5.1 adds support for using more than one cellular carrier SIM card at a time. This
+  feature lets users activate and use additional SIMs on devices that have two or more SIM card
+  slots.
+</p>
+
+<p>
+  You can access information about the currently active SIM through the {@link
+  android.telephony.SubscriptionManager} class, including whether or not the device is considered
+  to be roaming on the current network. This information is useful for developers who want to
+  throttle their apps' data access down or off for device users who are sensitive to data access
+  charges. Your app can be alerted to changes in a device's current network connection by
+  requesting the {@link android.Manifest.permission#READ_PHONE_STATE} permission and setting {@link
+  android.telephony.SubscriptionManager.OnSubscriptionsChangedListener} on the {@link
+  android.telephony.SubscriptionManager} object.
+</p>
+
+
+<h2 id="http">Deprecated HTTP Classes</h2>
+
+<p>
+  The {@code org.apache.http} classes and the {@link android.net.http.AndroidHttpClient} class
+  have been deprecated in Android 5.1. These classes are no longer being maintained and you should
+  migrate any app code using these APIs to the {@link java.net.URLConnection} classes as soon as
+  possible.
+</p>
+
+
+<h2 id="carrier">Carrier Services</h2>
+
+<p>
+  Android 5.1 provides support for telecommunication service providers to create apps that can
+  perform carrier provisioning tasks on an Android device. These APIs provide a secure and flexible
+  way for carrier-developed apps to perform these tasks and be distributed through Google Play. Apps
+  that use these functions must be signed by a certificate that matches the certificate in the
+  device's Universal Integrated Circuit Card (UICC).
+</p>
+
+<p>
+  The carrier service APIs have been added to the {@link android.telephony.TelephonyManager} class,
+  the {@link android.telephony.SmsManager} class, and the new {@link
+  android.service.carrier.CarrierMessagingService} class. Apps can check for access to these APIs
+  by calling the {@link android.telephony.TelephonyManager#hasCarrierPrivileges} method. Apps that
+  call these APIs without access receive a {@link java.lang.SecurityException}.
+</p>
