@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
 import android.content.Context;
@@ -31,6 +32,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
@@ -59,6 +62,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         RecentsPackageMonitor.PackageCallbacks {
 
     private static final String TAG = "RecentsView";
+
+    private static final boolean ADD_HEADER_BITMAP = true;
 
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
@@ -443,62 +448,158 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
-    private void postDrawHeaderThumbnailTransitionRunnable(final TaskView tv, final int offsetX,
-            final int offsetY, final TaskViewTransform transform,
+    private void postDrawHeaderThumbnailTransitionRunnable(final TaskStackView view,
+            final TaskView clickedView, final int offsetX, final int offsetY,
+            final float stackScroll,
             final ActivityOptions.OnAnimationStartedListener animStartedListener) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                // Disable any focused state before we draw the header
-                if (tv.isFocusedTask()) {
-                    tv.unsetFocusedTask();
-                }
+                overrideDrawHeaderThumbnailTransition(view, clickedView, offsetX, offsetY,
+                        stackScroll, animStartedListener);
 
-                float scale = tv.getScaleX();
-                int fromHeaderWidth = (int) (tv.mHeaderView.getMeasuredWidth() * scale);
-                int fromHeaderHeight = (int) (tv.mHeaderView.getMeasuredHeight() * scale);
-
-                Bitmap b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
-                        Bitmap.Config.ARGB_8888);
-                if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
-                    b.eraseColor(0xFFff0000);
-                } else {
-                    Canvas c = new Canvas(b);
-                    c.scale(tv.getScaleX(), tv.getScaleY());
-                    tv.mHeaderView.draw(c);
-                    c.setBitmap(null);
-                }
-                b = b.createAshmemBitmap();
-                int[] pts = new int[2];
-                tv.getLocationOnScreen(pts);
-                try {
-                    WindowManagerGlobal.getWindowManagerService()
-                            .overridePendingAppTransitionAspectScaledThumb(b,
-                                    pts[0] + offsetX,
-                                    pts[1] + offsetY,
-                                    transform.rect.width(),
-                                    transform.rect.height(),
-                                    new IRemoteCallback.Stub() {
-                                        @Override
-                                        public void sendResult(Bundle data)
-                                                throws RemoteException {
-                                            post(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    if (animStartedListener != null) {
-                                                        animStartedListener.onAnimationStarted();
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    }, true);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Error overriding app transition", e);
-                }
             }
         };
+
         mCb.runAfterPause(r);
     }
+
+    private void overrideDrawHeaderThumbnailTransition(TaskStackView stackView,
+            TaskView clickedTask, int offsetX, int offsetY, float stackScroll,
+            final ActivityOptions.OnAnimationStartedListener animStartedListener) {
+        List<AppTransitionAnimationSpec> specs = getAppTransitionAnimationSpecs(stackView,
+                clickedTask, offsetX, offsetY, stackScroll);
+        if (specs == null) {
+            return;
+        }
+
+        IRemoteCallback.Stub callback = new IRemoteCallback.Stub() {
+            @Override
+            public void sendResult(Bundle data) throws RemoteException {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (animStartedListener != null) {
+                            animStartedListener.onAnimationStarted();
+                        }
+                    }
+                });
+            }
+        };
+
+        AppTransitionAnimationSpec[] specsArray =
+                new AppTransitionAnimationSpec[specs.size()];
+        try {
+            WindowManagerGlobal.getWindowManagerService().overridePendingAppTransitionMultiThumb(
+                    specs.toArray(specsArray), callback, true /* scaleUp */);
+
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error overriding app transition", e);
+        }
+    }
+
+    private List<AppTransitionAnimationSpec> getAppTransitionAnimationSpecs(TaskStackView stackView,
+            TaskView clickedTask, int offsetX, int offsetY, float stackScroll) {
+        final int targetStackId = clickedTask.getTask().key.stackId;
+        if (targetStackId != ActivityManager.FREEFORM_WORKSPACE_STACK_ID
+                && targetStackId != ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID) {
+            return null;
+        }
+        // If this is a full screen stack, the transition will be towards the single, full screen
+        // task. We only need the transition spec for this task.
+        List<AppTransitionAnimationSpec> specs = new ArrayList<>();
+        if (targetStackId == ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID) {
+            specs.add(createThumbnailHeaderAnimationSpec(
+                    stackView, offsetX, offsetY, stackScroll, clickedTask,
+                    clickedTask.getTask().key.id, ADD_HEADER_BITMAP));
+            return specs;
+        }
+        // This is a free form stack or full screen stack, so there will be multiple windows
+        // animating from thumbnails. We need transition animation specs for all of them.
+
+        // We will use top and bottom task views as a base for tasks, that aren't visible on the
+        // screen. This is necessary for cascade recents list, where some of the tasks might be
+        // hidden.
+        List<TaskView> taskViews = stackView.getTaskViews();
+        int childCount = taskViews.size();
+        TaskView topChild = taskViews.get(0);
+        TaskView bottomChild = taskViews.get(childCount - 1);
+        SparseArray<TaskView> taskViewsByTaskId = new SparseArray<>();
+        for (int i = 0; i < childCount; i++) {
+            TaskView taskView = taskViews.get(i);
+            taskViewsByTaskId.put(taskView.getTask().key.id, taskView);
+        }
+
+        TaskStack stack = stackView.getStack();
+        // We go through all tasks now and for each generate transition animation spec. If there is
+        // a view associated with a task, we use that view as a base for the animation. If there
+        // isn't, we use bottom or top view, depending on which one would be closer to the task
+        // view if it existed.
+        ArrayList<Task> tasks = stack.getTasks();
+        boolean passedClickedTask = false;
+        for (int i = 0, n = tasks.size(); i < n; i++) {
+            Task task = tasks.get(i);
+            TaskView taskView = taskViewsByTaskId.get(task.key.id);
+            if (taskView != null) {
+                specs.add(createThumbnailHeaderAnimationSpec(stackView, offsetX, offsetY,
+                        stackScroll, taskView, taskView.getTask().key.id, ADD_HEADER_BITMAP));
+                if (taskView == clickedTask) {
+                    passedClickedTask = true;
+                }
+            } else {
+                taskView = passedClickedTask ? bottomChild : topChild;
+                specs.add(createThumbnailHeaderAnimationSpec(stackView, offsetX, offsetY,
+                        stackScroll, taskView, task.key.id, !ADD_HEADER_BITMAP));
+            }
+        }
+
+        return specs;
+    }
+
+    private AppTransitionAnimationSpec createThumbnailHeaderAnimationSpec(TaskStackView stackView,
+            int offsetX, int offsetY, float stackScroll, TaskView tv, int taskId,
+            boolean addHeaderBitmap) {
+        // Disable any focused state before we draw the header
+        // Upfront the processing of the thumbnail
+        if (tv.isFocusedTask()) {
+            tv.unsetFocusedTask();
+        }
+        TaskViewTransform transform = new TaskViewTransform();
+        transform = stackView.getStackAlgorithm().getStackTransform(tv.mTask, stackScroll,
+                transform, null);
+
+        float scale = tv.getScaleX();
+        int fromHeaderWidth = (int) (tv.mHeaderView.getMeasuredWidth() * scale);
+        int fromHeaderHeight = (int) (tv.mHeaderView.getMeasuredHeight() * scale);
+
+        Bitmap b = null;
+        if (addHeaderBitmap) {
+            b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
+                    Bitmap.Config.ARGB_8888);
+
+            if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
+                b.eraseColor(0xFFff0000);
+            } else {
+                Canvas c = new Canvas(b);
+                c.scale(tv.getScaleX(), tv.getScaleY());
+                tv.mHeaderView.draw(c);
+                c.setBitmap(null);
+
+            }
+            b = b.createAshmemBitmap();
+        }
+
+        int[] pts = new int[2];
+        tv.getLocationOnScreen(pts);
+
+        final int left = pts[0] + offsetX;
+        final int top = pts[1] + offsetY;
+        final Rect rect = new Rect(left, top, left + transform.rect.width(),
+                top + transform.rect.height());
+
+        return new AppTransitionAnimationSpec(taskId, b, rect);
+    }
+
     /**** TaskStackView.TaskStackCallbacks Implementation ****/
 
     @Override
@@ -521,12 +622,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             // and then offset to the expected transform rect, but bound this to just
             // outside the display rect (to ensure we don't animate from too far away)
             sourceView = stackView;
-            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
             offsetX = transform.rect.left;
             offsetY = mConfig.displayRect.height();
         } else {
             sourceView = tv.mThumbnailView;
-            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
         }
 
         // Compute the thumbnail to scale up from
@@ -553,10 +652,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     }
                 };
             }
-            if (tv != null) {
-                postDrawHeaderThumbnailTransitionRunnable(tv, offsetX, offsetY, transform,
-                        animStartedListener);
-            }
+            postDrawHeaderThumbnailTransitionRunnable(stackView, tv, offsetX, offsetY, stackScroll,
+                    animStartedListener);
             if (mConfig.multiStackEnabled) {
                 opts = ActivityOptions.makeCustomAnimation(sourceView.getContext(),
                         R.anim.recents_from_unknown_enter,

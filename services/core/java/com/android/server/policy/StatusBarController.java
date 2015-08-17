@@ -122,7 +122,7 @@ public class StatusBarController extends BarController {
      *
      * @return the desired start time of the status bar transition, in uptime millis
      */
-    private long calculateStatusBarTransitionStartTime(Animation openAnimation,
+    private static long calculateStatusBarTransitionStartTime(Animation openAnimation,
             Animation closeAnimation) {
         if (openAnimation != null && closeAnimation != null) {
             TranslateAnimation openTranslateAnimation = findTranslateAnimation(openAnimation);
@@ -151,7 +151,7 @@ public class StatusBarController extends BarController {
      *
      * @return the found animation, {@code null} otherwise
      */
-    private TranslateAnimation findTranslateAnimation(Animation animation) {
+    private static TranslateAnimation findTranslateAnimation(Animation animation) {
         if (animation instanceof TranslateAnimation) {
             return (TranslateAnimation) animation;
         } else if (animation instanceof AnimationSet) {
@@ -170,7 +170,7 @@ public class StatusBarController extends BarController {
      * Binary searches for a {@code t} such that there exists a {@code -0.01 < eps < 0.01} for which
      * {@code interpolator(t + eps) > 0.99}.
      */
-    private float findAlmostThereFraction(Interpolator interpolator) {
+    private static float findAlmostThereFraction(Interpolator interpolator) {
         float val = 0.5f;
         float adj = 0.25f;
         while (adj >= 0.01f) {
