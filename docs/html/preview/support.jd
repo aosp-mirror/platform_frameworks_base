@@ -151,16 +151,19 @@ page.image=images/cards/card-support_16-9_2x.png
 </h3>
 <ul>
   <li>General
-  <ul>
-  <li>Final Permissions user interface &mdash; the permissions user interface is updated
-  and some of the permissions behaviors are enhanced. </li>
-  <li>Updates to the Fingerprint API &mdash; updated API that enables better error reporting,
-  better fingerprint enrollment experience, plus enumeration support for greater
-  reliability.</li>
-  </ul>
+    <ul>
+      <li>Updated the Fingerprint API to enables better error reporting,
+        better fingerprint enrollment experience, and enumeration support for greater
+        reliability.</li>
+      <li>Modified app access to BLE and Wi-Fi scans to require the location permisssion when they
+        target Android 6.0 (API level 23) or higher. Apps targeting API 22 or earlier can
+        still perform BTLE and WiFi scans, but only when they are in the foreground. While in the background, those apps will get no results from BTLE and WiFi scans.</li>
+    </ul>
   </li>
   <li>Permission changes
     <ul>
+      <li>Updated the user interface for permissions and enhanced some of the permissions
+        behaviors.</li>
       <li>The {@link android.Manifest.permission#GET_ACCOUNTS} permission is now a member of the
         {@link android.Manifest.permission_group#CONTACTS} permission group and it has a
         {@code android:protectionLevel} of {@code dangerous}. This change means that when
@@ -192,6 +195,10 @@ page.image=images/cards/card-support_16-9_2x.png
         interfere with navigation services.
       </li>
       <li>During Hangouts calls, users may experience distorted or low audio on some devices.
+      </li>
+      <li>The bundled Google Apps Device Policy app is unable to set up an Android for Work
+        Profile in the MPA44G system images, so you cannot create a new Work Profile with that
+        app. Other apps that provide Android for Work functionality are unaffected.
       </li>
     </ul>
   </li>
