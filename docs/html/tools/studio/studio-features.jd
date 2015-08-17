@@ -12,6 +12,7 @@ page.tags=studio, features
       <li><a href="#git-samples">Android Code Samples on GitHub</a></li>
       <li><a href="#template-support">Expanded Template and Form Factor Support</a></li>
       <li><a href="#project-settings">Android Studio and Project Settings</a></li>
+      <li><a href="#finger-print">Fingerprint Support</a></li>
       <li><a href="#support-apis">Editor Support for the Latest Android APIs</a></li>
     </ol>
 
@@ -110,6 +111,32 @@ Additional settings from the <strong>File &gt; Project Structure</strong> menus 
 <p>Use the <strong>File &gt; Settings</strong> menu to modify the Android Studio or project
 behavior, such a UI themes, system settings, and version control. </p>
 
+
+
+<h2 id="finger-print">Fingerprint Support</h2>
+<p>Android Studio provides the {@code finger} command, allowing you to simulate, and thus validate,
+fingerprint authentication for your app. After you set up your app to accept
+<a href="https://developer.android.com/preview/api-overview.html#authentication">fingerprint
+authentication</a>, your emulator or device should display the fingerprint authentication screen,
+as shown below. </p>
+
+    <p><img src="{@docRoot}images/tools/studio-fingerprint.png" /></p>
+    <p class="img-caption"><strong>Figure 6</strong> Fingerprint authentication.</p>
+
+<p>Open a terminal session, and telnet to the emulator. For example:</p>
+<pre>
+{@code telnet localhost 5554}
+</pre>
+
+<p>Enter the <code>finger</code> command to simulate finger touch and removal: </p>
+
+<ul>
+   <li><code>finger touch &lt;fingerprint-id&gt;</code> to simulate a finger touching the sensor</li>
+   <li><code>finger remove</code> to simulate finger removal </li>
+</ul>
+
+<p>Your app should respond as if a user touched, and then removed their finger from, the
+fingerprint sensor. </p>
 
 
 <h2 id="support-apis">Editor Support for the Latest Android APIs</h2>
