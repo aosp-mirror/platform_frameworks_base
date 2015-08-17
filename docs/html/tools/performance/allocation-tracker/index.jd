@@ -90,19 +90,24 @@ page.article=true
          alt=""
          width="400px" />
       <p class="img-caption">
-        <strong>Figure 1. </strong>Steps for starting Allocation Tracker.
+        <strong>Figure 1. </strong>Steps for starting Allocation Tracker in Android DDMS.
       </p>
     </div>
 
     <li>Connect your mobile device to your computer.</li>
 
-    <li>Open your application in Android Studio, build the source, and run it on your device.</li>
+    <li>Open your application in Android Studio, build the source, and run it on your device or
+      emulator.</li>
 
     <li>Click the <b>Android</b> button at the bottom of your Android Studio window.</li>
 
-    <li>Click the RECORD button
+    <li>If you are using the Android Device Monitor, click the RECORD button
         <img src="{@docRoot}images/tools/performance/allocation-tracker/gettingstarted_image02.png">
-        (Start Allocation Tracking tooltip).</li>
+        (Start Allocation Tracking tooltip) in the Android DDMS tool bar. If you are using Android
+        Studio, click the
+        <img src="{@docRoot}images/tools/performance/allocation-tracker/gettingstarted_image02.png">
+        icon in the <a href="{@docRoot}tools/studio/index.html#mem-cpu">Memory Monitor</a> tool
+        bar. </li>
 
     <li>Interact with your application.</li>
 
@@ -119,7 +124,7 @@ page.article=true
          alt=""
          width="440px" />
       <p class="img-caption">
-        <strong>Figure 2. </strong>Example of Allocation Tracker output.
+        <strong>Figure 2. </strong>Example of Allocation Tracker output in Android DDMS.
       </p>
     </div>
 
