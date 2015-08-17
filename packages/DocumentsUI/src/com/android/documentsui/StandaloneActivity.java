@@ -70,6 +70,8 @@ public class StandaloneActivity extends BaseActivity {
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
     private DocumentClipper mClipper;
+    private DrawerController mDrawer;
+    private boolean mCompactMode;
 
     public StandaloneActivity() {
         super(TAG);
@@ -106,6 +108,18 @@ public class StandaloneActivity extends BaseActivity {
         }
 
         setActionBar(mToolbar);
+
+
+        // "show as dialog" is true on BIG screens. But we *assume* a big screen
+        // and specialize for smaller screens by moving roots into an auto-hide drawer.
+        // This works in conjunction with the specialized layouts defined for sw720dp.
+        mCompactMode = !getResources().getBoolean(R.bool.show_as_dialog);
+
+        if (mCompactMode) {
+            setTheme(R.style.DocumentsNonDialogTheme);
+        }
+
+        mDrawer = DrawerController.create(this);
 
         mClipper = new DocumentClipper(this);
 
@@ -164,10 +178,23 @@ public class StandaloneActivity extends BaseActivity {
     @Override
     public void updateActionBar() {
         final RootInfo root = getCurrentRoot();
-        mToolbar.setNavigationIcon(
-                root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
-        mToolbar.setNavigationContentDescription(R.string.drawer_open);
-        mToolbar.setNavigationOnClickListener(null);
+
+        if (mCompactMode) {
+            mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
+            mToolbar.setNavigationContentDescription(R.string.drawer_open);
+            mToolbar.setNavigationOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mDrawer.setOpen(true);
+                        }
+                    });
+        } else {
+            mToolbar.setNavigationIcon(
+                    root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
+            mToolbar.setNavigationContentDescription(R.string.drawer_open);
+            mToolbar.setNavigationOnClickListener(null);
+        }
 
         if (mSearchManager.isExpanded()) {
             mToolbar.setTitle(null);
@@ -281,6 +308,12 @@ public class StandaloneActivity extends BaseActivity {
                 DirectoryFragment.showNormal(fm, root, cwd, anim);
             }
         }
+    }
+
+    @Override
+    void onRootPicked(RootInfo root) {
+        super.onRootPicked(root);
+        mDrawer.setOpen(false);
     }
 
     @Override
