@@ -67,27 +67,27 @@ page.image=images/cards/card-support_16-9_2x.png
 </div>
 
 <p>
-  Android M Developer Preview 3 is the <strong>final incremental update</strong>
+  Developer Preview 3 is the <strong>final incremental update</strong>
   to the Android M preview platform that was originally released in May 2015.
-  The update includes <strong>final APIs and final SDK</strong>, as well as
-  <strong>near-final system images</strong> for testing your apps. The
-  updated system images include a variety of fixes and enhancements across
+  The update includes <strong>final APIs and the official Android 6.0 SDK</strong>,
+  as well as <strong>near-final system images</strong> for testing your apps. The
+  updated system images bring a variety of fixes and enhancements across
   the system, including those related to issues reported by developers
   through the external issue tracker.
 </p>
 
 <p>
   If you are currently developing or testing on Android M, you should <strong>update
-  your environment to Developer Preview 3</strong> as soon as possible, so that
-  you can begin <strong>final compatibility testing</strong> in preparation for the public
-  release to device manufacturers.</p>
+  your environment</strong> as soon as possible, so that
+  you can begin <strong>final compatibility testing</strong> in preparation for
+  the public release to device manufacturers later this year.</p>
 
-<p class="important">Updating to Developer Preview 3 ensures that
-   you are building against final platform APIs and testing against
-   the final behaviors. If you are just getting started with the Android
-   M Developer Preview SDK, follow the instructions in <a href=
-  "/preview/setup-sdk.html">Set up the Preview SDK</a>, then update your
-  environment for Developer Preview 3.
+<p class="important">Updating to the Android 6.0 SDK and the latest
+   system images 3 ensures that you are building against final
+   platform APIs in <strong>API level 23</strong> and testing
+   against final behaviors. If you are just getting started,
+   follow the instructions in <a href=
+  "/preview/setup-sdk.html">Set up the Preview SDK</a>.
 </p>
 
 <h3>
@@ -95,15 +95,16 @@ page.image=images/cards/card-support_16-9_2x.png
 </h3>
 
 <p>
-  Developer Preview 3 includes an updated SDK and system images,
-  documentation, and samples for developing against the final Android M
+  Developer Preview 3 includes the official Android 6.0 
+  SDK as well as updated preview system images, documentation,
+  and samples for developing against the Android 6.0
   development platform.
 </p>
 
 <ul>
   <li>
     <strong>SDK platform</strong> and <strong>system images</strong> (Nexus and
-    emulator) for building and testing. You can download the updated tools from
+    emulator) for building and testing. You can download the Android 6.0 SDK and tools from
     the SDK Manager, and the system images are available by over-the-air (OTA)
     update or download (see below).
   </li>
@@ -116,14 +117,15 @@ page.image=images/cards/card-support_16-9_2x.png
     been updated to reflect the latest changes in the platform. An updated
     <a href="/preview/download.html">Developer Documentation download
     package</a> is available, including full reference docs and API diff
-    reports.
+    reports. Reference documentation is also now <a
+    href="{@docRoot}reference/packages.html">available online</a>.
   </li>
 
   <li>
-    <strong>Translations</strong> of the documentation are now available. Use
+    <strong>Translations</strong> of the documentation are available. Use
     the language selector at the bottom right corner of any page to switch
     languages. Note that some of the translated docs are not yet updated for
-    Developer Preview 3 (coming soon).
+    Developer Preview 3.
   </li>
 
   <li>The <a href="{@docRoot}preview/samples.html">Android M code samples</a> are also
@@ -138,11 +140,7 @@ page.image=images/cards/card-support_16-9_2x.png
         <code>shouldShowRequestPermissionRationale()</code>.
       </li>
       <li>
-        <a href=
-        "https://github.com/googlesamples/android-FingerprintDialog">FingerprintDialog</a>
-        adds a flow to ask for passwords when new fingerprints are added as
-        well as a preference if the app will use fingerprints as a method of
-        authentication.
+        Other samples are updated to support runtime permissions.
       </li>
     </ul>
   </li>
@@ -198,8 +196,8 @@ page.image=images/cards/card-support_16-9_2x.png
 </h3>
 
 <p>
-  You can download the Developer Preview 3 final SDK platform and
-  emulator images from the SDK Manager.
+  You can download the official Android 6.0 SDK platform and
+  Developer Preview 3 emulator images from the SDK Manager.
 </p>
 
 <p>
@@ -211,23 +209,15 @@ page.image=images/cards/card-support_16-9_2x.png
 </p>
 
 <p>
-  If you are just getting started with Android M Developer Preview and want
-  to receive Developer Preview 3 via OTA, download the
-  Developer Preview 2 <a href="{@docRoot}preview/download_mp2.html#images">
-  system image</a>, and flash it to your device. Then,
-  leave the device powered on for several hours. It registers with the
-  OTA service, and receives Developer Preview 3 by OTA.
-</p>
-
-<p>
-  For instructions on how to download and flash your device to the Developer
+  For instructions on how to download and flash your device to the latest Developer
   Preview, see the links and instructions on the <a href=
   "{@docRoot}preview/download.html">Downloads</a> page.
 </p>
 
 <p>
-  For instructions on how to start developing and testing with Android M, read
-  <a href="{@docRoot}preview/setup-sdk.html">Setting up the SDK</a>.
+  For instructions on how to start developing and testing with Android 6.0
+  Marshmallow, read <a href="{@docRoot}preview/setup-sdk.html">Setting
+  up the SDK</a>.
 </p>
 
 <h2 id="preview2-notes">
