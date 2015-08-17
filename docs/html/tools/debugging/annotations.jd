@@ -7,7 +7,12 @@ page.title=Improving Code Inspection with Annotations
     <h2>In this document</h2>
     <ol>
       <li><a href="#adding-nullness">Adding Nullness Annotations</a></li>
-      <li><a href="#res-annotations">Adding Resource Annotation</a></li>
+      <li><a href="#res-annotations">Adding Resource Annotations</a></li>
+      <li><a href="#thread-annotations">Adding Thread Annotations</a></li>
+      <li><a href="#value-constraint">Adding Value Constraint Annotations</a></li>
+      <li><a href="#permissions">Adding Permission Annotations</a></li>
+      <li><a href="#check-result">Adding CheckResult Annotations</a></li>
+      <li><a href="#call-super">Adding CallSuper Annotations</a></li>
       <li><a href="#enum-annotations">Creating Enumerated Annotations</a></li>
     </ol>
 
@@ -70,6 +75,10 @@ values in your code, for example:</p>
     <dt>{@link android.support.annotation.AnyRes @AnyRes}</dt>
     <dd>References any type of <a href="{@docRoot}reference/android/R.html"><code>R.</code></a>
     resource. </dd>
+
+    <dt><code>@UiThread</code></dt>
+    <dd>Calls from a UI
+    <a href="{@docRoot}guide/components/processes-and-threads.html">thread</a>. </dd>
   </dl>
 
 <p>For a complete list of the supported annotations, either examine the contents of the
@@ -85,11 +94,14 @@ development tools.</p>
 
 <p>To add annotations to your code, first add a dependency to the
 {@link android.support.annotation Support-Annotations} library. In Android Studio,
-add the dependency to your <code>build.gradle</code> file. </p>
+add the dependency using the <strong>File &gt; Project Structure &gt; Dependencies</strong> menu
+option or your <code>build.gradle</code> file. The following example shows how to add the
+{@link android.support.annotation Support-Annotations} library dependency in the
+<code>build.gradle</code> file: </p>
 
 <pre>
 dependencies {
-    compile 'com.android.support:support-annotations:22.0.0'
+    compile 'com.android.support:support-annotations:22.2.0'
 }
 </pre>
 
@@ -143,17 +155,19 @@ inferring nullability in Android Studio, see
 
 
 <h2 id="res-annotations">Adding Resource Annotations</h2>
-<p>Add {@link android.support.annotation.StringRes @StringRes} annotations to check that
-a resource parameter contains a
+<p>Validating resource types can be useful as Android references to resources, such as
+<a href="{@docRoot}guide/topics/resources/drawable-resource.html"><code>Drawables</code></a> and
+<a href="{@docRoot}reference/android/R.string.html"><code>R.string</code></a> resources, are
+passed as integers. Code that expects a parameter to reference a specific type of resource, for
+example <a href="{@docRoot}guide/topics/resources/drawable-resource.html"><code>Drawables</code></a>,
+can be passed the expected reference type of <code>int</code>, but actually reference a different
+type of resource, such as a <code>R.string</code></a> resource. </p>
+
+<p>For example, add {@link android.support.annotation.StringRes @StringRes} annotations to check
+that a resource parameter contains a
 <a href="{@docRoot}reference/android/R.string.html"><code>R.string</code></a>
 reference. During code inspection, the annotation generates a warning if a <code>R.string</code>
 reference is not passed in the parameter.</p>
-
-<p>Validating resource types can be useful as Android references to
-<a href="{@docRoot}guide/topics/resources/drawable-resource.html"><code>Drawables</code></a> and
-<a href="{@docRoot}reference/android/R.string.html"><code>R.string</code></a> resources are both
-passed as integers. Code that expects a parameter to reference a <code>Drawable</code> can be passed
-the expected reference type of int, but actually reference a <code>R.string</code></a> resource. </p>
 
 <p>This example attaches the {@link android.support.annotation.StringRes @StringRes}
 annotation to the <code>resId</code> parameter to validate that it is really a string resource.  </p>
@@ -168,9 +182,133 @@ import android.support.annotation.StringRes;
 
 <p>Annotations for the other resource types, such as
 {@link android.support.annotation.DrawableRes @DrawableRes},
+{@link android.support.annotation.DimenRes @DimenRes},
 {@link android.support.annotation.ColorRes @ColorRes}, and
 {@link android.support.annotation.InterpolatorRes @InterpolatorRes} can be added using
 the same annotation format and run during the code inspection.  </p>
+
+
+
+
+<h2 id="thread-annotations">Adding Thread Annotations</h2>
+<p>Thread annotations check if a method is called from a specific type of
+<a href="{@docRoot}guide/components/processes-and-threads.html">thread</a>. The following thread
+annotations are supported: </p>
+<ul>
+ <li><code>@UiThread</code>  </li>
+ <li><code>@MainThread</code>  </li>
+ <li><code>@WorkerThread</code>  </li>
+ <li><code>@BinderThread</code>
+</ul>
+
+<p class="note"><strong>Note:</strong> The <code>@MainThread</code>
+and the <code>@UiThread</code> annotations are interchangeable so
+methods calls from either thread type are allowed for these annotations. </p>
+
+
+<p>If all methods in a class share the same threading requirement, you can add a single
+<a href="{@docRoot}guide/components/processes-and-threads.html">thread</a>
+annotation to the class to verify that all methods in the class are called from the same type of
+<a href="{@docRoot}guide/components/processes-and-threads.html">thread</a>. </p>
+
+<p>A common use of the <a href="{@docRoot}guide/components/processes-and-threads.html">thread</a>
+annotation is to validate method overrides in the
+<a href="{@docRoot}reference/android/os/AsyncTask.html">AsyncTask</a> class as this class performs
+background operations and publishes results only on the UI
+<a href="{@docRoot}guide/components/processes-and-threads.html">thread</a>. </p>
+
+
+
+<h2 id="value-constraint">Adding Value Constraint Annotations</h2>
+<p>Use the <code>@IntRange</code>,
+<code>@FloatRange</code>, and
+<code>@Size</code> annotations to validate the values of passed
+parameters. </p>
+
+<p>The <code>@IntRange</code> annotation validates that the parameter
+value is within a specified range. The following example ensures that the <code>alpha</code>
+parameter contains an integer value from 0 to 255:  </p>
+
+<pre>
+public void setAlpha(&#64;IntRange(from=0,to=255) int alpha) { … }
+</pre>
+
+<p>The <code>@FloatRange</code> annotation checks that the parameter
+value is  within a specified range of floating point values. The following example ensures that the
+<code>alpha</code> parameter contains a float value from 0.0 to 1.0:  </p>
+
+<pre>
+public void setAlpha(&#64;FloatRange(from=0.0, to=1.0) float alpha) {...}
+</pre>
+
+<p>The <code>@Size</code> annotation checks the size of a collection or
+array, as well as the length of a string. For example, use the <code>&#64;Size(min=1)</code>
+annotation to check if a collection is not empty, and the <code>&#64;Size(2)</code> annotation to
+validate that an array contains exactly two values. The following example ensures that the
+<code>location</code> array contains at least one element:  </p>
+
+<pre>
+int[] location = new int[3];
+button.getLocationOnScreen(@Size(min=1) location);
+</pre>
+
+
+<h2 id="permissions">Adding Permission Annotations</h2>
+<p>Use the <code>@RequiresPermission</code> annotation to
+validate the permissions of the caller of a method. To check for a single permission from a
+list the valid permissions, use the <code>anyOf</code> attribute. To check for a set of
+permissions, use the <code>allOf</code> attribute. The following example annotates the
+<code>setWallpaper</code> method to ensure that the caller of the method has the
+<code>permission.SET_WALLPAPERS</code> permission. </p>
+
+<pre>
+&#64;RequiresPermission(Manifest.permission.SET_WALLPAPER)
+public abstract void setWallpaper(Bitmap bitmap) throws IOException;
+</pre>
+
+<p>This example requires the caller of the
+<code>updateVisitedHistory</code> method to have both read and write bookmark history permissions. </p>
+
+<pre>
+&#64;RequiresPermission(allOf = {
+    Manifest.permission.READ_HISTORY_BOOKMARKS,
+    Manifest.permission.WRITE_HISTORY_BOOKMARKS})
+public static final void updateVisitedHistory(ContentResolver cr, String url, boolean real) {
+    ...
+}
+</pre>
+
+
+<h2 id="check-result">Adding CheckResults Annotations</h2>
+<p>Use the <code>@CheckResults</code> annotation to
+validate that a method's result or return value is actually used. The following example annotates
+the <code>checkPermissions</code> method to ensure the return value of the method is actually
+referenced. It also names the
+<a href="{@docRoot}reference/android/content/ContextWrapper.html#enforcePermission">enforcePermission</a>
+method as a method to be suggested to the developer as a replacement. </p>
+
+
+
+<pre>
+&#64;CheckResult(suggest="#enforcePermission(String,int,int,String)")
+public abstract int checkPermission(@NonNull String permission, int pid, int uid);
+</pre>
+
+{@link android.support.annotation.StringDef @StringDef}
+
+
+<h2 id="call-super">Adding CallSuper Annotations</h2>
+<p>Use the <code>@CallSuper</code> annotation to validate that an
+overriding method calls the super implementation of the method. The following example annotates
+the <code>onCreate</code> method to ensure that any overriding method implementations call
+<code>super.onCreate()</code>.  </p>
+
+<pre>
+&#64;CallSuper
+protected void onCreate(Bundle savedInstanceState) {
+}
+</pre>
+
 
 
 <h2 id="enum-annotations">Creating Enumerated Annotations</h2>
