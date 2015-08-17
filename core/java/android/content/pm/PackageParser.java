@@ -4702,7 +4702,7 @@ public class PackageParser {
 
     private static boolean copyNeeded(int flags, Package p,
             PackageUserState state, Bundle metaData, int userId) {
-        if (userId != UserHandle.USER_OWNER) {
+        if (userId != UserHandle.USER_SYSTEM) {
             // We always need to copy for other users, since we need
             // to fix up the uid.
             return true;

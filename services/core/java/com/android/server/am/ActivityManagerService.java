@@ -16022,7 +16022,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "Call does not support special user #" + targetUserId);
         }
         // Check shell permission
-        if (callingUid == Process.SHELL_UID && targetUserId >= UserHandle.USER_OWNER) {
+        if (callingUid == Process.SHELL_UID && targetUserId >= UserHandle.USER_SYSTEM) {
             if (mUserManager.hasUserRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES,
                     targetUserId)) {
                 throw new SecurityException("Shell does not have permission to access user "

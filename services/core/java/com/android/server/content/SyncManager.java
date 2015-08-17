@@ -790,7 +790,7 @@ public class SyncManager {
 
         for (AccountAndUser account : accounts) {
             // If userId is specified, do not sync accounts of other users
-            if (userId >= UserHandle.USER_OWNER && account.userId >= UserHandle.USER_OWNER
+            if (userId >= UserHandle.USER_SYSTEM && account.userId >= UserHandle.USER_SYSTEM
                     && userId != account.userId) {
                 continue;
             }

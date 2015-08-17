@@ -213,7 +213,7 @@ public abstract class RegisteredServicesCache<V> {
         @Override
         public void onReceive(Context context, Intent intent) {
             // External apps can't coexist with multi-user, so scan owner
-            handlePackageEvent(intent, UserHandle.USER_OWNER);
+            handlePackageEvent(intent, UserHandle.USER_SYSTEM);
         }
     };
 
