@@ -732,7 +732,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, flo
 #endif
 
     std::unique_ptr<float[]> gaussian(new float[2 * intRadius + 1]);
-    Blur::generateGaussianWeights(gaussian.get(), intRadius);
+    Blur::generateGaussianWeights(gaussian.get(), radius);
 
     std::unique_ptr<uint8_t[]> scratch(new uint8_t[width * height]);
     Blur::horizontal(gaussian.get(), intRadius, *image, scratch.get(), width, height);
