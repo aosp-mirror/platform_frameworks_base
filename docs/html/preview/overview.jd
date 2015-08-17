@@ -164,7 +164,8 @@ page.tags="preview", "developer", "android"
   </li>
 
   <li>
-    <strong><a href="{@docRoot}preview/download.html">Preview&nbsp;3</a></strong> (final APIs and official Android 6.0 SDK, available).
+  <strong><a href="{@docRoot}preview/download.html">Preview&nbsp;3</a></strong>
+    (final APIs and official Android 6.0 SDK, available).
   </li>
 </ul>
 
@@ -336,12 +337,12 @@ page.tags="preview", "developer", "android"
   to <code>“23”</code>.
 </p>
 
-  <p>Before releasing your app targeting API level 23, we strongly
+  <p>Before releasing an app that targets API level 23, we strongly
   recommend distributing it to a group of testers through the new <a
-  href="http://android-developers.blogspot.com/2015/07/iterate-faster-on-google-play-with.html">
+  href="http://android-developers.blogspot.com/2015/07/iterate-faster-on-google-play-with.html"> 
   beta testing features available in the Google Play Developer Console. See the
   <a href="https://support.google.com/googleplay/android-developer/answer/3131213">Help
-  Center article</a> for more information.
+  Center article</a> for more information. 
 </p>
 
 <h2 id="get_started">
