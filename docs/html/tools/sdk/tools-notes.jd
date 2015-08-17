@@ -22,9 +22,63 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
 
+
+
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.3.4</a> <em>(August 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 23 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Added support for Android 6.0 (API level 23) platform.</li>
+      </ul>
+    </dd>
+
+    <dt>Emulator:</dt>
+    <dd>
+      <ul>
+        <li>Improved emulator performance on multi-core Windows desktops.
+          (<a href="http://b.android.com/101040">Issue 101040</a>)</li>
+        <li>Added support for GPU emulation on Windows and Linux platforms using the
+          {@code -gpu mesa} command line option.</li>
+        <li>Enabled support for running emulators with GPU emulation through remote desktop
+          services, including Chrome Remote Desktop, Windows Terminal Services, and NoMachine.</li>
+        <li>Added support for emulators with 280 dpi and 360 dpi screen resolutions.</li>
+        <li>Improved support for GLES 2.0 extensions.</li>
+        <li>Fixed several issues with GPU emulation support.</li>
+        <li>Added support for setting the storage size on emulators using Android 4.4 (API level 19)
+          and higher.
+          (<a href="http://b.android.com/75141">Issue 75141</a>)</li>
+        <li>Fixed problem with sending long SMS messages between emulators.
+          (<a href="http://b.android.com/3539">Issue 3539</a>)</li>
+        <li>Fixed issue with emulator getting incorrect time from location objects.
+          (<a href="http://b.android.com/27272">Issue 27272</a>)</li>
+        <li>Added handling for unusual characters in paths and file names when starting emulators.
+          (<a href="http://b.android.com/35889">Issue 35889</a>)</li>
+      </ul>
+    </dd>
+
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.3.3</a> <em>(June 2015)</em>
   </p>
 
@@ -48,8 +102,6 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     </dd>
   </div>
 </div>
-
-
 
 
 <div class="toggle-content closed">
