@@ -16,11 +16,11 @@
 
 package com.android.server.fingerprint;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IUserSwitchObserver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -29,8 +29,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.Looper;
-import android.os.MessageQueue;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SELinux;
@@ -40,7 +38,12 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.server.SystemService;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
@@ -48,12 +51,14 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintDaemon;
 import android.hardware.fingerprint.IFingerprintDaemonCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.view.Display;
 
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -557,6 +562,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         private boolean sendEnrollResult(int fpId, int groupId, int remaining) {
             if (receiver == null) return true; // client not listening
             FingerprintUtils.vibrateFingerprintSuccess(getContext());
+            MetricsLogger.action(mContext, MetricsLogger.ACTION_FINGERPRINT_ENROLL);
             try {
                 receiver.onEnrollResult(mHalDeviceId, fpId, groupId, remaining);
                 return remaining == 0;
@@ -574,6 +580,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             boolean authenticated = fpId != 0;
             if (receiver != null) {
                 try {
+                    MetricsLogger.action(mContext, MetricsLogger.ACTION_FINGERPRINT_AUTH,
+                            authenticated);
                     if (!authenticated) {
                         receiver.onAuthenticationFailed(mHalDeviceId);
                     } else {
@@ -669,7 +677,6 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         public void onEnumerate(long deviceId, int[] fingerIds, int[] groupIds) {
             dispatchEnumerate(deviceId, fingerIds, groupIds);
         }
-
     };
 
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
@@ -853,6 +860,46 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
             return FingerprintService.this.getAuthenticatorId();
         }
+
+        @Override // Binder call
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump Fingerprint from from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid());
+                return;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    private void dumpInternal(PrintWriter pw) {
+        JSONObject dump = new JSONObject();
+        try {
+            dump.put("service", "Fingerprint Manager");
+
+            JSONArray sets = new JSONArray();
+            for (UserInfo user : UserManager.get(getContext()).getUsers()) {
+                final int userId = user.getUserHandle().getIdentifier();
+                final int N = mFingerprintUtils.getFingerprintsForUser(mContext, userId).size();
+                JSONObject set = new JSONObject();
+                set.put("id", userId);
+                set.put("count", N);
+                sets.put(set);
+            }
+
+            dump.put("prints", sets);
+        } catch (JSONException e) {
+            Slog.e(TAG, "dump formatting failure", e);
+        }
+        pw.println(dump);
     }
 
     @Override
