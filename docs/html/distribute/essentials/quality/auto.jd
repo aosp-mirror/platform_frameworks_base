@@ -396,7 +396,8 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-     Media apps do not autoplay or take over media focus when launched.
+     Media apps do not autoplay on startup of Android Auto or without user initiated action to
+     select the app or app media.
      (<a href="{@docRoot}training/auto/audio/index.html#playback-commands">Learn How</a>)
     </p>
   </td>
