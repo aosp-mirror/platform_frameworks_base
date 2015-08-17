@@ -113,6 +113,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"आपण डिव्‍हाइस रीस्टार्ट करता तेव्‍हा नुमन्याची आवश्‍यकता असते."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"आपण डिव्‍हाइस रीस्टार्ट करता तेव्‍हा पिन ची आवश्‍यकता असते."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"आपण डिव्‍हाइस रीस्टार्ट करता तेव्‍हा संकेतशब्दाची आवश्‍यकता असते."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"अतिरिक्त सुरक्षिततेसाठी नमुना आवश्‍यक आहे."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"अतिरिक्त सुरक्षिततेसाठी पिन आवश्‍यक आहे."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"अतिरिक्त सुरक्षिततेसाठी संकेतशब्द आवश्‍यक आहे."</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"आपण प्रोफाईल स्विच करता तेव्‍हा नमुन्याची आवश्‍यकता असते."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"आपण प्रोफाईल स्विच करता तेव्‍हा पिन ची आवश्‍यकता असते."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"आपण प्रोफाईल स्विच करता तेव्‍हा संकेतशब्दाची आवश्‍यकता असते."</string>
