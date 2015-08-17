@@ -22,6 +22,8 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
+#include <androidfw/ResourceTypes.h>
+
 #include <cutils/properties.h>
 
 #include <SkBitmap.h>
@@ -80,6 +82,17 @@ static jint android_view_DisplayListCanvas_getMaxTextureHeight(JNIEnv* env, jobj
 // ----------------------------------------------------------------------------
 // Drawing
 // ----------------------------------------------------------------------------
+
+static void android_view_DisplayListCanvas_drawPatch(JNIEnv* env, jobject clazz,
+        jlong rendererPtr, jobject jbitmap, jlong patchPtr,
+        float left, float top, float right, float bottom, jlong paintPtr) {
+    SkBitmap bitmap;
+    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
+    Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(patchPtr);
+    Paint* paint = reinterpret_cast<Paint*>(paintPtr);
+    renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
+}
 
 static void android_view_DisplayListCanvas_drawRoundRectProps(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong leftPropPtr, jlong topPropPtr, jlong rightPropPtr,
@@ -182,6 +195,8 @@ static JNINativeMethod gMethods[] = {
     { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
 
     { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_DisplayListCanvas_callDrawGLFunction },
+
+    { "nDrawPatch",         "(JLandroid/graphics/Bitmap;JFFFFJ)V",     (void*) android_view_DisplayListCanvas_drawPatch },
 
     { "nDrawRoundRect",     "(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
     { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },

@@ -198,6 +198,16 @@ public class NinePatch {
         canvas.drawPatch(this, location, paint);
     }
 
+    void drawSoftware(Canvas canvas, RectF location, Paint paint) {
+        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap, mNativeChunk,
+                paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
+    }
+
+    void drawSoftware(Canvas canvas, Rect location, Paint paint) {
+        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap, mNativeChunk,
+                paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
+    }
+
     /**
      * Return the underlying bitmap's density, as per
      * {@link Bitmap#getDensity() Bitmap.getDensity()}.
@@ -263,5 +273,9 @@ public class NinePatch {
      */
     private static native long validateNinePatchChunk(byte[] chunk);
     private static native void nativeFinalize(long chunk);
+    private static native void nativeDraw(long canvas_instance, RectF loc, Bitmap bitmap_instance,
+            long c, long paint_instance_or_null, int destDensity, int srcDensity);
+    private static native void nativeDraw(long canvas_instance, Rect loc, Bitmap bitmap_instance,
+            long c, long paint_instance_or_null, int destDensity, int srcDensity);
     private static native long nativeGetTransparentRegion(Bitmap bitmap, long chunk, Rect location);
 }
