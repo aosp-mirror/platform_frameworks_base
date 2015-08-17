@@ -457,6 +457,7 @@ public class UserSwitcherController {
                     .setSmallIcon(R.drawable.ic_person)
                     .setContentTitle(mContext.getString(R.string.guest_notification_title))
                     .setContentText(mContext.getString(R.string.guest_notification_text))
+                    .setContentIntent(removeGuestPI)
                     .setShowWhen(false)
                     .addAction(R.drawable.ic_delete,
                             mContext.getString(R.string.guest_notification_remove_action),
@@ -475,6 +476,7 @@ public class UserSwitcherController {
                     .setSmallIcon(R.drawable.ic_person)
                     .setContentTitle(mContext.getString(R.string.user_logout_notification_title))
                     .setContentText(mContext.getString(R.string.user_logout_notification_text))
+                    .setContentIntent(logoutPI)
                     .setShowWhen(false)
                     .addAction(R.drawable.ic_delete,
                             mContext.getString(R.string.user_logout_notification_action),
