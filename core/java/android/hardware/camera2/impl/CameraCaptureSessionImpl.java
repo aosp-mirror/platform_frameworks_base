@@ -146,6 +146,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
+    public void prepare(int maxCount, Surface surface) throws CameraAccessException {
+        mDeviceImpl.prepare(maxCount, surface);
+    }
+
+    @Override
     public void tearDown(Surface surface) throws CameraAccessException {
         mDeviceImpl.tearDown(surface);
     }

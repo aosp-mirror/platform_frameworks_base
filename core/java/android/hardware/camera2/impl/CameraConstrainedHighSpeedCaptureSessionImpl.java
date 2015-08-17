@@ -169,6 +169,11 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     }
 
     @Override
+    public void prepare(int maxCount, Surface surface) throws CameraAccessException {
+        mSessionImpl.prepare(maxCount, surface);
+    }
+
+    @Override
     public void tearDown(Surface surface) throws CameraAccessException {
         mSessionImpl.tearDown(surface);
     }
