@@ -91,6 +91,55 @@ MtpDevice* get_device_from_object(JNIEnv* env, jobject javaDevice)
     return (MtpDevice*)env->GetLongField(javaDevice, field_context);
 }
 
+void fill_jobject_from_object_info(JNIEnv* env, jobject object, MtpObjectInfo* objectInfo) {
+    if (objectInfo->mHandle)
+        env->SetIntField(object, field_objectInfo_handle, objectInfo->mHandle);
+    if (objectInfo->mStorageID)
+        env->SetIntField(object, field_objectInfo_storageId, objectInfo->mStorageID);
+    if (objectInfo->mFormat)
+        env->SetIntField(object, field_objectInfo_format, objectInfo->mFormat);
+    if (objectInfo->mProtectionStatus)
+        env->SetIntField(object, field_objectInfo_protectionStatus, objectInfo->mProtectionStatus);
+    if (objectInfo->mCompressedSize)
+        env->SetIntField(object, field_objectInfo_compressedSize, objectInfo->mCompressedSize);
+    if (objectInfo->mThumbFormat)
+        env->SetIntField(object, field_objectInfo_thumbFormat, objectInfo->mThumbFormat);
+    if (objectInfo->mThumbCompressedSize) {
+        env->SetIntField(object, field_objectInfo_thumbCompressedSize,
+                objectInfo->mThumbCompressedSize);
+    }
+    if (objectInfo->mThumbPixWidth)
+        env->SetIntField(object, field_objectInfo_thumbPixWidth, objectInfo->mThumbPixWidth);
+    if (objectInfo->mThumbPixHeight)
+        env->SetIntField(object, field_objectInfo_thumbPixHeight, objectInfo->mThumbPixHeight);
+    if (objectInfo->mImagePixWidth)
+        env->SetIntField(object, field_objectInfo_imagePixWidth, objectInfo->mImagePixWidth);
+    if (objectInfo->mImagePixHeight)
+        env->SetIntField(object, field_objectInfo_imagePixHeight, objectInfo->mImagePixHeight);
+    if (objectInfo->mImagePixDepth)
+        env->SetIntField(object, field_objectInfo_imagePixDepth, objectInfo->mImagePixDepth);
+    if (objectInfo->mParent)
+        env->SetIntField(object, field_objectInfo_parent, objectInfo->mParent);
+    if (objectInfo->mAssociationType)
+        env->SetIntField(object, field_objectInfo_associationType, objectInfo->mAssociationType);
+    if (objectInfo->mAssociationDesc)
+        env->SetIntField(object, field_objectInfo_associationDesc, objectInfo->mAssociationDesc);
+    if (objectInfo->mSequenceNumber)
+        env->SetIntField(object, field_objectInfo_sequenceNumber, objectInfo->mSequenceNumber);
+    if (objectInfo->mName)
+        env->SetObjectField(object, field_objectInfo_name, env->NewStringUTF(objectInfo->mName));
+    if (objectInfo->mDateCreated)
+        env->SetLongField(object, field_objectInfo_dateCreated, objectInfo->mDateCreated * 1000LL);
+    if (objectInfo->mDateModified) {
+        env->SetLongField(object, field_objectInfo_dateModified,
+                objectInfo->mDateModified * 1000LL);
+    }
+    if (objectInfo->mKeywords) {
+        env->SetObjectField(object, field_objectInfo_keywords,
+            env->NewStringUTF(objectInfo->mKeywords));
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static jboolean
@@ -246,48 +295,7 @@ android_mtp_MtpDevice_get_object_info(JNIEnv *env, jobject thiz, jint objectID)
         return NULL;
     }
 
-    if (objectInfo->mHandle)
-        env->SetIntField(info, field_objectInfo_handle, objectInfo->mHandle);
-    if (objectInfo->mStorageID)
-        env->SetIntField(info, field_objectInfo_storageId, objectInfo->mStorageID);
-    if (objectInfo->mFormat)
-        env->SetIntField(info, field_objectInfo_format, objectInfo->mFormat);
-    if (objectInfo->mProtectionStatus)
-        env->SetIntField(info, field_objectInfo_protectionStatus, objectInfo->mProtectionStatus);
-    if (objectInfo->mCompressedSize)
-        env->SetIntField(info, field_objectInfo_compressedSize, objectInfo->mCompressedSize);
-    if (objectInfo->mThumbFormat)
-        env->SetIntField(info, field_objectInfo_thumbFormat, objectInfo->mThumbFormat);
-    if (objectInfo->mThumbCompressedSize)
-        env->SetIntField(info, field_objectInfo_thumbCompressedSize, objectInfo->mThumbCompressedSize);
-    if (objectInfo->mThumbPixWidth)
-        env->SetIntField(info, field_objectInfo_thumbPixWidth, objectInfo->mThumbPixWidth);
-    if (objectInfo->mThumbPixHeight)
-        env->SetIntField(info, field_objectInfo_thumbPixHeight, objectInfo->mThumbPixHeight);
-    if (objectInfo->mImagePixWidth)
-        env->SetIntField(info, field_objectInfo_imagePixWidth, objectInfo->mImagePixWidth);
-    if (objectInfo->mImagePixHeight)
-        env->SetIntField(info, field_objectInfo_imagePixHeight, objectInfo->mImagePixHeight);
-    if (objectInfo->mImagePixDepth)
-        env->SetIntField(info, field_objectInfo_imagePixDepth, objectInfo->mImagePixDepth);
-    if (objectInfo->mParent)
-        env->SetIntField(info, field_objectInfo_parent, objectInfo->mParent);
-    if (objectInfo->mAssociationType)
-        env->SetIntField(info, field_objectInfo_associationType, objectInfo->mAssociationType);
-    if (objectInfo->mAssociationDesc)
-        env->SetIntField(info, field_objectInfo_associationDesc, objectInfo->mAssociationDesc);
-    if (objectInfo->mSequenceNumber)
-        env->SetIntField(info, field_objectInfo_sequenceNumber, objectInfo->mSequenceNumber);
-    if (objectInfo->mName)
-        env->SetObjectField(info, field_objectInfo_name, env->NewStringUTF(objectInfo->mName));
-    if (objectInfo->mDateCreated)
-        env->SetLongField(info, field_objectInfo_dateCreated, objectInfo->mDateCreated * 1000LL);
-    if (objectInfo->mDateModified)
-        env->SetLongField(info, field_objectInfo_dateModified, objectInfo->mDateModified * 1000LL);
-    if (objectInfo->mKeywords)
-        env->SetObjectField(info, field_objectInfo_keywords,
-            env->NewStringUTF(objectInfo->mKeywords));
-
+    fill_jobject_from_object_info(env, info, objectInfo);
     delete objectInfo;
     return info;
 }
@@ -403,6 +411,82 @@ android_mtp_MtpDevice_import_file_to_fd(JNIEnv *env, jobject thiz, jint object_i
         return JNI_FALSE;
 }
 
+static jboolean
+android_mtp_MtpDevice_send_object(JNIEnv *env, jobject thiz, jint object_id, jint fd)
+{
+    MtpDevice* device = get_device_from_object(env, thiz);
+    if (!device)
+        return JNI_FALSE;
+    MtpObjectInfo* object_info = device->getObjectInfo(object_id);
+    if (!object_info)
+        return JNI_FALSE;
+
+    bool result = device->sendObject(object_info, fd);
+    delete object_info;
+    return result;
+}
+
+static jobject
+android_mtp_MtpDevice_send_object_info(JNIEnv *env, jobject thiz, jobject info)
+{
+    MtpDevice* device = get_device_from_object(env, thiz);
+    if (!device)
+        return JNI_FALSE;
+
+    // Updating existing objects is not supported.
+    if (env->GetIntField(info, field_objectInfo_handle) != -1)
+        return JNI_FALSE;
+
+    MtpObjectInfo* object_info = new MtpObjectInfo(-1);
+    object_info->mStorageID = env->GetIntField(info, field_objectInfo_storageId);
+    object_info->mFormat = env->GetIntField(info, field_objectInfo_format);
+    object_info->mProtectionStatus = env->GetIntField(info, field_objectInfo_protectionStatus);
+    object_info->mCompressedSize = env->GetIntField(info, field_objectInfo_compressedSize);
+    object_info->mThumbFormat = env->GetIntField(info, field_objectInfo_thumbFormat);
+    object_info->mThumbCompressedSize =
+            env->GetIntField(info, field_objectInfo_thumbCompressedSize);
+    object_info->mThumbPixWidth = env->GetIntField(info, field_objectInfo_thumbPixWidth);
+    object_info->mThumbPixHeight = env->GetIntField(info, field_objectInfo_thumbPixHeight);
+    object_info->mImagePixWidth = env->GetIntField(info, field_objectInfo_imagePixWidth);
+    object_info->mImagePixHeight = env->GetIntField(info, field_objectInfo_imagePixHeight);
+    object_info->mImagePixDepth = env->GetIntField(info, field_objectInfo_imagePixDepth);
+    object_info->mParent = env->GetIntField(info, field_objectInfo_parent);
+    object_info->mAssociationType = env->GetIntField(info, field_objectInfo_associationType);
+    object_info->mAssociationDesc = env->GetIntField(info, field_objectInfo_associationDesc);
+    object_info->mSequenceNumber = env->GetIntField(info, field_objectInfo_sequenceNumber);
+
+    jstring name_jstring = (jstring) env->GetObjectField(info, field_objectInfo_name);
+    const char* name_string = env->GetStringUTFChars(name_jstring, NULL);
+    object_info->mName = strdup(name_string);
+    env->ReleaseStringUTFChars(name_jstring, name_string);
+
+    object_info->mDateCreated = env->GetLongField(info, field_objectInfo_dateCreated) / 1000LL;
+    object_info->mDateModified = env->GetLongField(info, field_objectInfo_dateModified) / 1000LL;
+
+    jstring keywords_jstring = (jstring) env->GetObjectField(info, field_objectInfo_keywords);
+    const char* keywords_string = env->GetStringUTFChars(keywords_jstring, NULL);
+    object_info->mKeywords = strdup(keywords_string);
+    env->ReleaseStringUTFChars(keywords_jstring, keywords_string);
+
+    int object_handle = device->sendObjectInfo(object_info);
+    if (object_handle == -1) {
+        delete object_info;
+        return NULL;
+    }
+
+    object_info->mHandle = object_handle;
+    jobject result = env->NewObject(clazz_objectInfo, constructor_objectInfo);
+    if (result == NULL) {
+        ALOGE("Could not create a MtpObjectInfo object");
+        delete object_info;
+        return NULL;
+    }
+
+    fill_jobject_from_object_info(env, result, object_info);
+    delete object_info;
+    return result;
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -425,7 +509,10 @@ static JNINativeMethod gMethods[] = {
     {"native_get_storage_id",   "(I)J", (void *)android_mtp_MtpDevice_get_storage_id},
     {"native_import_file",      "(ILjava/lang/String;)Z",
                                         (void *)android_mtp_MtpDevice_import_file},
-    {"native_import_file",      "(II)Z", (void *)android_mtp_MtpDevice_import_file_to_fd}
+    {"native_import_file",      "(II)Z",(void *)android_mtp_MtpDevice_import_file_to_fd},
+    {"native_send_object",      "(II)Z",(void *)android_mtp_MtpDevice_send_object},
+    {"native_send_object_info", "(Landroid/mtp/MtpObjectInfo;)Landroid/mtp/MtpObjectInfo;",
+                                        (void *)android_mtp_MtpDevice_send_object_info}
 };
 
 int register_android_mtp_MtpDevice(JNIEnv *env)

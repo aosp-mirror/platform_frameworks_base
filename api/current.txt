@@ -18102,6 +18102,8 @@ package android.mtp {
     method public boolean importFile(int, java.lang.String);
     method public boolean importFile(int, android.os.ParcelFileDescriptor);
     method public boolean open(android.hardware.usb.UsbDeviceConnection);
+    method public boolean sendObject(int, android.os.ParcelFileDescriptor);
+    method public android.mtp.MtpObjectInfo sendObjectInfo(android.mtp.MtpObjectInfo);
   }
 
   public class MtpDeviceInfo {
@@ -18132,6 +18134,31 @@ package android.mtp {
     method public final int getThumbFormat();
     method public final int getThumbPixHeight();
     method public final int getThumbPixWidth();
+  }
+
+  public class MtpObjectInfo.Builder {
+    ctor public MtpObjectInfo.Builder();
+    ctor public MtpObjectInfo.Builder(android.mtp.MtpObjectInfo);
+    method public android.mtp.MtpObjectInfo build();
+    method public android.mtp.MtpObjectInfo.Builder setAssociationDesc(int);
+    method public android.mtp.MtpObjectInfo.Builder setAssociationType(int);
+    method public android.mtp.MtpObjectInfo.Builder setCompressedSize(int);
+    method public android.mtp.MtpObjectInfo.Builder setDateCreated(long);
+    method public android.mtp.MtpObjectInfo.Builder setDateModified(long);
+    method public android.mtp.MtpObjectInfo.Builder setFormat(int);
+    method public android.mtp.MtpObjectInfo.Builder setImagePixDepth(int);
+    method public android.mtp.MtpObjectInfo.Builder setImagePixHeight(int);
+    method public android.mtp.MtpObjectInfo.Builder setImagePixWidth(int);
+    method public android.mtp.MtpObjectInfo.Builder setKeywords(java.lang.String);
+    method public android.mtp.MtpObjectInfo.Builder setName(java.lang.String);
+    method public android.mtp.MtpObjectInfo.Builder setParent(int);
+    method public android.mtp.MtpObjectInfo.Builder setProtectionStatus(int);
+    method public android.mtp.MtpObjectInfo.Builder setSequenceNumber(int);
+    method public android.mtp.MtpObjectInfo.Builder setStorageId(int);
+    method public android.mtp.MtpObjectInfo.Builder setThumbCompressedSize(int);
+    method public android.mtp.MtpObjectInfo.Builder setThumbFormat(int);
+    method public android.mtp.MtpObjectInfo.Builder setThumbPixHeight(int);
+    method public android.mtp.MtpObjectInfo.Builder setThumbPixWidth(int);
   }
 
   public final class MtpStorageInfo {
