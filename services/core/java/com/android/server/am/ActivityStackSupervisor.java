@@ -1687,14 +1687,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     private int getComponentRestrictionForCallingPackage(ActivityInfo activityInfo,
             String callingPackage, int callingPid, int callingUid, boolean ignoreTargetSecurity) {
-        if (activityInfo.permission == null) {
-            return ACTIVITY_RESTRICTION_NONE;
-        }
-
         if (!ignoreTargetSecurity && mService.checkComponentPermission(activityInfo.permission,
                 callingPid, callingUid, activityInfo.applicationInfo.uid, activityInfo.exported)
                 == PackageManager.PERMISSION_DENIED) {
             return ACTIVITY_RESTRICTION_PERMISSION;
+        }
+
+        if (activityInfo.permission == null) {
+            return ACTIVITY_RESTRICTION_NONE;
         }
 
         final int opCode = AppOpsManager.permissionToOpCode(activityInfo.permission);
