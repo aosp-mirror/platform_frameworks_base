@@ -14,6 +14,7 @@ page.tags=studio, features
       <li><a href="#project-settings">Android Studio and Project Settings</a></li>
       <li><a href="#finger-print">Fingerprint Support</a></li>
       <li><a href="#support-apis">Editor Support for the Latest Android APIs</a></li>
+      <li><a href="#test-module">Test APK Module</a></li>
     </ol>
 
   <h2>See also</h2>
@@ -145,6 +146,107 @@ fingerprint sensor. </p>
 graphics, such as shadow layers and API version rendering (showing the layout across different
 UI versions). Also, the drawable XML tags and attributes, such as <code>&lt;ripple&gt;</code>
 and <code>&lt;animated-selector&gt;</code>, are supported.</p>
+
+
+
+<h2 id="test-module">Test APK Module</h2>
+<p>Android Studio supports adding a separate <code>test</code> module to your app so you can
+generate a test APK. This <code>test</code> module resides at the same level as your app and
+contains: the tests and instrumentation used to run the test APK on an Android device; an
+<code>Android Manifest.xml</code> file for test APK configuration settings; and, a
+<code>build.gradle</code> file for build settings.</p>
+
+<p>The <code>test</code> module cannot contain a <code>src/androidTest/</code> folder and does
+not support build variants. If you have different product flavors in your main application APK,
+create a different test module for each build variant.</p>
+
+
+<p>To create a test APK module:
+
+<ul>
+  <li>Use the <strong>File &gt; New &gt; Module</strong> menu option to create a
+    <code>test</code> module consisting of the following directories and files:
+    <ul>
+      <li><code>./test/</code> </li>
+      <li><code>./test/build.gradle</code> </li>
+      <li><code>./test/src/main/java/com/android/tests/basic/MainTest.java</code> </li>
+      <li><code>./test/src/main/AndroidManifest.xml</code> </li>
+    </ul>
+  </li>
+  <li>In the <code>build.gradle</code> file, add the required properties to the
+    <code>android</code> block.
+    <ul>
+      <li><code>targetProjectPath ':&lt;app name&gt;'</code> specifies the main application APK
+        to test. </li>
+      <li><code>targetVariant ':&lt;buildType&gt;'</code> specifies the target build type.</li>
+    </ul>
+    <p>Here is an example of <code>build.gradle</code> file property settings: </p>
+
+<pre>
+android {
+    compileSdkVersion 19
+    buildToolsVersion = ‘21.1.3’
+
+    targetProjectPath ':app'
+    targetVariant 'debug'
+}
+</pre>
+  </li>
+  <li>Define the instrumentation entries in the manifest file.
+    <p>Here is an example of <code>&lt;instrumentation&gt;</code> settings in the manifest file: </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.android.tests.basic.test"&gt;
+
+      &lt;uses-sdk android:minSdkVersion="16" android:targetSdkVersion="16" /&gt;
+
+      &lt;application>
+            &gt;uses-library android:name="android.test.runner" /&gt;
+      &lt;/application>
+
+      &lt;instrumentation android:name="android.test.InstrumentationTestRunner"
+                       android:targetPackage="com.android.tests.basic"
+                       android:handleProfiling="false"
+                       android:functionalTest="false"
+                       android:label="Tests for com.android.tests.basic"/&gt;
+&lt;/manifest&lt;
+</pre>
+
+<p class="note"><strong>Note:</strong> The <code>targetPackage</code> in the instrumentation
+settings specifies the package of the test variant. </p>
+
+   </li>
+   <li>In the <code>build.gradle</code> file for the tested app, include additional artifacts
+     that the test APK requires, such as the <code> classes.jar</code> file, by adding the
+     {@code publishNonDefault} property to the {@code Android} block, and assigning that property
+     a value of {@code true}.
+     <p>Here is an example of the <code>build.gradle</code> file that includes additional
+     artifacts: </p></li>
+<pre>
+android {
+    compileSdkVersion 19
+    buildToolsVersion = ‘21.1.3’
+
+    publishNonDefault true
+}
+</pre>
+ </li>
+</ul>
+
+
+<p>In the {@code test} module in this example, the {@code build.gradle} file specifies the
+properties for the project path and target build type variant. </p>
+
+    <p><img src="{@docRoot}images/tools/studio-test-module.png" /></p>
+    <p class="img-caption"><strong>Figure 3.</strong> Test module for APK testing.</p>
+
+
+<p class="note"><strong>Note:</strong> By default, the test module's build variant uses the
+<code>debug</code> build type. You can configure additional build types using the
+<code>testBuildType</code> property in the <code>defaultConfig</code> block in the main
+app's <code>build.gradle</code> file. </p>
 
 
 
