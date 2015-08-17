@@ -68,15 +68,12 @@ static const int ANIM_ENTRY_NAME_MAX = 256;
 
 // ---------------------------------------------------------------------------
 
-BootAnimation::BootAnimation() : Thread(false), mZip(NULL)
+BootAnimation::BootAnimation() : Thread(false)
 {
     mSession = new SurfaceComposerClient();
 }
 
 BootAnimation::~BootAnimation() {
-    if (mZip != NULL) {
-        delete mZip;
-    }
 }
 
 void BootAnimation::onFirstRef() {
@@ -289,19 +286,15 @@ status_t BootAnimation::readyToRun() {
 
     bool encryptedAnimation = atoi(decrypt) != 0 || !strcmp("trigger_restart_min_framework", decrypt);
 
-    ZipFileRO* zipFile = NULL;
-    if ((encryptedAnimation &&
-            (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0) &&
-            ((zipFile = ZipFileRO::open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE)) != NULL)) ||
-
-            ((access(OEM_BOOTANIMATION_FILE, R_OK) == 0) &&
-            ((zipFile = ZipFileRO::open(OEM_BOOTANIMATION_FILE)) != NULL)) ||
-
-            ((access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
-            ((zipFile = ZipFileRO::open(SYSTEM_BOOTANIMATION_FILE)) != NULL))) {
-        mZip = zipFile;
+    if (encryptedAnimation && (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0)) {
+        mZipFileName = SYSTEM_ENCRYPTED_BOOTANIMATION_FILE;
     }
-
+    else if (access(OEM_BOOTANIMATION_FILE, R_OK) == 0) {
+        mZipFileName = OEM_BOOTANIMATION_FILE;
+    }
+    else if (access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) {
+        mZipFileName = SYSTEM_BOOTANIMATION_FILE;
+    }
     return NO_ERROR;
 }
 
@@ -310,7 +303,7 @@ bool BootAnimation::threadLoop()
     bool r;
     // We have no bootanimation file, so we use the stock android logo
     // animation.
-    if (mZip == NULL) {
+    if (mZipFileName.isEmpty()) {
         r = android();
     } else {
         r = movie();
@@ -430,16 +423,17 @@ static bool parseColor(const char str[7], float color[3]) {
     return true;
 }
 
-bool BootAnimation::readFile(const char* name, String8& outString)
+
+static bool readFile(ZipFileRO* zip, const char* name, String8& outString)
 {
-    ZipEntryRO entry = mZip->findEntryByName(name);
+    ZipEntryRO entry = zip->findEntryByName(name);
     ALOGE_IF(!entry, "couldn't find %s", name);
     if (!entry) {
         return false;
     }
 
-    FileMap* entryMap = mZip->createEntryFileMap(entry);
-    mZip->releaseEntry(entry);
+    FileMap* entryMap = zip->createEntryFileMap(entry);
+    zip->releaseEntry(entry);
     ALOGE_IF(!entryMap, "entryMap is null");
     if (!entryMap) {
         return false;
@@ -450,26 +444,24 @@ bool BootAnimation::readFile(const char* name, String8& outString)
     return true;
 }
 
-bool BootAnimation::movie()
+bool BootAnimation::parseAnimationDesc(Animation& animation)
 {
     String8 desString;
 
-    if (!readFile("desc.txt", desString)) {
+    if (!readFile(animation.zip, "desc.txt", desString)) {
         return false;
     }
     char const* s = desString.string();
 
     // Create and initialize an AudioPlayer if we have an audio_conf.txt file
     String8 audioConf;
-    if (readFile("audio_conf.txt", audioConf)) {
+    if (readFile(animation.zip, "audio_conf.txt", audioConf)) {
         mAudioPlayer = new AudioPlayer;
         if (!mAudioPlayer->init(audioConf.string())) {
             ALOGE("mAudioPlayer.init failed");
             mAudioPlayer = NULL;
         }
     }
-
-    Animation animation;
 
     // Parse the description file
     for (;;) {
@@ -496,6 +488,7 @@ bool BootAnimation::movie()
             part.pause = pause;
             part.path = path;
             part.audioFile = NULL;
+            part.animation = NULL;
             if (!parseColor(color, part.backgroundColor)) {
                 ALOGE("> invalid color '#%s'", color);
                 part.backgroundColor[0] = 0.0f;
@@ -504,13 +497,29 @@ bool BootAnimation::movie()
             }
             animation.parts.add(part);
         }
-
+        else if (strcmp(l, "$SYSTEM") == 0) {
+            // ALOGD("> SYSTEM");
+            Animation::Part part;
+            part.playUntilComplete = false;
+            part.count = 1;
+            part.pause = 0;
+            part.audioFile = NULL;
+            part.animation = loadAnimation(String8(SYSTEM_BOOTANIMATION_FILE));
+            if (part.animation != NULL)
+                animation.parts.add(part);
+        }
         s = ++endl;
     }
 
+    return true;
+}
+
+bool BootAnimation::preloadZip(Animation& animation)
+{
     // read all the data structures
     const size_t pcount = animation.parts.size();
     void *cookie = NULL;
+    ZipFileRO* mZip = animation.zip;
     if (!mZip->startIteration(&cookie)) {
         return false;
     }
@@ -556,6 +565,17 @@ bool BootAnimation::movie()
 
     mZip->endIteration(cookie);
 
+    return true;
+}
+
+bool BootAnimation::movie()
+{
+
+    Animation* animation = loadAnimation(mZipFileName);
+    if (animation == NULL)
+        return false;
+
+    // clear screen
     glShadeModel(GL_FLAT);
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
@@ -569,6 +589,16 @@ bool BootAnimation::movie()
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    playAnimation(*animation);
+    releaseAnimation(animation);
+
+    return false;
+}
+
+bool BootAnimation::playAnimation(const Animation& animation)
+{
+    const size_t pcount = animation.parts.size();
+
     const int xc = (mWidth - animation.width) / 2;
     const int yc = ((mHeight - animation.height) / 2);
     nsecs_t frameDuration = s2ns(1) / animation.fps;
@@ -580,6 +610,14 @@ bool BootAnimation::movie()
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Handle animation package
+        if (part.animation != NULL) {
+            playAnimation(*part.animation);
+            if (exitPending())
+                break;
+            continue; //to next part
+        }
 
         for (int r=0 ; !part.count || r<part.count ; r++) {
             // Exit any non playuntil complete parts immediately
@@ -664,10 +702,46 @@ bool BootAnimation::movie()
             }
         }
     }
-
-    return false;
+    return true;
 }
 
+void BootAnimation::releaseAnimation(Animation* animation) const
+{
+    for (Vector<Animation::Part>::iterator it = animation->parts.begin(),
+         e = animation->parts.end(); it != e; ++it) {
+        if (it->animation)
+            releaseAnimation(it->animation);
+    }
+    if (animation->zip)
+        delete animation->zip;
+    delete animation;
+}
+
+BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
+{
+    if (mLoadedFiles.indexOf(fn) >= 0) {
+        ALOGE("File \"%s\" is already loaded. Cyclic ref is not allowed",
+            fn.string());
+        return NULL;
+    }
+    ZipFileRO *zip = ZipFileRO::open(fn);
+    if (zip == NULL) {
+        ALOGE("Failed to open animation zip \"%s\": %s",
+            fn.string(), strerror(errno));
+        return NULL;
+    }
+
+    Animation *animation =  new Animation;
+    animation->fileName = fn;
+    animation->zip = zip;
+    mLoadedFiles.add(animation->fileName);
+
+    parseAnimationDesc(*animation);
+    preloadZip(*animation);
+
+    mLoadedFiles.remove(fn);
+    return animation;
+}
 // ---------------------------------------------------------------------------
 
 }
