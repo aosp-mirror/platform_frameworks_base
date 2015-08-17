@@ -226,6 +226,30 @@ snapshot in the <em>Captures</em> view and select <strong>Export to standard .hp
 
 
 
+<h4 id="alloc-tracker">Allocation tracker </h4>
+<p>Android Studio allows you to track memory allocation as it monitors memory use. Tracking memory
+allocation allows you to monitor where objects are being allocated when you perform certain actions.
+Knowing these allocations enables you to  adjust the method
+calls related to those actions to optimize your app's performance and memory use. </p>
+
+<img src="{@docRoot}images/tools/studio-allocation-tracker.png" alt="" />
+    <p class="img-caption"><strong>Figure 6.</strong> Allocation tracker.</p>
+
+<p>Perform the following steps to track and analyze allocations: </p>
+<ol>
+  <li>Click the Start/Stop Allocation Tracking icon
+    (<img src="{@docRoot}images/tools/studio-allocation-tracker-icon.png" style="vertical-align:bottom;margin:0;height:17px"/>) in the
+    <a href="#mem-cpu">Memory Monitor</a>. Android Studio starts tracking memory allocations.</li>
+  <li>Perform the tasks whose mallocs you want to track. </li> 
+  <li>Click the Start/Stop Allocation Tracking icon again. Android Studio stops tracking mallocs
+    and saves the data to a file named <code>Allocation-yyyy.mm.dd-hh.mm.ss.alloc</code>. The
+    resulting file appears in the <em>Captures</em> tab. </li>
+  <li>Double-click the file to open it in the allocation viewer.
+   <p>The allocation viewer allows you to view and analyze the allocations your app made while
+   running. </p> </li>
+</ol>
+
+
 <h3>Data file access</h3>
 <p>The Android SDK tools, such as <a href="{@docRoot}tools/help/systrace.html">Systrace</a>,
 <a href="{@docRoot}tools/help/logcat.html">logcat</a>, and
