@@ -63,6 +63,31 @@ page.title=Support Library
 <div class="toggle-content opened">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 23</a> <em>(August 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+     <dt>Added new support libraries:</a></dt>
+      <dd>
+        <ul>
+          <li><a href="features.html#custom-tabs">Custom Tabs Support library</a></li>
+          <li><a href="features.html#percent">Percent Support library</a></li>
+          <li><a href="features.html#recommendation">App Recommendation Support library for TV</a></li>
+          <li><a href="features.html#v7-preference">v7 Preference Support library</a></li>
+          <li><a href="features.html#v14-preference">v14 Preference Support library</a></li>
+          <li><a href="features.html#v17-preference">v17 Preference Support library for TV</a></li>
+         </ul>
+       </dd>
+
+    </dl>
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22.2.1</a> <em>(July 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -94,8 +119,6 @@ page.title=Support Library
     <p>For a complete list of the Support Library changes, see the
     <a href="{@docRoot}sdk/support_api_diff/22.2.0/changes.html">Support
     Library API Differences Report</a>.  </p>
-
-
 
   </div>
 </div> <!-- end of collapsible section -->
@@ -684,7 +707,7 @@ page.title=Support Library
       <dt>Added <a href="{@docRoot}tools/support-library/features.html#multidex">
       multidex support library</a> to support multiple
       <a href="https://source.android.com/devices/tech/dalvik/">Dalvik</a> Executable (DEX) files
-      for multi-dex file support prior to Android 5.0. </li>
+      for multi-dex file support prior to Android 5.0.
       </dt>
     </dl>
   </div>
