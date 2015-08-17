@@ -72,7 +72,7 @@ class MtpManager {
 
         // Handle devices that fail to obtain storages just after opening a MTP session.
         final int[] storageIds = device.getStorageIds();
-        if (storageIds == null || storageIds.length == 0) {
+        if (storageIds == null) {
             throw new IOException("Not found MTP storages in the device.");
         }
 
@@ -97,7 +97,7 @@ class MtpManager {
         final int[] storageIds = device.getStorageIds();
         final MtpRoot[] results = new MtpRoot[storageIds.length];
         for (int i = 0; i < storageIds.length; i++) {
-            results[i] = new MtpRoot(device.getStorageInfo(storageIds[i]));
+            results[i] = new MtpRoot(deviceId, device.getStorageInfo(storageIds[i]));
         }
         return results;
     }
