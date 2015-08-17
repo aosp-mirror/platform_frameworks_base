@@ -211,7 +211,7 @@ to query and update your records and follow up with customers directly, if neede
 
 <h3 id="manual-renewal">Manual Renewal</h3>
 
-<p>With version 5 of the In-app Billing API, users can renew a subscription
+<p>With version 3 of the In-app Billing API, users can renew a subscription
 during its active period even if the subscription is not set to
 automatically renew. If the user purchases a subscription while the subscription
 is active, it is extended by the appropriate period at the current rate.</p>
@@ -230,7 +230,7 @@ say <strong>renew</strong>.</p>
 <h3 id="upgrade">Subscription Upgrade/Downgrade</h3>
 
 <p>
-  With version 5 of the In-app Billing API, users can upgrade or downgrade a
+  With version 3 of the In-app Billing API, users can upgrade or downgrade a
   subscription during its active period. When the user does this, the active
   subscription is canceled and a new subscription is created. The unused
   balance of the old subscription is applied on a pro-rated basis to the new
