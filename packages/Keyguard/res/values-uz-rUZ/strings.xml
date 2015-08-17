@@ -113,6 +113,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Qurilmani o‘chirib yoqishda chizmali kalit talab qilinadi."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Qurilmani o‘chirib yoqishda PIN-kod talab qilinadi."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Qurilmani o‘chirib yoqishda parol talab qilinadi."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Qo‘shimcha xavfsizlik chorasi sifatida chizmali kalit talab qilinadi."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Qo‘shimcha xavfsizlik chorasi sifatida PIN-kod talab qilinadi."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Qo‘shimcha xavfsizlik chorasi sifatida parol talab qilinadi."</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Profilni amlashtirishda chizmali kalit talab qilinadi."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Profilni amlashtirishda PIN-kod talab qilinadi."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Profilni amlashtirishda parol talab qilinadi."</string>
