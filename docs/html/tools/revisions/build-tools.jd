@@ -78,6 +78,17 @@ listing in the Android SDK Manager.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 23.0.0</a> <em>(August 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Added support for the Android 6.0 (API level 23) release.</p>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 22.0.1</a> <em>(March 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
