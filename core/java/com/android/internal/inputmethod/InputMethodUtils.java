@@ -64,6 +64,9 @@ public class InputMethodUtils {
     private static final String TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE =
             "EnabledWhenDefaultIsNotAsciiCapable";
     private static final String TAG_ASCII_CAPABLE = "AsciiCapable";
+
+    // The string for enabled input method is saved as follows:
+    // example: ("ime0;subtype0;subtype1;subtype2:ime1:ime2;subtype0")
     private static final char INPUT_METHOD_SEPARATOR = ':';
     private static final char INPUT_METHOD_SUBTYPE_SEPARATOR = ';';
     /**
@@ -809,15 +812,11 @@ public class InputMethodUtils {
      * TODO: Move all putters and getters of settings to this class.
      */
     public static class InputMethodSettings {
-        // The string for enabled input method is saved as follows:
-        // example: ("ime0;subtype0;subtype1;subtype2:ime1:ime2;subtype0")
-        private static final char INPUT_METHOD_SEPARATER = ':';
-        private static final char INPUT_METHOD_SUBTYPE_SEPARATER = ';';
         private final TextUtils.SimpleStringSplitter mInputMethodSplitter =
-                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATER);
+                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
 
         private final TextUtils.SimpleStringSplitter mSubtypeSplitter =
-                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATER);
+                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
 
         private final Resources mRes;
         private final ContentResolver mResolver;
@@ -834,7 +833,7 @@ public class InputMethodUtils {
             // Inputmethod and subtypes are saved in the settings as follows:
             // ime0;subtype0;subtype1:ime1;subtype0:ime2:ime3;subtype0;subtype1
             for (String subtypeId: ime.second) {
-                builder.append(INPUT_METHOD_SUBTYPE_SEPARATER).append(subtypeId);
+                builder.append(INPUT_METHOD_SUBTYPE_SEPARATOR).append(subtypeId);
             }
         }
 
@@ -844,7 +843,7 @@ public class InputMethodUtils {
             boolean needsSeparator = false;
             for (Pair<String, ArrayList<String>> ime : allImeSettingsMap) {
                 if (needsSeparator) {
-                    b.append(INPUT_METHOD_SEPARATER);
+                    b.append(INPUT_METHOD_SEPARATOR);
                 }
                 buildEnabledInputMethodsSettingString(b, ime);
                 needsSeparator = true;
@@ -984,7 +983,7 @@ public class InputMethodUtils {
                 putEnabledInputMethodsStr(id);
             } else {
                 putEnabledInputMethodsStr(
-                        mEnabledInputMethodsStrCache + INPUT_METHOD_SEPARATER + id);
+                        mEnabledInputMethodsStrCache + INPUT_METHOD_SEPARATOR + id);
             }
         }
 
@@ -1005,7 +1004,7 @@ public class InputMethodUtils {
                     isRemoved = true;
                 } else {
                     if (needsAppendSeparator) {
-                        builder.append(INPUT_METHOD_SEPARATER);
+                        builder.append(INPUT_METHOD_SEPARATOR);
                     } else {
                         needsAppendSeparator = true;
                     }
@@ -1055,7 +1054,7 @@ public class InputMethodUtils {
             StringBuilder builder = new StringBuilder();
             boolean isImeAdded = false;
             if (!TextUtils.isEmpty(newImeId) && !TextUtils.isEmpty(newSubtypeId)) {
-                builder.append(newImeId).append(INPUT_METHOD_SUBTYPE_SEPARATER).append(
+                builder.append(newImeId).append(INPUT_METHOD_SUBTYPE_SEPARATOR).append(
                         newSubtypeId);
                 isImeAdded = true;
             }
@@ -1066,14 +1065,14 @@ public class InputMethodUtils {
                     subtypeId = NOT_A_SUBTYPE_ID_STR;
                 }
                 if (isImeAdded) {
-                    builder.append(INPUT_METHOD_SEPARATER);
+                    builder.append(INPUT_METHOD_SEPARATOR);
                 } else {
                     isImeAdded = true;
                 }
-                builder.append(imeId).append(INPUT_METHOD_SUBTYPE_SEPARATER).append(
+                builder.append(imeId).append(INPUT_METHOD_SUBTYPE_SEPARATOR).append(
                         subtypeId);
             }
-            // Remove the last INPUT_METHOD_SEPARATER
+            // Remove the last INPUT_METHOD_SEPARATOR
             putSubtypeHistoryStr(builder.toString());
         }
 
