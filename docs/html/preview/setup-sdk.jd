@@ -1,4 +1,4 @@
-page.title=Set Up the Preview SDK
+page.title=Set Up the SDK
 page.image=images/cards/card-set-up_16-9_2x.png
 
 @jd:body
@@ -9,14 +9,14 @@ page.image=images/cards/card-set-up_16-9_2x.png
     <h2>In this document</h2>
       <ol>
         <li><a href="#get-as13">Get Android Studio 1.3</a></li>
-        <li><a href="#get-sdk">Get the Preview SDK</a></li>
+        <li><a href="#get-sdk">Get the Android 6.0 SDK</a></li>
         <li><a href="#create-update">Create or Update a Project</a></li>
         <li><a href="#setup-test">Set Up for Testing</a></li>
       </ol>
   </div>
 </div>
 
-<p>With Developer Preview 3, the official Android 6.0 SDK is now available from the Android SDK
+<p>With Developer Preview 3, the <strong>official Android 6.0 SDK is now available</strong> from the Android SDK
 Manager. This document assumes that you are familiar with Android app development, such
 as using the Android SDK Manager and creating projects. If you are new to
 Android, see <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First
@@ -26,17 +26,16 @@ App</a> training lesson first.</p>
 <h2 id="get-as13">Get Android Studio 1.3</h2>
 
 <p>
-  The Developer Preview is best used with Android Studio 1.3. It is highly recommended that
-  you install the Android Studio 1.3 to work with the Preview SDK and the final Android 6.0 SDK
-  provided with Preview 3. Please update your Android Studio installation to version 1.3 or
+  It is highly recommended that you install the Android Studio 1.3 to work best with
+  the Android 6.0 SDK. Please update your Android Studio installation to version 1.3 or
   higher, or follow the instructions for
   <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Installing Android Studio</a>.
 </p>
 
 
-<h2 id="get-sdk">Get the Preview SDK</h2>
+<h2 id="get-sdk">Get the Android 6.0 SDK</h2>
 
-<p>To add the Preview SDK components to your development environment:</p>
+<p>To add the Android 6.0 SDK components to your development environment:</p>
 
 <ol>
   <li>Launch Android Studio 1.3 or higher.
@@ -61,8 +60,7 @@ App</a> training lesson first.</p>
   standalone application.)
   </li>
 
-  <li>Under the <strong>Platforms</strong> section, select <strong>Android MNC
-  Preview</strong>.
+  <li>Under the <strong>Platforms</strong> section, select <strong>Android 6.0</strong>.
   </li>
 
   <li>In the <strong>Tools</strong> section, select the latest Android <strong>
@@ -74,13 +72,12 @@ App</a> training lesson first.</p>
     agreement for all of the packages.
   </li>
 
-  <li>Verify that the M Developer Preview is installed by opening the <strong>
+  <li>Verify that the Android 6.0 SDK is installed by opening the <strong>
     Settings</strong> window and choosing the <strong>Appearance &amp; Behavior
     &gt; System Settings &gt; Android SDK</strong> panel.</li>
 
   <li>On the <strong>Android SDK</strong> panel, choose
-    the <strong>SDK Platforms</strong> tab. <strong>Android MNC
-    Preview</strong> should be listed as <em>Installed</em>. Also, open the
+    the <strong>SDK Platforms</strong> tab. <strong>Android 6.0</strong> should be listed as <em>Installed</em>. Also, open the
     <strong>SDK Tools</strong> tab to verify that the latest tools are
     installed.
   </li>
@@ -116,8 +113,9 @@ App</a> training lesson first.</p>
 <h3 id="update">Update an existing project</h3>
 
 <p>
-  For existing projects, you must modify the project configuration to enable the preview APIs. In
-  your development environment, open the <code>build.gradle</code> file for your module and
+  For existing projects, if you are using Android 6.0 APIs (API level 23) you must
+  modify the project configuration. In your development environment, open the
+  <code>build.gradle</code> file for your module and
   set these values as follows:
 </p>
 
