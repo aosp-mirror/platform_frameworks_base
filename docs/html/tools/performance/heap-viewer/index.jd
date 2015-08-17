@@ -75,18 +75,23 @@ page.article=true
          alt=""
          width="400px" />
       <p class="img-caption">
-        <strong>Figure 1. </strong>Starting Android Device Monitor.
+        <strong>Figure 1. </strong>Starting Memory Monitor.
       </p>
     </div>
 
     <li>Connect your mobile device to your computer.</li>
 
-    <li>Open your application in Android Studio, build the source, and run it on your device.</li>
+    <li>Open your application in Android Studio, build the source, and run it on your device or
+      emulator.</li>
 
-    <li>Start the Android Device Monitor from Android Studio: <b>Tools -&gt; Android -&gt; Android
-    Device</b> <b>Monitor</b>.
+    <li>Start the Android Device Monitor from Android Studio: <strong>Tools -&gt; Android
+      -> Android Device Monitor</strong>.
 
-</ol>
+      <p>You can also start the <a href="{@docRoot}tools/studio/index.html#mem-cpu">Memory Monitor</a>
+      in Android Studio: Click the <em>Android</em> tab in the lower-left corner of the application
+      window. The CPU and Memory Monitor views appear.</p> </li>
+
+   </ol>
 </div></li>
 
 <li><div style="overflow:hidden">
@@ -102,13 +107,7 @@ page.article=true
       </p>
     </div>
 
-    <li>Make sure your device and application are showing in the <b>Devices</b> tab.</li>
-
-    <li>Click the <b>DDMS</b> button, because the Heap Viewer is one of the DDMS tools.</li>
-
-    <li>Click the <b>Heap</b> tab, which is where your data will appear.</li>
-
-    <li>In the <b>Devices</b> tab, select the app you want to monitor.</li>
+    <li>In the device and application drop-downs, select the app you want to monitor.</li>
 
 </ol>
 </div></li>
@@ -126,7 +125,9 @@ page.article=true
       </p>
     </div>
 
-    <li>To start monitoring, click the Update Heap button, which looks like a green can.</li>
+    <li>To save a heap dump, click the Dump Java Heap icon. The heap snapshot file
+      with the filename <code>Snapshot-yyyy.mm.dd-hh.mm.ss.hprof</code> appears in the
+      <em>Captures</em> tab.</li>
 
 </ol>
 </div></li>
@@ -147,7 +148,7 @@ page.article=true
     <li>Note the <em>Heap updates will happen
       after every GC for this client.</em> message.</li>
 
-    <li>Press the <strong>Cause CG</strong> button to
+    <li>Click the <strong>Initiate CG</strong> icon to
       trigger a garbage collection event.
     </li>
 </ol>
@@ -166,12 +167,10 @@ page.article=true
       </p>
     </div>
 
-    <li>Click a data type to see detailed information on its current allocations on the
-      heap.</li>
+    <li>Double-click the heap snapshot file to open the heap viewer and see detailed information
+      about the current allocations on the heap.</li>
 
  </ol>
 </div></li>
 
-  <p class="note"><b>Note:</b> To visualize allocation changes over time, combine
-    several snapshots of the bar graph into an animated gif or video.</p>
  </ul>
