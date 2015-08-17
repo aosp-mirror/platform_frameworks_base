@@ -82,37 +82,18 @@ page.article=true
       </p>
     </div>
 
-    <li>Connect your mobile device to your computer.</li>
+    <li>If you're using a mobile device, connect it to your computer.</li>
 
     <li>Open your application in Android Studio, build the source,
-      and run it on your device.</li></li>
+      and run it on your device or emulator.</li>
 
-    <li>In Android Studio, choose <b>Tools &gt; Android &gt; Memory Monitor.</b></li>
-
+    <li>In Android Studio, choose <strong> Tools &gt; Android &gt; Memory Monitor</strong>. You
+      can also click the <em>Android</em> tab in the lower-left corner of the application
+      window to launch the Android runtime window. The CPU and Memory Monitor views appear.</li>
+ 
  </ol>
 </div></li>
 
-<li><div style="overflow:hidden">
-<hr>
-  <ol class="padded" start="4">
-
-    <div class="figure" style="">
-  <img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image002.png"
-         alt=""
-         width="400px" />
-      <p class="img-caption">
-        <strong>Figure 2. </strong>Choosing the device and Activity to monitor.
-      </p>
-    </div>
-
-    <li>This opens the Memory Monitor pane.</li>
-
-    <li>Choose your device from the drop-down menu at the top left of the pane.</li>
-
-    <li>Choose your Activity from the drop-down menu at the top right of the pane.</li>
-
- </ol>
-</div></li>
 
 <li><div style="overflow:hidden">
 <hr>
@@ -123,7 +104,7 @@ page.article=true
          alt=""
          width="400px" />
       <p class="img-caption">
-        <strong>Figure 3. </strong>Allocated and free memory in Memory Monitor.
+        <strong>Figure 1. </strong>Allocated and free memory in Memory Monitor.
       </p>
     </div>
 
@@ -156,7 +137,7 @@ page.article=true
          alt=""
          width="400px" />
       <p class="img-caption">
-        <strong>Figure 4. </strong>Forcing a GC (Garbage Collection) event.
+        <strong>Figure 2. </strong>Forcing a GC (Garbage Collection) event.
       </p>
     </div>
 
