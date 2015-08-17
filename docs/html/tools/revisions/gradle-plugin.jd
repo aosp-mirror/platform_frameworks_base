@@ -59,8 +59,8 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     <dd>
       <ul>
       <li>Added support for the <code>com.android.build.threadPoolSize</code> property to control
-         the <code>Android</code> task thread pool size from the <code>build.gradle</code> file or
-         the command line. The following example sets this property to 4.
+         the <code>Android</code> task thread pool size from the <code>gradle.properties</code> file
+         or the command line. The following example sets this property to 4.
 <pre>
 -Pcom.android.build.threadPoolSize=4
 </pre>
