@@ -4,7 +4,7 @@
 #include "os.h"
 #include <string.h>
 
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
 #include <io.h>
 #endif
 
@@ -42,7 +42,7 @@ find_import_file(const char* given)
         }
         f.append(expected);
 
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
         /* check that the file exists and is not write-only */
         if (0 == _access(f.c_str(), 0) &&  /* mode 0=exist */
             0 == _access(f.c_str(), 4) ) { /* mode 4=readable */
