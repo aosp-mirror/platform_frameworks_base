@@ -22,9 +22,9 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <h1 class="dac-hero-title" style="white-space:nowrap;">Android 6.0 Marshmallow</h1>
         </div>
         <div class="col-6of16 col-push-1of16">
-        <p class="dac-hero-description"><strong>The official Android 6.0
-        SDK is now available!</strong> Update to Developer Preview 3
-        and get your apps ready for Android Marshmallow!</p>
+        <p class="dac-hero-description" style="color:white"><strong>The
+        official Android 6.0 SDK is now available!</strong> Update to
+        Developer Preview 3 and get your apps ready for Android Marshmallow!</p>
 
         <a class="dac-hero-cta" href="/preview/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
