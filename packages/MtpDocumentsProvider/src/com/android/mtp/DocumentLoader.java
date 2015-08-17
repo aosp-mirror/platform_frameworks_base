@@ -30,6 +30,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 
+/**
+ * Loader for MTP document.
+ * At the first request, the loader returns only first NUM_INITIAL_ENTRIES. Then it launches
+ * background thread to load the rest documents and caches its result for next requests.
+ */
 class DocumentLoader {
     static final int NUM_INITIAL_ENTRIES = 10;
     static final int NUM_LOADING_ENTRIES = 20;
@@ -37,7 +42,7 @@ class DocumentLoader {
 
     private final MtpManager mMtpManager;
     private final ContentResolver mResolver;
-    private final LinkedList<LoaderTask> mTasks = new LinkedList<LoaderTask>();
+    private final TaskList mTaskList = new TaskList();
     private boolean mHasBackgroundThread = false;
 
     DocumentLoader(MtpManager mtpManager, ContentResolver resolver) {
@@ -56,7 +61,7 @@ class DocumentLoader {
 
     synchronized Cursor queryChildDocuments(String[] columnNames, Identifier parent)
             throws IOException {
-        LoaderTask task = findTask(parent);
+        LoaderTask task = mTaskList.findTask(parent);
         if (task == null) {
             int parentHandle = parent.mObjectHandle;
             // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
@@ -70,11 +75,12 @@ class DocumentLoader {
                     mMtpManager,
                     parent.mDeviceId,
                     task.getUnloadedObjectHandles(NUM_INITIAL_ENTRIES)));
+        } else {
+            // Once remove the existing task in order to add it to the head of the list.
+            mTaskList.remove(task);
         }
 
-        // Move this task to the head of the list to prioritize it.
-        mTasks.remove(task);
-        mTasks.addFirst(task);
+        mTaskList.addFirst(task);
         if (!task.completed() && !mHasBackgroundThread) {
             mHasBackgroundThread = true;
             new BackgroundLoaderThread().start();
@@ -84,41 +90,11 @@ class DocumentLoader {
     }
 
     synchronized void clearCache(int deviceId) {
-        int i = 0;
-        while (i < mTasks.size()) {
-            if (mTasks.get(i).mIdentifier.mDeviceId == deviceId) {
-                mTasks.remove(i);
-            } else {
-                i++;
-            }
-        }
+        mTaskList.clearTaskForDevice(deviceId);
     }
 
     synchronized void clearCache() {
-        int i = 0;
-        while (i < mTasks.size()) {
-            if (mTasks.get(i).completed()) {
-                mTasks.remove(i);
-            } else {
-                i++;
-            }
-        }
-    }
-
-    private LoaderTask findTask(Identifier parent) {
-        for (int i = 0; i < mTasks.size(); i++) {
-            if (mTasks.get(i).mIdentifier.equals(parent))
-                return mTasks.get(i);
-        }
-        return null;
-    }
-
-    private LoaderTask findUncompletedTask() {
-        for (int i = 0; i < mTasks.size(); i++) {
-            if (!mTasks.get(i).completed())
-                return mTasks.get(i);
-        }
-        return null;
+        mTaskList.clearCompletedTask();
     }
 
     private class BackgroundLoaderThread extends Thread {
@@ -130,7 +106,7 @@ class DocumentLoader {
                 int deviceId;
                 int[] handles;
                 synchronized (DocumentLoader.this) {
-                    task = findUncompletedTask();
+                    task = mTaskList.findRunningTask();
                     if (task == null) {
                         mHasBackgroundThread = false;
                         return;
@@ -156,8 +132,48 @@ class DocumentLoader {
                             task.notify(mResolver);
                         }
                     } else {
-                        mTasks.remove(task);
+                        mTaskList.remove(task);
                     }
+                }
+            }
+        }
+    }
+
+    private static class TaskList extends LinkedList<LoaderTask> {
+        LoaderTask findTask(Identifier parent) {
+            for (int i = 0; i < size(); i++) {
+                if (get(i).mIdentifier.equals(parent))
+                    return get(i);
+            }
+            return null;
+        }
+
+        LoaderTask findRunningTask() {
+            for (int i = 0; i < size(); i++) {
+                if (!get(i).completed())
+                    return get(i);
+            }
+            return null;
+        }
+
+        void clearTaskForDevice(int deviceId) {
+            int i = 0;
+            while (i < size()) {
+                if (get(i).mIdentifier.mDeviceId == deviceId) {
+                    remove(i);
+                } else {
+                    i++;
+                }
+            }
+        }
+
+        void clearCompletedTask() {
+            int i = 0;
+            while (i < size()) {
+                if (get(i).completed()) {
+                    remove(i);
+                } else {
+                    i++;
                 }
             }
         }
