@@ -113,6 +113,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ต้องใช้รูปแบบเมื่อคุณรีสตาร์ทอุปกรณ์"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"ต้องใช้ PIN เมื่อคุณรีสตาร์ทอุปกรณ์"</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"ต้องใช้รหัสผ่านเมื่อคุณรีสตาร์ทอุปกรณ์"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"ต้องใช้รูปแบบเพื่อความปลอดภัยเพิ่มเติม"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"ต้องใช้ PIN เพื่อความปลอดภัยเพิ่มเติม"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"ต้องใช้รหัสผ่านเพื่อความปลอดภัยเพิ่มเติม"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ต้องใช้รูปแบบเมื่อคุณเปลี่ยนโปรไฟล์"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"ต้องใช้ PIN เมื่อคุณเปลี่ยนโปรไฟล์"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"ต้องใช้รหัสผ่านเมื่อคุณเปลี่ยนโปรไฟล์"</string>
