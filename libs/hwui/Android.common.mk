@@ -23,6 +23,7 @@ LOCAL_SRC_FILES := \
     utils/Blur.cpp \
     utils/GLUtils.cpp \
     utils/LinearAllocator.cpp \
+    utils/NinePatchImpl.cpp \
     AmbientShadow.cpp \
     AnimationContext.cpp \
     Animator.cpp \
