@@ -636,6 +636,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         return CameraBinderDecorator.NO_ERROR;
     }
 
+    public int prepare2(int maxCount, int streamId) {
+        // We don't support this in LEGACY mode.
+        return prepare(streamId);
+    }
+
     public int tearDown(int streamId) {
         if (DEBUG) {
             Log.d(TAG, "tearDown called.");

@@ -102,4 +102,6 @@ interface ICameraDeviceUser
     int prepare(int streamId);
 
     int tearDown(int streamId);
+
+    int prepare2(int maxCount, int streamId);
 }
