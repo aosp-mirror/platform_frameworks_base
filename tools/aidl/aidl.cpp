@@ -15,7 +15,7 @@
 #include <string.h>
 #include <map>
 
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
 #include <io.h>
 #include <direct.h>
 #include <sys/stat.h>
@@ -754,7 +754,7 @@ check_outputFilePath(const string& path) {
         if (path[i] == OS_PATH_SEPARATOR) {
             string p = path.substr(0, i);
             if (access(path.data(), F_OK) != 0) {
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
                 _mkdir(p.data());
 #else
                 mkdir(p.data(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
@@ -1113,7 +1113,7 @@ preprocess_aidl(const Options& options)
     // write preprocessed file
     int fd = open( options.outputFileName.c_str(), 
                    O_RDWR|O_CREAT|O_TRUNC|O_BINARY,
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
                    _S_IREAD|_S_IWRITE);
 #else    
                    S_IRUSR|S_IWUSR|S_IRGRP);
