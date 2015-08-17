@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include "Images.h"
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
 #include <direct.h>
 #endif
 
@@ -81,7 +81,7 @@ public:
                 // Advance to the next segment of the path
                 existsPath.appendPath(toCreate.walkPath(&remains));
                 toCreate = remains;
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
                 _mkdir(existsPath.string());
 #else
                 mkdir(existsPath.string(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);

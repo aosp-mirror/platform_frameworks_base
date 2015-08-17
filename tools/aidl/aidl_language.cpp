@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
 int isatty(int  fd)
 {
     return (fd == 0);

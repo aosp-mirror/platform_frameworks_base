@@ -12,7 +12,7 @@
 #include <errno.h>
 #include <string.h>
 
-#ifndef HAVE_MS_C_RUNTIME
+#ifndef _WIN32
 #define O_BINARY 0
 #endif
 

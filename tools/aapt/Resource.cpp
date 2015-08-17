@@ -2682,7 +2682,7 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
                 if (s > last && (*s == '.' || *s == 0)) {
                     String8 part(last, s-last);
                     dest.appendPath(part);
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
                     _mkdir(dest.string());
 #else
                     mkdir(dest.string(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
