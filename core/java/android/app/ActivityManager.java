@@ -405,6 +405,12 @@ public class ActivityManager {
     public static final int COMPAT_MODE_TOGGLE = 2;
 
     /**
+     * Invalid stack ID.
+     * @hide
+     */
+    public static final int INVALID_STACK_ID = -1;
+
+    /**
      * First static stack ID.
      * @hide
      */

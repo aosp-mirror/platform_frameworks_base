@@ -568,7 +568,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return task;
         }
 
-        if (!restoreRecentTaskLocked(task)) {
+        if (!restoreRecentTaskLocked(task, INVALID_STACK_ID)) {
             if (DEBUG_RECENTS) Slog.w(TAG_RECENTS,
                     "Couldn't restore task id=" + id + " found in recents");
             return null;
@@ -3008,7 +3008,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             task.mBounds = task.mLastNonFullscreenBounds = new Rect(bounds);
             if (task.stack != null && task.stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
                 // re-restore the task so it can have the proper stack association.
-                restoreRecentTaskLocked(task);
+                restoreRecentTaskLocked(task, FREEFORM_WORKSPACE_STACK_ID);
             }
             return;
         }
@@ -3074,9 +3074,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return mNextFreeStackId;
     }
 
-    private boolean restoreRecentTaskLocked(TaskRecord task) {
-        final int stackId =
-                mLeanbackOnlyDevice ? mHomeStack.mStackId : task.getLaunchStackId(mFocusedStack);
+    /**
+     * Restores a recent task to a stack
+     * @param task The recent task to be restored.
+     * @param stackId The stack to restore the task to (default launch stack will be used
+     *                if stackId is invalid).
+     * @return true if the task has been restored successfully.
+     */
+    private boolean restoreRecentTaskLocked(TaskRecord task, int stackId) {
+        if (stackId == INVALID_STACK_ID) {
+            stackId = mLeanbackOnlyDevice ?
+                    mHomeStack.mStackId : task.getLaunchStackId(mFocusedStack);
+        }
         if (task.stack != null) {
             // Task has already been restored once. See if we need to do anything more
             if (task.stack.mStackId == stackId) {
