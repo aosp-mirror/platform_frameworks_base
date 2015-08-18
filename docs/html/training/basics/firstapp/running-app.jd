@@ -25,7 +25,7 @@ helpoutsWidget=true
 
 <ul>
   <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
-  <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
+  <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
   <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
 
@@ -128,10 +128,6 @@ to first create an <a href="{@docRoot}tools/devices/index.html">Android Virtual 
 AVD is a device configuration for the Android emulator that allows you to model a specific
 device.</p>
 
-<div class="figure" style="width:457px">
-  <img src="{@docRoot}images/screens_support/as-mac-avds-config.png" />
-  <p class="img-caption"><strong>Figure 1.</strong> The AVD Manager showing a virtual device.</p>
-</div>
 
 <h3>Create an AVD</h3>
 <ol>
@@ -161,18 +157,10 @@ device.</p>
   </li>
   <li>Verify the configuration settings, then click <strong>Finish</strong>.
   </li>
-  <li>In the <strong>Android Virtual Device Manager</strong> window, click <strong>Create</strong>.</li>
-  <li>Enter an <strong>AVD Name</strong>.</li>
-  <li>Select a <strong>Device</strong> type.
-    <p>When you select a device type, most of the fields auto-populate.</p>
-  <li>For <strong>Skin</strong> select <strong>HVGA</strong>.</li>
-  <li>For <strong>SD Card</strong>, enter something small, like 10 MiB.
-    <p>It really doesn't matter what you enter here since you're not using any storage. But if you
-      reuse this AVD, you might have to adjust this setting.</p></li>
-  <li>Ignore the <strong>Emulation Options</strong> and click <strong>OK</strong>.</li>
-  <li>In the <strong>Result</strong> screen, click <strong>OK</strong>.</li>
-  <li>Close the <strong>Android Virtual Device Manager</strong> window.</li>
 </ol>
+
+<p>For more information about using AVDs, see
+<a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a>.</p>
 
 <h3>Run the app from Android Studio</h3>
 <ol>
