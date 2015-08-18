@@ -1585,7 +1585,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 NetworkCapabilities.TRANSPORT_CELLULAR)) {
             timeout = Settings.Global.getInt(mContext.getContentResolver(),
                                              Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
-                                             5);
+                                             10);
             type = ConnectivityManager.TYPE_MOBILE;
         } else if (networkAgent.networkCapabilities.hasTransport(
                 NetworkCapabilities.TRANSPORT_WIFI)) {
