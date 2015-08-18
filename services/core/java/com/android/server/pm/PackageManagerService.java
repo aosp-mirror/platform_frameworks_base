@@ -1925,8 +1925,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             mFoundPolicyFile = SELinuxMMAC.readInstallPolicy();
 
-            mRestoredSettings = mSettings.readLPw(this, sUserManager.getUsers(false),
-                    mSdkVersion, mOnlyCore);
+            mRestoredSettings = mSettings.readLPw(sUserManager.getUsers(false));
 
             String customResolverActivity = Resources.getSystem().getString(
                     R.string.config_customResolverActivity);

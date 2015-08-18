@@ -29,6 +29,7 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
 
+import android.annotation.NonNull;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IntentFilterVerificationInfo;
@@ -2486,8 +2487,7 @@ final class Settings {
         }
     }
 
-    boolean readLPw(PackageManagerService service, List<UserInfo> users, int sdkVersion,
-            boolean onlyCore) {
+    boolean readLPw(@NonNull List<UserInfo> users) {
         FileInputStream str = null;
         if (mBackupSettingsFilename.exists()) {
             try {
@@ -2583,7 +2583,7 @@ final class Settings {
                     String userStr = parser.getAttributeValue(null, ATTR_USER);
                     String codeStr = parser.getAttributeValue(null, ATTR_CODE);
                     if (name != null) {
-                        int userId = 0;
+                        int userId = UserHandle.USER_SYSTEM;
                         boolean andCode = true;
                         try {
                             if (userStr != null) {
@@ -2672,14 +2672,8 @@ final class Settings {
         if (PackageManagerService.CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE) {
             final VersionInfo internal = getInternalVersion();
             if (!Build.FINGERPRINT.equals(internal.fingerprint)) {
-                if (users == null) {
-                    mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(
-                            UserHandle.USER_OWNER);
-                } else {
-                    for (UserInfo user : users) {
-                        mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(
-                                user.id);
-                    }
+                for (UserInfo user : users) {
+                    mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(user.id);
                 }
             }
         }
@@ -2722,23 +2716,15 @@ final class Settings {
             mBackupStoppedPackagesFilename.delete();
             mStoppedPackagesFilename.delete();
             // Migrate to new file format
-            writePackageRestrictionsLPr(0);
+            writePackageRestrictionsLPr(UserHandle.USER_SYSTEM);
         } else {
-            if (users == null) {
-                readPackageRestrictionsLPr(0);
-            } else {
-                for (UserInfo user : users) {
-                    readPackageRestrictionsLPr(user.id);
-                }
+            for (UserInfo user : users) {
+                readPackageRestrictionsLPr(user.id);
             }
         }
 
-        if (users == null) {
-            mRuntimePermissionsPersistence.readStateForUserSyncLPr(UserHandle.USER_OWNER);
-        } else {
-            for (UserInfo user : users) {
-                mRuntimePermissionsPersistence.readStateForUserSyncLPr(user.id);
-            }
+        for (UserInfo user : users) {
+            mRuntimePermissionsPersistence.readStateForUserSyncLPr(user.id);
         }
 
         /*
@@ -4321,7 +4307,7 @@ final class Settings {
             pw.print("    sourcePackage="); pw.println(p.sourcePackage);
             pw.print("    uid="); pw.print(p.uid);
                     pw.print(" gids="); pw.print(Arrays.toString(
-                            p.computeGids(UserHandle.USER_OWNER)));
+                            p.computeGids(UserHandle.USER_SYSTEM)));
                     pw.print(" type="); pw.print(p.type);
                     pw.print(" prot=");
                     pw.println(PermissionInfo.protectionToString(p.protectionLevel));

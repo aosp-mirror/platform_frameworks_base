@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -280,7 +281,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public List<UserInfo> getUsers(boolean excludeDying) {
+    public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         checkManageUsersPermission("query users");
         synchronized (mPackagesLock) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
