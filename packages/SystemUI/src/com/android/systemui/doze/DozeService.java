@@ -534,8 +534,8 @@ public class DozeService extends DreamService {
                     }
                 }
 
-                requestPulse(mPulseReason);
                 mRegistered = false;
+                requestPulse(mPulseReason);
                 updateListener();  // reregister, this sensor only fires once
 
                 // reset the notification pulse schedule, but only if we think we were not triggered
