@@ -400,12 +400,6 @@ public class UserSwitcherController {
                     switchToUserId(UserHandle.USER_SYSTEM);
                     stopUserId(currentUser);
                 }
-            } else if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
-                final int currentId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                UserInfo userInfo = mUserManager.getUserInfo(currentId);
-                if (userInfo != null && userInfo.isGuest()) {
-                    showGuestNotification(currentId);
-                }
             } else if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
                     mExitGuestDialog.cancel();
@@ -436,6 +430,9 @@ public class UserSwitcherController {
                 if (UserManager.isSplitSystemUser() && userInfo != null && !userInfo.isGuest()
                         && userInfo.id != UserHandle.USER_SYSTEM) {
                     showLogoutNotification(currentId);
+                }
+                if (userInfo != null && userInfo.isGuest()) {
+                    showGuestNotification(currentId);
                 }
                 unpauseRefreshUsers = true;
             } else if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
@@ -477,6 +474,7 @@ public class UserSwitcherController {
                     .setContentTitle(mContext.getString(R.string.user_logout_notification_title))
                     .setContentText(mContext.getString(R.string.user_logout_notification_text))
                     .setContentIntent(logoutPI)
+                    .setOngoing(true)
                     .setShowWhen(false)
                     .addAction(R.drawable.ic_delete,
                             mContext.getString(R.string.user_logout_notification_action),
