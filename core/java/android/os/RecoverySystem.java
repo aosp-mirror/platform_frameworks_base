@@ -68,7 +68,7 @@ public class RecoverySystem {
     /** Send progress to listeners no more often than this (in ms). */
     private static final long PUBLISH_PROGRESS_INTERVAL_MS = 500;
 
-    /** Used to communicate with recovery.  See bootable/recovery/recovery.c. */
+    /** Used to communicate with recovery.  See bootable/recovery/recovery.cpp. */
     private static File RECOVERY_DIR = new File("/cache/recovery");
     private static File COMMAND_FILE = new File(RECOVERY_DIR, "command");
     private static File UNCRYPT_FILE = new File(RECOVERY_DIR, "uncrypt_file");
@@ -506,15 +506,29 @@ public class RecoverySystem {
         String[] names = RECOVERY_DIR.list();
         for (int i = 0; names != null && i < names.length; i++) {
             if (names[i].startsWith(LAST_PREFIX)) continue;
-            File f = new File(RECOVERY_DIR, names[i]);
-            if (!f.delete()) {
-                Log.e(TAG, "Can't delete: " + f);
-            } else {
-                Log.i(TAG, "Deleted: " + f);
-            }
+            recursiveDelete(new File(RECOVERY_DIR, names[i]));
         }
 
         return log;
+    }
+
+    /**
+     * Internally, delete a given file or directory recursively.
+     */
+    private static void recursiveDelete(File name) {
+        if (name.isDirectory()) {
+            String[] files = name.list();
+            for (int i = 0; files != null && i < files.length; i++) {
+                File f = new File(name, files[i]);
+                recursiveDelete(f);
+            }
+        }
+
+        if (!name.delete()) {
+            Log.e(TAG, "Can't delete: " + name);
+        } else {
+            Log.i(TAG, "Deleted: " + name);
+        }
     }
 
     /**
