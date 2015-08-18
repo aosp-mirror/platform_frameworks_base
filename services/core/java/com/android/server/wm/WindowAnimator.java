@@ -258,6 +258,7 @@ public class WindowAnimator {
         boolean startingInUnForceHiding = false;
         ArrayList<WindowStateAnimator> unForceHiding = null;
         WindowState wallpaper = null;
+        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
@@ -294,7 +295,8 @@ public class WindowAnimator {
                             ", nowAnimating=" + nowAnimating);
                 }
 
-                if (wasAnimating && !winAnimator.mAnimating && mService.mWallpaperTarget == win) {
+                if (wasAnimating && !winAnimator.mAnimating
+                        && wallpaperController.isWallpaperTarget(win)) {
                     mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
                     setPendingLayoutChanges(Display.DEFAULT_DISPLAY,
                             WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
