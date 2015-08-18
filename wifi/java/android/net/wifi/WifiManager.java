@@ -1086,17 +1086,8 @@ public class WifiManager {
     public WifiActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
         if (mService == null) return null;
         try {
-            WifiActivityEnergyInfo record;
-            if (!isEnhancedPowerReportingSupported()) {
-                return null;
-            }
             synchronized(this) {
-                record = mService.reportActivityInfo();
-                if (record != null && record.isValid()) {
-                    return record;
-                } else {
-                    return null;
-                }
+                return mService.reportActivityInfo();
             }
         } catch (RemoteException e) {
             Log.e(TAG, "getControllerActivityEnergyInfo: " + e);
