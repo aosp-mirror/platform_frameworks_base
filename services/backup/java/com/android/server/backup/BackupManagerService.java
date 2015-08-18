@@ -7848,8 +7848,12 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // If we get this far, the callback or timeout will schedule the
                 // next restore state, so we're done
             } catch (Exception e) {
-                Slog.e(TAG, "Unable to finalize restore of " + mCurrentPackage.packageName);
-                executeNextState(UnifiedRestoreState.FINAL);
+                final String packageName = mCurrentPackage.packageName;
+                Slog.e(TAG, "Unable to finalize restore of " + packageName);
+                EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
+                        packageName, e.toString());
+                keyValueAgentErrorCleanup();
+                executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
             }
         }
 
