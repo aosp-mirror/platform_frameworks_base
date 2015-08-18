@@ -34,12 +34,12 @@ parent.link=index.html
    <p>This document shows you how to run your application on an emulator or a real device
    from Eclipse&mdash;all of which is done using the debug version of your application.
    For more information about how to sign your application with a private key for release, see <a href=
-  "{@docRoot}tools/workflow/publishing/app-signing.html#ExportWizard">Signing Your Applications</a></p>
+  "{@docRoot}tools/publishing/app-signing.html#ExportWizard">Signing Your Applications</a></p>
 
   <h2 id="RunningOnEmulatorEclipse">Running on the emulator</h2>
 
   <p>Before you can run your application on the Android Emulator, you must <a href=
-  "{@docRoot}tools/workflow/devices/managing-avds.html">create an AVD</a>.</p>
+  "{@docRoot}tools/devices/managing-avds.html">create an AVD</a>.</p>
 
   <p>To run (or debug) your application, select <strong>Run</strong> &gt; <strong>Run</strong> (or
   <strong>Run</strong> &gt; <strong>Debug</strong>) from the Eclipse menu bar. The ADT plugin will
@@ -100,7 +100,7 @@ parent.link=index.html
     <li>Ensure that your development computer can detect your device when connected via USB</li>
   </ul>
 
-  <p>Read <a href="{@docRoot}tools/workflow/devices/device.html">Using Hardware Devices</a>
+  <p>Read <a href="{@docRoot}tools/device.html">Using Hardware Devices</a>
   for more information.</p>
 
   <p>Once set up and your device is connected via USB, install your application on the device by
