@@ -5853,6 +5853,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (!mBootAnimationStopped) {
                 // Do this one time.
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
                 try {
                     IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
                     if (surfaceFlinger != null) {
@@ -5875,6 +5876,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             EventLog.writeEvent(EventLogTags.WM_BOOT_ANIMATION_DONE, SystemClock.uptimeMillis());
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
             mDisplayEnabled = true;
             if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG, "******************** ENABLING SCREEN!");
 
