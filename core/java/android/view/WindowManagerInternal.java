@@ -120,6 +120,13 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+      * An interface to be notified about hardware keyboard status.
+      */
+    public interface OnHardKeyboardStatusChangeListener {
+        public void onHardKeyboardStatusChange(boolean available);
+    }
+
+    /**
      * Request that the window manager call
      * {@link DisplayManagerInternal#performTraversalInTransactionFromWindowManager}
      * within a surface transaction at a later time.
@@ -231,4 +238,29 @@ public abstract class WindowManagerInternal {
      * @param listener The listener to register.
      */
     public abstract void registerAppTransitionListener(AppTransitionListener listener);
+
+    /**
+     * Retrieves a height of input method window.
+     */
+    public abstract int getInputMethodWindowVisibleHeight();
+
+    /**
+      * Saves last input method window for transition.
+      *
+      * Note that it is assumed that this method is called only by InputMethodManagerService.
+      */
+    public abstract void saveLastInputMethodWindowForTransition();
+
+    /**
+      * Returns true when the hardware keyboard is available.
+      */
+    public abstract boolean isHardKeyboardAvailable();
+
+    /**
+      * Sets the callback listener for hardware keyboard status changes.
+      *
+      * @param listener The listener to set.
+      */
+    public abstract void setOnHardKeyboardStatusChangeListener(
+        OnHardKeyboardStatusChangeListener listener);
 }
