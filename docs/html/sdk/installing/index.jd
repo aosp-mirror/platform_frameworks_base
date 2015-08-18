@@ -87,7 +87,7 @@ where they are installed. For example:</p>
 
 <p><b>To set up Android Studio on Mac OSX:</b></p>
   <ol>
-    <li>Unzip the downloaded zip file, {@code android-studio-ide-&lt;version&gt;-mac.zip}.</li>
+    <li>Launch the {@code .dmg} file you just downloaded.</li>
     <li>Drag and drop Android Studio into the Applications folder.
     <li>Open Android Studio and follow the setup wizard to install any necessary SDK tools.
       <p>
@@ -97,13 +97,11 @@ where they are installed. For example:</p>
       <strong>Allow applications downloaded from</strong>, select <strong>Anywhere</strong>.
       Then open Android Studio again.</p>
     </li>
-    <li>Follow the links to install the SDK outside of the Android Studio directories.</li>
   </ol>
 
-<p>The individual tools and other SDK packages are saved outside the Android Studio application
-directory. If you need access the tools directly, use a terminal to navigate into the location
-where they are installed. For example:</p>
-<p><code>/Applications/sdk/</code></p>
+<p>If you need use the Android SDK tools from a command line,
+you can access them at:</p>
+<p><code>/Users/&lt;user>/Library/Android/sdk/</code></p>
 
 
 </div><!-- end mac -->
@@ -114,7 +112,7 @@ where they are installed. For example:</p>
 <p><b>To set up Android Studio on Linux:</b></p>
 
   <ol>
-    <li>Unpack the downloaded Tar file, {@code android-studio-ide-&lt;version&gt;-linux.zip}, into an
+    <li>Unpack the downloaded ZIP file into an
         appropriate location for your applications.
     <li>To launch Android Studio, navigate to the {@code android-studio/bin/} directory
     in a terminal and execute {@code studio.sh}.
