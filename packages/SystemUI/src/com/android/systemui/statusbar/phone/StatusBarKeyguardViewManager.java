@@ -503,6 +503,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mMediaManager.updateMediaMetaData(false, animate && !occluded);
         }
         mStatusBarWindowController.setKeyguardOccluded(occluded);
+        mStatusBar.getVisualizer().setOccluded(occluded);
 
         // setDozing(false) will call reset once we stop dozing.
         if (!mDozing) {

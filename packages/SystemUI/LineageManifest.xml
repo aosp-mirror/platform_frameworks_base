@@ -27,6 +27,10 @@
     <uses-permission android:name="lineageos.permission.WRITE_SETTINGS" />
     <uses-permission android:name="lineageos.permission.WRITE_SECURE_SETTINGS" />
 
+    <!-- Visualizer -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- SystemUI Tuner -->
     <application>
         <activity-alias
