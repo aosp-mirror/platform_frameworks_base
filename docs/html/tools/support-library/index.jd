@@ -80,6 +80,11 @@ page.title=Support Library
        </dd>
 
     </dl>
+
+    <p>For a complete list of the Support Library changes, see the
+    <a href="{@docRoot}sdk/support_api_diff/23/changes.html">Support
+    Library API Differences Report</a>.  </p>
+
   </div>
 </div> <!-- end of collapsible section -->
 
