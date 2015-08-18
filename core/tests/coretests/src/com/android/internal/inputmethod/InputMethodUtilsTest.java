@@ -950,6 +950,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
     }
 
+    @SmallTest
     public void testParseInputMethodsAndSubtypesString() {
         // Trivial cases.
         {
