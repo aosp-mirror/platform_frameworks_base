@@ -30,7 +30,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
@@ -46,8 +48,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /** View that represents the quick settings tile panel. **/
-public class QSPanel extends ViewGroup {
-    private static final float TILE_ASPECT = 1.2f;
+public class QSPanel extends FrameLayout {
 
     private final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
@@ -59,15 +60,8 @@ public class QSPanel extends ViewGroup {
     private final QSDetailClipper mClipper;
     private final H mHandler = new H();
 
-    private int mColumns;
-    private int mCellWidth;
-    private int mCellHeight;
-    private int mLargeCellWidth;
-    private int mLargeCellHeight;
     private int mPanelPaddingBottom;
-    private int mDualTileUnderlap;
     private int mBrightnessPaddingTop;
-    private int mGridHeight;
     private boolean mExpanded;
     private boolean mListening;
     private boolean mClosingDetail;
@@ -79,6 +73,9 @@ public class QSPanel extends ViewGroup {
 
     private QSFooter mFooter;
     private boolean mGridContentVisible = true;
+
+    private LinearLayout mQsContainer;
+    private TileLayout mTileLayout;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -99,8 +96,19 @@ public class QSPanel extends ViewGroup {
                 R.layout.quick_settings_brightness_dialog, this, false);
         mFooter = new QSFooter(this, context);
         addView(mDetail);
-        addView(mBrightnessView);
-        addView(mFooter.getView());
+
+        mQsContainer = new LinearLayout(mContext);
+        mQsContainer.setOrientation(LinearLayout.VERTICAL);
+        mQsContainer.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT));
+
+        addView(mQsContainer);
+
+        mTileLayout = new TileLayout(mContext, mRecords);
+
+        mQsContainer.addView(mBrightnessView);
+        mQsContainer.addView(mTileLayout);
+        mQsContainer.addView(mFooter.getView());
         mClipper = new QSDetailClipper(mDetail);
         updateResources();
 
@@ -146,18 +154,9 @@ public class QSPanel extends ViewGroup {
 
     public void updateResources() {
         final Resources res = mContext.getResources();
-        final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
-        mCellHeight = res.getDimensionPixelSize(R.dimen.qs_tile_height);
-        mCellWidth = (int)(mCellHeight * TILE_ASPECT);
-        mLargeCellHeight = res.getDimensionPixelSize(R.dimen.qs_dual_tile_height);
-        mLargeCellWidth = (int)(mLargeCellHeight * TILE_ASPECT);
         mPanelPaddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
-        mDualTileUnderlap = res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
         mBrightnessPaddingTop = res.getDimensionPixelSize(R.dimen.qs_brightness_padding_top);
-        if (mColumns != columns) {
-            mColumns = columns;
-            postInvalidate();
-        }
+        mQsContainer.setPadding(0, mBrightnessPaddingTop, 0, mPanelPaddingBottom);
         for (TileRecord r : mRecords) {
             r.tile.clearState();
         }
@@ -165,6 +164,7 @@ public class QSPanel extends ViewGroup {
             refreshAllTiles();
         }
         updateDetailText();
+        mTileLayout.updateResources();
     }
 
     @Override
@@ -245,9 +245,6 @@ public class QSPanel extends ViewGroup {
     }
 
     private void handleSetTileVisibility(View v, int visibility) {
-        if (visibility == VISIBLE && !mGridContentVisible) {
-            visibility = INVISIBLE;
-        }
         if (visibility == v.getVisibility()) return;
         v.setVisibility(visibility);
     }
@@ -332,7 +329,7 @@ public class QSPanel extends ViewGroup {
         r.tile.refreshState();
         mRecords.add(r);
 
-        addView(r.tileView);
+        mTileLayout.addView(r.tileView);
     }
 
     public boolean isShowingDetail() {
@@ -348,7 +345,7 @@ public class QSPanel extends ViewGroup {
     }
 
     public int getGridHeight() {
-        return mGridHeight;
+        return mQsContainer.getMeasuredHeight();
     }
 
     private void handleShowDetail(Record r, boolean show) {
@@ -374,7 +371,7 @@ public class QSPanel extends ViewGroup {
         }
         r.tile.setDetailListening(show);
         int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
-        int y = r.tileView.getTop() + r.tileView.getHeight() / 2;
+        int y = r.tileView.getTop() + mTileLayout.getTop() + r.tileView.getHeight() / 2;
         handleShowDetailImpl(r, show, x, y);
     }
 
@@ -427,13 +424,7 @@ public class QSPanel extends ViewGroup {
 
     private void setGridContentVisibility(boolean visible) {
         int newVis = visible ? VISIBLE : INVISIBLE;
-        for (int i = 0; i < mRecords.size(); i++) {
-            TileRecord tileRecord = mRecords.get(i);
-            if (tileRecord.tileView.getVisibility() != GONE) {
-                tileRecord.tileView.setVisibility(newVis);
-            }
-        }
-        mBrightnessView.setVisibility(newVis);
+        mQsContainer.setVisibility(newVis);
         if (mGridContentVisible != visible) {
             MetricsLogger.visibility(mContext, MetricsLogger.QS_PANEL, newVis);
         }
@@ -447,107 +438,6 @@ public class QSPanel extends ViewGroup {
                 MetricsLogger.visible(mContext, tileRecord.tile.getMetricsCategory());
             }
         }
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        mBrightnessView.measure(exactly(width), MeasureSpec.UNSPECIFIED);
-        final int brightnessHeight = mBrightnessView.getMeasuredHeight() + mBrightnessPaddingTop;
-        mFooter.getView().measure(exactly(width), MeasureSpec.UNSPECIFIED);
-        int r = -1;
-        int c = -1;
-        int rows = 0;
-        boolean rowIsDual = false;
-        for (TileRecord record : mRecords) {
-            if (record.tileView.getVisibility() == GONE) continue;
-            // wrap to next column if we've reached the max # of columns
-            // also don't allow dual + single tiles on the same row
-            if (r == -1 || c == (mColumns - 1) || rowIsDual != record.tile.supportsDualTargets()) {
-                r++;
-                c = 0;
-                rowIsDual = record.tile.supportsDualTargets();
-            } else {
-                c++;
-            }
-            record.row = r;
-            record.col = c;
-            rows = r + 1;
-        }
-
-        View previousView = mBrightnessView;
-        for (TileRecord record : mRecords) {
-            if (record.tileView.setDual(record.tile.supportsDualTargets())) {
-                record.tileView.handleStateChanged(record.tile.getState());
-            }
-            if (record.tileView.getVisibility() == GONE) continue;
-            final int cw = record.row == 0 ? mLargeCellWidth : mCellWidth;
-            final int ch = record.row == 0 ? mLargeCellHeight : mCellHeight;
-            record.tileView.measure(exactly(cw), exactly(ch));
-            previousView = record.tileView.updateAccessibilityOrder(previousView);
-        }
-        int h = rows == 0 ? brightnessHeight : (getRowTop(rows) + mPanelPaddingBottom);
-        if (mFooter.hasFooter()) {
-            h += mFooter.getView().getMeasuredHeight();
-        }
-        mDetail.measure(exactly(width), MeasureSpec.UNSPECIFIED);
-        if (mDetail.getMeasuredHeight() < h) {
-            mDetail.measure(exactly(width), exactly(h));
-        }
-        mGridHeight = h;
-        setMeasuredDimension(width, Math.max(h, mDetail.getMeasuredHeight()));
-    }
-
-    private static int exactly(int size) {
-        return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        final int w = getWidth();
-        mBrightnessView.layout(0, mBrightnessPaddingTop,
-                mBrightnessView.getMeasuredWidth(),
-                mBrightnessPaddingTop + mBrightnessView.getMeasuredHeight());
-        boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-        for (TileRecord record : mRecords) {
-            if (record.tileView.getVisibility() == GONE) continue;
-            final int cols = getColumnCount(record.row);
-            final int cw = record.row == 0 ? mLargeCellWidth : mCellWidth;
-            final int extra = (w - cw * cols) / (cols + 1);
-            int left = record.col * cw + (record.col + 1) * extra;
-            final int top = getRowTop(record.row);
-            int right;
-            int tileWith = record.tileView.getMeasuredWidth();
-            if (isRtl) {
-                right = w - left;
-                left = right - tileWith;
-            } else {
-                right = left + tileWith;
-            }
-            record.tileView.layout(left, top, right, top + record.tileView.getMeasuredHeight());
-        }
-        final int dh = Math.max(mDetail.getMeasuredHeight(), getMeasuredHeight());
-        mDetail.layout(0, 0, mDetail.getMeasuredWidth(), dh);
-        if (mFooter.hasFooter()) {
-            View footer = mFooter.getView();
-            footer.layout(0, getMeasuredHeight() - footer.getMeasuredHeight(),
-                    footer.getMeasuredWidth(), getMeasuredHeight());
-        }
-    }
-
-    private int getRowTop(int row) {
-        if (row <= 0) return mBrightnessView.getMeasuredHeight() + mBrightnessPaddingTop;
-        return mBrightnessView.getMeasuredHeight() + mBrightnessPaddingTop
-                + mLargeCellHeight - mDualTileUnderlap + (row - 1) * mCellHeight;
-    }
-
-    private int getColumnCount(int row) {
-        int cols = 0;
-        for (TileRecord record : mRecords) {
-            if (record.tileView.getVisibility() == GONE) continue;
-            if (record.row == row) cols++;
-        }
-        return cols;
     }
 
     private void fireShowingDetail(QSTile.DetailAdapter detail) {
