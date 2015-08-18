@@ -19,7 +19,9 @@ package android.hardware.camera2.params;
 
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.utils.HashCodeHelpers;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.util.Log;
+import android.util.Size;
 import android.view.Surface;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -66,9 +68,7 @@ public final class OutputConfiguration implements Parcelable {
      *
      */
     public OutputConfiguration(Surface surface) {
-        checkNotNull(surface, "Surface must not be null");
-        mSurface = surface;
-        mRotation = ROTATION_0;
+        this(surface, ROTATION_0);
     }
 
     /**
@@ -94,6 +94,9 @@ public final class OutputConfiguration implements Parcelable {
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
         mSurface = surface;
         mRotation = rotation;
+        mConfiguredSize = SurfaceUtils.getSurfaceSize(surface);
+        mConfiguredFormat = SurfaceUtils.getSurfaceFormat(surface);
+        mConfiguredDataspace = SurfaceUtils.getSurfaceDataspace(surface);
     }
 
     /**
@@ -106,6 +109,9 @@ public final class OutputConfiguration implements Parcelable {
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
         mSurface = surface;
         mRotation = rotation;
+        mConfiguredSize = SurfaceUtils.getSurfaceSize(mSurface);
+        mConfiguredFormat = SurfaceUtils.getSurfaceFormat(mSurface);
+        mConfiguredDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
     }
 
     /**
@@ -163,8 +169,9 @@ public final class OutputConfiguration implements Parcelable {
     /**
      * Check if this {@link OutputConfiguration} is equal to another {@link OutputConfiguration}.
      *
-     * <p>Two output configurations are only equal if and only if the underlying surface and
-     * all other configuration parameters are equal. </p>
+     * <p>Two output configurations are only equal if and only if the underlying surfaces, surface
+     * properties (width, height, format, dataspace) when the output configurations are created,
+     * and all other configuration parameters are equal. </p>
      *
      * @return {@code true} if the objects were equal, {@code false} otherwise
      */
@@ -176,7 +183,11 @@ public final class OutputConfiguration implements Parcelable {
             return true;
         } else if (obj instanceof OutputConfiguration) {
             final OutputConfiguration other = (OutputConfiguration) obj;
-            return (mSurface == other.mSurface && mRotation == other.mRotation);
+            return mSurface == other.mSurface &&
+                   mRotation == other.mRotation &&
+                   mConfiguredSize.equals(other.mConfiguredSize) &&
+                   mConfiguredFormat == other.mConfiguredFormat &&
+                   mConfiguredDataspace == other.mConfiguredDataspace;
         }
         return false;
     }
@@ -192,4 +203,9 @@ public final class OutputConfiguration implements Parcelable {
     private static final String TAG = "OutputConfiguration";
     private final Surface mSurface;
     private final int mRotation;
+
+    // The size, format, and dataspace of the surface when OutputConfiguration is created.
+    private final Size mConfiguredSize;
+    private final int mConfiguredFormat;
+    private final int mConfiguredDataspace;
 }
