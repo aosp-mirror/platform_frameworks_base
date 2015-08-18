@@ -491,10 +491,6 @@
     <!-- Boolean indicating that wifi only link configuratios that have exact same credentials (i.e PSK) -->
     <bool translatable="false" name="config_wifi_only_link_same_credential_configurations">true</bool>
 
-    <!-- Wifi driver stop delay, in milliseconds.
-         Default value is 2 minutes. -->
-    <integer translatable="false" name="config_wifi_driver_stop_delay">120000</integer>
-
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
 
