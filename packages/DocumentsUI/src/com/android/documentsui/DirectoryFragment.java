@@ -1773,8 +1773,6 @@ public class DirectoryFragment extends Fragment {
         }
 
         @Override
-        public void afterActivityCreated(DirectoryFragment fragment) {
-            new BandSelectManager(fragment.mRecView, fragment.mSelectionManager);
-        }
+        public void afterActivityCreated(DirectoryFragment fragment) {}
     }
 }

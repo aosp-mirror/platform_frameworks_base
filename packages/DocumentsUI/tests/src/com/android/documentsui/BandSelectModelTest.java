@@ -18,7 +18,7 @@ package com.android.documentsui;
 
 import static org.junit.Assert.*;
 
-import com.android.documentsui.BandSelectMatrix;
+import com.android.documentsui.MultiSelectManager.BandSelectModel;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -28,13 +28,13 @@ import android.util.SparseBooleanArray;
 import org.junit.After;
 import org.junit.Test;
 
-public class BandSelectMatrixTest {
+public class BandSelectModelTest {
 
     private static final int VIEW_PADDING_PX = 5;
     private static final int CHILD_VIEW_EDGE_PX = 100;
     private static final int VIEWPORT_HEIGHT = 500;
 
-    private static BandSelectMatrix matrix;
+    private static BandSelectModel model;
     private static TestHelper helper;
     private static SparseBooleanArray lastSelection;
     private static int viewWidth;
@@ -42,8 +42,8 @@ public class BandSelectMatrixTest {
     private static void setUp(int numChildren, int numColumns) {
         helper = new TestHelper(numChildren, numColumns);
         viewWidth = VIEW_PADDING_PX + numColumns * (VIEW_PADDING_PX + CHILD_VIEW_EDGE_PX);
-        matrix = new BandSelectMatrix(helper);
-        matrix.addOnSelectionChangedListener(new BandSelectMatrix.OnSelectionChangedListener() {
+        model = new BandSelectModel(helper);
+        model.addOnSelectionChangedListener(new BandSelectModel.OnSelectionChangedListener() {
 
             @Override
             public void onSelectionChanged(SparseBooleanArray updatedSelection) {
@@ -54,7 +54,7 @@ public class BandSelectMatrixTest {
 
     @After
     public void tearDown() {
-        matrix = null;
+        model = null;
         helper = null;
         lastSelection = null;
     }
@@ -62,111 +62,120 @@ public class BandSelectMatrixTest {
     @Test
     public void testSelectionLeftOfItems() {
         setUp(20, 5);
-        matrix.startSelection(new Point(0, 10));
-        matrix.resizeSelection(new Point(1, 11));
+        model.startSelection(new Point(0, 10));
+        model.resizeSelection(new Point(1, 11));
         assertSelected(new int[0]);
+        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
     public void testSelectionRightOfItems() {
         setUp(20, 4);
-        matrix.startSelection(new Point(viewWidth - 1, 10));
-        matrix.resizeSelection(new Point(viewWidth - 2, 11));
+        model.startSelection(new Point(viewWidth - 1, 10));
+        model.resizeSelection(new Point(viewWidth - 2, 11));
         assertSelected(new int[0]);
+        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
     public void testSelectionAboveItems() {
         setUp(20, 4);
-        matrix.startSelection(new Point(10, 0));
-        matrix.resizeSelection(new Point(11, 1));
+        model.startSelection(new Point(10, 0));
+        model.resizeSelection(new Point(11, 1));
         assertSelected(new int[0]);
+        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
     public void testSelectionBelowItems() {
         setUp(5, 4);
-        matrix.startSelection(new Point(10, VIEWPORT_HEIGHT - 1));
-        matrix.resizeSelection(new Point(11, VIEWPORT_HEIGHT - 2));
+        model.startSelection(new Point(10, VIEWPORT_HEIGHT - 1));
+        model.resizeSelection(new Point(11, VIEWPORT_HEIGHT - 2));
         assertSelected(new int[0]);
+        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
     public void testVerticalSelectionBetweenItems() {
         setUp(20, 4);
-        matrix.startSelection(new Point(106, 0));
-        matrix.resizeSelection(new Point(107, 200));
+        model.startSelection(new Point(106, 0));
+        model.resizeSelection(new Point(107, 200));
         assertSelected(new int[0]);
+        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
     public void testHorizontalSelectionBetweenItems() {
         setUp(20, 4);
-        matrix.startSelection(new Point(0, 105));
-        matrix.resizeSelection(new Point(200, 106));
+        model.startSelection(new Point(0, 105));
+        model.resizeSelection(new Point(200, 106));
         assertSelected(new int[0]);
+        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
     public void testGrowingAndShrinkingSelection() {
         setUp(20, 4);
-        matrix.startSelection(new Point(0, 0));
-        matrix.resizeSelection(new Point(5, 5));
+        model.startSelection(new Point(0, 0));
+        model.resizeSelection(new Point(5, 5));
         assertSelected(new int[] {0});
-        matrix.resizeSelection(new Point(109, 109));
+        model.resizeSelection(new Point(109, 109));
         assertSelected(new int[] {0});
-        matrix.resizeSelection(new Point(110, 109));
+        model.resizeSelection(new Point(110, 109));
         assertSelected(new int[] {0, 1});
-        matrix.resizeSelection(new Point(110, 110));
+        model.resizeSelection(new Point(110, 110));
         assertSelected(new int[] {0, 1, 4, 5});
-        matrix.resizeSelection(new Point(214, 214));
+        model.resizeSelection(new Point(214, 214));
         assertSelected(new int[] {0, 1, 4, 5});
-        matrix.resizeSelection(new Point(215, 214));
+        model.resizeSelection(new Point(215, 214));
         assertSelected(new int[] {0, 1, 2, 4, 5, 6});
-        matrix.resizeSelection(new Point(214, 214));
+        model.resizeSelection(new Point(214, 214));
         assertSelected(new int[] {0, 1, 4, 5});
-        matrix.resizeSelection(new Point(110, 110));
+        model.resizeSelection(new Point(110, 110));
         assertSelected(new int[] {0, 1, 4, 5});
-        matrix.resizeSelection(new Point(110, 109));
+        model.resizeSelection(new Point(110, 109));
         assertSelected(new int[] {0, 1});
-        matrix.resizeSelection(new Point(109, 109));
+        model.resizeSelection(new Point(109, 109));
         assertSelected(new int[] {0});
-        matrix.resizeSelection(new Point(5, 5));
+        model.resizeSelection(new Point(5, 5));
         assertSelected(new int[] {0});
-        matrix.resizeSelection(new Point(0, 0));
+        model.resizeSelection(new Point(0, 0));
         assertSelected(new int[0]);
+        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
     public void testSelectionMovingAroundOrigin() {
         setUp(16, 4);
-        matrix.startSelection(new Point(210, 210));
-        matrix.resizeSelection(new Point(viewWidth - 1, 0));
+        model.startSelection(new Point(210, 210));
+        model.resizeSelection(new Point(viewWidth - 1, 0));
         assertSelected(new int[] {2, 3, 6, 7});
-        matrix.resizeSelection(new Point(0, 0));
+        model.resizeSelection(new Point(0, 0));
         assertSelected(new int[] {0, 1, 4, 5});
-        matrix.resizeSelection(new Point(0, 420));
+        model.resizeSelection(new Point(0, 420));
         assertSelected(new int[] {8, 9, 12, 13});
-        matrix.resizeSelection(new Point(viewWidth - 1, 420));
+        model.resizeSelection(new Point(viewWidth - 1, 420));
         assertSelected(new int[] {10, 11, 14, 15});
+        assertEquals(10, model.getPositionNearestOrigin());
     }
 
     @Test
     public void testScrollingBandSelect() {
         setUp(40, 4);
-        matrix.startSelection(new Point(0, 0));
-        matrix.resizeSelection(new Point(100, VIEWPORT_HEIGHT - 1));
+        model.startSelection(new Point(0, 0));
+        model.resizeSelection(new Point(100, VIEWPORT_HEIGHT - 1));
         assertSelected(new int[] {0, 4, 8, 12, 16});
         scroll(CHILD_VIEW_EDGE_PX);
         assertSelected(new int[] {0, 4, 8, 12, 16, 20});
-        matrix.resizeSelection(new Point(200, VIEWPORT_HEIGHT - 1));
+        model.resizeSelection(new Point(200, VIEWPORT_HEIGHT - 1));
         assertSelected(new int[] {0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 20, 21});
         scroll(CHILD_VIEW_EDGE_PX);
         assertSelected(new int[] {0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 20, 21, 24, 25});
         scroll(-2 * CHILD_VIEW_EDGE_PX);
         assertSelected(new int[] {0, 1, 4, 5, 8, 9, 12, 13, 16, 17});
-        matrix.resizeSelection(new Point(100, VIEWPORT_HEIGHT - 1));
+        model.resizeSelection(new Point(100, VIEWPORT_HEIGHT - 1));
         assertSelected(new int[] {0, 4, 8, 12, 16});
+        assertEquals(0, model.getPositionNearestOrigin());
     }
 
     private static void assertSelected(int[] selectedPositions) {
@@ -179,10 +188,10 @@ public class BandSelectMatrixTest {
     private static void scroll(int dy) {
         assertTrue(helper.verticalOffset + VIEWPORT_HEIGHT + dy <= helper.getTotalHeight());
         helper.verticalOffset += dy;
-        matrix.onScrolled(null, 0, dy);
+        model.onScrolled(null, 0, dy);
     }
 
-    private static final class TestHelper implements BandSelectMatrix.RecyclerViewHelper {
+    private static final class TestHelper implements MultiSelectManager.BandModelHelper {
 
         public int horizontalOffset = 0;
         public int verticalOffset = 0;

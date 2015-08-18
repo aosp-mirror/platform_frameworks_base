@@ -19,12 +19,12 @@ package com.android.documentsui;
 import static org.junit.Assert.*;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.documentsui.MultiSelectManager.RecyclerViewHelper;
 import com.android.documentsui.MultiSelectManager.Selection;
 
 import org.junit.Before;
@@ -79,7 +79,7 @@ public class MultiSelectManagerTest {
 
     @Test
     public void mouseClick_NoPosition_ClearsSelection() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         click(11);
         click(RecyclerView.NO_POSITION);
         assertSelection();
@@ -95,27 +95,27 @@ public class MultiSelectManagerTest {
 
     @Test
     public void longPress_StartsSelectionMode() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         assertSelection(7);
     }
 
     @Test
     public void longPress_SecondPressExtendsSelection() {
-        mManager.onLongPress(7);
-        mManager.onLongPress(99);
+        mManager.onLongPress(7, 0);
+        mManager.onLongPress(99, 0);
         assertSelection(7, 99);
     }
 
     @Test
     public void singleTapUp_UnselectsSelectedItem() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         tap(7);
         assertSelection();
     }
 
     @Test
     public void singleTapUp_NoPosition_ClearsSelection() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         tap(11);
         tap(RecyclerView.NO_POSITION);
         assertSelection();
@@ -123,7 +123,7 @@ public class MultiSelectManagerTest {
 
     @Test
     public void singleTapUp_ExtendsSelection() {
-        mManager.onLongPress(99);
+        mManager.onLongPress(99, 0);
         tap(7);
         tap(13);
         tap(129899);
@@ -132,21 +132,21 @@ public class MultiSelectManagerTest {
 
     @Test
     public void singleTapUp_ShiftCreatesRangeSelection() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         shiftTap(17);
         assertRangeSelection(7, 17);
     }
 
     @Test
     public void singleTapUp_ShiftCreatesRangeSeletion_Backwards() {
-        mManager.onLongPress(17);
+        mManager.onLongPress(17, 0);
         shiftTap(7);
         assertRangeSelection(7, 17);
     }
 
     @Test
     public void singleTapUp_SecondShiftClickExtendsSelection() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         shiftTap(11);
         shiftTap(17);
         assertRangeSelection(7, 17);
@@ -154,7 +154,7 @@ public class MultiSelectManagerTest {
 
     @Test
     public void singleTapUp_MultipleContiguousRangesSelected() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         shiftTap(11);
         tap(20);
         shiftTap(25);
@@ -165,7 +165,7 @@ public class MultiSelectManagerTest {
 
     @Test
     public void singleTapUp_ShiftReducesSelectionRange_FromPreviousShiftClick() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         shiftTap(17);
         shiftTap(10);
         assertRangeSelection(7, 10);
@@ -173,7 +173,7 @@ public class MultiSelectManagerTest {
 
     @Test
     public void singleTapUp_ShiftReducesSelectionRange_FromPreviousShiftClick_Backwards() {
-        mManager.onLongPress(17);
+        mManager.onLongPress(17, 0);
         shiftTap(7);
         shiftTap(14);
         assertRangeSelection(14, 17);
@@ -182,7 +182,7 @@ public class MultiSelectManagerTest {
 
     @Test
     public void singleTapUp_ShiftReversesSelectionDirection() {
-        mManager.onLongPress(7);
+        mManager.onLongPress(7, 0);
         shiftTap(17);
         shiftTap(0);
         assertRangeSelection(0, 7);
@@ -204,6 +204,36 @@ public class MultiSelectManagerTest {
         tap(13);
         shiftTap(20);
         assertSelection(20);
+    }
+
+    @Test
+    public void provisionaSelection() {
+        Selection s = mManager.getSelection();
+        assertSelection();
+
+        SparseBooleanArray provisional = new SparseBooleanArray();
+        provisional.append(1, true);
+        provisional.append(2, true);
+        s.setProvisionalSelection(provisional);
+        assertSelection(1, 2);
+
+        provisional.delete(1);
+        provisional.append(3, true);
+        s.setProvisionalSelection(provisional);
+        assertSelection(2, 3);
+
+        s.applyProvisionalSelection();
+        assertSelection(2, 3);
+
+        provisional.clear();
+        provisional.append(3, true);
+        provisional.append(4, true);
+        s.setProvisionalSelection(provisional);
+        assertSelection(2, 3, 4);
+
+        provisional.delete(3);
+        s.setProvisionalSelection(provisional);
+        assertSelection(2, 3, 4);
     }
 
     private void tap(int position) {
@@ -252,7 +282,8 @@ public class MultiSelectManagerTest {
         assertEquals(selection.toString(), expected, selection.size());
     }
 
-    private static final class EventHelper implements RecyclerViewHelper {
+    private static final class EventHelper implements MultiSelectManager.MultiSelectHelper {
+
         @Override
         public int findEventPosition(MotionEvent e) {
             throw new UnsupportedOperationException();
