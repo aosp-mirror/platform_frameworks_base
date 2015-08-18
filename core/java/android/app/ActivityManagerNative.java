@@ -3528,12 +3528,12 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     @Override
-    public void resizeStack(int stackBoxId, Rect r) throws RemoteException
+    public void resizeStack(int stackId, Rect r) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(stackBoxId);
+        data.writeInt(stackId);
         r.writeToParcel(data, 0);
         mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, 0);
         reply.readException();

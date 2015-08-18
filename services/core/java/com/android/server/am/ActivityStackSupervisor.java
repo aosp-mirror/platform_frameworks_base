@@ -184,6 +184,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // (e.g. stack) is due to it moving to another container.
     static final boolean MOVING = true;
 
+    // Force the focus to change to the stack we are moving a task to..
+    static final boolean FORCE_FOCUS = true;
+
     // Activity actions an app cannot start if it uses a permission which is not granted.
     private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
             new ArrayMap<>();
@@ -327,6 +330,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     /** Used to keep resumeTopActivityLocked() from being entered recursively */
     boolean inResumeTopActivity;
+
+    // temp. rect used during resize calculation so we don't need to create a new object each time.
+    private final Rect tempRect = new Rect();
 
     /**
      * Description of a request to start a new activity, which has been held
@@ -2908,16 +2914,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        final ActivityRecord r = stack.topRunningActivityLocked(null);
-        if (r != null && !r.task.mResizeable) {
-            Slog.w(TAG, "resizeStack: top task " + r.task + " not resizeable.");
-            return;
-        }
+        ActivityRecord r = stack.topRunningActivityLocked(null);
+        final boolean resizeTasks = r != null && r.task.mResizeable;
 
         final IntArray changedTaskIds = new IntArray(stack.numTasks());
         final List<Configuration> newTaskConfigs = new ArrayList<>(stack.numTasks());
-        stack.mFullscreen =
-                mWindowManager.resizeStack(stackId, bounds, changedTaskIds, newTaskConfigs);
+        stack.mFullscreen = mWindowManager.resizeStack(
+                stackId, bounds, resizeTasks, changedTaskIds, newTaskConfigs);
         for (int i = changedTaskIds.size() - 1; i >= 0; i--) {
             final TaskRecord task = anyTaskForIdLocked(changedTaskIds.get(i), false);
             if (task == null) {
@@ -2926,6 +2929,55 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             task.updateOverrideConfiguration(newTaskConfigs.get(i), bounds);
         }
+
+        if (stack.mStackId == DOCKED_STACK_ID) {
+            // Dock stack funness...Yay!
+            if (stack.mFullscreen) {
+                // The dock stack went fullscreen which is kinda like dismissing it.
+                // In this case we make all other static stacks fullscreen and move all
+                // docked stack tasks to the fullscreen stack.
+                for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
+                    if (i != DOCKED_STACK_ID) {
+                        resizeStackLocked(i, null);
+                    }
+                }
+
+                final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+                final int count = tasks.size();
+                for (int i = 0; i < count; i++) {
+                    moveTaskToStackLocked(tasks.get(i).taskId,
+                            FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, FORCE_FOCUS);
+                }
+
+                // stack shouldn't contain anymore activities, so nothing to resume.
+                r = null;
+            } else {
+                // Docked stacks occupy a dedicated region on screen so the size of all other
+                // static stacks need to be adjusted so they don't overlap with the docked stack.
+                final int leftChange = stack.mBounds.left - bounds.left;
+                final int rightChange = stack.mBounds.right - bounds.right;
+                final int topChange = stack.mBounds.top - bounds.top;
+                final int bottomChange = stack.mBounds.bottom - bounds.bottom;
+
+                for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
+                    if (i != DOCKED_STACK_ID) {
+                        ActivityStack otherStack = getStack(i);
+                        if (otherStack != null) {
+                            tempRect.set(otherStack.mBounds);
+                            // We adjust the opposing sides of the other stacks to
+                            // the side in the dock stack that changed.
+                            tempRect.left -= rightChange;
+                            tempRect.right -= leftChange;
+                            tempRect.top -= bottomChange;
+                            tempRect.bottom -= topChange;
+                            resizeStackLocked(i, tempRect);
+                        }
+                    }
+                }
+
+            }
+        }
+        stack.mBounds = stack.mFullscreen ? null : new Rect(bounds);
 
         if (r != null) {
             final boolean updated = stack.ensureActivityConfigurationLocked(r, 0);
@@ -2968,7 +3020,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final boolean wasFrontStack = isFrontStack(task.stack);
         if (bounds == null && stackId != FULLSCREEN_WORKSPACE_STACK_ID) {
             stackId = FULLSCREEN_WORKSPACE_STACK_ID;
-        } else if (bounds != null && task.stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
+        } else if (bounds != null
+                && stackId != FREEFORM_WORKSPACE_STACK_ID && stackId != DOCKED_STACK_ID) {
             stackId = FREEFORM_WORKSPACE_STACK_ID;
         }
         if (stackId != task.stack.mStackId) {
@@ -3069,8 +3122,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      */
     private ActivityStack moveTaskToStackUncheckedLocked(
             TaskRecord task, int stackId, boolean toTop, String reason) {
-        final ActivityStack stack =
-                getStack(stackId, CREATE_IF_NEEDED, toTop);
+        final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
         mWindowManager.moveTaskToStack(task.taskId, stack.mStackId, toTop);
         if (task.stack != null) {
             task.stack.removeTask(task, reason, MOVING);
@@ -3079,26 +3131,39 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return stack;
     }
 
-    void moveTaskToStackLocked(int taskId, int stackId, boolean toTop) {
+    void moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
             return;
         }
-        ActivityStack stack =
-                moveTaskToStackUncheckedLocked(task, stackId, toTop, "moveTaskToStack");
+        final String reason = "moveTaskToStack";
+        final ActivityRecord top = task.topRunningActivityLocked(null);
+        final boolean adjustFocus = forceFocus || mService.mFocusedActivity == top;
+        final ActivityStack stack =
+                moveTaskToStackUncheckedLocked(task, stackId, toTop, reason);
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-            resizeTaskLocked(task, null);
+            resizeTaskLocked(task, stack.mBounds);
         } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
                 && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
             resizeTaskLocked(task, task.mLastNonFullscreenBounds);
+        } else if (stackId == DOCKED_STACK_ID) {
+            resizeTaskLocked(task, stack.mBounds);
+        }
+
+        if (top != null && adjustFocus) {
+            if (mService.mFocusedActivity != top) {
+                mService.setFocusedActivityLocked(top, reason);
+            } else {
+                setFocusedStack(top, reason);
+            }
         }
 
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
-        stack.ensureActivitiesVisibleLocked(null, 0);
+        ensureActivitiesVisibleLocked(null, 0);
         resumeTopActivitiesLocked();
     }
 
@@ -3659,6 +3724,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 stackHeader.append("  Stack #");
                 stackHeader.append(stack.mStackId);
                 stackHeader.append(":");
+                stackHeader.append("\n");
+                stackHeader.append("  mFullscreen=" + stack.mFullscreen);
+                stackHeader.append("\n");
+                stackHeader.append("  mBounds=" + stack.mBounds);
                 printed |= stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage,
                         needSep, stackHeader.toString());
                 printed |= dumpHistoryList(fd, pw, stack.mLRUActivities, "    ", "Run", false,
@@ -4313,7 +4382,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mStack.mStacks = activityDisplay.mStacks;
 
             activityDisplay.attachActivities(mStack, onTop);
-            mWindowManager.attachStack(mStackId, activityDisplay.mDisplayId, onTop);
+            mStack.mBounds =
+                    mWindowManager.attachStack(mStackId, activityDisplay.mDisplayId, onTop);
+            mStack.mFullscreen = mStack.mBounds == null;
         }
 
         @Override

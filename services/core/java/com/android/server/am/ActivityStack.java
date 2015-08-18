@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
@@ -229,6 +230,8 @@ final class ActivityStack {
 
     // Whether or not this stack covers the entire screen; by default stacks are fullscreen
     boolean mFullscreen = true;
+    // Current bounds of the stack or null if fullscreen.
+    Rect mBounds = null;
 
     long mLaunchStartTime = 0;
     long mFullyDrawnStartTime = 0;
@@ -1227,8 +1230,42 @@ final class ActivityStack {
         return null;
     }
 
-    // Checks if any of the stacks above this one has a fullscreen activity behind it.
-    // If so, this stack is hidden, otherwise it is visible.
+    /** Returns true if the stack contains a fullscreen task. */
+    private boolean hasFullscreenTask() {
+        for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
+            final TaskRecord task = mTaskHistory.get(i);
+            if (task.mFullscreen) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Return true if this stack is hidden by the presence of a docked stack. */
+    private boolean isHiddenByDockedStack() {
+        final ActivityStack dockedStack = mStackSupervisor.getStack(DOCKED_STACK_ID);
+        if (dockedStack != null) {
+            final int dockedStackIndex = mStacks.indexOf(dockedStack);
+            final int stackIndex = mStacks.indexOf(this);
+            if (dockedStackIndex > stackIndex) {
+                // Fullscreen stacks or stacks with fullscreen task below the docked stack are not
+                // visible. We do this so we don't have the 2 stacks and their tasks overlap.
+                if (mFullscreen) {
+                    return true;
+                }
+
+                // We need to also check the tasks in the stack because they can be fullscreen
+                // even though their stack isn't due to their root activity not been resizeable
+                // (i.e. doesn't support multi-window mode).
+                if (hasFullscreenTask()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Returns true if the stack is considered visible. */
     private boolean isStackVisibleLocked() {
         if (!isAttached()) {
             return false;
@@ -1238,12 +1275,15 @@ final class ActivityStack {
             return true;
         }
 
-        // Any stack that isn't the front stack is not visible, except for the case of the home
-        // stack behind the main application stack since we can have dialog activities on the
-        // main application stack that need the home stack to display behind them.
-        // TODO(multi-window): Also need to add exception for side-by-side stacks.
-        final boolean homeStack = mStackId == HOME_STACK_ID;
-        if (!homeStack) {
+        final int stackIndex = mStacks.indexOf(this);
+
+        if (stackIndex == mStacks.size() - 1) {
+            Slog.wtf(TAG,
+                    "Stack=" + this + " isn't front stack but is at the top of the stack list");
+            return false;
+        }
+
+        if (isHiddenByDockedStack()) {
             return false;
         }
 
@@ -1252,13 +1292,24 @@ final class ActivityStack {
          * fullscreen activity, or a translucent activity that requested the
          * wallpaper to be shown behind it.
          */
-        for (int i = mStacks.indexOf(this) + 1; i < mStacks.size(); i++) {
+        for (int i = stackIndex + 1; i < mStacks.size(); i++) {
             final ActivityStack stack = mStacks.get(i);
-            if (stack.mStackId != FULLSCREEN_WORKSPACE_STACK_ID) {
+            final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+
+            if (!stack.mFullscreen && !stack.hasFullscreenTask()) {
+                continue;
+            }
+
+            if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID
+                    || stack.mStackId == HOME_STACK_ID) {
+                // The freeform and home stacks can't have any other stack visible behind them
+                // when they are fullscreen since they act as base/cut-off points for visibility.
+                // NOTE: we don't cut-off at the FULLSCREEN_WORKSPACE_STACK_ID because the home
+                // stack sometimes needs to be visible behind it when it is displaying a dialog
+                // activity. We let it fall through to the logic below to determine visibility.
                 return false;
             }
 
-            final ArrayList<TaskRecord> tasks = stack.getAllTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = tasks.get(taskNdx);
                 // task above isn't fullscreen, so, we assume we're still visible.
@@ -2680,9 +2731,10 @@ final class ActivityStack {
             ActivityRecord next = topRunningActivityLocked(null);
             final String myReason = reason + " adjustFocus";
             if (next != r) {
-                if (next != null && mStackId == FREEFORM_WORKSPACE_STACK_ID) {
-                    // For freeform stack we always keep the focus within the stack as long as
-                    // there is a running activity in the stack that we can adjust focus to.
+                if (next != null && (mStackId == FREEFORM_WORKSPACE_STACK_ID
+                        || mStackId == DOCKED_STACK_ID)) {
+                    // For freeform and docked stacks we always keep the focus within the stack as
+                    // long as there is a running activity in the stack that we can adjust focus to.
                     mService.setFocusedActivityLocked(next, myReason);
                     return;
                 } else {
@@ -4321,7 +4373,10 @@ final class ActivityStack {
             printed |= ActivityStackSupervisor.dumpHistoryList(fd, pw,
                     mTaskHistory.get(taskNdx).mActivities, "    ", "Hist", true, !dumpAll,
                     dumpClient, dumpPackage, needSep, header,
-                    "    Task id #" + task.taskId);
+                    "    Task id #" + task.taskId + "\n" +
+                    "    mFullscreen=" + task.mFullscreen + "\n" +
+                    "    mBounds=" + task.mBounds + "\n" +
+                    "    mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
             if (printed) {
                 header = null;
             }
