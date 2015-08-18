@@ -6112,7 +6112,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // Give priority to system apps that listen for pre boot complete.
             Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
-            ArraySet<String> pkgNames = getPackageNamesForIntent(intent);
+            ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
             for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
                 PackageParser.Package pkg = it.next();
                 if (pkgNames.contains(pkg.packageName)) {
@@ -6147,7 +6147,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // Give priority to apps that listen for boot complete.
             intent = new Intent(Intent.ACTION_BOOT_COMPLETED);
-            pkgNames = getPackageNamesForIntent(intent);
+            pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
             for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
                 PackageParser.Package pkg = it.next();
                 if (pkgNames.contains(pkg.packageName)) {
@@ -6218,11 +6218,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private ArraySet<String> getPackageNamesForIntent(Intent intent) {
+    private ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
         List<ResolveInfo> ris = null;
         try {
             ris = AppGlobals.getPackageManager().queryIntentReceivers(
-                    intent, null, 0, UserHandle.USER_OWNER);
+                    intent, null, 0, userId);
         } catch (RemoteException e) {
         }
         ArraySet<String> pkgNames = new ArraySet<String>();
@@ -11845,8 +11845,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         String pkgName = pkg.packageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installNewPackageLI: " + pkg);
+        // TODO: b/23350563
         final boolean dataDirExists = Environment
-                .getDataUserPackageDirectory(volumeUuid, UserHandle.USER_OWNER, pkgName).exists();
+                .getDataUserPackageDirectory(volumeUuid, UserHandle.USER_SYSTEM, pkgName).exists();
 
         synchronized(mPackages) {
             if (mSettings.mRenamedPackages.containsKey(pkgName)) {
