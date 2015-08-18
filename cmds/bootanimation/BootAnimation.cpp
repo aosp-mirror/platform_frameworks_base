@@ -556,15 +556,10 @@ bool BootAnimation::movie()
 
     mZip->endIteration(cookie);
 
-    // clear screen
     glShadeModel(GL_FLAT);
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
     glDisable(GL_BLEND);
-    glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    eglSwapBuffers(mDisplay, mSurface);
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glEnable(GL_TEXTURE_2D);
