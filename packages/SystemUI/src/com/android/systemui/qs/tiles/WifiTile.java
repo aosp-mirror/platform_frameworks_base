@@ -50,16 +50,19 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     private final WifiSignalCallback mSignalCallback = new WifiSignalCallback();
 
-    public WifiTile(Host host) {
+    private final boolean mAlwaysDetail;
+
+    public WifiTile(Host host, boolean alwaysDetail) {
         super(host);
+        mAlwaysDetail = alwaysDetail;
         mController = host.getNetworkController();
         mWifiController = mController.getAccessPointController();
         mDetailAdapter = new WifiDetailAdapter();
     }
 
     @Override
-    public boolean supportsDualTargets() {
-        return true;
+    public int getTileType() {
+        return QSTileView.QS_TYPE_DUAL;
     }
 
     @Override
@@ -97,6 +100,10 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleClick() {
+        if (mAlwaysDetail) {
+            handleSecondaryClick();
+            return;
+        }
         mState.copyTo(mStateBeforeClick);
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.enabled);
         mController.setWifiEnabled(!mState.enabled);

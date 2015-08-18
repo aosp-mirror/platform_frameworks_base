@@ -15,11 +15,32 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:title="@string/system_ui_tuner">
 
-    <Preference
-        android:key="qs_tuner"
-        android:title="@string/quick_settings" />
+    <PreferenceScreen
+        android:title="@string/quick_settings">
+
+        <Preference
+            android:key="qs_tuner"
+            android:title="@string/qs_rearrange" />
+
+        <PreferenceCategory
+            android:title="@string/experimental">
+
+            <com.android.systemui.tuner.TunerSwitch
+                android:key="qs_show_brightness"
+                android:title="@string/show_brightness"
+                sysui:defValue="true" />
+
+            <com.android.systemui.tuner.QSPagingSwitch
+                android:key="qs_paged_panel"
+                android:title="@string/qs_paging" />
+
+        </PreferenceCategory>
+
+    </PreferenceScreen>
+
 
     <PreferenceScreen
         android:title="@string/status_bar" >

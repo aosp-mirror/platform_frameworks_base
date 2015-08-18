@@ -31,6 +31,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSTileView;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import java.util.Collection;
@@ -43,15 +44,18 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     private final BluetoothController mController;
     private final BluetoothDetailAdapter mDetailAdapter;
 
-    public BluetoothTile(Host host) {
+    private final boolean mAlwaysDetail;
+
+    public BluetoothTile(Host host, boolean alwaysDetail) {
         super(host);
+        mAlwaysDetail = alwaysDetail;
         mController = host.getBluetoothController();
         mDetailAdapter = new BluetoothDetailAdapter();
     }
 
     @Override
-    public boolean supportsDualTargets() {
-        return true;
+    public int getTileType() {
+        return QSTileView.QS_TYPE_DUAL;
     }
 
     @Override
@@ -75,6 +79,10 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleClick() {
+        if (mAlwaysDetail) {
+            handleSecondaryClick();
+            return;
+        }
         final boolean isEnabled = (Boolean)mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setBluetoothEnabled(!isEnabled);

@@ -43,12 +43,17 @@ import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 /** View that represents the quick settings tile panel. **/
-public class QSPanel extends FrameLayout {
+public class QSPanel extends FrameLayout implements Tunable {
+
+    public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
+    public static final String QS_PAGED_PANEL = "qs_paged_panel";
 
     private final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
@@ -75,7 +80,7 @@ public class QSPanel extends FrameLayout {
     private boolean mGridContentVisible = true;
 
     private LinearLayout mQsContainer;
-    private TileLayout mTileLayout;
+    private QSTileLayout mTileLayout;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -104,10 +109,7 @@ public class QSPanel extends FrameLayout {
 
         addView(mQsContainer);
 
-        mTileLayout = new TileLayout(mContext, mRecords);
-
         mQsContainer.addView(mBrightnessView);
-        mQsContainer.addView(mTileLayout);
         mQsContainer.addView(mFooter.getView());
         mClipper = new QSDetailClipper(mDetail);
         updateResources();
@@ -124,6 +126,41 @@ public class QSPanel extends FrameLayout {
                 closeDetail();
             }
         });
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        TunerService.get(mContext).addTunable(this, QS_SHOW_BRIGHTNESS, QS_PAGED_PANEL);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        TunerService.get(mContext).removeTunable(this);
+        super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (QS_SHOW_BRIGHTNESS.equals(key)) {
+            mBrightnessView.setVisibility(newValue == null || Integer.parseInt(newValue) != 0
+                    ? VISIBLE : GONE);
+        } else if (QS_PAGED_PANEL.equals(key)) {
+            if (mTileLayout != null) {
+                for (int i = 0; i < mRecords.size(); i++) {
+                    mTileLayout.removeTile(mRecords.get(i));
+                }
+                mQsContainer.removeView((View) mTileLayout);
+            }
+            int layout = newValue != null && Integer.parseInt(newValue) != 0
+                    ? R.layout.qs_paged_tile_layout : R.layout.qs_tile_layout;
+            mTileLayout =
+                    (QSTileLayout) LayoutInflater.from(mContext).inflate(layout, mQsContainer, false);
+            mQsContainer.addView((View) mTileLayout, 1 /* Between brightness and footer */);
+            for (int i = 0; i < mRecords.size(); i++) {
+                mTileLayout.addTile(mRecords.get(i));
+            }
+        }
     }
 
     private void updateDetailText() {
@@ -164,7 +201,9 @@ public class QSPanel extends FrameLayout {
             refreshAllTiles();
         }
         updateDetailText();
-        mTileLayout.updateResources();
+        if (mTileLayout != null) {
+            mTileLayout.updateResources();
+        }
     }
 
     @Override
@@ -240,18 +279,18 @@ public class QSPanel extends FrameLayout {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0, r).sendToTarget();
     }
 
-    private void setTileVisibility(View v, int visibility) {
-        mHandler.obtainMessage(H.SET_TILE_VISIBILITY, visibility, 0, v).sendToTarget();
+    private void setTileVisibility(TileRecord record, int visibility) {
+        mHandler.obtainMessage(H.SET_TILE_VISIBILITY, visibility, 0, record).sendToTarget();
     }
 
-    private void handleSetTileVisibility(View v, int visibility) {
-        if (visibility == v.getVisibility()) return;
-        v.setVisibility(visibility);
+    private void handleSetTileVisibility(TileRecord tile, int visibility) {
+        if (visibility == tile.tileView.getVisibility()) return;
+        mTileLayout.setTileVisibility(tile, visibility);
     }
 
     public void setTiles(Collection<QSTile<?>> tiles) {
         for (TileRecord record : mRecords) {
-            removeView(record.tileView);
+            mTileLayout.removeTile(record);
         }
         mRecords.clear();
         for (QSTile<?> tile : tiles) {
@@ -264,7 +303,7 @@ public class QSPanel extends FrameLayout {
 
     private void drawTile(TileRecord r, QSTile.State state) {
         final int visibility = state.visible ? VISIBLE : GONE;
-        setTileVisibility(r.tileView, visibility);
+        setTileVisibility(r, visibility);
         r.tileView.onStateChanged(state);
     }
 
@@ -329,7 +368,9 @@ public class QSPanel extends FrameLayout {
         r.tile.refreshState();
         mRecords.add(r);
 
-        mTileLayout.addView(r.tileView);
+        if (mTileLayout != null) {
+            mTileLayout.addTile(r);
+        }
     }
 
     public boolean isShowingDetail() {
@@ -371,7 +412,7 @@ public class QSPanel extends FrameLayout {
         }
         r.tile.setDetailListening(show);
         int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
-        int y = r.tileView.getTop() + mTileLayout.getTop() + r.tileView.getHeight() / 2;
+        int y = r.tileView.getTop() + mTileLayout.getOffsetTop(r) + r.tileView.getHeight() / 2;
         handleShowDetailImpl(r, show, x, y);
     }
 
@@ -474,7 +515,7 @@ public class QSPanel extends FrameLayout {
             if (msg.what == SHOW_DETAIL) {
                 handleShowDetail((Record)msg.obj, msg.arg1 != 0);
             } else if (msg.what == SET_TILE_VISIBILITY) {
-                handleSetTileVisibility((View)msg.obj, msg.arg1);
+                handleSetTileVisibility((TileRecord) msg.obj, msg.arg1);
             }
         }
     }
@@ -533,5 +574,13 @@ public class QSPanel extends FrameLayout {
         void onShowingDetail(QSTile.DetailAdapter detail);
         void onToggleStateChanged(boolean state);
         void onScanStateChanged(boolean state);
+    }
+
+    public interface QSTileLayout {
+        void addTile(TileRecord tile);
+        void removeTile(TileRecord tile);
+        void setTileVisibility(TileRecord tile, int visibility);
+        int getOffsetTop(TileRecord tile);
+        void updateResources();
     }
 }

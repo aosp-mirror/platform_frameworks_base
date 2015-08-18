@@ -389,10 +389,11 @@ public class QsTuner extends Fragment implements Callback {
             mView = super.createTileView(context);
             return mView;
         }
-
+        
         @Override
-        public boolean supportsDualTargets() {
-            return "wifi".equals(mSpec) || "bt".equals(mSpec);
+        public int getTileType() {
+            return "wifi".equals(mSpec) || "bt".equals(mSpec) ? QSTileView.QS_TYPE_DUAL
+                    : QSTileView.QS_TYPE_NORMAL;
         }
 
         @Override
