@@ -16,9 +16,6 @@
 
 package com.android.server;
 
-import android.app.AlarmManager;
-import android.content.BroadcastReceiver;
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -85,16 +82,11 @@ public class AnyMotionDetector {
     /** The accelerometer sampling interval. */
     private static final int SAMPLING_INTERVAL_MILLIS = 40;
 
-    private AlarmManager mAlarmManager;
     private final Handler mHandler;
-    private Intent mAlarmIntent;
     private final Object mLock = new Object();
     private Sensor mAccelSensor;
     private SensorManager mSensorManager;
     private PowerManager.WakeLock mWakeLock;
-
-    /** The time when detection was last performed. */
-    private long mDetectionStartTime;
 
     /** The minimum number of samples required to detect AnyMotion. */
     private int mNumSufficientSamples;
@@ -113,11 +105,11 @@ public class AnyMotionDetector {
 
     private DeviceIdleCallback mCallback = null;
 
-    public AnyMotionDetector(AlarmManager am, PowerManager pm, Handler handler, SensorManager sm,
+    public AnyMotionDetector(PowerManager pm, Handler handler, SensorManager sm,
             DeviceIdleCallback callback) {
         if (DEBUG) Slog.d(TAG, "AnyMotionDetector instantiated.");
-        mAlarmManager = am;
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock.setReferenceCounted(false);
         mHandler = handler;
         mSensorManager = sm;
         mAccelSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -144,6 +136,22 @@ public class AnyMotionDetector {
         }
     }
 
+    public void stop() {
+        if (mState == STATE_ACTIVE) {
+            mState = STATE_INACTIVE;
+            if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE.");
+            if (mMeasurementInProgress) {
+                mMeasurementInProgress = false;
+                mSensorManager.unregisterListener(mListener);
+            }
+            mHandler.removeCallbacks(mMeasurementTimeout);
+            mHandler.removeCallbacks(mSensorRestart);
+            mWakeLock.release();
+            mCurrentGravityVector = null;
+            mPreviousGravityVector = null;
+        }
+    }
+
     private void startOrientationMeasurement() {
         if (DEBUG) Slog.d(TAG, "startOrientationMeasurement: mMeasurementInProgress=" +
             mMeasurementInProgress + ", (mAccelSensor != null)=" + (mAccelSensor != null));
@@ -153,7 +161,6 @@ public class AnyMotionDetector {
                     SAMPLING_INTERVAL_MILLIS * 1000)) {
                 mWakeLock.acquire();
                 mMeasurementInProgress = true;
-                mDetectionStartTime = SystemClock.elapsedRealtime();
                 mRunningStats.reset();
             }
 
@@ -170,9 +177,7 @@ public class AnyMotionDetector {
         if (mMeasurementInProgress) {
             mSensorManager.unregisterListener(mListener);
             mHandler.removeCallbacks(mMeasurementTimeout);
-            if (mWakeLock.isHeld()) {
-                mWakeLock.release();
-            }
+            mWakeLock.release();
             long detectionEndTime = SystemClock.elapsedRealtime();
             mMeasurementInProgress = false;
             mPreviousGravityVector = mCurrentGravityVector;
