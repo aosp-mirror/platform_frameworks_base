@@ -1217,6 +1217,14 @@ final class TaskRecord {
         return mLastNonFullscreenBounds;
     }
 
+    void setInitialBounds(int left, int top, int right, int bottom) {
+        if (mBounds == null) {
+            mBounds = new Rect();
+        }
+        mBounds.set(left, top, right, bottom);
+        mLastNonFullscreenBounds = mBounds;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("userId="); pw.print(userId);
                 pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);

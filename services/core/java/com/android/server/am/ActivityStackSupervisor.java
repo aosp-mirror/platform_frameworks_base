@@ -2977,7 +2977,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             }
         }
-        stack.mBounds = stack.mFullscreen ? null : new Rect(bounds);
+        stack.setBounds(bounds);
 
         if (r != null) {
             final boolean updated = stack.ensureActivityConfigurationLocked(r, 0);
@@ -3112,7 +3112,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
         for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            stack.addAppToken(activities.get(activityNdx), task);
+            stack.addConfigOverride(activities.get(activityNdx), task);
         }
         return true;
     }
@@ -4387,13 +4387,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (DEBUG_STACK) Slog.d(TAG_STACK, "attachToDisplayLocked: " + this
                     + " to display=" + activityDisplay + " onTop=" + onTop);
             mActivityDisplay = activityDisplay;
-            mStack.mDisplayId = activityDisplay.mDisplayId;
-            mStack.mStacks = activityDisplay.mStacks;
-
+            mStack.attachDisplay(activityDisplay, onTop);
             activityDisplay.attachActivities(mStack, onTop);
-            mStack.mBounds =
-                    mWindowManager.attachStack(mStackId, activityDisplay.mDisplayId, onTop);
-            mStack.mFullscreen = mStack.mBounds == null;
         }
 
         @Override
@@ -4465,9 +4460,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (mActivityDisplay != null) {
                 mActivityDisplay.detachActivitiesLocked(mStack);
                 mActivityDisplay = null;
-                mStack.mDisplayId = -1;
-                mStack.mStacks = null;
-                mWindowManager.detachStack(mStackId);
+                mStack.detachDisplay();
             }
         }
 

@@ -248,6 +248,8 @@ final class ActivityStack {
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
 
+    private final LaunchingTaskPositioner mTaskPositioner;
+
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
     static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
@@ -363,6 +365,33 @@ final class ActivityStack {
         mStackId = activityContainer.mStackId;
         mCurrentUser = mService.mCurrentUserId;
         mRecentTasks = recentTasks;
+        mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
+                ? new LaunchingTaskPositioner() : null;
+    }
+
+    void attachDisplay(ActivityStackSupervisor.ActivityDisplay activityDisplay, boolean onTop) {
+        mDisplayId = activityDisplay.mDisplayId;
+        mStacks = activityDisplay.mStacks;
+        mBounds = mWindowManager.attachStack(mStackId, activityDisplay.mDisplayId, onTop);
+        mFullscreen = mBounds == null;
+        if (mTaskPositioner != null) {
+            mTaskPositioner.setDisplay(activityDisplay.mDisplay);
+            mTaskPositioner.configure(mBounds);
+        }
+    }
+
+    void detachDisplay() {
+        mDisplayId = Display.INVALID_DISPLAY;
+        mStacks = null;
+        if (mTaskPositioner != null) {
+            mTaskPositioner.reset();
+        }
+        mWindowManager.detachStack(mStackId);
+    }
+
+    void setBounds(Rect bounds) {
+        mBounds = mFullscreen ? null : new Rect(bounds);
+        mTaskPositioner.configure(bounds);
     }
 
     boolean okToShowLocked(ActivityRecord r) {
@@ -2223,7 +2252,7 @@ final class ActivityStack {
                                 + task, new RuntimeException("here").fillInStackTrace());
                         task.addActivityToTop(r);
                         r.putInHistory();
-                        addAppToken(r, task);
+                        addConfigOverride(r, task);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
                         }
@@ -2283,7 +2312,7 @@ final class ActivityStack {
                         : AppTransition.TRANSIT_ACTIVITY_OPEN, keepCurTransition);
                 mNoAnimActivities.remove(r);
             }
-            addAppToken(r, task);
+            addConfigOverride(r, task);
             boolean doShow = true;
             if (newTask) {
                 // Even though this activity is starting fresh, we still need
@@ -2332,7 +2361,7 @@ final class ActivityStack {
         } else {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
-            addAppToken(r, task);
+            addConfigOverride(r, task);
             ActivityOptions.abort(options);
             options = null;
         }
@@ -4513,6 +4542,9 @@ final class ActivityStack {
             boolean toTop) {
         TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
                 voiceInteractor);
+        if (mTaskPositioner != null) {
+            mTaskPositioner.updateDefaultBounds(task, mTaskHistory);
+        }
         addTask(task, toTop, false);
         return task;
     }
@@ -4548,7 +4580,7 @@ final class ActivityStack {
         }
     }
 
-    void addAppToken(ActivityRecord r, TaskRecord task) {
+    void addConfigOverride(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.getLaunchBounds();
         final Configuration config =
                 mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
