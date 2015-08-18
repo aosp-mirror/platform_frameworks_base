@@ -40,7 +40,6 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -837,6 +836,8 @@ class WindowStateAnimator {
             mSurfaceX = 0;
             mSurfaceY = 0;
             w.mLastSystemDecorRect.set(0, 0, 0, 0);
+            mHasClipRect = false;
+            mClipRect.set(0, 0, 0, 0);
             mLastClipRect.set(0, 0, 0, 0);
 
             // Set up surface control with initial size.
