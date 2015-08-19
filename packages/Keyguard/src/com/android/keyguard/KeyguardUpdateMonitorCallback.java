@@ -194,6 +194,17 @@ public class KeyguardUpdateMonitorCallback {
     public void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) { }
 
     /**
+     * Called when we might be starting a wake-and-unlock sequence.
+     */
+    public void onFingerprintWakeAndUnlockingStarted() { }
+
+    /**
+     * Called when we're done with the wake-and-unlock sequence. This can either happen when we
+     * figure out that the fingerprint didn't match, or when the phone is fully unlocked.
+     */
+    public void onFingerprintWakeAndUnlockingFinished() { }
+
+    /**
      * Called when fingerprint provides help string (e.g. "Try again")
      * @param msgId
      * @param helpString

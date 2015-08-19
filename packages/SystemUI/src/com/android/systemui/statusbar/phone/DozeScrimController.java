@@ -100,6 +100,17 @@ public class DozeScrimController {
         mHandler.post(mPulseIn);
     }
 
+    /**
+     * Aborts pulsing immediately.
+     */
+    public void abortPulsing() {
+        mHandler.removeCallbacks(mPulseIn);
+        abortAnimations();
+        mScrimController.setDozeBehindAlpha(1f);
+        mScrimController.setDozeInFrontAlpha(1f);
+        mPulseCallback = null;
+    }
+
     public void onScreenTurnedOn() {
         if (isPulsing()) {
             final boolean pickup = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;

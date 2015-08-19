@@ -99,6 +99,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
@@ -623,6 +624,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         startKeyguard();
 
         mDozeServiceHost = new DozeServiceHost();
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mDozeServiceHost);
         putComponent(DozeHost.class, mDozeServiceHost);
         putComponent(PhoneStatusBar.class, this);
 
@@ -4076,7 +4078,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    private final class DozeServiceHost implements DozeHost {
+    private final class DozeServiceHost extends KeyguardUpdateMonitorCallback implements DozeHost  {
         // Amount of time to allow to update the time shown on the screen before releasing
         // the wakelock.  This timeout is design to compensate for the fact that we don't
         // currently have a way to know when time display contents have actually been
@@ -4088,6 +4090,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Keeps the last reported state by fireNotificationLight.
         private boolean mNotificationLightOn;
+        private boolean mWakeAndUnlocking;
 
         @Override
         public String toString() {
@@ -4147,6 +4150,22 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public boolean isPowerSaveActive() {
             return mBatteryController != null && mBatteryController.isPowerSave();
+        }
+
+        @Override
+        public boolean isPulsingBlocked() {
+            return mWakeAndUnlocking;
+        }
+
+        @Override
+        public void onFingerprintWakeAndUnlockingStarted() {
+            mWakeAndUnlocking = true;
+            mDozeScrimController.abortPulsing();
+        }
+
+        @Override
+        public void onFingerprintWakeAndUnlockingFinished() {
+            mWakeAndUnlocking = false;
         }
 
         @Override
