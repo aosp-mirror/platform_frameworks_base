@@ -19,6 +19,8 @@
 #include "renderthread/EglManager.h"
 #include "utils/GLUtils.h"
 
+#include <algorithm>
+
 namespace android {
 namespace uirenderer {
 
@@ -320,7 +322,7 @@ void RenderState::render(const Glop& glop) {
         GLsizei elementsCount = mesh.elementCount;
         const GLbyte* vertexData = static_cast<const GLbyte*>(vertices.position);
         while (elementsCount > 0) {
-            GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
+            GLsizei drawCount = std::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
 
             // rebind pointers without forcing, since initial bind handled above
             meshState().bindPositionVertexPointer(false, vertexData, vertices.stride);

@@ -26,14 +26,12 @@
 #include "Rect.h"
 #include "renderstate/RenderState.h"
 #include "utils/Blur.h"
-#include "utils/MathUtils.h"
 #include "utils/Timing.h"
 
+#include <algorithm>
+#include <cutils/properties.h>
 #include <SkGlyph.h>
 #include <SkUtils.h>
-
-#include <cutils/properties.h>
-
 #include <utils/Log.h>
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
@@ -118,10 +116,10 @@ FontRenderer::FontRenderer()
 
     uint32_t maxTextureSize = (uint32_t) Caches::getInstance().maxTextureSize;
 
-    mSmallCacheWidth = MathUtils::min(mSmallCacheWidth, maxTextureSize);
-    mSmallCacheHeight = MathUtils::min(mSmallCacheHeight, maxTextureSize);
-    mLargeCacheWidth = MathUtils::min(mLargeCacheWidth, maxTextureSize);
-    mLargeCacheHeight = MathUtils::min(mLargeCacheHeight, maxTextureSize);
+    mSmallCacheWidth = std::min(mSmallCacheWidth, maxTextureSize);
+    mSmallCacheHeight = std::min(mSmallCacheHeight, maxTextureSize);
+    mLargeCacheWidth = std::min(mLargeCacheWidth, maxTextureSize);
+    mLargeCacheHeight = std::min(mLargeCacheHeight, maxTextureSize);
 
     if (sLogFontRendererCreate) {
         INIT_LOGD("  Text cache sizes, in pixels: %i x %i, %i x %i, %i x %i, %i x %i",

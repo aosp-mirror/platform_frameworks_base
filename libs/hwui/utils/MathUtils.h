@@ -16,6 +16,7 @@
 #ifndef MATHUTILS_H
 #define MATHUTILS_H
 
+#include <algorithm>
 #include <math.h>
 
 namespace android {
@@ -82,18 +83,8 @@ public:
     }
 
     template<typename T>
-    static inline T max(T a, T b) {
-        return a > b ? a : b;
-    }
-
-    template<typename T>
-    static inline T min(T a, T b) {
-        return a < b ? a : b;
-    }
-
-    template<typename T>
     static inline T clamp(T a, T minValue, T maxValue) {
-        return min(max(a, minValue), maxValue);
+        return std::min(std::max(a, minValue), maxValue);
     }
 
     inline static float lerp(float v1, float v2, float t) {
