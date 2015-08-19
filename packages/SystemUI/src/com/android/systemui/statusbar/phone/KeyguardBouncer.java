@@ -52,7 +52,7 @@ public class KeyguardBouncer {
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onStrongAuthTimeoutExpiredChanged(int userId) {
+                public void onStrongAuthStateChanged(int userId) {
                     mBouncerPromptReason = mCallback.getBouncerPromptReason();
                 }
             };
