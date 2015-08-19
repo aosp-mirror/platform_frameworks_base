@@ -106,8 +106,10 @@ public class DozeScrimController {
     public void abortPulsing() {
         mHandler.removeCallbacks(mPulseIn);
         abortAnimations();
-        mScrimController.setDozeBehindAlpha(1f);
-        mScrimController.setDozeInFrontAlpha(1f);
+        if (mDozing) {
+            mScrimController.setDozeBehindAlpha(1f);
+            mScrimController.setDozeInFrontAlpha(1f);
+        }
         mPulseCallback = null;
     }
 
@@ -123,6 +125,10 @@ public class DozeScrimController {
 
     public boolean isPulsing() {
         return mPulseCallback != null;
+    }
+
+    public boolean isDozing() {
+        return mDozing;
     }
 
     private void cancelPulsing() {
