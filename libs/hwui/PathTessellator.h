@@ -22,7 +22,11 @@
 #include "Vertex.h"
 #include "VertexBuffer.h"
 
+#include <algorithm>
 #include <vector>
+
+class SkPath;
+class SkPaint;
 
 namespace android {
 namespace uirenderer {
@@ -38,7 +42,7 @@ struct PathApproximationInfo {
         : thresholdSquared(pixelThreshold * pixelThreshold)
         , sqrInvScaleX(invScaleX * invScaleX)
         , sqrInvScaleY(invScaleY * invScaleY)
-        , thresholdForConicQuads(pixelThreshold * MathUtils::min(invScaleX, invScaleY) / 2.0f) {
+        , thresholdForConicQuads(pixelThreshold * std::min(invScaleX, invScaleY) / 2.0f) {
     };
 
     const float thresholdSquared;

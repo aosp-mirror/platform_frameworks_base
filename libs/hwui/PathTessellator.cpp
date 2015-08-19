@@ -32,6 +32,15 @@
 #define DEBUG_DUMP_BUFFER()
 #endif
 
+#include "PathTessellator.h"
+
+#include "Matrix.h"
+#include "Vector.h"
+#include "Vertex.h"
+#include "utils/MathUtils.h"
+
+#include <algorithm>
+
 #include <SkPath.h>
 #include <SkPaint.h>
 #include <SkPoint.h>
@@ -43,12 +52,6 @@
 
 #include <utils/Log.h>
 #include <utils/Trace.h>
-
-#include "PathTessellator.h"
-#include "Matrix.h"
-#include "Vector.h"
-#include "Vertex.h"
-#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -152,7 +155,7 @@ public:
             // always use 2 points for hairline
             if (halfStrokeWidth == 0.0f) return 2;
 
-            float threshold = MathUtils::min(inverseScaleX, inverseScaleY) * ROUND_CAP_THRESH;
+            float threshold = std::min(inverseScaleX, inverseScaleY) * ROUND_CAP_THRESH;
             return MathUtils::divisionsNeededToApproximateArc(halfStrokeWidth, PI, threshold);
         }
         return 0;

@@ -52,14 +52,14 @@
 // If this is set to negative value, then all the edge will be tessellated.
 #define ALPHA_THRESHOLD (0.1f / 255.0f)
 
-#include <math.h>
-#include <utils/Log.h>
-
 #include "AmbientShadow.h"
+
 #include "ShadowTessellator.h"
 #include "Vertex.h"
 #include "VertexBuffer.h"
-#include "utils/MathUtils.h"
+
+#include <algorithm>
+#include <utils/Log.h>
 
 namespace android {
 namespace uirenderer {
@@ -78,7 +78,7 @@ inline Vector2 getNormalFromVertices(const Vector3* vertices, int current, int n
 // The input z value will be converted to be non-negative inside.
 // The output must be ranged from 0 to 1.
 inline float getAlphaFromFactoredZ(float factoredZ) {
-    return 1.0 / (1 + MathUtils::max(factoredZ, 0.0f));
+    return 1.0 / (1 + std::max(factoredZ, 0.0f));
 }
 
 // The shader is using gaussian function e^-(1-x)*(1-x)*4, therefore, we transform

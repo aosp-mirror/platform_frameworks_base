@@ -46,16 +46,17 @@
 #define TRANSFORMED_PENUMBRA_ALPHA 1.0f
 #define TRANSFORMED_UMBRA_ALPHA 0.0f
 
+#include "SpotShadow.h"
+
+#include "ShadowTessellator.h"
+#include "Vertex.h"
+#include "VertexBuffer.h"
+#include "utils/MathUtils.h"
+
 #include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 #include <utils/Log.h>
-
-#include "ShadowTessellator.h"
-#include "SpotShadow.h"
-#include "Vertex.h"
-#include "VertexBuffer.h"
-#include "utils/MathUtils.h"
 
 // TODO: After we settle down the new algorithm, we can remove the old one and
 // its utility functions.
@@ -543,7 +544,7 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCente
         }
 
         float ratioVI = outlineData[i].radius / distOutline;
-        minRaitoVI = MathUtils::min(minRaitoVI, ratioVI);
+        minRaitoVI = std::min(minRaitoVI, ratioVI);
         if (ratioVI >= (1 - FAKE_UMBRA_SIZE_RATIO)) {
             ratioVI = (1 - FAKE_UMBRA_SIZE_RATIO);
         }
