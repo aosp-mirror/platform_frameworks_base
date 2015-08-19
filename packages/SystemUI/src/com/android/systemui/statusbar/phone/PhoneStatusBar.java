@@ -231,7 +231,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public static final int FADE_KEYGUARD_START_DELAY = 100;
     public static final int FADE_KEYGUARD_DURATION = 300;
-    public static final int FADE_KEYGUARD_DURATION_PULSING = 120;
+    public static final int FADE_KEYGUARD_DURATION_PULSING = 96;
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
@@ -3440,16 +3440,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 .alpha(0f)
                 .setStartDelay(0)
                 .setDuration(FADE_KEYGUARD_DURATION_PULSING)
-                .setInterpolator(ScrimController.KEYGUARD_FADE_OUT_INTERPOLATOR)
-                .withLayer()
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        mNotificationPanel.setAlpha(1f);
-                        hideKeyguard();
-                    }
-                })
-                .start();
+                .setInterpolator(ScrimController.KEYGUARD_FADE_OUT_INTERPOLATOR);
     }
 
     /**
@@ -3502,6 +3493,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mQSPanel.refreshAllTiles();
         }
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
+        mNotificationPanel.setAlpha(1f);
         return staying;
     }
 
