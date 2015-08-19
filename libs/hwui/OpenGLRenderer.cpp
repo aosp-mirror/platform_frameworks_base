@@ -1141,7 +1141,7 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
 
     // Transform and alpha always deferred, since they are used by state operations
     // (Note: saveLayer/restore use colorFilter and alpha, so we just save restore everything)
-    state.mMatrix.load(*currentMatrix);
+    state.mMatrix = *currentMatrix;
     state.mAlpha = currentSnapshot()->alpha;
 
     // always store/restore, since these are just pointers

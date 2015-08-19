@@ -467,8 +467,8 @@ void GlopBuilder::setTransform(const Matrix4& ortho, const Matrix4& canvas,
         const int transformFlags) {
     TRIGGER_STAGE(kTransformStage);
 
-    mOutGlop->transform.ortho.load(ortho);
-    mOutGlop->transform.canvas.load(canvas);
+    mOutGlop->transform.ortho = ortho;
+    mOutGlop->transform.canvas = canvas;
     mOutGlop->transform.transformFlags = transformFlags;
 }
 
@@ -615,7 +615,7 @@ void GlopBuilder::build() {
             shaderMatrix.loadInverse(mOutGlop->transform.canvas);
             shaderMatrix.multiply(mOutGlop->transform.modelView);
         } else {
-            shaderMatrix.load(mOutGlop->transform.modelView);
+            shaderMatrix = mOutGlop->transform.modelView;
         }
         SkiaShader::store(mCaches, *mShader, shaderMatrix,
                 &textureUnit, &mDescription, &(mOutGlop->fill.skiaShaderData));

@@ -58,7 +58,7 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
         , mViewportData(s->mViewportData)
         , mRelativeLightCenter(s->mRelativeLightCenter) {
     if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
-        mTransformRoot.load(*s->transform);
+        mTransformRoot = *s->transform;
         transform = &mTransformRoot;
     } else {
         transform = s->transform;
@@ -190,8 +190,7 @@ void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& boun
     state->highPriority = highPriority;
 
     // store the inverse drawing matrix
-    Matrix4 roundRectDrawingMatrix;
-    roundRectDrawingMatrix.load(getOrthoMatrix());
+    Matrix4 roundRectDrawingMatrix = getOrthoMatrix();
     roundRectDrawingMatrix.multiply(*transform);
     state->matrix.loadInverse(roundRectDrawingMatrix);
 
