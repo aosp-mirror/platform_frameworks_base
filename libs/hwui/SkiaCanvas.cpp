@@ -702,7 +702,7 @@ void SkiaCanvas::drawText(const uint16_t* text, const float* positions, int coun
     SkPaint paintCopy(paint);
     paintCopy.setTextAlign(SkPaint::kLeft_Align);
 
-    SK_COMPILE_ASSERT(sizeof(SkPoint) == sizeof(float)*2, SkPoint_is_no_longer_2_floats);
+    static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
     mCanvas->drawPosText(text, count << 1, reinterpret_cast<const SkPoint*>(positions), paintCopy);
 }
 

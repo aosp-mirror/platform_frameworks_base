@@ -112,15 +112,15 @@ public:
     }
 
     static jlong init(JNIEnv* env, jobject clazz) {
-        SK_COMPILE_ASSERT(1 <<  0 == SkPaint::kAntiAlias_Flag,          paint_flags_mismatch);
-        SK_COMPILE_ASSERT(1 <<  2 == SkPaint::kDither_Flag,             paint_flags_mismatch);
-        SK_COMPILE_ASSERT(1 <<  3 == SkPaint::kUnderlineText_Flag,      paint_flags_mismatch);
-        SK_COMPILE_ASSERT(1 <<  4 == SkPaint::kStrikeThruText_Flag,     paint_flags_mismatch);
-        SK_COMPILE_ASSERT(1 <<  5 == SkPaint::kFakeBoldText_Flag,       paint_flags_mismatch);
-        SK_COMPILE_ASSERT(1 <<  6 == SkPaint::kLinearText_Flag,         paint_flags_mismatch);
-        SK_COMPILE_ASSERT(1 <<  7 == SkPaint::kSubpixelText_Flag,       paint_flags_mismatch);
-        SK_COMPILE_ASSERT(1 <<  8 == SkPaint::kDevKernText_Flag,        paint_flags_mismatch);
-        SK_COMPILE_ASSERT(1 << 10 == SkPaint::kEmbeddedBitmapText_Flag, paint_flags_mismatch);
+        static_assert(1 <<  0 == SkPaint::kAntiAlias_Flag,          "paint_flags_mismatch");
+        static_assert(1 <<  2 == SkPaint::kDither_Flag,             "paint_flags_mismatch");
+        static_assert(1 <<  3 == SkPaint::kUnderlineText_Flag,      "paint_flags_mismatch");
+        static_assert(1 <<  4 == SkPaint::kStrikeThruText_Flag,     "paint_flags_mismatch");
+        static_assert(1 <<  5 == SkPaint::kFakeBoldText_Flag,       "paint_flags_mismatch");
+        static_assert(1 <<  6 == SkPaint::kLinearText_Flag,         "paint_flags_mismatch");
+        static_assert(1 <<  7 == SkPaint::kSubpixelText_Flag,       "paint_flags_mismatch");
+        static_assert(1 <<  8 == SkPaint::kDevKernText_Flag,        "paint_flags_mismatch");
+        static_assert(1 << 10 == SkPaint::kEmbeddedBitmapText_Flag, "paint_flags_mismatch");
 
         Paint* obj = new Paint();
         defaultSettingsForAndroid(obj);
