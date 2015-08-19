@@ -16,15 +16,22 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Log;
 import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -92,6 +99,58 @@ class NavigationBarAppsModel {
             edit.putInt(VERSION_PREF, CURRENT_VERSION);
             edit.apply();
         }
+    }
+
+    @VisibleForTesting
+    protected IPackageManager getPackageManager() {
+        return AppGlobals.getPackageManager();
+    }
+
+    // Returns a launch intent for a given component, or null if the component is unlauncheable.
+    public Intent buildAppLaunchIntent(ComponentName component, UserHandle appUser) {
+        int appUserId = appUser.getIdentifier();
+
+        // This code is based on LauncherAppsService.startActivityAsUser code.
+        Intent launchIntent = new Intent(Intent.ACTION_MAIN);
+        launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        launchIntent.setPackage(component.getPackageName());
+
+        try {
+            ActivityInfo info = getPackageManager().getActivityInfo(component, 0, appUserId);
+            if (info == null) {
+                Log.e(TAG, "Activity " + component + " is not installed.");
+                return null;
+            }
+
+            if (!info.exported) {
+                Log.e(TAG, "Activity " + component + " doesn't have 'exported' attribute.");
+                return null;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get activity info for " + component, e);
+            return null;
+        }
+
+        // Check that the component actually has Intent.CATEGORY_LAUNCHER
+        // as calling startActivityAsUser ignores the category and just
+        // resolves based on the component if present.
+        List<ResolveInfo> apps = mContext.getPackageManager().queryIntentActivitiesAsUser(launchIntent,
+                0 /* flags */, appUserId);
+        final int size = apps.size();
+        for (int i = 0; i < size; ++i) {
+            ActivityInfo activityInfo = apps.get(i).activityInfo;
+            if (activityInfo.packageName.equals(component.getPackageName()) &&
+                    activityInfo.name.equals(component.getClassName())) {
+                // Found an activity with category launcher that matches
+                // this component so ok to launch.
+                launchIntent.setComponent(component);
+                return launchIntent;
+            }
+        }
+
+        Log.e(TAG, "Activity doesn't have category Intent.CATEGORY_LAUNCHER " + component);
+        return null;
     }
 
     /**
@@ -199,6 +258,10 @@ class NavigationBarAppsModel {
 
     /** Loads the list of apps from SharedPreferences. */
     private void loadAppsFromPrefs() {
+        UserManager mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+
+        boolean hadUnlauncheableApps = false;
+
         int appCount = mPrefs.getInt(userPrefixed(APP_COUNT_PREF), -1);
         for (int i = 0; i < appCount; i++) {
             String prefValue = mPrefs.getString(prefNameForApp(i), null);
@@ -214,8 +277,15 @@ class NavigationBarAppsModel {
                 // Couldn't find the saved state. Just skip this item.
                 continue;
             }
-            mApps.add(new AppInfo(componentName, userSerialNumber));
+            UserHandle appUser = mUserManager.getUserForSerialNumber(userSerialNumber);
+            if (appUser != null && buildAppLaunchIntent(componentName, appUser) != null) {
+                mApps.add(new AppInfo(componentName, userSerialNumber));
+            } else {
+                hadUnlauncheableApps = true;
+            }
         }
+
+        if (hadUnlauncheableApps) savePrefs();
     }
 
     /** Adds the first few apps from the owner profile. Used for demo purposes. */
