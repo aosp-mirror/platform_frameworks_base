@@ -771,6 +771,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
     }
 
+    void setRssi(int rssi) {
+        mRssi = rssi;
+    }
+
     public static String getSummary(Context context, String ssid, DetailedState state,
             boolean isEphemeral, String passpointProvider) {
         if (state == DetailedState.CONNECTED && ssid == null) {

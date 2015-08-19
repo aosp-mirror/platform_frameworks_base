@@ -312,6 +312,8 @@ public class WifiTracker {
             connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId());
         }
 
+        final Collection<ScanResult> results = fetchScanResults();
+
         final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
         if (configs != null) {
             mSavedNetworksExist = configs.size() != 0;
@@ -326,8 +328,20 @@ public class WifiTracker {
                     }
                 }
                 if (mIncludeSaved) {
-                    if (!config.isPasspoint() || mIncludePasspoints)
+                    if (!config.isPasspoint() || mIncludePasspoints) {
+                        // If saved network not present in scan result then set its Rssi to MAX_VALUE
+                        boolean apFound = false;
+                        for (ScanResult result : results) {
+                            if (result.SSID.equals(accessPoint.getSsidStr())) {
+                                apFound = true;
+                                break;
+                            }
+                        }
+                        if (!apFound) {
+                            accessPoint.setRssi(Integer.MAX_VALUE);
+                        }
                         accessPoints.add(accessPoint);
+                    }
 
                     if (config.isPasspoint() == false) {
                         apMap.put(accessPoint.getSsidStr(), accessPoint);
@@ -340,7 +354,6 @@ public class WifiTracker {
             }
         }
 
-        final Collection<ScanResult> results = fetchScanResults();
         if (results != null) {
             for (ScanResult result : results) {
                 // Ignore hidden and ad-hoc networks.
