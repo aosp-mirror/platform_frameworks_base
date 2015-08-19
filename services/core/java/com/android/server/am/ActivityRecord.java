@@ -513,7 +513,7 @@ final class ActivityRecord {
         configDestroy = false;
         keysPaused = false;
         inHistory = false;
-        visible = true;
+        visible = false;
         nowVisible = false;
         idle = false;
         hasBeenLaunched = false;
