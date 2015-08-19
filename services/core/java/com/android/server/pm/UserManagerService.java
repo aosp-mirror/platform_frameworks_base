@@ -419,9 +419,10 @@ public class UserManagerService extends IUserManager.Stub {
         return ui;
     }
 
+    /** Called by PackageManagerService */
     public boolean exists(int userId) {
         synchronized (mPackagesLock) {
-            return ArrayUtils.contains(mUserIds, userId);
+            return mUsers.get(userId) != null;
         }
     }
 
