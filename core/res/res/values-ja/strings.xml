@@ -1136,7 +1136,7 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"ファイルが選択されていません"</string>
     <string name="reset" msgid="2448168080964209908">"リセット"</string>
     <string name="submit" msgid="1602335572089911941">"送信"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"運転モードになっています"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"運転モード中"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"タップすると運転モードを終了します"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"テザリングまたはアクセスポイントが有効です"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"タップしてセットアップします。"</string>
