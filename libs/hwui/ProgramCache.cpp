@@ -38,7 +38,8 @@ namespace uirenderer {
 // Vertex shaders snippets
 ///////////////////////////////////////////////////////////////////////////////
 
-const char* gVS_Header_Attributes =
+const char* gVS_Header_Start =
+        "#version 100\n"
         "attribute vec4 position;\n";
 const char* gVS_Header_Attributes_TexCoords =
         "attribute vec2 texCoords;\n";
@@ -132,6 +133,8 @@ const char* gVS_Footer =
 // Fragment shaders snippets
 ///////////////////////////////////////////////////////////////////////////////
 
+const char* gFS_Header_Start =
+        "#version 100\n";
 const char* gFS_Header_Extension_FramebufferFetch =
         "#extension GL_NV_shader_framebuffer_fetch : enable\n\n";
 const char* gFS_Header_Extension_ExternalTexture =
@@ -457,7 +460,7 @@ static inline size_t gradientIndex(const ProgramDescription& description) {
 
 String8 ProgramCache::generateVertexShader(const ProgramDescription& description) {
     // Add attributes
-    String8 shader(gVS_Header_Attributes);
+    String8 shader(gVS_Header_Start);
     if (description.hasTexture || description.hasExternalTexture) {
         shader.append(gVS_Header_Attributes_TexCoords);
     }
@@ -543,7 +546,7 @@ static bool shaderOp(const ProgramDescription& description, String8& shader,
 }
 
 String8 ProgramCache::generateFragmentShader(const ProgramDescription& description) {
-    String8 shader;
+    String8 shader(gFS_Header_Start);
 
     const bool blendFramebuffer = description.framebufferMode >= SkXfermode::kPlus_Mode;
     if (blendFramebuffer) {
