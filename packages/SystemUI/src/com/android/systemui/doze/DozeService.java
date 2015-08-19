@@ -256,6 +256,8 @@ public class DozeService extends DreamService {
 
     private void continuePulsing(int reason) {
         if (mHost.isPulsingBlocked()) {
+            mPulsing = false;
+            mWakeLock.release();
             return;
         }
         mHost.pulseWhileDozing(new DozeHost.PulseCallback() {
