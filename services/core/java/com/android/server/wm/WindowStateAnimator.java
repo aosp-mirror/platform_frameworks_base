@@ -47,7 +47,6 @@ import android.view.MagnificationSpec;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
@@ -77,6 +76,7 @@ class WindowStateAnimator {
     final WindowManagerPolicy mPolicy;
     final Context mContext;
     final boolean mIsWallpaper;
+    final WallpaperController mWallpaperControllerLocked;
 
     // Currently running animation.
     boolean mAnimating;
@@ -209,6 +209,7 @@ class WindowStateAnimator {
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
+        mWallpaperControllerLocked = mService.mWallpaperControllerLocked;
     }
 
     public void setAnimation(Animation anim, long startTime) {
@@ -375,7 +376,7 @@ class WindowStateAnimator {
         if (mWin.mIsImWindow) {
             mAnimLayer += mService.mInputMethodAnimLayerAdjustment;
         } else if (mIsWallpaper) {
-            mAnimLayer += mService.mWallpaperAnimLayerAdjustment;
+            mAnimLayer += mWallpaperControllerLocked.getAnimLayerAdjustment();
         }
         if (DEBUG_LAYERS) Slog.v(TAG, "Stepping win " + this
                 + " anim layer: " + mAnimLayer);
@@ -484,7 +485,7 @@ class WindowStateAnimator {
             mService.mPendingRemove.add(mWin);
             mWin.mRemoveOnExit = false;
         }
-        mService.hideWallpapersLocked(mWin);
+        mWallpaperControllerLocked.hideWallpapers(mWin);
     }
 
     void hide() {
@@ -986,7 +987,7 @@ class WindowStateAnimator {
                     }
                     mSurfaceControl.destroy();
                 }
-                mService.hideWallpapersLocked(mWin);
+                mWallpaperControllerLocked.hideWallpapers(mWin);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Exception thrown when destroying Window " + this
                     + " surface " + mSurfaceControl + " session " + mSession
@@ -1012,7 +1013,7 @@ class WindowStateAnimator {
                     WindowManagerService.logSurface(mWin, "DESTROY PENDING", e);
                 }
                 mPendingDestroySurface.destroy();
-                mService.hideWallpapersLocked(mWin);
+                mWallpaperControllerLocked.hideWallpapers(mWin);
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying Window "
@@ -1033,7 +1034,7 @@ class WindowStateAnimator {
 
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
-        final WindowState wallpaperTarget = mService.mWallpaperTarget;
+        final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
         if (mIsWallpaper && wallpaperTarget != null && mService.mAnimateWallpaperWithTarget) {
             final WindowStateAnimator wallpaperAnimator = wallpaperTarget.mWinAnimator;
             if (wallpaperAnimator.mHasLocalTransformation &&
@@ -1467,7 +1468,7 @@ class WindowStateAnimator {
             hide();
         } else if (w.mAttachedHidden || !w.isOnScreen()) {
             hide();
-            mService.hideWallpapersLocked(w);
+            mWallpaperControllerLocked.hideWallpapers(w);
 
             // If we are waiting for this window to handle an
             // orientation change, well, it is hidden, so
@@ -1522,7 +1523,7 @@ class WindowStateAnimator {
                         if (showSurfaceRobustlyLocked()) {
                             mLastHidden = false;
                             if (mIsWallpaper) {
-                                mService.dispatchWallpaperVisibility(w, true);
+                                mWallpaperControllerLocked.dispatchWallpaperVisibility(w, true);
                             }
                             // This draw means the difference between unique content and mirroring.
                             // Run another pass through performLayout to set mHasContent in the

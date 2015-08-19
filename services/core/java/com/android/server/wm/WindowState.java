@@ -34,7 +34,6 @@ import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 
 import android.app.AppOpsManager;
-import android.os.Debug;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.SystemClock;
@@ -743,8 +742,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final DisplayContent displayContent = getDisplayContent();
             if (displayContent != null) {
                 final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                mService.updateWallpaperOffsetLocked(this,
-                        displayInfo.logicalWidth, displayInfo.logicalHeight, false);
+                mService.mWallpaperControllerLocked.updateWallpaperOffset(
+                        this, displayInfo.logicalWidth, displayInfo.logicalHeight, false);
             }
         }
 

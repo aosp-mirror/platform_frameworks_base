@@ -193,6 +193,7 @@ public class AppWindowAnimator {
         final int windowCount = mAppToken.allAppWindows.size();
         final int adj = animLayerAdjustment;
         thumbnailLayer = -1;
+        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         for (int i = 0; i < windowCount; i++) {
             final WindowState w = mAppToken.allAppWindows.get(i);
             final WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -204,9 +205,7 @@ public class AppWindowAnimator {
             if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
                 mService.setInputMethodAnimLayerAdjustment(adj);
             }
-            if (w == mService.mWallpaperTarget && mService.mLowerWallpaperTarget == null) {
-                mService.setWallpaperAnimLayerAdjustmentLocked(adj);
-            }
+            wallpaperController.setAnimLayerAdjustment(w, adj);
         }
     }
 

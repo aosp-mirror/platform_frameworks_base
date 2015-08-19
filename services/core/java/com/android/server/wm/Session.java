@@ -403,7 +403,7 @@ final class Session extends IWindowSession.Stub
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.setWindowWallpaperPositionLocked(
+                mService.mWallpaperControllerLocked.setWindowWallpaperPosition(
                         mService.windowForClientLocked(this, window, true),
                         x, y, xStep, yStep);
             } finally {
@@ -413,14 +413,16 @@ final class Session extends IWindowSession.Stub
     }
 
     public void wallpaperOffsetsComplete(IBinder window) {
-        mService.wallpaperOffsetsComplete(window);
+        synchronized (mService.mWindowMap) {
+            mService.mWallpaperControllerLocked.wallpaperOffsetsComplete(window);
+        }
     }
 
     public void setWallpaperDisplayOffset(IBinder window, int x, int y) {
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.setWindowWallpaperDisplayOffsetLocked(
+                mService.mWallpaperControllerLocked.setWindowWallpaperDisplayOffset(
                         mService.windowForClientLocked(this, window, true), x, y);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -433,7 +435,7 @@ final class Session extends IWindowSession.Stub
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                return mService.sendWindowWallpaperCommandLocked(
+                return mService.mWallpaperControllerLocked.sendWindowWallpaperCommand(
                         mService.windowForClientLocked(this, window, true),
                         action, x, y, z, extras, sync);
             } finally {
@@ -443,7 +445,9 @@ final class Session extends IWindowSession.Stub
     }
 
     public void wallpaperCommandComplete(IBinder window, Bundle result) {
-        mService.wallpaperCommandComplete(window, result);
+        synchronized (mService.mWindowMap) {
+            mService.mWallpaperControllerLocked.wallpaperCommandComplete(window);
+        }
     }
 
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {

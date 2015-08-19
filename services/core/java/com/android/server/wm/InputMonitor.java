@@ -260,6 +260,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
         // Add all windows on the default display.
         final int numDisplays = mService.mDisplayContents.size();
+        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             WindowList windows = mService.mDisplayContents.valueAt(displayNdx).getWindowList();
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
@@ -287,7 +288,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                             != 0) {
                     disableWallpaperTouchEvents = true;
                 }
-                final boolean hasWallpaper = (child == mService.mWallpaperTarget)
+                final boolean hasWallpaper = wallpaperController.isWallpaperTarget(child)
                         && (privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD) == 0
                         && !disableWallpaperTouchEvents;
                 final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
