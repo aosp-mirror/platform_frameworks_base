@@ -2080,24 +2080,24 @@ public class PackageManagerService extends IPackageManager.Stub {
             // For security and version matching reason, only consider
             // overlay packages if they reside in VENDOR_OVERLAY_DIR.
             File vendorOverlayDir = new File(VENDOR_OVERLAY_DIR);
-            scanDirLI(vendorOverlayDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(vendorOverlayDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags | SCAN_TRUSTED_OVERLAY, 0);
 
             // Find base frameworks (resource packages without code).
-            scanDirLI(frameworkDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(frameworkDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_IS_PRIVILEGED,
                     scanFlags | SCAN_NO_DEX, 0);
 
             // Collected privileged system packages.
             final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
-            scanDirLI(privilegedAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(privilegedAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_IS_PRIVILEGED, scanFlags, 0);
 
             // Collect ordinary system packages.
             final File systemAppDir = new File(Environment.getRootDirectory(), "app");
-            scanDirLI(systemAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(systemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
             // Collect all vendor packages.
@@ -2107,12 +2107,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             } catch (IOException e) {
                 // failed to look up canonical path, continue with original one
             }
-            scanDirLI(vendorAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(vendorAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
             // Collect all OEM packages.
             final File oemAppDir = new File(Environment.getOemDirectory(), "app");
-            scanDirLI(oemAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(oemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
             if (DEBUG_UPGRADE) Log.v(TAG, "Running installd update commands");
@@ -2188,9 +2188,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!mOnlyCore) {
                 EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                         SystemClock.uptimeMillis());
-                scanDirLI(mAppInstallDir, 0, scanFlags | SCAN_REQUIRE_KNOWN, 0);
+                scanDirTracedLI(mAppInstallDir, 0, scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
-                scanDirLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
+                scanDirTracedLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
                         scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
                 /**
@@ -5617,6 +5617,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.resourceDirs[i++] = p.baseCodePath;
         }
         return true;
+    }
+
+    private void scanDirTracedLI(File dir, int parseFlags, int scanFlags, long currentTime) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir");
+        try {
+            scanDirLI(dir, parseFlags, scanFlags, currentTime);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
     }
 
     private void scanDirLI(File dir, int parseFlags, int scanFlags, long currentTime) {
