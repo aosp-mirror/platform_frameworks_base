@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGI KASUTAJA VÄLJA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Kas lisada uus kasutaja?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kui lisate uue kasutaja, siis peab ta seadistama oma ruumi.\n\nIga kasutaja saab värskendada rakendusi kõigi kasutajate jaoks."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Kas eemaldada kasutaja?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Kasutaja kõik rakendused ja andmed kustutatakse."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Eemalda"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Akusäästja on sisse lülitatud"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Vähendab jõudlust ja taustaandmeid"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Akusäästja väljalülitamine"</string>

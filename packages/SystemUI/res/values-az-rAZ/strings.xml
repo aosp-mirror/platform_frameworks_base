@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"İSTİFADƏÇİ ÇIXIŞI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Yeni istifadəçi əlavə edilsin?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yeni istifadəçi əlavə etdiyiniz zaman həmin şəxs öz yerini quraşdırmalıdır. \n\n İstənilən istifadəçi bütün digər istifadəçilərdən olan tətbiqləri güncəlləşdirə bilər."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"İstifadəçi silinsin?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Bu istifadəçinin bütün tətbiqləri və datası silinəcək."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Silin"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Enerji qənaəti aktivdir"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Performansı azaldır və arxa fon datasını məhdudlaşdırır"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Enerjiyə qənaət rejimini deaktiv edin"</string>

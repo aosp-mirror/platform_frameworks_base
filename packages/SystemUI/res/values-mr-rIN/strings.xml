@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"वापरकर्त्यास लॉगआउट करा"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नवीन वापरकर्ता जोडायचा?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"आपण एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अॅप्स अद्यतनित करू शकतो."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"वापरकर्त्यास काढायचे?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"या वापरकर्त्याचे सर्व अॅप्स आणि डेटा काढून टाकला जाईल."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"काढा"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"बॅटरी बचतकर्ता चालू आहे"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"कार्यप्रदर्शन आणि पार्श्वभूमी डेटा कमी करते"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"बॅटरी बचतकर्ता बंद करा"</string>

@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGG UT BRUKER"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vil du legge til en ny bruker?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Når du legger til en ny bruker, må vedkommende konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Vil du fjerne brukeren?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Alle apper og data som tilhører denne brukeren, blir slettet."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Fjern"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Batterisparing er på"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduserer ytelsen og begrenser bakgrunnsdataene"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Slå av batterisparing"</string>

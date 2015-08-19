@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ИЗЛИЗАНЕ НА ПОТРЕБИТЕЛЯ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Да се добави ли нов потреб.?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Да се премахне ли потребителят?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Всички приложения и данни на този потребител ще бъдат изтрити."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Премахване"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Режимът за запазване на батерията е включен"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Намалява ефективността и данните на заден план"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Изключване на режима за запазване на батерията"</string>

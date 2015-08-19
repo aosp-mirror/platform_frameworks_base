@@ -351,6 +351,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"登出使用者"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"新增使用者？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"新增的使用者需要自行設定個人空間。\n\n任何使用者均可為所有其他使用者更新應用程式。"</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"移除使用者？"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"系統將會刪除這個使用者的所有應用程式和資料。"</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"移除"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"省電模式已開啟"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低效能並限制背景數據傳輸"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"關閉省電模式"</string>

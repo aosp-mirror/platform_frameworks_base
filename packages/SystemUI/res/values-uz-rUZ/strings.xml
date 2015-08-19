@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"FOYDALANUVCHI NOMIDAN CHIQISH"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Yangi foyd-chi qo‘shilsinmi?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yangi foydalanuvchi qo‘shilgach, o‘sha shaxs o‘z hududini sozlashi lozim bo‘ladi.\n\nHar qanday foydalanuvchi ilovalarni barcha foydalanuvchilar uchun yangilashi mumkin."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Foydalanuvchi olib tashlansinmi?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Ushbu foydalanuvchining barcha ilovalari va ma’lumotlari o‘chirib tashlanadi."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Olib tashlash"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Quvvat tejash rejimi yoqildi"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Unumdorlikni pasaytiradi va fonda int-dan foyd-ni cheklaydi"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Quvvat tejash funksiyasini o‘chiring"</string>

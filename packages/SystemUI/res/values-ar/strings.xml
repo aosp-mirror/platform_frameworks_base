@@ -353,6 +353,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"خروج المستخدم"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"هل تريد إضافة مستخدم جديد؟"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"عند إضافة مستخدم جديد، يلزمه إعداد مساحته.\n\nعلمًا بأنه يُمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"هل تريد إزالة المستخدم؟"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"سيتم حذف جميع تطبيقات وبيانات هذا المستخدم."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"إزالة"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"وضع توفير الطاقة قيد التشغيل"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"لخفض مستوى الأداء وبيانات الخلفية"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"إيقاف توفير شحن البطارية"</string>

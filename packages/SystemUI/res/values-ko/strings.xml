@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"사용자 로그아웃"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"새 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"사용자를 삭제할까요?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"이 사용자의 모든 앱과 데이터가 삭제됩니다."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"삭제"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"배터리 세이버 사용 중"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"성능 및 백그라운드 데이터를 줄입니다."</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"배터리 절약 기능 사용 중지"</string>

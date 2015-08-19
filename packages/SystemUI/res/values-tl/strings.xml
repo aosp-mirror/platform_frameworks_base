@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"I-LOGOUT ANG USER"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Magdagdag ng bagong user?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay maaaring mag-update ng mga app para sa lahat ng iba pang user."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Gusto mo bang alisin ang user?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Made-delete ang lahat ng app at data ng user na ito."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Alisin"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Naka-on ang tagatipid ng baterya"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Binabawasan ang pagganap at data sa background"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"I-off ang pagtitipid ng baterya"</string>

@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGOUT USER"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Add new user?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Remove user?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"All apps and data of this user will be deleted."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Remove"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Battery saver is on"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduces performance and background data"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Turn off battery saver"</string>

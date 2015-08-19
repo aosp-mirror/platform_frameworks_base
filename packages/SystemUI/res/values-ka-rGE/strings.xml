@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"მომხმარებლის გასვლა"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"დაემატოს ახალი მომხმარებელი?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ახალი მომხმარებლის დამატებისას, ამ მომხმარებელს საკუთარი სივრცის შექმნა მოუწევს.\n\nნებისმიერ მომხმარებელს შეუძლია აპები ყველა სხვა მომხმარებლისათვის განაახლოს."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"გსურთ მომხმარებლის წაშლა?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"ამ მომხმარებლის ყველა აპი და მონაცემი წაიშლება."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"წაშლა"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ბატარეის დამზოგი ჩართულია"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ამცირებს წარმადობას და უკანა ფონის მონაცემებს"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ბატარეის დაზოგვის გამორთვა"</string>

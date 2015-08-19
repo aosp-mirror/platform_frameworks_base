@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"વપરાશકર્તાને લૉગઆઉટ કરો"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"વપરાશકર્તાને દૂર કરીએ?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"આ વપરાશકર્તાની તમામ એપ્લિકેશન્સ અને ડેટા કાઢી નાખવામાં આવશે."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"દૂર કરો"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"બેટરી સેવર ચાલુ છે"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"પ્રદર્શન અને પૃષ્ઠભૂમિ ડેટા ઘટાડે છે"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"બૅટરી સેવર બંધ કરો"</string>
