@@ -2480,6 +2480,10 @@
     <permission android:name="android.permission.MANAGE_FINGERPRINT"
         android:protectionLevel="system|signature" />
 
+    <!-- Allows an app to reset fingerprint attempt counter. Reserved for the system. @hide -->
+    <permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to control keyguard.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.CONTROL_KEYGUARD"
