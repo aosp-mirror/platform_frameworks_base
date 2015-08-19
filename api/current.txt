@@ -34141,6 +34141,15 @@ package android.util {
     field public static final int RTL = 1; // 0x1
   }
 
+  public final class LocaleList {
+    ctor public LocaleList();
+    ctor public LocaleList(java.util.Locale[]);
+    method public java.util.Locale get(int);
+    method public java.util.Locale getPrimary();
+    method public boolean isEmpty();
+    method public int size();
+  }
+
   public final class Log {
     method public static int d(java.lang.String, java.lang.String);
     method public static int d(java.lang.String, java.lang.String, java.lang.Throwable);
