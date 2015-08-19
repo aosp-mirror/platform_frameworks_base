@@ -943,8 +943,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         if (capability == NET_CAPABILITY_CBS || capability == NET_CAPABILITY_DUN ||
                 capability == NET_CAPABILITY_EIMS || capability == NET_CAPABILITY_FOTA ||
                 capability == NET_CAPABILITY_IA || capability == NET_CAPABILITY_IMS ||
-                capability == NET_CAPABILITY_RCS || capability == NET_CAPABILITY_XCAP ||
-                capability == NET_CAPABILITY_TRUSTED || capability == NET_CAPABILITY_NOT_VPN) {
+                capability == NET_CAPABILITY_RCS || capability == NET_CAPABILITY_XCAP) {
             assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
         } else {
             assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
