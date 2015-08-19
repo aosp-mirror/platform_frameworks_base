@@ -23,6 +23,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -292,6 +293,22 @@ public class TextureView extends View {
      */
     @Override
     public void buildLayer() {
+    }
+
+    @Override
+    public void setForeground(Drawable foreground) {
+        if (foreground != null) {
+            throw new UnsupportedOperationException(
+                    "TextureView doesn't support displaying a foreground drawable");
+        }
+    }
+
+    @Override
+    public void setBackgroundDrawable(Drawable background) {
+        if (background != null) {
+            throw new UnsupportedOperationException(
+                    "TextureView doesn't support displaying a background drawable");
+        }
     }
 
     /**
