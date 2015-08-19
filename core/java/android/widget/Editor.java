@@ -2643,6 +2643,8 @@ public class Editor {
         private SuggestionAdapter mSuggestionsAdapter;
         private final Comparator<SuggestionSpan> mSuggestionSpanComparator;
         private final HashMap<SuggestionSpan, Integer> mSpansLengths;
+        private final TextAppearanceSpan mHighlightSpan = new TextAppearanceSpan(
+                mTextView.getContext(), android.R.style.TextAppearance_SuggestionHighlight);
 
         private class CustomPopupWindow extends PopupWindow {
             public CustomPopupWindow(Context context, int defStyleAttr) {
@@ -2708,8 +2710,6 @@ public class Editor {
             SuggestionSpan suggestionSpan; // the SuggestionSpan that this TextView represents
             int suggestionIndex; // the index of this suggestion inside suggestionSpan
             SpannableStringBuilder text = new SpannableStringBuilder();
-            TextAppearanceSpan highlightSpan = new TextAppearanceSpan(mTextView.getContext(),
-                    android.R.style.TextAppearance_SuggestionHighlight);
         }
 
         private class SuggestionAdapter extends BaseAdapter {
@@ -2941,7 +2941,7 @@ public class Editor {
                     suggestionInfo.suggestionIndex = ADD_TO_DICTIONARY;
                     suggestionInfo.text.replace(0, suggestionInfo.text.length(), mTextView.
                             getContext().getString(com.android.internal.R.string.addToDictionary));
-                    suggestionInfo.text.setSpan(suggestionInfo.highlightSpan, 0, 0,
+                    suggestionInfo.text.setSpan(mHighlightSpan, 0, 0,
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                     mNumberOfSuggestions++;
@@ -2954,8 +2954,7 @@ public class Editor {
             suggestionInfo.suggestionIndex = DELETE_TEXT;
             suggestionInfo.text.replace(0, suggestionInfo.text.length(),
                     mTextView.getContext().getString(com.android.internal.R.string.deleteText));
-            suggestionInfo.text.setSpan(suggestionInfo.highlightSpan, 0, 0,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            suggestionInfo.text.setSpan(mHighlightSpan, 0, 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             mNumberOfSuggestions++;
 
             if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
@@ -2986,8 +2985,8 @@ public class Editor {
             suggestionInfo.suggestionEnd = suggestionInfo.suggestionStart
                     + suggestionInfo.text.length();
 
-            suggestionInfo.text.setSpan(suggestionInfo.highlightSpan, 0,
-                    suggestionInfo.text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            suggestionInfo.text.setSpan(mHighlightSpan, 0, suggestionInfo.text.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             // Add the text before and after the span.
             final String textAsString = text.toString();
