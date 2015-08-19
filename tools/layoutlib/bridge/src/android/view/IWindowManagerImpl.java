@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
+import android.view.AppTransitionAnimationSpec;
 
 import java.lang.Override;
 
@@ -237,6 +238,12 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void overridePendingAppTransitionInPlace(String packageName, int anim) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
+            IRemoteCallback callback, boolean scaleUp) {
         // TODO Auto-generated method stub
     }
 
