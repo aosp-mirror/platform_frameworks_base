@@ -512,8 +512,8 @@ public final class Call {
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
                         Objects.equals(mVideoState, d.mVideoState) &&
                         Objects.equals(mStatusHints, d.mStatusHints) &&
-                        Objects.equals(mExtras, d.mExtras) &&
-                        Objects.equals(mIntentExtras, d.mIntentExtras);
+                        areBundlesEqual(mExtras, d.mExtras) &&
+                        areBundlesEqual(mIntentExtras, d.mIntentExtras);
             }
             return false;
         }
@@ -1251,5 +1251,33 @@ public final class Call {
                 }
             });
         }
+    }
+
+    /**
+     * Determines if two bundles are equal.
+     *
+     * @param bundle The original bundle.
+     * @param newBundle The bundle to compare with.
+     * @retrun {@code true} if the bundles are equal, {@code false} otherwise.
+     */
+    private static boolean areBundlesEqual(Bundle bundle, Bundle newBundle) {
+        if (bundle == null || newBundle == null) {
+            return bundle == newBundle;
+        }
+
+        if (bundle.size() != newBundle.size()) {
+            return false;
+        }
+
+        for(String key : bundle.keySet()) {
+            if (key != null) {
+                final Object value = bundle.get(key);
+                final Object newValue = newBundle.get(key);
+                if (!Objects.equals(value, newValue)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
