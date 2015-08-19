@@ -698,6 +698,8 @@ public class ActivityInfo extends ComponentInfo
      */
     public int lockTaskLaunchMode;
 
+    public InitialLayout initialLayout;
+
     public ActivityInfo() {
     }
 
@@ -763,9 +765,14 @@ public class ActivityInfo extends ComponentInfo
         }
         pw.println(prefix + "resizeable=" + resizeable + " lockTaskLaunchMode="
                 + lockTaskLaunchModeToString(lockTaskLaunchMode));
+        if (initialLayout != null) {
+            pw.println(prefix + "initialLayout=" + initialLayout.width + "|"
+                    + initialLayout.widthFraction + ", " + initialLayout.height + "|"
+                    + initialLayout.heightFraction + ", " + initialLayout.gravity);
+        }
         super.dumpBack(pw, prefix);
     }
-    
+
     public String toString() {
         return "ActivityInfo{"
             + Integer.toHexString(System.identityHashCode(this))
@@ -793,6 +800,16 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(maxRecents);
         dest.writeInt(resizeable ? 1 : 0);
         dest.writeInt(lockTaskLaunchMode);
+        if (initialLayout != null) {
+            dest.writeInt(1);
+            dest.writeInt(initialLayout.width);
+            dest.writeFloat(initialLayout.widthFraction);
+            dest.writeInt(initialLayout.height);
+            dest.writeFloat(initialLayout.heightFraction);
+            dest.writeInt(initialLayout.gravity);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -822,5 +839,33 @@ public class ActivityInfo extends ComponentInfo
         maxRecents = source.readInt();
         resizeable = (source.readInt() == 1);
         lockTaskLaunchMode = source.readInt();
+        if (source.readInt() == 1) {
+            initialLayout = new InitialLayout(source);
+        }
+    }
+
+    public static final class InitialLayout {
+        public InitialLayout(int width, float widthFraction, int height, float heightFraction,
+                int gravity) {
+            this.width = width;
+            this.widthFraction = widthFraction;
+            this.height = height;
+            this.heightFraction = heightFraction;
+            this.gravity = gravity;
+        }
+
+        InitialLayout(Parcel source) {
+            width = source.readInt();
+            widthFraction = source.readFloat();
+            height = source.readInt();
+            heightFraction = source.readFloat();
+            gravity = source.readInt();
+        }
+
+        public final int width;
+        public final float widthFraction;
+        public final int height;
+        public final float heightFraction;
+        public final int gravity;
     }
 }

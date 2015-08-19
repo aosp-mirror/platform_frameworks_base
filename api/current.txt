@@ -8881,6 +8881,7 @@ package android.content.pm {
     field public int configChanges;
     field public int documentLaunchMode;
     field public int flags;
+    field public android.content.pm.ActivityInfo.InitialLayout initialLayout;
     field public int launchMode;
     field public int maxRecents;
     field public java.lang.String parentActivityName;
@@ -8892,6 +8893,15 @@ package android.content.pm {
     field public java.lang.String taskAffinity;
     field public int theme;
     field public int uiOptions;
+  }
+
+  public static final class ActivityInfo.InitialLayout {
+    ctor public ActivityInfo.InitialLayout(int, float, int, float, int);
+    field public final int gravity;
+    field public final int height;
+    field public final float heightFraction;
+    field public final int width;
+    field public final float widthFraction;
   }
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
