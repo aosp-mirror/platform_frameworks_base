@@ -40,7 +40,7 @@ public:
                 Tolerance near 255: draw on any colors even remotely similar to the op-color
      */
     static AvoidXfermode* Create(SkColor opColor, U8CPU tolerance, Mode mode) {
-        return SkNEW_ARGS(AvoidXfermode, (opColor, tolerance, mode));
+        return new AvoidXfermode(opColor, tolerance, mode);
     }
 
     // overrides from SkXfermode
