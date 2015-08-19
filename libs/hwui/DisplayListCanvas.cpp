@@ -168,11 +168,6 @@ void DisplayListCanvas::setMatrix(const SkMatrix& matrix) {
     mState.setMatrix(matrix);
 }
 
-void DisplayListCanvas::setLocalMatrix(const SkMatrix& matrix) {
-    addStateOp(new (alloc()) SetLocalMatrixOp(matrix));
-    mState.setMatrix(matrix);
-}
-
 void DisplayListCanvas::concat(const SkMatrix& matrix) {
     addStateOp(new (alloc()) ConcatMatrixOp(matrix));
     mState.concatMatrix(matrix);

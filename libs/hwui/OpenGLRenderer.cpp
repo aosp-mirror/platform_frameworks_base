@@ -1151,7 +1151,7 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
 }
 
 void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore) {
-    setMatrix(state.mMatrix);
+    setGlobalMatrix(state.mMatrix);
     writableSnapshot()->alpha = state.mAlpha;
     writableSnapshot()->roundRectClipState = state.mRoundRectClipState;
     writableSnapshot()->projectionPathMask = state.mProjectionPathMask;
@@ -2098,8 +2098,9 @@ void OpenGLRenderer::skew(float sx, float sy) {
     mState.skew(sx, sy);
 }
 
-void OpenGLRenderer::setMatrix(const Matrix4& matrix) {
-    mState.setMatrix(matrix);
+void OpenGLRenderer::setLocalMatrix(const Matrix4& matrix) {
+    mState.setMatrix(mBaseTransform);
+    mState.concatMatrix(matrix);
 }
 
 void OpenGLRenderer::setLocalMatrix(const SkMatrix& matrix) {

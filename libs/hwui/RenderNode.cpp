@@ -719,7 +719,7 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
     // Apply the base transform of the parent of the 3d children. This isolates
     // 3d children of the current chunk from transformations made in previous chunks.
     int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
-    renderer.setMatrix(initialTransform);
+    renderer.setGlobalMatrix(initialTransform);
 
     /**
      * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters

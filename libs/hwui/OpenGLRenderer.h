@@ -367,8 +367,10 @@ public:
     void restore();
     void restoreToCount(int saveCount);
 
-    void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
-    void setMatrix(const SkMatrix& matrix) { mState.setMatrix(matrix); }
+    void setGlobalMatrix(const Matrix4& matrix) {
+        mState.setMatrix(matrix);
+    }
+    void setLocalMatrix(const Matrix4& matrix);
     void setLocalMatrix(const SkMatrix& matrix);
     void concatMatrix(const SkMatrix& matrix) { mState.concatMatrix(matrix); }
 

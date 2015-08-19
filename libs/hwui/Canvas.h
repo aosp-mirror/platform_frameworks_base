@@ -85,10 +85,6 @@ public:
     virtual void getMatrix(SkMatrix* outMatrix) const = 0;
     virtual void setMatrix(const SkMatrix& matrix) = 0;
 
-    /// Like setMatrix(), but to be translated into local / view-relative coordinates
-    /// rather than executed in global / device coordinates at rendering time.
-    virtual void setLocalMatrix(const SkMatrix& matrix) = 0;
-
     virtual void concat(const SkMatrix& matrix) = 0;
     virtual void rotate(float degrees) = 0;
     virtual void scale(float sx, float sy) = 0;
