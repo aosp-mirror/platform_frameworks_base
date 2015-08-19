@@ -247,7 +247,9 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matri
         const SkPaint* paint) {
     if (matrix.isIdentity()) {
         drawBitmap(&bitmap, paint);
-    } else if (!(matrix.getType() & ~(SkMatrix::kScale_Mask | SkMatrix::kTranslate_Mask))) {
+    } else if (!(matrix.getType() & ~(SkMatrix::kScale_Mask | SkMatrix::kTranslate_Mask))
+            && MathUtils::isPositive(matrix.getScaleX())
+            && MathUtils::isPositive(matrix.getScaleY())) {
         // SkMatrix::isScaleTranslate() not available in L
         SkRect src;
         SkRect dst;
