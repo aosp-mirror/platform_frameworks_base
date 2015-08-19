@@ -104,13 +104,11 @@ public class DozeScrimController {
      * Aborts pulsing immediately.
      */
     public void abortPulsing() {
-        mHandler.removeCallbacks(mPulseIn);
-        abortAnimations();
+        cancelPulsing();
         if (mDozing) {
             mScrimController.setDozeBehindAlpha(1f);
             mScrimController.setDozeInFrontAlpha(1f);
         }
-        mPulseCallback = null;
     }
 
     public void onScreenTurnedOn() {
