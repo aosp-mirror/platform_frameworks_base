@@ -9663,12 +9663,14 @@ package android.content.res {
     method public int diff(android.content.res.Configuration);
     method public boolean equals(android.content.res.Configuration);
     method public int getLayoutDirection();
+    method public android.util.LocaleList getLocales();
     method public boolean isLayoutSizeAtLeast(int);
     method public boolean isScreenRound();
     method public static boolean needNewResources(int, int);
     method public void readFromParcel(android.os.Parcel);
     method public void setLayoutDirection(java.util.Locale);
     method public void setLocale(java.util.Locale);
+    method public void setLocales(android.util.LocaleList);
     method public void setTo(android.content.res.Configuration);
     method public void setToDefaults();
     method public int updateFrom(android.content.res.Configuration);
@@ -9742,7 +9744,7 @@ package android.content.res {
     field public int hardKeyboardHidden;
     field public int keyboard;
     field public int keyboardHidden;
-    field public java.util.Locale locale;
+    field public deprecated java.util.Locale locale;
     field public int mcc;
     field public int mnc;
     field public int navigation;
@@ -34200,11 +34202,15 @@ package android.util {
 
   public final class LocaleList {
     ctor public LocaleList();
+    ctor public LocaleList(java.util.Locale);
     ctor public LocaleList(java.util.Locale[]);
+    method public static android.util.LocaleList forLanguageTags(java.lang.String);
     method public java.util.Locale get(int);
+    method public static android.util.LocaleList getEmptyLocaleList();
     method public java.util.Locale getPrimary();
     method public boolean isEmpty();
     method public int size();
+    method public java.lang.String toLanguageTags();
   }
 
   public final class Log {
