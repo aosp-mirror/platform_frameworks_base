@@ -132,7 +132,7 @@ public class UnlockMethodCache {
         }
 
         @Override
-        public void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) {
+        public void onFingerprintAuthenticated(int userId) {
             if (!mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed()) {
                 return;
             }

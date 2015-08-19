@@ -44,12 +44,15 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         HeadsUpManager.OnHeadsUpChangedListener {
     public static final long ANIMATION_DURATION = 220;
+    public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR
+            = new PathInterpolator(0f, 0, 0.7f, 1f);
 
     private static final float SCRIM_BEHIND_ALPHA = 0.62f;
     private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
     private static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
     private static final int TAG_KEY_ANIM = R.id.scrim;
+    private static final int TAG_KEY_ANIM_TARGET = R.id.scrim_target;
     private static final int TAG_HUN_START_ALPHA = R.id.hun_scrim_alpha_start;
     private static final int TAG_HUN_END_ALPHA = R.id.hun_scrim_alpha_end;
 
@@ -71,9 +74,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private long mDurationOverride = -1;
     private long mAnimationDelay;
     private Runnable mOnAnimationFinished;
-    private boolean mAnimationStarted;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
-    private final Interpolator mKeyguardFadeOutInterpolator = new PathInterpolator(0f, 0, 0.7f, 1f);
     private BackDropView mBackDropView;
     private boolean mScrimSrcEnabled;
     private boolean mDozing;
@@ -145,7 +146,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void abortKeyguardFadingOut() {
         if (mAnimateKeyguardFadingOut) {
-            endAnimateKeyguardFadingOut();
+            endAnimateKeyguardFadingOut(true /* force */);
         }
     }
 
@@ -198,8 +199,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
             // During wake and unlock, we first hide everything behind a black scrim, which then
             // gets faded out from animateKeyguardFadingOut.
-            setScrimInFrontColor(1f);
-            setScrimBehindColor(0f);
+            if (mDozing) {
+                setScrimInFrontColor(0f);
+                setScrimBehindColor(1f);
+            } else {
+                setScrimInFrontColor(1f);
+                setScrimBehindColor(0f);
+            }
         } else if (!mKeyguardShowing && !mBouncerShowing) {
             updateScrimNormal();
             setScrimInFrontColor(0);
@@ -258,10 +264,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void setScrimColor(View scrim, float alpha) {
-        Object runningAnim = scrim.getTag(TAG_KEY_ANIM);
-        if (runningAnim instanceof ValueAnimator) {
-            ((ValueAnimator) runningAnim).cancel();
-            scrim.setTag(TAG_KEY_ANIM, null);
+        ValueAnimator runningAnim = (ValueAnimator) scrim.getTag(TAG_KEY_ANIM);
+        Float target = (Float) scrim.getTag(TAG_KEY_ANIM_TARGET);
+        if (runningAnim != null && target != null) {
+            if (alpha != target) {
+                runningAnim.cancel();
+            } else {
+                return;
+            }
         }
         if (mAnimateChange) {
             startScrimAnimation(scrim, alpha);
@@ -325,15 +335,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                     mOnAnimationFinished = null;
                 }
                 scrim.setTag(TAG_KEY_ANIM, null);
+                scrim.setTag(TAG_KEY_ANIM_TARGET, null);
             }
         });
         anim.start();
         scrim.setTag(TAG_KEY_ANIM, anim);
-        mAnimationStarted = true;
+        scrim.setTag(TAG_KEY_ANIM_TARGET, target);
     }
 
     private Interpolator getInterpolator() {
-        return mAnimateKeyguardFadingOut ? mKeyguardFadeOutInterpolator : mInterpolator;
+        return mAnimateKeyguardFadingOut ? KEYGUARD_FADE_OUT_INTERPOLATOR : mInterpolator;
     }
 
     @Override
@@ -345,17 +356,21 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mAnimationDelay = 0;
 
         // Make sure that we always call the listener even if we didn't start an animation.
-        endAnimateKeyguardFadingOut();
-        mAnimationStarted = false;
+        endAnimateKeyguardFadingOut(false /* force */);
         return true;
     }
 
-    private void endAnimateKeyguardFadingOut() {
+    private void endAnimateKeyguardFadingOut(boolean force) {
         mAnimateKeyguardFadingOut = false;
-        if (!mAnimationStarted && mOnAnimationFinished != null) {
+        if ((force || (!isAnimating(mScrimInFront) && !isAnimating(mScrimBehind)))
+                && mOnAnimationFinished != null) {
             mOnAnimationFinished.run();
             mOnAnimationFinished = null;
         }
+    }
+
+    private boolean isAnimating(View scrim) {
+        return scrim.getTag(TAG_KEY_ANIM) != null;
     }
 
     public void setBackDropView(BackDropView backDropView) {
