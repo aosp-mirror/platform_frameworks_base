@@ -142,7 +142,7 @@ void SkiaCanvasProxy::onDrawSprite(const SkBitmap& bitmap, int left, int top,
         const SkPaint* paint) {
     // TODO: if bitmap is a subset, do we need to add pixelRefOrigin to src?
     mCanvas->save(SkCanvas::kMatrixClip_SaveFlag);
-    mCanvas->setLocalMatrix(SkMatrix::I());
+    mCanvas->setMatrix(SkMatrix::I());
     mCanvas->drawBitmap(bitmap, left, top, paint);
     mCanvas->restore();
 }
@@ -192,9 +192,7 @@ void SkiaCanvasProxy::didConcat(const SkMatrix& matrix) {
 }
 
 void SkiaCanvasProxy::didSetMatrix(const SkMatrix& matrix) {
-    // SkCanvas setMatrix() is relative to the Canvas origin, but OpenGLRenderer's
-    // setMatrix() is relative to device origin; call setLocalMatrix() instead.
-    mCanvas->setLocalMatrix(matrix);
+    mCanvas->setMatrix(matrix);
 }
 
 void SkiaCanvasProxy::onDrawDRRect(const SkRRect& outer, const SkRRect& inner,

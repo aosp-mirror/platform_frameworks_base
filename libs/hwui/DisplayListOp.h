@@ -472,7 +472,9 @@ public:
             : mMatrix(matrix) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const override {
-        renderer.setMatrix(mMatrix);
+        // Setting a matrix on a Canvas isn't equivalent to setting a total matrix on the scene.
+        // Set a canvas-relative matrix on the renderer instead.
+        renderer.setLocalMatrix(mMatrix);
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
@@ -484,25 +486,6 @@ public:
     }
 
     virtual const char* name() override { return "SetMatrix"; }
-
-private:
-    const SkMatrix mMatrix;
-};
-
-class SetLocalMatrixOp : public StateOp {
-public:
-    SetLocalMatrixOp(const SkMatrix& matrix)
-            : mMatrix(matrix) {}
-
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const override {
-        renderer.setLocalMatrix(mMatrix);
-    }
-
-    virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("SetLocalMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(&mMatrix));
-    }
-
-    virtual const char* name() override { return "SetLocalMatrix"; }
 
 private:
     const SkMatrix mMatrix;
