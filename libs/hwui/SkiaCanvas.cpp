@@ -321,7 +321,7 @@ void SkiaCanvas::recordPartialSave(SkCanvas::SaveFlags flags) {
     }
 
     if (NULL == mSaveStack.get()) {
-        mSaveStack.reset(SkNEW_ARGS(SkDeque, (sizeof(struct SaveRec), 8)));
+        mSaveStack.reset(new SkDeque(sizeof(struct SaveRec), 8));
     }
 
     SaveRec* rec = static_cast<SaveRec*>(mSaveStack->push_back());
