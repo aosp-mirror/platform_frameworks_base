@@ -131,6 +131,13 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Return the pointer to the native object.
+     */
+    long getNativeInstance() {
+        return mNativePtr;
+    }
+
+    /**
      * Native bitmap has been reconfigured, so set premult and cached
      * width/height values
      */

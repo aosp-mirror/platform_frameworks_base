@@ -15,11 +15,7 @@
 ** limitations under the License.
 */
 
-#define LOG_TAG "NinePatch"
-#define LOG_NDEBUG 1
-
-#include <androidfw/ResourceTypes.h>
-#include <utils/Log.h>
+#include "utils/NinePatch.h"
 
 #include "SkBitmap.h"
 #include "SkCanvas.h"
@@ -29,6 +25,8 @@
 #include "SkUnPreMultiply.h"
 
 #include <utils/Log.h>
+
+namespace android {
 
 static const bool kUseTrace = true;
 static bool gTrace = false;
@@ -97,9 +95,9 @@ SkScalar calculateStretch(SkScalar boundsLimit, SkScalar startingPoint,
     return srcSpace * stretchySpaceRemaining / numStrechyPixelsRemaining;
 }
 
-void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
-                       const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
-                       const SkPaint* paint, SkRegion** outRegion) {
+void NinePatch::Draw(SkCanvas* canvas, const SkRect& bounds,
+                     const SkBitmap& bitmap, const Res_png_9patch& chunk,
+                     const SkPaint* paint, SkRegion** outRegion) {
     if (canvas && canvas->quickReject(bounds)) {
         return;
     }
@@ -324,3 +322,5 @@ nextDiv:
         dstRightsHaveBeenCached = true;
     }
 }
+
+} // namespace android
