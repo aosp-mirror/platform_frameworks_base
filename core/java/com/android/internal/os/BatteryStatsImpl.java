@@ -25,7 +25,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiManager;
-import android.os.BadParcelableException;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
