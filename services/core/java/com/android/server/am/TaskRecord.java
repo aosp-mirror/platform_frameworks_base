@@ -1103,7 +1103,7 @@ final class TaskRecord {
 
         int event;
         while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
-                (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
+                (event != XmlPullParser.END_TAG || in.getDepth() >= outerDepth)) {
             if (event == XmlPullParser.START_TAG) {
                 final String name = in.getName();
                 if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: START_TAG name=" +
