@@ -39,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
+import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
 
 /**
@@ -127,6 +128,16 @@ interface IWindowManager
     void overridePendingAppTransitionAspectScaledThumb(in Bitmap srcThumb, int startX,
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp);
+    /**
+     * Overrides animation for app transition that exits from an application to a multi-window
+     * environment and allows specifying transition animation parameters for each window.
+     *
+     * @param specs Array of transition animation descriptions for entering windows.
+     *
+     * @hide
+     */
+    void overridePendingAppTransitionMultiThumb(in AppTransitionAnimationSpec[] specs,
+            IRemoteCallback startedCallback, boolean scaleUp);
     void overridePendingAppTransitionInPlace(String packageName, int anim);
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,

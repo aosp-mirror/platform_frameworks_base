@@ -78,6 +78,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
+import android.view.AppTransitionAnimationSpec;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -443,6 +444,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final float[] mTmpFloats = new float[9];
     final Rect mTmpContentRect = new Rect();
+    private final Rect mTmpStartRect = new Rect();
 
     boolean mDisplayReady;
     boolean mSafeMode;
@@ -3495,7 +3497,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean resizedWindow = !fullscreen && !dialogWindow;
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, containingWidth,
                     containingHeight, mCurConfiguration.orientation, containingFrame, contentInsets,
-                    surfaceInsets, appFrame, isVoiceInteraction, resizedWindow);
+                    surfaceInsets, appFrame, isVoiceInteraction, resizedWindow,
+                    atoken.mTask.mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
@@ -4215,6 +4218,14 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             mAppTransition.overridePendingAppTransitionAspectScaledThumb(srcThumb, startX,
                     startY, targetWidth, targetHeight, startedCallback, scaleUp);
+        }
+    }
+
+    @Override
+    public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
+            IRemoteCallback callback, boolean scaleUp) {
+        synchronized (mWindowMap) {
+            mAppTransition.overridePendingAppTransitionMultiThumb(specs, callback, scaleUp);
         }
     }
 
@@ -9402,11 +9413,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 animLp = null;
             }
 
-            AppWindowToken topOpeningApp = null;
-            AppWindowToken topClosingApp = null;
-            int topOpeningLayer = 0;
-            int topClosingLayer = 0;
-
             // Process all applications animating in place
             if (transit == AppTransition.TRANSIT_TASK_IN_PLACE) {
                 // Find the focused window
@@ -9431,49 +9437,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            appsCount = mOpeningApps.size();
-            for (i = 0; i < appsCount; i++) {
-                AppWindowToken wtoken = mOpeningApps.valueAt(i);
-                final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
-
-                if (!appAnimator.usingTransferredAnimation) {
-                    appAnimator.clearThumbnail();
-                    appAnimator.animation = null;
-                }
-                wtoken.inPendingTransaction = false;
-                if (!setTokenVisibilityLocked(
-                        wtoken, animLp, true, transit, false, voiceInteraction)){
-                    // This token isn't going to be animating. Add it to the list of tokens to
-                    // be notified of app transition complete since the notification will not be
-                    // sent be the app window animator.
-                    mNoAnimationNotifyOnTransitionFinished.add(wtoken.token);
-                }
-                wtoken.updateReportedVisibilityLocked();
-                wtoken.waitingToShow = false;
-
-                appAnimator.mAllAppWinAnimators.clear();
-                final int windowsCount = wtoken.allAppWindows.size();
-                for (int j = 0; j < windowsCount; j++) {
-                    appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
-                }
-                mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
-                mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
-
-                if (animLp != null) {
-                    int layer = -1;
-                    for (int j = 0; j < wtoken.windows.size(); j++) {
-                        WindowState win = wtoken.windows.get(j);
-                        if (win.mWinAnimator.mAnimLayer > layer) {
-                            layer = win.mWinAnimator.mAnimLayer;
-                        }
-                    }
-                    if (topOpeningApp == null || layer > topOpeningLayer) {
-                        topOpeningApp = wtoken;
-                        topOpeningLayer = layer;
-                    }
-                }
-            }
+            AppWindowToken topClosingApp = null;
+            int topClosingLayer = 0;
             appsCount = mClosingApps.size();
             for (i = 0; i < appsCount; i++) {
                 AppWindowToken wtoken = mClosingApps.valueAt(i);
@@ -9511,77 +9476,57 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ? null :
+            AppWindowToken topOpeningApp = null;
+            appsCount = mOpeningApps.size();
+            for (i = 0; i < appsCount; i++) {
+                AppWindowToken wtoken = mOpeningApps.valueAt(i);
+                final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
+
+                if (!appAnimator.usingTransferredAnimation) {
+                    appAnimator.clearThumbnail();
+                    appAnimator.animation = null;
+                }
+                wtoken.inPendingTransaction = false;
+                if (!setTokenVisibilityLocked(
+                        wtoken, animLp, true, transit, false, voiceInteraction)){
+                    // This token isn't going to be animating. Add it to the list of tokens to
+                    // be notified of app transition complete since the notification will not be
+                    // sent be the app window animator.
+                    mNoAnimationNotifyOnTransitionFinished.add(wtoken.token);
+                }
+                wtoken.updateReportedVisibilityLocked();
+                wtoken.waitingToShow = false;
+
+                appAnimator.mAllAppWinAnimators.clear();
+                final int windowsCount = wtoken.allAppWindows.size();
+                for (int j = 0; j < windowsCount; j++) {
+                    appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
+                }
+                mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+                mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
+
+                int topOpeningLayer = 0;
+                if (animLp != null) {
+                    int layer = -1;
+                    for (int j = 0; j < wtoken.windows.size(); j++) {
+                        WindowState win = wtoken.windows.get(j);
+                        if (win.mWinAnimator.mAnimLayer > layer) {
+                            layer = win.mWinAnimator.mAnimLayer;
+                        }
+                    }
+                    if (topOpeningApp == null || layer > topOpeningLayer) {
+                        topOpeningApp = wtoken;
+                        topOpeningLayer = layer;
+                    }
+                }
+                createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
+            }
+
+            AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
                     topOpeningApp.mAppAnimator;
             AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
                     topClosingApp.mAppAnimator;
-            Bitmap nextAppTransitionThumbnail = mAppTransition.getNextAppTransitionThumbnail();
-            if (nextAppTransitionThumbnail != null
-                    && openingAppAnimator != null && openingAppAnimator.animation != null &&
-                    nextAppTransitionThumbnail.getConfig() != Config.ALPHA_8) {
-                // This thumbnail animation is very special, we need to have
-                // an extra surface with the thumbnail included with the animation.
-                Rect dirty = new Rect(0, 0, nextAppTransitionThumbnail.getWidth(),
-                        nextAppTransitionThumbnail.getHeight());
-                try {
-                    // TODO(multi-display): support other displays
-                    final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                    final Display display = displayContent.getDisplay();
-                    final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-
-                    // Create a new surface for the thumbnail
-                    SurfaceControl surfaceControl = new SurfaceControl(mFxSession,
-                            "thumbnail anim", dirty.width(), dirty.height(),
-                            PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
-                    surfaceControl.setLayerStack(display.getLayerStack());
-                    if (SHOW_TRANSACTIONS) {
-                        Slog.i(TAG, "  THUMBNAIL " + surfaceControl + ": CREATE");
-                    }
-
-                    // Draw the thumbnail onto the surface
-                    Surface drawSurface = new Surface();
-                    drawSurface.copyFrom(surfaceControl);
-                    Canvas c = drawSurface.lockCanvas(dirty);
-                    c.drawBitmap(nextAppTransitionThumbnail, 0, 0, null);
-                    drawSurface.unlockCanvasAndPost(c);
-                    drawSurface.release();
-
-                    // Get the thumbnail animation
-                    Animation anim;
-                    if (mAppTransition.isNextThumbnailTransitionAspectScaled()) {
-                        // If this is a multi-window scenario, we use the windows frame as
-                        // destination of the thumbnail header animation. If this is a full screen
-                        // window scenario, we use the whole display as the target.
-                        WindowState win = topOpeningApp.findMainWindow();
-                        Rect appRect = win != null ? win.getContentFrameLw() :
-                                new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
-                        // For the new aspect-scaled transition, we want it to always show
-                        // above the animating opening/closing window, and we want to
-                        // synchronize its thumbnail surface with the surface for the
-                        // open/close animation (only on the way down)
-                        anim = mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect);
-                        openingAppAnimator.thumbnailForceAboveLayer = Math.max(topOpeningLayer,
-                                topClosingLayer);
-                        openingAppAnimator.deferThumbnailDestruction =
-                                !mAppTransition.isNextThumbnailTransitionScaleUp();
-                    } else {
-                        anim = mAppTransition.createThumbnailScaleAnimationLocked(
-                                displayInfo.appWidth, displayInfo.appHeight, transit);
-                    }
-                    anim.restrictDuration(MAX_ANIMATION_DURATION);
-                    anim.scaleCurrentDuration(getTransitionAnimationScaleLocked());
-
-                    openingAppAnimator.thumbnail = surfaceControl;
-                    openingAppAnimator.thumbnailLayer = topOpeningLayer;
-                    openingAppAnimator.thumbnailAnimation = anim;
-                    openingAppAnimator.thumbnailX = mAppTransition.getStartingX();
-                    openingAppAnimator.thumbnailY = mAppTransition.getStartingY();
-                } catch (OutOfResourcesException e) {
-                    Slog.e(TAG, "Can't allocate thumbnail/Canvas surface w=" + dirty.width()
-                            + " h=" + dirty.height(), e);
-                    openingAppAnimator.clearThumbnail();
-                }
-            }
 
             mAppTransition.goodToGo(openingAppAnimator, closingAppAnimator);
             mAppTransition.postAnimationCallback();
@@ -9607,6 +9552,83 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         return changes;
+    }
+
+    private void createThumbnailAppAnimator(int transit, AppWindowToken appToken,
+            int openingLayer, int closingLayer) {
+        AppWindowAnimator openingAppAnimator = (appToken == null) ? null : appToken.mAppAnimator;
+        if (openingAppAnimator == null || openingAppAnimator.animation == null) {
+            return;
+        }
+        final int taskId = appToken.mTask.mTaskId;
+        Bitmap thumbnailHeader = mAppTransition.getAppTransitionThumbnailHeader(taskId);
+        if (thumbnailHeader == null || thumbnailHeader.getConfig() == Config.ALPHA_8) {
+            return;
+        }
+        // This thumbnail animation is very special, we need to have
+        // an extra surface with the thumbnail included with the animation.
+        Rect dirty = new Rect(0, 0, thumbnailHeader.getWidth(), thumbnailHeader.getHeight());
+        try {
+            // TODO(multi-display): support other displays
+            final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            final Display display = displayContent.getDisplay();
+            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+
+            // Create a new surface for the thumbnail
+            SurfaceControl surfaceControl = new SurfaceControl(mFxSession,
+                    "thumbnail anim", dirty.width(), dirty.height(),
+                    PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            surfaceControl.setLayerStack(display.getLayerStack());
+            if (SHOW_TRANSACTIONS) {
+                Slog.i(TAG, "  THUMBNAIL " + surfaceControl + ": CREATE");
+            }
+
+            // Draw the thumbnail onto the surface
+            Surface drawSurface = new Surface();
+            drawSurface.copyFrom(surfaceControl);
+            Canvas c = drawSurface.lockCanvas(dirty);
+            c.drawBitmap(thumbnailHeader, 0, 0, null);
+            drawSurface.unlockCanvasAndPost(c);
+            drawSurface.release();
+
+            // Get the thumbnail animation
+            Animation anim;
+            if (mAppTransition.isNextThumbnailTransitionAspectScaled()) {
+                // If this is a multi-window scenario, we use the windows frame as
+                // destination of the thumbnail header animation. If this is a full screen
+                // window scenario, we use the whole display as the target.
+                WindowState win = appToken.findMainWindow();
+                Rect appRect = win != null ? win.getContentFrameLw() :
+                        new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
+                // For the new aspect-scaled transition, we want it to always show
+                // above the animating opening/closing window, and we want to
+                // synchronize its thumbnail surface with the surface for the
+                // open/close animation (only on the way down)
+                anim = mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect,
+                        thumbnailHeader, taskId);
+                Log.d(TAG, "assigning thumbnail force above layer: " + openingLayer + " " +
+                        closingLayer);
+                openingAppAnimator.thumbnailForceAboveLayer = Math.max(openingLayer, closingLayer);
+                openingAppAnimator.deferThumbnailDestruction =
+                        !mAppTransition.isNextThumbnailTransitionScaleUp();
+            } else {
+                anim = mAppTransition.createThumbnailScaleAnimationLocked(
+                        displayInfo.appWidth, displayInfo.appHeight, transit, thumbnailHeader);
+            }
+            anim.restrictDuration(MAX_ANIMATION_DURATION);
+            anim.scaleCurrentDuration(getTransitionAnimationScaleLocked());
+
+            openingAppAnimator.thumbnail = surfaceControl;
+            openingAppAnimator.thumbnailLayer = openingLayer;
+            openingAppAnimator.thumbnailAnimation = anim;
+            mAppTransition.getNextAppTransitionStartRect(taskId, mTmpStartRect);
+            openingAppAnimator.thumbnailX = mTmpStartRect.left;
+            openingAppAnimator.thumbnailY = mTmpStartRect.top;
+        } catch (OutOfResourcesException e) {
+            Slog.e(TAG, "Can't allocate thumbnail/Canvas surface w=" + dirty.width()
+                    + " h=" + dirty.height(), e);
+            openingAppAnimator.clearThumbnail();
+        }
     }
 
     /**
