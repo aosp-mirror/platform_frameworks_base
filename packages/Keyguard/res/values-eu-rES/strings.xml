@@ -113,9 +113,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Gailua berrabiarazi duzunez, eredua marraztu behar duzu."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Gailua berrabiarazi duzunez, PIN kodea idatzi behar duzu."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Gailua berrabiarazi duzunez, pasahitza idatzi behar duzu."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Segurtasun gehiago izateko, eredua behar da."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Segurtasun gehiago izateko, PIN kodea behar da."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Segurtasun gehiago izateko, pasahitza behar da."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Segurtasun handiagoa izateko, eredua behar da."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Segurtasun handiagoa izateko, PIN kodea behar da."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Segurtasun handiagoa izateko, pasahitza behar da."</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Profilez aldatu duzunez, eredua marraztu behar duzu."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Profilez aldatu duzunez, PIN kodea idatzi behar duzu."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Profilez aldatu duzunez, pasahitza idatzi behar duzu."</string>
