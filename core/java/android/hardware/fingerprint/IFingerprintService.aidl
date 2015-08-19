@@ -68,4 +68,7 @@ interface IFingerprintService {
 
     // Gets the authenticator ID for fingerprint
     long getAuthenticatorId(String opPackageName);
+
+    // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
+    void resetTimeout(in byte [] cryptoToken);
 }
