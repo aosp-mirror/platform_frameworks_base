@@ -22,7 +22,7 @@
 #include <string>
 #include <sys/stat.h>
 
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
 // Windows includes.
 #include <direct.h>
 #endif
@@ -83,7 +83,7 @@ std::vector<std::string> listFiles(const StringPiece& root) {
 }
 
 inline static int mkdirImpl(const StringPiece& path) {
-#ifdef HAVE_MS_C_RUNTIME
+#ifdef _WIN32
     return _mkdir(path.toString().c_str());
 #else
     return mkdir(path.toString().c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
