@@ -186,23 +186,23 @@ public class KeyguardUpdateMonitorCallback {
     public void onTrustGrantedWithFlags(int flags, int userId) { }
 
     /**
+     * Called when a finger has been acquired.
+     * <p>
+     * It is guaranteed that either {@link #onFingerprintAuthenticated} or
+     * {@link #onFingerprintAuthFailed()} is called after this method eventually.
+     */
+    public void onFingerprintAcquired() { }
+
+    /**
+     * Called when a fingerprint couldn't be authenticated.
+     */
+    public void onFingerprintAuthFailed() { }
+
+    /**
      * Called when a fingerprint is recognized.
      * @param userId the user id for which the fingerprint was authenticated
-     * @param wakeAndUnlocking whether the authentication woke the device up and thus we'd like to
-     *                         dismiss the lockscreen before turning on the screen
      */
-    public void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) { }
-
-    /**
-     * Called when we might be starting a wake-and-unlock sequence.
-     */
-    public void onFingerprintWakeAndUnlockingStarted() { }
-
-    /**
-     * Called when we're done with the wake-and-unlock sequence. This can either happen when we
-     * figure out that the fingerprint didn't match, or when the phone is fully unlocked.
-     */
-    public void onFingerprintWakeAndUnlockingFinished() { }
+    public void onFingerprintAuthenticated(int userId) { }
 
     /**
      * Called when fingerprint provides help string (e.g. "Try again")
