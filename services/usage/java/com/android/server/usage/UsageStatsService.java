@@ -848,6 +848,9 @@ public class UsageStatsService extends SystemService implements
         try {
             ParceledListSlice<ApplicationInfo> slice
                     = AppGlobals.getPackageManager().getInstalledApplications(0, userId);
+            if (slice == null) {
+                return new int[0];
+            }
             apps = slice.getList();
         } catch (RemoteException e) {
             return new int[0];
