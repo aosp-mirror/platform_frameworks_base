@@ -13,6 +13,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.net \
     easymocklib \
     guava \
+    android-support-test \
     mockito-target
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
