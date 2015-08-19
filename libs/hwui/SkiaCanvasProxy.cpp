@@ -24,6 +24,8 @@
 #include <SkRect.h>
 #include <SkRRect.h>
 
+#include <memory>
+
 namespace android {
 namespace uirenderer {
 
@@ -216,7 +218,8 @@ public:
             glyphIDs = (uint16_t*)text;
             count = byteLength >> 1;
         } else {
-            storage.reset(byteLength); // ensures space for one glyph per ID given UTF8 encoding.
+             // ensure space for one glyph per ID given UTF8 encoding.
+            storage.reset(new uint16_t[byteLength]);
             glyphIDs = storage.get();
             count = paint.textToGlyphs(text, byteLength, storage.get());
             paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
@@ -227,7 +230,7 @@ public:
     uint16_t* glyphIDs;
     int count;
 private:
-    SkAutoSTMalloc<32, uint16_t> storage;
+    std::unique_ptr<uint16_t[]> storage;
 };
 
 void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x, SkScalar y,
@@ -236,8 +239,8 @@ void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x
     GlyphIDConverter glyphs(text, byteLength, origPaint);
 
     // compute the glyph positions
-    SkAutoSTMalloc<32, SkPoint> pointStorage(glyphs.count);
-    SkAutoSTMalloc<32, SkScalar> glyphWidths(glyphs.count);
+    std::unique_ptr<SkPoint[]> pointStorage(new SkPoint[glyphs.count]);
+    std::unique_ptr<SkScalar[]> glyphWidths(new SkScalar[glyphs.count]);
     glyphs.paint.getTextWidths(glyphs.glyphIDs, glyphs.count << 1, glyphWidths.get());
 
     // compute conservative bounds
@@ -296,7 +299,7 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
     // convert to relative positions if necessary
     int x, y;
     const SkPoint* posArray;
-    SkAutoSTMalloc<32, SkPoint> pointStorage;
+    std::unique_ptr<SkPoint[]> pointStorage;
     if (mCanvas->drawTextAbsolutePos()) {
         x = 0;
         y = 0;
@@ -304,11 +307,12 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
     } else {
         x = pos[0].fX;
         y = pos[0].fY;
-        posArray = pointStorage.reset(glyphs.count);
+        pointStorage.reset(new SkPoint[glyphs.count]);
         for (int i = 0; i < glyphs.count; i++) {
-            pointStorage[i].fX = pos[i].fX- x;
-            pointStorage[i].fY = pos[i].fY- y;
+            pointStorage[i].fX = pos[i].fX - x;
+            pointStorage[i].fY = pos[i].fY - y;
         }
+        posArray = pointStorage.get();
     }
 
     // compute conservative bounds
@@ -326,12 +330,11 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
 void SkiaCanvasProxy::onDrawPosTextH(const void* text, size_t byteLength, const SkScalar xpos[],
         SkScalar constY, const SkPaint& paint) {
     const size_t pointCount = byteLength >> 1;
-    SkAutoSTMalloc<32, SkPoint> storage(pointCount);
-    SkPoint* pts = storage.get();
+    std::unique_ptr<SkPoint[]> pts(new SkPoint[pointCount]);
     for (size_t i = 0; i < pointCount; i++) {
         pts[i].set(xpos[i], constY);
     }
-    this->onDrawPosText(text, byteLength, pts, paint);
+    this->onDrawPosText(text, byteLength, pts.get(), paint);
 }
 
 void SkiaCanvasProxy::onDrawTextOnPath(const void* text, size_t byteLength, const SkPath& path,
