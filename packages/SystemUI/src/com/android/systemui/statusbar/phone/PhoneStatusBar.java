@@ -154,6 +154,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.statusbar.stack.StackViewState;
 import com.android.systemui.volume.VolumeComponent;
 
@@ -3486,10 +3487,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setBarState(StatusBarState.SHADE);
         if (mLeaveOpenOnKeyguardHide) {
             mLeaveOpenOnKeyguardHide = false;
-            mNotificationPanel.animateToFullShade(calculateGoingToFullShadeDelay());
+            long delay = calculateGoingToFullShadeDelay();
+            mNotificationPanel.animateToFullShade(delay);
             if (mDraggedDownRow != null) {
                 mDraggedDownRow.setUserLocked(false);
                 mDraggedDownRow = null;
+            }
+
+            // Disable layout transitions in navbar for this transition because the load is just
+            // too heavy for the CPU and GPU on any device.
+            if (mNavigationBarView != null) {
+                mNavigationBarView.setLayoutTransitionsEnabled(false);
+                mNavigationBarView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mNavigationBarView.setLayoutTransitionsEnabled(true);
+                    }
+                }, delay + StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE);
             }
         } else {
             instantCollapseNotificationPanel();
