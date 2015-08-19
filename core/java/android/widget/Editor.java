@@ -107,6 +107,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
@@ -2632,7 +2633,8 @@ public class Editor {
         }
     }
 
-    private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
+    @VisibleForTesting
+    public class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
         private static final int ADD_TO_DICTIONARY = -1;
         private static final int DELETE_TEXT = -2;
@@ -2796,6 +2798,11 @@ public class Editor {
             mSpansLengths.clear();
 
             return suggestionSpans;
+        }
+
+        @VisibleForTesting
+        public ViewGroup getContentViewForTesting() {
+            return mContentView;
         }
 
         @Override
@@ -5101,6 +5108,11 @@ public class Editor {
      */
     private static boolean isValidRange(CharSequence text, int start, int end) {
         return 0 <= start && start <= end && end <= text.length();
+    }
+
+    @VisibleForTesting
+    public SuggestionsPopupWindow getSuggestionsPopupWindowForTesting() {
+        return mSuggestionsPopupWindow;
     }
 
     /**
