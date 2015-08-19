@@ -307,6 +307,10 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
     private AccessibilityEvent createEventForHost(int eventType) {
         final AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
         mView.onInitializeAccessibilityEvent(event);
+
+        // Allow the client to populate the event.
+        onPopulateEventForHost(event);
+
         return event;
     }
 
@@ -369,6 +373,10 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
     private AccessibilityNodeInfo createNodeForHost() {
         final AccessibilityNodeInfo node = AccessibilityNodeInfo.obtain(mView);
         mView.onInitializeAccessibilityNodeInfo(node);
+        final int realNodeCount = node.getChildCount();
+
+        // Allow the client to populate the host node.
+        onPopulateNodeForHost(node);
 
         // Add the virtual descendants.
         if (mTempArray == null) {
@@ -378,6 +386,9 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
         }
         final IntArray virtualViewIds = mTempArray;
         getVisibleVirtualViews(virtualViewIds);
+        if (realNodeCount > 0 && virtualViewIds.size() > 0) {
+            throw new RuntimeException("Views cannot have both real and virtual children");
+        }
 
         final int N = virtualViewIds.size();
         for (int i = 0; i < N; i++) {
@@ -692,6 +703,18 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
             int virtualViewId, AccessibilityEvent event);
 
     /**
+     * Populates an {@link AccessibilityEvent} with information about the host
+     * view.
+     * <p>
+     * The default implementation is a no-op.
+     *
+     * @param event the event to populate with information about the host view
+     */
+    protected void onPopulateEventForHost(AccessibilityEvent event) {
+        // Default implementation is no-op.
+    }
+
+    /**
      * Populates an {@link AccessibilityNodeInfo} with information
      * about the specified item.
      * <p>
@@ -748,6 +771,18 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     protected abstract void onPopulateNodeForVirtualView(
             int virtualViewId, AccessibilityNodeInfo node);
+
+    /**
+     * Populates an {@link AccessibilityNodeInfo} with information about the
+     * host view.
+     * <p>
+     * The default implementation is a no-op.
+     *
+     * @param node the node to populate with information about the host view
+     */
+    protected void onPopulateNodeForHost(AccessibilityNodeInfo node) {
+        // Default implementation is no-op.
+    }
 
     /**
      * Performs the specified accessibility action on the item associated
