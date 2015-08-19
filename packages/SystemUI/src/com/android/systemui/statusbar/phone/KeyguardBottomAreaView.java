@@ -113,12 +113,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mPrewarmMessenger = new Messenger(service);
-            mPrewarmBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mPrewarmBound = false;
             mPrewarmMessenger = null;
         }
     };
@@ -384,8 +382,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 serviceIntent.setClassName(targetInfo.packageName, clazz);
                 serviceIntent.setAction(CameraPrewarmService.ACTION_PREWARM);
                 try {
-                    getContext().bindServiceAsUser(serviceIntent, mPrewarmConnection,
-                            Context.BIND_AUTO_CREATE, new UserHandle(UserHandle.USER_CURRENT));
+                    if (getContext().bindServiceAsUser(serviceIntent, mPrewarmConnection,
+                            Context.BIND_AUTO_CREATE, new UserHandle(UserHandle.USER_CURRENT))) {
+                        mPrewarmBound = true;
+                    }
                 } catch (SecurityException e) {
                     Log.w(TAG, "Unable to bind to prewarm service package=" + targetInfo.packageName
                             + " class=" + clazz, e);
@@ -396,7 +396,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void unbindCameraPrewarmService(boolean launched) {
         if (mPrewarmBound) {
-            if (launched) {
+            if (mPrewarmMessenger != null && launched) {
                 try {
                     mPrewarmMessenger.send(Message.obtain(null /* handler */,
                             CameraPrewarmService.MSG_CAMERA_FIRED));
