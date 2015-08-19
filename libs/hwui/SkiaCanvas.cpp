@@ -487,13 +487,12 @@ void SkiaCanvas::drawPoints(const float* points, int count, const SkPaint& paint
                             SkCanvas::PointMode mode) {
     // convert the floats into SkPoints
     count >>= 1;    // now it is the number of points
-    SkAutoSTMalloc<32, SkPoint> storage(count);
-    SkPoint* pts = storage.get();
+    std::unique_ptr<SkPoint[]> pts(new SkPoint[count]);
     for (int i = 0; i < count; i++) {
         pts[i].set(points[0], points[1]);
         points += 2;
     }
-    mCanvas->drawPoints(mode, count, pts, paint);
+    mCanvas->drawPoints(mode, count, pts.get(), paint);
 }
 
 
@@ -605,7 +604,7 @@ void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshH
 #ifndef SK_SCALAR_IS_FLOAT
     SkDEBUGFAIL("SkScalar must be a float for these conversions to be valid");
 #endif
-    SkAutoMalloc storage(storageSize);
+    std::unique_ptr<char[]> storage(new char[storageSize]);
     SkPoint* texs = (SkPoint*)storage.get();
     uint16_t* indices = (uint16_t*)(texs + ptCount);
 
