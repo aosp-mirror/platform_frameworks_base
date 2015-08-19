@@ -1020,7 +1020,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private void startListeningForFingerprint() {
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
         int userId = ActivityManager.getCurrentUser();
-        if (isUnlockWithFingerprintPossible(userId)) {
+        if (!mFingerprintDetectionRunning && isUnlockWithFingerprintPossible(userId)) {
             mUserHasAuthenticatedSinceBoot = mTrustManager.hasUserAuthenticatedSinceBoot(
                     ActivityManager.getCurrentUser());
             if (mFingerprintCancelSignal != null) {
