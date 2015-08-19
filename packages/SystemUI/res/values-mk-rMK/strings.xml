@@ -351,6 +351,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ОДЈАВИ ГО КОРИСНИКОТ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Да се додаде нов корисник?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Кога додавате нов корисник, тоа лице треба да го постави својот простор.\n\nСекој корисник може да ажурира апликации за сите други корисници."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Да се отстрани корисникот?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Сите апликации и податоци од овој корисник ќе се избришат."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Отстрани"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Штедачот на батерија е вклучен"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Ја намалува изведбата и податоците во заднина"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Исклучете го штедачот на батерија"</string>

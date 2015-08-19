@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"KELUARKAN PENGGUNA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Tambahkan pengguna baru?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\n1Pengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Hapus pengguna?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Semua aplikasi dan data pengguna ini akan dihapus."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Hapus"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Penghemat baterai aktif"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Mengurangi kinerja dan data latar belakang"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Nonaktifkan penghemat baterai"</string>

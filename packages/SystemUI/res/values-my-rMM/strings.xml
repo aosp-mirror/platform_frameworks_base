@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"အသုံးပြုသူ ထွက်လိုက်ပါ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"အသုံးပြုသူ အသစ်ကို ထည့်ရမလား?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"သင်က အသုံးပြုသူ အသစ် တစ်ဦးကို ထည့်ပေးလိုက်လျှင်၊ ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်မည်။\n\n အသုံးပြုသူ မည်သူမဆို ကျန်အသုံးပြုသူ အားလုံးတို့အတွက် appများကို မွမ်းမံပေးနိုင်သည်။"</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"သုံးစွဲသူကိုဖယ်ရှားမည်လား?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"ဤအသုံးပြုသူ၏ ဒေတာနှင့် အပ်ဖ်များအားလုံး ဖျက်လိုက်ပါမည်"</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"ဖယ်ရှားရန်"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ဘက်ထရီ ချွေတာသူ ဖွင့်ထား"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"လုပ်ကိုင်မှုကို လျှော့ချလျက် နောက်ခံ ဒေတာကို ကန့်သတ်သည်"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ဘက်ထရီ ချွေတာမှုကို ပိတ်ထားရန်"</string>

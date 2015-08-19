@@ -351,6 +351,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ユーザーをログアウト"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"新しいユーザーを追加しますか？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"新しいユーザーを追加したら、そのユーザーは自分のスペースをセットアップする必要があります。\n\nすべてのユーザーは他のユーザーに代わってアプリを更新できます。"</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"ユーザーを削除しますか？"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"このユーザーのアプリとデータがすべて削除されます。"</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"削除"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"バッテリーセーバーがON"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"パフォーマンスとバックグラウンドデータを制限します"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"バッテリーセーバーをOFFにします"</string>

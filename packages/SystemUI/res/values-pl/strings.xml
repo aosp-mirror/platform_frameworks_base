@@ -351,6 +351,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"WYLOGUJ UŻYTKOWNIKA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Dodać nowego użytkownika?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Gdy dodasz nowego użytkownika, musi on skonfigurować swój profil.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Usunąć użytkownika?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Wszystkie aplikacje i dane tego użytkownika zostaną usunięte."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Usuń"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Oszczędzanie baterii jest włączone"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Zmniejsza wydajność i ogranicza dane w tle"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Wyłącz oszczędzanie baterii"</string>

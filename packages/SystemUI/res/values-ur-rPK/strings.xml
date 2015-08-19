@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"صارف لاگ آؤٹ کریں"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"نیا صارف شامل کریں؟"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے۔\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"صارف کو ہٹائیں؟"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"اس صارف کی سبھی ایپس اور ڈیٹا حذف کر دیا جائے گا۔"</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"ہٹائیں"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"بیٹری سیور آن ہے"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"کارکردگی اور پس منظر کا ڈیٹا کم کر دیتا ہے"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"بیٹری کی بچت آف کریں"</string>

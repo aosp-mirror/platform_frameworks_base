@@ -351,6 +351,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"TANCA LA SESSIÓ DE L\'USUARI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Vols suprimir l\'usuari?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Totes les aplicacions i les dades d\'aquest usuari se suprimiran."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Suprimeix"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Estalvi de bateria activada"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desactiva l\'estalvi de bateria"</string>

@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGGA UT ANVÄNDAREN"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Lägga till ny användare?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"När du lägger till en ny användare måste den personen konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Vill du ta bort användaren?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Alla appar och all data som tillhör den här användaren raderas."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Ta bort"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Batterisparläget har aktiverats"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Minskar prestanda och bakgrundsdata"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Inaktivera batterisparläget"</string>

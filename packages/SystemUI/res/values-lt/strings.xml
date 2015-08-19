@@ -351,6 +351,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ATJUNGTI NAUDOTOJĄ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Pridėti naują naudotoją?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kai pridedate naują naudotoją, šis asmuo turi nustatyti savo erdvę.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Pašalinti naudotoją?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Bus ištrinti visi šio naudotojo duomenys ir programos."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Pašalinti"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Akumuliatoriaus tausojimo priemonė įjungta"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Išjungti Akumuliatoriaus tausojimo priemonę"</string>

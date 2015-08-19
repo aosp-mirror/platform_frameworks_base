@@ -351,6 +351,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ВИЙТИ З ОБЛІКОВОГО ЗАПИСУ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Додати нового користувача?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Користувач має налаштувати свій профіль після створення.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Видалити користувача?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Усі додатки й дані цього користувача буде видалено."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Видалити"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Режим заощадження заряду акумулятора ввімкнено"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Знижується продуктивність і обмежуються фонові дані"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Вимкнути режим заощадження заряду акумулятора"</string>

@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ເອົາຜູ້ໃຊ້ອອກຈາກລະບົບ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່​ບໍ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່, ຜູ່​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ່​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯ​ຂອງ​ຜູ່​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"ລຶບຜູ້ໃຊ້ອອກບໍ?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"ທຸກ​ແອັບ ແລະ ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ລຶບ."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"ເອົາ​ອອກ"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ເປີດ​ໃຊ້​ໂຕ​ປະຢັດ​ແບັດເຕີຣີ​ແລ້ວ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ຫຼຸດ​ປະ​ສິ​ທິ​ພາບ​ແລະ​ການ​ນຳ​ໃຊ້​ຂໍ້​ມູນ​ພື້ນຫຼັງ"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ປິດ​ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ"</string>

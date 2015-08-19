@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"TERMINAR SESSÃO DO UTILIZADOR"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Adicionar um novo utilizador?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Pretende remover o utilizador?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Serão eliminados todos os dados e todas as aplicações deste utilizador."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Remover"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"A poupança de bateria está ligada"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduz o desempenho e os dados de segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desativar a poupança de bateria"</string>

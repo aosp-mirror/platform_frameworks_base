@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ПАЙДАЛАНУШЫНЫ ШЫҒАРУ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Жаңа пайд-ны қосу керек пе?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Жаңа пайдаланушыны қосқанда сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Пайдаланушы жойылсын ба?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Осы пайдаланушының барлық қолданбалары мен деректері жойылады."</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"Жою"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Батарея үнемдегіш қосулы"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Өнімділікті және фондық деректерді азайтады"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Батарея үнемдегішті өшіру"</string>

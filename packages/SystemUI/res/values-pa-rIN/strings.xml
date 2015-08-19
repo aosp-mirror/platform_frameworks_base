@@ -349,6 +349,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ਉਪਭੋਗਤਾ ਨੂੰ ਲੌਗ ਆਉਟ ਕਰੋ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ਕੀ ਨਵਾਂ ਉਪਭੋਗਤਾ ਜੋੜਨਾ ਹੈ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਉਪਭੋਗਤਾ ਜੋੜਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣਾ ਸਪੇਸ ਸੈਟ ਅਪ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਉਪਭੋਗਤਾ ਹੋਰ ਸਾਰੇ ਉਪਭੋਗਤਾਵਾਂ ਦੇ ਐਪਸ ਨੂੰ ਅਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"ਕੀ ਉਪਭੋਗਤਾ ਹਟਾਉਣਾ ਹੈ?"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"ਇਸ ਉਪਭੋਗਤਾ ਦੇ ਸਾਰੇ ਐਪਸ ਅਤੇ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
+    <string name="user_remove_user_remove" msgid="7479275741742178297">"ਹਟਾਓ"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ਪ੍ਰਦਰਸ਼ਨ ਅਤੇ ਪਿਛੋਕੜ ਡਾਟਾ ਘੱਟ ਕਰਦਾ ਹੈ"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ਬੈਟਰੀ ਸੇਵਰ ਬੰਦ ਕਰੋ"</string>
