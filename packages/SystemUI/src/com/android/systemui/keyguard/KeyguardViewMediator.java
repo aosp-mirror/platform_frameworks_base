@@ -68,6 +68,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SystemUI;
+import com.android.systemui.statusbar.phone.FingerprintUnlockController;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -175,11 +176,6 @@ public class KeyguardViewMediator extends SystemUI {
      * Secure setting whether analytics are collected on the keyguard.
      */
     private static final String KEYGUARD_ANALYTICS_SETTING = "keyguard_analytics";
-
-    /**
-     * How much faster we collapse the lockscreen when authenticating with fingerprint.
-     */
-    private static final float FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR = 1.3f;
 
     /** The stream type that the lock sounds are tied to. */
     private int mUiSoundsStreamType;
@@ -458,31 +454,6 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
             }
         }
-
-        @Override
-        public void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) {
-            boolean unlockingWithFingerprintAllowed =
-                    mUpdateMonitor.isUnlockingWithFingerprintAllowed();
-            if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                if (unlockingWithFingerprintAllowed) {
-                    mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated(
-                            false /* strongAuth */);
-                }
-            } else {
-                if (wakeAndUnlocking && mShowing && unlockingWithFingerprintAllowed) {
-                    mWakeAndUnlocking = true;
-                    mStatusBarKeyguardViewManager.setWakeAndUnlocking();
-                    keyguardDone(true);
-                } else if (mShowing) {
-                    if (wakeAndUnlocking) {
-                        mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
-                    }
-                    mStatusBarKeyguardViewManager.animateCollapsePanels(
-                            FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
-                }
-            }
-        };
-
     };
 
     ViewMediatorCallback mViewMediatorCallback = new ViewMediatorCallback() {
@@ -1634,11 +1605,17 @@ public class KeyguardViewMediator extends SystemUI {
         }
     }
 
+    public void onWakeAndUnlocking() {
+        mWakeAndUnlocking = true;
+        keyguardDone(true /* authenticated */);
+    }
+
     public StatusBarKeyguardViewManager registerStatusBar(PhoneStatusBar phoneStatusBar,
             ViewGroup container, StatusBarWindowManager statusBarWindowManager,
-            ScrimController scrimController) {
+            ScrimController scrimController,
+            FingerprintUnlockController fingerprintUnlockController) {
         mStatusBarKeyguardViewManager.registerStatusBar(phoneStatusBar, container,
-                statusBarWindowManager, scrimController);
+                statusBarWindowManager, scrimController, fingerprintUnlockController);
         return mStatusBarKeyguardViewManager;
     }
 

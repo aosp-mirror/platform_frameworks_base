@@ -37,6 +37,7 @@
     <item type="id" name="doze_saved_filter_tag"/>
     <item type="id" name="qs_icon_tag"/>
     <item type="id" name="scrim"/>
+    <item type="id" name="scrim_target"/>
     <item type="id" name="hun_scrim_alpha_start"/>
     <item type="id" name="hun_scrim_alpha_end"/>
     <item type="id" name="notification_power"/>
