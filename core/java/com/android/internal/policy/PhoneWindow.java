@@ -2028,18 +2028,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         // Save the accessibility focused view ID.
-        final ViewRootImpl viewRootImpl = mContentParent.getViewRootImpl();
-        final View accessFocusHost = viewRootImpl.getAccessibilityFocusedHost();
-        if (accessFocusHost != null && accessFocusHost.getId() != View.NO_ID) {
-            outState.putInt(ACCESSIBILITY_FOCUSED_ID_TAG, accessFocusHost.getId());
+        if (mDecor != null) {
+            final ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
+            if (viewRootImpl != null) {
+                final View accessFocusHost = viewRootImpl.getAccessibilityFocusedHost();
+                if (accessFocusHost != null && accessFocusHost.getId() != View.NO_ID) {
+                    outState.putInt(ACCESSIBILITY_FOCUSED_ID_TAG, accessFocusHost.getId());
 
-            // If we have a focused virtual node ID, save that too.
-            final AccessibilityNodeInfo accessFocusedNode =
-                    viewRootImpl.getAccessibilityFocusedVirtualView();
-            if (accessFocusedNode != null) {
-                final int virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
-                        accessFocusedNode.getSourceNodeId());
-                outState.putInt(ACCESSIBILITY_FOCUSED_VIRTUAL_ID_TAG, virtualNodeId);
+                    // If we have a focused virtual node ID, save that too.
+                    final AccessibilityNodeInfo accessFocusedNode =
+                            viewRootImpl.getAccessibilityFocusedVirtualView();
+                    if (accessFocusedNode != null) {
+                        final int virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
+                                accessFocusedNode.getSourceNodeId());
+                        outState.putInt(ACCESSIBILITY_FOCUSED_VIRTUAL_ID_TAG, virtualNodeId);
+                    }
+                }
             }
         }
 
@@ -2112,8 +2116,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private void tryRestoreAccessibilityFocus(int hostViewId, int virtualViewId) {
-        if (hostViewId != View.NO_ID) {
-            final View needsAccessFocus = mContentParent.findViewById(hostViewId);
+        if (hostViewId != View.NO_ID && mDecor != null) {
+            final View needsAccessFocus = mDecor.findViewById(hostViewId);
             if (needsAccessFocus != null) {
                 if (!tryFocusingVirtualView(needsAccessFocus, virtualViewId)
                         && !needsAccessFocus.requestAccessibilityFocus()) {
