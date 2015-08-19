@@ -57,7 +57,7 @@ page.image=images/cards/card-support_16-9_2x.png
     <div class="col-9of16">
       <p>
         <em>Date: August 2015<br>
-        Build: MPA44G<br>
+        Build: MPA44I<br>
         Hardware support: Nexus 5, 6, 9, Player<br>
         Emulator support: x86 &amp; ARM 32/64-bit<br>
         Google Play services: 7.8</em>
@@ -196,9 +196,10 @@ page.image=images/cards/card-support_16-9_2x.png
       </li>
       <li>During Hangouts calls, users may experience distorted or low audio on some devices.
       </li>
-      <li>The bundled Google Apps Device Policy app is unable to set up an Android for Work
-        Profile in the MPA44G system images, so you cannot create a new Work Profile with that
-        app. Other apps that provide Android for Work functionality are unaffected.
+      <li>The Google Apps Device Policy app bundled with MPA44G is unable to set up an Android for
+Work Profile, so you cannot create a new Work Profile with that version of the app. This issue is
+resolved in the Google Apps Device Policy app bundled with MPA44I. Other apps that provide Android
+for Work functionality remain unaffected on either build.
       </li>
     </ul>
   </li>

@@ -247,34 +247,34 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="hammerhead">
     <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPA44G-preview-3fff4cf7.tgz</a><br>
-      MD5: ce86cb083174fab9f52483fa0828b23f<br>
-      SHA-1: 3fff4cf707c2ce5a5efbb7238982a41d36bd7dcc
+      >hammerhead-MPA44I-preview-2ebbc049.tgz</a><br>
+      MD5: 91a924fb0c9f8e716e3b4c9954fd0dbb<br>
+      SHA-1: 2ebbc049b68c4da8baeee3e42bb94d7a965ba4a3
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPA44G-preview-6ad5fb56.tgz</a><br>
-      MD5: d1ec118d4b7dc564f048542576885985<br>
-      SHA-1: 6ad5fb561e3ccc7fd8c12f8513984a64a0a265da
+      >shamu-MPA44I-preview-62b9c486.tgz</a><br>
+      MD5: ac6e58da86125073d9c395257fd42664<br>
+      SHA-1: 62b9c486fd7a5020e228d53ca5acd5c1857e48ff
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPA44G-preview-7ff8343a.tgz</a><br>
-      MD5: 2f764a8d0b2c176ab723ed7e26907075<br>
-      SHA-1: 7ff8343a0545a142e6a84023940b75ab328b6ae8
+      >volantis-MPA44I-preview-5c30a6e2.tgz</a><br>
+      MD5: 7f83768757913d3fea945a661020d185<br>
+      SHA-1: 5c30a6e2acd11a81f4105b12d23ff654f534f699
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-MPA44G-preview-f9cc2862.tgz</a><br>
-      MD5: 876fdc064836fa7ddf33d34e04fbd772<br>
-      SHA-1: f9cc2862fa5314393ec5780a6a9e08f9a9aacf4d
+      >fugu-MPA44I-preview-2860040a.tgz</a><br>
+      MD5: 438da8d37da9e341a69cfb16a4001ac5<br>
+      SHA-1: 2860040a326582f1ff5f702bf9a1ef002717fc98
     </td>
   </tr>
 
