@@ -409,6 +409,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintAuthFailed() {
+        if (mFpWakeMode == FP_WAKE_DIRECT_UNLOCK) {
+            notifyOnFingerprintWakeAndUnlockingFinished();
+        }
+        mFpWakeMode = FP_WAKE_NONE;
         releaseFingerprintWakeLock();
         handleFingerprintHelp(-1, mContext.getString(R.string.fingerprint_not_recognized));
     }
@@ -428,10 +432,31 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
             mHandler.postDelayed(mReleaseFingerprintWakeLockRunnable,
                     FINGERPRINT_WAKELOCK_TIMEOUT_MS);
+            if (mFpWakeMode == FP_WAKE_DIRECT_UNLOCK) {
+                notifyOnFingerprintWakeAndUnlockingStarted();
+            }
         } else if (!mDeviceInteractive) {
             mFpWakeMode = FP_WAKE_TO_BOUNCER;
         } else {
             mFpWakeMode = FP_WAKE_NONE;
+        }
+    }
+
+    private void notifyOnFingerprintWakeAndUnlockingStarted() {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFingerprintWakeAndUnlockingStarted();
+            }
+        }
+    }
+
+    private void notifyOnFingerprintWakeAndUnlockingFinished() {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFingerprintWakeAndUnlockingFinished();
+            }
         }
     }
 
@@ -891,6 +916,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onScreenTurnedOn();
             }
         }
+        if (mFpWakeMode == FP_WAKE_DIRECT_UNLOCK) {
+            notifyOnFingerprintWakeAndUnlockingFinished();
+        }
+        mFpWakeMode = FP_WAKE_NONE;
     }
 
     private void handleScreenTurnedOff() {

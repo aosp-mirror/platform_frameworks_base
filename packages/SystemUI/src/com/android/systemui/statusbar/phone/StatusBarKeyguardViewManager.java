@@ -48,6 +48,8 @@ public class StatusBarKeyguardViewManager {
     // with the appear animations of the PIN/pattern/password views.
     private static final long NAV_BAR_SHOW_DELAY_BOUNCER = 320;
 
+    private static final long WAKE_AND_UNLOCK_SCRIM_FADEOUT_DURATION_MS = 200;
+
     private static String TAG = "StatusBarKeyguardViewManager";
 
     private final Context mContext;
@@ -178,16 +180,16 @@ public class StatusBarKeyguardViewManager {
 
     public void onScreenTurnedOn() {
         mScreenTurnedOn = true;
-        mWakeAndUnlocking = false;
         if (mDeferScrimFadeOut) {
             mDeferScrimFadeOut = false;
-            animateScrimControllerKeyguardFadingOut(0, 200);
+            animateScrimControllerKeyguardFadingOut(0, WAKE_AND_UNLOCK_SCRIM_FADEOUT_DURATION_MS);
             updateStates();
         }
         mPhoneStatusBar.onScreenTurnedOn();
     }
 
     public void onScreenTurnedOff() {
+        mWakeAndUnlocking = false;
         mScreenTurnedOn = false;
     }
 
@@ -279,7 +281,12 @@ public class StatusBarKeyguardViewManager {
                 mStatusBarWindowManager.setKeyguardFadingAway(true);
                 if (mWakeAndUnlocking && !mScreenTurnedOn) {
                     mDeferScrimFadeOut = true;
-                } else {
+                } else if (mWakeAndUnlocking){
+
+                    // Screen is already on, don't defer with fading out.
+                    animateScrimControllerKeyguardFadingOut(0,
+                            WAKE_AND_UNLOCK_SCRIM_FADEOUT_DURATION_MS);
+                } else  {
                     animateScrimControllerKeyguardFadingOut(delay, fadeoutDuration);
                 }
             } else {
@@ -292,7 +299,7 @@ public class StatusBarKeyguardViewManager {
             executeAfterKeyguardGoneAction();
             updateStates();
         }
-
+        mWakeAndUnlocking = false;
     }
 
     private void animateScrimControllerKeyguardFadingOut(long delay, long duration) {
