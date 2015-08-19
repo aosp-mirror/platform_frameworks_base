@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -247,7 +248,7 @@ class GestureLauncherService extends SystemService {
             intent.setComponent(new ComponentName(componentInfo.activityInfo.packageName,
                     componentInfo.activityInfo.name));
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
             mWakeLock.release();
         }
 
