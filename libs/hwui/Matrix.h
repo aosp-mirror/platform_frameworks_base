@@ -114,7 +114,6 @@ public:
     void loadIdentity();
 
     void load(const float* v);
-    void load(const Matrix4& v);
     void load(const SkMatrix& v);
 
     void loadInverse(const Matrix4& v);
@@ -139,7 +138,7 @@ public:
     void multiply(const Matrix4& v) {
         Matrix4 u;
         u.loadMultiply(*this, v);
-        load(u);
+        *this = u;
     }
 
     void multiply(float v);

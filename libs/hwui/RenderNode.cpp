@@ -532,7 +532,7 @@ void RenderNode::computeOrderingImpl(
     if (properties().getProjectBackwards()) {
         // composited projectee, flag for out of order draw, save matrix, and store in proj surface
         opState->mSkipInOrderDraw = true;
-        opState->mTransformFromCompositingAncestor.load(localTransformFromProjectionSurface);
+        opState->mTransformFromCompositingAncestor = localTransformFromProjectionSurface;
         compositedChildrenOfProjectionSurface->push_back(opState);
     } else {
         // standard in order draw

@@ -152,10 +152,6 @@ void Matrix4::load(const float* v) {
     mType = kTypeUnknown;
 }
 
-void Matrix4::load(const Matrix4& v) {
-    *this = v;
-}
-
 void Matrix4::load(const SkMatrix& v) {
     memset(data, 0, sizeof(data));
 

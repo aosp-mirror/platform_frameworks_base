@@ -138,7 +138,7 @@ void CanvasState::setMatrix(const SkMatrix& matrix) {
 }
 
 void CanvasState::setMatrix(const Matrix4& matrix) {
-    mSnapshot->transform->load(matrix);
+    *(mSnapshot->transform) = matrix;
 }
 
 void CanvasState::concatMatrix(const SkMatrix& matrix) {
