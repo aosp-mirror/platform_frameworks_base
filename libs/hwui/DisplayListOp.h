@@ -1541,15 +1541,15 @@ private:
 
 class DrawLayerOp : public DrawOp {
 public:
-    DrawLayerOp(Layer* layer, float x, float y)
-            : DrawOp(nullptr), mLayer(layer), mX(x), mY(y) {}
+    DrawLayerOp(Layer* layer)
+            : DrawOp(nullptr), mLayer(layer) {}
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
-        renderer.drawLayer(mLayer, mX, mY);
+        renderer.drawLayer(mLayer);
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("Draw Layer %p at %f %f", mLayer, mX, mY);
+        OP_LOG("Draw Layer %p", mLayer);
     }
 
     virtual const char* name() override { return "DrawLayer"; }
