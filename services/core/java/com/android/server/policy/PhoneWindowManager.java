@@ -6113,6 +6113,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         startedWakingUp();
         screenTurningOn(null);
+        screenTurnedOn();
     }
 
     ProgressDialog mBootMsgDialog = null;
