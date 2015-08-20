@@ -80,8 +80,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     static final String TAG = "WindowState";
 
     // The minimal size of a window within the usable area of the freeform stack.
-    static final int MINIMUM_VISIBLE_WIDTH_IN_DP = 48;
-    static final int MINIMUM_VISIBLE_HEIGHT_IN_DP = 32;
+    private static final int MINIMUM_VISIBLE_WIDTH_IN_DP = 48;
+    private static final int MINIMUM_VISIBLE_HEIGHT_IN_DP = 32;
+
+    // The thickness of a window resize handle outside the window bounds on the free form workspace
+    // to capture touch events in that area.
+    private static final int RESIZE_HANDLE_WIDTH_IN_DP = 10;
+
+    static final boolean BOUNDS_FOR_TOUCH = true;
 
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
@@ -541,9 +547,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHaveFrame = true;
 
         final Task task = mAppToken != null ? getTask() : null;
-        final boolean isFreeFormWorkspace = task != null && task.mStack != null &&
-                task.mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
         final boolean nonFullscreenTask = task != null && !task.isFullscreen();
+        final boolean freeformWorkspace = inFreeformWorkspace();
         if (nonFullscreenTask) {
             task.getBounds(mContainingFrame);
             final WindowState imeWin = mService.mInputMethodWindow;
@@ -553,7 +558,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mContainingFrame.top -= mContainingFrame.bottom - cf.bottom;
             }
 
-            if (isFreeFormWorkspace) {
+            if (freeformWorkspace) {
                 // In free form mode we have only to set the rectangle if it wasn't set already. No
                 // need to intersect it with the (visible) "content frame" since it is allowed to
                 // be outside the visible desktop.
@@ -669,7 +674,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         // Make sure the content and visible frames are inside of the
         // final window frame.
-        if (isFreeFormWorkspace && !mFrame.isEmpty()) {
+        if (freeformWorkspace && !mFrame.isEmpty()) {
             // Keep the frame out of the blocked system area, limit it in size to the content area
             // and make sure that there is always a minimum visible so that the user can drag it
             // into a usable area..
@@ -910,10 +915,22 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mDisplayContent.getHomeStack();
     }
 
-    void getTaskBounds(Rect bounds) {
+    /**
+     * Retrieves the bounds for a task.
+     * @param bounds The rect which gets the bounds.
+     * @param forTouch Pass in BOUNDS_FOR_TOUCH to get touch related bounds, otherwise visible
+     *        bounds will be returned.
+     */
+    void getTaskBounds(Rect bounds, boolean forTouch) {
         final Task task = getTask();
         if (task != null) {
             task.getBounds(bounds);
+            if (forTouch == BOUNDS_FOR_TOUCH) {
+                if (inFreeformWorkspace()) {
+                    final int delta = calculatePixelFromDp(RESIZE_HANDLE_WIDTH_IN_DP);
+                    bounds.inset(-delta, -delta);
+                }
+            }
             return;
         }
         bounds.set(mFrame);
@@ -1610,6 +1627,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         synchronized(mService.mWindowMap) {
             return mService.mCurrentFocus == this;
         }
+    }
+
+    private boolean inFreeformWorkspace() {
+        final Task task = getTask();
+        return task != null && task.mStack != null &&
+                task.mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
     }
 
     private int calculatePixelFromDp(int dp) {

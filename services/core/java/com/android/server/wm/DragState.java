@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
 import com.android.server.wm.WindowManagerService.DragInputEventReceiver;
@@ -413,7 +414,7 @@ class DragState {
                 continue;
             }
 
-            child.getTaskBounds(mTmpRect);
+            child.getTaskBounds(mTmpRect, !BOUNDS_FOR_TOUCH);
             if (!mTmpRect.contains(x, y)) {
                 // outside of this window's activity stack == don't tell about drags
                 continue;
