@@ -59,6 +59,7 @@ public class TextViewTest extends AndroidTestCase {
         assertEquals('\0', c2[5]);
     }
 
+    @SmallTest
     public void testProcessTextActivityResultNonEditable() {
         TextView tv = new TextView(mContext);
         CharSequence originalText = "This is some text.";
@@ -76,6 +77,7 @@ public class TextViewTest extends AndroidTestCase {
         assertEquals(originalText, tv.getText().toString());
     }
 
+    @SmallTest
     public void testProcessTextActivityResultEditable() {
         EditText tv = new EditText(mContext);
         CharSequence originalText = "This is some text.";
@@ -92,6 +94,7 @@ public class TextViewTest extends AndroidTestCase {
         assertEquals(newText, tv.getText().toString());
     }
 
+    @SmallTest
     public void testProcessTextActivityResultCancel() {
         EditText tv = new EditText(mContext);
         CharSequence originalText = "This is some text.";
@@ -108,6 +111,7 @@ public class TextViewTest extends AndroidTestCase {
         assertEquals(originalText, tv.getText().toString());
     }
 
+    @SmallTest
     public void testProcessTextActivityNoData() {
         EditText tv = new EditText(mContext);
         CharSequence originalText = "This is some text.";
