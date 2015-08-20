@@ -63,7 +63,7 @@
         <item name="android:colorAccent">@color/material_blue_700</item>
     </style>
 
-    <style name="StandaloneTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
+    <style name="FilesTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
         <item name="android:actionBarWidgetTheme">@null</item>
 
         <item name="android:colorPrimaryDark">@color/status_bar_background</item>

@@ -167,7 +167,7 @@ public class CopyService extends IntentService {
 
             if (mFailedFiles.size() > 0) {
                 final Context context = getApplicationContext();
-                final Intent navigateIntent = new Intent(context, StandaloneActivity.class);
+                final Intent navigateIntent = new Intent(context, FilesActivity.class);
                 navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
                 navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
                 navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, mFailedFiles);
@@ -213,7 +213,7 @@ public class CopyService extends IntentService {
         mIsCancelled = false;
 
         final Context context = getApplicationContext();
-        final Intent navigateIntent = new Intent(context, StandaloneActivity.class);
+        final Intent navigateIntent = new Intent(context, FilesActivity.class);
         navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
 
         final String contentTitle = getString(copying ? R.string.copy_notification_title

@@ -18,7 +18,6 @@ package com.android.documentsui;
 
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
-import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -57,7 +56,7 @@ import java.util.List;
 /**
  * Standalone file management activity.
  */
-public class StandaloneActivity extends BaseActivity {
+public class FilesActivity extends BaseActivity {
 
     public static final String TAG = "StandaloneFileManagement";
     static final boolean DEBUG = false;
@@ -66,31 +65,21 @@ public class StandaloneActivity extends BaseActivity {
     private Spinner mToolbarStack;
     private Toolbar mRootsToolbar;
     private DirectoryContainerView mDirectoryContainer;
-    private State mState;
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
     private DocumentClipper mClipper;
-    private DrawerController mDrawer;
-    private boolean mCompactMode;
 
-    public StandaloneActivity() {
-        super(TAG);
+    public FilesActivity() {
+        super(R.layout.files_activity, TAG);
     }
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        setResult(Activity.RESULT_CANCELED);
-        setContentView(R.layout.activity);
-
         final Context context = this;
 
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
-
-        mState = (icicle != null)
-                ? icicle.<State> getParcelable(EXTRA_STATE)
-                : buildDefaultState();
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitleTextAppearance(context,
@@ -109,19 +98,12 @@ public class StandaloneActivity extends BaseActivity {
 
         setActionBar(mToolbar);
 
-
-        // "show as dialog" is true on BIG screens. But we *assume* a big screen
-        // and specialize for smaller screens by moving roots into an auto-hide drawer.
-        // This works in conjunction with the specialized layouts defined for sw720dp.
-        mCompactMode = !getResources().getBoolean(R.bool.show_as_dialog);
-
-        if (mCompactMode) {
+        mClipper = new DocumentClipper(this);
+        mDrawer = DrawerController.create(this);
+        if (mDrawer.isPresent()) {
             setTheme(R.style.DocumentsNonDialogTheme);
         }
 
-        mDrawer = DrawerController.create(this);
-
-        mClipper = new DocumentClipper(this);
 
         RootsFragment.show(getFragmentManager(), null);
         if (!mState.restored) {
@@ -144,7 +126,8 @@ public class StandaloneActivity extends BaseActivity {
         }
     }
 
-    private State buildDefaultState() {
+    @Override
+    State buildDefaultState() {
         State state = new State();
 
         final Intent intent = getIntent();
@@ -179,7 +162,7 @@ public class StandaloneActivity extends BaseActivity {
     public void updateActionBar() {
         final RootInfo root = getCurrentRoot();
 
-        if (mCompactMode) {
+        if (mDrawer.isPresent()) {
             mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
             mToolbar.setNavigationContentDescription(R.string.drawer_open);
             mToolbar.setNavigationOnClickListener(
@@ -260,22 +243,6 @@ public class StandaloneActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (!mState.stackTouched) {
-            super.onBackPressed();
-            return;
-        }
-
-        final int size = mState.stack.size();
-        if (size > 1) {
-            mState.stack.pop();
-            onCurrentDirectoryChanged(ANIM_UP);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     @Override
