@@ -145,6 +145,17 @@ public class UserInfo implements Parcelable {
         return (!hideSystemUser || id != UserHandle.USER_SYSTEM) && supportsSwitchTo();
     }
 
+    /* @hide */
+    public boolean canHaveProfile() {
+        if (isManagedProfile() || isGuest() || isRestricted()) {
+            return false;
+        }
+        if (UserManager.isSplitSystemUser()) {
+            return id != UserHandle.USER_SYSTEM;
+        }
+        return id == UserHandle.USER_OWNER;
+    }
+
     public UserInfo() {
     }
 

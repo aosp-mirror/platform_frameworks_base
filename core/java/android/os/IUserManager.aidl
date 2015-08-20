@@ -43,7 +43,7 @@ interface IUserManager {
     UserInfo getPrimaryUser();
     List<UserInfo> getUsers(boolean excludeDying);
     List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
-    boolean canAddMoreManagedProfiles();
+    boolean canAddMoreManagedProfiles(int userId);
     UserInfo getProfileParent(int userHandle);
     UserInfo getUserInfo(int userHandle);
     long getUserCreationTime(int userHandle);
