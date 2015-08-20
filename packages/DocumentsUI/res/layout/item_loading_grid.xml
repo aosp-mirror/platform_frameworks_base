@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.GridItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/grid_height"
     android:orientation="horizontal">
@@ -26,4 +26,4 @@
         android:indeterminate="true"
         style="?android:attr/progressBarStyle" />
 
-</FrameLayout>
+</com.android.documentsui.GridItem>

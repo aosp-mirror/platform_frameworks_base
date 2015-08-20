@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.GridItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/grid_item_height"
     android:layout_margin="@dimen/grid_item_margin"
@@ -140,4 +140,4 @@
         android:contentDescription="@null"
         android:duplicateParentState="true" />
 
-</FrameLayout>
+</com.android.documentsui.GridItem>

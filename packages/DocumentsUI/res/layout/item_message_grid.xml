@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.GridItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/grid_height"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
@@ -48,4 +48,4 @@
 
     </LinearLayout>
 
-</FrameLayout>
+</com.android.documentsui.GridItem>
