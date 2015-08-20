@@ -26,7 +26,6 @@ import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
-import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -48,9 +47,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -81,9 +77,7 @@ public class DocumentsActivity extends BaseActivity {
 
     private Toolbar mRootsToolbar;
 
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private View mRootsDrawer;
+    private DrawerController mDrawer;
 
     private DirectoryContainerView mDirectoryContainer;
 
@@ -105,6 +99,7 @@ public class DocumentsActivity extends BaseActivity {
         final Resources res = getResources();
         mShowAsDialog = res.getBoolean(R.bool.show_as_dialog) && mState.action != ACTION_MANAGE &&
                 mState.action != ACTION_BROWSE;
+
         if (!mShowAsDialog) {
             setTheme(R.style.DocumentsNonDialogTheme);
         }
@@ -117,6 +112,8 @@ public class DocumentsActivity extends BaseActivity {
         final Context context = this;
 
         if (mShowAsDialog) {
+            mDrawer = DrawerController.createDummy();
+
             // Strongly define our horizontal dimension; we leave vertical as
             // WRAP_CONTENT so that system resizes us when IME is showing.
             final WindowManager.LayoutParams a = getWindow().getAttributes();
@@ -128,17 +125,7 @@ public class DocumentsActivity extends BaseActivity {
             getWindow().setAttributes(a);
 
         } else {
-            // Non-dialog means we have a drawer
-            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-            if (mDrawerLayout != null) {
-                mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                        R.drawable.ic_hamburger, R.string.drawer_open, R.string.drawer_close);
-
-                mDrawerLayout.setDrawerListener(mDrawerListener);
-
-                mRootsDrawer = findViewById(R.id.drawer_roots);
-            }
+            mDrawer = DrawerController.create(this);
         }
 
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
@@ -162,10 +149,9 @@ public class DocumentsActivity extends BaseActivity {
 
         // Hide roots when we're managing a specific root
         if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
-            if (mShowAsDialog || mDrawerLayout == null) {
+            mDrawer.lockClosed();
+            if (mShowAsDialog) {
                 findViewById(R.id.container_roots).setVisibility(View.GONE);
-            } else {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             }
         }
 
@@ -341,53 +327,15 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
-    private DrawerListener mDrawerListener = new DrawerListener() {
-        @Override
-        public void onDrawerSlide(View drawerView, float slideOffset) {
-            mDrawerToggle.onDrawerSlide(drawerView, slideOffset);
-        }
-
-        @Override
-        public void onDrawerOpened(View drawerView) {
-            mDrawerToggle.onDrawerOpened(drawerView);
-        }
-
-        @Override
-        public void onDrawerClosed(View drawerView) {
-            mDrawerToggle.onDrawerClosed(drawerView);
-        }
-
-        @Override
-        public void onDrawerStateChanged(int newState) {
-            mDrawerToggle.onDrawerStateChanged(newState);
-        }
-    };
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (mDrawerToggle != null) {
-            mDrawerToggle.syncState();
-        }
+        mDrawer.syncState();
         updateActionBar();
     }
 
     public void setRootsDrawerOpen(boolean open) {
-        if (!mShowAsDialog && mDrawerLayout != null) {
-            if (open) {
-                mDrawerLayout.openDrawer(mRootsDrawer);
-            } else {
-                mDrawerLayout.closeDrawer(mRootsDrawer);
-            }
-        }
-    }
-
-    private boolean isRootsDrawerOpen() {
-        if (mShowAsDialog || mDrawerLayout == null) {
-            return false;
-        } else {
-            return mDrawerLayout.isDrawerOpen(mRootsDrawer);
-        }
+        mDrawer.setOpen(open);
     }
 
     @Override
@@ -408,8 +356,7 @@ public class DocumentsActivity extends BaseActivity {
             }
         }
 
-        if (!mShowAsDialog && mDrawerLayout != null &&
-                mDrawerLayout.getDrawerLockMode(mRootsDrawer) == DrawerLayout.LOCK_MODE_UNLOCKED) {
+        if (!mShowAsDialog && mDrawer.isUnlocked()) {
             mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
             mToolbar.setNavigationContentDescription(R.string.drawer_open);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -504,10 +451,7 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return mDrawer.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -526,7 +470,7 @@ public class DocumentsActivity extends BaseActivity {
         if (size > 1) {
             mState.stack.pop();
             onCurrentDirectoryChanged(ANIM_UP);
-        } else if (size == 1 && !isRootsDrawerOpen()) {
+        } else if (size == 1 && !mDrawer.isOpen()) {
             // TODO: open root drawer once we can capture back key
             super.onBackPressed();
         } else {
