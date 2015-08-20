@@ -420,62 +420,54 @@ Wi-Fi, as described here.
 <ol>
 
 <li>
-Connect Android device and adb host computer
+<p>Connect your Android device and adb host computer
 to a common Wi-Fi network accessible to both.
 We have found that not all access points
 are suitable; you may need to use an access point
-whose firewall is configured properly to support adb.
+whose firewall is configured properly to support adb.</p>
+
+<p class="note"><strong>Note: </strong>If you are attempting to connect
+to a Wear device, force it to connect to Wi-Fi by shutting off Bluetooth
+on the phone connected to it.</p>
 </li>
 
 <li>
-Connect the device with USB cable to host.
+Connect the device to the host computer with a USB cable.
 </li>
 
 <li>
-Make sure adb is running in USB mode on host.
-<pre>
-$ adb usb
-restarting in USB mode
-</pre>
-</li>
-
-<li>
-Connect to the device over USB.
-<pre>
-$ adb devices
-List of devices attached
-######## device
-</pre>
-</li>
-
-<li>
-Restart host adb in tcpip mode.
-<pre>
+Set the target device to listen for a TCP/IP connection on port 5555.
+<pre class="no-pretty-print">
 $ adb tcpip 5555
-restarting in TCP mode port: 5555
 </pre>
 </li>
 
 <li>
-Find out the IP address of the Android device:
-Settings -> About tablet -> Status -> IP address.
-Remember the IP address, of the form <code>#.#.#.#</code>.
+Disconnect the USB cable from the target device.
 </li>
 
 <li>
-Connect adb host to device:
-<pre>
-$ adb connect #.#.#.#
-connected to #.#.#.#:5555
+Find the IP address of the Android device. For example, on a Nexus device, you can find
+the IP address at <strong>Settings</strong> &gt; <strong>About tablet</strong>
+(or <strong>About phone</strong>) &gt; <strong>Status</strong> &gt; <strong>IP address</strong>. Or,
+on an Android Wear device, you can find the IP address at <strong>Settings</strong> &gt;
+<strong>Wi-Fi Settings</strong> &gt; <strong>Advanced</strong> &gt; <strong>IP address</strong>.
+</li>
+
+<li>
+Connect to the device, identifying it by IP address.
+<pre class="no-pretty-print">
+$ adb connect &lt;device-ip-address&gt;
 </pre>
 </li>
 
+
 <li>
-Remove USB cable from device, and confirm you can still access device:
-<pre>
+Confirm that your host computer is connected to the target device:
+<pre class="no-pretty-print">
 $ adb devices
 List of devices attached
-#.#.#.#:5555 device
+&lt;device-ip-address&gt;:5555 device
 </pre>
 
 </ol>
@@ -500,7 +492,7 @@ Reconnect by executing the "adb connect" step again.
 
 <li>
 Or if that doesn't work, reset your adb host:
-<pre>
+<pre class="no-pretty-print">
 adb kill-server
 </pre>
 and then start over from the beginning.
