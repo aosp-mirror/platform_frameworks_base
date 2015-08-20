@@ -18,7 +18,6 @@ package com.android.documentsui;
 
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
-import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
@@ -28,6 +27,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.documentsui.BaseActivity.DocumentContext;

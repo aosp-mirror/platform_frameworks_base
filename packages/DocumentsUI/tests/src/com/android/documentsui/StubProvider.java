@@ -36,8 +36,6 @@ import android.provider.DocumentsProvider;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
-import com.google.android.collect.Maps;
-
 import libcore.io.IoUtils;
 
 import java.io.File;
@@ -101,7 +99,7 @@ public class StubProvider extends DocumentsProvider {
             });
         }
         // Create new roots.
-        mRoots = Maps.newHashMap();
+        mRoots = new HashMap<>();
         for (String rootId : rootIds) {
             final RootInfo rootInfo = new RootInfo(rootId, getSize(rootId));
             mRoots.put(rootId, rootInfo);

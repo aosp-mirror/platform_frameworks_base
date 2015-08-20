@@ -22,7 +22,6 @@ import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 import static com.android.internal.util.Preconditions.checkArgument;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -38,6 +37,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -59,8 +59,6 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
-
-import com.google.common.collect.Maps;
 
 import libcore.io.IoUtils;
 
@@ -371,7 +369,7 @@ abstract class BaseActivity extends Activity {
         public String currentSearch;
 
         /** Instance state for every shown directory */
-        public HashMap<String, SparseArray<Parcelable>> dirState = Maps.newHashMap();
+        public HashMap<String, SparseArray<Parcelable>> dirState = new HashMap<>();
 
         /** Currently copying file */
         public List<DocumentInfo> selectedDocumentsForCopy = new ArrayList<DocumentInfo>();

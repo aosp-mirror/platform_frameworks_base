@@ -16,7 +16,7 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.Shared.TAG;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -39,14 +39,14 @@ import android.util.Log;
 import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
-import com.google.android.collect.Lists;
-import com.google.android.collect.Sets;
+import android.support.annotation.VisibleForTesting;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import libcore.io.IoUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -74,10 +74,10 @@ public class RootsCache {
     @GuardedBy("mLock")
     private Multimap<String, RootInfo> mRoots = ArrayListMultimap.create();
     @GuardedBy("mLock")
-    private HashSet<String> mStoppedAuthorities = Sets.newHashSet();
+    private HashSet<String> mStoppedAuthorities = new HashSet<>();
 
     @GuardedBy("mObservedAuthorities")
-    private final HashSet<String> mObservedAuthorities = Sets.newHashSet();
+    private final HashSet<String> mObservedAuthorities = new HashSet<>();
 
     public RootsCache(Context context) {
         mContext = context;
@@ -159,7 +159,7 @@ public class RootsCache {
         private final String mFilterPackage;
 
         private final Multimap<String, RootInfo> mTaskRoots = ArrayListMultimap.create();
-        private final HashSet<String> mTaskStoppedAuthorities = Sets.newHashSet();
+        private final HashSet<String> mTaskStoppedAuthorities = new HashSet<>();
 
         /**
          * Update all roots.
@@ -251,7 +251,7 @@ public class RootsCache {
             }
         }
 
-        final List<RootInfo> roots = Lists.newArrayList();
+        final List<RootInfo> roots = new ArrayList<>();
         final Uri rootsUri = DocumentsContract.buildRootsUri(authority);
 
         ContentProviderClient client = null;
@@ -350,7 +350,7 @@ public class RootsCache {
 
     @VisibleForTesting
     static List<RootInfo> getMatchingRoots(Collection<RootInfo> roots, State state) {
-        final List<RootInfo> matching = Lists.newArrayList();
+        final List<RootInfo> matching = new ArrayList<>();
         for (RootInfo root : roots) {
             final boolean supportsCreate = (root.flags & Root.FLAG_SUPPORTS_CREATE) != 0;
             final boolean supportsIsChild = (root.flags & Root.FLAG_SUPPORTS_IS_CHILD) != 0;

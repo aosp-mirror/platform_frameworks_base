@@ -16,7 +16,7 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 

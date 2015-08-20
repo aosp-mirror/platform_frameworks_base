@@ -20,7 +20,6 @@ import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
@@ -33,6 +32,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;

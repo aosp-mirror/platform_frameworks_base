@@ -24,14 +24,13 @@ import static com.android.documentsui.BaseActivity.State.MODE_GRID;
 import static com.android.documentsui.BaseActivity.State.MODE_LIST;
 import static com.android.documentsui.BaseActivity.State.MODE_UNKNOWN;
 import static com.android.documentsui.BaseActivity.State.SORT_ORDER_UNKNOWN;
-import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
-import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -98,7 +97,7 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.util.Preconditions;
 
-import com.google.android.collect.Lists;
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -235,8 +234,7 @@ public class DirectoryFragment extends Fragment {
                     public void onLayoutChange(
                             View v, int left, int top, int right, int bottom, int oldLeft,
                             int oldTop, int oldRight, int oldBottom) {
-                        int thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
-                        mColumnCount = pickColumnCount(thumbSize);
+                        mColumnCount = calculateColumnCount();
                         if (mGridLayout != null) {
                             mGridLayout.setSpanCount(mColumnCount);
                         }
@@ -573,13 +571,15 @@ public class DirectoryFragment extends Fragment {
         mThumbSize = new Point(thumbSize, thumbSize);
     }
 
-    private int pickColumnCount(final int thumbSize) {
-        int itemPadding =
-                getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
+    private int calculateColumnCount() {
+        int cellWidth = getResources().getDimensionPixelSize(R.dimen.grid_width);
+        int cellMargin = 2 * getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
         int viewPadding = mRecView.getPaddingLeft() + mRecView.getPaddingRight();
+
         checkState(mRecView.getWidth() > 0);
         int columnCount = Math.max(1,
-                (mRecView.getWidth() - viewPadding) / (thumbSize + itemPadding));
+                (mRecView.getWidth() - viewPadding) / (cellWidth + cellMargin));
+
         return columnCount;
     }
 
@@ -753,7 +753,7 @@ public class DirectoryFragment extends Fragment {
                 Intent intent;
 
                 // Filter out directories - those can't be shared.
-                List<DocumentInfo> docsForSend = Lists.newArrayList();
+                List<DocumentInfo> docsForSend = new ArrayList<>();
                 for (DocumentInfo doc: docs) {
                     if (!Document.MIME_TYPE_DIR.equals(doc.mimeType)) {
                         docsForSend.add(doc);
@@ -774,8 +774,8 @@ public class DirectoryFragment extends Fragment {
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     intent.addCategory(Intent.CATEGORY_DEFAULT);
 
-                    final ArrayList<String> mimeTypes = Lists.newArrayList();
-                    final ArrayList<Uri> uris = Lists.newArrayList();
+                    final ArrayList<String> mimeTypes = new ArrayList<>();
+                    final ArrayList<Uri> uris = new ArrayList<>();
                     for (DocumentInfo doc : docsForSend) {
                         mimeTypes.add(doc.mimeType);
                         uris.add(doc.derivedUri);
@@ -956,7 +956,7 @@ public class DirectoryFragment extends Fragment {
         private final Context mContext;
         private final LayoutInflater mInflater;
         // TODO: Bring back support for footers.
-        private final List<Footer> mFooters = Lists.newArrayList();
+        private final List<Footer> mFooters = new ArrayList<>();
 
         private Cursor mCursor;
         private int mCursorCount;
@@ -1330,7 +1330,7 @@ public class DirectoryFragment extends Fragment {
         return MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
     }
 
-    private @NonNull List<DocumentInfo> getSelectedDocuments() {
+    private List<DocumentInfo> getSelectedDocuments() {
         Selection sel = mSelectionManager.getSelection(new Selection());
         return getItemsAsDocuments(sel);
     }
@@ -1570,6 +1570,7 @@ public class DirectoryFragment extends Fragment {
         final Cursor cursor = mAdapter.getItem(position);
         checkNotNull(cursor, "Cursor cannot be null.");
         final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
+
         return Lists.newArrayList(doc);
     }
 
