@@ -25,11 +25,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -160,7 +161,8 @@ class NavigationBarRecents extends LinearLayout {
 
         button.setVisibility(View.VISIBLE);
         // Load the activity icon on a background thread.
-        new GetActivityIconTask(mPackageManager, button).execute(getRealActivityForTask(task));
+        AppInfo app = new AppInfo(activityName, new UserHandle(task.userId));
+        new GetActivityIconTask(mPackageManager, button).execute(app);
 
         final int taskPersistentId = task.persistentId;
         button.setOnClickListener(new View.OnClickListener() {
@@ -218,6 +220,35 @@ class NavigationBarRecents extends LinearLayout {
             mContext = context;
         }
 
+        private ComponentName getLaunchComponentForPackage(String packageName, int userId) {
+            // This code is based on ApplicationPackageManager.getLaunchIntentForPackage.
+            PackageManager packageManager = mContext.getPackageManager();
+
+            // First see if the package has an INFO activity; the existence of
+            // such an activity is implied to be the desired front-door for the
+            // overall package (such as if it has multiple launcher entries).
+            Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
+            intentToResolve.addCategory(Intent.CATEGORY_INFO);
+            intentToResolve.setPackage(packageName);
+            List<ResolveInfo> ris = packageManager.queryIntentActivitiesAsUser(
+                    intentToResolve, 0, userId);
+
+            // Otherwise, try to find a main launcher activity.
+            if (ris == null || ris.size() <= 0) {
+                // reuse the intent instance
+                intentToResolve.removeCategory(Intent.CATEGORY_INFO);
+                intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
+                intentToResolve.setPackage(packageName);
+                ris = packageManager.queryIntentActivitiesAsUser(intentToResolve, 0, userId);
+            }
+            if (ris == null || ris.size() <= 0) {
+                Log.e(TAG, "Failed to build intent for " + packageName);
+                return null;
+            }
+            return new ComponentName(ris.get(0).activityInfo.packageName,
+                    ris.get(0).activityInfo.name);
+        }
+
         @Override
         public boolean onLongClick(View v) {
             ImageView icon = (ImageView) v;
@@ -226,17 +257,15 @@ class NavigationBarRecents extends LinearLayout {
             // for the task's package.
             RecentTaskInfo task = (RecentTaskInfo) v.getTag();
             String packageName = getRealActivityForTask(task).getPackageName();
-            Intent intent = mContext.getPackageManager().getLaunchIntentForPackage(packageName);
-            if (intent == null) {
+            ComponentName component = getLaunchComponentForPackage(packageName, task.userId);
+            if (component == null) {
                 return false;
             }
 
-            if (DEBUG) Slog.d(TAG, "Start drag with " + intent);
+            if (DEBUG) Slog.d(TAG, "Start drag with " + component);
 
-            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            long userSerialNumber = userManager.getSerialNumberForUser(new UserHandle(task.userId));
             NavigationBarApps.startAppDrag(
-                    icon, new AppInfo(intent.getComponent(), userSerialNumber));
+                    icon, new AppInfo(component, new UserHandle(task.userId)));
             return true;
         }
     }

@@ -17,24 +17,26 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.ComponentName;
+import android.os.UserHandle;
 
 /**
  * Navigation bar app information.
  */
 class AppInfo {
     private final ComponentName mComponentName;
-    private final long mUserSerialNumber;
+    private final UserHandle mUser;
 
-    public AppInfo(ComponentName componentName, long userSerialNumber) {
+    public AppInfo(ComponentName componentName, UserHandle user) {
+        if (componentName == null || user == null) throw new IllegalArgumentException();
         mComponentName = componentName;
-        mUserSerialNumber = userSerialNumber;
+        mUser = user;
     }
 
     public ComponentName getComponentName() {
         return mComponentName;
     }
 
-    public long getUserSerialNumber() {
-        return mUserSerialNumber;
+    public UserHandle getUser() {
+        return mUser;
     }
 }
