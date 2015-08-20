@@ -10732,7 +10732,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             buildAssistBundleLocked(pae, pae.result);
             mPendingAssistExtras.remove(pae);
-            mHandler.removeCallbacks(pae);
+            mUiHandler.removeCallbacks(pae);
         }
         return pae.extras;
     }
@@ -10820,7 +10820,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 activity.app.thread.requestAssistContextExtras(activity.appToken, pae,
                         requestType);
                 mPendingAssistExtras.add(pae);
-                mHandler.postDelayed(pae, timeout);
+                mUiHandler.postDelayed(pae, timeout);
             } catch (RemoteException e) {
                 Slog.w(TAG, "getAssistContextExtras failed: crash calling " + activity);
                 return null;
@@ -10877,7 +10877,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             buildAssistBundleLocked(pae, extras);
             boolean exists = mPendingAssistExtras.remove(pae);
-            mHandler.removeCallbacks(pae);
+            mUiHandler.removeCallbacks(pae);
             if (!exists) {
                 // Timed out.
                 return;
