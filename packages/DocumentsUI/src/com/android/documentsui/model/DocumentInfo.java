@@ -24,7 +24,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
-import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.text.TextUtils;
 

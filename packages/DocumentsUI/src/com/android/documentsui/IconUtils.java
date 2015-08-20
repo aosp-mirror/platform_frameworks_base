@@ -23,13 +23,11 @@ import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Document;
 import android.util.TypedValue;
 
-import com.google.android.collect.Maps;
-
 import java.util.HashMap;
 
 public class IconUtils {
 
-    private static HashMap<String, Integer> sMimeIcons = Maps.newHashMap();
+    private static HashMap<String, Integer> sMimeIcons = new HashMap<>();
 
     private static void add(String mimeType, int resId) {
         if (sMimeIcons.put(mimeType, resId) != null) {

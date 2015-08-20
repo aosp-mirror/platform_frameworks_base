@@ -21,7 +21,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
-import com.google.android.collect.Lists;
+
+import com.google.common.collect.Lists;
 
 import java.util.List;
 

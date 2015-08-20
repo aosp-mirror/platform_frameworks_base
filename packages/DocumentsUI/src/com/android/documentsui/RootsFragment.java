@@ -44,8 +44,8 @@ import android.widget.TextView;
 import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
-import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -293,8 +293,8 @@ public class RootsFragment extends Fragment {
             RootItem audio = null;
             RootItem downloads = null;
 
-            final List<RootInfo> clouds = Lists.newArrayList();
-            final List<RootInfo> locals = Lists.newArrayList();
+            final List<RootInfo> clouds = new ArrayList<>();
+            final List<RootInfo> locals = new ArrayList<>();
 
             for (RootInfo root : roots) {
                 if (root.isRecents()) {
@@ -338,7 +338,7 @@ public class RootsFragment extends Fragment {
                 final List<ResolveInfo> infos = pm.queryIntentActivities(
                         includeApps, PackageManager.MATCH_DEFAULT_ONLY);
 
-                final List<AppItem> apps = Lists.newArrayList();
+                final List<AppItem> apps = new ArrayList<>();
 
                 // Omit ourselves from the list
                 for (ResolveInfo info : infos) {

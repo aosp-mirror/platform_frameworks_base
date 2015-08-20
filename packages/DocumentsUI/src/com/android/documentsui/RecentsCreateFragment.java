@@ -16,7 +16,7 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.Shared.TAG;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -50,7 +50,6 @@ import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
-import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
@@ -157,7 +156,7 @@ public class RecentsCreateFragment extends Fragment {
         @Override
         public List<DocumentStack> loadInBackground(Uri uri, CancellationSignal signal) {
             final Collection<RootInfo> matchingRoots = mRoots.getMatchingRootsBlocking(mState);
-            final ArrayList<DocumentStack> result = Lists.newArrayList();
+            final ArrayList<DocumentStack> result = new ArrayList<>();
 
             final ContentResolver resolver = getContext().getContentResolver();
             final Cursor cursor = resolver.query(

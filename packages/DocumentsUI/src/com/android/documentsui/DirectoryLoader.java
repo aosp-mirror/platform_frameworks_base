@@ -16,12 +16,12 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.BaseActivity.State.MODE_UNKNOWN;
 import static com.android.documentsui.BaseActivity.State.SORT_ORDER_DISPLAY_NAME;
 import static com.android.documentsui.BaseActivity.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.BaseActivity.State.SORT_ORDER_SIZE;
 import static com.android.documentsui.BaseActivity.State.SORT_ORDER_UNKNOWN;
+import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 
 import android.content.AsyncTaskLoader;
@@ -31,8 +31,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;

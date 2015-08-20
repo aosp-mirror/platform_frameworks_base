@@ -16,8 +16,6 @@
 
 package com.android.documentsui;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentProviderClient;
@@ -26,15 +24,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Preconditions;
 
-import com.google.android.collect.Lists;
-
 import libcore.io.IoUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -78,7 +76,7 @@ final class DocumentClipper {
      * Returns a list of Documents as decoded from Clipboard primary clipdata.
      * This should be run from inside an AsyncTask.
      */
-    public @NonNull List<DocumentInfo> getClippedDocuments() {
+    public List<DocumentInfo> getClippedDocuments() {
         return getDocumentsFromClipData(mClipboard.getPrimaryClip());
     }
 
@@ -86,9 +84,9 @@ final class DocumentClipper {
      * Returns a list of Documents as decoded in clipData.
      * This should be run from inside an AsyncTask.
      */
-    public @NonNull List<DocumentInfo> getDocumentsFromClipData(ClipData clipData) {
+    public List<DocumentInfo> getDocumentsFromClipData(ClipData clipData) {
         Preconditions.checkNotNull(clipData);
-        final List<DocumentInfo> srcDocs = Lists.newArrayList();
+        final List<DocumentInfo> srcDocs = new ArrayList<>();
 
         int count = clipData.getItemCount();
         if (count == 0) {

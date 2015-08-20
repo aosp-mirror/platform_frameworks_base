@@ -16,8 +16,8 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.BaseActivity.State.SORT_ORDER_LAST_MODIFIED;
+import static com.android.documentsui.Shared.TAG;
 
 import android.app.ActivityManager;
 import android.content.AsyncTaskLoader;
@@ -36,14 +36,14 @@ import android.util.Log;
 
 import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
-import com.google.android.collect.Maps;
-import com.google.common.collect.Lists;
+
 import com.google.common.util.concurrent.AbstractFuture;
 
 import libcore.io.IoUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +53,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
-    private static final boolean LOGD = true;
+    private static final boolean DEBUG = false;
 
     // TODO: clean up cursor ownership so background thread doesn't traverse
     // previously returned cursors for filtering/sorting; this currently races
@@ -81,7 +81,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
     private final RootsCache mRoots;
     private final State mState;
 
-    private final HashMap<RootInfo, RecentTask> mTasks = Maps.newHashMap();
+    private final HashMap<RootInfo, RecentTask> mTasks = new HashMap<>();
 
     private final int mSortOrder = State.SORT_ORDER_LAST_MODIFIED;
 
@@ -196,7 +196,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
 
         // Collect all finished tasks
         boolean allDone = true;
-        List<Cursor> cursors = Lists.newArrayList();
+        List<Cursor> cursors = new ArrayList<>();
         for (RecentTask task : mTasks.values()) {
             if (task.isDone()) {
                 try {
@@ -221,7 +221,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
             }
         }
 
-        if (LOGD) {
+        if (DEBUG) {
             Log.d(TAG, "Found " + cursors.size() + " of " + mTasks.size() + " recent queries done");
         }
 

@@ -31,7 +31,7 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.google.common.annotations.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
