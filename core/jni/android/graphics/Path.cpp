@@ -519,6 +519,9 @@ static JNINativeMethod methods[] = {
 
 int register_android_graphics_Path(JNIEnv* env) {
     return RegisterMethodsOrDie(env, "android/graphics/Path", methods, NELEM(methods));
+
+    static_assert(0  == SkPath::kCW_Direction,  "direction_mismatch");
+    static_assert(1  == SkPath::kCCW_Direction, "direction_mismatch");
 }
 
 }
