@@ -72,10 +72,16 @@
         android:summary="@string/show_battery_percentage_summary"
         android:persistent="false" />
 
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="clock_seconds"
+        android:title="@string/clock_seconds"
+        android:summary="@string/clock_seconds_desc" />
+
     <Preference
         android:key="demo_mode"
         android:title="@string/demo_mode" />
 
+    <!-- Warning, this goes last. -->
     <Preference
         android:summary="@string/tuner_persistent_warning"
         android:selectable="false" />

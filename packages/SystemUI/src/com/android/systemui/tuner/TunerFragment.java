@@ -15,8 +15,6 @@
  */
 package com.android.systemui.tuner;
 
-import static com.android.systemui.BatteryMeterView.SHOW_PERCENT_SETTING;
-
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
@@ -29,7 +27,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceGroup;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -39,8 +36,8 @@ import android.view.MenuItem;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
-import com.android.systemui.tuner.TunerService.Tunable;
+
+import static com.android.systemui.BatteryMeterView.SHOW_PERCENT_SETTING;
 
 public class TunerFragment extends PreferenceFragment {
 
@@ -108,7 +105,6 @@ public class TunerFragment extends PreferenceFragment {
         getContext().getContentResolver().registerContentObserver(
                 System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
 
-        registerPrefs(getPreferenceScreen());
         MetricsLogger.visibility(getContext(), MetricsLogger.TUNER, true);
     }
 
@@ -117,34 +113,7 @@ public class TunerFragment extends PreferenceFragment {
         super.onPause();
         getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
 
-        unregisterPrefs(getPreferenceScreen());
         MetricsLogger.visibility(getContext(), MetricsLogger.TUNER, false);
-    }
-
-    private void registerPrefs(PreferenceGroup group) {
-        TunerService tunerService = TunerService.get(getContext());
-        final int N = group.getPreferenceCount();
-        for (int i = 0; i < N; i++) {
-            Preference pref = group.getPreference(i);
-            if (pref instanceof StatusBarSwitch) {
-                tunerService.addTunable((Tunable) pref, StatusBarIconController.ICON_BLACKLIST);
-            } else if (pref instanceof PreferenceGroup) {
-                registerPrefs((PreferenceGroup) pref);
-            }
-        }
-    }
-
-    private void unregisterPrefs(PreferenceGroup group) {
-        TunerService tunerService = TunerService.get(getContext());
-        final int N = group.getPreferenceCount();
-        for (int i = 0; i < N; i++) {
-            Preference pref = group.getPreference(i);
-            if (pref instanceof Tunable) {
-                tunerService.removeTunable((Tunable) pref);
-            } else if (pref instanceof PreferenceGroup) {
-                registerPrefs((PreferenceGroup) pref);
-            }
-        }
     }
 
     @Override

@@ -1140,4 +1140,9 @@
     <!-- Displayed when user launches an app that was uninstalled  [CHAR LIMIT=NONE] -->
     <string name="activity_not_found">Application is not installed on your device</string>
 
+    <!-- Name of setting to show clock seconds [CHAR LIMIT=40] -->
+    <string name="clock_seconds">Show clock seconds</string>
+    <!-- Description of setting to show clock seconds [CHAR LIMIT=NONE] -->
+    <string name="clock_seconds_desc">Show clock seconds in the status bar. May impact battery life.</string>
+
 </resources>
