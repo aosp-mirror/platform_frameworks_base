@@ -35,6 +35,7 @@
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColorFilter.h>
+#include <SkDrawLooper.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkRegion.h>
