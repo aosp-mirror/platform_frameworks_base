@@ -139,10 +139,10 @@ static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
 // ----------------------------------------------------------------------------
 
 static void android_view_DisplayListCanvas_drawLayer(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong layerPtr, jfloat x, jfloat y) {
+        jlong rendererPtr, jlong layerPtr) {
     DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
-    renderer->drawLayer(layer, x, y);
+    renderer->drawLayer(layer);
 }
 
 // ----------------------------------------------------------------------------
@@ -192,7 +192,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateDisplayListCanvas", "(II)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
     { "nResetDisplayListCanvas", "(JII)V",     (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
 
-    { "nDrawLayer",               "(JJFF)V",   (void*) android_view_DisplayListCanvas_drawLayer },
+    { "nDrawLayer",               "(JJ)V",     (void*) android_view_DisplayListCanvas_drawLayer },
 
     { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_DisplayListCanvas_getMaxTextureWidth },
     { "nGetMaximumTextureHeight", "()I",       (void*) android_view_DisplayListCanvas_getMaxTextureHeight },
