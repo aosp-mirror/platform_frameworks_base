@@ -83,24 +83,24 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
 // Clipping
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Snapshot::clipRegionTransformed(const SkRegion& region, SkRegion::Op op) {
+void Snapshot::clipRegionTransformed(const SkRegion& region, SkRegion::Op op) {
     flags |= Snapshot::kFlagClipSet;
-    return mClipArea->clipRegion(region, op);
+    mClipArea->clipRegion(region, op);
 }
 
-bool Snapshot::clip(float left, float top, float right, float bottom, SkRegion::Op op) {
+void Snapshot::clip(float left, float top, float right, float bottom, SkRegion::Op op) {
     flags |= Snapshot::kFlagClipSet;
-    return mClipArea->clipRectWithTransform(left, top, right, bottom, transform, op);
+    mClipArea->clipRectWithTransform(left, top, right, bottom, transform, op);
 }
 
-bool Snapshot::clipPath(const SkPath& path, SkRegion::Op op) {
+void Snapshot::clipPath(const SkPath& path, SkRegion::Op op) {
     flags |= Snapshot::kFlagClipSet;
-    return mClipArea->clipPathWithTransform(path, transform, op);
+    mClipArea->clipPathWithTransform(path, transform, op);
 }
 
 void Snapshot::setClip(float left, float top, float right, float bottom) {
-    mClipArea->setClip(left, top, right, bottom);
     flags |= Snapshot::kFlagClipSet;
+    mClipArea->setClip(left, top, right, bottom);
 }
 
 bool Snapshot::hasPerspectiveTransform() const {

@@ -124,26 +124,25 @@ public:
      * the specified operation. The specified rectangle is transformed
      * by this snapshot's trasnformation.
      */
-    bool clip(float left, float top, float right, float bottom,
-            SkRegion::Op op = SkRegion::kIntersect_Op);
+    void clip(float left, float top, float right, float bottom, SkRegion::Op op);
 
     /**
      * Modifies the current clip with the new clip rectangle and
      * the specified operation. The specified rectangle is considered
      * already transformed.
      */
-    bool clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op);
+    void clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op);
 
     /**
      * Modifies the current clip with the specified region and operation.
      * The specified region is considered already transformed.
      */
-    bool clipRegionTransformed(const SkRegion& region, SkRegion::Op op);
+    void clipRegionTransformed(const SkRegion& region, SkRegion::Op op);
 
     /**
      * Modifies the current clip with the specified path and operation.
      */
-    bool clipPath(const SkPath& path, SkRegion::Op op);
+    void clipPath(const SkPath& path, SkRegion::Op op);
 
     /**
      * Sets the current clip.
