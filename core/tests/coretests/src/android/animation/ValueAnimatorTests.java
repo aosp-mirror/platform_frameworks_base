@@ -19,6 +19,8 @@ import android.os.SystemClock;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import static android.test.MoreAsserts.assertNotEqual;
+
 public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAnimatorActivity> {
     private ValueAnimator a1;
     private ValueAnimator a2;
@@ -27,6 +29,11 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
     private final static long TOLERANCE = 100; // ms
     private final static long POLL_INTERVAL = 100; // ms
 
+    private final static float A1_START_VALUE = 0f;
+    private final static float A1_END_VALUE = 1f;
+    private final static int A2_START_VALUE = 100;
+    private final static int A2_END_VALUE = 200;
+
     public ValueAnimatorTests() {
         super(BasicAnimatorActivity.class);
     }
@@ -34,8 +41,8 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        a1 = ValueAnimator.ofFloat(0, 1f).setDuration(300);
-        a2 = ValueAnimator.ofInt(100, 200).setDuration(500);
+        a1 = ValueAnimator.ofFloat(A1_START_VALUE, A1_END_VALUE).setDuration(300);
+        a2 = ValueAnimator.ofInt(A2_START_VALUE, A2_END_VALUE).setDuration(500);
     }
 
     @Override
@@ -377,6 +384,55 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
         long entireSpan = totalDuration * 2;
         long frameDelta = l1.lastUpdateTime - l1.firstRunningFrameTime;
         assertTrue(Math.abs(entireSpan - frameDelta) < TOLERANCE);
+    }
+
+    @SmallTest
+    public void testEndValue() throws Throwable {
+        final MyListener l1 = new MyListener();
+        a1.addListener(l1);
+
+        final MyListener l2 = new MyListener();
+        a2.addListener(l2);
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                a1.start();
+                a2.start();
+            }
+        });
+
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Animation has started but not finished, check animated values against end values
+                assertFalse(l1.endCalled);
+                assertFalse(l2.endCalled);
+                assertNotEqual(A1_END_VALUE, a1.getAnimatedValue());
+                assertNotEqual(A1_END_VALUE, a2.getAnimatedValue());
+
+                // Force a2 to end.
+                a2.end();
+            }
+        });
+
+        Thread.sleep(a1.getTotalDuration());
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(l1.cancelCalled);
+                assertTrue(l1.endCalled);
+                assertFalse(l2.cancelCalled);
+                assertTrue(l2.endCalled);
+
+                // By now a1 should have finished normally and a2 has skipped to the end, check
+                // their end values.
+                assertEquals(A1_END_VALUE, ((Float) (a1.getAnimatedValue())).floatValue());
+                assertEquals(A2_END_VALUE, ((Integer) (a2.getAnimatedValue())).intValue());
+            }
+        });
     }
 
     class MyUpdateListener implements ValueAnimator.AnimatorUpdateListener {
