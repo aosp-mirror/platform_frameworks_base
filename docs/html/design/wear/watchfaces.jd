@@ -288,6 +288,107 @@ Try your concept out with lots of different types of data and scenarios. Test yo
 with an actual watch screen before you start coding.</p>
 
 
+<h2 id="interactive">Design Interactive Watch Faces</h2>
+
+<p>Your watch face can respond to a single-tap gesture from the user, as long as
+there’s not another UI element that also responds to that gesture. Some possible use cases for
+interacting with the watch face include:</p>
+
+<ul>
+   <li><strong>Causing an aesthetic change</strong> on the watch face, for example inverting
+         the color scheme.</li>
+   <li><strong>Showing more information</strong> inline on the watch face, for example displaying a
+         detailed step count.</li>
+   <li><strong>Completing an action</strong> inline or in the background, for example starting a
+         timer.</li>
+   <li><strong>Launching a specific activity,</strong> for example a starting a conversation in a
+   messaging application.</li>
+</ul>
+
+<h3 id="ag">Available gestures</h3>
+<p>Only single taps are available. This restriction is important for maintaining clear and
+consistent system interactions, and for making watch face interactions as simple as
+possible: Neither you nor the user should think of watch faces as full-fledged apps. Figure 1
+summarizes the categories of gestures, and their uses.</p>
+
+<img src="{@docRoot}design/media/wear/available_gestures.png"
+srcset="{@docRoot}design/media/wear/available_gestures.png 1x,
+{@docRoot}design/media/wear/available_gestures_2x.png 2x"
+alt="Single tap is the only available gesture." width="740" height="" id="available-gestures" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Available, reserved, and blocked gestures.
+</p>
+
+As a rule, watch-face interaction should be lightweight, with the user completing their desired
+action within one or two touches.
+
+<h3>Tap targets</h3>
+
+<p>If you want to cause a simple state change on the watch face, such as a purely aesthetic
+change, you can use the entire canvas of the watch face as the tap target.</p>
+
+<p>For a more significant change or action, such as launching an activity or sending a message to a
+friend, it’s important to keep targets smaller, between 48-90 dpi, to avoid false-positive taps.
+There should be a gap between targets of at least 8-16 dpi. For an optimized tappable experience,
+display a maximum of 7 to 9 targets at once.</p>
+
+<h3 id=”areas”>Tap regions</h3>
+
+<p>You can also use different regions of the screen to trigger different changes to the watch face.
+For example, tapping on the entire canvas could toggle states for the entire face. Tapping a specific target
+could produce an inline display of information related to the target. Last, tapping outside the
+target could restore the watch face to its default state.</p>
+
+<div style="float:right;margin-bottom:20px;margin-left:20px">
+  <img src="/design/media/wear/visual_feedback.gif" width="200"
+       height="196" alt="The watch face should show where the user’s finger has made contact." style="margin-top:-10px;margin-left:13px">
+</div>
+
+
+<h3>Visual feedback</h3>
+
+<p>Provide visual feedback when the user’s finger touches down on the watch face. The tap
+event does not trigger until the user lifts their finger, but visual feedback on touchdown helps
+indicate that the system has received the touch, and also helps the user know where the touch
+landed.</p>
+
+<p class=”warning”><strong>Warning:</strong> Do not immediately launch a UI on touchdown. A UI that
+you launch on touchdown conflicts with gestures for interacting with system UI elements including
+the watch face picker, notification stream, settings shade, and app launcher.</p>
+
+<h3>Design examples</h3>
+
+Here are some examples of approaches for interactive watch faces:
+
+<h4>Applying an aesthetic change</h4>
+
+<img src="{@docRoot}design/media/wear/aesthetic.png"
+alt="" width="686" height="" id="descriptive-id" />
+
+<h4>Toggling states</h4>
+
+<img src="{@docRoot}design/media/wear/toggling-states.png"
+alt="" width="686" height="" id="descriptive-id" />
+
+<h4>Changing a targeted UI element</h4>
+
+<img src="{@docRoot}design/media/wear/changing-target.png"
+alt="" width="686" height="" id="descriptive-id" />
+
+<h4>Revealing information inline</h4>
+
+<img src="{@docRoot}design/media/wear/revealing-info.png"
+alt="" width="686" height="" id="descriptive-id" />
+
+<h4>Launching an activity with a single tap</h4>
+
+<img src="{@docRoot}design/media/wear/1-tap-launch.png"
+alt="" width="751" height="" id="descriptive-id" />
+
+<h4>Launching an activity with two taps</h4>
+
+<img src="{@docRoot}design/media/wear/2-tap-launch.png"
+alt="" width="751" height="" id="descriptive-id" />
 
 <h2 id="CompanionApp">Support the Android Wear Companion App</h2>
 

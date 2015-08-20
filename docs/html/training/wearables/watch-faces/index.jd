@@ -65,6 +65,9 @@ Drawing Watch Faces</a></dt>
 <dt><a href="{@docRoot}training/wearables/watch-faces/information.html">
 Showing Information in Watch Faces</a></dt>
 <dd>Learn how to incorporate contextual information into your watch face.</dd>
+<dt><a href="{@docRoot}training/wearables/watch-faces/interacting.html">
+Making Your Watch Face Interactive </a></dt>
+<dd>Learn how to enable the user to interact with your watch face.</dd>
 <dt><a href="{@docRoot}training/wearables/watch-faces/configuration.html">
 Providing Configuration Activities</a></dt>
 <dd>Learn how to create watch faces with configurable parameters.</dd>

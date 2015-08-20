@@ -128,7 +128,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -466,6 +466,11 @@ type="text/css">
 
             <ul>
               
+    <li><h2>Annotations</h2>
+      <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.TapType.html">WatchFaceService.TapType</a></li>
+      </ul>
+    </li>
               
               
     <li><h2>Classes</h2>
@@ -694,7 +699,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-"><p style="border:2px solid #99ccff;padding:12px;margin-top:20px"><strong>Note:</strong> The Wearable Support Library classes under the <code>android.support.wearable</code> package are subject to change. For the full Android API reference, see <a href="/reference/">Reference</a>.</p>
+<div id="jd-content" class="api apilevel-">
 <table class="jd-inheritance-table">
 
 
@@ -948,6 +953,44 @@ Summary:
         <td class="jd-descrcol" width="100%">
           Property in bundle passed to <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onPropertiesChanged(android.os.Bundle)">onPropertiesChanged(Bundle)</a></code> to indicate whether the device
  has low-bit ambient mode.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#TAP_TYPE_TAP">TAP_TYPE_TAP</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used in onTapCommaned to indicate that an "up" event on the watch face has occurred that
+ has not been consumed by another activity.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#TAP_TYPE_TOUCH">TAP_TYPE_TOUCH</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used in onTapCommand to indicate a "down" touch event on the watch face.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#TAP_TYPE_TOUCH_CANCEL">TAP_TYPE_TOUCH_CANCEL</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used in onTapCaommand to indicate that a previous TAP_TYPE_TOUCH touch event has been
+ canceled.
           
     
 
@@ -6241,6 +6284,7 @@ From interface
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>
