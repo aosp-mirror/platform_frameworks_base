@@ -54,29 +54,7 @@ public class TetherUtil {
     public static boolean setWifiTethering(boolean enable, Context context) {
         final WifiManager wifiManager =
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        final ContentResolver cr = context.getContentResolver();
-        /**
-         * Disable Wifi if enabling tethering
-         */
-        int wifiState = wifiManager.getWifiState();
-        if (enable && ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
-                    (wifiState == WifiManager.WIFI_STATE_ENABLED))) {
-            wifiManager.setWifiEnabled(false);
-            Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 1);
-        }
-
-        boolean success = wifiManager.setWifiApEnabled(null, enable);
-        /**
-         *  If needed, restore Wifi on tether disable
-         */
-        if (!enable) {
-            int wifiSavedState = Settings.Global.getInt(cr, Settings.Global.WIFI_SAVED_STATE, 0);
-            if (wifiSavedState == 1) {
-                wifiManager.setWifiEnabled(true);
-                Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 0);
-            }
-        }
-        return success;
+        return wifiManager.setWifiApEnabled(null, enable);
     }
 
     public static boolean isWifiTetherEnabled(Context context) {
