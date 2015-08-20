@@ -2835,6 +2835,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
+        } else if (keyCode == KeyEvent.KEYCODE_SLASH && event.isMetaPressed()) {
+            if (down) {
+                if (repeatCount == 0) {
+                    showKeyboardShortcutsMenu();
+                }
+            }
         } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
             if (down) {
                 if (repeatCount == 0) {
@@ -3252,6 +3258,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Slog.e(TAG, "RemoteException when showing recent apps", e);
             // re-acquire status bar service next time it is needed.
             mStatusBarService = null;
+        }
+    }
+
+    private void showKeyboardShortcutsMenu() {
+        try {
+            IStatusBarService statusbar = getStatusBarService();
+            if (statusbar != null) {
+                statusbar.showKeyboardShortcutsMenu();
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException when showing keyboard shortcuts menu", e);
         }
     }
 
