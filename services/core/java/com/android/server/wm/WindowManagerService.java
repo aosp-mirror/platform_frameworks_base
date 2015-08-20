@@ -11952,12 +11952,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowList windows = getDefaultWindowListLocked();
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                     final WindowState win = windows.get(winNdx);
+                    final boolean isForceHiding = mPolicy.isForceHiding(win.mAttrs);
                     if (win.isVisibleLw()
-                            && (win.mAppToken != null || mPolicy.isForceHiding(win.mAttrs))) {
+                            && (win.mAppToken != null || isForceHiding)) {
                         win.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
                         // Force add to mResizingWindows.
                         win.mLastContentInsets.set(-1, -1, -1, -1);
                         mWaitingForDrawn.add(win);
+
+                        // No need to wait for the windows below Keyguard.
+                        if (isForceHiding) {
+                            break;
+                        }
                     }
                 }
                 requestTraversalLocked();
