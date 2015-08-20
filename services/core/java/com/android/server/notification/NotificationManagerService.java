@@ -716,7 +716,7 @@ public class NotificationManagerService extends SystemService {
                             final IPackageManager pm = AppGlobals.getPackageManager();
                             final int enabled = pm.getApplicationEnabledSetting(pkgName,
                                     changeUserId != UserHandle.USER_ALL ? changeUserId :
-                                    UserHandle.USER_OWNER);
+                                    UserHandle.USER_SYSTEM);
                             if (enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                                     || enabled == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
                                 cancelNotifications = false;
@@ -1420,7 +1420,7 @@ public class NotificationManagerService extends SystemService {
                             if (!r.isSeen()) {
                                 if (DBG) Slog.d(TAG, "Marking notification as seen " + keys[i]);
                                 mAppUsageStats.reportEvent(r.sbn.getPackageName(),
-                                        userId == UserHandle.USER_ALL ? UserHandle.USER_OWNER
+                                        userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM
                                                 : userId,
                                         UsageEvents.Event.USER_INTERACTION);
                                 r.setSeen();
@@ -1701,7 +1701,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public byte[] getBackupPayload(int user) {
             if (DBG) Slog.d(TAG, "getBackupPayload u=" + user);
-            if (user != UserHandle.USER_OWNER) {
+            //TODO: http://b/22388012
+            if (user != UserHandle.USER_SYSTEM) {
                 Slog.w(TAG, "getBackupPayload: cannot backup policy for user " + user);
                 return null;
             }
@@ -1723,7 +1724,8 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "applyRestore: no payload to restore for user " + user);
                 return;
             }
-            if (user != UserHandle.USER_OWNER) {
+            //TODO: http://b/22388012
+            if (user != UserHandle.USER_SYSTEM) {
                 Slog.w(TAG, "applyRestore: cannot restore policy for user " + user);
                 return;
             }

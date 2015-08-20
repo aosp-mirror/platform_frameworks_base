@@ -148,7 +148,8 @@ public class RankingHelper implements RankingConfig {
                     if (!TextUtils.isEmpty(name)) {
                         if (forRestore) {
                             try {
-                                uid = pm.getPackageUid(name, UserHandle.USER_OWNER);
+                                //TODO: http://b/22388012
+                                uid = pm.getPackageUid(name, UserHandle.USER_SYSTEM);
                             } catch (NameNotFoundException e) {
                                 // noop
                             }
@@ -213,7 +214,8 @@ public class RankingHelper implements RankingConfig {
         final int N = mRecords.size();
         for (int i = 0; i < N; i++) {
             final Record r = mRecords.valueAt(i);
-            if (forBackup && UserHandle.getUserId(r.uid) != UserHandle.USER_OWNER) {
+            //TODO: http://b/22388012
+            if (forBackup && UserHandle.getUserId(r.uid) != UserHandle.USER_SYSTEM) {
                 continue;
             }
             out.startTag(null, TAG_PACKAGE);
@@ -437,7 +439,8 @@ public class RankingHelper implements RankingConfig {
             final Record r = mRestoredWithoutUids.get(pkg);
             if (r != null) {
                 try {
-                    r.uid = pm.getPackageUid(r.pkg, UserHandle.USER_OWNER);
+                    //TODO: http://b/22388012
+                    r.uid = pm.getPackageUid(r.pkg, UserHandle.USER_SYSTEM);
                     mRestoredWithoutUids.remove(pkg);
                     mRecords.put(recordKey(r.pkg, r.uid), r);
                     updated = true;

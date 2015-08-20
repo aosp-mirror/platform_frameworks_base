@@ -85,7 +85,7 @@ public class ZenModeHelper {
     private final Metrics mMetrics = new Metrics();
 
     private int mZenMode;
-    private int mUser = UserHandle.USER_OWNER;
+    private int mUser = UserHandle.USER_SYSTEM;
     private ZenModeConfig mConfig;
     private AudioManagerInternal mAudioManager;
     private boolean mEffectsSuppressed;
@@ -99,7 +99,7 @@ public class ZenModeHelper {
         appendDefaultScheduleRules(mDefaultConfig);
         appendDefaultEventRules(mDefaultConfig);
         mConfig = mDefaultConfig;
-        mConfigs.put(UserHandle.USER_OWNER, mConfig);
+        mConfigs.put(UserHandle.USER_SYSTEM, mConfig);
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
         mFiltering = new ZenModeFiltering(mContext);
@@ -152,7 +152,7 @@ public class ZenModeHelper {
     }
 
     public void onUserSwitched(int user) {
-        if (mUser == user || user < UserHandle.USER_OWNER) return;
+        if (mUser == user || user < UserHandle.USER_SYSTEM) return;
         mUser = user;
         if (DEBUG) Log.d(TAG, "onUserSwitched u=" + user);
         ZenModeConfig config = mConfigs.get(user);
@@ -165,7 +165,7 @@ public class ZenModeHelper {
     }
 
     public void onUserRemoved(int user) {
-        if (user < UserHandle.USER_OWNER) return;
+        if (user < UserHandle.USER_SYSTEM) return;
         if (DEBUG) Log.d(TAG, "onUserRemoved u=" + user);
         mConfigs.remove(user);
     }
@@ -265,7 +265,8 @@ public class ZenModeHelper {
         final ZenModeConfig config = ZenModeConfig.readXml(parser, mConfigMigration);
         if (config != null) {
             if (forRestore) {
-                if (config.user != UserHandle.USER_OWNER) {
+                //TODO: http://b/22388012
+                if (config.user != UserHandle.USER_SYSTEM) {
                     return;
                 }
                 config.manualRule = null;  // don't restore the manual rule
@@ -285,7 +286,8 @@ public class ZenModeHelper {
     public void writeXml(XmlSerializer out, boolean forBackup) throws IOException {
         final int N = mConfigs.size();
         for (int i = 0; i < N; i++) {
-            if (forBackup && mConfigs.keyAt(i) != UserHandle.USER_OWNER) {
+            //TODO: http://b/22388012
+            if (forBackup && mConfigs.keyAt(i) != UserHandle.USER_SYSTEM) {
                 continue;
             }
             mConfigs.valueAt(i).writeXml(out);
