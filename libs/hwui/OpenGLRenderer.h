@@ -188,7 +188,7 @@ public:
             const SkPaint* paint, int flags);
 
     void drawRenderNode(RenderNode* displayList, Rect& dirty, int32_t replayFlags = 1);
-    void drawLayer(Layer* layer, float x, float y);
+    void drawLayer(Layer* layer);
     void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     void drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
             TextureVertex* vertices, bool pureTranslate, const Rect& bounds, const SkPaint* paint);
