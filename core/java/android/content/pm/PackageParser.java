@@ -50,6 +50,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.Gravity;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
@@ -3260,10 +3261,12 @@ public class PackageParser {
                     owner.preferredActivityFilters.add(intent);
                 }
             } else if (parser.getName().equals("meta-data")) {
-                if ((a.metaData=parseMetaData(res, parser, attrs, a.metaData,
+                if ((a.metaData = parseMetaData(res, parser, attrs, a.metaData,
                         outError)) == null) {
                     return null;
                 }
+            } else if (!receiver && parser.getName().equals("initial-layout")) {
+                parseInitialLayout(res, attrs, a);
             } else {
                 if (!RIGID_PARSER) {
                     Slog.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
@@ -3294,6 +3297,43 @@ public class PackageParser {
         }
 
         return a;
+    }
+
+    private void parseInitialLayout(Resources res, AttributeSet attrs, Activity a) {
+        TypedArray sw = res.obtainAttributes(attrs,
+                com.android.internal.R.styleable.AndroidManifestInitialLayout);
+        int width = -1;
+        float widthFraction = -1f;
+        int height = -1;
+        float heightFraction = -1f;
+        final int widthType = sw.getType(
+                com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_width);
+        if (widthType == TypedValue.TYPE_FRACTION) {
+            widthFraction = sw.getFraction(
+                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_width,
+                    1, 1, -1);
+        } else if (widthType == TypedValue.TYPE_DIMENSION) {
+            width = sw.getDimensionPixelSize(
+                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_width,
+                    -1);
+        }
+        final int heightType = sw.getType(
+                com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_height);
+        if (heightType == TypedValue.TYPE_FRACTION) {
+            heightFraction = sw.getFraction(
+                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_height,
+                    1, 1, -1);
+        } else if (heightType == TypedValue.TYPE_DIMENSION) {
+            height = sw.getDimensionPixelSize(
+                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_height,
+                    -1);
+        }
+        int gravity = sw.getInt(
+                com.android.internal.R.styleable.AndroidManifestInitialLayout_gravity,
+                Gravity.CENTER);
+        sw.recycle();
+        a.info.initialLayout = new ActivityInfo.InitialLayout(width, widthFraction,
+                height, heightFraction, gravity);
     }
 
     private Activity parseActivityAlias(Package owner, Resources res,
