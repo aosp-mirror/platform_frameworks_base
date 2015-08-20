@@ -855,7 +855,8 @@ public class RippleDrawable extends LayerDrawable {
 
         // Position the shader to account for canvas translation.
         if (mMaskShader != null) {
-            mMaskMatrix.setTranslate(-x, -y);
+            final Rect bounds = getBounds();
+            mMaskMatrix.setTranslate(bounds.left - x, bounds.top - y);
             mMaskShader.setLocalMatrix(mMaskMatrix);
         }
 
