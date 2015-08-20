@@ -279,10 +279,15 @@ public class StatusBarKeyguardViewManager {
             if (mFingerprintUnlockController.getMode()
                     == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING) {
                 mFingerprintUnlockController.startKeyguardFadingAway();
-                mPhoneStatusBar.setKeyguardFadingAway(startTime, 0, 250);
+                mPhoneStatusBar.setKeyguardFadingAway(startTime, 0, 240);
                 mStatusBarWindowManager.setKeyguardFadingAway(true);
                 mPhoneStatusBar.fadeKeyguardWhilePulsing();
-                animateScrimControllerKeyguardFadingOut(0, 250);
+                animateScrimControllerKeyguardFadingOut(0, 240, new Runnable() {
+                    @Override
+                    public void run() {
+                        mPhoneStatusBar.hideKeyguard();
+                    }
+                });
             } else {
                 mFingerprintUnlockController.startKeyguardFadingAway();
                 mPhoneStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
@@ -316,10 +321,18 @@ public class StatusBarKeyguardViewManager {
     }
 
     private void animateScrimControllerKeyguardFadingOut(long delay, long duration) {
+        animateScrimControllerKeyguardFadingOut(delay, duration, null /* endRunnable */);
+    }
+
+    private void animateScrimControllerKeyguardFadingOut(long delay, long duration,
+            final Runnable endRunnable) {
         Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, "Fading out", 0);
         mScrimController.animateKeyguardFadingOut(delay, duration, new Runnable() {
             @Override
             public void run() {
+                if (endRunnable != null) {
+                    endRunnable.run();
+                }
                 mStatusBarWindowManager.setKeyguardFadingAway(false);
                 mPhoneStatusBar.finishKeyguardFadingAway();
                 mFingerprintUnlockController.finishKeyguardFadingAway();
