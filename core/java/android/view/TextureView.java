@@ -302,25 +302,11 @@ public class TextureView extends View {
      */
     @Override
     public final void draw(Canvas canvas) {
-        // NOTE: Maintain this carefully (see View#draw)
+        // NOTE: Maintain this carefully (see View.java)
         mPrivateFlags = (mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
 
-        /* Simplify drawing to guarantee the layer is the only thing drawn - so e.g. no background,
-        scrolling, or fading edges. This guarantees all drawing is in the layer, so drawing
-        properties (alpha, layer paint) affect all of the content of a TextureView. */
-
-        if (canvas.isHardwareAccelerated()) {
-            DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
-
-            HardwareLayer layer = getHardwareLayer();
-            if (layer != null) {
-                applyUpdate();
-                applyTransformMatrix();
-
-                mLayer.setLayerPaint(mLayerPaint); // ensure layer paint is up to date
-                displayListCanvas.drawHardwareLayer(layer);
-            }
-        }
+        applyUpdate();
+        applyTransformMatrix();
     }
 
     /**
@@ -356,7 +342,12 @@ public class TextureView extends View {
         invalidate(true);
     }
 
+    @Override
     HardwareLayer getHardwareLayer() {
+        // NOTE: Maintain these two lines very carefully (see View.java)
+        mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
+        mPrivateFlags &= ~PFLAG_DIRTY_MASK;
+
         if (mLayer == null) {
             if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
                 return null;
@@ -393,6 +384,9 @@ public class TextureView extends View {
             mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
         }
+
+        applyUpdate();
+        applyTransformMatrix();
 
         return mLayer;
     }

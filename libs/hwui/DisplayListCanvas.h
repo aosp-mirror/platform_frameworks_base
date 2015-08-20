@@ -91,7 +91,7 @@ public:
 // ----------------------------------------------------------------------------
 // HWUI Canvas draw operations - special
 // ----------------------------------------------------------------------------
-    void drawLayer(DeferredLayerUpdater* layerHandle);
+    void drawLayer(DeferredLayerUpdater* layerHandle, float x, float y);
     void drawRenderNode(RenderNode* renderNode);
 
     // TODO: rename for consistency

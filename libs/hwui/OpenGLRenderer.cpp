@@ -2267,7 +2267,7 @@ void OpenGLRenderer::drawPath(const SkPath* path, const SkPaint* paint) {
     mDirty = true;
 }
 
-void OpenGLRenderer::drawLayer(Layer* layer) {
+void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
     if (!layer) {
         return;
     }
@@ -2283,7 +2283,7 @@ void OpenGLRenderer::drawLayer(Layer* layer) {
 
     bool clipRequired = false;
     const bool rejected = mState.calculateQuickRejectForScissor(
-            0, 0, layer->layer.getWidth(), layer->layer.getHeight(),
+            x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight(),
             &clipRequired, nullptr, false);
 
     if (rejected) {
@@ -2312,7 +2312,7 @@ void OpenGLRenderer::drawLayer(Layer* layer) {
                     .setMeshTexturedIndexedQuads(layer->mesh, layer->meshElementCount)
                     .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
                     .setTransform(*currentSnapshot(),  TransformFlags::None)
-                    .setModelViewOffsetRectSnap(0, 0, Rect(0, 0, layer->layer.getWidth(), layer->layer.getHeight()))
+                    .setModelViewOffsetRectSnap(x, y, Rect(0, 0, layer->layer.getWidth(), layer->layer.getHeight()))
                     .build();
             DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
 #if DEBUG_LAYERS_AS_REGIONS
@@ -2325,7 +2325,7 @@ void OpenGLRenderer::drawLayer(Layer* layer) {
 
             SkPaint paint;
             paint.setColor(0x7f00ff00);
-            drawColorRect(0, 0, layer->layer.getWidth(), layer->layer.getHeight(), &paint);
+            drawColorRect(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight(), &paint);
         }
     }
     layer->hasDrawnSinceUpdate = true;

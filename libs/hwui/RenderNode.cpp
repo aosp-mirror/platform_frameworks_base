@@ -875,7 +875,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         renderer.setBaseTransform(initialTransform);
 
         if (drawLayer) {
-            handler(new (alloc) DrawLayerOp(mLayer),
+            handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
                     renderer.getSaveCount() - 1, properties().getClipToBounds());
         } else {
             const int saveCountOffset = renderer.getSaveCount() - 1;
