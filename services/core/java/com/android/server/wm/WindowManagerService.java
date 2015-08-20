@@ -114,6 +114,7 @@ import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.FastPrintWriter;
@@ -5634,7 +5635,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         int right = wf.right - cr.right;
                         int bottom = wf.bottom - cr.bottom;
                         frame.union(left, top, right, bottom);
-                        ws.getTaskBounds(stackBounds);
+                        ws.getTaskBounds(stackBounds, !BOUNDS_FOR_TOUCH);
                         if (!frame.intersect(stackBounds)) {
                             // Set frame empty if there's no intersection.
                             frame.setEmpty();
