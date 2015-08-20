@@ -358,8 +358,8 @@ static void DetachDescriptors(JNIEnv* env, jintArray fdsToClose) {
     return;
   }
   jsize count = env->GetArrayLength(fdsToClose);
-  jint *ar = env->GetIntArrayElements(fdsToClose, 0);
-  if (!ar) {
+  ScopedIntArrayRO ar(env, fdsToClose);
+  if (ar.get() == NULL) {
       ALOGE("Bad fd array");
       RuntimeAbort(env);
   }
