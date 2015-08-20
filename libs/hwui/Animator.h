@@ -59,8 +59,8 @@ public:
         mMayRunAsync = mayRunAsync;
     }
     bool mayRunAsync() { return mMayRunAsync; }
-    ANDROID_API void start() { mStagingPlayState = RUNNING; onStagingPlayStateChanged(); }
-    ANDROID_API void end() { mStagingPlayState = FINISHED; onStagingPlayStateChanged(); }
+    ANDROID_API void start() { mStagingPlayState = PlayState::Running; onStagingPlayStateChanged(); }
+    ANDROID_API void end() { mStagingPlayState = PlayState::Finished; onStagingPlayStateChanged(); }
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
@@ -68,8 +68,8 @@ public:
     void pushStaging(AnimationContext& context);
     bool animate(AnimationContext& context);
 
-    bool isRunning() { return mPlayState == RUNNING; }
-    bool isFinished() { return mPlayState == FINISHED; }
+    bool isRunning() { return mPlayState == PlayState::Running; }
+    bool isFinished() { return mPlayState == PlayState::Finished; }
     float finalValue() { return mFinalValue; }
 
     ANDROID_API virtual uint32_t dirtyMask() = 0;
@@ -77,6 +77,12 @@ public:
     void forceEndNow(AnimationContext& context);
 
 protected:
+    enum class PlayState {
+        NotStarted,
+        Running,
+        Finished,
+    };
+
     BaseRenderNodeAnimator(float finalValue);
     virtual ~BaseRenderNodeAnimator();
 
@@ -87,12 +93,6 @@ protected:
     void callOnFinishedListener(AnimationContext& context);
 
     virtual void onStagingPlayStateChanged() {}
-
-    enum PlayState {
-        NOT_STARTED,
-        RUNNING,
-        FINISHED,
-    };
 
     RenderNode* mTarget;
 

@@ -245,7 +245,7 @@ void Caches::flush(FlushMode mode) {
     FLUSH_LOGD("Flushing caches (mode %d)", mode);
 
     switch (mode) {
-        case kFlushMode_Full:
+        case FlushMode::Full:
             textureCache.clear();
             patchCache.clear();
             dropShadowCache.clear();
@@ -254,13 +254,13 @@ void Caches::flush(FlushMode mode) {
             fboCache.clear();
             dither.clear();
             // fall through
-        case kFlushMode_Moderate:
+        case FlushMode::Moderate:
             fontRenderer->flush();
             textureCache.flush();
             pathCache.clear();
             tessellationCache.clear();
             // fall through
-        case kFlushMode_Layers:
+        case FlushMode::Layers:
             layerCache.clear();
             renderBufferCache.clear();
             break;

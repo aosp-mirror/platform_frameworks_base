@@ -103,10 +103,10 @@ typedef uint64_t programid;
  * A ProgramDescription must be used in conjunction with a ProgramCache.
  */
 struct ProgramDescription {
-    enum ColorFilterMode {
-        kColorNone = 0,
-        kColorMatrix,
-        kColorBlend
+    enum class ColorFilterMode {
+        None = 0,
+        Matrix,
+        Blend
     };
 
     enum Gradient {
@@ -193,7 +193,7 @@ struct ProgramDescription {
         bitmapWrapS = GL_CLAMP_TO_EDGE;
         bitmapWrapT = GL_CLAMP_TO_EDGE;
 
-        colorOp = kColorNone;
+        colorOp = ColorFilterMode::None;
         colorMode = SkXfermode::kClear_Mode;
 
         framebufferMode = SkXfermode::kClear_Mode;
@@ -249,14 +249,14 @@ struct ProgramDescription {
             key |= (shadersMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_SHADER_SHIFT;
         }
         switch (colorOp) {
-            case kColorMatrix:
+            case ColorFilterMode::Matrix:
                 key |= PROGRAM_KEY_COLOR_MATRIX;
                 break;
-            case kColorBlend:
+            case ColorFilterMode::Blend:
                 key |= PROGRAM_KEY_COLOR_BLEND;
                 key |= (colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
                 break;
-            case kColorNone:
+            case ColorFilterMode::None:
                 break;
         }
         key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;

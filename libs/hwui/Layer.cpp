@@ -36,7 +36,7 @@ namespace android {
 namespace uirenderer {
 
 Layer::Layer(Type layerType, RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight)
-        : state(kState_Uncached)
+        : state(State::Uncached)
         , caches(Caches::getInstance())
         , renderState(renderState)
         , texture(caches)

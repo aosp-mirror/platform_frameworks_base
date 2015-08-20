@@ -272,7 +272,7 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
 Layer* LayerRenderer::createTextureLayer(RenderState& renderState) {
     LAYER_RENDERER_LOGD("Creating new texture layer");
 
-    Layer* layer = new Layer(Layer::kType_Texture, renderState, 0, 0);
+    Layer* layer = new Layer(Layer::Type::Texture, renderState, 0, 0);
     layer->setCacheable(false);
     layer->layer.set(0.0f, 0.0f, 0.0f, 0.0f);
     layer->texCoords.set(0.0f, 1.0f, 1.0f, 0.0f);

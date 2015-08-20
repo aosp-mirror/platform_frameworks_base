@@ -710,8 +710,8 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
         OpenGLRenderer& renderer, T& handler) {
     const int size = zTranslatedNodes.size();
     if (size == 0
-            || (mode == kNegativeZChildren && zTranslatedNodes[0].key > 0.0f)
-            || (mode == kPositiveZChildren && zTranslatedNodes[size - 1].key < 0.0f)) {
+            || (mode == ChildrenSelectMode::NegativeZChildren && zTranslatedNodes[0].key > 0.0f)
+            || (mode == ChildrenSelectMode::PositiveZChildren && zTranslatedNodes[size - 1].key < 0.0f)) {
         // no 3d children to draw
         return;
     }
@@ -730,7 +730,7 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
      */
     const size_t nonNegativeIndex = findNonNegativeIndex(zTranslatedNodes);
     size_t drawIndex, shadowIndex, endIndex;
-    if (mode == kNegativeZChildren) {
+    if (mode == ChildrenSelectMode::NegativeZChildren) {
         drawIndex = 0;
         endIndex = nonNegativeIndex;
         shadowIndex = endIndex; // draw no shadows
@@ -886,7 +886,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                 std::vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
                 buildZSortedChildList(chunk, zTranslatedNodes);
 
-                issueOperationsOf3dChildren(kNegativeZChildren,
+                issueOperationsOf3dChildren(ChildrenSelectMode::NegativeZChildren,
                         initialTransform, zTranslatedNodes, renderer, handler);
 
 
@@ -903,7 +903,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                     }
                 }
 
-                issueOperationsOf3dChildren(kPositiveZChildren,
+                issueOperationsOf3dChildren(ChildrenSelectMode::PositiveZChildren,
                         initialTransform, zTranslatedNodes, renderer, handler);
             }
         }

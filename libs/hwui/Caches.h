@@ -83,10 +83,10 @@ private:
     static Caches* sInstance;
 
 public:
-    enum FlushMode {
-        kFlushMode_Layers = 0,
-        kFlushMode_Moderate,
-        kFlushMode_Full
+    enum class FlushMode {
+        Layers = 0,
+        Moderate,
+        Full
     };
 
     /**
@@ -103,7 +103,7 @@ public:
 
     /**
      * Destroys all resources associated with this cache. This should
-     * be called after a flush(kFlushMode_Full).
+     * be called after a flush(FlushMode::Full).
      */
     void terminate();
 

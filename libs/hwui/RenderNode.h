@@ -184,9 +184,9 @@ private:
         return nodes.size();
     }
 
-    enum ChildrenSelectMode {
-        kNegativeZChildren,
-        kPositiveZChildren
+    enum class ChildrenSelectMode {
+        NegativeZChildren,
+        PositiveZChildren
     };
 
     void computeOrderingImpl(DrawRenderNodeOp* opState,

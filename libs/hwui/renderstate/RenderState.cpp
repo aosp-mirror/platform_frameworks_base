@@ -229,11 +229,11 @@ void RenderState::render(const Glop& glop) {
             glop.transform.transformFlags & TransformFlags::OffsetByFudgeFactor);
 
     // Color filter uniforms
-    if (fill.filterMode == ProgramDescription::kColorBlend) {
+    if (fill.filterMode == ProgramDescription::ColorFilterMode::Blend) {
         const FloatColor& color = fill.filter.color;
         glUniform4f(mCaches->program().getUniform("colorBlend"),
                 color.r, color.g, color.b, color.a);
-    } else if (fill.filterMode == ProgramDescription::kColorMatrix) {
+    } else if (fill.filterMode == ProgramDescription::ColorFilterMode::Matrix) {
         glUniformMatrix4fv(mCaches->program().getUniform("colorMatrix"), 1, GL_FALSE,
                 fill.filter.matrix.matrix);
         glUniform4fv(mCaches->program().getUniform("colorMatrixVector"), 1,
