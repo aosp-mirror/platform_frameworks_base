@@ -91,7 +91,8 @@ public class NavigationBarView extends LinearLayout {
 
     private OnVerticalChangedListener mOnVerticalChangedListener;
     private boolean mIsLayoutRtl;
-    private boolean mLayoutTransitionsEnabled;
+    private boolean mLayoutTransitionsEnabled = true;
+    private boolean mWakeAndUnlocking;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -361,13 +362,19 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-    public void setWakeAndUnlocking(boolean wakeAndUnlocking) {
-        setUseFadingAnimations(wakeAndUnlocking);
-        setLayoutTransitionsEnabled(!wakeAndUnlocking);
+    public void setLayoutTransitionsEnabled(boolean enabled) {
+        mLayoutTransitionsEnabled = enabled;
+        updateLayoutTransitionsEnabled();
     }
 
-    private void setLayoutTransitionsEnabled(boolean enabled) {
-        mLayoutTransitionsEnabled = enabled;
+    public void setWakeAndUnlocking(boolean wakeAndUnlocking) {
+        setUseFadingAnimations(wakeAndUnlocking);
+        mWakeAndUnlocking = wakeAndUnlocking;
+        updateLayoutTransitionsEnabled();
+    }
+
+    private void updateLayoutTransitionsEnabled() {
+        boolean enabled = !mWakeAndUnlocking && mLayoutTransitionsEnabled;
         ViewGroup navButtons = (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
         LayoutTransition lt = navButtons.getLayoutTransition();
         if (lt != null) {
@@ -459,7 +466,7 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
-        setLayoutTransitionsEnabled(mLayoutTransitionsEnabled);
+        updateLayoutTransitionsEnabled();
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
