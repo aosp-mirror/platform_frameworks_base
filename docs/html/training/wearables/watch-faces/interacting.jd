@@ -62,10 +62,10 @@ implementation.</p>
 reserves gestures such as drag and long-press for system UI elements.
 Therefore, the system does not send raw touch events to the watch face. Instead, the system forwards specific commands to the
 <a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onTapCommand(int, int, int, long)">
-method.
+onTapCommand()</a> method.
 
 <p>The system sends the first command,
-<a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceService.html#TAP_TYPE_TOUCH"</a>
+<a href="{@docRoot}reference/android/support/wearable/watchface/WatchFaceService.html#TAP_TYPE_TOUCH">
 {@code TAP_TYPE_TOUCH}</a>, when the user initially touches the
 screen. This event lets you provide visual feedback to the user on touch.  Your app should not
 launch a UI when this event triggers. Launching a UI prevents drag events from opening the app
