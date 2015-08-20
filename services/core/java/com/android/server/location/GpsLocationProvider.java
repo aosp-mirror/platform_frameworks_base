@@ -766,6 +766,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 && mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
             if (mNetworkAvailable) {
                 String apnName = info.getExtraInfo();
+                // APN wasn't found in the intent, try to get it from the content provider.
+                if (apnName == null) {
+                    apnName = getSelectedApn();
+                }
                 if (apnName == null) {
                     /* Assign a dummy value in the case of C2K as otherwise we will have a runtime
                     exception in the following call to native_agps_data_conn_open*/
