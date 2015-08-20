@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -474,15 +475,18 @@ class WallpaperController {
         result.reset();
         WindowState w = null;
         int windowDetachedI = -1;
+        boolean resetTopWallpaper = false;
+        boolean inFreeformSpace = false;
         for (int i = windows.size() - 1; i >= 0; i--) {
             w = windows.get(i);
             if ((w.mAttrs.type == TYPE_WALLPAPER)) {
-                if (result.topWallpaper == null) {
+                if (result.topWallpaper == null || resetTopWallpaper) {
                     result.setTopWallpaper(w, i);
+                    resetTopWallpaper = false;
                 }
                 continue;
             }
-            result.topWallpaper = null;
+            resetTopWallpaper = true;
             if (w != winAnimator.mWindowDetachedWallpaper && w.mAppToken != null) {
                 // If this window's app token is hidden and not animating,
                 // it is of no interest to us.
@@ -494,6 +498,11 @@ class WallpaperController {
             }
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Win #" + i + " " + w + ": isOnScreen="
                     + w.isOnScreen() + " mDrawState=" + w.mWinAnimator.mDrawState);
+
+            if (!inFreeformSpace) {
+                TaskStack stack = w.getStack();
+                inFreeformSpace = stack != null && stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
+            }
 
             // If the app is executing an animation because the keyguard is going away,
             // keep the wallpaper during the animation so it doesn't flicker out.
@@ -520,6 +529,11 @@ class WallpaperController {
             if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "Found animating detached wallpaper activity: #" + windowDetachedI + "=" + w);
             result.setWallpaperTarget(w, windowDetachedI);
+        }
+        if (result.wallpaperTarget == null && inFreeformSpace) {
+            // In freeform mode we set the wallpaper as its own target, so we don't need an
+            // additional window to make it visible.
+            result.setWallpaperTarget(result.topWallpaper, result.topWallpaperIndex);
         }
     }
 
