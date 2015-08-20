@@ -2388,4 +2388,9 @@ public class NotificationPanelView extends PanelView implements
     protected boolean isPanelVisibleBecauseOfHeadsUp() {
         return mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpAnimatingAway;
     }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return !mDozing;
+    }
 }
