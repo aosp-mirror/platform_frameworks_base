@@ -128,7 +128,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -501,6 +501,7 @@ type="text/css">
           <li class="selected api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html">GridPagerAdapter</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridViewPager.html">GridViewPager</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridViewPager.LayoutParams.html">GridViewPager.LayoutParams</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ProgressSpinner.html">ProgressSpinner</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/SimpleAnimatorListener.html">SimpleAnimatorListener</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/WatchViewStub.html">WatchViewStub</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/WearableFrameLayout.html">WearableFrameLayout</a></li>
@@ -600,6 +601,9 @@ Summary:
   
 
 
+  &#124; <a href="#promethods">Protected Methods</a>
+  
+
 
   &#124; <a href="#inhmethods">Inherited Methods</a>
 
@@ -645,7 +649,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-"><p style="border:2px solid #99ccff;padding:12px;margin-top:20px"><strong>Note:</strong> The Wearable Support Library classes under the <code>android.support.wearable</code> package are subject to change. For the full Android API reference, see <a href="/reference/">Reference</a>.</p>
+<div id="jd-content" class="api apilevel-">
 <table class="jd-inheritance-table">
 
 
@@ -1367,6 +1371,39 @@ Summary:
 </table>
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="promethods" class="jd-sumtable"><tr><th colspan="12">Protected Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html#applyItemPosition(java.lang.Object, android.graphics.Point)">applyItemPosition</a></span>(Object object, Point position)</nobr>
+        
+        <div class="jd-descrdiv">
+          Called after <code><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html#getItemPosition(java.lang.Object)">getItemPosition(Object)</a></code> to allow superclasses to update their
+ internal bookkeeping if a subclass has overridden <code><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html#getItemPosition(java.lang.Object)">getItemPosition(Object)</a></code>.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+
+</table>
 
 
 
@@ -2742,6 +2779,58 @@ From class
 
 <!-- ========= METHOD DETAIL ======== -->
 
+<h2>Protected Methods</h2>
+
+
+
+<A NAME="applyItemPosition(java.lang.Object, android.graphics.Point)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">applyItemPosition</span>
+      <span class="normal">(Object object, Point position)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called after <code><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html#getItemPosition(java.lang.Object)">getItemPosition(Object)</a></code> to allow superclasses to update their
+ internal bookkeeping if a subclass has overridden <code><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html#getItemPosition(java.lang.Object)">getItemPosition(Object)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>object</td>
+          <td>Object representing the item passed to <code><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html#getItemPosition(java.lang.Object)">getItemPosition(Object)</a></code>.</td>
+        </tr>
+        <tr>
+          <th>position</td>
+          <td>position which was returned from <code><a href="../../../../../reference/android/support/wearable/view/GridPagerAdapter.html#getItemPosition(java.lang.Object)">getItemPosition(Object)</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+
 
 
 <!-- ========= END OF CLASS DATA ========= -->
@@ -2800,6 +2889,7 @@ From class
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>
