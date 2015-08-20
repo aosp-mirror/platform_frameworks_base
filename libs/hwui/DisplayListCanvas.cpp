@@ -216,11 +216,11 @@ void DisplayListCanvas::drawRenderNode(RenderNode* renderNode) {
     addRenderNodeOp(op);
 }
 
-void DisplayListCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
+void DisplayListCanvas::drawLayer(DeferredLayerUpdater* layerHandle, float x, float y) {
     // We ref the DeferredLayerUpdater due to its thread-safe ref-counting
     // semantics.
     mDisplayListData->ref(layerHandle);
-    addDrawOp(new (alloc()) DrawLayerOp(layerHandle->backingLayer()));
+    addDrawOp(new (alloc()) DrawLayerOp(layerHandle->backingLayer(), x, y));
 }
 
 void DisplayListCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {

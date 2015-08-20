@@ -15002,6 +15002,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * If this View draws with a HardwareLayer, returns it.
+     * Otherwise returns null
+     *
+     * TODO: Only TextureView uses this, can we eliminate it?
+     */
+    HardwareLayer getHardwareLayer() {
+        return null;
+    }
+
+    /**
      * Destroys all hardware rendering resources. This method is invoked
      * when the system needs to reclaim resources. Upon execution of this
      * method, you should free any OpenGL resources created by the view.
@@ -15151,7 +15161,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             canvas.setHighContrastText(mAttachInfo.mHighContrastText);
 
             try {
-                if (layerType == LAYER_TYPE_SOFTWARE) {
+                final HardwareLayer layer = getHardwareLayer();
+                if (layer != null && layer.isValid()) {
+                    canvas.drawHardwareLayer(layer, 0, 0, mLayerPaint);
+                } else if (layerType == LAYER_TYPE_SOFTWARE) {
                     buildDrawingCache(true);
                     Bitmap cache = getDrawingCache(true);
                     if (cache != null) {
