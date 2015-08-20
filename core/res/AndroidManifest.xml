@@ -786,6 +786,46 @@
         android:protectionLevel="normal"
         android:permissionFlags="hidden"/>
 
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.WRITE_SMS"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.MANAGE_ACCOUNTS"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.USE_CREDENTIALS"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.SUBSCRIBED_FEEDS_READ"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.SUBSCRIBED_FEEDS_WRITE"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
     <!-- ====================================================================== -->
     <!-- INSTALL PERMISSIONS                                                    -->
     <!-- ====================================================================== -->
