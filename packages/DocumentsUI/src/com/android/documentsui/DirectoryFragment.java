@@ -535,8 +535,6 @@ public class DirectoryFragment extends Fragment {
 
         updateLayout(state.derivedMode);
 
-        final int thumbSize = getResources().getDimensionPixelSize(R.dimen.icon_size);
-        mThumbSize = new Point(thumbSize, thumbSize);
         mRecView.setAdapter(mAdapter);
     }
 
