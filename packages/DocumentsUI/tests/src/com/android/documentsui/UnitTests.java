@@ -22,6 +22,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+        BandSelectMatrixTest.class,
         MultiSelectManager_SelectionTest.class,
         MultiSelectManagerTest.class
 })
