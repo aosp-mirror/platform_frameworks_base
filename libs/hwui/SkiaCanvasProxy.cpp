@@ -45,7 +45,7 @@ void SkiaCanvasProxy::onDrawPoints(PointMode pointMode, size_t count, const SkPo
     }
 
     // convert the SkPoints into floats
-    SK_COMPILE_ASSERT(sizeof(SkPoint) == sizeof(float)*2, SkPoint_is_no_longer_2_floats);
+    static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
     const size_t floatCount = count << 1;
     const float* floatArray = &pts[0].fX;
 
@@ -154,7 +154,7 @@ void SkiaCanvasProxy::onDrawVertices(VertexMode mode, int vertexCount, const SkP
         return;
     }
     // convert the SkPoints into floats
-    SK_COMPILE_ASSERT(sizeof(SkPoint) == sizeof(float)*2, SkPoint_is_no_longer_2_floats);
+    static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
     const int floatCount = vertexCount << 1;
     const float* vArray = &vertices[0].fX;
     const float* tArray = (texs) ? &texs[0].fX : NULL;
@@ -284,7 +284,7 @@ void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x
         }
     }
 
-    SK_COMPILE_ASSERT(sizeof(SkPoint) == sizeof(float)*2, SkPoint_is_no_longer_2_floats);
+    static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
     mCanvas->drawText(glyphs.glyphIDs, &pointStorage[0].fX, glyphs.count, glyphs.paint,
                       x, y, bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, 0);
 }
@@ -320,7 +320,7 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
     glyphs.paint.measureText(glyphs.glyphIDs, glyphs.count << 1, &bounds);
     bounds.offset(x, y);
 
-    SK_COMPILE_ASSERT(sizeof(SkPoint) == sizeof(float)*2, SkPoint_is_no_longer_2_floats);
+    static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
     mCanvas->drawText(glyphs.glyphIDs, &posArray[0].fX, glyphs.count, glyphs.paint, x, y,
                       bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, 0);
 }
