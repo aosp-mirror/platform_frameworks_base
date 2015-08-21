@@ -8557,312 +8557,322 @@ public class WindowManagerService extends IWindowManager.Stub
      * @return bitmap indicating if another pass through layout must be made.
      */
     public int handleAppTransitionReadyLocked(WindowList windows) {
-        int changes = 0;
-        int i;
         int appsCount = mOpeningApps.size();
-        boolean goodToGo = true;
+        if (!checkIfTransitionGoodToGo(appsCount)) {
+            return 0;
+        }
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
+        int transit = mAppTransition.getAppTransition();
+        if (mSkipAppTransitionAnimation) {
+            transit = AppTransition.TRANSIT_UNSET;
+        }
+        mSkipAppTransitionAnimation = false;
+        mNoAnimationNotifyOnTransitionFinished.clear();
+
+        mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
+
+        rebuildAppWindowListLocked();
+
+        mInnerFields.mWallpaperMayChange = false;
+
+        // The top-most window will supply the layout params,
+        // and we will determine it below.
+        LayoutParams animLp = null;
+        int bestAnimLayer = -1;
+        boolean fullscreenAnim = false;
+        boolean voiceInteraction = false;
+
+        final WindowState lowerWallpaperTarget =
+                mWallpaperControllerLocked.getLowerWallpaperTarget();
+        final WindowState upperWallpaperTarget =
+                mWallpaperControllerLocked.getUpperWallpaperTarget();
+
+        boolean openingAppHasWallpaper = false;
+        boolean closingAppHasWallpaper = false;
+        final AppWindowToken lowerWallpaperAppToken;
+        final AppWindowToken upperWallpaperAppToken;
+        if (lowerWallpaperTarget == null) {
+            lowerWallpaperAppToken = upperWallpaperAppToken = null;
+        } else {
+            lowerWallpaperAppToken = lowerWallpaperTarget.mAppToken;
+            upperWallpaperAppToken = upperWallpaperTarget.mAppToken;
+        }
+
+        int i;
+        // Do a first pass through the tokens for two
+        // things:
+        // (1) Determine if both the closing and opening
+        // app token sets are wallpaper targets, in which
+        // case special animations are needed
+        // (since the wallpaper needs to stay static
+        // behind them).
+        // (2) Find the layout params of the top-most
+        // application window in the tokens, which is
+        // what will control the animation theme.
+        final int closingAppsCount = mClosingApps.size();
+        appsCount = closingAppsCount + mOpeningApps.size();
+        for (i = 0; i < appsCount; i++) {
+            final AppWindowToken wtoken;
+            if (i < closingAppsCount) {
+                wtoken = mClosingApps.valueAt(i);
+                if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
+                    closingAppHasWallpaper = true;
+                }
+            } else {
+                wtoken = mOpeningApps.valueAt(i - closingAppsCount);
+                if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
+                    openingAppHasWallpaper = true;
+                }
+            }
+
+            voiceInteraction |= wtoken.voiceInteraction;
+
+            if (wtoken.appFullscreen) {
+                WindowState ws = wtoken.findMainWindow();
+                if (ws != null) {
+                    animLp = ws.mAttrs;
+                    bestAnimLayer = ws.mLayer;
+                    fullscreenAnim = true;
+                }
+            } else if (!fullscreenAnim) {
+                WindowState ws = wtoken.findMainWindow();
+                if (ws != null) {
+                    if (ws.mLayer > bestAnimLayer) {
+                        animLp = ws.mAttrs;
+                        bestAnimLayer = ws.mLayer;
+                    }
+                }
+            }
+        }
+
+        transit = maybeUpdateTransitToWallpaper(transit, openingAppHasWallpaper,
+                closingAppHasWallpaper, lowerWallpaperTarget, upperWallpaperTarget);
+
+        // If all closing windows are obscured, then there is
+        // no need to do an animation.  This is the case, for
+        // example, when this transition is being done behind
+        // the lock screen.
+        if (!mPolicy.allowAppAnimationsLw()) {
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                    "Animations disallowed by keyguard or dream.");
+            animLp = null;
+        }
+
+        processApplicationsAnimatingInPlace(transit);
+
+        AppWindowToken topClosingApp = null;
+        int topClosingLayer = 0;
+        appsCount = mClosingApps.size();
+        for (i = 0; i < appsCount; i++) {
+            AppWindowToken wtoken = mClosingApps.valueAt(i);
+            final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
+            appAnimator.clearThumbnail();
+            appAnimator.animation = null;
+            wtoken.inPendingTransaction = false;
+            setTokenVisibilityLocked(wtoken, animLp, false, transit, false, voiceInteraction);
+            wtoken.updateReportedVisibilityLocked();
+            // Force the allDrawn flag, because we want to start
+            // this guy's animations regardless of whether it's
+            // gotten drawn.
+            wtoken.allDrawn = true;
+            wtoken.deferClearAllDrawn = false;
+            // Ensure that apps that are mid-starting are also scheduled to have their
+            // starting windows removed after the animation is complete
+            if (wtoken.startingWindow != null && !wtoken.startingWindow.mExiting) {
+                scheduleRemoveStartingWindowLocked(wtoken);
+            }
+            mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
+
+            if (animLp != null) {
+                int layer = -1;
+                for (int j = 0; j < wtoken.windows.size(); j++) {
+                    WindowState win = wtoken.windows.get(j);
+                    if (win.mWinAnimator.mAnimLayer > layer) {
+                        layer = win.mWinAnimator.mAnimLayer;
+                    }
+                }
+                if (topClosingApp == null || layer > topClosingLayer) {
+                    topClosingApp = wtoken;
+                    topClosingLayer = layer;
+                }
+            }
+        }
+
+        AppWindowToken topOpeningApp = null;
+        appsCount = mOpeningApps.size();
+        for (i = 0; i < appsCount; i++) {
+            AppWindowToken wtoken = mOpeningApps.valueAt(i);
+            final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
+
+            if (!appAnimator.usingTransferredAnimation) {
+                appAnimator.clearThumbnail();
+                appAnimator.animation = null;
+            }
+            wtoken.inPendingTransaction = false;
+            if (!setTokenVisibilityLocked(
+                    wtoken, animLp, true, transit, false, voiceInteraction)){
+                // This token isn't going to be animating. Add it to the list of tokens to
+                // be notified of app transition complete since the notification will not be
+                // sent be the app window animator.
+                mNoAnimationNotifyOnTransitionFinished.add(wtoken.token);
+            }
+            wtoken.updateReportedVisibilityLocked();
+            wtoken.waitingToShow = false;
+
+            appAnimator.mAllAppWinAnimators.clear();
+            final int windowsCount = wtoken.allAppWindows.size();
+            for (int j = 0; j < windowsCount; j++) {
+                appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
+            }
+            mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+            mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
+
+            int topOpeningLayer = 0;
+            if (animLp != null) {
+                int layer = -1;
+                for (int j = 0; j < wtoken.windows.size(); j++) {
+                    WindowState win = wtoken.windows.get(j);
+                    if (win.mWinAnimator.mAnimLayer > layer) {
+                        layer = win.mWinAnimator.mAnimLayer;
+                    }
+                }
+                if (topOpeningApp == null || layer > topOpeningLayer) {
+                    topOpeningApp = wtoken;
+                    topOpeningLayer = layer;
+                }
+            }
+            createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
+        }
+
+        AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
+                topOpeningApp.mAppAnimator;
+        AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
+                topClosingApp.mAppAnimator;
+
+        mAppTransition.goodToGo(openingAppAnimator, closingAppAnimator);
+        mAppTransition.postAnimationCallback();
+        mAppTransition.clear();
+
+        mOpeningApps.clear();
+        mClosingApps.clear();
+
+        // This has changed the visibility of windows, so perform
+        // a new layout to get them all up-to-date.
+        getDefaultDisplayContentLocked().layoutNeeded = true;
+
+        // TODO(multidisplay): IMEs are only supported on the default display.
+        if (windows == getDefaultWindowListLocked()
+                && !moveInputMethodWindowsIfNeededLocked(true)) {
+            assignLayersLocked(windows);
+        }
+        updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES, true /*updateInputWindows*/);
+        mFocusMayChange = false;
+        notifyActivityDrawnForKeyguard();
+        return WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT
+                | WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
+
+    }
+
+    private int maybeUpdateTransitToWallpaper(int transit, boolean openingAppHasWallpaper,
+            boolean closingAppHasWallpaper, WindowState lowerWallpaperTarget,
+            WindowState upperWallpaperTarget) {
+        // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
+        final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
+        final WindowState oldWallpaper = mWallpaperControllerLocked.isWallpaperTargetAnimating()
+                ? null : wallpaperTarget;
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                "New wallpaper target=" + wallpaperTarget
+                        + ", oldWallpaper=" + oldWallpaper
+                        + ", lower target=" + lowerWallpaperTarget
+                        + ", upper target=" + upperWallpaperTarget);
+        mAnimateWallpaperWithTarget = false;
+        if (closingAppHasWallpaper && openingAppHasWallpaper) {
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Wallpaper animation!");
+            switch (transit) {
+                case AppTransition.TRANSIT_ACTIVITY_OPEN:
+                case AppTransition.TRANSIT_TASK_OPEN:
+                case AppTransition.TRANSIT_TASK_TO_FRONT:
+                    transit = AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN;
+                    break;
+                case AppTransition.TRANSIT_ACTIVITY_CLOSE:
+                case AppTransition.TRANSIT_TASK_CLOSE:
+                case AppTransition.TRANSIT_TASK_TO_BACK:
+                    transit = AppTransition.TRANSIT_WALLPAPER_INTRA_CLOSE;
+                    break;
+            }
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                    "New transit: " + AppTransition.appTransitionToString(transit));
+        } else if ((oldWallpaper != null) && !mOpeningApps.isEmpty()
+                && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
+            // We are transitioning from an activity with
+            // a wallpaper to one without.
+            transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                    "New transit away from wallpaper: "
+                    + AppTransition.appTransitionToString(transit));
+        } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()) {
+            // We are transitioning from an activity without
+            // a wallpaper to now showing the wallpaper
+            transit = AppTransition.TRANSIT_WALLPAPER_OPEN;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                    "New transit into wallpaper: "
+                    + AppTransition.appTransitionToString(transit));
+        } else {
+            mAnimateWallpaperWithTarget = true;
+        }
+        return transit;
+    }
+
+    private void processApplicationsAnimatingInPlace(int transit) {
+        if (transit == AppTransition.TRANSIT_TASK_IN_PLACE) {
+            // Find the focused window
+            final WindowState win =
+                    findFocusedWindowLocked(getDefaultDisplayContentLocked());
+            if (win != null) {
+                final AppWindowToken wtoken = win.mAppToken;
+                final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now animating app in place " + wtoken);
+                appAnimator.clearThumbnail();
+                appAnimator.animation = null;
+                updateTokenInPlaceLocked(wtoken, transit);
+                wtoken.updateReportedVisibilityLocked();
+
+                appAnimator.mAllAppWinAnimators.clear();
+                final int N = wtoken.allAppWindows.size();
+                for (int j = 0; j < N; j++) {
+                    appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
+                }
+                mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
+                mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+            }
+        }
+    }
+
+    private boolean checkIfTransitionGoodToGo(int appsCount) {
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                 "Checking " + appsCount + " opening apps (frozen="
-                + mDisplayFrozen + " timeout="
-                + mAppTransition.isTimeout() + ")...");
+                        + mDisplayFrozen + " timeout="
+                        + mAppTransition.isTimeout() + ")...");
         if (!mAppTransition.isTimeout()) {
-            for (i = 0; i < appsCount && goodToGo; i++) {
+            for (int i = 0; i < appsCount; i++) {
                 AppWindowToken wtoken = mOpeningApps.valueAt(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "Check opening app=" + wtoken + ": allDrawn="
                         + wtoken.allDrawn + " startingDisplayed="
                         + wtoken.startingDisplayed + " startingMoved="
                         + wtoken.startingMoved);
-                if (!wtoken.allDrawn && !wtoken.startingDisplayed
-                        && !wtoken.startingMoved) {
-                    goodToGo = false;
+                if (!wtoken.allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
+                    return false;
                 }
             }
 
-            if (goodToGo && mWallpaperControllerLocked.isWallpaperVisible()) {
-                goodToGo &= mWallpaperControllerLocked.wallpaperTransitionReady();
-            }
+            // If the wallpaper is visible, we need to check it's ready too.
+            return !mWallpaperControllerLocked.isWallpaperVisible() ||
+                    mWallpaperControllerLocked.wallpaperTransitionReady();
         }
-        if (goodToGo) {
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
-            int transit = mAppTransition.getAppTransition();
-            if (mSkipAppTransitionAnimation) {
-                transit = AppTransition.TRANSIT_UNSET;
-            }
-            mSkipAppTransitionAnimation = false;
-            mNoAnimationNotifyOnTransitionFinished.clear();
-
-            mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
-
-            rebuildAppWindowListLocked();
-
-            // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
-            final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
-            final WindowState oldWallpaper = mWallpaperControllerLocked.isWallpaperTargetAnimating()
-                    ? null : wallpaperTarget;
-
-            mInnerFields.mWallpaperMayChange = false;
-
-            // The top-most window will supply the layout params,
-            // and we will determine it below.
-            LayoutParams animLp = null;
-            int bestAnimLayer = -1;
-            boolean fullscreenAnim = false;
-            boolean voiceInteraction = false;
-
-            final WindowState lowerWallpaperTarget =
-                    mWallpaperControllerLocked.getLowerWallpaperTarget();
-            final WindowState upperWallpaperTarget =
-                    mWallpaperControllerLocked.getUpperWallpaperTarget();
-
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                    "New wallpaper target=" + wallpaperTarget
-                    + ", oldWallpaper=" + oldWallpaper
-                    + ", lower target=" + lowerWallpaperTarget
-                    + ", upper target=" + upperWallpaperTarget);
-
-            boolean openingAppHasWallpaper = false;
-            boolean closingAppHasWallpaper = false;
-            final AppWindowToken lowerWallpaperAppToken;
-            final AppWindowToken upperWallpaperAppToken;
-            if (lowerWallpaperTarget == null) {
-                lowerWallpaperAppToken = upperWallpaperAppToken = null;
-            } else {
-                lowerWallpaperAppToken = lowerWallpaperTarget.mAppToken;
-                upperWallpaperAppToken = upperWallpaperTarget.mAppToken;
-            }
-
-            // Do a first pass through the tokens for two
-            // things:
-            // (1) Determine if both the closing and opening
-            // app token sets are wallpaper targets, in which
-            // case special animations are needed
-            // (since the wallpaper needs to stay static
-            // behind them).
-            // (2) Find the layout params of the top-most
-            // application window in the tokens, which is
-            // what will control the animation theme.
-            final int closingAppsCount = mClosingApps.size();
-            appsCount = closingAppsCount + mOpeningApps.size();
-            for (i = 0; i < appsCount; i++) {
-                final AppWindowToken wtoken;
-                if (i < closingAppsCount) {
-                    wtoken = mClosingApps.valueAt(i);
-                    if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
-                        closingAppHasWallpaper = true;
-                    }
-                } else {
-                    wtoken = mOpeningApps.valueAt(i - closingAppsCount);
-                    if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
-                        openingAppHasWallpaper = true;
-                    }
-                }
-
-                voiceInteraction |= wtoken.voiceInteraction;
-
-                if (wtoken.appFullscreen) {
-                    WindowState ws = wtoken.findMainWindow();
-                    if (ws != null) {
-                        animLp = ws.mAttrs;
-                        bestAnimLayer = ws.mLayer;
-                        fullscreenAnim = true;
-                    }
-                } else if (!fullscreenAnim) {
-                    WindowState ws = wtoken.findMainWindow();
-                    if (ws != null) {
-                        if (ws.mLayer > bestAnimLayer) {
-                            animLp = ws.mAttrs;
-                            bestAnimLayer = ws.mLayer;
-                        }
-                    }
-                }
-            }
-
-            mAnimateWallpaperWithTarget = false;
-            if (closingAppHasWallpaper && openingAppHasWallpaper) {
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Wallpaper animation!");
-                switch (transit) {
-                    case AppTransition.TRANSIT_ACTIVITY_OPEN:
-                    case AppTransition.TRANSIT_TASK_OPEN:
-                    case AppTransition.TRANSIT_TASK_TO_FRONT:
-                        transit = AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN;
-                        break;
-                    case AppTransition.TRANSIT_ACTIVITY_CLOSE:
-                    case AppTransition.TRANSIT_TASK_CLOSE:
-                    case AppTransition.TRANSIT_TASK_TO_BACK:
-                        transit = AppTransition.TRANSIT_WALLPAPER_INTRA_CLOSE;
-                        break;
-                }
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "New transit: " + AppTransition.appTransitionToString(transit));
-            } else if ((oldWallpaper != null) && !mOpeningApps.isEmpty()
-                    && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
-                // We are transitioning from an activity with
-                // a wallpaper to one without.
-                transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "New transit away from wallpaper: "
-                        + AppTransition.appTransitionToString(transit));
-            } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()) {
-                // We are transitioning from an activity without
-                // a wallpaper to now showing the wallpaper
-                transit = AppTransition.TRANSIT_WALLPAPER_OPEN;
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "New transit into wallpaper: "
-                        + AppTransition.appTransitionToString(transit));
-            } else {
-                mAnimateWallpaperWithTarget = true;
-            }
-
-            // If all closing windows are obscured, then there is
-            // no need to do an animation.  This is the case, for
-            // example, when this transition is being done behind
-            // the lock screen.
-            if (!mPolicy.allowAppAnimationsLw()) {
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "Animations disallowed by keyguard or dream.");
-                animLp = null;
-            }
-
-            // Process all applications animating in place
-            if (transit == AppTransition.TRANSIT_TASK_IN_PLACE) {
-                // Find the focused window
-                final WindowState win =
-                        findFocusedWindowLocked(getDefaultDisplayContentLocked());
-                if (win != null) {
-                    final AppWindowToken wtoken = win.mAppToken;
-                    final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-                    if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now animating app in place " + wtoken);
-                    appAnimator.clearThumbnail();
-                    appAnimator.animation = null;
-                    updateTokenInPlaceLocked(wtoken, transit);
-                    wtoken.updateReportedVisibilityLocked();
-
-                    appAnimator.mAllAppWinAnimators.clear();
-                    final int N = wtoken.allAppWindows.size();
-                    for (int j = 0; j < N; j++) {
-                        appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
-                    }
-                    mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
-                    mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
-                }
-            }
-
-            AppWindowToken topClosingApp = null;
-            int topClosingLayer = 0;
-            appsCount = mClosingApps.size();
-            for (i = 0; i < appsCount; i++) {
-                AppWindowToken wtoken = mClosingApps.valueAt(i);
-                final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
-                appAnimator.clearThumbnail();
-                appAnimator.animation = null;
-                wtoken.inPendingTransaction = false;
-                setTokenVisibilityLocked(wtoken, animLp, false, transit, false, voiceInteraction);
-                wtoken.updateReportedVisibilityLocked();
-                // Force the allDrawn flag, because we want to start
-                // this guy's animations regardless of whether it's
-                // gotten drawn.
-                wtoken.allDrawn = true;
-                wtoken.deferClearAllDrawn = false;
-                // Ensure that apps that are mid-starting are also scheduled to have their
-                // starting windows removed after the animation is complete
-                if (wtoken.startingWindow != null && !wtoken.startingWindow.mExiting) {
-                    scheduleRemoveStartingWindowLocked(wtoken);
-                }
-                mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
-
-                if (animLp != null) {
-                    int layer = -1;
-                    for (int j = 0; j < wtoken.windows.size(); j++) {
-                        WindowState win = wtoken.windows.get(j);
-                        if (win.mWinAnimator.mAnimLayer > layer) {
-                            layer = win.mWinAnimator.mAnimLayer;
-                        }
-                    }
-                    if (topClosingApp == null || layer > topClosingLayer) {
-                        topClosingApp = wtoken;
-                        topClosingLayer = layer;
-                    }
-                }
-            }
-
-            AppWindowToken topOpeningApp = null;
-            appsCount = mOpeningApps.size();
-            for (i = 0; i < appsCount; i++) {
-                AppWindowToken wtoken = mOpeningApps.valueAt(i);
-                final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
-
-                if (!appAnimator.usingTransferredAnimation) {
-                    appAnimator.clearThumbnail();
-                    appAnimator.animation = null;
-                }
-                wtoken.inPendingTransaction = false;
-                if (!setTokenVisibilityLocked(
-                        wtoken, animLp, true, transit, false, voiceInteraction)){
-                    // This token isn't going to be animating. Add it to the list of tokens to
-                    // be notified of app transition complete since the notification will not be
-                    // sent be the app window animator.
-                    mNoAnimationNotifyOnTransitionFinished.add(wtoken.token);
-                }
-                wtoken.updateReportedVisibilityLocked();
-                wtoken.waitingToShow = false;
-
-                appAnimator.mAllAppWinAnimators.clear();
-                final int windowsCount = wtoken.allAppWindows.size();
-                for (int j = 0; j < windowsCount; j++) {
-                    appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
-                }
-                mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
-                mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
-
-                int topOpeningLayer = 0;
-                if (animLp != null) {
-                    int layer = -1;
-                    for (int j = 0; j < wtoken.windows.size(); j++) {
-                        WindowState win = wtoken.windows.get(j);
-                        if (win.mWinAnimator.mAnimLayer > layer) {
-                            layer = win.mWinAnimator.mAnimLayer;
-                        }
-                    }
-                    if (topOpeningApp == null || layer > topOpeningLayer) {
-                        topOpeningApp = wtoken;
-                        topOpeningLayer = layer;
-                    }
-                }
-                createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
-            }
-
-            AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
-                    topOpeningApp.mAppAnimator;
-            AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
-                    topClosingApp.mAppAnimator;
-
-            mAppTransition.goodToGo(openingAppAnimator, closingAppAnimator);
-            mAppTransition.postAnimationCallback();
-            mAppTransition.clear();
-
-            mOpeningApps.clear();
-            mClosingApps.clear();
-
-            // This has changed the visibility of windows, so perform
-            // a new layout to get them all up-to-date.
-            changes |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT
-                    | WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
-            getDefaultDisplayContentLocked().layoutNeeded = true;
-
-            // TODO(multidisplay): IMEs are only supported on the default display.
-            if (windows == getDefaultWindowListLocked()
-                    && !moveInputMethodWindowsIfNeededLocked(true)) {
-                assignLayersLocked(windows);
-            }
-            updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES, true /*updateInputWindows*/);
-            mFocusMayChange = false;
-            notifyActivityDrawnForKeyguard();
-        }
-
-        return changes;
+        return true;
     }
 
     private void createThumbnailAppAnimator(int transit, AppWindowToken appToken,
