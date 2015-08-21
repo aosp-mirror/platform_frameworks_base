@@ -202,11 +202,12 @@ MidiInputPort inputPort = device.openInputPort(index);
 <p>MIDI messages are sent as byte arrays. Here we encode a NoteOn message.</p>
 
 <pre class=prettyprint>
-byte[] buffer = new buffer[64];
+byte[] buffer = new byte[32];
 int numBytes = 0;
-buffer[numBytes++] = 0x90 + channel; // note on
-buffer[numBytes++] = pitch;
-buffer[numBytes++] = velocity;
+int channel = 3; // MIDI channels 1-16 are encoded as 0-15.
+buffer[numBytes++] = (byte)(0x90 + (channel - 1)); // note on
+buffer[numBytes++] = (byte)60; // pitch is middle C
+buffer[numBytes++] = (byte)127; // max velocity
 int offset = 0;
 // post is non-blocking
 inputPort.send(buffer, offset, numBytes);
