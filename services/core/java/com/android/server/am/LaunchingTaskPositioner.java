@@ -16,16 +16,30 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
+import android.annotation.Nullable;
+import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.Slog;
 import android.view.Display;
+import android.view.Gravity;
 
 import java.util.ArrayList;
 
 /**
  * Determines where a launching task should be positioned and sized on the display.
+ *
+ * The positioner is fairly simple. For the new task it tries default position based on the gravity
+ * and compares corners of the task with corners of existing tasks. If some two pairs of corners are
+ * sufficiently close enough, it shifts the bounds of the new task and tries again. When it exhausts
+ * all possible shifts, it gives up and puts the task in the original position.
  */
 class LaunchingTaskPositioner {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "LaunchingTaskPositioner" : TAG_AM;
+
     // Determines how close window frames/corners have to be to call them colliding.
     private static final int BOUNDS_CONFLICT_MIN_DISTANCE = 4;
 
@@ -42,8 +56,19 @@ class LaunchingTaskPositioner {
     // We always want to step by at least this.
     private static final int MINIMAL_STEP = 1;
 
+    // Used to indicate if positioning algorithm is allowed to restart from the beginning, when it
+    // reaches the end of stack bounds.
+    private static final boolean ALLOW_RESTART = true;
+
+    private static final int SHIFT_POLICY_DIAGONAL_DOWN = 1;
+    private static final int SHIFT_POLICY_HORIZONTAL_RIGHT = 2;
+    private static final int SHIFT_POLICY_HORIZONTAL_LEFT = 3;
+
     private boolean mDefaultStartBoundsConfigurationSet = false;
     private final Rect mAvailableRect = new Rect();
+    private final Rect mTmpProposal = new Rect();
+    private final Rect mTmpOriginal = new Rect();
+
     private int mDefaultFreeformStartX;
     private int mDefaultFreeformStartY;
     private int mDefaultFreeformWidth;
@@ -84,56 +109,192 @@ class LaunchingTaskPositioner {
      *
      * @param task Task for which we want to find bounds that won't collide with other.
      * @param tasks Existing tasks with which we don't want to collide.
+     * @param initialLayout Optional information from the client about how it would like to be sized
+     *                      and positioned.
      */
-    void updateDefaultBounds(TaskRecord task, ArrayList<TaskRecord> tasks) {
+    void updateDefaultBounds(TaskRecord task, ArrayList<TaskRecord> tasks,
+            @Nullable ActivityInfo.InitialLayout initialLayout) {
         if (!mDefaultStartBoundsConfigurationSet) {
             return;
         }
-        int startX = mDefaultFreeformStartX;
-        int startY = mDefaultFreeformStartY;
-        final int right = mAvailableRect.right;
-        final int bottom = mAvailableRect.bottom;
+        if (initialLayout == null) {
+            positionCenter(task, tasks, mDefaultFreeformWidth, mDefaultFreeformHeight);
+            return;
+        }
+        int width = getFinalWidth(initialLayout);
+        int height = getFinalHeight(initialLayout);
+        int verticalGravity = initialLayout.gravity & Gravity.VERTICAL_GRAVITY_MASK;
+        int horizontalGravity = initialLayout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+        if (verticalGravity == Gravity.TOP) {
+            if (horizontalGravity == Gravity.RIGHT) {
+                positionTopRight(task, tasks, width, height);
+            } else {
+                positionTopLeft(task, tasks, width, height);
+            }
+        } else if (verticalGravity == Gravity.BOTTOM) {
+            if (horizontalGravity == Gravity.RIGHT) {
+                positionBottomRight(task, tasks, width, height);
+            } else {
+                positionBottomLeft(task, tasks, width, height);
+            }
+        } else {
+            // Some fancy gravity setting that we don't support yet. We just put the activity in the
+            // center.
+            Slog.w(TAG, "Received unsupported gravity: " + initialLayout.gravity
+                    + ", positioning in the center instead.");
+            positionCenter(task, tasks, width, height);
+        }
+    }
+
+    private int getFinalWidth(ActivityInfo.InitialLayout initialLayout) {
+        int width = mDefaultFreeformWidth;
+        if (initialLayout.width > 0) {
+            width = initialLayout.width;
+        }
+        if (initialLayout.widthFraction > 0) {
+            width = (int) (mAvailableRect.width() * initialLayout.widthFraction);
+        }
+        return width;
+    }
+
+    private int getFinalHeight(ActivityInfo.InitialLayout initialLayout) {
+        int height = mDefaultFreeformHeight;
+        if (initialLayout.height > 0) {
+            height = initialLayout.height;
+        }
+        if (initialLayout.heightFraction > 0) {
+            height = (int) (mAvailableRect.height() * initialLayout.heightFraction);
+        }
+        return height;
+    }
+
+    private void positionBottomLeft(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
+            int height) {
+        mTmpProposal.set(mAvailableRect.left, mAvailableRect.bottom - height,
+                mAvailableRect.left + width, mAvailableRect.bottom);
+        position(task, tasks, mTmpProposal, !ALLOW_RESTART, SHIFT_POLICY_HORIZONTAL_RIGHT);
+    }
+
+    private void positionBottomRight(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
+            int height) {
+        mTmpProposal.set(mAvailableRect.right - width, mAvailableRect.bottom - height,
+                mAvailableRect.right, mAvailableRect.bottom);
+        position(task, tasks, mTmpProposal, !ALLOW_RESTART, SHIFT_POLICY_HORIZONTAL_LEFT);
+    }
+
+    private void positionTopLeft(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
+            int height) {
+        mTmpProposal.set(mAvailableRect.left, mAvailableRect.top,
+                mAvailableRect.left + width, mAvailableRect.top + height);
+        position(task, tasks, mTmpProposal, !ALLOW_RESTART, SHIFT_POLICY_HORIZONTAL_RIGHT);
+    }
+
+    private void positionTopRight(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
+            int height) {
+        mTmpProposal.set(mAvailableRect.right - width, mAvailableRect.top,
+                mAvailableRect.right, mAvailableRect.top + height);
+        position(task, tasks, mTmpProposal, !ALLOW_RESTART, SHIFT_POLICY_HORIZONTAL_LEFT);
+    }
+
+    private void positionCenter(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
+            int height) {
+        mTmpProposal.set(mDefaultFreeformStartX, mDefaultFreeformStartY,
+                mDefaultFreeformStartX + width, mDefaultFreeformStartY + height);
+        position(task, tasks, mTmpProposal, ALLOW_RESTART, SHIFT_POLICY_DIAGONAL_DOWN);
+    }
+
+    private void position(TaskRecord task, ArrayList<TaskRecord> tasks, Rect proposal,
+            boolean allowRestart, int shiftPolicy) {
+        mTmpOriginal.set(proposal);
         boolean restarted = false;
-        while (boundsConflict(startX, startY, tasks)) {
+        while (boundsConflict(proposal, tasks)) {
             // Unfortunately there is already a task at that spot, so we need to look for some
             // other place.
-            startX += mDefaultFreeformStepHorizontal;
-            startY += mDefaultFreeformStepVertical;
-            if (startX + mDefaultFreeformWidth > right
-                    || startY + mDefaultFreeformHeight > bottom) {
-                // We don't want the task to go outside of the display, because it won't look
-                // nice. Let's restart from the top instead, because there should be some space
-                // there.
-                startX = mAvailableRect.left;
-                startY = mAvailableRect.top;
+            shiftStartingPoint(proposal, shiftPolicy);
+            if (shiftedToFar(proposal, shiftPolicy)) {
+                // We don't want the task to go outside of the stack, because it won't look
+                // nice. Depending on the starting point we either restart, or immediately give up.
+                if (!allowRestart) {
+                    proposal.set(mTmpOriginal);
+                    break;
+                }
+                // We must have started not from the top. Let's restart from there because there
+                // might be some space there.
+                proposal.set(mAvailableRect.left, mAvailableRect.top,
+                        mAvailableRect.left + proposal.width(),
+                        mAvailableRect.top + proposal.height());
                 restarted = true;
             }
-            if (restarted
-                    && (startX > mDefaultFreeformStartX || startY > mDefaultFreeformStartY)) {
+            if (restarted && (proposal.left > mDefaultFreeformStartX
+                    || proposal.top > mDefaultFreeformStartY)) {
                 // If we restarted and crossed the initial position, let's not struggle anymore.
                 // The user already must have ton of tasks visible, we can just smack the new
                 // one in the center.
-                startX = mDefaultFreeformStartX;
-                startY = mDefaultFreeformStartY;
+                proposal.set(mTmpOriginal);
                 break;
             }
         }
-        task.setInitialBounds(startX, startY, startX + mDefaultFreeformWidth,
-                startY + mDefaultFreeformHeight);
+        task.setInitialBounds(proposal);
     }
 
-    private boolean boundsConflict(int startX, int startY, ArrayList<TaskRecord> tasks) {
+    private boolean shiftedToFar(Rect start, int shiftPolicy) {
+        switch (shiftPolicy) {
+            case SHIFT_POLICY_HORIZONTAL_LEFT:
+                return start.left < mAvailableRect.left;
+            case SHIFT_POLICY_HORIZONTAL_RIGHT:
+                return start.right > mAvailableRect.right;
+            default: // SHIFT_POLICY_DIAGONAL_DOWN
+                return start.right > mAvailableRect.right || start.bottom > mAvailableRect.bottom;
+        }
+    }
+
+    private void shiftStartingPoint(Rect posposal, int shiftPolicy) {
+        switch (shiftPolicy) {
+            case SHIFT_POLICY_HORIZONTAL_LEFT:
+                posposal.offset(-mDefaultFreeformStepHorizontal, 0);
+                break;
+            case SHIFT_POLICY_HORIZONTAL_RIGHT:
+                posposal.offset(mDefaultFreeformStepHorizontal, 0);
+                break;
+            default: // SHIFT_POLICY_DIAGONAL_DOWN:
+                posposal.offset(mDefaultFreeformStepHorizontal, mDefaultFreeformStepVertical);
+                break;
+        }
+    }
+
+    private static boolean boundsConflict(Rect proposal, ArrayList<TaskRecord> tasks) {
         for (int i = tasks.size() - 1; i >= 0; i--) {
             TaskRecord task = tasks.get(i);
-            if (!task.mActivities.isEmpty()) {
+            if (!task.mActivities.isEmpty() && task.mBounds != null) {
                 Rect bounds = task.mBounds;
-                if (bounds != null && (Math.abs(bounds.left - startX) < BOUNDS_CONFLICT_MIN_DISTANCE
-                        || Math.abs(bounds.top - startY) < BOUNDS_CONFLICT_MIN_DISTANCE)) {
+                if (closeLeftTopCorner(proposal, bounds) || closeRightTopCorner(proposal, bounds)
+                        || closeLeftBottomCorner(proposal, bounds)
+                        || closeRightBottomCorner(proposal, bounds)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private static final boolean closeLeftTopCorner(Rect first, Rect second) {
+        return Math.abs(first.left - second.left) < BOUNDS_CONFLICT_MIN_DISTANCE
+                && Math.abs(first.top - second.top) < BOUNDS_CONFLICT_MIN_DISTANCE;
+    }
+
+    private static final boolean closeRightTopCorner(Rect first, Rect second) {
+        return Math.abs(first.right - second.right) < BOUNDS_CONFLICT_MIN_DISTANCE
+                && Math.abs(first.top - second.top) < BOUNDS_CONFLICT_MIN_DISTANCE;
+    }
+
+    private static final boolean closeLeftBottomCorner(Rect first, Rect second) {
+        return Math.abs(first.left - second.left) < BOUNDS_CONFLICT_MIN_DISTANCE
+                && Math.abs(first.bottom - second.bottom) < BOUNDS_CONFLICT_MIN_DISTANCE;
+    }
+
+    private static final boolean closeRightBottomCorner(Rect first, Rect second) {
+        return Math.abs(first.right - second.right) < BOUNDS_CONFLICT_MIN_DISTANCE
+                && Math.abs(first.bottom - second.bottom) < BOUNDS_CONFLICT_MIN_DISTANCE;
     }
 
     void reset() {

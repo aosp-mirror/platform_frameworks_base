@@ -1217,11 +1217,11 @@ final class TaskRecord {
         return mLastNonFullscreenBounds;
     }
 
-    void setInitialBounds(int left, int top, int right, int bottom) {
+    void setInitialBounds(Rect rect) {
         if (mBounds == null) {
             mBounds = new Rect();
         }
-        mBounds.set(left, top, right, bottom);
+        mBounds.set(rect);
         mLastNonFullscreenBounds = mBounds;
     }
 
