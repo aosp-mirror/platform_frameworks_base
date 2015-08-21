@@ -27,6 +27,8 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MODULE:= bootanimation
 
+LOCAL_INIT_RC := bootanim.rc
+
 ifdef TARGET_32_BIT_SURFACEFLINGER
 LOCAL_32_BIT_ONLY := true
 endif
