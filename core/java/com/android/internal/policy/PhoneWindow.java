@@ -20,6 +20,7 @@ import static android.app.ActivityManager.FIRST_DYNAMIC_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
+import static android.app.ActivityManager.INVALID_STACK_ID;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -5250,7 +5251,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @return Returns the workspace stack id which contains this window.
      **/
     private int getWorkspaceId() {
-        int workspaceId = FULLSCREEN_WORKSPACE_STACK_ID;
+        int workspaceId = INVALID_STACK_ID;
         WindowControllerCallback callback = getWindowControllerCallback();
         if (callback != null) {
             try {
@@ -5258,6 +5259,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             } catch (RemoteException ex) {
                 Log.e(TAG, "Failed to get the workspace ID of a PhoneWindow.");
             }
+        }
+        if (workspaceId == INVALID_STACK_ID) {
+            return FULLSCREEN_WORKSPACE_STACK_ID;
         }
         return workspaceId;
     }

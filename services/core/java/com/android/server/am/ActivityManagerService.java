@@ -21,6 +21,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
+import static android.app.ActivityManager.INVALID_STACK_ID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -9005,8 +9006,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack == null) {
-                throw new IllegalArgumentException(
-                        "getActivityStackId: No stack for token=" + token);
+                return INVALID_STACK_ID;
             }
             return stack.mStackId;
         }
