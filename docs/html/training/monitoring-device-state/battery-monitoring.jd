@@ -80,7 +80,7 @@ further if the battery is discharging.</p>
 monitor the charging state for changes and alter your refresh rate accordingly.</p>
 
 <p>The {@link android.os.BatteryManager} broadcasts an action whenever the device is connected or
-disconnected from power. It's important to to receive these events even while your app isn't
+disconnected from power. It's important to receive these events even while your app isn't
 running&mdash;particularly as these events should impact how often you start your app in order to
 initiate a background update&mdash;so you should register a {@link
 android.content.BroadcastReceiver} in your manifest to listen for both events by defining the

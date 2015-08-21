@@ -60,7 +60,7 @@ without typing the password every time you make a change to your project.</p>
 you run or debug your project from the IDE.</p>
 
 <p>You can run and debug an app signed in debug mode on the emulator and on devices connected
-to your development manchine through USB, but you cannot distribute an app signed in debug
+to your development machine through USB, but you cannot distribute an app signed in debug
 mode.</p>
 
 <p>By default, the <em>debug</em> configuration uses a debug keystore, with a known

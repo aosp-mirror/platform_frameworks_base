@@ -321,7 +321,7 @@ fragment), you must use APIs from {@link android.app.FragmentTransaction}. You c
 of {@link android.app.FragmentTransaction} from your {@link android.app.Activity} like this:</p>
 
 <pre>
-FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
 FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
 </pre>
 

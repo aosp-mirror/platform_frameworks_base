@@ -60,7 +60,7 @@ framework.</dd>
     <dd>Learn how to test the behavior of specific UI
 components in your {@link android.app.Activity}.</dd>
   <dt><b><a href="activity-unit-testing.html">Creating Unit Tests</a></b></dt>
-    <dd>Learn how to how to perform unit testing to
+    <dd>Learn how to perform unit testing to
 verify the behavior of an Activity in isolation.</dd>
   <dt><b><a href="activity-functional-testing.html">Creating Functional Tests</a></b></dt>
     <dd>Learn how to perform functional testing to

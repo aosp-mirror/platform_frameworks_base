@@ -107,7 +107,7 @@ a memory leak.</p>
 
 <h3 id="ARTLogMessages">ART Log Messages</h3>
 
-<p>Unlike Dalvik, ART doesn't log messqages for GCs that were not explicitly requested. GCs are only
+<p>Unlike Dalvik, ART doesn't log messages for GCs that were not explicitly requested. GCs are only
 printed when they are they are deemed slow. More precisely, if the GC pause exceeds than 5ms or
 the GC duration exceeds 100ms. If the app is not in a pause perceptible process state,
 then none of its GCs are deemed slow. Explicit GCs are always logged.</p>

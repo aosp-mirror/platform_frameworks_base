@@ -1148,7 +1148,7 @@ vnd.android.cursor.<strong>item</strong>
 </p>
 <p>
     The <em>subtype</em> is provider-specific. The Android built-in providers usually have a simple
-    subtype. For example, the when the Contacts application creates a row for a telephone number,
+    subtype. For example, when the Contacts application creates a row for a telephone number,
     it sets the following MIME type in the row:
 </p>
 <pre>

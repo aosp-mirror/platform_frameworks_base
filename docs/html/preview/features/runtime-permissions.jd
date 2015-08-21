@@ -636,7 +636,7 @@ page.image=images/permissions_check.png
   method with the results, passing the same "request code" that the app passed
   to {@link android.app.Activity#requestPermissions requestPermissions()}.</p>
 
-  <p>The following code code checks if the app has permission to read the
+  <p>The following code checks if the app has permission to read the
     user's contacts, and requests the permission if necessary:</p>
 
 <pre>

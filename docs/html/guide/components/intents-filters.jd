@@ -707,7 +707,7 @@ best activity for the intent by comparing the intent to intent filters based on 
   <li>The intent category
 </ul>
 
-<p>The following sections describe how an intents are matched to the appropriate component(s)
+<p>The following sections describe how intents are matched to the appropriate component(s)
 in terms of how the intent filter is declared in an app's manifest file.</p>
 
 

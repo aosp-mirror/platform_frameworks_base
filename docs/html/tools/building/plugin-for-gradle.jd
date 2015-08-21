@@ -34,7 +34,7 @@ Building and Running from Android Studio</a></li>
 <a href="http://www.gradle.org/">Gradle</a> is an advanced build toolkit that manages
 dependencies and allows you to define custom build logic. Android Studio uses a Gradle wrapper
 to fully integrate the Android plugin for Gradle. The Android plugin for Gradle also runs
-independent of Android Studio. This means that you can build your Android apps from which Android
+independent of Android Studio. This means that you can build your Android apps from within Android
 Studio and from the command line on your machine or on machines where Android Studio is not installed
 (such as continuous integration servers).</p>
 
@@ -99,7 +99,7 @@ several kinds of modules:</p>
 
 <ul>
     <li><em>Android application modules</em> contain application (mobile, TV, Wear, Glass) code and
-         may depend on library modules, although many Android apps consists of only one application
+         may depend on library modules, although many Android apps consist of only one application
          module. The build system generates APK packages for application modules. </li>
     <li><em>Android library modules</em> contain reusable Android-specific code and resources.
         The build system generates an AAR (Android ARchive) package for library modules.</li>

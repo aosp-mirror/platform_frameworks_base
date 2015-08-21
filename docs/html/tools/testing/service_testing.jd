@@ -77,7 +77,7 @@ parent.link=index.html
 <h2 id="ServiceTestCase">ServiceTestCase</h2>
 <p>
     {@link android.test.ServiceTestCase} extends the JUnit {@link junit.framework.TestCase} class
-    with with methods for testing application permissions and for controlling the application and
+    with methods for testing application permissions and for controlling the application and
     Service under test. It also provides mock application and Context objects that isolate your
     test from the rest of the system.
 </p>

@@ -558,7 +558,7 @@ static final Uri mLocationForPhotos;
 public void capturePhoto(String targetFilename) {
     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     intent.putExtra(MediaStore.EXTRA_OUTPUT,
-            Uri.withAppendedPath(mLocationForPhotos, targetFilename);
+            Uri.withAppendedPath(mLocationForPhotos, targetFilename));
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
     }

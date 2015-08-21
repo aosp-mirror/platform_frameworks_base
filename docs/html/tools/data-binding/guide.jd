@@ -141,7 +141,7 @@ page.tags="databinding", "layouts"
   application logic and layouts.
 </p>
 
-<p>The Data Binding Library offers both flexibility and broad comnpatibility
+<p>The Data Binding Library offers both flexibility and broad compatibility
 &mdash; it's a support library, so you can use it with all Android platform
 versions back to <strong>Android 2.1</strong> (API level 7+).</p>
 

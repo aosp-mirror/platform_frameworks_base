@@ -276,7 +276,7 @@ UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
 HashMap&lt;String, UsbDevice&gt; deviceList = manager.getDeviceList();
 Iterator&lt;UsbDevice&gt; deviceIterator = deviceList.values().iterator();
 while(deviceIterator.hasNext()){
-    UsbDevice device = deviceIterator.next()
+    UsbDevice device = deviceIterator.next();
     //your code
 }
 </pre>

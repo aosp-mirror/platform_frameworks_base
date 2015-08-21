@@ -198,7 +198,7 @@ attribute to "8".</p>
 href="http://code.google.com/android/backup/index.html">Android Backup Service</a> for most
 Android-powered devices running Android 2.2 or greater.</p>
 
-<p>In order for you application to perform backup using Android Backup Service, you must
+<p>In order for your application to perform backup using Android Backup Service, you must
 register your application with the service to receive a Backup Service Key, then
 declare the Backup Service Key in your Android manifest.</p>
 

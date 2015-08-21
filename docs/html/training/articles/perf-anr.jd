@@ -168,7 +168,7 @@ broadcast.</p>
 <p class="note"><strong>Tip:</strong>
 You can use {@link android.os.StrictMode} to help find potentially
 long running operations such as network or database operations that
-you might accidentally be doing your main thread.</p>
+you might accidentally be doing on your main thread.</p>
 
 
 

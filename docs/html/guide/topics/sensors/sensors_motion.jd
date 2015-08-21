@@ -338,7 +338,7 @@ acceleration sensor.</p>
 should be identical to that of the accelerometer.</p>
 
 <h2 id="sensors-motion-gyro">Using the Gyroscope</h2>
-<p>The gyroscope measures the rate or rotation in rad/s around a device's x, y,
+<p>The gyroscope measures the rate of rotation in rad/s around a device's x, y,
 and z axis. The following code shows you how to get an instance of the default gyroscope:</p>
 
 <pre>

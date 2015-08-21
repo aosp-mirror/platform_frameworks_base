@@ -293,7 +293,6 @@ trainingnavtop=true
             /*
              * Handle file not found errors
              */
-        }
         // In all cases, close the asset file descriptor
         } finally {
             if (afd != null) {

@@ -100,7 +100,7 @@ project and override similar module file settings.</p>
 
    <dt><code>build</code></dt>
 
-   <dd>This directory stories the build output for all project modules.</dd>
+   <dd>This directory stores the build output for all project modules.</dd>
 
 
     <dt><code>gradle</code></dt>
