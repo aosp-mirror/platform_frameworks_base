@@ -56,14 +56,14 @@ public class FormatterTest extends AndroidTestCase {
     public void testFormatBytes() {
         setLocale(Locale.ENGLISH);
 
-        checkFormatBytes(0, true, "0.00", 0);
-        checkFormatBytes(0, false, "0.00", 0);
+        checkFormatBytes(0, true, "0", 0);
+        checkFormatBytes(0, false, "0", 0);
 
-        checkFormatBytes(1, true, "1.0", 1);
-        checkFormatBytes(1, false, "1.00", 1);
+        checkFormatBytes(1, true, "1", 1);
+        checkFormatBytes(1, false, "1", 1);
 
         checkFormatBytes(12, true, "12", 12);
-        checkFormatBytes(12, false, "12.00", 12);
+        checkFormatBytes(12, false, "12", 12);
 
         checkFormatBytes(123, true, "123", 123);
         checkFormatBytes(123, false, "123", 123);
@@ -80,13 +80,15 @@ public class FormatterTest extends AndroidTestCase {
         checkFormatBytes(9123000, true, "8.7", 9122611);
         checkFormatBytes(9123000, false, "8.70", 9122611);
 
-        // The method doesn't really support negative values, but apparently people pass -1...
-        checkFormatBytes(-1, true, "-1.00", -1);
-        checkFormatBytes(-1, false, "-1.00", -1);
+        checkFormatBytes(-1, true, "-1", -1);
+        checkFormatBytes(-1, false, "-1", -1);
+
+        checkFormatBytes(-912, true, "-0.89", -911);
+        checkFormatBytes(-912, false, "-0.89", -911);
 
         // Missing FLAG_CALCULATE_ROUNDED case.
         BytesResult r = Formatter.formatBytes(getContext().getResources(), 1, 0);
-        assertEquals("1.00", r.value);
+        assertEquals("1", r.value);
         assertEquals(0, r.roundedBytes); // Didn't pass FLAG_CALCULATE_ROUNDED
 
         // Make sure it works on different locales.
