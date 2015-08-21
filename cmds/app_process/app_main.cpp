@@ -221,14 +221,14 @@ int main(int argc, char* const argv[])
 
     if (zygote) {
         runtime.start("com.android.internal.os.ZygoteInit",
-                startSystemServer ? "start-system-server" : "");
+                startSystemServer ? "start-system-server" : "", zygote);
     } else if (className) {
         // Remainder of args get passed to startup class main()
         runtime.mClassName = className;
         runtime.mArgC = argc - i;
         runtime.mArgV = argv + i;
         runtime.start("com.android.internal.os.RuntimeInit",
-                application ? "application" : "tool");
+                application ? "application" : "tool", zygote);
     } else {
         fprintf(stderr, "Error: no class name or --zygote supplied.\n");
         app_usage();
