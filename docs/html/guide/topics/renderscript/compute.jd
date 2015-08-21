@@ -215,7 +215,7 @@ import android.support.v8.renderscript.*;
 
 <ul>
   <li>{@code renderscript.target} - Specifies the bytecode version to be generated. We
-    recommend you set this value the highest available API level and set {@code
+    recommend you set this value to your minimum required API level and set {@code
     renderscript.support.mode} to {@code true}. Valid values for this setting are any integer value
     from 11 to the most recently released API level. If your minimum SDK version specified in your
     application manifest is set to a higher value, this value is ignored and the target value is set
