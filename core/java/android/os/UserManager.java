@@ -927,6 +927,28 @@ public class UserManager {
     }
 
     /**
+     * Creates a restricted profile with the specified name.
+     *
+     * @param name profile's name
+     * @return UserInfo object for the created user, or null if the user could not be created.
+     * @hide
+     */
+    public UserInfo createRestrictedProfile(String name) {
+        try {
+            if (isSplitSystemUser()) {
+                return mService.createProfileForUser(name, UserInfo.FLAG_RESTRICTED,
+                        UserHandle.getCallingUserId());
+            } else {
+                return mService.createProfileForUser(name, UserInfo.FLAG_RESTRICTED,
+                        UserHandle.USER_SYSTEM);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not create a restricted profile", e);
+        }
+        return null;
+    }
+
+    /**
      * @hide
      * Marks the guest user for deletion to allow a new guest to be created before deleting
      * the current user who is a guest.

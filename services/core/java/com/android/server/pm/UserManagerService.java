@@ -61,7 +61,6 @@ import com.google.android.collect.Sets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -102,6 +101,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_GUEST_TO_REMOVE = "guestToRemove";
     private static final String ATTR_USER_VERSION = "version";
     private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
+    private static final String ATTR_RESTRICTED_PROFILE_PARENT_ID = "restrictedProfileParentId";
     private static final String TAG_GUEST_RESTRICTIONS = "guestRestrictions";
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
@@ -927,7 +927,10 @@ public class UserManagerService extends IUserManager.Stub {
                 serializer.attribute(null, ATTR_PROFILE_GROUP_ID,
                         Integer.toString(userInfo.profileGroupId));
             }
-
+            if (userInfo.restrictedProfileParentId != UserInfo.NO_PROFILE_GROUP_ID) {
+                serializer.attribute(null, ATTR_RESTRICTED_PROFILE_PARENT_ID,
+                        Integer.toString(userInfo.restrictedProfileParentId));
+            }
             serializer.startTag(null, TAG_NAME);
             serializer.text(userInfo.name);
             serializer.endTag(null, TAG_NAME);
@@ -1037,6 +1040,7 @@ public class UserManagerService extends IUserManager.Stub {
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
         int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
+        int restrictedProfileParentId = UserInfo.NO_PROFILE_GROUP_ID;
         boolean partial = false;
         boolean guestToRemove = false;
         Bundle restrictions = new Bundle();
@@ -1072,6 +1076,8 @@ public class UserManagerService extends IUserManager.Stub {
                 lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
                 profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
                         UserInfo.NO_PROFILE_GROUP_ID);
+                restrictedProfileParentId = readIntAttribute(parser,
+                        ATTR_RESTRICTED_PROFILE_PARENT_ID, UserInfo.NO_PROFILE_GROUP_ID);
                 String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
                 if ("true".equals(valueString)) {
                     partial = true;
@@ -1106,6 +1112,7 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.partial = partial;
             userInfo.guestToRemove = guestToRemove;
             userInfo.profileGroupId = profileGroupId;
+            userInfo.restrictedProfileParentId = restrictedProfileParentId;
             mUserRestrictions.append(id, restrictions);
             return userInfo;
 
@@ -1262,6 +1269,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
         final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
+        final boolean isRestricted = (flags & UserInfo.FLAG_RESTRICTED) != 0;
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo = null;
         final int userId;
@@ -1286,6 +1294,24 @@ public class UserManagerService extends IUserManager.Stub {
                     if (isGuest && findCurrentGuestUserLocked() != null) {
                         return null;
                     }
+                    // In legacy mode, restricted profile's parent can only be the owner user
+                    if (isRestricted && !UserManager.isSplitSystemUser()
+                            && (parentId != UserHandle.USER_SYSTEM)) {
+                        Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be owner");
+                        return null;
+                    }
+                    if (isRestricted && UserManager.isSplitSystemUser()) {
+                        if (parent == null) {
+                            Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be "
+                                    + "specified");
+                            return null;
+                        }
+                        if (!parent.canHaveProfile()) {
+                            Log.w(LOG_TAG, "Cannot add restricted profile - profiles cannot be "
+                                    + "created for the specified parent user id " + parentId);
+                            return null;
+                        }
+                    }
                     // In split system user mode, we assign the first human user the primary flag.
                     // And if there is no device owner, we also assign the admin flag to primary
                     // user.
@@ -1309,11 +1335,22 @@ public class UserManagerService extends IUserManager.Stub {
                     mUsers.put(userId, userInfo);
                     writeUserListLocked();
                     if (parent != null) {
-                        if (parent.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
-                            parent.profileGroupId = parent.id;
-                            scheduleWriteUserLocked(parent);
+                        if (isManagedProfile) {
+                            if (parent.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+                                parent.profileGroupId = parent.id;
+                                scheduleWriteUserLocked(parent);
+                            }
+                            userInfo.profileGroupId = parent.profileGroupId;
+                        } else if (isRestricted) {
+                            if (!parent.canHaveProfile()) {
+                                Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be owner");
+                            }
+                            if (parent.restrictedProfileParentId == UserInfo.NO_PROFILE_GROUP_ID) {
+                                parent.restrictedProfileParentId = parent.id;
+                                scheduleWriteUserLocked(parent);
+                            }
+                            userInfo.restrictedProfileParentId = parent.restrictedProfileParentId;
                         }
-                        userInfo.profileGroupId = parent.profileGroupId;
                     }
                     final StorageManager storage = mContext.getSystemService(StorageManager.class);
                     for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
@@ -1348,24 +1385,9 @@ public class UserManagerService extends IUserManager.Stub {
         return userInfo;
     }
 
-    private int numberOfUsersOfTypeLocked(int flags, boolean excludeDying) {
-        int count = 0;
-        for (int i = mUsers.size() - 1; i >= 0; i--) {
-            UserInfo user = mUsers.valueAt(i);
-            if (!excludeDying || !mRemovingUserIds.get(user.id)) {
-                if ((user.flags & flags) != 0) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
     /**
      * Find the current guest user. If the Guest user is partial,
      * then do not include it in the results as it is about to die.
-     * This is different than {@link #numberOfUsersOfTypeLocked(int, boolean)} due to
-     * the special handling of Guests being removed.
      */
     private UserInfo findCurrentGuestUserLocked() {
         final int size = mUsers.size();
