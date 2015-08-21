@@ -274,7 +274,7 @@ void GlopBuilder::setFill(int color, float alphaScale,
         SkXfermode::Mode mode;
         SkScalar srcColorMatrix[20];
         if (colorFilter->asColorMode(&color, &mode)) {
-            mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::kColorBlend;
+            mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Blend;
             mDescription.colorMode = mode;
 
             const float alpha = SkColorGetA(color) / 255.0f;
@@ -286,7 +286,7 @@ void GlopBuilder::setFill(int color, float alphaScale,
                     alpha,
             };
         } else if (colorFilter->asColorMatrix(srcColorMatrix)) {
-            mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::kColorMatrix;
+            mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Matrix;
 
             float* colorMatrix = mOutGlop->fill.filter.matrix.matrix;
             memcpy(colorMatrix, srcColorMatrix, 4 * sizeof(float));
@@ -305,7 +305,7 @@ void GlopBuilder::setFill(int color, float alphaScale,
             LOG_ALWAYS_FATAL("unsupported ColorFilter");
         }
     } else {
-        mOutGlop->fill.filterMode = ProgramDescription::kColorNone;
+        mOutGlop->fill.filterMode = ProgramDescription::ColorFilterMode::None;
     }
 }
 

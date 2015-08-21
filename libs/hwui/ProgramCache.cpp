@@ -607,7 +607,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (!description.hasVertexAlpha
             && !blendFramebuffer
             && !description.hasColors
-            && description.colorOp == ProgramDescription::kColorNone
+            && description.colorOp == ProgramDescription::ColorFilterMode::None
             && !description.hasDebugHighlight
             && !description.hasRoundRectClip) {
         bool fast = false;
@@ -671,13 +671,13 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.hasBitmap) {
         shader.append(gFS_Uniforms_BitmapSampler);
     }
-    shader.append(gFS_Uniforms_ColorOp[description.colorOp]);
+    shader.append(gFS_Uniforms_ColorOp[static_cast<int>(description.colorOp)]);
 
     // Generate required functions
     if (description.hasGradient && description.hasBitmap) {
         generateBlend(shader, "blendShaders", description.shadersMode);
     }
-    if (description.colorOp == ProgramDescription::kColorBlend) {
+    if (description.colorOp == ProgramDescription::ColorFilterMode::Blend) {
         generateBlend(shader, "blendColors", description.colorMode);
     }
     if (blendFramebuffer) {
@@ -740,7 +740,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         }
 
         // Apply the color op if needed
-        shader.append(gFS_Main_ApplyColorOp[description.colorOp]);
+        shader.append(gFS_Main_ApplyColorOp[static_cast<int>(description.colorOp)]);
 
         if (description.hasVertexAlpha) {
             if (description.useShadowAlphaInterp) {

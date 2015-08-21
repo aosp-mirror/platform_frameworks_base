@@ -56,19 +56,19 @@ struct DeferStateStruct;
  */
 class Layer : public VirtualLightRefBase {
 public:
-    enum Type {
-        kType_Texture,
-        kType_DisplayList,
+    enum class Type {
+        Texture,
+        DisplayList,
     };
 
     // layer lifecycle, controlled from outside
-    enum State {
-        kState_Uncached = 0,
-        kState_InCache = 1,
-        kState_FailedToCache = 2,
-        kState_RemovedFromCache = 3,
-        kState_DeletedFromCache = 4,
-        kState_InGarbageList = 5,
+    enum class State {
+        Uncached = 0,
+        InCache = 1,
+        FailedToCache = 2,
+        RemovedFromCache = 3,
+        DeletedFromCache = 4,
+        InGarbageList = 5,
     };
     State state; // public for logging/debugging purposes
 
@@ -241,7 +241,7 @@ public:
     }
 
     inline bool isTextureLayer() const {
-        return type == kType_Texture;
+        return type == Type::Texture;
     }
 
     inline SkColorFilter* getColorFilter() const {

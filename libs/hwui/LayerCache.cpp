@@ -81,7 +81,7 @@ void LayerCache::deleteLayer(Layer* layer) {
         LAYER_LOGD("Destroying layer %dx%d, fbo %d", layer->getWidth(), layer->getHeight(),
                 layer->getFbo());
         mSize -= layer->getWidth() * layer->getHeight() * 4;
-        layer->state = Layer::kState_DeletedFromCache;
+        layer->state = Layer::State::DeletedFromCache;
         layer->decStrong(nullptr);
     }
 }
@@ -104,14 +104,14 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
         mCache.erase(iter);
 
         layer = entry.mLayer;
-        layer->state = Layer::kState_RemovedFromCache;
+        layer->state = Layer::State::RemovedFromCache;
         mSize -= layer->getWidth() * layer->getHeight() * 4;
 
         LAYER_LOGD("Reusing layer %dx%d", layer->getWidth(), layer->getHeight());
     } else {
         LAYER_LOGD("Creating new layer %dx%d", entry.mWidth, entry.mHeight);
 
-        layer = new Layer(Layer::kType_DisplayList, renderState, entry.mWidth, entry.mHeight);
+        layer = new Layer(Layer::Type::DisplayList, renderState, entry.mWidth, entry.mHeight);
         layer->setBlend(true);
         layer->generateTexture();
         layer->bindTexture();
@@ -156,11 +156,11 @@ bool LayerCache::put(Layer* layer) {
         mCache.insert(entry);
         mSize += size;
 
-        layer->state = Layer::kState_InCache;
+        layer->state = Layer::State::InCache;
         return true;
     }
 
-    layer->state = Layer::kState_FailedToCache;
+    layer->state = Layer::State::FailedToCache;
     return false;
 }
 

@@ -421,7 +421,7 @@ void CanvasContext::destroyHardwareResources() {
         // Make sure to release all the textures we were owning as there won't
         // be another draw
         caches.textureCache.resetMarkInUse(this);
-        caches.flush(Caches::kFlushMode_Layers);
+        caches.flush(Caches::FlushMode::Layers);
     }
 }
 
@@ -431,10 +431,10 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
 
     ATRACE_CALL();
     if (level >= TRIM_MEMORY_COMPLETE) {
-        Caches::getInstance().flush(Caches::kFlushMode_Full);
+        Caches::getInstance().flush(Caches::FlushMode::Full);
         thread.eglManager().destroy();
     } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
-        Caches::getInstance().flush(Caches::kFlushMode_Moderate);
+        Caches::getInstance().flush(Caches::FlushMode::Moderate);
     }
 }
 

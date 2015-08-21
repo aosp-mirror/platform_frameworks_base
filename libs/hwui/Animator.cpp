@@ -36,8 +36,8 @@ BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
         , mFinalValue(finalValue)
         , mDeltaValue(0)
         , mFromValue(0)
-        , mStagingPlayState(NOT_STARTED)
-        , mPlayState(NOT_STARTED)
+        , mStagingPlayState(PlayState::NotStarted)
+        , mPlayState(PlayState::NotStarted)
         , mHasStartValue(false)
         , mStartTime(0)
         , mDuration(300)
@@ -50,7 +50,7 @@ BaseRenderNodeAnimator::~BaseRenderNodeAnimator() {
 
 void BaseRenderNodeAnimator::checkMutable() {
     // Should be impossible to hit as the Java-side also has guards for this
-    LOG_ALWAYS_FATAL_IF(mStagingPlayState != NOT_STARTED,
+    LOG_ALWAYS_FATAL_IF(mStagingPlayState != PlayState::NotStarted,
             "Animator has already been started!");
 }
 
@@ -92,9 +92,9 @@ void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
     if (mStagingPlayState > mPlayState) {
         mPlayState = mStagingPlayState;
         // Oh boy, we're starting! Man the battle stations!
-        if (mPlayState == RUNNING) {
+        if (mPlayState == PlayState::Running) {
             transitionToRunning(context);
-        } else if (mPlayState == FINISHED) {
+        } else if (mPlayState == PlayState::Finished) {
             callOnFinishedListener(context);
         }
     }
@@ -124,10 +124,10 @@ void BaseRenderNodeAnimator::transitionToRunning(AnimationContext& context) {
 }
 
 bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
-    if (mPlayState < RUNNING) {
+    if (mPlayState < PlayState::Running) {
         return false;
     }
-    if (mPlayState == FINISHED) {
+    if (mPlayState == PlayState::Finished) {
         return true;
     }
 
@@ -141,18 +141,18 @@ bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
     }
 
     float fraction = 1.0f;
-    if (mPlayState == RUNNING && mDuration > 0) {
+    if (mPlayState == PlayState::Running && mDuration > 0) {
         fraction = (float)(context.frameTimeMs() - mStartTime) / mDuration;
     }
     if (fraction >= 1.0f) {
         fraction = 1.0f;
-        mPlayState = FINISHED;
+        mPlayState = PlayState::Finished;
     }
 
     fraction = mInterpolator->interpolate(fraction);
     setValue(mTarget, mFromValue + (mDeltaValue * fraction));
 
-    if (mPlayState == FINISHED) {
+    if (mPlayState == PlayState::Finished) {
         callOnFinishedListener(context);
         return true;
     }
@@ -161,8 +161,8 @@ bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
 }
 
 void BaseRenderNodeAnimator::forceEndNow(AnimationContext& context) {
-    if (mPlayState < FINISHED) {
-        mPlayState = FINISHED;
+    if (mPlayState < PlayState::Finished) {
+        mPlayState = PlayState::Finished;
         callOnFinishedListener(context);
     }
 }
@@ -212,9 +212,9 @@ void RenderPropertyAnimator::onAttached() {
 }
 
 void RenderPropertyAnimator::onStagingPlayStateChanged() {
-    if (mStagingPlayState == RUNNING) {
+    if (mStagingPlayState == PlayState::Running) {
         (mTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
-    } else if (mStagingPlayState == FINISHED) {
+    } else if (mStagingPlayState == PlayState::Finished) {
         // We're being canceled, so make sure that whatever values the UI thread
         // is observing for us is pushed over
         mTarget->setPropertyFieldsDirty(dirtyMask());
