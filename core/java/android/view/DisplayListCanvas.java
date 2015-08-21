@@ -20,12 +20,7 @@ import android.annotation.NonNull;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
-import android.graphics.NinePatch;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Picture;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.Pools.SynchronizedPool;
 
 /**
@@ -206,16 +201,12 @@ public class DisplayListCanvas extends Canvas {
      * Draws the specified layer onto this canvas.
      *
      * @param layer The layer to composite on this canvas
-     * @param x The left coordinate of the layer
-     * @param y The top coordinate of the layer
-     * @param paint The paint used to draw the layer
      */
-    void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint) {
-        layer.setLayerPaint(paint);
-        nDrawLayer(mNativeCanvasWrapper, layer.getLayerHandle(), x, y);
+    void drawHardwareLayer(HardwareLayer layer) {
+        nDrawLayer(mNativeCanvasWrapper, layer.getLayerHandle());
     }
 
-    private static native void nDrawLayer(long renderer, long layer, float x, float y);
+    private static native void nDrawLayer(long renderer, long layer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Drawing
