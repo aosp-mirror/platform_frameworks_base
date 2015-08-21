@@ -64,7 +64,7 @@ public:
      */
     static jclass findClass(JNIEnv* env, const char* className);
 
-    void start(const char *classname, const Vector<String8>& options);
+    void start(const char *classname, const Vector<String8>& options, bool zygote);
 
     void exit(int code);
 
@@ -131,7 +131,7 @@ private:
                                     const char* runtimeArg,
                                     const char* quotingArg);
     void parseExtraOpts(char* extraOptsBuf, const char* quotingArg);
-    int startVm(JavaVM** pJavaVM, JNIEnv** pEnv);
+    int startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote);
 
     Vector<JavaVMOption> mOptions;
     bool mExitWithoutCleanup;
