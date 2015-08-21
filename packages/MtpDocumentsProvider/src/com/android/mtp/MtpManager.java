@@ -21,7 +21,10 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.mtp.MtpDevice;
+import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract;
 import android.util.SparseArray;
 
 import java.io.FileNotFoundException;
@@ -132,6 +135,22 @@ class MtpManager {
         if (!device.deleteObject(objectHandle)) {
             throw new IOException("Failed to delete document");
         }
+    }
+
+    synchronized int createDocument(int deviceId, int storageId, int parentObjectHandle,
+            String mimeType, String name) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        final MtpObjectInfo objectInfo = new MtpObjectInfo.Builder()
+                .setName(name)
+                .setStorageId(storageId)
+                .setParent(parentObjectHandle)
+                .setFormat(MtpDocument.mimeTypeToFormatType(mimeType))
+                .build();
+        final MtpObjectInfo result = device.sendObjectInfo(objectInfo);
+        if (result == null) {
+            throw new IOException("Failed to create a document");
+        }
+        return result.getObjectHandle();
     }
 
     synchronized int getParent(int deviceId, int objectHandle) throws IOException {

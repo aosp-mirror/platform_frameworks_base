@@ -91,7 +91,8 @@ public class DocumentLoaderTest extends AndroidTestCase {
                     "file" + objectHandle,
                     new Date(),
                     1024,
-                    0 /* thumbnail size */));
+                    0 /* thumbnail size */,
+                    false /* not read only */));
         }
         manager.setObjectHandles(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, childDocuments);
     }

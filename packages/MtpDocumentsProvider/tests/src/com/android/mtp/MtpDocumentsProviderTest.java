@@ -210,7 +210,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 "image.jpg" /* display name */,
                 new Date(1422716400000L) /* modified date */,
                 1024 * 1024 * 5 /* file size */,
-                1024 * 50 /* thumbnail size */));
+                1024 * 50 /* thumbnail size */,
+                true /* read only */));
         final Cursor cursor = mProvider.queryDocument("0_1_2", null);
         assertEquals(1, cursor.getCount());
 
@@ -257,7 +258,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 "image.jpg" /* display name */,
                 new Date(0) /* modified date */,
                 1024 * 1024 * 5 /* file size */,
-                1024 * 50 /* thumbnail size */));
+                1024 * 50 /* thumbnail size */,
+                true /* read only */));
 
         final Cursor cursor = mProvider.queryChildDocuments("0_0_0", null, null);
         assertEquals(1, cursor.getCount());
@@ -302,7 +304,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 "image.jpg" /* display name */,
                 new Date(1422716400000L) /* modified date */,
                 1024 * 1024 * 5 /* file size */,
-                1024 * 50 /* thumbnail size */));
+                1024 * 50 /* thumbnail size */,
+                false /* not read only */));
         mMtpManager.setParent(0, 1, 2);
         mProvider.deleteDocument("0_0_1");
         assertEquals(1, mResolver.getChangeCount(

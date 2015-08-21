@@ -430,12 +430,14 @@ static jobject
 android_mtp_MtpDevice_send_object_info(JNIEnv *env, jobject thiz, jobject info)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
-    if (!device)
+    if (!device) {
         return JNI_FALSE;
+    }
 
     // Updating existing objects is not supported.
-    if (env->GetIntField(info, field_objectInfo_handle) != -1)
+    if (env->GetIntField(info, field_objectInfo_handle) != -1) {
         return JNI_FALSE;
+    }
 
     MtpObjectInfo* object_info = new MtpObjectInfo(-1);
     object_info->mStorageID = env->GetIntField(info, field_objectInfo_storageId);
@@ -456,17 +458,21 @@ android_mtp_MtpDevice_send_object_info(JNIEnv *env, jobject thiz, jobject info)
     object_info->mSequenceNumber = env->GetIntField(info, field_objectInfo_sequenceNumber);
 
     jstring name_jstring = (jstring) env->GetObjectField(info, field_objectInfo_name);
-    const char* name_string = env->GetStringUTFChars(name_jstring, NULL);
-    object_info->mName = strdup(name_string);
-    env->ReleaseStringUTFChars(name_jstring, name_string);
+    if (name_jstring != NULL) {
+        const char* name_string = env->GetStringUTFChars(name_jstring, NULL);
+        object_info->mName = strdup(name_string);
+        env->ReleaseStringUTFChars(name_jstring, name_string);
+    }
 
     object_info->mDateCreated = env->GetLongField(info, field_objectInfo_dateCreated) / 1000LL;
     object_info->mDateModified = env->GetLongField(info, field_objectInfo_dateModified) / 1000LL;
 
     jstring keywords_jstring = (jstring) env->GetObjectField(info, field_objectInfo_keywords);
-    const char* keywords_string = env->GetStringUTFChars(keywords_jstring, NULL);
-    object_info->mKeywords = strdup(keywords_string);
-    env->ReleaseStringUTFChars(keywords_jstring, keywords_string);
+    if (keywords_jstring != NULL) {
+        const char* keywords_string = env->GetStringUTFChars(keywords_jstring, NULL);
+        object_info->mKeywords = strdup(keywords_string);
+        env->ReleaseStringUTFChars(keywords_jstring, keywords_string);
+    }
 
     int object_handle = device->sendObjectInfo(object_info);
     if (object_handle == -1) {

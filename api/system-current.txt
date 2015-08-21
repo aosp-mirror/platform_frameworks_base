@@ -19659,7 +19659,7 @@ package android.mtp {
     method public final int getThumbPixWidth();
   }
 
-  public class MtpObjectInfo.Builder {
+  public static class MtpObjectInfo.Builder {
     ctor public MtpObjectInfo.Builder();
     ctor public MtpObjectInfo.Builder(android.mtp.MtpObjectInfo);
     method public android.mtp.MtpObjectInfo build();
