@@ -288,7 +288,6 @@ public final class MidiManager {
                         // fetch MidiDeviceInfo from the server
                         MidiDeviceInfo deviceInfo = server.getDeviceInfo();
                         device = new MidiDevice(deviceInfo, server, mService, mToken, deviceToken);
-                        sendOpenDeviceResponse(device, listenerF, handlerF);
                     } catch (RemoteException e) {
                         Log.e(TAG, "remote exception in getDeviceInfo()");
                     }
