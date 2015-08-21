@@ -401,21 +401,40 @@ public class BackupManagerService {
         public boolean isSystemRestore;
         public String[] filterSet;
 
-        // Restore a single package
+        /**
+         * Restore a single package; no kill after restore
+         */
         RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-                long _token, PackageInfo _pkg, int _pmToken) {
+                long _token, PackageInfo _pkg) {
             transport = _transport;
             dirName = _dirName;
             observer = _obs;
             token = _token;
             pkgInfo = _pkg;
-            pmToken = _pmToken;
+            pmToken = 0;
             isSystemRestore = false;
             filterSet = null;
         }
 
-        // Restore everything possible.  This is the form that Setup Wizard or similar
-        // restore UXes use.
+        /**
+         * Restore at install: PM token needed, kill after restore
+         */
+        RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
+                long _token, String _pkgName, int _pmToken) {
+            transport = _transport;
+            dirName = _dirName;
+            observer = _obs;
+            token = _token;
+            pkgInfo = null;
+            pmToken = _pmToken;
+            isSystemRestore = false;
+            filterSet = new String[] { _pkgName };
+        }
+
+        /**
+         * Restore everything possible.  This is the form that Setup Wizard or similar
+         * restore UXes use.
+         */
         RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
                 long _token) {
             transport = _transport;
@@ -428,8 +447,10 @@ public class BackupManagerService {
             filterSet = null;
         }
 
-        // Restore some set of packages.  Leave this one up to the caller to specify
-        // whether it's to be considered a system-level restore.
+        /**
+         * Restore some set of packages.  Leave this one up to the caller to specify
+         * whether it's to be considered a system-level restore.
+         */
         RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
                 long _token, String[] _filterSet, boolean _isSystemRestore) {
             transport = _transport;
@@ -9137,19 +9158,13 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // This can throw and so *must* happen before the wakelock is acquired
                 String dirName = transport.transportDirName();
 
-                // We can use a synthetic PackageInfo here because:
-                //   1. We know it's valid, since the Package Manager supplied the name
-                //   2. Only the packageName field will be used by the restore code
-                PackageInfo pkg = new PackageInfo();
-                pkg.packageName = packageName;
-
                 mWakelock.acquire();
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Restore at install of " + packageName);
                 }
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                 msg.obj = new RestoreParams(transport, dirName, null,
-                        restoreSet, pkg, token);
+                        restoreSet, packageName, token);
                 mBackupHandler.sendMessage(msg);
             } catch (RemoteException e) {
                 // Binding to the transport broke; back off and proceed with the installation.
@@ -9528,8 +9543,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     Slog.d(TAG, "restorePackage() : " + packageName);
                 }
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                msg.obj = new RestoreParams(mRestoreTransport, dirName,
-                        observer, token, app, 0);
+                msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, token, app);
                 mBackupHandler.sendMessage(msg);
             } finally {
                 Binder.restoreCallingIdentity(oldId);
