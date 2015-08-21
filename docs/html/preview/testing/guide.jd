@@ -166,12 +166,12 @@ $ adb shell dumpsys deviceidle -h
 
 <pre>
 $ adb shell am broadcast -a android.os.action.DISCHARGING
-$ adb shell am set-idle &lt;packageName&gt; true
+$ adb shell am set-inactive &lt;packageName&gt; true
 </pre>
 
   </li>
   <li>Simulate waking your app using the following command:
-    <pre>$ adb shell am set-idle &lt;packageName&gt; false</pre>
+    <pre>$ adb shell am set-inactive &lt;packageName&gt; false</pre>
   </li>
   <li>Observe the behavior of your app when it is woken. Make sure it recovers gracefully
     from standby mode. In particular, you should check if your app's Notifications and background

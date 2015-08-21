@@ -101,9 +101,9 @@ and calling the following commands:
 </p>
 <pre class="no-prettyprint">
 $ adb shell dumpsys battery unplug
-$ adb shell am set-idle &lt;packageName&gt; true
-$ adb shell am set-idle &lt;packageName&gt; false
-$ adb shell am get-idle &lt;packageName&gt;
+$ adb shell am set-inactive &lt;packageName&gt; true
+$ adb shell am set-inactive &lt;packageName&gt; false
+$ adb shell am get-inactive &lt;packageName&gt;
 </pre>
 
 <p class="note"><strong>Note</strong>:
