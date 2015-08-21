@@ -56,11 +56,12 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
 
     // This path must match what the WallpaperManagerService uses
     // TODO: Will need to change if backing up non-primary user's wallpaper
+    // http://b/22388012
     public static final String WALLPAPER_IMAGE =
-            new File(Environment.getUserSystemDirectory(UserHandle.USER_OWNER),
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM),
                     "wallpaper").getAbsolutePath();
     public static final String WALLPAPER_INFO =
-            new File(Environment.getUserSystemDirectory(UserHandle.USER_OWNER),
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM),
                     "wallpaper_info.xml").getAbsolutePath();
     // Use old keys to keep legacy data compatibility and avoid writing two wallpapers
     public static final String WALLPAPER_IMAGE_KEY =
@@ -71,8 +72,9 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
     // will be saved to this file from the restore stream, then renamed to the proper
     // location if it's deemed suitable.
     // TODO: Will need to change if backing up non-primary user's wallpaper
+    // http://b/22388012
     private static final String STAGE_FILE =
-            new File(Environment.getUserSystemDirectory(UserHandle.USER_OWNER),
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM),
                     "wallpaper-tmp").getAbsolutePath();
 
     Context mContext;

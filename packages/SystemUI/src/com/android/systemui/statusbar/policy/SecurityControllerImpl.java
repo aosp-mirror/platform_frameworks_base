@@ -178,7 +178,8 @@ public class SecurityControllerImpl implements SecurityController {
         mCurrentUserId = newUserId;
         if (mUserManager.getUserInfo(newUserId).isRestricted()) {
             // VPN for a restricted profile is routed through its owner user
-            mVpnUserId = UserHandle.USER_OWNER;
+            // TODO: http://b/22950929
+            mVpnUserId = UserHandle.USER_SYSTEM;
         } else {
             mVpnUserId = mCurrentUserId;
         }

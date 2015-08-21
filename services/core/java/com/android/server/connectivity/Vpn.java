@@ -146,7 +146,8 @@ public class Vpn {
         } catch (RemoteException e) {
             Log.wtf(TAG, "Problem registering observer", e);
         }
-        if (userHandle == UserHandle.USER_OWNER) {
+        // TODO: http://b/22950929
+        if (userHandle == UserHandle.USER_SYSTEM) {
             // Owner's VPN also needs to handle restricted users
             mUserIntentReceiver = new BroadcastReceiver() {
                 @Override

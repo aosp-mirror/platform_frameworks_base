@@ -152,8 +152,9 @@ public class UserInfo implements Parcelable {
         }
         if (UserManager.isSplitSystemUser()) {
             return id != UserHandle.USER_SYSTEM;
+        } else {
+            return id == UserHandle.USER_SYSTEM;
         }
-        return id == UserHandle.USER_OWNER;
     }
 
     public UserInfo() {
