@@ -4994,12 +4994,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             IPackageManager pm = AppGlobals.getPackageManager();
             long id = Binder.clearCallingIdentity();
             try {
-                // Removing those that go from the managed profile to the primary user.
+                UserInfo parent = mUserManager.getProfileParent(callingUserId);
+                if (parent == null) {
+                    Slog.e(LOG_TAG, "Cannot call clearCrossProfileIntentFilter if there is no "
+                            + "parent");
+                    return;
+                }
+                // Removing those that go from the managed profile to the parent.
                 pm.clearCrossProfileIntentFilters(callingUserId, who.getPackageName());
-                // And those that go from the primary user to the managed profile.
+                // And those that go from the parent to the managed profile.
                 // If we want to support multiple managed profiles, we will have to only remove
                 // those that have callingUserId as their target.
-                pm.clearCrossProfileIntentFilters(UserHandle.USER_OWNER, who.getPackageName());
+                pm.clearCrossProfileIntentFilters(parent.id, who.getPackageName());
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
