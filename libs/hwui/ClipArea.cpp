@@ -32,9 +32,7 @@ static bool intersect(Rect& r, const Rect& r2) {
 }
 
 static void handlePoint(Rect& transformedBounds, const Matrix4& transform, float x, float y) {
-    Vertex v;
-    v.x = x;
-    v.y = y;
+    Vertex v = {x, y};
     transform.mapPoint(v.x, v.y);
     transformedBounds.expandToCoverVertex(v.x, v.y);
 }
@@ -187,7 +185,7 @@ SkRegion RectangleList::convertToRegion(const SkRegion& clip) const {
  */
 
 ClipArea::ClipArea()
-        : mMode(kModeRectangle) {
+        : mMode(Mode::Rectangle) {
 }
 
 /*
@@ -200,45 +198,46 @@ void ClipArea::setViewportDimensions(int width, int height) {
 }
 
 void ClipArea::setEmpty() {
-    mMode = kModeRectangle;
+    mMode = Mode::Rectangle;
     mClipRect.setEmpty();
     mClipRegion.setEmpty();
     mRectangleList.setEmpty();
 }
 
 void ClipArea::setClip(float left, float top, float right, float bottom) {
-    mMode = kModeRectangle;
+    mMode = Mode::Rectangle;
     mClipRect.set(left, top, right, bottom);
     mClipRegion.setEmpty();
 }
 
-bool ClipArea::clipRectWithTransform(float left, float top, float right,
+void ClipArea::clipRectWithTransform(float left, float top, float right,
         float bottom, const mat4* transform, SkRegion::Op op) {
     Rect r(left, top, right, bottom);
-    return clipRectWithTransform(r, transform, op);
+    clipRectWithTransform(r, transform, op);
 }
 
-bool ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
+void ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
         SkRegion::Op op) {
     switch (mMode) {
-    case kModeRectangle:
-        return rectangleModeClipRectWithTransform(r, transform, op);
-    case kModeRectangleList:
-        return rectangleListModeClipRectWithTransform(r, transform, op);
-    case kModeRegion:
-        return regionModeClipRectWithTransform(r, transform, op);
+    case Mode::Rectangle:
+        rectangleModeClipRectWithTransform(r, transform, op);
+        break;
+    case Mode::RectangleList:
+        rectangleListModeClipRectWithTransform(r, transform, op);
+        break;
+    case Mode::Region:
+        regionModeClipRectWithTransform(r, transform, op);
+        break;
     }
-    return false;
 }
 
-bool ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
+void ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
     enterRegionMode();
     mClipRegion.op(region, op);
     onClipRegionUpdated();
-    return true;
 }
 
-bool ClipArea::clipPathWithTransform(const SkPath& path, const mat4* transform,
+void ClipArea::clipPathWithTransform(const SkPath& path, const mat4* transform,
         SkRegion::Op op) {
     SkMatrix skTransform;
     transform->copyTo(skTransform);
@@ -246,7 +245,7 @@ bool ClipArea::clipPathWithTransform(const SkPath& path, const mat4* transform,
     path.transform(skTransform, &transformed);
     SkRegion region;
     regionFromPath(transformed, region);
-    return clipRegion(region, op);
+    clipRegion(region, op);
 }
 
 /*
@@ -257,19 +256,20 @@ void ClipArea::enterRectangleMode() {
     // Entering rectangle mode discards any
     // existing clipping information from the other modes.
     // The only way this occurs is by a clip setting operation.
-    mMode = kModeRectangle;
+    mMode = Mode::Rectangle;
 }
 
-bool ClipArea::rectangleModeClipRectWithTransform(const Rect& r,
+void ClipArea::rectangleModeClipRectWithTransform(const Rect& r,
         const mat4* transform, SkRegion::Op op) {
 
     if (op == SkRegion::kReplace_Op && transform->rectToRect()) {
         mClipRect = r;
         transform->mapRect(mClipRect);
-        return true;
+        return;
     } else if (op != SkRegion::kIntersect_Op) {
         enterRegionMode();
-        return regionModeClipRectWithTransform(r, transform, op);
+        regionModeClipRectWithTransform(r, transform, op);
+        return;
     }
 
     if (transform->rectToRect()) {
@@ -279,19 +279,18 @@ bool ClipArea::rectangleModeClipRectWithTransform(const Rect& r,
         if (!hasIntersection) {
             mClipRect.setEmpty();
         }
-        return true;
+        return;
     }
 
     enterRectangleListMode();
-    return rectangleListModeClipRectWithTransform(r, transform, op);
+    rectangleListModeClipRectWithTransform(r, transform, op);
 }
 
-bool ClipArea::rectangleModeClipRectWithTransform(float left, float top,
+void ClipArea::rectangleModeClipRectWithTransform(float left, float top,
         float right, float bottom, const mat4* transform, SkRegion::Op op) {
     Rect r(left, top, right, bottom);
-    bool result = rectangleModeClipRectWithTransform(r, transform, op);
+    rectangleModeClipRectWithTransform(r, transform, op);
     mClipRect = mRectangleList.calculateBounds();
-    return result;
 }
 
 /*
@@ -302,25 +301,24 @@ void ClipArea::enterRectangleListMode() {
     // Is is only legal to enter rectangle list mode from
     // rectangle mode, since rectangle list mode cannot represent
     // all clip areas that can be represented by a region.
-    ALOG_ASSERT(mMode == kModeRectangle);
-    mMode = kModeRectangleList;
+    ALOG_ASSERT(mMode == Mode::Rectangle);
+    mMode = Mode::RectangleList;
     mRectangleList.set(mClipRect, Matrix4::identity());
 }
 
-bool ClipArea::rectangleListModeClipRectWithTransform(const Rect& r,
+void ClipArea::rectangleListModeClipRectWithTransform(const Rect& r,
         const mat4* transform, SkRegion::Op op) {
     if (op != SkRegion::kIntersect_Op
             || !mRectangleList.intersectWith(r, *transform)) {
         enterRegionMode();
-        return regionModeClipRectWithTransform(r, transform, op);
+        regionModeClipRectWithTransform(r, transform, op);
     }
-    return true;
 }
 
-bool ClipArea::rectangleListModeClipRectWithTransform(float left, float top,
+void ClipArea::rectangleListModeClipRectWithTransform(float left, float top,
         float right, float bottom, const mat4* transform, SkRegion::Op op) {
     Rect r(left, top, right, bottom);
-    return rectangleListModeClipRectWithTransform(r, transform, op);
+    rectangleListModeClipRectWithTransform(r, transform, op);
 }
 
 /*
@@ -329,9 +327,9 @@ bool ClipArea::rectangleListModeClipRectWithTransform(float left, float top,
 
 void ClipArea::enterRegionMode() {
     Mode oldMode = mMode;
-    mMode = kModeRegion;
-    if (oldMode != kModeRegion) {
-        if (oldMode == kModeRectangle) {
+    mMode = Mode::Region;
+    if (oldMode != Mode::Region) {
+        if (oldMode == Mode::Rectangle) {
             mClipRegion.setRect(mClipRect.left, mClipRect.top,
                     mClipRect.right, mClipRect.bottom);
         } else {
@@ -341,20 +339,18 @@ void ClipArea::enterRegionMode() {
     }
 }
 
-bool ClipArea::regionModeClipRectWithTransform(const Rect& r,
+void ClipArea::regionModeClipRectWithTransform(const Rect& r,
         const mat4* transform, SkRegion::Op op) {
     SkPath transformedRect = pathFromTransformedRectangle(r, *transform);
     SkRegion transformedRectRegion;
     regionFromPath(transformedRect, transformedRectRegion);
     mClipRegion.op(transformedRectRegion, op);
     onClipRegionUpdated();
-    return true;
 }
 
-bool ClipArea::regionModeClipRectWithTransform(float left, float top,
+void ClipArea::regionModeClipRectWithTransform(float left, float top,
         float right, float bottom, const mat4* transform, SkRegion::Op op) {
-    return regionModeClipRectWithTransform(Rect(left, top, right, bottom),
-            transform, op);
+    regionModeClipRectWithTransform(Rect(left, top, right, bottom), transform, op);
 }
 
 void ClipArea::onClipRegionUpdated() {

@@ -80,6 +80,13 @@ private:
 };
 
 class ClipArea {
+private:
+    enum class Mode {
+        Rectangle,
+        Region,
+        RectangleList
+    };
+
 public:
     ClipArea();
 
@@ -91,12 +98,12 @@ public:
 
     void setEmpty();
     void setClip(float left, float top, float right, float bottom);
-    bool clipRectWithTransform(float left, float top, float right, float bottom,
-            const mat4* transform, SkRegion::Op op = SkRegion::kIntersect_Op);
-    bool clipRectWithTransform(const Rect& r, const mat4* transform,
-            SkRegion::Op op = SkRegion::kIntersect_Op);
-    bool clipRegion(const SkRegion& region, SkRegion::Op op = SkRegion::kIntersect_Op);
-    bool clipPathWithTransform(const SkPath& path, const mat4* transform,
+    void clipRectWithTransform(float left, float top, float right, float bottom,
+            const mat4* transform, SkRegion::Op op);
+    void clipRectWithTransform(const Rect& r, const mat4* transform,
+            SkRegion::Op op);
+    void clipRegion(const SkRegion& region, SkRegion::Op op);
+    void clipPathWithTransform(const SkPath& path, const mat4* transform,
             SkRegion::Op op);
 
     const Rect& getClipRect() const {
@@ -112,41 +119,39 @@ public:
     }
 
     bool isRegion() const {
-        return kModeRegion == mMode;
+        return Mode::Region == mMode;
     }
 
     bool isSimple() const {
-        return mMode == kModeRectangle;
+        return mMode == Mode::Rectangle;
     }
 
     bool isRectangleList() const {
-        return mMode == kModeRectangleList;
+        return mMode == Mode::RectangleList;
     }
 
 private:
     void enterRectangleMode();
-    bool rectangleModeClipRectWithTransform(const Rect& r, const mat4* transform, SkRegion::Op op);
-    bool rectangleModeClipRectWithTransform(float left, float top, float right,
+    void rectangleModeClipRectWithTransform(const Rect& r, const mat4* transform, SkRegion::Op op);
+    void rectangleModeClipRectWithTransform(float left, float top, float right,
             float bottom, const mat4* transform, SkRegion::Op op);
 
     void enterRectangleListMode();
-    bool rectangleListModeClipRectWithTransform(float left, float top,
+    void rectangleListModeClipRectWithTransform(float left, float top,
             float right, float bottom, const mat4* transform, SkRegion::Op op);
-    bool rectangleListModeClipRectWithTransform(const Rect& r,
+    void rectangleListModeClipRectWithTransform(const Rect& r,
             const mat4* transform, SkRegion::Op op);
 
     void enterRegionModeFromRectangleMode();
     void enterRegionModeFromRectangleListMode();
     void enterRegionMode();
-    bool regionModeClipRectWithTransform(const Rect& r, const mat4* transform,
+    void regionModeClipRectWithTransform(const Rect& r, const mat4* transform,
             SkRegion::Op op);
-    bool regionModeClipRectWithTransform(float left, float top, float right,
+    void regionModeClipRectWithTransform(float left, float top, float right,
             float bottom, const mat4* transform, SkRegion::Op op);
 
     void ensureClipRegion();
     void onClipRegionUpdated();
-    bool clipRegionOp(float left, float top, float right, float bottom,
-            SkRegion::Op op);
 
     SkRegion createViewportRegion() {
         return SkRegion(mViewportBounds.toSkIRect());
@@ -157,12 +162,6 @@ private:
         // paths to clip to larger areas (which is valid e.g. with SkRegion::kReplace_Op)
         pathAsRegion.setPath(path, createViewportRegion());
     }
-
-    enum Mode {
-        kModeRectangle,
-        kModeRegion,
-        kModeRectangleList
-    };
 
     Mode mMode;
     Rect mViewportBounds;

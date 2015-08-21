@@ -155,17 +155,20 @@ void CanvasState::concatMatrix(const Matrix4& matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool CanvasState::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
-    mDirtyClip |= mSnapshot->clip(left, top, right, bottom, op);
+    mSnapshot->clip(left, top, right, bottom, op);
+    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
 bool CanvasState::clipPath(const SkPath* path, SkRegion::Op op) {
-    mDirtyClip |= mSnapshot->clipPath(*path, op);
+    mSnapshot->clipPath(*path, op);
+    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
 bool CanvasState::clipRegion(const SkRegion* region, SkRegion::Op op) {
-    mDirtyClip |= mSnapshot->clipRegionTransformed(*region, op);
+    mSnapshot->clipRegionTransformed(*region, op);
+    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
