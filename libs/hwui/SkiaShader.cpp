@@ -32,11 +32,18 @@ namespace uirenderer {
 // Support
 ///////////////////////////////////////////////////////////////////////////////
 
-static const GLenum gTileModes[] = {
+static constexpr GLenum gTileModes[] = {
         GL_CLAMP_TO_EDGE,   // == SkShader::kClamp_TileMode
         GL_REPEAT,          // == SkShader::kRepeat_Mode
         GL_MIRRORED_REPEAT  // == SkShader::kMirror_TileMode
 };
+
+static_assert(gTileModes[SkShader::kClamp_TileMode] == GL_CLAMP_TO_EDGE,
+        "SkShader TileModes have changed");
+static_assert(gTileModes[SkShader::kRepeat_TileMode] == GL_REPEAT,
+        "SkShader TileModes have changed");
+static_assert(gTileModes[SkShader::kMirror_TileMode] == GL_MIRRORED_REPEAT,
+        "SkShader TileModes have changed");
 
 /**
  * This function does not work for n == 0.
