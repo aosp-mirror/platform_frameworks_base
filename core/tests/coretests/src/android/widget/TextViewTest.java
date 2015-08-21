@@ -18,7 +18,7 @@ package android.widget;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.test.AndroidTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.GetChars;
 import android.text.Selection;
@@ -27,11 +27,15 @@ import android.text.Spannable;
 /**
  * TextViewTest tests {@link TextView}.
  */
-public class TextViewTest extends AndroidTestCase {
+public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActivity> {
+
+    public TextViewTest() {
+        super(TextViewActivity.class);
+    }
 
     @SmallTest
     public void testArray() throws Exception {
-        TextView tv = new TextView(mContext);
+        TextView tv = new TextView(getActivity());
 
         char[] c = new char[] { 'H', 'e', 'l', 'l', 'o', ' ',
                                 'W', 'o', 'r', 'l', 'd', '!' };
@@ -61,17 +65,24 @@ public class TextViewTest extends AndroidTestCase {
 
     @SmallTest
     public void testProcessTextActivityResultNonEditable() {
-        TextView tv = new TextView(mContext);
+        final TextView tv = new TextView(getActivity());
         CharSequence originalText = "This is some text.";
         tv.setText(originalText, TextView.BufferType.SPANNABLE);
         assertEquals(originalText, tv.getText().toString());
         tv.setTextIsSelectable(true);
         Selection.setSelection((Spannable) tv.getText(), 0, tv.getText().length());
 
-        CharSequence newText = "Text is replaced.";
-        Intent data = new Intent();
-        data.putExtra(Intent.EXTRA_PROCESS_TEXT, newText);
-        tv.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK, data);
+        // We need to run this in the UI thread, as it will create a Toast.
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                CharSequence newText = "Text is replaced.";
+                Intent data = new Intent();
+                data.putExtra(Intent.EXTRA_PROCESS_TEXT, newText);
+                tv.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK, data);
+            }
+        });
+        getInstrumentation().waitForIdleSync();
 
         // This is a TextView, which can't be modified. Hence no change should have been made.
         assertEquals(originalText, tv.getText().toString());
@@ -79,7 +90,7 @@ public class TextViewTest extends AndroidTestCase {
 
     @SmallTest
     public void testProcessTextActivityResultEditable() {
-        EditText tv = new EditText(mContext);
+        EditText tv = new EditText(getActivity());
         CharSequence originalText = "This is some text.";
         tv.setText(originalText, TextView.BufferType.SPANNABLE);
         assertEquals(originalText, tv.getText().toString());
@@ -96,7 +107,7 @@ public class TextViewTest extends AndroidTestCase {
 
     @SmallTest
     public void testProcessTextActivityResultCancel() {
-        EditText tv = new EditText(mContext);
+        EditText tv = new EditText(getActivity());
         CharSequence originalText = "This is some text.";
         tv.setText(originalText, TextView.BufferType.SPANNABLE);
         assertEquals(originalText, tv.getText().toString());
@@ -113,7 +124,7 @@ public class TextViewTest extends AndroidTestCase {
 
     @SmallTest
     public void testProcessTextActivityNoData() {
-        EditText tv = new EditText(mContext);
+        EditText tv = new EditText(getActivity());
         CharSequence originalText = "This is some text.";
         tv.setText(originalText, TextView.BufferType.SPANNABLE);
         assertEquals(originalText, tv.getText().toString());
