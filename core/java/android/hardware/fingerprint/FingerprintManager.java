@@ -395,7 +395,7 @@ public class FingerprintManager {
      * Request authentication of a crypto object. This call warms up the fingerprint hardware
      * and starts scanning for a fingerprint. It terminates when
      * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} or
-     * {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult) is called, at
+     * {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult)} is called, at
      * which point the object is no longer valid. The operation can be canceled by using the
      * provided cancel object.
      *
