@@ -954,7 +954,7 @@ same way. For example, a color:</p>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;resources>
     &lt;color name="yellow">#f00&lt;/color>
-    &lt;color name="highlight">@color/red&lt;/color>
+    &lt;color name="highlight">@color/yellow&lt;/color>
 &lt;/resources>
 </pre>
 
