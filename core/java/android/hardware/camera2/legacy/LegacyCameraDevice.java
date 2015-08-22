@@ -338,6 +338,8 @@ public class LegacyCameraDevice implements AutoCloseable {
                     } else {
                         sizedSurfaces.add(new Pair<>(output, s));
                     }
+                    // Lock down the size before configuration
+                    setSurfaceDimens(output, s.getWidth(), s.getHeight());
                 } catch (BufferQueueAbandonedException e) {
                     Log.e(TAG, "Surface bufferqueue is abandoned, cannot configure as output: ", e);
                     return BAD_VALUE;
