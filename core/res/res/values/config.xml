@@ -619,6 +619,17 @@
         <!-- rotation: 270 (rotate CW)  --> <item>-25</item> <item>65</item>
     </integer-array>
 
+    <!-- Indicate the name of the window orientation sensor type if present. A
+         window orientation sensor produces values to be used in lieu of the
+         typical, accelerometer based sensor. It must only produce integral
+         values between 0 and 3, inclusive, with each one corresponding to a
+         given rotation:
+            0: 0 degrees of rotation (natural)
+            1: 90 degrees of rotation (rotate CCW)
+            2: 180 degrees of rotation (reverse)
+            3: 270 degrees of rotation (rotate CW) -->
+    <string name="config_orientationSensorType" translatable="false">@null</string>
+
     <!-- Lid switch behavior -->
 
     <!-- The number of degrees to rotate the display when the keyboard is open.
