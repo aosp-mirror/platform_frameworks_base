@@ -19,12 +19,14 @@ package com.android.server.devicepolicy;
 import android.app.AppGlobals;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.os.Environment;
-import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -40,12 +42,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import libcore.io.IoUtils;
 
 /**
  * Stores and restores state for the Device and Profile owners. By definition there can be
@@ -54,21 +58,27 @@ import java.util.Set;
 class DeviceOwner {
     private static final String TAG = "DevicePolicyManagerService";
 
-    private static final String DEVICE_OWNER_XML = "device_owner.xml";
+    private static final String DEVICE_OWNER_XML_LEGACY = "device_owner.xml";
+
+    private static final String DEVICE_OWNER_XML = "device_owner_2.xml";
+
+    private static final String PROFILE_OWNER_XML = "profile_owner.xml";
+
+    private static final String TAG_ROOT = "root";
+
     private static final String TAG_DEVICE_OWNER = "device-owner";
     private static final String TAG_DEVICE_INITIALIZER = "device-initializer";
     private static final String TAG_PROFILE_OWNER = "profile-owner";
+
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_COMPONENT_NAME = "component";
     private static final String ATTR_USERID = "userId";
+
     private static final String TAG_SYSTEM_UPDATE_POLICY = "system-update-policy";
 
-    private AtomicFile fileForWriting;
-
-    // Input/Output streams for testing.
-    private InputStream mInputStreamForTest;
-    private OutputStream mOutputStreamForTest;
+    private final Context mContext;
+    private final UserManager mUserManager;
 
     // Internal state for the device owner package.
     private OwnerInfo mDeviceOwner;
@@ -82,54 +92,39 @@ class DeviceOwner {
     // Local system update policy controllable by device owner.
     private SystemUpdatePolicy mSystemUpdatePolicy;
 
-    // Private default constructor.
-    private DeviceOwner() {
-    }
-
-    @VisibleForTesting
-    DeviceOwner(InputStream in, OutputStream out) {
-        mInputStreamForTest = in;
-        mOutputStreamForTest = out;
+    public DeviceOwner(Context context) {
+        mContext = context;
+        mUserManager = UserManager.get(mContext);
     }
 
     /**
-     * Loads the device owner state from disk.
+     * Load configuration from the disk.
      */
-    static DeviceOwner load() {
-        DeviceOwner owner = new DeviceOwner();
-        if (new File(Environment.getSystemSecureDirectory(), DEVICE_OWNER_XML).exists()) {
-            owner.readOwnerFile();
-            return owner;
-        } else {
-            return null;
+    void load() {
+        synchronized (this) {
+            // First, try to read from the legacy file.
+            final File legacy = getLegacyConfigFileWithTestOverride();
+
+            if (readLegacyOwnerFile(legacy)) {
+                // Legacy file exists, write to new files and remove the legacy one.
+                writeDeviceOwner();
+                for (int userId : getProfileOwnerKeys()) {
+                    writeProfileOwner(userId);
+                }
+                if (!legacy.delete()) {
+                    Slog.e(TAG, "Failed to remove the legacy setting file");
+                }
+                return;
+            }
+
+            // No legacy file, read from the new format files.
+            new DeviceOwnerReadWriter().readFromFileLocked();
+
+            final List<UserInfo> users = mUserManager.getUsers();        // XXX double check this is the correct profile set.
+            for (UserInfo ui : users) {
+                new ProfileOwnerReadWriter(ui.id).readFromFileLocked();  // XXX double check ID is the right one.
+            }
         }
-    }
-
-    /**
-     * Creates an instance of the device owner object with the device owner set.
-     */
-    static DeviceOwner createWithDeviceOwner(String packageName, String ownerName) {
-        DeviceOwner owner = new DeviceOwner();
-        owner.mDeviceOwner = new OwnerInfo(ownerName, packageName);
-        return owner;
-    }
-
-    /**
-     * Creates an instance of the device owner object with the device initializer set.
-     */
-    static DeviceOwner createWithDeviceInitializer(ComponentName admin) {
-        DeviceOwner owner = new DeviceOwner();
-        owner.mDeviceInitializer = new OwnerInfo(null, admin);
-        return owner;
-    }
-
-    /**
-     * Creates an instance of the device owner object with the profile owner set.
-     */
-    static DeviceOwner createWithProfileOwner(ComponentName admin, String ownerName, int userId) {
-        DeviceOwner owner = new DeviceOwner();
-        owner.mProfileOwners.put(userId, new OwnerInfo(ownerName, admin));
-        return owner;
     }
 
     String getDeviceOwnerPackageName() {
@@ -234,10 +229,13 @@ class DeviceOwner {
         return false;
     }
 
-    @VisibleForTesting
-    void readOwnerFile() {
+    private boolean readLegacyOwnerFile(File file) {
+        if (!file.exists()) {
+            // Already migrated or the device has no owners.
+            return false;
+        }
         try {
-            InputStream input = openRead();
+            InputStream input = new AtomicFile(file).openRead();
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(input, StandardCharsets.UTF_8.name());
             int type;
@@ -295,99 +293,212 @@ class DeviceOwner {
                 }
             }
             input.close();
-        } catch (XmlPullParserException xppe) {
-            Slog.e(TAG, "Error parsing device-owner file\n" + xppe);
-        } catch (IOException ioe) {
-            Slog.e(TAG, "IO Exception when reading device-owner file\n" + ioe);
+        } catch (XmlPullParserException|IOException e) {
+            Slog.e(TAG, "Error parsing device-owner file", e);
         }
+        return true;
     }
 
-    @VisibleForTesting
-    void writeOwnerFile() {
+    void writeDeviceOwner() {
         synchronized (this) {
-            writeOwnerFileLocked();
+            new DeviceOwnerReadWriter().writeToFileLocked();
         }
     }
 
-    private void writeOwnerFileLocked() {
-        try {
-            OutputStream outputStream = startWrite();
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(outputStream, StandardCharsets.UTF_8.name());
-            out.startDocument(null, true);
+    void writeProfileOwner(int userId) {
+        synchronized (this) {
+            new ProfileOwnerReadWriter(userId).writeToFileLocked();
+        }
+    }
 
-            // Write device owner tag
-            if (mDeviceOwner != null) {
-                out.startTag(null, TAG_DEVICE_OWNER);
-                out.attribute(null, ATTR_PACKAGE, mDeviceOwner.packageName);
-                if (mDeviceOwner.name != null) {
-                    out.attribute(null, ATTR_NAME, mDeviceOwner.name);
-                }
-                out.endTag(null, TAG_DEVICE_OWNER);
-            }
+    private abstract static class FileReadWriter {
+        private final File mFile;
 
-            // Write device initializer tag
-            if (mDeviceInitializer != null) {
-                out.startTag(null, TAG_DEVICE_INITIALIZER);
-                out.attribute(null, ATTR_PACKAGE, mDeviceInitializer.packageName);
-                if (mDeviceInitializer.admin != null) {
-                    out.attribute(
-                            null, ATTR_COMPONENT_NAME, mDeviceInitializer.admin.flattenToString());
-                }
-                out.endTag(null, TAG_DEVICE_INITIALIZER);
-            }
+        protected FileReadWriter(File file) {
+            mFile = file;
+        }
 
-            // Write profile owner tags
-            if (mProfileOwners.size() > 0) {
-                for (HashMap.Entry<Integer, OwnerInfo> owner : mProfileOwners.entrySet()) {
-                    out.startTag(null, TAG_PROFILE_OWNER);
-                    OwnerInfo ownerInfo = owner.getValue();
-                    out.attribute(null, ATTR_PACKAGE, ownerInfo.packageName);
-                    out.attribute(null, ATTR_NAME, ownerInfo.name);
-                    out.attribute(null, ATTR_USERID, Integer.toString(owner.getKey()));
-                    if (ownerInfo.admin != null) {
-                        out.attribute(null, ATTR_COMPONENT_NAME, ownerInfo.admin.flattenToString());
+        abstract boolean shouldWrite();
+
+        void writeToFileLocked() {
+            if (!shouldWrite()) {
+                // No contents, remove the file.
+                if (mFile.exists()) {
+                    if (!mFile.delete()) {
+                        Slog.e(TAG, "Failed to remove " + mFile.getPath());
                     }
-                    out.endTag(null, TAG_PROFILE_OWNER);
                 }
+                return;
             }
 
-            // Write system update policy tag
+            final AtomicFile f = new AtomicFile(mFile);
+            FileOutputStream outputStream = null;
+            try {
+                outputStream = f.startWrite();
+                final XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(outputStream, StandardCharsets.UTF_8.name());
+
+                // Root tag
+                out.startDocument(null, true);
+                out.startTag(null, TAG_ROOT);
+
+                // Actual content
+                writeInner(out);
+
+                // Close root
+                out.endTag(null, TAG_ROOT);
+                out.endDocument();
+                out.flush();
+
+                // Commit the content.
+                f.finishWrite(outputStream);
+                outputStream = null;
+
+            } catch (IOException e) {
+                Slog.e(TAG, "Exception when writing", e);
+                if (outputStream != null) {
+                    f.failWrite(outputStream);
+                }
+            }
+        }
+
+        void readFromFileLocked() {
+            if (!mFile.exists()) {
+                return;
+            }
+            final AtomicFile f = new AtomicFile(mFile);
+            InputStream input = null;
+            try {
+                input = f.openRead();
+                final XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(input, StandardCharsets.UTF_8.name());
+
+                int type;
+                int depth = 0;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                    switch (type) {
+                        case XmlPullParser.START_TAG:
+                            depth++;
+                            break;
+                        case XmlPullParser.END_TAG:
+                            depth--;
+                            // fallthrough
+                        default:
+                            continue;
+                    }
+                    // Check the root tag
+                    final String tag = parser.getName();
+                    if (depth == 1) {
+                        if (!TAG_ROOT.equals(tag)) {
+                            Slog.e(TAG, "Invalid root tag: " + tag);
+                            return;
+                        }
+                    }
+                    // readInner() will only see START_TAG at depth >= 2.
+                    if (!readInner(parser, depth, tag)) {
+                        return; // Error
+                    }
+                }
+            } catch (XmlPullParserException | IOException e) {
+                Slog.e(TAG, "Error parsing device-owner file", e);
+            } finally {
+                IoUtils.closeQuietly(input);
+            }
+        }
+
+        abstract void writeInner(XmlSerializer out) throws IOException;
+
+        abstract boolean readInner(XmlPullParser parser, int depth, String tag);
+
+    }
+
+    private class DeviceOwnerReadWriter extends FileReadWriter {
+
+        protected DeviceOwnerReadWriter() {
+            super(getDeviceOwnerFileWithTestOverride());
+        }
+
+        @Override
+        boolean shouldWrite() {
+            return (mDeviceOwner != null) || (mDeviceInitializer != null)
+                    || (mSystemUpdatePolicy != null);
+        }
+
+        @Override
+        void writeInner(XmlSerializer out) throws IOException {
+            if (mDeviceOwner != null) {
+                mDeviceOwner.writeToXml(out, TAG_DEVICE_OWNER);
+            }
+            if (mDeviceInitializer != null) {
+                mDeviceInitializer.writeToXml(out, TAG_DEVICE_INITIALIZER);
+            }
             if (mSystemUpdatePolicy != null) {
                 out.startTag(null, TAG_SYSTEM_UPDATE_POLICY);
                 mSystemUpdatePolicy.saveToXml(out);
                 out.endTag(null, TAG_SYSTEM_UPDATE_POLICY);
             }
-            out.endDocument();
-            out.flush();
-            finishWrite(outputStream);
-        } catch (IOException ioe) {
-            Slog.e(TAG, "IO Exception when writing device-owner file\n" + ioe);
+        }
+
+        @Override
+        boolean readInner(XmlPullParser parser, int depth, String tag) {
+            if (depth > 2) {
+                return true; // Ignore
+            }
+            switch (tag) {
+                case TAG_DEVICE_OWNER:
+                    mDeviceOwner = OwnerInfo.readFromXml(parser);
+                    break;
+                case TAG_DEVICE_INITIALIZER:
+                    mDeviceInitializer = OwnerInfo.readFromXml(parser);
+                    break;
+                case TAG_SYSTEM_UPDATE_POLICY:
+                    mSystemUpdatePolicy = SystemUpdatePolicy.restoreFromXml(parser);
+                    break;
+                default:
+                    Slog.e(TAG, "Unexpected tag: " + tag);
+                    return false;
+
+            }
+            return true;
         }
     }
 
-    private InputStream openRead() throws IOException {
-        if (mInputStreamForTest != null) {
-            return mInputStreamForTest;
+    private class ProfileOwnerReadWriter extends FileReadWriter {
+        private final int mUserId;
+
+        ProfileOwnerReadWriter(int userId) {
+            super(getProfileOwnerFileWithTestOverride(userId));
+            mUserId = userId;
         }
 
-        return new AtomicFile(new File(Environment.getSystemSecureDirectory(),
-                DEVICE_OWNER_XML)).openRead();
-    }
-
-    private OutputStream startWrite() throws IOException {
-        if (mOutputStreamForTest != null) {
-            return mOutputStreamForTest;
+        @Override
+        boolean shouldWrite() {
+            return mProfileOwners.get(mUserId) != null;
         }
 
-        fileForWriting = new AtomicFile(new File(Environment.getSystemSecureDirectory(),
-                DEVICE_OWNER_XML));
-        return fileForWriting.startWrite();
-    }
+        @Override
+        void writeInner(XmlSerializer out) throws IOException {
+            final OwnerInfo profileOwner = mProfileOwners.get(mUserId);
+            if (profileOwner != null) {
+                profileOwner.writeToXml(out, TAG_PROFILE_OWNER);
+            }
+        }
 
-    private void finishWrite(OutputStream stream) {
-        if (fileForWriting != null) {
-            fileForWriting.finishWrite((FileOutputStream) stream);
+        @Override
+        boolean readInner(XmlPullParser parser, int depth, String tag) {
+            if (depth > 2) {
+                return true; // Ignore
+            }
+            switch (tag) {
+                case TAG_PROFILE_OWNER:
+                    mProfileOwners.put(mUserId, OwnerInfo.readFromXml(parser));
+                    break;
+                default:
+                    Slog.e(TAG, "Unexpected tag: " + tag);
+                    return false;
+
+            }
+            return true;
         }
     }
 
@@ -407,9 +518,46 @@ class DeviceOwner {
             this.admin = admin;
             this.packageName = admin.getPackageName();
         }
+
+        public void writeToXml(XmlSerializer out, String tag) throws IOException {
+            out.startTag(null, tag);
+            out.attribute(null, ATTR_PACKAGE, packageName);
+            if (name != null) {
+                out.attribute(null, ATTR_NAME, name);
+            }
+            if (admin != null) {
+                out.attribute(null, ATTR_COMPONENT_NAME, admin.flattenToString());
+            }
+            out.endTag(null, tag);
+        }
+
+        public static OwnerInfo readFromXml(XmlPullParser parser) {
+            final String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+            final String name = parser.getAttributeValue(null, ATTR_NAME);
+            final String componentName =
+                    parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
+
+            // Has component name?  If so, return [name, component]
+            if (componentName != null) {
+                final ComponentName admin = ComponentName.unflattenFromString(componentName);
+                if (admin != null) {
+                    return new OwnerInfo(name, admin);
+                } else {
+                    // This shouldn't happen but switch from package name -> component name
+                    // might have written bad device owner files. b/17652534
+                    Slog.e(TAG, "Error parsing device-owner file. Bad component name " +
+                            componentName);
+                }
+            }
+
+            // Else, build with [name, package]
+            return new OwnerInfo(name, packageName);
+        }
+
         public void dump(String prefix, PrintWriter pw) {
             pw.println(prefix + "admin=" + admin);
             pw.println(prefix + "name=" + name);
+            pw.println(prefix + "package=" + packageName);
             pw.println();
         }
     }
@@ -425,5 +573,17 @@ class DeviceOwner {
                 entry.getValue().dump(prefix + "  ", pw);
             }
         }
+    }
+
+    File getLegacyConfigFileWithTestOverride() {
+        return new File(Environment.getSystemSecureDirectory(), DEVICE_OWNER_XML_LEGACY);
+    }
+
+    File getDeviceOwnerFileWithTestOverride() {
+        return new File(Environment.getSystemSecureDirectory(), DEVICE_OWNER_XML);
+    }
+
+    File getProfileOwnerFileWithTestOverride(int userId) {
+        return new File(Environment.getUserSystemDirectory(userId), PROFILE_OWNER_XML);
     }
 }
