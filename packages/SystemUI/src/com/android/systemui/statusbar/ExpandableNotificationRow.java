@@ -112,6 +112,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     };
     private LockedPhoneAnalytics mLockedPhoneAnalytics;
 
+    private boolean mJustClicked;
+
     public NotificationContentView getPrivateLayout() {
         return mPrivateLayout;
     }
@@ -301,6 +303,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public int getHeadsUpHeight() {
         return mHeadsUpHeight;
+    }
+
+    /**
+     * Mark whether this notification was just clicked, i.e. the user has just clicked this
+     * notification in this frame.
+     */
+    public void setJustClicked(boolean justClicked) {
+        mJustClicked = justClicked;
+    }
+
+    /**
+     * @return true if this notification has been clicked in this frame, false otherwise
+     */
+    public boolean wasJustClicked() {
+        return mJustClicked;
     }
 
     public interface ExpansionLogger {
