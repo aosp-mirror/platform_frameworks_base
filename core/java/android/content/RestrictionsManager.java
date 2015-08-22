@@ -677,7 +677,8 @@ public class RestrictionsManager {
      * <table>
      *     <tr><th>RestrictionEntry</th><th>Bundle</th></tr>
      *     <tr><td>{@link RestrictionEntry#TYPE_BOOLEAN}</td><td>{@link Bundle#putBoolean}</td></tr>
-     *     <tr><td>{@link RestrictionEntry#TYPE_CHOICE}, {@link RestrictionEntry#TYPE_CHOICE}</td>
+     *     <tr><td>{@link RestrictionEntry#TYPE_CHOICE},
+     *     {@link RestrictionEntry#TYPE_MULTI_SELECT}</td>
      *     <td>{@link Bundle#putStringArray}</td></tr>
      *     <tr><td>{@link RestrictionEntry#TYPE_INTEGER}</td><td>{@link Bundle#putInt}</td></tr>
      *     <tr><td>{@link RestrictionEntry#TYPE_STRING}</td><td>{@link Bundle#putString}</td></tr>
