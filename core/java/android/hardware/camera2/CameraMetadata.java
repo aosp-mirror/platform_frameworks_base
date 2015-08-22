@@ -647,8 +647,8 @@ public abstract class CameraMetadata<TKey> {
      *   {@link android.hardware.camera2.CaptureResult }:<ul>
      * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
      * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
-     * <li>android.lens.intrinsicCalibration</li>
-     * <li>android.lens.radialDistortion</li>
+     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
+     * <li>{@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion}</li>
      * </ul>
      * </li>
      * <li>The {@link CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE android.depth.depthIsExclusive} entry is listed by this device.</li>
@@ -667,8 +667,10 @@ public abstract class CameraMetadata<TKey> {
      *
      * @see CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE
      * @see CameraCharacteristics#LENS_FACING
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8;
