@@ -90,6 +90,7 @@ import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SwipeHelper;
@@ -1505,6 +1506,15 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             final PendingIntent intent = sbn.getNotification().contentIntent;
             final String notificationKey = sbn.getKey();
+
+            // Mark notification for one frame.
+            row.setJustClicked(true);
+            DejankUtils.postAfterTraversal(new Runnable() {
+                @Override
+                public void run() {
+                    row.setJustClicked(false);
+                }
+            });
 
             if (NOTIFICATION_CLICK_DEBUG) {
                 Log.d(TAG, "Clicked on content of " + notificationKey);
