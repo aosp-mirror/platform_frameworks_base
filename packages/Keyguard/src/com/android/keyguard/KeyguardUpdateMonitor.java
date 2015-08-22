@@ -29,36 +29,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-
-import static android.os.BatteryManager.BATTERY_STATUS_FULL;
-import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
-import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
-import static android.os.BatteryManager.EXTRA_STATUS;
-import static android.os.BatteryManager.EXTRA_PLUGGED;
-import static android.os.BatteryManager.EXTRA_LEVEL;
-import static android.os.BatteryManager.EXTRA_HEALTH;
-import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
-
+import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
+import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.media.AudioManager;
 import android.os.BatteryManager;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.IccCardConstants.State;
-import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.telephony.TelephonyIntents;
-
-import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
-import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -71,6 +54,11 @@ import android.util.SparseIntArray;
 
 import com.google.android.collect.Lists;
 
+import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.telephony.IccCardConstants.State;
+import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.TelephonyIntents;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -78,6 +66,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+
+import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
+import static android.os.BatteryManager.BATTERY_STATUS_FULL;
+import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
+import static android.os.BatteryManager.EXTRA_HEALTH;
+import static android.os.BatteryManager.EXTRA_LEVEL;
+import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
+import static android.os.BatteryManager.EXTRA_PLUGGED;
+import static android.os.BatteryManager.EXTRA_STATUS;
 
 /**
  * Watches for updates that may be interesting to the keyguard, and provides
@@ -138,6 +135,24 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_SCREEN_TURNED_ON = 331;
     private static final int MSG_SCREEN_TURNED_OFF = 332;
 
+    /** Fingerprint state: Not listening to fingerprint. */
+    private static final int FINGERPRINT_STATE_STOPPED = 0;
+
+    /** Fingerprint state: Listening. */
+    private static final int FINGERPRINT_STATE_RUNNING = 1;
+
+    /**
+     * Fingerprint state: Cancelling and waiting for the confirmation from FingerprintService to
+     * send us the confirmation that cancellation has happened.
+     */
+    private static final int FINGERPRINT_STATE_CANCELLING = 2;
+
+    /**
+     * Fingerprint state: During cancelling we got another request to start listening, so when we
+     * receive the cancellation done signal, we should start listening again.
+     */
+    private static final int FINGERPRINT_STATE_CANCELLING_RESTARTING = 3;
+
     private static KeyguardUpdateMonitor sInstance;
 
     private final Context mContext;
@@ -180,8 +195,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SubscriptionManager mSubscriptionManager;
     private AlarmManager mAlarmManager;
     private List<SubscriptionInfo> mSubscriptionInfo;
-    private boolean mFingerprintDetectionRunning;
     private TrustManager mTrustManager;
+    private int mFingerprintRunningState = FINGERPRINT_STATE_STOPPED;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -274,8 +289,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
 
     private static int sCurrentUser;
-
-    private int mFpWakeMode;
 
     public synchronized static void setCurrentUser(int currentUser) {
         sCurrentUser = currentUser;
@@ -429,7 +442,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
             onFingerprintAuthenticated(userId);
         } finally {
-            setFingerprintRunningDetectionRunning(false);
+            setFingerprintRunningState(FINGERPRINT_STATE_STOPPED);
         }
     }
 
@@ -443,7 +456,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintError(int msgId, String errString) {
-        setFingerprintRunningDetectionRunning(false);
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
+                && mFingerprintRunningState == FINGERPRINT_STATE_CANCELLING_RESTARTING) {
+            setFingerprintRunningState(FINGERPRINT_STATE_STOPPED);
+            startListeningForFingerprint();
+        } else {
+            setFingerprintRunningState(FINGERPRINT_STATE_STOPPED);
+        }
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -452,9 +471,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void setFingerprintRunningDetectionRunning(boolean running) {
-        if (running != mFingerprintDetectionRunning) {
-            mFingerprintDetectionRunning = running;
+    private void setFingerprintRunningState(int fingerprintRunningState) {
+        boolean wasRunning = mFingerprintRunningState == FINGERPRINT_STATE_RUNNING;
+        boolean isRunning = fingerprintRunningState == FINGERPRINT_STATE_RUNNING;
+        mFingerprintRunningState = fingerprintRunningState;
+
+        // Clients of KeyguardUpdateMonitor don't care about the internal state about the
+        // asynchronousness of the cancel cycle. So only notify them if the actualy running state
+        // has changed.
+        if (wasRunning != isRunning) {
             notifyFingerprintRunningStateChanged();
         }
     }
@@ -463,7 +488,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onFingerprintRunningStateChanged(mFingerprintDetectionRunning);
+                cb.onFingerprintRunningStateChanged(isFingerprintDetectionRunning());
             }
         }
     }
@@ -482,7 +507,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public boolean isFingerprintDetectionRunning() {
-        return mFingerprintDetectionRunning;
+        return mFingerprintRunningState == FINGERPRINT_STATE_RUNNING;
     }
 
     private boolean isTrustDisabled(int userId) {
@@ -955,9 +980,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private void updateFingerprintListeningState() {
         boolean shouldListenForFingerprint = shouldListenForFingerprint();
-        if (mFingerprintDetectionRunning && !shouldListenForFingerprint) {
+        if (mFingerprintRunningState == FINGERPRINT_STATE_RUNNING && !shouldListenForFingerprint) {
             stopListeningForFingerprint();
-        } else if (!mFingerprintDetectionRunning && shouldListenForFingerprint) {
+        } else if (mFingerprintRunningState != FINGERPRINT_STATE_RUNNING
+                && shouldListenForFingerprint) {
             startListeningForFingerprint();
         }
     }
@@ -968,6 +994,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void startListeningForFingerprint() {
+        if (mFingerprintRunningState == FINGERPRINT_STATE_CANCELLING) {
+            setFingerprintRunningState(FINGERPRINT_STATE_CANCELLING_RESTARTING);
+            return;
+        }
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
         int userId = ActivityManager.getCurrentUser();
         if (isUnlockWithFingerprintPossible(userId)) {
@@ -978,7 +1008,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
             mFingerprintCancelSignal = new CancellationSignal();
             mFpm.authenticate(null, mFingerprintCancelSignal, 0, mAuthenticationCallback, null, userId);
-            setFingerprintRunningDetectionRunning(true);
+            setFingerprintRunningState(FINGERPRINT_STATE_RUNNING);
         }
     }
 
@@ -989,11 +1019,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private void stopListeningForFingerprint() {
         if (DEBUG) Log.v(TAG, "stopListeningForFingerprint()");
-        if (isFingerprintDetectionRunning()) {
+        if (mFingerprintRunningState == FINGERPRINT_STATE_RUNNING) {
             mFingerprintCancelSignal.cancel();
             mFingerprintCancelSignal = null;
+            setFingerprintRunningState(FINGERPRINT_STATE_CANCELLING);
         }
-        setFingerprintRunningDetectionRunning(false);
+        if (mFingerprintRunningState == FINGERPRINT_STATE_CANCELLING_RESTARTING) {
+            setFingerprintRunningState(FINGERPRINT_STATE_CANCELLING);
+        }
     }
 
     private boolean isDeviceProvisionedInSettingsDb() {
