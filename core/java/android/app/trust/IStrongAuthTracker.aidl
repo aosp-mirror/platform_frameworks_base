@@ -1,6 +1,6 @@
 /*
 **
-** Copyright 2014, The Android Open Source Project
+** Copyright 2015, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,19 +16,11 @@
 */
 package android.app.trust;
 
-import android.app.trust.ITrustListener;
-
 /**
- * System private API to comunicate with trust service.
+ * Private API to be notified about strong auth changes
  *
  * {@hide}
  */
-interface ITrustManager {
-    void reportUnlockAttempt(boolean successful, int userId);
-    void reportEnabledTrustAgentsChanged(int userId);
-    void registerTrustListener(in ITrustListener trustListener);
-    void unregisterTrustListener(in ITrustListener trustListener);
-    void reportKeyguardShowingChanged();
-    boolean isDeviceLocked(int userId);
-    boolean isDeviceSecure(int userId);
+oneway interface IStrongAuthTracker {
+    void onStrongAuthRequiredChanged(int strongAuthRequired, int userId);
 }

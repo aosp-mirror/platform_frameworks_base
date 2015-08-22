@@ -58,6 +58,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.widget.LockPatternUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -170,7 +171,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mFingerprintAlreadyAuthenticated;
     private boolean mBouncer;
     private boolean mBootCompleted;
-    private boolean mUserHasAuthenticatedSinceBoot;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -183,6 +183,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     /** Tracks whether strong authentication hasn't been used since quite some time per user. */
     private ArraySet<Integer> mStrongAuthTimedOut = new ArraySet<>();
+    private final StrongAuthTracker mStrongAuthTracker = new StrongAuthTracker();
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
@@ -539,7 +540,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public boolean isUnlockingWithFingerprintAllowed() {
-        return mUserHasAuthenticatedSinceBoot && !hasFingerprintUnlockTimedOut(sCurrentUser);
+        return mStrongAuthTracker.isUnlockingWithFingerprintAllowed()
+                && !hasFingerprintUnlockTimedOut(sCurrentUser);
+    }
+
+    public StrongAuthTracker getStrongAuthTracker() {
+        return mStrongAuthTracker;
     }
 
     /**
@@ -827,6 +833,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    public class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+
+        public boolean isUnlockingWithFingerprintAllowed() {
+            int userId = getCurrentUser();
+            return isFingerprintAllowedForUser(userId);
+        }
+
+        public boolean hasUserAuthenticatedSinceBoot() {
+            int userId = getCurrentUser();
+            return (getStrongAuthForUser(userId)
+                    & STRONG_AUTH_REQUIRED_AFTER_BOOT) == 0;
+        }
+
+        @Override
+        public void onStrongAuthRequiredChanged(int userId) {
+            // do something?
+        }
+    }
+
     public static KeyguardUpdateMonitor getInstance(Context context) {
         if (sInstance == null) {
             sInstance = new KeyguardUpdateMonitor(context);
@@ -973,6 +998,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 PERMISSION_SELF, null /* handler */);
         mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
         mTrustManager.registerTrustListener(this);
+        new LockPatternUtils(context).registerStrongAuthTracker(mStrongAuthTracker);
 
         mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
         updateFingerprintListeningState();
@@ -1001,8 +1027,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
         int userId = ActivityManager.getCurrentUser();
         if (isUnlockWithFingerprintPossible(userId)) {
-            mUserHasAuthenticatedSinceBoot = mTrustManager.hasUserAuthenticatedSinceBoot(
-                    ActivityManager.getCurrentUser());
             if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
             }
