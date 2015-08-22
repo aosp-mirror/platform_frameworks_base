@@ -1915,7 +1915,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean onBottom = false;
             boolean pinnedAndClosed = row.isPinned() && !mIsExpanded;
             if (!mIsExpanded && !isHeadsUp) {
-                type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
+                type = row.wasJustClicked()
+                        ? AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
+                        : AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
             } else {
                 StackViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
                 if (viewState == null) {
@@ -3016,6 +3018,15 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateY()
                         .animateZ(),
 
+                // ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
+                new AnimationFilter()
+                        .animateAlpha()
+                        .animateHeight()
+                        .animateTopInset()
+                        .animateY()
+                        .animateZ()
+                        .hasDelays(),
+
                 // ANIMATION_TYPE_HEADS_UP_OTHER
                 new AnimationFilter()
                         .animateAlpha()
@@ -3087,6 +3098,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // ANIMATION_TYPE_HEADS_UP_DISAPPEAR
                 StackStateAnimator.ANIMATION_DURATION_HEADS_UP_DISAPPEAR,
 
+                // ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
+                StackStateAnimator.ANIMATION_DURATION_HEADS_UP_DISAPPEAR,
+
                 // ANIMATION_TYPE_HEADS_UP_OTHER
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
 
@@ -3110,8 +3124,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         static final int ANIMATION_TYPE_GROUP_EXPANSION_CHANGED = 13;
         static final int ANIMATION_TYPE_HEADS_UP_APPEAR = 14;
         static final int ANIMATION_TYPE_HEADS_UP_DISAPPEAR = 15;
-        static final int ANIMATION_TYPE_HEADS_UP_OTHER = 16;
-        static final int ANIMATION_TYPE_EVERYTHING = 17;
+        static final int ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK = 16;
+        static final int ANIMATION_TYPE_HEADS_UP_OTHER = 17;
+        static final int ANIMATION_TYPE_EVERYTHING = 18;
 
         static final int DARK_ANIMATION_ORIGIN_INDEX_ABOVE = -1;
         static final int DARK_ANIMATION_ORIGIN_INDEX_BELOW = -2;
