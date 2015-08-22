@@ -17,9 +17,14 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 
+LOCAL_PROTOC_OPTIMIZE_TYPE := nano
+LOCAL_PROTOC_FLAGS := -I$(LOCAL_PATH)/..
+LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
+
 LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages com.android.systemui:com.android.keyguard
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     $(call all-java-files-under, ../src) \
+    $(call all-proto-files-under, ../src) \
     src/com/android/systemui/EventLogTags.logtags
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \

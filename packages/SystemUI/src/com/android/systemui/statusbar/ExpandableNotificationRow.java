@@ -34,6 +34,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
+import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
@@ -109,6 +110,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     !mChildrenExpanded);
         }
     };
+    private LockedPhoneAnalytics mLockedPhoneAnalytics;
 
     public NotificationContentView getPrivateLayout() {
         return mPrivateLayout;
@@ -307,6 +309,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
     }
 
     /**
@@ -494,6 +497,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param userExpanded whether the user wants this notification to be expanded
      */
     public void setUserExpanded(boolean userExpanded) {
+        mLockedPhoneAnalytics.setNotificationExpanded();
         if (userExpanded && !mExpandable) return;
         final boolean wasExpanded = isExpanded();
         mHasUserChangedExpansion = true;
