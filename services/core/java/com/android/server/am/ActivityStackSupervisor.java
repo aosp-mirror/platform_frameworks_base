@@ -3017,7 +3017,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Place the task in the right stack if it isn't there already based on the requested
         // bounds.
         int stackId = task.stack.mStackId;
-        final boolean wasFrontStack = isFrontStack(task.stack);
         if (bounds == null && stackId != FULLSCREEN_WORKSPACE_STACK_ID) {
             stackId = FULLSCREEN_WORKSPACE_STACK_ID;
         } else if (bounds != null
@@ -3027,12 +3026,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (stackId != task.stack.mStackId) {
             final String reason = "resizeTask";
             final ActivityStack stack =
-                    moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, reason);
-            if (wasFrontStack) {
-                // Since the stack was previously in front,
-                // move the stack in which we are placing the task to the front.
-                stack.moveToFront(reason);
-            }
+                    moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, reason);
         }
 
         final Configuration overrideConfig = mWindowManager.resizeTask(task.taskId, bounds);
@@ -3126,17 +3120,36 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * @param task Task to move.
      * @param stackId Id of stack to move task to.
      * @param toTop True if the task should be placed at the top of the stack.
+     * @param forceFocus if focus should be moved to the new stack
      * @param reason Reason the task is been moved.
      * @return The stack the task was moved to.
      */
     private ActivityStack moveTaskToStackUncheckedLocked(
-            TaskRecord task, int stackId, boolean toTop, String reason) {
+            TaskRecord task, int stackId, boolean toTop, boolean forceFocus, String reason) {
+        final ActivityRecord r = task.getTopActivity();
+        final boolean wasFocused = isFrontStack(task.stack) && (topRunningActivityLocked() == r);
+        final boolean wasResumed = wasFocused && (task.stack.mResumedActivity == r);
+
         final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
         mWindowManager.moveTaskToStack(task.taskId, stack.mStackId, toTop);
         if (task.stack != null) {
             task.stack.removeTask(task, reason, MOVING);
         }
         stack.addTask(task, toTop, MOVING);
+
+        // If the task had focus before (or we're requested to move focus),
+        // move focus to the new stack.
+        if (forceFocus || wasFocused) {
+            // If the task owns the last resumed activity, transfer that together,
+            // so that we don't resume the same activity again in the new stack.
+            // Apps may depend on onResume()/onPause() being called in pairs.
+            if (wasResumed) {
+                stack.mResumedActivity = r;
+            }
+            // move the stack in which we are placing the task to the front.
+            stack.moveToFront(reason);
+        }
+
         return stack;
     }
 
@@ -3147,10 +3160,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
         final String reason = "moveTaskToStack";
-        final ActivityRecord top = task.topRunningActivityLocked(null);
-        final boolean adjustFocus = forceFocus || mService.mFocusedActivity == top;
         final ActivityStack stack =
-                moveTaskToStackUncheckedLocked(task, stackId, toTop, reason);
+                moveTaskToStackUncheckedLocked(task, stackId, toTop, forceFocus, reason);
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
@@ -3160,14 +3171,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             resizeTaskLocked(task, task.mLastNonFullscreenBounds);
         } else if (stackId == DOCKED_STACK_ID) {
             resizeTaskLocked(task, stack.mBounds);
-        }
-
-        if (top != null && adjustFocus) {
-            if (mService.mFocusedActivity != top) {
-                mService.setFocusedActivityLocked(top, reason);
-            } else {
-                setFocusedStack(top, reason);
-            }
         }
 
         // The task might have already been running and its visibility needs to be synchronized with

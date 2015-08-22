@@ -9028,7 +9028,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveActivityToStack: moving r=" + r
                         + " to stackId=" + stackId);
-                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP, FORCE_FOCUS);
+                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP, !FORCE_FOCUS);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
