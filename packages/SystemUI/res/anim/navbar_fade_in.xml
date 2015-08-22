@@ -19,4 +19,5 @@
     android:fromAlpha="0.0"
     android:toAlpha="1.0"
     android:interpolator="@android:interpolator/linear_out_slow_in"
+    android:startDelay="32"
     android:duration="200"/>
