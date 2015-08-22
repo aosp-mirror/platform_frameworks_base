@@ -916,8 +916,11 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
   </dt>
 
   <dd>
-    Returns <code>true</code> if the app has the specified permission, whether
-    or not the device is using the M Preview.
+    Returns {@link android.content.pm.PackageManager#PERMISSION_GRANTED
+    PERMISSION_GRANTED} if the app has the specified permission, whether
+    or not the device is using the M Preview. If the app does not have the
+    specified permission, returns {@link
+    android.content.pm.PackageManager#PERMISSION_DENIED PERMISSION_DENIED}.
   </dd>
 
   <dt>
