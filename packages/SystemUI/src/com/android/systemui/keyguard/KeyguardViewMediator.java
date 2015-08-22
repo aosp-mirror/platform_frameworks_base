@@ -531,7 +531,7 @@ public class KeyguardViewMediator extends SystemUI {
             int currentUser = ActivityManager.getCurrentUser();
             if ((mUpdateMonitor.getUserTrustIsManaged(currentUser)
                     || mUpdateMonitor.isUnlockWithFingerprintPossible(currentUser))
-                    && !mTrustManager.hasUserAuthenticatedSinceBoot(currentUser)) {
+                    && !mUpdateMonitor.getStrongAuthTracker().hasUserAuthenticatedSinceBoot()) {
                 return KeyguardSecurityView.PROMPT_REASON_RESTART;
             } else if (mUpdateMonitor.isUnlockWithFingerprintPossible(currentUser)
                     && mUpdateMonitor.hasFingerprintUnlockTimedOut(currentUser)) {

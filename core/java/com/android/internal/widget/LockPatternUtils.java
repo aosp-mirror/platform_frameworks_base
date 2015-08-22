@@ -16,19 +16,19 @@
 
 package com.android.internal.widget;
 
-import android.Manifest;
+import android.annotation.IntDef;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
-import android.bluetooth.BluetoothClass;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -39,9 +39,12 @@ import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.google.android.collect.Lists;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -229,7 +232,7 @@ public class LockPatternUtils {
     public void reportFailedPasswordAttempt(int userId) {
         getDevicePolicyManager().reportFailedPasswordAttempt(userId);
         getTrustManager().reportUnlockAttempt(false /* authenticated */, userId);
-        getTrustManager().reportRequireCredentialEntry(userId);
+        requireCredentialEntry(userId);
     }
 
     public void reportSuccessfulPasswordAttempt(int userId) {
@@ -1168,10 +1171,32 @@ public class LockPatternUtils {
     }
 
     /**
-     * @see android.app.trust.TrustManager#reportRequireCredentialEntry(int)
+     * Disable trust until credentials have been entered for user {@param userId}.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
+     * @param userId either an explicit user id or {@link android.os.UserHandle#USER_ALL}
      */
     public void requireCredentialEntry(int userId) {
-        getTrustManager().reportRequireCredentialEntry(userId);
+        requireStrongAuth(StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, userId);
+    }
+
+    /**
+     * Requests strong authentication for user {@param userId}.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
+     * @param strongAuthReason a combination of {@link StrongAuthTracker.StrongAuthFlags} indicating
+     *                         the reason for and the strength of the requested authentication.
+     * @param userId either an explicit user id or {@link android.os.UserHandle#USER_ALL}
+     */
+    public void requireStrongAuth(@StrongAuthTracker.StrongAuthFlags int strongAuthReason,
+            int userId) {
+        try {
+            getLockSettings().requireStrongAuth(strongAuthReason, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error while requesting strong auth: " + e);
+        }
     }
 
     private void onAfterChangingPassword(int userHandle) {
@@ -1208,5 +1233,148 @@ public class LockPatternUtils {
         if (Looper.getMainLooper().isCurrentThread()) {
             throw new IllegalStateException("should not be called from the main thread.");
         }
+    }
+
+    public void registerStrongAuthTracker(final StrongAuthTracker strongAuthTracker) {
+        try {
+            getLockSettings().registerStrongAuthTracker(strongAuthTracker.mStub);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Could not register StrongAuthTracker");
+        }
+    }
+
+    public void unregisterStrongAuthTracker(final StrongAuthTracker strongAuthTracker) {
+        try {
+            getLockSettings().unregisterStrongAuthTracker(strongAuthTracker.mStub);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not unregister StrongAuthTracker", e);
+        }
+    }
+
+    /**
+     * Tracks the global strong authentication state.
+     */
+    public static class StrongAuthTracker {
+
+        @IntDef(flag = true,
+                value = { STRONG_AUTH_NOT_REQUIRED,
+                        STRONG_AUTH_REQUIRED_AFTER_BOOT,
+                        STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW,
+                        SOME_AUTH_REQUIRED_AFTER_USER_REQUEST})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface StrongAuthFlags {}
+
+        /**
+         * Strong authentication is not required.
+         */
+        public static final int STRONG_AUTH_NOT_REQUIRED = 0x0;
+
+        /**
+         * Strong authentication is required because the user has not authenticated since boot.
+         */
+        public static final int STRONG_AUTH_REQUIRED_AFTER_BOOT = 0x1;
+
+        /**
+         * Strong authentication is required because a device admin has requested it.
+         */
+        public static final int STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW = 0x2;
+
+        /**
+         * Some authentication is required because the user has temporarily disabled trust.
+         */
+        public static final int SOME_AUTH_REQUIRED_AFTER_USER_REQUEST = 0x4;
+
+        public static final int DEFAULT = STRONG_AUTH_REQUIRED_AFTER_BOOT;
+        private static final int ALLOWING_FINGERPRINT = SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
+
+        final SparseIntArray mStrongAuthRequiredForUser = new SparseIntArray();
+
+        private final H mHandler;
+
+        public StrongAuthTracker() {
+            this(Looper.myLooper());
+        }
+
+        /**
+         * @param looper the looper on whose thread calls to {@link #onStrongAuthRequiredChanged}
+         *               will be scheduled.
+         */
+        public StrongAuthTracker(Looper looper) {
+            mHandler = new H(looper);
+        }
+
+        /**
+         * Returns {@link #STRONG_AUTH_NOT_REQUIRED} if strong authentication is not required,
+         * otherwise returns a combination of {@link StrongAuthFlags} indicating why strong
+         * authentication is required.
+         *
+         * @param userId the user for whom the state is queried.
+         */
+        public @StrongAuthFlags int getStrongAuthForUser(int userId) {
+            return mStrongAuthRequiredForUser.get(userId, DEFAULT);
+        }
+
+        /**
+         * @return true if unlocking with trust alone is allowed for {@param userId} by the current
+         * strong authentication requirements.
+         */
+        public boolean isTrustAllowedForUser(int userId) {
+            return getStrongAuthForUser(userId) == STRONG_AUTH_NOT_REQUIRED;
+        }
+
+        /**
+         * @return true if unlocking with fingerprint alone is allowed for {@param userId} by the
+         * current strong authentication requirements.
+         */
+        public boolean isFingerprintAllowedForUser(int userId) {
+            return (getStrongAuthForUser(userId) & ~ALLOWING_FINGERPRINT) == 0;
+        }
+
+        /**
+         * Called when the strong authentication requirements for {@param userId} changed.
+         */
+        public void onStrongAuthRequiredChanged(int userId) {
+        }
+
+        void handleStrongAuthRequiredChanged(@StrongAuthFlags int strongAuthFlags,
+                int userId) {
+
+            int oldValue = getStrongAuthForUser(userId);
+            if (strongAuthFlags != oldValue) {
+                if (strongAuthFlags == DEFAULT) {
+                    mStrongAuthRequiredForUser.delete(userId);
+                } else {
+                    mStrongAuthRequiredForUser.put(userId, strongAuthFlags);
+                }
+                onStrongAuthRequiredChanged(userId);
+            }
+        }
+
+
+        final IStrongAuthTracker.Stub mStub = new IStrongAuthTracker.Stub() {
+            @Override
+            public void onStrongAuthRequiredChanged(@StrongAuthFlags int strongAuthFlags,
+                    int userId) {
+                mHandler.obtainMessage(H.MSG_ON_STRONG_AUTH_REQUIRED_CHANGED,
+                        strongAuthFlags, userId).sendToTarget();
+            }
+        };
+
+        private class H extends Handler {
+            static final int MSG_ON_STRONG_AUTH_REQUIRED_CHANGED = 1;
+
+            public H(Looper looper) {
+                super(looper);
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_ON_STRONG_AUTH_REQUIRED_CHANGED:
+                        handleStrongAuthRequiredChanged(msg.arg1, msg.arg2);
+                        break;
+                }
+            }
+        };
     }
 }
