@@ -182,7 +182,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SparseIntArray mFailedAttempts = new SparseIntArray();
 
     /** Tracks whether strong authentication hasn't been used since quite some time per user. */
-    private ArraySet<Integer> mStrongAuthTimedOut = new ArraySet<>();
+    private ArraySet<Integer> mStrongAuthNotTimedOut = new ArraySet<>();
     private final StrongAuthTracker mStrongAuthTracker = new StrongAuthTracker();
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
@@ -553,11 +553,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      *         while and thus can't unlock with fingerprint, false otherwise
      */
     public boolean hasFingerprintUnlockTimedOut(int userId) {
-        return mStrongAuthTimedOut.contains(userId);
+        return !mStrongAuthNotTimedOut.contains(userId);
     }
 
     public void reportSuccessfulStrongAuthUnlockAttempt() {
-        mStrongAuthTimedOut.remove(sCurrentUser);
+        mStrongAuthNotTimedOut.add(sCurrentUser);
         scheduleStrongAuthTimeout();
         if (mFpm != null) {
             byte[] token = null; /* TODO: pass real auth token once fp HAL supports it */
@@ -572,14 +572,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         PendingIntent sender = PendingIntent.getBroadcast(mContext,
                 sCurrentUser, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, when, sender);
-        notifyStrongAuthTimedOutChanged(sCurrentUser);
+        notifyStrongAuthStateChanged(sCurrentUser);
     }
 
-    private void notifyStrongAuthTimedOutChanged(int userId) {
+    private void notifyStrongAuthStateChanged(int userId) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onStrongAuthTimeoutExpiredChanged(userId);
+                cb.onStrongAuthStateChanged(userId);
             }
         }
     }
@@ -674,8 +674,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public void onReceive(Context context, Intent intent) {
             if (ACTION_STRONG_AUTH_TIMEOUT.equals(intent.getAction())) {
                 int userId = intent.getIntExtra(USER_ID, -1);
-                mStrongAuthTimedOut.add(userId);
-                notifyStrongAuthTimedOutChanged(userId);
+                mStrongAuthNotTimedOut.remove(userId);
+                notifyStrongAuthStateChanged(userId);
             }
         }
     };
@@ -848,7 +848,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         @Override
         public void onStrongAuthRequiredChanged(int userId) {
-            // do something?
+            notifyStrongAuthStateChanged(userId);
         }
     }
 
