@@ -34,6 +34,7 @@ public class AnimationFilter {
     boolean hasDelays;
     boolean hasGoToFullShadeEvent;
     boolean hasDarkEvent;
+    boolean hasHeadsUpDisappearClickEvent;
     int darkAnimationOriginIndex;
 
     public AnimationFilter animateAlpha() {
@@ -106,6 +107,10 @@ public class AnimationFilter {
                 hasDarkEvent = true;
                 darkAnimationOriginIndex = ev.darkAnimationOriginIndex;
             }
+            if (ev.animationType == NotificationStackScrollLayout.AnimationEvent
+                    .ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
+                hasHeadsUpDisappearClickEvent = true;
+            }
         }
     }
 
@@ -135,6 +140,7 @@ public class AnimationFilter {
         hasDelays = false;
         hasGoToFullShadeEvent = false;
         hasDarkEvent = false;
+        hasHeadsUpDisappearClickEvent = false;
         darkAnimationOriginIndex =
                 NotificationStackScrollLayout.AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE;
     }
