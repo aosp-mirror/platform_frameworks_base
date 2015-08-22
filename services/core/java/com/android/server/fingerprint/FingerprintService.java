@@ -298,6 +298,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             final int result = daemon.enroll(cryptoToken, groupId, timeout);
             if (result != 0) {
                 Slog.w(TAG, "startEnroll failed, result=" + result);
+                dispatchError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "startEnroll failed", e);
@@ -391,6 +392,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             final int result = daemon.authenticate(opId, groupId);
             if (result != 0) {
                 Slog.w(TAG, "startAuthentication failed, result=" + result);
+                dispatchError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "startAuthentication failed", e);
@@ -433,12 +435,14 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             return;
         }
 
+        stopPendingOperations(true);
         mRemoveClient = new ClientMonitor(token, receiver, userId, restricted);
         // The fingerprint template ids will be removed when we get confirmation from the HAL
         try {
             final int result = daemon.remove(fingerId, userId);
             if (result != 0) {
                 Slog.w(TAG, "startRemove with id = " + fingerId + " failed, result=" + result);
+                dispatchError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "startRemove failed", e);
