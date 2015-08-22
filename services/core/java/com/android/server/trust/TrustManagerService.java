@@ -19,6 +19,7 @@ package com.android.server.trust;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
 import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -59,6 +60,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
@@ -96,16 +98,15 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_UNREGISTER_LISTENER = 2;
     private static final int MSG_DISPATCH_UNLOCK_ATTEMPT = 3;
     private static final int MSG_ENABLED_AGENTS_CHANGED = 4;
-    private static final int MSG_REQUIRE_CREDENTIAL_ENTRY = 5;
     private static final int MSG_KEYGUARD_SHOWING_CHANGED = 6;
     private static final int MSG_START_USER = 7;
     private static final int MSG_CLEANUP_USER = 8;
     private static final int MSG_SWITCH_USER = 9;
 
-    private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<AgentInfo>();
-    private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
+    private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<>();
+    private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();
     private final Receiver mReceiver = new Receiver();
-    private final SparseBooleanArray mUserHasAuthenticated = new SparseBooleanArray();
+
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
     private final LockPatternUtils mLockPatternUtils;
@@ -117,9 +118,6 @@ public class TrustManagerService extends SystemService {
 
     @GuardedBy("mDeviceLockedForUser")
     private final SparseBooleanArray mDeviceLockedForUser = new SparseBooleanArray();
-
-    @GuardedBy("mUserHasAuthenticatedSinceBoot")
-    private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
 
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_OWNER;
@@ -146,6 +144,7 @@ public class TrustManagerService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
+            mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             mTrustAgentsCanRun = true;
             refreshAgentList(UserHandle.USER_ALL);
@@ -230,7 +229,7 @@ public class TrustManagerService extends SystemService {
             if (!userInfo.supportsSwitchTo()) continue;
             if (!mActivityManager.isUserRunning(userInfo.id)) continue;
             if (!lockPatternUtils.isSecure(userInfo.id)) continue;
-            if (!getUserHasAuthenticated(userInfo.id)) continue;
+            if (!mStrongAuthTracker.isTrustAllowedForUser(userInfo.id)) continue;
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
             final boolean disableTrustAgents =
@@ -509,7 +508,7 @@ public class TrustManagerService extends SystemService {
     // Agent dispatch and aggregation
 
     private boolean aggregateIsTrusted(int userId) {
-        if (!getUserHasAuthenticated(userId)) {
+        if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
@@ -524,7 +523,7 @@ public class TrustManagerService extends SystemService {
     }
 
     private boolean aggregateIsTrustManaged(int userId) {
-        if (!getUserHasAuthenticated(userId)) {
+        if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
@@ -545,54 +544,6 @@ public class TrustManagerService extends SystemService {
                 info.agent.onUnlockAttempt(successful);
             }
         }
-
-        if (successful) {
-            updateUserHasAuthenticated(userId);
-        }
-    }
-
-    private void updateUserHasAuthenticated(int userId) {
-        boolean changed = setUserHasAuthenticated(userId);
-        if (changed) {
-            refreshAgentList(userId);
-        }
-    }
-
-    private boolean getUserHasAuthenticated(int userId) {
-        return mUserHasAuthenticated.get(userId);
-    }
-
-    /**
-     * @return whether the value has changed
-     */
-    private boolean setUserHasAuthenticated(int userId) {
-        if (!mUserHasAuthenticated.get(userId)) {
-            mUserHasAuthenticated.put(userId, true);
-            synchronized (mUserHasAuthenticatedSinceBoot) {
-                mUserHasAuthenticatedSinceBoot.put(userId, true);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private void clearUserHasAuthenticated(int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            mUserHasAuthenticated.clear();
-        } else {
-            mUserHasAuthenticated.put(userId, false);
-        }
-    }
-
-    private boolean getUserHasAuthenticatedSinceBoot(int userId) {
-        synchronized (mUserHasAuthenticatedSinceBoot) {
-            return mUserHasAuthenticatedSinceBoot.get(userId);
-        }
-    }
-
-    private void requireCredentialEntry(int userId) {
-        clearUserHasAuthenticated(userId);
-        refreshAgentList(userId);
     }
 
     // Listeners
@@ -681,17 +632,6 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
-        public void reportRequireCredentialEntry(int userId) throws RemoteException {
-            enforceReportPermission();
-            if (userId == UserHandle.USER_ALL || userId >= UserHandle.USER_OWNER) {
-                mHandler.obtainMessage(MSG_REQUIRE_CREDENTIAL_ENTRY, userId, 0).sendToTarget();
-            } else {
-                throw new IllegalArgumentException(
-                        "userId must be an explicit user id or USER_ALL");
-            }
-        }
-
-        @Override
         public void reportKeyguardShowingChanged() throws RemoteException {
             enforceReportPermission();
             // coalesce refresh messages.
@@ -729,18 +669,6 @@ public class TrustManagerService extends SystemService {
             long token = Binder.clearCallingIdentity();
             try {
                 return new LockPatternUtils(mContext).isSecure(userId);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public boolean hasUserAuthenticatedSinceBoot(int userId) throws RemoteException {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, null);
-            long token = Binder.clearCallingIdentity();
-            try {
-                return getUserHasAuthenticatedSinceBoot(userId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -794,9 +722,8 @@ public class TrustManagerService extends SystemService {
             fout.print(": trusted=" + dumpBool(aggregateIsTrusted(user.id)));
             fout.print(", trustManaged=" + dumpBool(aggregateIsTrustManaged(user.id)));
             fout.print(", deviceLocked=" + dumpBool(isDeviceLockedInner(user.id)));
-            fout.print(", hasAuthenticated=" + dumpBool(getUserHasAuthenticated(user.id)));
-            fout.print(", hasAuthenticatedSinceBoot="
-                    + dumpBool(getUserHasAuthenticatedSinceBoot(user.id)));
+            fout.print(", strongAuthRequired=" + dumpHex(
+                    mStrongAuthTracker.getStrongAuthForUser(user.id)));
             fout.println();
             fout.println("   Enabled agents:");
             boolean duplicateSimpleNames = false;
@@ -831,6 +758,10 @@ public class TrustManagerService extends SystemService {
         private String dumpBool(boolean b) {
             return b ? "1" : "0";
         }
+
+        private String dumpHex(int i) {
+            return "0x" + Integer.toHexString(i);
+        }
     };
 
     private int resolveProfileParent(int userId) {
@@ -863,9 +794,6 @@ public class TrustManagerService extends SystemService {
                     refreshAgentList(UserHandle.USER_ALL);
                     // This is also called when the security mode of a user changes.
                     refreshDeviceLockedForUser(UserHandle.USER_ALL);
-                    break;
-                case MSG_REQUIRE_CREDENTIAL_ENTRY:
-                    requireCredentialEntry(msg.arg1);
                     break;
                 case MSG_KEYGUARD_SHOWING_CHANGED:
                     refreshDeviceLockedForUser(mCurrentUser);
@@ -900,6 +828,13 @@ public class TrustManagerService extends SystemService {
         }
     };
 
+    private final StrongAuthTracker mStrongAuthTracker = new StrongAuthTracker() {
+        @Override
+        public void onStrongAuthRequiredChanged(int userId) {
+            refreshAgentList(userId);
+        }
+    };
+
     private class Receiver extends BroadcastReceiver {
 
         @Override
@@ -908,8 +843,6 @@ public class TrustManagerService extends SystemService {
             if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action)) {
                 refreshAgentList(getSendingUserId());
                 updateDevicePolicyFeatures();
-            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                updateUserHasAuthenticated(getSendingUserId());
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 int userId = getUserId(intent);
                 if (userId > 0) {
@@ -918,7 +851,6 @@ public class TrustManagerService extends SystemService {
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 int userId = getUserId(intent);
                 if (userId > 0) {
-                    mUserHasAuthenticated.delete(userId);
                     synchronized (mUserIsTrusted) {
                         mUserIsTrusted.delete(userId);
                     }
