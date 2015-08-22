@@ -3441,7 +3441,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 .alpha(0f)
                 .setStartDelay(0)
                 .setDuration(FADE_KEYGUARD_DURATION_PULSING)
-                .setInterpolator(ScrimController.KEYGUARD_FADE_OUT_INTERPOLATOR);
+                .setInterpolator(ScrimController.KEYGUARD_FADE_OUT_INTERPOLATOR)
+                .start();
     }
 
     /**
