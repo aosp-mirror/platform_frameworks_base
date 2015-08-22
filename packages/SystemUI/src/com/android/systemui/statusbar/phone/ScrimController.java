@@ -22,7 +22,6 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
@@ -87,6 +86,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private float mTopHeadsUpDragAmount;
     private View mDraggedHeadsUpView;
     private boolean mForceHideScrims;
+    private boolean mSkipFirstFrame;
 
     public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
             boolean scrimSrcEnabled) {
@@ -134,14 +134,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         scheduleUpdate();
     }
 
-    public void animateKeyguardFadingOut(long delay, long duration, Runnable onAnimationFinished) {
+    public void animateKeyguardFadingOut(long delay, long duration, Runnable onAnimationFinished,
+            boolean skipFirstFrame) {
         mWakeAndUnlocking = false;
         mAnimateKeyguardFadingOut = true;
         mDurationOverride = duration;
         mAnimationDelay = delay;
         mAnimateChange = true;
+        mSkipFirstFrame = skipFirstFrame;
         mOnAnimationFinished = onAnimationFinished;
         scheduleUpdate();
+
+        // No need to wait for the next frame to be drawn for this case - onPreDraw will execute
+        // the changes we just scheduled.
+        onPreDraw();
     }
 
     public void abortKeyguardFadingOut() {
@@ -339,6 +345,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             }
         });
         anim.start();
+        if (mSkipFirstFrame) {
+            anim.setCurrentPlayTime(16);
+        }
         scrim.setTag(TAG_KEY_ANIM, anim);
         scrim.setTag(TAG_KEY_ANIM_TARGET, target);
     }
@@ -354,6 +363,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         updateScrims();
         mDurationOverride = -1;
         mAnimationDelay = 0;
+        mSkipFirstFrame = false;
 
         // Make sure that we always call the listener even if we didn't start an animation.
         endAnimateKeyguardFadingOut(false /* force */);
