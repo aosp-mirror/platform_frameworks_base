@@ -108,7 +108,7 @@ parent.link=index.html
   <ul>
     <li>If you are using the {@link android.os.Debug} class,
      your application must have permission to write to external storage
-     ({@link android.Manifest.permission#READ_EXTERNAL_STORAGE}). </li>
+     ({@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}). </li>
     <li>If you are using DDMS:
       <ul>
         <li>Android 2.1 and earlier devices must
