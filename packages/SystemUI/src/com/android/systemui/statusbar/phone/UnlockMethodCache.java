@@ -145,7 +145,7 @@ public class UnlockMethodCache {
         }
 
         @Override
-        public void onStrongAuthTimeoutExpiredChanged(int userId) {
+        public void onStrongAuthStateChanged(int userId) {
             update(false /* updateAlways */);
         }
     };

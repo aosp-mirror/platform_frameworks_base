@@ -649,7 +649,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
 
         @Override
-        public void onStrongAuthTimeoutExpiredChanged(int userId) {
+        public void onStrongAuthStateChanged(int userId) {
             mLockIcon.update();
         }
     };
