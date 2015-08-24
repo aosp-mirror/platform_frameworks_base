@@ -72,7 +72,9 @@ public class StatusBarController extends BarController {
                         if (statusbar != null) {
                             long startTime = calculateStatusBarTransitionStartTime(openAnimation,
                                     closeAnimation);
-                            statusbar.appTransitionStarting(startTime, TRANSITION_DURATION);
+                            long duration = closeAnimation != null || openAnimation != null
+                                    ? TRANSITION_DURATION : 0;
+                            statusbar.appTransitionStarting(startTime, duration);
                         }
                     } catch (RemoteException e) {
                         Slog.e(mTag, "RemoteException when app transition is starting", e);
