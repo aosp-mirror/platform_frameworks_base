@@ -257,11 +257,12 @@ public final class MtpDevice {
      * on completion, and must be done by the caller.
      *
      * @param objectHandle handle of the target file
+     * @param size size of the file in bytes
      * @param descriptor file descriptor to read the data from.
      * @return true if the file transfer succeeds
      */
-    public boolean sendObject(int objectHandle, ParcelFileDescriptor descriptor) {
-        return native_send_object(objectHandle, descriptor.getFd());
+    public boolean sendObject(int objectHandle, int size, ParcelFileDescriptor descriptor) {
+        return native_send_object(objectHandle, size, descriptor.getFd());
     }
 
     /**
@@ -294,6 +295,6 @@ public final class MtpDevice {
     private native long native_get_storage_id(int objectHandle);
     private native boolean native_import_file(int objectHandle, String destPath);
     private native boolean native_import_file(int objectHandle, int fd);
-    private native boolean native_send_object(int objectHandle, int fd);
+    private native boolean native_send_object(int objectHandle, int size, int fd);
     private native MtpObjectInfo native_send_object_info(MtpObjectInfo info);
 }

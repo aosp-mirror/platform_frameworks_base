@@ -167,13 +167,18 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     public ParcelFileDescriptor openDocument(
             String documentId, String mode, CancellationSignal signal)
                     throws FileNotFoundException {
-        if (!"r".equals(mode) && !"w".equals(mode)) {
-            // TODO: Support seekable file.
-            throw new UnsupportedOperationException("The provider does not support seekable file.");
-        }
         final Identifier identifier = Identifier.createFromDocumentId(documentId);
         try {
-            return mPipeManager.readDocument(mMtpManager, identifier);
+            switch (mode) {
+                case "r":
+                    return mPipeManager.readDocument(mMtpManager, identifier);
+                case "w":
+                    return mPipeManager.writeDocument(getContext(), mMtpManager, identifier);
+                default:
+                    // TODO: Add support for seekable files.
+                    throw new UnsupportedOperationException(
+                            "The provider does not support seekable file.");
+            }
         } catch (IOException error) {
             throw new FileNotFoundException(error.getMessage());
         }

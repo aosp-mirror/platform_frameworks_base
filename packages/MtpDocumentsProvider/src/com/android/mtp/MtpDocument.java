@@ -76,18 +76,25 @@ class MtpDocument {
     void addToCursor(Identifier rootIdentifier, MatrixCursor.RowBuilder builder) {
         final Identifier identifier = new Identifier(
                 rootIdentifier.mDeviceId, rootIdentifier.mStorageId, mObjectHandle);
+        final String mimeType = formatTypeToMimeType(mFormat);
 
         int flag = 0;
         if (mObjectHandle != DUMMY_HANDLE_FOR_ROOT) {
-            flag |= DocumentsContract.Document.FLAG_SUPPORTS_DELETE;
             if (mThumbSize > 0) {
                 flag |= DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL;
             }
+            if (!mReadOnly) {
+                flag |= DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
+                        DocumentsContract.Document.FLAG_SUPPORTS_WRITE;
+            }
+        }
+        if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR && !mReadOnly) {
+            flag |= DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE;
         }
 
         builder.add(Document.COLUMN_DOCUMENT_ID, identifier.toDocumentId());
         builder.add(Document.COLUMN_DISPLAY_NAME, mName);
-        builder.add(Document.COLUMN_MIME_TYPE, formatTypeToMimeType(mFormat));
+        builder.add(Document.COLUMN_MIME_TYPE, mimeType); 
         builder.add(
                 Document.COLUMN_LAST_MODIFIED,
                 mDateModified != null ? mDateModified.getTime() : null);
