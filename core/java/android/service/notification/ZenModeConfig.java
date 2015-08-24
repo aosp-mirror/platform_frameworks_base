@@ -755,6 +755,10 @@ public class ZenModeConfig implements Parcelable {
         return rt;
     }
 
+    public static ComponentName getScheduleConditionProvider() {
+        return new ComponentName(SYSTEM_AUTHORITY, "ScheduleConditionProvider");
+    }
+
     public static class ScheduleInfo {
         public int[] days;
         public int startHour;
@@ -825,6 +829,10 @@ public class ZenModeConfig implements Parcelable {
         }
         rt.reply = tryParseInt(conditionId.getQueryParameter("reply"), 0);
         return rt;
+    }
+
+    public static ComponentName getEventConditionProvider() {
+        return new ComponentName(SYSTEM_AUTHORITY, "EventConditionProvider");
     }
 
     public static class EventInfo {

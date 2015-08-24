@@ -27,6 +27,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
@@ -101,6 +102,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -1172,8 +1174,8 @@ public class NotificationManagerService extends SystemService {
             // Don't allow client applications to cancel foreground service notis.
             cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(), pkg, tag, id, 0,
                     Binder.getCallingUid() == Process.SYSTEM_UID
-                    ? 0 : Notification.FLAG_FOREGROUND_SERVICE, false, userId, REASON_NOMAN_CANCEL,
-                    null);
+                            ? 0 : Notification.FLAG_FOREGROUND_SERVICE, false, userId,
+                    REASON_NOMAN_CANCEL, null);
         }
 
         @Override
@@ -1594,6 +1596,50 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public List<AutomaticZenRule> getAutomaticZenRules() throws RemoteException {
+            enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRules");
+            return mZenModeHelper.getAutomaticZenRules();
+        }
+
+        @Override
+        public AutomaticZenRule getAutomaticZenRule(String name) throws RemoteException {
+            enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRule");
+            return mZenModeHelper.getAutomaticZenRule(name);
+        }
+
+        @Override
+        public boolean addOrUpdateAutomaticZenRule(AutomaticZenRule automaticZenRule)
+                throws RemoteException {
+            Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
+            Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
+            Preconditions.checkNotNull(automaticZenRule.getOwner(), "Owner is null");
+            Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
+            enforcePolicyAccess(Binder.getCallingUid(), "addOrUpdateZenModeRule");
+
+            return mZenModeHelper.addOrUpdateAutomaticZenRule(automaticZenRule,
+                    "addOrUpdateAutomaticZenRule");
+        }
+
+        @Override
+        public boolean renameAutomaticZenRule(String oldName, String newName) {
+            Preconditions.checkNotNull(oldName, "oldName is null");
+            Preconditions.checkNotNull(newName, "newName is null");
+            enforcePolicyAccess(Binder.getCallingUid(), "renameAutomaticZenRule");
+
+            return mZenModeHelper.renameAutomaticZenRule(
+                    oldName, newName, "renameAutomaticZenRule");
+        }
+
+        @Override
+        public boolean removeAutomaticZenRule(String name) throws RemoteException {
+            Preconditions.checkNotNull(name, "Name is null");
+            // Verify that they can modify zen rules.
+            enforcePolicyAccess(Binder.getCallingUid(), "removeAutomaticZenRule");
+
+            return mZenModeHelper.removeAutomaticZenRule(name, "removeAutomaticZenRule");
+        }
+
+        @Override
         public void setInterruptionFilter(String pkg, int filter) throws RemoteException {
             enforcePolicyAccess(pkg, "setInterruptionFilter");
             final int zen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
@@ -1639,6 +1685,25 @@ public class NotificationManagerService extends SystemService {
             if (isCallerSystem()) return;
             getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
                     message);
+        }
+
+        private void enforcePolicyAccess(int uid, String method) {
+            if (PackageManager.PERMISSION_GRANTED == getContext().checkCallingPermission(
+                    android.Manifest.permission.MANAGE_NOTIFICATIONS)) {
+                return;
+            }
+            boolean accessAllowed = false;
+            String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
+            final int packageCount = packages.length;
+            for (int i = 0; i < packageCount; i++) {
+                if (checkPolicyAccess(packages[i])) {
+                    accessAllowed = true;
+                }
+            }
+            if (!accessAllowed) {
+                Slog.w(TAG, "Notification policy access denied calling " + method);
+                throw new SecurityException("Notification policy access denied");
+            }
         }
 
         private void enforcePolicyAccess(String pkg, String method) {

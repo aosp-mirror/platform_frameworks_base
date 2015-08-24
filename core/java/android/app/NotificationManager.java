@@ -420,6 +420,106 @@ public class NotificationManager
     }
 
     /**
+     * Returns AutomaticZenRules owned by the caller.
+     *
+     * <p>
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
+     */
+    public List<AutomaticZenRule> getAutomaticZenRules() {
+        INotificationManager service = getService();
+        try {
+            return service.getAutomaticZenRules();
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    /**
+     * Returns the AutomaticZenRule with the given name, if it exists and the caller has access.
+     *
+     * <p>
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
+     *
+     * <p>
+     * Returns null if there are no zen rules that match the given name, or if the calling package
+     * doesn't own the matching rule. See {@link AutomaticZenRule#getOwner}.
+     */
+    public AutomaticZenRule getAutomaticZenRule(String name) {
+        INotificationManager service = getService();
+        try {
+            return service.getAutomaticZenRule(name);
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    /**
+     * Creates or updates the given zen rule.
+     *
+     * <p>
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
+     *
+     * <p>
+     * Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
+     * @param automaticZenRule the rule to create or update.
+     * @return Whether the rule was successfully created or updated.
+     */
+    public boolean addOrUpdateAutomaticZenRule(AutomaticZenRule automaticZenRule) {
+        INotificationManager service = getService();
+        try {
+            return service.addOrUpdateAutomaticZenRule(automaticZenRule);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
+     * Renames a zen rule.
+     *
+     * <p>
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
+     *
+     * <p>
+     * Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
+     * @param oldName The name of the rule to update.
+     * @param newName The new name for the rule.
+     * @return Whether the rule was successfully updated.
+     */
+    public boolean renameAutomaticZenRule(String oldName, String newName) {
+        INotificationManager service = getService();
+        try {
+            return service.renameAutomaticZenRule(oldName, newName);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
+     * Deletes the automatic zen rule with the given name.
+     *
+     * <p>
+     * Only available if policy access is granted to this package.
+     * See {@link #isNotificationPolicyAccessGranted}.
+     *
+     * <p>
+     * Callers can only delete rules that they own. See {@link AutomaticZenRule#getOwner}.
+     * @param name the name of the rule to delete.
+     * @return Whether the rule was successfully deleted.
+     */
+    public boolean removeAutomaticZenRule(String name) {
+        INotificationManager service = getService();
+        try {
+            return service.removeAutomaticZenRule(name);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
      * Checks the ability to read/modify notification policy for the calling package.
      *
      * <p>
