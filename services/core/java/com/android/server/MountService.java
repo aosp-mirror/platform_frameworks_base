@@ -165,6 +165,8 @@ class MountService extends IMountService.Stub
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mMountService.systemReady();
+            } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+                mMountService.bootCompleted();
             }
         }
 
@@ -405,6 +407,7 @@ class MountService extends IMountService.Stub
     private final NativeDaemonConnector mCryptConnector;
 
     private volatile boolean mSystemReady = false;
+    private volatile boolean mBootCompleted = false;
     private volatile boolean mDaemonConnected = false;
 
     private PackageManagerService mPms;
@@ -1244,7 +1247,9 @@ class MountService extends IMountService.Stub
 
         mCallbacks.notifyVolumeStateChanged(vol, oldState, newState);
 
-        if (isBroadcastWorthy(vol)) {
+        // Do not broadcast before boot has completed to avoid launching the
+        // processes that receive the intent unnecessarily.
+        if (mBootCompleted && isBroadcastWorthy(vol)) {
             final Intent intent = new Intent(VolumeInfo.ACTION_VOLUME_STATE_CHANGED);
             intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.id);
             intent.putExtra(VolumeInfo.EXTRA_VOLUME_STATE, newState);
@@ -1427,6 +1432,10 @@ class MountService extends IMountService.Stub
     private void systemReady() {
         mSystemReady = true;
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
+    }
+
+    private void bootCompleted() {
+        mBootCompleted = true;
     }
 
     private String getDefaultPrimaryStorageUuid() {
