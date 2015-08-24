@@ -14,9 +14,6 @@
      limitations under the License.
 -->
 
-<ViewStub xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/stub"
-    android:inflatedId="@+id/fixed_layout"
-    android:layout="@layout/fixed_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+<resources>
+    <item name="files_activity" type="layout">@layout/fixed_layout</item>
+</resources>

@@ -108,9 +108,7 @@ abstract class BaseActivity extends Activity {
                 ? icicle.<State>getParcelable(EXTRA_STATE)
                         : buildDefaultState();
 
-        setContentView(R.layout.files_activity);
-        ViewStub stub = (ViewStub) findViewById(R.id.stub);
-        stub.inflate();
+        setContentView(mLayoutId);
 
         mRoots = DocumentsApplication.getRootsCache(this);
         mSearchManager = new SearchManager();
