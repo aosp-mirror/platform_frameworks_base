@@ -4543,7 +4543,7 @@ final class ActivityStack {
         TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
                 voiceInteractor);
         if (mTaskPositioner != null) {
-            mTaskPositioner.updateDefaultBounds(task, mTaskHistory);
+            mTaskPositioner.updateDefaultBounds(task, mTaskHistory, info.initialLayout);
         }
         addTask(task, toTop, false);
         return task;

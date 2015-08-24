@@ -2200,10 +2200,10 @@
     <declare-styleable name="AndroidManifestInitialLayout" parent="AndroidManifestActivity">
         <!-- Initial width of the activity. Can be either a fixed value or fraction, in which case
              the width will be constructed as a fraction of the total available width. -->
-        <attr name="activity_width" format="dimension|fraction" />
+        <attr name="activityWidth" format="dimension|fraction" />
         <!-- Initial height of the activity. Can be either a fixed value or fraction, in which case
              the height will be constructed as a fraction of the total available height. -->
-        <attr name="activity_height" format="dimension|fraction" />
+        <attr name="activityHeight" format="dimension|fraction" />
         <!-- Where to initially position the activity inside the available space. Uses constants
              defined in {@link android.view.Gravity}. -->
         <attr name="gravity" />

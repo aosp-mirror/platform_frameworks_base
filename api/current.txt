@@ -240,8 +240,10 @@ package android {
     field public static final int activatedBackgroundIndicator = 16843517; // 0x10102fd
     field public static final int activityCloseEnterAnimation = 16842938; // 0x10100ba
     field public static final int activityCloseExitAnimation = 16842939; // 0x10100bb
+    field public static final int activityHeight = 16844019; // 0x10104f3
     field public static final int activityOpenEnterAnimation = 16842936; // 0x10100b8
     field public static final int activityOpenExitAnimation = 16842937; // 0x10100b9
+    field public static final int activityWidth = 16844018; // 0x10104f2
     field public static final int addPrintersActivity = 16843750; // 0x10103e6
     field public static final int addStatesFromChildren = 16842992; // 0x10100f0
     field public static final int adjustViewBounds = 16843038; // 0x101011e

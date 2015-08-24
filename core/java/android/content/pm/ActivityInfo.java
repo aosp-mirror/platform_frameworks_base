@@ -719,6 +719,7 @@ public class ActivityInfo extends ComponentInfo
         maxRecents = orig.maxRecents;
         resizeable = orig.resizeable;
         lockTaskLaunchMode = orig.lockTaskLaunchMode;
+        initialLayout = orig.initialLayout;
     }
 
     /**

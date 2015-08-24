@@ -3307,25 +3307,25 @@ public class PackageParser {
         int height = -1;
         float heightFraction = -1f;
         final int widthType = sw.getType(
-                com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_width);
+                com.android.internal.R.styleable.AndroidManifestInitialLayout_activityWidth);
         if (widthType == TypedValue.TYPE_FRACTION) {
             widthFraction = sw.getFraction(
-                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_width,
+                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activityWidth,
                     1, 1, -1);
         } else if (widthType == TypedValue.TYPE_DIMENSION) {
             width = sw.getDimensionPixelSize(
-                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_width,
+                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activityWidth,
                     -1);
         }
         final int heightType = sw.getType(
-                com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_height);
+                com.android.internal.R.styleable.AndroidManifestInitialLayout_activityHeight);
         if (heightType == TypedValue.TYPE_FRACTION) {
             heightFraction = sw.getFraction(
-                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_height,
+                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activityHeight,
                     1, 1, -1);
         } else if (heightType == TypedValue.TYPE_DIMENSION) {
             height = sw.getDimensionPixelSize(
-                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activity_height,
+                    com.android.internal.R.styleable.AndroidManifestInitialLayout_activityHeight,
                     -1);
         }
         int gravity = sw.getInt(
@@ -3415,6 +3415,7 @@ public class PackageParser {
         info.uiOptions = target.info.uiOptions;
         info.parentActivityName = target.info.parentActivityName;
         info.maxRecents = target.info.maxRecents;
+        info.initialLayout = target.info.initialLayout;
 
         Activity a = new Activity(mParseActivityAliasArgs, info);
         if (outError[0] != null) {
