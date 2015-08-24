@@ -82,7 +82,7 @@ public class DocumentsActivity extends BaseActivity {
     private BaseAdapter mStackAdapter;
 
     public DocumentsActivity() {
-        super(R.layout.activity, TAG);
+        super(R.layout.docs_activity, TAG);
     }
 
     @Override
