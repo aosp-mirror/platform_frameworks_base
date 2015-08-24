@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static  android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
@@ -80,11 +78,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
-import android.widget.DateTimeView;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -116,6 +111,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public abstract class BaseStatusBar extends SystemUI implements
@@ -236,6 +232,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     private NotificationGuts mNotificationGutsExposed;
 
     private TimeInterpolator mLinearOutSlowIn, mFastOutLinearIn;
+
+    private KeyboardShortcuts mKeyboardShortcuts;
 
     /**
      * The {@link StatusBarState} of the status bar.
@@ -1142,7 +1140,7 @@ public abstract class BaseStatusBar extends SystemUI implements
          return new H();
     }
 
-    static void sendCloseSystemWindows(Context context, String reason) {
+    protected void sendCloseSystemWindows(String reason) {
         if (ActivityManagerNative.isSystemReady()) {
             try {
                 ActivityManagerNative.getDefault().closeSystemDialogs(reason);
@@ -1177,7 +1175,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void showRecents(boolean triggeredFromAltTab) {
         if (mRecents != null) {
-            sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
             mRecents.showRecents(triggeredFromAltTab, getStatusBarView());
         }
     }
@@ -1200,8 +1198,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    // TODO: this (and maybe a few layers above) should be called toggle instead of show.
     protected void showKeyboardShortcuts() {
-        Toast.makeText(mContext, "Show keyboard shortcuts screen", Toast.LENGTH_LONG).show();
+        getKeyboardShortcuts().toggleKeyboardShortcuts(mContext);
     }
 
     protected void cancelPreloadingRecents() {
@@ -1529,6 +1528,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                 rebuilder.build(); // will rewrite n
             }
         }
+    }
+
+    protected KeyboardShortcuts getKeyboardShortcuts() {
+        if (mKeyboardShortcuts == null) {
+            mKeyboardShortcuts = new KeyboardShortcuts();
+        }
+
+        return mKeyboardShortcuts;
     }
 
     public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
