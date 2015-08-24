@@ -335,8 +335,10 @@ public class StatusBarIconController implements Tunable {
         }
     }
 
-    public void setIconsDark(boolean dark) {
-        if (mTransitionPending) {
+    public void setIconsDark(boolean dark, boolean animate) {
+        if (!animate) {
+            setIconTintInternal(dark ? 1.0f : 0.0f);
+        } else if (mTransitionPending) {
             deferIconTintChange(dark ? 1.0f : 0.0f);
         } else if (mTransitionDeferring) {
             animateIconTint(dark ? 1.0f : 0.0f,
