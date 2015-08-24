@@ -51,6 +51,7 @@ import android.content.pm.VerificationParams;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IUserManager;
@@ -1094,6 +1095,7 @@ public final class Pm {
             }
         }
 
+        userId = translateUserId(userId, "runInstall");
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
             installFlags |= PackageManager.INSTALL_ALL_USERS;
@@ -1164,6 +1166,16 @@ public final class Pm {
         }
     }
 
+    /**
+     * @param userId The user id to be translated.
+     * @param logContext Optional human readable text to provide some context in error log.
+     * @return Translated concrete user id.  This will include USER_ALL.
+     */
+    private int translateUserId(int userId, String logContext) {
+        return ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, true, logContext, "pm command");
+    }
+
     private int runInstallCreate() throws RemoteException {
         int userId = UserHandle.USER_ALL;
         String installerPackageName = null;
@@ -1220,6 +1232,7 @@ public final class Pm {
             }
         }
 
+        userId = translateUserId(userId, "runInstallCreate");
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
             params.installFlags |= PackageManager.INSTALL_ALL_USERS;
@@ -1551,6 +1564,7 @@ public final class Pm {
             return 1;
         }
 
+        userId = translateUserId(userId, "runUninstall");
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
             flags |= PackageManager.DELETE_ALL_USERS;
