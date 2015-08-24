@@ -289,7 +289,7 @@ width: 400px;text-align: center;">The official Android IDE</p>
 </ul>
 
 <a class="online landing-button green download-bundle-button"
-href="#Other" >Download Android Studio</a>
+href="#Other" >Download Android Studio<br/><span class='small'></span></a>
 
 <!-- this appears when viewing the offline docs -->
 <p class="offline">
