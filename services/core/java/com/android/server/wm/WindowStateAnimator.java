@@ -1589,8 +1589,6 @@ class WindowStateAnimator {
         final int left = ((int) shownFrame.left) - attrs.surfaceInsets.left;
         final int top = ((int) shownFrame.top) - attrs.surfaceInsets.top;
         if (mSurfaceX != left || mSurfaceY != top) {
-            mSurfaceX = left;
-            mSurfaceY = top;
             if (mAnimating) {
                 // If this window (or its app token) is animating, then the position
                 // of the surface will be re-computed on the next animation frame.
@@ -1598,6 +1596,8 @@ class WindowStateAnimator {
                 // transformation is being applied by the animation.
                 return;
             }
+            mSurfaceX = left;
+            mSurfaceY = top;
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
             SurfaceControl.openTransaction();
             try {
