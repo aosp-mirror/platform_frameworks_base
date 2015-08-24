@@ -25,7 +25,6 @@ import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_COPY_DESTIN
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
-import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -77,24 +76,18 @@ public class DocumentsActivity extends BaseActivity {
 
     private Toolbar mRootsToolbar;
 
-    private DrawerController mDrawer;
-
     private DirectoryContainerView mDirectoryContainer;
-
-    private State mState;
 
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
 
     public DocumentsActivity() {
-        super(TAG);
+        super(R.layout.activity, TAG);
     }
 
     @Override
     public void onCreate(Bundle icicle) {
-        mState = (icicle != null)
-                ? icicle.<State>getParcelable(EXTRA_STATE)
-                : buildDefaultState();
+        super.onCreate(icicle);
 
         final Resources res = getResources();
         mShowAsDialog = res.getBoolean(R.bool.show_as_dialog) && mState.action != ACTION_MANAGE &&
@@ -103,11 +96,6 @@ public class DocumentsActivity extends BaseActivity {
         if (!mShowAsDialog) {
             setTheme(R.style.DocumentsNonDialogTheme);
         }
-
-        super.onCreate(icicle);
-
-        setResult(Activity.RESULT_CANCELED);
-        setContentView(R.layout.activity);
 
         final Context context = this;
 
@@ -191,7 +179,8 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
-    private State buildDefaultState() {
+    @Override
+    State buildDefaultState() {
         State state = new State();
 
         final Intent intent = getIntent();
@@ -452,30 +441,6 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return mDrawer.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // While action bar is expanded, the state stack UI is hidden.
-        if (mSearchManager.cancelSearch()) {
-            return;
-        }
-
-        if (!mState.stackTouched) {
-            super.onBackPressed();
-            return;
-        }
-
-        final int size = mState.stack.size();
-        if (size > 1) {
-            mState.stack.pop();
-            onCurrentDirectoryChanged(ANIM_UP);
-        } else if (size == 1 && !mDrawer.isOpen()) {
-            // TODO: open root drawer once we can capture back key
-            super.onBackPressed();
-        } else {
-            super.onBackPressed();
-        }
     }
 
     @Override

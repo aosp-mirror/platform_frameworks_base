@@ -738,7 +738,7 @@ public class DirectoryFragment extends Fragment {
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
-                // TODO: Implement support in standalone for opening multiple docs.
+                // TODO: Implement support in Files activity for opening multiple docs.
                 BaseActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
             }
         }.execute(selected);
@@ -1684,7 +1684,7 @@ public class DirectoryFragment extends Fragment {
 
     private FragmentTuner pickFragmentTuner(final State state) {
         return state.action == ACTION_BROWSE_ALL
-                ? new StandaloneTuner()
+                ? new FilesTuner()
                 : new DefaultTuner(state);
     }
 
@@ -1749,7 +1749,7 @@ public class DirectoryFragment extends Fragment {
             copyTo.setVisible(manageOrBrowse && dirType != TYPE_RECENT_OPEN);
             moveTo.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_move", false));
 
-            // Only shown in standalone mode.
+            // Only shown in files mode.
             copyToClipboard.setVisible(false);
         }
 
@@ -1758,9 +1758,9 @@ public class DirectoryFragment extends Fragment {
     }
 
     /**
-     * Provides support for Standalone specific specializations of DirectoryFragment.
+     * Provides support for Files activity specific specializations of DirectoryFragment.
      */
-    private static final class StandaloneTuner implements FragmentTuner {
+    private static final class FilesTuner implements FragmentTuner {
         @Override
         public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
             menu.findItem(R.id.menu_share).setVisible(true);

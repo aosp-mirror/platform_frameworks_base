@@ -48,8 +48,8 @@
         </activity>
 
         <activity
-            android:name=".StandaloneActivity"
-            android:theme="@style/StandaloneTheme"
+            android:name=".FilesActivity"
+            android:theme="@style/FilesTheme"
             android:icon="@drawable/ic_files_app"
             android:label="@string/files_label"
             android:enabled="@bool/productivity_device">

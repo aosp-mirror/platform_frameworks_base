@@ -35,6 +35,7 @@ abstract class DrawerController implements DrawerListener {
     abstract void setOpen(boolean open);
     abstract void lockOpen();
     abstract void lockClosed();
+    abstract boolean isPresent();
     abstract boolean isOpen();
     abstract boolean isUnlocked();
     abstract void syncState();
@@ -104,6 +105,11 @@ abstract class DrawerController implements DrawerListener {
         }
 
         @Override
+        boolean isPresent() {
+            return true;
+        }
+
+        @Override
         void syncState() {
             mToggle.syncState();
         }
@@ -155,9 +161,7 @@ abstract class DrawerController implements DrawerListener {
     private static final class DummyDrawerController extends DrawerController {
 
         @Override
-        boolean isOpen() {
-            return false;
-        }
+        void setOpen(boolean open) {}
 
         @Override
         void syncState() {}
@@ -169,8 +173,18 @@ abstract class DrawerController implements DrawerListener {
         void lockClosed() {}
 
         @Override
+        boolean isOpen() {
+            return false;
+        }
+
+        @Override
         boolean isUnlocked() {
             return true;
+        }
+
+        @Override
+        boolean isPresent() {
+            return false;
         }
 
         @Override
@@ -189,8 +203,5 @@ abstract class DrawerController implements DrawerListener {
 
         @Override
         public void onDrawerStateChanged(int newState) {}
-
-        @Override
-        void setOpen(boolean open) {}
     }
 }

@@ -37,6 +37,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
@@ -46,6 +47,7 @@ import android.view.MenuItem;
 import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
@@ -74,9 +76,13 @@ abstract class BaseActivity extends Activity {
 
     static final String EXTRA_STATE = "state";
 
+    State mState;
     RootsCache mRoots;
     SearchManager mSearchManager;
+    DrawerController mDrawer;
 
+    @LayoutRes
+    private int mLayoutId;
     private final String mTag;
 
     public abstract State getDisplayState();
@@ -87,16 +93,30 @@ abstract class BaseActivity extends Activity {
     abstract void onDirectoryChanged(int anim);
     abstract void updateActionBar();
     abstract void saveStackBlocking();
+    abstract State buildDefaultState();
 
-    public BaseActivity(String tag) {
+    public BaseActivity(@LayoutRes int layoutId, String tag) {
+        mLayoutId = layoutId;
         mTag = tag;
     }
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        mState = (icicle != null)
+                ? icicle.<State>getParcelable(EXTRA_STATE)
+                        : buildDefaultState();
+
+        setContentView(R.layout.files_activity);
+        ViewStub stub = (ViewStub) findViewById(R.id.stub);
+        stub.inflate();
+
         mRoots = DocumentsApplication.getRootsCache(this);
         mSearchManager = new SearchManager();
+
+        // Base classes must update result in their onCreate.
+        setResult(Activity.RESULT_CANCELED);
     }
 
     @Override
@@ -522,6 +542,30 @@ abstract class BaseActivity extends Activity {
             return ProviderExecutor.forAuthority(cwd.authority);
         } else {
             return AsyncTask.THREAD_POOL_EXECUTOR;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // While action bar is expanded, the state stack UI is hidden.
+        if (mSearchManager.cancelSearch()) {
+            return;
+        }
+
+        if (!mState.stackTouched) {
+            super.onBackPressed();
+            return;
+        }
+
+        final int size = mState.stack.size();
+
+        if (mDrawer.isOpen()) {
+            mDrawer.setOpen(false);
+        } else if (size > 1) {
+            mState.stack.pop();
+            onCurrentDirectoryChanged(ANIM_UP);
+        } else {
+            super.onBackPressed();
         }
     }
 
