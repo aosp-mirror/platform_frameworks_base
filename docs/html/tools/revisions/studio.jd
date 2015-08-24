@@ -43,6 +43,29 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.3.2</a> <em>(August 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+      <li>Added support for Android 6.0 (API level 23), including new icons and AVD Manager
+        support for creating devices with new screen densities.</li>
+      <li>Fixed an exception that was occuring during update checks.
+        <a href="http://b.android.com/183068">Issue: 183068</a></li>
+      <li>Fixed problem where unresolved view coordinates could cause the layout editor to crash.
+        <a href="http://b.android.com/178690">Issue: 178690</a></li>
+      <li>Fixed issue with invalid resource type warnings.
+        <a href="http://b.android.com/182433">Issue: 182433</a></li>
+      <li>Fixed lint check that was incorrectly flagging resources as private.
+        <a href="http://b.android.com/183120">Issue: 183120</a></li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.3.1</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -58,8 +81,6 @@ Android Studio, as denoted by revision number. </p>
     </ul>
   </div>
 </div>
-
-
 
 
 <div class="toggle-content closed">
@@ -100,7 +121,7 @@ Android Studio, as denoted by revision number. </p>
       <li>Added <a href="{@docRoot}tools/data-binding/guide.html">data binding</a> support to
         create declarative layouts that bind your application logic to layout elements. </li>
       <li>Added support for a separate
-        <a href="{@docRoot}tools/studio/studio-features.html#test-module">test APK module</a> 
+        <a href="{@docRoot}tools/studio/studio-features.html#test-module">test APK module</a>
         to build test APKs in Android Studio.  </li>
       <li>Updated the <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a> with HAXM
         optimizations and improved notifications. </li>
