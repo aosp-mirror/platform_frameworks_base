@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"सेटिंग्ज मधून काढा"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"सेटिंग्ज मधून सिस्टीम UI ट्यूनर काढून त्याची सर्व वैशिष्ट्‍ये वापरणे थांबवायचे?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"अनुप्रयोग आपल्या डिव्हाइसवर स्थापित केलेला नाही"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"घड्‍याळ सेकंद दर्शवा"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"स्टेटस बारमध्‍ये घड्‍याळ सेकंद दर्शवा. कदाचित बॅटरी आयुष्‍य प्रभावित होऊ शकते."</string>
 </resources>

@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"ਸੈਟਿੰਗਜ਼ ਤੋਂ ਹਟਾਓ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ਕੀ ਸੈਟਿੰਗਜ਼ ਤੋਂ ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਹਟਾਉਣਾ ਹੈ ਅਤੇ ਇਸਦੀਆਂ ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਉਪਯੋਗ ਕਰਨ ਤੋਂ ਰੋਕਣਾ ਹੈ?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"ਐਪਲੀਕੇਸ਼ਨ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਤੇ ਇੰਸਟੌਲ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"ਸਥਿਤੀ ਬਾਰ ਵਿੱਚ ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ। ਬੈਟਰੀ ਸਮਰੱਥਾ ਤੇ ਅਸਰ ਪੈ ਸਕਦਾ ਹੈ।"</string>
 </resources>

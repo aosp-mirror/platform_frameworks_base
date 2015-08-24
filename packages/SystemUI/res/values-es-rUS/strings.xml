@@ -435,4 +435,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Quitar de Configuración"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Quieres quitar el sintonizador de IU del sistema de Configuración y dejar de utilizar todas sus funciones?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"La aplicación no está instalada en el dispositivo"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Mostrar los segundos del reloj"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Muestra los segundos del reloj en la barra de estado. Puede afectar la duración de la batería."</string>
 </resources>

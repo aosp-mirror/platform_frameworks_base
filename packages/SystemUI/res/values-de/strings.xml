@@ -435,4 +435,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Aus \"Einstellungen\" entfernen"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner aus \"Einstellungen\" entfernen und die Verwendung von allen zugehörigen Funktionen beenden?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Die App ist nicht auf Ihrem Gerät installiert."</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Uhrsekunden anzeigen"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Uhrsekunden in der Statusleiste anzeigen. Kann sich auf die Akkulaufzeit auswirken."</string>
 </resources>

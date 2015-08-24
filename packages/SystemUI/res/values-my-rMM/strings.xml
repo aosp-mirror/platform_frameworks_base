@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"ဆက်တင် အထဲမှ ဖယ်ရှားရန်"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ဆက်တင် အထဲမှ စနစ် UI ဖမ်းစက်ကို ဖယ်ရှားလျက် ၎င်း၏ အင်္ဂါရပ်များ အားလုံး အသုံးပြုမှု ရပ်တန့်ရမလား?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"အပလီကေးရှင်းကို သင်၏ ကိရိယာထဲသို့ တပ်ဆင်မပေးရသေးပါ။"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"နာရီ စက္ကန့်များကို ပြရန်"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"အခြေအနေပြနေရာမှာ နာရီ စက္ကန့်များကို ပြပါ။ ဘက်ထရီ သက်တမ်းကို အကျိုးသက်ရောက်နိုင်တယ်။"</string>
 </resources>

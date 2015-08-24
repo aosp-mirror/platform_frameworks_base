@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Alih keluar daripada Tetapan"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Alih keluar Penala UI Sistem daripada Tetapan dan berhenti menggunakan semua cirinya?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Aplikasi tidak dipasang pada peranti anda"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Tunjukkan saat jam"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Tunjukkan saat jam dalam bar status. Mungkin menjejaskan hayat bateri."</string>
 </resources>

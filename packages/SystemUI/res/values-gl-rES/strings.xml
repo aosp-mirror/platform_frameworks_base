@@ -435,4 +435,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Eliminar da Configuración"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Queres eliminar o configurador da IU do sistema da Configuración e deixar de usar todas as súas funcións?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"A aplicación non está instalada no teu dispositivo"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Mostrar segundos do reloxo"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra os segundos do reloxo na barra de estado. Pode influír na duración da batería."</string>
 </resources>

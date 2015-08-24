@@ -435,4 +435,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Supprimer l\'outil des paramètres"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Supprimer System UI Tuner des paramètres et arrêter d\'utiliser toutes ses fonctionnalités ?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"L\'application n\'est pas installée sur votre appareil."</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Afficher les secondes sur l\'horloge"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Afficher les secondes dans la barre d\'état. Cela risque de réduire l\'autonomie de la batterie."</string>
 </resources>

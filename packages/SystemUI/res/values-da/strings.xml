@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Fjern fra Indstillinger"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vil du fjerne System UI Tuner fra Indstillinger og stoppe med at bruge alle dens funktioner?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Applikationen er ikke installeret på din enhed."</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Vis sekunder"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statuslinjen. Dette kan påvirke batteriets levetid."</string>
 </resources>

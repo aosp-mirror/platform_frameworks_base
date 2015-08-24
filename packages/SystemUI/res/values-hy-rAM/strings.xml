@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Հեռացնել կարգավորումներից"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Հեռացնե՞լ Համակարգի ՕՄ-ի կարգավորիչը կարգավորումներից և չօգտվել այլևս նրա գործառույթներից:"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Հավելվածը տեղադրված չէ սարքի վրա"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Ցույց տալ ժամացույցի վայրկյանները"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Ցույց տալ ժամացույցի վայրկյանները կարգավիճակի տողում: Կարող է ազդել մարտկոցի աշխատանքի ժամանակի վրա:"</string>
 </resources>

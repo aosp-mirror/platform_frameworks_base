@@ -437,4 +437,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Удалить из настроек"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Убрать функцию System UI Tuner из меню настроек и прекратить ее работу?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Приложение не установлено на вашем устройстве"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Показывать секунды"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Показывать в строке состояния время с точностью до секунды (заряд батареи может расходоваться быстрее)."</string>
 </resources>

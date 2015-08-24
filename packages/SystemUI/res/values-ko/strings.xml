@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"설정에서 삭제"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"시스템 UI 튜너를 설정에서 삭제하고 모든 관련 기능의 사용을 중지하시겠습니까?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"기기에 애플리케이션이 설치되어 있지 않습니다."</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"시계 초 단위 표시"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"상태 표시줄에 시계 초 단위를 표시합니다. 배터리 수명에 영향을 줄 수도 있습니다."</string>
 </resources>

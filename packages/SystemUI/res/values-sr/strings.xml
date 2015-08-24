@@ -434,4 +434,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Уклони из Подешавања"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Желите ли да уклоните Тјунер за кориснички интерфејс система из Подешавања и да престанете да користите све његове функције?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Апликација није инсталирана на уређају"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Приказуј секунде на сату"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Секунде на сату се приказују на статусној траци. То може да утиче на трајање батерије."</string>
 </resources>

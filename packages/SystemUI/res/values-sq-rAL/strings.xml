@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Hiqe nga Cilësimet"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Të hiqet Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit nga Cilësimet dhe të ndërpritet përdorimi i të gjitha funksioneve të tij?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Aplikacioni nuk është instaluar në pajisjen tënde."</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Trego sekondat e orës"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Trego sekondat e orës në shiritin e statusit. Mund të ndikojë te jeta e baterisë."</string>
 </resources>

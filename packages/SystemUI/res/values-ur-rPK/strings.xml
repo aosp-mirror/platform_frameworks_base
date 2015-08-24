@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"ترتیبات سے ہٹائیں"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"‏ترتیبات سے سسٹم UI ٹیونر کو ہٹائیں اور اس کی سبھی خصوصیات کا استعمال بند کریں؟"</string>
     <string name="activity_not_found" msgid="348423244327799974">"ایپلیکیشن آپ کے آلہ پر انسٹال نہیں ہے"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"گھڑی کے سیکنڈز دکھائیں"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"گھڑی کے سیکنڈز اسٹیٹس بار میں دکھائیں۔ اس کا بیٹری کی زندگی پر اثر پڑ سکتا ہے۔"</string>
 </resources>

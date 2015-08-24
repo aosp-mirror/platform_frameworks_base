@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"सेटिङहरूबाट हटाउनुहोस्"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"प्रणाली UI ट्युनर सेटिङहरूबाट हटाउने र यसका सबै सुविधाहरू प्रयोग गर्न रोक्ने हो?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"तपाईँको यन्त्रमा अनुप्रयोग स्थापना भएको छैन"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"घडीमा सेकेन्ड देखाउनुहोस्"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"वस्तुस्थिति पट्टीको घडीमा सेकेन्ड देखाउनुहोस्। ब्याट्री आयु प्रभावित हुन सक्छ।"</string>
 </resources>

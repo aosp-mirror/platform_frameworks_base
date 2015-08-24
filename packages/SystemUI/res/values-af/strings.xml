@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Verwyder uit Instellings"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Verwyder Stelsel-UI-ontvanger uit Instellings en staak die gebruik van al sy kenmerke?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Program is nie op jou toestel geïnstalleer nie"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Wys horlosiesekondes"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Wys horlosiesekondes op die statusbalk. Sal batterylewe dalk beïnvloed."</string>
 </resources>

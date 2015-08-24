@@ -435,4 +435,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Remover das configurações"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Remover sintonizador System UI das configurações e parar de usar todos os seus recursos?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"O app não está instalado no seu dispositivo"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Mostrar segundos do relógio"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostrar segundos do relógio na barra de status. Pode afetar a duração da bateria."</string>
 </resources>

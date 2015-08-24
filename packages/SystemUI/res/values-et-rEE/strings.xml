@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Eemalda seadetest"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Kas eemaldada seadetest süsteemi kasutajaliidese tuuner ja lõpetada kõikide selle funktsioonide kasutamine?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Rakendust pole teie seadmesse installitud"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Kella sekundite kuvamine"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Olekuribal kella sekundite kuvamine. See võib mõjutada aku kasutusaega."</string>
 </resources>

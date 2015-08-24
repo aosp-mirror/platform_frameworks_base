@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"ከቅንብሮች አስወግድ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ከቅንብሮች ላይ የስርዓት በይነገጽ መቃኛ ተወግዶ ሁሉም ባህሪዎቹን መጠቀም ይቁም?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"መተግበሪያ በእርስዎ መሣሪያ ላይ አልተጫነም"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"የሰዓት ሰከንዶችን አሳይ"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"የሰዓት ሰከንዶችን በሁኔታ አሞሌ ውስጥ አሳይ። በባትሪ ዕድሜ ላይ ተጽዕኖ ሊኖርው ይችል ይሆናል።"</string>
 </resources>

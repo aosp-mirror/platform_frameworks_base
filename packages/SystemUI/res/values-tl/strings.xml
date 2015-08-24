@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Alisin sa Mga Setting"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Alisin ang Tuner ng System UI sa Mga Setting at ihinto ang paggamit ng lahat ng feature nito?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Hindi naka-install ang application sa iyong device"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Ipakita ang mga segundo ng orasan"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Ipakita ang mga segundo ng orasan sa status bar. Maaaring makaapekto sa tagal ng baterya."</string>
 </resources>

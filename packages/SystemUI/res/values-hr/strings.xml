@@ -434,4 +434,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Ukloni iz Postavki"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Želite li ukloniti Ugađanje korisničkog sučelja sustava iz Postavki i prestati upotrebljavati njegove značajke?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Aplikacija nije instalirana na vašem uređaju"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Prikaži sekunde na satu"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Prikazuju se sekunde na satu na traci statusa. Može utjecati na trajanje baterije."</string>
 </resources>

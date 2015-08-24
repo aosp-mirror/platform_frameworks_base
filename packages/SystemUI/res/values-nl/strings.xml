@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Verwijderen uit Instellingen"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Systeem-UI-tuner uit Instellingen verwijderen en het gebruik van alle functies daarvan stopzetten?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Deze app is niet geïnstalleerd op uw apparaat"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Klokseconden weergeven"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Klokseconden op de statusbalk weergeven. Kan van invloed zijn op de accuduur."</string>
 </resources>

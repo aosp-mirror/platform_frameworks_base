@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"យកចេញពីការកំណត់"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"យកកម្មវិធីសម្រួល UI ប្រព័ន្ធចេញពីការកំណត់ ហើយឈប់ប្រើលក្ខណៈពិសេសរបស់វាទាំងអស់?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"កម្មវិធីមិនបានដំឡើងនៅលើឧបករណ៍របស់អ្នកទេ"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"បង្ហាញវិនាទី"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"បង្ហាញវិនាទីនៅលើរបារស្ថានភាពអាចនឹងប៉ះពាល់ដល់ថាមពលថ្ម។"</string>
 </resources>

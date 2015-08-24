@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Ta bort från inställningarna"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vill du ta bort inställningar för systemgränssnitt från inställningarna och sluta använda alla tillhörande funktioner?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Appen är inte installerad på enheten"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Visa klocksekunder"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Visa klocksekunder i statusfältet. Detta kan påverka batteritiden."</string>
 </resources>

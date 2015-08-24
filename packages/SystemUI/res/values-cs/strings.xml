@@ -437,4 +437,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Odstranit z Nastavení"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Chcete nástroj na ladění uživatelského rozhraní systému odstranit z Nastavení a přestat používat všechny jeho funkce?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Aplikace není v zařízení nainstalována."</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Zobrazit sekundovou ručičku"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Na stavovém řádku se bude zobrazovat sekundová ručička. Může být ovlivněna výdrž baterie."</string>
 </resources>

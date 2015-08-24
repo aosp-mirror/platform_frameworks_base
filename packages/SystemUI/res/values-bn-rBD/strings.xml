@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"সেটিংস থেকে সরান"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"সেটিংস থেকে সিস্টেম UI টিউনার সরাতে এবং এটির সমস্ত বৈশিষ্ট্য ব্যবহার করা বন্ধ করতে চান?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"আপনার ডিভাইসে অ্যাপ্লিকেশান ইনস্টল করা নেই"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"ঘড়ির সেকেন্ড দেখায়"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"স্থিতি দন্ডে ঘড়ির সেকেন্ড দেখায়৷ ব্যাটারি লাইফকে প্রভাবিত করতে পারে৷"</string>
 </resources>

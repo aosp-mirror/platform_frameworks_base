@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Susa kusuka kuzilungiselelo"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Susa isishuni se-UI yesistimu kusuka kuzilungiselelo futhi uyeke ukusebenzisa zonke izici zakhona?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Uhlelo lokusebenza alufakiwe kudivayisi yakho"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Bonisa amasekhondi wewashi"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Bonisa amasekhondi wewashi kubha yesimo. Ingathinta impilo yebhethri."</string>
 </resources>

@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"සැකසීම් වෙතින් ඉවත් කරන්න"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"සැකසීම් වෙතින් පද්ධති UI සුසරකය ඉවත් කර සහ එහි සියලු අංග භාවිතය නවත් වන්නද?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"යෙදුම ඔබේ උපාංගය මත ස්ථාපනය කර නැත"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"ඔරලෝසු තත්පර පෙන්වන්න"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"තත්ත්ව තීරුවෙහි ඔරලෝසු තත්පර පෙන්වන්න. බැටරි ආයු කාලයට බලපෑමට හැකිය."</string>
 </resources>

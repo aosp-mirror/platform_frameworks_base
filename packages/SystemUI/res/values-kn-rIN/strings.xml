@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ತೆಗೆದುಹಾಕಿ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ತೆಗೆದುಹಾಕುವುದೇ ಮತ್ತು ಅದರ ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಬಳಸುವುದನ್ನು ನಿಲ್ಲಿಸುವುದೇ?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಸ್ಥಾಪಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"ಗಡಿಯಾರದ ಸೆಕೆಂಡುಗಳನ್ನು ತೋರಿಸು"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯಲ್ಲಿ ಗಡಿಯಾರ ಸೆಕೆಂಡುಗಳನ್ನು ತೋರಿಸು. ಇದಕ್ಕೆ ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯು ಪರಿಣಾಮಬೀರಬಹುದು."</string>
 </resources>

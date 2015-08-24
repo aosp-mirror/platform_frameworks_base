@@ -433,4 +433,6 @@
     <string name="remove_from_settings" msgid="8389591916603406378">"Sozlamalardan olib tashlash"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner Sozlamalardan olib tashlanib, uning barcha funksiyalaridan foydalanish to‘xtatilsinmi?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Ilova qurilmangizga o‘rnatilmagan"</string>
+    <string name="clock_seconds" msgid="7689554147579179507">"Soat soniyalari ko‘rsatilsin"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Holat panelida soat soniyalari ko‘rsatilsin. Bu batareya resursiga ta’sir qilishi mumkin."</string>
 </resources>
