@@ -764,6 +764,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    MetricsLogger.histogram(mContext, "fingerprint_token", opId != 0L ? 1 : 0);
                     startAuthentication(token, opId, effectiveGroupId, receiver, flags, restricted);
                 }
             });
