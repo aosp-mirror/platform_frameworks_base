@@ -5,7 +5,8 @@
 #include <string>
 #include <vector>
 
-using namespace std;
+using std::string;
+using std::vector;
 
 enum {
     COMPILE_AIDL,

@@ -7,7 +7,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-using namespace std;
+using std::set;
+using std::string;
+using std::vector;
 
 class Type;
 
