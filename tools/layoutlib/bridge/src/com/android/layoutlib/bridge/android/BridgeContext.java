@@ -66,7 +66,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcel;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -679,44 +681,48 @@ public final class BridgeContext extends Context {
                 }
             }
         } else if (defStyleRes != 0) {
-            boolean isFrameworkRes = true;
-            Pair<ResourceType, String> value = Bridge.resolveResourceId(defStyleRes);
-            if (value == null) {
-                value = mLayoutlibCallback.resolveResourceId(defStyleRes);
-                isFrameworkRes = false;
-            }
+            StyleResourceValue item = mDynamicIdToStyleMap.get(defStyleRes);
+            if (item != null) {
+                defStyleValues = item;
+            } else {
+                boolean isFrameworkRes = true;
+                Pair<ResourceType, String> value = Bridge.resolveResourceId(defStyleRes);
+                if (value == null) {
+                    value = mLayoutlibCallback.resolveResourceId(defStyleRes);
+                    isFrameworkRes = false;
+                }
 
-            if (value != null) {
-                if ((value.getFirst() == ResourceType.STYLE)) {
-                    // look for the style in all resources:
-                    StyleResourceValue item = mRenderResources.getStyle(value.getSecond(),
-                            isFrameworkRes);
-                    if (item != null) {
-                        if (defaultPropMap != null) {
-                            defaultPropMap.put("style", item.getName());
+                if (value != null) {
+                    if ((value.getFirst() == ResourceType.STYLE)) {
+                        // look for the style in all resources:
+                        item = mRenderResources.getStyle(value.getSecond(), isFrameworkRes);
+                        if (item != null) {
+                            if (defaultPropMap != null) {
+                                defaultPropMap.put("style", item.getName());
+                            }
+
+                            defStyleValues = item;
+                        } else {
+                            Bridge.getLog().error(null,
+                                    String.format(
+                                            "Style with id 0x%x (resolved to '%s') does not exist.",
+                                            defStyleRes, value.getSecond()),
+                                    null);
                         }
-
-                        defStyleValues = item;
                     } else {
                         Bridge.getLog().error(null,
                                 String.format(
-                                        "Style with id 0x%x (resolved to '%s') does not exist.",
-                                        defStyleRes, value.getSecond()),
+                                        "Resource id 0x%x is not of type STYLE (instead %s)",
+                                        defStyleRes, value.getFirst().toString()),
                                 null);
                     }
                 } else {
                     Bridge.getLog().error(null,
                             String.format(
-                                    "Resource id 0x%x is not of type STYLE (instead %s)",
-                                    defStyleRes, value.getFirst().toString()),
+                                    "Failed to find style with id 0x%x in current theme",
+                                    defStyleRes),
                             null);
                 }
-            } else {
-                Bridge.getLog().error(null,
-                        String.format(
-                                "Failed to find style with id 0x%x in current theme",
-                                defStyleRes),
-                        null);
             }
         }
 
