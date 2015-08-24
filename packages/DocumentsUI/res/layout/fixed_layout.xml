@@ -25,7 +25,8 @@
         android:layout_height="?android:attr/actionBarSize"
         android:background="?android:attr/colorPrimary"
         android:elevation="8dp"
-        android:theme="?android:attr/actionBarTheme">
+        android:theme="?actionBarTheme"
+        android:popupTheme="?actionBarPopupTheme">
 
         <Spinner
             android:id="@+id/stack"

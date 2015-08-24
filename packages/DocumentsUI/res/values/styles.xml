@@ -16,12 +16,12 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="DialogWhenReallyLarge" parent="@android:style/Theme.Material.DayNight.DarkActionBar" />
+    <style name="DocumentsBaseTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar" />
 
-    <style name="DocumentsTheme" parent="@style/DialogWhenReallyLarge">
-        <item name="android:actionBarWidgetTheme">@null</item>
-        <item name="android:actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
-        <item name="android:actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
+    <style name="DocumentsTheme" parent="@style/DocumentsBaseTheme">
+        <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
+        <item name="actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
 
         <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
         <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
@@ -37,14 +37,10 @@
         <item name="android:alertDialogTheme">@android:style/Theme.Material.Light.Dialog.Alert</item>
     </style>
 
-    <style name="DocumentsNonDialogTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
-        <item name="android:actionBarWidgetTheme">@null</item>
-        <item name="android:actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
-        <item name="android:actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
-
-        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
-        <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
-        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
+    <style name="DocumentsBaseTheme.FullScreen" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
+        <item name="actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
@@ -53,6 +49,12 @@
         <item name="android:windowNoTitle">true</item>
 
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+    </style>
+
+    <style name="DocumentsNonDialogTheme" parent="@style/DocumentsBaseTheme.FullScreen">
+        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
+        <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
+        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
     </style>
 
     <style name="ActionModeStyle" parent="@android:style/Widget.Material.Light.ActionMode">
@@ -63,21 +65,12 @@
         <item name="android:colorAccent">@color/material_blue_700</item>
     </style>
 
-    <style name="FilesTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
-        <item name="android:actionBarWidgetTheme">@null</item>
-
+    <style name="FilesTheme" parent="@style/DocumentsBaseTheme.FullScreen">
         <item name="android:colorPrimaryDark">@color/status_bar_background</item>
         <item name="android:colorPrimary">@color/material_blue_500</item>
         <item name="android:colorAccent">@color/material_blue_700</item>
         <item name="android:actionModeStyle">@style/ActionModeStyle</item>
 
-        <item name="android:listDivider">@*android:drawable/list_divider_material</item>
-
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowActionModeOverlay">true</item>
-        <item name="android:windowNoTitle">true</item>
-
-        <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
     </style>
 
