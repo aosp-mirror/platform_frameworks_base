@@ -19,6 +19,8 @@ package android.hardware;
 /**
  * Binder interface for the camera service proxy running in system_server.
  *
+ * Keep in sync with frameworks/av/include/camera/ICameraServiceProxy.h
+ *
  * @hide
  */
 interface ICameraServiceProxy
@@ -27,4 +29,9 @@ interface ICameraServiceProxy
      * Ping the service proxy to update the valid users for the camera service.
      */
     oneway void pingForUserUpdate();
+
+    /**
+     * Update the status of a camera device
+     */
+     oneway void notifyCameraState(String cameraId, int newCameraState);
 }
