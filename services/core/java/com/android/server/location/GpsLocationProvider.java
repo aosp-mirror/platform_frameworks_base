@@ -2200,14 +2200,18 @@ public class GpsLocationProvider implements LocationProviderInterface {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
-        s.append("  mFixInterval=").append(mFixInterval).append("\n");
-        s.append("  mDisableGps (battery saver mode)=").append(mDisableGps).append("\n");
-        s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities)).append(" (");
-        if (hasCapability(GPS_CAPABILITY_SCHEDULING)) s.append("SCHED ");
+        s.append("  mFixInterval=").append(mFixInterval).append('\n');
+        s.append("  mDisableGps (battery saver mode)=").append(mDisableGps).append('\n');
+        s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities));
+        s.append(" ( ");
+        if (hasCapability(GPS_CAPABILITY_SCHEDULING)) s.append("SCHEDULING ");
         if (hasCapability(GPS_CAPABILITY_MSB)) s.append("MSB ");
         if (hasCapability(GPS_CAPABILITY_MSA)) s.append("MSA ");
         if (hasCapability(GPS_CAPABILITY_SINGLE_SHOT)) s.append("SINGLE_SHOT ");
         if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) s.append("ON_DEMAND_TIME ");
+        if (hasCapability(GPS_CAPABILITY_GEOFENCING)) s.append("GEOFENCING ");
+        if (hasCapability(GPS_CAPABILITY_MEASUREMENTS)) s.append("MEASUREMENTS ");
+        if (hasCapability(GPS_CAPABILITY_NAV_MESSAGES)) s.append("NAV_MESSAGES ");
         s.append(")\n");
 
         s.append(native_get_internal_state());
