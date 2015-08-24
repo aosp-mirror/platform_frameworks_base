@@ -43,6 +43,8 @@ public final class ActivityRecognitionProvider {
     public static final String ACTIVITY_STILL = "android.activity_recognition.still";
     public static final String ACTIVITY_TILTING = "android.activity_recognition.tilting";
 
+    // NOTE: when adding an additional EVENT_TYPE_, EVENT_TYPE_COUNT needs to be updated in
+    // android.hardware.location.ActivityRecognitionHardware
     public static final int EVENT_TYPE_FLUSH_COMPLETE = 0;
     public static final int EVENT_TYPE_ENTER = 1;
     public static final int EVENT_TYPE_EXIT = 2;
