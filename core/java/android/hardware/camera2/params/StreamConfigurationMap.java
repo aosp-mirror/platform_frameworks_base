@@ -1290,7 +1290,7 @@ public final class StreamConfigurationMap {
         for (StreamConfiguration config : configurations) {
             int fmt = config.getFormat();
             if (fmt == format && config.isOutput() == output) {
-                if (output) {
+                if (output && mListHighResolution) {
                     // Filter slow high-res output formats; include for
                     // highRes, remove for !highRes
                     long duration = 0;
