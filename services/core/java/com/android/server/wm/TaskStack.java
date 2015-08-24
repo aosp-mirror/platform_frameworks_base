@@ -389,7 +389,9 @@ public class TaskStack {
 
     void resetAnimationBackgroundAnimator() {
         mAnimationBackgroundAnimator = null;
-        mAnimationBackgroundSurface.hide();
+        if (mAnimationBackgroundSurface != null) {
+            mAnimationBackgroundSurface.hide();
+        }
     }
 
     private long getDimBehindFadeDuration(long duration) {
@@ -454,11 +456,14 @@ public class TaskStack {
     }
 
     boolean isDimming() {
+        if (mDimLayer == null) {
+            return false;
+        }
         return mDimLayer.isDimming();
     }
 
     boolean isDimming(WindowStateAnimator winAnimator) {
-        return mDimWinAnimator == winAnimator && mDimLayer.isDimming();
+        return mDimWinAnimator == winAnimator && isDimming();
     }
 
     void startDimmingIfNeeded(WindowStateAnimator newWinAnimator) {
