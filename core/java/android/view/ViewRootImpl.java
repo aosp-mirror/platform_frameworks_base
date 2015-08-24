@@ -6621,6 +6621,19 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
+    /**
+     * Force the window to report its next draw.
+     * <p>
+     * This method is only supposed to be used to speed up the interaction from SystemUI and window
+     * manager when waiting for the first frame to be drawn when turning on the screen. DO NOT USE
+     * unless you fully understand this interaction.
+     * @hide
+     */
+    public void setReportNextDraw() {
+        mReportNextDraw = true;
+        invalidate();
+    }
+
     void changeCanvasOpacity(boolean opaque) {
         Log.d(TAG, "changeCanvasOpacity: opaque=" + opaque);
         if (mAttachInfo.mHardwareRenderer != null) {
