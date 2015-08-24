@@ -53,6 +53,39 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 23.0.7</a> <em>(August 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 7 or higher is required if you are targeting Android 5.0 and higher.</li>
+      <li>Java 1.6 or higher is required if you are targeting other releases.</li>
+      <li>Eclipse Indigo (Version 3.7.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r24.1.2</a>.
+        If you haven't already installed SDK Tools r24.1.2 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+        <li>Fixed issues with the rendering library for the visual layout editor.</li>
+    </ul>
+  </dd>
+</dl>
+</div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 23.0.6</a> <em>(March 2015)</em>
   </p>
 
@@ -75,7 +108,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
   <dt>General Notes:</dt>
   <dd>
     <ul>
-        <li>Fixed issues with the rendering library.</li>
+        <li>Fixed issues with the rendering library for the visual layout editor.</li>
     </ul>
   </dd>
 </dl>
