@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -234,7 +235,7 @@ class LaunchingTaskPositioner {
                 break;
             }
         }
-        task.setInitialBounds(proposal);
+        task.updateOverrideConfiguration(FREEFORM_WORKSPACE_STACK_ID, proposal);
     }
 
     private boolean shiftedToFar(Rect start, int shiftPolicy) {

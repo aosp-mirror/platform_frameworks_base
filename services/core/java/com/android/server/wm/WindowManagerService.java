@@ -3041,8 +3041,8 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
-    private Task createTaskLocked(
-            int taskId, int stackId, int userId, AppWindowToken atoken, Rect bounds) {
+    private Task createTaskLocked(int taskId, int stackId, int userId, AppWindowToken atoken,
+            Rect bounds, Configuration config) {
         if (DEBUG_STACK) Slog.i(TAG, "createTaskLocked: taskId=" + taskId + " stackId=" + stackId
                 + " atoken=" + atoken + " bounds=" + bounds);
         final TaskStack stack = mStackIdToStack.get(stackId);
@@ -3050,17 +3050,17 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
         }
         EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
-        Task task = new Task(taskId, stack, userId, this, bounds);
+        Task task = new Task(taskId, stack, userId, this, bounds, config);
         mTaskIdToTask.put(taskId, task);
         stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showForAllUsers);
         return task;
     }
 
     @Override
-    public Configuration addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
+    public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            Rect taskBounds) {
+            Rect taskBounds, Configuration config) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3084,7 +3084,7 @@ public class WindowManagerService extends IWindowManager.Stub
             AppWindowToken atoken = findAppWindowToken(token.asBinder());
             if (atoken != null) {
                 Slog.w(TAG, "Attempted to add existing app token: " + token);
-                return null;
+                return;
             }
             atoken = new AppWindowToken(this, token, voiceInteraction);
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
@@ -3098,10 +3098,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
 
             Task task = mTaskIdToTask.get(taskId);
-            Configuration outConfig = null;
             if (task == null) {
-                task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds);
-                outConfig = task.mOverrideConfig;
+                task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds, config);
             }
             task.addAppToken(addPos, atoken);
 
@@ -3110,13 +3108,11 @@ public class WindowManagerService extends IWindowManager.Stub
             // Application tokens start out hidden.
             atoken.hidden = true;
             atoken.hiddenRequested = true;
-
-            return outConfig;
         }
     }
 
     @Override
-    public Configuration setAppTask(IBinder token, int taskId, Rect taskBounds) {
+    public void setAppTask(IBinder token, int taskId, Rect taskBounds, Configuration config) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3126,20 +3122,18 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken atoken = findAppWindowToken(token);
             if (atoken == null) {
                 Slog.w(TAG, "Attempted to set task id of non-existing app token: " + token);
-                return null;
+                return;
             }
             final Task oldTask = atoken.mTask;
             oldTask.removeAppToken(atoken);
 
             Task newTask = mTaskIdToTask.get(taskId);
-            Configuration outConfig = null;
             if (newTask == null) {
                 newTask = createTaskLocked(
-                        taskId, oldTask.mStack.mStackId, oldTask.mUserId, atoken, taskBounds);
-                outConfig = newTask.mOverrideConfig;
+                        taskId, oldTask.mStack.mStackId, oldTask.mUserId, atoken, taskBounds,
+                        config);
             }
             newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken);
-            return outConfig;
         }
     }
 
@@ -4599,19 +4593,19 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param stackId Id of stack to resize.
      * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
      * @param resizeTasks If true, the tasks within the stack will also be resized.
-     * @param changedTaskIds Output list of Ids of tasks that changed in bounds due to resize.
-     * @param newTaskConfigs Output list of new Configuation of the tasks that changed.
+     * @param configs Configurations for tasks in the resized stack, keyed by task id.
+     * @param taskBounds Bounds for tasks in the resized stack, keyed by task id.
      * @return True if the stack is now fullscreen.
      * */
     public boolean resizeStack(int stackId, Rect bounds, boolean resizeTasks,
-            IntArray changedTaskIds, List<Configuration> newTaskConfigs) {
+            SparseArray<Configuration> configs, SparseArray<Rect> taskBounds) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack == null) {
                 throw new IllegalArgumentException("resizeStack: stackId " + stackId
                         + " not found.");
             }
-            if (stack.setBounds(bounds, resizeTasks, changedTaskIds, newTaskConfigs)) {
+            if (stack.setBounds(bounds, resizeTasks, configs, taskBounds)) {
                 stack.resizeWindows();
                 stack.getDisplayContent().layoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
@@ -4648,19 +4642,20 @@ public class WindowManagerService extends IWindowManager.Stub
      * Returns a {@link Configuration} object that contains configurations settings
      * that should be overridden due to the operation.
      */
-    public Configuration resizeTask(int taskId, Rect bounds) {
+    public void resizeTask(int taskId, Rect bounds, Configuration configuration, boolean relayout) {
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
                 throw new IllegalArgumentException("resizeTask: taskId " + taskId
                         + " not found.");
             }
-            if (task.setBounds(bounds)) {
+            if (task.setBounds(bounds, configuration)) {
                 task.resizeWindows();
-                task.getDisplayContent().layoutNeeded = true;
-                performLayoutAndPlaceSurfacesLocked();
+                if (relayout) {
+                    task.getDisplayContent().layoutNeeded = true;
+                    performLayoutAndPlaceSurfacesLocked();
+                }
             }
-            return new Configuration(task.mOverrideConfig);
         }
     }
 

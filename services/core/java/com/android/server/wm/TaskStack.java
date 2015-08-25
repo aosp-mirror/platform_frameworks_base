@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.DisplayInfo;
 
 import com.android.server.EventLogTags;
@@ -96,15 +97,15 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
     /**
      * Set the bounds of the stack and its containing tasks.
-     * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
+     * @param stackBounds New stack bounds. Passing in null sets the bounds to fullscreen.
      * @param resizeTasks If true, the tasks within the stack will also be resized.
-     * @param changedTaskIds Output list of Ids of tasks that changed in bounds.
-     * @param newTaskConfigs Output list of new Configuation of the tasks that changed.
+     * @param configs Configuration for individual tasks, keyed by task id.
+     * @param taskBounds Bounds for individual tasks, keyed by task id.
      * @return True if the stack bounds was changed.
      * */
-    boolean setBounds(Rect bounds, boolean resizeTasks, IntArray changedTaskIds,
-            List<Configuration> newTaskConfigs) {
-        if (!setBounds(bounds)) {
+    boolean setBounds(Rect stackBounds, boolean resizeTasks, SparseArray<Configuration> configs,
+            SparseArray<Rect> taskBounds) {
+        if (!setBounds(stackBounds)) {
             return false;
         }
 
@@ -113,20 +114,17 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
 
         // Update bounds of containing tasks.
-        final Rect newBounds = mFullscreen ? null : mBounds;
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = mTasks.get(taskNdx);
-            if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
-                // For freeform stack we don't adjust the size of the tasks to match that of the
-                // stack, but we do try to make sure the tasks are still contained with the
-                // bounds of the stack.
-                if (task.fitWithinBounds(newBounds)) {
-                    changedTaskIds.add(task.mTaskId);
-                    newTaskConfigs.add(task.mOverrideConfig);
+            Configuration config = configs.get(task.mTaskId);
+            if (config != null) {
+                Rect bounds = taskBounds.get(task.mTaskId);
+                if (bounds == null) {
+                    bounds = stackBounds;
                 }
-            } else if (task.setBounds(newBounds)) {
-                changedTaskIds.add(task.mTaskId);
-                newTaskConfigs.add(task.mOverrideConfig);
+                task.setBounds(bounds, config);
+            } else {
+                Slog.wtf(TAG, "No config for task: " + task + ", is there a mismatch with AM?");
             }
         }
         return true;
