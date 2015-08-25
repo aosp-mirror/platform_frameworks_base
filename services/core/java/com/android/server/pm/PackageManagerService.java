@@ -4626,7 +4626,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (result == null) {
                 result = new CrossProfileDomainInfo();
                 result.resolveInfo =
-                        createForwardingResolveInfo(null, sourceUserId, parentUserId);
+                        createForwardingResolveInfo(new IntentFilter(), sourceUserId, parentUserId);
                 result.bestDomainVerificationStatus = status;
             } else {
                 result.bestDomainVerificationStatus = bestDomainVerificationStatus(status,
