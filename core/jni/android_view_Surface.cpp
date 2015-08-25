@@ -292,7 +292,7 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         return 0;
     }
 
-    Rect dirtyRect;
+    Rect dirtyRect(Rect::EMPTY_RECT);
     Rect* dirtyRectPtr = NULL;
 
     if (dirtyRectObj) {

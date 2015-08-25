@@ -158,7 +158,7 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
 
     sp<GraphicBuffer> buffer(wrapper->buffer);
 
-    Rect rect;
+    Rect rect(Rect::EMPTY_RECT);
     if (dirtyRect) {
         rect.left = GET_INT(dirtyRect, gRectClassInfo.left);
         rect.top = GET_INT(dirtyRect, gRectClassInfo.top);

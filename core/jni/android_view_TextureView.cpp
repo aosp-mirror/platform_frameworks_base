@@ -142,7 +142,7 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
 
     ANativeWindow_Buffer buffer;
 
-    Rect rect;
+    Rect rect(Rect::EMPTY_RECT);
     if (dirtyRect) {
         rect.left = GET_INT(dirtyRect, gRectClassInfo.left);
         rect.top = GET_INT(dirtyRect, gRectClassInfo.top);
