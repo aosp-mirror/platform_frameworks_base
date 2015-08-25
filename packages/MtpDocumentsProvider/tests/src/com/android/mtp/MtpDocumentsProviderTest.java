@@ -17,9 +17,12 @@
 package com.android.mtp;
 
 import android.database.Cursor;
+import android.mtp.MtpConstants;
+import android.mtp.MtpObjectInfo.Builder;
+import android.mtp.MtpObjectInfo;
 import android.net.Uri;
-import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
+import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -204,14 +207,14 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryDocument() throws IOException {
-        mMtpManager.setDocument(0, 2, new MtpDocument(
-                2 /* object handle */,
-                0x3801 /* JPEG */,
-                "image.jpg" /* display name */,
-                new Date(1422716400000L) /* modified date */,
-                1024 * 1024 * 5 /* file size */,
-                1024 * 50 /* thumbnail size */,
-                false /* read only */));
+        mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
+                .setObjectHandle(2)
+                .setFormat(0x3801)
+                .setName("image.jpg")
+                .setDateModified(1422716400000L)
+                .setCompressedSize(1024 * 1024 * 5)
+                .setThumbCompressedSize(1024 * 50)
+                .build());
         final Cursor cursor = mProvider.queryDocument("0_1_2", null);
         assertEquals(1, cursor.getCount());
 
@@ -229,14 +232,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryDocument_directory() throws IOException {
-        mMtpManager.setDocument(0, 2, new MtpDocument(
-                2 /* object handle */,
-                0x3001 /* directory */,
-                "directory" /* display name */,
-                new Date(1422716400000L) /* modified date */,
-                0 /* file size */,
-                0 /* thumbnail size */,
-                false /* read only */));
+        mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
+                .setObjectHandle(2)
+                .setFormat(0x3001 /* directory format */)
+                .setName("directory")
+                .setDateModified(1422716400000L)
+                .build());
         final Cursor cursor = mProvider.queryDocument("0_1_2", null);
         assertEquals(1, cursor.getCount());
 
@@ -278,14 +279,14 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testQueryChildDocuments() throws Exception {
         mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
 
-        mMtpManager.setDocument(0, 1, new MtpDocument(
-                1 /* object handle */,
-                0x3801 /* JPEG */,
-                "image.jpg" /* display name */,
-                new Date(0) /* modified date */,
-                1024 * 1024 * 5 /* file size */,
-                1024 * 50 /* thumbnail size */,
-                true /* read only */));
+        mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
+                .setObjectHandle(1)
+                .setFormat(0x3801 /* JPEG */)
+                .setName("image.jpg")
+                .setCompressedSize(1024 * 1024 * 5)
+                .setThumbCompressedSize(5 * 1024)
+                .setProtectionStatus(MtpConstants.PROTECTION_STATUS_READ_ONLY)
+                .build());
 
         final Cursor cursor = mProvider.queryChildDocuments("0_0_0", null, null);
         assertEquals(1, cursor.getCount());
@@ -321,14 +322,14 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testDeleteDocument() throws FileNotFoundException {
-        mMtpManager.setDocument(0, 1, new MtpDocument(
-                1 /* object handle */,
-                0x3801 /* JPEG */,
-                "image.jpg" /* display name */,
-                new Date(1422716400000L) /* modified date */,
-                1024 * 1024 * 5 /* file size */,
-                1024 * 50 /* thumbnail size */,
-                false /* not read only */));
+        mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
+                .setObjectHandle(1)
+                .setFormat(0x3801)
+                .setName("image.jpg")
+                .setDateModified(1422716400000L)
+                .setCompressedSize(1024 * 1024 * 5)
+                .setThumbCompressedSize(1024 * 50)
+                .build());
         mMtpManager.setParent(0, 1, 2);
         mProvider.deleteDocument("0_0_1");
         assertEquals(1, mResolver.getChangeCount(

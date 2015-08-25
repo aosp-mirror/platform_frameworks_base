@@ -19,6 +19,7 @@ package com.android.mtp;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
@@ -34,6 +35,7 @@ import java.util.LinkedList;
  * Loader for MTP document.
  * At the first request, the loader returns only first NUM_INITIAL_ENTRIES. Then it launches
  * background thread to load the rest documents and caches its result for next requests.
+ * TODO: Rename this class to ObjectInfoLoader
  */
 class DocumentLoader {
     static final int NUM_INITIAL_ENTRIES = 10;
@@ -50,13 +52,13 @@ class DocumentLoader {
         mResolver = resolver;
     }
 
-    private static MtpDocument[] loadDocuments(MtpManager manager, int deviceId, int[] handles)
+    private static MtpObjectInfo[] loadDocuments(MtpManager manager, int deviceId, int[] handles)
             throws IOException {
-        final MtpDocument[] documents = new MtpDocument[handles.length];
+        final MtpObjectInfo[] objectInfos = new MtpObjectInfo[handles.length];
         for (int i = 0; i < handles.length; i++) {
-            documents[i] = manager.getDocument(deviceId, handles[i]);
+            objectInfos[i] = manager.getObjectInfo(deviceId, handles[i]);
         }
-        return documents;
+        return objectInfos;
     }
 
     synchronized Cursor queryChildDocuments(String[] columnNames, Identifier parent)
@@ -66,7 +68,7 @@ class DocumentLoader {
             int parentHandle = parent.mObjectHandle;
             // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
             // getObjectHandles if we would like to obtain children under the root.
-            if (parentHandle == MtpDocument.DUMMY_HANDLE_FOR_ROOT) {
+            if (parentHandle == CursorHelper.DUMMY_HANDLE_FOR_ROOT) {
                 parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
             }
             task = new LoaderTask(parent, mMtpManager.getObjectHandles(
@@ -114,16 +116,16 @@ class DocumentLoader {
                     deviceId = task.mIdentifier.mDeviceId;
                     handles = task.getUnloadedObjectHandles(NUM_LOADING_ENTRIES);
                 }
-                MtpDocument[] documents;
+                MtpObjectInfo[] objectInfos;
                 try {
-                    documents = loadDocuments(mMtpManager, deviceId, handles);
+                    objectInfos = loadDocuments(mMtpManager, deviceId, handles);
                 } catch (IOException exception) {
-                    documents = null;
+                    objectInfos = null;
                     Log.d(MtpDocumentsProvider.TAG, exception.getMessage());
                 }
                 synchronized (DocumentLoader.this) {
-                    if (documents != null) {
-                        task.fillDocuments(documents);
+                    if (objectInfos != null) {
+                        task.fillDocuments(objectInfos);
                         final boolean shouldNotify =
                                 task.mLastNotified.getTime() <
                                 new Date().getTime() - NOTIFY_PERIOD_MS ||
@@ -182,14 +184,14 @@ class DocumentLoader {
     private static class LoaderTask {
         final Identifier mIdentifier;
         final int[] mObjectHandles;
-        final MtpDocument[] mDocuments;
+        final MtpObjectInfo[] mObjectInfos;
         Date mLastNotified;
         int mNumLoaded;
 
         LoaderTask(Identifier identifier, int[] objectHandles) {
             mIdentifier = identifier;
             mObjectHandles = objectHandles;
-            mDocuments = new MtpDocument[mObjectHandles.length];
+            mObjectInfos = new MtpObjectInfo[mObjectHandles.length];
             mNumLoaded = 0;
             mLastNotified = new Date();
         }
@@ -199,7 +201,7 @@ class DocumentLoader {
             final Identifier rootIdentifier = new Identifier(
                     mIdentifier.mDeviceId, mIdentifier.mStorageId);
             for (int i = 0; i < mNumLoaded; i++) {
-                mDocuments[i].addToCursor(rootIdentifier, cursor.newRow());
+                CursorHelper.addToCursor(mObjectInfos[i], rootIdentifier, cursor.newRow());
             }
             final Bundle extras = new Bundle();
             extras.putBoolean(DocumentsContract.EXTRA_LOADING, !completed());
@@ -209,7 +211,7 @@ class DocumentLoader {
         }
 
         boolean completed() {
-            return mNumLoaded == mDocuments.length;
+            return mNumLoaded == mObjectInfos.length;
         }
 
         int[] getUnloadedObjectHandles(int count) {
@@ -224,9 +226,9 @@ class DocumentLoader {
             mLastNotified = new Date();
         }
 
-        void fillDocuments(MtpDocument[] documents) {
-            for (int i = 0; i < documents.length; i++) {
-                mDocuments[mNumLoaded++] = documents[i];
+        void fillDocuments(MtpObjectInfo[] objectInfos) {
+            for (int i = 0; i < objectInfos.length; i++) {
+                mObjectInfos[mNumLoaded++] = objectInfos[i];
             }
         }
 

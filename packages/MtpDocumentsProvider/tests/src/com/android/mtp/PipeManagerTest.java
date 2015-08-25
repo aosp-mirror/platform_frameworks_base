@@ -16,6 +16,7 @@
 
 package com.android.mtp;
 
+import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -56,7 +57,9 @@ public class PipeManagerTest extends AndroidTestCase {
 
     public void testWriteDocument_basic() throws Exception {
         // Create a placeholder file which should be replaced by a real file later.
-        mtpManager.setDocument(0, 1, new MtpDocument(1, 0, "", new Date(), 0, 0, false));
+        mtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
+                .setObjectHandle(1)
+                .build());
 
         // Upload testing bytes.
         final ParcelFileDescriptor descriptor = mPipeManager.writeDocument(
@@ -69,14 +72,14 @@ public class PipeManagerTest extends AndroidTestCase {
 
         // Check if the placeholder file is removed.
         try {
-            final MtpDocument placeholderDocument = mtpManager.getDocument(0, 1);
+            final MtpObjectInfo placeholderDocument = mtpManager.getObjectInfo(0, 1);
             fail();  // The placeholder file has not been deleted.
         } catch (IOException e) {
             // Expected error, as the file is gone.
         }
 
         // Confirm that the target file is created.
-        final MtpDocument targetDocument = mtpManager.getDocument(
+        final MtpObjectInfo targetDocument = mtpManager.getObjectInfo(
                 0, TestMtpManager.CREATED_DOCUMENT_HANDLE);
         assertTrue(targetDocument != null);
 

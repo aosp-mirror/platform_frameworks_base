@@ -21,11 +21,12 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Point;
+import android.mtp.MtpObjectInfo;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
-import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.util.Log;
 
@@ -116,37 +117,37 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
         final Identifier identifier = Identifier.createFromDocumentId(documentId);
 
-        MtpDocument document = null;
-        if (identifier.mObjectHandle != MtpDocument.DUMMY_HANDLE_FOR_ROOT) {
+        if (identifier.mObjectHandle != CursorHelper.DUMMY_HANDLE_FOR_ROOT) {
+            MtpObjectInfo objectInfo;
             try {
-                document = mMtpManager.getDocument(identifier.mDeviceId, identifier.mObjectHandle);
+                objectInfo = mMtpManager.getObjectInfo(
+                        identifier.mDeviceId, identifier.mObjectHandle);
             } catch (IOException e) {
                 throw new FileNotFoundException(e.getMessage());
             }
+            final MatrixCursor cursor = new MatrixCursor(projection);
+            CursorHelper.addToCursor(
+                    objectInfo,
+                    new Identifier(identifier.mDeviceId, identifier.mStorageId),
+                    cursor.newRow());
+            return cursor;
         } else {
             MtpRoot[] roots;
             try {
                 roots = mMtpManager.getRoots(identifier.mDeviceId);
-                if (roots != null) {
-                    for (final MtpRoot root : roots) {
-                        if (identifier.mStorageId == root.mStorageId) {
-                            document = new MtpDocument(root);
-                            break;
-                        }
-                    }
-                }
-                if (document == null) {
-                    throw new FileNotFoundException();
-                }
             } catch (IOException e) {
                 throw new FileNotFoundException(e.getMessage());
             }
+            for (final MtpRoot root : roots) {
+                if (identifier.mStorageId != root.mStorageId)
+                    continue;
+                final MatrixCursor cursor = new MatrixCursor(projection);
+                CursorHelper.addToCursor(root, cursor.newRow());
+                return cursor;
+            }
         }
 
-        final MatrixCursor cursor = new MatrixCursor(projection);
-        document.addToCursor(
-                new Identifier(identifier.mDeviceId, identifier.mStorageId), cursor.newRow());
-        return cursor;
+        throw new FileNotFoundException();
     }
 
     @Override
@@ -225,8 +226,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         try {
             final Identifier parentId = Identifier.createFromDocumentId(parentDocumentId);
             final int objectHandle = mMtpManager.createDocument(
-                    parentId.mDeviceId, parentId.mStorageId, parentId.mObjectHandle, mimeType,
-                    displayName);
+                    parentId.mDeviceId,
+                    new MtpObjectInfo.Builder()
+                            .setStorageId(parentId.mStorageId)
+                            .setParent(parentId.mObjectHandle)
+                            .setFormat(CursorHelper.mimeTypeToFormatType(mimeType))
+                            .setName(displayName)
+                            .build());
             final String documentId =  new Identifier(parentId.mDeviceId, parentId.mStorageId,
                    objectHandle).toDocumentId();
             notifyChildDocumentsChange(parentDocumentId);

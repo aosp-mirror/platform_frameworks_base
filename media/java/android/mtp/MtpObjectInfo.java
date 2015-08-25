@@ -294,6 +294,11 @@ public final class MtpObjectInfo {
             mObjectInfo.mThumbPixWidth = objectInfo.mThumbPixWidth;
         }
 
+        public Builder setObjectHandle(int value) {
+            mObjectInfo.mHandle = value;
+            return this;
+        }
+
         public Builder setAssociationDesc(int value) {
             mObjectInfo.mAssociationDesc = value;
             return this;

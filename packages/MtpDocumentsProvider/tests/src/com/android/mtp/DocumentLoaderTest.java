@@ -18,6 +18,7 @@ package com.android.mtp;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
@@ -31,14 +32,14 @@ import java.util.concurrent.CountDownLatch;
 
 @SmallTest
 public class DocumentLoaderTest extends AndroidTestCase {
-    private BlockableTestMtpMaanger mManager;
+    private BlockableTestMtpManager mManager;
     private TestContentResolver mResolver;
     private DocumentLoader mLoader;
     final private Identifier mParentIdentifier = new Identifier(0, 0, 0);
 
     @Override
     public void setUp() {
-        mManager = new BlockableTestMtpMaanger(getContext());
+        mManager = new BlockableTestMtpManager(getContext());
         mResolver = new TestContentResolver();
         mLoader = new DocumentLoader(mManager, mResolver);
     }
@@ -85,22 +86,17 @@ public class DocumentLoaderTest extends AndroidTestCase {
         for (int i = 0; i < childDocuments.length; i++) {
             final int objectHandle = i + 1;
             childDocuments[i] = objectHandle;
-            manager.setDocument(0, objectHandle, new MtpDocument(
-                    objectHandle,
-                    0 /* format */,
-                    "file" + objectHandle,
-                    new Date(),
-                    1024,
-                    0 /* thumbnail size */,
-                    false /* not read only */));
+            manager.setObjectInfo(0, new MtpObjectInfo.Builder()
+                    .setObjectHandle(objectHandle)
+                    .build());
         }
         manager.setObjectHandles(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, childDocuments);
     }
 
-    private static class BlockableTestMtpMaanger extends TestMtpManager {
+    private static class BlockableTestMtpManager extends TestMtpManager {
         final private Map<String, CountDownLatch> blockedDocuments = new HashMap<>();
 
-        BlockableTestMtpMaanger(Context context) {
+        BlockableTestMtpManager(Context context) {
             super(context);
         }
 
@@ -113,7 +109,7 @@ public class DocumentLoaderTest extends AndroidTestCase {
         }
 
         @Override
-        MtpDocument getDocument(int deviceId, int objectHandle) throws IOException {
+        MtpObjectInfo getObjectInfo(int deviceId, int objectHandle) throws IOException {
             final CountDownLatch latch = blockedDocuments.get(pack(deviceId, objectHandle));
             if (latch != null) {
                 try {
@@ -122,7 +118,7 @@ public class DocumentLoaderTest extends AndroidTestCase {
                     fail();
                 }
             }
-            return super.getDocument(deviceId, objectHandle);
+            return super.getObjectInfo(deviceId, objectHandle);
         }
     }
 }
