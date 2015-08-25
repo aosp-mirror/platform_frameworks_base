@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
@@ -60,16 +61,23 @@ public class ContextThemeWrapper extends ContextWrapper {
      * information.
      *
      * <p>This method can only be called once, and must be called before any
-     * calls to {@link #getResources()} are made.
+     * calls to {@link #getResources()} or {@link #getAssets()} are made.
      */
     public void applyOverrideConfiguration(Configuration overrideConfiguration) {
         if (mResources != null) {
-            throw new IllegalStateException("getResources() has already been called");
+            throw new IllegalStateException(
+                    "getResources() or getAssets() has already been called");
         }
         if (mOverrideConfiguration != null) {
             throw new IllegalStateException("Override configuration has already been set");
         }
         mOverrideConfiguration = new Configuration(overrideConfiguration);
+    }
+
+    @Override
+    public AssetManager getAssets() {
+        // Ensure we're returning assets with the correct configuration.
+        return getResources().getAssets();
     }
 
     @Override
