@@ -112,6 +112,8 @@ public class AsmAnalyzer {
             mGen.setDeps(deps);
             mGen.setCopyFiles(filesFound);
             mGen.setRewriteMethodCallClasses(mReplaceMethodCallClasses);
+            // hack hack hack
+            mGen.mSimpleMonthViewReader = zipClasses.get(AsmGenerator.SIMPLE_MONTH_VIEW);
         }
     }
 
