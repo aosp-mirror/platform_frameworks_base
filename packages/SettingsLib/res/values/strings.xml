@@ -195,4 +195,34 @@
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
 
+    <!-- Label for kernel threads in battery usage -->
+    <string name="process_kernel_label">Android OS</string>
+    <!-- Title of data usage item that represents all uninstalled applications. [CHAR LIMIT=48] -->
+    <string name="data_usage_uninstalled_apps">Removed apps</string>
+    <!-- Title of data usage item that represents all uninstalled applications or removed users. [CHAR LIMIT=48] -->
+    <string name="data_usage_uninstalled_apps_users">Removed apps and users</string>
+
+    <!-- Tethering controls, item title to go into the tethering settings -->
+    <!-- Tethering controls, item title to go into the tethering settings when only USB tethering is available [CHAR LIMIT=25]-->
+    <string name="tether_settings_title_usb">USB tethering</string>
+    <!-- Tethering controls, item title to go into the tethering settings when only Wifi tethering is available [CHAR LIMIT=25]-->
+    <string name="tether_settings_title_wifi">Portable hotspot</string>
+    <!-- Tethering controls, item title to go into the tethering settings when only Bluetooth tethering is available [CHAR LIMIT=25]-->
+    <string name="tether_settings_title_bluetooth">Bluetooth tethering</string>
+    <!-- Tethering controls, item title to go into the tethering settings when USB and Bluetooth tethering are available [CHAR LIMIT=25]-->
+    <string name="tether_settings_title_usb_bluetooth">Tethering</string>
+    <!-- Tethering controls, item title to go into the tethering settings when USB, Bluetooth and Wifi tethering are available [CHAR LIMIT=25]-->
+    <string name="tether_settings_title_all">Tethering &amp; portable hotspot</string>
+
+    <!-- Title for a work profile. [CHAR LIMIT=25] -->
+    <string name="managed_user_title">Work profile</string>
+
+    <!-- Title for Guest user [CHAR LIMIT=35] -->
+    <string name="user_guest">Guest</string>
+
+    <!-- Manage apps, individual app screen, substituted for the application's label when the app's label CAN NOT be determined.-->
+    <string name="unknown">Unknown</string>
+
+    <!-- [CHAR LIMIT=NONE] Label of a running process that represents another user -->
+    <string name="running_process_item_user_label">User: <xliff:g id="user_name">%1$s</xliff:g></string>
 </resources>
