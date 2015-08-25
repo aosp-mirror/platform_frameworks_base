@@ -166,6 +166,12 @@ public class RippleDrawable extends LayerDrawable {
     private boolean mOverrideBounds;
 
     /**
+     * If set, force all ripple animations to not run on RenderThread, even if it would be
+     * available.
+     */
+    private boolean mForceSoftware;
+
+    /**
      * Constructor used for drawable inflation.
      */
     RippleDrawable() {
@@ -546,7 +552,7 @@ public class RippleDrawable extends LayerDrawable {
      */
     private void tryBackgroundEnter(boolean focused) {
         if (mBackground == null) {
-            mBackground = new RippleBackground(this, mHotspotBounds);
+            mBackground = new RippleBackground(this, mHotspotBounds, mForceSoftware);
         }
 
         mBackground.setup(mState.mMaxRadius, mDensity);
@@ -584,7 +590,7 @@ public class RippleDrawable extends LayerDrawable {
             }
 
             final boolean isBounded = isBounded();
-            mRipple = new RippleForeground(this, mHotspotBounds, x, y, isBounded);
+            mRipple = new RippleForeground(this, mHotspotBounds, x, y, isBounded, mForceSoftware);
         }
 
         mRipple.setup(mState.mMaxRadius, mDensity);
@@ -947,6 +953,16 @@ public class RippleDrawable extends LayerDrawable {
         } else {
             return getBounds();
         }
+    }
+
+    /**
+     * Sets whether to disable RenderThread animations for this ripple.
+     *
+     * @param forceSoftware true if RenderThread animations should be disabled, false otherwise
+     * @hide
+     */
+    public void setForceSoftware(boolean forceSoftware) {
+        mForceSoftware = forceSoftware;
     }
 
     @Override

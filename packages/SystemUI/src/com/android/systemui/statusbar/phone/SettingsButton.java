@@ -19,6 +19,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
