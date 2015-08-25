@@ -61,7 +61,8 @@ class GetActivityIconTask extends AsyncTask<AppInfo, Void, Drawable> {
                 return null;
             }
 
-            return ai.loadIcon(mPackageManager);
+            Drawable unbadgedIcon = ai.loadIcon(mPackageManager);
+            return mPackageManager.getUserBadgedIcon(unbadgedIcon, appInfo.getUser());
         } catch (RemoteException e) {
             Slog.w(TAG, "Icon not found for " + appInfo, e);
             return null;
