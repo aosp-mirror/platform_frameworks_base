@@ -173,7 +173,9 @@ class NavigationBarRecents extends LinearLayout {
                 try {
                     manager.startActivityFromRecents(taskPersistentId, null /* options */);
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Exception when activating a recent task", e);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Exception when activating a recent task", e);
                 }
             }
         });
