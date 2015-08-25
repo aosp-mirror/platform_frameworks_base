@@ -546,7 +546,7 @@ public final class SystemServer {
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             try {
                 Slog.i(TAG, "Input Method Service");
-                imm = new InputMethodManagerService(context, wm);
+                imm = new InputMethodManagerService(context);
                 ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
             } catch (Throwable e) {
                 reportWtf("starting Input Manager Service", e);

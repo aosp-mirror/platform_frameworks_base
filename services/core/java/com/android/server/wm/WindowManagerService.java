@@ -552,7 +552,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mHardKeyboardAvailable;
     boolean mShowImeWithHardKeyboard;
-    OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
+    WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
 
     private final class SettingsObserver extends ContentObserver {
@@ -6808,12 +6808,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.adjustConfigurationLw(config, keyboardPresence, navigationPresence);
     }
 
-    public boolean isHardKeyboardAvailable() {
-        synchronized (mWindowMap) {
-            return mHardKeyboardAvailable;
-        }
-    }
-
     public void updateShowImeWithHardKeyboard() {
         synchronized (mWindowMap) {
             final boolean showImeWithHardKeyboard = Settings.Secure.getIntForUser(
@@ -6826,16 +6820,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setOnHardKeyboardStatusChangeListener(
-            OnHardKeyboardStatusChangeListener listener) {
-        synchronized (mWindowMap) {
-            mHardKeyboardStatusChangeListener = listener;
-        }
-    }
-
     void notifyHardKeyboardStatusChange() {
         final boolean available;
-        final OnHardKeyboardStatusChangeListener listener;
+        final WindowManagerInternal.OnHardKeyboardStatusChangeListener listener;
         synchronized (mWindowMap) {
             listener = mHardKeyboardStatusChangeListener;
             available = mHardKeyboardAvailable;
@@ -10431,23 +10418,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    // It is assumed that this method is called only by InputMethodManagerService.
-    public void saveLastInputMethodWindowForTransition() {
-        synchronized (mWindowMap) {
-            // TODO(multidisplay): Pass in the displayID.
-            DisplayContent displayContent = getDefaultDisplayContentLocked();
-            if (mInputMethodWindow != null) {
-                mPolicy.setLastInputMethodWindowLw(mInputMethodWindow, mInputMethodTarget);
-            }
-        }
-    }
-
-    public int getInputMethodWindowVisibleHeight() {
-        synchronized (mWindowMap) {
-            return mPolicy.getInputMethodWindowVisibleHeightLw();
-        }
-    }
-
     @Override
     public boolean hasNavigationBar() {
         return mPolicy.hasNavigationBar();
@@ -11037,10 +11007,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) { }
     }
 
-    public interface OnHardKeyboardStatusChangeListener {
-        public void onHardKeyboardStatusChange(boolean available);
-    }
-
     void debugLayoutRepeats(final String msg, int pendingLayoutChanges) {
         if (mLayoutRepeatCount >= LAYOUT_REPEAT_THRESHOLD) {
             Slog.v(TAG, "Layouts looping: " + msg + ", mPendingLayoutChanges = 0x" +
@@ -11348,5 +11314,39 @@ public class WindowManagerService extends IWindowManager.Stub
                 mAppTransition.registerListenerLocked(listener);
             }
         }
+
+        @Override
+        public int getInputMethodWindowVisibleHeight() {
+            synchronized (mWindowMap) {
+                return mPolicy.getInputMethodWindowVisibleHeightLw();
+            }
+        }
+
+        @Override
+        public void saveLastInputMethodWindowForTransition() {
+            synchronized (mWindowMap) {
+                // TODO(multidisplay): Pass in the displayID.
+                DisplayContent displayContent = getDefaultDisplayContentLocked();
+                if (mInputMethodWindow != null) {
+                    mPolicy.setLastInputMethodWindowLw(mInputMethodWindow, mInputMethodTarget);
+                }
+            }
+        }
+
+        @Override
+        public boolean isHardKeyboardAvailable() {
+            synchronized (mWindowMap) {
+                return mHardKeyboardAvailable;
+            }
+        }
+
+        @Override
+        public void setOnHardKeyboardStatusChangeListener(
+                OnHardKeyboardStatusChangeListener listener) {
+            synchronized (mWindowMap) {
+                mHardKeyboardStatusChangeListener = listener;
+            }
+        }
+
     }
 }

@@ -33,7 +33,6 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 import com.android.server.statusbar.StatusBarManagerService;
-import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -109,6 +108,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerInternal;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethod;
@@ -182,11 +182,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
     final IWindowManager mIWindowManager;
+    final WindowManagerInternal mWindowManagerInternal;
     final HandlerCaller mCaller;
     final boolean mHasFeature;
     private InputMethodFileManager mFileManager;
     private final HardKeyboardListener mHardKeyboardListener;
-    private final WindowManagerService mWindowManagerService;
     private final AppOpsManager mAppOpsManager;
 
     final InputBindResult mNoBinding = new InputBindResult(null, null, null, -1, -1);
@@ -710,7 +710,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private class HardKeyboardListener
-            implements WindowManagerService.OnHardKeyboardStatusChangeListener {
+            implements WindowManagerInternal.OnHardKeyboardStatusChangeListener {
         @Override
         public void onHardKeyboardStatusChange(boolean available) {
             mHandler.sendMessage(mHandler.obtainMessage(MSG_HARD_KEYBOARD_SWITCH_CHANGED,
@@ -732,7 +732,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public InputMethodManagerService(Context context, WindowManagerService windowManager) {
+    public InputMethodManagerService(Context context) {
         mIPackageManager = AppGlobals.getPackageManager();
         mContext = context;
         mRes = context.getResources();
@@ -741,13 +741,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mSettingsObserver = new SettingsObserver(mHandler);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+        mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
             @Override
             public void executeMessage(Message msg) {
                 handleMessage(msg);
             }
         }, true /*asyncHandler*/);
-        mWindowManagerService = windowManager;
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mHardKeyboardListener = new HardKeyboardListener();
         mHasFeature = context.getPackageManager().hasSystemFeature(
@@ -1045,7 +1045,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
                 if (mShowOngoingImeSwitcherForPhones) {
-                    mWindowManagerService.setOnHardKeyboardStatusChangeListener(
+                    mWindowManagerInternal.setOnHardKeyboardStatusChangeListener(
                             mHardKeyboardListener);
                 }
                 buildInputMethodListLocked(mMethodList, mMethodMap,
@@ -1507,7 +1507,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (DEBUG) Slog.v(TAG, "Removing window token: " + mCurToken);
                 if ((mImeWindowVis & InputMethodService.IME_ACTIVE) != 0 && savePosition) {
                     // The current IME is shown. Hence an IME switch (transition) is happening.
-                    mWindowManagerService.saveLastInputMethodWindowForTransition();
+                    mWindowManagerInternal.saveLastInputMethodWindowForTransition();
                 }
                 mIWindowManager.removeWindowToken(mCurToken);
             } catch (RemoteException e) {
@@ -1641,7 +1641,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mSwitchingDialog != null) return false;
         if (isScreenLocked()) return false;
         if ((visibility & InputMethodService.IME_ACTIVE) == 0) return false;
-        if (mWindowManagerService.isHardKeyboardAvailable()) {
+        if (mWindowManagerInternal.isHardKeyboardAvailable()) {
             // When physical keyboard is attached, we show the ime switcher (or notification if
             // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
             // exists in the IME switcher dialog.  Might be OK to remove this condition once
@@ -1753,15 +1753,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mImeSwitcherNotification.setContentTitle(title)
                         .setContentText(summary)
                         .setContentIntent(mImeSwitchPendingIntent);
-                if ((mNotificationManager != null)
-                        && !mWindowManagerService.hasNavigationBar()) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "--- show notification: label =  " + summary);
+                try {
+                    if ((mNotificationManager != null)
+                            && !mIWindowManager.hasNavigationBar()) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "--- show notification: label =  " + summary);
+                        }
+                        mNotificationManager.notifyAsUser(null,
+                                com.android.internal.R.string.select_input_method,
+                                mImeSwitcherNotification.build(), UserHandle.ALL);
+                        mNotificationShown = true;
                     }
-                    mNotificationManager.notifyAsUser(null,
-                            com.android.internal.R.string.select_input_method,
-                            mImeSwitcherNotification.build(), UserHandle.ALL);
-                    mNotificationShown = true;
+                } catch (RemoteException e) {
                 }
             } else {
                 if (mNotificationShown && mNotificationManager != null) {
@@ -2527,7 +2530,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public int getInputMethodWindowVisibleHeight() {
-        return mWindowManagerService.getInputMethodWindowVisibleHeight();
+        return mWindowManagerInternal.getInputMethodWindowVisibleHeight();
     }
 
     @Override
@@ -3041,7 +3044,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialogTitleView = tv;
             mSwitchingDialogTitleView
                     .findViewById(com.android.internal.R.id.hard_keyboard_section)
-                    .setVisibility(mWindowManagerService.isHardKeyboardAvailable()
+                    .setVisibility(mWindowManagerInternal.isHardKeyboardAvailable()
                             ? View.VISIBLE : View.GONE);
             final Switch hardKeySwitch = (Switch) mSwitchingDialogTitleView.findViewById(
                     com.android.internal.R.id.hard_keyboard_switch);
