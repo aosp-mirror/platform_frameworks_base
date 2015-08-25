@@ -143,17 +143,23 @@ user, it uses the notification <em>tag</em> and <em>ID</em> to determine which c
 messages belong to. It is important to use the same tag and ID for all messages in
 a conversation, and to not use that tag for other conversations.</p>
 
-<h3 id="#workflow">Workflow</h3>
+<h3 id="workflow">Workflow</h3>
 
 <p>This section describes how the mobile device interacts with Auto to present
 messages to the user.</p>
 
 <ol>
 
-<li>The app receives a message that it wants to pass on to the user. It attaches
-the message to an  {@link
+<li>The app receives a message that it wants to pass on to the user. The app
+attaches the message to an {@link
+android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation.Builder
+UnreadConversation.Builder} object, then uses the {@link
+android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation.Builder
+UnreadConversation.Builder} to generate an {@link
 android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation
-UnreadConversation} object and attaches it to a notification. That notification
+UnreadConversation}. The app attaches that {@link
+android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation
+UnreadConversation} to a notification. That notification
 is associated with a {@link
 android.support.v4.app.NotificationCompat.CarExtender CarExtender} object, which
 indicates that the notification can be handled by Android Auto.</li>
@@ -176,7 +182,7 @@ reply as a message to go to the other conversation participants.</li>
 
 </ol>
 
-<h2 id="#manifest">Configure Your Manifest</h2>
+<h2 id="manifest">Configure Your Manifest</h2>
 
 <p>
   You configure your app <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>
