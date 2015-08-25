@@ -307,8 +307,8 @@ libraries in your build path when setting up your project. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. If you are developing in Eclipse/ADT, make sure to include
-both the <code>android-support-v7-mediarouter.jar</code> and
-<code>android-support-v7-appcompat.jar</code> files.</p>
+the <code>android-support-v7-mediarouter.jar</code>, <code>android-support-v7-appcompat.jar</code>,
+and <code>android-support-v7-palette.jar</code> files.</p>
 
 <p>If you are using Android Studio, all you need to do is specify the Gradle build
 script dependency identifier <code>com.android.support:support-v7-mediarouter:&lt;revision&gt;</code>,
