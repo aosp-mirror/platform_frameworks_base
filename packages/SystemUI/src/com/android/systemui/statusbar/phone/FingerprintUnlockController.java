@@ -183,8 +183,11 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 mStatusBarKeyguardViewManager.animateCollapsePanels(
                         FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
                 break;
-            case MODE_WAKE_AND_UNLOCK:
             case MODE_WAKE_AND_UNLOCK_PULSING:
+                mPhoneStatusBar.updateMediaMetaData(false /* metaDataChanged */);
+                // Fall through.
+            case MODE_WAKE_AND_UNLOCK:
+                mStatusBarWindowManager.setStatusBarFocusable(false);
                 mDozeScrimController.abortPulsing();
                 mKeyguardViewMediator.onWakeAndUnlocking();
                 mScrimController.setWakeAndUnlocking();
