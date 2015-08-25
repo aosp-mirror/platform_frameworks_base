@@ -261,6 +261,7 @@ public class CarrierConfigManager {
     /**
      * Flag specifying whether IMS instant lettering is available for the carrier.  {@code True} if
      * instant lettering is available for the carrier, {@code false} otherwise.
+     * @hide
      */
     public static final String KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL =
             "carrier_instant_lettering_available_bool";
@@ -268,7 +269,6 @@ public class CarrierConfigManager {
     /*
      * Flag specifying whether IMS should be the first phone attempted for E911 even if the
      * phone is not in service.
-     * @hide
      */
     public static final String KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL
             = "carrier_use_ims_first_for_emergency_bool";
