@@ -21,4 +21,6 @@
 
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>
+
+    <dimen name="circle_avatar_size">40dp</dimen>
 </resources>
