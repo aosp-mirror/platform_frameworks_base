@@ -3138,8 +3138,8 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_IMMERSIVE;
         }
 
-        if (sa.getBoolean(R.styleable.AndroidManifestActivity_primaryUserOnly, false)) {
-            a.info.flags |= ActivityInfo.FLAG_PRIMARY_USER_ONLY;
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_systemUserOnly, false)) {
+            a.info.flags |= ActivityInfo.FLAG_SYSTEM_USER_ONLY;
         }
 
         if (!receiver) {

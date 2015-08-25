@@ -4554,7 +4554,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (xpResolveInfo != null && isUserEnabled(xpResolveInfo.targetUserId)) {
                     List<ResolveInfo> result = new ArrayList<ResolveInfo>(1);
                     result.add(xpResolveInfo);
-                    return filterIfNotPrimaryUser(result, userId);
+                    return filterIfNotSystemUser(result, userId);
                 }
 
                 // Check for results in the current profile.
@@ -4568,7 +4568,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     result.add(xpResolveInfo);
                     Collections.sort(result, mResolvePrioritySorter);
                 }
-                result = filterIfNotPrimaryUser(result, userId);
+                result = filterIfNotSystemUser(result, userId);
                 if (hasWebURI(intent)) {
                     CrossProfileDomainInfo xpDomainInfo = null;
                     final UserInfo parent = getProfileParent(userId);
@@ -4597,7 +4597,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
-                return filterIfNotPrimaryUser(
+                return filterIfNotSystemUser(
                         mActivities.queryIntentForPackage(
                                 intent, resolvedType, flags, pkg.activities, userId),
                         userId);
@@ -4684,17 +4684,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
-     * Filter out activities with primaryUserOnly flag set, when current user is not the owner.
+     * Filter out activities with systemUserOnly flag set, when current user is not System.
      *
      * @return filtered list
      */
-    private List<ResolveInfo> filterIfNotPrimaryUser(List<ResolveInfo> resolveInfos, int userId) {
-        if (userId == UserHandle.USER_OWNER) {
+    private List<ResolveInfo> filterIfNotSystemUser(List<ResolveInfo> resolveInfos, int userId) {
+        if (userId == UserHandle.USER_SYSTEM) {
             return resolveInfos;
         }
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             ResolveInfo info = resolveInfos.get(i);
-            if ((info.activityInfo.flags & ActivityInfo.FLAG_PRIMARY_USER_ONLY) != 0) {
+            if ((info.activityInfo.flags & ActivityInfo.FLAG_SYSTEM_USER_ONLY) != 0) {
                 resolveInfos.remove(i);
             }
         }
