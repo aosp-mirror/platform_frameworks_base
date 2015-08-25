@@ -118,6 +118,9 @@ public class ImageView extends View {
     // AdjustViewBounds behavior will be in compatibility mode for older apps.
     private boolean mAdjustViewBoundsCompat = false;
 
+    /** Whether to pass Resources when creating the source from a stream. */
+    private boolean mUseCorrectStreamDensity;
+
     private static final ScaleType[] sScaleTypeArray = {
         ScaleType.MATRIX,
         ScaleType.FIT_XY,
@@ -202,8 +205,10 @@ public class ImageView extends View {
     private void initImageView() {
         mMatrix = new Matrix();
         mScaleType = ScaleType.FIT_CENTER;
-        mAdjustViewBoundsCompat = mContext.getApplicationInfo().targetSdkVersion
-                <= Build.VERSION_CODES.JELLY_BEAN_MR1;
+
+        final int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        mAdjustViewBoundsCompat = targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR1;
+        mUseCorrectStreamDensity = targetSdkVersion > Build.VERSION_CODES.M;
     }
 
     @Override
@@ -810,7 +815,8 @@ public class ImageView extends View {
                 InputStream stream = null;
                 try {
                     stream = mContext.getContentResolver().openInputStream(mUri);
-                    d = Drawable.createFromStream(stream, null);
+                    d = Drawable.createFromResourceStream(
+                            mUseCorrectStreamDensity ? res : null, null, stream, null);
                 } catch (Exception e) {
                     Log.w(LOG_TAG, "Unable to open content: " + mUri, e);
                 } finally {
