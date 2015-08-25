@@ -16,20 +16,21 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.content.ComponentName;
+import android.app.AppGlobals;
+import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.RemoteException;
 import android.util.Slog;
-import android.view.View;
 import android.widget.ImageView;
 
 /**
  * Retrieves the icon for an activity and sets it as the Drawable on an ImageView. The ImageView
  * is hidden if the activity isn't recognized or if there is no icon.
  */
-class GetActivityIconTask extends AsyncTask<ComponentName, Void, Drawable> {
+class GetActivityIconTask extends AsyncTask<AppInfo, Void, Drawable> {
     private final static String TAG = "GetActivityIconTask";
 
     private final PackageManager mPackageManager;
@@ -43,15 +44,26 @@ class GetActivityIconTask extends AsyncTask<ComponentName, Void, Drawable> {
     }
 
     @Override
-    protected Drawable doInBackground(ComponentName... params) {
+    protected Drawable doInBackground(AppInfo... params) {
         if (params.length != 1) {
             throw new IllegalArgumentException("Expected one parameter");
         }
-        ComponentName activityName = params[0];
+        AppInfo appInfo = params[0];
         try {
-            return mPackageManager.getActivityIcon(activityName);
-        } catch (NameNotFoundException e) {
-            Slog.w(TAG, "Icon not found for " + activityName);
+            IPackageManager mPM = AppGlobals.getPackageManager();
+            ActivityInfo ai = mPM.getActivityInfo(
+                    appInfo.getComponentName(),
+                    0,
+                    appInfo.getUser().getIdentifier());
+
+            if (ai == null) {
+                Slog.w(TAG, "Icon not found for " + appInfo);
+                return null;
+            }
+
+            return ai.loadIcon(mPackageManager);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Icon not found for " + appInfo, e);
             return null;
         }
     }

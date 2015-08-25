@@ -28,14 +28,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Slog;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -47,8 +45,6 @@ import android.widget.Toast;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.systemui.R;
-
-import java.util.List;
 
 /**
  * Container for application icons that appear in the navigation bar. Their appearance is similar
@@ -83,8 +79,6 @@ class NavigationBarApps extends LinearLayout {
     // The icon is set invisible for the duration of the drag, creating a visual space for a drop.
     // When the user is not dragging this member is null.
     private View mDragView;
-
-    private long mCurrentUserSerialNumber = -1;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -173,17 +167,17 @@ class NavigationBarApps extends LinearLayout {
     }
 
     private void removeIfUnlauncheable(String packageName, UserHandle user) {
-        long appUserSerialNumber = mUserManager.getSerialNumberForUser(user);
-
         // Remove icons for all apps that match a package that perhaps became unlauncheable.
         for(int i = sAppsModel.getAppCount() - 1; i >= 0; --i) {
             AppInfo appInfo = sAppsModel.getApp(i);
-            if (appInfo.getUserSerialNumber() != appUserSerialNumber) continue;
+            if (!appInfo.getUser().equals(user)) continue;
 
             ComponentName appComponentName = appInfo.getComponentName();
             if (!appComponentName.getPackageName().equals(packageName)) continue;
 
-            if (sAppsModel.buildAppLaunchIntent(appComponentName, user) != null) continue;
+            if (sAppsModel.buildAppLaunchIntent(new AppInfo(appComponentName, user)) != null) {
+                continue;
+            }
 
             removeViewAt(i);
             sAppsModel.removeApp(i);
@@ -206,10 +200,7 @@ class NavigationBarApps extends LinearLayout {
         transition.enableTransitionType(LayoutTransition.CHANGING);
         parent.setLayoutTransition(transition);
 
-        int currentUserId = ActivityManager.getCurrentUser();
-        mCurrentUserSerialNumber = mUserManager.getSerialNumberForUser(
-                new UserHandle(currentUserId));
-        sAppsModel.setCurrentUser(currentUserId);
+        sAppsModel.setCurrentUser(ActivityManager.getCurrentUser());
         recreateAppButtons();
 
         IntentFilter filter = new IntentFilter();
@@ -244,7 +235,7 @@ class NavigationBarApps extends LinearLayout {
             button.setContentDescription(appLabel);
 
             // Load the icon asynchronously.
-            new GetActivityIconTask(mPackageManager, button).execute(app.getComponentName());
+            new GetActivityIconTask(mPackageManager, button).execute(app);
         }
     }
 
@@ -280,7 +271,7 @@ class NavigationBarApps extends LinearLayout {
      */
     @Nullable
     static CharSequence getAppLabel(PackageManager packageManager,
-            ComponentName activityName) {
+                                    ComponentName activityName) {
         String packageName = activityName.getPackageName();
         ApplicationInfo info;
         try {
@@ -296,7 +287,10 @@ class NavigationBarApps extends LinearLayout {
     static void startAppDrag(ImageView icon, AppInfo appInfo) {
         // The drag data is an Intent to launch the activity.
         Intent mainIntent = Intent.makeMainActivity(appInfo.getComponentName());
-        mainIntent.putExtra(EXTRA_PROFILE, appInfo.getUserSerialNumber());
+        UserManager userManager =
+                (UserManager) icon.getContext().getSystemService(Context.USER_SERVICE);
+        long userSerialNumber = userManager.getSerialNumberForUser(appInfo.getUser());
+        mainIntent.putExtra(EXTRA_PROFILE, userSerialNumber);
         ClipData dragData = ClipData.newIntent("", mainIntent);
         // Use the ImageView to create the shadow.
         View.DragShadowBuilder shadow = new AppIconDragShadowBuilder(icon);
@@ -472,17 +466,17 @@ class NavigationBarApps extends LinearLayout {
         // Validate the received user serial number.
         UserHandle appUser = mUserManager.getUserForSerialNumber(userSerialNumber);
         if (appUser == null) {
-            userSerialNumber = mCurrentUserSerialNumber;
+            appUser = new UserHandle(ActivityManager.getCurrentUser());
         }
 
-        return new AppInfo(intent.getComponent(), userSerialNumber);
+        return new AppInfo(intent.getComponent(), appUser);
     }
 
     /** Updates the app at a given view index. */
     private void updateAppAt(int index, AppInfo appInfo) {
         sAppsModel.setApp(index, appInfo);
         ImageView button = (ImageView) getChildAt(index);
-        new GetActivityIconTask(mPackageManager, button).execute(appInfo.getComponentName());
+        new GetActivityIconTask(mPackageManager, button).execute(appInfo);
     }
 
     /** Removes the empty placeholder view and cleans up the data model. */
@@ -540,20 +534,10 @@ class NavigationBarApps extends LinearLayout {
         @Override
         public void onClick(View v) {
             AppInfo appInfo = sAppsModel.getApp(indexOfChild(v));
-            ComponentName component = appInfo.getComponentName();
-
-            long appUserSerialNumber = appInfo.getUserSerialNumber();
-            UserHandle appUser = mUserManager.getUserForSerialNumber(appUserSerialNumber);
-            if (appUser == null) {
-                Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Can't start activity " + component +
-                        " because its user doesn't exist.");
-                return;
-            }
-
-            Intent launchIntent = sAppsModel.buildAppLaunchIntent(component, appUser);
+            Intent launchIntent = sAppsModel.buildAppLaunchIntent(appInfo);
             if (launchIntent == null) {
-                Toast.makeText(getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -568,18 +552,12 @@ class NavigationBarApps extends LinearLayout {
             Bundle optsBundle = opts.toBundle();
             launchIntent.setSourceBounds(sourceBounds);
 
-            mContext.startActivityAsUser(launchIntent, optsBundle, appUser);
+            mContext.startActivityAsUser(launchIntent, optsBundle, appInfo.getUser());
         }
     }
 
     private void onUserSwitched(int currentUserId) {
-        final long newUserSerialNumber =
-                mUserManager.getSerialNumberForUser(new UserHandle(currentUserId));
-
-        if (newUserSerialNumber != mCurrentUserSerialNumber) {
-            mCurrentUserSerialNumber = newUserSerialNumber;
-            sAppsModel.setCurrentUser(currentUserId);
-            recreateAppButtons();
-        }
+        sAppsModel.setCurrentUser(currentUserId);
+        recreateAppButtons();
     }
 }

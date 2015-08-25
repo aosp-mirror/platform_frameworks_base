@@ -106,9 +106,10 @@ class NavigationBarAppsModel {
         return AppGlobals.getPackageManager();
     }
 
-    // Returns a launch intent for a given component, or null if the component is unlauncheable.
-    public Intent buildAppLaunchIntent(ComponentName component, UserHandle appUser) {
-        int appUserId = appUser.getIdentifier();
+    // Returns a launch intent for a given app info, or null if the app info is unlauncheable.
+    public Intent buildAppLaunchIntent(AppInfo appInfo) {
+        ComponentName component = appInfo.getComponentName();
+        int appUserId = appInfo.getUser().getIdentifier();
 
         // This code is based on LauncherAppsService.startActivityAsUser code.
         Intent launchIntent = new Intent(Intent.ACTION_MAIN);
@@ -250,7 +251,8 @@ class NavigationBarAppsModel {
             final AppInfo appInfo = mApps.get(i);
             String componentNameString = appInfo.getComponentName().flattenToString();
             edit.putString(prefNameForApp(i), componentNameString);
-            edit.putLong(prefUserForApp(i), appInfo.getUserSerialNumber());
+            long userSerialNumber = mUserManager.getSerialNumberForUser(appInfo.getUser());
+            edit.putLong(prefUserForApp(i), userSerialNumber);
         }
         // Start an asynchronous disk write.
         edit.apply();
@@ -278,8 +280,9 @@ class NavigationBarAppsModel {
                 continue;
             }
             UserHandle appUser = mUserManager.getUserForSerialNumber(userSerialNumber);
-            if (appUser != null && buildAppLaunchIntent(componentName, appUser) != null) {
-                mApps.add(new AppInfo(componentName, userSerialNumber));
+            AppInfo appInfo = new AppInfo(componentName, appUser);
+            if (appUser != null && buildAppLaunchIntent(appInfo) != null) {
+                mApps.add(appInfo);
             } else {
                 hadUnlauncheableApps = true;
             }
@@ -301,7 +304,7 @@ class NavigationBarAppsModel {
             ResolveInfo ri = apps.get(i);
             ComponentName componentName = new ComponentName(
                     ri.activityInfo.packageName, ri.activityInfo.name);
-            mApps.add(new AppInfo(componentName, mCurrentUserSerialNumber));
+            mApps.add(new AppInfo(componentName, new UserHandle(mCurrentUserId)));
         }
 
         savePrefs();
