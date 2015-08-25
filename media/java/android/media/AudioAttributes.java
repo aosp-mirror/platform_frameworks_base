@@ -671,15 +671,15 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_VOICE_COMMUNICATION:
                 return new String("USAGE_VOICE_COMMUNICATION");
             case USAGE_VOICE_COMMUNICATION_SIGNALLING:
-                return new String("USAGE_VOICE_COMMUNICATION");
+                return new String("USAGE_VOICE_COMMUNICATION_SIGNALLING");
             case USAGE_ALARM:
                 return new String("USAGE_ALARM");
             case USAGE_NOTIFICATION:
                 return new String("USAGE_NOTIFICATION");
             case USAGE_NOTIFICATION_RINGTONE:
-                return new String("USAGE_NOTIFICATION");
+                return new String("USAGE_NOTIFICATION_RINGTONE");
             case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
-                return new String("USAGE_NOTIFICATION");
+                return new String("USAGE_NOTIFICATION_COMMUNICATION_REQUEST");
             case USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
                 return new String("USAGE_NOTIFICATION_COMMUNICATION_INSTANT");
             case USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
