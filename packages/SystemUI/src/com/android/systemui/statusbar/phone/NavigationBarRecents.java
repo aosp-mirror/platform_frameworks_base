@@ -30,6 +30,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -171,7 +172,9 @@ class NavigationBarRecents extends LinearLayout {
                 try {
                     manager.startActivityFromRecents(taskPersistentId, null /* options */);
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Exception when activating a recent task", e);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Exception when activating a recent task", e);
                 }
             }
         });
