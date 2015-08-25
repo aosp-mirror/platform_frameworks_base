@@ -576,6 +576,53 @@ import java.util.concurrent.atomic.AtomicInteger;
  * often used as a convenience to store data related to views in the views
  * themselves rather than by putting them in a separate structure.
  * </p>
+ * <p>
+ * Tags may be specified with character sequence values in layout XML as either
+ * a single tag using the {@link android.R.styleable#View_tag android:tag}
+ * attribute or multiple tags using the {@code &lt;tag&gt;} child element:
+ * <pre>
+ *     &ltView ...
+ *           android:tag="@string/mytag_value" /&gt;
+ *     &ltView ...&gt;
+ *         &lttag android:id="@+id/mytag"
+ *              android:value="@string/mytag_value" /&gt;
+ *     &lt/View>
+ * </pre>
+ * </p>
+ * <p>
+ * Tags may also be specified with arbitrary objects from code using
+ * {@link #setTag(Object)} or {@link #setTag(int, Object)}.
+ * </p>
+ *
+ * <a name="Themes"></a>
+ * <h3>Themes</h3>
+ * <p>
+ * By default, Views are created using the theme of the Context object supplied
+ * to their constructor; however, a different theme may be specified by using
+ * the {@link android.R.styleable#View_theme android:theme} attribute in layout
+ * XML or by passing a {@link ContextThemeWrapper} to the constructor from
+ * code.
+ * </p>
+ * <p>
+ * When the {@link android.R.styleable#View_theme android:theme} attribute is
+ * used in XML, the specified theme is applied on top of the inflation
+ * context's theme (see {@link LayoutInflater}) and used for the view itself as
+ * well as any child elements.
+ * </p>
+ * <p>
+ * In the following example, both views will be created using the Material dark
+ * color scheme; however, because an overlay theme is used which only defines a
+ * subset of attributes, the value of
+ * {@link android.R.styleable#Theme_colorAccent android:colorAccent} defined on
+ * the inflation context's theme (e.g. the Activity theme) will be preserved.
+ * <pre>
+ *     &ltLinearLayout
+ *             ...
+ *             android:theme="@android:theme/ThemeOverlay.Material.Dark"&gt;
+ *         &ltView ...&gt;
+ *     &lt/LinearLayout&gt;
+ * </pre>
+ * </p>
  *
  * <a name="Properties"></a>
  * <h3>Properties</h3>
@@ -699,6 +746,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @attr ref android.R.styleable#View_translationY
  * @attr ref android.R.styleable#View_translationZ
  * @attr ref android.R.styleable#View_visibility
+ * @attr ref android.R.styleable#View_theme
  *
  * @see android.view.ViewGroup
  */
