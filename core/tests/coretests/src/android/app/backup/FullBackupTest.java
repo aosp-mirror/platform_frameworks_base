@@ -114,12 +114,14 @@ public class FullBackupTest extends AndroidTestCase {
     public void testparseBackupSchemeFromXml_lotsOfIncludesAndExcludes() throws Exception {
         mXpp.setInput(new StringReader(
                 "<full-backup-content>" +
-                        "<exclude path=\"exclude1.txt\" domain=\"file\"/>" +
+                         "<exclude path=\"exclude1.txt\" domain=\"file\"/>" +
                         "<include path=\"include1.txt\" domain=\"file\"/>" +
                          "<exclude path=\"exclude2.txt\" domain=\"database\"/>" +
                         "<include path=\"include2.txt\" domain=\"database\"/>" +
-                         "<exclude path=\"exclude3.txt\" domain=\"sharedpref\"/>" +
-                        "<include path=\"include3.txt\" domain=\"sharedpref\"/>" +
+                         "<exclude path=\"exclude3\" domain=\"sharedpref\"/>" +
+                        "<include path=\"include3\" domain=\"sharedpref\"/>" +
+                         "<exclude path=\"exclude4.xml\" domain=\"sharedpref\"/>" +
+                        "<include path=\"include4.xml\" domain=\"sharedpref\"/>" +
                 "</full-backup-content>"));
 
 
@@ -146,16 +148,27 @@ public class FullBackupTest extends AndroidTestCase {
                                 "include2.txt-journal")
                                 .getCanonicalPath()));
 
-        Set<String> sharedPrefDomainIncludes = includeMap.get(FullBackup.SHAREDPREFS_TREE_TOKEN);
+        List<String> sharedPrefDomainIncludes = new ArrayList<String>(
+                includeMap.get(FullBackup.SHAREDPREFS_TREE_TOKEN));
+        Collections.sort(sharedPrefDomainIncludes);
+
         assertEquals("Didn't find expected sharedpref domain include.",
-                1, sharedPrefDomainIncludes.size());
+                3, sharedPrefDomainIncludes.size());
         assertEquals("Invalid path parsed for <include/>",
-                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "include3.txt")
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "include3")
                         .getCanonicalPath(),
-                sharedPrefDomainIncludes.iterator().next());
+                sharedPrefDomainIncludes.get(0));
+        assertEquals("Invalid path parsed for <include/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "include3.xml")
+                        .getCanonicalPath(),
+                sharedPrefDomainIncludes.get(1));
+        assertEquals("Invalid path parsed for <include/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "include4.xml")
+                        .getCanonicalPath(),
+                sharedPrefDomainIncludes.get(2));
 
 
-        assertEquals("Unexpected number of <exclude/>s", 4, excludesSet.size());
+        assertEquals("Unexpected number of <exclude/>s", 6, excludesSet.size());
         // Sets are annoying to iterate over b/c order isn't enforced - convert to an array and
         // sort lexicographically.
         List<String> arrayedSet = new ArrayList<String>(excludesSet);
@@ -173,9 +186,17 @@ public class FullBackupTest extends AndroidTestCase {
                 new File(mContext.getFilesDir(), "exclude1.txt").getCanonicalPath(),
                 arrayedSet.get(2));
         assertEquals("Invalid path parsed for <exclude/>",
-                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "exclude3.txt")
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "exclude3")
                         .getCanonicalPath(),
                 arrayedSet.get(3));
+        assertEquals("Invalid path parsed for <exclude/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "exclude3.xml")
+                        .getCanonicalPath(),
+                arrayedSet.get(4));
+        assertEquals("Invalid path parsed for <exclude/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "exclude4.xml")
+                        .getCanonicalPath(),
+                arrayedSet.get(5));
     }
 
     public void testParseBackupSchemeFromXml_invalidXmlFails() throws Exception {
