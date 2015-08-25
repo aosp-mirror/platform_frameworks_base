@@ -709,6 +709,7 @@ public class WifiScanner {
         validateChannel();
         HotlistSettings settings = new HotlistSettings();
         settings.bssidInfos = bssidInfos;
+        settings.apLostThreshold = apLostThreshold;
         sAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, putListener(listener), settings);
     }
 
