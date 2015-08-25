@@ -21,6 +21,7 @@ package android {
     field public static final deprecated java.lang.String BIND_CARRIER_MESSAGING_SERVICE = "android.permission.BIND_CARRIER_MESSAGING_SERVICE";
     field public static final java.lang.String BIND_CARRIER_SERVICES = "android.permission.BIND_CARRIER_SERVICES";
     field public static final java.lang.String BIND_CHOOSER_TARGET_SERVICE = "android.permission.BIND_CHOOSER_TARGET_SERVICE";
+    field public static final java.lang.String BIND_CONDITION_PROVIDER_SERVICE = "android.permission.BIND_CONDITION_PROVIDER_SERVICE";
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_DREAM_SERVICE = "android.permission.BIND_DREAM_SERVICE";
     field public static final java.lang.String BIND_INCALL_SERVICE = "android.permission.BIND_INCALL_SERVICE";
@@ -28742,6 +28743,49 @@ package android.service.media {
 }
 
 package android.service.notification {
+
+  public class Condition implements android.os.Parcelable {
+    ctor public Condition(android.net.Uri, java.lang.String, java.lang.String, java.lang.String, int, int, int);
+    method public android.service.notification.Condition copy();
+    method public int describeContents();
+    method public static boolean isValidId(android.net.Uri, java.lang.String);
+    method public static android.net.Uri.Builder newId(android.content.Context);
+    method public static java.lang.String relevanceToString(int);
+    method public static java.lang.String stateToString(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.notification.Condition> CREATOR;
+    field public static final int FLAG_RELEVANT_ALWAYS = 2; // 0x2
+    field public static final int FLAG_RELEVANT_NOW = 1; // 0x1
+    field public static final java.lang.String SCHEME = "condition";
+    field public static final int STATE_ERROR = 3; // 0x3
+    field public static final int STATE_FALSE = 0; // 0x0
+    field public static final int STATE_TRUE = 1; // 0x1
+    field public static final int STATE_UNKNOWN = 2; // 0x2
+    field public final int flags;
+    field public final int icon;
+    field public final android.net.Uri id;
+    field public final java.lang.String line1;
+    field public final java.lang.String line2;
+    field public final int state;
+    field public final java.lang.String summary;
+  }
+
+  public abstract class ConditionProviderService extends android.app.Service {
+    ctor public ConditionProviderService();
+    method public final void notifyCondition(android.service.notification.Condition);
+    method public final void notifyConditions(android.service.notification.Condition...);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onConnected();
+    method public abstract void onRequestConditions(int);
+    method public abstract void onSubscribe(android.net.Uri);
+    method public abstract void onUnsubscribe(android.net.Uri);
+    field public static final java.lang.String EXTRA_CONDITION_ID = "android.content.automatic.conditionId";
+    field public static final java.lang.String EXTRA_RULE_NAME = "android.content.automatic.ruleName";
+    field public static final java.lang.String META_DATA_CONFIGURATION_ACTIVITY = "android.service.zen.automatic.configurationActivity";
+    field public static final java.lang.String META_DATA_DEFAULT_CONDITION_ID = "android.service.zen.automatic.defaultConditionId";
+    field public static final java.lang.String META_DATA_RULE_TYPE = "android.service.zen.automatic.ruleType";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.ConditionProviderService";
+  }
 
   public abstract class NotificationListenerService extends android.app.Service {
     ctor public NotificationListenerService();

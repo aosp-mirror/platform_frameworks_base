@@ -2567,10 +2567,11 @@
     <permission android:name="android.permission.BIND_CHOOSER_TARGET_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Must be required by a {@link
+    <!-- Must be required by a {@link
          android.service.notification.ConditionProviderService},
          to ensure that only the system can bind to it.
-         @hide -->
+         <p>Protection level: signature
+         -->
     <permission android:name="android.permission.BIND_CONDITION_PROVIDER_SERVICE"
         android:protectionLevel="signature" />
 
