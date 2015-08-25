@@ -1135,6 +1135,8 @@ public class PhoneNumberUtils
         "VI", // U.S. Virgin Islands
     };
 
+    private static final String KOREA_ISO_COUNTRY_CODE = "KR";
+
     /**
      * Breaks the given number down and formats it according to the rules
      * for the country the number is from.
@@ -1455,7 +1457,14 @@ public class PhoneNumberUtils
         String result = null;
         try {
             PhoneNumber pn = util.parseAndKeepRawInput(phoneNumber, defaultCountryIso);
-            result = util.formatInOriginalFormat(pn, defaultCountryIso);
+            if (KOREA_ISO_COUNTRY_CODE.equals(defaultCountryIso) &&
+                    (pn.getCountryCode() == util.getCountryCodeForRegion(KOREA_ISO_COUNTRY_CODE))) {
+                // Format local Korean phone numbers with country code to corresponding national
+                // format which would replace the leading +82 with 0.
+                result = util.format(pn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
+            } else {
+                result = util.formatInOriginalFormat(pn, defaultCountryIso);
+            }
         } catch (NumberParseException e) {
         }
         return result;
