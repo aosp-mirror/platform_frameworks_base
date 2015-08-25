@@ -18,26 +18,26 @@ page.keywords=applinking, deeplinks, intents
 
 
 <p>
-  The M Developer Preview introduces a new option for handling web site links, allowing clicked
-  links to go directly to the website's official app, instead of asking the user to chose how to
-  handle the link. This feature saves the user time and helps developers deliver a better
+  The M Developer Preview introduces a new option for handling website links. It allows clicked
+  links to go directly to the website's official app &mdash; instead of asking the user to choose 
+  how to handle the link. This feature saves users' time and helps developers deliver a better
   experience. Users can also select whether an app should always open specific types of links
-  automatically or prompt the user each time.
+  automatically, or prompt each time.
 </p>
 
 <p>
   Handling links automatically requires the cooperation of app developers and website owners.
   Developers must configure their apps to declare connections with websites and request
-  verification. Website owners can publish a
-  Digital Asset Links file
+  verification. Website owners should publish a Digital Asset Links file
   to allow Android to verify the association of apps with their sites. The general steps for
   creating verified app links are as follows:
 </p>
 
 <ol>
-  <li>Create intent filters within your app for your website URLs</li>
-  <li>Configure your app to request verification of app links</li>
-  <li>Publish a Digital Asset Links JSON file on your websites</li>
+  <li>Create intent filters within your app for your website URLs.</li>
+  <li>Configure your app to request verification of app links.</li>
+  <li>Publish a Digital Asset Links JSON file on your websites.</li>
+  <li>Test that the Android system can verify your app.</li>
 </ol>
 
 <h2 id="url-handling">Understanding URL Request Handling</h2>
@@ -45,35 +45,36 @@ page.keywords=applinking, deeplinks, intents
 <p>
   The app links feature allows your app to become the default handler for your website URLs, as
   long as the user has not already chosen an app to handle that URL pattern. When a web URI intent
-  is invoked through a clicked link or programatic request, the Android system determines what app
-  is used to handle the intent. The system use these criteria, in order, to determine how to handle
+  is invoked through a clicked link or programmatic request, the Android system determines what app
+  is used to handle the intent. The system uses these criteria, in order, to determine how to handle
   the request:
 </p>
 
 <ol>
   <li>
-    <strong>User has set app link associations</strong>: If the user has designated an app to
-    handle app links, the system passes the web URI request to that app. Users set this association
-    by opening <strong>Settings &gt; Apps &gt; Configure apps (gear icon) &gt; App links</strong>,
-    then selecting an app to use and configuring it's <strong>App links</strong> property to the
+    <strong>The user has set up a matching app link association</strong>. If the user has designated 
+    an app to handle app links, the system passes the web URI request to that app. The user sets 
+    this association by opening
+     <strong>Settings &gt; Apps &gt; Configure apps (gear icon) &gt; App links</strong>, and 
+    then selecting an app to use and configuring its <strong>App links</strong> property to the
     <em>Open in this app</em> option.
   </li>
 
   <li>
-    <strong>No association set by user and a single supporting app</strong>: If the user
-    has not set a preference that matches the web URI request, and there is only one app declaring
-    support for the intent’s URI pattern, the system passes the request to that app.
+    <strong>The user has not set up an association, and there is a single supporting app</strong>.   
+    If the user has not set a preference that matches the web URI request, and there is only one app 
+    declaring support for the intent’s URI pattern, the system passes the request to that app.
   </li>
 
   <li>
-    <strong>No association set by user and multiple supporting apps</strong>: If there is
-    no explicit user preference and there are multiple apps declaring support for the web URI
-    pattern, the system prompts the user to select one of the available apps
+    <strong>The user has not set up an association, and there are multiple supporting apps</strong>.  
+    If there is no explicit user preference and there are multiple apps declaring support for the  
+    web URI pattern, the system prompts the user to select one of the available apps.
   </li>
 </ol>
 
 <p>
-  In case #2 (no user setting and no other app handlers), if an app is newly installed and verified
+  In the second case, if an app is newly installed and verified
   as a handler for this type of link, the system sets it as the default handler. In the other two
   cases, the system behavior is the same, regardless of the presence of a verified app link
   handler.
@@ -85,7 +86,7 @@ page.keywords=applinking, deeplinks, intents
 <p>
   App links are based on the <a href="{@docRoot}guide/components/intents-filters.html">Intent</a>
   framework, which enables apps to handle requests from the system or other apps. Multiple apps may
-  declare matching web link URI patterns in their intent filters. When a user clicks on a web link
+  declare matching web link URI patterns in their intent filters. When a user clicks a web link
   that does not have a default launch handler, the platform selects an app to handle the request,
   based on the criteria described in the previous section.
 </p>
@@ -110,15 +111,15 @@ page.keywords=applinking, deeplinks, intents
 </pre>
 
 <p>
-  As shown in the example above, intent filters for app links must declare an {@code android:scheme}
-  value of either {@code http} or {@code https}, or both. The filter should not declare
-  any other schemes. The filter must also include the {@code android.intent.action.VIEW}; and
+  As shown in this example, intent filters for app links must declare an {@code android:scheme}
+  value of {@code http}, {@code https}, or both. The filter should not declare
+  any other schemes. The filter must also include the {@code android.intent.action.VIEW} and
   {@code android.intent.category.BROWSABLE} category names.
 </p>
 
 <p>
-  This manifest declaration defines the connection between your app and a website. However, in
-  order to have the system treat your app as the default handler for a set of URLs, you must
+  This manifest declaration defines the connection between your app and a website. However, 
+  to have the system treat your app as the default handler for a set of URLs, you must
   also request that the system verify this connection, which is explained in the next section.
 </p>
 
@@ -126,15 +127,15 @@ page.keywords=applinking, deeplinks, intents
 <h2 id="request-verify">Request App Links Verification</h2>
 
 <p>
-  In addition to declaring an association between your app and a web site using intent filters,
+  In addition to declaring an association between your app and a website by using intent filters,
   your app must also request automatic verification with an additional manifest declaration. When
-  this declaration is set, the Android system attempts to verify your app after it is installed.
+  this declaration is set, the Android system attempts to verify your app after it's installed.
   If the verification succeeds, and the user has not set a preference for your website URLs, the
   system automatically routes those URL requests to your app.
 </p>
 
 <p>
-  The system performs app link verifications by comparing the host names in the data elements of
+  The system performs app link verifications by comparing the hostnames in the data elements of
   the app’s intent filters against the Digital Asset Links files ({@code assetlinks.json}) hosted
   on the respective web domains. To enable the system to verify a host, make sure that your intent
   filter declarations include the {@code android.intent.action.VIEW} intent action and {@code
@@ -155,7 +156,7 @@ page.keywords=applinking, deeplinks, intents
 
     &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
         &lt;action android:name="android.intent.action.VIEW" /&gt;
-        &lt;category android:name="android.intent.category.DEFAULT"gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
         &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
         &lt;data android:scheme="http" android:host="www.android.com" /&gt;
         &lt;data android:scheme="https" android:host="www.android.com" /&gt;
@@ -166,7 +167,7 @@ page.keywords=applinking, deeplinks, intents
 
 <p>
   When the {@code android:autoVerify} attribute is set, the system attempts to verify all hosts
-  associated with web URI’s in all of your app's intent filters when the app is installed. The
+  associated with web URIs in all of your app's intent filters when the app is installed. The
   system treats your app as the default handler for the specified URI pattern only if it
   successfully verifies <em>all</em> app link patterns declared in your manifest.
 </p>
@@ -175,8 +176,8 @@ page.keywords=applinking, deeplinks, intents
 <h3 id="multi-host">Supporting app linking for multiple hosts</h3>
 
 <p>
-  The system must be able to verify each host specified in the app’s web URI intent filters’ data
-  elements against the Digital Asset Links files hosted on the respective web domains. If any
+  The system must be able to verify each host specified in the data elements of the app’s web URI 
+  intent filters against the Digital Asset Links files hosted on the respective web domains. If any
   verification fails, the app is not verified to be a default handler for any of the web URL
   patterns defined in its intent filters. For example, an app with the following intent filters
   would fail verification if an {@code assetlinks.json} file were not found at both
@@ -187,7 +188,7 @@ page.keywords=applinking, deeplinks, intents
 <pre>
 &lt;application&gt;
 
-  &lt;activity android:name=”MainActivity”&gt;
+  &lt;activity android:name="MainActivity"&gt;
     &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
       &lt;action android:name="android.intent.action.VIEW" /&gt;
       &lt;category android:name="android.intent.category.DEFAULT" /&gt;
@@ -196,7 +197,7 @@ page.keywords=applinking, deeplinks, intents
       &lt;data android:scheme="https" android:host="www.domain1.com" /&gt;
     &lt;/intent-filter&gt;
   &lt;/activity&gt;
-  &lt;activity android:name=”SecondActivity”&gt;
+  &lt;activity android:name="SecondActivity"&gt;
     &lt;intent-filter&gt;
       &lt;action android:name="android.intent.action.VIEW" /&gt;
       &lt;category android:name="android.intent.category.DEFAULT" /&gt;
@@ -205,7 +206,7 @@ page.keywords=applinking, deeplinks, intents
     &lt;/intent-filter&gt;
   &lt;/activity&gt;
 
-&lt;/application
+&lt;/application&gt;
 </pre>
 
 
@@ -214,7 +215,7 @@ page.keywords=applinking, deeplinks, intents
 <p>
   The Digital Asset Links protocol treats subdomains as unique, separate hosts. If your intent
   filter lists both the {@code www.example.com} and {@code mobile.example.com} subdomains as
-  schemes, you must host separate {@code assetlink.json} file on each subdomain. For example, an
+  schemes, you must host a separate {@code assetlink.json} file on each subdomain. For example, an
   app with the following intent filter declaration would pass verification only if the website
   owner published valid {@code assetlinks.json} files at both
   {@code https://www.example.com/.well-known/assetlinks.json} and
@@ -223,7 +224,7 @@ page.keywords=applinking, deeplinks, intents
 
 <pre>
 &lt;application&gt;
-  &lt;activity android:name=”MainActivity”&gt;
+  &lt;activity android:name="MainActivity"&gt;
     &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
       &lt;action android:name="android.intent.action.VIEW" /&gt;
       &lt;category android:name="android.intent.category.DEFAULT" /&gt;
@@ -250,20 +251,20 @@ page.keywords=applinking, deeplinks, intents
 
 <p class="note">
   <strong>Important:</strong> With M Preview 3 and the Android 6.0 (API level 23) release, the JSON
-  file is verified via the encrypted HTTPS protocol. Make sure that your hosted file can be
+  file is verified through the encrypted HTTPS protocol. Make sure that your hosted file can be
   accessed over an HTTPS connection, regardless of whether your app's intent filter declares an
-  {@code android:scheme} setting of {@code http}, {@code https} or both.
+  {@code android:scheme} setting of {@code http}, {@code https}, or both.
 </p>
 
 <p>
-  A Digital Asset Links JSON file indicates the Android apps that are associated with the web site.
+  A Digital Asset Links JSON file indicates the Android apps that are associated with the website.
   The JSON file identifies associated apps with the following fields:
 </p>
 
 <ul>
-  <li>{@code package_name}: The package name declared in the app's manifest.</li>
+  <li>{@code package_name} - The package name declared in the app's manifest.</li>
 
-  <li>{@code sha256_cert_fingerprints}: The SHA256 fingerprints of your app’s signing certificate.
+  <li>{@code sha256_cert_fingerprints} - The SHA256 fingerprints of your app’s signing certificate.
     You can use the Java keytool to generate the fingerprint using the following command:
     <pre>keytool -list -v -keystore my-release-key.keystore</pre>
     This field supports multiple fingerprints, which can be used to support different versions
@@ -294,7 +295,7 @@ page.keywords=applinking, deeplinks, intents
 <p>
   A website can declare associations with multiple apps within the same {@code assetlinks.json}
   file. The following file listing shows an example of a statement file that declares association
-  with two, separate apps and is hosted at
+  with two separate apps and is hosted at
   <code>https://www.example.com/.well-known/assetlinks.json</code>:
 </p>
 
@@ -375,7 +376,7 @@ https://www.domain2.com/.well-known/assetlinks.json
 
 <p>
   When implementing the app linking feature, you should test the linking functionality to
-  make your app can be successfully associated with your websites and handle URL requests
+  make sure that your app can be successfully associated with your websites and handle URL requests
   as you expect.
 </p>
 
@@ -384,8 +385,8 @@ https://www.domain2.com/.well-known/assetlinks.json
 
 <p>
   When testing, you should confirm the list of associated hosts that the system should verify
-  for your app. Make a list of all web URI’s in intent-filters in your manifest that
-  includes the following:
+  for your app. Make a list of all web URIs in intent-filters in your manifest that
+  include all of the following:
 </p>
 
 <ul>
@@ -422,7 +423,7 @@ https://digitalassetlinks.googleapis.com/v1/statements:list?
 <h3 id="test-intent">Testing a web URI intent</h3>
 
 <p>
-  Once you have confirmed the list of websites to associate with your app, and you have confirmed
+  After you've confirmed the list of websites to associate with your app, and confirmed
   that the hosted JSON file is valid, install the app on your device. Wait at least 20 seconds for
   the asynchronous verification process to complete. Use the following command to check
   if the system verified your app and set the correct link handling policies:
@@ -472,26 +473,25 @@ Domains: play.google.com market.android.com
 Status: always : 200000002
 </pre>
 
-<p>This listing indicates the what apps are associated with what domains for that user, as
-  described below:</p>
+<p>This listing indicates the apps associated with domains for that user:</p>
 
 <ul>
   <li>{@code Package} - Identifies an app by its package name, as declared in its manifest.
   </li>
   <li>{@code Domains} - Shows the full list of hosts whose web links this app handles.
   </li>
-  <li>{@code Status} - Shows the current link-handling setting for this app. An app that set {@code
-  android:autoVerify="true"} value and passed verification is shown with a status of {@code
-  always}. The hexadecimal number after this status is related to the Android system's record of
+  <li>{@code Status} - Shows the current link-handling setting for this app. An app that set the 
+  {@code android:autoVerify="true"} value and passed verification is shown with a status of {@code
+  always}. The hexadecimal number after this status indicates the Android system's record of
   the user’s app linkage preferences. This value is not relevant for interpreting whether the
   verification operation passed.
   </li>
 </ul>
 
 <p class="note">
-  <strong>Note:</strong>It is possible for a user to change the app link settings for an app
+  <strong>Note:</strong> It's possible for a user to change the app link settings for an app
   before the verification operation has completed. If this
-  situation occurs, you may see a false positive for a successful verification, even though
+  situation occurs, you may see a false positive for a successful verification, even if
   verification has failed. However, the user has already explicitly enabled the app to open
   supported links without asking. In this case, no dialog is shown and the link goes directly to
   your app, but only because explicit user preferences take precedence.
@@ -503,14 +503,14 @@ Status: always : 200000002
 
 <p>
   For app link verification to succeed, the system must be able to verify your app with all of
-  the websites referenced in your app’s intent filters, that meet the criteria for app links.
-  The following example manifest snippet shows app configuration with several app links defined:
+  the websites referenced in your app’s intent filters that meet the criteria for app links.
+  The following example manifest snippet shows an app configuration with several app links defined:
 </p>
 
 <pre>
   &lt;application&gt;
 
-      &lt;activity android:name=”MainActivity”&gt;
+      &lt;activity android:name="MainActivity"&gt;
           &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
               &lt;action android:name="android.intent.action.VIEW" /&gt;
               &lt;category android:name="android.intent.category.DEFAULT" /&gt;
@@ -525,7 +525,7 @@ Status: always : 200000002
           &lt;/intent-filter&gt;
       &lt;/activity&gt;
 
-      &lt;activity android:name=”SecondActivity”&gt;
+      &lt;activity android:name="SecondActivity"&gt;
           &lt;intent-filter&gt;
               &lt;action android:name="android.intent.action.VIEW" /&gt;
               &lt;category android:name="android.intent.category.DEFAULT" /&gt;
@@ -534,7 +534,7 @@ Status: always : 200000002
           &lt;/intent-filter&gt;
       &lt;/activity&gt;
 
-      &lt;activity android:name=”ThirdActivity”&gt;
+      &lt;activity android:name="ThirdActivity"&gt;
         &lt;intent-filter&gt;
             &lt;action android:name="android.intent.action.VIEW" /&gt;
             &lt;category android:name="android.intent.category.DEFAULT" /&gt;
@@ -551,7 +551,7 @@ Status: always : 200000002
 </pre>
 
 <p>
-  The list of hosts that the platform would attempt to verify from the above manifest is:
+  The list of hosts that the platform would attempt to verify from this manifest is:
 </p>
 
 <pre>
@@ -562,7 +562,7 @@ Status: always : 200000002
 </pre>
 
 <p>
-  The list of hosts that the platform would not attempt to verify from the above manifest is:
+  The list of hosts that the platform would not attempt to verify based on the manifest is:
 </p>
 
 <pre>
