@@ -48,8 +48,8 @@ class RippleBackground extends RippleComponent {
     // Software rendering properties.
     private float mOpacity = 0;
 
-    public RippleBackground(RippleDrawable owner, Rect bounds) {
-        super(owner, bounds);
+    public RippleBackground(RippleDrawable owner, Rect bounds, boolean forceSoftware) {
+        super(owner, bounds, forceSoftware);
     }
 
     public boolean isVisible() {
