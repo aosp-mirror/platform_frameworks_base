@@ -1569,6 +1569,10 @@ results."
             Developing Accessibility Services
           </a>
           </li>
+          <li><a href="<?cs var:toroot ?>training/accessibility/testing.html">
+            Accessibility Testing Checklist
+          </a>
+          </li>
         </ul>
       </li>
 
@@ -2115,58 +2119,18 @@ results."
 
   <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>training/testing.html">
+      <a href="<?cs var:toroot ?>training/testing/index.html">
       <span class="small">Best Practices for</span><br/>
               Testing
       </a>
     </div>
     <ul>
-      <li class="nav-section">
-      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/activity-testing/index.html"
-         description="How to test Activities in your Android applications.">
-            Testing Your Activity
-          </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/activity-testing/preparing-activity-testing.html">
-            <span class="en">Setting Up Your Test Environment</span>
+      <li>
+      <a href="<?cs var:toroot ?>training/testing/start/index.html"
+         description="How to get started with testing your Android applications.">
+            Getting Started with Testing
           </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-basic-testing.html">
-            <span class="en">Creating and Running a Test Case</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-ui-testing.html">
-            <span class="en">Testing UI Components</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-unit-testing.html">
-            <span class="en">Creating Unit Tests</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-functional-testing.html">
-            <span class="en">Creating Functional Tests</span>
-          </a>
-          </li>
-        </ul>
       </li>
-
-      <li class="nav-section">
-      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/ui-testing/index.html"
-         description="How to automate your user interface tests for Android apps.">
-            Automating UI Tests
-          </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/testing/ui-testing/espresso-testing.html">
-            <span class="en">Testing UI for a Single App</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/testing/ui-testing/uiautomator-testing.html">
-            <span class="en">Testing UI for Multiple Apps</span>
-          </a>
-          </li>
-        </ul>
-      </li>
-
       <li class="nav-section">
       <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/unit-testing/index.html"
          description="How to build effective unit tests for Android apps.">
@@ -2183,10 +2147,36 @@ results."
           </li>
         </ul>
       </li>
-
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/ui-testing/index.html"
+         description="How to automate your user interface tests for Android apps.">
+            Automating UI Tests
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/testing/ui-testing/espresso-testing.html">
+            <span class="en">Testing UI for a Single App</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/testing/ui-testing/uiautomator-testing.html">
+            <span class="en">Testing UI for Multiple Apps</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/integration-testing/index.html"
+         description="How to build effective integration tests for Android apps.">
+            Testing App Component Integrations
+          </a></div>
+        <ul>
+         <li><a href="<?cs var:toroot ?>training/testing/integration-testing/service-testing.html">
+           <span class="en">Testing Your Service</span></a></li>
+         <li><a href="<?cs var:toroot ?>training/testing/integration-testing/content-provider-testing.html">
+           <span class="en">Testing Your Content Provider</span></a></li>
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>training/testing/performance.html"
-            description="How to automate UI performance testing.">
-            Testing Display Performance</a>
+          description="How to automate UI performance testing.">Testing Display Performance</a>
       </li>
     </ul>
   </li>

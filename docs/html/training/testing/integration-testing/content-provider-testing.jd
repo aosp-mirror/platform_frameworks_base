@@ -1,0 +1,174 @@
+page.title=Testing Your Content Provider
+page.tags=testing, content provider
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+
+  <ul>
+    <li>Android 2.2 (API level 8) or higher</li>
+    <li><a href="{@docRoot}tools/testing-support-library/index.html">
+      Android Testing Support Library</a></li>
+    <li><a href="{@docRoot}tools/studio/index.html">Android Studio 1.4.1 or higher</a>.</li>
+  </ul>
+
+  <h2>This lesson teaches you to</h2>
+
+  <ol>
+    <li><a href="#build">Create Integration Tests for Content Providers</a></li>
+    <li><a href="#WhatToTest">What to Test</a></li>
+  </ol>
+
+  <h2>You should also read</h2>
+  <ul>
+      <li><a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
+      </li>
+  </ul>
+</div>
+</div>
+
+<p>
+    If you are implementing a <a href="{@docRoot}guide/topics/providers/content-providers.html">
+    content provider</a> to store and retrieve data or to make data
+    accessible to other apps, you should test your provider to ensure that it doesn't behave in an
+    unexpected way. This lesson describes how to test public content providers, and is also
+    applicable to providers that you keep private to your own app.
+</p>
+<h2 id="build">Create Integration Tests for Content Providers</h2>
+<p>
+In Android, apps view content providers as data APIs that provide
+tables of data, with their internals hidden from view. A content provider may have many
+public constants, but it usually has few if any public methods and no public variables.
+For this reason, you should write your tests based only on the provider's public members.
+A content provider that is designed like this is offering a contract between itself and its users.
+</p>
+<p>
+Content providers let you access actual user data, so it's important to ensure
+that you test the content provider in an isolated testing environment. This approach allows you to
+only run against data dependencies set explicitly in the test case. It also means that your tests
+do not modify actual user data. For example, you should avoid writing a test that fails because
+there was data left over from a previous test. Similarly, your test should avoid adding or deleting
+actual contact information in a provider.
+</p>
+
+<p>
+To test your content provider in isolation, use the {@link android.test.ProviderTestCase2} class.
+This class allows you to use Android mock object classes such as {@link android.test.IsolatedContext}
+and {@link android.test.mock.MockContentResolver} to access file and database information without
+affecting the actual user data.
+</p>
+
+<p>Your integration test should be written as a JUnit 4 test class. To learn more about creating
+JUnit 4 test classes and using JUnit 4 assertions, see
+<a href="{@docRoot}training/testing/unit-testing/local-unit-tests.html#build">
+Create a Local Unit Test Class</a>.</p>
+
+<p>To create an integration test for your content provider, you must perform these steps:</p>
+<ul>
+    <li>Create your test class as a subclass of {@link android.test.ProviderTestCase2}.</li>
+    <li>Add the
+{@code &#64;RunWith(AndroidJUnit4.class)} annotation at the beginning of your test class
+definition.</li>
+    <li>Specify the
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+{@code AndroidJUnitRunner}</a> class that the
+<a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>
+provides as your default test runner. This step is described in more detail in
+<a href="{@docRoot}training/testing/start/index.html#run-instrumented-tests">
+Getting Started with Testing</a>.</li>
+    <li>Set the {@link android.content.Context} object from the
+<a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html">
+{@code InstrumentationRegistry}</a> class. See the snippet below for an example.
+    <pre>
+&#64;Override
+protected void setUp() throws Exception {
+    setContext(InstrumentationRegistry.getTargetContext());
+    super.setUp();
+}</pre>
+    </li>
+</ul>
+
+<h3 id="ProviderTestCase2">How ProviderTestCase2 works</h3>
+<p>
+    You test a provider with a subclass of {@link android.test.ProviderTestCase2}. This base class
+    extends {@link android.test.AndroidTestCase}, so it provides the JUnit testing framework as well
+    as Android-specific methods for testing application permissions. The most important
+    feature of this class is its initialization, which creates the isolated test environment.
+</p>
+<p>
+    The initialization is done in the constructor for {@link android.test.ProviderTestCase2}, which
+    subclasses call in their own constructors. The {@link android.test.ProviderTestCase2}
+    constructor creates an {@link android.test.IsolatedContext} object that allows file and
+    database operations but stubs out other interactions with the Android system.
+    The file and database operations themselves take place in a directory that is local to the
+    device or emulator and has a special prefix.
+</p>
+<p>
+    The constructor then creates a {@link android.test.mock.MockContentResolver} to use as the
+    resolver for the test.
+</p>
+<p>
+    Lastly, the constructor creates an instance of the provider under test. This is a normal
+    {@link android.content.ContentProvider} object, but it takes all of its environment information
+    from the {@link android.test.IsolatedContext}, so it is restricted to
+    working in the isolated test environment. All of the tests done in the test case class run
+    against this isolated object.
+</p>
+
+<p>
+You run integration tests for content providers the same way as instrumented unit tests. To run the
+integration test for your content provider, follow the steps described in <a
+href="{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html#run">
+Run Instrumented Unit Tests</a>.
+</p>
+
+<h2 id="WhatToTest">What to Test</h2>
+<p>
+Here are some specific guidelines for testing content providers.
+</p>
+<ul>
+    <li>
+        Test with resolver methods: Even though you can instantiate a provider object in
+        {@link android.test.ProviderTestCase2}, you should always test with a resolver object
+        using the appropriate URI. Doing so ensures that you are testing the provider by performing
+        the same interaction that a regular application would use.
+    </li>
+    <li>
+        Test a public provider as a contract: If you intend your provider to be public and
+        available to other applications, you should test it as a contract. Some examples of how to
+        do so are as follows:
+        <ul>
+            <li>
+                Test with constants that your provider publicly exposes. For
+                example, look for constants that refer to column names in one of the provider's
+                data tables. These should always be constants publicly defined by the provider.
+            </li>
+            <li>
+                Test all the URIs that your provider offers. Your provider may offer several URIs,
+                each one referring to a different aspect of the data.
+            </li>
+            <li>
+                Test invalid URIs: Your unit tests should deliberately call the provider with an
+                invalid URI, and look for errors. A good provider design is to throw an
+                {@code IllegalArgumentException} for invalid URIs.
+
+            </li>
+        </ul>
+    </li>
+    <li>
+        Test the standard provider interactions: Most providers offer six access methods:
+        {@code query()}, {@code insert()}, {@code delete()}, {@code update()},
+        {@code getType()}, and {@code onCreate()}. Your tests should verify that all
+        of these methods work. These methods are described in more detail in the topic
+        <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.
+    </li>
+    <li>
+        Test business logic: If the content provider implements business logic, you should test it.
+        Business logic includes handling of invalid values, financial or arithmetic calculations,
+        elimination or combining of duplicates.
+    </li>
+</ul>

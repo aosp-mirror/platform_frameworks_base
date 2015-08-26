@@ -1522,6 +1522,42 @@ var RESOURCE_COLLECTIONS = {
       "distribute/googleplay/auto.html"
     ]
   },
+  "training/testing/overview": {
+    "title": "",
+    "resources": [
+      "training/testing/start/index.html",
+      "tools/testing/testing_android.html",
+      "https://www.youtube.com/watch?v=vdasFFfXKOY"
+    ]
+  },
+  "training/testing/tools": {
+    "title": "",
+    "resources": [
+      "tools/testing-support-library/index.html",
+      "tools/help/monkey.html",
+      "tools/help/monkeyrunner_concepts.html",
+      "tools/testing/testing_otheride.html",
+      "https://source.android.com/devices/tech/debug/dumpsys.html"
+    ]
+  },
+  "training/testing/techniques": {
+    "title": "",
+    "resources": [
+      "training/testing/ui-testing/index.html",
+      "training/testing/unit-testing/index.html",
+      "training/testing/performance.html"
+    ]
+  },
+  "training/testing/resources": {
+    "title": "",
+    "resources": [
+      "https://github.com/googlesamples/android-testing",
+      "https://www.youtube.com/watch?v=2I6fuD20qlY",
+      "https://codelabs.developers.google.com/codelabs/android-testing/index.html",
+      "https://github.com/googlesamples/android-testing-templates",
+      "https://google.github.io/android-testing-support-library"
+    ]
+  },
   "distribute/stories/games": {
     "title": "",
     "resources": [

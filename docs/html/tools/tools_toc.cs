@@ -83,56 +83,11 @@
           <li><a href="<?cs var:toroot ?>tools/building/building-studio.html">
             <span class="en">From Android Studio</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html">
-            <span class="en">From the Command Line</span></a></li>
+            <span class="en">From the Command-Line</span></a></li>
         </ul>
       </li>
 
-
-  <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot?>tools/testing/index.html">
-            <span class="en">Testing</span>
-          </a></div>
-        <ul>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/testing_android.html">
-            <span class="en">Fundamentals</span></a>
-          </li>
-          <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">
-            <span class="en">From Eclipse</span></a>
-          </li>
-          <li><a href="<?cs var:toroot ?>tools/testing/testing_otheride.html">
-            <span class="en">From Other IDEs</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/activity_testing.html">
-            <span class="en">Activity Testing</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/service_testing.html">
-            <span class="en">Service Testing</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/contentprovider_testing.html">
-            <span class="en">Content Provider Testing</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/testing_accessibility.html">
-            <span class="en">Accessibility Testing</span></a>
-          </li>
-           <li>
-            <a href="<?cs var:toroot?>tools/testing/testing_ui.html">
-            <span class="en">UI Testing</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot ?>tools/testing/what_to_test.html">
-            <span class="en">What To Test</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot ?>tools/testing/activity_test.html">
-            <span class="en">Activity Testing Tutorial</span></a>
-          </li>
-        </ul>
-  </li><!-- end of testing -->
+  <li><a href="<?cs var:toroot?>tools/testing/index.html"><span class="en">Testing</span></a></li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/debugging/index.html"><span class="en">Debugging</span></a></div>
@@ -307,15 +262,23 @@ class="en">Tools Help</span></a></div>
   <!-- Testing Tools menu-->
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing/testing-tools.html"><span class="en">Testing Tools</span></a></div>
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing/testing-tools.html">
+    <span class="en">Testing Tools</span></a></div>
     <ul>
+      <li><a href="<?cs var:toroot ?>tools/testing/testing_android.html">Testing Concepts</a></li>
       <li class="nav-section">
-         <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing-support-library/index.html"><span
+         <div class="nav-section-header">
+         <a href="<?cs var:toroot ?>tools/testing-support-library/index.html"><span
 class="en">Testing Support Library</span></a></div>
          <ul>
-            <li><a href="<?cs var:toroot ?>reference/android/support/test/package-summary.html">API Reference</a></li>
+            <li><a href="<?cs var:toroot ?>reference/android/support/test/package-summary.html">
+            API Reference</a></li>
          </ul>
       </li>
+      <li><a href="<?cs var:toroot ?>training/testing/start/index.html">
+      Testing with Android Studio</a></li>
+      <li><a href="<?cs var:toroot ?>tools/testing/testing_otheride.html">
+      Testing from the Command-Line</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/monkey.html">monkey</a></li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot
