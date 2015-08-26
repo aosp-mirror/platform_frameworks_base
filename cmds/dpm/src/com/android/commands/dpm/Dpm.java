@@ -107,7 +107,7 @@ public final class Dpm extends BaseCommand {
 
     private void runSetDeviceOwner() throws RemoteException {
         ComponentName component = parseComponentName(nextArgRequired());
-        mDevicePolicyManager.setActiveAdmin(component, true /*refreshing*/, UserHandle.USER_OWNER);
+        mDevicePolicyManager.setActiveAdmin(component, true /*refreshing*/, UserHandle.USER_SYSTEM);
 
         String packageName = component.getPackageName();
         try {
@@ -117,7 +117,7 @@ public final class Dpm extends BaseCommand {
             }
         } catch (Exception e) {
             // Need to remove the admin that we just added.
-            mDevicePolicyManager.removeActiveAdmin(component, UserHandle.USER_OWNER);
+            mDevicePolicyManager.removeActiveAdmin(component, UserHandle.USER_SYSTEM);
             throw e;
         }
         System.out.println("Success: Device owner set to package " + packageName);
