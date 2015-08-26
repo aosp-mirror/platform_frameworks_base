@@ -1569,6 +1569,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if ("-h".equals(arg)) {
                     dumpHelp(pw);
                     return;
+                } else if ("-a".equals(arg)) {
+                    // dump all data
                 } else if ("write-settings".equals(arg)) {
                     long token = Binder.clearCallingIdentity();
                     try {
