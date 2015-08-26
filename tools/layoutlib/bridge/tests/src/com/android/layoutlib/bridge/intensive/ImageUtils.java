@@ -16,7 +16,7 @@
 
 package com.android.layoutlib.bridge.intensive;
 
-import com.android.annotations.NonNull;
+import android.annotation.NonNull;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;

@@ -16,9 +16,8 @@
 
 package android.view.accessibility;
 
-import com.android.annotations.NonNull;
-
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
 import android.view.IWindow;

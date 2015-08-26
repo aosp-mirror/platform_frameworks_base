@@ -23,6 +23,7 @@ import com.android.layoutlib.bridge.impl.GcSnapshot;
 import com.android.layoutlib.bridge.impl.PorterDuffUtility;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.Nullable;
 import android.graphics.Bitmap.Config;
 import android.text.TextUtils;
 

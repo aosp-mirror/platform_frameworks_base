@@ -118,6 +118,8 @@ public class Main {
                         "android.app.DatePickerDialog",     // b.android.com/28318
                         "android.app.TimePickerDialog",     // b.android.com/61515
                         "com.android.internal.view.menu.ActionMenu",
+                        "android.annotation.NonNull",       // annotations
+                        "android.annotation.Nullable",      // annotations
                     },
                     excludeClasses,
                     new String[] {

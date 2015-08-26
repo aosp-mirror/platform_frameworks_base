@@ -16,10 +16,10 @@
 
 package com.android.layoutlib.bridge.util;
 
-import com.android.annotations.NonNull;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
+import android.annotation.NonNull;
 import android.util.SparseArray;
 
 import java.util.HashMap;

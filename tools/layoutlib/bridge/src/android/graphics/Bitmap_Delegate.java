@@ -22,6 +22,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.resources.Density;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.Nullable;
 import android.graphics.Bitmap.Config;
 import android.os.Parcel;
 

@@ -21,6 +21,8 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.FontFamily_Delegate.FontVariant;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.FontMetricsInt;

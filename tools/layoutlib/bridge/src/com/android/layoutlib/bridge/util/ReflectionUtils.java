@@ -16,8 +16,8 @@
 
 package com.android.layoutlib.bridge.util;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
