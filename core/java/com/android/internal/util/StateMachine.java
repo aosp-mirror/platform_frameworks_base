@@ -29,6 +29,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -1861,6 +1862,20 @@ public class StateMachine {
         if (smh == null) return;
 
         smh.removeMessages(what);
+    }
+
+    /**
+     * Removes a message from the deferred messages queue.
+     */
+    protected final void removeDeferredMessages(int what) {
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        Iterator<Message> iterator = smh.mDeferredMessages.iterator();
+        while (iterator.hasNext()) {
+            Message msg = iterator.next();
+            if (msg.what == what) iterator.remove();
+        }
     }
 
     /**
