@@ -88,7 +88,7 @@
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"音声アシスト"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ロック解除"</string>
     <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"ロック解除ボタン、指紋を待っています"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"指紋を使用せずにロック解除"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"指紋認証を使用せずにロック解除"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ロック解除"</string>
     <string name="phone_label" msgid="2320074140205331708">"電話を起動"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"音声アシストを開く"</string>
