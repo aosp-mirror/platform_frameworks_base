@@ -239,15 +239,12 @@ public final class BridgeTypedArray extends TypedArray {
     public int getInt(int index, int defValue) {
         String s = getString(index);
         try {
-            if (s != null) {
-                return convertValueToInt(s, defValue);
-            }
+            return convertValueToInt(s, defValue);
         } catch (NumberFormatException e) {
             Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
                     String.format("\"%1$s\" in attribute \"%2$s\" is not a valid integer",
                             s, mNames[index]),
                     null);
-            return defValue;
         }
         return defValue;
     }
@@ -948,7 +945,7 @@ public final class BridgeTypedArray extends TypedArray {
      * "XXXXXXXX" > 80000000.
      */
     private static int convertValueToInt(@Nullable String charSeq, int defValue) {
-        if (null == charSeq)
+        if (null == charSeq || charSeq.isEmpty())
             return defValue;
 
         int sign = 1;
