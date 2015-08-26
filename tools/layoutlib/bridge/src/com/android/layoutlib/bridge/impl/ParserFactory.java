@@ -17,7 +17,10 @@
 package com.android.layoutlib.bridge.impl;
 
 
-import org.kxml2.io.KXmlParser;
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -35,24 +38,35 @@ import java.io.InputStream;
  */
 public class ParserFactory {
 
-    private final static String ENCODING = "UTF-8"; //$NON-NLS-1$
-
     public final static boolean LOG_PARSER = false;
 
-    public static XmlPullParser create(File f)
+    private final static String ENCODING = "UTF-8"; //$NON-NLS-1$
+
+    // Used to get a new XmlPullParser from the client.
+    @Nullable
+    private static LayoutlibCallback sLayoutlibCallback;
+
+    public static void setLayoutlibCallback(@Nullable LayoutlibCallback callback) {
+        sLayoutlibCallback = callback;
+    }
+
+    @NonNull
+    public static XmlPullParser create(@NonNull File f)
             throws XmlPullParserException, FileNotFoundException {
         InputStream stream = new FileInputStream(f);
         return create(stream, f.getName(), f.length());
     }
 
-    public static XmlPullParser create(InputStream stream, String name)
+    @NonNull
+    public static XmlPullParser create(@NonNull InputStream stream, @Nullable String name)
         throws XmlPullParserException {
         return create(stream, name, -1);
     }
 
-    private static XmlPullParser create(InputStream stream, String name, long size)
-            throws XmlPullParserException {
-        KXmlParser parser = instantiateParser(name);
+    @NonNull
+    private static XmlPullParser create(@NonNull InputStream stream, @Nullable String name,
+            long size) throws XmlPullParserException {
+        XmlPullParser parser = instantiateParser(name);
 
         stream = readAndClose(stream, name, size);
 
@@ -60,19 +74,20 @@ public class ParserFactory {
         return parser;
     }
 
-    private static KXmlParser instantiateParser(String name) throws XmlPullParserException {
-        KXmlParser parser;
-        if (name != null) {
-            parser = new CustomParser(name);
-        } else {
-            parser = new KXmlParser();
+    @NonNull
+    public static XmlPullParser instantiateParser(@Nullable String name)
+            throws XmlPullParserException {
+        if (sLayoutlibCallback == null) {
+            throw new XmlPullParserException("ParserFactory not initialized.");
         }
+        XmlPullParser parser = sLayoutlibCallback.createParser(name);
         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
         return parser;
     }
 
-    private static InputStream readAndClose(InputStream stream, String name, long size)
-            throws XmlPullParserException {
+    @NonNull
+    private static InputStream readAndClose(@NonNull InputStream stream, @Nullable String name,
+            long size) throws XmlPullParserException {
         // just a sanity check. It's doubtful we'll have such big files!
         if (size > Integer.MAX_VALUE) {
             throw new XmlPullParserException("File " + name + " is too big to be parsed");
@@ -121,22 +136,8 @@ public class ParserFactory {
         } finally {
             try {
                 bufferedStream.close();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
-        }
-    }
-
-    private static class CustomParser extends KXmlParser {
-        private final String mName;
-
-        CustomParser(String name) {
-            super();
-            mName = name;
-        }
-
-        @Override
-        public String toString() {
-            return mName;
         }
     }
 }
