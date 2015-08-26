@@ -140,7 +140,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
             assertEquals("0_1", cursor.getString(0));
-            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD, cursor.getInt(1));
+            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
             assertEquals("Storage A", cursor.getString(3));
@@ -156,7 +156,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             cursor.moveToNext();
             cursor.moveToNext();
             assertEquals("1_1", cursor.getString(0));
-            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD, cursor.getInt(1));
+            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
             assertEquals("Storage B", cursor.getString(3));
@@ -194,7 +194,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
             assertEquals("1_1", cursor.getString(0));
-            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD, cursor.getInt(1));
+            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
             assertEquals("Storage B", cursor.getString(3));
