@@ -284,8 +284,8 @@ width: 400px;text-align: center;">The official Android IDE</p>
 <ul style="font-size:12px;line-height:19px;">
 <li>Android Studio IDE</li>
 <li>Android SDK tools</li>
-<li>Android 5.0 (Lollipop) Platform</li>
-<li>Android 5.0 emulator system image with Google APIs</li>
+<li>Android 6.0 (Marshmallow) Platform</li>
+<li>Android 6.0 emulator system image with Google APIs</li>
 </ul>
 
 <a class="online landing-button green download-bundle-button"
