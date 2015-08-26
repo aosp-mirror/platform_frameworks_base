@@ -328,8 +328,8 @@ public class Main {
                 .setNavigation(Navigation.NONAV);
 
         SessionParams params = getSessionParams(parser, customConfigGenerator,
-                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", RenderingMode.V_SCROLL,
-                22);
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
 
         renderAndVerify(params, "expand_vert_layout.png");
 
@@ -341,8 +341,8 @@ public class Main {
         parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
                 "expand_horz_layout.xml");
         params = getSessionParams(parser, customConfigGenerator,
-                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", RenderingMode
-                        .H_SCROLL, 22);
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.H_SCROLL, 22);
 
         renderAndVerify(params, "expand_horz_layout.png");
     }
@@ -388,7 +388,7 @@ public class Main {
         // TODO: Set up action bar handler properly to test menu rendering.
         // Create session params.
         SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
-                layoutLibCallback, "Theme.Material.Light.DarkActionBar", RenderingMode.NORMAL, 22);
+                layoutLibCallback, "AppTheme", true, RenderingMode.NORMAL, 22);
         renderAndVerify(params, goldenFileName);
     }
 
@@ -397,12 +397,13 @@ public class Main {
      */
     private SessionParams getSessionParams(LayoutPullParser layoutParser,
             ConfigGenerator configGenerator, LayoutLibTestCallback layoutLibCallback,
-            String themeName, RenderingMode renderingMode, int targetSdk) {
+            String themeName, boolean isProjectTheme, RenderingMode renderingMode, int targetSdk) {
         FolderConfiguration config = configGenerator.getFolderConfig();
         ResourceResolver resourceResolver =
                 ResourceResolver.create(sProjectResources.getConfiguredResources(config),
                         sFrameworkRepo.getConfiguredResources(config),
-                        themeName, false);
+                        themeName, isProjectTheme);
+
         return new SessionParams(
                 layoutParser,
                 renderingMode,
