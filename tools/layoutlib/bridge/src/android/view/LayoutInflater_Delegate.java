@@ -134,12 +134,8 @@ public class LayoutInflater_Delegate {
 
                             params = group.generateLayoutParams(attrs);
 
-                        } catch (RuntimeException e) {
-                            // ---- START CHANGES
-                            sIsInInclude = false;
-                            // ---- END CHANGES
-
-                            params = group.generateLayoutParams(childAttrs);
+                        } catch (RuntimeException ignored) {
+                            // Ignore, just fail over to child attrs.
                         } finally {
                             // ---- START CHANGES
                             sIsInInclude = false;
