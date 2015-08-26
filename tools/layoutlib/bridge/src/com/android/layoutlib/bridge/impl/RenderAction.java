@@ -39,8 +39,6 @@ import android.view.inputmethod.InputMethodManager_Accessor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.swing.text.html.parser.Parser;
-
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_LOCK_INTERRUPTED;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_TIMEOUT;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
@@ -102,7 +100,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         }
 
         // setup the ParserFactory
-        ParserFactory.setLayoutlibCallback(mParams.getLayoutlibCallback());
+        ParserFactory.setParserFactory(mParams.getLayoutlibCallback().getParserFactory());
 
         HardwareConfig hardwareConfig = mParams.getHardwareConfig();
 
@@ -276,7 +274,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             mContext.getRenderResources().setFrameworkResourceIdProvider(null);
             mContext.getRenderResources().setLogger(null);
         }
-        ParserFactory.setLayoutlibCallback(null);
+        ParserFactory.setParserFactory(null);
 
     }
 

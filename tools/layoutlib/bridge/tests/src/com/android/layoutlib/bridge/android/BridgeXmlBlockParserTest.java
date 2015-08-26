@@ -17,15 +17,7 @@
 package com.android.layoutlib.bridge.android;
 
 import com.android.annotations.NonNull;
-import com.android.ide.common.rendering.api.ActionBarCallback;
-import com.android.ide.common.rendering.api.AdapterBinding;
-import com.android.ide.common.rendering.api.ILayoutPullParser;
-import com.android.ide.common.rendering.api.LayoutlibCallback;
-import com.android.ide.common.rendering.api.ResourceReference;
-import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.impl.ParserFactory;
-import com.android.resources.ResourceType;
-import com.android.util.Pair;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,8 +32,8 @@ import static org.junit.Assert.assertEquals;
 public class BridgeXmlBlockParserTest {
 
     @BeforeClass
-    public void setUp() {
-        ParserFactory.setLayoutlibCallback(new LayoutlibTestCallback());
+    public static void setUp() {
+        ParserFactory.setParserFactory(new ParserFactoryImpl());
     }
 
     @Test
@@ -128,79 +120,17 @@ public class BridgeXmlBlockParserTest {
     }
 
     @AfterClass
-    public void tearDown() {
-        ParserFactory.setLayoutlibCallback(null);
+    public static void tearDown() {
+        ParserFactory.setParserFactory(null);
     }
 
-    private static class LayoutlibTestCallback extends LayoutlibCallback {
+    private static class ParserFactoryImpl
+            extends com.android.ide.common.rendering.api.ParserFactory {
 
         @NonNull
         @Override
         public XmlPullParser createParser(String displayName) throws XmlPullParserException {
             return new KXmlParser();
-        }
-
-        @Override
-        public boolean supports(int ideFeature) {
-            throw new AssertionError();
-        }
-
-        @Override
-        public Object loadView(String name, Class[] constructorSignature, Object[] constructorArgs)
-                throws Exception {
-            throw new AssertionError();
-        }
-
-        @Override
-        public String getNamespace() {
-            throw new AssertionError();
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        public Pair<ResourceType, String> resolveResourceId(int id) {
-            throw new AssertionError();
-        }
-
-        @Override
-        public String resolveResourceId(int[] id) {
-            throw new AssertionError();
-        }
-
-        @Override
-        public Integer getResourceId(ResourceType type, String name) {
-            throw new AssertionError();
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        public ILayoutPullParser getParser(String layoutName) {
-            throw new AssertionError();
-        }
-
-        @Override
-        public ILayoutPullParser getParser(ResourceValue layoutResource) {
-            throw new AssertionError();
-        }
-
-        @Override
-        public Object getAdapterItemValue(ResourceReference adapterView, Object adapterCookie,
-                ResourceReference itemRef, int fullPosition, int positionPerType,
-                int fullParentPosition, int parentPositionPerType, ResourceReference viewRef,
-                ViewAttribute viewAttribute, Object defaultValue) {
-            throw new AssertionError();
-        }
-
-        @Override
-        public AdapterBinding getAdapterBinding(ResourceReference adapterViewRef,
-                Object adapterCookie,
-                Object viewObject) {
-            throw new AssertionError();
-        }
-
-        @Override
-        public ActionBarCallback getActionBarCallback() {
-            throw new AssertionError();
         }
     }
 }
