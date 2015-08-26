@@ -66,6 +66,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -484,6 +485,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private ExpandableNotificationRow mDraggedDownRow;
     private boolean mLaunchCameraOnScreenTurningOn;
     private PowerManager.WakeLock mGestureWakeLock;
+    private Vibrator mVibrator;
 
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
@@ -907,6 +909,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 new Intent(pm.isScreenOn() ? Intent.ACTION_SCREEN_ON : Intent.ACTION_SCREEN_OFF));
         mGestureWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                 "GestureWakeLock");
+        mVibrator = mContext.getSystemService(Vibrator.class);
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -3912,6 +3915,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    private void vibrateForCameraGesture() {
+        mVibrator.vibrate(1000L);
+    }
+
     public void onScreenTurnedOn() {
         mDozeScrimController.onScreenTurnedOn();
     }
@@ -4075,6 +4082,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             pm.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:CAMERA_GESTURE");
             mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
         }
+        vibrateForCameraGesture();
         if (!mStatusBarKeyguardViewManager.isShowing()) {
             startActivity(KeyguardBottomAreaView.INSECURE_CAMERA_INTENT,
                     true /* dismissShade */);
