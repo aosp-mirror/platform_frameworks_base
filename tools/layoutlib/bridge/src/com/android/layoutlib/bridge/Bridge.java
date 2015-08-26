@@ -54,6 +54,7 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -92,7 +93,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     /**
      * Same as sRMap except for int[] instead of int resources. This is for android.R only.
      */
-    private final static Map<IntArray, String> sRArrayMap = new HashMap<IntArray, String>();
+    private final static Map<IntArray, String> sRArrayMap = new HashMap<IntArray, String>(384);
     /**
      * Reverse map compared to sRMap, resource type -> (resource name -> id).
      * This is for com.android.internal.R.
@@ -248,37 +249,56 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         // the internal version), and put the content in the maps.
         try {
             Class<?> r = com.android.internal.R.class;
+            // Parse the styleable class first, since it may contribute to attr values.
+            parseStyleable();
 
             for (Class<?> inner : r.getDeclaredClasses()) {
+                if (inner == com.android.internal.R.styleable.class) {
+                    // Already handled the styleable case. Not skipping attr, as there may be attrs
+                    // that are not referenced from styleables.
+                    continue;
+                }
                 String resTypeName = inner.getSimpleName();
                 ResourceType resType = ResourceType.getEnum(resTypeName);
                 if (resType != null) {
-                    Map<String, Integer> fullMap = new HashMap<String, Integer>();
-                    sRevRMap.put(resType, fullMap);
+                    Map<String, Integer> fullMap = null;
+                    switch (resType) {
+                        case ATTR:
+                            fullMap = sRevRMap.get(ResourceType.ATTR);
+                            break;
+                        case STRING:
+                        case STYLE:
+                            // Slightly less than thousand entries in each.
+                            fullMap = new HashMap<String, Integer>(1280);
+                            // no break.
+                        default:
+                            if (fullMap == null) {
+                                fullMap = new HashMap<String, Integer>();
+                            }
+                            sRevRMap.put(resType, fullMap);
+                    }
 
                     for (Field f : inner.getDeclaredFields()) {
                         // only process static final fields. Since the final attribute may have
                         // been altered by layoutlib_create, we only check static
-                        int modifiers = f.getModifiers();
-                        if (Modifier.isStatic(modifiers)) {
-                            Class<?> type = f.getType();
-                            if (type.isArray() && type.getComponentType() == int.class) {
-                                // if the object is an int[] we put it in sRArrayMap using an IntArray
-                                // wrapper that properly implements equals and hashcode for the array
-                                // objects, as required by the map contract.
-                                sRArrayMap.put(new IntArray((int[]) f.get(null)), f.getName());
-                            } else if (type == int.class) {
-                                Integer value = (Integer) f.get(null);
-                                sRMap.put(value, Pair.of(resType, f.getName()));
-                                fullMap.put(f.getName(), value);
-                            } else {
-                                assert false;
-                            }
+                        if (!isValidRField(f)) {
+                            continue;
+                        }
+                        Class<?> type = f.getType();
+                        if (type.isArray()) {
+                            // if the object is an int[] we put it in sRArrayMap using an IntArray
+                            // wrapper that properly implements equals and hashcode for the array
+                            // objects, as required by the map contract.
+                            sRArrayMap.put(new IntArray((int[]) f.get(null)), f.getName());
+                        } else {
+                            Integer value = (Integer) f.get(null);
+                            sRMap.put(value, Pair.of(resType, f.getName()));
+                            fullMap.put(f.getName(), value);
                         }
                     }
                 }
             }
-        } catch (Throwable throwable) {
+        } catch (Exception throwable) {
             if (log != null) {
                 log.error(LayoutLog.TAG_BROKEN,
                         "Failed to load com.android.internal.R from the layout library jar",
@@ -288,6 +308,90 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         }
 
         return true;
+    }
+
+    /**
+     * Tests if the field is pubic, static and one of int or int[].
+     */
+    private static boolean isValidRField(Field field) {
+        int modifiers = field.getModifiers();
+        boolean isAcceptable = Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers);
+        Class<?> type = field.getType();
+        return isAcceptable && type == int.class ||
+                (type.isArray() && type.getComponentType() == int.class);
+
+    }
+
+    private static void parseStyleable() throws Exception {
+        // R.attr doesn't contain all the needed values. There are too many resources in the
+        // framework for all to be in the R class. Only the ones specified manually in
+        // res/values/symbols.xml are put in R class. Since, we need to create a map of all attr
+        // values, we try and find them from the styleables.
+
+        // There were 1500 elements in this map at M timeframe.
+        Map<String, Integer> revRAttrMap = new HashMap<String, Integer>(2048);
+        sRevRMap.put(ResourceType.ATTR, revRAttrMap);
+        // There were 2000 elements in this map at M timeframe.
+        Map<String, Integer> revRStyleableMap = new HashMap<String, Integer>(3072);
+        sRevRMap.put(ResourceType.STYLEABLE, revRStyleableMap);
+        Class<?> c = com.android.internal.R.styleable.class;
+        Field[] fields = c.getDeclaredFields();
+        // Sort the fields to bring all arrays to the beginning, so that indices into the array are
+        // able to refer back to the arrays (i.e. no forward references).
+        Arrays.sort(fields, new Comparator<Field>() {
+            @Override
+            public int compare(Field o1, Field o2) {
+                if (o1 == o2) {
+                    return 0;
+                }
+                Class<?> t1 = o1.getType();
+                Class<?> t2 = o2.getType();
+                if (t1.isArray() && !t2.isArray()) {
+                    return -1;
+                } else if (t2.isArray() && !t1.isArray()) {
+                    return 1;
+                }
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        Map<String, int[]> styleables = new HashMap<String, int[]>();
+        for (Field field : fields) {
+            if (!isValidRField(field)) {
+                // Only consider public static fields that are int or int[].
+                // Don't check the final flag as it may have been modified by layoutlib_create.
+                continue;
+            }
+            String name = field.getName();
+            if (field.getType().isArray()) {
+                int[] styleableValue = (int[]) field.get(null);
+                sRArrayMap.put(new IntArray(styleableValue), name);
+                styleables.put(name, styleableValue);
+                continue;
+            }
+            // Not an array.
+            String arrayName = name;
+            int[] arrayValue = null;
+            int index;
+            while ((index = arrayName.lastIndexOf('_')) >= 0) {
+                // Find the name of the corresponding styleable.
+                // Search in reverse order so that attrs like LinearLayout_Layout_layout_gravity
+                // are mapped to LinearLayout_Layout and not to LinearLayout.
+                arrayName = arrayName.substring(0, index);
+                arrayValue = styleables.get(arrayName);
+                if (arrayValue != null) {
+                    break;
+                }
+            }
+            index = (Integer) field.get(null);
+            if (arrayValue != null) {
+                String attrName = name.substring(arrayName.length() + 1);
+                int attrValue = arrayValue[index];
+                sRMap.put(attrValue, Pair.of(ResourceType.ATTR, attrName));
+                revRAttrMap.put(attrName, attrValue);
+            }
+            sRMap.put(index, Pair.of(ResourceType.STYLEABLE, name));
+            revRStyleableMap.put(name, index);
+        }
     }
 
     @Override
