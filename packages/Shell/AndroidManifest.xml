@@ -104,6 +104,7 @@
     <uses-permission android:name="android.permission.REGISTER_CALL_PROVIDER" />
     <uses-permission android:name="android.permission.REGISTER_CONNECTION_MANAGER" />
     <uses-permission android:name="android.permission.REGISTER_SIM_SUBSCRIPTION" />
+    <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
 
     <application android:label="@string/app_label">
         <provider
