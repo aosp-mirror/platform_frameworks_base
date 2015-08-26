@@ -139,6 +139,7 @@ import android.view.textservice.SpellCheckerSubtype;
 import android.view.textservice.TextServicesManager;
 import android.widget.RemoteViews.RemoteView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastMath;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -1693,6 +1694,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public final UndoManager getUndoManager() {
         // TODO: Consider supporting a global undo manager.
         throw new UnsupportedOperationException("not implemented");
+    }
+
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public final Editor getEditorForTesting() {
+        return mEditor;
     }
 
     /**
