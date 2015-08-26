@@ -53,7 +53,6 @@ class GestureLauncherService extends SystemService {
     private final GestureEventListener mGestureListener = new GestureEventListener();
 
     private Sensor mCameraLaunchSensor;
-    private Vibrator mVibrator;
     private Context mContext;
 
     /** The wake lock held when a gesture is detected. */
@@ -78,7 +77,6 @@ class GestureLauncherService extends SystemService {
                 return;
             }
 
-            mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
             PowerManager powerManager = (PowerManager) mContext.getSystemService(
                     Context.POWER_SERVICE);
             mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -222,16 +220,12 @@ class GestureLauncherService extends SystemService {
                     "userSetupComplete = %s, performing camera launch gesture.",
                     userSetupComplete));
 
-            if (mVibrator != null && mVibrator.hasVibrator()) {
-                mVibrator.vibrate(1000L);
-            }
             // Make sure we don't sleep too early
             mWakeLock.acquire(500L);
             StatusBarManagerInternal service = LocalServices.getService(
                     StatusBarManagerInternal.class);
             service.onCameraLaunchGestureDetected();
             mWakeLock.release();
-
         }
 
         @Override
