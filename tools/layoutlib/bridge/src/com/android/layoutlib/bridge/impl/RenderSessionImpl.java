@@ -29,10 +29,8 @@ import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
-import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.ide.common.rendering.api.ViewType;
-import com.android.internal.util.XmlUtils;
 import com.android.internal.view.menu.ActionMenuItemView;
 import com.android.internal.view.menu.BridgeMenuItemImpl;
 import com.android.internal.view.menu.IconMenuItemView;
@@ -45,21 +43,10 @@ import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.android.support.DesignLibUtil;
-import com.android.layoutlib.bridge.bars.AppCompatActionBar;
-import com.android.layoutlib.bridge.bars.BridgeActionBar;
-import com.android.layoutlib.bridge.bars.Config;
-import com.android.layoutlib.bridge.bars.FrameworkActionBar;
-import com.android.layoutlib.bridge.bars.NavigationBar;
-import com.android.layoutlib.bridge.bars.StatusBar;
-import com.android.layoutlib.bridge.bars.TitleBar;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
-import com.android.resources.Density;
 import com.android.resources.ResourceType;
-import com.android.resources.ScreenOrientation;
 import com.android.util.Pair;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.animation.AnimationThread;
 import android.animation.Animator;
@@ -72,10 +59,7 @@ import android.app.Fragment_Delegate;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.preference.Preference_Delegate;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.AttachInfo_Accessor;
 import android.view.BridgeInflater;
 import android.view.IWindowManager;
@@ -126,33 +110,22 @@ import static com.android.layoutlib.bridge.util.ReflectionUtils.isInstanceOf;
  */
 public class RenderSessionImpl extends RenderAction<SessionParams> {
 
-    private static final int DEFAULT_TITLE_BAR_HEIGHT = 25;
-    private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
-
     // scene state
     private RenderSession mScene;
     private BridgeXmlBlockParser mBlockParser;
     private BridgeInflater mInflater;
-    private ResourceValue mWindowBackground;
     private ViewGroup mViewRoot;
     private FrameLayout mContentRoot;
     private Canvas mCanvas;
     private int mMeasuredScreenWidth = -1;
     private int mMeasuredScreenHeight = -1;
     private boolean mIsAlphaChannelImage;
-    private boolean mWindowIsFloating;
-    private Boolean mIsThemeAppCompat;
-
-    private int mStatusBarSize;
-    private int mNavigationBarSize;
-    private int mNavigationBarOrientation = LinearLayout.HORIZONTAL;
-    private int mTitleBarSize;
-    private int mActionBarSize;
 
     // information being returned through the API
     private BufferedImage mImage;
     private List<ViewInfo> mViewInfoList;
     private List<ViewInfo> mSystemViewInfoList;
+    private Layout.Builder mLayoutBuilder;
 
     private static final class PostInflateException extends Exception {
         private static final long serialVersionUID = 1L;
@@ -196,34 +169,24 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         SessionParams params = getParams();
         BridgeContext context = getContext();
 
-
-        RenderResources resources = getParams().getResources();
-        DisplayMetrics metrics = getContext().getMetrics();
-
         // use default of true in case it's not found to use alpha by default
-        mIsAlphaChannelImage  = getBooleanThemeValue(resources, "windowIsFloating", true, true);
-        // FIXME: Find out why both variables are taking the same value.
-        mWindowIsFloating = getBooleanThemeValue(resources, "windowIsFloating", true, true);
+        mIsAlphaChannelImage = Layout.Builder.getBooleanThemeValue(params.getResources(),
+                        "windowIsFloating", true, true);
 
-        findBackground(resources);
-        findStatusBar(resources, metrics);
-        findActionBar(resources, metrics);
-        findNavigationBar(resources, metrics);
+        mLayoutBuilder = new Layout.Builder(params, context);
 
         // FIXME: find those out, and possibly add them to the render params
         boolean hasNavigationBar = true;
         //noinspection ConstantConditions
         IWindowManager iwm = new IWindowManagerImpl(getContext().getConfiguration(),
-                metrics, Surface.ROTATION_0,
-                hasNavigationBar);
+                context.getMetrics(), Surface.ROTATION_0, hasNavigationBar);
         WindowManagerGlobal_Delegate.setWindowManagerService(iwm);
 
         // build the inflater and parser.
         mInflater = new BridgeInflater(context, params.getLayoutlibCallback());
         context.setBridgeInflater(mInflater);
 
-        mBlockParser = new BridgeXmlBlockParser(
-                params.getLayoutDescription(), context, false /* platformResourceFlag */);
+        mBlockParser = new BridgeXmlBlockParser(params.getLayoutDescription(), context, false);
 
         return SUCCESS.createResult();
     }
@@ -240,164 +203,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         checkLock();
 
         try {
-
+            mViewRoot = new Layout(mLayoutBuilder);
+            mLayoutBuilder = null;  // Done with the builder.
+            mContentRoot = ((Layout) mViewRoot).getContentRoot();
             SessionParams params = getParams();
-            HardwareConfig hardwareConfig = params.getHardwareConfig();
             BridgeContext context = getContext();
-            boolean isRtl = Bridge.isLocaleRtl(params.getLocale());
-            int layoutDirection = isRtl ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR;
-
-            // the view group that receives the window background.
-            ViewGroup backgroundView;
-
-            if (mWindowIsFloating || params.isForceNoDecor()) {
-                backgroundView = mViewRoot = mContentRoot = new FrameLayout(context);
-                mViewRoot.setLayoutDirection(layoutDirection);
-            } else {
-                int simulatedPlatformVersion = params.getSimulatedPlatformVersion();
-                if (hasSoftwareButtons() && mNavigationBarOrientation == LinearLayout.VERTICAL) {
-                    /*
-                     * This is a special case where the navigation bar is on the right.
-                       +-------------------------------------------------+---+
-                       | Status bar (always)                             |   |
-                       +-------------------------------------------------+   |
-                       | (Layout with background drawable)               |   |
-                       | +---------------------------------------------+ |   |
-                       | | Title/Action bar (optional)                 | |   |
-                       | +---------------------------------------------+ |   |
-                       | | Content, vertical extending                 | |   |
-                       | |                                             | |   |
-                       | +---------------------------------------------+ |   |
-                       +-------------------------------------------------+---+
-
-                       So we create a horizontal layout, with the nav bar on the right,
-                       and the left part is the normal layout below without the nav bar at
-                       the bottom
-                     */
-                    LinearLayout topLayout = new LinearLayout(context);
-                    topLayout.setLayoutDirection(layoutDirection);
-                    mViewRoot = topLayout;
-                    topLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-                    if (Config.showOnScreenNavBar(simulatedPlatformVersion)) {
-                        try {
-                            NavigationBar navigationBar = createNavigationBar(context,
-                                    hardwareConfig.getDensity(), isRtl, params.isRtlSupported(),
-                                    simulatedPlatformVersion);
-                            topLayout.addView(navigationBar);
-                        } catch (XmlPullParserException ignored) {
-                        }
-                    }
-                }
-
-                /*
-                 * we're creating the following layout
-                 *
-                   +-------------------------------------------------+
-                   | Status bar (always)                             |
-                   +-------------------------------------------------+
-                   | (Layout with background drawable)               |
-                   | +---------------------------------------------+ |
-                   | | Title/Action bar (optional)                 | |
-                   | +---------------------------------------------+ |
-                   | | Content, vertical extending                 | |
-                   | |                                             | |
-                   | +---------------------------------------------+ |
-                   +-------------------------------------------------+
-                   | Navigation bar for soft buttons, maybe see above|
-                   +-------------------------------------------------+
-
-                 */
-
-                LinearLayout topLayout = new LinearLayout(context);
-                topLayout.setOrientation(LinearLayout.VERTICAL);
-                topLayout.setLayoutDirection(layoutDirection);
-                // if we don't already have a view root this is it
-                if (mViewRoot == null) {
-                    mViewRoot = topLayout;
-                } else {
-                    int topLayoutWidth =
-                            params.getHardwareConfig().getScreenWidth() - mNavigationBarSize;
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                            topLayoutWidth, LayoutParams.MATCH_PARENT);
-                    topLayout.setLayoutParams(layoutParams);
-
-                    // this is the case of soft buttons + vertical bar.
-                    // this top layout is the first layout in the horizontal layout. see above)
-                    if (isRtl && params.isRtlSupported()) {
-                        // If RTL is enabled, layoutlib will mirror the layouts. So, add the
-                        // topLayout to the right of Navigation Bar and layoutlib will draw it
-                        // to the left.
-                        mViewRoot.addView(topLayout);
-                    } else {
-                        // Add the top layout to the left of the Navigation Bar.
-                        mViewRoot.addView(topLayout, 0);
-                    }
-                }
-
-                if (mStatusBarSize > 0) {
-                    // system bar
-                    try {
-                        StatusBar statusBar = createStatusBar(context, hardwareConfig.getDensity(),
-                                layoutDirection, params.isRtlSupported(),
-                                simulatedPlatformVersion);
-                        topLayout.addView(statusBar);
-                    } catch (XmlPullParserException ignored) {
-
-                    }
-                }
-
-                LinearLayout backgroundLayout = new LinearLayout(context);
-                backgroundView = backgroundLayout;
-                backgroundLayout.setOrientation(LinearLayout.VERTICAL);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT, 0);
-                layoutParams.weight = 1;
-                backgroundLayout.setLayoutParams(layoutParams);
-                topLayout.addView(backgroundLayout);
-
-
-                // if the theme says no title/action bar, then the size will be 0
-                if (mActionBarSize > 0) {
-                    BridgeActionBar actionBar = createActionBar(context, params, backgroundLayout);
-                    actionBar.createMenuPopup();
-                    mContentRoot = actionBar.getContentRoot();
-                } else if (mTitleBarSize > 0) {
-                    try {
-                        TitleBar titleBar = createTitleBar(context,
-                                params.getAppLabel(),
-                                simulatedPlatformVersion);
-                        backgroundLayout.addView(titleBar);
-                    } catch (XmlPullParserException ignored) {
-
-                    }
-                }
-
-                // content frame
-                if (mContentRoot == null) {
-                    mContentRoot = new FrameLayout(context);
-                    layoutParams = new LinearLayout.LayoutParams(
-                            LayoutParams.MATCH_PARENT, 0);
-                    layoutParams.weight = 1;
-                    mContentRoot.setLayoutParams(layoutParams);
-                    backgroundLayout.addView(mContentRoot);
-                }
-
-                if (Config.showOnScreenNavBar(simulatedPlatformVersion) &&
-                        mNavigationBarOrientation == LinearLayout.HORIZONTAL &&
-                        mNavigationBarSize > 0) {
-                    // system bar
-                    try {
-                        NavigationBar navigationBar = createNavigationBar(context,
-                                hardwareConfig.getDensity(), isRtl, params.isRtlSupported(),
-                                simulatedPlatformVersion);
-                        topLayout.addView(navigationBar);
-                    } catch (XmlPullParserException ignored) {
-
-                    }
-                }
-            }
-
 
             // Sets the project callback (custom view loader) to the fragment delegate so that
             // it can instantiate the custom Fragment.
@@ -408,7 +218,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             View view;
             if (isPreference) {
                 view = Preference_Delegate.inflatePreference(getContext(), mBlockParser,
-                  mContentRoot);
+                        mContentRoot);
             } else {
                 view = mInflater.inflate(mBlockParser, mContentRoot);
             }
@@ -426,12 +236,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             mInflater.onDoneInflation();
 
             setActiveToolbar(view, context, params);
-
-            // get the background drawable
-            if (mWindowBackground != null) {
-                Drawable d = ResourceHelper.getDrawable(mWindowBackground, context);
-                backgroundView.setBackground(d);
-            }
 
             return SUCCESS.createResult();
         } catch (PostInflateException e) {
@@ -1073,198 +877,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
     }
 
-
-    private void findBackground(RenderResources resources) {
-        if (!getParams().isBgColorOverridden()) {
-            mWindowBackground = resources.findItemInTheme("windowBackground",
-                    true /*isFrameworkAttr*/);
-            if (mWindowBackground != null) {
-                mWindowBackground = resources.resolveResValue(mWindowBackground);
-            }
-        }
-    }
-
-    private boolean hasSoftwareButtons() {
-        return getParams().getHardwareConfig().hasSoftwareButtons();
-    }
-
-    private void findStatusBar(RenderResources resources, DisplayMetrics metrics) {
-        boolean windowFullscreen = getBooleanThemeValue(resources,
-                "windowFullscreen", false, true);
-
-        if (!windowFullscreen && !mWindowIsFloating) {
-            // default value
-            mStatusBarSize = DEFAULT_STATUS_BAR_HEIGHT;
-
-            // get the real value
-            ResourceValue value = resources.getFrameworkResource(ResourceType.DIMEN,
-                    "status_bar_height");
-
-            if (value != null) {
-                TypedValue typedValue = ResourceHelper.getValue("status_bar_height",
-                        value.getValue(), true /*requireUnit*/);
-                if (typedValue != null) {
-                    // compute the pixel value based on the display metrics
-                    mStatusBarSize = (int)typedValue.getDimension(metrics);
-                }
-            }
-        }
-    }
-
-    private void findActionBar(RenderResources resources, DisplayMetrics metrics) {
-        if (mWindowIsFloating) {
-            return;
-        }
-
-        boolean windowActionBar = getBooleanThemeValue(resources,
-                "windowActionBar", true, !isThemeAppCompat(resources));
-
-        // if there's a value and it's false (default is true)
-        if (windowActionBar) {
-
-            // default size of the window title bar
-            mActionBarSize = DEFAULT_TITLE_BAR_HEIGHT;
-
-            // get value from the theme.
-            ResourceValue value = resources.findItemInTheme("actionBarSize",
-                    true /*isFrameworkAttr*/);
-
-            // resolve it
-            value = resources.resolveResValue(value);
-
-            if (value != null) {
-                // get the numerical value, if available
-                TypedValue typedValue = ResourceHelper.getValue("actionBarSize", value.getValue(),
-                        true /*requireUnit*/);
-                if (typedValue != null) {
-                    // compute the pixel value based on the display metrics
-                    mActionBarSize = (int)typedValue.getDimension(metrics);
-                }
-            }
-        } else {
-            // action bar overrides title bar so only look for this one if action bar is hidden
-            boolean windowNoTitle = getBooleanThemeValue(resources, "windowNoTitle", false, true);
-
-            if (!windowNoTitle) {
-
-                // default size of the window title bar
-                mTitleBarSize = DEFAULT_TITLE_BAR_HEIGHT;
-
-                // get value from the theme.
-                ResourceValue value = resources.findItemInTheme("windowTitleSize",
-                        true /*isFrameworkAttr*/);
-
-                // resolve it
-                value = resources.resolveResValue(value);
-
-                if (value != null) {
-                    // get the numerical value, if available
-                    TypedValue typedValue = ResourceHelper.getValue("windowTitleSize",
-                            value.getValue(), true /*requireUnit*/);
-                    if (typedValue != null) {
-                        // compute the pixel value based on the display metrics
-                        mTitleBarSize = (int)typedValue.getDimension(metrics);
-                    }
-                }
-            }
-
-        }
-    }
-
-    private void findNavigationBar(RenderResources resources, DisplayMetrics metrics) {
-        if (hasSoftwareButtons() && !mWindowIsFloating) {
-
-            // default value
-            mNavigationBarSize = 48; // ??
-
-            HardwareConfig hardwareConfig = getParams().getHardwareConfig();
-
-            boolean barOnBottom = true;
-
-            if (hardwareConfig.getOrientation() == ScreenOrientation.LANDSCAPE) {
-                // compute the dp of the screen.
-                int shortSize = hardwareConfig.getScreenHeight();
-
-                // compute in dp
-                int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT /
-                        hardwareConfig.getDensity().getDpiValue();
-
-                // 0-599dp: "phone" UI with bar on the side
-                // 600+dp: "tablet" UI with bar on the bottom
-                barOnBottom = shortSizeDp >= 600;
-            }
-
-            if (barOnBottom) {
-                mNavigationBarOrientation = LinearLayout.HORIZONTAL;
-            } else {
-                mNavigationBarOrientation = LinearLayout.VERTICAL;
-            }
-
-            // get the real value
-            ResourceValue value = resources.getFrameworkResource(ResourceType.DIMEN,
-                    barOnBottom ? "navigation_bar_height" : "navigation_bar_width");
-
-            if (value != null) {
-                TypedValue typedValue = ResourceHelper.getValue("navigation_bar_height",
-                        value.getValue(), true /*requireUnit*/);
-                if (typedValue != null) {
-                    // compute the pixel value based on the display metrics
-                    mNavigationBarSize = (int)typedValue.getDimension(metrics);
-                }
-            }
-        }
-    }
-
-    private boolean isThemeAppCompat(RenderResources resources) {
-        // Ideally, we should check if the corresponding activity extends
-        // android.support.v7.app.ActionBarActivity, and not care about the theme name at all.
-        if (mIsThemeAppCompat == null) {
-            StyleResourceValue defaultTheme = resources.getDefaultTheme();
-          // We can't simply check for parent using resources.themeIsParentOf() since the
-          // inheritance structure isn't really what one would expect. The first common parent
-          // between Theme.AppCompat.Light and Theme.AppCompat is Theme.Material (for v21).
-            boolean isThemeAppCompat = false;
-            for (int i = 0; i < 50; i++) {
-                if (defaultTheme == null) {
-                    break;
-                }
-                // for loop ensures that we don't run into cyclic theme inheritance.
-                if (defaultTheme.getName().startsWith("Theme.AppCompat")) {
-                    isThemeAppCompat = true;
-                    break;
-                }
-                defaultTheme = resources.getParent(defaultTheme);
-            }
-            mIsThemeAppCompat = isThemeAppCompat;
-        }
-        return mIsThemeAppCompat;
-    }
-
-    /**
-     * Looks for an attribute in the current theme.
-     *
-     * @param resources the render resources
-     * @param name the name of the attribute
-     * @param defaultValue the default value.
-     * @param isFrameworkAttr if the attribute is in android namespace
-     * @return the value of the attribute or the default one if not found.
-     */
-    private boolean getBooleanThemeValue(RenderResources resources,
-            String name, boolean defaultValue, boolean isFrameworkAttr) {
-
-        ResourceValue value = resources.findItemInTheme(name, isFrameworkAttr);
-
-        // because it may reference something else, we resolve it.
-        value = resources.resolveResValue(value);
-
-        // if there's no value, return the default.
-        if (value == null || value.getValue() == null) {
-            return defaultValue;
-        }
-
-        return XmlUtils.convertValueToBoolean(value.getValue(), defaultValue);
-    }
-
     /**
      * Post process on a view hierarchy that was just inflated.
      * <p/>
@@ -1735,63 +1347,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     public void invalidateRenderingSize() {
         mMeasuredScreenWidth = mMeasuredScreenHeight = -1;
-    }
-
-    /**
-     * Creates the status bar with wifi and battery icons.
-     */
-    private StatusBar createStatusBar(BridgeContext context, Density density, int direction,
-            boolean isRtlSupported, int platformVersion) throws XmlPullParserException {
-        StatusBar statusBar = new StatusBar(context, density,
-                direction, isRtlSupported, platformVersion);
-        statusBar.setLayoutParams(
-                new LinearLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT, mStatusBarSize));
-        return statusBar;
-    }
-
-    /**
-     * Creates the navigation bar with back, home and recent buttons.
-     *
-     * @param isRtl true if the current locale is right-to-left
-     * @param isRtlSupported true is the project manifest declares that the application
-     *        is RTL aware.
-     */
-    private NavigationBar createNavigationBar(BridgeContext context, Density density,
-            boolean isRtl, boolean isRtlSupported, int simulatedPlatformVersion)
-            throws XmlPullParserException {
-        NavigationBar navigationBar = new NavigationBar(context,
-                density, mNavigationBarOrientation, isRtl,
-                isRtlSupported, simulatedPlatformVersion);
-        if (mNavigationBarOrientation == LinearLayout.VERTICAL) {
-            navigationBar.setLayoutParams(new LinearLayout.LayoutParams(mNavigationBarSize,
-                    LayoutParams.MATCH_PARENT));
-        } else {
-            navigationBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-                    mNavigationBarSize));
-        }
-        return navigationBar;
-    }
-
-    private TitleBar createTitleBar(BridgeContext context, String title,
-            int simulatedPlatformVersion)
-            throws XmlPullParserException {
-        TitleBar titleBar = new TitleBar(context, title, simulatedPlatformVersion);
-        titleBar.setLayoutParams(
-                new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, mTitleBarSize));
-        return titleBar;
-    }
-
-    /**
-     * Creates the action bar. Also queries the project callback for missing information.
-     */
-    private BridgeActionBar createActionBar(BridgeContext context, SessionParams params,
-            ViewGroup parentView) {
-        if (mIsThemeAppCompat == Boolean.TRUE) {
-            return new AppCompatActionBar(context, params, parentView);
-        } else {
-            return new FrameworkActionBar(context, params, parentView);
-        }
     }
 
     public BufferedImage getImage() {
