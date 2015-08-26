@@ -19,12 +19,9 @@ package com.android.server;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
@@ -35,11 +32,11 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.os.Vibrator;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Slog;
+
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 /**
  * The service that listens for gestures detected in sensor firmware and starts the intent
@@ -57,7 +54,6 @@ class GestureLauncherService extends SystemService {
 
     private Sensor mCameraLaunchSensor;
     private Vibrator mVibrator;
-    private KeyguardManager mKeyGuard;
     private Context mContext;
 
     /** The wake lock held when a gesture is detected. */
@@ -83,11 +79,9 @@ class GestureLauncherService extends SystemService {
             }
 
             mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-            mKeyGuard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
             PowerManager powerManager = (PowerManager) mContext.getSystemService(
                     Context.POWER_SERVICE);
-            mWakeLock = powerManager.newWakeLock(
-                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                     "GestureLauncherService");
             updateCameraRegistered();
 
@@ -227,29 +221,17 @@ class GestureLauncherService extends SystemService {
             if (DBG) Slog.d(TAG, String.format(
                     "userSetupComplete = %s, performing camera launch gesture.",
                     userSetupComplete));
-            boolean locked = mKeyGuard != null && mKeyGuard.inKeyguardRestrictedInputMode();
-            String action = locked
-                    ? MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
-                    : MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA;
-            Intent intent = new Intent(action);
-            PackageManager pm = mContext.getPackageManager();
-            ResolveInfo componentInfo = pm.resolveActivity(intent,
-                PackageManager.MATCH_DEFAULT_ONLY);
-            if (componentInfo == null) {
-                if (DBG) Slog.d(TAG, "Couldn't find an app to process the camera intent.");
-                return;
-            }
 
             if (mVibrator != null && mVibrator.hasVibrator()) {
                 mVibrator.vibrate(1000L);
             }
-            // Turn on the screen before the camera launches.
+            // Make sure we don't sleep too early
             mWakeLock.acquire(500L);
-            intent.setComponent(new ComponentName(componentInfo.activityInfo.packageName,
-                    componentInfo.activityInfo.name));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            StatusBarManagerInternal service = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            service.onCameraLaunchGestureDetected();
             mWakeLock.release();
+
         }
 
         @Override

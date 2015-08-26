@@ -203,6 +203,7 @@ public class NotificationPanelView extends PanelView implements
     private int mLastOrientation = -1;
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
+    private boolean mLaunchingAffordance;
 
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
@@ -488,7 +489,9 @@ public class NotificationPanelView extends PanelView implements
         mIsLaunchTransitionFinished = false;
         mBlockTouches = false;
         mUnlockIconActive = false;
-        mAfforanceHelper.reset(true);
+        if (!mLaunchingAffordance) {
+            mAfforanceHelper.reset(false);
+        }
         closeQs();
         mStatusBar.dismissPopups();
         mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
@@ -2392,5 +2395,37 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public boolean hasOverlappingRendering() {
         return !mDozing;
+    }
+
+    public void launchCamera(boolean animate) {
+        // If we are launching it when we are occluded already we don't want it to animate,
+        // nor setting these flags, since the occluded state doesn't change anymore, hence it's
+        // never reset.
+        if (!isFullyCollapsed()) {
+            mLaunchingAffordance = true;
+            setLaunchingAffordance(true);
+        } else {
+            animate = false;
+        }
+        mAfforanceHelper.launchAffordance(animate, getLayoutDirection() == LAYOUT_DIRECTION_RTL);
+    }
+
+    public void onAffordanceLaunchEnded() {
+        mLaunchingAffordance = false;
+        setLaunchingAffordance(false);
+    }
+
+    /**
+     * Set whether we are currently launching an affordance. This is currently only set when
+     * launched via a camera gesture.
+     */
+    private void setLaunchingAffordance(boolean launchingAffordance) {
+        getLeftIcon().setLaunchingAffordance(launchingAffordance);
+        getRightIcon().setLaunchingAffordance(launchingAffordance);
+        getCenterIcon().setLaunchingAffordance(launchingAffordance);
+    }
+
+    public boolean canCameraGestureBeLaunched() {
+        return !mAfforanceHelper.isSwipingInProgress();
     }
 }
