@@ -124,6 +124,10 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
         // input device we are listening to.
         switch (e.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                if (!mShowDecor) {
+                    // When there is no decor we should not react to anything.
+                    return false;
+                }
                 // A drag action is started if we aren't dragging already and the starting event is
                 // either a left mouse button or any other input device.
                 if (!mDragging &&
