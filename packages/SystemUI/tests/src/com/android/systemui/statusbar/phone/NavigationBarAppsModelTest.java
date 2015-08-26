@@ -72,7 +72,7 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         mMockEdit = mock(SharedPreferences.Editor.class);
         mMockUserManager = mock(UserManager.class);
 
-        when (context.getSharedPreferences(
+        when(context.getSharedPreferences(
                 "com.android.systemui.navbarapps", Context.MODE_PRIVATE)).thenReturn(mMockPrefs);
         when(context.getSystemService(Context.USER_SERVICE)).thenReturn(mMockUserManager);
         when(context.getPackageManager()).thenReturn(mMockPackageManager);
@@ -90,6 +90,16 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         when(mMockUserManager.getUserForSerialNumber(222L)).thenReturn(new UserHandle(2));
         when(mMockUserManager.getUserForSerialNumber(444L)).thenReturn(new UserHandle(4));
         when(mMockUserManager.getUserForSerialNumber(555L)).thenReturn(new UserHandle(5));
+
+        UserInfo ui2 = new UserInfo();
+        ui2.profileGroupId = 999;
+        UserInfo ui4 = new UserInfo();
+        ui4.profileGroupId = 999;
+        UserInfo ui5 = new UserInfo();
+        ui5.profileGroupId = 999;
+        when(mMockUserManager.getUserInfo(2)).thenReturn(ui2);
+        when(mMockUserManager.getUserInfo(4)).thenReturn(ui4);
+        when(mMockUserManager.getUserInfo(5)).thenReturn(ui5);
 
         mModel = new NavigationBarAppsModel(context) {
             @Override
@@ -137,17 +147,22 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
                 .queryIntentActivitiesAsUser(any(Intent.class), eq(0), any(int.class)))
                 .thenReturn(Arrays.asList(ri0, ri1));
 
+        mModel.setCurrentUser(3);
         // Unlauncheable (for various reasons) apps.
         assertEquals(null, mModel.buildAppLaunchIntent(
                 new AppInfo(new ComponentName("package0", "class0"), new UserHandle(3))));
+        mModel.setCurrentUser(4);
         assertEquals(null, mModel.buildAppLaunchIntent(
                 new AppInfo(new ComponentName("package1", "class1"), new UserHandle(4))));
+        mModel.setCurrentUser(5);
         assertEquals(null, mModel.buildAppLaunchIntent(
                 new AppInfo(new ComponentName("package2", "class2"), new UserHandle(5))));
+        mModel.setCurrentUser(6);
         assertEquals(null, mModel.buildAppLaunchIntent(
                 new AppInfo(new ComponentName("package3", "class3"), new UserHandle(6))));
 
         // A launcheable app.
+        mModel.setCurrentUser(7);
         Intent intent = mModel.buildAppLaunchIntent(
                 new AppInfo(new ComponentName("package4", "class4"), new UserHandle(7)));
         assertNotNull(intent);
@@ -158,13 +173,11 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
     /** Initializes the model from SharedPreferences for a few app activites. */
     private void initializeModelFromPrefs() {
         // Assume several apps are stored.
-        when(mMockPrefs.getInt("222|app_count", -1)).thenReturn(3);
-        when(mMockPrefs.getString("222|app_0", null)).thenReturn("package0/class0");
-        when(mMockPrefs.getLong("222|app_user_0", -1)).thenReturn(-1L);
-        when(mMockPrefs.getString("222|app_1", null)).thenReturn("package1/class1");
-        when(mMockPrefs.getLong("222|app_user_1", -1)).thenReturn(444L);
-        when(mMockPrefs.getString("222|app_2", null)).thenReturn("package2/class2");
-        when(mMockPrefs.getLong("222|app_user_2", -1)).thenReturn(555L);
+        when(mMockPrefs.getInt("222|app_count", -1)).thenReturn(2);
+        when(mMockPrefs.getString("222|app_0", null)).thenReturn("package1/class1");
+        when(mMockPrefs.getLong("222|app_user_0", -1)).thenReturn(444L);
+        when(mMockPrefs.getString("222|app_1", null)).thenReturn("package2/class2");
+        when(mMockPrefs.getLong("222|app_user_1", -1)).thenReturn(555L);
 
         ActivityInfo mockActivityInfo = new ActivityInfo();
         mockActivityInfo.exported = true;
@@ -283,6 +296,11 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         assertEquals(1, mModel.getAppCount());
         assertEquals("package0/class0", mModel.getApp(0).getComponentName().flattenToString());
         assertEquals(new UserHandle(5), mModel.getApp(0).getUser());
+        InOrder order = inOrder(mMockEdit);
+        order.verify(mMockEdit).putInt("222|app_count", 1);
+        order.verify(mMockEdit).putString("222|app_0", "package0/class0");
+        order.verify(mMockEdit).putLong("222|app_user_0", 555L);
+        order.verify(mMockEdit).apply();
         verifyNoMoreInteractions(mMockEdit);
     }
 

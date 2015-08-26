@@ -111,6 +111,20 @@ class NavigationBarAppsModel {
         ComponentName component = appInfo.getComponentName();
         int appUserId = appInfo.getUser().getIdentifier();
 
+        if (mCurrentUserId != appUserId) {
+            // Check if app user is a profile of current user and the app user is enabled.
+            UserInfo appUserInfo = mUserManager.getUserInfo(appUserId);
+            UserInfo currentUserInfo = mUserManager.getUserInfo(mCurrentUserId);
+            if (appUserInfo == null || currentUserInfo == null
+                    || appUserInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID
+                    || appUserInfo.profileGroupId != currentUserInfo.profileGroupId
+                    || !appUserInfo.isEnabled()) {
+                Log.e(TAG, "User " + appUserId +
+                        " is is not a profile of the current user, or is disabled.");
+                return null;
+            }
+        }
+
         // This code is based on LauncherAppsService.startActivityAsUser code.
         Intent launchIntent = new Intent(Intent.ACTION_MAIN);
         launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -165,7 +179,7 @@ class NavigationBarAppsModel {
 
         int appCount = mPrefs.getInt(userPrefixed(APP_COUNT_PREF), -1);
         if (appCount >= 0) {
-            loadAppsFromPrefs();
+            loadAppsFromPrefs(appCount);
         } else {
             // We switched to this user for the first time ever. This is a good opportunity to clean
             // prefs for users deleted in the past.
@@ -258,37 +272,45 @@ class NavigationBarAppsModel {
         edit.apply();
     }
 
+    /** Loads AppInfo from prefs. Returns null if something is wrong. */
+    private AppInfo loadAppFromPrefs(int index) {
+        String prefValue = mPrefs.getString(prefNameForApp(index), null);
+        if (prefValue == null) {
+            Slog.w(TAG, "Couldn't find pref " + prefNameForApp(index));
+            return null;
+        }
+        ComponentName componentName = ComponentName.unflattenFromString(prefValue);
+        if (componentName == null) {
+            Slog.w(TAG, "Invalid component name " + prefValue);
+            return null;
+        }
+        long userSerialNumber = mPrefs.getLong(prefUserForApp(index), -1);
+        if (userSerialNumber == -1) {
+            Slog.w(TAG, "Couldn't find pref " + prefUserForApp(index));
+            return null;
+        }
+        UserHandle appUser = mUserManager.getUserForSerialNumber(userSerialNumber);
+        if (appUser == null) {
+            Slog.w(TAG, "No user for serial " + userSerialNumber);
+            return null;
+        }
+        AppInfo appInfo = new AppInfo(componentName, appUser);
+        if (buildAppLaunchIntent(appInfo) == null) {
+            return null;
+        }
+        return appInfo;
+    }
+
     /** Loads the list of apps from SharedPreferences. */
-    private void loadAppsFromPrefs() {
-        UserManager mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-
-        boolean hadUnlauncheableApps = false;
-
-        int appCount = mPrefs.getInt(userPrefixed(APP_COUNT_PREF), -1);
+    private void loadAppsFromPrefs(int appCount) {
         for (int i = 0; i < appCount; i++) {
-            String prefValue = mPrefs.getString(prefNameForApp(i), null);
-            if (prefValue == null) {
-                Slog.w(TAG, "Couldn't find pref " + prefNameForApp(i));
-                // Couldn't find the saved state. Just skip this item.
-                continue;
-            }
-            ComponentName componentName = ComponentName.unflattenFromString(prefValue);
-            long userSerialNumber = mPrefs.getLong(prefUserForApp(i), -1);
-            if (userSerialNumber == -1) {
-                Slog.w(TAG, "Couldn't find pref " + prefUserForApp(i));
-                // Couldn't find the saved state. Just skip this item.
-                continue;
-            }
-            UserHandle appUser = mUserManager.getUserForSerialNumber(userSerialNumber);
-            AppInfo appInfo = new AppInfo(componentName, appUser);
-            if (appUser != null && buildAppLaunchIntent(appInfo) != null) {
+            AppInfo appInfo = loadAppFromPrefs(i);
+            if (appInfo != null) {
                 mApps.add(appInfo);
-            } else {
-                hadUnlauncheableApps = true;
             }
         }
 
-        if (hadUnlauncheableApps) savePrefs();
+        if (appCount != mApps.size()) savePrefs();
     }
 
     /** Adds the first few apps from the owner profile. Used for demo purposes. */

@@ -175,7 +175,7 @@ class NavigationBarApps extends LinearLayout {
             ComponentName appComponentName = appInfo.getComponentName();
             if (!appComponentName.getPackageName().equals(packageName)) continue;
 
-            if (sAppsModel.buildAppLaunchIntent(new AppInfo(appComponentName, user)) != null) {
+            if (sAppsModel.buildAppLaunchIntent(appInfo) != null) {
                 continue;
             }
 
@@ -456,20 +456,31 @@ class NavigationBarApps extends LinearLayout {
         if (data.getItemCount() != 1) {
             return null;
         }
-        Intent intent = data.getItemAt(0).getIntent();
+        ClipData.Item item = data.getItemAt(0);
+        if (item == null) {
+            return null;
+        }
+        Intent intent = item.getIntent();
         if (intent == null) {
             return null;
         }
-
         long userSerialNumber = intent.getLongExtra(EXTRA_PROFILE, -1);
-
-        // Validate the received user serial number.
+        if (userSerialNumber == -1) {
+            return null;
+        }
         UserHandle appUser = mUserManager.getUserForSerialNumber(userSerialNumber);
         if (appUser == null) {
-            appUser = new UserHandle(ActivityManager.getCurrentUser());
+            return null;
         }
-
-        return new AppInfo(intent.getComponent(), appUser);
+        ComponentName componentName = intent.getComponent();
+        if (componentName == null) {
+            return null;
+        }
+        AppInfo appInfo = new AppInfo(componentName, appUser);
+        if (sAppsModel.buildAppLaunchIntent(appInfo) == null) {
+            return null;
+        }
+        return appInfo;
     }
 
     /** Updates the app at a given view index. */
