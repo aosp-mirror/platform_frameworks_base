@@ -21,7 +21,10 @@
         <uses-permission android:name="android.permission.SET_WALLPAPER" />
         <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
 
-        <application android:requiredForAllUsers="true">
+        <application
+            android:requiredForAllUsers="true"
+            android:largeHeap="true">
+
         <activity
             android:name="WallpaperCropActivity"
             android:theme="@style/Theme.WallpaperCropper"
