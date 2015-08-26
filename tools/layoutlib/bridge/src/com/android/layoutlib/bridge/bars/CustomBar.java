@@ -33,6 +33,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
@@ -227,16 +228,18 @@ abstract class CustomBar extends LinearLayout {
      * Find the background color for this bar from the theme attributes. Only relevant to StatusBar
      * and NavigationBar.
      * <p/>
-     * Returns 0 if not found.
+     * Returns null if not found.
      *
      * @param colorAttrName the attribute name for the background color
      * @param translucentAttrName the attribute name for the translucency property of the bar.
      *
      * @throws NumberFormatException if color resolved to an invalid string.
      */
-    protected int getBarColor(@NonNull String colorAttrName, @NonNull String translucentAttrName) {
+    @Nullable
+    protected Integer getBarColor(@NonNull String colorAttrName,
+            @NonNull String translucentAttrName) {
         if (!Config.isGreaterOrEqual(mSimulatedPlatformVersion, LOLLIPOP)) {
-            return 0;
+            return null;
         }
         RenderResources renderResources = getContext().getRenderResources();
         // First check if the bar is translucent.
@@ -251,10 +254,11 @@ abstract class CustomBar extends LinearLayout {
         if (transparent) {
             return getColor(renderResources, colorAttrName);
         }
-        return 0;
+        return null;
     }
 
-    private static int getColor(RenderResources renderResources, String attr) {
+    @Nullable
+    private static Integer getColor(RenderResources renderResources, String attr) {
         // From ?attr/foo to @color/bar. This is most likely an ItemResourceValue.
         ResourceValue resource = renderResources.findItemInTheme(attr, true);
         // Form @color/bar to the #AARRGGBB
@@ -275,7 +279,7 @@ abstract class CustomBar extends LinearLayout {
                 }
             }
         }
-        return 0;
+        return null;
     }
 
     private ResourceValue getResourceValue(String reference) {

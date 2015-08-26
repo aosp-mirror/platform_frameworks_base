@@ -65,8 +65,8 @@ public class NavigationBar extends CustomBar {
         super(context, orientation, getShortestWidth(context)>= 600 ? LAYOUT_600DP_XML : LAYOUT_XML,
                 "navigation_bar.xml", simulatedPlatformVersion);
 
-        int color = getBarColor(ATTR_COLOR, ATTR_TRANSLUCENT);
-        setBackgroundColor(color == 0 ? 0xFF000000 : color);
+        Integer color = getBarColor(ATTR_COLOR, ATTR_TRANSLUCENT);
+        setBackgroundColor(color == null ? 0xFF000000 : color);
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
