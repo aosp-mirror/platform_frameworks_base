@@ -485,6 +485,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private Runnable mLaunchTransitionEndRunnable;
     private boolean mLaunchTransitionFadingAway;
     private ExpandableNotificationRow mDraggedDownRow;
+    private boolean mLaunchCameraOnScreenTurningOn;
+    private PowerManager.WakeLock mGestureWakeLock;
 
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
@@ -919,7 +921,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastReceiver.onReceive(mContext,
                 new Intent(pm.isScreenOn() ? Intent.ACTION_SCREEN_ON : Intent.ACTION_SCREEN_OFF));
-
+        mGestureWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
+                "GestureWakeLock");
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -3425,6 +3428,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void onLaunchTransitionFadingEnded() {
         mNotificationPanel.setAlpha(1.0f);
+        mNotificationPanel.onAffordanceLaunchEnded();
+        releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
         mLaunchTransitionFadingAway = false;
         mScrimController.forceHideScrims(false /* hide */);
@@ -3512,6 +3517,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void onLaunchTransitionTimeout() {
         Log.w(TAG, "Launch transition: Timeout!");
+        mNotificationPanel.onAffordanceLaunchEnded();
+        releaseGestureWakeLock();
         mNotificationPanel.resetViews();
     }
 
@@ -3563,8 +3570,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mQSPanel.refreshAllTiles();
         }
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
+        releaseGestureWakeLock();
+        mNotificationPanel.onAffordanceLaunchEnded();
         mNotificationPanel.setAlpha(1f);
         return staying;
+    }
+
+    private void releaseGestureWakeLock() {
+        if (mGestureWakeLock.isHeld()) {
+            mGestureWakeLock.release();
+        }
     }
 
     public long calculateGoingToFullShadeDelay() {
@@ -3702,6 +3717,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public boolean onMenuPressed() {
         return mState == StatusBarState.KEYGUARD && mStatusBarKeyguardViewManager.onMenuPressed();
+    }
+
+    public void endAffordanceLaunch() {
+        releaseGestureWakeLock();
+        mNotificationPanel.onAffordanceLaunchEnded();
     }
 
     public boolean onBackPressed() {
@@ -3939,6 +3959,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onFinishedGoingToSleep() {
+        mNotificationPanel.onAffordanceLaunchEnded();
+        releaseGestureWakeLock();
+        mLaunchCameraOnScreenTurningOn = false;
         mDeviceInteractive = false;
         mWakeUpComingFromTouch = false;
         mWakeUpTouchLocation = null;
@@ -3957,6 +3980,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onScreenTurningOn() {
         mNotificationPanel.onScreenTurningOn();
+        if (mLaunchCameraOnScreenTurningOn) {
+            mNotificationPanel.launchCamera(false);
+            mLaunchCameraOnScreenTurningOn = false;
+        }
     }
 
     public void onScreenTurnedOn() {
@@ -4111,6 +4138,38 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mIconPolicy != null) {
             mIconPolicy.appTransitionStarting(startTime, duration);
+        }
+    }
+
+    @Override
+    public void onCameraLaunchGestureDetected() {
+        if (!mNotificationPanel.canCameraGestureBeLaunched()) {
+            return;
+        }
+        if (!mDeviceInteractive) {
+            PowerManager pm = mContext.getSystemService(PowerManager.class);
+            pm.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:CAMERA_GESTURE");
+            mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
+        }
+        if (!mStatusBarKeyguardViewManager.isShowing()) {
+            startActivity(KeyguardBottomAreaView.INSECURE_CAMERA_INTENT,
+                    true /* dismissShade */);
+        } else {
+            if (!mDeviceInteractive) {
+                // Avoid flickering of the scrim when we instant launch the camera and the bouncer
+                // comes on.
+                mScrimController.dontAnimateBouncerChangesUntilNextFrame();
+                mGestureWakeLock.acquire(LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
+            }
+            if (mStatusBarKeyguardViewManager.isScreenTurnedOn()) {
+                mNotificationPanel.launchCamera(mDeviceInteractive /* animate */);
+            } else {
+                // We need to defer the camera launch until the screen comes on, since otherwise
+                // we will dismiss us too early since we are waiting on an activity to be drawn and
+                // incorrectly get notified because of the screen on event (which resumes and pauses
+                // some activities)
+                mLaunchCameraOnScreenTurningOn = true;
+            }
         }
     }
 
