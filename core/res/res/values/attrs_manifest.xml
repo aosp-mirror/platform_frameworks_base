@@ -1816,9 +1816,9 @@
         <attr name="uiOptions" />
         <attr name="parentActivityName" />
         <attr name="singleUser" />
-        <!-- @hide This broacast receiver will only receive broadcasts for the
-             primary user.  Can only be used with receivers. -->
-        <attr name="primaryUserOnly" format="boolean" />
+        <!-- @hide This broadcast receiver or activity will only receive broadcasts for the
+             system user-->
+        <attr name="systemUserOnly" format="boolean" />
         <attr name="persistableMode" />
         <attr name="allowEmbedded" />
         <attr name="documentLaunchMode" />

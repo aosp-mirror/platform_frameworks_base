@@ -273,10 +273,10 @@ public class ActivityInfo extends ComponentInfo
     public static final int FLAG_RESUME_WHILE_PAUSING = 0x4000;
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
-     * by the primary user.  Only works with broadcast receivers.  Set from the
-     * android.R.attr#primaryUserOnly attribute.
+     * by the system user.  Only works with broadcast receivers.  Set from the
+     * android.R.attr#systemUserOnly attribute.
      */
-    public static final int FLAG_PRIMARY_USER_ONLY = 0x20000000;
+    public static final int FLAG_SYSTEM_USER_ONLY = 0x20000000;
     /**
      * Bit in {@link #flags}: If set, a single instance of the receiver will
      * run for all users on the device.  Set from the

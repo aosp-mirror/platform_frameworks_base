@@ -2804,7 +2804,7 @@
         </activity>
 
         <receiver android:name="com.android.server.BootReceiver"
-                android:primaryUserOnly="true">
+                android:systemUserOnly="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

@@ -208,7 +208,6 @@ import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -16541,12 +16540,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 List<ResolveInfo> newReceivers = AppGlobals.getPackageManager()
                         .queryIntentReceivers(intent, resolvedType, STOCK_PM_FLAGS, user);
-                if (user != UserHandle.USER_OWNER && newReceivers != null) {
-                    // If this is not the primary user, we need to check for
+                if (user != UserHandle.USER_SYSTEM && newReceivers != null) {
+                    // If this is not the system user, we need to check for
                     // any receivers that should be filtered out.
                     for (int i=0; i<newReceivers.size(); i++) {
                         ResolveInfo ri = newReceivers.get(i);
-                        if ((ri.activityInfo.flags&ActivityInfo.FLAG_PRIMARY_USER_ONLY) != 0) {
+                        if ((ri.activityInfo.flags&ActivityInfo.FLAG_SYSTEM_USER_ONLY) != 0) {
                             newReceivers.remove(i);
                             i--;
                         }

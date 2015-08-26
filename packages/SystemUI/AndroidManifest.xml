@@ -168,14 +168,14 @@
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
 
-        <receiver android:name=".BootReceiver" androidprv:primaryUserOnly="true">
+        <receiver android:name=".BootReceiver" androidprv:systemUserOnly="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
         <receiver android:name=".qs.tiles.HotspotTile$APChangedReceiver"
-                androidprv:primaryUserOnly="true">
+                androidprv:systemUserOnly="true">
             <intent-filter>
                 <action android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
             </intent-filter>
