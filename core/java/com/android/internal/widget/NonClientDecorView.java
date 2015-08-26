@@ -128,6 +128,8 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
                     // When there is no decor we should not react to anything.
                     return false;
                 }
+                // Ensure that the activity is active.
+                activateActivity();
                 // A drag action is started if we aren't dragging already and the starting event is
                 // either a left mouse button or any other input device.
                 if (!mDragging &&
@@ -343,6 +345,20 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
                 callback.setActivityBounds(newBounds);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Failed to set the activity bounds.");
+            }
+        }
+    }
+
+    /**
+     * Activates the activity - means setting the focus and moving it to the top of the stack.
+     */
+    private void activateActivity() {
+        Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
+        if (callback != null) {
+            try {
+                callback.activateActivity();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to activate the activity.");
             }
         }
     }

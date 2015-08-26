@@ -510,6 +510,11 @@ public abstract class Window {
          * @param newBounds The new target bounds of the activity in task or stack.
          */
         void setActivityBounds(Rect newBounds) throws RemoteException;
+
+        /**
+         * Activates this activity, hence bringing it to the top and giving it focus.
+         */
+        void activateActivity() throws RemoteException;
     }
 
     public Window(Context context) {
