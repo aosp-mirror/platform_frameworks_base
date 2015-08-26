@@ -879,6 +879,7 @@ public final class MultiSelectManager {
      */
     interface BandManagerHelper {
         void drawBand(Rect rect);
+        void addOnScrollListener(RecyclerView.OnScrollListener listener);
         int findEventPosition(MotionEvent e);
         int getHeight();
         void hideBand();
@@ -1164,7 +1165,8 @@ public final class MultiSelectManager {
      * and {@link MultiSelectManager}. This class is responsible for rendering the band select
      * overlay and selecting overlaid items via MultiSelectManager.
      */
-    public class BandSelectManager implements BandSelectModel.OnSelectionChangedListener {
+    public class BandSelectManager extends RecyclerView.OnScrollListener
+            implements BandSelectModel.OnSelectionChangedListener {
 
         private static final int NOT_SET = -1;
 
@@ -1184,6 +1186,7 @@ public final class MultiSelectManager {
         public <T extends BandManagerHelper & BandModelHelper>
                 BandSelectManager(T helper) {
             mHelper = helper;
+            mHelper.addOnScrollListener(this);
             mModel = new BandSelectModel(helper);
             mModel.addOnSelectionChangedListener(this);
         }
@@ -1316,11 +1319,6 @@ public final class MultiSelectManager {
                         pixelsPastView, System.currentTimeMillis() - mScrollStartTime);
                 mHelper.scrollBy(numPixels);
 
-                // Adjust the y-coordinate of the origin the opposite number of pixels so that the
-                // origin remains in the same place relative to the view's items.
-                mOrigin.y -= numPixels;
-                resizeBandSelectRectangle();
-
                 mHelper.removeCallback(mViewScroller);
                 mHelper.postRunnable(this);
             }
@@ -1386,6 +1384,18 @@ public final class MultiSelectManager {
                 return (float) Math.pow(ratio, 5);
             }
         };
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            if (!mIsActive) {
+                return;
+            }
+
+            // Adjust the y-coordinate of the origin the opposite number of pixels so that the
+            // origin remains in the same place relative to the view's items.
+            mOrigin.y -= dy;
+            resizeBandSelectRectangle();
+        }
     }
 
     /**
