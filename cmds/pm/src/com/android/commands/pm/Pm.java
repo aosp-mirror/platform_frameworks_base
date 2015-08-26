@@ -983,6 +983,7 @@ public final class Pm {
             case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK: return "ask";
             case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS: return "always";
             case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER: return "never";
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK : return "always ask";
         }
         return "Unknown link state: " + state;
     }
