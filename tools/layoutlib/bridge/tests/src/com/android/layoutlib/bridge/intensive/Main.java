@@ -296,6 +296,11 @@ public class Main {
         renderAndVerify("allwidgets.xml", "allwidgets.png");
     }
 
+    @Test
+    public void testArrayCheck() throws ClassNotFoundException {
+        renderAndVerify("array_check.xml", "array_check.png");
+    }
+
     /** Test expand_layout.xml */
     @Test
     public void testExpand() throws ClassNotFoundException {
@@ -388,7 +393,6 @@ public class Main {
                 ResourceResolver.create(mProjectResources.getConfiguredResources(config),
                         mFrameworkRepo.getConfiguredResources(config),
                         themeName, false);
-
         return new SessionParams(
                 layoutParser,
                 renderingMode,
