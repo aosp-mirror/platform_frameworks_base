@@ -129,6 +129,15 @@ public class UserInfo implements Parcelable {
     }
 
     /**
+     * Returns true if the user is a split system user.
+     * <p>If {@link UserManager#isSplitSystemUser split system user mode} is not enabled,
+     * the method always returns false.
+     */
+    public boolean isSystemOnly() {
+        return id == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser();
+    }
+
+    /**
      * @return true if this user can be switched to.
      **/
     public boolean supportsSwitchTo() {
