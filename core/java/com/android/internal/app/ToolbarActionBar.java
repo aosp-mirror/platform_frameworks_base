@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.view.ActionMode;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -467,6 +468,9 @@ public class ToolbarActionBar extends ActionBar {
     public boolean onKeyShortcut(int keyCode, KeyEvent event) {
         Menu menu = mDecorToolbar.getMenu();
         if (menu != null) {
+            final KeyCharacterMap kmap = KeyCharacterMap.load(
+                    event != null ? event.getDeviceId() : KeyCharacterMap.VIRTUAL_KEYBOARD);
+            menu.setQwertyMode(kmap.getKeyboardType() != KeyCharacterMap.NUMERIC);
             menu.performShortcut(keyCode, event, 0);
         }
         // This action bar always returns true for handling keyboard shortcuts.
