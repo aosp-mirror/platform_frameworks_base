@@ -1275,6 +1275,12 @@ public class LockPatternUtils {
          */
         public static final int SOME_AUTH_REQUIRED_AFTER_USER_REQUEST = 0x4;
 
+        /**
+         * Strong authentication is required because the user has been locked out after too many
+         * attempts.
+         */
+        public static final int STRONG_AUTH_REQUIRED_AFTER_LOCKOUT = 0x8;
+
         public static final int DEFAULT = STRONG_AUTH_REQUIRED_AFTER_BOOT;
         private static final int ALLOWING_FINGERPRINT = SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 
