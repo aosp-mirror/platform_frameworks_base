@@ -29,6 +29,8 @@ import android.content.pm.UserInfo;
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.content.Context.USER_SERVICE;
 import static android.Manifest.permission.READ_CONTACTS;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.IBinder;
@@ -663,6 +665,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             unlockKeystore(credential, userId);
             if (shouldReEnroll) {
                 credentialUtil.setCredential(credential, credential, userId);
+            }
+        } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+            if (response.getTimeout() > 0) {
+                requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, userId);
             }
         }
 
