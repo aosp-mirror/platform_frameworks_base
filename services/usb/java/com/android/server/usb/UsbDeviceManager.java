@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
  * UsbDeviceManager manages USB state in device mode.
@@ -148,6 +149,7 @@ public class UsbDeviceManager {
     private String[] mAccessoryStrings;
     private UsbDebuggingManager mDebuggingManager;
     private final UsbAlsaManager mUsbAlsaManager;
+    private Intent mBroadcastedIntent;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -427,7 +429,7 @@ public class UsbDeviceManager {
             if (DEBUG) Slog.d(TAG, "setUsbDataUnlocked: " + enable);
             mUsbDataUnlocked = enable;
             updateUsbNotification();
-            updateUsbStateBroadcast();
+            updateUsbStateBroadcastIfNeeded();
             setEnabledFunctions(mCurrentFunctions, true);
         }
 
@@ -574,7 +576,33 @@ public class UsbDeviceManager {
             }
         }
 
-        private void updateUsbStateBroadcast() {
+        private boolean isUsbStateChanged(Intent intent) {
+            final Set<String> keySet = intent.getExtras().keySet();
+            if (mBroadcastedIntent == null) {
+                for (String key : keySet) {
+                    if (intent.getBooleanExtra(key, false)) {
+                        // MTP function is enabled by default.
+                        if (UsbManager.USB_FUNCTION_MTP.equals(key)) {
+                            continue;
+                        }
+                        return true;
+                    }
+                }
+            } else {
+                if (!keySet.equals(mBroadcastedIntent.getExtras().keySet())) {
+                    return true;
+                }
+                for (String key : keySet) {
+                    if (intent.getBooleanExtra(key, false) !=
+                        mBroadcastedIntent.getBooleanExtra(key, false)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void updateUsbStateBroadcastIfNeeded() {
             // send a sticky broadcast containing current USB state
             Intent intent = new Intent(UsbManager.ACTION_USB_STATE);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
@@ -586,13 +614,25 @@ public class UsbDeviceManager {
             if (mCurrentFunctions != null) {
                 String[] functions = mCurrentFunctions.split(",");
                 for (int i = 0; i < functions.length; i++) {
-                    intent.putExtra(functions[i], true);
+                    final String function = functions[i];
+                    if (UsbManager.USB_FUNCTION_NONE.equals(function)) {
+                        continue;
+                    }
+                    intent.putExtra(function, true);
                 }
             }
 
-            if (DEBUG) Slog.d(TAG, "broadcasting " + intent + " connected: " + mConnected
-                                    + " configured: " + mConfigured);
+            // send broadcast intent only if the USB state has changed
+            if (!isUsbStateChanged(intent)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "skip broadcasting " + intent + " extras: " + intent.getExtras());
+                }
+                return;
+            }
+
+            if (DEBUG) Slog.d(TAG, "broadcasting " + intent + " extras: " + intent.getExtras());
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+            mBroadcastedIntent = intent;
         }
 
         private void updateUsbFunctions() {
@@ -670,7 +710,7 @@ public class UsbDeviceManager {
                         setEnabledFunctions(null, false);
                     }
                     if (mBootCompleted) {
-                        updateUsbStateBroadcast();
+                        updateUsbStateBroadcastIfNeeded();
                         updateUsbFunctions();
                     }
                     break;
@@ -694,7 +734,7 @@ public class UsbDeviceManager {
                 case MSG_SYSTEM_READY:
                     updateUsbNotification();
                     updateAdbNotification();
-                    updateUsbStateBroadcast();
+                    updateUsbStateBroadcastIfNeeded();
                     updateUsbFunctions();
                     break;
                 case MSG_BOOT_COMPLETED:
