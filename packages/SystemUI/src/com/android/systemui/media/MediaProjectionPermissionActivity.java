@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.media.projection.MediaProjectionManager;
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjection;
@@ -29,7 +30,14 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.BidiFormatter;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextPaint;
+import android.text.TextUtils;
+import android.text.style.StyleSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -39,6 +47,8 @@ public class MediaProjectionPermissionActivity extends Activity
         implements DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener,
         DialogInterface.OnCancelListener {
     private static final String TAG = "MediaProjectionPermissionActivity";
+    private static final float MAX_APP_NAME_SIZE_PX = 500f;
+    private static final String ELLIPSIS = "\u2026";
 
     private boolean mPermanentGrant;
     private String mPackageName;
@@ -84,11 +94,49 @@ public class MediaProjectionPermissionActivity extends Activity
             return;
         }
 
-        String appName = aInfo.loadLabel(packageManager).toString();
+        TextPaint paint = new TextPaint();
+        paint.setTextSize(42);
+
+        String label = aInfo.loadLabel(packageManager).toString();
+
+        // If the label contains new line characters it may push the security
+        // message below the fold of the dialog. Labels shouldn't have new line
+        // characters anyways, so just truncate the message the first time one
+        // is seen.
+        final int labelLength = label.length();
+        int offset = 0;
+        while (offset < labelLength) {
+            final int codePoint = label.codePointAt(offset);
+            final int type = Character.getType(codePoint);
+            if (type == Character.LINE_SEPARATOR
+                    || type == Character.CONTROL
+                    || type == Character.PARAGRAPH_SEPARATOR) {
+                label = label.substring(0, offset) + ELLIPSIS;
+                break;
+            }
+            offset += Character.charCount(codePoint);
+        }
+
+        if (label.isEmpty()) {
+            label = mPackageName;
+        }
+
+        String unsanitizedAppName = TextUtils.ellipsize(label,
+                paint, MAX_APP_NAME_SIZE_PX, TextUtils.TruncateAt.END).toString();
+        String appName = BidiFormatter.getInstance().unicodeWrap(unsanitizedAppName);
+
+        String actionText = getString(R.string.media_projection_dialog_text, appName);
+        SpannableString message = new SpannableString(actionText);
+
+        int appNameIndex = actionText.indexOf(appName);
+        if (appNameIndex >= 0) {
+            message.setSpan(new StyleSpan(Typeface.BOLD),
+                    appNameIndex, appNameIndex + appName.length(), 0);
+        }
 
         mDialog = new AlertDialog.Builder(this)
                 .setIcon(aInfo.loadIcon(packageManager))
-                .setMessage(getString(R.string.media_projection_dialog_text, appName))
+                .setMessage(message)
                 .setPositiveButton(R.string.media_projection_action_text, this)
                 .setNegativeButton(android.R.string.cancel, this)
                 .setView(R.layout.remember_permission_checkbox)
