@@ -45,6 +45,7 @@ import android.widget.RelativeLayout;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.widget.LinearLayout.VERTICAL;
+import static com.android.layoutlib.bridge.impl.ResourceHelper.getBooleanThemeValue;
 
 /**
  * The Layout used to create the system decor.
@@ -325,7 +326,7 @@ class Layout extends RelativeLayout {
             mParams = params;
             mContext = context;
             mResources = mParams.getResources();
-            mWindowIsFloating = ResourceHelper.getBooleanThemeValue(mResources, ATTR_WINDOW_FLOATING, true, true);
+            mWindowIsFloating = getBooleanThemeValue(mResources, ATTR_WINDOW_FLOATING, true, true);
             
             findBackground();
             findStatusBar();
@@ -342,11 +343,11 @@ class Layout extends RelativeLayout {
 
         private void findStatusBar() {
             boolean windowFullScreen =
-                    ResourceHelper.getBooleanThemeValue(mResources, ATTR_WINDOW_FULL_SCREEN, true, false);
+                    getBooleanThemeValue(mResources, ATTR_WINDOW_FULL_SCREEN, true, false);
             if (!windowFullScreen && !mWindowIsFloating) {
                 mStatusBarSize =
                         getDimension(ATTR_STATUS_BAR_HEIGHT, true, DEFAULT_STATUS_BAR_HEIGHT);
-                mTranslucentStatus = ResourceHelper.getBooleanThemeValue(mResources,
+                mTranslucentStatus = getBooleanThemeValue(mResources,
                         ATTR_WINDOW_TRANSLUCENT_STATUS, true, false);
             }
         }
@@ -356,14 +357,14 @@ class Layout extends RelativeLayout {
                 return;
             }
             // Check if an actionbar is needed
-            boolean windowActionBar = ResourceHelper.getBooleanThemeValue(mResources, ATTR_WINDOW_ACTION_BAR,
+            boolean windowActionBar = getBooleanThemeValue(mResources, ATTR_WINDOW_ACTION_BAR,
                     !isThemeAppCompat(), true);
             if (windowActionBar) {
                 mActionBarSize = getDimension(ATTR_ACTION_BAR_SIZE, true, DEFAULT_TITLE_BAR_HEIGHT);
             } else {
                 // Maybe the gingerbread era title bar is needed
                 boolean windowNoTitle =
-                        ResourceHelper.getBooleanThemeValue(mResources, ATTR_WINDOW_NO_TITLE, true, false);
+                        getBooleanThemeValue(mResources, ATTR_WINDOW_NO_TITLE, true, false);
                 if (!windowNoTitle) {
                     mTitleBarSize =
                             getDimension(ATTR_WINDOW_TITLE_SIZE, true, DEFAULT_TITLE_BAR_HEIGHT);
@@ -391,7 +392,7 @@ class Layout extends RelativeLayout {
                 mNavBarOrientation = barOnBottom ? LinearLayout.HORIZONTAL : VERTICAL;
                 mNavBarSize = getDimension(barOnBottom ? ATTR_NAV_BAR_HEIGHT : ATTR_NAV_BAR_WIDTH,
                         true, DEFAULT_NAV_BAR_SIZE);
-                mTranslucentNav = ResourceHelper.getBooleanThemeValue(mResources,
+                mTranslucentNav = getBooleanThemeValue(mResources,
                         ATTR_WINDOW_TRANSLUCENT_NAV, true, false);
             }
         }
