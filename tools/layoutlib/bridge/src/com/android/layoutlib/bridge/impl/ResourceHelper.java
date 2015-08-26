@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.impl;
 
+import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -70,6 +71,10 @@ public final class ResourceHelper {
     public static int getColor(String value) {
         if (value != null) {
             if (!value.startsWith("#")) {
+                if (value.startsWith(SdkConstants.PREFIX_THEME_REF)) {
+                    throw new NumberFormatException(String.format(
+                            "Attribute '%s' not found. Are you using the right theme?", value));
+                }
                 throw new NumberFormatException(
                         String.format("Color value '%s' must start with #", value));
             }
