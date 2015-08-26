@@ -46,6 +46,7 @@ public class BluetoothMidiService extends Service {
                 device = mDeviceServerMap.get(bluetoothDevice);
                 if (device == null) {
                     device = new BluetoothMidiDevice(this, bluetoothDevice, this);
+                    mDeviceServerMap.put(bluetoothDevice, device);
                 }
             }
             return device.getBinder();
