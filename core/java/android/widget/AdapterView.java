@@ -612,7 +612,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         View listItem = view;
         try {
             View v;
-            while (!(v = (View) listItem.getParent()).equals(this)) {
+            while ((v = (View) listItem.getParent()) != null && !v.equals(this)) {
                 listItem = v;
             }
         } catch (ClassCastException e) {
@@ -620,11 +620,13 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             return INVALID_POSITION;
         }
 
-        // Search the children for the list item
-        final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            if (getChildAt(i).equals(listItem)) {
-                return mFirstPosition + i;
+        if (listItem != null) {
+            // Search the children for the list item
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                if (getChildAt(i).equals(listItem)) {
+                    return mFirstPosition + i;
+                }
             }
         }
 
