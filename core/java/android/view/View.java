@@ -801,6 +801,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static boolean sIgnoreMeasureCache = false;
 
     /**
+     * Ignore an optimization that skips unnecessary EXACTLY layout passes.
+     */
+    private static boolean sAlwaysRemeasureExactly = false;
+
+    /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
      * calling setFlags.
      */
@@ -3864,6 +3869,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // themselves at 1/3 the size of their container. It breaks older apps though,
             // specifically apps that use some popular open source libraries.
             sUseZeroUnspecifiedMeasureSpec = targetSdkVersion < M;
+
+            // Old versions of the platform would give different results from
+            // LinearLayout measurement passes using EXACTLY and non-EXACTLY
+            // modes, so we always need to run an additional EXACTLY pass.
+            sAlwaysRemeasureExactly = targetSdkVersion <= M;
 
             sCompatibilityDone = true;
         }
@@ -18820,17 +18830,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         long key = (long) widthMeasureSpec << 32 | (long) heightMeasureSpec & 0xffffffffL;
         if (mMeasureCache == null) mMeasureCache = new LongSparseLongArray(2);
 
-        if ((mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ||
-                widthMeasureSpec != mOldWidthMeasureSpec ||
-                heightMeasureSpec != mOldHeightMeasureSpec) {
+        final boolean forceLayout = (mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT;
 
+        // Optimize layout by avoiding an extra EXACTLY pass when the view is
+        // already measured as the correct size. In API 23 and below, this
+        // extra pass is required to make LinearLayout re-distribute weight.
+        final boolean specChanged = widthMeasureSpec != mOldWidthMeasureSpec
+                || heightMeasureSpec != mOldHeightMeasureSpec;
+        final boolean isSpecExactly = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY
+                && MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY;
+        final boolean matchesSpecSize = getMeasuredWidth() == MeasureSpec.getSize(widthMeasureSpec)
+                && getMeasuredHeight() == MeasureSpec.getSize(heightMeasureSpec);
+        final boolean needsLayout = specChanged
+                && (sAlwaysRemeasureExactly || !isSpecExactly || !matchesSpecSize);
+
+        if (forceLayout || needsLayout) {
             // first clears the measured dimension flag
             mPrivateFlags &= ~PFLAG_MEASURED_DIMENSION_SET;
 
             resolveRtlPropertiesIfNeeded();
 
-            int cacheIndex = (mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ? -1 :
-                    mMeasureCache.indexOfKey(key);
+            int cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
             if (cacheIndex < 0 || sIgnoreMeasureCache) {
                 // measure ourselves, this should set the measured dimension flag back
                 onMeasure(widthMeasureSpec, heightMeasureSpec);
