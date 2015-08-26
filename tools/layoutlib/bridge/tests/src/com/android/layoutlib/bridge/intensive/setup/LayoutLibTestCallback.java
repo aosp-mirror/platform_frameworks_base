@@ -23,6 +23,7 @@ import com.android.ide.common.rendering.api.ActionBarCallback;
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
+import com.android.ide.common.rendering.api.ParserFactory;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.resources.IntArrayWrapper;
@@ -32,6 +33,7 @@ import com.android.utils.ILogger;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -163,7 +165,14 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
 
     @NonNull
     @Override
-    public XmlPullParser createParser(@Nullable String name) {
-        return new KXmlParser();
+    public ParserFactory getParserFactory() {
+        return new ParserFactory() {
+            @NonNull
+            @Override
+            public XmlPullParser createParser(@Nullable String debugName)
+                    throws XmlPullParserException {
+                return new KXmlParser();
+            }
+        };
     }
 }
