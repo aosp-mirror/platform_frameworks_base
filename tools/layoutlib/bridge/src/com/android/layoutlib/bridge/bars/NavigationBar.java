@@ -31,6 +31,8 @@ public class NavigationBar extends CustomBar {
 
     /** Navigation bar background color attribute name. */
     private static final String ATTR_COLOR = "navigationBarColor";
+    /** Attribute for translucency property. */
+    public static final String ATTR_TRANSLUCENT = "windowTranslucentNavigation";
     // These correspond to @dimen/navigation_side_padding in the system ui code.
     private static final int PADDING_WIDTH_DEFAULT = 36;
     private static final int PADDING_WIDTH_SW360 = 40;
@@ -60,7 +62,7 @@ public class NavigationBar extends CustomBar {
         super(context, orientation, "/bars/navigation_bar.xml", "navigation_bar.xml",
                 simulatedPlatformVersion);
 
-        int color = getThemeAttrColor(ATTR_COLOR, true);
+        int color = getBarColor(ATTR_COLOR, ATTR_TRANSLUCENT);
         setBackgroundColor(color == 0 ? 0xFF000000 : color);
 
         // Cannot access the inside items through id because no R.id values have been

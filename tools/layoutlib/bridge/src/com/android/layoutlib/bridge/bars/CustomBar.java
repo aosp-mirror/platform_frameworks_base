@@ -32,7 +32,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
-import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
@@ -78,8 +77,7 @@ abstract class CustomBar extends LinearLayout {
             setGravity(Gravity.CENTER_HORIZONTAL);
         }
 
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
 
         XmlPullParser parser;
         try {
@@ -159,7 +157,7 @@ abstract class CustomBar extends LinearLayout {
 
     protected void setStyle(String themeEntryName) {
 
-        BridgeContext bridgeContext = (BridgeContext) mContext;
+        BridgeContext bridgeContext = getContext();
         RenderResources res = bridgeContext.getRenderResources();
 
         ResourceValue value = res.findItemInTheme(themeEntryName, true /*isFrameworkAttr*/);
@@ -219,27 +217,47 @@ abstract class CustomBar extends LinearLayout {
         }
     }
 
+    @Override
+    public BridgeContext getContext() {
+        return (BridgeContext) mContext;
+    }
+
     /**
-     * Given a theme attribute name, get the color referenced by it. The theme attribute may be
-     * used in a layout like "?attr/foo".
+     * Find the background color for this bar from the theme attributes. Only relevant to StatusBar
+     * and NavigationBar.
      * <p/>
      * Returns 0 if not found.
      *
+     * @param colorAttrName the attribute name for the background color
+     * @param translucentAttrName the attribute name for the translucency property of the bar.
+     *
      * @throws NumberFormatException if color resolved to an invalid string.
      */
-    protected int getThemeAttrColor(@NonNull String attrName, boolean isFramework) {
+    protected int getBarColor(@NonNull String colorAttrName, @NonNull String translucentAttrName) {
         if (!Config.isGreaterOrEqual(mSimulatedPlatformVersion, LOLLIPOP)) {
             return 0;
         }
-        assert mContext instanceof BridgeContext;
-        BridgeContext context = ((BridgeContext) mContext);
-        RenderResources renderResources = context.getRenderResources();
-        // From ?attr/foo to @color/bar. This is most likely an ItemResourceValue.
-        ResourceValue resource = renderResources.findItemInTheme(attrName, isFramework);
-        if (resource != null) {
-            // Form @color/bar to the #AARRGGBB
-            resource = renderResources.resolveResValue(resource);
+        RenderResources renderResources = getContext().getRenderResources();
+        // First check if the bar is translucent.
+        boolean translucent = ResourceHelper.getBooleanThemeValue(renderResources,
+                translucentAttrName, true, false);
+        if (translucent) {
+            // Keep in sync with R.color.system_bar_background_semi_transparent from system ui.
+            return 0x66000000;  // 40% black.
         }
+        boolean transparent = ResourceHelper.getBooleanThemeValue(renderResources,
+                "windowDrawsSystemBarBackgrounds", true, false);
+        if (transparent) {
+            return getColor(renderResources, colorAttrName);
+        }
+        return 0;
+    }
+
+    private static int getColor(RenderResources renderResources, String attr) {
+        // From ?attr/foo to @color/bar. This is most likely an ItemResourceValue.
+        ResourceValue resource = renderResources.findItemInTheme(attr, true);
+        // Form @color/bar to the #AARRGGBB
+        resource = renderResources.resolveResValue(resource);
         if (resource != null && ResourceType.COLOR.equals(resource.getResourceType())) {
             return ResourceHelper.getColor(resource.getValue());
         }
@@ -247,8 +265,7 @@ abstract class CustomBar extends LinearLayout {
     }
 
     private ResourceValue getResourceValue(String reference) {
-        BridgeContext bridgeContext = (BridgeContext) mContext;
-        RenderResources res = bridgeContext.getRenderResources();
+        RenderResources res = getContext().getRenderResources();
 
         // find the resource
         ResourceValue value = res.findResValue(reference, false);
