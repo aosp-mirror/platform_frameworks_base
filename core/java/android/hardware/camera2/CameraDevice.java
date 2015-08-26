@@ -480,8 +480,11 @@ public abstract class CameraDevice implements AutoCloseable {
      * the configurations in the tables below are also guaranteed for creating a reprocessable
      * capture session if the camera device supports YUV reprocessing or PRIVATE reprocessing.
      * However, not all output targets used to create a reprocessable session may be used in a
-     * {@link CaptureRequest} simultaneously. The guaranteed output targets that can be included
-     * in a {@link CaptureRequest} simultaneously are listed in the tables under
+     * {@link CaptureRequest} simultaneously. For devices that support only 1 output target in a
+     * reprocess {@link CaptureRequest}, submitting a reprocess {@link CaptureRequest} with multiple
+     * output targets will result in a {@link CaptureFailure}. For devices that support multiple
+     * output targets in a reprocess {@link CaptureRequest}, the guaranteed output targets that can
+     * be included in a {@link CaptureRequest} simultaneously are listed in the tables under
      * {@link #createCaptureSession createCaptureSession}. For example, with a FULL-capability
      * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL} {@code == }
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}) device that supports PRIVATE
@@ -532,8 +535,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code RECORD}</td> <td></td><td id="rb"></td> <td>High-resolution ZSL in-app video processing with regular preview.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>Maximum-resolution ZSL in-app processing with regular preview.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>Maximum-resolution two-input ZSL in-app processing.</td> </tr>
-     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code RECORD}</td> <td>{@code JPEG}</td><td id="rb">{@code RECORD}</td> <td>High-resolution ZSL in-app video processing and video snapshot with regular preview.</td> </tr>
-     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Maximum-resolution two-input ZSL in-app processing with regular preview.</td> </tr>
      * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>ZSL still capture and in-app processing.</td> </tr>
      * </table><br>
      * </p>
@@ -711,7 +712,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * provide input images to camera device via {@link android.media.ImageWriter#queueInputImage}.
      * The application must use the capture result of one of those output images to create a
      * reprocess capture request so that the camera device can use the information to achieve
-     * optimal reprocess image quality.
+     * optimal reprocess image quality. For camera devices that support only 1 output
+     * {@link Surface}, submitting a reprocess {@link CaptureRequest} with multiple
+     * output targets will result in a {@link CaptureFailure}.
      *
      * @param inputResult The capture result of the output image or one of the output images used
      *                       to generate the reprocess input image for this capture request.
