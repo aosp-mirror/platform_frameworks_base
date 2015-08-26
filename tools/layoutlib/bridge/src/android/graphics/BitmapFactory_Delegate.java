@@ -16,13 +16,13 @@
 
 package android.graphics;
 
-import com.android.annotations.Nullable;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.Density;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.Nullable;
 import android.content.res.BridgeResources.NinePatchInputStream;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Bitmap_Delegate.BitmapCreateFlags;

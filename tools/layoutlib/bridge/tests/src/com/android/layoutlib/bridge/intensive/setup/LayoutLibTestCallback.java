@@ -17,8 +17,6 @@
 package com.android.layoutlib.bridge.intensive.setup;
 
 import com.android.SdkConstants;
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.ActionBarCallback;
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
@@ -34,6 +32,9 @@ import com.android.utils.ILogger;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.io.File;
 import java.lang.reflect.Constructor;

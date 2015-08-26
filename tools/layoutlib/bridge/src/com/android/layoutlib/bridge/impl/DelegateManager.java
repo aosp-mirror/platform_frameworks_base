@@ -19,6 +19,7 @@ package com.android.layoutlib.bridge.impl;
 import com.android.layoutlib.bridge.util.Debug;
 import com.android.layoutlib.bridge.util.SparseWeakArray;
 
+import android.annotation.Nullable;
 import android.util.SparseArray;
 
 import java.lang.ref.WeakReference;
