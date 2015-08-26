@@ -1024,7 +1024,7 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USBを写真転送に使用"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USBをMIDIに使用"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBアクセサリを接続しました"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"タップするとその他のオプションが表示されます。"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"タップしてその他のオプションを表示"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効化"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
