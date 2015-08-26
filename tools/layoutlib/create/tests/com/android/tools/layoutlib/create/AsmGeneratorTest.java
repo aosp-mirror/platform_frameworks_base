@@ -19,7 +19,9 @@ package com.android.tools.layoutlib.create;
 
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
@@ -32,13 +34,17 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -130,6 +136,11 @@ public class AsmGeneratorTest {
                  // methods deleted from their return type.
                 return new String[0];
             }
+
+            @Override
+            public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
+                return new HashMap<String, InjectMethodRunnable>(0);
+            }
         };
 
         AsmGenerator agen = new AsmGenerator(mLog, mOsDestJar, ci);
@@ -199,6 +210,11 @@ public class AsmGeneratorTest {
             public String[] getDeleteReturns() {
                  // methods deleted from their return type.
                 return new String[0];
+            }
+
+            @Override
+            public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
+                return new HashMap<String, InjectMethodRunnable>(0);
             }
         };
 
@@ -278,6 +294,11 @@ public class AsmGeneratorTest {
                 // methods deleted from their return type.
                 return new String[0];
             }
+
+            @Override
+            public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
+                return new HashMap<String, InjectMethodRunnable>(0);
+            }
         };
 
         AsmGenerator agen = new AsmGenerator(mLog, mOsDestJar, ci);
@@ -301,6 +322,118 @@ public class AsmGeneratorTest {
         }
         assertArrayEquals(new String[] {"mock_android/data/dataFile"},
                 filesFound.keySet().toArray());
+    }
+
+    @Test
+    public void testMethodInjection() throws IOException, LogAbortException,
+            ClassNotFoundException, IllegalAccessException, InstantiationException,
+            NoSuchMethodException, InvocationTargetException {
+        ICreateInfo ci = new ICreateInfo() {
+            @Override
+            public Class<?>[] getInjectedClasses() {
+                return new Class<?>[0];
+            }
+
+            @Override
+            public String[] getDelegateMethods() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getDelegateClassNatives() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getOverriddenMethods() {
+                // methods to force override
+                return new String[0];
+            }
+
+            @Override
+            public String[] getRenamedClasses() {
+                // classes to rename (so that we can replace them)
+                return new String[0];
+            }
+
+            @Override
+            public String[] getJavaPkgClasses() {
+                // classes to refactor (so that we can replace them)
+                return new String[0];
+            }
+
+            @Override
+            public Set<String> getExcludedClasses() {
+                return new HashSet<String>(0);
+            }
+
+            @Override
+            public String[] getDeleteReturns() {
+                // methods deleted from their return type.
+                return new String[0];
+            }
+
+            @Override
+            public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
+                HashMap<String, InjectMethodRunnable> map =
+                        new HashMap<String, InjectMethodRunnable>(1);
+                map.put("mock_android.util.EmptyArray",
+                        InjectMethodRunnables.CONTEXT_GET_FRAMEWORK_CLASS_LOADER);
+                return map;
+            }
+        };
+
+        AsmGenerator agen = new AsmGenerator(mLog, mOsDestJar, ci);
+        AsmAnalyzer aa = new AsmAnalyzer(mLog, mOsJarPath, agen,
+                null,                 // derived from
+                new String[] {        // include classes
+                        "**"
+                },
+                ci.getExcludedClasses(),
+                new String[] {        /* include files */
+                        "mock_android/data/data*"
+                });
+        aa.analyze();
+        agen.generate();
+        Map<String, ClassReader> output = new TreeMap<String, ClassReader>();
+        Map<String, InputStream> filesFound = new TreeMap<String, InputStream>();
+        parseZip(mOsDestJar, output, filesFound);
+        final String modifiedClass = "mock_android.util.EmptyArray";
+        final String modifiedClassPath = modifiedClass.replace('.', '/').concat(".class");
+        ZipFile zipFile = new ZipFile(mOsDestJar);
+        ZipEntry entry = zipFile.getEntry(modifiedClassPath);
+        assertNotNull(entry);
+        final byte[] bytes;
+        final InputStream inputStream = zipFile.getInputStream(entry);
+        try {
+            bytes = getByteArray(inputStream);
+        } finally {
+            inputStream.close();
+        }
+        ClassLoader classLoader = new ClassLoader(getClass().getClassLoader()) {
+            @Override
+            protected Class<?> findClass(String name) throws ClassNotFoundException {
+                if (name.equals(modifiedClass)) {
+                    return defineClass(null, bytes, 0, bytes.length);
+                }
+                throw new ClassNotFoundException(name + " not found.");
+            }
+        };
+        Class<?> emptyArrayClass = classLoader.loadClass(modifiedClass);
+        Object emptyArrayInstance = emptyArrayClass.newInstance();
+        Method method = emptyArrayClass.getMethod("getFrameworkClassLoader");
+        Object cl = method.invoke(emptyArrayInstance);
+        assertEquals(classLoader, cl);
+    }
+
+    private static byte[] getByteArray(InputStream stream) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = stream.read(buffer, 0, buffer.length)) > -1) {
+            bos.write(buffer, 0, read);
+        }
+        return bos.toByteArray();
     }
 
     private void parseZip(String jarPath,

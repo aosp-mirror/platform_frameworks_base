@@ -728,7 +728,7 @@ public class AsmAnalyzer {
 
 
                 // Check if method needs to replaced by a call to a different method.
-                if (ReplaceMethodCallsAdapter.isReplacementNeeded(owner, name, desc)) {
+                if (ReplaceMethodCallsAdapter.isReplacementNeeded(owner, name, desc, mOwnerClass)) {
                     mReplaceMethodCallClasses.add(mOwnerClass);
                 }
             }
