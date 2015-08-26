@@ -77,6 +77,9 @@ public class AsmGenerator {
     /** Methods to inject. FQCN of class in which method should be injected => runnable that does
      * the injection. */
     private final Map<String, ICreateInfo.InjectMethodRunnable> mInjectedMethodsMap;
+    // A hack to do some modifications to simple month view.
+    static final String SIMPLE_MONTH_VIEW = "android/widget/SimpleMonthView";
+    ClassReader mSimpleMonthViewReader;
 
     /**
      * Creates a new generator that can generate the output JAR with the stubbed classes.
@@ -204,7 +207,7 @@ public class AsmGenerator {
      * Utility that returns the internal ASM class name from a fully qualified binary class
      * name. E.g. it returns android/view/View from android.view.View.
      */
-    String binaryToInternalClassName(String className) {
+    static String binaryToInternalClassName(String className) {
         if (className == null) {
             return null;
         } else {
@@ -378,6 +381,10 @@ public class AsmGenerator {
                             delegateMethods.contains(DelegateClassAdapter.ALL_NATIVES))) {
                 cv = new DelegateClassAdapter(mLog, cv, className, delegateMethods);
             }
+        }
+
+        if (SIMPLE_MONTH_VIEW.equals(className)) {
+            cv = new SimpleMonthViewAdapter(cv);
         }
 
         cr.accept(cv, 0);
