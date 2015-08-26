@@ -18,24 +18,35 @@
 */
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/toastFrameBackground">
+    android:clipChildren="false">
 
     <TextView
         android:id="@android:id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginVertical="15dp"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="15dp"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="-16dp"
+        android:layout_marginStart="-16dp"
+        android:layout_toRightOf="@android:id/icon"
+        android:layout_below="@android:id/icon"
         android:textAppearance="@style/TextAppearance.Toast"
         android:textColor="@color/primary_text_default_material_light"
+        android:background="?android:attr/toastFrameBackground"
         />
 
-</LinearLayout>
+    <ImageView
+        android:id="@android:id/icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
+
+</RelativeLayout>
 
 
