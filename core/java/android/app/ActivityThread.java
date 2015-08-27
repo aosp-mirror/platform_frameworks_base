@@ -1727,7 +1727,8 @@ public final class ActivityThread {
             String[] libDirs, int displayId, Configuration overrideConfiguration,
             LoadedApk pkgInfo) {
         return mResourcesManager.getTopLevelResources(resDir, splitResDirs, overlayDirs, libDirs,
-                displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo());
+                displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo(),
+                pkgInfo.getClassLoader());
     }
 
     final Handler getHandler() {

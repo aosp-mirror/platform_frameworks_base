@@ -1146,76 +1146,10 @@ public abstract class Drawable {
      * document, tries to create a Drawable from that tag. Returns {@code null}
      * if the tag is not a valid drawable.
      */
-    @SuppressWarnings("deprecation")
     public static Drawable createFromXmlInner(Resources r, XmlPullParser parser, AttributeSet attrs,
             Theme theme) throws XmlPullParserException, IOException {
-        final Drawable drawable;
-
-        final String name = parser.getName();
-        switch (name) {
-            case "selector":
-                drawable = new StateListDrawable();
-                break;
-            case "animated-selector":
-                drawable = new AnimatedStateListDrawable();
-                break;
-            case "level-list":
-                drawable = new LevelListDrawable();
-                break;
-            case "layer-list":
-                drawable = new LayerDrawable();
-                break;
-            case "transition":
-                drawable = new TransitionDrawable();
-                break;
-            case "ripple":
-                drawable = new RippleDrawable();
-                break;
-            case "color":
-                drawable = new ColorDrawable();
-                break;
-            case "shape":
-                drawable = new GradientDrawable();
-                break;
-            case "vector":
-                drawable = new VectorDrawable();
-                break;
-            case "animated-vector":
-                drawable = new AnimatedVectorDrawable();
-                break;
-            case "scale":
-                drawable = new ScaleDrawable();
-                break;
-            case "clip":
-                drawable = new ClipDrawable();
-                break;
-            case "rotate":
-                drawable = new RotateDrawable();
-                break;
-            case "animated-rotate":
-                drawable = new AnimatedRotateDrawable();
-                break;
-            case "animation-list":
-                drawable = new AnimationDrawable();
-                break;
-            case "inset":
-                drawable = new InsetDrawable();
-                break;
-            case "bitmap":
-                drawable = new BitmapDrawable();
-                break;
-            case "nine-patch":
-                drawable = new NinePatchDrawable();
-                break;
-            default:
-                throw new XmlPullParserException(parser.getPositionDescription() +
-                        ": invalid drawable tag " + name);
-
-        }
-        drawable.inflate(r, parser, attrs, theme);
-        return drawable;
+        return r.getDrawableInflater().inflateFromXml(parser.getName(), parser, attrs, theme);
     }
-
 
     /**
      * Create a drawable from file path name.

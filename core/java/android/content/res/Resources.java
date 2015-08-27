@@ -20,6 +20,7 @@ import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.graphics.drawable.DrawableInflater;
 import android.icu.text.PluralRules;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.XmlUtils;
@@ -142,6 +143,9 @@ public class Resources {
     private final ConfigurationBoundResourceCache<StateListAnimator> mStateListAnimatorCache =
             new ConfigurationBoundResourceCache<>(this);
 
+    /** Used to inflate drawable objects from XML. */
+    private DrawableInflater mDrawableInflater;
+
     private TypedValue mTmpValue = new TypedValue();
     private boolean mPreloading;
 
@@ -150,6 +154,7 @@ public class Resources {
     private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[4];
 
     final AssetManager mAssets;
+    final ClassLoader mClassLoader;
     final DisplayMetrics mMetrics = new DisplayMetrics();
 
     private final Configuration mConfiguration = new Configuration();
@@ -204,6 +209,17 @@ public class Resources {
     }
 
     /**
+     * @return the inflater used to create drawable objects
+     * @hide Pending API finalization.
+     */
+    public final DrawableInflater getDrawableInflater() {
+        if (mDrawableInflater == null) {
+            mDrawableInflater = new DrawableInflater(this, mClassLoader);
+        }
+        return mDrawableInflater;
+    }
+
+    /**
      * Used by AnimatorInflater.
      *
      * @hide
@@ -245,7 +261,7 @@ public class Resources {
      *               selecting/computing resource values (optional).
      */
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config) {
-        this(assets, metrics, config, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
+        this(assets, metrics, config, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
     }
 
     /**
@@ -257,11 +273,15 @@ public class Resources {
      * @param config Desired device configuration to consider when
      *               selecting/computing resource values (optional).
      * @param compatInfo this resource's compatibility info. Must not be null.
+     * @param classLoader class loader for the package used to load custom
+     *                    resource classes, may be {@code null} to use system
+     *                    class loader
      * @hide
      */
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config,
-            CompatibilityInfo compatInfo) {
+            CompatibilityInfo compatInfo, @Nullable ClassLoader classLoader) {
         mAssets = assets;
+        mClassLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
         mMetrics.setToDefaults();
         if (compatInfo != null) {
             mCompatibilityInfo = compatInfo;
@@ -2803,6 +2823,7 @@ public class Resources {
 
     private Resources() {
         mAssets = AssetManager.getSystem();
+        mClassLoader = ClassLoader.getSystemClassLoader();
         // NOTE: Intentionally leaving this uninitialized (all values set
         // to zero), so that anyone who tries to do something that requires
         // metrics will get a very wrong value.

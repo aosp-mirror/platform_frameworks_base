@@ -1838,7 +1838,7 @@ class ContextImpl extends Context {
                 resources = mResourcesManager.getTopLevelResources(packageInfo.getResDir(),
                         packageInfo.getSplitResDirs(), packageInfo.getOverlayDirs(),
                         packageInfo.getApplicationInfo().sharedLibraryFiles, displayId,
-                        overrideConfiguration, compatInfo);
+                        overrideConfiguration, compatInfo, packageInfo.getClassLoader());
             }
         }
         mResources = resources;

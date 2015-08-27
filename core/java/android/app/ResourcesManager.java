@@ -157,7 +157,8 @@ public class ResourcesManager {
      */
     Resources getTopLevelResources(String resDir, String[] splitResDirs,
             String[] overlayDirs, String[] libDirs, int displayId,
-            Configuration overrideConfiguration, CompatibilityInfo compatInfo) {
+            Configuration overrideConfiguration, CompatibilityInfo compatInfo,
+            ClassLoader classLoader) {
         final float scale = compatInfo.applicationScale;
         Configuration overrideConfigCopy = (overrideConfiguration != null)
                 ? new Configuration(overrideConfiguration) : null;
@@ -237,7 +238,7 @@ public class ResourcesManager {
         } else {
             config = getConfiguration();
         }
-        r = new Resources(assets, dm, config, compatInfo);
+        r = new Resources(assets, dm, config, compatInfo, classLoader);
         if (DEBUG) Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                 + r.getConfiguration() + " appScale=" + r.getCompatibilityInfo().applicationScale);
 
