@@ -456,7 +456,7 @@ public class LockPatternUtils {
             // well, we tried...
         }
 
-        if (userHandle == UserHandle.USER_OWNER) {
+        if (userHandle == UserHandle.USER_SYSTEM) {
             // Set the encryption password to default.
             updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
         }
@@ -516,7 +516,7 @@ public class LockPatternUtils {
             DevicePolicyManager dpm = getDevicePolicyManager();
 
             // Update the device encryption password.
-            if (userId == UserHandle.USER_OWNER
+            if (userId == UserHandle.USER_SYSTEM
                     && LockPatternUtils.isDeviceEncryptionEnabled()) {
                 if (!shouldEncryptWithCredentials(true)) {
                     clearEncryptionPassword();
@@ -538,7 +538,7 @@ public class LockPatternUtils {
     }
 
     private void updateCryptoUserInfo(int userId) {
-        if (userId != UserHandle.USER_OWNER) {
+        if (userId != UserHandle.USER_SYSTEM) {
             return;
         }
 
@@ -714,7 +714,7 @@ public class LockPatternUtils {
             int computedQuality = computePasswordQuality(password);
 
             // Update the device encryption password.
-            if (userHandle == UserHandle.USER_OWNER
+            if (userHandle == UserHandle.USER_SYSTEM
                     && LockPatternUtils.isDeviceEncryptionEnabled()) {
                 if (!shouldEncryptWithCredentials(true)) {
                     clearEncryptionPassword();
@@ -1008,7 +1008,7 @@ public class LockPatternUtils {
         setBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, enabled, userId);
 
         // Update for crypto if owner
-        if (userId != UserHandle.USER_OWNER) {
+        if (userId != UserHandle.USER_SYSTEM) {
             return;
         }
 
@@ -1031,7 +1031,7 @@ public class LockPatternUtils {
      */
     public void setVisiblePasswordEnabled(boolean enabled, int userId) {
         // Update for crypto if owner
-        if (userId != UserHandle.USER_OWNER) {
+        if (userId != UserHandle.USER_SYSTEM) {
             return;
         }
 
@@ -1210,7 +1210,7 @@ public class LockPatternUtils {
     }
 
     public void setCredentialRequiredToDecrypt(boolean required) {
-        if (ActivityManager.getCurrentUser() != UserHandle.USER_OWNER) {
+        if (ActivityManager.getCurrentUser() != UserHandle.USER_SYSTEM) {
             Log.w(TAG, "Only device owner may call setCredentialRequiredForDecrypt()");
             return;
         }
