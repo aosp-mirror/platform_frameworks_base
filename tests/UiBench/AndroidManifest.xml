@@ -34,8 +34,32 @@
 
         <!-- Tests -->
         <activity
+            android:name=".GlTextureViewActivity"
+            android:label="Microbenchmarks/GL TextureView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".FullscreenOverdrawActivity"
+            android:label="Microbenchmarks/Fullscreen Overdraw" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TrivialAnimationActivity"
+            android:label="Microbenchmarks/Trivial Animation" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TrivialListActivity"
-            android:label="Microbenchmarks/Trivial ListActivity" >
+            android:label="Microbenchmarks/Trivial ListView" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />
