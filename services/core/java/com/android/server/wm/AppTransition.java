@@ -870,10 +870,10 @@ public class AppTransition implements Dump {
     }
 
     private Animation createAspectScaledThumbnailEnterNonFullscreenAnimationLocked(
-            Rect containingFrame, @Nullable Rect surfaceInsets, int taskId) {
+            Rect frame, @Nullable Rect surfaceInsets, int taskId) {
         getNextAppTransitionStartRect(taskId, mTmpStartRect);
-        float width = containingFrame.width();
-        float height = containingFrame.height();
+        float width = frame.width();
+        float height = frame.height();
         float scaleWidth = mTmpStartRect.width() / width;
         float scaleHeight = mTmpStartRect.height() / height;
         AnimationSet set = new AnimationSet(true);
@@ -886,9 +886,9 @@ public class AppTransition implements Dump {
         ScaleAnimation scale = new ScaleAnimation(scaleWidth, 1, scaleHeight, 1,
                 (width + surfaceInsetsHorizontal) / 2, (height + surfaceInsetsVertical) / 2);
         int fromX = mTmpStartRect.left + mTmpStartRect.width() / 2
-                - (containingFrame.left + containingFrame.width() / 2);
+                - (frame.left + frame.width() / 2);
         int fromY = mTmpStartRect.top + mTmpStartRect.height() / 2
-                - (containingFrame.top + containingFrame.height() / 2);
+                - (frame.top + frame.height() / 2);
         TranslateAnimation translation = new TranslateAnimation(fromX, 0, fromY, 0);
         set.addAnimation(scale);
         set.addAnimation(translation);

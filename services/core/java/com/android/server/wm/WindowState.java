@@ -1629,7 +1629,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
-    private boolean inFreeformWorkspace() {
+    boolean inFreeformWorkspace() {
         final Task task = getTask();
         return task != null && task.mStack != null &&
                 task.mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
