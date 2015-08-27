@@ -12,7 +12,7 @@ page.title=RenderScript Numerical Types
 <tr><td>                 </td>  <td>8 bits        </td>   <td>16 bits         </td>   <td>32 bits       </td>   <td>64 bits</td></tr>
 <tr><td>Integer:         </td>  <td>char, <a href='rs_value_types.html#android_rs:int8_t'>int8_t</a>  </td>   <td>short, <a href='rs_value_types.html#android_rs:int16_t'>int16_t</a>  </td>   <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>       </td>   <td>long, long long, <a href='rs_value_types.html#android_rs:int64_t'>int64_t</a></td></tr>
 <tr><td>Unsigned integer:</td>  <td>uchar, <a href='rs_value_types.html#android_rs:uint8_t'>uint8_t</a></td>   <td>ushort, <a href='rs_value_types.html#android_rs:uint16_t'>uint16_t</a></td>   <td>uint, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a></td>   <td>ulong, <a href='rs_value_types.html#android_rs:uint64_t'>uint64_t</a></td></tr>
-<tr><td>Floating point:  </td>  <td>              </td>   <td>                </td>   <td>float         </td>   <td>double</td></tr>
+<tr><td>Floating point:  </td>  <td>              </td>   <td>half            </td>   <td>float         </td>   <td>double</td></tr>
 </table>
 </p>
 
@@ -25,7 +25,7 @@ E.g. <a href='rs_value_types.html#android_rs:float4'>float4</a>, <a href='rs_val
 </p>
 
 <p> To create vector literals, use the vector type followed by the values enclosed
-between parentheses, e.g. <code>(float3)(1.0f, 2.0f, 3.0f)</code>.
+between curly braces, e.g. <code>(float3){1.0f, 2.0f, 3.0f}</code>.
 </p>
 
 <p> Entries of a vector can be accessed using different naming styles.
@@ -159,6 +159,38 @@ of operations.
     </td>
     <td class='jd-descrcol' width='100%'>
       Four 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:half'>half</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      16 bit floating point value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:half2'>half2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 16 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:half3'>half3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 16 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:half4'>half4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 16 bit floats
     </td>
   </tr>
   <tr class='alt-color api apilevel-1'>
@@ -605,6 +637,65 @@ with a 128 bit alignment.
   </div>
 </div>
 
+<a name='android_rs:half'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>half</span>
+    <span class='normal'>: 16 bit floating point value</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: __fp16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+</p>
+<p> A 16 bit floating point value.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:half2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>half2</span>
+    <span class='normal'>: Two 16 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: half __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+</p>
+<p> Vector version of the half float type. Provides two half fields packed
+into a single 32 bit field with 32 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:half3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>half3</span>
+    <span class='normal'>: Three 16 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: half __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+</p>
+<p> Vector version of the half float type. Provides three half fields packed
+into a single 64 bit field with 64 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:half4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>half4</span>
+    <span class='normal'>: Four 16 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: half __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+</p>
+<p> Vector version of the half float type. Provides four half fields packed
+into a single 64 bit field with 64 bit alignment.
+</p>
+  </div>
+</div>
+
 <a name='android_rs:int16_t'></a>
 <div class='jd-details'>
   <h4 class='jd-details-title'>
@@ -680,7 +771,7 @@ with a 128 bit alignment.
     <span class='normal'>: 64 bit signed integer</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+<p>A typedef of: long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21 and higher</a>
 </p>
 <p>A typedef of: long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
 </p>
@@ -1037,7 +1128,7 @@ with a 128 bit alignment.
     <span class='normal'>: 64 bit unsigned integer</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: unsigned long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+<p>A typedef of: unsigned long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21 and higher</a>
 </p>
 <p>A typedef of: unsigned long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
 </p>

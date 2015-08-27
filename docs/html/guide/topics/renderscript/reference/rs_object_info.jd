@@ -290,6 +290,9 @@ See <a href='http://developer.android.com/reference/android/renderscript/Sampler
 <p> If the Allocation is a cubemap, this function returns 1 if there's more than one face
 present.  In all other cases, it returns 0.
 </p>
+
+<p> Use <a href='rs_for_each.html#android_rs:rsGetDimHasFaces'>rsGetDimHasFaces</a>() to get the dimension of a currently running kernel.
+</p>
   </div>
 </div>
 
@@ -317,6 +320,9 @@ present.  In all other cases, it returns 0.
 <p> Query an Allocation for the presence of more than one Level Of Detail.  This is useful
 for mipmaps.
 </p>
+
+<p> Use <a href='rs_for_each.html#android_rs:rsGetDimLod'>rsGetDimLod</a>() to get the dimension of a currently running kernel.
+</p>
   </div>
 </div>
 
@@ -342,6 +348,9 @@ for mipmaps.
   </div>
   <div class='jd-tagdata jd-tagdescr'>
 <p> Returns the size of the X dimension of the Allocation.
+</p>
+
+<p> Use <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() to get the dimension of a currently running kernel.
 </p>
   </div>
 </div>
@@ -370,6 +379,9 @@ for mipmaps.
 <p> Returns the size of the Y dimension of the Allocation.  If the Allocation has less
 than two dimensions, returns 0.
 </p>
+
+<p> Use <a href='rs_for_each.html#android_rs:rsGetDimY'>rsGetDimY</a>() to get the dimension of a currently running kernel.
+</p>
   </div>
 </div>
 
@@ -396,6 +408,9 @@ than two dimensions, returns 0.
   <div class='jd-tagdata jd-tagdescr'>
 <p> Returns the size of the Z dimension of the Allocation.  If the Allocation has less
 than three dimensions, returns 0.
+</p>
+
+<p> Use <a href='rs_for_each.html#android_rs:rsGetDimZ'>rsGetDimZ</a>() to get the dimension of a currently running kernel.
 </p>
   </div>
 </div>
@@ -453,37 +468,37 @@ of an Allocation.  See the rsElement* functions below.
       <tr>
         <td>void rsClearObject(<a href='rs_graphics.html#android_rs:rs_font'>rs_font</a>* dst);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsClearObject(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a>* dst);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsClearObject(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a>* dst);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsClearObject(<a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a>* dst);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsClearObject(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a>* dst);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsClearObject(<a href='rs_graphics.html#android_rs:rs_program_vertex'>rs_program_vertex</a>* dst);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
@@ -885,37 +900,37 @@ allocation.  The results are undefined if the pointer is not from a valid Alloca
       <tr>
         <td>bool rsIsObject(<a href='rs_graphics.html#android_rs:rs_font'>rs_font</a> v);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>bool rsIsObject(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> v);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>bool rsIsObject(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> v);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>bool rsIsObject(<a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a> v);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>bool rsIsObject(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> v);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>bool rsIsObject(<a href='rs_graphics.html#android_rs:rs_program_vertex'>rs_program_vertex</a> v);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>

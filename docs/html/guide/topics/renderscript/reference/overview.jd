@@ -30,7 +30,7 @@ framework APIs interact, see the <a target="_parent" href="http://developer.andr
 <tr><td>                 </td>  <td>8 bits        </td>   <td>16 bits         </td>   <td>32 bits       </td>   <td>64 bits</td></tr>
 <tr><td>Integer:         </td>  <td>char, <a href='rs_value_types.html#android_rs:int8_t'>int8_t</a>  </td>   <td>short, <a href='rs_value_types.html#android_rs:int16_t'>int16_t</a>  </td>   <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>       </td>   <td>long, long long, <a href='rs_value_types.html#android_rs:int64_t'>int64_t</a></td></tr>
 <tr><td>Unsigned integer:</td>  <td>uchar, <a href='rs_value_types.html#android_rs:uint8_t'>uint8_t</a></td>   <td>ushort, <a href='rs_value_types.html#android_rs:uint16_t'>uint16_t</a></td>   <td>uint, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a></td>   <td>ulong, <a href='rs_value_types.html#android_rs:uint64_t'>uint64_t</a></td></tr>
-<tr><td>Floating point:  </td>  <td>              </td>   <td>                </td>   <td>float         </td>   <td>double</td></tr>
+<tr><td>Floating point:  </td>  <td>              </td>   <td>half            </td>   <td>float         </td>   <td>double</td></tr>
 </table>
 </p>
 
@@ -176,6 +176,38 @@ of operations.
     </td>
     <td class='jd-descrcol' width='100%'>
       Four 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:half'>half</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      16 bit floating point value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:half2'>half2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 16 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:half3'>half3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 16 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:half4'>half4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 16 bit floats
     </td>
   </tr>
   <tr class='alt-color api apilevel-1'>
@@ -2585,6 +2617,11 @@ See <a href='http://developer.android.com/reference/android/renderscript/Sampler
 <h2>Kernel Invocation Functions and Types</h2>
 <p> The <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>() function can be used to invoke the root kernel of a script.
 </p>
+
+<p> The other functions are used to get the characteristics of the invocation of
+an executing kernel, like dimensions and current indices.  These functions take
+a <a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> as argument.
+</p>
 <table class='jd-sumtable'><tbody>
   <tr><th colspan='2'>Types</th></tr>
   <tr class='alt-color api apilevel-1'>
@@ -2593,6 +2630,14 @@ See <a href='http://developer.android.com/reference/android/renderscript/Sampler
     </td>
     <td class='jd-descrcol' width='100%'>
       Suggested cell processing order
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a kernel invocation context
     </td>
   </tr>
   <tr class='alt-color api apilevel-1'>
@@ -2612,6 +2657,126 @@ See <a href='http://developer.android.com/reference/android/renderscript/Sampler
     </td>
     <td class='jd-descrcol' width='100%'>
       Invoke the root kernel of a script
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetArray0'>rsGetArray0</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Array0 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetArray1'>rsGetArray1</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Array1 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetArray2'>rsGetArray2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Array2 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetArray3'>rsGetArray3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Array3 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimArray0'>rsGetDimArray0</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Array0 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimArray1'>rsGetDimArray1</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Array1 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimArray2'>rsGetDimArray2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Array2 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimArray3'>rsGetDimArray3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Array3 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimHasFaces'>rsGetDimHasFaces</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Presence of more than one face for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimLod'>rsGetDimLod</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Number of levels of detail for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the X dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimY'>rsGetDimY</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Y dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimZ'>rsGetDimZ</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Z dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetFace'>rsGetFace</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Coordinate of the Face for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetLod'>rsGetLod</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Levels of Detail dimension for the specified kernel context
     </td>
   </tr>
 </tbody></table>
@@ -2671,6 +2836,6 @@ They should not be used in shipping applications.
   </tr>
 </tbody></table>
 <h2>Graphics Functions and Types</h2>
-<p> The graphics subsystem of RenderScript has been deprecated.
+<p> The graphics subsystem of RenderScript was removed at API level 23.
 </p>
 </div>
