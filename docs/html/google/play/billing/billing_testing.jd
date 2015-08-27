@@ -75,6 +75,7 @@ accounts, and automatically canceling the completed orders after 14 days. </p>
   the product's subscription period.
 </p>
 
+
 <h4 id="setup">Setting up test purchases</h4>
 
 <p>It’s easy to set up test purchases&mdash;any user account can be chosen to be
@@ -83,7 +84,7 @@ available payment method (even though there’s no charge to the payment
 method).</p>
 
 <p>First, upload and publish in-app products that you want testers to be able to
-purchase. You can upload and publish in-app products in the Developer Console. 
+purchase. You can upload and publish in-app products in the Developer Console.
 Note that you can upload and publish your in-app items before you publish the
 APK itself.</p>
 
@@ -103,6 +104,12 @@ account, the purchase will be made with the account that downloaded the app. If
 none of the accounts has downloaded the app, the purchase is made with the first
 account. Users can confirm the account that is making a purchase by expanding the
 purchase dialog.</p>
+
+<p class="note">
+  <strong>Note:</strong> For test subscription purchases, leave the {@code orderId}
+  field blank. You can use the {@code purchaseToken} field to identify test purchases.
+</p>
+
 
 <h4 id="tp-account">Test purchases and developer account</h4>
 <p>Authorized license test accounts are associated with your developer account
@@ -132,6 +139,22 @@ purchases 14 days after their purchase date. </li>
 center, look up the transaction, and then cancel it. You can find transactions
 by looking up their order numbers.</li>
 </ul>
+
+<p>
+  You can cancel test subscriptions purchases from the app page in the Play Store,
+  or use the 
+  <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/cancel">
+  {@code cancel}</a> method.
+</p>
+
+<p class="caution">
+  <strong>Important:</strong> The
+  <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/refund">
+  {@code refund}</a> and
+  <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/revoke">
+  {@code revoke}</a> methods do not support test purchases.
+</p>
+
 
 <h3 id="transations">Testing with real transactions</h3>
 <p>As you prepare to launch an app that uses In-app Billing, you can make use of
