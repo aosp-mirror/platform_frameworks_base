@@ -1115,12 +1115,17 @@ public abstract class Layout {
      */
     public int getOffsetForHorizontal(int line, float horiz) {
         // TODO: use Paint.getOffsetForAdvance to avoid binary search
-        int max = getLineEnd(line) - 1;
-        int min = getLineStart(line);
+        final int lineEndOffset = getLineEnd(line);
+        final int max;
+        if (line == getLineCount() - 1) {
+            max = lineEndOffset;
+        } else {
+            max = mPaint.getTextRunCursor(mText, 0, mText.length(),
+                    isRtlCharAt(lineEndOffset) ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR,
+                    lineEndOffset, Paint.CURSOR_BEFORE);
+        }
+        final int min = getLineStart(line);
         Directions dirs = getLineDirections(line);
-
-        if (line == getLineCount() - 1)
-            max++;
 
         int best = min;
         float bestdist = Math.abs(getPrimaryHorizontal(best) - horiz);
