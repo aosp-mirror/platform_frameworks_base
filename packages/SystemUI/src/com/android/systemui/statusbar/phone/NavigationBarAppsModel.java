@@ -78,7 +78,7 @@ class NavigationBarAppsModel {
     private final SharedPreferences mPrefs;
 
     // Apps are represented as an ordered list of app infos.
-    private final List<AppInfo> mApps = new ArrayList<AppInfo>();
+    private List<AppInfo> mApps = new ArrayList<AppInfo>();
 
     // Id of the current user.
     private int mCurrentUserId = -1;
@@ -231,33 +231,19 @@ class NavigationBarAppsModel {
         edit.apply();
     }
 
-    /** Returns the number of apps. */
-    public int getAppCount() {
-        return mApps.size();
+    /** Returns the list of apps. */
+    public List<AppInfo> getApps() {
+        return mApps;
     }
 
-    /** Returns the app at the given index. */
-    public AppInfo getApp(int index) {
-        return mApps.get(index);
-    }
-
-    /** Adds the app before the given index. */
-    public void addApp(int index, AppInfo appInfo) {
-        mApps.add(index, appInfo);
-    }
-
-    /** Sets the app at the given index. */
-    public void setApp(int index, AppInfo appInfo) {
-        mApps.set(index, appInfo);
-    }
-
-    /** Remove the app at the given index. */
-    public AppInfo removeApp(int index) {
-        return mApps.remove(index);
+    /** Sets the list of apps and saves it. */
+    public void setApps(List<AppInfo> apps) {
+        mApps = apps;
+        savePrefs();
     }
 
     /** Saves the current model to disk. */
-    public void savePrefs() {
+    private void savePrefs() {
         SharedPreferences.Editor edit = mPrefs.edit();
         int appCount = mApps.size();
         edit.putInt(userPrefixed(APP_COUNT_PREF), appCount);

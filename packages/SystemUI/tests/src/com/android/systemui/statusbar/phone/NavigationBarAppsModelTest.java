@@ -218,11 +218,12 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
     /** Tests initializing the model from SharedPreferences. */
     public void testInitializeFromPrefs() {
         initializeModelFromPrefs();
-        assertEquals(2, mModel.getAppCount());
-        assertEquals("package1/class1", mModel.getApp(0).getComponentName().flattenToString());
-        assertEquals(new UserHandle(4), mModel.getApp(0).getUser());
-        assertEquals("package2/class2", mModel.getApp(1).getComponentName().flattenToString());
-        assertEquals(new UserHandle(5), mModel.getApp(1).getUser());
+        List<AppInfo> apps = mModel.getApps();
+        assertEquals(2, apps.size());
+        assertEquals("package1/class1", apps.get(0).getComponentName().flattenToString());
+        assertEquals(new UserHandle(4), apps.get(0).getUser());
+        assertEquals("package2/class2", apps.get(1).getComponentName().flattenToString());
+        assertEquals(new UserHandle(5), apps.get(1).getUser());
     }
 
     /** Tests initializing the model when the SharedPreferences aren't available. */
@@ -247,11 +248,12 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
 
         // Setting the user should load the installed activities.
         mModel.setCurrentUser(2);
-        assertEquals(2, mModel.getAppCount());
-        assertEquals("package1/class1", mModel.getApp(0).getComponentName().flattenToString());
-        assertEquals(new UserHandle(2), mModel.getApp(0).getUser());
-        assertEquals("package2/class2", mModel.getApp(1).getComponentName().flattenToString());
-        assertEquals(new UserHandle(2), mModel.getApp(1).getUser());
+        List<AppInfo> apps = mModel.getApps();
+        assertEquals(2, apps.size());
+        assertEquals("package1/class1", apps.get(0).getComponentName().flattenToString());
+        assertEquals(new UserHandle(2), apps.get(0).getUser());
+        assertEquals("package2/class2", apps.get(1).getComponentName().flattenToString());
+        assertEquals(new UserHandle(2), apps.get(1).getUser());
         InOrder order = inOrder(mMockEdit);
         order.verify(mMockEdit).apply();
         order.verify(mMockEdit).putInt("222|app_count", 2);
@@ -293,9 +295,10 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
 
         // Initializing the model should load from prefs and skip the missing one.
         mModel.setCurrentUser(2);
-        assertEquals(1, mModel.getAppCount());
-        assertEquals("package0/class0", mModel.getApp(0).getComponentName().flattenToString());
-        assertEquals(new UserHandle(5), mModel.getApp(0).getUser());
+        List<AppInfo> apps = mModel.getApps();
+        assertEquals(1, apps.size());
+        assertEquals("package0/class0", apps.get(0).getComponentName().flattenToString());
+        assertEquals(new UserHandle(5), apps.get(0).getUser());
         InOrder order = inOrder(mMockEdit);
         order.verify(mMockEdit).putInt("222|app_count", 1);
         order.verify(mMockEdit).putString("222|app_0", "package0/class0");
@@ -333,9 +336,10 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
 
         // Initializing the model should load from prefs and skip the unlauncheable one.
         mModel.setCurrentUser(2);
-        assertEquals(1, mModel.getAppCount());
-        assertEquals("package0/class0", mModel.getApp(0).getComponentName().flattenToString());
-        assertEquals(new UserHandle(5), mModel.getApp(0).getUser());
+        List<AppInfo> apps = mModel.getApps();
+        assertEquals(1, apps.size());
+        assertEquals("package0/class0", apps.get(0).getComponentName().flattenToString());
+        assertEquals(new UserHandle(5), apps.get(0).getUser());
 
         // Once an unlauncheable app is detected, the model should save all apps excluding the
         // unlauncheable one.
@@ -350,7 +354,7 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
     public void testSavePrefs() {
         initializeModelFromPrefs();
 
-        mModel.savePrefs();
+        mModel.setApps(mModel.getApps());
         verify(mMockEdit).putInt("222|app_count", 2);
         verify(mMockEdit).putString("222|app_0", "package1/class1");
         verify(mMockEdit).putLong("222|app_user_0", 444L);
