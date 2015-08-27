@@ -387,6 +387,63 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
     }
 
     @SmallTest
+    public void testEnd() throws Throwable {
+        final MyListener l1 = new MyListener();
+        final MyListener l2 = new MyListener();
+        a1.addListener(l1);
+        a2.addListener(l2);
+        a1.addListener(new MyListener() {
+            @Override
+            public void onAnimationEnd(Animator anim) {
+                anim.cancel();
+            }
+        });
+        a2.addListener(new MyListener() {
+            @Override
+            public void onAnimationCancel(Animator anim) {
+                anim.end();
+            }
+        });
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(l1.cancelCalled);
+                assertFalse(l1.endCalled);
+                assertFalse(l2.cancelCalled);
+                assertFalse(l2.endCalled);
+                a1.start();
+                a2.start();
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                a1.end();
+                a2.cancel();
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Calling cancel from onAnimationEnd will be ignored.
+                assertFalse(l1.cancelCalled);
+                assertTrue(l1.endCalled);
+                assertTrue(l2.cancelCalled);
+                assertTrue(l2.endCalled);
+
+                float value1 = (Float) a1.getAnimatedValue();
+                int value2 = (Integer) a2.getAnimatedValue();
+                assertEquals(A1_END_VALUE, value1);
+                assertEquals(A2_END_VALUE, value2);
+            }
+        });
+
+    }
+
+    @SmallTest
     public void testEndValue() throws Throwable {
         final MyListener l1 = new MyListener();
         a1.addListener(l1);
