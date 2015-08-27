@@ -902,7 +902,14 @@ final class ActivityStack {
         prev.task.touchActiveTime();
         clearLaunchTime(prev);
         final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
-        if (mService.mHasRecents && (next == null || next.noDisplay || next.task != prev.task || uiSleeping)) {
+        // In freeform mode we only update the thumbnail when there is no thumbnail yet since every
+        // focus change will request a thumbnail to be taken.
+        // Note furthermore that since windows can change their content in freeform mode all the
+        // time a thumbnail is possibly constantly outdated.
+        if (mService.mHasRecents &&
+                (next == null || next.noDisplay || next.task != prev.task || uiSleeping) &&
+                (!prev.task.hasThumbnail() ||
+                        prev.task.stack.mStackId != FREEFORM_WORKSPACE_STACK_ID)) {
             prev.updateThumbnailLocked(screenshotActivities(prev), null);
         }
         stopFullyDrawnTraceIfNeeded();
