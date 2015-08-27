@@ -8765,12 +8765,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         super.onPopulateAccessibilityEventInternal(event);
 
-        final boolean isPassword = hasPasswordTransformationMethod();
-        if (!isPassword || shouldSpeakPasswordsForAccessibility()) {
-            final CharSequence text = getTextForAccessibility();
-            if (!TextUtils.isEmpty(text)) {
-                event.getText().add(text);
-            }
+        final CharSequence text = getTextForAccessibility();
+        if (!TextUtils.isEmpty(text)) {
+            event.getText().add(text);
         }
     }
 
@@ -8921,10 +8918,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final boolean isPassword = hasPasswordTransformationMethod();
         info.setPassword(isPassword);
-
-        if (!isPassword || shouldSpeakPasswordsForAccessibility()) {
-            info.setText(getTextForAccessibility());
-        }
+        info.setText(getTextForAccessibility());
 
         if (mBufferType == BufferType.EDITABLE) {
             info.setEditable(true);
@@ -9156,18 +9150,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Gets the text reported for accessibility purposes.
+     * Returns the text that should be exposed to accessibility services.
+     * <p>
+     * This approximates what is displayed visually. If the user has specified
+     * that accessibility services should speak passwords, this method will
+     * bypass any password transformation method and return unobscured text.
      *
-     * @return The accessibility text.
-     *
-     * @hide
+     * @return the text that should be exposed to accessibility services, may
+     *         be {@code null} if no text is set
      */
-    public CharSequence getTextForAccessibility() {
-        CharSequence text = getText();
-        if (TextUtils.isEmpty(text)) {
-            text = getHint();
+    @Nullable
+    private CharSequence getTextForAccessibility() {
+        // If the text is empty, we must be showing the hint text.
+        if (TextUtils.isEmpty(mText)) {
+            return mHint;
         }
-        return text;
+
+        // Check whether we need to bypass the transformation
+        // method and expose unobscured text.
+        if (hasPasswordTransformationMethod() && shouldSpeakPasswordsForAccessibility()) {
+            return mText;
+        }
+
+        // Otherwise, speak whatever text is being displayed.
+        return mTransformed;
     }
 
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
