@@ -28,7 +28,9 @@ import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
@@ -41,9 +43,7 @@ import android.support.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * MultiSelectManager provides support traditional multi-item selection support to RecyclerView.
@@ -1420,12 +1420,11 @@ public final class MultiSelectManager {
         private final BandModelHelper mHelper;
         private final List<OnSelectionChangedListener> mOnSelectionChangedListeners = new ArrayList<>();
 
-        // Map from the x-value of the left side of an item to an ordered list of metadata of all
-        // items whose x-values are the same. The list is ordered by the y-values of the items in
-        // the column. For example, if the first column of the view starts at an x-value of 5,
-        // mColumns.get(5) would return a list of all items in that column, with the top-most item
-        // first in the list and the bottom-most item last in the list.
-        private final Map<Integer, List<ItemData>> mColumns = new HashMap<>();
+        // Map from the x-value of the left side of a SparseBooleanArray of adapter positions, keyed
+        // by their y-offset. For example, if the first column of the view starts at an x-value of 5,
+        // mColumns.get(5) would return an array of positions in that column. Within that array, the
+        // value for key y is the adapter position for the item whose y-offset is y.
+        private final SparseArray<SparseIntArray> mColumns = new SparseArray<>();
 
         // List of limits along the x-axis. For example, if the view has two columns, this list will
         // have two elements, each of which lists the lower- and upper-limits of the x-values of the
@@ -1560,16 +1559,12 @@ public final class MultiSelectManager {
                         mYLimitsList, new Limits(absoluteChildRect.top, absoluteChildRect.bottom));
             }
 
-            List<ItemData> columnList = mColumns.get(absoluteChildRect.left);
+            SparseIntArray columnList = mColumns.get(absoluteChildRect.left);
             if (columnList == null) {
-                columnList = new ArrayList<ItemData>();
+                columnList = new SparseIntArray();
                 mColumns.put(absoluteChildRect.left, columnList);
             }
-            ItemData itemData = new ItemData(adapterPosition, absoluteChildRect.top);
-            int index = Collections.binarySearch(columnList, itemData);
-            if (index < 0) {
-                columnList.add(~index, itemData);
-            }
+            columnList.put(absoluteChildRect.top, adapterPosition);
         }
 
         /**
@@ -1635,9 +1630,9 @@ public final class MultiSelectManager {
                 columnEndIndex = i;
             }
 
-            List<ItemData> firstColumn =
+            SparseIntArray firstColumn =
                     mColumns.get(mXLimitsList.get(columnStartIndex).lowerLimit);
-            int rowStartIndex = Collections.binarySearch(firstColumn, new ItemData(0, rect.top));
+            int rowStartIndex = firstColumn.indexOfKey(rect.top);
             if (rowStartIndex < 0) {
                 mPositionNearestOrigin = NOT_SET;
                 return;
@@ -1645,7 +1640,7 @@ public final class MultiSelectManager {
 
             int rowEndIndex = rowStartIndex;
             for (int i = rowStartIndex;
-                    i < firstColumn.size() && firstColumn.get(i).offset <= rect.bottom; i++) {
+                    i < firstColumn.size() && firstColumn.keyAt(i) <= rect.bottom; i++) {
                 rowEndIndex = i;
             }
 
@@ -1660,9 +1655,9 @@ public final class MultiSelectManager {
                 int columnStartIndex, int columnEndIndex, int rowStartIndex, int rowEndIndex) {
             mSelection.clear();
             for (int column = columnStartIndex; column <= columnEndIndex; column++) {
-                List<ItemData> items = mColumns.get(mXLimitsList.get(column).lowerLimit);
+                SparseIntArray items = mColumns.get(mXLimitsList.get(column).lowerLimit);
                 for (int row = rowStartIndex; row <= rowEndIndex; row++) {
-                    int position = items.get(row).position;
+                    int position = items.get(items.keyAt(row));
                     mSelection.append(position, true);
                     if (isPossiblePositionNearestOrigin(column, columnStartIndex, columnEndIndex,
                             row, rowStartIndex, rowEndIndex)) {
@@ -1714,27 +1709,6 @@ public final class MultiSelectManager {
 
         void removeOnSelectionChangedListener(OnSelectionChangedListener listener) {
             mOnSelectionChangedListeners.remove(listener);
-        }
-
-        /**
-         * Metadata for an item in the view, consisting of the adapter position and the offset from the
-         * top of the view (in pixels). Stored in the mColumns map to model the item grid.
-         */
-        private class ItemData implements Comparable<ItemData> {
-            int position;
-            int offset;
-
-            ItemData(int position, int offset) {
-                this.position = position;
-                this.offset = offset;
-            }
-
-            @Override
-            public int compareTo(ItemData other) {
-                // The list of columns is sorted via the offset from the top, so PositionMetadata
-                // objects with lower y-values are befor those with higher y-values.
-                return offset - other.offset;
-            }
         }
 
         /**
