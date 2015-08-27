@@ -169,7 +169,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Current version of checkin data format.
      */
-    static final String CHECKIN_VERSION = "14";
+    static final String CHECKIN_VERSION = "15";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
