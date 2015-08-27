@@ -158,6 +158,18 @@ public class AudioTrack
      * Denotes a failure due to the improper use of a method.
      */
     public  static final int ERROR_INVALID_OPERATION               = AudioSystem.INVALID_OPERATION;
+    /**
+     * An error code indicating that the object reporting it is no longer valid and needs to
+     * be recreated.
+     * @hide
+     */
+    public  static final int ERROR_DEAD_OBJECT                     = AudioSystem.DEAD_OBJECT;
+    /**
+     * {@link #getTimestampWithStatus(AudioTimestamp)} is called in STOPPED or FLUSHED state,
+     * or immediately after start/ACTIVE.
+     * @hide
+     */
+    public  static final int ERROR_WOULD_BLOCK                     = AudioSystem.WOULD_BLOCK;
 
     // Error codes:
     // to keep in sync with frameworks/base/core/jni/android_media_AudioTrack.cpp
@@ -1225,6 +1237,44 @@ public class AudioTrack
         return true;
     }
 
+    /**
+     * Poll for a timestamp on demand.
+     * <p>
+     * Same as {@link #getTimestamp(AudioTimestamp)} but with a more useful return code.
+     *
+     * @param timestamp a reference to a non-null AudioTimestamp instance allocated
+     *        and owned by caller.
+     * @return {@link #SUCCESS} if a timestamp is available
+     *         {@link #ERROR_WOULD_BLOCK} if called in STOPPED or FLUSHED state, or if called
+     *         immediately after start/ACTIVE, when the number of frames consumed is less than the
+     *         overall hardware latency to physical output. In WOULD_BLOCK cases, one might poll
+     *         again, or use {@link #getPlaybackHeadPosition}, or use 0 position and current time
+     *         for the timestamp.
+     *         {@link #ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *         needs to be recreated.
+     *         {@link #ERROR_INVALID_OPERATION} if current route does not support
+     *         timestamps. In this case, the approximate frame position can be obtained
+     *         using {@link #getPlaybackHeadPosition}.
+     *
+     *         The AudioTimestamp instance is filled in with a position in frame units, together
+     *         with the estimated time when that frame was presented or is committed to
+     *         be presented.
+     * @hide
+     */
+     // Add this text when the "on new timestamp" API is added:
+     //   Use if you need to get the most recent timestamp outside of the event callback handler.
+     public int getTimestampWithStatus(AudioTimestamp timestamp)
+     {
+         if (timestamp == null) {
+             throw new IllegalArgumentException();
+         }
+         // It's unfortunate, but we have to either create garbage every time or use synchronized
+         long[] longArray = new long[2];
+         int ret = native_get_timestamp(longArray);
+         timestamp.framePosition = longArray[0];
+         timestamp.nanoTime = longArray[1];
+         return ret;
+     }
 
     //--------------------------------------------------------------------------
     // Initialization / configuration
