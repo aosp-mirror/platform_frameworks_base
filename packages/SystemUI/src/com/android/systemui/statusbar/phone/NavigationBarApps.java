@@ -87,6 +87,9 @@ class NavigationBarApps extends LinearLayout {
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 int currentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 onUserSwitched(currentUserId);
+            } else if (Intent.ACTION_MANAGED_PROFILE_REMOVED.equals(action)) {
+                UserHandle removedProfile = intent.getParcelableExtra(Intent.EXTRA_USER);
+                onManagedProfileRemoved(removedProfile);
             }
         }
     };
@@ -205,6 +208,7 @@ class NavigationBarApps extends LinearLayout {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mAppPackageMonitor.register(mContext, null, UserHandle.ALL, true);
@@ -570,5 +574,18 @@ class NavigationBarApps extends LinearLayout {
     private void onUserSwitched(int currentUserId) {
         sAppsModel.setCurrentUser(currentUserId);
         recreateAppButtons();
+    }
+
+    private void onManagedProfileRemoved(UserHandle removedProfile) {
+        boolean removedApps = false;
+        for(int i = sAppsModel.getAppCount() - 1; i >= 0; --i) {
+            AppInfo appInfo = sAppsModel.getApp(i);
+            if (!appInfo.getUser().equals(removedProfile)) continue;
+
+            removeViewAt(i);
+            sAppsModel.removeApp(i);
+            removedApps = true;
+        }
+        if (removedApps) sAppsModel.savePrefs();
     }
 }
