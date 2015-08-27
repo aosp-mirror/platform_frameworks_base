@@ -185,6 +185,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     boolean mInitialized = false;
 
+    /**
+     * Flag that tracks whether animation has been requested to end.
+     */
+    private boolean mAnimationEndRequested = false;
+
     //
     // Backing variables
     //
@@ -915,6 +920,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mStarted = true;
         mPaused = false;
         mRunning = false;
+        mAnimationEndRequested = false;
         updateScaledDuration(); // in case the scale factor has changed since creation time
         AnimationHandler animationHandler = AnimationHandler.getInstance();
         animationHandler.addAnimationFrameCallback(this, mStartDelay);
@@ -930,9 +936,15 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
+
+        // If end has already been requested, through a previous end() or cancel() call, no-op
+        // until animation starts again.
+        if (mAnimationEndRequested) {
+            return;
+        }
+
         // Only cancel if the animation is actually running or has been started and is about
         // to run
-
         // Only notify listeners if the animator has actually started
         if ((mStarted || mRunning) && mListeners != null) {
             if (!mRunning) {
@@ -1029,9 +1041,14 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * Called internally to end an animation by removing it from the animations list. Must be
      * called on the UI thread.
      */
-     private void endAnimation() {
+    private void endAnimation() {
+        if (mAnimationEndRequested) {
+            return;
+        }
         AnimationHandler handler = AnimationHandler.getInstance();
         handler.removeCallback(this);
+
+        mAnimationEndRequested = true;
         mPaused = false;
         if ((mStarted || mRunning) && mListeners != null) {
             if (!mRunning) {
@@ -1256,6 +1273,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         anim.mStartListenersCalled = false;
         anim.mStartTime = 0;
         anim.mStartTimeCommitted = false;
+        anim.mAnimationEndRequested = false;
         anim.mPauseTime = 0;
         anim.mLastFrameTime = 0;
         anim.mCurrentFraction = 0;
