@@ -63,8 +63,8 @@ the {@link android.media.session.MediaSession#FLAG_HANDLES_TRANSPORT_CONTROLS} f
 
 <p>The Now Playing card shows up after {@link android.media.session.MediaSession#setActive(boolean) setActive(true)}
 is called, if the session is the highest priority session in the system. Also, note that your app
-must request the audio focus, as described in <a href="{@docRoot}training/managing-audio/audio-focus">
-Managing Audio Focus</a>.</p>
+must request the audio focus, as described in
+<a href="{@docRoot}training/managing-audio/audio-focus.html">Managing Audio Focus</a>.</p>
 
 <pre>
 private void handlePlayRequest() {
