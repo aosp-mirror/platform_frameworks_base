@@ -279,6 +279,7 @@ public class AudioSystem
     public static final int PERMISSION_DENIED  = -4;
     public static final int NO_INIT            = -5;
     public static final int DEAD_OBJECT        = -6;
+    public static final int WOULD_BLOCK        = -7;
 
     /*
      * AudioPolicyService methods
