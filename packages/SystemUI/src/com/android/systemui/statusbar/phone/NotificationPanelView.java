@@ -21,7 +21,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -60,6 +63,8 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
+
+import java.util.List;
 
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
@@ -2425,7 +2430,28 @@ public class NotificationPanelView extends PanelView implements
         getCenterIcon().setLaunchingAffordance(launchingAffordance);
     }
 
-    public boolean canCameraGestureBeLaunched() {
-        return !mAfforanceHelper.isSwipingInProgress();
+    /**
+     * Whether the camera application can be launched for the camera launch gesture.
+     *
+     * @param keyguardIsShowing whether keyguard is being shown
+     */
+    public boolean canCameraGestureBeLaunched(boolean keyguardIsShowing) {
+        ResolveInfo resolveInfo = mKeyguardBottomArea.resolveCameraIntent();
+        String packageToLaunch = (resolveInfo == null || resolveInfo.activityInfo == null)
+                ? null : resolveInfo.activityInfo.packageName;
+        return packageToLaunch != null &&
+               (keyguardIsShowing || !isForegroundApp(packageToLaunch)) &&
+               !mAfforanceHelper.isSwipingInProgress();
+    }
+
+    /**
+     * Return true if the applications with the package name is running in foreground.
+     *
+     * @param pkgName application package name.
+     */
+    private boolean isForegroundApp(String pkgName) {
+        ActivityManager am = getContext().getSystemService(ActivityManager.class);
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
     }
 }
