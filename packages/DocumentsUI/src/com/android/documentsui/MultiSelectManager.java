@@ -250,6 +250,10 @@ public final class MultiSelectManager {
         notifySelectionChanged();
     }
 
+    public void handleLayoutChanged() {
+        mBandSelectManager.handleLayoutChanged();
+    }
+
     /**
      * Clears the selection, without notifying anyone.
      */
@@ -1188,6 +1192,18 @@ public final class MultiSelectManager {
             mHelper = helper;
             mHelper.addOnScrollListener(this);
             mModel = new BandSelectModel(helper);
+            mModel.addOnSelectionChangedListener(this);
+        }
+
+        /**
+         * Handle a change in layout by cleaning up and getting rid of the old model and creating
+         * a new model which will track the new layout.
+         */
+        public void handleLayoutChanged() {
+            mModel.removeOnSelectionChangedListener(this);
+            mModel.stopListening();
+
+            mModel = new BandSelectModel((RuntimeRecyclerViewHelper) mHelper);
             mModel.addOnSelectionChangedListener(this);
         }
 
