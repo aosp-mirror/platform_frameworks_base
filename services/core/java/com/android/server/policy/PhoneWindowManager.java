@@ -65,6 +65,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -265,6 +266,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowManagerFuncs mWindowManagerFuncs;
     WindowManagerInternal mWindowManagerInternal;
     PowerManager mPowerManager;
+    PowerManagerInternal mPowerManagerInternal;
     ActivityManagerInternal mActivityManagerInternal;
     DreamManagerInternal mDreamManagerInternal;
     IStatusBarService mStatusBarService;
@@ -1324,6 +1326,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
 
         // Init display burn-in protection
         boolean burnInProtectionEnabled = context.getResources().getBoolean(
@@ -5076,6 +5079,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     sleepPress(event.getEventTime());
                 } else {
                     sleepRelease(event.getEventTime());
+                }
+                break;
+            }
+
+            case KeyEvent.KEYCODE_SOFT_SLEEP: {
+                result &= ~ACTION_PASS_TO_USER;
+                isWakeKey = false;
+                if (!down) {
+                    mPowerManagerInternal.setUserInactiveOverrideFromWindowManager();
                 }
                 break;
             }
