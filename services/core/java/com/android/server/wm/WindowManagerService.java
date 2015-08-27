@@ -2806,12 +2806,17 @@ public class WindowManagerService extends IWindowManager.Stub
             Rect appFrame = new Rect(0, 0, width, height);
             Rect surfaceInsets = null;
             final boolean fullscreen = win != null && win.isFullscreen(width, height);
-            // Dialog activities have windows with containing frame being very large, but not
-            // exactly fullscreen and much smaller mFrame. We use this distinction to identify
-            // dialog activities.
-            final boolean dialogWindow = win != null && !win.mContainingFrame.equals(win.mFrame);
+            final boolean freeform = win != null && win.inFreeformWorkspace();
             if (win != null) {
-                containingFrame.set(win.mContainingFrame);
+                // Containing frame will usually cover the whole screen, including dialog windows.
+                // For freeform workspace windows it will not cover the whole screen and it also
+                // won't exactly match the final freeform window frame (e.g. when overlapping with
+                // the status bar). In that case we need to use the final frame.
+                if (freeform) {
+                    containingFrame.set(win.mFrame);
+                } else {
+                    containingFrame.set(win.mContainingFrame);
+                }
                 surfaceInsets = win.getAttrs().surfaceInsets;
                 if (fullscreen) {
                     // For fullscreen windows use the window frames and insets to set the thumbnail
@@ -2830,11 +2835,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 // screen gets the enter animation. Both appear in the mOpeningApps set.
                 enter = false;
             }
-            final boolean resizedWindow = !fullscreen && !dialogWindow;
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, containingWidth,
                     containingHeight, mCurConfiguration.orientation, containingFrame, contentInsets,
-                    surfaceInsets, appFrame, isVoiceInteraction, resizedWindow,
-                    atoken.mTask.mTaskId);
+                    surfaceInsets, appFrame, isVoiceInteraction, freeform, atoken.mTask.mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
