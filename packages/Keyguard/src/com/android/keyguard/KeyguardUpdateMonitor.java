@@ -523,7 +523,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         final DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         return dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
-                    & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0;
+                    & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0
+                || isSimPinSecure();
     }
 
     public boolean getUserCanSkipBouncer(int userId) {
@@ -1016,7 +1017,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private boolean shouldListenForFingerprint() {
         return (mKeyguardIsVisible || !mDeviceInteractive) && !mSwitchingUser
-                && !mFingerprintAlreadyAuthenticated;
+                && !mFingerprintAlreadyAuthenticated && !isFingerprintDisabled(getCurrentUser());
     }
 
     private void startListeningForFingerprint() {
@@ -1090,6 +1091,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_DPM_STATE_CHANGED}
      */
     protected void handleDevicePolicyManagerStateChanged() {
+        updateFingerprintListeningState();
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
