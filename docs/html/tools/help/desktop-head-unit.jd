@@ -1,0 +1,439 @@
+page.title=Desktop Head Unit
+page.tags="auto", "car", "testing","dhu"
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#launching-dhu">Launching the DHU</a></li>
+      <li><a href="#dhu-commands">Issuing DHU Commands</a></li>
+    </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/auto/start/index.html#test-it-dhu">Run and Test Auto Apps</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>The Desktop Head Unit (DHU) enables your development machine to emulate an Android Auto
+head unit, so you can easily run and test Android Auto apps. The DHU runs on
+Windows, Mac, and Linux hosts and replaces previous Android Auto simulators,
+such as the Android Media Browser and Messaging
+simulators.</p>
+
+<p class="note"><strong>Note:</strong> For other information about testing Auto apps, see the
+training lesson
+<a href="{@docRoot}training/auto/start/index.html#test-it-dhu">Run and Test Auto Apps</a>.  </p>
+
+
+<h2 id="launching-dhu">Launching the DHU</h2>
+
+<p>
+  To launch the DHU, run the <code>desktop-head-unit.exe</code> (on Windows)
+  or <code>desktop-head-unit</code> (on Mac or Linux) command, as described in
+  <a href="{@docRoot}training/auto/start/index.html#connecting-dhu">Connecting
+  the DHU to your mobile device</a>.
+</p>
+
+<p>
+  By default, the DHU emulates the most common form of Android Auto-compatible
+  head unit, which uses a touch screen user interface. You can simulate user
+  touches by clicking the DHU with a mouse. To emulate head units which use
+  a rotary controller for input, you can use the <code>-i controller</code> flag,
+  as in this example:
+</p>
+
+<pre class="no-pretty-print">$ ./desktop-head-unit -i controller</pre>
+
+<p>
+  When the DHU is in rotary-controller mode you can simulate controller
+  operations by using keyboard shortcuts, as described in <a href=
+  "#cmd-bindings">DHU commands and key bindings</a>. If the DHU is in rotary
+  controller mode, it ignores mouse clicks; you must operate Android Auto with
+  the simulated rotary controller operations.
+</p>
+
+<h2 id="dhu-commands">Issuing DHU Commands</h2>
+
+<p>
+  DHU commands allow you to test your app with Android Auto features, such as
+  playing voice input or switching between night and day display mode. You can issue commands to
+  the DHU by running commands from the terminal window where you launched DHU.
+  You can also issue commands by selecting the DHU window and
+  using keyboard shortcuts. The DHU commands
+  and key bindings for all controls are listed in <a href="#cmd-bindings">DHU
+  commands and key bindings</a>.
+</p>
+
+
+<h3 id="day-night">Switching between day and night mode</h3>
+
+<p>
+  Android Auto supports different color schemes for day and night. You should test your app in both
+  day and night mode. You can switch between night and day mode in either of the
+  following ways:
+</p>
+
+<ul>
+  <li>Run the command <code>daynight</code> in the terminal where you launched the DHU.
+  </li>
+
+  <li>Select the DHU window and press the <strong>N</strong> key.
+  </li>
+</ul>
+
+<h3>Microphone testing</h3>
+
+<p>The DHU supports using a microphone for voice input. You can also instruct the DHU to treat
+a pre-recorded voice track as input, as if the DHU had heard the track through the microphone.</p>
+
+<p>To use a pre-recorded sound file as input, enter this command: </p>
+<pre class="no-pretty-print">
+$ mic play &lt;sound_file_path&gt;/&lt;sound_file&gt;.wav
+</pre>
+
+<p>For your convenience, we have provided the following sound files for common
+voice commands. These sound files are installed in the
+<code>&lt;sdk&gt;/extras/google/auto/voice/</code> directory.</p>
+
+<dl>
+  <dt>
+    <code>exitnav.wav</code>
+  </dt>
+
+  <dd>
+    "Exit navigation."
+  </dd>
+
+  <dt>
+    <code>navgoogle.wav</code>
+  </dt>
+
+  <dd>
+    "Navigate to 1600 Amphitheatre Parkway, Mountain View."
+  </dd>
+
+  <dt>
+    <code>navsoh.wav</code>
+  </dt>
+
+  <dd>
+    "Navigate to Sydney Opera House."
+  </dd>
+
+  <dt>
+    <code>nextturn.wav</code>
+  </dt>
+
+  <dd>
+    "When is my next turn?"
+  </dd>
+
+  <dt>
+    <code>showalternateroute.wav</code>
+  </dt>
+
+  <dd>
+    "Show alternate routes.""
+  </dd>
+
+  <dt>
+    <code>howlong.wav</code>
+  </dt>
+
+  <dd>
+    "How long until I get there?"
+  </dd>
+
+  <dt>
+    <code>navhome.wav</code>
+  </dt>
+
+  <dd>
+    "Navigate to home."
+  </dd>
+
+  <dt>
+    <code>navwork.wav</code>
+  </dt>
+
+  <dd>
+    "Navigate to work.""
+  </dd>
+
+  <dt>
+    <code>pause.wav</code>
+  </dt>
+
+  <dd>
+    "Pause music."
+  </dd>
+
+  <dt>
+    <code>showtraffic.wav</code>
+  </dt>
+
+  <dd>
+    "Show traffic."
+  </dd>
+</dl>
+<h3 id="cmd-bindings">DHU commands and key bindings</h3>
+
+<p>The DHU supports the following commands.</p>
+
+<p class="table-caption" id="table-commands"><strong>Table 1.</strong> Commands and key bindings</p>
+<table>
+<tr>
+  <th>Category</th>
+  <th>Command</th>
+  <th>Subcommand</th>
+  <th>Argument(s)</th>
+  <th>Keyboard Shortcut(s)</th>
+  <th>Description</th>
+</tr>
+
+<!--system-->
+
+<tr>
+<td rowspan="4">System</td>
+<td>help</td>
+<td></td>
+<td>[command]</td>
+<td></td>
+<td>Shows the full command set. Specifying a command name (for example, <code>help day</code>)
+  causes the system to show help for that command.</td>
+</tr>
+
+<tr>
+
+<td>quit</td>
+<td></td>
+<td></td>
+<td>Alt+q</td>
+<td>Quits the head unit.</td>
+</tr>
+
+<tr>
+
+<td>sleep</td>
+<td></td>
+<td>[seconds]</td>
+<td></td>
+<td>Sleeps for one second. Specifying an argument (for example, <code>sleep 30</code>) causes the
+system to sleep the specified number of seconds. This command
+is useful if you are writing scripts for the DHU. (You can run a script by using I/O redirection
+from the command line: <code>./desktop-head-unit &lt; script.txt</code> loads commands from the
+file <code>script.txt</code>.)</td>
+</tr>
+
+<tr>
+
+<td>screenshot</td>
+<td></td>
+<td>filename.png</td>
+<td></td>
+<td>Saves a screenshot to <code>filename.png</code>.</td>
+</tr>
+
+
+<!--microphone-->
+
+<tr>
+<td rowspan="3">Microphone</td>
+<td rowspan="3">mic</td>
+<td>begin</td>
+<td></td>
+<td>m </td>
+<td>Activates the microphone (equivalent to clicking the steering wheel's microphone button) and
+waits for input from the computer microphone.</td>
+</tr>
+
+<tr>
+
+
+<td>play</td>
+<td>filename.wav</td>
+<td></td>
+<td>Causes the DHU to treat <code>filename.wav</code> as voice input, as if it had heard that sound
+  through the microphone. You do not hear the sound file being played, but you do hear
+  the response from Android Auto.</td>
+</tr>
+
+<tr>
+
+
+<td>repeat</td>
+<td></td>
+<td></td>
+<td>Repeats the last <code>mic play</code> command, as if you had called <code>mic play</code>
+  again with the same sound file parameter.</td>
+</tr>
+
+<!--Input-->
+
+<tr>
+<td rowspan="7">Input</td>
+<td rowspan="6">dpad</td>
+<td>up <br> down <br> left <br> right</td>
+<td></td>
+<td>Arrow keys</td>
+<td>Simulates moving the rotary controller.</td>
+</tr>
+
+<tr>
+
+
+<td>soft left <br> soft right</td>
+<td></td>
+<td>Shift+Arrow keys</td>
+<td>Simulates pressing the side buttons available on some rotary controllers.</td>
+</tr>
+
+<tr>
+
+
+<td>click</td>
+<td></td>
+<td>Return</td>
+<td>Simulates pressing the rotary controller.</td>
+</tr>
+
+<tr>
+
+
+<td>back</td>
+<td></td>
+<td>Backspace</td>
+<td>Simulates pressing the <strong>back</strong> button available below some rotary
+  controllers.</td>
+</tr>
+
+<tr>
+
+
+<td>rotate left <br> rotate right</td>
+<td></td>
+<td>1 <br> 2</td>
+<td>Simulates rotating the rotary controller left (counter-clockwise) or right (clockwise).</td>
+</tr>
+
+<tr>
+
+
+<td>flick left <br> flick right</td>
+<td></td>
+<td>Shift+1 <br> Shift+2</td>
+<td>Simulates a fast spin of the rotary controller to the left (counter-clockwise) or right
+  (clockwise).</td>
+</tr>
+
+<tr>
+
+<td>tap</td>
+<td></td>
+<td>x y</td>
+<td></td>
+<td>Simulates a touch event at the specified coordinates. For example, <code>tap 50 100</code></td>
+</tr>
+
+
+<!--Day/Night-->
+
+<tr>
+<td rowspan="3">Day/Night</td>
+<td>day</td>
+<td></td>
+<td></td>
+<td>Shift+n</td>
+<td>Activates day mode (high brightness, full color).</td>
+</tr>
+
+<tr>
+
+<td>night</td>
+<td></td>
+<td> </td>
+<td>Ctrl+n </td>
+<td>Activates night mode (low brightness, high contrast).</td>
+</tr>
+
+<tr>
+
+<td>daynight</td>
+<td></td>
+<td></td>
+<td>n </td>
+<td>Toggles current day/night mode.</td>
+</tr>
+
+</table>
+
+
+
+
+<h2 id="auto-simulators">Media Browser and Messaging Simulators</h2>
+
+<p class="caution"><strong>Important:</strong> Use of the Android Media Browser and Messaging
+Simulators for testing Android Auto apps is deprecated. Instead, we recommend using the
+Desktop Head Unit, which enables your development machine to act as if it were an Android Auto head
+unit.</p>
+
+<p>To get the simulators, open the
+<a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> and download
+them from <strong>Extras &gt; Android Auto API Simulators</strong>.</p>
+
+<p>Before you begin testing, compile your app in your development environment.
+Install your app and the Android simulator for the features you want to test
+(that is, audio or messaging) on a physical or virtual device running Android
+5.0 (API level 21) or higher. To check the version of Android on the device, go
+to <strong>Settings &gt; About phone</strong> (or <strong>About tablet</strong>)
+<strong>&gt; Android Version</strong>.</p>
+
+<h3 id="testing-audio-apps">Testing audio apps</h3>
+<p>To run and test audio apps:</p>
+
+<ol>
+<li>Install the Android Media Browser simulator
+({@code &lt;sdk&gt;/extras/google/simulators/media-browser-simulator.apk}) on
+the test device. You can do this using
+the <a href="{@docRoot}tools/help/adb.html#move">adb</a> command line tool.</li>
+<li>Enable <a href="{@docRoot}tools/device.html#developer-device-options">
+developer options</a> on the test device.</li>
+<li>Install your app on the test device.</li>
+<li>Launch the Android Media Browser simulator to see how your audio app
+appears in Auto. If your app does not appear, stop the simulator from
+<strong>Settings &gt; Apps</strong> and restart it.</li>
+</ol>
+
+
+<h3 id="testing-messaging-apps">Testing messaging apps</h3>
+<p>To run and test messaging apps:</p>
+
+<ol>
+<li>Install the Android Messaging simulator
+  ({@code &lt;sdk&gt;/extras/google/simulators/messaging-simulator.apk})
+on the test device. You can do this using the
+<a href="{@docRoot}tools/help/adb.html#move">adb</a> command line tool.</li>
+<li>Enable the simulator to read notifications posted on the system:
+<ol type="a">
+	<li>Enable <a href="{@docRoot}tools/device.html#developer-device-options">
+developer options</a> on the test device.</li>
+  <li>Click <strong>Settings &gt; Sounds &amp; Notifications &gt; Notification
+    Access</strong> and check the box labeled
+    <strong>Messaging Simulator</strong>.</li>
+</ol>
+<li>Install your app on the test device.</li>
+<li>Launch the Android Messaging Simulator to see how your messaging app appears
+in Auto. If your app does not appear, stop the simulator from
+<strong>Settings &gt; Apps</strong> and restart it.</li>
+</ol>
+
+
+
+
