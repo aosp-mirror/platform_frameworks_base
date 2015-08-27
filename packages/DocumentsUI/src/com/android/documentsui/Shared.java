@@ -16,9 +16,18 @@
 
 package com.android.documentsui;
 
+import android.content.Context;
+
 /**
  * @hide
  */
 public final class Shared {
     public static final String TAG = "Documents";
+
+    /**
+     * Generates a formatted quantity string.
+     */
+    public static final String getQuantityString(Context context, int resourceId, int quantity) {
+        return context.getResources().getQuantityString(resourceId, quantity, quantity);
+    }
 }

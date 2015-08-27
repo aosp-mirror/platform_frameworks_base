@@ -62,6 +62,7 @@ import android.os.SystemProperties;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -74,6 +75,7 @@ import android.text.format.Formatter;
 import android.text.format.Time;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.GestureDetector;
@@ -803,41 +805,33 @@ public class DirectoryFragment extends Fragment {
     }
 
     private void deleteDocuments(final Selection selected) {
-        final Context context = getActivity();
-        final ContentResolver resolver = context.getContentResolver();
+        Context context = getActivity();
+        ContentResolver resolver = context.getContentResolver();
+        String message = Shared.getQuantityString(context, R.plurals.deleting, selected.size());
 
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                boolean hadTrouble = false;
-                for (DocumentInfo doc : docs) {
-                    if (!doc.isDeleteSupported()) {
-                        Log.w(TAG, "Skipping " + doc);
-                        hadTrouble = true;
-                        continue;
-                    }
+        mModel.markForDeletion(selected);
 
-                    ContentProviderClient client = null;
-                    try {
-                        client = DocumentsApplication.acquireUnstableProviderOrThrow(
-                                resolver, doc.derivedUri.getAuthority());
-                        DocumentsContract.deleteDocument(client, doc.derivedUri);
-                    } catch (Exception e) {
-                        Log.w(TAG, "Failed to delete " + doc);
-                        hadTrouble = true;
-                    } finally {
-                        ContentProviderClient.releaseQuietly(client);
-                    }
-                }
-
-                if (hadTrouble) {
-                    Toast.makeText(
-                            context,
-                            R.string.toast_failed_delete,
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        }.execute(selected);
+        Activity activity = getActivity();
+        Snackbar.make(this.getView(), message, Snackbar.LENGTH_LONG)
+                .setAction(
+                        R.string.undo,
+                        new android.view.View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {}
+                        })
+                .setCallback(
+                        new Snackbar.Callback() {
+                            @Override
+                            public void onDismissed(Snackbar snackbar, int event) {
+                                if (event == Snackbar.Callback.DISMISS_EVENT_ACTION) {
+                                    mModel.undoDeletion();
+                                } else {
+                                    mModel.finalizeDeletion();
+                                }
+                                ;
+                            }
+                        })
+                .show();
     }
 
     private void transferDocuments(final Selection selected, final int mode) {
@@ -1405,7 +1399,7 @@ public class DirectoryFragment extends Fragment {
      * @return true if the list of files can be copied to destination.
      */
     boolean canCopy(List<DocumentInfo> files, DocumentInfo dest) {
-        BaseActivity activity = (BaseActivity)getActivity();
+        BaseActivity activity = (BaseActivity) getActivity();
 
         final RootInfo root = activity.getCurrentRoot();
 
@@ -1735,6 +1729,7 @@ public class DirectoryFragment extends Fragment {
         @Nullable private Cursor mCursor;
         @Nullable private String info;
         @Nullable private String error;
+        private SparseBooleanArray mMarkedForDeletion = new SparseBooleanArray();
 
         /**
          * Sets the selection manager used by the model.
@@ -1806,10 +1801,28 @@ public class DirectoryFragment extends Fragment {
         }
 
         private int getItemCount() {
-            return mCursorCount;
+            return mCursorCount - mMarkedForDeletion.size();
         }
 
         private Cursor getItem(int position) {
+            // Items marked for deletion are masked out of the UI.  To do this, for every marked
+            // item whose position is less than the requested item position, advance the requested
+            // position by 1.
+            final int originalPos = position;
+            final int size = mMarkedForDeletion.size();
+            for (int i = 0; i <= size; ++i) {
+                // It'd be more concise, but less efficient, to iterate over positions while calling
+                // mMarkedForDeletion.get.  Instead, iterate over deleted entries.
+                if (mMarkedForDeletion.keyAt(i) <= position && mMarkedForDeletion.valueAt(i)) {
+                    ++position;
+                }
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "Item position adjusted for deletion.  Original: " + originalPos
+                        + "  Adjusted: " + position);
+            }
+
             if (position >= mCursorCount) {
                 throw new IndexOutOfBoundsException("Attempt to retrieve " + position + " of " +
                         mCursorCount + " items");
@@ -1833,12 +1846,9 @@ public class DirectoryFragment extends Fragment {
         }
 
         private List<DocumentInfo> getDocuments(Selection items) {
-            if (items == null || items.size() == 0) {
-                return new ArrayList<>(0);
-            }
+            final int size = (items != null) ? items.size() : 0;
 
-            final List<DocumentInfo> docs =  new ArrayList<>(items.size());
-            final int size = items.size();
+            final List<DocumentInfo> docs =  new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 final Cursor cursor = getItem(items.get(i));
                 checkNotNull(cursor, "Cursor cannot be null.");
@@ -1854,6 +1864,123 @@ public class DirectoryFragment extends Fragment {
                 throw new IllegalStateException("Can't call getCursor from non-main thread.");
             }
             return mCursor;
+        }
+
+        private List<DocumentInfo> getDocumentsMarkedForDeletion() {
+            final int size = mMarkedForDeletion.size();
+            List<DocumentInfo> docs =  new ArrayList<>(size);
+
+            for (int i = 0; i < size; ++i) {
+                final int position = mMarkedForDeletion.keyAt(i);
+                checkState(position < mCursorCount);
+                mCursor.moveToPosition(position);
+                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(mCursor);
+                docs.add(doc);
+            }
+            return docs;
+        }
+
+        /**
+         * Marks the given files for deletion. This will remove them from the UI. Clients must then
+         * call either {@link #undoDeletion()} or {@link #finalizeDeletion()} to cancel or confirm
+         * the deletion, respectively. Only one deletion operation is allowed at a time.
+         *
+         * @param selected A selection representing the files to delete.
+         */
+        public void markForDeletion(Selection selected) {
+            // Only one deletion operation at a time.
+            checkState(mMarkedForDeletion.size() == 0);
+            // There should never be more to delete than what exists.
+            checkState(mCursorCount >= selected.size());
+
+            final int size = selected.size();
+            for (int i = 0; i < size; ++i) {
+                int position = selected.get(i);
+                if (DEBUG) Log.d(TAG, "Marked position " + position + " for deletion");
+                mMarkedForDeletion.append(position, true);
+                mAdapter.notifyItemRemoved(position);
+            }
+        }
+
+        /**
+         * Cancels an ongoing deletion operation. All files currently marked for deletion will be
+         * unmarked, and restored in the UI.  See {@link #markForDeletion(Selection)}.
+         */
+        public void undoDeletion() {
+            // Iterate over deleted items, temporarily marking them false in the deletion list, and
+            // re-adding them to the UI.
+            final int size = mMarkedForDeletion.size();
+            for (int i = 0; i < size; ++i) {
+                final int position = mMarkedForDeletion.keyAt(i);
+                mMarkedForDeletion.put(position, false);
+                mAdapter.notifyItemInserted(position);
+            }
+
+            // Then, clear the deletion list.
+            mMarkedForDeletion.clear();
+        }
+
+        /**
+         * Finalizes an ongoing deletion operation. All files currently marked for deletion will be
+         * deleted.  See {@link #markForDeletion(Selection)}.
+         */
+        public void finalizeDeletion() {
+            final Context context = getActivity();
+            final ContentResolver resolver = context.getContentResolver();
+            new DeleteFilesTask(resolver).execute();
+        }
+
+        /**
+         * A Task which collects the DocumentInfo for documents that have been marked for deletion,
+         * and actually deletes them.
+         */
+        private class DeleteFilesTask extends AsyncTask<Void, Void, List<DocumentInfo>> {
+            private ContentResolver mResolver;
+
+            public DeleteFilesTask(ContentResolver resolver) {
+                mResolver = resolver;
+            }
+
+            @Override
+            protected List<DocumentInfo> doInBackground(Void... params) {
+                return getDocumentsMarkedForDeletion();
+            }
+
+            @Override
+            protected void onPostExecute(List<DocumentInfo> docs) {
+                boolean hadTrouble = false;
+                for (DocumentInfo doc : docs) {
+                    if (!doc.isDeleteSupported()) {
+                        Log.w(TAG, doc + " could not be deleted.  Skipping...");
+                        hadTrouble = true;
+                        continue;
+                    }
+
+                    ContentProviderClient client = null;
+                    try {
+                        if (DEBUG) Log.d(TAG, "Deleting: " + doc.displayName);
+                        client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                            mResolver, doc.derivedUri.getAuthority());
+                        DocumentsContract.deleteDocument(client, doc.derivedUri);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed to delete " + doc);
+                        hadTrouble = true;
+                    } finally {
+                        ContentProviderClient.releaseQuietly(client);
+                    }
+                }
+
+                if (hadTrouble) {
+                    // TODO show which files failed?
+                    Snackbar.make(DirectoryFragment.this.getView(),
+                       R.string.toast_failed_delete,
+                       Snackbar.LENGTH_LONG).show();
+                    if (DEBUG) Log.d(TAG, "Deletion task completed.  Some deletions failed.");
+                } else {
+                    if (DEBUG) Log.d(TAG, "Deletion task completed successfully.");
+                }
+                mMarkedForDeletion.clear();
+            }
         }
     }
 }
