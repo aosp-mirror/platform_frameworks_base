@@ -29,7 +29,7 @@ import java.util.ArrayList;
  * calculating their values, which makes synchronizing animations possible.
  *
  * The handler uses the Choreographer by default for doing periodic callbacks. A custom
- * {@Link AnimationFrameCallbackProvider} can be set on the handler to provide timing pulse that
+ * AnimationFrameCallbackProvider can be set on the handler to provide timing pulse that
  * may be independent of UI frame update. This could be useful in testing.
  *
  * @hide
