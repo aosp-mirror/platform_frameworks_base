@@ -255,7 +255,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
         if (DEBUG) Log.d(TAG, "reportFailedPatternAttempt: #" + failedAttempts);
 
-        SecurityMode mode = mSecurityModel.getSecurityMode();
         final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
         final DevicePolicyManager dpm = mLockPatternUtils.getDevicePolicyManager();
         final int failedAttemptsBeforeWipe =
@@ -264,7 +263,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         final int remainingBeforeWipe = failedAttemptsBeforeWipe > 0 ?
                 (failedAttemptsBeforeWipe - failedAttempts)
                 : Integer.MAX_VALUE; // because DPM returns 0 if no restriction
-        boolean showTimeout = false;
         if (remainingBeforeWipe < LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE) {
             // The user has installed a DevicePolicyManager that requests a user/profile to be wiped
             // N attempts. Once we get below the grace period, we post this dialog every time as a
@@ -273,7 +271,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             final int expiringUser = dpm.getProfileWithMinimumFailedPasswordsForWipe(currentUser);
             int userType = USER_TYPE_PRIMARY;
             if (expiringUser == currentUser) {
-                if (expiringUser != UserHandle.USER_OWNER) {
+                // TODO: http://b/23522538
+                if (expiringUser != UserHandle.USER_SYSTEM) {
                     userType = USER_TYPE_SECONDARY_USER;
                 }
             } else if (expiringUser != UserHandle.USER_NULL) {
