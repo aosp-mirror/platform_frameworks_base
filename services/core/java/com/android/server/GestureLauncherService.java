@@ -31,6 +31,7 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -59,6 +60,36 @@ class GestureLauncherService extends SystemService {
     private WakeLock mWakeLock;
     private boolean mRegistered;
     private int mUserId;
+
+    // Below are fields used for event logging only.
+    /** Elapsed real time when the camera gesture is turned on. */
+    private long mCameraGestureOnTimeMs = 0L;
+
+    /** Elapsed real time when the last camera gesture was detected. */
+    private long mCameraGestureLastEventTime = 0L;
+
+    /**
+     * How long the sensor 1 has been turned on since camera launch sensor was
+     * subscribed to and when the last camera launch gesture was detected.
+     * <p>Sensor 1 is the main sensor used to detect camera launch gesture.</p>
+     */
+    private long mCameraGestureSensor1LastOnTimeMs = 0L;
+
+    /**
+     * If applicable, how long the sensor 2 has been turned on since camera
+     * launch sensor was subscribed to and when the last camera launch
+     * gesture was detected.
+     * <p>Sensor 2 is the secondary sensor used to detect camera launch gesture.
+     * This is optional and if only sensor 1 is used for detect camera launch
+     * gesture, this value would always be 0.</p>
+     */
+    private long mCameraGestureSensor2LastOnTimeMs = 0L;
+
+    /**
+     * Extra information about the event when the last camera launch gesture
+     * was detected.
+     */
+    private int mCameraLaunchLastEventExtra = 0;
 
     public GestureLauncherService(Context context) {
         super(context);
@@ -107,6 +138,12 @@ class GestureLauncherService extends SystemService {
     private void unregisterCameraLaunchGesture() {
         if (mRegistered) {
             mRegistered = false;
+            mCameraGestureOnTimeMs = 0L;
+            mCameraGestureLastEventTime = 0L;
+            mCameraGestureSensor1LastOnTimeMs = 0;
+            mCameraGestureSensor2LastOnTimeMs = 0;
+            mCameraLaunchLastEventExtra = 0;
+
             SensorManager sensorManager = (SensorManager) mContext.getSystemService(
                     Context.SENSOR_SERVICE);
             sensorManager.unregisterListener(mGestureListener);
@@ -120,6 +157,8 @@ class GestureLauncherService extends SystemService {
         if (mRegistered) {
             return;
         }
+        mCameraGestureOnTimeMs = SystemClock.elapsedRealtime();
+        mCameraGestureLastEventTime = mCameraGestureOnTimeMs;
         SensorManager sensorManager = (SensorManager) mContext.getSystemService(
                 Context.SENSOR_SERVICE);
         int cameraLaunchGestureId = resources.getInteger(
@@ -200,14 +239,22 @@ class GestureLauncherService extends SystemService {
     private final class GestureEventListener implements SensorEventListener {
         @Override
         public void onSensorChanged(SensorEvent event) {
+            if (!mRegistered) {
+              if (DBG) Slog.d(TAG, "Ignoring gesture event because it's unregistered.");
+              return;
+            }
             if (event.sensor == mCameraLaunchSensor) {
-                handleCameraLaunchGesture();
+                handleCameraLaunchGesture(event);
                 return;
             }
         }
 
-        private void handleCameraLaunchGesture() {
-            if (DBG) Slog.d(TAG, "Received a camera launch event.");
+        private void handleCameraLaunchGesture(SensorEvent event) {
+            if (DBG) {
+                float[] values = event.values;
+                Slog.d(TAG, String.format("Received a camera launch event: " +
+                      "values=[%.4f, %.4f, %.4f].", values[0], values[1], values[2]));
+            }
             boolean userSetupComplete = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
             if (!userSetupComplete) {
@@ -225,12 +272,58 @@ class GestureLauncherService extends SystemService {
             StatusBarManagerInternal service = LocalServices.getService(
                     StatusBarManagerInternal.class);
             service.onCameraLaunchGestureDetected();
+            trackCameraLaunchEvent(event);
             mWakeLock.release();
         }
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
             // Ignored.
+        }
+
+        private void trackCameraLaunchEvent(SensorEvent event) {
+            long now = SystemClock.elapsedRealtime();
+            long totalDuration = now - mCameraGestureOnTimeMs;
+            // values[0]: ratio between total time duration when accel is turned on and time
+            //            duration since camera launch gesture is subscribed.
+            // values[1]: ratio between total time duration when gyro is turned on and time duration
+            //            since camera launch gesture is subscribed.
+            // values[2]: extra information
+            float[] values = event.values;
+
+            long sensor1OnTime = (long) (totalDuration * (double) values[0]);
+            long sensor2OnTime = (long) (totalDuration * (double) values[1]);
+            int extra = (int) values[2];
+
+            // We only log the difference in the event log to make aggregation easier.
+            long gestureOnTimeDiff = now - mCameraGestureLastEventTime;
+            long sensor1OnTimeDiff = sensor1OnTime - mCameraGestureSensor1LastOnTimeMs;
+            long sensor2OnTimeDiff = sensor2OnTime - mCameraGestureSensor2LastOnTimeMs;
+            int extraDiff = extra - mCameraLaunchLastEventExtra;
+
+            // Gating against negative time difference. This doesn't usually happen, but it may
+            // happen because of numeric errors.
+            if (gestureOnTimeDiff < 0 || sensor1OnTimeDiff < 0 || sensor2OnTimeDiff < 0) {
+                if (DBG) Slog.d(TAG, "Skipped event logging because negative numbers.");
+                return;
+            }
+
+            if (DBG) Slog.d(TAG, String.format("totalDuration: %d, sensor1OnTime: %s, " +
+                    "sensor2OnTime: %d, extra: %d",
+                    gestureOnTimeDiff,
+                    sensor1OnTimeDiff,
+                    sensor2OnTimeDiff,
+                    extraDiff));
+            EventLogTags.writeCameraGestureTriggered(
+                    gestureOnTimeDiff,
+                    sensor1OnTimeDiff,
+                    sensor2OnTimeDiff,
+                    extraDiff);
+
+            mCameraGestureLastEventTime = now;
+            mCameraGestureSensor1LastOnTimeMs = sensor1OnTime;
+            mCameraGestureSensor2LastOnTimeMs = sensor2OnTime;
+            mCameraLaunchLastEventExtra = extra;
         }
     }
 }

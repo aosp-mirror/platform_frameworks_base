@@ -244,3 +244,8 @@ option java_package com.android.server
 # ---------------------------
 40000 volume_changed (stream|1), (prev_level|1), (level|1), (max_level|1), (caller|3)
 40001 stream_devices_changed (stream|1), (prev_devices|1), (devices|1)
+
+# ---------------------------
+# GestureLauncherService.java
+# ---------------------------
+40100 camera_gesture_triggered (gesture_on_time|2|3), (sensor1_on_time|2|3), (sensor2_on_time|2|3), (event_extra|1|1)
