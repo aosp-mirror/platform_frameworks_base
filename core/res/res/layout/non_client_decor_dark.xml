@@ -26,7 +26,9 @@
         android:layout_width="match_parent"
         android:layout_gravity="end"
         android:layout_height="wrap_content"
-        android:background="@drawable/non_client_decor_title" >
+        android:background="@drawable/non_client_decor_title"
+        android:focusable="false"
+        android:descendantFocusability="blocksDescendants" >
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -40,7 +42,7 @@
             android:layout_gravity="center_vertical|end"
             android:contentDescription="@string/maximize_button_text"
             android:background="@drawable/decor_maximize_button_dark" />
-         <Button
+        <Button
             android:id="@+id/close_window"
             android:layout_width="32dp"
             android:layout_height="32dp"
