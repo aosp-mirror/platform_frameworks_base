@@ -1445,6 +1445,15 @@ public class KeyguardViewMediator extends SystemUI {
             }
             mHiding = false;
 
+            if (mWakeAndUnlocking && mDrawnCallback != null) {
+
+                // Hack level over 9000: To speed up wake-and-unlock sequence, force it to report
+                // the next draw from here so we don't have to wait for window manager to signal
+                // this to our ViewRootImpl.
+                mStatusBarKeyguardViewManager.getViewRootImpl().setReportNextDraw();
+                notifyDrawn(mDrawnCallback);
+            }
+
             // only play "unlock" noises if not on a call (since the incall UI
             // disables the keyguard)
             if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
@@ -1458,9 +1467,6 @@ public class KeyguardViewMediator extends SystemUI {
             updateActivityLockScreenState();
             adjustStatusBarLocked();
             sendUserPresentBroadcast();
-            if (mWakeAndUnlocking && mDrawnCallback != null) {
-                notifyDrawn(mDrawnCallback);
-            }
         }
     }
 

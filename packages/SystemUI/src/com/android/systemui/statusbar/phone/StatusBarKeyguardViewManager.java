@@ -24,6 +24,7 @@ import android.os.Trace;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -532,5 +533,9 @@ public class StatusBarKeyguardViewManager {
 
     public void showBouncerMessage(String message, int color) {
         mBouncer.showMessage(message, color);
+    }
+
+    public ViewRootImpl getViewRootImpl() {
+        return mPhoneStatusBar.getStatusBarView().getViewRootImpl();
     }
 }
