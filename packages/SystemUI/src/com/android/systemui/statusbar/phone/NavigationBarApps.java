@@ -46,6 +46,9 @@ import android.widget.Toast;
 import com.android.internal.content.PackageMonitor;
 import com.android.systemui.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Container for application icons that appear in the navigation bar. Their appearance is similar
  * to the launcher hotseat. Clicking an icon launches the associated activity. A long click will
@@ -73,12 +76,12 @@ class NavigationBarApps extends LinearLayout {
 
     // This view has two roles:
     // 1) If the drag started outside the pinned apps list, it is a placeholder icon with a null
-    // data model entry.
+    // tag.
     // 2) If the drag started inside the pinned apps list, it is the icon for the app being dragged
-    // with the associated data model entry.
+    // with the associated AppInfo tag.
     // The icon is set invisible for the duration of the drag, creating a visual space for a drop.
     // When the user is not dragging this member is null.
-    private View mDragView;
+    private ImageView mDragView;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -171,8 +174,10 @@ class NavigationBarApps extends LinearLayout {
 
     private void removeIfUnlauncheable(String packageName, UserHandle user) {
         // Remove icons for all apps that match a package that perhaps became unlauncheable.
-        for(int i = sAppsModel.getAppCount() - 1; i >= 0; --i) {
-            AppInfo appInfo = sAppsModel.getApp(i);
+        for(int i = getChildCount() - 1; i >= 0; --i) {
+            View child = getChildAt(i);
+            AppInfo appInfo = (AppInfo)child.getTag();
+            if (appInfo == null) continue;  // Skip the drag placeholder.
             if (!appInfo.getUser().equals(user)) continue;
 
             ComponentName appComponentName = appInfo.getComponentName();
@@ -183,8 +188,9 @@ class NavigationBarApps extends LinearLayout {
             }
 
             removeViewAt(i);
-            sAppsModel.removeApp(i);
-            sAppsModel.savePrefs();
+        }
+        if (getChildCount() != sAppsModel.getApps().size()) {
+            saveApps();
         }
     }
 
@@ -229,12 +235,13 @@ class NavigationBarApps extends LinearLayout {
         // Remove any existing icon buttons.
         removeAllViews();
 
-        int appCount = sAppsModel.getAppCount();
+        List<AppInfo> apps = sAppsModel.getApps();
+        int appCount = apps.size();
         for (int i = 0; i < appCount; i++) {
-            ImageView button = createAppButton();
+            AppInfo app = apps.get(i);
+            ImageView button = createAppButton(app);
             addView(button);
 
-            AppInfo app = sAppsModel.getApp(i);
             CharSequence appLabel = getAppLabel(mPackageManager, app.getComponentName());
             button.setContentDescription(appLabel);
 
@@ -244,16 +251,32 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /**
+     * Saves apps stored in app icons into the data model.
+     */
+    private void saveApps() {
+        List<AppInfo> apps = new ArrayList<AppInfo>();
+        int childCount = getChildCount();
+        for (int i = 0; i != childCount; ++i) {
+            View child = getChildAt(i);
+            AppInfo appInfo = (AppInfo)child.getTag();
+            if (appInfo == null) continue;  // Skip the drag placeholder.
+            apps.add(appInfo);
+        }
+        sAppsModel.setApps(apps);
+    }
+
+    /**
      * Creates a new ImageView for a launcher activity, inflated from
      * R.layout.navigation_bar_app_item.
      */
-    private ImageView createAppButton() {
+    private ImageView createAppButton(AppInfo appInfo) {
         ImageView button = (ImageView) mLayoutInflater.inflate(
                 R.layout.navigation_bar_app_item, this, false /* attachToRoot */);
         button.setOnClickListener(new AppClickListener());
         // TODO: Ripple effect. Use either KeyButtonRipple or the default ripple background.
         button.setOnLongClickListener(new AppLongClickListener());
         button.setOnDragListener(new AppIconDragListener());
+        button.setTag(appInfo);
         return button;
     }
 
@@ -261,10 +284,9 @@ class NavigationBarApps extends LinearLayout {
     private class AppLongClickListener implements View.OnLongClickListener {
         @Override
         public boolean onLongClick(View v) {
-            mDragView = v;
-            ImageView icon = (ImageView) v;
-            AppInfo app = sAppsModel.getApp(indexOfChild(v));
-            startAppDrag(icon, app);
+            mDragView = (ImageView) v;
+            AppInfo app = (AppInfo) v.getTag();
+            startAppDrag(mDragView, app);
             return true;
         }
     }
@@ -368,13 +390,11 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /**
-     * Creates a blank icon-sized View to create an empty space during a drag. Also creates a data
-     * model entry so the rest of the code can assume it is reordering existing entries.
+     * Creates a blank icon-sized View to create an empty space during a drag.
      */
     private ImageView createPlaceholderDragView(int index) {
-        ImageView button = createAppButton();
+        ImageView button = createAppButton(null);
         addView(button, index);
-        sAppsModel.addApp(index, null /* name */);
         return button;
     }
 
@@ -409,10 +429,6 @@ class NavigationBarApps extends LinearLayout {
         //   the view at targetIndex will therefore place the app *after* the target.
         removeView(mDragView);
         addView(mDragView, targetIndex);
-
-        // Update the data model.
-        AppInfo app = sAppsModel.removeApp(dragViewIndex);
-        sAppsModel.addApp(targetIndex, app);
     }
 
     private boolean onDrop(DragEvent event) {
@@ -423,23 +439,21 @@ class NavigationBarApps extends LinearLayout {
             return true;
         }
 
-        // If this was an existing app being dragged then end the drag.
-        int dragViewIndex = indexOfChild(mDragView);
-        if (sAppsModel.getApp(dragViewIndex) != null) {
-            endDrag();
-            return true;
-        }
-
-        // The drag view was a placeholder. Unpack the drop.
         AppInfo appInfo = getAppFromDragEvent(event);
         if (appInfo == null) {
-            // This wasn't a valid drop. Clean up the placeholder and model.
+            // This wasn't a valid drop. Clean up the placeholder.
             removePlaceholderDragViewIfNeeded();
             return false;
         }
 
-        // The drop had valid data. Update the placeholder with a real activity and icon.
-        updateAppAt(dragViewIndex, appInfo);
+        // If this was an existing app being dragged then end the drag.
+        if (mDragView.getTag() != null) {
+            endDrag();
+            return true;
+        }
+
+        // The drop had valid data. Convert the placeholder to a real icon.
+        updateApp(mDragView, appInfo);
         endDrag();
         return true;
     }
@@ -448,7 +462,7 @@ class NavigationBarApps extends LinearLayout {
     private void endDrag() {
         mDragView.setVisibility(View.VISIBLE);
         mDragView = null;
-        sAppsModel.savePrefs();
+        saveApps();
     }
 
     /** Returns an app info from a DragEvent, or null if the data wasn't valid. */
@@ -488,13 +502,12 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /** Updates the app at a given view index. */
-    private void updateAppAt(int index, AppInfo appInfo) {
-        sAppsModel.setApp(index, appInfo);
-        ImageView button = (ImageView) getChildAt(index);
+    private void updateApp(ImageView button, AppInfo appInfo) {
+        button.setTag(appInfo);
         new GetActivityIconTask(mPackageManager, button).execute(appInfo);
     }
 
-    /** Removes the empty placeholder view and cleans up the data model. */
+    /** Removes the empty placeholder view. */
     private void removePlaceholderDragViewIfNeeded() {
         // If the drag has ended already there is nothing to do.
         if (mDragView == null) {
@@ -502,7 +515,6 @@ class NavigationBarApps extends LinearLayout {
         }
         int index = indexOfChild(mDragView);
         removeViewAt(index);
-        sAppsModel.removeApp(index);
         endDrag();
     }
 
@@ -548,7 +560,7 @@ class NavigationBarApps extends LinearLayout {
     private class AppClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            AppInfo appInfo = sAppsModel.getApp(indexOfChild(v));
+            AppInfo appInfo = (AppInfo)v.getTag();
             Intent launchIntent = sAppsModel.buildAppLaunchIntent(appInfo);
             if (launchIntent == null) {
                 Toast.makeText(
@@ -577,15 +589,16 @@ class NavigationBarApps extends LinearLayout {
     }
 
     private void onManagedProfileRemoved(UserHandle removedProfile) {
-        boolean removedApps = false;
-        for(int i = sAppsModel.getAppCount() - 1; i >= 0; --i) {
-            AppInfo appInfo = sAppsModel.getApp(i);
+        for(int i = getChildCount() - 1; i >= 0; --i) {
+            View view = getChildAt(i);
+            AppInfo appInfo = (AppInfo)view.getTag();
+            if (appInfo == null) return;  // Skip the drag placeholder.
             if (!appInfo.getUser().equals(removedProfile)) continue;
 
             removeViewAt(i);
-            sAppsModel.removeApp(i);
-            removedApps = true;
         }
-        if (removedApps) sAppsModel.savePrefs();
+        if (getChildCount() != sAppsModel.getApps().size()) {
+            saveApps();
+        }
     }
 }
