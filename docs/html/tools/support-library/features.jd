@@ -656,7 +656,7 @@ PercentRelativeLayout</a>.  </p>
 
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+{@code &lt;sdk&gt;/extras/android/support/percent} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
