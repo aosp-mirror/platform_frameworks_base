@@ -10,19 +10,16 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 <section class="dac-hero-carousel">
 
 <!-- <article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);"> -->
-<article class="dac-expand dac-hero dac-invert active" style="background-color: #455A64;">
+<article class="dac-expand dac-hero dac-invert dac-darken mprev active" style="background-color: #75d1ff;">
 <a href="/preview/index.html">
-  <div class="wrap" style="max-width:1100px;">
+  <div class="wrap" style="max-width:1100px;margin-top:0">
     <div class="cols dac-hero-content">
-      <div class="col-10of16 col-push-6of16 dac-hero-figure">
-        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png"
-             srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
-             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
+      <div class="col-8of16 col-push-6of16 dac-hero-figure mprev">
       </div>
-      <div class="col-6of16 col-pull-10of16">
+      <div class="col-8of16 col-pull-7of16">
         <div class="dac-hero-tag"></div>
 
-        <h1 class="dac-hero-title">Android M Developer Preview</h1>
+        <h1 class="dac-hero-title" style="white-space:nowrap;">Android 6.0 Marshmallow</h1>
         <p class="dac-hero-description">Android의 다음 버전을 만나볼 준비가
         되셨습니까? 여러분의 앱을 Nexus 5, 6, 9 및 Player에서 테스트해보십시오. </p>
 
@@ -32,7 +29,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         </a><br>
         <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Developer Preview 2</a>
+          Developer Preview 3 (final SDK)</a>
       </div>
     </div>
   </div>
