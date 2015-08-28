@@ -118,7 +118,7 @@ class NavigationBarAppsModel {
                     || appUserInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID
                     || appUserInfo.profileGroupId != currentUserInfo.profileGroupId
                     || !appUserInfo.isEnabled()) {
-                Log.e(TAG, "User " + appUserId +
+                Slog.e(TAG, "User " + appUserId +
                         " is is not a profile of the current user, or is disabled.");
                 return null;
             }
