@@ -6,7 +6,8 @@
 
 #include <string>
 
-using namespace std;
+using std::string;
+using std::vector;
 
 int generate_java(const string& filename, const string& originalSrc,
                 interface_type* iface);

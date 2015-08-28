@@ -3,7 +3,8 @@
 
 const bool VERBOSE = false;
 
-using namespace std;
+using std::string;
+using std::vector;
 
 struct Answer {
     const char* argv[8];

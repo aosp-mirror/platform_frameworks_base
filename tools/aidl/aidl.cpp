@@ -31,7 +31,10 @@
 #define MIN_USER_SET_METHOD_ID                0
 #define MAX_USER_SET_METHOD_ID                16777214
 
-using namespace std;
+using std::map;
+using std::set;
+using std::string;
+using std::vector;
 
 static void
 test_document(document_item_type* d)
