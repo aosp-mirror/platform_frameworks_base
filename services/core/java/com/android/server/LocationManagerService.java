@@ -307,6 +307,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        intentFilter.addAction(Intent.ACTION_SHUTDOWN);
 
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
@@ -317,9 +318,33 @@ public class LocationManagerService extends ILocationManager.Stub {
                 } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)
                         || Intent.ACTION_MANAGED_PROFILE_REMOVED.equals(action)) {
                     updateUserProfiles(mCurrentUserId);
+                } else if (Intent.ACTION_SHUTDOWN.equals(action)) {
+                    shutdownComponents();
                 }
             }
         }, UserHandle.ALL, intentFilter, null, mLocationHandler);
+    }
+
+    /**
+     * Provides a way for components held by the {@link LocationManagerService} to clean-up
+     * gracefully on system's shutdown.
+     *
+     * NOTES:
+     * 1) Only provides a chance to clean-up on an opt-in basis. This guarantees back-compat
+     * support for components that do not wish to handle such event.
+     */
+    private void shutdownComponents() {
+        if(D) Log.d(TAG, "Shutting down components...");
+
+        LocationProviderInterface gpsProvider = mProvidersByName.get(LocationManager.GPS_PROVIDER);
+        if (gpsProvider != null && gpsProvider.isEnabled()) {
+            gpsProvider.disable();
+        }
+
+        FlpHardwareProvider flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
+        if (FlpHardwareProvider.isSupported() && flpHardwareProvider != null) {
+            flpHardwareProvider.cleanup();
+        }
     }
 
     /**
