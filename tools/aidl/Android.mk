@@ -26,4 +26,13 @@ LOCAL_MODULE := aidl
 
 include $(BUILD_HOST_EXECUTABLE)
 
+# Unit tests
+include $(CLEAR_VARS)
+LOCAL_MODULE := aidl_unittests
+LOCAL_CFLAGS := -g -DUNIT_TEST
+LOCAL_SRC_FILES := tests/test.cpp
+LOCAL_STATIC_LIBRARIES := libgmock_host libgtest_host libBionicGtestMain
+LOCAL_LDLIBS := -lrt
+include $(BUILD_HOST_NATIVE_TEST)
+
 endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK
