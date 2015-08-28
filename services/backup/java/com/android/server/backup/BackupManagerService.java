@@ -1955,10 +1955,12 @@ public class BackupManagerService {
                 .setPackage(pkgInfo.packageName);
         List<ResolveInfo> hosts = mPackageManager.queryIntentServicesAsUser(
                 intent, 0, UserHandle.USER_OWNER);
-        final int N = hosts.size();
-        for (int i = 0; i < N; i++) {
-            final ServiceInfo info = hosts.get(i).serviceInfo;
-            tryBindTransport(info);
+        if (hosts != null) {
+            final int N = hosts.size();
+            for (int i = 0; i < N; i++) {
+                final ServiceInfo info = hosts.get(i).serviceInfo;
+                tryBindTransport(info);
+            }
         }
     }
 
