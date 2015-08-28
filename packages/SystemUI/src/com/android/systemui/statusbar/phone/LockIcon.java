@@ -166,10 +166,13 @@ public class LockIcon extends KeyguardAffordanceView {
         if (mAccessibilityController == null) {
             return;
         }
+        boolean trustManagedOrFingerprintAllowed = mUnlockMethodCache.isTrustManaged()
+                || KeyguardUpdateMonitor.getInstance(mContext).isUnlockingWithFingerprintAllowed();
+
         boolean clickToUnlock = mAccessibilityController.isTouchExplorationEnabled();
-        boolean clickToForceLock = mUnlockMethodCache.isTrustManaged()
+        boolean clickToForceLock = trustManagedOrFingerprintAllowed
                 && !mAccessibilityController.isAccessibilityEnabled();
-        boolean longClickToForceLock = mUnlockMethodCache.isTrustManaged()
+        boolean longClickToForceLock = trustManagedOrFingerprintAllowed
                 && !clickToForceLock;
         setClickable(clickToForceLock || clickToUnlock);
         setLongClickable(longClickToForceLock);
