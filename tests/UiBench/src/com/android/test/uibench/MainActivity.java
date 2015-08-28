@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         if (fm.findFragmentById(android.R.id.content) == null) {
             ListFragment listFragment = new ListFragment() {
                 @Override
-                @SuppressWarnings({ "unchecked" })
+                @SuppressWarnings("unchecked")
                 public void onListItemClick(ListView l, View v, int position, long id) {
                     Map<String, Object> map = (Map<String, Object>)l.getItemAtPosition(position);
 
