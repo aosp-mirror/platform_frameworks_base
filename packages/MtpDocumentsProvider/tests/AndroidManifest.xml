@@ -17,6 +17,8 @@
 
     <instrumentation android:name="com.android.mtp.TestResultInstrumentation"
         android:targetPackage="com.android.mtp"
-        android:label="Tests for MtpDocumentsProvider" />
-
+        android:label="Tests for MtpDocumentsProvider with the UI for output." />
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.android.mtp"
+        android:label="Tests for MtpDocumentsProvider." />
 </manifest>
