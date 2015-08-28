@@ -13728,9 +13728,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 libDirRoot = ps.legacyNativeLibraryPathString;
             }
             if (p != null && (isExternal(p) || p.isForwardLocked())) {
-                String secureContainerId = cidFromCodePath(p.applicationInfo.getBaseCodePath());
-                if (secureContainerId != null) {
-                    asecPath = PackageHelper.getSdFilesystem(secureContainerId);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    String secureContainerId = cidFromCodePath(p.applicationInfo.getBaseCodePath());
+                    if (secureContainerId != null) {
+                        asecPath = PackageHelper.getSdFilesystem(secureContainerId);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
             }
         }
