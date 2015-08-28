@@ -28,7 +28,6 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -120,16 +119,16 @@ class NavigationBarAppsModel {
         try {
             ActivityInfo info = getPackageManager().getActivityInfo(component, 0, appUserId);
             if (info == null) {
-                Log.e(TAG, "Activity " + component + " is not installed.");
+                Slog.e(TAG, "Activity " + component + " is not installed.");
                 return null;
             }
 
             if (!info.exported) {
-                Log.e(TAG, "Activity " + component + " doesn't have 'exported' attribute.");
+                Slog.e(TAG, "Activity " + component + " doesn't have 'exported' attribute.");
                 return null;
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get activity info for " + component, e);
+            Slog.e(TAG, "Failed to get activity info for " + component, e);
             return null;
         }
 
@@ -150,7 +149,7 @@ class NavigationBarAppsModel {
             }
         }
 
-        Log.e(TAG, "Activity doesn't have category Intent.CATEGORY_LAUNCHER " + component);
+        Slog.e(TAG, "Activity doesn't have category Intent.CATEGORY_LAUNCHER " + component);
         return null;
     }
 
