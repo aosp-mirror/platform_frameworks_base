@@ -78,13 +78,6 @@ public interface ICreateInfo {
     Set<String> getExcludedClasses();
 
     /**
-     * Returns a list of fields which should be promoted to public visibility. The array values
-     * are in the form of the binary FQCN of the class containing the field and the field name
-     * separated by a '#'.
-     */
-    String[] getPromotedFields();
-
-    /**
      * Returns a map from binary FQCN className to {@link InjectMethodRunnable} which will be
      * called to inject methods into a class.
      * Can be empty but must not be null.

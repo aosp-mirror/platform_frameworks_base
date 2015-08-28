@@ -36,7 +36,6 @@ import android.util.DisplayMetrics;
 import android.view.ViewConfiguration_Accessor;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodManager_Accessor;
-import android.widget.SimpleMonthView_Delegate;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -278,7 +277,6 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             mContext.getRenderResources().setLogger(null);
         }
         ParserFactory.setParserFactory(null);
-        SimpleMonthView_Delegate.clearCache();
     }
 
     public static BridgeContext getCurrentContext() {

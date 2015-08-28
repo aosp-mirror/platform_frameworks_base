@@ -138,11 +138,6 @@ public class AsmGeneratorTest {
             }
 
             @Override
-            public String[] getPromotedFields() {
-                return new String[0];
-            }
-
-            @Override
             public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
                 return new HashMap<String, InjectMethodRunnable>(0);
             }
@@ -214,11 +209,6 @@ public class AsmGeneratorTest {
             @Override
             public String[] getDeleteReturns() {
                  // methods deleted from their return type.
-                return new String[0];
-            }
-
-            @Override
-            public String[] getPromotedFields() {
                 return new String[0];
             }
 
@@ -306,11 +296,6 @@ public class AsmGeneratorTest {
             }
 
             @Override
-            public String[] getPromotedFields() {
-                return new String[0];
-            }
-
-            @Override
             public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
                 return new HashMap<String, InjectMethodRunnable>(0);
             }
@@ -385,11 +370,6 @@ public class AsmGeneratorTest {
             @Override
             public String[] getDeleteReturns() {
                 // methods deleted from their return type.
-                return new String[0];
-            }
-
-            @Override
-            public String[] getPromotedFields() {
                 return new String[0];
             }
 

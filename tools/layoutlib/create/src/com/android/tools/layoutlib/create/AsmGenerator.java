@@ -77,8 +77,6 @@ public class AsmGenerator {
     /** Methods to inject. FQCN of class in which method should be injected => runnable that does
      * the injection. */
     private final Map<String, ICreateInfo.InjectMethodRunnable> mInjectedMethodsMap;
-    /** A map { FQCN => set { field names } } which should be promoted to public visibility */
-    private final Map<String, Set<String>> mPromotedFields;
 
     /**
      * Creates a new generator that can generate the output JAR with the stubbed classes.
@@ -111,8 +109,20 @@ public class AsmGenerator {
 
         // Create the map/set of methods to change to delegates
         mDelegateMethods = new HashMap<String, Set<String>>();
-        addToMap(createInfo.getDelegateMethods(), mDelegateMethods);
-
+        for (String signature : createInfo.getDelegateMethods()) {
+            int pos = signature.indexOf('#');
+            if (pos <= 0 || pos >= signature.length() - 1) {
+                continue;
+            }
+            String className = binaryToInternalClassName(signature.substring(0, pos));
+            String methodName = signature.substring(pos + 1);
+            Set<String> methods = mDelegateMethods.get(className);
+            if (methods == null) {
+                methods = new HashSet<String>();
+                mDelegateMethods.put(className, methods);
+            }
+            methods.add(methodName);
+        }
         for (String className : createInfo.getDelegateClassNatives()) {
             className = binaryToInternalClassName(className);
             Set<String> methods = mDelegateMethods.get(className);
@@ -177,31 +187,7 @@ public class AsmGenerator {
             returnTypes.add(binaryToInternalClassName(className));
         }
 
-        mPromotedFields = new HashMap<String, Set<String>>();
-        addToMap(createInfo.getPromotedFields(), mPromotedFields);
-
         mInjectedMethodsMap = createInfo.getInjectedMethodsMap();
-    }
-
-    /**
-     * For each value in the array, split the value on '#' and add the parts to the map as key
-     * and value.
-     */
-    private void addToMap(String[] entries, Map<String, Set<String>> map) {
-        for (String entry : entries) {
-            int pos = entry.indexOf('#');
-            if (pos <= 0 || pos >= entry.length() - 1) {
-                return;
-            }
-            String className = binaryToInternalClassName(entry.substring(0, pos));
-            String methodOrFieldName = entry.substring(pos + 1);
-            Set<String> set = map.get(className);
-            if (set == null) {
-                set = new HashSet<String>();
-                map.put(className, set);
-            }
-            set.add(methodOrFieldName);
-        }
     }
 
     /**
@@ -394,10 +380,6 @@ public class AsmGenerator {
             }
         }
 
-        Set<String> promoteFields = mPromotedFields.get(className);
-        if (promoteFields != null && !promoteFields.isEmpty()) {
-            cv = new PromoteFieldClassAdapter(cv, promoteFields);
-        }
         cr.accept(cv, 0);
         return cw.toByteArray();
     }
