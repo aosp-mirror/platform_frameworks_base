@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="trusted_state_to_error"
+    android:width="32dp"
+    android:viewportWidth="32"
+    android:height="32dp"
+    android:viewportHeight="32" >
+    <group
+        android:name="trusted_state_to_error_0"
+        android:translateX="16"
+        android:translateY="16" >
+        <group
+            android:name="error_circle" >
+            <path
+                android:name="ellipse_path_1"
+                android:trimPathStart="1"
+                android:trimPathOffset="1"
+                android:strokeColor="#FFFFFFFF"
+                android:strokeAlpha="0.5"
+                android:strokeWidth="2"
+                android:pathData="M 0.0,-12.0 c 6.6274169976,0.0 12.0,5.3725830024 12.0,12.0 c 0.0,6.6274169976 -5.3725830024,12.0 -12.0,12.0 c -6.6274169976,0.0 -12.0,-5.3725830024 -12.0,-12.0 c 0.0,-6.6274169976 5.3725830024,-12.0 12.0,-12.0 Z" />
+        </group>
+        <group
+            android:name="middle_ellipse"
+            android:translateY="2.9375" >
+            <path
+                android:name="ellipse_path_2"
+                android:fillColor="#FFFFFFFF"
+                android:fillAlpha="0.5"
+                android:pathData="M 0.0,-1.988645 c 1.09829830627,0.0 1.988645,0.890346693734 1.988645,1.988645 c 0.0,1.09829830627 -0.890346693734,1.988645 -1.988645,1.988645 c -1.09829830627,0.0 -1.988645,-0.890346693734 -1.988645,-1.988645 c 0.0,-1.09829830627 0.890346693734,-1.988645 1.988645,-1.988645 Z" />
+        </group>
+        <group
+            android:name="lock_right_side" >
+            <path
+                android:name="path_1"
+                android:pathData="M 6.00561523438,-4.046875 c 0.0,0.0 -5.98999023438,0.0 -5.98999023438,0.0 c 0.0,0.0 0.0,2.0 0.0,2.0 c 0.0,0.0 5.98812866211,0.0 5.98812866211,0.0 c 0.0,0.0 0.00064086914062,10.0 0.00064086914062,10.0 c 0.0,0.0 -5.98840332031,0.0 -5.98840332031,0.0 c 0.0,0.0 -0.0052490234375,2.0 -0.0052490234375,2.0 c 0.0,0.0 5.99487304688,0.0 5.99487304688,0.0 c 1.10000610352,0.0 2.0,-0.900024414062 2.0,-2.0 c 0.0,0.0 0.0,-10.0 0.0,-10.0 c 0.0,-1.09997558594 -0.899993896484,-2.0 -2.0,-2.0 Z"
+                android:fillColor="#FFFFFFFF"
+                android:fillAlpha="0.5" />
+        </group>
+        <group
+            android:name="lock_left_side" >
+            <path
+                android:name="path_2"
+                android:pathData="M -5.9959564209,-2.04727172852 c 0.0,0.0 6.01173400879,0.00039672851562 6.01173400879,0.00039672851562 c 0.0,0.0 -0.00015258789062,-2.0 -0.00015258789062,-2.0 c 0.0,0.0 -6.01000976562,0.0 -6.01000976562,0.0 c -1.10000610352,0.0 -2.0,0.900024414062 -2.0,2.0 c 0.0,0.0 0.0,10.0 0.0,10.0 c 0.0,1.09997558594 0.899993896484,2.0 2.0,2.0 c 0.0,0.0 6.01000976562,0.0 6.01000976562,0.0 c 0.0,0.0 -0.000244140625,-2.0009765625 -0.000244140625,-2.0009765625 c 0.0,0.0 -6.01171875,0.0003662109375 -6.01171875,0.0003662109375 c 0.0,0.0 0.00038146972656,-9.99978637695 0.00038146972656,-9.99978637695 Z"
+                android:fillColor="#FFFFFFFF"
+                android:fillAlpha="0.5" />
+        </group>
+        <group
+            android:name="lock_top" >
+            <path
+                android:name="path_3"
+                android:pathData="M 5.00619506836,-6.046875 c 0.0,-2.76000976562 -2.23999023438,-5.0 -5.0,-5.0 c -2.76000976562,0.0 -5.0,2.23999023438 -5.0,5.0 c 0.0,0.0 1.89999389648,0.0 1.89999389648,0.0 c 0.0,-1.71002197266 1.38999938965,-3.09997558594 3.10000610352,-3.09997558594 c 1.71000671387,0.0 3.10000610352,1.38995361328 3.10000610352,3.09997558594 c 0.0,0.0 0.0,2.0 0.0,2.0 c 0.0,0.0 1.89999389648,0.0 1.89999389648,0.0 c 0.0,0.0 0.0,-2.0 0.0,-2.0 Z"
+                android:fillColor="#FFFFFFFF"
+                android:fillAlpha="0.5" />
+        </group>
+        <group
+            android:name="exclamation_dot"
+            android:translateY="4"
+            android:scaleX="0"
+            android:scaleY="0" >
+            <path
+                android:name="rectangle_path_1"
+                android:fillColor="#FFFFFFFF"
+                android:fillAlpha="0.5"
+                android:pathData="M -1.33871,-1.3335 l 2.67742,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,2.667 c 0.0,0.0 0.0,0.0 0.0,0.0 l -2.67742,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,-2.667 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+        </group>
+    </group>
+</vector>
