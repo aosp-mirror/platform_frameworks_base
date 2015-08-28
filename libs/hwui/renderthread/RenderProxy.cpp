@@ -74,7 +74,7 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode, IContextF
     args->thread = &mRenderThread;
     args->contextFactory = contextFactory;
     mContext = (CanvasContext*) postAndWait(task);
-    mDrawFrameTask.setContext(&mRenderThread, mContext);
+    mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode);
 }
 
 RenderProxy::~RenderProxy() {
@@ -91,7 +91,7 @@ void RenderProxy::destroyContext() {
         SETUP_TASK(destroyContext);
         args->context = mContext;
         mContext = nullptr;
-        mDrawFrameTask.setContext(nullptr, nullptr);
+        mDrawFrameTask.setContext(nullptr, nullptr, nullptr);
         // This is also a fence as we need to be certain that there are no
         // outstanding mDrawFrame tasks posted before it is destroyed
         postAndWait(task);
@@ -461,7 +461,8 @@ void RenderProxy::dumpGraphicsMemory(int fd) {
     staticPostAndWait(task);
 }
 
-CREATE_BRIDGE4(setTextureAtlas, RenderThread* thread, GraphicBuffer* buffer, int64_t* map, size_t size) {
+CREATE_BRIDGE4(setTextureAtlas, RenderThread* thread, GraphicBuffer* buffer, int64_t* map,
+               size_t size) {
     CanvasContext::setTextureAtlas(*args->thread, args->buffer, args->map, args->size);
     args->buffer->decStrong(nullptr);
     return nullptr;
@@ -488,6 +489,61 @@ void RenderProxy::setProcessStatsBuffer(int fd) {
     args->thread = &mRenderThread;
     args->fd = dup(fd);
     post(task);
+}
+
+CREATE_BRIDGE3(addRenderNode, CanvasContext* context, RenderNode* node, bool placeFront) {
+    args->context->addRenderNode(args->node, args->placeFront);
+    return nullptr;
+}
+
+void RenderProxy::addRenderNode(RenderNode* node, bool placeFront) {
+    SETUP_TASK(addRenderNode);
+    args->context = mContext;
+    args->node = node;
+    args->placeFront = placeFront;
+    post(task);
+}
+
+CREATE_BRIDGE2(removeRenderNode, CanvasContext* context, RenderNode* node) {
+    args->context->removeRenderNode(args->node);
+    return nullptr;
+}
+
+void RenderProxy::removeRenderNode(RenderNode* node) {
+    SETUP_TASK(removeRenderNode);
+    args->context = mContext;
+    args->node = node;
+    post(task);
+}
+
+CREATE_BRIDGE2(drawRenderNode, CanvasContext* context, RenderNode* node) {
+    args->context->prepareAndDraw(args->node);
+    return nullptr;
+}
+
+void RenderProxy::drawRenderNode(RenderNode* node) {
+    SETUP_TASK(drawRenderNode);
+    args->context = mContext;
+    args->node = node;
+    // Be pseudo-thread-safe and don't use any member variables
+    staticPostAndWait(task);
+}
+
+CREATE_BRIDGE5(setContentOverdrawProtectionBounds, CanvasContext* context, int left, int top,
+        int right, int bottom) {
+    args->context->setContentOverdrawProtectionBounds(args->left, args->top, args->right,
+                                                      args->bottom);
+    return nullptr;
+}
+
+void RenderProxy::setContentOverdrawProtectionBounds(int left, int top, int right, int bottom) {
+    SETUP_TASK(setContentOverdrawProtectionBounds);
+    args->context = mContext;
+    args->left = left;
+    args->top = top;
+    args->right = right;
+    args->bottom = bottom;
+    staticPostAndWait(task);
 }
 
 CREATE_BRIDGE1(serializeDisplayListTree, CanvasContext* context) {

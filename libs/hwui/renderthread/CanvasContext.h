@@ -34,6 +34,7 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -77,12 +78,14 @@ public:
     void setOpaque(bool opaque);
     void makeCurrent();
     void processLayerUpdate(DeferredLayerUpdater* layerUpdater);
-    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued);
+    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
+            int64_t syncQueued, RenderNode* target);
     void draw();
     void destroy();
 
     // IFrameCallback, Chroreographer-driven frame callback entry point
     virtual void doFrame() override;
+    void prepareAndDraw(RenderNode* node);
 
     void buildLayer(RenderNode* node);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
@@ -113,6 +116,20 @@ public:
 
     void serializeDisplayListTree();
 
+    void addRenderNode(RenderNode* node, bool placeFront) {
+        int pos = placeFront ? 0 : static_cast<int>(mRenderNodes.size());
+        mRenderNodes.emplace( mRenderNodes.begin() + pos, node);
+    }
+
+    void removeRenderNode(RenderNode* node) {
+        mRenderNodes.erase(std::remove(mRenderNodes.begin(), mRenderNodes.end(), node),
+                mRenderNodes.end());
+    }
+
+    void setContentOverdrawProtectionBounds(int left, int top, int right, int bottom) {
+        mContentOverdrawProtectionBounds.set(left, top, right, bottom);
+    }
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -138,7 +155,7 @@ private:
     DamageAccumulator mDamageAccumulator;
     std::unique_ptr<AnimationContext> mAnimationContext;
 
-    const sp<RenderNode> mRootRenderNode;
+    std::vector< sp<RenderNode> > mRenderNodes;
 
     FrameInfo* mCurrentFrameInfo = nullptr;
     // Ring buffer large enough for 2 seconds worth of frames
@@ -148,6 +165,9 @@ private:
     FrameInfoVisualizer mProfiler;
 
     std::set<RenderNode*> mPrefetechedLayers;
+
+    // Stores the bounds of the main content.
+    Rect mContentOverdrawProtectionBounds;
 };
 
 } /* namespace renderthread */

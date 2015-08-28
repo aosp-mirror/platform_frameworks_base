@@ -106,6 +106,11 @@ public:
 
     ANDROID_API void serializeDisplayListTree();
 
+    ANDROID_API void addRenderNode(RenderNode* node, bool placeFront);
+    ANDROID_API void removeRenderNode(RenderNode* node);
+    ANDROID_API void drawRenderNode(RenderNode* node);
+    ANDROID_API void setContentOverdrawProtectionBounds(int left, int top, int right, int bottom);
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

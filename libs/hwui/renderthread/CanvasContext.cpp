@@ -60,9 +60,10 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mEglManager(thread.eglManager())
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
-        , mRootRenderNode(rootRenderNode)
         , mJankTracker(thread.timeLord().frameIntervalNanos())
-        , mProfiler(mFrames) {
+        , mProfiler(mFrames)
+        , mContentOverdrawProtectionBounds(0, 0, 0, 0) {
+    mRenderNodes.emplace_back(rootRenderNode);
     mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
 }
@@ -172,7 +173,8 @@ static bool wasSkipped(FrameInfo* info) {
     return info && ((*info)[FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame);
 }
 
-void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued) {
+void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
+        int64_t syncQueued, RenderNode* target) {
     mRenderThread.removeFrameCallback(this);
 
     // If the previous frame was dropped we don't need to hold onto it, so
@@ -189,7 +191,13 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
     info.canvasContext = this;
 
     mAnimationContext->startFrame(info.mode);
-    mRootRenderNode->prepareTree(info);
+    for (const sp<RenderNode>& node : mRenderNodes) {
+        // Only the primary target node will be drawn full - all other nodes would get drawn in
+        // real time mode. In case of a window, the primary node is the window content and the other
+        // node(s) are non client / filler nodes.
+        info.mode = (node.get() == target ? TreeInfo::MODE_FULL : TreeInfo::MODE_RT_ONLY);
+        node->prepareTree(info);
+    }
     mAnimationContext->runRemainingAnimations(info);
 
     freePrefetechedLayers();
@@ -299,7 +307,95 @@ void CanvasContext::draw() {
             dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom, mOpaque);
 
     Rect outBounds;
-    mCanvas->drawRenderNode(mRootRenderNode.get(), outBounds);
+    // It there are multiple render nodes, they are as follows:
+    // #0 - backdrop
+    // #1 - content (with - and clipped to - bounds mContentOverdrawProtectionBounds)
+    // #2 - frame
+    // Usually the backdrop cannot be seen since it will be entirely covered by the content. While
+    // resizing however it might become partially visible. The following render loop will crop the
+    // backdrop against the content and draw the remaining part of it. It will then crop the content
+    // against the backdrop (since that indicates a shrinking of the window) and then the frame
+    // around everything.
+    // The bounds of the backdrop against which the content should be clipped.
+    Rect backdropBounds = mContentOverdrawProtectionBounds;
+    // If there is no content bounds we ignore the layering as stated above and start with 2.
+    int layer = mContentOverdrawProtectionBounds.isEmpty() ? 2 : 0;
+    // Draw all render nodes. Note that
+    for (const sp<RenderNode>& node : mRenderNodes) {
+        if (layer == 0) { // Backdrop.
+            // Draw the backdrop clipped to the inverse content bounds.
+            const RenderProperties& properties = node->properties();
+            Rect targetBounds(properties.getLeft(), properties.getTop(),
+                              properties.getRight(), properties.getBottom());
+            // Remember the intersection of the target bounds and the intersection bounds against
+            // which we have to crop the content.
+            backdropBounds.intersect(targetBounds);
+            // Check if we have to draw something on the left side ...
+            if (targetBounds.left < mContentOverdrawProtectionBounds.left) {
+                mCanvas->save(SkCanvas::kClip_SaveFlag);
+                if (mCanvas->clipRect(targetBounds.left, targetBounds.top,
+                                      mContentOverdrawProtectionBounds.left, targetBounds.bottom,
+                                      SkRegion::kIntersect_Op)) {
+                    mCanvas->drawRenderNode(node.get(), outBounds);
+                }
+                // Reduce the target area by the area we have just painted.
+                targetBounds.left = std::min(mContentOverdrawProtectionBounds.left,
+                                             targetBounds.right);
+                mCanvas->restore();
+            }
+            // ... or on the right side ...
+            if (targetBounds.right > mContentOverdrawProtectionBounds.right &&
+                !targetBounds.isEmpty()) {
+                mCanvas->save(SkCanvas::kClip_SaveFlag);
+                if (mCanvas->clipRect(mContentOverdrawProtectionBounds.right, targetBounds.top,
+                                      targetBounds.right, targetBounds.bottom,
+                                      SkRegion::kIntersect_Op)) {
+                    mCanvas->drawRenderNode(node.get(), outBounds);
+                }
+                // Reduce the target area by the area we have just painted.
+                targetBounds.right = std::max(targetBounds.left,
+                                              mContentOverdrawProtectionBounds.right);
+                mCanvas->restore();
+            }
+            // ... or at the top ...
+            if (targetBounds.top < mContentOverdrawProtectionBounds.top &&
+                !targetBounds.isEmpty()) {
+                mCanvas->save(SkCanvas::kClip_SaveFlag);
+                if (mCanvas->clipRect(targetBounds.left, targetBounds.top, targetBounds.right,
+                                      mContentOverdrawProtectionBounds.top,
+                                      SkRegion::kIntersect_Op)) {
+                    mCanvas->drawRenderNode(node.get(), outBounds);
+                }
+                // Reduce the target area by the area we have just painted.
+                targetBounds.top = std::min(mContentOverdrawProtectionBounds.top,
+                                            targetBounds.bottom);
+                mCanvas->restore();
+            }
+            // ... or at the bottom.
+            if (targetBounds.bottom > mContentOverdrawProtectionBounds.bottom &&
+                !targetBounds.isEmpty()) {
+                mCanvas->save(SkCanvas::kClip_SaveFlag);
+                if (mCanvas->clipRect(targetBounds.left,
+                                      mContentOverdrawProtectionBounds.bottom, targetBounds.right,
+                                      targetBounds.bottom, SkRegion::kIntersect_Op)) {
+                    mCanvas->drawRenderNode(node.get(), outBounds);
+                }
+                mCanvas->restore();
+            }
+        } else if (layer == 1) { // Content
+            // It gets cropped against the bounds of the backdrop to stay inside.
+            mCanvas->save(SkCanvas::kClip_SaveFlag);
+            if (mCanvas->clipRect(backdropBounds.left, backdropBounds.top,
+                                  backdropBounds.right, backdropBounds.bottom,
+                                  SkRegion::kIntersect_Op)) {
+                mCanvas->drawRenderNode(node.get(), outBounds);
+            }
+            mCanvas->restore();
+        } else { // draw the rest on top at will!
+            mCanvas->drawRenderNode(node.get(), outBounds);
+        }
+        layer++;
+    }
 
     profiler().draw(mCanvas);
 
@@ -343,7 +439,10 @@ void CanvasContext::doFrame() {
     if (CC_UNLIKELY(!mCanvas || mEglSurface == EGL_NO_SURFACE)) {
         return;
     }
+    prepareAndDraw(nullptr);
+}
 
+void CanvasContext::prepareAndDraw(RenderNode* node) {
     ATRACE_CALL();
 
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
@@ -353,7 +452,7 @@ void CanvasContext::doFrame() {
                 mRenderThread.timeLord().latestVsync());
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, mRenderThread.renderState());
-    prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC));
+    prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC), node);
     if (info.out.canDrawThisFrame) {
         draw();
     }
@@ -423,7 +522,9 @@ void CanvasContext::destroyHardwareResources() {
     stopDrawing();
     if (mEglManager.hasEglContext()) {
         freePrefetechedLayers();
-        mRootRenderNode->destroyHardwareResources();
+        for (const sp<RenderNode>& node : mRenderNodes) {
+            node->destroyHardwareResources();
+        }
         Caches& caches = Caches::getInstance();
         // Make sure to release all the textures we were owning as there won't
         // be another draw

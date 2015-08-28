@@ -440,6 +440,32 @@ static void android_view_ThreadedRenderer_dumpProfileData(JNIEnv* env, jobject c
     }
 }
 
+static void android_view_ThreadedRenderer_addRenderNode(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong renderNodePtr, jboolean placeFront) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    proxy->addRenderNode(renderNode, placeFront);
+}
+
+static void android_view_ThreadedRenderer_removeRenderNode(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong renderNodePtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    proxy->removeRenderNode(renderNode);
+}
+
+static void android_view_ThreadedRendererd_drawRenderNode(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong renderNodePtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    proxy->drawRenderNode(renderNode);
+}
+
+static void android_view_ThreadedRenderer_setContentOverdrawProtectionBounds(JNIEnv* env,
+        jobject clazz, jlong proxyPtr, jint left, jint top, jint right, jint bottom) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setContentOverdrawProtectionBounds(left, top, right, bottom);
+}
 
 // ----------------------------------------------------------------------------
 // Shaders
@@ -447,7 +473,6 @@ static void android_view_ThreadedRenderer_dumpProfileData(JNIEnv* env, jobject c
 
 static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
         jstring diskCachePath) {
-
     const char* cacheArray = env->GetStringUTFChars(diskCachePath, NULL);
     egl_cache_t::get()->setCacheFilename(cacheArray);
     env->ReleaseStringUTFChars(diskCachePath, cacheArray);
@@ -494,6 +519,11 @@ static JNINativeMethod gMethods[] = {
     { "nDumpProfileData", "([BLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileData },
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",
                 (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
+    { "nAddRenderNode", "(JJZ)V", (void*) android_view_ThreadedRenderer_addRenderNode},
+    { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},
+    { "nDrawRenderNode", "(JJ)V", (void*) android_view_ThreadedRendererd_drawRenderNode},
+    { "nSetContentOverdrawProtectionBounds", "(JIIII)V",
+                (void*)android_view_ThreadedRenderer_setContentOverdrawProtectionBounds},
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
