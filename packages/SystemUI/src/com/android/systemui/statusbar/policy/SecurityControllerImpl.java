@@ -36,6 +36,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
@@ -62,8 +63,9 @@ public class SecurityControllerImpl implements SecurityController {
     private final IConnectivityManager mConnectivityManagerService;
     private final DevicePolicyManager mDevicePolicyManager;
     private final UserManager mUserManager;
-    private final ArrayList<SecurityControllerCallback> mCallbacks
-            = new ArrayList<SecurityControllerCallback>();
+
+    @GuardedBy("mCallbacks")
+    private final ArrayList<SecurityControllerCallback> mCallbacks = new ArrayList<>();
 
     private SparseArray<VpnConfig> mCurrentVpns = new SparseArray<>();
     private int mCurrentUserId;
@@ -161,16 +163,20 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public void removeCallback(SecurityControllerCallback callback) {
-        if (callback == null) return;
-        if (DEBUG) Log.d(TAG, "removeCallback " + callback);
-        mCallbacks.remove(callback);
+        synchronized (mCallbacks) {
+            if (callback == null) return;
+            if (DEBUG) Log.d(TAG, "removeCallback " + callback);
+            mCallbacks.remove(callback);
+        }
     }
 
     @Override
     public void addCallback(SecurityControllerCallback callback) {
-        if (callback == null || mCallbacks.contains(callback)) return;
-        if (DEBUG) Log.d(TAG, "addCallback " + callback);
-        mCallbacks.add(callback);
+        synchronized (mCallbacks) {
+            if (callback == null || mCallbacks.contains(callback)) return;
+            if (DEBUG) Log.d(TAG, "addCallback " + callback);
+            mCallbacks.add(callback);
+        }
     }
 
     @Override
@@ -202,8 +208,10 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     private void fireCallbacks() {
-        for (SecurityControllerCallback callback : mCallbacks) {
-            callback.onStateChanged();
+        synchronized (mCallbacks) {
+            for (SecurityControllerCallback callback : mCallbacks) {
+                callback.onStateChanged();
+            }
         }
     }
 
