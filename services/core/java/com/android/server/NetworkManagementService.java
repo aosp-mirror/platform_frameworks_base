@@ -120,6 +120,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     public static final String LIMIT_GLOBAL_ALERT = "globalAlert";
 
+    /**
+     * String to pass to netd to indicate that a network is only accessible
+     * to apps that have the CHANGE_NETWORK_STATE permission.
+     */
+    public static final String PERMISSION_NETWORK = "NETWORK";
+
+    /**
+     * String to pass to netd to indicate that a network is only
+     * accessible to system apps and those with the CONNECTIVITY_INTERNAL
+     * permission.
+     */
+    public static final String PERMISSION_SYSTEM = "SYSTEM";
+
     class NetdResponseCode {
         /* Keep in sync with system/netd/server/ResponseCode.h */
         public static final int InterfaceListResult       = 110;
@@ -1998,11 +2011,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void createPhysicalNetwork(int netId) {
+    public void createPhysicalNetwork(int netId, String permission) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
-            mConnector.execute("network", "create", netId);
+            if (permission != null) {
+                mConnector.execute("network", "create", netId, permission);
+            } else {
+                mConnector.execute("network", "create", netId);
+            }
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -2092,6 +2109,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             throw e.rethrowAsParcelableException();
         }
     }
+
+    @Override
+    public void setNetworkPermission(int netId, String permission) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            if (permission != null) {
+                mConnector.execute("network", "permission", "network", "set", permission, netId);
+            } else {
+                mConnector.execute("network", "permission", "network", "clear", netId);
+            }
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
 
     @Override
     public void setPermission(String permission, int[] uids) {

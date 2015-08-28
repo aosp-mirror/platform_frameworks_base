@@ -384,8 +384,10 @@ interface INetworkManagementService
 
     /**
      * Setup a new physical network.
+     * @param permission null if no permissions required to access this network.  PERMISSION_NETWORK
+     *                   or PERMISSION_SYSTEM to set respective permission.
      */
-    void createPhysicalNetwork(int netId);
+    void createPhysicalNetwork(int netId, String permission);
 
     /**
      * Setup a new VPN.
@@ -411,6 +413,13 @@ interface INetworkManagementService
 
     void setDefaultNetId(int netId);
     void clearDefaultNetId();
+
+    /**
+     * Set permission for a network.
+     * @param permission null to clear permissions. PERMISSION_NETWORK or PERMISSION_SYSTEM to set
+     *                   permission.
+     */
+    void setNetworkPermission(int netId, String permission);
 
     void setPermission(String permission, in int[] uids);
     void clearPermission(in int[] uids);
