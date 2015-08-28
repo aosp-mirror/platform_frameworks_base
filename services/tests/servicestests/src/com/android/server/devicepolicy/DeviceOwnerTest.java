@@ -17,11 +17,13 @@
 package com.android.server.devicepolicy;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 /**
  * Tests for the DeviceOwner object that saves & loads device and policy owner information.
@@ -32,69 +34,34 @@ import java.io.ByteArrayOutputStream;
  */
 public class DeviceOwnerTest extends AndroidTestCase {
 
-    private ByteArrayInputStream mInputStreamForTest;
-    private final ByteArrayOutputStream mOutputStreamForTest = new ByteArrayOutputStream();
+    private static class DeviceOwnerSub extends DeviceOwner{
+        private final File mLegacyFile;
+        private final File mDeviceOwnerFile;
+        private final File mProfileOwnerBase;
 
-    @SmallTest
-    public void testDeviceOwnerOnly() throws Exception {
-        DeviceOwner out = new DeviceOwner(null, mOutputStreamForTest);
-        out.setDeviceOwner("some.device.owner.package", "owner");
-        out.writeOwnerFile();
+        public DeviceOwnerSub(Context context, File legacyFile, File deviceOwnerFile,
+                File profileOwnerBase) {
+            super(context);
+            mLegacyFile = legacyFile;
+            mDeviceOwnerFile = deviceOwnerFile;
+            mProfileOwnerBase = profileOwnerBase;
+        }
 
-        mInputStreamForTest = new ByteArrayInputStream(mOutputStreamForTest.toByteArray());
-        DeviceOwner in = new DeviceOwner(mInputStreamForTest, null);
-        in.readOwnerFile();
+        @Override
+        File getLegacyConfigFileWithTestOverride() {
+            return mLegacyFile;
+        }
 
-        assertEquals("some.device.owner.package", in.getDeviceOwnerPackageName());
-        assertEquals("owner", in.getDeviceOwnerName());
-        assertNull(in.getProfileOwnerComponent(1));
+        @Override
+        File getDeviceOwnerFileWithTestOverride() {
+            return mDeviceOwnerFile;
+        }
+
+        @Override
+        File getProfileOwnerFileWithTestOverride(int userId) {
+            return new File(mDeviceOwnerFile.getAbsoluteFile() + "-" + userId);
+        }
     }
 
-    @SmallTest
-    public void testProfileOwnerOnly() throws Exception {
-        DeviceOwner out = new DeviceOwner(null, mOutputStreamForTest);
-        ComponentName admin = new ComponentName(
-            "some.profile.owner.package", "some.profile.owner.package.Class");
-        out.setProfileOwner(admin, "some-company", 1);
-        out.writeOwnerFile();
-
-        mInputStreamForTest = new ByteArrayInputStream(mOutputStreamForTest.toByteArray());
-        DeviceOwner in = new DeviceOwner(mInputStreamForTest, null);
-        in.readOwnerFile();
-
-        assertNull(in.getDeviceOwnerPackageName());
-        assertNull(in.getDeviceOwnerName());
-        assertEquals(admin, in.getProfileOwnerComponent(1));
-        assertEquals("some-company", in.getProfileOwnerName(1));
-    }
-
-    @SmallTest
-    public void testDeviceAndProfileOwners() throws Exception {
-        DeviceOwner out = new DeviceOwner(null, mOutputStreamForTest);
-        ComponentName profileAdmin = new ComponentName(
-            "some.profile.owner.package", "some.profile.owner.package.Class");
-        ComponentName otherProfileAdmin = new ComponentName(
-            "some.other.profile.owner", "some.other.profile.owner.OtherClass");
-        // Old code used package name rather than component name, so the class
-        // bit could be empty.
-        ComponentName legacyComponentName = new ComponentName("legacy.profile.owner.package", "");
-        out.setDeviceOwner("some.device.owner.package", "owner");
-        out.setProfileOwner(profileAdmin, "some-company", 1);
-        out.setProfileOwner(otherProfileAdmin, "some-other-company", 2);
-        out.setProfileOwner(legacyComponentName, "legacy-company", 3);
-        out.writeOwnerFile();
-
-        mInputStreamForTest = new ByteArrayInputStream(mOutputStreamForTest.toByteArray());
-
-        DeviceOwner in = new DeviceOwner(mInputStreamForTest, null);
-        in.readOwnerFile();
-
-        assertEquals("some.device.owner.package", in.getDeviceOwnerPackageName());
-        assertEquals("owner", in.getDeviceOwnerName());
-        assertEquals(profileAdmin, in.getProfileOwnerComponent(1));
-        assertEquals("some-company", in.getProfileOwnerName(1));
-        assertEquals(otherProfileAdmin, in.getProfileOwnerComponent(2));
-        assertEquals("some-other-company", in.getProfileOwnerName(2));
-        assertEquals(legacyComponentName, in.getProfileOwnerComponent(3));
-    }
+    // TODO Write tests
 }
