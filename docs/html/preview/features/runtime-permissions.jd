@@ -1055,7 +1055,6 @@ $ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
   <li><code>android.permission.DISABLE_KEYGUARD</code></li>
   <li><code>android.permission.EXPAND_STATUS_BAR</code></li>
   <li><code>android.permission.FLASHLIGHT</code></li>
-  <li><code>android.permission.GET_ACCOUNTS</code></li>
   <li><code>android.permission.GET_PACKAGE_SIZE</code></li>
   <li><code>android.permission.INTERNET</code></li>
   <li><code>android.permission.KILL_BACKGROUND_PROCESSES</code></li>
