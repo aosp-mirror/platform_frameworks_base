@@ -36,6 +36,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import java.io.File;
@@ -53,6 +54,9 @@ public final class BridgeInflater extends LayoutInflater {
     private boolean mIsInMerge = false;
     private ResourceReference mResourceReference;
     private Map<View, String> mOpenDrawerLayouts;
+
+    // Keep in sync with the same value in LayoutInflater.
+    private static final int[] ATTRS_THEME = new int[] {com.android.internal.R.attr.theme };
 
     /**
      * List of class prefixes which are tried first by default.
@@ -135,11 +139,23 @@ public final class BridgeInflater extends LayoutInflater {
 
     @Override
     public View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,
-            boolean ignoreThemeAttrs) {
+            boolean ignoreThemeAttr) {
         View view;
         try {
-            view = super.createViewFromTag(parent, name, context, attrs, ignoreThemeAttrs);
+            view = super.createViewFromTag(parent, name, context, attrs, ignoreThemeAttr);
         } catch (InflateException e) {
+            // Creation of ContextThemeWrapper code is same as in the super method.
+            // Apply a theme wrapper, if allowed and one is specified.
+            if (!ignoreThemeAttr) {
+                final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
+                final int themeResId = ta.getResourceId(0, 0);
+                if (themeResId != 0) {
+                    context = new ContextThemeWrapper(context, themeResId);
+                }
+                ta.recycle();
+            }
+            final Object lastContext = mConstructorArgs[0];
+            mConstructorArgs[0] = context;
             // try to load the class from using the custom view loader
             try {
                 view = loadCustomView(name, attrs);
@@ -153,6 +169,8 @@ public final class BridgeInflater extends LayoutInflater {
                     exception.initCause(e);
                 }
                 throw exception;
+            } finally {
+                mConstructorArgs[0] = lastContext;
             }
         }
 
