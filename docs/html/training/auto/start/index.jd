@@ -192,18 +192,24 @@ $ sudo apt-get install libsdl2-2.0-0 libsdl2-ttf-2.0-0 libportaudio2 libpng12-0
   </li>
 </ol>
 
-<div class="figure" style="width:330px">
-  <img src="{@docRoot}images/training/auto-desktop-head-unit-server-running.png"
-      alt="" >
-  <p class="img-caption">
-    <strong>Figure 2.</strong> Notification that the head unit server is running.
-  </p>
-</div>
-<img src="{@docRoot}images/training/auto-desktop-head-unit-context-menu-enabled.png"
-    alt="" >
-<p class="img-caption">
-  <strong>Figure 1.</strong> Context menu with developer options.
-</p>
+<div class="cols">
+  <div class="col-6">
+    <img src="{@docRoot}images/training/auto-desktop-head-unit-context-menu-enabled.png"
+        alt="" >
+    <p class="img-caption">
+      <strong>Figure 1.</strong> Context menu with developer options.
+    </p>
+  </div>
+
+  <div class="col-6">
+    <img src="{@docRoot}images/training/auto-desktop-head-unit-server-running.png"
+        alt="" >
+    <p class="img-caption">
+      <strong>Figure 2.</strong> Notification that the head unit server is running.
+    </p>
+  </div>
+</div> <!-- end cols-->
+
 
 <h3 id="connecting-dhu">Connecting the DHU to your mobile device</h3>
 
@@ -221,9 +227,13 @@ $ sudo apt-get install libsdl2-2.0-0 libsdl2-ttf-2.0-0 libportaudio2 libpng12-0
     <p>On the device, a foreground service appears in the notification area. </p>
   </li>
 
-  <li>Connect the mobile device to the development machine via USB. Your device must be unlocked to
-    launch the DHU.
-  </li>
+  <li>In the Android Auto app, make sure the <strong>Only connect to known cars</strong> option
+    is disabled.</li>
+
+  <li>Connect the mobile device to the development machine via USB.</li>
+
+  <li>Make sure the mobile device has its screen unlocked, otherwise it cannot launch the DHU.</li>
+
   <li>On the development machine, run the following {@code adb} command to
     forward socket connections from the
     development machine's port 5277 to the same port number on the Android device.
