@@ -419,7 +419,6 @@ class NavigationBarApps extends LinearLayout {
         }
 
         // "Move" the dragged app by removing it and adding it back at the target location.
-        int dragViewIndex = indexOfChild(mDragView);
         int targetIndex = indexOfChild(target);
         // This works, but is subtle:
         // * If dragViewIndex > targetIndex then the dragged app is moving from right to left and
@@ -513,8 +512,7 @@ class NavigationBarApps extends LinearLayout {
         if (mDragView == null) {
             return;
         }
-        int index = indexOfChild(mDragView);
-        removeViewAt(index);
+        removeView(mDragView);
         endDrag();
     }
 
