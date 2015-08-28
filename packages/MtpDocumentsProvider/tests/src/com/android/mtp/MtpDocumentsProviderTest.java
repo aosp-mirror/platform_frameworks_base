@@ -211,7 +211,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new Date(1422716400000L) /* modified date */,
                 1024 * 1024 * 5 /* file size */,
                 1024 * 50 /* thumbnail size */,
-                true /* read only */));
+                false /* read only */));
         final Cursor cursor = mProvider.queryDocument("0_1_2", null);
         assertEquals(1, cursor.getCount());
 
@@ -222,9 +222,35 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(1422716400000L, cursor.getLong(3));
         assertEquals(
                 DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
+                DocumentsContract.Document.FLAG_SUPPORTS_WRITE |
                 DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL,
                 cursor.getInt(4));
         assertEquals(1024 * 1024 * 5, cursor.getInt(5));
+    }
+
+    public void testQueryDocument_directory() throws IOException {
+        mMtpManager.setDocument(0, 2, new MtpDocument(
+                2 /* object handle */,
+                0x3001 /* directory */,
+                "directory" /* display name */,
+                new Date(1422716400000L) /* modified date */,
+                0 /* file size */,
+                0 /* thumbnail size */,
+                false /* read only */));
+        final Cursor cursor = mProvider.queryDocument("0_1_2", null);
+        assertEquals(1, cursor.getCount());
+
+        cursor.moveToNext();
+        assertEquals("0_1_2", cursor.getString(0));
+        assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
+        assertEquals("directory", cursor.getString(2));
+        assertEquals(1422716400000L, cursor.getLong(3));
+        assertEquals(
+                DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
+                DocumentsContract.Document.FLAG_SUPPORTS_WRITE |
+                DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE,
+                cursor.getInt(4));
+        assertEquals(0, cursor.getInt(5));
     }
 
     public void testQueryDocument_forRoot() throws IOException {
@@ -269,10 +295,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals("image/jpeg", cursor.getString(1));
         assertEquals("image.jpg", cursor.getString(2));
         assertEquals(0, cursor.getLong(3));
-        assertEquals(
-                DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
-                DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL,
-                cursor.getInt(4));
+        assertEquals(DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL, cursor.getInt(4));
         assertEquals(1024 * 1024 * 5, cursor.getInt(5));
 
         assertFalse(cursor.moveToNext());

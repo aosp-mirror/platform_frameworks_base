@@ -412,18 +412,13 @@ android_mtp_MtpDevice_import_file_to_fd(JNIEnv *env, jobject thiz, jint object_i
 }
 
 static jboolean
-android_mtp_MtpDevice_send_object(JNIEnv *env, jobject thiz, jint object_id, jint fd)
+android_mtp_MtpDevice_send_object(JNIEnv *env, jobject thiz, jint object_id, jint size, jint fd)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device)
         return JNI_FALSE;
-    MtpObjectInfo* object_info = device->getObjectInfo(object_id);
-    if (!object_info)
-        return JNI_FALSE;
 
-    bool result = device->sendObject(object_info, fd);
-    delete object_info;
-    return result;
+    return device->sendObject(object_id, size, fd);
 }
 
 static jobject
@@ -516,7 +511,7 @@ static JNINativeMethod gMethods[] = {
     {"native_import_file",      "(ILjava/lang/String;)Z",
                                         (void *)android_mtp_MtpDevice_import_file},
     {"native_import_file",      "(II)Z",(void *)android_mtp_MtpDevice_import_file_to_fd},
-    {"native_send_object",      "(II)Z",(void *)android_mtp_MtpDevice_send_object},
+    {"native_send_object",      "(III)Z",(void *)android_mtp_MtpDevice_send_object},
     {"native_send_object_info", "(Landroid/mtp/MtpObjectInfo;)Landroid/mtp/MtpObjectInfo;",
                                         (void *)android_mtp_MtpDevice_send_object_info}
 };

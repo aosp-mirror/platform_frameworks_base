@@ -108,6 +108,11 @@ class MtpManager {
         return results;
     }
 
+    synchronized MtpObjectInfo getObjectInfo(int deviceId, int objectHandle) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        return device.getObjectInfo(objectHandle);
+    }
+
     synchronized MtpDocument getDocument(int deviceId, int objectHandle) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         return new MtpDocument(device.getObjectInfo(objectHandle));
@@ -137,15 +142,20 @@ class MtpManager {
         }
     }
 
+    // TODO: Remove this method.
     synchronized int createDocument(int deviceId, int storageId, int parentObjectHandle,
             String mimeType, String name) throws IOException {
-        final MtpDevice device = getDevice(deviceId);
         final MtpObjectInfo objectInfo = new MtpObjectInfo.Builder()
                 .setName(name)
                 .setStorageId(storageId)
                 .setParent(parentObjectHandle)
                 .setFormat(MtpDocument.mimeTypeToFormatType(mimeType))
                 .build();
+        return createDocument(deviceId, objectInfo);
+    }
+
+    synchronized int createDocument(int deviceId, MtpObjectInfo objectInfo) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
         final MtpObjectInfo result = device.sendObjectInfo(objectInfo);
         if (result == null) {
             throw new IOException("Failed to create a document");
@@ -166,6 +176,13 @@ class MtpManager {
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
         device.importFile(objectHandle, target);
+    }
+
+    synchronized void sendObject(int deviceId, int objectHandle, int size,
+            ParcelFileDescriptor source) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        if (!device.sendObject(objectHandle, size, source))
+            throw new IOException("Failed to send a document");
     }
 
     private MtpDevice getDevice(int deviceId) throws IOException {

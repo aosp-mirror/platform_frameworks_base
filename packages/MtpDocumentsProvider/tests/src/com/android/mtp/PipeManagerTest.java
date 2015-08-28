@@ -21,6 +21,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +52,41 @@ public class PipeManagerTest extends AndroidTestCase {
         final ParcelFileDescriptor descriptor =
                 pipeManager.readDocument(mtpManager, new Identifier(0, 0, 1));
         assertDescriptorError(descriptor);
+    }
+
+    public void testWriteDocument_basic() throws Exception {
+        // Create a placeholder file which should be replaced by a real file later.
+        mtpManager.setDocument(0, 1, new MtpDocument(1, 0, "", new Date(), 0, 0, false));
+
+        // Upload testing bytes.
+        final ParcelFileDescriptor descriptor = pipeManager.writeDocument(
+                getContext(), mtpManager, new Identifier(0, 0, 1));
+        final ParcelFileDescriptor.AutoCloseOutputStream outputStream =
+                new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
+        outputStream.write(HELLO_BYTES, 0, HELLO_BYTES.length);
+        outputStream.close();
+        executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+
+        // Check if the placeholder file is removed.
+        try {
+            final MtpDocument placeholderDocument = mtpManager.getDocument(0, 1);
+            fail();  // The placeholder file has not been deleted.
+        } catch (IOException e) {
+            // Expected error, as the file is gone.
+        }
+
+        // Confirm that the target file is created.
+        final MtpDocument targetDocument = mtpManager.getDocument(
+                0, TestMtpManager.CREATED_DOCUMENT_HANDLE);
+        assertTrue(targetDocument != null);
+
+        // Verify uploaded bytes.
+        final byte[] uploadedBytes = mtpManager.getImportFileBytes(
+                0, TestMtpManager.CREATED_DOCUMENT_HANDLE);
+        assertEquals(HELLO_BYTES.length, uploadedBytes.length);
+        for (int i = 0; i < HELLO_BYTES.length; i++) {
+            assertEquals(HELLO_BYTES[i], uploadedBytes[i]);
+        }
     }
 
     public void testReadThumbnail_basic() throws Exception {

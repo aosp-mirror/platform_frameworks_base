@@ -273,25 +273,25 @@ public final class MtpObjectInfo {
         public Builder(MtpObjectInfo objectInfo) {
             mObjectInfo = new MtpObjectInfo();
             mObjectInfo.mHandle = -1;
-            mObjectInfo.mAssociationDesc = mObjectInfo.mAssociationDesc;
-            mObjectInfo.mAssociationType = mObjectInfo.mAssociationType;
-            mObjectInfo.mCompressedSize = mObjectInfo.mCompressedSize;
-            mObjectInfo.mDateCreated = mObjectInfo.mDateCreated;
-            mObjectInfo.mDateModified = mObjectInfo.mDateModified;
-            mObjectInfo.mFormat = mObjectInfo.mFormat;
-            mObjectInfo.mImagePixDepth = mObjectInfo.mImagePixDepth;
-            mObjectInfo.mImagePixHeight = mObjectInfo.mImagePixHeight;
-            mObjectInfo.mImagePixWidth = mObjectInfo.mImagePixWidth;
-            mObjectInfo.mKeywords = mObjectInfo.mKeywords;
-            mObjectInfo.mName = mObjectInfo.mName;
-            mObjectInfo.mParent = mObjectInfo.mParent;
-            mObjectInfo.mProtectionStatus = mObjectInfo.mProtectionStatus;
-            mObjectInfo.mSequenceNumber = mObjectInfo.mSequenceNumber;
-            mObjectInfo.mStorageId = mObjectInfo.mStorageId;
-            mObjectInfo.mThumbCompressedSize = mObjectInfo.mThumbCompressedSize;
-            mObjectInfo.mThumbFormat = mObjectInfo.mThumbFormat;
-            mObjectInfo.mThumbPixHeight = mObjectInfo.mThumbPixHeight;
-            mObjectInfo.mThumbPixWidth = mObjectInfo.mThumbPixWidth;
+            mObjectInfo.mAssociationDesc = objectInfo.mAssociationDesc;
+            mObjectInfo.mAssociationType = objectInfo.mAssociationType;
+            mObjectInfo.mCompressedSize = objectInfo.mCompressedSize;
+            mObjectInfo.mDateCreated = objectInfo.mDateCreated;
+            mObjectInfo.mDateModified = objectInfo.mDateModified;
+            mObjectInfo.mFormat = objectInfo.mFormat;
+            mObjectInfo.mImagePixDepth = objectInfo.mImagePixDepth;
+            mObjectInfo.mImagePixHeight = objectInfo.mImagePixHeight;
+            mObjectInfo.mImagePixWidth = objectInfo.mImagePixWidth;
+            mObjectInfo.mKeywords = objectInfo.mKeywords;
+            mObjectInfo.mName = objectInfo.mName;
+            mObjectInfo.mParent = objectInfo.mParent;
+            mObjectInfo.mProtectionStatus = objectInfo.mProtectionStatus;
+            mObjectInfo.mSequenceNumber = objectInfo.mSequenceNumber;
+            mObjectInfo.mStorageId = objectInfo.mStorageId;
+            mObjectInfo.mThumbCompressedSize = objectInfo.mThumbCompressedSize;
+            mObjectInfo.mThumbFormat = objectInfo.mThumbFormat;
+            mObjectInfo.mThumbPixHeight = objectInfo.mThumbPixHeight;
+            mObjectInfo.mThumbPixWidth = objectInfo.mThumbPixWidth;
         }
 
         public Builder setAssociationDesc(int value) {

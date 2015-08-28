@@ -16,10 +16,16 @@
 
 package com.android.mtp;
 
+import android.content.Context;
+import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,6 +44,13 @@ class PipeManager {
         final Task task = new ImportFileTask(model, identifier);
         mExecutor.execute(task);
         return task.getReadingFileDescriptor();
+    }
+
+    ParcelFileDescriptor writeDocument(Context context, MtpManager model, Identifier identifier)
+            throws IOException {
+        final Task task = new WriteDocumentTask(context, model, identifier);
+        mExecutor.execute(task);
+        return task.getWritingFileDescriptor();
     }
 
     ParcelFileDescriptor readThumbnail(MtpManager model, Identifier identifier) throws IOException {
@@ -60,6 +73,10 @@ class PipeManager {
         ParcelFileDescriptor getReadingFileDescriptor() {
             return mDescriptors[0];
         }
+
+        ParcelFileDescriptor getWritingFileDescriptor() {
+            return mDescriptors[1];
+        }
     }
 
     private static class ImportFileTask extends Task {
@@ -78,6 +95,70 @@ class PipeManager {
                     mDescriptors[1].closeWithError("Failed to stream a file.");
                 } catch (IOException closeError) {
                     Log.w(MtpDocumentsProvider.TAG, closeError.getMessage());
+                }
+            }
+        }
+    }
+
+    private static class WriteDocumentTask extends Task {
+        private final Context mContext;
+
+        WriteDocumentTask(Context context, MtpManager model, Identifier identifier)
+                throws IOException {
+            super(model, identifier);
+            mContext = context;
+        }
+
+        @Override
+        public void run() {
+            File tempFile = null;
+            try {
+                // Obtain a temporary file and copy the data to it.
+                tempFile = mContext.getCacheDir().createTempFile("mtp", "tmp");
+                try (
+                    final FileOutputStream tempOutputStream =
+                            new ParcelFileDescriptor.AutoCloseOutputStream(
+                                    ParcelFileDescriptor.open(
+                                            tempFile, ParcelFileDescriptor.MODE_WRITE_ONLY));
+                    final ParcelFileDescriptor.AutoCloseInputStream inputStream =
+                            new ParcelFileDescriptor.AutoCloseInputStream(mDescriptors[0])
+                ) {
+                    final byte[] buffer = new byte[32 * 1024];
+                    int bytes;
+                    while ((bytes = inputStream.read(buffer)) != -1) {
+                        mDescriptors[0].checkError();
+                        tempOutputStream.write(buffer, 0, bytes);
+                    }
+                    tempOutputStream.flush();
+                }
+
+                // Get the placeholder object info.
+                final MtpObjectInfo placeholderObjectInfo =
+                        mManager.getObjectInfo(mIdentifier.mDeviceId, mIdentifier.mObjectHandle);
+
+                // Delete the target object info if it already exists (as a placeholder).
+                mManager.deleteDocument(mIdentifier.mDeviceId, mIdentifier.mObjectHandle);
+
+                // Create the target object info with a correct file size.
+                final int targetObjectHandle =
+                        mManager.createDocument(
+                                mIdentifier.mDeviceId,
+                                new MtpObjectInfo.Builder(placeholderObjectInfo)
+                                        .setCompressedSize((int) tempFile.length())
+                                        .build());
+
+                // Upload the object.
+                final ParcelFileDescriptor tempInputDescriptor = ParcelFileDescriptor.open(
+                        tempFile, ParcelFileDescriptor.MODE_READ_ONLY);
+                mManager.sendObject(mIdentifier.mDeviceId,
+                        targetObjectHandle, (int) tempFile.length(), tempInputDescriptor);
+
+            } catch (IOException error) {
+                Log.w(MtpDocumentsProvider.TAG,
+                        "Failed to send a file because of: " + error.getMessage());
+            } finally {
+                if (tempFile != null) {
+                    tempFile.delete();
                 }
             }
         }
