@@ -77,7 +77,7 @@ public class UserInfo implements Parcelable {
     public static final int FLAG_DISABLED = 0x00000040;
 
 
-    public static final int NO_PROFILE_GROUP_ID = -1;
+    public static final int NO_PROFILE_GROUP_ID = UserHandle.USER_NULL;
 
     public int id;
     public int serialNumber;
@@ -87,6 +87,7 @@ public class UserInfo implements Parcelable {
     public long creationTime;
     public long lastLoggedInTime;
     public int profileGroupId;
+    public int restrictedProfileParentId;
 
     /** User is only partially created. */
     public boolean partial;
@@ -102,6 +103,7 @@ public class UserInfo implements Parcelable {
         this.flags = flags;
         this.iconPath = iconPath;
         this.profileGroupId = NO_PROFILE_GROUP_ID;
+        this.restrictedProfileParentId = NO_PROFILE_GROUP_ID;
     }
 
     public boolean isPrimary() {
@@ -206,6 +208,7 @@ public class UserInfo implements Parcelable {
         dest.writeInt(partial ? 1 : 0);
         dest.writeInt(profileGroupId);
         dest.writeInt(guestToRemove ? 1 : 0);
+        dest.writeInt(restrictedProfileParentId);
     }
 
     public static final Parcelable.Creator<UserInfo> CREATOR
@@ -229,5 +232,6 @@ public class UserInfo implements Parcelable {
         partial = source.readInt() != 0;
         profileGroupId = source.readInt();
         guestToRemove = source.readInt() != 0;
+        restrictedProfileParentId = source.readInt();
     }
 }

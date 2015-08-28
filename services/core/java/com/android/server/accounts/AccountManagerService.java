@@ -511,10 +511,17 @@ public class AccountManagerService
         Account[] sharedAccounts = getSharedAccountsAsUser(userId);
         if (sharedAccounts == null || sharedAccounts.length == 0) return;
         Account[] accounts = getAccountsAsUser(null, userId);
+        int parentUserId = UserManager.isSplitSystemUser()
+                ? mUserManager.getUserInfo(userId).restrictedProfileParentId
+                : UserHandle.USER_SYSTEM;
+        if (parentUserId < 0) {
+            Log.w(TAG, "User " + userId + " has shared accounts, but no parent user");
+            return;
+        }
         for (Account sa : sharedAccounts) {
             if (ArrayUtils.contains(accounts, sa)) continue;
             // Account doesn't exist. Copy it now.
-            copyAccountToUser(null /*no response*/, sa, UserHandle.USER_OWNER, userId);
+            copyAccountToUser(null /*no response*/, sa, parentUserId, userId);
         }
     }
 
@@ -740,7 +747,7 @@ public class AccountManagerService
 
     @Override
     public void copyAccountToUser(final IAccountManagerResponse response, final Account account,
-            int userFrom, int userTo) {
+            final int userFrom, int userTo) {
         int callingUid = Binder.getCallingUid();
         if (isCrossUser(callingUid, UserHandle.USER_ALL)) {
             throw new SecurityException("Calling copyAccountToUser requires "
@@ -784,7 +791,7 @@ public class AccountManagerService
                     if (result != null
                             && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
                         // Create a Session for the target user and pass in the bundle
-                        completeCloningAccount(response, result, account, toAccounts);
+                        completeCloningAccount(response, result, account, toAccounts, userFrom);
                     } else {
                         super.onResult(result);
                     }
@@ -851,7 +858,8 @@ public class AccountManagerService
     }
 
     private void completeCloningAccount(IAccountManagerResponse response,
-            final Bundle accountCredentials, final Account account, final UserAccounts targetUser) {
+            final Bundle accountCredentials, final Account account, final UserAccounts targetUser,
+            final int parentUserId){
         long id = clearCallingIdentity();
         try {
             new Session(targetUser, response, account.type, false,
@@ -866,9 +874,9 @@ public class AccountManagerService
                 @Override
                 public void run() throws RemoteException {
                     // Confirm that the owner's account still exists before this step.
-                    UserAccounts owner = getUserAccounts(UserHandle.USER_OWNER);
+                    UserAccounts owner = getUserAccounts(parentUserId);
                     synchronized (owner.cacheLock) {
-                        for (Account acc : getAccounts(UserHandle.USER_OWNER)) {
+                        for (Account acc : getAccounts(parentUserId)) {
                             if (acc.equals(account)) {
                                 mAuthenticator.addAccountFromCredentials(
                                         this, account, accountCredentials);
@@ -949,27 +957,27 @@ public class AccountManagerService
             }
             sendAccountsChangedBroadcast(accounts.userId);
         }
-        if (accounts.userId == UserHandle.USER_OWNER) {
-            addAccountToLimitedUsers(account);
+        if (getUserManager().getUserInfo(accounts.userId).canHaveProfile()) {
+            addAccountToLinkedRestrictedUsers(account, accounts.userId);
         }
         return true;
     }
 
     /**
-     * Adds the account to all limited users as shared accounts. If the user is currently
+     * Adds the account to all linked restricted users as shared accounts. If the user is currently
      * running, then clone the account too.
      * @param account the account to share with limited users
+     *
      */
-    private void addAccountToLimitedUsers(Account account) {
+    private void addAccountToLinkedRestrictedUsers(Account account, int parentUserId) {
         List<UserInfo> users = getUserManager().getUsers();
         for (UserInfo user : users) {
-            if (user.isRestricted()) {
+            if (user.isRestricted() && (parentUserId == user.restrictedProfileParentId)) {
                 addSharedAccountAsUser(account, user.id);
                 try {
                     if (ActivityManagerNative.getDefault().isUserRunning(user.id, false)) {
                         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(
-                                MESSAGE_COPY_SHARED_ACCOUNT, UserHandle.USER_OWNER, user.id,
-                                account));
+                                MESSAGE_COPY_SHARED_ACCOUNT, parentUserId, user.id, account));
                     }
                 } catch (RemoteException re) {
                     // Shouldn't happen
@@ -1172,14 +1180,16 @@ public class AccountManagerService
                           new AtomicReference<String>(accountToRename.name));
                     resultAccount = renamedAccount;
 
-                    if (accounts.userId == UserHandle.USER_OWNER) {
+                    int parentUserId = accounts.userId;
+                    if (canHaveProfile(parentUserId)) {
                         /*
-                         * Owner's account was renamed, rename the account for
+                         * Owner or system user account was renamed, rename the account for
                          * those users with which the account was shared.
                          */
                         List<UserInfo> users = mUserManager.getUsers(true);
                         for (UserInfo user : users) {
-                            if (!user.isPrimary() && user.isRestricted()) {
+                            if (user.isRestricted()
+                                    && (user.restrictedProfileParentId == parentUserId)) {
                                 renameSharedAccountAsUser(accountToRename, newName, user.id);
                             }
                         }
@@ -1189,6 +1199,11 @@ public class AccountManagerService
             }
         }
         return resultAccount;
+    }
+
+    private boolean canHaveProfile(final int parentUserId) {
+        final UserInfo userInfo = mUserManager.getUserInfo(parentUserId);
+        return userInfo != null && userInfo.canHaveProfile();
     }
 
     @Override
@@ -1304,7 +1319,7 @@ public class AccountManagerService
         logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE, TABLE_ACCOUNTS);
         long identityToken = clearCallingIdentity();
         try {
-            return removeAccountInternal(accounts, account);
+            return removeAccountInternal(accounts, account, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -1337,7 +1352,7 @@ public class AccountManagerService
                     && !result.containsKey(AccountManager.KEY_INTENT)) {
                 final boolean removalAllowed = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
                 if (removalAllowed) {
-                    removeAccountInternal(mAccounts, mAccount);
+                    removeAccountInternal(mAccounts, mAccount, getCallingUid());
                 }
                 IAccountManagerResponse response = getResponseAndClose();
                 if (response != null) {
@@ -1360,10 +1375,10 @@ public class AccountManagerService
 
     /* For testing */
     protected void removeAccountInternal(Account account) {
-        removeAccountInternal(getUserAccountsForCaller(), account);
+        removeAccountInternal(getUserAccountsForCaller(), account, getCallingUid());
     }
 
-    private boolean removeAccountInternal(UserAccounts accounts, Account account) {
+    private boolean removeAccountInternal(UserAccounts accounts, Account account, int callingUid) {
         int deleted;
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
@@ -1376,21 +1391,20 @@ public class AccountManagerService
 
             logRecord(db, DebugDbHelper.ACTION_ACCOUNT_REMOVE, TABLE_ACCOUNTS, accountId, accounts);
         }
-        if (accounts.userId == UserHandle.USER_OWNER) {
-            // Owner's account was removed, remove from any users that are sharing
-            // this account.
-            int callingUid = getCallingUid();
-            long id = Binder.clearCallingIdentity();
-            try {
+        long id = Binder.clearCallingIdentity();
+        try {
+            int parentUserId = accounts.userId;
+            if (canHaveProfile(parentUserId)) {
+                // Remove from any restricted profiles that are sharing this account.
                 List<UserInfo> users = mUserManager.getUsers(true);
                 for (UserInfo user : users) {
-                    if (!user.isPrimary() && user.isRestricted()) {
+                    if (user.isRestricted() && parentUserId == (user.restrictedProfileParentId)) {
                         removeSharedAccountAsUser(account, user.id, callingUid);
                     }
                 }
-            } finally {
-                Binder.restoreCallingIdentity(id);
             }
+        } finally {
+            Binder.restoreCallingIdentity(id);
         }
         return (deleted > 0);
     }
@@ -2707,7 +2721,7 @@ public class AccountManagerService
         if (r > 0) {
             logRecord(db, DebugDbHelper.ACTION_ACCOUNT_REMOVE, TABLE_SHARED_ACCOUNTS,
                     sharedTableAccountId, accounts, callingUid);
-            removeAccountInternal(accounts, account);
+            removeAccountInternal(accounts, account, callingUid);
         }
         return r > 0;
     }
