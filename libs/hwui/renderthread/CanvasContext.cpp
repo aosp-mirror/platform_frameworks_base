@@ -26,14 +26,21 @@
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
 #include "renderstate/Stencil.h"
+#include "protos/hwui.pb.h"
+
+#include <cutils/properties.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <private/hwui/DrawGlInfo.h>
+#include <strings.h>
 
 #include <algorithm>
-#include <strings.h>
-#include <cutils/properties.h>
-#include <private/hwui/DrawGlInfo.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
+
+#define ENABLE_RENDERNODE_SERIALIZATION false
 
 #define LOG_FRAMETIME_MMA 0
 
@@ -478,6 +485,40 @@ void CanvasContext::dumpFrames(int fd) {
 void CanvasContext::resetFrameStats() {
     mFrames.clear();
     mRenderThread.jankTracker().reset();
+}
+
+void CanvasContext::serializeDisplayListTree() {
+#if ENABLE_RENDERNODE_SERIALIZATION
+    using namespace google::protobuf::io;
+    char package[128];
+    // Check whether tracing is enabled for this process.
+    FILE * file = fopen("/proc/self/cmdline", "r");
+    if (file) {
+        if (!fgets(package, 128, file)) {
+            ALOGE("Error reading cmdline: %s (%d)", strerror(errno), errno);
+            fclose(file);
+            return;
+        }
+        fclose(file);
+    } else {
+        ALOGE("Error opening /proc/self/cmdline: %s (%d)", strerror(errno),
+                errno);
+        return;
+    }
+    char path[1024];
+    snprintf(path, 1024, "/data/data/%s/cache/rendertree_dump", package);
+    int fd = open(path, O_CREAT | O_WRONLY, S_IRWXU | S_IRGRP | S_IROTH);
+    if (fd == -1) {
+        ALOGD("Failed to open '%s'", path);
+        return;
+    }
+    proto::RenderNode tree;
+    // TODO: Streaming writes?
+    mRootRenderNode->copyTo(&tree);
+    std::string data = tree.SerializeAsString();
+    write(fd, data.c_str(), data.length());
+    close(fd);
+#endif
 }
 
 } /* namespace renderthread */

@@ -104,6 +104,8 @@ public:
     ANDROID_API void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size);
     ANDROID_API void setProcessStatsBuffer(int fd);
 
+    ANDROID_API void serializeDisplayListTree();
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

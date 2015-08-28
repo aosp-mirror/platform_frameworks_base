@@ -490,6 +490,17 @@ void RenderProxy::setProcessStatsBuffer(int fd) {
     post(task);
 }
 
+CREATE_BRIDGE1(serializeDisplayListTree, CanvasContext* context) {
+    args->context->serializeDisplayListTree();
+    return nullptr;
+}
+
+void RenderProxy::serializeDisplayListTree() {
+    SETUP_TASK(serializeDisplayListTree);
+    args->context = mContext;
+    post(task);
+}
+
 void RenderProxy::post(RenderTask* task) {
     mRenderThread.queue(task);
 }

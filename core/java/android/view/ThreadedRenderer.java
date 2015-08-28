@@ -407,6 +407,10 @@ public class ThreadedRenderer extends HardwareRenderer {
         nRegisterAnimatingRenderNode(mRootNode.mNativeRenderNode, animator.mNativeRenderNode);
     }
 
+    public void serializeDisplayListTree() {
+        nSerializeDisplayListTree(mNativeProxy);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -531,6 +535,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nFence(long nativeProxy);
     private static native void nStopDrawing(long nativeProxy);
     private static native void nNotifyFramePending(long nativeProxy);
+
+    private static native void nSerializeDisplayListTree(long nativeProxy);
 
     private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
             @DumpFlags int dumpFlags);

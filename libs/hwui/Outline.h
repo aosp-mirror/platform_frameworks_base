@@ -26,6 +26,13 @@ namespace uirenderer {
 
 class Outline {
 public:
+    enum class Type {
+        None = 0,
+        Empty = 1,
+        ConvexPath = 2,
+        RoundRect = 3
+    };
+
     Outline()
             : mShouldClip(false)
             , mType(Type::None)
@@ -122,14 +129,19 @@ public:
         return &mPath;
     }
 
-private:
-    enum class Type {
-        None = 0,
-        Empty = 1,
-        ConvexPath = 2,
-        RoundRect = 3
-    };
+    Type getType() const {
+        return mType;
+    }
 
+    const Rect& getBounds() const {
+        return mBounds;
+    }
+
+    float getRadius() const {
+        return mRadius;
+    }
+
+private:
     bool mShouldClip;
     Type mType;
     Rect mBounds;
