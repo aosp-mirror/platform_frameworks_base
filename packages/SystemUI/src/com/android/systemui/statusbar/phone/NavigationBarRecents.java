@@ -30,7 +30,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -173,9 +172,9 @@ class NavigationBarRecents extends LinearLayout {
                 try {
                     manager.startActivityFromRecents(taskPersistentId, null /* options */);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Exception when activating a recent task", e);
+                    Slog.e(TAG, "Exception when activating a recent task", e);
                 } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "Exception when activating a recent task", e);
+                    Slog.e(TAG, "Exception when activating a recent task", e);
                 }
             }
         });
@@ -244,7 +243,7 @@ class NavigationBarRecents extends LinearLayout {
                 ris = packageManager.queryIntentActivitiesAsUser(intentToResolve, 0, userId);
             }
             if (ris == null || ris.size() <= 0) {
-                Log.e(TAG, "Failed to build intent for " + packageName);
+                Slog.e(TAG, "Failed to build intent for " + packageName);
                 return null;
             }
             return new ComponentName(ris.get(0).activityInfo.packageName,
