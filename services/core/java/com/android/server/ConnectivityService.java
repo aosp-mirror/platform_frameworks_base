@@ -24,6 +24,7 @@ import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
@@ -3900,6 +3901,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void updateCapabilities(NetworkAgentInfo networkAgent,
             NetworkCapabilities networkCapabilities) {
         if (!Objects.equals(networkAgent.networkCapabilities, networkCapabilities)) {
+            if (networkAgent.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) !=
+                    networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)) {
+                try {
+                    mNetd.setNetworkPermission(networkAgent.network.netId,
+                            networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) ?
+                                    null : NetworkManagementService.PERMISSION_SYSTEM);
+                } catch (RemoteException e) {
+                    loge("Exception in setNetworkPermission: " + e);
+                }
+            }
             synchronized (networkAgent) {
                 networkAgent.networkCapabilities = networkCapabilities;
             }
@@ -4329,7 +4340,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             (networkAgent.networkMisc == null ||
                                 !networkAgent.networkMisc.allowBypass));
                 } else {
-                    mNetd.createPhysicalNetwork(networkAgent.network.netId);
+                    mNetd.createPhysicalNetwork(networkAgent.network.netId,
+                            networkAgent.networkCapabilities.hasCapability(
+                                    NET_CAPABILITY_NOT_RESTRICTED) ?
+                                    null : NetworkManagementService.PERMISSION_SYSTEM);
                 }
             } catch (Exception e) {
                 loge("Error creating network " + networkAgent.network.netId + ": "
