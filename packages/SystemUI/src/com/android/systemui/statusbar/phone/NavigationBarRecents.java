@@ -151,7 +151,7 @@ class NavigationBarRecents extends LinearLayout {
         button.setOnLongClickListener(mAppLongClickListener);
         addView(button);
 
-        ComponentName activityName = getRealActivityForTask(task);
+        ComponentName activityName = getActivityForTask(task);
         CharSequence appLabel = NavigationBarApps.getAppLabel(mPackageManager, activityName);
         button.setContentDescription(appLabel);
 
@@ -180,8 +180,17 @@ class NavigationBarRecents extends LinearLayout {
         });
     }
 
-    private static ComponentName getRealActivityForTask(RecentTaskInfo task) {
-        // Prefer the activity that started the task.
+    private static ComponentName getActivityForTask(RecentTaskInfo task) {
+        // If the task was started from an alias, return the actual activity component that was
+        // initially started.
+        if (task.origActivity != null) {
+            return task.origActivity;
+        }
+        // Prefer the first activity of the task.
+        if (task.baseActivity != null) {
+            return task.baseActivity;
+        }
+        // Then goes the activity that started the task.
         if (task.realActivity != null) {
             return task.realActivity;
         }
@@ -257,16 +266,28 @@ class NavigationBarRecents extends LinearLayout {
             // The drag will go to the pinned section, which wants to launch the main activity
             // for the task's package.
             RecentTaskInfo task = (RecentTaskInfo) v.getTag();
-            String packageName = getRealActivityForTask(task).getPackageName();
-            ComponentName component = getLaunchComponentForPackage(packageName, task.userId);
-            if (component == null) {
-                return false;
+            ComponentName componentName = getActivityForTask(task);
+            UserHandle taskUser = new UserHandle(task.userId);
+            AppInfo appInfo = new AppInfo(componentName, taskUser);
+
+            if (NavigationBarApps.getModel(mContext).buildAppLaunchIntent(appInfo) == null) {
+                // If task's activity is not launcheable, fall back to a launch component of the
+                // task's package.
+                ComponentName component = getLaunchComponentForPackage(
+                        componentName.getPackageName(), task.userId);
+
+                if (component == null) {
+                    return false;
+                }
+
+                appInfo = new AppInfo(component, taskUser);
             }
 
-            if (DEBUG) Slog.d(TAG, "Start drag with " + component);
+            if (DEBUG) {
+                Slog.d(TAG, "Start drag with " + appInfo.getComponentName().flattenToString());
+            }
 
-            NavigationBarApps.startAppDrag(
-                    icon, new AppInfo(component, new UserHandle(task.userId)));
+            NavigationBarApps.startAppDrag(icon, appInfo);
             return true;
         }
     }
