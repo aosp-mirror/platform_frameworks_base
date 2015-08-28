@@ -1038,11 +1038,13 @@ public class ConnectivityManager {
             type = "enableDUN";
             result = TYPE_MOBILE_DUN;
         } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
-            type = "enableSUPL";
+           type = "enableSUPL";
             result = TYPE_MOBILE_SUPL;
-        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_MMS)) {
-            type = "enableMMS";
-            result = TYPE_MOBILE_MMS;
+        // back out this hack for mms as they no longer need this and it's causing
+        // device slowdowns - b/23350688 (note, supl still needs this)
+        //} else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_MMS)) {
+        //    type = "enableMMS";
+        //    result = TYPE_MOBILE_MMS;
         } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
             type = "enableHIPRI";
             result = TYPE_MOBILE_HIPRI;
