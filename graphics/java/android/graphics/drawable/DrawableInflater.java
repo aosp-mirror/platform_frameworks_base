@@ -112,6 +112,17 @@ public final class DrawableInflater {
     public Drawable inflateFromXml(@NonNull String name, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
+        // Inner classes must be referenced as Outer$Inner, but XML tag names
+        // can't contain $, so the <drawable> tag allows developers to specify
+        // the class in an attribute. We'll still run it through inflateFromTag
+        // to stay consistent with how LayoutInflater works.
+        if (name.equals("drawable")) {
+            name = attrs.getAttributeValue(null, "class");
+            if (name == null) {
+                throw new InflateException("<drawable> tag must specify class attribute");
+            }
+        }
+
         Drawable drawable = inflateFromTag(name);
         if (drawable == null) {
             drawable = inflateFromClass(name);
