@@ -5,9 +5,17 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+        <activity android:name="com.android.mtp.TestResultActivity"
+                  android:screenOrientation="locked"
+                  android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
+    <instrumentation android:name="com.android.mtp.TestResultInstrumentation"
         android:targetPackage="com.android.mtp"
         android:label="Tests for MtpDocumentsProvider" />
 
