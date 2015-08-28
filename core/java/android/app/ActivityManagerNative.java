@@ -827,10 +827,18 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case ACTIVATE_ACTIVITY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            activateActivity(token);
+            reply.writeNoException();
+            return true;
+        }
+
         case SET_FOCUSED_TASK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int taskId = data.readInt();
-            setFocusedStack(taskId);
+            setFocusedTask(taskId);
             reply.writeNoException();
             return true;
         }
@@ -3621,6 +3629,18 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return focusedStackId;
+    }
+    @Override
+    public void activateActivity(IBinder token) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(ACTIVATE_ACTIVITY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
     @Override
     public void setFocusedTask(int taskId) throws RemoteException

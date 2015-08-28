@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.app.ActivityManager.INVALID_STACK_ID;
@@ -2697,6 +2698,40 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mStackSupervisor.resumeTopActivitiesLocked(stack, null, null);
                 }
             }
+        }
+    }
+
+    /**
+     * Activate an activity by bringing it to the top and set the focus on it.
+     * Note: This is only allowed for activities which are on the freeform stack.
+     * @param token The token of the activity calling which will get activated.
+     */
+    @Override
+    public void activateActivity(IBinder token) {
+        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "ActivateActivity token=" + token);
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized (ActivityManagerService.this) {
+                final ActivityRecord anyTaskRecord = ActivityRecord.isInStackLocked(token);
+                if (anyTaskRecord == null) {
+                    Slog.w(TAG, "ActivateActivity: token=" + token + " not found");
+                    return;
+                }
+                TaskRecord task = anyTaskRecord.task;
+                final boolean runsOnFreeformStack =
+                        task.stack.getStackId() == FREEFORM_WORKSPACE_STACK_ID;
+                if (!runsOnFreeformStack) {
+                    Slog.w(TAG, "Tried to use activateActivity on a non freeform workspace!");
+                } else if (task != null) {
+                    ActivityRecord topTaskRecord = task.topRunningActivityLocked(null);
+                    if (topTaskRecord != null) {
+                        setFocusedActivityLocked(topTaskRecord, "activateActivity");
+                        mStackSupervisor.resumeTopActivitiesLocked(task.stack, null, null);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
         }
     }
 

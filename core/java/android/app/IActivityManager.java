@@ -147,6 +147,7 @@ public interface IActivityManager extends IInterface {
     public boolean isInHomeStack(int taskId) throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getFocusedStackId() throws RemoteException;
+    public void activateActivity(IBinder token) throws RemoteException;
     public void setFocusedTask(int taskId) throws RemoteException;
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
@@ -892,4 +893,5 @@ public interface IActivityManager extends IInterface {
     int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
     int GET_ACTIVITY_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 346;
     int SET_ACTIVITY_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 347;
+    int ACTIVATE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 348;
 }

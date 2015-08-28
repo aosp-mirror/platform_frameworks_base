@@ -2761,6 +2761,15 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Activates this activity, hence bringing it to the top and giving it focus.
+     * Note: This will only work for activities which are located on the freeform desktop.
+     * @hide
+     */
+    public void activateActivity() throws RemoteException {
+        ActivityManagerNative.getDefault().activateActivity(mToken);
+    }
+
+    /**
      * Called to process key events.  You can override this to intercept all
      * key events before they are dispatched to the window.  Be sure to call
      * this implementation for key events that should be handled normally.
