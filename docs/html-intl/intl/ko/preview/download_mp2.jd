@@ -164,15 +164,14 @@ page.image=images/cards/card-download_16-9_2x.png
   <div id="qv">
     <h2>이 문서의 내용</h2>
       <ol>
-        <li><a href="#sdk">Android 6.0 SDK</a></li>
+        <li><a href="#sdk">미리 보기 SDK</a></li>
         <li><a href="#docs">개발자 관련 문서</a></li>
         <li><a href="#images">하드웨어 시스템 이미지</a></li>
       </ol>
 
      <h2>Legacy downloads</h2>
         <ol>
-           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview 1</a></li>
-           <li><a href="{@docRoot}preview/download_mp2.html">Developer Preview 2</a></li>
+           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview Archive</a></li>
         </ol>
   </div>
 </div>
@@ -185,7 +184,7 @@ page.image=images/cards/card-download_16-9_2x.png
 </p>
 
 
-<h2 id="sdk">Android 6.0 SDK</h2>
+<h2 id="sdk">미리 보기 SDK</h2>
 
 <p>
   미리 보기 SDK는 <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>를 통해 다운로드할 수 있습니다. 미리 보기 SDK를 다운로드하고 구성하는 데 관한 자세한 정보는 <a href="{@docRoot}preview/setup-sdk.html#downloadSdk">미리 보기 SDK 설정하기</a>를 참조하십시오.
@@ -205,11 +204,11 @@ page.image=images/cards/card-download_16-9_2x.png
     <th scope="col">Download / Checksums</th>
   </tr>
   <tr id="docs-dl">
-    <td>Android M Preview 3<br>Developer Docs</td>
+    <td>Android M Preview 2<br>Developer Docs</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-3-developer-docs.zip</a><br>
-      MD5: d99b14b0c06d31c8dfecb25072654ca3<br>
-      SHA-1: 9cefeeda07676130da606a1796e1c00fffc667c1
+      >m-preview-2-developer-docs.zip</a><br>
+      MD5: 1db6fff9c722b0339757e1cdf43663a8<br>
+      SHA-1: 5a4ae88d644e63824d21b0e18f8e3977a7665157
     </td>
   </tr>
 </table>
@@ -242,34 +241,34 @@ page.image=images/cards/card-download_16-9_2x.png
   <tr id="hammerhead">
     <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPA44I-preview-2ebbc049.tgz</a><br>
-      MD5: 91a924fb0c9f8e716e3b4c9954fd0dbb<br>
-      SHA-1: 2ebbc049b68c4da8baeee3e42bb94d7a965ba4a3
+      >hammerhead-MPZ79M-preview-b1f4bde4.tgz</a><br>
+      MD5: 2ca9f18bf47a061b339bab52647ceb0d<br>
+      SHA-1: b1f4bde447eccbf8ce5d9b8b8ba954e3eac8e939
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPA44I-preview-62b9c486.tgz</a><br>
-      MD5: ac6e58da86125073d9c395257fd42664<br>
-      SHA-1: 62b9c486fd7a5020e228d53ca5acd5c1857e48ff
+      >shamu-MPZ79M-preview-e1024040.tgz</a><br>
+      MD5: 24a2118da340b9afedfbdfc026f6ff81<br>
+      SHA-1: e10240408859d5188c4aae140e1c539130ba614b
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPA44I-preview-5c30a6e2.tgz</a><br>
-      MD5: 7f83768757913d3fea945a661020d185<br>
-      SHA-1: 5c30a6e2acd11a81f4105b12d23ff654f534f699
+      >volantis-MPZ79M-preview-9f305342.tgz</a><br>
+      MD5: 9edabf0a4c61b247f1cbb9dfdc0a899e<br>
+      SHA-1: 9f30534216f10899a6a75495fc7e92408ea333a7
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-MPA44I-preview-2860040a.tgz</a><br>
-      MD5: 438da8d37da9e341a69cfb16a4001ac5<br>
-      SHA-1: 2860040a326582f1ff5f702bf9a1ef002717fc98
+      >fugu-MPZ79N-preview-fb63af98.tgz</a><br>
+      MD5: e8d081137a20b66df595ee69523314b5<br>
+      SHA-1: fb63af98302dd97be8de9313734d389ccdcce250
     </td>
   </tr>
 
