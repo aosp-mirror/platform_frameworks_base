@@ -141,5 +141,5 @@
       <item quantity="other">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godziny. Potwierdź hasło.</item>
       <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź hasło.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nie rozpoznano"</string>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nie rozpoznano odcisku palca."</string>
 </resources>
