@@ -100,6 +100,8 @@ public class LockIcon extends KeyguardAffordanceView {
         // TODO: Real icon for facelock.
         int state = getState();
         boolean anyFingerprintIcon = state == STATE_FINGERPRINT || state == STATE_FINGERPRINT_ERROR;
+        boolean useAdditionalPadding = anyFingerprintIcon;
+        boolean trustHidden = anyFingerprintIcon;
         if (state != mLastState || mDeviceInteractive != mLastDeviceInteractive
                 || mScreenOn != mLastScreenOn) {
             boolean isAnim = true;
@@ -107,6 +109,16 @@ public class LockIcon extends KeyguardAffordanceView {
                     mDeviceInteractive, mLastScreenOn, mScreenOn);
             if (iconRes == R.drawable.lockscreen_fingerprint_draw_off_animation) {
                 anyFingerprintIcon = true;
+                useAdditionalPadding = true;
+                trustHidden = true;
+            } else if (iconRes == R.drawable.trusted_state_to_error_animation) {
+                anyFingerprintIcon = true;
+                useAdditionalPadding = false;
+                trustHidden = true;
+            } else if (iconRes == R.drawable.error_to_trustedstate_animation) {
+                anyFingerprintIcon = true;
+                useAdditionalPadding = false;
+                trustHidden = false;
             }
             if (iconRes == -1) {
                 iconRes = getIconForState(state, mScreenOn, mDeviceInteractive);
@@ -124,7 +136,7 @@ public class LockIcon extends KeyguardAffordanceView {
                     || icon.getIntrinsicWidth() != iconWidth)) {
                 icon = new IntrinsicSizeDrawable(icon, iconWidth, iconHeight);
             }
-            setPaddingRelative(0, 0, 0, anyFingerprintIcon
+            setPaddingRelative(0, 0, 0, useAdditionalPadding
                     ? getResources().getDimensionPixelSize(
                     R.dimen.fingerprint_icon_additional_padding)
                     : 0);
@@ -145,7 +157,7 @@ public class LockIcon extends KeyguardAffordanceView {
         }
 
         // Hide trust circle when fingerprint is running.
-        boolean trustManaged = mUnlockMethodCache.isTrustManaged() && !anyFingerprintIcon;
+        boolean trustManaged = mUnlockMethodCache.isTrustManaged() && !trustHidden;
         mTrustDrawable.setTrustManaged(trustManaged);
         updateClickability();
     }
@@ -208,6 +220,10 @@ public class LockIcon extends KeyguardAffordanceView {
             boolean oldScreenOn, boolean screenOn) {
         if (oldState == STATE_FINGERPRINT && newState == STATE_FINGERPRINT_ERROR) {
             return R.drawable.lockscreen_fingerprint_fp_to_error_state_animation;
+        } else if (oldState == STATE_LOCK_OPEN && newState == STATE_FINGERPRINT_ERROR) {
+            return R.drawable.trusted_state_to_error_animation;
+        } else if (oldState == STATE_FINGERPRINT_ERROR && newState == STATE_LOCK_OPEN) {
+            return R.drawable.error_to_trustedstate_animation;
         } else if (oldState == STATE_FINGERPRINT_ERROR && newState == STATE_FINGERPRINT) {
             return R.drawable.lockscreen_fingerprint_error_state_to_fp_animation;
         } else if (oldState == STATE_FINGERPRINT && newState == STATE_LOCK_OPEN
@@ -225,10 +241,10 @@ public class LockIcon extends KeyguardAffordanceView {
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         boolean fingerprintRunning = updateMonitor.isFingerprintDetectionRunning();
         boolean unlockingAllowed = updateMonitor.isUnlockingWithFingerprintAllowed();
-        if (mUnlockMethodCache.canSkipBouncer()) {
-            return STATE_LOCK_OPEN;
-        } else if (mTransientFpError) {
+        if (mTransientFpError) {
             return STATE_FINGERPRINT_ERROR;
+        } else if (mUnlockMethodCache.canSkipBouncer()) {
+            return STATE_LOCK_OPEN;
         } else if (fingerprintRunning && unlockingAllowed) {
             return STATE_FINGERPRINT;
         } else if (mUnlockMethodCache.isFaceUnlockRunning()) {
