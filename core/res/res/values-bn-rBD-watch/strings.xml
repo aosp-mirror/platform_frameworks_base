@@ -21,48 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"<xliff:g id="NUMBER_1">%2$d</xliff:g>টির মধ্যে <xliff:g id="NUMBER_0">%1$d</xliff:g>টি অ্যাপ্লিকেশান"</string>
-    <!-- no translation found for permgrouplab_sensors (202675452368612754) -->
-    <skip />
-    <!-- no translation found for permgrouplab_contactswear (2340286500790908344) -->
-    <skip />
-    <!-- no translation found for permgrouplab_locationwear (6275317222482780209) -->
-    <skip />
-    <!-- no translation found for permgrouplab_calendarwear (441900844045065081) -->
-    <skip />
-    <!-- no translation found for permgrouplab_smswear (6849506550342974220) -->
-    <skip />
-    <!-- no translation found for permgrouplab_storagewear (1003807594193602313) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphonewear (1047561180980891136) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camerawear (4543951283103407017) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phonewear (134365036753766126) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensorswear (1429324744329327663) -->
-    <skip />
-    <!-- no translation found for permlab_statusBarServicewear (2469402818964691034) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensorswear (7857941041202791873) -->
-    <skip />
-    <!-- no translation found for permlab_accessFineLocationwear (5584423486924377563) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocationwear (5880746016230166090) -->
-    <skip />
-    <!-- no translation found for permlab_sim_communicationwear (1899198085342781874) -->
-    <skip />
-    <!-- no translation found for permlab_createNetworkSocketswear (6467042386273822913) -->
-    <skip />
-    <!-- no translation found for permlab_manageProfileAndDeviceOwnerswear (7313340516937821847) -->
-    <skip />
-    <!-- no translation found for permlab_changeWimaxStatewear (3828470843939853744) -->
-    <skip />
-    <!-- no translation found for permlab_handoverStatuswear (4835786819716499249) -->
-    <skip />
-    <!-- no translation found for permlab_route_media_outputwear (8737024341474587192) -->
-    <skip />
-    <!-- no translation found for permlab_readInstallSessionswear (9059478058685861989) -->
-    <skip />
-    <!-- no translation found for permlab_requestInstallPackageswear (4982025836783539503) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"সেন্সরগুলি"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"আপনার পরিচিতিগুলিতে অ্যাক্সেস করুন"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"এই ঘড়ির অবস্থানে অ্যাক্সেস করুন"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"আপনার ক্যালেন্ডারে অ্যাক্সেস করুন"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"SMS বার্তাগুলি পাঠান এবং দেখুন"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"আপনার দেখা ফটো, মিডিয়া এবং ফাইলগুলিতে অ্যাক্সেস করুন"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"অডিও রেকর্ড করুন"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"ছবি তুলুন এবং ভিডিও রেকর্ড করুন"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"ফোন কলগুলি করুন এবং পরিচালনা করুন"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"আপনার গুরুত্বপূর্ণ লক্ষণ এবং শারীরিক ক্রিয়াকলাপের সম্পর্কে তথ্য অ্যাক্সেস করুন"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"স্থিতি দন্ডে থাকুন"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"শরীরের সেন্সর (হার্ট রেট মনিটারের মত) অ্যাক্সেস করুন"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"সুনির্দিষ্ট অবস্থান (GPS এবং নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"আনুমানিক অবস্থান (নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"SIM এ আদেশগুলি পাঠান"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"সম্পূর্ণ নেটওয়ার্ক অ্যাক্সেস রয়েছে"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"প্রোফাইল এবং ডিভাইস মালিকদের পরিচালনা করুন"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"WiMAX এর স্থিতি পরিবর্তন করুন"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"Android বীম স্থানান্তর স্থিতি গ্রহণ করুন"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"মিডিয়া আউটপুট রুট করুন"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"ইনস্টল সেশন পড়ুন"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"প্যাকেজগুলি ইনস্টল করার অনুরোধ"</string>
 </resources>

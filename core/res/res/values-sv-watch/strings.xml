@@ -21,48 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> av <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <!-- no translation found for permgrouplab_sensors (202675452368612754) -->
-    <skip />
-    <!-- no translation found for permgrouplab_contactswear (2340286500790908344) -->
-    <skip />
-    <!-- no translation found for permgrouplab_locationwear (6275317222482780209) -->
-    <skip />
-    <!-- no translation found for permgrouplab_calendarwear (441900844045065081) -->
-    <skip />
-    <!-- no translation found for permgrouplab_smswear (6849506550342974220) -->
-    <skip />
-    <!-- no translation found for permgrouplab_storagewear (1003807594193602313) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphonewear (1047561180980891136) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camerawear (4543951283103407017) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phonewear (134365036753766126) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensorswear (1429324744329327663) -->
-    <skip />
-    <!-- no translation found for permlab_statusBarServicewear (2469402818964691034) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensorswear (7857941041202791873) -->
-    <skip />
-    <!-- no translation found for permlab_accessFineLocationwear (5584423486924377563) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocationwear (5880746016230166090) -->
-    <skip />
-    <!-- no translation found for permlab_sim_communicationwear (1899198085342781874) -->
-    <skip />
-    <!-- no translation found for permlab_createNetworkSocketswear (6467042386273822913) -->
-    <skip />
-    <!-- no translation found for permlab_manageProfileAndDeviceOwnerswear (7313340516937821847) -->
-    <skip />
-    <!-- no translation found for permlab_changeWimaxStatewear (3828470843939853744) -->
-    <skip />
-    <!-- no translation found for permlab_handoverStatuswear (4835786819716499249) -->
-    <skip />
-    <!-- no translation found for permlab_route_media_outputwear (8737024341474587192) -->
-    <skip />
-    <!-- no translation found for permlab_readInstallSessionswear (9059478058685861989) -->
-    <skip />
-    <!-- no translation found for permlab_requestInstallPackageswear (4982025836783539503) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"Sensorer"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"få tillgång till dina kontakter"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"få tillgång till klockans plats"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"få tillgång till din kalender"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"skicka och visa sms"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"få åtkomst till foton, media och filer på klockan"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"spela in ljud"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"ta bilder och spela in video"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"ringa och hantera telefonsamtal"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"få åtkomst till sensordata om dina vitalparametrar"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"visas i statusfältet"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"få åtkomst till kroppssensorer (till exempel pulsmätare)"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"få åtkomst till din exakta position (GPS- och nätverksbaserad)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"få åtkomst till din ungefärliga position (nätverksbaserad)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"skicka kommandon till SIM-kortet"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"få fullständig nätverksåtkomst"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"hantera profil- och enhetsägare"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"ändra WiMAX-status"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"ta emot status för Android Beam-överföring"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"dirigera medieuppspelning"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"läsa installationssessioner"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"begära installationspaket"</string>
 </resources>
