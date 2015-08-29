@@ -129,7 +129,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     public void binderDied() {
         Slog.v(TAG, "fingerprintd died");
         mDaemon = null;
-        dispatchError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+        handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
     }
 
     public IFingerprintDaemon getFingerprintDaemon() {
@@ -157,7 +157,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         return mDaemon;
     }
 
-    protected void dispatchEnumerate(long deviceId, int[] fingerIds, int[] groupIds) {
+    protected void handleEnumerate(long deviceId, int[] fingerIds, int[] groupIds) {
         if (fingerIds.length != groupIds.length) {
             Slog.w(TAG, "fingerIds and groupIds differ in length: f[]="
                     + fingerIds + ", g[]=" + groupIds);
@@ -167,7 +167,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         // TODO: update fingerprint/name pairs
     }
 
-    protected void dispatchRemoved(long deviceId, int fingerId, int groupId) {
+    protected void handleRemoved(long deviceId, int fingerId, int groupId) {
         final ClientMonitor client = mRemoveClient;
         if (fingerId != 0) {
             removeTemplateForUser(mRemoveClient, fingerId);
@@ -177,7 +177,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    protected void dispatchError(long deviceId, int error) {
+    protected void handleError(long deviceId, int error) {
         if (mEnrollClient != null) {
             final IBinder token = mEnrollClient.token;
             if (mEnrollClient.sendError(error)) {
@@ -193,7 +193,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    protected void dispatchAuthenticated(long deviceId, int fingerId, int groupId) {
+    protected void handleAuthenticated(long deviceId, int fingerId, int groupId) {
         if (mAuthClient != null) {
             final IBinder token = mAuthClient.token;
             if (mAuthClient.sendAuthenticated(fingerId, groupId)) {
@@ -203,7 +203,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    protected void dispatchAcquired(long deviceId, int acquiredInfo) {
+    protected void handleAcquired(long deviceId, int acquiredInfo) {
         if (mEnrollClient != null) {
             if (mEnrollClient.sendAcquired(acquiredInfo)) {
                 removeClient(mEnrollClient);
@@ -215,16 +215,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    private void userActivity() {
-        long now = SystemClock.uptimeMillis();
-        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-    }
-
-    void handleUserSwitching(int userId) {
-        updateActiveGroup(userId);
-    }
-
-    protected void dispatchEnrollResult(long deviceId, int fingerId, int groupId, int remaining) {
+    protected void handleEnrollResult(long deviceId, int fingerId, int groupId, int remaining) {
         if (mEnrollClient != null) {
             if (mEnrollClient.sendEnrollResult(fingerId, groupId, remaining)) {
                 if (remaining == 0) {
@@ -233,6 +224,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 }
             }
         }
+    }
+
+    private void userActivity() {
+        long now = SystemClock.uptimeMillis();
+        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
+    }
+
+    void handleUserSwitching(int userId) {
+        updateActiveGroup(userId);
     }
 
     private void removeClient(ClientMonitor client) {
@@ -298,7 +298,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             final int result = daemon.enroll(cryptoToken, groupId, timeout);
             if (result != 0) {
                 Slog.w(TAG, "startEnroll failed, result=" + result);
-                dispatchError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+                handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "startEnroll failed", e);
@@ -392,7 +392,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             final int result = daemon.authenticate(opId, groupId);
             if (result != 0) {
                 Slog.w(TAG, "startAuthentication failed, result=" + result);
-                dispatchError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+                handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "startAuthentication failed", e);
@@ -442,7 +442,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             final int result = daemon.remove(fingerId, userId);
             if (result != 0) {
                 Slog.w(TAG, "startRemove with id = " + fingerId + " failed, result=" + result);
-                dispatchError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+                handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "startRemove failed", e);
@@ -657,33 +657,64 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private IFingerprintDaemonCallback mDaemonCallback = new IFingerprintDaemonCallback.Stub() {
 
         @Override
-        public void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining) {
-            dispatchEnrollResult(deviceId, fingerId, groupId, remaining);
+        public void onEnrollResult(final long deviceId, final int fingerId, final int groupId,
+                final int remaining) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handleEnrollResult(deviceId, fingerId, groupId, remaining);
+                }
+            });
         }
 
         @Override
-        public void onAcquired(long deviceId, int acquiredInfo) {
-            dispatchAcquired(deviceId, acquiredInfo);
+        public void onAcquired(final long deviceId, final int acquiredInfo) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handleAcquired(deviceId, acquiredInfo);
+                }
+            });
         }
 
         @Override
-        public void onAuthenticated(long deviceId, int fingerId, int groupId) {
-            dispatchAuthenticated(deviceId, fingerId, groupId);
+        public void onAuthenticated(final long deviceId, final int fingerId, final int groupId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handleAuthenticated(deviceId, fingerId, groupId);
+                }
+            });
         }
 
         @Override
-        public void onError(long deviceId, int error) {
-            dispatchError(deviceId, error);
+        public void onError(final long deviceId, final int error) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handleError(deviceId, error);
+                }
+            });
         }
 
         @Override
-        public void onRemoved(long deviceId, int fingerId, int groupId) {
-            dispatchRemoved(deviceId, fingerId, groupId);
+        public void onRemoved(final long deviceId, final int fingerId, final int groupId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handleRemoved(deviceId, fingerId, groupId);
+                }
+            });
         }
 
         @Override
-        public void onEnumerate(long deviceId, int[] fingerIds, int[] groupIds) {
-            dispatchEnumerate(deviceId, fingerIds, groupIds);
+        public void onEnumerate(final long deviceId, final int[] fingerIds, final int[] groupIds) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handleEnumerate(deviceId, fingerIds, groupIds);
+                }
+            });
         }
     };
 
