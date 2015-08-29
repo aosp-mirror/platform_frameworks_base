@@ -21,48 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"ແອັບ <xliff:g id="NUMBER_0">%1$d</xliff:g> ໃນ <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <!-- no translation found for permgrouplab_sensors (202675452368612754) -->
-    <skip />
-    <!-- no translation found for permgrouplab_contactswear (2340286500790908344) -->
-    <skip />
-    <!-- no translation found for permgrouplab_locationwear (6275317222482780209) -->
-    <skip />
-    <!-- no translation found for permgrouplab_calendarwear (441900844045065081) -->
-    <skip />
-    <!-- no translation found for permgrouplab_smswear (6849506550342974220) -->
-    <skip />
-    <!-- no translation found for permgrouplab_storagewear (1003807594193602313) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphonewear (1047561180980891136) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camerawear (4543951283103407017) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phonewear (134365036753766126) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensorswear (1429324744329327663) -->
-    <skip />
-    <!-- no translation found for permlab_statusBarServicewear (2469402818964691034) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensorswear (7857941041202791873) -->
-    <skip />
-    <!-- no translation found for permlab_accessFineLocationwear (5584423486924377563) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocationwear (5880746016230166090) -->
-    <skip />
-    <!-- no translation found for permlab_sim_communicationwear (1899198085342781874) -->
-    <skip />
-    <!-- no translation found for permlab_createNetworkSocketswear (6467042386273822913) -->
-    <skip />
-    <!-- no translation found for permlab_manageProfileAndDeviceOwnerswear (7313340516937821847) -->
-    <skip />
-    <!-- no translation found for permlab_changeWimaxStatewear (3828470843939853744) -->
-    <skip />
-    <!-- no translation found for permlab_handoverStatuswear (4835786819716499249) -->
-    <skip />
-    <!-- no translation found for permlab_route_media_outputwear (8737024341474587192) -->
-    <skip />
-    <!-- no translation found for permlab_readInstallSessionswear (9059478058685861989) -->
-    <skip />
-    <!-- no translation found for permlab_requestInstallPackageswear (4982025836783539503) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"ເຊັນເຊີ"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"ເຂົ້າ​ຫາ​ລາຍ​ຊື່​ຂອງ​ທ່ານ"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"ເຂົ້າ​ຫາ​ທີ່​ຕັ້ງ​ຂອງ​ໂມງ​ນີ້"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"ສົ່ງ ແລະ​ ເບິ່ງ​ຂໍ້​ຄວາມ SMS"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"ເຂົ້າເຖິງຮູບຖ່າຍ, ສື່ ແລະ ໄຟລ໌ຢູ່ເທິງໂມງຂອງທ່ານ"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"ບັນທຶກສຽງ"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"ຖ່າຍ​ຮູບ ແລະ ​ບັນ​ທຶກວິ​ດີ​ໂອ"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"ໂທ ແລະ​ ຈັດ​ການ​ການ​ໂທ​ລະ​ສັບ"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"ເຂົ້າ​ຫາ​ຂໍ້​ມູນ​ເຊັນ​ເຊີ​ກ່ຽວ​ກັບ​ສັນ​ຍານ​ຊີບ​ຂອງ​ທ່ານ"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"ເປັນ​ແຖບ​ສະ​ຖາ​ນະ"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"ເຂົ້າ​ຫາເຊັນ​ເຊີ​​ກວດຮ່າງ​ກາຍ (ເຊັ່ນ: ​ຈໍຕິດ​ຕາມ​ອັດ​ຕາ​ການ​ເຕັ້ນ​ຂອງຫົວ​ໃຈ)"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"ເຂົ້າ​ຫາທີ່ຕັ້ງທີ່ແນ່ນອນ (ອີງໃສ່ GPS ແລະ ເຄືອຂ່າຍ)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"ເຂົ້າ​ຫາທີ່ຕັ້ງໂດຍປະມານ (ອີງໃສ່ເຄືອຂ່າຍ)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"ສົ່ງ​ຄຳ​ສັ່ງ​ຫາ SIM"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"ມີ​ການເຂົ້າເຖິງເຄືອຂ່າຍເຕັມຮູບແບບ"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"ຈັດ​ການ​ເຈົ້າ​ຂອງ​ໂປ​ຣ​ໄຟ​ລ໌ ແລະ​ ອຸ​ປະ​ກອນ"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"ປ່ຽນສະຖານະ WiMAX"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"ຮັບ​ສະ​ຖາ​ນະ​ການ​ໂອນ​ຂໍ້​ມູນ Android Beam"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"ກຳນົດຊ່ອງທາງອອກຂອງສື່"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"ອ່ານ​ເຊສ​ຊັນ​ການ​ຕິດ​ຕັ້ງ"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"ຂໍ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ"</string>
 </resources>
