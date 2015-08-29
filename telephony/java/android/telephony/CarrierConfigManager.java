@@ -357,6 +357,12 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_CONFERENCE_CALL_BOOL = "support_conference_call_bool";
 
     /**
+     * Determine whether user can toggle Enhanced 4G LTE Mode in Settings.
+     * @hide
+     */
+    public static final String KEY_EDITABLE_ENHANCED_4G_LTE_BOOL = "editable_enhanced_4g_lte_bool";
+
+    /**
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
      * prevent manual operator selection. If false, this SIM setting will be ignored and manual
      * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
@@ -482,6 +488,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_FORCE_HOME_NETWORK_BOOL, false);
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
