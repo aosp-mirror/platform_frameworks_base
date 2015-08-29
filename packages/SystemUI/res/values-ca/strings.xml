@@ -270,7 +270,7 @@
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emet"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"En emissió"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositiu sense nom"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"A punt per a l\'emissió"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"A punt per emetre"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"No hi ha cap dispositiu disponible."</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillantor"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÀTICA"</string>
