@@ -1,5 +1,5 @@
-#ifndef AIDL_TYPE_H
-#define AIDL_TYPE_H
+#ifndef AIDL_TYPE_H_
+#define AIDL_TYPE_H_
 
 #include "AST.h"
 #include <string>
@@ -540,4 +540,4 @@ extern Expression* FALSE_VALUE;
 
 void register_base_types();
 
-#endif // AIDL_TYPE_H
+#endif // AIDL_TYPE_H_

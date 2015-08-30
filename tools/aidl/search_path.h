@@ -1,5 +1,5 @@
-#ifndef DEVICE_TOOLS_AIDL_SEARCH_PATH_H
-#define DEVICE_TOOLS_AIDL_SEARCH_PATH_H
+#ifndef AIDL_SEARCH_PATH_H_
+#define AIDL_SEARCH_PATH_H_
 
 #include <stdio.h>
 
@@ -22,5 +22,4 @@ char* find_import_file(const char* given);
 void set_import_paths(const vector<string>& importPaths);
 #endif
 
-#endif // DEVICE_TOOLS_AIDL_SEARCH_PATH_H
-
+#endif // AIDL_SEARCH_PATH_H_

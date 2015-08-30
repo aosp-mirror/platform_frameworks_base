@@ -20,17 +20,18 @@ LOCAL_CFLAGS += -Wno-deprecated-register
 LOCAL_CFLAGS += -Wno-writable-strings
 
 LOCAL_SRC_FILES := \
-	aidl_language_l.l \
-	aidl_language_y.y \
-	aidl.cpp \
-	aidl_language.cpp \
-	options.cpp \
-	search_path.cpp \
-	AST.cpp \
-	Type.cpp \
-	generate_java.cpp \
-	generate_java_binder.cpp \
-	generate_java_rpc.cpp
+    AST.cpp \
+    Type.cpp \
+    aidl.cpp \
+    aidl_language.cpp \
+    aidl_language_l.l \
+    aidl_language_y.y \
+    generate_java.cpp \
+    generate_java_binder.cpp \
+    generate_java_rpc.cpp \
+    main.cpp \
+    options.cpp \
+    search_path.cpp \
 
 LOCAL_MODULE := aidl
 

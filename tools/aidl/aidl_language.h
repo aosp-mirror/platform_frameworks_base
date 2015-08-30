@@ -1,5 +1,5 @@
-#ifndef DEVICE_TOOLS_AIDL_AIDL_LANGUAGE_H
-#define DEVICE_TOOLS_AIDL_AIDL_LANGUAGE_H
+#ifndef AIDL_AIDL_LANGUAGE_H_
+#define AIDL_AIDL_LANGUAGE_H_
 
 
 typedef enum {
@@ -169,4 +169,4 @@ void init_buffer_type(buffer_type* buf, int lineno);
 #endif
 
 
-#endif // DEVICE_TOOLS_AIDL_AIDL_LANGUAGE_H
+#endif // AIDL_AIDL_LANGUAGE_H_
