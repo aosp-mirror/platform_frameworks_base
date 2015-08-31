@@ -1,5 +1,5 @@
-#ifndef GENERATE_JAVA_H
-#define GENERATE_JAVA_H
+#ifndef AIDL_GENERATE_JAVA_H_
+#define AIDL_GENERATE_JAVA_H_
 
 #include "aidl_language.h"
 #include "AST.h"
@@ -30,5 +30,5 @@ private:
     int m_index;
 };
 
-#endif // GENERATE_JAVA_H
+#endif // AIDL_GENERATE_JAVA_H_
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _FRAMEWORKS_BASE_TOOLS_AIDL_OS_SEP_H_
-#define _FRAMEWORKS_BASE_TOOLS_AIDL_OS_SEP_H_
+#ifndef AIDL_OS_H_
+#define AIDL_OS_H_
 
 #if defined(_WIN32)
 #define OS_PATH_SEPARATOR '\\'
@@ -23,4 +23,4 @@
 #define OS_PATH_SEPARATOR '/'
 #endif
 
-#endif
+#endif  // AIDL_OS_H_

@@ -1,5 +1,5 @@
-#ifndef AIDL_AST_H
-#define AIDL_AST_H
+#ifndef AIDL_AST_H_
+#define AIDL_AST_H_
 
 #include <string>
 #include <vector>
@@ -370,4 +370,4 @@ struct Document
     virtual void Write(FILE* to);
 };
 
-#endif // AIDL_AST_H
+#endif // AIDL_AST_H_

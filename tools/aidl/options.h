@@ -1,5 +1,5 @@
-#ifndef DEVICE_TOOLS_AIDL_H
-#define DEVICE_TOOLS_AIDL_H
+#ifndef AIDL_OPTIONS_H_
+#define AIDL_OPTIONS_H_
 
 #include <string.h>
 #include <string>
@@ -34,4 +34,4 @@ struct Options
 // It also prints the usage statement on failure.
 int parse_options(int argc, const char* const* argv, Options *options);
 
-#endif // DEVICE_TOOLS_AIDL_H
+#endif // AIDL_OPTIONS_H_
