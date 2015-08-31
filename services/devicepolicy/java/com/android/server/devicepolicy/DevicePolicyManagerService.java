@@ -45,7 +45,6 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
-import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -279,7 +278,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     NotificationManager mNotificationManager;
 
     // Stores and loads state on device and profile owners.
-    private final DeviceOwner mDeviceOwner;
+    private final Owners mOwners;
 
     private final Binder mToken = new Binder();
 
@@ -1044,7 +1043,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     public DevicePolicyManagerService(Context context) {
         mContext = context;
-        mDeviceOwner = new DeviceOwner(mContext);
+        mOwners = new Owners(mContext);
         mUserManager = UserManager.get(mContext);
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_DEVICE_ADMIN);
@@ -1120,8 +1119,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slog.w(LOG_TAG, "Tried to remove device policy file for user 0! Ignoring.");
                 return;
             }
-            mDeviceOwner.removeProfileOwner(userHandle);
-            mDeviceOwner.writeProfileOwner(userHandle);
+            mOwners.removeProfileOwner(userHandle);
+            mOwners.writeProfileOwner(userHandle);
 
             DevicePolicyData policy = mUserData.get(userHandle);
             if (policy != null) {
@@ -1137,7 +1136,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void loadDeviceOwner() {
         synchronized (this) {
-            mDeviceOwner.load();
+            mOwners.load();
             updateDeviceOwnerLocked();
         }
     }
@@ -1805,7 +1804,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Set<Integer> usersWithProfileOwners;
         Set<Integer> usersWithData;
         synchronized(this) {
-            usersWithProfileOwners = mDeviceOwner.getProfileOwnerKeys();
+            usersWithProfileOwners = mOwners.getProfileOwnerKeys();
             usersWithData = new HashSet<Integer>();
             for (int i = 0; i < mUserData.size(); i++) {
                 usersWithData.add(mUserData.keyAt(i));
@@ -4116,7 +4115,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         if (packageName == null
-                || !DeviceOwner.isInstalled(packageName, mContext.getPackageManager())) {
+                || !Owners.isInstalled(packageName, mContext.getPackageManager())) {
             throw new IllegalArgumentException("Invalid package name " + packageName
                     + " for device owner");
         }
@@ -4135,8 +4134,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
 
-            mDeviceOwner.setDeviceOwner(packageName, ownerName);
-            mDeviceOwner.writeDeviceOwner();
+            mOwners.setDeviceOwner(packageName, ownerName);
+            mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
             Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
 
@@ -4156,8 +4155,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         synchronized (this) {
-            return mDeviceOwner.hasDeviceOwner()
-                    && mDeviceOwner.getDeviceOwnerPackageName().equals(packageName);
+            return mOwners.hasDeviceOwner()
+                    && mOwners.getDeviceOwnerPackageName().equals(packageName);
         }
     }
 
@@ -4167,7 +4166,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         synchronized (this) {
-            return mDeviceOwner.getDeviceOwnerPackageName();
+            return mOwners.getDeviceOwnerPackageName();
         }
     }
 
@@ -4178,10 +4177,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         synchronized (this) {
-            if (!mDeviceOwner.hasDeviceOwner()) {
+            if (!mOwners.hasDeviceOwner()) {
                 return null;
             }
-            String deviceOwnerPackage = mDeviceOwner.getDeviceOwnerPackageName();
+            String deviceOwnerPackage = mOwners.getDeviceOwnerPackageName();
             return getApplicationLabel(deviceOwnerPackage, UserHandle.USER_OWNER);
         }
     }
@@ -4221,8 +4220,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             clearUserPoliciesLocked(new UserHandle(UserHandle.USER_OWNER));
 
-            mDeviceOwner.clearDeviceOwner();
-            mDeviceOwner.writeDeviceOwner();
+            mOwners.clearDeviceOwner();
+            mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
             // Reactivate backup service.
             long ident = Binder.clearCallingIdentity();
@@ -4243,7 +4242,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        if (initializer == null || !DeviceOwner.isInstalled(
+        if (initializer == null || !Owners.isInstalled(
                 initializer.getPackageName(), mContext.getPackageManager())) {
             throw new IllegalArgumentException("Invalid component name " + initializer
                     + " for device initializer");
@@ -4262,15 +4261,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             enforceCanSetDeviceInitializer(who);
 
-            if (mDeviceOwner.hasDeviceInitializer()) {
+            if (mOwners.hasDeviceInitializer()) {
                 throw new IllegalStateException(
                         "Trying to set device initializer but device initializer is already set.");
             }
 
-            mDeviceOwner.setDeviceInitializer(initializer);
+            mOwners.setDeviceInitializer(initializer);
 
             addDeviceInitializerToLockTaskPackagesLocked(UserHandle.USER_OWNER);
-            mDeviceOwner.writeDeviceOwner();
+            mOwners.writeDeviceOwner();
             return true;
         }
     }
@@ -4294,8 +4293,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         synchronized (this) {
-            return mDeviceOwner.hasDeviceInitializer()
-                    && mDeviceOwner.getDeviceInitializerPackageName().equals(packageName);
+            return mOwners.hasDeviceInitializer()
+                    && mOwners.getDeviceInitializerPackageName().equals(packageName);
         }
     }
 
@@ -4305,8 +4304,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         synchronized (this) {
-            if (mDeviceOwner.hasDeviceInitializer()) {
-                return mDeviceOwner.getDeviceInitializerPackageName();
+            if (mOwners.hasDeviceInitializer()) {
+                return mOwners.getDeviceInitializerPackageName();
             }
         }
         return null;
@@ -4318,8 +4317,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         synchronized (this) {
-            if (mDeviceOwner.hasDeviceInitializer()) {
-                return mDeviceOwner.getDeviceInitializerComponent();
+            if (mOwners.hasDeviceInitializer()) {
+                return mOwners.getDeviceInitializerComponent();
             }
         }
         return null;
@@ -4347,8 +4346,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mDeviceOwner.clearDeviceInitializer();
-                mDeviceOwner.writeDeviceOwner();
+                mOwners.clearDeviceInitializer();
+                mOwners.writeDeviceOwner();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4361,14 +4360,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         if (who == null
-                || !DeviceOwner.isInstalledForUser(who.getPackageName(), userHandle)) {
+                || !Owners.isInstalledForUser(who.getPackageName(), userHandle)) {
             throw new IllegalArgumentException("Component " + who
                     + " not installed for userId:" + userHandle);
         }
         synchronized (this) {
             enforceCanSetProfileOwner(userHandle);
-            mDeviceOwner.setProfileOwner(who, ownerName, userHandle);
-            mDeviceOwner.writeProfileOwner(userHandle);
+            mOwners.setProfileOwner(who, ownerName, userHandle);
+            mOwners.writeProfileOwner(userHandle);
             return true;
         }
     }
@@ -4384,8 +4383,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             clearUserPoliciesLocked(callingUser);
             final int userId = callingUser.getIdentifier();
-            mDeviceOwner.removeProfileOwner(userId);
-            mDeviceOwner.writeProfileOwner(userId);
+            mOwners.removeProfileOwner(userId);
+            mOwners.writeProfileOwner(userId);
         }
     }
 
@@ -4542,14 +4541,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         synchronized (this) {
-            return mDeviceOwner.getProfileOwnerComponent(userHandle);
+            return mOwners.getProfileOwnerComponent(userHandle);
         }
     }
 
     // Returns the active profile owner for this user or null if the current user has no
     // profile owner.
     private ActiveAdmin getProfileOwnerAdmin(int userHandle) {
-        ComponentName profileOwner = mDeviceOwner.getProfileOwnerComponent(userHandle);
+        ComponentName profileOwner = mOwners.getProfileOwnerComponent(userHandle);
         if (profileOwner == null) {
             return null;
         }
@@ -4650,7 +4649,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * except for adb if no accounts or additional users are present on the device.
      */
     private void enforceCanSetDeviceOwner() {
-        if (mDeviceOwner != null && mDeviceOwner.hasDeviceOwner()) {
+        if (mOwners != null && mOwners.hasDeviceOwner()) {
             throw new IllegalStateException("Trying to set the device owner, but device owner "
                     + "is already set.");
         }
@@ -4751,7 +4750,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (this) {
             p.println("Current Device Policy Manager state:");
-            mDeviceOwner.dump("  ", pw);
+            mOwners.dump("  ", pw);
             int userCount = mUserData.size();
             for (int u = 0; u < userCount; u++) {
                 DevicePolicyData policy = getUserData(mUserData.keyAt(u));
@@ -6238,10 +6237,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         @Override
         public List<String> getCrossProfileWidgetProviders(int profileId) {
             synchronized (DevicePolicyManagerService.this) {
-                if (mDeviceOwner == null) {
+                if (mOwners == null) {
                     return Collections.emptyList();
                 }
-                ComponentName ownerComponent = mDeviceOwner.getProfileOwnerComponent(profileId);
+                ComponentName ownerComponent = mOwners.getProfileOwnerComponent(profileId);
                 if (ownerComponent == null) {
                     return Collections.emptyList();
                 }
@@ -6311,11 +6310,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             if (policy == null) {
-                mDeviceOwner.clearSystemUpdatePolicy();
+                mOwners.clearSystemUpdatePolicy();
             } else {
-                mDeviceOwner.setSystemUpdatePolicy(policy);
+                mOwners.setSystemUpdatePolicy(policy);
             }
-            mDeviceOwner.writeDeviceOwner();
+            mOwners.writeDeviceOwner();
         }
         mContext.sendBroadcastAsUser(
                 new Intent(DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED),
@@ -6325,7 +6324,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public SystemUpdatePolicy getSystemUpdatePolicy() {
         synchronized (this) {
-            SystemUpdatePolicy policy =  mDeviceOwner.getSystemUpdatePolicy();
+            SystemUpdatePolicy policy =  mOwners.getSystemUpdatePolicy();
             if (policy != null && !policy.isValid()) {
                 Slog.w(LOG_TAG, "Stored system update policy is invalid, return null instead.");
                 return null;

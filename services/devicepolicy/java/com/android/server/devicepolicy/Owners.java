@@ -55,7 +55,7 @@ import libcore.io.IoUtils;
  * Stores and restores state for the Device and Profile owners. By definition there can be
  * only one device owner, but there may be a profile owner for each user.
  */
-class DeviceOwner {
+class Owners {
     private static final String TAG = "DevicePolicyManagerService";
 
     private static final String DEVICE_OWNER_XML_LEGACY = "device_owner.xml";
@@ -92,7 +92,7 @@ class DeviceOwner {
     // Local system update policy controllable by device owner.
     private SystemUpdatePolicy mSystemUpdatePolicy;
 
-    public DeviceOwner(Context context) {
+    public Owners(Context context) {
         mContext = context;
         mUserManager = UserManager.get(mContext);
     }
@@ -120,9 +120,9 @@ class DeviceOwner {
             // No legacy file, read from the new format files.
             new DeviceOwnerReadWriter().readFromFileLocked();
 
-            final List<UserInfo> users = mUserManager.getUsers();        // XXX double check this is the correct profile set.
+            final List<UserInfo> users = mUserManager.getUsers();
             for (UserInfo ui : users) {
-                new ProfileOwnerReadWriter(ui.id).readFromFileLocked();  // XXX double check ID is the right one.
+                new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
             }
         }
     }

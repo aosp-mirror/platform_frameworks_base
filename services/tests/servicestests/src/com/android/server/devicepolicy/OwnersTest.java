@@ -16,13 +16,9 @@
 
 package com.android.server.devicepolicy;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 /**
@@ -32,14 +28,14 @@ import java.io.File;
  *   runtest --path frameworks/base/services/tests/servicestests/ \
  *       src/com/android/server/devicepolicy/DeviceOwnerTest.java
  */
-public class DeviceOwnerTest extends AndroidTestCase {
+public class OwnersTest extends AndroidTestCase {
 
-    private static class DeviceOwnerSub extends DeviceOwner{
+    private static class OwnersSub extends Owners {
         private final File mLegacyFile;
         private final File mDeviceOwnerFile;
         private final File mProfileOwnerBase;
 
-        public DeviceOwnerSub(Context context, File legacyFile, File deviceOwnerFile,
+        public OwnersSub(Context context, File legacyFile, File deviceOwnerFile,
                 File profileOwnerBase) {
             super(context);
             mLegacyFile = legacyFile;
