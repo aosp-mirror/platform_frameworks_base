@@ -165,11 +165,6 @@ import_import_parsed(buffer_type* statement)
 {
 }
 
-static ParserCallbacks g_importCallbacks = {
-    &main_document_parsed,
-    &import_import_parsed
-};
-
 // ==========================================================
 static int
 check_filename(const char* filename, const char* package, buffer_type* name)
