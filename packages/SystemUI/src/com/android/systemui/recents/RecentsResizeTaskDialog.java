@@ -197,6 +197,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
                 break;
             case PLACE_FULL:
                 // Nothing to change.
+                mBounds[0] = null;
                 break;
         }
 
@@ -213,10 +214,13 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         dismiss();
         mRecentsActivity.dismissRecentsToHomeWithoutTransitionAnimation();
 
-        // Resize all tasks beginning from the "oldest" one.
-        for (int i = additionalTasks; i >= 0; --i) {
-            if (mTasks[i] != null) {
-               mSsp.resizeTask(mTasks[i].key.id, mBounds[i]);
+        // In debug mode, we force all task to be resizeable regardless of the
+        // current app configuration.
+        if (RecentsConfiguration.getInstance().multiStackEnabled) {
+            for (int i = additionalTasks; i >= 0; --i) {
+                if (mTasks[i] != null) {
+                    mSsp.setTaskResizeable(mTasks[i].key.id);
+                }
             }
         }
 
@@ -224,7 +228,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         // the focus ends on the selected one.
         for (int i = additionalTasks; i >= 0; --i) {
             if (mTasks[i] != null) {
-                mRecentsView.launchTask(mTasks[i]);
+                mRecentsView.launchTask(mTasks[i], mBounds[i]);
             }
         }
     }

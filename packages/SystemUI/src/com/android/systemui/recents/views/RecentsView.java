@@ -165,7 +165,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Gets the next task in the stack - or if the last - the top task */
     public Task getNextTaskOrTopTask(Task taskToSearch) {
-        Task returnTask = null; 
+        Task returnTask = null;
         boolean found = false;
         List<TaskStackView> stackViews = getTaskStackViews();
         int stackCount = stackViews.size();
@@ -203,7 +203,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 TaskView tv = taskViews.get(j);
                 Task task = tv.getTask();
                 if (tv.isFocusedTask()) {
-                    onTaskViewClicked(stackView, tv, stack, task, false);
+                    onTaskViewClicked(stackView, tv, stack, task, false, false, null);
                     return true;
                 }
             }
@@ -212,7 +212,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     /** Launches a given task. */
-    public boolean launchTask(Task task) {
+    public boolean launchTask(Task task, Rect taskBounds) {
         // Get the first stack view
         List<TaskStackView> stackViews = getTaskStackViews();
         int stackCount = stackViews.size();
@@ -225,7 +225,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             for (int j = 0; j < taskViewCount; j++) {
                 TaskView tv = taskViews.get(j);
                 if (tv.getTask() == task) {
-                    onTaskViewClicked(stackView, tv, stack, task, false);
+                    onTaskViewClicked(stackView, tv, stack, task, false, true, taskBounds);
                     return true;
                 }
             }
@@ -250,7 +250,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     if (tasks.get(j).isLaunchTarget) {
                         Task task = tasks.get(j);
                         TaskView tv = stackView.getChildViewForTask(task);
-                        onTaskViewClicked(stackView, tv, stack, task, false);
+                        onTaskViewClicked(stackView, tv, stack, task, false, false, null);
                         return true;
                     }
                 }
@@ -373,7 +373,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     searchBarSpaceBounds.right, searchBarSpaceBounds.bottom);
         }
 
-        // Layout each TaskStackView with the full width and height of the window since the 
+        // Layout each TaskStackView with the full width and height of the window since the
         // transition view is a child of that stack view
         List<TaskStackView> stackViews = getTaskStackViews();
         int stackCount = stackViews.size();
@@ -604,7 +604,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
-                                  final TaskStack stack, final Task task, final boolean lockToTask) {
+                                  final TaskStack stack, final Task task, final boolean lockToTask,
+                                  final boolean boundsValid, final Rect bounds) {
 
         // Notify any callbacks of the launching of a new task
         if (mCb != null) {
@@ -632,9 +633,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         final SystemServicesProxy ssp =
                 RecentsTaskLoader.getInstance().getSystemServicesProxy();
         ActivityOptions opts = null;
+        ActivityOptions.OnAnimationStartedListener animStartedListener = null;
         if (task.thumbnail != null && task.thumbnail.getWidth() > 0 &&
                 task.thumbnail.getHeight() > 0) {
-            ActivityOptions.OnAnimationStartedListener animStartedListener = null;
             if (lockToTask) {
                 animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
                     boolean mTriggered = false;
@@ -665,9 +666,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                         offsetX, offsetY, transform.rect.width(), transform.rect.height(),
                         sourceView.getHandler(), animStartedListener);
             }
+        } else {
+            opts = ActivityOptions.makeBasic();
         }
-
+        if (boundsValid) {
+            opts.setBounds(bounds);
+        }
         final ActivityOptions launchOpts = opts;
+        final boolean screenPinningRequested = (animStartedListener == null) && lockToTask;
         final Runnable launchRunnable = new Runnable() {
             @Override
             public void run() {
@@ -677,7 +683,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 } else {
                     if (ssp.startActivityFromRecents(getContext(), task.key.id,
                             task.activityLabel, launchOpts)) {
-                        if (launchOpts == null && lockToTask) {
+                        if (screenPinningRequested) {
                             mCb.onScreenPinningRequest();
                         }
                     } else {

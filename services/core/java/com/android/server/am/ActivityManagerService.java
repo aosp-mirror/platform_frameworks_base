@@ -4225,7 +4225,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new IllegalArgumentException("Task " + taskId + " not found.");
             }
             if (task.getRootActivity() != null) {
-                moveTaskToFrontLocked(task.taskId, 0, null);
+                moveTaskToFrontLocked(task.taskId, 0, options);
                 return ActivityManager.START_TASK_TO_FRONT;
             }
             callingUid = task.mCallingUid;

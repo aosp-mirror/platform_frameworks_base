@@ -4547,10 +4547,11 @@ final class ActivityStack {
             boolean toTop) {
         TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
                 voiceInteractor);
+        // add the task to stack first, mTaskPositioner might need the stack association
+        addTask(task, toTop, false);
         if (mTaskPositioner != null) {
             mTaskPositioner.updateDefaultBounds(task, mTaskHistory, info.initialLayout);
         }
-        addTask(task, toTop, false);
         return task;
     }
 
@@ -4587,19 +4588,20 @@ final class ActivityStack {
 
     void addConfigOverride(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.getLaunchBounds();
-        final Configuration config = task.updateOverrideConfiguration(bounds);
+        task.updateOverrideConfiguration(bounds);
         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
                 r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind,
-                bounds, config);
+                bounds, task.mOverrideConfig);
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
     private void setAppTask(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.getLaunchBounds();
-        final Configuration config = task.updateOverrideConfiguration(bounds);
-        mWindowManager.setAppTask(r.appToken, task.taskId, task.getLaunchBounds(), config);
+        task.updateOverrideConfiguration(bounds);
+        mWindowManager.setAppTask(
+                r.appToken, task.taskId, task.getLaunchBounds(), task.mOverrideConfig);
         r.taskConfigOverride = task.mOverrideConfig;
     }
 

@@ -271,17 +271,12 @@ public class SystemServicesProxy {
         return null;
     }
 
-    /** Resize a given task. */
-    public void resizeTask(int taskId, Rect bounds) {
+    /** Allow a task to resize. */
+    public void setTaskResizeable(int taskId) {
         if (mIam == null) return;
 
         try {
-            if (RecentsConfiguration.getInstance().multiStackEnabled) {
-                // In debug mode, we force all task to be resizeable regardless of the
-                // current app configuration.
-                mIam.setTaskResizeable(taskId, true);
-            }
-            mIam.resizeTask(taskId, bounds);
+            mIam.setTaskResizeable(taskId, true);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

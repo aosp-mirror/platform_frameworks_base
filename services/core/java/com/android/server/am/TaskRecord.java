@@ -1228,20 +1228,16 @@ final class TaskRecord {
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
     }
 
-    /** Returns the stack that should be used to launch this task. */
-    int getLaunchStackId(ActivityStack focusStack) {
-        if (stack != null) {
-            // We are already in a stack silly...
-            return stack.mStackId;
-        }
-        if (isHomeTask()) {
+    /**
+     * Returns the correct stack to use based on task type and currently set bounds,
+     * regardless of the focused stack and current stack association of the task.
+     * The task will be moved (and stack focus changed) later if necessary.
+     */
+    int getLaunchStackId() {
+        if (!isApplicationTask()) {
             return HOME_STACK_ID;
         }
-        if (focusStack != null && focusStack.mStackId != HOME_STACK_ID) {
-            // Like it or not you are going in the focused stack!
-            return focusStack.mStackId;
-        }
-        if (mBounds != null || mLastNonFullscreenBounds != null) {
+        if (mBounds != null) {
             return FREEFORM_WORKSPACE_STACK_ID;
         }
         return FULLSCREEN_WORKSPACE_STACK_ID;

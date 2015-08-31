@@ -1764,7 +1764,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return ACTIVITY_RESTRICTION_NONE;
     }
 
-    ActivityStack computeStackFocus(ActivityRecord r, boolean newTask) {
+    ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds) {
         final TaskRecord task = r.task;
 
         // On leanback only devices we should keep all activities in the same stack.
@@ -1815,10 +1815,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
 
             // If there is no suitable dynamic stack then we figure out which static stack to use.
-            stack = getStack(
-                    task != null
-                            ? task.getLaunchStackId(mFocusedStack) : FULLSCREEN_WORKSPACE_STACK_ID,
-                    CREATE_IF_NEEDED, ON_TOP);
+            int stackId = task != null ? task.getLaunchStackId() :
+                        bounds != null ? FREEFORM_WORKSPACE_STACK_ID :
+                                         FULLSCREEN_WORKSPACE_STACK_ID;
+            stack = getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
                     + r + " stackId=" + stack.mStackId);
             return stack;
@@ -1845,6 +1845,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
             boolean doResume, Bundle options, TaskRecord inTask) {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
+
+        boolean overrideBounds = false;
+        Rect newBounds = null;
+        if (r.info.resizeable || (inTask != null && inTask.mResizeable)) {
+            if (intent.hasExtra(ActivityOptions.KEY_BOUNDS)) {
+                overrideBounds = true;
+                newBounds = Rect.unflattenFromString(
+                        intent.getStringExtra(ActivityOptions.KEY_BOUNDS));
+            } else if (options != null) {
+                ActivityOptions opts = new ActivityOptions(options);
+                if (opts.hasBounds()) {
+                    overrideBounds = true;
+                    newBounds = opts.getBounds();
+                }
+            }
+        }
 
         // In some flows in to this function, we retrieve the task record and hold on to it
         // without a lock before calling back in to here...  so the task at this point may
@@ -2199,7 +2215,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             if (task != null && task.stack == null) {
                                 // Target stack got cleared when we all activities were removed
                                 // above. Go ahead and reset it.
-                                targetStack = computeStackFocus(sourceRecord, false /* newTask */);
+                                targetStack = computeStackFocus(
+                                        sourceRecord, false /* newTask */, null /* bounds */);
                                 targetStack.addTask(
                                         task, !launchTaskBehind /* toTop */, false /* moving */);
                             }
@@ -2325,7 +2342,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (r.resultTo == null && inTask == null && !addingToTask
                 && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             newTask = true;
-            targetStack = computeStackFocus(r, newTask);
+            targetStack = computeStackFocus(r, newTask, newBounds);
             if (doResume) {
                 targetStack.moveToFront("startingNewTask");
             }
@@ -2336,6 +2353,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         newTaskIntent != null ? newTaskIntent : intent,
                         voiceSession, voiceInteractor, !launchTaskBehind /* toTop */),
                         taskToAffiliate);
+                if (overrideBounds) {
+                    r.task.updateOverrideConfiguration(newBounds);
+                }
                 if (DEBUG_TASKS) Slog.v(TAG_TASKS,
                         "Starting new activity " + r + " in new task " + r.task);
             } else {
@@ -2420,6 +2440,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
+            if (overrideBounds) {
+                inTask.updateOverrideConfiguration(newBounds);
+                int stackId = inTask.getLaunchStackId();
+                if (stackId != inTask.stack.mStackId) {
+                    moveTaskToStackUncheckedLocked(
+                            inTask, stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
+                }
+            }
             targetStack = inTask.stack;
             targetStack.moveTaskToFrontLocked(inTask, noAnimation, options, r.appTimeTracker,
                     "inTaskToFront");
@@ -2457,7 +2485,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            targetStack = computeStackFocus(r, newTask);
+            targetStack = computeStackFocus(r, newTask, null /* bounds */);
             if (doResume) {
                 targetStack.moveToFront("addingToTopTask");
             }
@@ -2816,9 +2844,26 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     + task + " to front. Stack is null");
             return;
         }
-        task.stack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
+
+        int stackId = task.stack.mStackId;
+        if (task.mResizeable && options != null) {
+            ActivityOptions opts = new ActivityOptions(options);
+            if (opts.hasBounds()) {
+                Rect bounds = opts.getBounds();
+                task.updateOverrideConfiguration(bounds);
+                mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig, false);
+                stackId = task.getLaunchStackId();
+            }
+        }
+
+        if (stackId != task.stack.mStackId) {
+            moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, FORCE_FOCUS, reason);
+        } else {
+            task.stack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
                 task.getTopActivity() == null ? null : task.getTopActivity().appTimeTracker,
                 reason);
+        }
+
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + task.stack);
     }
@@ -3007,7 +3052,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Task doesn't exist in window manager yet (e.g. was restored from recents).
             // All we can do for now is update the bounds so it can be used when the task is
             // added to window manager.
-            task.mBounds = task.mLastNonFullscreenBounds = new Rect(bounds);
+            task.updateOverrideConfiguration(bounds);
             if (task.stack != null && task.stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
                 // re-restore the task so it can have the proper stack association.
                 restoreRecentTaskLocked(task, FREEFORM_WORKSPACE_STACK_ID);
@@ -3081,8 +3126,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      */
     private boolean restoreRecentTaskLocked(TaskRecord task, int stackId) {
         if (stackId == INVALID_STACK_ID) {
-            stackId = mLeanbackOnlyDevice ?
-                    mHomeStack.mStackId : task.getLaunchStackId(mFocusedStack);
+            stackId = mLeanbackOnlyDevice ? mHomeStack.mStackId : task.getLaunchStackId();
         }
         if (task.stack != null) {
             // Task has already been restored once. See if we need to do anything more

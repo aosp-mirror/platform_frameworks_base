@@ -19,6 +19,7 @@ package android.app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
@@ -57,6 +58,13 @@ public class ActivityOptions {
      * @hide
      */
     public static final String KEY_PACKAGE_NAME = "android:activity.packageName";
+
+    /**
+     * The bounds that the activity should be started in. Set to null explicitly
+     * for full screen. If the key is not found, previous bounds will be preserved.
+     * @hide
+     */
+    public static final String KEY_BOUNDS = "android:activity.bounds";
 
     /**
      * Type of animation that arguments specify.
@@ -163,6 +171,8 @@ public class ActivityOptions {
     public static final int ANIM_CLIP_REVEAL = 11;
 
     private String mPackageName;
+    private boolean mHasBounds;
+    private Rect mBounds;
     private int mAnimationType = ANIM_NONE;
     private int mCustomEnterResId;
     private int mCustomExitResId;
@@ -631,6 +641,10 @@ public class ActivityOptions {
         } catch (RuntimeException e) {
             Slog.w(TAG, e);
         }
+        mHasBounds = opts.containsKey(KEY_BOUNDS);
+        if (mHasBounds) {
+            mBounds = opts.getParcelable(KEY_BOUNDS);
+        }
         mAnimationType = opts.getInt(KEY_ANIM_TYPE);
         switch (mAnimationType) {
             case ANIM_CUSTOM:
@@ -677,8 +691,25 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public ActivityOptions setBounds(Rect bounds) {
+        mHasBounds = true;
+        mBounds = bounds;
+        return this;
+    }
+
+    /** @hide */
     public String getPackageName() {
         return mPackageName;
+    }
+
+    /** @hide */
+    public boolean hasBounds() {
+        return mHasBounds;
+    }
+
+    /** @hide */
+    public Rect getBounds(){
+        return mBounds;
     }
 
     /** @hide */
@@ -866,6 +897,9 @@ public class ActivityOptions {
         Bundle b = new Bundle();
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
+        }
+        if (mHasBounds) {
+            b.putParcelable(KEY_BOUNDS, mBounds);
         }
         b.putInt(KEY_ANIM_TYPE, mAnimationType);
         if (mUsageTimeReport != null) {
