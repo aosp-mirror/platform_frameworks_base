@@ -17152,8 +17152,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Can't call out of the system process with a lock held, so post a message.
-        mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
-                app.instrumentationUiAutomationConnection).sendToTarget();
+        if (app.instrumentationUiAutomationConnection != null) {
+            mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
+                    app.instrumentationUiAutomationConnection).sendToTarget();
+        }
 
         app.instrumentationWatcher = null;
         app.instrumentationUiAutomationConnection = null;
