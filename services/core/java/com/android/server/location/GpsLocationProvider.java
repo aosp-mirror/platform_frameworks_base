@@ -434,8 +434,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-
             if (DEBUG) Log.d(TAG, "receive broadcast intent, action: " + action);
+            if (action == null) {
+                return;
+            }
+
             if (action.equals(ALARM_WAKEUP)) {
                 startNavigating(false);
             } else if (action.equals(ALARM_TIMEOUT)) {
@@ -490,21 +493,27 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private void checkSmsSuplInit(Intent intent) {
         SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
-
         if (messages == null) {
             Log.e(TAG, "Message does not exist in the intent.");
             return;
         }
 
-        for (int i=0; i <messages.length; i++) {
-            byte[] supl_init = messages[i].getUserData();
-            native_agps_ni_message(supl_init,supl_init.length);
+        for (SmsMessage message : messages) {
+            if (message != null && message.mWrappedSmsMessage != null) {
+                byte[] suplInit = message.getUserData();
+                if (suplInit != null) {
+                    native_agps_ni_message(suplInit, suplInit.length);
+                }
+            }
         }
     }
 
     private void checkWapSuplInit(Intent intent) {
-        byte[] supl_init = (byte[]) intent.getExtra("data");
-        native_agps_ni_message(supl_init,supl_init.length);
+        byte[] suplInit = intent.getByteArrayExtra("data");
+        if (suplInit == null) {
+            return;
+        }
+        native_agps_ni_message(suplInit,suplInit.length);
     }
 
     private void updateLowPowerMode() {
