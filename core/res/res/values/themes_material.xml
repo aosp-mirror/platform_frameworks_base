@@ -238,6 +238,7 @@ please see themes_device_defaults.xml.
         <item name="gridViewStyle">@style/Widget.Material.GridView</item>
         <item name="imageButtonStyle">@style/Widget.Material.ImageButton</item>
         <item name="imageWellStyle">@style/Widget.Material.ImageWell</item>
+        <item name="listMenuViewStyle">@style/Widget.Material.ListMenuView</item>
         <item name="listViewStyle">@style/Widget.Material.ListView</item>
         <item name="listViewWhiteStyle">@style/Widget.Material.ListView.White</item>
         <item name="popupWindowStyle">@style/Widget.Material.PopupWindow</item>
@@ -594,6 +595,7 @@ please see themes_device_defaults.xml.
         <item name="gridViewStyle">@style/Widget.Material.Light.GridView</item>
         <item name="imageButtonStyle">@style/Widget.Material.Light.ImageButton</item>
         <item name="imageWellStyle">@style/Widget.Material.Light.ImageWell</item>
+        <item name="listMenuViewStyle">@style/Widget.Material.ListMenuView</item>
         <item name="listViewStyle">@style/Widget.Material.Light.ListView</item>
         <item name="listViewWhiteStyle">@style/Widget.Material.Light.ListView.White</item>
         <item name="popupWindowStyle">@style/Widget.Material.Light.PopupWindow</item>

@@ -241,10 +241,10 @@ package android {
     field public static final int activatedBackgroundIndicator = 16843517; // 0x10102fd
     field public static final int activityCloseEnterAnimation = 16842938; // 0x10100ba
     field public static final int activityCloseExitAnimation = 16842939; // 0x10100bb
-    field public static final int activityHeight = 16844019; // 0x10104f3
+    field public static final int activityHeight = 16844021; // 0x10104f5
     field public static final int activityOpenEnterAnimation = 16842936; // 0x10100b8
     field public static final int activityOpenExitAnimation = 16842937; // 0x10100b9
-    field public static final int activityWidth = 16844018; // 0x10104f2
+    field public static final int activityWidth = 16844020; // 0x10104f4
     field public static final int addPrintersActivity = 16843750; // 0x10103e6
     field public static final int addStatesFromChildren = 16842992; // 0x10100f0
     field public static final int adjustViewBounds = 16843038; // 0x101011e
@@ -786,6 +786,7 @@ package android {
     field public static final int listChoiceIndicatorSingle = 16843289; // 0x1010219
     field public static final int listDivider = 16843284; // 0x1010214
     field public static final int listDividerAlertDialog = 16843525; // 0x1010305
+    field public static final int listMenuViewStyle = 16844018; // 0x10104f2
     field public static final int listPopupWindowStyle = 16843519; // 0x10102ff
     field public static final int listPreferredItemHeight = 16842829; // 0x101004d
     field public static final int listPreferredItemHeightLarge = 16843654; // 0x1010386
@@ -1148,6 +1149,7 @@ package android {
     field public static final int strokeLineJoin = 16843788; // 0x101040c
     field public static final int strokeMiterLimit = 16843789; // 0x101040d
     field public static final int strokeWidth = 16843783; // 0x1010407
+    field public static final int subMenuArrow = 16844019; // 0x10104f3
     field public static final int submitBackground = 16843912; // 0x1010488
     field public static final int subtitle = 16843473; // 0x10102d1
     field public static final int subtitleTextAppearance = 16843823; // 0x101042f

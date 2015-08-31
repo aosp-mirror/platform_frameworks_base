@@ -158,6 +158,7 @@
   <java-symbol type="id" name="shortcut" />
   <java-symbol type="id" name="skip_button" />
   <java-symbol type="id" name="split_action_bar" />
+  <java-symbol type="id" name="submenuarrow" />
   <java-symbol type="id" name="submit_area" />
   <java-symbol type="id" name="switch_new" />
   <java-symbol type="id" name="switch_old" />

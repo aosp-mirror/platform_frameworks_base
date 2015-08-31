@@ -2660,6 +2660,9 @@
        =============================================================== -->
     <eat-comment />
 
+    <public type="attr" name="listMenuViewStyle" />
+    <public type="attr" name="subMenuArrow" />
+
     <public type="style" name="Theme.Material.DayNight" />
     <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
     <public type="style" name="Theme.Material.DayNight.Dialog" />
