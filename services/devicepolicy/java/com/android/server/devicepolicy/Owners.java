@@ -393,6 +393,7 @@ class Owners {
                             Slog.e(TAG, "Invalid root tag: " + tag);
                             return;
                         }
+                        continue;
                     }
                     // readInner() will only see START_TAG at depth >= 2.
                     if (!readInner(parser, depth, tag)) {
