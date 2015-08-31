@@ -154,6 +154,7 @@ public class ResourcesManager {
      * @param displayId display Id.
      * @param overrideConfiguration override configurations.
      * @param compatInfo the compatibility info. Must not be null.
+     * @param classLoader the class loader for the resource package
      */
     Resources getTopLevelResources(String resDir, String[] splitResDirs,
             String[] overlayDirs, String[] libDirs, int displayId,

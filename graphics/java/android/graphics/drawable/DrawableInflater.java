@@ -203,7 +203,10 @@ public final class DrawableInflater {
             throw ie;
         } catch (ClassNotFoundException e) {
             // If loadClass fails, we should propagate the exception.
-            throw new InflateException("Class not found " + className);
+            final InflateException ie = new InflateException(
+                    "Class not found " + className);
+            ie.initCause(e);
+            throw ie;
         } catch (Exception e) {
             final InflateException ie = new InflateException(
                     "Error inflating class " + className);
