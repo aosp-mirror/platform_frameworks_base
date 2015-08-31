@@ -29,6 +29,7 @@ import android.util.Pools.SynchronizedPool;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -1243,7 +1244,7 @@ public class StaticLayout extends Layout {
     private static native void nFreeBuilder(long nativePtr);
     private static native void nFinishBuilder(long nativePtr);
 
-    /* package */ static native long nLoadHyphenator(String patternData);
+    /* package */ static native long nLoadHyphenator(ByteBuffer buf, int offset);
 
     private static native void nSetLocale(long nativePtr, String locale, long nativeHyphenator);
 
