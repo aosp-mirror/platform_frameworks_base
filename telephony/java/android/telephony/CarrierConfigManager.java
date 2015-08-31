@@ -428,6 +428,15 @@ public class CarrierConfigManager {
     public static final String BOOL_ALLOW_VIDEO_PAUSE =
             "bool_allow_video_pause";
 
+    /**
+     * Determines whether the carrier supports making non-emergency phone calls while the phone is
+     * in emergency callback mode.  Default value is {@code true}, meaning that non-emergency calls
+     * are allowed in emergency callback mode.
+     * @hide
+     */
+    public static final String KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL =
+            "allowNonEmergencyCallsInEcm";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -522,6 +531,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_UA_PROF_TAG_NAME_STRING, "x-wap-profile");
         sDefaults.putString(KEY_MMS_UA_PROF_URL_STRING, "");
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
+        sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
     }
 
     /**
