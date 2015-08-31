@@ -56,6 +56,7 @@ import java.util.Objects;
 
 public class CopyService extends IntentService {
     public static final String TAG = "CopyService";
+    public static final boolean DEBUG = false;
 
     private static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
     public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
@@ -159,6 +160,7 @@ public class CopyService extends IntentService {
             // Catch-all to prevent any copy errors from wedging the app.
             Log.e(TAG, "Exceptions occurred during copying", e);
         } finally {
+            if (DEBUG) Log.d(TAG, "Cleaning up after copy");
             ContentProviderClient.releaseQuietly(mSrcClient);
             ContentProviderClient.releaseQuietly(mDstClient);
 
@@ -166,10 +168,12 @@ public class CopyService extends IntentService {
             mNotificationManager.cancel(mJobId, 0);
 
             if (mFailedFiles.size() > 0) {
+                Log.e(TAG, mFailedFiles.size() + " files failed to copy");
                 final Context context = getApplicationContext();
                 final Intent navigateIntent = new Intent(context, FilesActivity.class);
                 navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
                 navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
+                navigateIntent.putExtra(EXTRA_TRANSFER_MODE, transferMode);
                 navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, mFailedFiles);
 
                 final int titleResourceId = (transferMode == TRANSFER_MODE_COPY ?
@@ -186,6 +190,7 @@ public class CopyService extends IntentService {
                         .setAutoCancel(true);
                 mNotificationManager.notify(mJobId, 0, errorBuilder.build());
             }
+            if (DEBUG) Log.d(TAG, "Done cleaning up");
         }
     }
 
@@ -398,6 +403,9 @@ public class CopyService extends IntentService {
      */
     private void copy(DocumentInfo srcInfo, DocumentInfo dstDirInfo, int mode)
             throws RemoteException {
+        if (DEBUG) Log.d(TAG, "Copying " + srcInfo.displayName + " (" + srcInfo.derivedUri + ")" +
+            " to " + dstDirInfo.displayName + " (" + dstDirInfo.derivedUri + ")");
+
         final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirInfo.derivedUri,
                 srcInfo.mimeType, srcInfo.displayName);
         if (dstUri == null) {
@@ -499,10 +507,28 @@ public class CopyService extends IntentService {
             srcFile.checkError();
         } catch (IOException e) {
             copyError = e;
+
             try {
-                dstFile.closeWithError(copyError.getMessage());
-            } catch (IOException closeError) {
-                Log.e(TAG, "Error closing destination", closeError);
+                DocumentInfo info = DocumentInfo.fromUri(getContentResolver(), srcUri);
+                mFailedFiles.add(info);
+                Log.e(TAG, "Error while copying " + info.displayName + " (" + info.derivedUri + ")",
+                        copyError);
+            } catch (FileNotFoundException ignore) {
+                // Generate a dummy DocumentInfo so an error still gets reflected in the UI for this
+                // file.
+                DocumentInfo info = new DocumentInfo();
+                info.derivedUri = srcUri;
+                info.displayName = "Unknown [" + srcUri + "]";
+                mFailedFiles.add(info);
+                Log.e(TAG, "Error while copying " + srcUri, copyError);
+            }
+
+            if (dstFile != null) {
+                try {
+                    dstFile.closeWithError(copyError.getMessage());
+                } catch (IOException closeError) {
+                    Log.e(TAG, "Error closing destination", closeError);
+                }
             }
         } finally {
             // This also ensures the file descriptors are closed.
@@ -510,16 +536,6 @@ public class CopyService extends IntentService {
             IoUtils.closeQuietly(dst);
         }
 
-        if (copyError != null) {
-            // Log errors.
-            Log.e(TAG, "Error while copying " + srcUri.toString(), copyError);
-            try {
-                mFailedFiles.add(DocumentInfo.fromUri(getContentResolver(), srcUri));
-            } catch (FileNotFoundException ignore) {
-                Log.w(TAG, "Source file gone: " + srcUri, copyError);
-                // The source file is gone.
-            }
-        }
 
         if (copyError != null || mIsCancelled) {
             // Clean up half-copied files.
