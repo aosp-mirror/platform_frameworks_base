@@ -338,7 +338,7 @@ public final class BatteryStatsHelper {
         }
 
         if (mCpuPowerCalculator == null) {
-            mCpuPowerCalculator = new CpuPowerCalculator(mPowerProfile);
+            mCpuPowerCalculator = new CpuPowerCalculator();
         }
         mCpuPowerCalculator.reset();
 
