@@ -59,13 +59,13 @@ public class PipeManagerTest extends AndroidTestCase {
         mtpManager.setDocument(0, 1, new MtpDocument(1, 0, "", new Date(), 0, 0, false));
 
         // Upload testing bytes.
-        final ParcelFileDescriptor descriptor = pipeManager.writeDocument(
+        final ParcelFileDescriptor descriptor = mPipeManager.writeDocument(
                 getContext(), mtpManager, new Identifier(0, 0, 1));
         final ParcelFileDescriptor.AutoCloseOutputStream outputStream =
                 new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
         outputStream.write(HELLO_BYTES, 0, HELLO_BYTES.length);
         outputStream.close();
-        executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+        mExecutor.awaitTermination(1000, TimeUnit.MILLISECONDS);
 
         // Check if the placeholder file is removed.
         try {
