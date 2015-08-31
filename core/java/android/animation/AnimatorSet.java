@@ -408,15 +408,18 @@ public final class AnimatorSet extends Animator {
 
     /**
      * Returns true if any of the child animations of this AnimatorSet have been started and have
-     * not yet ended.
-     * @return Whether this AnimatorSet has been started and has not yet ended.
+     * not yet ended. Child animations will not be started until the AnimatorSet has gone past
+     * its initial delay set through {@link #setStartDelay(long)}.
+     *
+     * @return Whether this AnimatorSet has gone past the initial delay, and at least one child
+     *         animation has been started and not yet ended.
      */
     @Override
     public boolean isRunning() {
         int size = mNodes.size();
         for (int i = 0; i < size; i++) {
             Node node = mNodes.get(i);
-            if (node != mRootNode && node.mAnimation.isRunning()) {
+            if (node != mRootNode && node.mAnimation.isStarted()) {
                 return true;
             }
         }
