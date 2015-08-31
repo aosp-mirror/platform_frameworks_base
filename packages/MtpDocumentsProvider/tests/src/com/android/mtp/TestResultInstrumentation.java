@@ -40,6 +40,10 @@ public class TestResultInstrumentation extends InstrumentationTestRunner impleme
         mHasError = false;
     }
 
+    void show(String message) {
+        TestResultActivity.show(getContext(), "    " + message);
+    }
+
     private void show(String tag, Test test, Throwable t) {
         TestResultActivity.show(
                 getContext(),
