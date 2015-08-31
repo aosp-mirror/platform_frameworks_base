@@ -6681,14 +6681,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the {@link View} description. It briefly describes the view and is
-     * primarily used for accessibility support. Set this property to enable
-     * better accessibility support for your application. This is especially
-     * true for views that do not have textual representation (For example,
-     * ImageButton).
+     * Returns the {@link View}'s content description.
+     * <p>
+     * <strong>Note:</strong> Do not override this method, as it will have no
+     * effect on the content description presented to accessibility services.
+     * You must call {@link #setContentDescription(CharSequence)} to modify the
+     * content description.
      *
-     * @return The content description.
-     *
+     * @return the content description
+     * @see #setContentDescription(CharSequence)
      * @attr ref android.R.styleable#View_contentDescription
      */
     @ViewDebug.ExportedProperty(category = "accessibility")
@@ -6697,14 +6698,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets the {@link View} description. It briefly describes the view and is
-     * primarily used for accessibility support. Set this property to enable
-     * better accessibility support for your application. This is especially
-     * true for views that do not have textual representation (For example,
-     * ImageButton).
+     * Sets the {@link View}'s content description.
+     * <p>
+     * A content description briefly describes the view and is primarily used
+     * for accessibility support to determine how a view should be presented to
+     * the user. In the case of a view with no textual representation, such as
+     * {@link ImageButton}, a useful content description explains what the view
+     * does. For example, an image button with a phone icon that is used to
+     * place a call may use "Call" as its content description. An image of a
+     * floppy disk that is used to save a file may use "Save".
      *
      * @param contentDescription The content description.
-     *
+     * @see #getContentDescription()
      * @attr ref android.R.styleable#View_contentDescription
      */
     @RemotableViewMethod
