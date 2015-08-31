@@ -16,7 +16,11 @@
 
 package android.util;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -163,5 +167,23 @@ public final class LocaleList {
             }
             return new LocaleList(localeArray);
         }
+    }
+
+    private final static Object sLock = new Object();
+
+    @GuardedBy("sLock")
+    private static LocaleList sDefaultLocaleList;
+
+    // TODO: fix this to return the default system locale list once we have that
+    @NonNull @Size(min=1)
+    public static LocaleList getDefault() {
+        Locale defaultLocale = Locale.getDefault();
+        synchronized (sLock) {
+            if (sDefaultLocaleList == null || sDefaultLocaleList.size() != 1
+                    || !defaultLocale.equals(sDefaultLocaleList.getPrimary())) {
+                sDefaultLocaleList = new LocaleList(defaultLocale);
+            }
+        }
+        return sDefaultLocaleList;
     }
 }
