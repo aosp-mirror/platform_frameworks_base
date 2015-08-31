@@ -248,8 +248,15 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 0x00200000;
 
+    /**
+     * Indicates that the connection itself wants to handle any sort of reply response, rather than
+     * relying on SMS.
+     * @hide
+     */
+    public static final int CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION = 0x00400000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x00400000
+    // Next CAPABILITY value: 0x00800000
     //**********************************************************************************************
 
     /**
@@ -388,6 +395,10 @@ public abstract class Connection extends Conferenceable {
         if (can(capabilities, CAPABILITY_CONFERENCE_HAS_NO_CHILDREN)) {
             builder.append(" CAPABILITY_SINGLE_PARTY_CONFERENCE");
         }
+        if (can(capabilities, CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION)) {
+            builder.append(" CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION");
+        }
+
         builder.append("]");
         return builder.toString();
     }
@@ -1761,6 +1772,13 @@ public abstract class Connection extends Conferenceable {
      * a request to reject.
      */
     public void onReject() {}
+
+    /**
+     * Notifies ths Connection of a request reject with a message.
+     *
+     * @hide
+     */
+    public void onReject(String replyMessage) {}
 
     /**
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
