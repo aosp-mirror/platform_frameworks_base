@@ -468,6 +468,7 @@ public abstract class BatteryStats implements Parcelable {
          * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
          * @see BatteryStats#getCpuSpeedSteps()
          */
+        @Deprecated
         public abstract long getTimeAtCpuSpeed(int step, int which);
 
         public static abstract class Sensor {
