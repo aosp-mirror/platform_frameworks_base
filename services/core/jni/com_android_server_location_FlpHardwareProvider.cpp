@@ -840,16 +840,6 @@ static void Cleanup(JNIEnv* env, jobject /* object */) {
     env->DeleteGlobalRef(sCallbacksObj);
     sCallbacksObj = NULL;
   }
-
-  sFlpInterface = NULL;
-  sFlpDiagnosticInterface = NULL;
-  sFlpDeviceContextInterface = NULL;
-  sFlpGeofencingInterface = NULL;
-
-  if(sHardwareDevice != NULL) {
-    sHardwareDevice->close(sHardwareDevice);
-    sHardwareDevice = NULL;
-  }
 }
 
 static void GetBatchedLocation(JNIEnv* env, jobject /* object */, jint lastNLocations) {
