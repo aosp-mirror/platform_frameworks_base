@@ -20,6 +20,7 @@ import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.mtp.MtpConstants;
 import android.mtp.MtpDevice;
 import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
@@ -138,13 +139,20 @@ class MtpManager {
         }
     }
 
-    synchronized int createDocument(int deviceId, MtpObjectInfo objectInfo) throws IOException {
+    synchronized int createDocument(int deviceId, MtpObjectInfo objectInfo,
+            ParcelFileDescriptor source) throws IOException {
         final MtpDevice device = getDevice(deviceId);
-        final MtpObjectInfo result = device.sendObjectInfo(objectInfo);
-        if (result == null) {
+        final MtpObjectInfo sendObjectInfoResult = device.sendObjectInfo(objectInfo);
+        if (sendObjectInfoResult == null) {
             throw new IOException("Failed to create a document");
         }
-        return result.getObjectHandle();
+        if (objectInfo.getFormat() != MtpConstants.FORMAT_ASSOCIATION) {
+            if (!device.sendObject(sendObjectInfoResult.getObjectHandle(),
+                    sendObjectInfoResult.getCompressedSize(), source)) {
+                throw new IOException("Failed to send contents of a document");
+            }
+        }
+        return sendObjectInfoResult.getObjectHandle();
     }
 
     synchronized int getParent(int deviceId, int objectHandle) throws IOException {
@@ -160,13 +168,6 @@ class MtpManager {
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
         device.importFile(objectHandle, target);
-    }
-
-    synchronized void sendObject(int deviceId, int objectHandle, int size,
-            ParcelFileDescriptor source) throws IOException {
-        final MtpDevice device = getDevice(deviceId);
-        if (!device.sendObject(objectHandle, size, source))
-            throw new IOException("Failed to send a document");
     }
 
     private MtpDevice getDevice(int deviceId) throws IOException {
