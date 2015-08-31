@@ -1366,6 +1366,14 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void jumpToCurrentState() {
+        final ChildDrawable[] children = mLayerState.mChildren;
+        for (int i = 0, count = mLayerState.mNum; i < count; i++) {
+            children[i].mDrawable.jumpToCurrentState();
+        }
+    }
+
+    @Override
     public boolean isStateful() {
         return mLayerState.isStateful();
     }
