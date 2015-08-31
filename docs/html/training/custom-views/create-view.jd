@@ -146,9 +146,15 @@ enable this behavior in your custom view, you must:
         <p>In order to avoid having to repeat the long namespace URI, the sample uses an {@code
             xmlns} directive. This
             directive assigns the alias {@code custom} to the namespace {@code
-            http://schemas.android.com/apk/res/com.example.customviews}. You can choose any alias
+            http://schemas.android.com/apk/res-auto}. You can choose any alias
             you want for your
             namespace.</p>
+
+<p class="note"><strong>Note:</strong> If you are not using Gradle to build
+your project, your {@code xlmns} URI cannot include {@code res-auto}.
+Instead, the URI must contain the fully qualified name of your project. In
+this example, the non-Gradle URI would be:
+{@code http://schemas.android.com/apk/res/com.example.customviews}.</p> 
 
         <p>Notice the name of the XML tag that adds the custom view to the layout. It is the fully
             qualified name of the
