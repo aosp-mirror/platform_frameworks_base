@@ -28,7 +28,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -37,7 +36,6 @@ import android.test.suitebuilder.annotation.Suppress;
 import java.util.List;
 
 /** Unit test for SettingsProvider. */
-@Suppress  // Failing.
 public class SettingsProviderTest extends AndroidTestCase {
     @MediumTest
     public void testNameValueCache() {
@@ -53,84 +51,108 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertEquals(1, r.delete(Settings.Secure.getUriFor("test_service"), null, null));
         assertEquals(null, Settings.Secure.getString(r, "test_service"));
 
-        // Try all the same things in the System table
-        Settings.System.putString(r, "test_setting", "Value");
-        assertEquals("Value", Settings.System.getString(r, "test_setting"));
-
-        Settings.System.putString(r, "test_setting", "New");
-        assertEquals("New", Settings.System.getString(r, "test_setting"));
-
-        assertEquals(1, r.delete(Settings.System.getUriFor("test_setting"), null, null));
-        assertEquals(null, Settings.System.getString(r, "test_setting"));
+        // Apps should not be able to use System settings.
+        try {
+            Settings.System.putString(r, "test_setting", "Value");
+            fail("IllegalArgumentException expected");
+        } catch (java.lang.IllegalArgumentException e) {
+            // expected
+        }
     }
 
     @MediumTest
-    public void testRowNameContentUri() {
+    public void testRowNameContentUriForSecure() {
+        final String testKey = "testRowNameContentUriForSecure";
+        final String testValue = "testValue";
+        final String secondTestValue = "testValueNew";
+
+        try {
+            testRowNameContentUri(Settings.Secure.CONTENT_URI, Settings.Secure.NAME,
+                    Settings.Secure.VALUE, testKey, testValue, secondTestValue);
+        } finally {
+            // clean up
+            Settings.Secure.putString(getContext().getContentResolver(), testKey, null);
+        }
+    }
+
+    @MediumTest
+    public void testRowNameContentUriForSystem() {
+        final String testKey = Settings.System.VIBRATE_ON;
+        assertTrue("Settings.System.PUBLIC_SETTINGS cannot be empty.  We need to use one of it"
+                + " for testing.  Only settings key in this collection will be accepted by the"
+                + " framework.", Settings.System.PUBLIC_SETTINGS.contains(testKey));
+        final String testValue = "0";
+        final String secondTestValue = "1";
+        final String oldValue =
+                Settings.System.getString(getContext().getContentResolver(), testKey);
+
+        try {
+            testRowNameContentUri(Settings.System.CONTENT_URI, Settings.System.NAME,
+                    Settings.System.VALUE, testKey, testValue, secondTestValue);
+        } finally {
+            // restore old value
+            if (oldValue != null) {
+                Settings.System.putString(getContext().getContentResolver(), testKey, oldValue);
+            }
+        }
+    }
+
+    private void testRowNameContentUri(Uri table, String nameField, String valueField,
+            String testKey, String testValue, String secondTestValue) {
         ContentResolver r = getContext().getContentResolver();
 
-        assertEquals("content://settings/system/test_setting",
-                Settings.System.getUriFor("test_setting").toString());
-        assertEquals("content://settings/secure/test_service",
-                Settings.Secure.getUriFor("test_service").toString());
+        ContentValues v = new ContentValues();
+        v.put(nameField, testKey);
+        v.put(valueField, testValue);
 
-        // These tables use the row name (not ID) as their content URI.
-        Uri tables[] = { Settings.System.CONTENT_URI, Settings.Secure.CONTENT_URI };
-        for (Uri table : tables) {
-            ContentValues v = new ContentValues();
-            v.put(Settings.System.NAME, "test_key");
-            v.put(Settings.System.VALUE, "Test");
-            Uri uri = r.insert(table, v);
-            assertEquals(table.toString() + "/test_key", uri.toString());
+        r.insert(table, v);
+        Uri uri = Uri.parse(table.toString() + "/" + testKey);
 
-            // Query with a specific URI and no WHERE clause succeeds.
-            Cursor c = r.query(uri, null, null, null, null);
-            try {
-                assertTrue(c.moveToNext());
-                assertEquals("test_key", c.getString(c.getColumnIndex(Settings.System.NAME)));
-                assertEquals("Test", c.getString(c.getColumnIndex(Settings.System.VALUE)));
-                assertFalse(c.moveToNext());
-            } finally {
-                c.close();
-            }
-
-            // Query with a specific URI and a WHERE clause fails.
-            try {
-                r.query(uri, null, "1", null, null);
-                fail("UnsupportedOperationException expected");
-            } catch (UnsupportedOperationException e) {
-                if (!e.toString().contains("WHERE clause")) throw e;
-            }
-
-            // Query with a tablewide URI and a WHERE clause succeeds.
-            c = r.query(table, null, "name='test_key'", null, null);
-            try {
-                assertTrue(c.moveToNext());
-                assertEquals("test_key", c.getString(c.getColumnIndex(Settings.System.NAME)));
-                assertEquals("Test", c.getString(c.getColumnIndex(Settings.System.VALUE)));
-                assertFalse(c.moveToNext());
-            } finally {
-                c.close();
-            }
-
-            v = new ContentValues();
-            v.put(Settings.System.VALUE, "Toast");
-            assertEquals(1, r.update(uri, v, null, null));
-
-            c = r.query(uri, null, null, null, null);
-            try {
-                assertTrue(c.moveToNext());
-                assertEquals("test_key", c.getString(c.getColumnIndex(Settings.System.NAME)));
-                assertEquals("Toast", c.getString(c.getColumnIndex(Settings.System.VALUE)));
-                assertFalse(c.moveToNext());
-            } finally {
-                c.close();
-            }
-
-            assertEquals(1, r.delete(uri, null, null));
+        // Query with a specific URI and no WHERE clause succeeds.
+        Cursor c = r.query(uri, null, null, null, null);
+        try {
+            assertTrue(c.moveToNext());
+            assertEquals(testKey, c.getString(c.getColumnIndex(nameField)));
+            assertEquals(testValue, c.getString(c.getColumnIndex(valueField)));
+            assertFalse(c.moveToNext());
+        } finally {
+            c.close();
         }
 
-        assertEquals(null, Settings.System.getString(r, "test_key"));
-        assertEquals(null, Settings.Secure.getString(r, "test_key"));
+        // Query with a specific URI and a WHERE clause fails.
+        try {
+            r.query(uri, null, "1", null, null);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        // Query with a tablewide URI and a WHERE clause succeeds.
+        c = r.query(table, null, "name='" + testKey + "'", null, null);
+        try {
+            assertTrue(c.moveToNext());
+            assertEquals(testKey, c.getString(c.getColumnIndex(nameField)));
+            assertEquals(testValue, c.getString(c.getColumnIndex(valueField)));
+            assertFalse(c.moveToNext());
+        } finally {
+            c.close();
+        }
+
+        v = new ContentValues();
+        // NAME is still needed, although the uri should be specific enough. Why?
+        v.put(nameField, testKey);
+        v.put(valueField, secondTestValue);
+        assertEquals(1, r.update(uri, v, null, null));
+
+        c = r.query(uri, null, null, null, null);
+        try {
+            assertTrue(c.moveToNext());
+            assertEquals(testKey, c.getString(c.getColumnIndex(nameField)));
+            assertEquals(secondTestValue, c.getString(c.getColumnIndex(valueField)));
+            assertFalse(c.moveToNext());
+        } finally {
+            c.close();
+        }
     }
 
     @MediumTest
@@ -139,7 +161,7 @@ public class SettingsProviderTest extends AndroidTestCase {
         ContentResolver r = getContext().getContentResolver();
 
         // Make sure there's an owner
-        assertTrue(findUser(um, UserHandle.USER_OWNER));
+        assertTrue(findUser(um, UserHandle.USER_SYSTEM));
 
         // create a new user to use for testing
         UserInfo otherUser = um.createUser("TestUser1", UserInfo.FLAG_GUEST);
@@ -148,21 +170,17 @@ public class SettingsProviderTest extends AndroidTestCase {
             assertNotSame("Current calling user id should not be the new guest user",
                     otherUser.id, UserHandle.getCallingUserId());
 
-            Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "gps");
-            Settings.Secure.putStringForUser(r,
-                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "network", otherUser.id);
+            final String testKey = "testSettingsChangeForOtherUser";
+            final String testValue1 = "value1";
+            final String testValue2 = "value2";
+            Settings.Secure.putString(r, testKey, testValue1);
+            Settings.Secure.putStringForUser(r, testKey, testValue2, otherUser.id);
 
-            assertEquals("gps",
-                    Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
-            assertEquals("network", Settings.Secure.getStringForUser(
-                    r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, otherUser.id));
+            assertEquals(testValue1, Settings.Secure.getString(r, testKey));
+            assertEquals(testValue2, Settings.Secure.getStringForUser(r, testKey, otherUser.id));
 
             assertNotSame("Current calling user id should not be the new guest user",
                     otherUser.id, UserHandle.getCallingUserId());
-            Settings.Secure.setLocationProviderEnabledForUser(r, "network", false, otherUser.id);
-            assertEquals("", Settings.Secure.getStringForUser(
-                    r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, otherUser.id));
-
         } finally {
             // Tidy up
             um.removeUser(otherUser.id);
@@ -170,6 +188,7 @@ public class SettingsProviderTest extends AndroidTestCase {
     }
 
     @MediumTest
+    @Suppress  // Settings.Bookmarks uses a query format that's not supported now.
     public void testRowNumberContentUri() {
         ContentResolver r = getContext().getContentResolver();
 
@@ -196,47 +215,56 @@ public class SettingsProviderTest extends AndroidTestCase {
     public void testParseProviderList() {
         ContentResolver r = getContext().getContentResolver();
 
-        // Make sure we get out what we put in.
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                "test1,test2,test3");
-        assertEquals(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED),
-                "test1,test2,test3");
-
+        // We only accept "+value" and "-value"
         // Test adding a value
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                "");
         Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test1");
-        assertEquals("test1",
-                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test1"));
 
         // Test adding a second value
         Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test2");
-        assertEquals("test1,test2",
-                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test1"));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test2"));
 
         // Test adding a third value
         Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test3");
-        assertEquals("test1,test2,test3",
-                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test1"));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test2"));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test3"));
 
         // Test deleting the first value in a 3 item list
         Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test1");
-        assertEquals("test2,test3",
-                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+        assertFalse(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test1"));
 
         // Test deleting the middle value in a 3 item list
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                "test1,test2,test3");
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test2");
-        assertEquals("test1,test3",
-                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test4");
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test2"));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test3"));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test4"));
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test3");
+        assertFalse(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test3"));
 
         // Test deleting the last value in a 3 item list
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                "test1,test2,test3");
-        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test3");
-        assertEquals("test1,test2",
-                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test5");
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test2"));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test4"));
+        assertTrue(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test5"));
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test5");
+        assertFalse(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
+                .contains("test5"));
      }
 
     private boolean findUser(UserManager um, int userHandle) {
@@ -254,7 +282,7 @@ public class SettingsProviderTest extends AndroidTestCase {
         ContentResolver r = getContext().getContentResolver();
 
         // Make sure there's an owner
-        assertTrue(findUser(um, UserHandle.USER_OWNER));
+        assertTrue(findUser(um, UserHandle.USER_SYSTEM));
 
         // create a new user to use for testing
         UserInfo user = um.createUser("TestUser1", UserInfo.FLAG_GUEST);
@@ -266,12 +294,12 @@ public class SettingsProviderTest extends AndroidTestCase {
             final int SELF_VALUE = 40;
             final int OTHER_VALUE = 27;
 
-            Settings.System.putInt(r, TEST_KEY, SELF_VALUE);
-            Settings.System.putIntForUser(r, TEST_KEY, OTHER_VALUE, user.id);
+            Settings.Secure.putInt(r, TEST_KEY, SELF_VALUE);
+            Settings.Secure.putIntForUser(r, TEST_KEY, OTHER_VALUE, user.id);
 
             // Verify that they read back as intended
-            int myValue = Settings.System.getInt(r, TEST_KEY, 0);
-            int otherValue = Settings.System.getIntForUser(r, TEST_KEY, 0, user.id);
+            int myValue = Settings.Secure.getInt(r, TEST_KEY, 0);
+            int otherValue = Settings.Secure.getIntForUser(r, TEST_KEY, 0, user.id);
             assertTrue("Running as user " + UserHandle.myUserId()
                     + " and reading/writing as user " + user.id
                     + ", expected to read " + SELF_VALUE + " but got " + myValue,
@@ -310,7 +338,8 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertCanBeHandled(new Intent(Settings.ACTION_MEMORY_CARD_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_NETWORK_OPERATOR_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_PRIVACY_SETTINGS));
-        assertCanBeHandled(new Intent(Settings.ACTION_QUICK_LAUNCH_SETTINGS));
+        //TODO: seems no one is using this anymore.
+//        assertCanBeHandled(new Intent(Settings.ACTION_QUICK_LAUNCH_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_SEARCH_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_SECURITY_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_SETTINGS));

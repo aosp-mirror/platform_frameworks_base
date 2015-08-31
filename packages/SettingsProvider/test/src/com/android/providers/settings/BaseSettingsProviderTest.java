@@ -48,7 +48,7 @@ abstract class BaseSettingsProviderTest extends AndroidTestCase {
             Settings.NameValueTable.NAME, Settings.NameValueTable.VALUE
     };
 
-    protected int mSecondaryUserId = UserHandle.USER_OWNER;
+    protected int mSecondaryUserId = UserHandle.USER_SYSTEM;
 
     @Override
     public void setContext(Context context) {

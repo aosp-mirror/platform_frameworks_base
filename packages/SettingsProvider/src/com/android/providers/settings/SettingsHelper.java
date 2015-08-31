@@ -123,7 +123,8 @@ public class SettingsHelper {
         }
 
         if (sBroadcastOnRestore.contains(name)) {
-            oldValue = table.lookup(cr, name, UserHandle.USER_OWNER);
+            // TODO: http://b/22388012
+            oldValue = table.lookup(cr, name, UserHandle.USER_SYSTEM);
             sendBroadcast = true;
         }
 

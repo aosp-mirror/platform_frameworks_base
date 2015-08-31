@@ -46,40 +46,40 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
 
     private final Object mLock = new Object();
 
-    public void testSetAndGetGlobalViaFrontEndApiForOwnerUser() throws Exception {
-        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_GLOBAL, UserHandle.USER_OWNER);
+    public void testSetAndGetGlobalViaFrontEndApiForSystemUser() throws Exception {
+        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
     }
 
-    public void testSetAndGetGlobalViaFrontEndApiForNonOwnerUser() throws Exception {
-        if (mSecondaryUserId == UserHandle.USER_OWNER) {
+    public void testSetAndGetGlobalViaFrontEndApiForNonSystemUser() throws Exception {
+        if (mSecondaryUserId == UserHandle.USER_SYSTEM) {
             Log.w(LOG_TAG, "No secondary user. Skipping "
-                    + "testSetAndGetGlobalViaFrontEndApiForNonOwnerUser");
+                    + "testSetAndGetGlobalViaFrontEndApiForNonSystemUser");
             return;
         }
         performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_GLOBAL, mSecondaryUserId);
     }
 
-    public void testSetAndGetSecureViaFrontEndApiForOwnerUser() throws Exception {
-        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SECURE, UserHandle.USER_OWNER);
+    public void testSetAndGetSecureViaFrontEndApiForSystemUser() throws Exception {
+        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SECURE, UserHandle.USER_SYSTEM);
     }
 
-    public void testSetAndGetSecureViaFrontEndApiForNonOwnerUser() throws Exception {
-        if (mSecondaryUserId == UserHandle.USER_OWNER) {
+    public void testSetAndGetSecureViaFrontEndApiForNonSystemUser() throws Exception {
+        if (mSecondaryUserId == UserHandle.USER_SYSTEM) {
             Log.w(LOG_TAG, "No secondary user. Skipping "
-                    + "testSetAndGetSecureViaFrontEndApiForNonOwnerUser");
+                    + "testSetAndGetSecureViaFrontEndApiForNonSystemUser");
             return;
         }
         performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SECURE, mSecondaryUserId);
     }
 
-    public void testSetAndGetSystemViaFrontEndApiForOwnerUser() throws Exception {
-        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SYSTEM, UserHandle.USER_OWNER);
+    public void testSetAndGetSystemViaFrontEndApiForSystemUser() throws Exception {
+        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SYSTEM, UserHandle.USER_SYSTEM);
     }
 
-    public void testSetAndGetSystemViaFrontEndApiForNonOwnerUser() throws Exception {
-        if (mSecondaryUserId == UserHandle.USER_OWNER) {
+    public void testSetAndGetSystemViaFrontEndApiForNonSystemUser() throws Exception {
+        if (mSecondaryUserId == UserHandle.USER_SYSTEM) {
             Log.w(LOG_TAG, "No secondary user. Skipping "
-                    + "testSetAndGetSystemViaFrontEndApiForNonOwnerUser");
+                    + "testSetAndGetSystemViaFrontEndApiForNonSystemUser");
             return;
         }
         performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SYSTEM, mSecondaryUserId);
@@ -357,7 +357,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
             public void run() {
                 insertStringViaProviderApi(type, name, value, withTableRowUri);
             }
-        }, type, name, value, UserHandle.USER_OWNER);
+        }, type, name, value, UserHandle.USER_SYSTEM);
     }
 
     private void setSettingAndAssertSuccessfulChange(Runnable setCommand, final int type,

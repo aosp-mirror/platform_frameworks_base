@@ -47,7 +47,7 @@ public class SettingsProviderPerformanceTest extends BaseSettingsProviderTest {
 
                 // Make sure the setting changed.
                 String firstValue = getStringViaFrontEndApiSetting(SETTING_TYPE_GLOBAL,
-                        FAKE_SETTING_NAME, UserHandle.USER_OWNER);
+                        FAKE_SETTING_NAME, UserHandle.USER_SYSTEM);
                 assertEquals("Setting value didn't change", FAKE_SETTING_VALUE, firstValue);
 
                 // Set the setting to its second value.
@@ -56,7 +56,7 @@ public class SettingsProviderPerformanceTest extends BaseSettingsProviderTest {
 
                 // Make sure the setting changed.
                 String secondValue = getStringViaFrontEndApiSetting(SETTING_TYPE_GLOBAL,
-                        FAKE_SETTING_NAME, UserHandle.USER_OWNER);
+                        FAKE_SETTING_NAME, UserHandle.USER_SYSTEM);
                 assertEquals("Setting value didn't change", FAKE_SETTING_VALUE_1, secondValue);
             }
         } finally {
@@ -86,20 +86,20 @@ public class SettingsProviderPerformanceTest extends BaseSettingsProviderTest {
             for (int i = 0; i < ITERATION_COUNT; i++) {
                 // Set the setting to its first value.
                 setStringViaFrontEndApiSetting(SETTING_TYPE_GLOBAL, FAKE_SETTING_NAME,
-                        FAKE_SETTING_VALUE, UserHandle.USER_OWNER);
+                        FAKE_SETTING_VALUE, UserHandle.USER_SYSTEM);
 
                 // Make sure the setting changed.
                 String firstValue = getStringViaFrontEndApiSetting(SETTING_TYPE_GLOBAL,
-                        FAKE_SETTING_NAME, UserHandle.USER_OWNER);
+                        FAKE_SETTING_NAME, UserHandle.USER_SYSTEM);
                 assertEquals("Setting value didn't change", FAKE_SETTING_VALUE, firstValue);
 
                 // Set the setting to its second value.
                 setStringViaFrontEndApiSetting(SETTING_TYPE_GLOBAL, FAKE_SETTING_NAME,
-                        FAKE_SETTING_VALUE_1, UserHandle.USER_OWNER);
+                        FAKE_SETTING_VALUE_1, UserHandle.USER_SYSTEM);
 
                 // Make sure the setting changed.
                 String secondValue = getStringViaFrontEndApiSetting(SETTING_TYPE_GLOBAL,
-                        FAKE_SETTING_NAME, UserHandle.USER_OWNER);
+                        FAKE_SETTING_NAME, UserHandle.USER_SYSTEM);
                 assertEquals("Setting value didn't change", FAKE_SETTING_VALUE_1, secondValue);
             }
         } finally {
