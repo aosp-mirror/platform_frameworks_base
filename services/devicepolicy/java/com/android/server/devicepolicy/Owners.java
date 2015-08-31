@@ -28,10 +28,10 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -57,6 +57,8 @@ import libcore.io.IoUtils;
  */
 class Owners {
     private static final String TAG = "DevicePolicyManagerService";
+
+    private static final boolean DEBUG = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String DEVICE_OWNER_XML_LEGACY = "device_owner.xml";
 
@@ -106,10 +108,17 @@ class Owners {
             final File legacy = getLegacyConfigFileWithTestOverride();
 
             if (readLegacyOwnerFile(legacy)) {
+                if (DEBUG) {
+                    Log.d(TAG, "Legacy config file found.");
+                }
+
                 // Legacy file exists, write to new files and remove the legacy one.
                 writeDeviceOwner();
                 for (int userId : getProfileOwnerKeys()) {
                     writeProfileOwner(userId);
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "Deleting legacy config file");
                 }
                 if (!legacy.delete()) {
                     Slog.e(TAG, "Failed to remove the legacy setting file");
@@ -179,6 +188,11 @@ class Owners {
     String getProfileOwnerName(int userId) {
         OwnerInfo profileOwner = mProfileOwners.get(userId);
         return profileOwner != null ? profileOwner.name : null;
+    }
+
+    String getProfileOwnerPackage(int userId) {
+        OwnerInfo profileOwner = mProfileOwners.get(userId);
+        return profileOwner != null ? profileOwner.packageName : null;
     }
 
     Set<Integer> getProfileOwnerKeys() {
@@ -301,12 +315,18 @@ class Owners {
 
     void writeDeviceOwner() {
         synchronized (this) {
+            if (DEBUG) {
+                Log.d(TAG, "Writing to device owner file");
+            }
             new DeviceOwnerReadWriter().writeToFileLocked();
         }
     }
 
     void writeProfileOwner(int userId) {
         synchronized (this) {
+            if (DEBUG) {
+                Log.d(TAG, "Writing to profile owner file for user " + userId);
+            }
             new ProfileOwnerReadWriter(userId).writeToFileLocked();
         }
     }
@@ -322,13 +342,22 @@ class Owners {
 
         void writeToFileLocked() {
             if (!shouldWrite()) {
+                if (DEBUG) {
+                    Log.d(TAG, "No need to write to " + mFile);
+                }
                 // No contents, remove the file.
                 if (mFile.exists()) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Deleting existing " + mFile);
+                    }
                     if (!mFile.delete()) {
                         Slog.e(TAG, "Failed to remove " + mFile.getPath());
                     }
                 }
                 return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Writing to " + mFile);
             }
 
             final AtomicFile f = new AtomicFile(mFile);
@@ -364,7 +393,13 @@ class Owners {
 
         void readFromFileLocked() {
             if (!mFile.exists()) {
+                if (DEBUG) {
+                    Log.d(TAG, "" + mFile + " doesn't exist");
+                }
                 return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Reading from " + mFile);
             }
             final AtomicFile f = new AtomicFile(mFile);
             InputStream input = null;
