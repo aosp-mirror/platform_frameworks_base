@@ -97,11 +97,16 @@ class NavigationBarApps extends LinearLayout {
         }
     };
 
-    public NavigationBarApps(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public static NavigationBarAppsModel getModel(Context context) {
         if (sAppsModel == null) {
             sAppsModel = new NavigationBarAppsModel(context);
         }
+        return sAppsModel;
+    }
+
+    public NavigationBarApps(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        getModel(context);
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mLayoutInflater = LayoutInflater.from(context);
