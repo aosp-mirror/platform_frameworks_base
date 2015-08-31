@@ -807,6 +807,32 @@ public class MediaRecorder
     public native void stop() throws IllegalStateException;
 
     /**
+     * Pauses recording. Call this after start(). You may resume recording
+     * with resume() without reconfiguration, as opposed to stop(). It does
+     * nothing if the recording is already paused.
+     *
+     * When the recording is paused and resumed, the resulting output would
+     * be as if nothing happend during paused period, immediately switching
+     * to the resumed scene.
+     *
+     * @throws IllegalStateException if it is called before start() or after
+     * stop()
+     * {@hide}
+     */
+    public native void pause() throws IllegalStateException;
+
+    /**
+     * Resumes recording. Call this after start(). It does nothing if the
+     * recording is not paused.
+     *
+     * @throws IllegalStateException if it is called before start() or after
+     * stop()
+     * @see android.media.MediaRecorder#pause
+     * {@hide}
+     */
+    public native void resume() throws IllegalStateException;
+
+    /**
      * Restarts the MediaRecorder to its idle state. After calling
      * this method, you will have to configure it again as if it had just been
      * constructed.

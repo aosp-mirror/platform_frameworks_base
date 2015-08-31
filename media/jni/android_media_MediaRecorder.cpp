@@ -399,6 +399,22 @@ android_media_MediaRecorder_stop(JNIEnv *env, jobject thiz)
 }
 
 static void
+android_media_MediaRecorder_pause(JNIEnv *env, jobject thiz)
+{
+    ALOGV("pause");
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    process_media_recorder_call(env, mr->pause(), "java/lang/RuntimeException", "pause failed.");
+}
+
+static void
+android_media_MediaRecorder_resume(JNIEnv *env, jobject thiz)
+{
+    ALOGV("resume");
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    process_media_recorder_call(env, mr->resume(), "java/lang/RuntimeException", "resume failed.");
+}
+
+static void
 android_media_MediaRecorder_native_reset(JNIEnv *env, jobject thiz)
 {
     ALOGV("native_reset");
@@ -528,6 +544,8 @@ static const JNINativeMethod gMethods[] = {
     {"getMaxAmplitude",      "()I",                             (void *)android_media_MediaRecorder_native_getMaxAmplitude},
     {"start",                "()V",                             (void *)android_media_MediaRecorder_start},
     {"stop",                 "()V",                             (void *)android_media_MediaRecorder_stop},
+    {"pause",                "()V",                             (void *)android_media_MediaRecorder_pause},
+    {"resume",               "()V",                             (void *)android_media_MediaRecorder_resume},
     {"native_reset",         "()V",                             (void *)android_media_MediaRecorder_native_reset},
     {"release",              "()V",                             (void *)android_media_MediaRecorder_release},
     {"native_init",          "()V",                             (void *)android_media_MediaRecorder_native_init},
