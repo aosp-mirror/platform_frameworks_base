@@ -1145,4 +1145,15 @@
     <!-- Description of setting to show clock seconds [CHAR LIMIT=NONE] -->
     <string name="clock_seconds_desc">Show clock seconds in the status bar. May impact battery life.</string>
 
+    <!-- Button that leads to page to rearrange quick settings tiles [CHAR LIMIT=60] -->
+    <string name="qs_rearrange">Rearrange Quick Settings</string>
+    <!-- Option to show brightness bar in quick settings [CHAR LIMIT=60] -->
+    <string name="show_brightness">Show brightness in Quick Settings</string>
+    <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
+    <string name="qs_paging">Use paging in Quick Settings</string>
+
+    <!-- Category in the System UI Tuner settings, where new/experimental
+         settings are -->
+    <string name="experimental">Experimental</string>
+
 </resources>

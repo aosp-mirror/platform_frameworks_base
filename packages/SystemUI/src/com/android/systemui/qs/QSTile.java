@@ -83,9 +83,13 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mContext = host.getContext();
         mHandler = new H(host.getLooper());
     }
+    
+    public int getTileType() {
+        return QSTileView.QS_TYPE_NORMAL;
+    }
 
-    public boolean supportsDualTargets() {
-        return false;
+    public final boolean supportsDualTargets() {
+        return getTileType() == QSTileView.QS_TYPE_DUAL;
     }
 
     public Host getHost() {

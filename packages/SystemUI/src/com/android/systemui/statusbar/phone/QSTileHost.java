@@ -36,6 +36,11 @@ import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
+import com.android.systemui.qs.tiles.QAirplaneTile;
+import com.android.systemui.qs.tiles.QBluetoothTile;
+import com.android.systemui.qs.tiles.QFlashlightTile;
+import com.android.systemui.qs.tiles.QRotationLockTile;
+import com.android.systemui.qs.tiles.QWifiTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -64,7 +69,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    protected static final String TILES_SETTING = "sysui_qs_tiles";
+    public static final String TILES_SETTING = "sysui_qs_tiles";
 
     private final Context mContext;
     private final PhoneStatusBar mStatusBar;
@@ -243,8 +248,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     protected QSTile<?> createTile(String tileSpec) {
-        if (tileSpec.equals("wifi")) return new WifiTile(this);
-        else if (tileSpec.equals("bt")) return new BluetoothTile(this);
+        if (tileSpec.equals("wifi")) return new WifiTile(this, false);
+        else if (tileSpec.equals("bt")) return new BluetoothTile(this, false);
         else if (tileSpec.equals("inversion")) return new ColorInversionTile(this);
         else if (tileSpec.equals("cell")) return new CellularTile(this);
         else if (tileSpec.equals("airplane")) return new AirplaneModeTile(this);
@@ -254,6 +259,16 @@ public class QSTileHost implements QSTile.Host, Tunable {
         else if (tileSpec.equals("location")) return new LocationTile(this);
         else if (tileSpec.equals("cast")) return new CastTile(this);
         else if (tileSpec.equals("hotspot")) return new HotspotTile(this);
+        // Detail only versions of wifi and bluetooth.
+        else if (tileSpec.equals("dwifi")) return new WifiTile(this, true);
+        else if (tileSpec.equals("dbt")) return new BluetoothTile(this, true);
+        // Quick tiles, no text.
+        else if (tileSpec.equals("qwifi")) return new QWifiTile(this);
+        else if (tileSpec.equals("qbt")) return new QBluetoothTile(this);
+        else if (tileSpec.equals("qairplane")) return new QAirplaneTile(this);
+        else if (tileSpec.equals("qrotation")) return new QRotationLockTile(this);
+        else if (tileSpec.equals("qflashlight")) return new QFlashlightTile(this);
+        // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
     }

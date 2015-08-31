@@ -2,33 +2,61 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
 
 import java.util.ArrayList;
 
-public class TileLayout extends ViewGroup {
+public class TileLayout extends ViewGroup implements QSTileLayout {
 
     private static final float TILE_ASPECT = 1.2f;
 
     private static final String TAG = "TileLayout";
 
     private int mDualTileUnderlap;
-    private int mColumns;
+    protected int mColumns;
     private int mCellWidth;
     private int mCellHeight;
     private int mLargeCellWidth;
     private int mLargeCellHeight;
 
-    private final ArrayList<TileRecord> mRecords;
+    protected boolean mAllowDual = true;
 
-    public TileLayout(Context context, ArrayList<TileRecord> records) {
-        super(context);
-        mRecords = records;
+    protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
+
+    public TileLayout(Context context) {
+        this(context, null);
+    }
+
+    public TileLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
         updateResources();
+    }
+
+    @Override
+    public int getOffsetTop(TileRecord tile) {
+        return getTop();
+    }
+
+    public void addTile(TileRecord tile) {
+        mRecords.add(tile);
+        addView(tile.tileView);
+    }
+
+    @Override
+    public void removeTile(TileRecord tile) {
+        mRecords.remove(tile);
+        removeView(tile.tileView);
+    }
+
+    @Override
+    public void setTileVisibility(TileRecord tile, int visibility) {
+        tile.tileView.setVisibility(visibility);
     }
 
     public void updateResources() {
@@ -56,10 +84,11 @@ public class TileLayout extends ViewGroup {
             if (record.tileView.getVisibility() == GONE) continue;
             // wrap to next column if we've reached the max # of columns
             // also don't allow dual + single tiles on the same row
-            if (r == -1 || c == (mColumns - 1) || rowIsDual != record.tile.supportsDualTargets()) {
+            if (r == -1 || c == (mColumns - 1)
+                    || rowIsDual != (mAllowDual && record.tile.supportsDualTargets())) {
                 r++;
                 c = 0;
-                rowIsDual = record.tile.supportsDualTargets();
+                rowIsDual = mAllowDual && record.tile.supportsDualTargets();
             } else {
                 c++;
             }
@@ -70,7 +99,8 @@ public class TileLayout extends ViewGroup {
 
         View previousView = this;
         for (TileRecord record : mRecords) {
-            if (record.tileView.setDual(record.tile.supportsDualTargets())) {
+            if (record.tileView.setType(mAllowDual ? record.tile.getTileType()
+                    : QSTileView.QS_TYPE_NORMAL)) {
                 record.tileView.handleStateChanged(record.tile.getState());
             }
             if (record.tileView.getVisibility() == GONE) continue;

@@ -90,5 +90,9 @@
     <declare-styleable name="AlphaOptimizedImageView">
         <attr name="hasOverlappingRendering" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="TunerSwitch">
+        <attr name="defValue" format="boolean" />
+    </declare-styleable>
 </resources>
 

@@ -48,6 +48,10 @@ public class QSTileView extends ViewGroup {
     private static final Typeface CONDENSED = Typeface.create("sans-serif-condensed",
             Typeface.NORMAL);
 
+    public static final int QS_TYPE_NORMAL = 0;
+    public static final int QS_TYPE_DUAL   = 1;
+    public static final int QS_TYPE_QUICK  = 2;
+
     protected final Context mContext;
     private final View mIcon;
     private final View mDivider;
@@ -61,12 +65,14 @@ public class QSTileView extends ViewGroup {
 
     private TextView mLabel;
     private QSDualTileLabel mDualLabel;
-    private boolean mDual;
+    private int mType;
     private OnClickListener mClickPrimary;
     private OnClickListener mClickSecondary;
     private OnLongClickListener mLongClick;
     private Drawable mTileBackground;
     private RippleDrawable mRipple;
+
+    private View mCircle;
 
     public QSTileView(Context context) {
         super(context);
@@ -88,6 +94,9 @@ public class QSTileView extends ViewGroup {
 
         mIcon = createIcon();
         addView(mIcon);
+
+        mCircle = createCircleIcon();
+        addView(mCircle);
 
         mDivider = new View(mContext);
         mDivider.setBackgroundColor(context.getColor(R.color.qs_tile_divider));
@@ -131,12 +140,12 @@ public class QSTileView extends ViewGroup {
         }
         if (mDualLabel != null) {
             labelText = mDualLabel.getText();
-            labelDescription = mLabel.getContentDescription();
+            labelDescription = mLabel != null ? mLabel.getContentDescription() : null;
             removeView(mDualLabel);
             mDualLabel = null;
         }
         final Resources res = mContext.getResources();
-        if (mDual) {
+        if (mType == QS_TYPE_DUAL) {
             mDualLabel = new QSDualTileLabel(mContext);
             mDualLabel.setId(View.generateViewId());
             mDualLabel.setBackgroundResource(R.drawable.btn_borderless_rect);
@@ -157,7 +166,7 @@ public class QSTileView extends ViewGroup {
             }
             addView(mDualLabel);
             mDualLabel.setAccessibilityTraversalAfter(mTopBackgroundView.getId());
-        } else {
+        } else if (mType == QS_TYPE_NORMAL) {
             mLabel = new TextView(mContext);
             mLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
             mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -174,16 +183,16 @@ public class QSTileView extends ViewGroup {
         }
     }
 
-    public boolean setDual(boolean dual) {
-        final boolean changed = dual != mDual;
-        mDual = dual;
+    public boolean setType(int type) {
+        final boolean changed = mType != type;
+        mType = type;
         if (changed) {
             recreateLabel();
         }
         if (mTileBackground instanceof RippleDrawable) {
             setRipple((RippleDrawable) mTileBackground);
         }
-        if (dual) {
+        if (mType == QS_TYPE_DUAL) {
             mTopBackgroundView.setOnClickListener(mClickPrimary);
             setOnClickListener(null);
             setClickable(false);
@@ -197,9 +206,10 @@ public class QSTileView extends ViewGroup {
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
             setBackground(mTileBackground);
         }
-        mTopBackgroundView.setFocusable(dual);
-        setFocusable(!dual);
-        mDivider.setVisibility(dual ? VISIBLE : GONE);
+        mTopBackgroundView.setFocusable(mType == QS_TYPE_DUAL);
+        setFocusable(mType != QS_TYPE_DUAL);
+        mDivider.setVisibility(mType == QS_TYPE_DUAL ? VISIBLE : GONE);
+        mCircle.setVisibility(mType == QS_TYPE_QUICK ? VISIBLE : GONE);
         postInvalidate();
         return changed;
     }
@@ -225,6 +235,21 @@ public class QSTileView extends ViewGroup {
         return icon;
     }
 
+    protected View createCircleIcon() {
+        final ImageView icon = new ImageView(mContext);
+        icon.setImageResource(R.drawable.ic_qs_circle);
+        // TODO: Not this.
+        icon.setPadding(20, 20, 20, 20);
+        return icon;
+    }
+
+    protected View createCircle() {
+        final ImageView icon = new ImageView(mContext);
+        icon.setId(android.R.id.icon);
+        icon.setScaleType(ScaleType.CENTER_INSIDE);
+        return icon;
+    }
+
     private Drawable newTileBackground() {
         final int[] attrs = new int[] { android.R.attr.selectableItemBackgroundBorderless };
         final TypedArray ta = mContext.obtainStyledAttributes(attrs);
@@ -234,7 +259,7 @@ public class QSTileView extends ViewGroup {
     }
 
     private View labelView() {
-        return mDual ? mDualLabel : mLabel;
+        return mType == QS_TYPE_DUAL ? mDualLabel : mLabel;
     }
 
     @Override
@@ -243,9 +268,18 @@ public class QSTileView extends ViewGroup {
         final int h = MeasureSpec.getSize(heightMeasureSpec);
         final int iconSpec = exactly(mIconSizePx);
         mIcon.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST), iconSpec);
-        labelView().measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
-        if (mDual) {
-            mDivider.measure(widthMeasureSpec, exactly(mDivider.getLayoutParams().height));
+        switch (mType) {
+            case QS_TYPE_QUICK:
+                mCircle.measure(
+                        MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY));
+                break;
+            case QS_TYPE_DUAL:
+                mDivider.measure(widthMeasureSpec, exactly(mDivider.getLayoutParams().height));
+            default:
+                labelView().measure(widthMeasureSpec,
+                        MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
+                break;
         }
         int heightSpec = exactly(
                 mIconSizePx + mTilePaddingBelowIconPx + mTilePaddingTopPx);
@@ -268,6 +302,10 @@ public class QSTileView extends ViewGroup {
         top += mTileSpacingPx;
         top += mTilePaddingTopPx;
         final int iconLeft = (w - mIcon.getMeasuredWidth()) / 2;
+        if (mType == QS_TYPE_QUICK) {
+            top = (h - mIcon.getMeasuredHeight()) / 2;
+            layout(mCircle, 0, 0);
+        }
         layout(mIcon, iconLeft, top);
         if (mRipple != null) {
             updateRippleSize(w, h);
@@ -275,17 +313,19 @@ public class QSTileView extends ViewGroup {
         }
         top = mIcon.getBottom();
         top += mTilePaddingBelowIconPx;
-        if (mDual) {
+        if (mType == QS_TYPE_DUAL) {
             layout(mDivider, 0, top);
             top = mDivider.getBottom();
         }
-        layout(labelView(), 0, top);
+        if (mType != QS_TYPE_QUICK) {
+            layout(labelView(), 0, top);
+        }
     }
 
     private void updateRippleSize(int width, int height) {
         // center the touch feedback on the center of the icon, and dial it down a bit
         final int cx = width / 2;
-        final int cy = mDual ? mIcon.getTop() + mIcon.getHeight() / 2 : height / 2;
+        final int cy = mType == QS_TYPE_DUAL ? mIcon.getTop() + mIcon.getHeight() / 2 : height / 2;
         final int rad = (int)(mIcon.getHeight() * 1.25f);
         mRipple.setHotspotBounds(cx - rad, cy - rad, cx + rad, cy + rad);
     }
@@ -298,11 +338,11 @@ public class QSTileView extends ViewGroup {
         if (mIcon instanceof ImageView) {
             setIcon((ImageView) mIcon, state);
         }
-        if (mDual) {
+        if (mType == QS_TYPE_DUAL) {
             mDualLabel.setText(state.label);
             mDualLabel.setContentDescription(state.dualLabelContentDescription);
             mTopBackgroundView.setContentDescription(state.contentDescription);
-        } else {
+        } else if (mType == QS_TYPE_NORMAL) {
             mLabel.setText(state.label);
             setContentDescription(state.contentDescription);
         }
@@ -338,7 +378,7 @@ public class QSTileView extends ViewGroup {
     public View updateAccessibilityOrder(View previousView) {
         View firstView;
         View lastView;
-        if (mDual) {
+        if (mType == QS_TYPE_DUAL) {
             lastView = mDualLabel;
             firstView = mTopBackgroundView;
         } else {
