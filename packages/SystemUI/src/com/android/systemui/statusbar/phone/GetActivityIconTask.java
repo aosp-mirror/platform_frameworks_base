@@ -20,6 +20,12 @@ import android.app.AppGlobals;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.RemoteException;
@@ -30,7 +36,7 @@ import android.widget.ImageView;
  * Retrieves the icon for an activity and sets it as the Drawable on an ImageView. The ImageView
  * is hidden if the activity isn't recognized or if there is no icon.
  */
-class GetActivityIconTask extends AsyncTask<AppInfo, Void, Drawable> {
+class GetActivityIconTask extends AsyncTask<AppButtonData, Void, Drawable> {
     private final static String TAG = "GetActivityIconTask";
 
     private final PackageManager mPackageManager;
@@ -44,11 +50,12 @@ class GetActivityIconTask extends AsyncTask<AppInfo, Void, Drawable> {
     }
 
     @Override
-    protected Drawable doInBackground(AppInfo... params) {
+    protected Drawable doInBackground(AppButtonData... params) {
         if (params.length != 1) {
             throw new IllegalArgumentException("Expected one parameter");
         }
-        AppInfo appInfo = params[0];
+        AppButtonData buttonData = params[0];
+        AppInfo appInfo = buttonData.appInfo;
         try {
             IPackageManager mPM = AppGlobals.getPackageManager();
             ActivityInfo ai = mPM.getActivityInfo(
@@ -62,7 +69,37 @@ class GetActivityIconTask extends AsyncTask<AppInfo, Void, Drawable> {
             }
 
             Drawable unbadgedIcon = ai.loadIcon(mPackageManager);
-            return mPackageManager.getUserBadgedIcon(unbadgedIcon, appInfo.getUser());
+            Drawable badgedIcon =
+                    mPackageManager.getUserBadgedIcon(unbadgedIcon, appInfo.getUser());
+
+            if (NavigationBarApps.DEBUG) {
+                // Draw pinned indicator and number of running tasks.
+                Bitmap bitmap = Bitmap.createBitmap(
+                        badgedIcon.getIntrinsicWidth(),
+                        badgedIcon.getIntrinsicHeight(),
+                        Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                badgedIcon.setBounds(
+                        0, 0, badgedIcon.getIntrinsicWidth(), badgedIcon.getIntrinsicHeight());
+                badgedIcon.draw(canvas);
+                Paint paint = new Paint();
+                paint.setStyle(Paint.Style.FILL);
+                if (buttonData.pinned) {
+                    paint.setColor(Color.WHITE);
+                    canvas.drawCircle(10, 10, 10, paint);
+                }
+                if (buttonData.tasks != null && buttonData.tasks.size() > 0) {
+                    paint.setColor(Color.BLACK);
+                    canvas.drawCircle(60, 30, 30, paint);
+                    paint.setColor(Color.WHITE);
+                    paint.setTextSize(50);
+                    paint.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
+                    canvas.drawText(Integer.toString(buttonData.tasks.size()), 50, 50, paint);
+                }
+                badgedIcon = new BitmapDrawable(null, bitmap);
+            }
+
+            return  badgedIcon;
         } catch (RemoteException e) {
             Slog.w(TAG, "Icon not found for " + appInfo, e);
             return null;

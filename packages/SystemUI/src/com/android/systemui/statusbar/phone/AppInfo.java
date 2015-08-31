@@ -39,4 +39,16 @@ class AppInfo {
     public UserHandle getUser() {
         return mUser;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AppInfo other = (AppInfo) obj;
+        return mComponentName.equals(other.mComponentName) && mUser.equals(other.mUser);
+    }
 }

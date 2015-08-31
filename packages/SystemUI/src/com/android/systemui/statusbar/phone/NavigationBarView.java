@@ -492,14 +492,6 @@ public class NavigationBarView extends LinearLayout {
         }
 
         updateTaskSwitchHelper();
-
-        // If using the app shelf, synchronize the current icons to the data model.
-        NavigationBarApps apps =
-                (NavigationBarApps) mCurrentView.findViewById(R.id.navigation_bar_apps);
-        if (apps != null) {
-            apps.recreateAppButtons();
-        }
-
         setNavigationIconHints(mNavigationIconHints, true);
     }
 

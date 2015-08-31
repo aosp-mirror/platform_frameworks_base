@@ -19,7 +19,11 @@ package com.android.systemui.statusbar.phone;
 import android.animation.LayoutTransition;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RecentTaskInfo;
+import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.app.IActivityManager;
+import android.app.ITaskStackListener;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -29,8 +33,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
@@ -51,12 +57,12 @@ import java.util.List;
 
 /**
  * Container for application icons that appear in the navigation bar. Their appearance is similar
- * to the launcher hotseat. Clicking an icon launches the associated activity. A long click will
- * trigger a drag to allow the icons to be reordered. As an icon is dragged the other icons shift
- * to make space for it to be dropped. These layout changes are animated.
+ * to the launcher hotseat. Clicking an icon launches or activates the associated activity. A long
+ * click will trigger a drag to allow the icons to be reordered. As an icon is dragged the other
+ * icons shift to make space for it to be dropped. These layout changes are animated.
  */
 class NavigationBarApps extends LinearLayout {
-    private final static boolean DEBUG = false;
+    public final static boolean DEBUG = false;
     private final static String TAG = "NavigationBarApps";
 
     /**
@@ -97,16 +103,9 @@ class NavigationBarApps extends LinearLayout {
         }
     };
 
-    public static NavigationBarAppsModel getModel(Context context) {
-        if (sAppsModel == null) {
-            sAppsModel = new NavigationBarAppsModel(context);
-        }
-        return sAppsModel;
-    }
-
     public NavigationBarApps(Context context, AttributeSet attrs) {
         super(context, attrs);
-        getModel(context);
+        sAppsModel = new NavigationBarAppsModel(context);
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mLayoutInflater = LayoutInflater.from(context);
@@ -124,19 +123,27 @@ class NavigationBarApps extends LinearLayout {
         transition.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
         transition.setStagger(LayoutTransition.CHANGE_DISAPPEARING, 0);
         setLayoutTransition(transition);
+
+        TaskStackListener taskStackListener = new TaskStackListener();
+        IActivityManager iam = ActivityManagerNative.getDefault();
+        try {
+            iam.registerTaskStackListener(taskStackListener);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "registerTaskStackListener failed", e);
+        }
     }
 
     // Monitor that catches events like "app uninstalled".
     private class AppPackageMonitor extends PackageMonitor {
         @Override
         public void onPackageRemoved(String packageName, int uid) {
-            postRemoveIfUnlauncheable(packageName, new UserHandle(getChangingUserId()));
+            postUnpinIfUnlauncheable(packageName, new UserHandle(getChangingUserId()));
             super.onPackageRemoved(packageName, uid);
         }
 
         @Override
         public void onPackageModified(String packageName) {
-            postRemoveIfUnlauncheable(packageName, new UserHandle(getChangingUserId()));
+            postUnpinIfUnlauncheable(packageName, new UserHandle(getChangingUserId()));
             super.onPackageModified(packageName);
         }
 
@@ -146,7 +153,7 @@ class NavigationBarApps extends LinearLayout {
                 UserHandle user = new UserHandle(getChangingUserId());
 
                 for (String packageName : packages) {
-                    postRemoveIfUnlauncheable(packageName, user);
+                    postUnpinIfUnlauncheable(packageName, user);
                 }
             }
             super.onPackagesAvailable(packages);
@@ -158,31 +165,36 @@ class NavigationBarApps extends LinearLayout {
                 UserHandle user = new UserHandle(getChangingUserId());
 
                 for (String packageName : packages) {
-                    postRemoveIfUnlauncheable(packageName, user);
+                    postUnpinIfUnlauncheable(packageName, user);
                 }
             }
             super.onPackagesUnavailable(packages);
         }
     }
 
-    private void postRemoveIfUnlauncheable(final String packageName, final UserHandle user) {
+    private void postUnpinIfUnlauncheable(final String packageName, final UserHandle user) {
         // This method doesn't necessarily get called in the main thread. Redirect the call into
         // the main thread.
         post(new Runnable() {
             @Override
             public void run() {
                 if (!isAttachedToWindow()) return;
-                removeIfUnlauncheable(packageName, user);
+                unpinIfUnlauncheable(packageName, user);
             }
         });
     }
 
-    private void removeIfUnlauncheable(String packageName, UserHandle user) {
-        // Remove icons for all apps that match a package that perhaps became unlauncheable.
+    private void unpinIfUnlauncheable(String packageName, UserHandle user) {
+        // Unpin icons for all apps that match a package that perhaps became unlauncheable.
+        boolean appsWereUnpinned = false;
         for(int i = getChildCount() - 1; i >= 0; --i) {
             View child = getChildAt(i);
-            AppInfo appInfo = (AppInfo)child.getTag();
-            if (appInfo == null) continue;  // Skip the drag placeholder.
+            AppButtonData appButtonData = (AppButtonData)child.getTag();
+            if (appButtonData == null) continue;  // Skip the drag placeholder.
+
+            if (!appButtonData.pinned) continue;
+
+            AppInfo appInfo = appButtonData.appInfo;
             if (!appInfo.getUser().equals(user)) continue;
 
             ComponentName appComponentName = appInfo.getComponentName();
@@ -192,10 +204,15 @@ class NavigationBarApps extends LinearLayout {
                 continue;
             }
 
-            removeViewAt(i);
+            appButtonData.pinned = false;
+            appsWereUnpinned = true;
+
+            if (appButtonData.isEmpty()) {
+                removeViewAt(i);
+            }
         }
-        if (getChildCount() != sAppsModel.getApps().size()) {
-            saveApps();
+        if (appsWereUnpinned) {
+            savePinnedApps();
         }
     }
 
@@ -215,7 +232,8 @@ class NavigationBarApps extends LinearLayout {
         parent.setLayoutTransition(transition);
 
         sAppsModel.setCurrentUser(ActivityManager.getCurrentUser());
-        recreateAppButtons();
+        recreatePinnedAppButtons();
+        updateRecentApps();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -232,11 +250,23 @@ class NavigationBarApps extends LinearLayout {
         mAppPackageMonitor.unregister();
     }
 
+    private void addAppButton(AppButtonData appButtonData) {
+        ImageView button = createAppButton(appButtonData);
+        addView(button);
+
+        AppInfo app = appButtonData.appInfo;
+        CharSequence appLabel = getAppLabel(mPackageManager, app.getComponentName());
+        button.setContentDescription(appLabel);
+
+        // Load the icon asynchronously.
+        new GetActivityIconTask(mPackageManager, button).execute(appButtonData);
+    }
+
     /**
      * Creates an ImageView icon for each pinned app. Removes any existing icons. May be called
      * to synchronize the current view with the shared data mode.
      */
-    public void recreateAppButtons() {
+    private void recreatePinnedAppButtons() {
         // Remove any existing icon buttons.
         removeAllViews();
 
@@ -244,54 +274,46 @@ class NavigationBarApps extends LinearLayout {
         int appCount = apps.size();
         for (int i = 0; i < appCount; i++) {
             AppInfo app = apps.get(i);
-            ImageView button = createAppButton(app);
-            addView(button);
-
-            CharSequence appLabel = getAppLabel(mPackageManager, app.getComponentName());
-            button.setContentDescription(appLabel);
-
-            // Load the icon asynchronously.
-            new GetActivityIconTask(mPackageManager, button).execute(app);
+            addAppButton(new AppButtonData(app, true /* pinned */));
         }
     }
 
     /**
-     * Saves apps stored in app icons into the data model.
+     * Saves pinned apps stored in app icons into the data model.
      */
-    private void saveApps() {
+    private void savePinnedApps() {
         List<AppInfo> apps = new ArrayList<AppInfo>();
         int childCount = getChildCount();
         for (int i = 0; i != childCount; ++i) {
             View child = getChildAt(i);
-            AppInfo appInfo = (AppInfo)child.getTag();
-            if (appInfo == null) continue;  // Skip the drag placeholder.
-            apps.add(appInfo);
+            AppButtonData appButtonData = (AppButtonData)child.getTag();
+            if (appButtonData == null) continue;  // Skip the drag placeholder.
+            if(!appButtonData.pinned) continue;
+            apps.add(appButtonData.appInfo);
         }
         sAppsModel.setApps(apps);
     }
 
     /**
-     * Creates a new ImageView for a launcher activity, inflated from
-     * R.layout.navigation_bar_app_item.
+     * Creates a new ImageView for an app, inflated from R.layout.navigation_bar_app_item.
      */
-    private ImageView createAppButton(AppInfo appInfo) {
+    private ImageView createAppButton(AppButtonData appButtonData) {
         ImageView button = (ImageView) mLayoutInflater.inflate(
                 R.layout.navigation_bar_app_item, this, false /* attachToRoot */);
         button.setOnClickListener(new AppClickListener());
         // TODO: Ripple effect. Use either KeyButtonRipple or the default ripple background.
         button.setOnLongClickListener(new AppLongClickListener());
         button.setOnDragListener(new AppIconDragListener());
-        button.setTag(appInfo);
+        button.setTag(appButtonData);
         return button;
     }
 
-    // Not shared with NavigationBarRecents because the data model is specific to pinned apps.
     private class AppLongClickListener implements View.OnLongClickListener {
         @Override
         public boolean onLongClick(View v) {
             mDragView = (ImageView) v;
-            AppInfo app = (AppInfo) v.getTag();
-            startAppDrag(mDragView, app);
+            AppButtonData appButtonData = (AppButtonData) v.getTag();
+            startAppDrag(mDragView, appButtonData.appInfo);
             return true;
         }
     }
@@ -443,30 +465,30 @@ class NavigationBarApps extends LinearLayout {
             return true;
         }
 
+        boolean dragResult = true;
         AppInfo appInfo = getAppFromDragEvent(event);
         if (appInfo == null) {
             // This wasn't a valid drop. Clean up the placeholder.
             removePlaceholderDragViewIfNeeded();
-            return false;
+            dragResult = false;
+        } else if (mDragView.getTag() == null) {
+            // This is a drag that adds a new app. Convert the placeholder to a real icon.
+            updateApp(mDragView, new AppButtonData(appInfo, true /* pinned */));
         }
-
-        // If this was an existing app being dragged then end the drag.
-        if (mDragView.getTag() != null) {
-            endDrag();
-            return true;
-        }
-
-        // The drop had valid data. Convert the placeholder to a real icon.
-        updateApp(mDragView, appInfo);
         endDrag();
-        return true;
+        return dragResult;
     }
 
     /** Cleans up at the end of a drag. */
     private void endDrag() {
+        // An earlier drag event might have canceled the drag. If so, there is nothing to do.
+        if (mDragView == null) return;
+
         mDragView.setVisibility(View.VISIBLE);
         mDragView = null;
-        saveApps();
+        savePinnedApps();
+        // Add recent tasks to the info of the potentially added app.
+        updateRecentApps();
     }
 
     /** Returns an app info from a DragEvent, or null if the data wasn't valid. */
@@ -506,9 +528,9 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /** Updates the app at a given view index. */
-    private void updateApp(ImageView button, AppInfo appInfo) {
-        button.setTag(appInfo);
-        new GetActivityIconTask(mPackageManager, button).execute(appInfo);
+    private void updateApp(ImageView button, AppButtonData appButtonData) {
+        button.setTag(appButtonData);
+        new GetActivityIconTask(mPackageManager, button).execute(appButtonData);
     }
 
     /** Removes the empty placeholder view. */
@@ -518,7 +540,6 @@ class NavigationBarApps extends LinearLayout {
             return;
         }
         removeView(mDragView);
-        endDrag();
     }
 
     /** Cleans up at the end of the drag. */
@@ -526,6 +547,7 @@ class NavigationBarApps extends LinearLayout {
         if (DEBUG) Slog.d(TAG, "onDragEnded");
         // If the icon wasn't already dropped into the app list then remove the placeholder.
         removePlaceholderDragViewIfNeeded();
+        endDrag();
         return true;
     }
 
@@ -561,9 +583,7 @@ class NavigationBarApps extends LinearLayout {
      * A click listener that launches an activity.
      */
     private class AppClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            AppInfo appInfo = (AppInfo)v.getTag();
+        private void launchApp(AppInfo appInfo, View anchor) {
             Intent launchIntent = sAppsModel.buildAppLaunchIntent(appInfo);
             if (launchIntent == null) {
                 Toast.makeText(
@@ -576,32 +596,226 @@ class NavigationBarApps extends LinearLayout {
             // already open in a visible window. In that case we should move the task to front
             // with minimal animation, perhaps using ActivityManager.moveTaskToFront().
             Rect sourceBounds = new Rect();
-            v.getBoundsOnScreen(sourceBounds);
+            anchor.getBoundsOnScreen(sourceBounds);
             ActivityOptions opts =
-                    ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getWidth(), v.getHeight());
+                    ActivityOptions.makeScaleUpAnimation(
+                            anchor, 0, 0, anchor.getWidth(), anchor.getHeight());
             Bundle optsBundle = opts.toBundle();
             launchIntent.setSourceBounds(sourceBounds);
 
             mContext.startActivityAsUser(launchIntent, optsBundle, appInfo.getUser());
         }
+
+        private void activateLatestTask(List<RecentTaskInfo> tasks) {
+            // 'tasks' is guaranteed to be non-empty.
+            int latestTaskPersistentId = tasks.get(0).persistentId;
+            // Launch or bring the activity to front.
+            IActivityManager manager = ActivityManagerNative.getDefault();
+            try {
+                manager.startActivityFromRecents(latestTaskPersistentId, null /* options */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception when activating a recent task", e);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Exception when activating a recent task", e);
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            AppButtonData appButtonData = (AppButtonData)v.getTag();
+
+            if (appButtonData.tasks == null || appButtonData.tasks.size() == 0) {
+                launchApp(appButtonData.appInfo, v);
+            } else {
+                activateLatestTask(appButtonData.tasks);
+            }
+        }
     }
 
     private void onUserSwitched(int currentUserId) {
         sAppsModel.setCurrentUser(currentUserId);
-        recreateAppButtons();
+        recreatePinnedAppButtons();
     }
 
     private void onManagedProfileRemoved(UserHandle removedProfile) {
+        // Unpin apps from the removed profile.
+        boolean itemsWereUnpinned = false;
         for(int i = getChildCount() - 1; i >= 0; --i) {
             View view = getChildAt(i);
-            AppInfo appInfo = (AppInfo)view.getTag();
-            if (appInfo == null) return;  // Skip the drag placeholder.
-            if (!appInfo.getUser().equals(removedProfile)) continue;
+            AppButtonData appButtonData = (AppButtonData)view.getTag();
+            if (appButtonData == null) return;  // Skip the drag placeholder.
+            if (!appButtonData.pinned) continue;
+            if (!appButtonData.appInfo.getUser().equals(removedProfile)) continue;
 
-            removeViewAt(i);
+            appButtonData.pinned = false;
+            itemsWereUnpinned = true;
+            if (appButtonData.isEmpty()) {
+                removeViewAt(i);
+            }
         }
-        if (getChildCount() != sAppsModel.getApps().size()) {
-            saveApps();
+        if (itemsWereUnpinned) {
+            savePinnedApps();
+        }
+    }
+
+    /**
+     * Returns app data for a button that matches the provided app info, if it exists, or null
+     * otherwise.
+     */
+    private AppButtonData findAppButtonData(AppInfo appInfo) {
+        int size = getChildCount();
+        for (int i = 0; i < size; ++i) {
+            View view = getChildAt(i);
+            AppButtonData appButtonData = (AppButtonData)view.getTag();
+            if (appButtonData == null) continue;  // Skip the drag placeholder.
+            if (appButtonData.appInfo.equals(appInfo)) {
+                return appButtonData;
+            }
+        }
+        return null;
+    }
+
+    private void updateTasks(List<RecentTaskInfo> tasks) {
+        // Remove tasks from all app buttons.
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            View view = getChildAt(i);
+            AppButtonData appButtonData = (AppButtonData)view.getTag();
+            if (appButtonData == null) return;  // Skip the drag placeholder.
+            appButtonData.clearTasks();
+        }
+
+        // Re-add tasks to app buttons, adding new buttons if needed.
+        int size = tasks.size();
+        for (int i = 0; i != size; ++i) {
+            RecentTaskInfo task = tasks.get(i);
+            AppInfo taskAppInfo = taskToAppInfo(task);
+            if (taskAppInfo == null) continue;
+            AppButtonData appButtonData = findAppButtonData(taskAppInfo);
+            if (appButtonData == null) {
+                appButtonData = new AppButtonData(taskAppInfo, false);
+                addAppButton(appButtonData);
+            }
+            appButtonData.addTask(task);
+        }
+
+        // Remove unpinned apps that now have no tasks.
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            View view = getChildAt(i);
+            AppButtonData appButtonData = (AppButtonData)view.getTag();
+            if (appButtonData == null) return;  // Skip the drag placeholder.
+            if (appButtonData.isEmpty()) {
+                removeViewAt(i);
+            }
+        }
+
+        if (DEBUG) {
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                View view = getChildAt(i);
+                AppButtonData appButtonData = (AppButtonData)view.getTag();
+                if (appButtonData == null) return;  // Skip the drag placeholder.
+                new GetActivityIconTask(mPackageManager, (ImageView )view).execute(appButtonData);
+
+            }
+        }
+    }
+
+    private void updateRecentApps() {
+        ActivityManager activityManager =
+                (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        // TODO: Should this be getRunningTasks?
+        List<RecentTaskInfo> recentTasks = activityManager.getRecentTasksForUser(
+                ActivityManager.getMaxAppRecentsLimitStatic(),
+                ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
+                        ActivityManager.RECENT_IGNORE_UNAVAILABLE |
+                        ActivityManager.RECENT_INCLUDE_PROFILES,
+                UserHandle.USER_CURRENT);
+        if (DEBUG) Slog.d(TAG, "Got recents " + recentTasks.size());
+        updateTasks(recentTasks);
+    }
+
+    private static ComponentName getActivityForTask(RecentTaskInfo task) {
+        // If the task was started from an alias, return the actual activity component that was
+        // initially started.
+        if (task.origActivity != null) {
+            return task.origActivity;
+        }
+        // Prefer the first activity of the task.
+        if (task.baseActivity != null) {
+            return task.baseActivity;
+        }
+        // Then goes the activity that started the task.
+        if (task.realActivity != null) {
+            return task.realActivity;
+        }
+        // This should not happen, but fall back to the base intent's activity component name.
+        return task.baseIntent.getComponent();
+    }
+
+    private ComponentName getLaunchComponentForPackage(String packageName, int userId) {
+        // This code is based on ApplicationPackageManager.getLaunchIntentForPackage.
+        PackageManager packageManager = mContext.getPackageManager();
+
+        // First see if the package has an INFO activity; the existence of
+        // such an activity is implied to be the desired front-door for the
+        // overall package (such as if it has multiple launcher entries).
+        Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
+        intentToResolve.addCategory(Intent.CATEGORY_INFO);
+        intentToResolve.setPackage(packageName);
+        List<ResolveInfo> ris = packageManager.queryIntentActivitiesAsUser(
+                intentToResolve, 0, userId);
+
+        // Otherwise, try to find a main launcher activity.
+        if (ris == null || ris.size() <= 0) {
+            // reuse the intent instance
+            intentToResolve.removeCategory(Intent.CATEGORY_INFO);
+            intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
+            intentToResolve.setPackage(packageName);
+            ris = packageManager.queryIntentActivitiesAsUser(intentToResolve, 0, userId);
+        }
+        if (ris == null || ris.size() <= 0) {
+            Slog.e(TAG, "Failed to build intent for " + packageName);
+            return null;
+        }
+        return new ComponentName(ris.get(0).activityInfo.packageName,
+                ris.get(0).activityInfo.name);
+    }
+
+    private AppInfo taskToAppInfo(RecentTaskInfo task) {
+        ComponentName componentName = getActivityForTask(task);
+        UserHandle taskUser = new UserHandle(task.userId);
+        AppInfo appInfo = new AppInfo(componentName, taskUser);
+
+        if (sAppsModel.buildAppLaunchIntent(appInfo) == null) {
+            // If task's activity is not launcheable, fall back to a launch component of the
+            // task's package.
+            ComponentName component = getLaunchComponentForPackage(
+                    componentName.getPackageName(), task.userId);
+
+            if (component == null) {
+                return null;
+            }
+
+            appInfo = new AppInfo(component, taskUser);
+        }
+
+        return appInfo;
+    }
+
+    /**
+     * A listener that updates the app buttons whenever the recents task stack changes.
+     */
+    private class TaskStackListener extends ITaskStackListener.Stub {
+        @Override
+        public void onTaskStackChanged() throws RemoteException {
+            // Post the message back to the UI thread.
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    if (isAttachedToWindow()) {
+                        updateRecentApps();
+                    }
+                }
+            });
         }
     }
 }
