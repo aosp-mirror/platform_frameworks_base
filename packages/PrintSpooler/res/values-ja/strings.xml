@@ -53,7 +53,7 @@
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"検索ボックスは表示されていません"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"プリンタを追加"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"プリンタを選択"</string>
-    <string name="print_forget_printer" msgid="5035287497291910766">"プリンタを切断"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"プリンタを削除"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g>台のプリンタが見つかりました</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g>台のプリンタが見つかりました</item>
