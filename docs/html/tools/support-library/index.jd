@@ -61,8 +61,75 @@ page.title=Support Library
 
 
 <div class="toggle-content opened">
-  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+  <p id="rev23-0-1"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 23.0.1</a> <em>(September 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v7-preference">v7</a> and
+          <a href="features.html#v14-preference">v14</a> Preference Support library:</dt>
+       <dd>
+        <ul>
+          <li>Added the material design layout and style files.
+          (<a href="http://b.android.com/183376">Issue 183376</a>)</li>
+         </ul>
+       </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library:</a></dt>
+       <dd>
+        <ul>
+          <li>Fixed crash issues for the {@link android.app.Fragment} class by limiting the use of
+              hardware layers to Android 4.1 (API level 16) and higher.
+          (<a href="http://b.android.com/183896">Issue 183896</a>)</li>
+          <li>Fixed an issue where hardware buttons did not work when an activity had set the
+            {@link android.widget.Toolbar} class to act as the
+            {@link android.app.ActionBar} by using the <code>setSupportActionBar()</code> method.
+          (<a href="http://b.android.com/183334">Issue 183334</a>)</li>
+          <li>Updated the {@link android.support.v7.app.AppCompatDialogFragment} class so it
+            no longer throws the {@code Windows feature must be requested before adding content}
+            error.
+          (<a href="http://b.android.com/183186">Issue 183186</a>)</li>
+         </ul>
+       </dd>
+
+
+     <dt>Changes for <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Fixed the
+            {@link android.support.design.widget.AppBarLayout} class so it now draws correctly after
+            rotation.
+          (<a href="http://b.android.com/183109">Issue 183109</a>)</li>
+          <li>Fixed the
+            {@link android.support.design.widget.TabLayout} class so it now behaves correctly when a
+            user clicks after a swipe.
+          (<a href="http://b.android.com/183123">Issue 183123</a>)</li>
+         </ul>
+       </dd>
+
+
+     <dt>Changes for <a href="features.html#custom-tabs">Custom Tabs Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Lowered the
+          <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>minSdkVersion</code></a>
+              value from 16 to 15 for version support.</li>
+          <li>Added a way to generate a
+            {@link android.support.customtabs.CustomTabsSessionToken} from an intent.</li>
+         </ul>
+       </dd>
+
+    </dl>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+<div class="toggle-content closed">
+  <p id="rev23"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 23</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -91,7 +158,7 @@ page.title=Support Library
 
 
 <div class="toggle-content closed">
-  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+  <p id="rev22-2-1"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22.2.1</a> <em>(July 2015)</em>
   </p>
