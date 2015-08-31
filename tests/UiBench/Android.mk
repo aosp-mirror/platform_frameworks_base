@@ -10,14 +10,18 @@ LOCAL_SRC_FILES := $(call all-java-files-under,src)
 # regressions are reflected in test data
 LOCAL_RESOURCE_DIR := \
     $(LOCAL_PATH)/res \
-    frameworks/support/v7/appcompat/res
+    frameworks/support/v7/appcompat/res \
+    frameworks/support/v7/cardview/res
 
 LOCAL_AAPT_FLAGS := \
-    --extra-packages android.support.v7.appcompat
+    --auto-add-overlay \
+    --extra-packages android.support.v7.appcompat \
+    --extra-packages android.support.v7.cardview
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v4 \
-    android-support-v7-appcompat
+    android-support-v7-appcompat \
+    android-support-v7-cardview
 
 LOCAL_PACKAGE_NAME := UiBench
 
