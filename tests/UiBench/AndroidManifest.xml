@@ -32,10 +32,10 @@
             </intent-filter>
         </activity>
 
-        <!-- Tests -->
+        <!-- General -->
         <activity
             android:name=".GlTextureViewActivity"
-            android:label="Microbenchmarks/GL TextureView" >
+            android:label="General/GL TextureView" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />
@@ -43,7 +43,15 @@
         </activity>
         <activity
             android:name=".FullscreenOverdrawActivity"
-            android:label="Microbenchmarks/Fullscreen Overdraw" >
+            android:label="General/Fullscreen Overdraw" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".InvalidateActivity"
+            android:label="General/Invalidate" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />
@@ -51,7 +59,7 @@
         </activity>
         <activity
             android:name=".TrivialAnimationActivity"
-            android:label="Microbenchmarks/Trivial Animation" >
+            android:label="General/Trivial Animation" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />
@@ -59,7 +67,27 @@
         </activity>
         <activity
             android:name=".TrivialListActivity"
-            android:label="Microbenchmarks/Trivial ListView" >
+            android:label="General/Trivial ListView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+
+        <!-- GPU -->
+        <activity
+            android:name=".BitmapUploadActivity"
+            android:label="GPU/Bitmap Upload" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+
+        <!-- Text -->
+        <activity
+            android:name=".EditTextTypeActivity"
+            android:label="Text/EditText Typing" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />
