@@ -36,11 +36,11 @@ public class MenuPopupWindow extends ListPopupWindow {
     }
 
     @Override
-    ListPopupWindow.DropDownListView createDropDownListView(Context context, boolean hijackFocus) {
+    DropDownListView createDropDownListView(Context context, boolean hijackFocus) {
         return new MenuDropDownListView(context, hijackFocus);
     }
 
-    static class MenuDropDownListView extends ListPopupWindow.DropDownListView {
+    static class MenuDropDownListView extends DropDownListView {
         private boolean mHoveredOnDisabledItem = false;
         private AccessibilityManager mAccessibilityManager;
 

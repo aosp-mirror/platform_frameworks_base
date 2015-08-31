@@ -89,7 +89,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mMenu = menu;
-        mAdapter = new MenuAdapter(mMenu);
+        mAdapter = new MenuAdapter(mMenu, mInflater, overflowOnly);
         mOverflowOnly = overflowOnly;
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
@@ -357,74 +357,5 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-    }
-
-    private class MenuAdapter extends BaseAdapter {
-        private MenuBuilder mAdapterMenu;
-        private int mExpandedIndex = -1;
-
-        public MenuAdapter(MenuBuilder menu) {
-            mAdapterMenu = menu;
-            findExpandedIndex();
-        }
-
-        public int getCount() {
-            ArrayList<MenuItemImpl> items = mOverflowOnly ?
-                    mAdapterMenu.getNonActionItems() : mAdapterMenu.getVisibleItems();
-            if (mExpandedIndex < 0) {
-                return items.size();
-            }
-            return items.size() - 1;
-        }
-
-        public MenuItemImpl getItem(int position) {
-            ArrayList<MenuItemImpl> items = mOverflowOnly ?
-                    mAdapterMenu.getNonActionItems() : mAdapterMenu.getVisibleItems();
-            if (mExpandedIndex >= 0 && position >= mExpandedIndex) {
-                position++;
-            }
-            return items.get(position);
-        }
-
-        public long getItemId(int position) {
-            // Since a menu item's ID is optional, we'll use the position as an
-            // ID for the item in the AdapterView
-            return position;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = mInflater.inflate(ITEM_LAYOUT, parent, false);
-            }
-
-            MenuView.ItemView itemView = (MenuView.ItemView) convertView;
-            if (mForceShowIcon) {
-                ((ListMenuItemView) convertView).setForceShowIcon(true);
-            }
-            itemView.initialize(getItem(position), 0);
-            return convertView;
-        }
-
-        void findExpandedIndex() {
-            final MenuItemImpl expandedItem = mMenu.getExpandedItem();
-            if (expandedItem != null) {
-                final ArrayList<MenuItemImpl> items = mMenu.getNonActionItems();
-                final int count = items.size();
-                for (int i = 0; i < count; i++) {
-                    final MenuItemImpl item = items.get(i);
-                    if (item == expandedItem) {
-                        mExpandedIndex = i;
-                        return;
-                    }
-                }
-            }
-            mExpandedIndex = -1;
-        }
-
-        @Override
-        public void notifyDataSetChanged() {
-            findExpandedIndex();
-            super.notifyDataSetChanged();
-        }
     }
 }

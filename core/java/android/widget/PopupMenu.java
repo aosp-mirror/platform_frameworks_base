@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuPresenter;
+import com.android.internal.view.menu.ShowableListMenu;
 import com.android.internal.view.menu.SubMenuBuilder;
 
 import android.annotation.MenuRes;
@@ -30,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.ListPopupWindow.ForwardingListener;
 
 /**
  * A PopupMenu displays a {@link Menu} in a modal popup window anchored to a {@link View}.
@@ -170,7 +170,7 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
                 }
 
                 @Override
-                public ListPopupWindow getPopup() {
+                public ShowableListMenu getPopup() {
                     // This will be null until show() is called.
                     return mPopup.getPopup();
                 }

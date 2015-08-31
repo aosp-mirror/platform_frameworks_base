@@ -37,7 +37,6 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.ListPopupWindow.ForwardingListener;
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.ActionMenuItemView;
 import com.android.internal.view.menu.BaseMenuPresenter;
@@ -45,6 +44,7 @@ import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuView;
+import com.android.internal.view.menu.ShowableListMenu;
 import com.android.internal.view.menu.SubMenuBuilder;
 
 import java.util.ArrayList;
@@ -828,7 +828,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
             setOnTouchListener(new ForwardingListener(this) {
                 @Override
-                public ListPopupWindow getPopup() {
+                public ShowableListMenu getPopup() {
                     if (mOverflowPopup == null) {
                         return null;
                     }
@@ -1003,7 +1003,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     private class ActionMenuPopupCallback extends ActionMenuItemView.PopupCallback {
         @Override
-        public ListPopupWindow getPopup() {
+        public ShowableListMenu getPopup() {
             return mActionButtonPopup != null ? mActionButtonPopup.getPopup() : null;
         }
     }

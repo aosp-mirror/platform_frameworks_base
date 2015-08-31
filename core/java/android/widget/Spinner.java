@@ -17,6 +17,7 @@
 package android.widget;
 
 import com.android.internal.R;
+import com.android.internal.view.menu.ShowableListMenu;
 
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
@@ -44,7 +45,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.ListPopupWindow.ForwardingListener;
 import android.widget.PopupWindow.OnDismissListener;
 
 /**
@@ -278,7 +278,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 mPopup = popup;
                 mForwardingListener = new ForwardingListener(this) {
                     @Override
-                    public ListPopupWindow getPopup() {
+                    public ShowableListMenu getPopup() {
                         return popup;
                     }
 
