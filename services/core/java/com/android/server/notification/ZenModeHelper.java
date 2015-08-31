@@ -46,7 +46,6 @@ import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -149,6 +148,7 @@ public class ZenModeHelper {
             mAudioManager.setRingerModeDelegate(mRingerModeDelegate);
         }
         mHandler.postMetricsTimer();
+        evaluateZenMode("onSystemReady", true);
     }
 
     public void onUserSwitched(int user) {
@@ -330,13 +330,14 @@ public class ZenModeHelper {
         }
         mConditions.evaluateConfig(config, false /*processSubscriptions*/);  // may modify config
         mConfigs.put(config.user, config);
-        if (config.equals(mConfig)) return true;
         if (DEBUG) Log.d(TAG, "setConfig reason=" + reason, new Throwable());
         ZenLog.traceConfig(reason, mConfig, config);
         final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
                 getNotificationPolicy(config));
         mConfig = config;
-        dispatchOnConfigChanged();
+        if (config.equals(mConfig)) {
+            dispatchOnConfigChanged();
+        }
         if (policyChanged){
             dispatchOnPolicyChanged();
         }
@@ -370,9 +371,7 @@ public class ZenModeHelper {
 
     private boolean evaluateZenMode(String reason, boolean setRingerMode) {
         if (DEBUG) Log.d(TAG, "evaluateZenMode");
-        final ArraySet<ZenRule> automaticRules = new ArraySet<ZenRule>();
-        final int zen = computeZenMode(automaticRules);
-        if (zen == mZenMode) return false;
+        final int zen = computeZenMode();
         ZenLog.traceSetZenMode(zen, reason);
         mZenMode = zen;
         updateRingerModeAffectedStreams();
@@ -381,7 +380,9 @@ public class ZenModeHelper {
             applyZenToRingerMode();
         }
         applyRestrictions();
-        mHandler.postDispatchOnZenModeChanged();
+        if (zen != mZenMode) {
+            mHandler.postDispatchOnZenModeChanged();
+        }
         return true;
     }
 
@@ -391,7 +392,7 @@ public class ZenModeHelper {
         }
     }
 
-    private int computeZenMode(ArraySet<ZenRule> automaticRulesOut) {
+    private int computeZenMode() {
         if (mConfig == null) return Global.ZEN_MODE_OFF;
         if (mConfig.manualRule != null) return mConfig.manualRule.zenMode;
         int zen = Global.ZEN_MODE_OFF;
