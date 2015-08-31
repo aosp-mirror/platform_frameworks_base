@@ -61,6 +61,7 @@ import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -96,7 +97,6 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.util.Preconditions;
-
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -129,6 +129,8 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_QUERY = "query";
     private static final String EXTRA_IGNORE_STATE = "ignoreState";
 
+    private final Model mModel = new Model();
+
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private View mEmptyView;
@@ -147,7 +149,6 @@ public class DirectoryFragment extends Fragment {
     private LoaderCallbacks<DirectoryResult> mCallbacks;
     private FragmentTuner mFragmentTuner;
     private DocumentClipper mClipper;
-    private MultiSelectManager mSelectionManager;
     // These are lazily initialized.
     private LinearLayoutManager mListLayout;
     private GridLayoutManager mGridLayout;
@@ -261,7 +262,7 @@ public class DirectoryFragment extends Fragment {
         }
 
         // Clear any outstanding selection
-        mSelectionManager.clearSelection();
+        mModel.clearSelection();
     }
 
     @Override
@@ -290,14 +291,17 @@ public class DirectoryFragment extends Fragment {
                     }
                 };
 
-        mSelectionManager = new MultiSelectManager(
+        // TODO: instead of inserting the view into the constructor, extract listener-creation code
+        // and set the listener on the view after the fact.  Then the view doesn't need to be passed
+        // into the selection manager which is passed into the model.
+        MultiSelectManager selMgr= new MultiSelectManager(
                 mRecView,
                 listener,
                 state.allowMultiple
                     ? MultiSelectManager.MODE_MULTIPLE
                     : MultiSelectManager.MODE_SINGLE);
-
-        mSelectionManager.addCallback(new SelectionModeListener());
+        selMgr.addCallback(new SelectionModeListener());
+        mModel.setSelectionManager(selMgr);
 
         mType = getArguments().getInt(EXTRA_TYPE);
         mStateKey = buildStateKey(root, doc);
@@ -367,7 +371,9 @@ public class DirectoryFragment extends Fragment {
 
                 if (!isAdded()) return;
 
-                mAdapter.replaceResult(result);
+                // TODO: make the adapter listen to the model
+                mModel.update(result);
+                mAdapter.update();
 
                 // Push latest state up to UI
                 // TODO: if mode change was racing with us, don't overwrite it
@@ -380,7 +386,7 @@ public class DirectoryFragment extends Fragment {
                 updateDisplayState();
 
                 // When launched into empty recents, show drawer
-                if (mType == TYPE_RECENT_OPEN && mAdapter.isEmpty() && !state.stackTouched &&
+                if (mType == TYPE_RECENT_OPEN && mModel.isEmpty() && !state.stackTouched &&
                         context instanceof DocumentsActivity) {
                     ((DocumentsActivity) context).setRootsDrawerOpen(true);
                 }
@@ -398,7 +404,9 @@ public class DirectoryFragment extends Fragment {
 
             @Override
             public void onLoaderReset(Loader<DirectoryResult> loader) {
-                mAdapter.replaceResult(null);
+                // TODO: make the adapter listen to the model.
+                mModel.update(null);
+                mAdapter.update();
             }
         };
 
@@ -433,7 +441,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     private boolean onSingleTapUp(MotionEvent e) {
-        if (Events.isTouchEvent(e) && mSelectionManager.getSelection().isEmpty()) {
+        if (Events.isTouchEvent(e) && mModel.getSelection().isEmpty()) {
             int position = getEventAdapterPosition(e);
             if (position != RecyclerView.NO_POSITION) {
                 return handleViewItem(position);
@@ -454,14 +462,14 @@ public class DirectoryFragment extends Fragment {
     }
 
     private boolean handleViewItem(int position) {
-        final Cursor cursor = mAdapter.getItem(position);
+        final Cursor cursor = mModel.getItem(position);
         checkNotNull(cursor, "Cursor cannot be null.");
         final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
         if (isDocumentEnabled(docMimeType, docFlags)) {
             final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-            ((BaseActivity) getActivity()).onDocumentPicked(doc, mAdapter);
-            mSelectionManager.clearSelection();
+            ((BaseActivity) getActivity()).onDocumentPicked(doc, mModel);
+            mModel.clearSelection();
             return true;
         }
         return false;
@@ -598,7 +606,7 @@ public class DirectoryFragment extends Fragment {
         public boolean onBeforeItemStateChange(int position, boolean selected) {
             // Directories and footer items cannot be checked
             if (selected) {
-                final Cursor cursor = mAdapter.getItem(position);
+                final Cursor cursor = mModel.getItem(position);
                 checkNotNull(cursor, "Cursor cannot be null.");
                 final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
                 final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
@@ -610,7 +618,7 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onItemStateChanged(int position, boolean selected) {
 
-            final Cursor cursor = mAdapter.getItem(position);
+            final Cursor cursor = mModel.getItem(position);
             checkNotNull(cursor, "Cursor cannot be null.");
 
             final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
@@ -621,7 +629,7 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public void onSelectionChanged() {
-            mSelectionManager.getSelection(mSelected);
+            mModel.getSelection(mSelected);
             if (mSelected.size() > 0) {
                 if (DEBUG) Log.d(TAG, "Maybe starting action mode.");
                 if (mActionMode == null) {
@@ -651,7 +659,7 @@ public class DirectoryFragment extends Fragment {
             if (DEBUG) Log.d(TAG, "Handling action mode destroyed.");
             mActionMode = null;
             // clear selection
-            mSelectionManager.clearSelection();
+            mModel.clearSelection();
             mSelected.clear();
             mNoDeleteCount = 0;
         }
@@ -659,8 +667,8 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
-            mode.setTitle(TextUtils.formatSelectedCount(mSelectionManager.getSelection().size()));
-            return mSelectionManager.getSelection().size() > 0;
+            mode.setTitle(TextUtils.formatSelectedCount(mModel.getSelection().size()));
+            return mModel.getSelection().size() > 0;
         }
 
         @Override
@@ -679,8 +687,7 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 
-            Selection selection = new Selection();
-            mSelectionManager.getSelection(selection);
+            Selection selection = mModel.getSelection(new Selection());
 
             final int id = item.getItemId();
             if (id == R.id.menu_open) {
@@ -948,50 +955,31 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder>
-            implements DocumentContext {
+    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder> {
 
         private final Context mContext;
         private final LayoutInflater mInflater;
         // TODO: Bring back support for footers.
         private final List<Footer> mFooters = new ArrayList<>();
 
-        private Cursor mCursor;
-        private int mCursorCount;
-
         public DocumentsAdapter(Context context) {
             mContext = context;
             mInflater = LayoutInflater.from(context);
         }
 
-        public void replaceResult(DirectoryResult result) {
-            if (DEBUG) Log.i(TAG, "Updating adapter with new result set.");
-            mCursor = result != null ? result.cursor : null;
-            mCursorCount = mCursor != null ? mCursor.getCount() : 0;
-
+        public void update() {
             mFooters.clear();
-
-            final Bundle extras = mCursor != null ? mCursor.getExtras() : null;
-            if (extras != null) {
-                final String info = extras.getString(DocumentsContract.EXTRA_INFO);
-                if (info != null) {
-                    mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info, info));
-                }
-                final String error = extras.getString(DocumentsContract.EXTRA_ERROR);
-                if (error != null) {
-                    mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, error));
-                }
-                if (extras.getBoolean(DocumentsContract.EXTRA_LOADING, false)) {
-                    mFooters.add(new LoadingFooter());
-                }
+            if (mModel.info != null) {
+                mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info, mModel.info));
+            }
+            if (mModel.error != null) {
+                mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, mModel.error));
+            }
+            if (mModel.isLoading()) {
+                mFooters.add(new LoadingFooter());
             }
 
-            if (result != null && result.exception != null) {
-                mFooters.add(new MessageFooter(
-                        3, R.drawable.ic_dialog_alert, getString(R.string.query_error)));
-            }
-
-            if (isEmpty()) {
+            if (mModel.isEmpty()) {
                 mEmptyView.setVisibility(View.VISIBLE);
             } else {
                 mEmptyView.setVisibility(View.GONE);
@@ -1025,7 +1013,7 @@ public class DirectoryFragment extends Fragment {
             final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
                     context, mThumbSize);
 
-            final Cursor cursor = getItem(position);
+            final Cursor cursor = mModel.getItem(position);
             checkNotNull(cursor, "Cursor cannot be null.");
 
             final String docAuthority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
@@ -1041,7 +1029,7 @@ public class DirectoryFragment extends Fragment {
 
             holder.docId = docId;
             final View itemView = holder.view;
-            itemView.setActivated(mSelectionManager.getSelection().contains(position));
+            itemView.setActivated(mModel.isSelected(position));
 
             final View line1 = itemView.findViewById(R.id.line1);
             final View line2 = itemView.findViewById(R.id.line2);
@@ -1214,43 +1202,20 @@ public class DirectoryFragment extends Fragment {
         }
 
         @Override
-        public Cursor getCursor() {
-            if (Looper.myLooper() != Looper.getMainLooper()) {
-                throw new IllegalStateException("Can't call getCursor from non-main thread.");
-            }
-            return mCursor;
-        }
-
-        private Cursor getItem(int position) {
-            if (position < mCursorCount) {
-                mCursor.moveToPosition(position);
-                return mCursor;
-            }
-
-            Log.w(TAG, "Returning null cursor for position: " + position);
-            if (DEBUG) Log.d(TAG, "...Adapter size: " + mCursorCount);
-            if (DEBUG) Log.d(TAG, "...Footer size: " + mFooters.size());
-            return null;
-        }
-
-        @Override
         public int getItemCount() {
-            return mCursorCount;
+            return mModel.getItemCount();
             // return mCursorCount + mFooters.size();
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (position < mCursorCount) {
+            final int itemCount = mModel.getItemCount();
+            if (position < itemCount) {
                 return 0;
             } else {
-                position -= mCursorCount;
+                position -= itemCount;
                 return mFooters.get(position).getItemViewType();
             }
-        }
-
-        private boolean isEmpty() {
-            return getItemCount() > 0;
         }
     }
 
@@ -1326,27 +1291,6 @@ public class DirectoryFragment extends Fragment {
         }
 
         return MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
-    }
-
-    private List<DocumentInfo> getSelectedDocuments() {
-        Selection sel = mSelectionManager.getSelection(new Selection());
-        return getItemsAsDocuments(sel);
-    }
-
-    private List<DocumentInfo> getItemsAsDocuments(Selection items) {
-        if (items == null || items.size() == 0) {
-            return new ArrayList<>(0);
-        }
-
-        final List<DocumentInfo> docs =  new ArrayList<>(items.size());
-        final int size = items.size();
-        for (int i = 0; i < size; i++) {
-            final Cursor cursor = mAdapter.getItem(items.get(i));
-            checkNotNull(cursor, "Cursor cannot be null.");
-            final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-            docs.add(doc);
-        }
-        return docs;
     }
 
     private void copyFromClipboard() {
@@ -1426,7 +1370,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     void copySelectedToClipboard() {
-        Selection sel = mSelectionManager.getSelection(new Selection());
+        Selection sel = mModel.getSelection(new Selection());
         copySelectionToClipboard(sel);
     }
 
@@ -1475,7 +1419,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     void selectAllFiles() {
-        boolean changed = mSelectionManager.setItemsSelected(0, mAdapter.getItemCount(), true);
+        boolean changed = mModel.selectAll();
         if (changed) {
             updateDisplayState();
         }
@@ -1521,7 +1465,7 @@ public class DirectoryFragment extends Fragment {
                     int dstPosition = mRecView.getChildAdapterPosition(v);
                     DocumentInfo dstDir = null;
                     if (dstPosition != android.widget.AdapterView.INVALID_POSITION) {
-                        Cursor dstCursor = mAdapter.getItem(dstPosition);
+                        Cursor dstCursor = mModel.getItem(dstPosition);
                         checkNotNull(dstCursor, "Cursor cannot be null.");
                         dstDir = DocumentInfo.fromDirectoryCursor(dstCursor);
                         // TODO: Do not drop into the directory where the documents came from.
@@ -1556,16 +1500,16 @@ public class DirectoryFragment extends Fragment {
             return Collections.EMPTY_LIST;
         }
 
-        final List<DocumentInfo> selectedDocs = getSelectedDocuments();
+        final List<DocumentInfo> selectedDocs = mModel.getSelectedDocuments();
         if (!selectedDocs.isEmpty()) {
-            if (!mSelectionManager.getSelection().contains(position)) {
+            if (!mModel.isSelected(position)) {
                 // There is a selection that does not include the current item, drag nothing.
                 return Collections.EMPTY_LIST;
             }
             return selectedDocs;
         }
 
-        final Cursor cursor = mAdapter.getItem(position);
+        final Cursor cursor = mModel.getItem(position);
         checkNotNull(cursor, "Cursor cannot be null.");
         final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
 
@@ -1671,12 +1615,14 @@ public class DirectoryFragment extends Fragment {
             mShadow.setBounds(0, 0, mShadowDimension, mShadowDimension);
         }
 
+        @Override
         public void onProvideShadowMetrics(
                 Point shadowSize, Point shadowTouchPoint) {
             shadowSize.set(mShadowDimension, mShadowDimension);
             shadowTouchPoint.set(mShadowDimension / 2, mShadowDimension / 2);
         }
 
+        @Override
         public void onDrawShadow(Canvas canvas) {
             mShadow.draw(canvas);
         }
@@ -1706,7 +1652,7 @@ public class DirectoryFragment extends Fragment {
             extends AsyncTask<Selection, Void, List<DocumentInfo>> {
         @Override
         protected final List<DocumentInfo> doInBackground(Selection... selected) {
-            return getItemsAsDocuments(selected[0]);
+            return mModel.getDocuments(selected[0]);
         }
 
         @Override
@@ -1774,5 +1720,137 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public void afterActivityCreated(DirectoryFragment fragment) {}
+    }
+
+    /**
+     * The data model for the current loaded directory.
+     */
+    private final class Model implements DocumentContext {
+        private MultiSelectManager mSelectionManager;
+        private int mCursorCount;
+        private boolean mIsLoading;
+        @Nullable private Cursor mCursor;
+        @Nullable private String info;
+        @Nullable private String error;
+
+        /**
+         * Sets the selection manager used by the model.
+         * TODO: the model should instantiate the selection manager.  See onActivityCreated.
+         */
+        void setSelectionManager(MultiSelectManager mgr) {
+            mSelectionManager = mgr;
+        }
+
+        /**
+         * Selects all files in the current directory.
+         * @return true if the selection state changed for any files.
+         */
+        boolean selectAll() {
+            return mSelectionManager.setItemsSelected(0, mCursorCount, true);
+        }
+
+        /**
+         * Clones the current selection into the given Selection object.
+         * @param selection
+         * @return The selection that was passed in, for convenience.
+         */
+        Selection getSelection(Selection selection) {
+            return mSelectionManager.getSelection(selection);
+        }
+
+        /**
+         * @return The current selection (the live instance, not a copy).
+         */
+        Selection getSelection() {
+            return mSelectionManager.getSelection();
+        }
+
+        boolean isSelected(int position) {
+            return mSelectionManager.getSelection().contains(position);
+        }
+
+        void clearSelection() {
+            mSelectionManager.clearSelection();
+        }
+
+        void update(DirectoryResult result) {
+            if (DEBUG) Log.i(TAG, "Updating model with new result set.");
+
+            if (result == null) {
+                mCursor = null;
+                mCursorCount = 0;
+                info = null;
+                error = null;
+                mIsLoading = false;
+                return;
+            }
+
+            if (result.exception != null) {
+                Log.e(TAG, "Error while loading directory contents", result.exception);
+                error = getString(R.string.query_error);
+                return;
+            }
+
+            mCursor = result.cursor;
+            mCursorCount = mCursor.getCount();
+
+            final Bundle extras = mCursor.getExtras();
+            if (extras != null) {
+                info = extras.getString(DocumentsContract.EXTRA_INFO);
+                error = extras.getString(DocumentsContract.EXTRA_ERROR);
+                mIsLoading = extras.getBoolean(DocumentsContract.EXTRA_LOADING, false);
+            }
+        }
+
+        private int getItemCount() {
+            return mCursorCount;
+        }
+
+        private Cursor getItem(int position) {
+            if (position >= mCursorCount) {
+                throw new IndexOutOfBoundsException("Attempt to retrieve " + position + " of " +
+                        mCursorCount + " items");
+            }
+
+            mCursor.moveToPosition(position);
+            return mCursor;
+        }
+
+        private boolean isEmpty() {
+            return mCursorCount == 0;
+        }
+
+        private boolean isLoading() {
+            return mIsLoading;
+        }
+
+        private List<DocumentInfo> getSelectedDocuments() {
+            Selection sel = getSelection(new Selection());
+            return getDocuments(sel);
+        }
+
+        private List<DocumentInfo> getDocuments(Selection items) {
+            if (items == null || items.size() == 0) {
+                return new ArrayList<>(0);
+            }
+
+            final List<DocumentInfo> docs =  new ArrayList<>(items.size());
+            final int size = items.size();
+            for (int i = 0; i < size; i++) {
+                final Cursor cursor = getItem(items.get(i));
+                checkNotNull(cursor, "Cursor cannot be null.");
+                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
+                docs.add(doc);
+            }
+            return docs;
+        }
+
+        @Override
+        public Cursor getCursor() {
+            if (Looper.myLooper() != Looper.getMainLooper()) {
+                throw new IllegalStateException("Can't call getCursor from non-main thread.");
+            }
+            return mCursor;
+        }
     }
 }

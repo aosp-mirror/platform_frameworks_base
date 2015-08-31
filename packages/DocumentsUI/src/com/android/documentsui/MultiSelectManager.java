@@ -184,13 +184,13 @@ public final class MultiSelectManager {
 
     /**
      * Returns a Selection object that provides a live view
-     * on the current selection. Callers wishing to get
+     * on the current selection.
      *
-     * @see #getSelectionSnapshot() on how to get a snapshot
+     * @see #getSelection(Selection) on how to get a snapshot
      *     of the selection that will not reflect future changes
      *     to selection.
      *
-     * @return The current seleciton.
+     * @return The current selection.
      */
     public Selection getSelection() {
         return mSelection;
