@@ -64,6 +64,7 @@ static struct {
     jfieldID secure;
     jfieldID appVsyncOffsetNanos;
     jfieldID presentationDeadlineNanos;
+    jfieldID colorTransform;
 } gPhysicalDisplayInfoClassInfo;
 
 static struct {
@@ -401,6 +402,8 @@ static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz,
                 info.appVsyncOffset);
         env->SetLongField(infoObj, gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos,
                 info.presentationDeadline);
+        env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.colorTransform,
+                info.colorTransform);
         env->SetObjectArrayElement(configArray, static_cast<jsize>(c), infoObj);
         env->DeleteLocalRef(infoObj);
     }
@@ -663,6 +666,8 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             clazz, "appVsyncOffsetNanos", "J");
     gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos = GetFieldIDOrDie(env,
             clazz, "presentationDeadlineNanos", "J");
+    gPhysicalDisplayInfoClassInfo.colorTransform = GetFieldIDOrDie(env, clazz,
+            "colorTransform", "I");
 
     jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClazz, "bottom", "I");
