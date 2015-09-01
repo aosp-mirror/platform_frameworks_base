@@ -139,20 +139,15 @@ class PipeManager {
                 // Delete the target object info if it already exists (as a placeholder).
                 mManager.deleteDocument(mIdentifier.mDeviceId, mIdentifier.mObjectHandle);
 
-                // Create the target object info with a correct file size.
-                final int targetObjectHandle =
-                        mManager.createDocument(
-                                mIdentifier.mDeviceId,
-                                new MtpObjectInfo.Builder(placeholderObjectInfo)
-                                        .setCompressedSize((int) tempFile.length())
-                                        .build());
-
-                // Upload the object.
+                // Create the target object info with a correct file size and upload the file.
+                final MtpObjectInfo targetObjectInfo =
+                        new MtpObjectInfo.Builder(placeholderObjectInfo)
+                                .setCompressedSize((int) tempFile.length())
+                                .build();
                 final ParcelFileDescriptor tempInputDescriptor = ParcelFileDescriptor.open(
                         tempFile, ParcelFileDescriptor.MODE_READ_ONLY);
-                mManager.sendObject(mIdentifier.mDeviceId,
-                        targetObjectHandle, (int) tempFile.length(), tempInputDescriptor);
-
+                mManager.createDocument(mIdentifier.mDeviceId,
+                        targetObjectInfo, tempInputDescriptor);
             } catch (IOException error) {
                 Log.w(MtpDocumentsProvider.TAG,
                         "Failed to send a file because of: " + error.getMessage());

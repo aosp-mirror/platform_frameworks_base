@@ -137,32 +137,26 @@ public class TestMtpManager extends MtpManager {
     }
 
     @Override
-    int createDocument(int deviceId, MtpObjectInfo objectInfo) throws IOException {
+    int createDocument(int deviceId, MtpObjectInfo objectInfo, ParcelFileDescriptor source)
+            throws IOException {
         final String key = pack(deviceId, CREATED_DOCUMENT_HANDLE);
-        if (!mObjectInfos.containsKey(key)) {
-            mObjectInfos.put(key, objectInfo);
-        } else {
+        if (mObjectInfos.containsKey(key)) {
             throw new IOException();
+        }
+        mObjectInfos.put(key, objectInfo);
+        if (objectInfo.getFormat() != 0x3001) {
+            try (final ParcelFileDescriptor.AutoCloseInputStream inputStream =
+                    new ParcelFileDescriptor.AutoCloseInputStream(source)) {
+                final byte[] buffer = new byte[objectInfo.getCompressedSize()];
+                if (inputStream.read(buffer, 0, objectInfo.getCompressedSize()) !=
+                        objectInfo.getCompressedSize()) {
+                    throw new IOException();
+                }
+
+                mImportFileBytes.put(pack(deviceId, CREATED_DOCUMENT_HANDLE), buffer);
+            }
         }
         return CREATED_DOCUMENT_HANDLE;
-    }
-
-    @Override
-    void sendObject(int deviceId, int objectHandle, int size, ParcelFileDescriptor source)
-            throws IOException {
-        final String key = pack(deviceId, objectHandle);
-        if (!mObjectInfos.containsKey(key)) {
-            throw new IOException();
-        }
-
-        ParcelFileDescriptor.AutoCloseInputStream inputStream =
-                new ParcelFileDescriptor.AutoCloseInputStream(source);
-        byte[] buffer = new byte[size];
-        if (inputStream.read(buffer, 0, size) != size) {
-            throw new IOException();
-        }
-
-        mImportFileBytes.put(pack(deviceId, objectHandle), buffer);
     }
 
     @Override

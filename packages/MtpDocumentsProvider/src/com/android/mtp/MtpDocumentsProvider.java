@@ -225,6 +225,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             throws FileNotFoundException {
         try {
             final Identifier parentId = Identifier.createFromDocumentId(parentDocumentId);
+            final ParcelFileDescriptor pipe[] = ParcelFileDescriptor.createReliablePipe();
+            pipe[0].close();  // 0 bytes for a new document.
             final int objectHandle = mMtpManager.createDocument(
                     parentId.mDeviceId,
                     new MtpObjectInfo.Builder()
@@ -232,7 +234,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                             .setParent(parentId.mObjectHandle)
                             .setFormat(CursorHelper.mimeTypeToFormatType(mimeType))
                             .setName(displayName)
-                            .build());
+                            .build(), pipe[1]);
             final String documentId =  new Identifier(parentId.mDeviceId, parentId.mStorageId,
                    objectHandle).toDocumentId();
             notifyChildDocumentsChange(parentDocumentId);
