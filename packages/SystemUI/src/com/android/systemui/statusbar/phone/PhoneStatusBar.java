@@ -3661,12 +3661,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // down on the lockscreen), clear notification LED, vibration,
         // ringing.
         // Other transitions are covered in handleVisibleToUserChanged().
-        if (state != mState && mVisible && state == StatusBarState.SHADE_LOCKED) {
-            try {
-                mBarService.clearNotificationEffects();
-            } catch (RemoteException e) {
-                // Ignore.
-            }
+        if (state != mState && mVisible && (state == StatusBarState.SHADE_LOCKED
+                || (state == StatusBarState.SHADE && isGoingToNotificationShade()))) {
+            clearNotificationEffects();
         }
         mState = state;
         mGroupManager.setStatusBarState(state);
